@@ -78,6 +78,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
@@ -100,7 +101,6 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -267,7 +267,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 */
 	private void doPropertyChange(PropertyChangeEvent event) {
 		if (fMethodsViewer != null) {
-			if (MembersOrderPreferencePage.PREF_OUTLINE_SORT_OPTION.equals(event.getProperty())) {
+			if (PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER.equals(event.getProperty())) {
 				fMethodsViewer.refresh();
 			}
 		}

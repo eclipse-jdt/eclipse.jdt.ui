@@ -1623,31 +1623,31 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_SPACES_FOR_TABS, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR, new RGB(63, 127, 95));
-		store.setDefault(PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_BOLD, false); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_BOLD, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR, new RGB(63, 127, 95));
-		store.setDefault(PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_BOLD, false); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_BOLD, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR, new RGB(127, 0, 85));
-		store.setDefault(PreferenceConstants.EDITOR_JAVA_KEYWORD_BOLD, true); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.EDITOR_JAVA_KEYWORD_BOLD, true);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_STRING_COLOR, new RGB(42, 0, 255));
-		store.setDefault(PreferenceConstants.EDITOR_STRING_BOLD, false); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.EDITOR_STRING_BOLD, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR, new RGB(0, 0, 0));
-		store.setDefault(PreferenceConstants.EDITOR_JAVA_DEFAULT_BOLD, false); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.EDITOR_JAVA_DEFAULT_BOLD, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR, new RGB(127, 159, 191));
-		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_KEYWORD_BOLD, true); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_KEYWORD_BOLD, true);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_TAG_COLOR, new RGB(127, 127, 159));
-		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_TAG_BOLD, false); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_TAG_BOLD, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR, new RGB(63, 63, 191));
-		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_LINKS_BOLD, false); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_LINKS_BOLD, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR, new RGB(63, 95, 191));
-		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_DEFAULT_BOLD, false);		 //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_DEFAULT_BOLD, false);
 
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 500);

@@ -31,13 +31,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
-
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
@@ -277,7 +275,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getProperty().equals(MembersOrderPreferencePage.PREF_OUTLINE_SORT_OPTION)) {
+		if (event.getProperty().equals(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER)) {
 			getViewer().refresh();
 		}
 	}
