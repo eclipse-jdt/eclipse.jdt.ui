@@ -16,6 +16,8 @@ import java.util.List;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -54,6 +56,9 @@ public final class ListRewriter {
 	 */
 	public void remove(ASTNode nodeToRemove, TextEditGroup editGroup) {
 		RewriteEvent event= getEvent().removeEntry(nodeToRemove);
+		if (event == null) {
+			throw new IllegalArgumentException("Node is not contained in list"); //$NON-NLS-1$
+		}
 		if (editGroup != null) {
 			getRewriteStore().setEventEditGroup(event, editGroup);
 		}
@@ -71,6 +76,9 @@ public final class ListRewriter {
 	 */
 	public void replace(ASTNode nodeToReplace, ASTNode replacingNode, TextEditGroup editGroup) {
 		RewriteEvent event= getEvent().replaceEntry(nodeToReplace, replacingNode);
+		if (event == null) {
+			throw new IllegalArgumentException("Node is not contained in list"); //$NON-NLS-1$
+		}
 		if (editGroup != null) {
 			getRewriteStore().setEventEditGroup(event, editGroup);
 		}
@@ -183,8 +191,6 @@ public final class ListRewriter {
 		List list= (List) getEvent().getNewValue();
 		return Collections.unmodifiableList(list);
 	}
-	
-
 	
 	
 }

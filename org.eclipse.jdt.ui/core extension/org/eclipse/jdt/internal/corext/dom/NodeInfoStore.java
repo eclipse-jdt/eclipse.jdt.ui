@@ -22,6 +22,8 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
 
+import org.eclipse.jdt.internal.corext.dom.RewriteEventStore.CopySourceInfo;
+
 /**
  *
  */
@@ -121,26 +123,15 @@ public final class NodeInfoStore {
 		data.code= code;
 		setPlaceholderData(placeholder, data);
 	}
-
-	/**
-	 * Marks a node as a move target. The move target represents a moved node at the target (moved) site.
-	 * @param target The node at the target site. Can be a placeholder node but also the source node itself.
-	 * @param source The node at the source site.
-	 */
-	public final void markAsMoveTarget(ASTNode target, ASTNode source) {
-		MovePlaceholderData data= new MovePlaceholderData();
-		data.node= source;
-		setPlaceholderData(target, data);
-	}
 	
 	/**
-	 * Marks a node as a copy target. The copy target represents a copied node at the target (copied) site.
+	 * Marks a node as a copy or move target. The copy target represents a copied node at the target (copied) site.
 	 * @param target The node at the target site. Can be a placeholder node but also the source node itself.
-	 * @param source The node at the source site.
+	 * @param copySource The info at the source site.
 	 */
-	public final void markAsCopyTarget(ASTNode target, ASTNode source) {
+	public final void markAsCopyTarget(ASTNode target, CopySourceInfo copySource) {
 		CopyPlaceholderData data= new CopyPlaceholderData();
-		data.node= source;
+		data.copySource= copySource;
 		setPlaceholderData(target, data);
 	}
 		
@@ -229,18 +220,11 @@ public final class NodeInfoStore {
 	
 	private static class PlaceholderData {
 	}
-		
-	protected static final class MovePlaceholderData extends PlaceholderData {
-		public ASTNode node;
-		public String toString() {
-			return "[placeholder move: " + node +"]"; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-	}
-	
+			
 	protected static final class CopyPlaceholderData extends PlaceholderData {
-		public ASTNode node;
+		public CopySourceInfo copySource;
 		public String toString() {
-			return "[placeholder copy: " + node +"]";  //$NON-NLS-1$//$NON-NLS-2$
+			return "[placeholder " + copySource +"]";  //$NON-NLS-1$//$NON-NLS-2$
 		}
 	}	
 	

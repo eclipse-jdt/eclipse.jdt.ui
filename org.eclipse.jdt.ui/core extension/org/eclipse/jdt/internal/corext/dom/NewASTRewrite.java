@@ -25,6 +25,8 @@ import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
+import org.eclipse.jdt.internal.corext.dom.RewriteEventStore.CopySourceInfo;
+
 /**
  * Work in progress.
  */
@@ -58,7 +60,6 @@ public class NewASTRewrite {
 		fAST= ast;
 		fEventStore= new RewriteEventStore();
 		fNodeStore= new NodeInfoStore(ast);
-		//ast.disallowModifications();
 	}
 	
 	/**
@@ -72,6 +73,10 @@ public class NewASTRewrite {
 		return fEventStore;
 	}
 	
+	protected NodeInfoStore getNodeStore() {
+		return fNodeStore;
+	}
+	
 	/**
 	 * Performs the rewrite: The rewrite events are translated to the corresponding in text changes.
 	 * @param document Document which describes the code of the AST that is passed in in the
@@ -83,6 +88,7 @@ public class NewASTRewrite {
 		
 		ASTNode rootNode= getRootNode();
 		if (rootNode != null) {
+			fEventStore.markMovedNodesRemoved();
 			try {
 				CompilationUnit astRoot= (CompilationUnit) rootNode.getRoot();
 				ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(document, astRoot, result, fEventStore, fNodeStore);
@@ -132,6 +138,7 @@ public class NewASTRewrite {
 		return node;
 
 	}
+		
 		
 	/**
 	 * Marks an existing node as removed.
@@ -281,6 +288,19 @@ public class NewASTRewrite {
 		fNodeStore.markAsStringPlaceholder(placeholder, code);
 		return placeholder;
 	}
+	
+	public ASTNode createTargetNode(ASTNode node, boolean isMove) {
+		validateIsInsideAST(node);
+		CopySourceInfo info= fEventStore.markAsCopySource(node.getParent(), node.getLocationInParent(), node, isMove);
+	
+		ASTNode placeholder= fNodeStore.newPlaceholderNode(getPlaceholderType(node));
+		if (placeholder == null) {
+			throw new IllegalArgumentException("Creating a target node is not supported for nodes of type" + node.getClass().getName()); //$NON-NLS-1$
+		}
+		fNodeStore.markAsCopyTarget(placeholder, info);
+		
+		return placeholder;		
+	}
 
 	/**
 	 * Creates a target node for a node to be copied. A target node can be inserted or used
@@ -289,16 +309,7 @@ public class NewASTRewrite {
 	 * @return The placeholder to be used at the copy destination.
 	 */
 	public final ASTNode createCopyTarget(ASTNode node) {
-		validateIsInsideAST(node);
-		fEventStore.increaseCopyCount(node);
-	
-		ASTNode placeholder= fNodeStore.newPlaceholderNode(getPlaceholderType(node));
-		if (placeholder == null) {
-			throw new IllegalArgumentException("Creating a copy placeholder is not supported for type" + node.getClass().getName()); //$NON-NLS-1$
-		}
-		
-		fNodeStore.markAsCopyTarget(placeholder, node);
-		return placeholder;
+		return createTargetNode(node, false);
 	}
 	
 	/**
@@ -308,21 +319,7 @@ public class NewASTRewrite {
 	 * @return The placeholder to be used at the move destination.
 	 */
 	public final ASTNode createMoveTarget(ASTNode node) {
-		validateIsInsideAST(node);
-		fEventStore.setAsMoveSource(node);
-		
-		int changeKind= fEventStore.getChangeKind(node);
-		if (changeKind != RewriteEvent.REMOVED && changeKind != RewriteEvent.REPLACED) {
-			markAsRemoved(node, null);
-		}
-		
-		ASTNode placeholder= fNodeStore.newPlaceholderNode(getPlaceholderType(node));
-		if (placeholder == null) {
-			throw new IllegalArgumentException("Creating a move placeholder is not supported for type" + node.getClass().getName()); //$NON-NLS-1$
-		}
-
-		fNodeStore.markAsMoveTarget(placeholder, node);
-		return placeholder;
+		return createTargetNode(node, true);
 	}	
 			
 	public String toString() {

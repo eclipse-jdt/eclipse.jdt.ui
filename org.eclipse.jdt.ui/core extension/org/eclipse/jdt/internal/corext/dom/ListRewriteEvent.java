@@ -169,6 +169,15 @@ public class ListRewriteEvent extends RewriteEvent {
 		return change;
 	}
 	
+	public void setNewValue(ASTNode newValue, int insertIndex) {
+		NodeRewriteEvent curr= (NodeRewriteEvent) getEntries().get(insertIndex);
+		curr.setNewValue(newValue);
+	}
+	
+	public int getChangeKind(int index) {
+		return ((NodeRewriteEvent) getEntries().get(index)).getChangeKind();
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
