@@ -32,12 +32,11 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintOperator2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.EquivalenceRepresentative;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IndependentTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SimpleTypeConstraint2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
@@ -157,7 +156,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param variable the constraint variable
 	 * @param constraint the type constraint
 	 */
-	public static void setVariableUsage(final ConstraintVariable2 variable, final ITypeConstraint2 constraint) {
+	public static void setVariableUsage(final ConstraintVariable2 variable, final TypeConstraint2 constraint) {
 		Assert.isNotNull(variable);
 		Assert.isNotNull(constraint);
 		final Object data= variable.getData(DATA_USAGE);
@@ -189,7 +188,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param variable the associated constraint variable
 	 * @return the created cast variable
 	 */
-	public final ConstraintVariable2 createCastVariable(final CastExpression expression, final TypeConstraintVariable2 variable) {
+	public final ConstraintVariable2 createCastVariable(final CastExpression expression, final ConstraintVariable2 variable) {
 		Assert.isNotNull(expression);
 		Assert.isNotNull(variable);
 		final ITypeBinding binding= expression.resolveTypeBinding();
@@ -207,7 +206,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param left the left typeconstraint variable
 	 * @param right the right typeconstraint variable
 	 */
-	public final void createEqualsConstraint(final TypeConstraintVariable2 left, final TypeConstraintVariable2 right) {
+	public final void createEqualsConstraint(final ConstraintVariable2 left, final ConstraintVariable2 right) {
 		if (left != null && right != null) {
 			final EquivalenceRepresentative first= left.getRepresentative();
 			final EquivalenceRepresentative second= right.getRepresentative();
@@ -227,13 +226,29 @@ public final class SuperTypeConstraintsModel {
 				} else if (first == second)
 					return;
 				else {
-					final TypeConstraintVariable2[] elements= second.getElements();
+					final ConstraintVariable2[] elements= second.getElements();
 					first.addAll(elements);
 					for (int index= 0; index < elements.length; index++)
 						elements[index].setRepresentative(first);
 				}
 			}
 		}
+	}
+
+	/**
+	 * Creates an independant type variable.
+	 * <p>
+	 * An independant type variable stands for an arbitrary type.
+	 * </p>
+	 * 
+	 * @param type the type binding
+	 * @return the created independant type variable
+	 */
+	public final ConstraintVariable2 createIndependantTypeVariable(final ITypeBinding type) {
+		Assert.isNotNull(type);
+		if (isConstrainedType(type))
+			return (ConstraintVariable2) fConstraintVariables.addExisting(new IndependentTypeVariable2(fEnvironment.create(type)));
+		return null;
 	}
 
 	/**
@@ -253,6 +268,9 @@ public final class SuperTypeConstraintsModel {
 
 	/**
 	 * Creates a plain type variable.
+	 * <p>
+	 * A plain type variable stands for an immutable type.
+	 * </p>
 	 * 
 	 * @param type the type binding
 	 * @return the created plain type variable
@@ -283,19 +301,17 @@ public final class SuperTypeConstraintsModel {
 	/**
 	 * Creates a subtype constraint.
 	 * 
-	 * @param left the left constraint variable
-	 * @param right the right constraint variable
+	 * @param descendant the descendant type constraint variable
+	 * @param ancestor the ancestor type constraint variable
 	 */
-	public final void createSubtypeConstraint(final ConstraintVariable2 left, final ConstraintVariable2 right) {
-		ConstraintOperator2 operator= ConstraintOperator2.createSubTypeOperator();
-		Assert.isNotNull(left);
-		Assert.isNotNull(right);
-		Assert.isNotNull(operator);
-		final ITypeConstraint2 constraint= new SimpleTypeConstraint2(left, right, operator);
+	public final void createSubtypeConstraint(final ConstraintVariable2 descendant, final ConstraintVariable2 ancestor) {
+		Assert.isNotNull(descendant);
+		Assert.isNotNull(ancestor);
+		final TypeConstraint2 constraint= new TypeConstraint2(descendant, ancestor, ConstraintOperator2.createSubTypeOperator());
 		if (!fTypeConstraints.contains(constraint)) {
 			fTypeConstraints.add(constraint);
-			setVariableUsage(left, constraint);
-			setVariableUsage(right, constraint);
+			setVariableUsage(descendant, constraint);
+			setVariableUsage(ancestor, constraint);
 		}
 	}
 
