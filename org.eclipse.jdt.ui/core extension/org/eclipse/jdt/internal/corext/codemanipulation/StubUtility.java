@@ -15,22 +15,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.ICodeFormatter;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IParent;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -275,6 +260,23 @@ public class StubUtility {
 		}
 		return str;
 	}
+	
+	public static String getCatchBodyContent(ICompilationUnit cu, String exceptionType, String variableName) throws CoreException {
+		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.CATCHBLOCK);
+		if (template != null) {
+			CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), StubUtility.getLineDelimiterUsed(cu), 0);
+			context.setVariable(CodeTemplateContextType.EXCEPTION_TYPE, exceptionType);
+			context.setVariable(CodeTemplateContextType.EXCEPTION_VAR, variableName); //$NON-NLS-1$
+			TemplateBuffer buffer= context.evaluate(template);
+			if (buffer != null) {
+				String res= buffer.getString();
+				if (!Strings.containsOnlyWhitespaces(res)) {
+					return buffer.getString();
+				}
+			}
+		}
+		return null;
+	}		
 	
 	/**
 	 * Returns the content for a new compilation unit using the 'new file' code template.
