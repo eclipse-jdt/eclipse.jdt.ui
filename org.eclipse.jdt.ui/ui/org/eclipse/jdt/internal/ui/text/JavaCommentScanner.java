@@ -42,7 +42,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 	private static class TaskTagDetector implements IWordDetector {
 
 		public boolean isWordStart(char c) {
-			return Character.isJavaIdentifierStart(c);
+			return c == '@' || Character.isJavaIdentifierStart(c);
 		}
 
 		public boolean isWordPart(char c) {
