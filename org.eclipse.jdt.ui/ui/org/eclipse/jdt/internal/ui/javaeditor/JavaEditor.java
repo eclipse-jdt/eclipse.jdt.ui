@@ -2101,7 +2101,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * The override and implements indicator manager for this editor.
 	 * @since 3.0
 	 */
-	protected OverrideIndicatorManager fOverrideAndImplementsIndicator;
+	protected OverrideIndicatorManager fOverrideIndicatorManager;
 	
 	
 	/**
@@ -2642,8 +2642,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			fEncodingSupport.reset();
 		setOutlinePageInput(fOutlinePage, input);
 		
-		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
-		installOverrideIndicator(model);
+		if (isShowingOverrideIndicators())
+			installOverrideIndicator(true);
 	}
 
 	/**
@@ -2839,6 +2839,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 							installOccurrencesFinder();
 					}
 				}
+				return;
 			}
 			if (PreferenceConstants.EDITOR_STICKY_OCCURRENCES.equals(property)) {
 				if (event.getNewValue() instanceof Boolean) {
@@ -2851,8 +2852,21 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 //							installOccurrencesFinder();
 					}
 				}
+				return;
 			}
+			
 			((JavaSourceViewerConfiguration)getSourceViewerConfiguration()).handlePropertyChangeEvent(event);
+			
+			if (affectsOverrideIndicatorAnnotations(event)) {
+				if (isShowingOverrideIndicators()) {
+					if (fOverrideIndicatorManager == null)
+						installOverrideIndicator(false);
+				} else {
+					if (fOverrideIndicatorManager != null)
+						uninstallOverrideIndicator();
+				}
+				return;
+			}
 			
 		} finally {
 			super.handlePreferenceStoreChanged(event);
@@ -3394,15 +3408,57 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	}
 
 	protected void uninstallOverrideIndicator() {
-		if (fOverrideAndImplementsIndicator != null) {
-			fOverrideAndImplementsIndicator.removeAnnotations();
-			fOverrideAndImplementsIndicator= null;
+		if (fOverrideIndicatorManager != null) {
+			fOverrideIndicatorManager.removeAnnotations();
+			fOverrideIndicatorManager= null;
 		}
 	}
 
-	protected void installOverrideIndicator(IAnnotationModel model) {
+	protected void installOverrideIndicator(boolean waitForReconcilation) {
 		uninstallOverrideIndicator();
-		fOverrideAndImplementsIndicator= new OverrideIndicatorManager(model, getInputJavaElement(), JavaPlugin.getDefault().getASTProvider().getAST(getInputJavaElement(), true, null));		
+		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
+		IJavaElement inputElement= getInputJavaElement();
+
+		if (model == null || inputElement == null)
+			return;
+
+		CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(inputElement, true, null);
+		fOverrideIndicatorManager= new OverrideIndicatorManager(model, inputElement, ast);		
+	}
+	
+	/**
+	 * Tells whether override indicators are shown.
+	 * 
+	 * @return <code>true</code> if the override indicators are shown
+	 * @since 3.0
+	 */
+	protected boolean isShowingOverrideIndicators() {
+		AnnotationPreference preference= getAnnotationPreferenceLookup().getAnnotationPreferenceFragment(OverrideIndicatorManager.ANNOTATION_TYPE);
+		IPreferenceStore store= getNewPreferenceStore();
+		return store.getBoolean(preference.getHighlightPreferenceKey())
+			|| store.getBoolean(preference.getVerticalRulerPreferenceKey())
+			|| store.getBoolean(preference.getOverviewRulerPreferenceKey())
+			|| store.getBoolean(preference.getTextPreferenceKey());
+	}
+	
+	/**
+	 * Determines whether the preference change encoded by the given event
+	 * changes the override indication.
+	 * 
+	 * @param event the event to be investigated
+	 * @return <code>true</code> if event causes a change
+	 * @since 3.0
+	 */
+	protected boolean affectsOverrideIndicatorAnnotations(PropertyChangeEvent event) {
+		String key= event.getProperty();
+		AnnotationPreference preference= getAnnotationPreferenceLookup().getAnnotationPreferenceFragment(OverrideIndicatorManager.ANNOTATION_TYPE);
+		if (key == null || preference == null)
+			return false;
+		
+		return key.equals(preference.getHighlightPreferenceKey())
+			|| key.equals(preference.getVerticalRulerPreferenceKey())
+			|| key.equals(preference.getOverviewRulerPreferenceKey())
+			|| key.equals(preference.getTextPreferenceKey());
 	}
 
 	/**
