@@ -23,7 +23,7 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 	
 	public ExtractTempInputPage() {
 		super(true);
-		setMessage("Enter a name for the introduced local variable.");
+		setMessage(RefactoringMessages.getString("ExtractTempInputPage.enter_name")); //$NON-NLS-1$
 	}
 
 	public void createControl(Composite parent) {
@@ -36,7 +36,7 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 		RowLayouter layouter= new RowLayouter(2);
 		
 		Label label= new Label(result, SWT.NONE);
-		label.setText("&Variable name:");
+		label.setText(RefactoringMessages.getString("ExtractTempInputPage.variable_name")); //$NON-NLS-1$
 		
 		Text text= createTextInputField(result);
 		text.selectAll();
@@ -52,7 +52,7 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 	}
 	
 	private void addReplaceAllCheckbox(Composite result, RowLayouter layouter) {
-		String title= "&Replace all occurrences of the selected expression with references to the local variable";
+		String title= RefactoringMessages.getString("ExtractTempInputPage.replace_all"); //$NON-NLS-1$
 		boolean defaultValue= getExtractTempRefactoring().replaceAllOccurrences();
 		final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
 		getExtractTempRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
@@ -64,7 +64,7 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 	}
 	
 	private void addDeclareFinalCheckbox(Composite result, RowLayouter layouter) {
-		String title= "&Declare the local variable as 'final'";
+		String title= RefactoringMessages.getString("ExtractTempInputPage.declare_final"); //$NON-NLS-1$
 		boolean defaultValue= getExtractTempRefactoring().declareFinal();
 		final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
 		getExtractTempRefactoring().setDeclareFinal(checkBox.getSelection());
@@ -92,9 +92,9 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 	
 	private void updatePreviewLabel(){
 		try {
-			fLabel.setText("Signature Preview: " + getExtractTempRefactoring().getTempSignaturePreview());
+			fLabel.setText(RefactoringMessages.getString("ExtractTempInputPage.signature_preview") + getExtractTempRefactoring().getTempSignaturePreview()); //$NON-NLS-1$
 		} catch(JavaModelException e) {
-			ExceptionHandler.handle(e, "Extract local variable", "Unexpected exception. See log for details.");
+			ExceptionHandler.handle(e, RefactoringMessages.getString("ExtractTempInputPage.extract_local"), RefactoringMessages.getString("ExtractTempInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	

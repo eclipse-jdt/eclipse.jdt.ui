@@ -62,7 +62,7 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 		private Label fLabel;
 		public NullContextViewer(Composite parent) {
 			fLabel= new Label(parent, SWT.CENTER | SWT.FLAT);
-			fLabel.setText("No context information available");
+			fLabel.setText(RefactoringMessages.getString("ErrorWizardPage.no_context_information_available")); //$NON-NLS-1$
 		}
 		public void setInput(Object input) {
 			// do nothing

@@ -13,7 +13,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
-		setPageTitle("Move static member(s)");
+		setPageTitle(RefactoringMessages.getString("MoveMembersWizard.page_title")); //$NON-NLS-1$
 		addPage(new MoveMembersInputPage());
 	}
 	

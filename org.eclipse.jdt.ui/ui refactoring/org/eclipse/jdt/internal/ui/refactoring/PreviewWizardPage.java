@@ -89,7 +89,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		private Label fLabel;
 		public NullPreviewer(Composite parent) {
 			fLabel= new Label(parent, SWT.CENTER | SWT.FLAT);
-			fLabel.setText("No preview available");
+			fLabel.setText(RefactoringMessages.getString("PreviewWizardPage.no_preview")); //$NON-NLS-1$
 		}
 		public void setInput(Object input) {
 			// do nothing
@@ -107,7 +107,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 			setImageDescriptor(CompareUI.DESC_ETOOL_NEXT);
 			setDisabledImageDescriptor(CompareUI.DESC_DTOOL_NEXT);
 			setHoverImageDescriptor(CompareUI.DESC_CTOOL_NEXT);
-			setToolTipText("Select Next Change");
+			setToolTipText(RefactoringMessages.getString("PreviewWizardPage.next_Change")); //$NON-NLS-1$
 		}
 		public void run() {
 			fTreeViewer.revealNext();	
@@ -119,7 +119,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 			setImageDescriptor(CompareUI.DESC_ETOOL_PREV);
 			setDisabledImageDescriptor(CompareUI.DESC_DTOOL_PREV);
 			setHoverImageDescriptor(CompareUI.DESC_CTOOL_PREV);
-			setToolTipText("Select Previous Change");
+			setToolTipText(RefactoringMessages.getString("PreviewWizardPage.previous_Change")); //$NON-NLS-1$
 		}	
 		public void run() {
 			fTreeViewer.revealPrevious();
@@ -127,8 +127,8 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	}
 	
 	private class ShowDetailsAction extends Action {
-		private static final String SHOW_QUALIFIED_NAMES= "Show Qualified Names";
-		private static final String HIDE_QUALIFIED_NAMES= "Hide Qualified Names";
+		private static final String SHOW_QUALIFIED_NAMES= RefactoringMessages.getString("PreviewWizardPage.show_Qualified_Names"); //$NON-NLS-1$
+		private static final String HIDE_QUALIFIED_NAMES= RefactoringMessages.getString("PreviewWizardPage.hide_Qualified_Names"); //$NON-NLS-1$
 		public ShowDetailsAction() {
 			setImageDescriptor(JavaPluginImages.DESC_OBJS_PACKAGE);
 			setChecked(true);
@@ -275,7 +275,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 				}
 			}
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), "Showing preview", "Unexpected exception while computing input for compare preview");
+			ExceptionHandler.handle(e, getShell(), RefactoringMessages.getString("PreviewWizardPage.showing_preview"), RefactoringMessages.getString("PreviewWizardPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return null;
 	}
@@ -337,7 +337,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		SashForm sashForm= new SashForm(result, SWT.VERTICAL);
 
 		CompareViewerPane pane= new CompareViewerPane(sashForm, SWT.BORDER | SWT.FLAT);
-		pane.setText("Changes to be performed");
+		pane.setText(RefactoringMessages.getString("PreviewWizardPage.changes")); //$NON-NLS-1$
 		ToolBarManager tbm= pane.getToolBarManager(pane);
 		// tbm.add(new ShowDetailsAction());
 		// tbm.add(new Separator());

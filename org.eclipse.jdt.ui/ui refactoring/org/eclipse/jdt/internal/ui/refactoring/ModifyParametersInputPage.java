@@ -71,7 +71,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	
 	public ModifyParametersInputPage() {
 		super(PAGE_NAME, true);
-		setMessage("Specify the new order of parameters and/or their new names.");
+		setMessage(RefactoringMessages.getString("ModifyParametersInputPage.new_order")); //$NON-NLS-1$
 	}
 	
 	public void createControl(Composite parent) {
@@ -105,7 +105,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		GridData labelGd= new GridData();
 		labelGd.horizontalSpan= 2;
 		tableLabel.setLayoutData(labelGd);
-		tableLabel.setText("&Parameters (click in the \'New Name\' column to edit an entry)");
+		tableLabel.setText(RefactoringMessages.getString("ModifyParametersInputPage.parameters")); //$NON-NLS-1$
 		
 		createParameterList(subComposite);
 		createButtonComposite(subComposite);
@@ -156,7 +156,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 			}
 			return ((ParameterInfo[]) result.toArray(new ParameterInfo[result.size()]));
 		} catch(JavaModelException e) {
-			ExceptionHandler.handle(e, "Rename Parameters", "Unexpected exception. See log for details.");
+			ExceptionHandler.handle(e, RefactoringMessages.getString("ModifyParamatersInputPage.modify_Parameters"), RefactoringMessages.getString("ModifyParametersInputPage.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 			return new ParameterInfo[0];
 		}		
 	}
@@ -207,8 +207,8 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		gl.marginHeight= 0;
 		buttonComposite.setLayout(gl);
 
-		fUpButton= createButton(buttonComposite, "Move &Up", true);
-		fDownButton= createButton(buttonComposite, "Move &Down", false);
+		fUpButton= createButton(buttonComposite, RefactoringMessages.getString("ModifyParametersInputPage.move_op"), true); //$NON-NLS-1$
+		fDownButton= createButton(buttonComposite, RefactoringMessages.getString("ModifyParametersInputPage.move_down"), false); //$NON-NLS-1$
 		
 		updateButtonsEnabledState();
 	}
@@ -259,15 +259,15 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		TableColumn tc;
 		tc= new TableColumn(table, SWT.NONE, TYPE_PROP);
 		tc.setResizable(columnLayoutData[TYPE_PROP].resizable);
-		tc.setText("Type");
+		tc.setText(RefactoringMessages.getString("ModifyParametersInputPage.type")); //$NON-NLS-1$
 		
 		tc= new TableColumn(table, SWT.NONE, OLDNAME_PROP);
 		tc.setResizable(columnLayoutData[OLDNAME_PROP].resizable);
-		tc.setText("Old Name"); 
+		tc.setText(RefactoringMessages.getString("ModifyParametersInputPage.old_Name"));  //$NON-NLS-1$
 		
 		tc= new TableColumn(table, SWT.NONE, NEWNAME_PROP);
 		tc.setResizable(columnLayoutData[NEWNAME_PROP].resizable);
-		tc.setText("New Name"); 
+		tc.setText(RefactoringMessages.getString("ModifyParametersInputPage.new_Name"));  //$NON-NLS-1$
 		
 		return layout;
 	}
@@ -387,7 +387,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 				setErrorMessage(null);
 			}	
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, "Exception", "Unexpected exception occurred. See log for details.");
+			ExceptionHandler.handle(e, RefactoringMessages.getString("ModifyParamatersInputPage.modify_Parameters"), RefactoringMessages.getString("ModifyParametersInputPage.exception1")); //$NON-NLS-2$ //$NON-NLS-1$
 			setPageComplete(false);
 			setErrorMessage(null);
 		}
@@ -395,9 +395,9 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	
 	private void updateSignaturePreview() {
 		try{
-			fSignaturePreview.setText("Method Signature Preview: " + getModifyParametersRefactoring().getMethodSignaturePreview());
+			fSignaturePreview.setText(RefactoringMessages.getString("ModifyParametersInputPage.method_Signature_Preview") + getModifyParametersRefactoring().getMethodSignaturePreview()); //$NON-NLS-1$
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, "Reorder/rename parameters", "Unexpected exception. See log for details.");
+			ExceptionHandler.handle(e, RefactoringMessages.getString("ModifyParamatersInputPage.modify_Parameters"), RefactoringMessages.getString("ModifyParametersInputPage.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 		}	
 	}
 	
@@ -452,7 +452,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 			if (columnIndex == NEWNAME_PROP)
 				return tuple.newName;
 			Assert.isTrue(false);
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 	}
 	

@@ -70,9 +70,9 @@ public class RefactoringSupportFactory {
 			RefactoringWizard wizard= createWizard(fRefactoring);
 			RefactoringStarter starter= new RefactoringStarter();
 			if (wizard != null)
-				starter.activate((Refactoring)fRefactoring, wizard, "Rename", true);
+				starter.activate((Refactoring)fRefactoring, wizard, RefactoringMessages.getString("RefactoringSupportFactory.rename"), true); //$NON-NLS-1$
 			else	
-				starter.activate(fRefactoring, "Rename", getNameEntryMessage(), false, element);
+				starter.activate(fRefactoring, RefactoringMessages.getString("RefactoringSupportFactory.rename"), getNameEntryMessage(), false, element); //$NON-NLS-1$
 				
 			selectAndReveal(fRefactoring.getNewElement());
 			fRefactoring= null;
@@ -126,7 +126,7 @@ public class RefactoringSupportFactory {
 		abstract boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException;
 
 		String getNameEntryMessage(){
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 	}
 	
@@ -145,7 +145,7 @@ public class RefactoringSupportFactory {
 				return ((RenameJavaProjectRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
 			}
 			String getNameEntryMessage(){
-				return "Enter the new name for this Java project:";
+				return RefactoringMessages.getString("RefactoringSupportFactory.project_name"); //$NON-NLS-1$
 			}	
 		};
 	}
@@ -159,7 +159,7 @@ public class RefactoringSupportFactory {
 				return ((RenameSourceFolderRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
 			}
 			String getNameEntryMessage(){
-				return "Enter the new name for this source folder:";
+				return RefactoringMessages.getString("RefactoringSupportFactory.source_folder_name"); //$NON-NLS-1$
 			}
 		};
 	}
@@ -173,7 +173,7 @@ public class RefactoringSupportFactory {
 				return ((RenameResourceRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
 			}
 			String getNameEntryMessage(){
-				return "Enter the new name for this resource:";
+				return RefactoringMessages.getString("RefactoringSupportFactory.resource_name"); //$NON-NLS-1$
 			}
 		};
 	}
@@ -187,8 +187,8 @@ public class RefactoringSupportFactory {
 				return ((RenamePackageRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
 			}
 			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
-				String title= "Rename Package";
-				String message= "Enter the new name for this package. References to all types declared in it will be updated.";
+				String title= RefactoringMessages.getString("RefactoringSupportFactory.rename_Package"); //$NON-NLS-1$
+				String message= RefactoringMessages.getString("RefactoringSupportFactory.package_name"); //$NON-NLS-1$
 				String wizardPageHelp= IJavaHelpContextIds.RENAME_PACKAGE_WIZARD_PAGE; 
 				String errorPageHelp= IJavaHelpContextIds.RENAME_PACKAGE_ERROR_WIZARD_PAGE;
 				ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR_PACKAGE;
@@ -209,8 +209,8 @@ public class RefactoringSupportFactory {
 				return ((RenameCompilationUnitRefactoring)refactoring).checkPreactivation().isOK();
 			}
 			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
-				String title= "Rename Compilation Unit";
-				String message= "Enter the new name for this compilation unit. Refactoring will also rename and update references to the type (if any exists) that has the same name as this compilation unit.";
+				String title= RefactoringMessages.getString("RefactoringSupportFactory.rename_Cu"); //$NON-NLS-1$
+				String message= RefactoringMessages.getString("RefactoringSupportFactory.compilation_unit"); //$NON-NLS-1$
 				String wizardPageHelp= IJavaHelpContextIds.RENAME_CU_WIZARD_PAGE; 
 				String errorPageHelp= IJavaHelpContextIds.RENAME_CU_ERROR_WIZARD_PAGE;
 				ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR_CU;

@@ -188,12 +188,12 @@ public class PullUpInputPage extends UserInputWizardPage {
 	private Label fContextLabel;
 	private Set fMarkedMethods; //Set of IMethods
 	public static final String PAGE_NAME= "PullUpMethodsInputPage"; //$NON-NLS-1$
-	private static final String fgHelpContextID= "HELP CONTEXT";
+	private static final String fgHelpContextID= "HELP CONTEXT"; //$NON-NLS-1$
 	
 	public PullUpInputPage() {
 		super(PAGE_NAME, true);
 		fMarkedMethods= new HashSet();
-		setMessage("Select the methods to be deleted");
+		setMessage(RefactoringMessages.getString("PullUpInputPage.select_methods")); //$NON-NLS-1$
 	}
 
 	/*
@@ -219,8 +219,8 @@ public class PullUpInputPage extends UserInputWizardPage {
 		bcl.marginWidth= 1;
 		buttonComposite.setLayout(bcl);
 
-		fSelectAllButton= createSelectButton(buttonComposite, "&Select All", true);
-		fDeselectAllButton= createSelectButton(buttonComposite, "&Deselect All", false);
+		fSelectAllButton= createSelectButton(buttonComposite, RefactoringMessages.getString("PullUpInputPage.select_All"), true); //$NON-NLS-1$
+		fDeselectAllButton= createSelectButton(buttonComposite, RefactoringMessages.getString("PullUpInputPage.deselect_All"), false); //$NON-NLS-1$
 	}
 	
 	private Button createSelectButton(Composite composite, String buttonLabel, final boolean select){
@@ -317,7 +317,7 @@ public class PullUpInputPage extends UserInputWizardPage {
 			};
 			new ProgressMonitorDialog(getShell()).run(false, false, op);
 		} catch(InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), "Pull Up", "Unexpected exception. See log for details.");
+			ExceptionHandler.handle(e, getShell(), RefactoringMessages.getString("PullUpInputPage.pull_Up"), RefactoringMessages.getString("PullUpInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch(InterruptedException e) {
 			Assert.isTrue(false);//not cancellable
 		}
@@ -360,7 +360,7 @@ public class PullUpInputPage extends UserInputWizardPage {
 			treeViever.setInput(hierarchy);
 			
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, "Pull Up Methods", "Unexpected exception. See log for details.");
+			ExceptionHandler.handle(e, RefactoringMessages.getString("PullUpInputPage.pull_up1"), RefactoringMessages.getString("PullUpInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 			treeViever.setInput(null);
 		}	
 		treeViever.expandAll();
@@ -390,7 +390,7 @@ public class PullUpInputPage extends UserInputWizardPage {
 		try{	
 			showInSourceViewer((ISourceReference)first);
 		} 	catch (JavaModelException e){
-			ExceptionHandler.handle(e, "Pull Up Methods", "See log");
+			ExceptionHandler.handle(e, RefactoringMessages.getString("PullUpInputPage.pull_up1"), "See log"); //$NON-NLS-1$
 		}
 	}
 	
@@ -430,7 +430,7 @@ public class PullUpInputPage extends UserInputWizardPage {
 		else if (entry instanceof IType)	
 			return  "&Source of type: '" + JavaModelUtil.getFullyQualifiedName((IType)entry) + "'";
 		else
-			return "";
+			return ""; //$NON-NLS-1$
 	}
 	
 	private boolean isMarkedToDelete(Object object){

@@ -71,7 +71,7 @@ public class ComparePreviewer extends CompareViewerSwitchingPane implements IPre
 			fType= type;
 		}
 		public String getName() {
-			return "Compare element name";
+			return RefactoringMessages.getString("ComparePreviewer.element_name"); //$NON-NLS-1$
 		}
 		public Image getImage() {
 			return null;
@@ -92,9 +92,9 @@ public class ComparePreviewer extends CompareViewerSwitchingPane implements IPre
 		super(parent, SWT.BORDER | SWT.FLAT, true);
 		fCompareConfiguration= new CompareConfiguration();
 		fCompareConfiguration.setLeftEditable(false);
-		fCompareConfiguration.setLeftLabel("Original Source");
+		fCompareConfiguration.setLeftLabel(RefactoringMessages.getString("ComparePreviewer.original_source")); //$NON-NLS-1$
 		fCompareConfiguration.setRightEditable(false);
-		fCompareConfiguration.setRightLabel("Refactored Source");
+		fCompareConfiguration.setRightLabel(RefactoringMessages.getString("ComparePreviewer.refactored_source")); //$NON-NLS-1$
 		fLabelProvider= new ChangeElementLabelProvider(
 			JavaElementLabelProvider.SHOW_POST_QUALIFIED| JavaElementLabelProvider.SHOW_SMALL_ICONS);
 	}
