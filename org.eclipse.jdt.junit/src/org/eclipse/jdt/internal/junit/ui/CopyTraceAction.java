@@ -43,6 +43,7 @@ public class CopyTraceAction extends Action {
 		clipboard.setContents(
 			new String[]{ convertLineTerminators(trace) }, 
 			new Transfer[]{ plainTextTransfer });
+		clipboard.dispose();
 	}
 
 	private String convertLineTerminators(String in) {
