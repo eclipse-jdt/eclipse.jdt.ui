@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -22,6 +23,8 @@ import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.CompareViewerSwitchingPane;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
+
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -44,7 +47,7 @@ public class ComparePreviewer extends CompareViewerSwitchingPane implements IPre
 		/** The change element */
 		public ChangeElement element;
 		public CompareInput(ChangeElement e, String l, String r, String t) {
-			this(e, new ByteArrayInputStream(l.getBytes()), new ByteArrayInputStream(r.getBytes()), t);
+			this(e, createInputStream(l), createInputStream(r), t);
 		}
 		public CompareInput(ChangeElement e, InputStream l, InputStream r, String t) {
 			Assert.isNotNull(e);
@@ -55,6 +58,14 @@ public class ComparePreviewer extends CompareViewerSwitchingPane implements IPre
 			left= l;
 			right= r;
 			type= t;
+		}
+		private static InputStream createInputStream(String s) {
+			// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19319
+			try {
+				return new ByteArrayInputStream(s.getBytes(ResourcesPlugin.getEncoding()));
+			} catch (UnsupportedEncodingException e) {
+				return new ByteArrayInputStream(s.getBytes());
+			}
 		}
 	}
 	

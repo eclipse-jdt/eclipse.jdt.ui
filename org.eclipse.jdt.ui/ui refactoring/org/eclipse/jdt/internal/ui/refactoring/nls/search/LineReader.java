@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+
 class LineReader extends Object {
 	protected static final int fgLF= '\n';
 	protected static final int fgCR= '\r';
@@ -19,8 +21,9 @@ class LineReader extends Object {
 	protected int fPushbackChar;
 	protected boolean fPushback;
 
-	public LineReader(InputStream in) {
-		this(new InputStreamReader(in));
+	// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19319
+	public LineReader(InputStream in) throws IOException {
+		this(new InputStreamReader(in, ResourcesPlugin.getEncoding()));
 	}
 
 	public LineReader(Reader reader) {

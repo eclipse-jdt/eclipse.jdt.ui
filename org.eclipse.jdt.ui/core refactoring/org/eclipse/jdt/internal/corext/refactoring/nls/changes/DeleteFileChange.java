@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.util.IOCloser;
 
 public class DeleteFileChange extends Change {
 
@@ -56,22 +57,23 @@ public class DeleteFileChange extends Change {
 		}
 	}
 	
-	private String getSource(IFile file) throws CoreException{
+	private String getSource(IFile file) throws CoreException {
 		InputStream in= file.getContents();
-		BufferedReader br= new BufferedReader(new InputStreamReader(in));
-		
+		// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19319
 		StringBuffer sb= new StringBuffer();
+		BufferedReader br= null;
 		try {
+			br= new BufferedReader(new InputStreamReader(in, ResourcesPlugin.getEncoding()));	
 			int read= 0;
 			while ((read= br.read()) != -1)
 				sb.append((char) read);
 		} catch (IOException e){
-			//		
+				throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
 		} finally {
 			try{
-				br.close();	
-			} catch (IOException e1){
-				throw new JavaModelException(e1, IJavaModelStatusConstants.IO_EXCEPTION);
+				IOCloser.rethrows(br, in);
+			} catch (IOException e){
+				throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
 			}	
 		}
 		return sb.toString();

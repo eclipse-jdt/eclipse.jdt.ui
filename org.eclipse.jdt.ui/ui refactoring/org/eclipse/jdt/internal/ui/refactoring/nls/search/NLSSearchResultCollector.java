@@ -14,13 +14,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.jface.text.Position;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jface.text.Position;
 
 import org.eclipse.ui.IWorkbenchPage;
 
@@ -34,10 +34,11 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 
-import org.eclipse.jdt.ui.JavaUI;
-
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.search.IJavaSearchUIConstants;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 class NLSSearchResultCollector implements IJavaSearchResultCollector {
 
@@ -252,16 +253,24 @@ class NLSSearchResultCollector implements IJavaSearchResultCollector {
 	 * @return	the start position of the property name in the file, -1 if not found
 	 */
 	protected int findPropertyNameStartPosition(String propertyName) {
+		// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19319
+		InputStream stream= null;
 		LineReader lineReader= null;
 		try {
-			lineReader= new LineReader(fPropertyFile.getContents());
+			stream= fPropertyFile.getContents();
+			lineReader= new LineReader(stream);
 		} catch (CoreException cex) {
-			if (lineReader != null)
+			// failed to get input stream
+			JavaPlugin.log(cex);
+			return -1;
+		} catch (IOException e) {
+			if (stream != null) {
 				try {
-					lineReader.close();
-				} catch (IOException ex) {
-					// XXX: log error
+					stream.close();
+				} catch (IOException ce) {
+					JavaPlugin.log(ce);
 				}
+			}
 			return -1;
 		}
 		int start= 0;

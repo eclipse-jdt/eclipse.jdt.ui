@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +29,8 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.corext.util.IOCloser;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 
@@ -132,10 +135,12 @@ import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 
 	private TextBuffer createFromFile(IFile file) throws CoreException {
 		IDocument document;
+		// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19319
+		InputStream stream= file.getContents();
 		InputStreamReader in= null;
 		try {		
 			document= new Document();
-			in= new InputStreamReader(new BufferedInputStream(file.getContents()));
+			in= new InputStreamReader(new BufferedInputStream(stream), ResourcesPlugin.getEncoding());
 			StringBuffer buffer= new StringBuffer();
 			char[] readBuffer= new char[2048];
 			int n= in.read(readBuffer);
@@ -149,12 +154,7 @@ import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 			IStatus s= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, x.getMessage(), x);
 			throw new CoreException(s);
 		} finally {
-			if (in != null) {
-				try {
-					in.close();
-				} catch (IOException x) {
-				}
-			}
+			IOCloser.perform(in, stream);
 		}
 	}
 	

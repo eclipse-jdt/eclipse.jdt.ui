@@ -50,6 +50,8 @@ public class LocalSelectionTransfer extends ByteArrayTransfer {
 	}
 	
 	public void javaToNative(Object object, TransferData transferData) {
+		// No encoding needed since this is a hardcoded string read and written in the same process.
+		// See nativeToJava below
 		byte[] check= TYPE_NAME.getBytes();
 		super.javaToNative(check, transferData);
 	}
@@ -63,6 +65,8 @@ public class LocalSelectionTransfer extends ByteArrayTransfer {
 	}
 
 	private boolean isInvalidNativeType(Object result) {
+		// No encoding needed since this is a hardcoded string read and written in the same process.
+		// See javaToNative above
 		return !(result instanceof byte[]) || !TYPE_NAME.equals(new String((byte[])result));
 	}
 	
