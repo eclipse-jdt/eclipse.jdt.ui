@@ -152,7 +152,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		PixelConverter converter= new PixelConverter(parent);
 		Composite composite= new Composite(parent, SWT.NONE);
 		
-		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fFoldersList, fUseFolderOutputs }, true);
+		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fFoldersList, fUseFolderOutputs }, true, SWT.DEFAULT, SWT.DEFAULT);
 		LayoutUtil.setHorizontalGrabbing(fFoldersList.getTreeControl(null));
 		
 		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);
