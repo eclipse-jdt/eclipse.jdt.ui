@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -14,17 +15,23 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
+import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 /**
  * Created on a Compilation unit, the ImportsStructure allows to add
@@ -57,7 +64,7 @@ public class ImportsStructure implements IImportsStructure {
 		synchronized (fCompilationUnit) {
 			fCompilationUnit.reconcile();
 		}
-		
+	
 		IImportContainer container= cu.getImportContainer();
 		
 		fImportOnDemandThreshold= importThreshold;
@@ -285,9 +292,10 @@ public class ImportsStructure implements IImportsStructure {
 	}	
 	
 	public static boolean isImplicitImport(String qualifier, ICompilationUnit cu) {
-		if (qualifier.length() == 0 || "java.lang".equals(qualifier)) { //$NON-NLS-1$
+		if ("java.lang".equals(qualifier)) { //$NON-NLS-1$
 			return true;
 		}
+		
 		String packageName= cu.getParent().getElementName();
 		if (qualifier.equals(packageName)) {
 			return true;
@@ -335,9 +343,9 @@ public class ImportsStructure implements IImportsStructure {
 					return fullTypeName;
 				}
 			}
-			if (fFilterImplicitImports && isImplicitImport(typeContainerName, fCompilationUnit)) {
+			/*if (fFilterImplicitImports && isImplicitImport(typeContainerName, fCompilationUnit)) {
 				return typeName;
-			}
+			}*/
 		}
 		
 		ImportDeclEntry decl= new ImportDeclEntry(fullTypeName, null);
@@ -482,11 +490,23 @@ public class ImportsStructure implements IImportsStructure {
 		
 		StringBuffer buf= new StringBuffer();
 				
-		// all (top level) types in this cu
 		int nCreated= 0;
 		PackageEntry lastPackage= null;
 		
+		
+		HashSet starImportPackages= new HashSet();
+		HashSet onDemandConflicts= new HashSet();
+		
 		int nPackageEntries= fPackageEntries.size();
+		for (int i= 0; i < nPackageEntries; i++) {
+			PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
+			if (pack.hasStarImport(fImportOnDemandThreshold)) {
+				starImportPackages.add(pack.getName());
+			}
+		}
+		
+		evaluateStarImportConflicts(starImportPackages, onDemandConflicts);
+		
 		for (int i= 0; i < nPackageEntries; i++) {
 			PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
 			int nImports= pack.getNumberOfImports();
@@ -504,8 +524,8 @@ public class ImportsStructure implements IImportsStructure {
 			}
 			lastPackage= pack;
 			
-			boolean doStarImport= pack.doesNeedStarImport(fImportOnDemandThreshold);
-			if (doStarImport) {
+			boolean doStarImport= starImportPackages.contains(pack.getName());
+			if (doStarImport && (!fRestoreExistingImports || pack.find("*") == null)) { //$NON-NLS-1$
 				String starImportString= pack.getName() + ".*"; //$NON-NLS-1$
 				appendImportToBuffer(buf, starImportString, lineDelim);
 				nCreated++;
@@ -516,7 +536,7 @@ public class ImportsStructure implements IImportsStructure {
 				String content= currDecl.getContent();
 				
 				if (content == null) { // new entry
-					if (!doStarImport) {
+					if (!doStarImport || currDecl.isOnDemand() || onDemandConflicts.contains(currDecl.getSimpleName())) {
 						appendImportToBuffer(buf, currDecl.getElementName(), lineDelim);
 						nCreated++;
 					}
@@ -546,6 +566,35 @@ public class ImportsStructure implements IImportsStructure {
 		}
 		return null;
 	}
+
+	private void evaluateStarImportConflicts(HashSet starImportPackages, HashSet onDemandConflicts) throws JavaModelException {
+		int nPackageEntries= fPackageEntries.size();
+		for (int i= 0; i < nPackageEntries; i++) {
+			PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
+			if (pack.hasStarImport(fImportOnDemandThreshold)) {
+				starImportPackages.add(pack.getName());
+			}
+		}
+		if (starImportPackages.size() == 0) {
+			return;
+		}
+		starImportPackages.add(fCompilationUnit.getParent().getElementName());
+		starImportPackages.add("java.lang");
+		
+		ArrayList res= new ArrayList();
+		HashSet typesInPackages= new HashSet();
+		
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { fCompilationUnit.getJavaProject() });
+		AllTypesCache.getTypes(scope, IJavaSearchConstants.TYPE, null, res);
+		for (int i= 0; i < res.size(); i++) {
+			TypeInfo elem= (TypeInfo) res.get(i);
+			if (starImportPackages.contains(elem.getTypeContainerName())) {
+				if (!typesInPackages.add(elem.getTypeName())) {
+					onDemandConflicts.add(elem.getTypeName());
+				}
+			}
+		}
+	}
 	
 	private boolean hasChanged(TextBuffer textBuffer, int offset, int length, String content) {
 		if (content.length() != length) {
@@ -560,7 +609,7 @@ public class ImportsStructure implements IImportsStructure {
 	}
 
 	private void appendImportToBuffer(StringBuffer buf, String importName, String lineDelim) {
-		String str= "import " + importName + ";\n";
+		String str= "import " + importName + ";\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		buf.append(StubUtility.codeFormat(str, 0, lineDelim));
 	}
 	
@@ -591,6 +640,10 @@ public class ImportsStructure implements IImportsStructure {
 		public String getElementName() {
 			return fElementName;
 		}
+		
+		public String getSimpleName() {
+			return Signature.getSimpleName(fElementName);
+		}		
 		
 		public boolean isOnDemand() {
 			return fElementName != null && fElementName.endsWith(".*"); //$NON-NLS-1$
@@ -659,9 +712,6 @@ public class ImportsStructure implements IImportsStructure {
 			for (int i= 0; i < nInports; i++) {
 				ImportDeclEntry curr= getImportAt(i);
 				if (!curr.isComment()) {
-					if (curr.isOnDemand()) {
-						return; // star imported
-					}
 					int cmp= fullImportName.compareTo(curr.getElementName());
 					if (cmp == 0) {
 						return; // exists already
@@ -713,9 +763,30 @@ public class ImportsStructure implements IImportsStructure {
 		
 		public final ImportDeclEntry getImportAt(int index) {
 			return (ImportDeclEntry) fImportEntries.get(index);
-		}	
+		}
+		
+		public boolean hasStarImport(int threshold) {
+			if (isComment() || isDefaultPackage()) { // can not star import default package
+				return false;
+			}
+
+			int count= 0;
+			boolean containsNew= false;
+			int nImports= getNumberOfImports();
+			for (int i= 0; i < nImports; i++) {
+				ImportDeclEntry curr= getImportAt(i);
+				if (curr.isOnDemand()) {
+					return true;
+				}
+				if (!curr.isComment()) {
+					count++;
+					containsNew |= curr.isNew();
+				}
+			}
+			return (count >= threshold) && containsNew;
+		}
 				
-		public boolean doesNeedStarImport(int threshold) {
+		/*public boolean doesNeedStarImport(int threshold) {
 			if (isComment()) {
 				return false;
 			}
@@ -725,7 +796,7 @@ public class ImportsStructure implements IImportsStructure {
 			int nImports= getNumberOfImports();
 			for (int i= 0; i < nImports; i++) {
 				ImportDeclEntry curr= getImportAt(i);
-				if (curr.isOnDemand()) {
+				if (curr.isOnDemand() && !curr.isNew()) { // already has on demand import
 					return false;
 				}
 				if (!curr.isComment()) {
@@ -734,7 +805,7 @@ public class ImportsStructure implements IImportsStructure {
 				}
 			}		
 			return (count >= threshold) && containsNew;	
-		}
+		}*/
 		
 		public int getNumberOfImports() {
 			return fImportEntries.size();
@@ -763,6 +834,10 @@ public class ImportsStructure implements IImportsStructure {
 		public boolean isComment() {
 			return "!".equals(fName); //$NON-NLS-1$
 		}
+		
+		public boolean isDefaultPackage() {
+			return fName.length() == 0;
+		}		
 		
 	}	
 

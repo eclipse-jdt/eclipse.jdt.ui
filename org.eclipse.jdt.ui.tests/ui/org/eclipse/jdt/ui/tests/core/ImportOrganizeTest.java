@@ -42,7 +42,7 @@ public class ImportOrganizeTest extends TestCase {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ImportOrganizeTest("testCommentAfterImport"));
+			suite.addTest(new ImportOrganizeTest("testImportFromDefaultWithStar"));
 			return suite;
 		}	
 	}
@@ -517,14 +517,7 @@ public class ImportOrganizeTest extends TestCase {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
-	private boolean BUG_10557= false;
-	
 	public void testCommentAfterImport() throws Exception {
-		if (BUG_10557) {
-			return;
-		}
-		
-		
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
@@ -557,4 +550,229 @@ public class ImportOrganizeTest extends TestCase {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
+	public void testImportToStar() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack2= sourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class List {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("List.java", buf.toString(), false, null);		
+		
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Set;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("import pack.List;\n");		
+		buf.append("\n");		
+		buf.append("public class C {\n");
+		buf.append("    Vector v;\n");
+		buf.append("    Set v2;\n");
+		buf.append("    Map v3;\n");
+		buf.append("    List v4;\n");
+		buf.append("    String v5;\n");				
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] { "java", "pack" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 2, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("import pack.List;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    Vector v;\n");
+		buf.append("    Set v2;\n");
+		buf.append("    Map v3;\n");
+		buf.append("    List v4;\n");
+		buf.append("    String v5;\n");		
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testImportToStarWithExplicit() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack2= sourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class List {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("List.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class List2 {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("List2.java", buf.toString(), false, null);
+
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Set;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("import pack.List;\n");
+		buf.append("import pack.List2;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    Vector v;\n");
+		buf.append("    Set v2;\n");
+		buf.append("    Map v3;\n");
+		buf.append("    List v4;\n");
+		buf.append("    List2 v5;\n");
+		buf.append("    String v6;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] { "java", "pack" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 2, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("import pack.*;\n");
+		buf.append("import pack.List;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    Vector v;\n");
+		buf.append("    Set v2;\n");
+		buf.append("    Map v3;\n");
+		buf.append("    List v4;\n");
+		buf.append("    List2 v5;\n");
+		buf.append("    String v6;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testImportFromDefault() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack2= sourceFolder.createPackageFragment("", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("public class List1 {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("List.java", buf.toString(), false, null);
+
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Set;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    Vector v;\n");
+		buf.append("    Set v2;\n");
+		buf.append("    Map v3;\n");
+		buf.append("    List1 v4;\n");
+		buf.append("    String v5;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] { "java", "pack" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 2, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import List1;\n");		
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    Vector v;\n");
+		buf.append("    Set v2;\n");
+		buf.append("    Map v3;\n");
+		buf.append("    List1 v4;\n");
+		buf.append("    String v5;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	public void testImportFromDefaultWithStar() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack2= sourceFolder.createPackageFragment("", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("public class List1 {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("List.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("public class List2 {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("List2.java", buf.toString(), false, null);
+
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Set;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    Vector v;\n");
+		buf.append("    Set v2;\n");
+		buf.append("    Map v3;\n");
+		buf.append("    List1 v4;\n");
+		buf.append("    List2 v5;\n");
+		buf.append("    String v6;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] { "java", "pack" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 2, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import List1;\n");
+		buf.append("import List2;\n");		
+		buf.append("import java.util.*;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    Vector v;\n");
+		buf.append("    Set v2;\n");
+		buf.append("    Map v3;\n");
+		buf.append("    List1 v4;\n");
+		buf.append("    List2 v5;\n");
+		buf.append("    String v6;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}	
 }
