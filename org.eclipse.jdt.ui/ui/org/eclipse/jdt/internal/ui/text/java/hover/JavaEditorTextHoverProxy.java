@@ -11,18 +11,13 @@ Contributors:
 
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IPartListener;
-import org.eclipse.ui.IWorkbenchPart;
 
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -32,46 +27,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 
-
-	// XXX: Can be removed if we decide we don't want enabling and disabling of hovers
-	class ListenerRemover implements IPartListener {
-
-		void dispose() {
-			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-			store.removePropertyChangeListener(fEnableStateUpdater);
-			fEnableStateUpdater= null;
-			stopListening();
-			setEditor(null);
-		}
-
-		private void stopListening() {
-			getEditor().getSite().getWorkbenchWindow().getPartService().removePartListener(this);
-		}
-
-		public void partClosed(IWorkbenchPart part) {
-			if (part == getEditor())
-				dispose();
-		}
-
-		public void partOpened(IWorkbenchPart part) {
-		}
-		
-		public void partDeactivated(IWorkbenchPart part) {
-		}
-		
-		public void partActivated(IWorkbenchPart part) {
-		}
-
-		public void partBroughtToTop(IWorkbenchPart part) {
-		}	
-	};
-
-
 	private JavaEditorTextHoverDescriptor fHoverDescriptor;
 	private IJavaEditorTextHover fHover;
 	private IPropertyChangeListener fEnableStateUpdater;
-	private ListenerRemover fListenerRemover;
-
 
 	public JavaEditorTextHoverProxy(JavaEditorTextHoverDescriptor descriptor, IEditorPart editor) {
 		fHoverDescriptor= descriptor;
@@ -82,26 +40,10 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 	 * @see IJavaEditorTextHover#setEditor(IEditorPart)
 	 */
 	public void setEditor(IEditorPart editor) {
-		if (getEditor() != null && fListenerRemover != null)
-			fListenerRemover.stopListening();
-			
 		super.setEditor(editor);
 
 		if (fHover != null)
 			fHover.setEditor(getEditor());
-
-//		XXX: Can be removed if we decide we don't want enabling and disabling of hovers
-//		if (fEditor != null) {
-//			fListenerRemover= new ListenerRemover();
-//			IWorkbenchWindow window= fEditor.getSite().getWorkbenchWindow();
-//			window.getPartService().addPartListener(fListenerRemover);
-//			
-//			if (fEnableStateUpdater == null) {
-//					fEnableStateUpdater= new EnableStateUpdater();
-//					IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-//					store.addPropertyChangeListener(fEnableStateUpdater);
-//			}
-//		}
 	}
 
 	public boolean isEnabled() {
@@ -134,11 +76,6 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 			return null;
 	}
 
-	public void dispose() {
-		fListenerRemover.dispose();
-		
-	}
-	
 	private boolean isCreated() {
 		return fHover != null;
 	}
