@@ -129,20 +129,29 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 					l.addAll(analyze((IJavaProject) element));
 			}
 			showResults(l);
-		}catch(JavaModelException e) {
+		} catch(JavaModelException e) {
 			ExceptionHandler.handle(e, 
 				ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"), //$NON-NLS-1$
 				ActionMessages.getString("FindStringsToExternalizeAction.error.message")); //$NON-NLS-1$
 		}
 	}
 	
-	private void showResults(List l){
-		if (l.isEmpty())
+	private void showResults(List l) {
+		if (noStrings(l))
 			MessageDialog.openInformation(getShell(), 
 				ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"), //$NON-NLS-1$
 				ActionMessages.getString("FindStringsToExternalizeAction.noStrings")); //$NON-NLS-1$
 		else	
 			new NonNLSListDialog(getShell(), l, countStrings(l)).open();
+	}
+	
+	private boolean noStrings(List l) {
+		for (Iterator iter= l.iterator(); iter.hasNext();) {
+			NonNLSElement element= (NonNLSElement)iter.next();
+			if (element.count != 0)
+				return false;
+		}
+		return true;
 	}
 	
 	/*
