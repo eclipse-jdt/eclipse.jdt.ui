@@ -104,22 +104,6 @@ public class TextBuffer {
 	}
 
 	/**
-	 * Releases this text buffer.
-	 */
-	public void release() {
-		try {
-			fDocument.removePositionUpdater(fUpdater);
-			Position[] positions= fDocument.getPositions(PositionUpdater.CATEGORY);
-			for (int i= 0; i < positions.length; i++) {
-				fDocument.removePosition(PositionUpdater.CATEGORY, positions[i]);
-			}
-			fDocument.removePositionCategory(fUpdater.CATEGORY);
-		} catch (BadPositionCategoryException e) {
-			Assert.isTrue(false, "Should never happen");
-		}
-	}
-	
-	/**
 	 * Returns the number of characters in this text buffer.
 	 *
 	 * @return the number of characters in this text buffer
@@ -359,6 +343,22 @@ public class TextBuffer {
 				"Replace failed due to wrong positions", e);
 			throw new CoreException(s);
 		}	
+	}
+	
+	/**
+	 * Releases this text buffer.
+	 */
+	/* package */ void release() {
+		try {
+			fDocument.removePositionUpdater(fUpdater);
+			Position[] positions= fDocument.getPositions(PositionUpdater.CATEGORY);
+			for (int i= 0; i < positions.length; i++) {
+				fDocument.removePosition(PositionUpdater.CATEGORY, positions[i]);
+			}
+			fDocument.removePositionCategory(fUpdater.CATEGORY);
+		} catch (BadPositionCategoryException e) {
+			Assert.isTrue(false, "Should never happen");
+		}
 	}
 	
 	void setCurrentPositions(TextPosition[] positions) {
