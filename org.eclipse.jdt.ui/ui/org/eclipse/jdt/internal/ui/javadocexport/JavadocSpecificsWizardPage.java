@@ -277,7 +277,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 		fAntBrowseButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-				//@hack
+
 				String temp= fAntText.getText();
 				IPath path= new Path(temp);
 				String file= path.lastSegment();

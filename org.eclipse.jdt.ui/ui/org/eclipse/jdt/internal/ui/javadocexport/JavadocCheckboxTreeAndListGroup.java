@@ -479,7 +479,6 @@ public class JavadocCheckboxTreeAndListGroup implements ICheckStateListener, ISe
 	 *@param treeElement java.lang.Object
 	 */
 	protected void populateListViewer(final Object treeElement) {
-		//@hack
 		//This is a problem because the very first time an item is
 		//click in the treeViewer which just happens to be the currentselection
 		//left over from the initial setup of the tree, nothing is displayed in

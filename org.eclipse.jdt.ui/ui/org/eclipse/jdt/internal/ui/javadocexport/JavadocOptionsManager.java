@@ -502,7 +502,7 @@ public class JavadocOptionsManager {
 		try {
 			if (!fAntpath.equals("")) {
 				File file= new File(fAntpath);
-				//@hack
+
 				IPath path= new Path(fAntpath);
 				path= path.removeLastSegments(1);
 				path.toFile().mkdirs();
