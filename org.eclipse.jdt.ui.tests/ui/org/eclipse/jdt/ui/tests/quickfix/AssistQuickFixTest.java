@@ -115,6 +115,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
 				buf.append("    private Class fClass;\n");
+				buf.append("\n");
 				buf.append("    public void foo() {\n");
 				buf.append("        fClass = getClass();\n");
 				buf.append("    }\n");

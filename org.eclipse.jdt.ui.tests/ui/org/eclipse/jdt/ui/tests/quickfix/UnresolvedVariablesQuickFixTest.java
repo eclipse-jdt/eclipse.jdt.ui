@@ -113,6 +113,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 				buf.append("import java.util.Vector;\n");
 				buf.append("public class E {\n");
 				buf.append("    private Iterator iter;\n");
+				buf.append("\n");
 				buf.append("    void foo(Vector vec) {\n");
 				buf.append("        iter= vec.iterator();\n");
 				buf.append("    }\n");
@@ -189,7 +190,8 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 				buf= new StringBuffer();
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
-				buf.append("    private int i;\n");				
+				buf.append("    private int i;\n");
+				buf.append("\n");
 				buf.append("    void foo() {\n");
 				buf.append("        for (i= 0;;) {\n");
 				buf.append("        }\n");		
@@ -258,7 +260,8 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    private int k;\n");		
+		buf.append("    private int k;\n");
+		buf.append("\n");
 		buf.append("    private int i= k;\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
@@ -308,6 +311,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
 				buf.append("    private int var1;\n");
+				buf.append("\n");
 				buf.append("    public int var2;\n");
 				buf.append("}\n");
 				assertEqualString(preview, buf.toString());
@@ -367,6 +371,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class F {\n");
 		buf.append("    private int x;\n");
+		buf.append("\n");
 		buf.append("    void foo(E e) {\n");
 		buf.append("         e.var.x= 2;\n");
 		buf.append("    }\n");
@@ -415,6 +420,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 					buf.append("import java.io.File;\n");
 					buf.append("public class F {\n");
 					buf.append("    private Object Fixe;\n");
+					buf.append("\n");
 					buf.append("    void foo() {\n");
 					buf.append("        char ch= Fixe.pathSeparatorChar;\n");
 					buf.append("    }\n");

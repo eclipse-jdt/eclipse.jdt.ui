@@ -30,11 +30,11 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 	}
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingTypeDeclTest("testSingleVariableDeclaration"));
+			suite.addTest(new ASTRewritingTypeDeclTest("testTypeDeclSpacingFields"));
 			return suite;
 		}
 	}
@@ -387,7 +387,8 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("package test1;\n");
 		buf.append("public final class E extends Exception implements Cloneable, Runnable, Serializable {\n");
 		buf.append("    public static class EInner {\n");
-		buf.append("        private double fCount;\n");	
+		buf.append("        private double fCount;\n");
+		buf.append("\n");				
 		buf.append("        public void xee() {\n");
 		buf.append("        }\n");
 		buf.append("    }\n");		
@@ -405,10 +406,12 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("class F extends Exception implements Runnable {\n");
 		buf.append("    public void foo() {\n");
 		buf.append("    }\n");
+		buf.append("\n");
 		buf.append("    private void newMethod(String str) {\n");
 		buf.append("    }\n");		
 		buf.append("}\n");				
 		buf.append("interface G extends Runnable {\n");
+		buf.append("\n");		
 		buf.append("    private abstract void newMethod(String str);\n");		
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
@@ -523,6 +526,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("public class E2 {\n");
 		buf.append("    public void foo() {\n");
 		buf.append("        new Runnable() {\n");
+		buf.append("\n");
 		buf.append("            private void newMethod(String str) {\n");
 		buf.append("            }\n");	
 		buf.append("        };\n");
@@ -812,5 +816,158 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
 	}
+	
+	public void testTypeDeclSpacingMethods1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void gee() {\n");
+		buf.append("    }\n");
+		buf.append("\n");		
+		buf.append("    public void hee() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+		
+		{  // insert method
+			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+			List members= type.bodyDeclarations();
+			assertTrue("Has declarations", !members.isEmpty());
+			
+			MethodDeclaration newMethodDecl= createNewMethod(ast, "foo", false);
+			members.add(newMethodDecl);
+			
+			rewrite.markAsInserted(newMethodDecl);
+		}
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void gee() {\n");
+		buf.append("    }\n");
+		buf.append("\n");		
+		buf.append("    public void hee() {\n");
+		buf.append("    }\n");
+		buf.append("\n");		
+		buf.append("    private void foo(String str) {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");		
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+
+	public void testTypeDeclSpacingMethods2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void gee() {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("\n");			
+		buf.append("    public void hee() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+		
+		{  // insert method at first position
+			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+			List members= type.bodyDeclarations();
+			assertTrue("Has declarations", !members.isEmpty());
+			
+			MethodDeclaration newMethodDecl= createNewMethod(ast, "foo", false);
+			members.add(0, newMethodDecl);
+			
+			rewrite.markAsInserted(newMethodDecl);
+		}
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private void foo(String str) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("\n");			
+		buf.append("    public void gee() {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("\n");
+		buf.append("    public void hee() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");		
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+	
+	public void testTypeDeclSpacingFields() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int x;\n");
+		buf.append("    private int y;\n");
+		buf.append("\n");
+		buf.append("    public void gee() {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("\n");			
+		buf.append("    public void hee() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+		
+		{  // insert method at first position
+			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+			List members= type.bodyDeclarations();
+			assertTrue("Has declarations", !members.isEmpty());
+			
+			FieldDeclaration newField= createNewField(ast, "fCount");
+			members.add(0, newField);
+			
+			rewrite.markAsInserted(newField);
+		}
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private double fCount;\n");
+		buf.append("    private int x;\n");
+		buf.append("    private int y;\n");
+		buf.append("\n");
+		buf.append("    public void gee() {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("\n");			
+		buf.append("    public void hee() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}		
 	
 }

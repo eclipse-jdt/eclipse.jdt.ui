@@ -104,6 +104,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    void foo(Vector vec) {\n");
 		buf.append("        int i= goo(vec, true);\n");
 		buf.append("    }\n");
+		buf.append("\n");
 		buf.append("    private int goo(Vector vec, boolean b) {\n");
 		buf.append("        return 0;\n");
 		buf.append("    }\n");		
@@ -145,6 +146,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    void foo(Vector vec) {\n");
 		buf.append("        int i= this.goo(vec, true);\n");
 		buf.append("    }\n");
+		buf.append("\n");
 		buf.append("    private int goo(Vector vec, boolean b) {\n");
 		buf.append("        return 0;\n");
 		buf.append("    }\n");		
@@ -187,6 +189,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class X {\n");
+		buf.append("\n");
 		buf.append("    public boolean goo(int i, double d) {\n");
 		buf.append("        return false;\n");
 		buf.append("    }\n");				
@@ -229,6 +232,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public interface X {\n");
+		buf.append("\n");
 		buf.append("    boolean goo(Class c);\n");				
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
@@ -268,6 +272,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
+		buf.append("\n");
 		buf.append("    public A(int i) {\n");
 		buf.append("    }\n");		
 		buf.append("}\n");
@@ -309,6 +314,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
+		buf.append("\n");
 		buf.append("    public A(int i) {\n");
 		buf.append("    }\n");		
 		buf.append("}\n");
@@ -346,6 +352,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    public E(int i) {\n");
 		buf.append("        this(i, true);\n");
 		buf.append("    }\n");
+		buf.append("\n");
 		buf.append("    public E(int i, boolean b) {\n");
 		buf.append("    }\n");		
 		buf.append("}\n");
@@ -386,6 +393,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
+		buf.append("\n");
 		buf.append("    public void foo(int i) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");

@@ -281,7 +281,8 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		buf.append("    public static class EInner {\n");
 		buf.append("        public void xee() {\n");
 		buf.append("            /* does nothing */\n");
-		buf.append("        }\n");			
+		buf.append("        }\n");
+		buf.append("\n");			
 		buf.append("        interface G {\n");
 		buf.append("        }\n");				
 		buf.append("    }\n");		

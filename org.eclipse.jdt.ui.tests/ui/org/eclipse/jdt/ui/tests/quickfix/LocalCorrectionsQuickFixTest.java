@@ -1203,6 +1203,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("\n");		
 		buf.append("import test2.Inter;\n");
 		buf.append("public class E implements Inter{\n");
+		buf.append("\n");
 		buf.append("    public int getCount(Object[] o) throws IOException {\n");
 		buf.append("        return 0;\n");
 		buf.append("    }\n");
@@ -1271,9 +1272,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("\n");		
 		buf.append("import test2.InterImpl;\n");
 		buf.append("public class E extends InterImpl {\n");
+		buf.append("\n");
 		buf.append("    protected int[] getMusic() throws IOException {\n");
 		buf.append("        return null;\n");
-		buf.append("    }\n");		
+		buf.append("    }\n");
+		buf.append("\n");
 		buf.append("    public int getCount(Object[] o) throws IOException {\n");
 		buf.append("        return 0;\n");
 		buf.append("    }\n");
