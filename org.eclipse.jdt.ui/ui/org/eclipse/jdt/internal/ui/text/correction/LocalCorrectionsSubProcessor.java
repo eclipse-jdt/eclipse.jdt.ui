@@ -383,6 +383,7 @@ public class LocalCorrectionsSubProcessor {
 				proposals.add(proposal);
 			}
 		}
+		ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, proposals, ModifierCorrectionSubProcessor.TO_NON_STATIC);
 	}
 
 	public static void addUnimplementedMethodsProposals(ICorrectionContext context, List proposals) throws CoreException {

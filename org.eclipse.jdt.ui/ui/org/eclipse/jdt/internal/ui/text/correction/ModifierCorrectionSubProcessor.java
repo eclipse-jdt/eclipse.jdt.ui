@@ -22,7 +22,8 @@ public class ModifierCorrectionSubProcessor {
 	public static final int TO_STATIC= 1;
 	public static final int TO_VISIBLE= 2;
 	public static final int TO_NON_PRIVATE= 3;
-
+	public static final int TO_NON_STATIC= 4;
+	
 	public static void addNonAccessibleMemberProposal(ICorrectionContext context, List proposals, int kind) throws JavaModelException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -85,6 +86,9 @@ public class ModifierCorrectionSubProcessor {
 			} else if (kind == TO_STATIC) {			
 				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertostatic.description", name); //$NON-NLS-1$
 				includedModifiers= Modifier.STATIC;
+			} else if (kind == TO_NON_STATIC) {			
+				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertononstatic.description", name); //$NON-NLS-1$
+				excludedModifiers= Modifier.STATIC;
 			} else if (kind == TO_NON_PRIVATE) {			
 				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertoprotected.description", name); //$NON-NLS-1$
 				excludedModifiers= Modifier.PRIVATE;
