@@ -14,29 +14,28 @@ package org.eclipse.jdt.astview.views;
 import org.eclipse.swt.graphics.Image;
 
 
-public class Error extends ASTAttribute {
-	
-	private final Binding fParent;
-	private final String fLabel;
+public abstract class DynamicBindingProperty {
 
-	public Error(Binding parent, String label) {
+	protected static final Object[] EMPTY= new Object[0];
+
+	private final Binding fParent;
+
+	public DynamicBindingProperty(Binding parent) {
 		fParent= parent;
-		fLabel= label;
+	}
+
+	public Object getParent() {
+		return fParent;
 	}
 
 	public Object[] getChildren() {
 		return EMPTY;
 	}
 
+	public abstract String getLabel(Binding viewerElement); 
+
 	public Image getImage() {
 		return null;
 	}
 
-	public String getLabel() {
-		return fLabel;
-	}
-
-	public Object getParent() {
-		return fParent;
-	}
 }

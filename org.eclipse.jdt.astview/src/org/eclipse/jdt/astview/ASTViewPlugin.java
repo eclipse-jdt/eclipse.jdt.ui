@@ -65,8 +65,8 @@ public class ASTViewPlugin extends AbstractUIPlugin {
 		log(multi);
 	}
 	
-	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, e.getLocalizedMessage(), e)); //$NON-NLS-1$
+	public static void log(String message, Throwable e) {
+		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, message, e)); //$NON-NLS-1$
 	}
 	
 }
