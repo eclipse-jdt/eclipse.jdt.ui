@@ -63,7 +63,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 
 	private final IConstraintVariableFactory fConstraintVariableFactory;
 	private final ITypeConstraintFactory fTypeConstraintFactory;
-	private final IContext fContext;
+	private IContext fContext;
 
 	public FullConstraintCreator(){
 		this(new ConstraintVariableFactory(), new TypeConstraintFactory());
@@ -79,6 +79,10 @@ public class FullConstraintCreator extends ConstraintCreator{
 
 	protected IContext getContext() {
 		return fContext;
+	}
+	
+	public void setContext(IContext context) {
+		fContext= context;
 	}
 	
 	protected ITypeConstraintFactory getConstraintFactory(){
@@ -615,7 +619,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 	}
 	
 	//--- RootDef ----//
-	private static IMethodBinding[] getRootDefs(IMethodBinding methodBinding) {
+	protected static IMethodBinding[] getRootDefs(IMethodBinding methodBinding) {
 		Set/*<ITypeBinding>*/ declaringSuperTypes= getDeclaringSuperTypes(methodBinding);
 		Set/*<IMethodBinding>*/ result= new HashSet();
 		for (Iterator iter= declaringSuperTypes.iterator(); iter.hasNext();) {
@@ -647,7 +651,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 	/* 
 	 * return Set of ITypeBindings
 	 */
-	private static Set getDeclaringSuperTypes(IMethodBinding methodBinding) {
+	protected static Set getDeclaringSuperTypes(IMethodBinding methodBinding) {
 		ITypeBinding superClass = methodBinding.getDeclaringClass();
 		Set allSuperTypes= new HashSet();
 		allSuperTypes.addAll(Arrays.asList(Bindings.getAllSuperTypes(superClass)));
@@ -662,7 +666,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		return result;
 	}
 	
-	private static IMethodBinding findMethod(IMethodBinding methodBinding, ITypeBinding type) {
+	protected static IMethodBinding findMethod(IMethodBinding methodBinding, ITypeBinding type) {
 		if (methodBinding.getDeclaringClass().equals(type))
 			return methodBinding;
 		return Bindings.findMethodInType(type, methodBinding.getName(), methodBinding.getParameterTypes());
