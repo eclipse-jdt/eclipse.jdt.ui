@@ -12,9 +12,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
-import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
@@ -110,6 +110,10 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 		result.merge(Checks.checkIfCuBroken(getMethod()));
 		if (result.hasFatalError())
 			return result;
+		if (getUnsavedFileList().contains(Refactoring.getResource(getMethod())))
+			result.addFatalError("Compilation unit must be saved before performing this refactoring.");		
+		if (result.hasFatalError())
+			return result;	
 		pm.subTask("checking preconditions");
 		result.merge(checkNewNames());
 		pm.worked(3);
