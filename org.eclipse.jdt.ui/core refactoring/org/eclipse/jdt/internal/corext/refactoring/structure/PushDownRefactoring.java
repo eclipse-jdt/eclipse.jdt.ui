@@ -178,7 +178,7 @@ public class PushDownRefactoring extends Refactoring {
 				return oldModifiers;
 			int modifiers= oldModifiers;	
 			if (isNewMethodToBeDeclaredAbstract()){
-				modifiers= JdtFlags.clearFlag(Modifier.FINAL, JdtFlags.clearFlag(Modifier.NATIVE, oldModifiers));
+				modifiers= JdtFlags.clearFlag(Modifier.FINAL | Modifier.NATIVE, oldModifiers);
 				modifiers |= Modifier.ABSTRACT;
 
 				if (! JdtFlags.isPublic(fMember))

@@ -1271,7 +1271,7 @@ public class PullUpRefactoring extends Refactoring {
 
 	private int createModifiersForAbstractDeclaration(IMethod method) throws JavaModelException {
 		MethodDeclaration methodDeclaration= getMethodDeclarationNode(method);
-		int modifiers= Modifier.ABSTRACT | JdtFlags.clearFlag(Modifier.NATIVE, JdtFlags.clearFlag(Modifier.FINAL, methodDeclaration.getModifiers()));
+		int modifiers= Modifier.ABSTRACT | JdtFlags.clearFlag(Modifier.NATIVE | Modifier.FINAL, methodDeclaration.getModifiers());
 		return getModifiersWithUpdatedVisibility(method, modifiers);
 	}
 	
@@ -1360,7 +1360,7 @@ public class PullUpRefactoring extends Refactoring {
 
 	private int createModifiersForMethodStubs(IMethod method) throws JavaModelException {
 		MethodDeclaration methodDeclaration= getMethodDeclarationNode(method);
-		int modifiers= JdtFlags.clearFlag(Modifier.NATIVE, JdtFlags.clearFlag(Modifier.ABSTRACT, methodDeclaration.getModifiers()));
+		int modifiers= JdtFlags.clearFlag(Modifier.NATIVE | Modifier.ABSTRACT, methodDeclaration.getModifiers());
 		return getModifiersWithUpdatedVisibility(method, modifiers);
 	}
 
