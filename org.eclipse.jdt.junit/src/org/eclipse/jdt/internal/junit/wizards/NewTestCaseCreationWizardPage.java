@@ -78,7 +78,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 /**
  * The first page of the TestCase creation wizard. 
  */
-public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
+public class NewTestCaseCreationWizardPage extends NewTypeWizardPage implements IAboutToRunOperation {
 
 	private final static String PAGE_NAME= "NewTestCaseCreationWizardPage"; //$NON-NLS-1$
 	private final static String CLASS_TO_TEST= PAGE_NAME + ".classtotest"; //$NON-NLS-1$
@@ -105,7 +105,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	private Button fClassToTestButton;
 	private JavaTypeCompletionProcessor fClassToTestCompletionProcessor;
 	
-	private boolean fFirstTime;  
+	private boolean fFirstTime;
+	private String fMainMethod;  
 
 	public NewTestCaseCreationWizardPage() {
 		super(true, PAGE_NAME);
@@ -410,7 +411,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		if (fMethodStubsButtons.isSelected(4))
 			createConstructor(type, imports); 		
 
-		if (isNextPageValid()) {
+		if (fClassToTest != null) {
 			createTestMethodStubs(type);
 		}
 	}
@@ -452,7 +453,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	}
 
 	private void createMain(IType type) throws JavaModelException {
-		type.createMethod(fMethodStubsButtons.getMainMethod(getTypeName()), null, false, null);	
+		type.createMethod(fMainMethod, null, false, null);	
 		fIndexOfFirstTestMethod++;		
 	}
 
@@ -882,6 +883,10 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			settings.put(STORE_USE_TESTRUNNER, fMethodStubsButtons.isSelected(1));
 			settings.put(STORE_TESTRUNNER_TYPE, fMethodStubsButtons.getComboSelection());
 		}
+	}
+
+	public void aboutToRunOperation() {
+		fMainMethod= fMethodStubsButtons.getMainMethod(getTypeName());	
 	}
 
 }

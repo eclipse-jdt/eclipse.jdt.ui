@@ -20,9 +20,10 @@ import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Shell; 
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -56,7 +57,14 @@ public abstract class JUnitWizard extends Wizard implements INewWizard {
 	protected boolean finishPage(IRunnableWithProgress runnable) {
 		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable);
 		try {
-			getContainer().run(false, true, op);
+			IWizardPage[] pages= getPages();
+			for (int i= 0; i < pages.length; i++) {
+				IWizardPage page= pages[i];
+				if (page instanceof IAboutToRunOperation) {
+					((IAboutToRunOperation)page).aboutToRunOperation();
+				}
+			}
+			getContainer().run(true, false, op);  
 		} catch (InvocationTargetException e) {
 			Shell shell= getShell();
 			String title= WizardMessages.getString("NewJUnitWizard.op_error.title"); //$NON-NLS-1$

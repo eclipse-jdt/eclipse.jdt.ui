@@ -46,7 +46,7 @@ import org.eclipse.ui.internal.dialogs.ContainerCheckedTreeViewer;
 /**
  * Wizard page to select the methods from a class under test.
  */
-public class NewTestCaseCreationWizardPage2 extends WizardPage {
+public class NewTestCaseCreationWizardPage2 extends WizardPage implements IAboutToRunOperation {
 
 	private final static String PAGE_NAME= "NewTestCaseCreationWizardPage2"; //$NON-NLS-1$
 	private final static String STORE_USE_TASKMARKER= PAGE_NAME + ".USE_TASKMARKER"; //$NON-NLS-1$
@@ -62,6 +62,9 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 	private Button fSelectAllButton;
 	private Button fDeselectAllButton;
 	private Label fSelectedMethodsLabel;
+	private Object[] fCheckedObjects;
+	private boolean fCreateFinalStubs;
+	private boolean fCreateTasks;
 	
 	/**
 	 * Constructor for NewTestCaseCreationWizardPage2.
@@ -249,17 +252,16 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 	 * Returns all checked methods in the Methods tree.
 	 */
 	public IMethod[] getCheckedMethods() {
-		Object[] checkedObjects= fMethodsTree.getCheckedElements();
 		int methodCount= 0;
-		for (int i = 0; i < checkedObjects.length; i++) {
-			if (checkedObjects[i] instanceof IMethod)
+		for (int i = 0; i < fCheckedObjects.length; i++) {
+			if (fCheckedObjects[i] instanceof IMethod)
 				methodCount++;
 		}
 		IMethod[] checkedMethods= new IMethod[methodCount];
 		int j= 0;
-		for (int i = 0; i < checkedObjects.length; i++) {
-			if (checkedObjects[i] instanceof IMethod) {
-				checkedMethods[j]= (IMethod)checkedObjects[i];
+		for (int i = 0; i < fCheckedObjects.length; i++) {
+			if (fCheckedObjects[i] instanceof IMethod) {
+				checkedMethods[j]= (IMethod)fCheckedObjects[i];
 				j++;
 			}
 		}
@@ -366,14 +368,14 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 	 * Returns true if the checkbox for creating tasks is checked.
 	 */
 	public boolean getCreateTasksButtonSelection() {
-		return fCreateTasksButton.getSelection();
+		return fCreateTasks;
 	}
 
 	/**
 	 * Returns true if the checkbox for final method stubs is checked.
 	 */
 	public boolean getCreateFinalMethodStubsButtonSelection() {
-		return fCreateFinalMethodStubsButton.getSelection();
+		return fCreateFinalStubs;
 	}
 		
 	private void updateSelectedMethodsLabel() {
@@ -427,5 +429,11 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 			settings.put(STORE_USE_TASKMARKER, fCreateTasksButton.getSelection());
 			settings.put(STORE_CREATE_FINAL_METHOD_STUBS, fCreateFinalMethodStubsButton.getSelection());
 		}
+	}
+
+	public void aboutToRunOperation() {
+		fCheckedObjects= fMethodsTree.getCheckedElements();
+		fCreateFinalStubs= fCreateFinalMethodStubsButton.getSelection();
+		fCreateTasks= fCreateTasksButton.getSelection();
 	}
 }

@@ -26,10 +26,8 @@ import org.eclipse.jdt.internal.junit.util.SWTUtil;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -70,6 +68,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -658,7 +657,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 			dialog=
 				JavaUI.createTypeDialog(
 					shell,
-					new ProgressMonitorDialog(shell),
+					PlatformUI.getWorkbench().getProgressService(),
 					SearchEngine.createWorkspaceScope(),
 					IJavaElementSearchConstants.CONSIDER_CLASSES,
 					false);
