@@ -14,6 +14,7 @@ package org.eclipse.test.internal.performance;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import junit.framework.TestCase;
@@ -28,14 +29,11 @@ public abstract class PerformanceMeterFactory {
 	}
 
 	public PerformanceMeter createPerformanceMeter(TestCase testCase, String monitorId) {
-		String scenario= testCase.getClass().getName() + "#" + testCase.getName() + "()";
-		if (monitorId != null && monitorId.length() > 0)
-			scenario= scenario + "-" + monitorId;
-		return createPerformanceMeter(scenario);
+		return createPerformanceMeter(Performance.getDefault().getDefaultScenarioId(testCase, monitorId));
 	}
 
 	public PerformanceMeter createPerformanceMeter(TestCase testCase) {
-		return createPerformanceMeter(testCase, null);
+		return createPerformanceMeter(Performance.getDefault().getDefaultScenarioId(testCase));
 	}
 
 	protected abstract PerformanceMeter doCreatePerformanceMeter(String scenario);

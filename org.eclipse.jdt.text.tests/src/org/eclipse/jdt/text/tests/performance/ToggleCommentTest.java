@@ -34,8 +34,9 @@ public class ToggleCommentTest extends TestCase {
 	private ITextEditor fEditor;
 
 	protected void setUp() throws Exception {
-		fCommentMeter= Performance.getDefault().createPerformanceMeter(this, "comment");
-		fUncommentMeter= Performance.getDefault().createPerformanceMeter(this, "uncomment");
+		Performance performance= Performance.getDefault();
+		fCommentMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this, "comment"));
+		fUncommentMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this, "uncomment"));
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
 		runAction(fEditor.getAction(ITextEditorActionConstants.SELECT_ALL));
 	}

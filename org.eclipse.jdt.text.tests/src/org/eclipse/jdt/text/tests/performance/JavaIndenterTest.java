@@ -42,7 +42,8 @@ public class JavaIndenterTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		EditorTestHelper.runEventQueue();
-		fPerformanceMeter= Performance.getDefault().createPerformanceMeter(this);
+		Performance performance= Performance.getDefault();
+		fPerformanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
 		
 		EditorTestHelper.bringToTop();
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);

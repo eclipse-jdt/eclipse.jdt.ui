@@ -50,7 +50,8 @@ public class NonInitialTypingTest extends TestCase {
 		// dirty editor to avoid initial dirtying / validate edit costs
 		fKeyboardProbe= new KeyboardProbe();
 		dirtyEditor();
-		fMeter= Performance.getDefault().createPerformanceMeter(this);
+		Performance performance= Performance.getDefault();
+		fMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
 
 		int offset= getInsertPosition();
 		fEditor.getSelectionProvider().setSelection(new TextSelection(offset, 0));

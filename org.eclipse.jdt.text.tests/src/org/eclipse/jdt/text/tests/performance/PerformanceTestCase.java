@@ -18,7 +18,8 @@ import junit.framework.TestCase;
 public class PerformanceTestCase extends TestCase {
 	
 	protected void runTest() throws Throwable {
-		PerformanceMeter meter= Performance.getDefault().createPerformanceMeter(this);
+		Performance performance= Performance.getDefault();
+		PerformanceMeter meter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
 		meter.start();
 		super.runTest();
 		meter.stop();

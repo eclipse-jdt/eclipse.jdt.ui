@@ -133,7 +133,8 @@ public abstract class MouseScrollEditorTest extends TestCase {
 	};
 
 	protected void setUp() throws Exception {
-		fPerformanceMeter= Performance.getDefault().createPerformanceMeter(this);
+		Performance performance= Performance.getDefault();
+		fPerformanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
 		EditorTestHelper.bringToTop();
 	}
 

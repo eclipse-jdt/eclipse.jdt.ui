@@ -22,7 +22,8 @@ import org.eclipse.ui.PartInitException;
 
 public abstract class OpenEditorTest extends TestCase {
 	protected void measureOpenInEditor(IFile[] files) throws PartInitException {
-		PerformanceMeter performanceMeter= Performance.getDefault().createPerformanceMeter(this);
+		Performance performance= Performance.getDefault();
+		PerformanceMeter performanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
 		try {
 			for (int i= 0, n= files.length; i < n; i++) {
 				performanceMeter.start();

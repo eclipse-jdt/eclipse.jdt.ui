@@ -97,7 +97,8 @@ public class OpenPreferencePageTest extends TestCase {
 	}
 
 	protected void setUp() throws Exception {
-		fMeter= Performance.getDefault().createPerformanceMeter(this, "cold");
+		Performance performance= Performance.getDefault();
+		fMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this, "cold"));
 		EditorTestHelper.calmDown(1000, 10000, 100);
 	}
 	

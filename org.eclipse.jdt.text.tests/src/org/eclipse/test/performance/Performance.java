@@ -24,6 +24,8 @@ import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 /**
  * Helper for performance measurements. Currently provides performance meter
  * creation and checking of measurements.
+ * 
+ * This class is not intended to be subclassed by clients.
  */
 public class Performance {
 
@@ -37,6 +39,9 @@ public class Performance {
 	
 	private PerformanceMeterFactory fPerformanceMeterFactory;
 	
+	private Performance() {
+	}
+	
 	/**
 	 * Returns the singleton of <code>Performance</code>
 	 * 
@@ -48,14 +53,11 @@ public class Performance {
 		return fgDefault;
 	}
 	
-	private Performance() {
-	}
-	
 	/**
 	 * Asserts default properties of the measurements captured by the given
 	 * performance meter.
 	 * 
-	 * @param performanceMeter
+	 * @param performanceMeter the performance meter
 	 * @throws RuntimeException if the properties do not hold
 	 */
 	public void assertPerformance(PerformanceMeter performanceMeter) {
@@ -63,30 +65,41 @@ public class Performance {
 	}
 	
 	/**
-	 * Creates a performance meter for the given test. Use
-	 * {@link Performance#createPerformanceMeter(TestCase, String)} if more
-	 * than one performance meter is used for the same test.
+	 * Creates a performance meter for the given scenario id.
+	 * 
+	 * @param scenarioId the scenario id
+	 * @return a performance meter for the given scenario id
+	 * @throws IllegalArgumentException if a performance meter for the given
+	 *                 scenario id has already been created
+	 */
+	public PerformanceMeter createPerformanceMeter(String scenarioId) {
+		return getPeformanceMeterFactory().createPerformanceMeter(scenarioId);
+	}
+
+	/**
+	 * Returns a default scenario id for the given test. The test's name
+	 * must have been set, such that <code>test.getName()</code> is not
+	 * <code>null</code>.
 	 * 
 	 * @param test the test
-	 * @return a performance meter for the given test
-	 * @throws IllegalArgumentException if a performance meter for the given
-	 *                 test has already been created
+	 * @return the default scenario id for the test
 	 */
-	public PerformanceMeter createPerformanceMeter(TestCase test) {
-		return getPeformanceMeterFactory().createPerformanceMeter(test);
+	public String getDefaultScenarioId(TestCase test) {
+		return test.getClass().getName() + "#" + test.getName() + "()";
 	}
 	
 	/**
-	 * Creates a performance meter for the given test and meter id.
+	 * Returns a default scenario id for the given test and id. The test's
+	 * name must have been set, such that <code>test.getName()</code> is
+	 * not <code>null</code>. The id distinguishes multiple scenarios in
+	 * the same test.
 	 * 
 	 * @param test the test
-	 * @param meterId the meter id
-	 * @return a performance meter for the given test
-	 * @throws IllegalArgumentException if a performance meter for the given
-	 *                 test and meter id has already been created
+	 * @param id the id
+	 * @return the default scenario id for the test and the id
 	 */
-	public PerformanceMeter createPerformanceMeter(TestCase test, String meterId) {
-		return getPeformanceMeterFactory().createPerformanceMeter(test, meterId);
+	public String getDefaultScenarioId(TestCase test, String id) {
+		return getDefaultScenarioId(test) + "-" + id;
 	}
 
 	private PerformanceMeterFactory getPeformanceMeterFactory() {

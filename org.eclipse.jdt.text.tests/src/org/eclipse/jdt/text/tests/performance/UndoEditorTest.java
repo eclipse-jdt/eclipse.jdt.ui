@@ -29,7 +29,8 @@ public abstract class UndoEditorTest extends TestCase {
 	private PerformanceMeter fPerformanceMeter;
 
 	protected void setUp() throws Exception {
-		fPerformanceMeter= Performance.getDefault().createPerformanceMeter(this);
+		Performance performance= Performance.getDefault();
+		fPerformanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
 		EditorTestHelper.runEventQueue();
 	}
 
