@@ -17,13 +17,13 @@ import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.help.HelpSystem;
+import org.eclipse.help.IContext;
+import org.eclipse.help.IHelpResource;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.help.WorkbenchHelp;
-
-import org.eclipse.help.IContext;
-import org.eclipse.help.IHelp;
-import org.eclipse.help.IHelpResource;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -45,15 +45,13 @@ public class JavadocHelpContext implements IContext {
 	
 	
 	public static void displayHelp(String contextId, Object[] selected) throws CoreException {
-		IHelp help= WorkbenchHelp.getHelpSupport();
-		if (help == null) {
-			return; // no help support installed
+		IContext context= HelpSystem.getContext(contextId);
+		if (context != null) {
+			if (selected != null && selected.length > 0) {
+				context= new JavadocHelpContext(context, selected);
+			}
+			WorkbenchHelp.displayHelp(context);
 		}
-		IContext context= help.getContext(contextId);
-		if (selected != null && selected.length > 0) {
-			context= new JavadocHelpContext(context, selected);
-		}
-		WorkbenchHelp.displayHelp(context);
 	}
 	
 	
