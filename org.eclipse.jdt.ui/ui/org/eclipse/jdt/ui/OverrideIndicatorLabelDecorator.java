@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.viewsupport;
+package org.eclipse.jdt.ui;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -14,24 +14,43 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
 
 /**
-  */
+ * LabelDecorator that decorates an method's image with override or implements overlays.
+ * Updating of images on element changes is the resposibility of the viewers using this 
+ * decorator.
+ */
 public class OverrideIndicatorLabelDecorator implements ILabelDecorator {
 
 	private ImageDescriptorRegistry fRegistry;
+	private boolean fRegistryNeedsDispose= false;
 
 	/**
-	 * Constructor for OverrideIndicatorLabelDecorator. Internal usage only!
+	 * Creates a decorator. The decorator creates an own image registry to cache
+	 * images. 
 	 */
 	public OverrideIndicatorLabelDecorator() {
-		fRegistry= JavaPlugin.getImageDescriptorRegistry();
+		this(new ImageDescriptorRegistry());
+		fRegistryNeedsDispose= true;
+	}	
+
+	/**
+	 * Internal constructor. Creates decorator with a shared image registry.
+	 * @param registry The registry to use or <code>null</code> to use the Java plugin's
+	 * image registry.
+	 */	
+	public OverrideIndicatorLabelDecorator(ImageDescriptorRegistry registry) {
+		if (registry == null) {
+			registry= JavaPlugin.getImageDescriptorRegistry();
+		}
+		fRegistry= registry;
 	}
 	
 	/* (non-Javadoc)

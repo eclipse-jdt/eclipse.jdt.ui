@@ -70,6 +70,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
@@ -92,7 +93,6 @@ import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.OverrideIndicatorLabelDecorator;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 
@@ -676,7 +676,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		ILabelProvider lprovider= new AppearanceAwareLabelProvider(
 			AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE,
 			AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS,
-			AppearanceAwareLabelProvider.getDecorators(true, new OverrideIndicatorLabelDecorator())
+			AppearanceAwareLabelProvider.getDecorators(true, new OverrideIndicatorLabelDecorator(null))
 		);
 
 		fOutlineViewer= new JavaOutlineViewer(tree);		

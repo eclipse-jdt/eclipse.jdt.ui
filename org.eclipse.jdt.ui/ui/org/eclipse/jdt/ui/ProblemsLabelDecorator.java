@@ -63,9 +63,14 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 	}
 	
 	/**
-	 * Internal constructor. Create decorator with a shared image registry.
-	 */
+	 * Internal constructor. Creates decorator with a shared image registry.
+	 * @param registry The registry to use or <code>null</code> to use the Java plugin's
+	 * image registry.
+	 */	
 	public ProblemsLabelDecorator(ImageDescriptorRegistry registry) {
+		if (registry == null) {
+			registry= JavaPlugin.getImageDescriptorRegistry();
+		}
 		fRegistry= registry;
 		fProblemChangedListener= null;
 	}

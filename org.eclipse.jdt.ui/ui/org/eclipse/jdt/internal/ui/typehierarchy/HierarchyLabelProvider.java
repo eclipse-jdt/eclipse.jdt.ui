@@ -9,13 +9,13 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.OverrideIndicatorLabelDecorator;
 
 /**
  * Label provider for the hierarchy viewers. Types in the hierarchy that are not belonging to the
@@ -28,6 +28,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		private TypeHierarchyLifeCycle fHierarchy;
 		
 		public HierarchyOverrideIndicatorLabelDecorator(TypeHierarchyLifeCycle lifeCycle) {
+			super(null);
 			fHierarchy= lifeCycle;
 		}
 		
@@ -60,8 +61,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	}
 	
 	private static ILabelDecorator[] getDecorators(TypeHierarchyLifeCycle lifeCycle) {
-		ImageDescriptorRegistry registry= JavaPlugin.getImageDescriptorRegistry();
-		return new ILabelDecorator[] { new ProblemsLabelDecorator(registry), new HierarchyOverrideIndicatorLabelDecorator(lifeCycle) };
+		return new ILabelDecorator[] { new ProblemsLabelDecorator(null), new HierarchyOverrideIndicatorLabelDecorator(lifeCycle) };
 	}
 	
 

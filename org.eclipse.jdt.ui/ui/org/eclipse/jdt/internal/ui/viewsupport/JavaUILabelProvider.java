@@ -176,11 +176,10 @@ public class JavaUILabelProvider extends LabelProvider {
 	
 	public static ILabelDecorator[] getDecorators(boolean errortick, ILabelDecorator extra) {
 		if (errortick) {
-			ImageDescriptorRegistry registry= JavaPlugin.getImageDescriptorRegistry();
 			if (extra == null) {
-				return new ILabelDecorator[] { new ProblemsLabelDecorator(registry) };
+				return new ILabelDecorator[] { new ProblemsLabelDecorator(null) };
 			} else {
-				return new ILabelDecorator[] { new ProblemsLabelDecorator(registry), extra };
+				return new ILabelDecorator[] { new ProblemsLabelDecorator(null), extra };
 			}
 		}
 		if (extra != null) {

@@ -35,7 +35,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	 * Creates a labelProvider with DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS and the ErrorTickLabelDecorator.
 	 */	
 	public AppearanceAwareLabelProvider() {
-		this(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS, new ILabelDecorator[] { new ProblemsLabelDecorator(JavaPlugin.getImageDescriptorRegistry()) });
+		this(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS, new ILabelDecorator[] { new ProblemsLabelDecorator(null) });
 	}
 	
 	private void initMasks() {
