@@ -27,11 +27,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
@@ -49,6 +51,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 public class ASTNodeSearchUtil {
 
@@ -119,6 +122,17 @@ public class ASTNodeSearchUtil {
 		return (MethodDeclaration)ASTNodes.getParent(getNameNode(iMethod, cuNode), MethodDeclaration.class);
 	}
 
+	public static AnnotationTypeMemberDeclaration getAnnotationTypeMemberDeclarationNode(IMethod iMethod, CompilationUnit cuNode) throws JavaModelException {
+		return (AnnotationTypeMemberDeclaration) ASTNodes.getParent(getNameNode(iMethod, cuNode), AnnotationTypeMemberDeclaration.class);
+	}
+
+	public static BodyDeclaration getMethodOrAnnotationTypeMemberDeclarationNode(IMethod iMethod, CompilationUnit cuNode) throws JavaModelException {
+		if (JdtFlags.isAnnotation(iMethod.getDeclaringType()))
+			return getAnnotationTypeMemberDeclarationNode(iMethod, cuNode);
+		else
+			return getMethodDeclarationNode(iMethod, cuNode);
+	}
+
 	public static VariableDeclarationFragment getFieldDeclarationFragmentNode(IField iField, CompilationUnit cuNode) throws JavaModelException {
 		ASTNode node= getNameNode(iField, cuNode);
 		if (node instanceof VariableDeclarationFragment)
@@ -128,6 +142,17 @@ public class ASTNodeSearchUtil {
 		
 	public static FieldDeclaration getFieldDeclarationNode(IField iField, CompilationUnit cuNode) throws JavaModelException {
 		return (FieldDeclaration) ASTNodes.getParent(getNameNode(iField, cuNode), FieldDeclaration.class);
+	}
+
+	public static EnumConstantDeclaration getEnumConstantDeclaration(IField iField, CompilationUnit cuNode) throws JavaModelException {
+		return (EnumConstantDeclaration) ASTNodes.getParent(getNameNode(iField, cuNode), EnumConstantDeclaration.class);
+	}
+
+	public static BodyDeclaration getFieldOrEnumConstantDeclaration(IField iField, CompilationUnit cuNode) throws JavaModelException {
+		if (JdtFlags.isEnum(iField))
+			return getEnumConstantDeclaration(iField, cuNode);
+		else
+			return getFieldDeclarationNode(iField, cuNode);
 	}
 
 	public static EnumDeclaration getEnumDeclarationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
@@ -166,17 +191,17 @@ public class ASTNodeSearchUtil {
 	public static ASTNode[] getDeclarationNodes(IJavaElement element, CompilationUnit cuNode) throws JavaModelException {
 		switch(element.getElementType()){
 			case IJavaElement.FIELD:
-				return new ASTNode[]{getFieldDeclarationNode((IField) element, cuNode)};
+				return new ASTNode[]{getFieldOrEnumConstantDeclaration((IField) element, cuNode)};
 			case IJavaElement.IMPORT_CONTAINER:
-				return ASTNodeSearchUtil.getImportNodes((IImportContainer)element, cuNode);
+				return getImportNodes((IImportContainer)element, cuNode);
 			case IJavaElement.IMPORT_DECLARATION:
-				return new ASTNode[]{ASTNodeSearchUtil.getImportDeclarationNode((IImportDeclaration)element, cuNode)};
+				return new ASTNode[]{getImportDeclarationNode((IImportDeclaration)element, cuNode)};
 			case IJavaElement.INITIALIZER:
-				return new ASTNode[]{ASTNodeSearchUtil.getInitializerNode((IInitializer)element, cuNode)};
+				return new ASTNode[]{getInitializerNode((IInitializer)element, cuNode)};
 			case IJavaElement.METHOD:
-				return new ASTNode[]{getMethodDeclarationNode((IMethod) element, cuNode)};
+				return new ASTNode[]{getMethodOrAnnotationTypeMemberDeclarationNode((IMethod) element, cuNode)};
 			case IJavaElement.PACKAGE_DECLARATION:
-				return new ASTNode[]{ASTNodeSearchUtil.getPackageDeclarationNode((IPackageDeclaration)element, cuNode)};
+				return new ASTNode[]{getPackageDeclarationNode((IPackageDeclaration)element, cuNode)};
 			case IJavaElement.TYPE:
 				return new ASTNode[]{getAbstractTypeDeclarationNode((IType) element, cuNode)};
 			default:

@@ -701,11 +701,11 @@ class ReorgPolicyFactory {
 					destinationContainer= nodeDestination.getParent();
 					break;
 				case IJavaElement.FIELD:
-					nodeDestination= ASTNodeSearchUtil.getFieldDeclarationNode((IField) javaElementDestination, destinationCuNode);
+					nodeDestination= ASTNodeSearchUtil.getFieldOrEnumConstantDeclaration((IField) javaElementDestination, destinationCuNode);
 					destinationContainer= nodeDestination.getParent();
 					break;
 				case IJavaElement.METHOD:
-					nodeDestination= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) javaElementDestination, destinationCuNode);
+					nodeDestination= ASTNodeSearchUtil.getMethodOrAnnotationTypeMemberDeclarationNode((IMethod) javaElementDestination, destinationCuNode);
 					destinationContainer= nodeDestination.getParent();
 					break;
 				case IJavaElement.TYPE:
