@@ -28,10 +28,19 @@ public abstract class CommentTestCase extends TestCase {
 
 	public static final String DELIMITER= TextUtilities.getDefaultLineDelimiter(new Document());
 
+	private Map fUserOptions;
+
 	protected CommentTestCase(String name) {
 		super(name);
 	}
 
+	/*
+	 * @see junit.framework.TestCase#tearDown()
+	 */
+	protected void tearDown() throws Exception {
+		fUserOptions= null;
+	}
+	
 	protected final Map createOptions(CommentFormattingContext context) {
 		assertNotNull(context);
 
@@ -61,20 +70,32 @@ public abstract class CommentTestCase extends TestCase {
 
 	protected abstract String getCommentType();
 
-	protected abstract Map getUserOptions();
-
+	protected Map getUserOptions() {
+		return fUserOptions;
+	}
+	
+	protected void setUserOption(String name, String value) {
+		if (fUserOptions == null)
+			fUserOptions= new HashMap();
+		
+		fUserOptions.put(name, value);
+	}
+	
 	protected final String testFormat(String text) {
 		return testFormat(text, 0, text.length());
 	}
 
 	protected String testFormat(String text, int offset, int length) {
+		return testFormat(text, offset, length, getCommentType());
+	}
+
+	protected String testFormat(String text, int offset, int length, final String type) {
 		assertNotNull(text);
 		assertTrue(offset >= 0);
 		assertTrue(offset < text.length());
 		assertTrue(length >= 0);
 		assertTrue(offset + length <= text.length());
 
-		final String type= getCommentType();
 		assertNotNull(type);
 		assertTrue(type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT) || type.equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT));
 

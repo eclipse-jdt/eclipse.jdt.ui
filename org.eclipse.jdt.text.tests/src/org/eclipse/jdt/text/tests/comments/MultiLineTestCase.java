@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.comments;
 
-import java.util.Map;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.text.comment.MultiCommentLine;
 
@@ -37,10 +37,6 @@ public class MultiLineTestCase extends CommentTestCase {
 
 	protected String getCommentType() {
 		return IJavaPartitions.JAVA_MULTI_LINE_COMMENT;
-	}
-
-	protected Map getUserOptions() {
-		return null;
 	}
 
 	public void testSingleLineComment1() {
@@ -88,12 +84,39 @@ public class MultiLineTestCase extends CommentTestCase {
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=51654
 	 */
 	public void testMultiLineCommentAsterisk1() {
-		// test3 (currently) forces the comment formatter to acctually do something, it wouldn't do anything otherwise.
+		// test3 (currently) forces the comment formatter to actually do something, it wouldn't do anything otherwise.
 		String input= PREFIX + INFIX + "test1" + DELIMITER + "test2" + INFIX + DELIMITER + "test3" + DELIMITER + "test4" + POSTFIX; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		String result= testFormat(input);
 		assertTrue(result.indexOf("test1") != -1); //$NON-NLS-1$
 		assertTrue(result.indexOf("test2") != -1); //$NON-NLS-1$
 		assertTrue(result.indexOf("test3") != -1); //$NON-NLS-1$
 		assertTrue(result.indexOf("test4") != -1); //$NON-NLS-1$
+	}
+	
+	public void testMultiLineCommentHeader1() {
+		setUserOption(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER, "false");
+		String prefix= PREFIX.trim() + DELIMITER + INFIX + "header" + DELIMITER + INFIX + "comment" + DELIMITER + POSTFIX + DELIMITER;
+		String inputInfix = JavaDocTestCase.PREFIX + DELIMITER + INFIX + "class" + DELIMITER + INFIX + "comment" + DELIMITER + POSTFIX + DELIMITER;
+		String expectedInfix = JavaDocTestCase.PREFIX + DELIMITER + INFIX + "class comment" + DELIMITER + POSTFIX + DELIMITER;
+		String postfix= "public class Test {" + DELIMITER + "}" + DELIMITER;
+		
+		String output= testFormat(prefix + inputInfix + postfix, 0, prefix.length() - DELIMITER.length(), IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
+		int offset= output.lastIndexOf(JavaDocTestCase.PREFIX);
+		output= testFormat(output, offset, output.lastIndexOf(POSTFIX) + POSTFIX.length() - offset, IJavaPartitions.JAVA_DOC);
+		assertEquals(prefix + expectedInfix + postfix, output);
+	}
+	
+	public void testMultiLineCommentHeader2() {
+		setUserOption(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER, "true");
+		String inputPrefix= PREFIX.trim() + DELIMITER + INFIX + "header" + DELIMITER + INFIX + "comment" + DELIMITER + POSTFIX + DELIMITER;
+		String expectedPrefix= PREFIX.trim() + DELIMITER + INFIX + "header comment" + DELIMITER + POSTFIX + DELIMITER;
+		String inputInfix = JavaDocTestCase.PREFIX + DELIMITER + INFIX + "class" + DELIMITER + INFIX + "comment" + DELIMITER + POSTFIX + DELIMITER;
+		String expectedInfix = JavaDocTestCase.PREFIX + DELIMITER + INFIX + "class comment" + DELIMITER + POSTFIX + DELIMITER;
+		String postfix= "public class Test {" + DELIMITER + "}" + DELIMITER;
+		
+		String output= testFormat(inputPrefix + inputInfix + postfix, 0, inputPrefix.length() - DELIMITER.length(), IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
+		int offset= output.lastIndexOf(JavaDocTestCase.PREFIX);
+		output= testFormat(output, offset, output.lastIndexOf(POSTFIX) + POSTFIX.length() - offset, IJavaPartitions.JAVA_DOC);
+		assertEquals(expectedPrefix + expectedInfix + postfix, output);
 	}
 }

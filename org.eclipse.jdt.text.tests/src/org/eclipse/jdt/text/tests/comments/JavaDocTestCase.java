@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.comments;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -34,8 +31,6 @@ public class JavaDocTestCase extends CommentTestCase {
 
 	protected static final String PREFIX= JavaDocLine.JAVADOC_START_PREFIX;
 	
-	private Map fUserOptions;
-
 	public static Test suite() {
 		return new TestSuite(JavaDocTestCase.class);
 	}
@@ -44,28 +39,10 @@ public class JavaDocTestCase extends CommentTestCase {
 		super(name);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void tearDown() throws Exception {
-		fUserOptions= null;
-	}
-	
 	protected String getCommentType() {
 		return IJavaPartitions.JAVA_DOC;
 	}
 
-	protected Map getUserOptions() {
-		return fUserOptions;
-	}
-	
-	protected void setUserOption(String name, String value) {
-		if (fUserOptions == null)
-			fUserOptions= new HashMap();
-		
-		fUserOptions.put(name, value);
-	}
-	
 	public void testSingleLineComment1() {
 		assertEquals(PREFIX + DELIMITER + INFIX + "test" + DELIMITER + POSTFIX, testFormat(PREFIX + "\t\t" + DELIMITER + "*\t test*/")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
