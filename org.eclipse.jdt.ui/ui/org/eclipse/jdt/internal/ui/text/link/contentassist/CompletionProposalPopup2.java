@@ -612,16 +612,11 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 						selectProposalWithMask(e.stateMask);
 						break;
 						
-					// in linked mode: tab inserts and jumps, but only in forward direction
-					// plus: don't invalidate the event in order to give LinkedUI a chance 
+					// in linked mode: hide popup
+					// plus: don't invalidate the event in order to give LinkedUI a chance to handle it
 					case '\t':
-//						if (e.stateMask == SWT.SHIFT) {
 							hide();
 							break;
-//						} else {
-//							selectProposalWithMask(e.stateMask);
-//							break;
-//						}
 						
 					default:			
 						ICompletionProposal p= getSelectedProposal();
@@ -783,5 +778,14 @@ class CompletionProposalPopup2 implements IContentAssistListener2 {
 		filtered.toArray(p); 		
 		return p;
 	}
-	
+
+	/**
+	 * Requests the proposal shell to take focus.
+	 * 
+	 * @since 3.0
+	 */
+	public void setFocus() {
+		if (Helper2.okToUse(fProposalShell))
+			fProposalShell.setFocus();		
+	}
 }

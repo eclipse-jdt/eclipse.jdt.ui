@@ -233,6 +233,16 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				return false;
 			return super.requestWidgetToken(requester);
 		}
+		
+		/*
+		 * @see IWidgetTokenOwnerExtension#requestWidgetToken(IWidgetTokenKeeper, int)
+		 * @since 3.0
+		 */
+		public boolean requestWidgetToken(IWidgetTokenKeeper requester, int priority) {
+			if (WorkbenchHelp.isContextHelpDisplayed())
+				return false;
+			return super.requestWidgetToken(requester, priority);
+		}
 
 		/*
 		 * @see org.eclipse.jface.text.source.ISourceViewer#configure(org.eclipse.jface.text.source.SourceViewerConfiguration)

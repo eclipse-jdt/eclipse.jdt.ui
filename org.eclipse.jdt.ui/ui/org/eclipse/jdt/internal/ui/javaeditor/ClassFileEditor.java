@@ -694,10 +694,17 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 */
 	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
 		return new SourceViewer(parent, ruler, styles) {
+			
 			public boolean requestWidgetToken(IWidgetTokenKeeper requester) {
 				if (WorkbenchHelp.isContextHelpDisplayed())
 					return false;
 				return super.requestWidgetToken(requester);
+			}
+			
+			public boolean requestWidgetToken(IWidgetTokenKeeper requester, int priority) {
+				if (WorkbenchHelp.isContextHelpDisplayed())
+					return false;
+				return super.requestWidgetToken(requester, priority);
 			}
 		};	
 	}

@@ -47,7 +47,9 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.IViewportListener;
 import org.eclipse.jface.text.IWidgetTokenKeeper;
+import org.eclipse.jface.text.IWidgetTokenKeeperExtension;
 import org.eclipse.jface.text.IWidgetTokenOwner;
+import org.eclipse.jface.text.IWidgetTokenOwnerExtension;
 import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
@@ -62,7 +64,7 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
  * The standard implementation of the <code>IContentAssistant</code> interface.
  * Usually, clients instantiate this class and configure it before using it.
  */
-public class ContentAssistant2 implements IContentAssistant, IWidgetTokenKeeper {
+public class ContentAssistant2 implements IContentAssistant, IWidgetTokenKeeper, IWidgetTokenKeeperExtension {
 	
 	/**
 	 * A generic closer class used to monitor various 
@@ -168,8 +170,8 @@ public class ContentAssistant2 implements IContentAssistant, IWidgetTokenKeeper 
 					if (d != null) {
 						d.asyncExec(new Runnable() {
 							public void run() {
-//								if (!fProposalPopup.hasFocus() && !fContextInfoPopup.hasFocus())
-//									hide();
+								if (!fProposalPopup.hasFocus() && !fContextInfoPopup.hasFocus())
+									hide();
 							}
 						});
 					}
@@ -638,6 +640,15 @@ public class ContentAssistant2 implements IContentAssistant, IWidgetTokenKeeper 
 	final static int CONTEXT_SELECTOR= 0;
 	final static int PROPOSAL_SELECTOR= 1;
 	final static int CONTEXT_INFO_POPUP= 2;
+
+	/** 
+	 * The popup priority: &gt; infopops, &lt; standard content assist.
+	 * Default value: <code>10</code>.
+	 * 
+	 * @since 3.0
+	 */
+	public static final int WIDGET_PRIORITY= 10;
+	
 	
 	private static final int DEFAULT_AUTO_ACTIVATION_DELAY= 500;
 	
@@ -1077,6 +1088,9 @@ public class ContentAssistant2 implements IContentAssistant, IWidgetTokenKeeper 
 				if (fViewer instanceof IWidgetTokenOwner) {
 					IWidgetTokenOwner owner= (IWidgetTokenOwner) fViewer;
 					return owner.requestWidgetToken(this);
+				} if (fViewer instanceof IWidgetTokenOwnerExtension)  {
+					IWidgetTokenOwnerExtension extension= (IWidgetTokenOwnerExtension) fViewer;
+					return extension.requestWidgetToken(this, WIDGET_PRIORITY);
 				}
 				return false;
 		}	
@@ -1228,7 +1242,8 @@ public class ContentAssistant2 implements IContentAssistant, IWidgetTokenKeeper 
 	}
 	
 	public void hidePossibleCompletions() {
-		fProposalPopup.hide();
+		if (fProposalPopup != null)
+			fProposalPopup.hide();
 	}
 	
 	/**
@@ -1443,6 +1458,27 @@ public class ContentAssistant2 implements IContentAssistant, IWidgetTokenKeeper 
 	 */
 	public void setCompletions(ICompletionProposal[] proposals) {
 		fProposals= proposals;
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.IWidgetTokenKeeperExtension#requestWidgetToken(org.eclipse.jface.text.IWidgetTokenOwner, int)
+	 * @since 3.0
+	 */
+	public boolean requestWidgetToken(IWidgetTokenOwner owner, int priority) {
+		if (priority > WIDGET_PRIORITY) {
+			hidePossibleCompletions();
+			return true;
+		} else
+			return false;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.IWidgetTokenKeeperExtension#setFocus(org.eclipse.jface.text.IWidgetTokenOwner)
+	 * @since 3.0
+	 */
+	public void setFocus(IWidgetTokenOwner owner) {
+		if (fProposalPopup != null)
+			fProposalPopup.setFocus();
 	}
 }
 
