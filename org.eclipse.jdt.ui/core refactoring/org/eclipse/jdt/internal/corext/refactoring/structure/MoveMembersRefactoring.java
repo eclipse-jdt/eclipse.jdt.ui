@@ -447,7 +447,8 @@ public class MoveMembersRefactoring extends Refactoring {
 		for (Iterator iter= fImportEdits.keySet().iterator(); iter.hasNext();) {
 			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit) iter.next());
 			ImportEdit edit= (ImportEdit)fImportEdits.get(cu);
-			manager.get(cu).addTextEdit("Update imports", edit);
+			if (edit != null && ! edit.isEmpty())
+				manager.get(cu).addTextEdit("Update imports", edit);
 		}
 	}
 
