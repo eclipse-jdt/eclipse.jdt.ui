@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -81,10 +82,11 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			/* 2 */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addjar.button"),	//$NON-NLS-1$
 			/* 3 */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addextjar.button"), //$NON-NLS-1$
 			/* 4 */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addvariable.button"), //$NON-NLS-1$
-			/* 5 */ null,  
-			/* 6 */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.setsource.button"), //$NON-NLS-1$
-			/* 7 */ null,  
-			/* 8 */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.remove.button") //$NON-NLS-1$
+			/* 5 */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addcontainer.button"), //$NON-NLS-1$
+			/* 6 */ null,  
+			/* 7 */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.setsource.button"), //$NON-NLS-1$
+			/* 8 */ null,  
+			/* 9 */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.remove.button") //$NON-NLS-1$
 		};		
 				
 		LibrariesAdapter adapter= new LibrariesAdapter();
@@ -92,9 +94,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		fLibrariesList= new ListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fLibrariesList.setDialogFieldListener(adapter);
 		fLibrariesList.setLabelText(NewWizardMessages.getString("LibrariesWorkbookPage.libraries.label")); //$NON-NLS-1$
-		fLibrariesList.setRemoveButtonIndex(8); //$NON-NLS-1$
+		fLibrariesList.setRemoveButtonIndex(9); //$NON-NLS-1$
 	
-		fLibrariesList.enableButton(6, false);
+		fLibrariesList.enableButton(7, false);
 		
 		fLibrariesList.setViewerSorter(new CPListElementSorter());
 
@@ -186,8 +188,11 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			break;
 		case 4: /* add variable */
 			libentries= chooseVariableEntries();
+			break;
+		case 5: /* add container */
+			libentries= chooseContainerEntry();
 			break;				
-		case 6: /* set source attachment */
+		case 7: /* set source attachment */
 			List selElements= fLibrariesList.getSelectedElements();
 			CPListElement selElement= (CPListElement) selElements.get(0);				
 			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), selElement.getClasspathEntry());
@@ -215,10 +220,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			fLibrariesList.postSetSelection(new StructuredSelection(libentries));
 		}
 	}
+
+
 	
 	private void libaryPageSelectionChanged(DialogField field) {
 		List selElements= fLibrariesList.getSelectedElements();
-		fLibrariesList.enableButton(6, canDoSourceAttachment(selElements));
+		fLibrariesList.enableButton(7, canDoSourceAttachment(selElements));
 	}
 	
 	private void libaryPageDialogFieldChanged(DialogField field) {
@@ -436,6 +443,25 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 		return null;
 	}
+	
+	private CPListElement[] chooseContainerEntry() {
+		ClasspathContainerWizard wizard= new ClasspathContainerWizard(null);
+		
+		WizardDialog dialog= new WizardDialog(getShell(), wizard);
+		PixelConverter converter= new PixelConverter(getShell());
+		
+		dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(40), converter.convertHeightInCharsToPixels(20));
+		dialog.create();
+		dialog.getShell().setText(NewWizardMessages.getString("LibrariesWorkbookPage.ContainerDialog.title")); //$NON-NLS-1$
+		if (dialog.open() == dialog.OK) {
+			IClasspathEntry created= wizard.getNewEntry();
+			if (created != null) {			
+				CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_CONTAINER, created.getPath(), null);
+				return new CPListElement[] { elem };
+			}
+		}			
+		return null;
+	}	
 	
 	
 	private void addAttachmentsFromExistingLibs(CPListElement elem) {

@@ -321,7 +321,7 @@ public class BuildPathsBlock {
 		doStatusLineUpdate();
 	}
 
-	private ArrayList getExistingEntries(IClasspathEntry[] classpathEntries) throws JavaModelException {
+	private ArrayList getExistingEntries(IClasspathEntry[] classpathEntries) {
 		ArrayList newClassPath= new ArrayList();
 		boolean projectExists= fCurrJProject.exists();
 		for (int i= 0; i < classpathEntries.length; i++) {
@@ -336,7 +336,11 @@ public class BuildPathsBlock {
 			switch (curr.getEntryKind()) {
 				case IClasspathEntry.CPE_CONTAINER:
 					res= null;
-					isMissing= (JavaCore.getClasspathContainer(path, fCurrJProject) == null);
+					try {
+						isMissing= (JavaCore.getClasspathContainer(path, fCurrJProject) == null);
+					} catch (JavaModelException e) {
+						isMissing= true;
+					}
 					break;
 				case IClasspathEntry.CPE_VARIABLE:
 					IPath resolvedPath= JavaCore.getResolvedVariablePath(path);
@@ -699,7 +703,7 @@ public class BuildPathsBlock {
 	}
 	
 	public static boolean hasClassfiles(IResource resource) throws CoreException {
-		if (resource.isDerived() && "class".equals(resource.getFileExtension())) {
+		if (resource.isDerived() && "class".equals(resource.getFileExtension())) { //$NON-NLS-1$
 			return true;
 		}		
 		if (resource instanceof IContainer) {
@@ -715,7 +719,7 @@ public class BuildPathsBlock {
 	
 
 	public static void removeOldClassfiles(IResource resource) throws CoreException {
-		if (resource.isDerived() && "class".equals(resource.getFileExtension())) {
+		if (resource.isDerived() && "class".equals(resource.getFileExtension())) { //$NON-NLS-1$
 			resource.delete(false, null);
 		}
 		if (resource instanceof IContainer) {
