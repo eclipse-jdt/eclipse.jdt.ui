@@ -98,7 +98,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	}
 
 	private void addStructureSelection(IMenuManager editMenu) {
-		MenuManager structureSelection= new MenuManager("Expand &Selection With");
+		MenuManager structureSelection= new MenuManager("Expand &Selection to");
 		structureSelection.add(fStructureSelectionAction);
 		structureSelection.add(fStructureSelectNextAction);
 		structureSelection.add(fStructureSelectPreviousAction);
