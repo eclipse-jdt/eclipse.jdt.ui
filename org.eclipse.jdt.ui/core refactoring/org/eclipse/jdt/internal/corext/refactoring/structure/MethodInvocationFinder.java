@@ -18,7 +18,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 
-public class MethodInvocationFinder {
+class MethodInvocationFinder {
 
 	public static ISourceRange[] findMessageSendRanges(SearchResultGroup searchResultGroup) throws JavaModelException {
 		Assert.isNotNull(searchResultGroup);
