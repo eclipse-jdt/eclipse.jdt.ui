@@ -463,7 +463,7 @@ public class NLSRefactoring extends Refactoring {
 					if (!"NLS".equals(superclassName) && !NLS.class.getName().equals(superclassName)) //$NON-NLS-1$
 						return false;
 					IType superclass= type.newSupertypeHierarchy(null).getSuperclass(type);
-					return NLS.class.getName().equals(superclass.getFullyQualifiedName());
+					return superclass != null && NLS.class.getName().equals(superclass.getFullyQualifiedName());
 				} catch (JavaModelException e) {
 					return false;
 				}
