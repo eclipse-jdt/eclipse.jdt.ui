@@ -1,6 +1,5 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
-import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.ui.model.IWorkbenchAdapter;
@@ -336,10 +335,8 @@ public class JavaElementLabels {
 	 */		
 	public static void getMethodLabel(IMethod method, int flags, StringBuffer buf) {
 		try {
-			boolean isConstructor= method.isConstructor();
-			
 			// return type
-			if (getFlag(flags, M_PRE_RETURNTYPE) && !isConstructor) {
+			if (getFlag(flags, M_PRE_RETURNTYPE) && method.exists() && !method.isConstructor()) {
 				buf.append(Signature.getSimpleName(Signature.toString(method.getReturnType())));
 				buf.append(' ');
 			}
@@ -357,7 +354,7 @@ public class JavaElementLabels {
 				buf.append('(');
 				
 				String[] types= getFlag(flags, M_PARAMETER_TYPES) ? method.getParameterTypes() : null;
-				String[] names= getFlag(flags, M_PARAMETER_NAMES) ? method.getParameterNames() : null;
+				String[] names= (getFlag(flags, M_PARAMETER_NAMES) && method.exists()) ? method.getParameterNames() : null;
 				int nParams= types != null ? types.length : names.length;
 				
 				for (int i= 0; i < nParams; i++) {
@@ -377,20 +374,20 @@ public class JavaElementLabels {
 				buf.append(')');
 			}
 					
-			if (getFlag(flags, M_EXCEPTIONS)) {
+			if (getFlag(flags, M_EXCEPTIONS) && method.exists()) {
 				String[] types= method.getExceptionTypes();
 				if (types.length > 0) {
 					buf.append(" throws "); //$NON-NLS-1$
 					for (int i= 0; i < types.length; i++) {
 						if (i > 0) {
-							buf.append(COMMA_STRING); //$NON-NLS-1$
+							buf.append(COMMA_STRING);
 						}
 						buf.append(Signature.getSimpleName(Signature.toString(types[i])));
 					}
 				}
 			}
 			
-			if (getFlag(flags, M_APP_RETURNTYPE) && !isConstructor) {
+			if (getFlag(flags, M_APP_RETURNTYPE) && method.exists() && !method.isConstructor()) {
 				buf.append(DECL_STRING);
 				buf.append(Signature.getSimpleName(Signature.toString(method.getReturnType())));	
 			}			
@@ -402,7 +399,7 @@ public class JavaElementLabels {
 			}			
 			
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.log(e); // NotExistsException will not reach this point
 		}
 	}
 	
@@ -411,9 +408,9 @@ public class JavaElementLabels {
 	 */	
 	public static void getFieldLabel(IField field, int flags, StringBuffer buf) {
 		try {
-			if (getFlag(flags, F_PRE_TYPE_SIGNATURE)) {
+			if (getFlag(flags, F_PRE_TYPE_SIGNATURE) && field.exists()) {
 				buf.append(Signature.toString(field.getTypeSignature()));
-				buf.append(' '); //$NON-NLS-1$
+				buf.append(' ');
 			}
 			
 			// qualification
@@ -423,8 +420,8 @@ public class JavaElementLabels {
 			}
 			buf.append(field.getElementName());
 			
-			if (getFlag(flags, F_APP_TYPE_SIGNATURE)) {
-				buf.append(DECL_STRING); //$NON-NLS-1$
+			if (getFlag(flags, F_APP_TYPE_SIGNATURE) && field.exists()) {
+				buf.append(DECL_STRING);
 				buf.append(Signature.toString(field.getTypeSignature()));
 			}
 			
@@ -435,7 +432,7 @@ public class JavaElementLabels {
 			}
 			
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			JavaPlugin.log(e); // NotExistsException will not reach this point
 		}			
 	}
 
@@ -591,7 +588,7 @@ public class JavaElementLabels {
 					}
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+				JavaPlugin.log(e); // problems with class path
 			}
 		}
 		if (root.isExternal()) {
