@@ -71,7 +71,6 @@ import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeBlock;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
@@ -118,6 +117,28 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private final ASTNodeMappingManager fASTManager;
 	private DeleteSourceReferenceEdit fCutTypeEdit; 
 	private boolean fMarkInstanceFieldAsFinal;
+	
+	private static class CodeBlock {
+		private List fLines;
+		public CodeBlock(String code) {
+			String[] lines= Strings.convertIntoLines(code);
+			Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth());
+			fLines= new ArrayList(Arrays.asList(lines));
+		}
+		public void fill(StringBuffer buffer, String initialIndent, String lineSeparator) {
+			int size= fLines.size();
+			int lastLine= size - 1;
+			for (int i= 0; i < size; i++) {
+				if (i == 0)
+					buffer.append(initialIndent);
+				else
+					buffer.append(initialIndent);
+				buffer.append((String)fLines.get(i));
+				if (i < lastLine)
+					buffer.append(lineSeparator);
+			}
+		}
+	}
 	
 	private MoveInnerToTopRefactoring(IType type, CodeGenerationSettings codeGenerationSettings){
 		Assert.isNotNull(type);
