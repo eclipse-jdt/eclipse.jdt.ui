@@ -130,8 +130,19 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 							position= (Position)fCodePositions.get(index--);
 							begin= position.getOffset();
 							
-							position= (Position)fCodePositions.get(index--);
-							end= position.getOffset();
+							if (index >= 0) {
+								position= (Position)fCodePositions.get(index--);
+								end= position.getOffset();
+							} else {
+								/* 
+								 * Handle missing closing tag
+								 * see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=57011
+								 */
+								position= null;
+								end= getOffset() + getLength() - MultiCommentLine.MULTI_COMMENT_END_PREFIX.trim().length();
+								while (end > begin && Character.isWhitespace(document.getChar(end - 1)))
+									end--;
+							}
 							
 							String snippet= document.get(begin, end - begin);
 							snippet= preprocessCodeSnippet(snippet);
