@@ -6,7 +6,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -95,7 +99,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		fTemplates= Templates.getInstance();
 	}
 
-	/**
+	/*
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite ancestor) {	
@@ -106,11 +110,20 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		layout.marginWidth= 0;
 		parent.setLayout(layout);				
 
-		Table table= new Table(parent, SWT.CHECK | SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
+        Composite innerParent= new Composite(parent, SWT.NONE);
+        GridLayout innerLayout= new GridLayout();
+        innerLayout.numColumns= 2;
+        innerLayout.marginHeight= 0;
+        innerLayout.marginWidth= 0;
+        innerParent.setLayout(innerLayout);
+        GridData gd= new GridData(GridData.FILL_BOTH);
+        gd.horizontalSpan= 2;
+        innerParent.setLayoutData(gd);
+
+		Table table= new Table(innerParent, SWT.CHECK | SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		
 		GridData data= new GridData(GridData.FILL_BOTH);
 		data.widthHint= convertWidthInCharsToPixels(3);
-		int width= data.widthHint;
 		data.heightHint= convertHeightInCharsToPixels(10);
 		table.setLayoutData(data);
 				
@@ -129,10 +142,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		TableColumn column3= new TableColumn(table, SWT.NONE);
 		column3.setText(TemplateMessages.getString("TemplatePreferencePage.column.description")); //$NON-NLS-1$
 		
-		tableLayout.addColumnData(new ColumnWeightData((width / 100) * 30));
-		tableLayout.addColumnData(new ColumnWeightData((width / 100) * 30));
-		tableLayout.addColumnData(new ColumnWeightData((width / 100) * 60));
-
 		fTableViewer= new CheckboxTableViewer(table);		
 		fTableViewer.setLabelProvider(new TemplateLabelProvider());
 		fTableViewer.setContentProvider(new TemplateContentProvider());
@@ -174,7 +183,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 			}
 		});
 
-		Composite buttons= new Composite(parent, SWT.NULL);
+		Composite buttons= new Composite(innerParent, SWT.NONE);
 		buttons.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
 		layout= new GridLayout();
 		layout.marginHeight= 0;
@@ -208,8 +217,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 			}
 		});
 				
-		createSpacer(buttons);
-
 		fImportButton= new Button(buttons, SWT.PUSH);
 		fImportButton.setLayoutData(getButtonGridData(fImportButton));
 		fImportButton.setText(TemplateMessages.getString("TemplatePreferencePage.import")); //$NON-NLS-1$
@@ -237,8 +244,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 			}
 		});		
 
-		createSpacer(buttons);
-		
 		fEnableAllButton= new Button(buttons, SWT.PUSH);
 		fEnableAllButton.setLayoutData(getButtonGridData(fEnableAllButton));
 		fEnableAllButton.setText(TemplateMessages.getString("TemplatePreferencePage.enable.all")); //$NON-NLS-1$
@@ -259,10 +264,11 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 
 		fPatternViewer= createViewer(parent);
 		
-		createSpacer(parent);
-
 		fFormatButton= new Button(parent, SWT.CHECK);
 		fFormatButton.setText(TemplateMessages.getString("TemplatePreferencePage.use.code.formatter")); //$NON-NLS-1$
+        GridData gd1= new GridData();
+        gd1.horizontalSpan= 2;
+        fFormatButton.setLayoutData(gd1);
 
 		fTableViewer.setInput(fTemplates);		
 		fTableViewer.setAllChecked(false);
@@ -272,11 +278,51 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		fFormatButton.setSelection(prefs.getBoolean(PREF_FORMAT_TEMPLATES));
 
 		updateButtons();
+        configureTableResizing(innerParent, buttons, table, column1, column2, column3);
 
 		WorkbenchHelp.setHelp(parent, IJavaHelpContextIds.TEMPLATE_PREFERENCE_PAGE);
 		
 		return parent;
 	}
+    
+     /**
+     * Correctly resizes the table so no phantom columns appear
+     */
+    private static void configureTableResizing(final Composite parent, final Composite buttons, final Table table, final TableColumn column1, final TableColumn column2, final TableColumn column3) {
+        parent.addControlListener(new ControlAdapter() {
+            public void controlResized(ControlEvent e) {
+                Rectangle area = parent.getClientArea();
+                Point preferredSize = table.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+                int width = area.width - 2 * table.getBorderWidth();
+                if (preferredSize.y > area.height) {
+                    // Subtract the scrollbar width from the total column width
+                    // if a vertical scrollbar will be required
+                    Point vBarSize = table.getVerticalBar().getSize();
+                    width -= vBarSize.x;
+                }
+                width-= buttons.getSize().x;
+                Point oldSize = table.getSize();
+                if (oldSize.x > width) {
+                    // table is getting smaller so make the columns
+                    // smaller first and then resize the table to
+                    // match the client area width
+                    column1.setWidth(width/4);
+                    column2.setWidth(width/4);
+                    column3.setWidth(width - (column1.getWidth() + column2.getWidth()));
+                    table.setSize(width, area.height);
+                } else {
+                    // table is getting bigger so make the table
+                    // bigger first and then make the columns wider
+                    // to match the client area width
+                    table.setSize(width, area.height);
+                    column1.setWidth(width/4);
+                    column2.setWidth(width/4);
+                    column3.setWidth(width - (column1.getWidth() + column2.getWidth()));
+                 }
+            }
+        });
+    }
+    
 	
 	private Template[] getEnabledTemplates() {
 		Template[] templates= fTemplates.getTemplates();
@@ -313,19 +359,11 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		
 		Control control= viewer.getControl();
 		data= new GridData(GridData.FILL_BOTH);
+        data.horizontalSpan= 2;
 		data.heightHint= convertHeightInCharsToPixels(5);
 		control.setLayoutData(data);
 		
 		return viewer;
-	}
-	
-	public void createSpacer(Composite parent) {
-		Label spacer= new Label(parent, SWT.NONE);
-		GridData data= new GridData();
-		data.horizontalAlignment= GridData.FILL;
-		data.verticalAlignment= GridData.BEGINNING;
-		data.heightHint= 4;		
-		spacer.setLayoutData(data);
 	}
 	
 	private static GridData getButtonGridData(Button button) {
