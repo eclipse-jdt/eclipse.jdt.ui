@@ -263,12 +263,13 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			fShowInheritedMembers= !fShowInheritedMembers;
 			getTreeViewer().refresh();
 			getTreeViewer().expandToLevel(2);
-			tree.setRedraw(true);
 			
 			// reveal selection
 			Object selectedElement= getSelectedElement();
 			if (selectedElement != null)
 				getTreeViewer().reveal(selectedElement);
+
+			tree.setRedraw(true);
 		}
 		
 		/**
@@ -397,12 +398,13 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			if (!fShowOnlyMainType)
 				fOutlineViewer.expandToLevel(2);
 			
-			tree.setRedraw(true);
 			
 			// reveal selection
 			Object selectedElement= getSelectedElement();
 			if (selectedElement != null)
 				fOutlineViewer.reveal(selectedElement);
+			
+			tree.setRedraw(true);
 					
 			getDialogSettings().put(STORE_GO_INTO_TOP_LEVEL_TYPE_CHECKED, show);
 		}
