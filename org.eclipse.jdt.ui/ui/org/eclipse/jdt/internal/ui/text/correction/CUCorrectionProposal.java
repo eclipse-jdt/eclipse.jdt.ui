@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.compare.contentmergeviewer.ITokenComparator;
+import org.eclipse.compare.rangedifferencer.IRangeComparator;
 import org.eclipse.compare.rangedifferencer.RangeDifference;
 import org.eclipse.compare.rangedifferencer.RangeDifferencer;
 
@@ -184,14 +184,19 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			IDocument previewContent= change.getPreviewDocument(new NullProgressMonitor());
 			String currentConentString= change.getCurrentContent(new NullProgressMonitor());
 			
-			ITokenComparator leftSide= new JavaTokenComparator(previewContent.get(), true); 
-			ITokenComparator rightSide= new JavaTokenComparator(currentConentString, true);
+			/*
+			 * Do not change the type of those local variables. We use Object
+			 * here in order to prevent loading of the Compare plug-in at load
+			 * time of this class.
+			 */
+			Object leftSide= new JavaTokenComparator(previewContent.get(), true); 
+			Object rightSide= new JavaTokenComparator(currentConentString, true);
 			
-			RangeDifference[] differences= RangeDifferencer.findRanges(leftSide, rightSide);
+			RangeDifference[] differences= RangeDifferencer.findRanges((IRangeComparator)leftSide, (IRangeComparator)rightSide);
 			for (int i= 0; i < differences.length; i++) {
 				RangeDifference curr= differences[i];
-				int start= leftSide.getTokenStart(curr.leftStart());
-				int end= leftSide.getTokenStart(curr.leftEnd());
+				int start= ((JavaTokenComparator)leftSide).getTokenStart(curr.leftStart());
+				int end= ((JavaTokenComparator)leftSide).getTokenStart(curr.leftEnd());
 				if (curr.kind() == RangeDifference.CHANGE && curr.leftLength() > 0) {
 					buf.append("<b>"); //$NON-NLS-1$
 					appendContent(previewContent, start, end, buf, false);
