@@ -22,13 +22,11 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Tracker;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
 
@@ -375,18 +373,11 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	}
 
 	protected void toggleShowInheritedMembers() {
-		Tracker tracker= new Tracker(getFilterText().getShell().getDisplay(), SWT.UP | SWT.RESIZE);
-		tracker.setStippled(false);
-		Rectangle[] r= new Rectangle[1];
-		
-		r[0]= getFilterText().getShell().getBounds();
-		tracker.setRectangles(r);
-		tracker.open();
-//		int flags= AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE;
-//		if (!fOutlineContentProvider.isShowingInheritedMembers())
-//			flags |= JavaElementLabels.ALL_POST_QUALIFIED;
-//		fInnerLabelProvider.setTextFlags(flags);
-//		fOutlineContentProvider.toggleShowInheritedMembers();
-//		updateStatusFieldText();
+		int flags= AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE;
+		if (!fOutlineContentProvider.isShowingInheritedMembers())
+			flags |= JavaElementLabels.ALL_POST_QUALIFIED;
+		fInnerLabelProvider.setTextFlags(flags);
+		fOutlineContentProvider.toggleShowInheritedMembers();
+		updateStatusFieldText();
 	}
 }
