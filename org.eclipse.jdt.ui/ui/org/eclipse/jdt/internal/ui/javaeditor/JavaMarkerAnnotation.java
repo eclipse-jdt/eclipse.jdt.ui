@@ -6,6 +6,12 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
+import org.eclipse.swt.widgets.Canvas;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 
@@ -28,6 +34,9 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	
 	private IDebugModelPresentation fPresentation;
 	private boolean fIsProblemMarker;
+	private IProblemAnnotation fOverlay;
+	private boolean fNotRelevant= false;
+	
 	
 	public JavaMarkerAnnotation(IMarker marker) {
 		super(marker);
@@ -131,5 +140,30 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 	 */
 	public boolean isProblem() {
 		return fIsProblemMarker;
+	}
+	
+	/*
+	 * @see IProblemAnnotation#isRelevant()
+	 */
+	public boolean isRelevant() {
+		return !fNotRelevant;
+	}
+	
+	public void setOverlay(IProblemAnnotation problemAnnotation) {
+		fOverlay= problemAnnotation;
+		fNotRelevant= (fNotRelevant || fOverlay != null);
+	}
+	
+	
+	/*
+	 * @see MarkerAnnotation#getImage(Display)
+	 */
+	public Image getImage(Display display) {
+		if (fOverlay != null) {
+			Image image= fOverlay.getImage(display);
+			if (image != null)
+				return image;
+		}
+		return super.getImage(display);
 	}
 }

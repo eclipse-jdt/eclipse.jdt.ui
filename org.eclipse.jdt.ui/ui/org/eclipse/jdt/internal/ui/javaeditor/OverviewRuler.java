@@ -192,6 +192,8 @@ public class OverviewRuler {
 	private int getType(Annotation annotation) {
 		if (annotation instanceof IProblemAnnotation) {
 			IProblemAnnotation pa= (IProblemAnnotation) annotation;
+			if (!pa.isRelevant())
+				return UNKNOWN;
 			if (pa.isTemporaryProblem())
 				return TEMPORARY;
 			if (pa.isError())

@@ -113,7 +113,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		HashSet idsProcessed= new HashSet();
 		
 		if (model != null) {
-			for (Iterator iter= new ProblemAnnotationIterator(model); iter.hasNext();) {
+			for (Iterator iter= new ProblemAnnotationIterator(model, true); iter.hasNext();) {
 				IProblemAnnotation annot= (IProblemAnnotation) iter.next();
 				Position pos= model.getPosition((Annotation) annot);
 				if (pos != null) {

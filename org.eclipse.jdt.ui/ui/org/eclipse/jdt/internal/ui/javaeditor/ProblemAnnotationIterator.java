@@ -17,9 +17,11 @@ public class ProblemAnnotationIterator implements Iterator {
 			
 	private Iterator fIterator;
 	private IProblemAnnotation fNext;
+	private boolean fSkipIrrelevants;
 	
-	public ProblemAnnotationIterator(IAnnotationModel model) {
+	public ProblemAnnotationIterator(IAnnotationModel model, boolean skipIrrelevants) {
 		fIterator= model.getAnnotationIterator();
+		fSkipIrrelevants= skipIrrelevants;
 		skip();
 	}
 	
@@ -27,8 +29,16 @@ public class ProblemAnnotationIterator implements Iterator {
 		while (fIterator.hasNext()) {
 			Object next= fIterator.next();
 			if (next instanceof IProblemAnnotation) {
-				fNext= (IProblemAnnotation) next;
-				return;
+				IProblemAnnotation a= (IProblemAnnotation) next;
+				if (fSkipIrrelevants) {
+					if (a.isRelevant()) {
+						fNext= a;
+						return;
+					}
+				} else {
+					fNext= a;
+					return;
+				}
 			}
 		}
 		fNext= null;

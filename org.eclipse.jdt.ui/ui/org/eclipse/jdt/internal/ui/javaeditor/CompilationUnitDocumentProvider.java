@@ -9,8 +9,10 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -26,6 +28,7 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultLineTracker;
@@ -114,7 +117,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			
 			public ProblemAnnotation(IProblem problem) {
 				fProblem= problem;
-				setLayer(1);
+				setLayer(MarkerAnnotation.PROBLEM_LAYER + 1);
 				
 				if (fgImage == null)
 					fgImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
@@ -128,9 +131,16 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 */
 			public void paint(GC gc, Canvas canvas, Rectangle r) {
 				if (fImage != null)
-					drawImage(fImage, gc, canvas, r, SWT.CENTER, SWT.TOP);
-			}				
-
+					drawImage(fImage, gc, canvas, r, SWT.CENTER, SWT.CENTER);
+			}
+			
+			/*
+			 * @see IProblemAnnotation#getImage(Display)
+			 */
+			public Image getImage(Display display) {
+				return fImage;
+			}
+			
 			/*
 			 * @see IProblemAnnotation#getMessage()
 			 */
@@ -179,6 +189,13 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			public boolean isProblem() {
 				return true;
 			}
+			
+			/*
+			 * @see IProblemAnnotation#isRelevant()
+			 */
+			public boolean isRelevant() {
+				return true;
+			}
 		};
 		
 		/**
@@ -192,7 +209,12 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			private List fGeneratedAnnotations;
 			private IProgressMonitor fProgressMonitor;
 			private boolean fIsActive= false;
-				
+			
+			private Map fReverseMap= new HashMap();
+			private List fPreviouslyShadowed= null; 
+			private List fCurrentlyShadowed= new ArrayList();
+			
+			
 			public CompilationUnitAnnotationModel(IResource resource) {
 				super(resource);
 			}
@@ -237,37 +259,76 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				if (fProgressMonitor != null && fProgressMonitor.isCanceled())
 					return;
 					
+				
 				boolean temporaryProblemsChanged= false;
+				fPreviouslyShadowed= fCurrentlyShadowed;
+				fCurrentlyShadowed= new ArrayList();
 				
 				synchronized (fAnnotations) {
 					
 					if (fGeneratedAnnotations.size() > 0) {
-						temporaryProblemsChanged= true;
-						
+						temporaryProblemsChanged= true;	
 						removeAnnotations(fGeneratedAnnotations, false, true);
-						
 						fGeneratedAnnotations.clear();
 					}
-
+					
 					if (fCollectedProblems.size() > 0) {
-						temporaryProblemsChanged= true;
-						
+												
 						Iterator e= fCollectedProblems.iterator();
 						while (e.hasNext()) {
+							
 							IProblem problem= (IProblem) e.next();
-							ProblemAnnotation annotation= new ProblemAnnotation(problem);
-							fGeneratedAnnotations.add(annotation);
-							Position p= createPositionFromProblem(problem);
-							if (p != null)
-								addAnnotation(annotation, p, false);
+							Position position= createPositionFromProblem(problem);
+							if (position != null) {
+								
+								ProblemAnnotation annotation= new ProblemAnnotation(problem);
+								overlayMarkers(position, annotation);								
+								fGeneratedAnnotations.add(annotation);
+								addAnnotation(annotation, position, false);
+								
+								temporaryProblemsChanged= true;
+							}
 						}
 						
 						fCollectedProblems.clear();
 					}
+					
+					removeMarkerOverlays();
+					fPreviouslyShadowed.clear();
+					fPreviouslyShadowed= null;
 				}
 					
-				if (temporaryProblemsChanged) {
+				if (temporaryProblemsChanged)
 					fireModelChanged(new CompilationUnitAnnotationModelEvent(this, getResource(), false));
+			}
+			
+			private void removeMarkerOverlays() {
+				Iterator e= fPreviouslyShadowed.iterator();
+				while (e.hasNext()) {
+					JavaMarkerAnnotation annotation= (JavaMarkerAnnotation) e.next();
+					annotation.setOverlay(null);
+				}						
+			}
+			
+			private void setOverlay(Object value, ProblemAnnotation problemAnnotation) {
+				if (value instanceof  JavaMarkerAnnotation) {
+					JavaMarkerAnnotation annotation= (JavaMarkerAnnotation) value;
+					if (annotation.isProblem()) {
+						annotation.setOverlay(problemAnnotation);
+						fPreviouslyShadowed.remove(annotation);
+						fCurrentlyShadowed.add(annotation);
+					}
+				}
+			}
+			
+			private void  overlayMarkers(Position position, ProblemAnnotation problemAnnotation) {
+				Object value= getAnnotations(position);
+				if (value instanceof List) {
+					List list= (List) value;
+					for (Iterator e = list.iterator(); e.hasNext();)
+						setOverlay(e.next(), problemAnnotation);
+				} else {
+					setOverlay(value, problemAnnotation);
 				}
 			}
 			
@@ -324,7 +385,60 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 						stopCollectingProblems();
 				}
 			}
+			
+			private Object getAnnotations(Position position) {
+				return fReverseMap.get(position);
+			}
+						
+			/*
+			 * @see AnnotationModel#addAnnotation(Annotation, Position, boolean)
+			 */
+			protected void addAnnotation(Annotation annotation, Position position, boolean fireModelChanged) {
+				super.addAnnotation(annotation, position, fireModelChanged);
+				
+				Object cached= fReverseMap.get(position);
+				if (cached == null)
+					fReverseMap.put(position, annotation);
+				else if (cached instanceof List) {
+					List list= (List) cached;
+					list.add(annotation);
+				} else if (cached instanceof Annotation) {
+					List list= new ArrayList(2);
+					list.add(cached);
+					list.add(annotation);
+					fReverseMap.put(position, list);
+				}
+			}
+			
+			/*
+			 * @see AnnotationModel#removeAllAnnotations(boolean)
+			 */
+			protected void removeAllAnnotations(boolean fireModelChanged) {
+				super.removeAllAnnotations(fireModelChanged);
+				fReverseMap.clear();
+			}
+			
+			/*
+			 * @see AnnotationModel#removeAnnotation(Annotation, boolean)
+			 */
+			protected void removeAnnotation(Annotation annotation, boolean fireModelChanged) {
+				Position position= getPosition(annotation);
+				Object cached= fReverseMap.get(position);
+				if (cached instanceof List) {
+					List list= (List) cached;
+					list.remove(annotation);
+					if (list.size() == 1) {
+						fReverseMap.put(position, list.get(0));
+						list.clear();
+					}
+				} else if (cached instanceof Annotation) {
+					fReverseMap.remove(position);
+				}
+				
+				super.removeAnnotation(annotation, fireModelChanged);
+			}
 		};
+		
 		
 		/**
 		 * Creates <code>IBuffer</code>s based on documents.

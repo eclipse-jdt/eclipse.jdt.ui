@@ -60,7 +60,7 @@ public class JavaProblemHover implements IJavaEditorTextHover {
 		IAnnotationModel model= provider.getAnnotationModel(fCompilationUnitEditor.getEditorInput());
 		
 		if (model != null) {
-			Iterator e= new ProblemAnnotationIterator(model);
+			Iterator e= new ProblemAnnotationIterator(model, true);
 			while (e.hasNext()) {
 				Annotation a= (Annotation) e.next();
 				Position p= model.getPosition(a);

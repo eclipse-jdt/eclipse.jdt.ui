@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class ProblemPainter implements IPainter, PaintListener, IAnnotationModelListener {
 	
+	
 	private boolean fIsActive= false;
 	private boolean fIsPainting= false;
 	private boolean fIsSettingModel= false;
@@ -49,7 +50,6 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 	private IAnnotationModel fModel;
 	private List fProblemPositions= new ArrayList();
 
-	
 	
 	
 	public ProblemPainter(ITextEditor textEditor, ISourceViewer sourceViewer) {
@@ -99,7 +99,7 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		if (fProblemPositions != null) {
 			fProblemPositions.clear();
 			if (fModel != null) {
-				Iterator e= new ProblemAnnotationIterator(fModel);
+				Iterator e= new ProblemAnnotationIterator(fModel, true);
 				while (e.hasNext()) {
 					IProblemAnnotation pa= (IProblemAnnotation) e.next();
 					if (pa.isProblem()) {

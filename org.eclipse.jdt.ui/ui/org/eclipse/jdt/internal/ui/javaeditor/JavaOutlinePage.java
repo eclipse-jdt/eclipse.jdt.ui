@@ -118,6 +118,10 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			class ElementChangedListener implements IElementChangedListener {
 				
 				public void elementChanged(final ElementChangedEvent e) {
+					
+					if (getControl() == null)
+						return;
+						
 					Display d= getControl().getDisplay();
 					if (d != null) {
 						d.asyncExec(new Runnable() {
