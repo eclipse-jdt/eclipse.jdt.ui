@@ -11,13 +11,16 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.Signature;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 
 
@@ -74,20 +77,20 @@ public final class RewriteEventStore {
 	}
 	
 	/** all events */
-	private final ArrayList fEvents;
+	private final List fEvents;
 	
 	/** cache for last accessed event */
 	private EventHolder fLastEvent;
 	
 	/** Maps events to group descriptions */
-	private HashMap fEditGroups;
+	private Map fEditGroups;
 	
 	/** Stores which nodes are source of a copy or move */
-	private HashMap fNodeSourceDatas;
+	private Map fNodeSourceDatas;
 	
 	/** Stores which inserted nodes bound to the previous node. If not, a node is
 	 * always bound to the next node */
-	private HashSet fInsertBoundToPrevious;
+	private Set fInsertBoundToPrevious;
 	
 	/** optional mapper to allow fix already modified AST trees */
 	private INodePropertyMapper fNodePropertyMapper;
@@ -96,7 +99,7 @@ public final class RewriteEventStore {
 		fEvents= new ArrayList();
 		fLastEvent= null;
 		
-		fNodeSourceDatas= new HashMap();
+		fNodeSourceDatas= new IdentityHashMap();
 		fEditGroups= null; // lazy initialization
 		fInsertBoundToPrevious= null;
 		
@@ -186,7 +189,9 @@ public final class RewriteEventStore {
 		for (int i= 0; i < fEvents.size(); i++) {
 			EventHolder holder= (EventHolder) fEvents.get(i);
 			if (holder.parent == parent) {
-				return true;
+				if (holder.event.getChangeKind() != RewriteEvent.UNCHANGED) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -274,7 +279,7 @@ public final class RewriteEventStore {
 	public void setEventEditGroup(RewriteEvent event, TextEditGroup editGroup) {
 		if (editGroup != null) {
 			if (fEditGroups == null) {
-				fEditGroups= new HashMap(5);
+				fEditGroups= new IdentityHashMap(5);
 			}	
 			fEditGroups.put(event, editGroup);
 		}

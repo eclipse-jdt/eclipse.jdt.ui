@@ -95,6 +95,9 @@ public final class ASTRewrite extends NewASTRewrite {
 		fEventStore.setNodePropertyMapper(new RewriteEventStore.INodePropertyMapper() {
 			public Object getOriginalValue(ASTNode parent, int childProperty) {
 				Object originalValue= ASTNodeConstants.getNodeChild(parent, childProperty);
+				if (parent.getStartPosition() == -1) {
+					return originalValue; // ignore unnecessary inserts
+				}
 				if (originalValue instanceof List) {
 					List originalList= (List) originalValue;
 					ArrayList fixedList= new ArrayList(originalList.size());

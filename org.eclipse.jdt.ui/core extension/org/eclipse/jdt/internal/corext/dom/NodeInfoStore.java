@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -46,10 +48,10 @@ public final class NodeInfoStore {
 	
 	private AST fAst;
 	
-	private HashMap fPlaceholderNodes;
-	private HashSet fCollapsedNodes;
+	private Map fPlaceholderNodes;
+	private Set fCollapsedNodes;
 
-	private HashMap fTrackedNodes;
+	private Map fTrackedNodes;
 	
 	public NodeInfoStore(AST ast) {
 		super();
@@ -107,111 +109,81 @@ public final class NodeInfoStore {
 		return UNKNOWN;
 	}
 	
+
 	/**
-	 * Creates a target node for a source string to be inserted without being formatted. A target node can
-	 * be inserted or used to replace at the target position.
-	 * @param code String that will be inserted. The string must not have extra indent.
-	 * @param nodeType the type of the place holder. Valid values are <code>METHOD_DECLARATION</code>,
-	 * <code>FIELD_DECLARATION</code>, <code>INITIALIZER</code>,
-	 * <code>TYPE_DECLARATION</code>, <code>BLOCK</code>, <code>STATEMENT</code>,
-	 *  <code>SINGLEVAR_DECLARATION</code>,<code> VAR_DECLARATION_FRAGMENT</code>,
-	 * <code>TYPE</code>, <code>EXPRESSION</code>, <code>NAME</code>
-	 * <code>PACKAGE_DECLARATION</code>, <code>IMPORT_DECLARATION</code> and <code>JAVADOC</code>.
-	 * @return Returns the place holder node
+	 * Marks a node as a placehoder for a plain string content. The type of the node should correspond to the
+	 * code's code content.
+	 * @param placeholder The placeholder node that acts for the string content.
+	 * @param code The string content.
 	 */
-	public final ASTNode createStringPlaceholder(String code, int nodeType) {
+	public final void markAsStringPlaceholder(ASTNode placeholder, String code) {
 		StringPlaceholderData data= new StringPlaceholderData();
 		data.code= code;
-		return createPlaceholder(data, nodeType);
+		setPlaceholderData(placeholder, data);
 	}
 
 	/**
-	 * Creates a target node for a node to be copied. A target node can be inserted or used
-	 * to replace at the target position.
-	 * @param node The node to create a copy placeholder for.
-	 * @return The placeholder to be used at the copy destination.
+	 * Marks a node as a move target. The move target represents a moved node at the target (moved) site.
+	 * @param target The node at the target site. Can be a placeholder node but also the source node itself.
+	 * @param source The node at the source site.
 	 */
-	public final ASTNode createCopyPlaceholder(ASTNode node) {
-		
-		int placeHolderType= getPlaceholderType(node);
-		if (placeHolderType == UNKNOWN) {
-			throw new IllegalArgumentException("Copy placeholders are not supported for nodes of type " + node.getClass().getName()); //$NON-NLS-1$
-		}
-		CopyPlaceholderData data= new CopyPlaceholderData();
-		data.node= node;
-		return createPlaceholder(data, placeHolderType);
+	public final void markAsMoveTarget(ASTNode target, ASTNode source) {
+		MovePlaceholderData data= new MovePlaceholderData();
+		data.node= source;
+		setPlaceholderData(target, data);
 	}
 	
 	/**
-	 * Creates a target node for a node to be moved. A target node can be inserted or used
-	 * to replace at the target position. The source node has to be marked as removed or replaced.
-	 * @param node The node to create a move placeholder for.
-	 * @return The placeholder to be used at the move destination.
+	 * Marks a node as a copy target. The copy target represents a copied node at the target (copied) site.
+	 * @param target The node at the target site. Can be a placeholder node but also the source node itself.
+	 * @param source The node at the source site.
 	 */
-	public final ASTNode createMovePlaceholder(ASTNode node) {
-		int placeHolderType= getPlaceholderType(node);
-		if (placeHolderType == UNKNOWN) {
-			throw new IllegalArgumentException("Move placeholders are not supported for nodes of type " + node.getClass().getName()); //$NON-NLS-1$
-		}
+	public final void markAsCopyTarget(ASTNode target, ASTNode source) {
+		CopyPlaceholderData data= new CopyPlaceholderData();
+		data.node= source;
+		setPlaceholderData(target, data);
+	}
 		
-		MovePlaceholderData data= new MovePlaceholderData();
-		data.node= node;
-		return createPlaceholder(data, placeHolderType);
-	}	
-	
-	private final ASTNode createPlaceholder(PlaceholderData data, int nodeType) {
+	/**
+	 * Creates a placeholder node of the given type. <code>null</code> if the type is not supported
+	 * @param nodeType Type of the node to create. Use the type constants in {@link NodeInfoStore}.
+	 * @return Returns a place holder node.
+	 */
+	public final ASTNode newPlaceholderNode(int nodeType) {
 		AST ast= fAst;
-		ASTNode placeHolder;
 		switch (nodeType) {
 			case NAME:
-				placeHolder= ast.newSimpleName("z"); //$NON-NLS-1$
-				break;
+				return ast.newSimpleName("z"); //$NON-NLS-1$
 			case EXPRESSION:
 				MethodInvocation expression = ast.newMethodInvocation(); 
 				expression.setName(ast.newSimpleName("z")); //$NON-NLS-1$
-				placeHolder = expression;
-				break;			
+				return expression;
 			case TYPE:
-				placeHolder= ast.newSimpleType(ast.newSimpleName("X")); //$NON-NLS-1$
-				break;				
+				return ast.newSimpleType(ast.newSimpleName("X")); //$NON-NLS-1$		
 			case STATEMENT:
-				placeHolder= ast.newReturnStatement();
-				break;
+				return ast.newReturnStatement();
 			case BLOCK:
-				placeHolder= ast.newBlock();
-				break;
+				return ast.newBlock();
 			case METHOD_DECLARATION:
-				placeHolder= ast.newMethodDeclaration();
-				break;
+				return ast.newMethodDeclaration();
 			case FIELD_DECLARATION:
-				placeHolder= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
-				break;
+				return ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
 			case INITIALIZER:
-				placeHolder= ast.newInitializer();
-				break;								
+				return ast.newInitializer();				
 			case SINGLEVAR_DECLARATION:
-				placeHolder= ast.newSingleVariableDeclaration();
-				break;
+				return ast.newSingleVariableDeclaration();
 			case VAR_DECLARATION_FRAGMENT:
-				placeHolder= ast.newVariableDeclarationFragment();
-				break;
+				return ast.newVariableDeclarationFragment();
 			case JAVADOC:
-				placeHolder= ast.newJavadoc();
-				break;				
+				return ast.newJavadoc();
 			case TYPE_DECLARATION:
-				placeHolder= ast.newTypeDeclaration();
-				break;
+				return ast.newTypeDeclaration();
 			case PACKAGE_DECLARATION:
-				placeHolder= ast.newPackageDeclaration();
-				break;
+				return ast.newPackageDeclaration();
 			case IMPORT_DECLARATION:
-				placeHolder= ast.newImportDeclaration();
-				break;
-			default:
-				return null;
+				return ast.newImportDeclaration();
 		}
-		setPlaceholderData(placeHolder, data);
-		return placeHolder;
+		return null;
 	}	
 
 
@@ -244,9 +216,9 @@ public final class NodeInfoStore {
 		return null;	
 	}
 	
-	public void setPlaceholderData(ASTNode node, PlaceholderData data) {
+	private void setPlaceholderData(ASTNode node, PlaceholderData data) {
 		if (fPlaceholderNodes == null) {
-			fPlaceholderNodes= new HashMap();
+			fPlaceholderNodes= new IdentityHashMap();
 		}
 		fPlaceholderNodes.put(node, data);		
 	}
@@ -285,7 +257,7 @@ public final class NodeInfoStore {
 	
 	public void setTrackedNodeData(ASTNode node, TextEditGroup editGroup) {
 		if (fTrackedNodes == null) {
-			fTrackedNodes= new HashMap();
+			fTrackedNodes= new IdentityHashMap();
 		}
 		fTrackedNodes.put(node, editGroup);
 	}

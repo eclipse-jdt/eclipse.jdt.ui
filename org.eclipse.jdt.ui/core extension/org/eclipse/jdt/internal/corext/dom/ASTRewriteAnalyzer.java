@@ -85,7 +85,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		fCopySources= new HashMap();
 		fMoveSources= new HashMap();
 		
-		fFormatter= new ASTRewriteFormatter(fNodeInfos, getLineDelimiter());
+		fFormatter= new ASTRewriteFormatter(nodeInfos, eventStore, getLineDelimiter());
 	}
 		
 	public final TokenScanner getScanner() {
@@ -572,7 +572,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 					ASTNode node= (ASTNode) event.getNewValue();
 					TextEditGroup editGroup= getEditGroup(event);
 					
-					String[] strings= context.getPrefixAndSuffix(indent, getLineDelimiter(), node);
+					String[] strings= context.getPrefixAndSuffix(indent, getLineDelimiter(), node, fEventStore);
 					
 					doTextInsert(offset, strings[0], editGroup);
 					doTextInsert(offset, node, indent, true, editGroup);
@@ -600,7 +600,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 					int nodeLen= endPos - offset; 
 					
 					ASTNode replacingNode= (ASTNode) event.getNewValue();
-					String[] strings= context.getPrefixAndSuffix(indent, getLineDelimiter(), replacingNode);
+					String[] strings= context.getPrefixAndSuffix(indent, getLineDelimiter(), replacingNode, fEventStore);
 					doTextRemoveAndVisit(offset, nodeLen, node, editGroup);
 					
 					String prefix= strings[0];
@@ -996,13 +996,13 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 					int visibilityModifiers= addedModifiers & (Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED);
 					if (visibilityModifiers != 0) {
 						StringBuffer buf= new StringBuffer();
-						ASTFlattener.printModifiers(visibilityModifiers, buf);
+						ASTRewriteFlattener.printModifiers(visibilityModifiers, buf);
 						doTextInsert(startPos, buf.toString(), editGroup);
 						addedModifiers &= ~visibilityModifiers;
 					}
 				}
 				StringBuffer buf= new StringBuffer();
-				ASTFlattener.printModifiers(addedModifiers, buf);
+				ASTRewriteFlattener.printModifiers(addedModifiers, buf);
 				doTextInsert(endPos, buf.toString(), editGroup);
 			}
 		} catch (CoreException e) {
@@ -1134,12 +1134,12 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		// superclass
 		if (!isInterface || invertType) {
 			RewriteEvent superClassEvent= getEvent(node, ASTNodeConstants.SUPERCLASS);
+			
 			int changeKind= superClassEvent != null ? superClassEvent.getChangeKind() : RewriteEvent.UNCHANGED;
 			switch (changeKind) {
 				case RewriteEvent.INSERTED: {
-					ASTNode superClass= (ASTNode) superClassEvent.getNewValue();
-					String str= " extends " + ASTFlattener.asString(superClass); //$NON-NLS-1$
-					doTextInsert(pos, str, getEditGroup(superClassEvent));
+					doTextInsert(pos, " extends ", getEditGroup(superClassEvent)); //$NON-NLS-1$
+					doTextInsert(pos, (ASTNode) superClassEvent.getNewValue(), 0, false, getEditGroup(superClassEvent));
 					break;
 				}
 				case RewriteEvent.REMOVED: {

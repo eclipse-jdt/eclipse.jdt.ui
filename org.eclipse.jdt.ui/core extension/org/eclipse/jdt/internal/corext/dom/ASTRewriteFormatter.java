@@ -31,12 +31,13 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		public Object data;
 	}
 		
-	private class ExtendedFlattener extends ASTFlattener {
+	private class ExtendedFlattener extends ASTRewriteFlattener {
 
 		private ArrayList fPositions;
 
 		
-		public ExtendedFlattener() {
+		public ExtendedFlattener(RewriteEventStore store) {
+			super(store);
 			fPositions= new ArrayList();
 		}
 	
@@ -69,11 +70,12 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 		}
 		
 		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.dom.ASTFlattener#visit(org.eclipse.jdt.core.dom.Block)
+		 * @see org.eclipse.jdt.internal.corext.dom.ASTRewriteFlattener#visit(org.eclipse.jdt.core.dom.Block)
 		 */
 		public boolean visit(Block node) {
 			if (fPlaceholders.isCollapsed(node)) {
-				return true;
+				visitList(node, ASTNodeConstants.STATEMENTS, null);
+				return false;
 			}
 			return super.visit(node);
 		}
@@ -105,9 +107,11 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 	protected String fLineDelimiter;
 	
 	protected NodeInfoStore fPlaceholders;
+	private RewriteEventStore fEventStore;
 	
-	public ASTRewriteFormatter(NodeInfoStore placeholders, String lineDelimiter) {
+	public ASTRewriteFormatter(NodeInfoStore placeholders, RewriteEventStore eventStore, String lineDelimiter) {
 		fPlaceholders= placeholders;
+		fEventStore= eventStore;
 
 		fLineDelimiter= lineDelimiter;
 	}
@@ -123,7 +127,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 	 */	
 	public String getFormattedResult(ASTNode node, int initialIndentationLevel, Collection resultingMarkers) {
 		
-		ExtendedFlattener flattener= new ExtendedFlattener();
+		ExtendedFlattener flattener= new ExtendedFlattener(fEventStore);
 		node.accept(flattener);
 
 		NodeMarker[] markers= flattener.getMarkers();
@@ -147,7 +151,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 	}
 	
 	public static interface BlockContext {
-		String[] getPrefixAndSuffix(int indent, String lineDelim, ASTNode node);
+		String[] getPrefixAndSuffix(int indent, String lineDelim, ASTNode node, RewriteEventStore events);
 	}	
 	
 	public static class ConstPrefix implements Prefix {
@@ -195,8 +199,8 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 			fPrefix= prefix;
 		}
 		
-		public String[] getPrefixAndSuffix(int indent, String lineDelim, ASTNode node) {
-			String nodeString= ASTFlattener.asString(node);
+		public String[] getPrefixAndSuffix(int indent, String lineDelim, ASTNode node, RewriteEventStore events) {
+			String nodeString= ASTRewriteFlattener.asString(node, events);
 			String str= fPrefix + nodeString;
 			Position pos= new Position(fStart, fPrefix.length() + 1 - fStart);
 
@@ -219,8 +223,8 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 			fPrefix= prefix;
 		}
 		
-		public String[] getPrefixAndSuffix(int indent, String lineDelim, ASTNode node) {
-			String nodeString= ASTFlattener.asString(node);
+		public String[] getPrefixAndSuffix(int indent, String lineDelim, ASTNode node, RewriteEventStore events) {
+			String nodeString= ASTRewriteFlattener.asString(node, events);
 			int nodeStart= fPrefix.length();
 			int nodeEnd= nodeStart + nodeString.length() - 1;
 			

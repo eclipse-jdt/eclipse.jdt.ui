@@ -280,7 +280,13 @@ public class NewASTRewrite {
 	 * @return Returns the place holder node
 	 */
 	public final ASTNode createStringPlaceholder(String code, int nodeType) {
-		return fNodeStore.createStringPlaceholder(code, nodeType);
+		ASTNode placeholder= fNodeStore.newPlaceholderNode(nodeType);
+		if (placeholder == null) {
+			throw new IllegalArgumentException("String placeholder is not supported for type" + nodeType); //$NON-NLS-1$
+		}
+		
+		fNodeStore.markAsStringPlaceholder(placeholder, code);
+		return placeholder;
 	}
 
 	/**
@@ -292,8 +298,14 @@ public class NewASTRewrite {
 	public final ASTNode createCopyPlaceholder(ASTNode node) {
 		validateIsInsideAST(node);
 		fEventStore.increaseCopyCount(node);
-
-		return fNodeStore.createCopyPlaceholder(node);
+	
+		ASTNode placeholder= fNodeStore.newPlaceholderNode(getPlaceholderType(node));
+		if (placeholder == null) {
+			throw new IllegalArgumentException("Creating a copy placeholder is not supported for type" + node.getClass().getName()); //$NON-NLS-1$
+		}
+		
+		fNodeStore.markAsCopyTarget(placeholder, node);
+		return placeholder;
 	}
 	
 	/**
@@ -311,7 +323,13 @@ public class NewASTRewrite {
 			markAsRemoved(node);
 		}
 		
-		return fNodeStore.createMovePlaceholder(node);
+		ASTNode placeholder= fNodeStore.newPlaceholderNode(getPlaceholderType(node));
+		if (placeholder == null) {
+			throw new IllegalArgumentException("Creating a move placeholder is not supported for type" + node.getClass().getName()); //$NON-NLS-1$
+		}
+
+		fNodeStore.markAsMoveTarget(placeholder, node);
+		return placeholder;
 	}	
 		
 	public final boolean isCollapsed(ASTNode node) {
