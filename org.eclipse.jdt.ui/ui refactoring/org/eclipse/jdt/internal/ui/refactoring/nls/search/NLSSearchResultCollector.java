@@ -196,7 +196,7 @@ class NLSSearchResultCollector implements IJavaSearchResultCollector {
 			int searchStart= end - offset;
 			int matchStart= end;
 			String source= ((ISourceReference) enclosingElement).getSource();
-			if (source == null || searchStart >= source.length())
+			if (searchStart >= source.length())
 				return null;
 			source= source.substring(searchStart);
 			if (source.charAt(0) != '.' || Character.isWhitespace(source.charAt(0)))
