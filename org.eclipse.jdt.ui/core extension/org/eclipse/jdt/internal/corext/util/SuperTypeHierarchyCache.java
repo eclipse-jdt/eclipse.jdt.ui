@@ -73,9 +73,6 @@ public class SuperTypeHierarchyCache {
 	
 	/**
 	 * Get a hierarchy for the given type
-	 * @param type
-	 * @return
-	 * @throws JavaModelException
 	 */
 	public static ITypeHierarchy getTypeHierarchy(IType type) throws JavaModelException {
 		return getTypeHierarchy(type, null);
@@ -83,10 +80,6 @@ public class SuperTypeHierarchyCache {
 
 	/**
 	 * Get a hierarchy for the given type
-	 * @param type
-	 * @param progressMonitor the progress monitor
-	 * @return
-	 * @throws JavaModelException
 	 */
 	public static ITypeHierarchy getTypeHierarchy(IType type, IProgressMonitor progressMonitor) throws JavaModelException {
 		ITypeHierarchy hierarchy= findTypeHierarchyInCache(type);
