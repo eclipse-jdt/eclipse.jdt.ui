@@ -35,6 +35,7 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.IShowInTargetList;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -469,6 +470,10 @@ public class PackagesView extends JavaBrowsingPart{
 		public LayoutAction(String text, int state) {
 			super(text);
 			fState= state;
+			if (state == PackagesView.LIST_VIEW_STATE)
+				WorkbenchHelp.setHelp(this, IJavaHelpContextIds.LAYOUT_FLAT_ACTION);
+			else
+				WorkbenchHelp.setHelp(this, IJavaHelpContextIds.LAYOUT_HIERARCHICAL_ACTION);			
 		}
 
 		public int getState() {

@@ -4,10 +4,13 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.swt.custom.BusyIndicator;
 
 import org.eclipse.jface.action.Action;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -27,8 +30,7 @@ public class ShowQualifiedTypeNamesAction extends Action {
 		fView= v;
 		setChecked(initValue);
 		
-		// JavaPluginImages.setLocalImageDescriptors(this, "impl_co.gif"); //$NON-NLS-1$
-		//WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ENABLE_METHODFILTER_ACTION);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SHOW_QUALIFIED_NAMES_ACTION);
 	}
 
 	/*

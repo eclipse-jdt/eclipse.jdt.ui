@@ -42,7 +42,7 @@ public class FindWriteReferencesAction extends FindReferencesAction {
 	public FindWriteReferencesAction(IWorkbenchSite site) {
 		super(site, SearchMessages.getString("Search.FindWriteReferencesAction.label"), new Class[] {IField.class} ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindWriteReferencesAction.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_ACTION);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKSPACE_ACTION);
 	}
 
 	/**
@@ -51,7 +51,7 @@ public class FindWriteReferencesAction extends FindReferencesAction {
 	public FindWriteReferencesAction(JavaEditor editor) {
 		super(editor, SearchMessages.getString("Search.FindWriteReferencesAction.label"), new Class[] {IField.class} ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindWriteReferencesAction.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_ACTION);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKSPACE_ACTION);
 	}
 
 	int getLimitTo() {

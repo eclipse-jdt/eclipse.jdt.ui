@@ -18,7 +18,9 @@ import org.eclipse.jface.action.Separator;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.MultiActionGroup;
 
@@ -81,9 +83,13 @@ class LayoutAction extends Action implements IAction {
 	private boolean fIsFlatLayout;
 	private PackageExplorerPart fPackageExplorer;
 
-	public LayoutAction(PackageExplorerPart packageExplorer, boolean state) {
-		fIsFlatLayout= state;
+	public LayoutAction(PackageExplorerPart packageExplorer, boolean flat) {
+		fIsFlatLayout= flat;
 		fPackageExplorer= packageExplorer;
+		if (fIsFlatLayout)
+			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.LAYOUT_FLAT_ACTION);
+		else
+			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.LAYOUT_HIERARCHICAL_ACTION);
 	}
 
 	/*

@@ -87,6 +87,7 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
@@ -607,32 +608,38 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);		
 		setAction("CorrectionAssistProposal", action); //$NON-NLS-1$
 		markAsStateDependentAction("CorrectionAssistProposal", true); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.QUICK_FIX_ACTION);
 
 		action= new ContentAssistAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal.", this); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);		
 		setAction("ContentAssistProposal", action); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistProposal", true); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.CONTENT_ASSIST_ACTION);
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION);	//$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);		
 		setAction("ContentAssistContextInformation", action); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistContextInformation", true); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.PARAMETER_HINTS_ACTION);
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Comment.", this, ITextOperationTarget.PREFIX); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.COMMENT);		
 		setAction("Comment", action); //$NON-NLS-1$
 		markAsStateDependentAction("Comment", true); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.COMMENT_ACTION);
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Uncomment.", this, ITextOperationTarget.STRIP_PREFIX); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.UNCOMMENT);		
 		setAction("Uncomment", action); //$NON-NLS-1$
 		markAsStateDependentAction("Uncomment", true); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.UNCOMMENT_ACTION);
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Format.", this, ISourceViewer.FORMAT); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.FORMAT);		
 		setAction("Format", action); //$NON-NLS-1$
 		markAsStateDependentAction("Format", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("Format", true); //$NON-NLS-1$		
+		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.FORMAT_ACTION);
 		
 		fGenerateActionGroup= new GenerateActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
 		ActionGroup rg= new RefactorActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);

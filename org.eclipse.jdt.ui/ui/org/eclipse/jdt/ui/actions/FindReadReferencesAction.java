@@ -42,7 +42,7 @@ public class FindReadReferencesAction extends FindReferencesAction {
 	public FindReadReferencesAction(IWorkbenchSite site) {
 		super(site, SearchMessages.getString("Search.FindReadReferencesAction.label"), new Class[] {IField.class} ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindReadReferencesAction.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_ACTION);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKSPACE_ACTION);
 	}
 
 	/**
@@ -51,7 +51,7 @@ public class FindReadReferencesAction extends FindReferencesAction {
 	public FindReadReferencesAction(JavaEditor editor) {
 		super(editor, SearchMessages.getString("Search.FindReadReferencesAction.label"), new Class[] {IField.class} ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindReadReferencesAction.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_ACTION);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKSPACE_ACTION);
 	}
 
 	int getLimitTo() {

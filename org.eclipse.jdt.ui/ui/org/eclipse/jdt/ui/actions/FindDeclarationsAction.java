@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -23,6 +24,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -65,11 +67,13 @@ public class FindDeclarationsAction extends FindAction {
 	FindDeclarationsAction(IWorkbenchSite site, String label, Class[] validTypes) {
 		super(site, label, validTypes);
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKSPACE_ACTION);
 	}
 
 	FindDeclarationsAction(JavaEditor editor, String label, Class[] validTypes) {
 		super(editor, label, validTypes);
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKSPACE_ACTION);
 	}
 	
 	JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {

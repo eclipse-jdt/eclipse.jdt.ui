@@ -49,6 +49,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.compare.CompareUI;
 
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.PageBook;
@@ -64,6 +65,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.base.StringContext;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.refactoring.SourceContextViewer.SourceContextInput;
@@ -95,6 +97,7 @@ class RefactoringStatusViewer extends SashForm {
 			setDisabledImageDescriptor(CompareUI.DESC_DTOOL_NEXT);
 			setHoverImageDescriptor(CompareUI.DESC_CTOOL_NEXT);
 			setToolTipText(RefactoringMessages.getString("ErrorWizardPage.next_Change")); //$NON-NLS-1$
+			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.NEXT_PROBLEM_ACTION);
 		}
 		public void run() {
 			revealElement(true);
@@ -116,6 +119,7 @@ class RefactoringStatusViewer extends SashForm {
 			setDisabledImageDescriptor(CompareUI.DESC_DTOOL_PREV);
 			setHoverImageDescriptor(CompareUI.DESC_CTOOL_PREV);
 			setToolTipText(RefactoringMessages.getString("ErrorWizardPage.previous_Change")); //$NON-NLS-1$
+			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.PREVIOUS_PROBLEM_ACTION);
 		}	
 		public void run() {
 			revealElement(false);

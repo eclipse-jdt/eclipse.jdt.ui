@@ -66,6 +66,7 @@ public class FindReadReferencesInWorkingSetAction extends FindReferencesInWorkin
 	public FindReadReferencesInWorkingSetAction(JavaEditor editor) {
 		super(editor, SearchMessages.getString("Search.FindReadReferencesInWorkingSetAction.label"), new Class[] {IField.class} ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindReadReferencesInWorkingSetAction.tooltip")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKING_SET_ACTION);
 	}
 
 	/**
@@ -73,6 +74,7 @@ public class FindReadReferencesInWorkingSetAction extends FindReferencesInWorkin
 	 */
 	public FindReadReferencesInWorkingSetAction(JavaEditor editor, IWorkingSet[] workingSets) {
 		super(editor, workingSets, new Class[] {IField.class});
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_WORKING_SET_ACTION);
 	}
 
 	int getLimitTo() {

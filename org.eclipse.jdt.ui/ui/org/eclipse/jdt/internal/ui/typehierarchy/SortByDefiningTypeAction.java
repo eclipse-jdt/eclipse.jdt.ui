@@ -32,7 +32,7 @@ public class SortByDefiningTypeAction extends Action {
 
 		fMethodsViewer= viewer;
 		
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SHOW_INHERITED_ACTION);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SORT_BY_DEFINING_TYPE_ACTION);
  
 		setChecked(initValue);
 	}

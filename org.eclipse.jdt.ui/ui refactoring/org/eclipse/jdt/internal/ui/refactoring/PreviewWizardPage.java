@@ -105,6 +105,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 			setDisabledImageDescriptor(CompareUI.DESC_DTOOL_NEXT);
 			setHoverImageDescriptor(CompareUI.DESC_CTOOL_NEXT);
 			setToolTipText(RefactoringMessages.getString("PreviewWizardPage.next_Change")); //$NON-NLS-1$
+			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.NEXT_CHANGE_ACTION);			
 		}
 		public void run() {
 			fTreeViewer.revealNext();	
@@ -117,6 +118,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 			setDisabledImageDescriptor(CompareUI.DESC_DTOOL_PREV);
 			setHoverImageDescriptor(CompareUI.DESC_CTOOL_PREV);
 			setToolTipText(RefactoringMessages.getString("PreviewWizardPage.previous_Change")); //$NON-NLS-1$
+			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.PREVIOUS_CHANGE_ACTION);			
 		}	
 		public void run() {
 			fTreeViewer.revealPrevious();
