@@ -24,7 +24,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -35,14 +34,10 @@ import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
@@ -169,6 +164,8 @@ public abstract class SourceActionDialog extends CheckedTreeSelectionDialog {
 
 		Composite selectionComposite = new Composite(composite, SWT.NONE);
 		GridLayout layout = new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
 		selectionComposite.setLayout(layout);
 		selectionComposite.setFont(composite.getFont());	
 						
@@ -198,93 +195,55 @@ public abstract class SourceActionDialog extends CheckedTreeSelectionDialog {
 
 		return buttonComposite;			
 	}
-	
+
 	private void fillWithPossibleInsertPositions(Combo combo) {
 		try {
+			int position= 0;
+			int presetOffset= 0;
+			if (getEditor() != null) {
+				presetOffset= ((TextSelection)getEditor().getSelectionProvider().getSelection()).getOffset();
+			}
+			else {
+				List preselected= getInitialElementSelections();	
+				int size= preselected.size();
+				if ((size > 1) || (size == 0))
+					presetOffset= 0;		
+				else {				
+					IJavaElement element= (IJavaElement) preselected.get(0);
+					int type= element.getElementType();
+					if (type == IJavaElement.FIELD)
+						presetOffset= ((IField)element).getSourceRange().getOffset();									
+					else if (type == IJavaElement.FIELD)
+						presetOffset= ((IField)element).getSourceRange().getOffset();	
+				}
+			}
+			
 			Object allFields[]= getContentProvider().getElements(null);
 			IField field= (IField)allFields[0];
-	
 			combo.add(ActionMessages.getString("GetterSetterTreeSelectionDialog.first_method")); //$NON-NLS-1$
+				
 			IMethod[] methods= field.getDeclaringType().getMethods();
-			int[] offsets= new int[methods.length];
+			int bestDiff= Integer.MAX_VALUE;
+			
 			for (int i= 0; i < methods.length; i++) {
+				int currDiff= 0;
+				IMethod curr= methods[i];
 				combo.add(JavaElementLabels.getElementLabel(methods[i], JavaElementLabels.M_PARAMETER_TYPES));
-				offsets[i]= methods[i].getSourceRange().getOffset();
-			}		
-			combo.select(preselectElementPosition(methods, offsets));
-			setInsertionIndex(combo.getSelectionIndex());	
-
+				// calculate method to pre-select
+				currDiff= presetOffset - curr.getSourceRange().getOffset();
+				if (currDiff >= 0)
+					if(currDiff < bestDiff) {
+						bestDiff= currDiff;
+						position= i + 1;	// first entry is "as first method"
+					}
+					else
+						break;
+			}	
+			combo.select(position);
+			setInsertionIndex(combo.getSelectionIndex());
 		} catch (JavaModelException e) {
-		}
-	}	
-	
-	/*
-	 * Returns pre-select index based on element selected or closest method above to cursor.
-	 */ 
-	private int preselectElementPosition(IMethod[] methods, int[] offsets) throws JavaModelException {	
-		int position= 0;
-		int elementOffset= 0;
-		
-		if (getEditor() != null) {
-			IJavaElement element= SelectionConverter.getElementAtOffset(getEditor());				
-			int type = element.getElementType();
-			if (type == IJavaElement.METHOD)
-				elementOffset= ((IMethod)element).getSourceRange().getOffset();
-			else if (type == IJavaElement.FIELD)
-				elementOffset= ((IField)element).getSourceRange().getOffset();
-			else {
-				GoToNextPreviousMemberAction action= GoToNextPreviousMemberAction.newGoToPreviousMemberAction(getEditor());
-				ITextSelection textSelect= (ITextSelection)getEditor().getSelectionProvider().getSelection();	
-				ISourceRange sourceRange= action.getNewSelectionRange(createSourceRange(textSelect), null);
-				IJavaElement nextElement= SelectionConverter.getElementAtOffset(SelectionConverter.getInput(getEditor()), createTextSelection(sourceRange));
-				type = nextElement.getElementType();
-				if (type == IJavaElement.METHOD)
-					elementOffset= ((IMethod)nextElement).getSourceRange().getOffset();
-				else if (type == IJavaElement.FIELD)
-					elementOffset= ((IField)nextElement).getSourceRange().getOffset();	
-				else 
-					return position;				
-			}					
-		}
-		else {
-			List preselected= getInitialElementSelections();			
-			// don't choose for more than one preselected or if no preselection available
-			int size= preselected.size();
-			if ((size > 1) || (size == 0))
-				return position;
-			else {
-				IJavaElement element= (IJavaElement) preselected.get(0);
-				int type= element.getElementType();
-				if (type == IJavaElement.FIELD)
-					elementOffset= ((IField)element).getSourceRange().getOffset();									
-				else if (type == IJavaElement.FIELD)
-					elementOffset= ((IField)element).getSourceRange().getOffset();	
-			}
-		}
-		
-		int delta= elementOffset - offsets[0];
-		if (delta < 0)
-			return position;
-		for (int i = 1; i < offsets.length; i++) {
-			int newDelta= elementOffset - offsets[i];
-			if (newDelta <= delta)
-				if (newDelta >= 0) {
-					delta= newDelta;
-					position= i;
-				}
-				else
-					return (position+1);
-		}
-		return (position+1);		// first position is "as first method"
-
-	}	
-	
-	private static ISourceRange createSourceRange(ITextSelection textSelection){
-		return new SourceRange(textSelection.getOffset(), textSelection.getLength());
+		}	
 	}
 	
-	private static ITextSelection createTextSelection(ISourceRange sourceRange){
-		return new TextSelection(sourceRange.getOffset(), sourceRange.getLength());
-	}	
 
 }

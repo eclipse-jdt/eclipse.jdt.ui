@@ -124,19 +124,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		} finally {
 			monitor.done();
 		}
-	}
-	
-	private IField[] getValidElementForSort() {
-		if (fGetterSetterFields.length > 0)
-			return fGetterSetterFields;
-		if (fGetterFields.length > 0)
-			return fGetterFields;
-		if (fSetterFields.length > 0)
-			return fSetterFields;
-		else
-			return null;
-		
-	}
+	}	
 
 	private boolean querySkipFinalSetters(IField field) throws OperationCanceledException {
 		if (!fSkipAllFinalSetters) {

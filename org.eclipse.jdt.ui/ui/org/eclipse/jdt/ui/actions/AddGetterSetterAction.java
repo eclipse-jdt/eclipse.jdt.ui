@@ -107,7 +107,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  * @since 2.0
  */
 public class AddGetterSetterAction extends SelectionDispatchAction {
-	private int fVisibility;
+//	private int fVisibility;
 	private boolean fSort;
 	private boolean fSynchronized;
 	private boolean fFinal;	
@@ -241,7 +241,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		if (result == null)
 			return;
 		fSort= dialog.getSort();
-		fVisibility= dialog.getVisibility();
 		fSynchronized= dialog.getSynchronized();
 		fNative= dialog.getNative();
 		fFinal= dialog.getFinal();
@@ -548,7 +547,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			AddGetterSetterOperation op= createAddGetterSetterOperation(getterFields, setterFields, getterSetterFields, elementPosition);
 			// Set the status fields corresponding to the visibility and modifiers set
 			op.setSort(fSort);
-			op.setVisibility(fVisibility);
+			op.setVisibility(Modifier.PUBLIC);
 			op.setSynchronized(fSynchronized);
 			op.setFinal(fFinal);
 			op.setNative(fNative);
