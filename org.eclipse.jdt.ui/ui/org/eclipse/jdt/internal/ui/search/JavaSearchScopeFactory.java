@@ -156,7 +156,7 @@ public class JavaSearchScopeFactory {
 	private IJavaSearchScope createJavaSearchScope(Set javaElements) {
 		if (javaElements.isEmpty())
 			return EMPTY_SCOPE;
-		return SearchEngine.createJavaSearchScope((IJavaElement[])javaElements.toArray(new IJavaElement[javaElements.size()]));
+		return SearchEngine.createJavaSearchScope((IJavaElement[])javaElements.toArray(new IJavaElement[javaElements.size()]), false);
 	}
 
 	private void addJavaElements(Set javaElements, IResource[] resources) {
