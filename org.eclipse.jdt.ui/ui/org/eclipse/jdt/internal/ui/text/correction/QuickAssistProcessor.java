@@ -106,7 +106,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		VariableDeclarationStatement statement= (VariableDeclarationStatement) fragment.getParent();
 		
-		SimpleName[] names= LinkedNodeFinder.perform(statement.getParent(), binding);
+		SimpleName[] names= LinkedNodeFinder.findByBinding(statement.getParent(), binding);
 		if (names.length <= 1 && names[0] != fragment.getName()) {
 			return false;
 		}
@@ -451,7 +451,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		SimpleName name= (SimpleName) node;
 		IBinding binding= name.resolveBinding();
-		if (binding == null || binding.getKind() == IBinding.PACKAGE) {
+		if (binding != null && binding.getKind() == IBinding.PACKAGE) {
 			return false;
 		}
 		if (resultingCollections == null) {

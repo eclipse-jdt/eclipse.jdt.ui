@@ -61,15 +61,14 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	public void apply(ITextViewer viewer, char trigger, int stateMask, final int offset) {
 		try {
 			// create full ast
-			CompilationUnit root= AST.parseCompilationUnit(fCompilationUnit, true);
+			CompilationUnit root= AST.parseCompilationUnit(fCompilationUnit, true); // full AST needed
 			SimpleName nameNode= (SimpleName) NodeFinder.perform(root, fNode.getStartPosition(), fNode.getLength());
 
-			ASTNode[] sameNodes= LinkedNodeFinder.perform(root, nameNode.resolveBinding());
+			ASTNode[] sameNodes= LinkedNodeFinder.findByNode(root, nameNode);
+
 			// sort for iteration order, starting with the node @ offset
 			Arrays.sort(sameNodes, new Comparator() {
-				/*
-				 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-				 */
+				
 				public int compare(Object o1, Object o2) {
 					return rank((ASTNode) o1) - rank((ASTNode) o2);
 				}

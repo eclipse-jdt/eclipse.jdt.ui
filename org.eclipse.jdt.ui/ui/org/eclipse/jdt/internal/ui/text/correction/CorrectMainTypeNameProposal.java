@@ -59,15 +59,9 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 		AST ast= astRoot.getAST();
 		TypeDeclaration decl= findTypeDeclaration(astRoot.types(), fOldName);
 		if (decl != null) {
-			IBinding binding= decl.resolveBinding();
-			if (binding != null) {
-				ASTNode[] sameNodes= LinkedNodeFinder.perform(astRoot, binding);
-				for (int i= 0; i < sameNodes.length; i++) {
-					rewrite.markAsReplaced(sameNodes[i], ast.newSimpleName(fNewName));
-				}
-			} else {
-				// no binding: only rename type
-				rewrite.markAsReplaced(decl.getName(), ast.newSimpleName(fNewName));
+			ASTNode[] sameNodes= LinkedNodeFinder.findByNode(astRoot, decl.getName());
+			for (int i= 0; i < sameNodes.length; i++) {
+				rewrite.markAsReplaced(sameNodes[i], ast.newSimpleName(fNewName));
 			}
 		}
 		return rewrite;

@@ -718,7 +718,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			ParameterInfo parameter= (ParameterInfo)iter.next();
 			if (parameter.isRenamed()) {
 				for (int n= 0; n < selected.length; n++) {
-					SimpleName[] oldNames= LinkedNodeFinder.perform(selected[n], (IBinding) parameter.getData());
+					SimpleName[] oldNames= LinkedNodeFinder.findByBinding(selected[n], (IBinding) parameter.getData());
 					for (int i= 0; i < oldNames.length; i++) {
 						fRewriter.markAsReplaced(oldNames[i], fAST.newSimpleName(parameter.getNewName()));
 					}

@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.ui.ISharedImages;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -90,7 +88,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
-	protected ASTRewrite getRewrite() throws CoreException {
+	protected ASTRewrite getRewrite() {
 		IBinding binding= fName.resolveBinding();
 		CompilationUnit root= (CompilationUnit) fName.getRoot();
 		ASTRewrite rewrite;
@@ -104,7 +102,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, fName.getStartPosition(), fName.getLength());
 
 			rewrite= new ASTRewrite(completeRoot); 
-			SimpleName[] references= LinkedNodeFinder.perform(completeRoot, nameNode.resolveBinding());
+			SimpleName[] references= LinkedNodeFinder.findByBinding(completeRoot, nameNode.resolveBinding());
 			for (int i= 0; i < references.length; i++) {
 				removeVariableReferences(rewrite, references[i]);
 			}
