@@ -31,9 +31,8 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -41,13 +40,12 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /**
@@ -236,34 +234,53 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 			fWorkingValues.put(PREF_SPELLING_LOCALE, SpellCheckEngine.getDefaultLocale().toString());
 	}
 
+	protected Combo addComboBox(Composite parent, String label, String key, String[] values, String[] valueLabels, int indent) {
+		ControlData data= new ControlData(key, values);
+		
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalIndent= indent;
+				
+		Label labelControl= new Label(parent, SWT.LEFT | SWT.WRAP);
+		labelControl.setText(label);
+		labelControl.setLayoutData(gd);
+		
+		Combo comboBox= new Combo(parent, SWT.READ_ONLY);
+		comboBox.setItems(valueLabels);
+		comboBox.setData(data);
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 2;
+		comboBox.setLayoutData(gd);
+		comboBox.addSelectionListener(getSelectionListener());
+		
+		fLabels.put(comboBox, labelControl);
+		
+		String currValue= (String)fWorkingValues.get(key);	
+		comboBox.select(data.getSelection(currValue));
+		
+		fComboBoxes.add(comboBox);
+		return comboBox;
+	}
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#createContents(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createContents(final Composite parent) {
-		setShell(parent.getShell());
 
-		final PixelConverter converter= new PixelConverter(parent);
-
-		GridLayout layout= new GridLayout();
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-
-		final Composite composite= new Composite(parent, SWT.NONE);
+		Composite composite= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout(); layout.numColumns= 1;
 		composite.setLayout(layout);
 
-		TabFolder folder= new TabFolder(composite, SWT.NONE);
-		folder.setLayout(new TabFolderLayout());
-
-		GridData data= new GridData(GridData.FILL_BOTH);
-		folder.setLayoutData(data);
+		final PixelConverter converter= new PixelConverter(parent);
 
 		layout= new GridLayout();
 		layout.numColumns= 3;
 
 		final String[] trueFalse= new String[] { IPreferenceStore.TRUE, IPreferenceStore.FALSE };
 
-		final Composite user= new Composite(folder, SWT.NULL);
-		user.setLayout(layout);
+		Group user= new Group(composite, SWT.NONE);
+		user.setText(PreferencesMessages.getString("SpellingPreferencePage.preferences.user")); //$NON-NLS-1$
+		user.setLayout(new GridLayout());		
+		user.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		String label= PreferencesMessages.getString("SpellingPreferencePage.enable.label"); //$NON-NLS-1$
 		final Button master= addCheckBox(user, label, PREF_SPELLING_CHECK_SPELLING, trueFalse, 0);
@@ -288,65 +305,51 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_URLS, trueFalse, 20);
 		createSelectionDependency(master, slave);
 
+		final Group engine= new Group(composite, SWT.NONE);
+		engine.setText(PreferencesMessages.getString("SpellingPreferencePage.preferences.engine")); //$NON-NLS-1$
 		layout= new GridLayout();
-		layout.numColumns= 4;
+		layout.numColumns= 3;
+		engine.setLayout(layout);		
+		engine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		final Composite engine= new Composite(folder, SWT.NULL);
-		engine.setLayout(layout);
-
-		label= PreferencesMessages.getString("SpellingPreferencePage.dictionary.label"); //$NON-NLS-1$
 		final Set locales= SpellCheckEngine.getAvailableLocales();
 
+		label= PreferencesMessages.getString("SpellingPreferencePage.dictionary.label"); //$NON-NLS-1$
 		Combo combo= addComboBox(engine, label, PREF_SPELLING_LOCALE, getDictionaryCodes(locales), getDictionaryLabels(locales), 0);
 		combo.setEnabled(locales.size() > 1);
 		
-		new Label(engine, SWT.NONE); // placeholder
-
 		label= PreferencesMessages.getString("SpellingPreferencePage.workspace.dictionary.label"); //$NON-NLS-1$
 		fDictionaryPath= addTextField(engine, label, PREF_SPELLING_USER_DICTIONARY, 0, 0);
+		((GridData)fDictionaryPath.getLayoutData()).horizontalSpan= 1;
 
-		
 		Button button= new Button(engine, SWT.PUSH);
 		button.setText(PreferencesMessages.getString("SpellingPreferencePage.browse.label")); //$NON-NLS-1$
 		button.addSelectionListener(new SelectionAdapter() {
 
-			public void widgetSelected(final SelectionEvent event) {
+		public void widgetSelected(final SelectionEvent event) {
 				handleBrowseButtonSelected();
 			}
 		});
-		button.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		button.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		SWTUtil.setButtonDimensionHint(button);
 		
+
+		Group advanced= new Group(composite, SWT.NONE);
+		advanced.setText(PreferencesMessages.getString("SpellingPreferencePage.preferences.advanced")); //$NON-NLS-1$
 		layout= new GridLayout();
 		layout.numColumns= 3;
-
-		final Composite advanced= new Composite(folder, SWT.NULL);
-		advanced.setLayout(layout);
+		advanced.setLayout(layout);		
+		advanced.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		label= PreferencesMessages.getString("SpellingPreferencePage.proposals.threshold"); //$NON-NLS-1$
 		Text text= addTextField(advanced, label, PREF_SPELLING_PROPOSAL_THRESHOLD, 0, 0);
 		text.setTextLimit(3);
+		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		data.widthHint= converter.convertWidthInCharsToPixels(4);
+		text.setLayoutData(data);
 		
 		label= PreferencesMessages.getString("SpellingPreferencePage.enable.contentassist.label"); //$NON-NLS-1$
 		addCheckBox(advanced, label, PREF_SPELLING_ENABLE_CONTENTASSIST, trueFalse, 0);
-
-
-		data= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		data.widthHint= converter.convertWidthInCharsToPixels(4);
-		text.setLayoutData(data);
-
-
-		TabItem item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("SpellingPreferencePage.preferences.engine")); //$NON-NLS-1$
-		item.setControl(engine);
-		
-		item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("SpellingPreferencePage.preferences.advanced")); //$NON-NLS-1$
-		item.setControl(advanced);
-
-		item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("SpellingPreferencePage.preferences.user")); //$NON-NLS-1$
-		item.setControl(user);
 
 		return composite;
 	}
@@ -397,7 +400,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 */
 	protected void handleBrowseButtonSelected() {
 
-		final FileDialog dialog= new FileDialog(getShell(), SWT.OPEN);
+		final FileDialog dialog= new FileDialog(fDictionaryPath.getShell(), SWT.OPEN);
 		dialog.setText(PreferencesMessages.getString("SpellingPreferencePage.filedialog.title")); //$NON-NLS-1$
 		dialog.setFilterExtensions(new String[] { PreferencesMessages.getString("SpellingPreferencePage.filter.dictionary.extension"), PreferencesMessages.getString("SpellingPreferencePage.filter.all.extension") }); //$NON-NLS-1$ //$NON-NLS-2$
 		dialog.setFilterNames(new String[] { PreferencesMessages.getString("SpellingPreferencePage.filter.dictionary.label"), PreferencesMessages.getString("SpellingPreferencePage.filter.all.label") }); //$NON-NLS-1$ //$NON-NLS-2$
