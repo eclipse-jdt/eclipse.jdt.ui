@@ -698,11 +698,11 @@ public class PullUpRefactoring extends Refactoring {
 	private String getCopyChangeName(IMember member) throws JavaModelException {
 		if (member.getElementType() == IJavaElement.METHOD){
 			String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.copy_method", //$NON-NLS-1$
-				new String[]{JavaElementUtil.createMethodSignature((IMethod)member), getDeclaringType().getElementName()});
+				new String[]{JavaElementUtil.createMethodSignature((IMethod)member), JavaModelUtil.getFullyQualifiedName(getDeclaringType())});
 			return message;
 		} else {
 			String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.copy_field", //$NON-NLS-1$
-				new String[]{member.getElementName(), getDeclaringType().getElementName()});
+				new String[]{member.getElementName(), JavaModelUtil.getFullyQualifiedName(getDeclaringType())});
 		 	return message;
 		}
 	}
