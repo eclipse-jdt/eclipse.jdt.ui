@@ -378,7 +378,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	 * not be changed by the user. If <code>true</code> the field is editable
 	 */ 
 	public void setPackageFragmentRoot(IPackageFragmentRoot root, boolean canBeModified) {
-		fCurrRoot= root;
+		fCurrRoot= ((root != null) && root.exists()) ? root : null;
 		String str= (root == null) ? "" : root.getPath().makeRelative().toString(); //$NON-NLS-1$
 		fContainerDialogField.setText(str);
 		fContainerDialogField.setEnabled(canBeModified);
