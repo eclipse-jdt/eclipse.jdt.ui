@@ -6,6 +6,7 @@ package org.eclipse.jdt.ui.text;
  */
 
 
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
 
@@ -144,18 +145,22 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getContentAssistant(ISourceViewer)
 	 */
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
-
+		
 		ContentAssistant assistant= new ContentAssistant();
 		assistant.setContentAssistProcessor(new JavaCompletionProcessor(getEditor()), IDocument.DEFAULT_CONTENT_TYPE);
 		assistant.setContentAssistProcessor(new JavaDocCompletionProcessor(getEditor()), JavaPartitionScanner.JAVA_DOC);
-
+		
 		assistant.enableAutoActivation(true);
 		assistant.setAutoActivationDelay(500);
 		assistant.setProposalPopupOrientation(assistant.PROPOSAL_OVERLAY);
 		assistant.setContextInformationPopupOrientation(assistant.CONTEXT_INFO_ABOVE);
-		assistant.setContextInformationPopupBackground(getColorManager().getColor(new RGB(255, 255, 88)));
 		assistant.setHoverControlCreator(getHoverControlCreator(sourceViewer));
-
+		
+		Color background= getColorManager().getColor(new RGB(254, 241, 233));
+		assistant.setContextInformationPopupBackground(background);
+		assistant.setContextSelectorBackground(background);
+		assistant.setProposalSelectorBackground(background);
+		
 		return assistant;
 	}
 	
