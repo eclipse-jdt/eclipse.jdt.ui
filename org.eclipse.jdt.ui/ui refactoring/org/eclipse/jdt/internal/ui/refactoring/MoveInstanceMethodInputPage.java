@@ -211,8 +211,7 @@ class MoveInstanceMethodInputPage extends UserInputWizardPage {
 				Object first= ((IStructuredSelection)event.getSelection()).getFirstElement();
 				if (! (first instanceof INewReceiver))
 					return;
-				INewReceiver chosen= (INewReceiver)first;	
-				getMoveRefactoring().chooseNewReceiver(chosen);
+				getMoveRefactoring().chooseNewReceiver((INewReceiver)first);
 			}
 		});
 

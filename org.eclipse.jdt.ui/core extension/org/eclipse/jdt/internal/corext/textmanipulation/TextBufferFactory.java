@@ -108,7 +108,7 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 		}
 	}
 	
-	public void commitChanges(final TextBuffer buffer, boolean force, IProgressMonitor pm) throws CoreException {
+	public void commitChanges(final TextBuffer buffer, boolean force, IProgressMonitor monitor) throws CoreException {
 		final Value value= (Value)fBufferValueMap.get(buffer);
 		if (value == null)
 			return;
@@ -125,7 +125,7 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 				}
 			};
 			try {
-				ResourcesPlugin.getWorkspace().run(action, pm);
+				ResourcesPlugin.getWorkspace().run(action, monitor);
 			} finally {
 				fDocumentProvider.changed(value.input);
 			}

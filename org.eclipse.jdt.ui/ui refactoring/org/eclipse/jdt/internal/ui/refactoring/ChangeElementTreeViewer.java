@@ -24,8 +24,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 class ChangeElementTreeViewer extends CheckboxTreeViewer {
 	
-	public ChangeElementTreeViewer(Composite parent) {
-		super(parent, SWT.NONE);
+	public ChangeElementTreeViewer(Composite parentComposite) {
+		super(parentComposite, SWT.NONE);
 		addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event){
 				ChangeElement element= (ChangeElement)event.getElement();

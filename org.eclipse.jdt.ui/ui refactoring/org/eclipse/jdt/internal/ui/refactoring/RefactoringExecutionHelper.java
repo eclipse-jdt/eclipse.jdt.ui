@@ -156,7 +156,7 @@ public class RefactoringExecutionHelper {
 			return;
 			
 		IRunnableWithProgress op= new IRunnableWithProgress() {
-			public void run(IProgressMonitor pm) throws InterruptedException, InvocationTargetException {
+			public void run(IProgressMonitor monitor) throws InterruptedException, InvocationTargetException {
 				try {
 					JavaCore.run(new IWorkspaceRunnable() {
 						public void run(IProgressMonitor pm) throws CoreException {
@@ -171,13 +171,13 @@ public class RefactoringExecutionHelper {
 								pm.worked(1);
 							}
 						}
-					}, pm);
+					}, monitor);
 				} catch (ChangeAbortException e) {
 					throw new InvocationTargetException(e.getThrowable());
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				} finally {
-					pm.done();
+					monitor.done();
 				} 
 			}
 		};
