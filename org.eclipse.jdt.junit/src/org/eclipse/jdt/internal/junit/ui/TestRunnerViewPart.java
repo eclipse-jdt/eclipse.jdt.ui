@@ -138,6 +138,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	 * first failed tests at the end of a run.
 	 */
 	private List fFailures= new ArrayList();
+	private boolean fTestIsRunning= false;
 
 	protected JUnitProgressBar fProgressBar;
 	protected ProgressImages fProgressImages;
@@ -563,6 +564,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	 * @see ITestRunListener#testStarted
 	 */
 	public void testStarted(String testId, String testName) {
+		fTestIsRunning= true;
 		postStartTest(testId, testName);
 		// reveal the part when the first test starts
 		if (!fShowOnErrorOnly && fExecutedTests == 1) 
@@ -601,7 +603,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	    TestRunInfo testInfo= getTestInfo(testId);
 	    if (testInfo == null) {
 	        testInfo= new TestRunInfo(testId, testName);
-	        fTestInfos.put(testName, testInfo);
+	        fTestInfos.put(testId, testInfo);
 	    }
 	    testInfo.setTrace(trace);
 	    testInfo.setStatus(status);
@@ -619,6 +621,14 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	    // show the view on the first error only
 	    if (fShowOnErrorOnly && (fErrorCount + fFailureCount == 1)) 
 	        postShowTestResultsView();
+	    
+	    // [Bug 35590] JUnit window doesn't report errors from junit.extensions.TestSetup [JUnit]
+	    // when a failure occurs in test setup then no test is running
+	    // to update the views we artificially signal the end of a test run
+	    if (!fTestIsRunning) {
+	    	fTestIsRunning= false;
+	    	testEnded(testId, testName);
+	    }
 	}
 	
 	/*
@@ -828,6 +838,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	}
 
 	private void handleEndTest() {
+		fTestIsRunning= false;
 		//refreshCounters();
 		fProgressBar.step(fFailureCount+fErrorCount);
 		if (!fPartIsVisible) 
