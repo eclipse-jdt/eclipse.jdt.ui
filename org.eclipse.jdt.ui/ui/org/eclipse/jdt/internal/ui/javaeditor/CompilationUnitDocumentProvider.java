@@ -380,6 +380,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		 */
 		protected static class CompilationUnitAnnotationModel extends ResourceMarkerAnnotationModel implements IProblemRequestor, IProblemRequestorExtension {
 			
+			private boolean fInsideReportingSequence= false;
 			private ICompilationUnit fCompilationUnit;
 			private List fCollectedProblems;
 			private List fGeneratedAnnotations;
@@ -424,38 +425,33 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 					
 				return new Position(start, length);
 			}
-
-			protected void update(IMarkerDelta[] markerDeltas) {
-	
-				super.update(markerDeltas);
-
-				if (fIncludesProblemAnnotationChanges) {
-					try {
-						if (fCompilationUnit != null)
-							fCompilationUnit.reconcile(true, null);
-					} catch (JavaModelException ex) {
-						if (!ex.isDoesNotExist())
-							handleCoreException(ex, ex.getMessage());
-					}
-				}
-			}
 			
 			/*
 			 * @see IProblemRequestor#beginReporting()
 			 */
 			public void beginReporting() {
+				if (!fInsideReportingSequence)
+					internalBeginReporting();
 			}
 			
 			/*
 			 * @see org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension#beginReportingSequence()
 			 */
 			public void beginReportingSequence() {
+				fInsideReportingSequence= true;
+				internalBeginReporting();
+			}
+			
+			/**
+			 * Signals the beginning of problem reporting.
+			 */
+			private void internalBeginReporting() {
 				if (fCompilationUnit != null && fCompilationUnit.getJavaProject().isOnClasspath(fCompilationUnit))
 					fCollectedProblems= new ArrayList();
 				else
 					fCollectedProblems= null;
 			}
-			
+
 			/*
 			 * @see IProblemRequestor#acceptProblem(IProblem)
 			 */
@@ -468,12 +464,22 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			 * @see IProblemRequestor#endReporting()
 			 */
 			public void endReporting() {
+				if (!fInsideReportingSequence)
+					internalEndReporting();
 			}
 			
 			/*
 			 * @see org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension#endReportingSequence()
 			 */
 			public void endReportingSequence() {
+				internalEndReporting();
+				fInsideReportingSequence= false;
+			}
+			
+			/**
+			 * Signals the end of problem reporting.
+			 */
+			private void internalEndReporting() {
 				if (!isActive())
 					return;
 					
@@ -534,7 +540,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				if (temporaryProblemsChanged)
 					fireModelChanged();
 			}
-			
+
 			private void removeMarkerOverlays(boolean isCanceled) {
 				if (isCanceled) {
 					fCurrentlyOverlaid.addAll(fPreviouslyOverlaid);
@@ -639,7 +645,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			/*
 			 * @see AnnotationModel#addAnnotation(Annotation, Position, boolean)
 			 */
-			protected void addAnnotation(Annotation annotation, Position position, boolean fireModelChanged) throws BadLocationException {
+			protected void addAnnotation(Annotation annotation, Position position, boolean fireModelChanged) throws BadLocationException {				
 				super.addAnnotation(annotation, position, fireModelChanged);
 
 				Object cached= fReverseMap.get(position);

@@ -12,6 +12,13 @@
 package org.eclipse.jdt.internal.ui.text;
 
 
+import org.eclipse.core.resources.IMarkerDelta;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IWorkspace;
+
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.events.ShellListener;
@@ -22,6 +29,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
 
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
@@ -32,6 +41,7 @@ import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
  
 /**
@@ -44,36 +54,36 @@ public class JavaReconciler extends MonoReconciler {
 	 */
 	private class PartListener implements IPartListener {
 		
-		/**
-		 * {@inheritDoc}
+		/*
+		 * @see org.eclipse.ui.IPartListener#partActivated(org.eclipse.ui.IWorkbenchPart)
 		 */
 		public void partActivated(IWorkbenchPart part) {
 			if (part == fTextEditor && hasJavaModelChanged())
 				JavaReconciler.this.forceReconciling();
 		}
 
-		/**
-		 * {@inheritDoc}
+		/*
+		 * @see org.eclipse.ui.IPartListener#partBroughtToTop(org.eclipse.ui.IWorkbenchPart)
 		 */
 		public void partBroughtToTop(IWorkbenchPart part) {
 		}
 
-		/**
-		 * {@inheritDoc}
+		/*
+		 * @see org.eclipse.ui.IPartListener#partClosed(org.eclipse.ui.IWorkbenchPart)
 		 */
 		public void partClosed(IWorkbenchPart part) {
 		}
 
-		/**
-		 * {@inheritDoc}
+		/*
+		 * @see org.eclipse.ui.IPartListener#partDeactivated(org.eclipse.ui.IWorkbenchPart)
 		 */
 		public void partDeactivated(IWorkbenchPart part) {
 			if (part == fTextEditor)
 				setJavaModelChanged(false);
 		}
 
-		/**
-		 * {@inheritDoc}
+		/*
+		 * @see org.eclipse.ui.IPartListener#partOpened(org.eclipse.ui.IWorkbenchPart)
 		 */
 		public void partOpened(IWorkbenchPart part) {
 		}
@@ -90,16 +100,16 @@ public class JavaReconciler extends MonoReconciler {
 			fControl= control;
 		}
 
-		/**
-		 * {@inheritDoc}
+		/*
+		 * @see org.eclipse.swt.events.ShellListener#shellActivated(org.eclipse.swt.events.ShellEvent)
 		 */
 		public void shellActivated(ShellEvent e) {
 			if (!fControl.isDisposed() && fControl.isVisible() && hasJavaModelChanged())
 				JavaReconciler.this.forceReconciling();
 		}
 		
-		/**
-		 * {@inheritDoc}
+		/*
+		 * @see org.eclipse.swt.events.ShellListener#shellDeactivated(org.eclipse.swt.events.ShellEvent)
 		 */
 		public void shellDeactivated(ShellEvent e) {
 			setJavaModelChanged(false);
@@ -112,12 +122,44 @@ public class JavaReconciler extends MonoReconciler {
 	 * @since 3.0
 	 */
 	private class ElementChangedListener implements IElementChangedListener {
-		
-		/**
-		 * {@inheritDoc}
+		/*
+		 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
 		 */
 		public void elementChanged(ElementChangedEvent event) {
 			setJavaModelChanged(true);
+		}
+	}
+	
+	/**
+	 * Internal recource change listener.
+	 * 
+	 * @since 3.0
+	 */
+	class ResourceChangeListener implements IResourceChangeListener {
+		
+		private IResource getResource() {
+			IEditorInput input= fTextEditor.getEditorInput();
+			if (input instanceof IFileEditorInput) {
+				IFileEditorInput fileInput= (IFileEditorInput) input;
+				return fileInput.getFile();
+			}
+			return null;
+		}
+		
+		/*
+		 * @see IResourceChangeListener#resourceChanged(org.eclipse.core.resources.IResourceChangeEvent)
+		 */
+		public void resourceChanged(IResourceChangeEvent e) {
+			IResourceDelta delta= e.getDelta();
+			IResource resource= getResource();
+			if (delta != null && resource != null) {
+				IResourceDelta child= delta.findMember(resource.getFullPath());
+				if (child != null) {
+					IMarkerDelta[] deltas= child.getMarkerDeltas();
+					if (deltas.length > 0)
+						forceReconciling();
+				}
+			}
 		}
 	}
 	
@@ -138,7 +180,11 @@ public class JavaReconciler extends MonoReconciler {
 	 * @since 3.0
 	 */
 	private volatile boolean fHasJavaModelChanged= true;
-	
+	/**
+	 * The resource change listener.
+	 * @since 3.0
+	 */
+	private IResourceChangeListener fResourceChangeListener;
 	
 	/**
 	 * Creates a new reconciler.
@@ -148,8 +194,8 @@ public class JavaReconciler extends MonoReconciler {
 		fTextEditor= editor;
 	}
 	
-	/**
-	 * {@inheritDoc}
+	/*
+	 * @see org.eclipse.jface.text.reconciler.IReconciler#install(org.eclipse.jface.text.ITextViewer)
 	 */
 	public void install(ITextViewer textViewer) {
 		super.install(textViewer);
@@ -165,10 +211,14 @@ public class JavaReconciler extends MonoReconciler {
 		
 		fJavaElementChangedListener= new ElementChangedListener();
 		JavaCore.addElementChangedListener(fJavaElementChangedListener);
+		
+		fResourceChangeListener= new ResourceChangeListener();
+		IWorkspace workspace= JavaPlugin.getWorkspace();
+		workspace.addResourceChangeListener(fResourceChangeListener);
 	}
 
-	/**
-	 * {@inheritDoc}
+	/*
+	 * @see org.eclipse.jface.text.reconciler.IReconciler#uninstall()
 	 */
 	public void uninstall() {
 		
@@ -185,11 +235,15 @@ public class JavaReconciler extends MonoReconciler {
 		JavaCore.removeElementChangedListener(fJavaElementChangedListener);
 		fJavaElementChangedListener= null;
 		
+		IWorkspace workspace= JavaPlugin.getWorkspace();
+		workspace.removeResourceChangeListener(fResourceChangeListener);
+		fResourceChangeListener= null;
+		
 		super.uninstall();
 	}
 	
-	/**
-	 * {@inheritDoc}
+	/*
+	 * @see org.eclipse.jface.text.reconciler.AbstractReconciler#forceReconciling()
 	 */
 	protected void forceReconciling() {
 		super.forceReconciling();
@@ -197,8 +251,8 @@ public class JavaReconciler extends MonoReconciler {
 		strategy.notifyParticipants(false);
 	}
     
-	/**
-	 * {@inheritDoc}
+	/*
+	 * @see org.eclipse.jface.text.reconciler.AbstractReconciler#reconcilerReset()
 	 */
 	protected void reconcilerReset() {
 		super.reconcilerReset();
