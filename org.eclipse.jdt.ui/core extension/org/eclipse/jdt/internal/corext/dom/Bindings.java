@@ -222,7 +222,7 @@ public class Bindings {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Finds the method specified by <code>methodName<code> and </code>parameters</code> in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
@@ -246,6 +246,51 @@ public class Bindings {
 				return method;
 		}
 		return null;
+	}
+
+	/**
+	 * Method to visit a type hierarchy defined by a given type.
+	 * 
+	 * @param type the type which hierarchy is to be visited
+	 * @param visitor the vistor
+	 */
+	public static boolean visitHierarchy(ITypeBinding type, TypeBindingVisitor visitor) {
+		boolean result= visitSuperclasses(type, visitor);
+		if(result) {
+			result= visitInterfaces(type, visitor);
+		}
+		return result;
+	}
+
+	/**
+	 * Method to visit a interface hierarchy defined by a given type.
+	 * 
+	 * @param type the type which interface hierarchy is to be visited
+	 * @param visitor the vistor
+	 */
+	public static boolean visitInterfaces(ITypeBinding type, TypeBindingVisitor visitor) {
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			if (!visitor.visit(interfaces[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Method to visit a super class hierarchy defined by a given type.
+	 * 
+	 * @param type the type which super class hierarchy is to be visited
+	 * @param visitor the vistor
+	 */
+	public static boolean visitSuperclasses(ITypeBinding type, TypeBindingVisitor visitor) {
+		while ((type= type.getSuperclass()) != null) {
+			if (!visitor.visit(type)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public static boolean isEqualMethod(IMethodBinding method, String methodName, ITypeBinding[] parameters) {

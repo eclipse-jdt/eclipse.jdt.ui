@@ -98,6 +98,9 @@ public class TypeRules {
 	public static boolean canAssign(ITypeBinding typeToAssign, ITypeBinding definedType) {
 		// definedType = typeToAssign;
 
+		if (typeToAssign.isNullType()) {
+			return !definedType.isPrimitive();
+		}
 		if (definedType.isArray()) {
 			if (!typeToAssign.isArray()) {
 				return false; // can not assign a non-array type to an array

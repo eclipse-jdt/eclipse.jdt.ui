@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -55,6 +56,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
@@ -137,6 +140,53 @@ public class CallInliner {
 			if (accessMode == FlowInfo.READ || accessMode == FlowInfo.UNUSED)
 				return setResult(true);
 			return setResult(false);
+		}
+	}
+
+	private static class AmbiguousMethodAnalyzer implements TypeBindingVisitor {
+		private String methodName;
+		private ITypeBinding[] types;
+		private IMethodBinding original;
+
+		public AmbiguousMethodAnalyzer(IMethodBinding original, ITypeBinding[] types) {
+			this.original= original;
+			this.methodName= original.getName();
+			this.types= types;
+		}
+
+		public boolean visit(ITypeBinding node) {
+			IMethodBinding[] methods= node.getDeclaredMethods();
+			for (int i= 0; i < methods.length; i++) {
+				IMethodBinding candidate= methods[i];
+				if (candidate == original) {
+					continue;
+				}
+				if (methodName.equals(candidate.getName())) {
+					if (canImplicitlyCall(candidate)) {
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
+		/**
+		 * @param candidate method binding to check
+		 * @return <code>true</code> if the method can be called without explicit casts, 
+		 * otherwise <code>false</code>.
+		 * @throws JavaModelException
+		 */
+		private boolean canImplicitlyCall(IMethodBinding candidate) {
+			ITypeBinding[] parameters= candidate.getParameterTypes();
+			if (parameters.length != types.length) {
+				return false;
+			}
+			for (int i= 0; i < parameters.length; i++) {
+				if (!TypeRules.canAssign(types[i], parameters[i])) {
+					return false;
+				}
+			}
+			return true;
 		}
 	}
 
@@ -377,11 +427,11 @@ public class CallInliner {
 		int nodeType= parent.getNodeType();
 		if (nodeType == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation methodInvocation= (MethodInvocation)parent;
+			if(methodInvocation.getExpression() == fTargetNode)
+				return false;
 			IMethodBinding method= methodInvocation.resolveMethodBinding();
 			ITypeBinding[] parameters= method.getParameterTypes();
 			int argumentIndex= methodInvocation.arguments().indexOf(fInvocation);
-			if (argumentIndex == -1)
-				return false;
 			List returnExprs= fSourceProvider.getReturnExpressions();
 			// it is infered that only methods consisting of a single 
 			// return statement can be inlined as parameters in other 
@@ -391,64 +441,22 @@ public class CallInliner {
 			parameters[argumentIndex]= ((Expression)returnExprs.get(0)).resolveTypeBinding();
 
 			ITypeBinding type= ASTNodes.getReceiverTypeBinding(methodInvocation);
-			// finds all overloaded methods with the same name in hierarchy
-			IMethodBinding[] methods= findMethodsInHierarchy(type, method.getName());
-			for (int i= 0; i < methods.length; i++) {
-				if (methods[i] != method) {
-					// method access type can disallow the call but still it is 
-					// better to have explicit cast in the place
-					if (canImplicitlyCall(methods[i], parameters)) {
-						return true;
-					}
-				}
+			TypeBindingVisitor visitor= new AmbiguousMethodAnalyzer(method, parameters);
+			if(!visitor.visit(type)) {
+				return true;
+			}
+			else if(type.isInterface()) {
+				return !Bindings.visitInterfaces(type, visitor);
+			}
+			else if(Modifier.isAbstract(type.getModifiers())) {
+				return !Bindings.visitHierarchy(type, visitor);
+			}
+			else {
+				// it is not needed to visit interfaces if receiver is a concrete class
+				return !Bindings.visitSuperclasses(type, visitor);
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * The method returns all methods with the specified name found in the type 
-	 * hierarchy.
-	 * 
-	 * @param type type to start from
-	 * @param methodName name of the method to search for in the hierarchy
-	 * @return array of methods with the name specified
-	 */
-	private IMethodBinding[] findMethodsInHierarchy(ITypeBinding type, String methodName) {
-		
-		ArrayList result = new ArrayList();
-		
-		while(type != null) {
-			IMethodBinding[] methods = type.getDeclaredMethods();
-			for(int i = 0; i < methods.length; i++) {
-				if(methodName.equals(methods[i].getName())) {
-					result.add(methods[i]);
-				}
-			}
-			type = type.getSuperclass();
-		}
-		
-		return (IMethodBinding[])result.toArray(new IMethodBinding[result.size()]);
-	}
-
-	/**
-	 * @param method method binding to query for
-	 * @param types types of method parameters
-	 * @return <code>true</code> if the method can be called with specified 
-	 * parameters without explicit casts, otherwise <code>false</code>.
-	 * @throws JavaModelException
-	 */
-	private boolean canImplicitlyCall(IMethodBinding method, ITypeBinding[] types) {
-		ITypeBinding[] parameters= method.getParameterTypes();
-		if (types.length != parameters.length) {
-			return false;
-		}
-		for (int i= 0; i < parameters.length; i++) {
-			if (!TypeRules.canAssign(types[i], parameters[i])) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	private boolean needsParenthesis() {
