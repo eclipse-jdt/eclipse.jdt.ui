@@ -48,6 +48,7 @@ public class UnresolvedElementsSubProcessor {
 		
 		// type that defines the variable, null if local
 		ITypeBinding binding= null;
+		ITypeBinding declaringTypeBinding= ASTResolving.getBindingOfParentType(selectedNode);
 
 		// possible kind of the node
 		int similarNodeKind= SimilarElementsRequestor.VARIABLES;
@@ -82,6 +83,9 @@ public class UnresolvedElementsSubProcessor {
 					node= access.getName();
 				}
 			}
+		} else if (selectedNode instanceof SuperFieldAccess) {
+			SuperFieldAccess access= (SuperFieldAccess) selectedNode;
+			binding= declaringTypeBinding.getSuperclass();	
 		} else if (selectedNode instanceof SimpleType) {
 			similarNodeKind= SimilarElementsRequestor.REF_TYPES;
 			node= ((SimpleType) selectedNode).getName();

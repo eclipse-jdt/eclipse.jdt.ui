@@ -72,6 +72,8 @@ public class NameMatcher {
 	}
 	
 	public static void main(String[] arguments) {
+		test("XXX", "XSecurity"); //$NON-NLS-1$ //$NON-NLS-2$
+		
 		test("runner", "gunner"); //$NON-NLS-1$ //$NON-NLS-2$
 		test("rundner", "gunner"); //$NON-NLS-1$ //$NON-NLS-2$
 		test("rundner", "rund"); //$NON-NLS-1$ //$NON-NLS-2$

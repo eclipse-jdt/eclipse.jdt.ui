@@ -23,14 +23,13 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
+import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
@@ -51,42 +50,45 @@ public class LocalCorrectionsSubProcessor {
 		}
 			
 		ICompilationUnit cu= problemPos.getCompilationUnit();
-		String castDestType= args[1];
+		String castType= args[1];
 
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		if (!(selectedNode instanceof Expression)) {
+			return;
+		}
+		Expression nodeToCast= (Expression) selectedNode;
 		
-		int pos= problemPos.getOffset();
-		if (selectedNode != null && selectedNode.getParent() != null) {
-			int parentNodeType= selectedNode.getParent().getNodeType();
-			if (parentNodeType == ASTNode.ASSIGNMENT) {
-				Assignment assign= (Assignment) selectedNode.getParent();
-				if (selectedNode.equals(assign.getLeftHandSide())) {
-					pos= assign.getRightHandSide().getStartPosition();
-				}
-			} else if (parentNodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-				VariableDeclarationFragment frag= (VariableDeclarationFragment) selectedNode.getParent();
-				if (selectedNode.equals(frag.getName())) {
-					pos= frag.getInitializer().getStartPosition();
-				}
+		int parentNodeType= selectedNode.getParent().getNodeType();
+		if (parentNodeType == ASTNode.ASSIGNMENT) {
+			Assignment assign= (Assignment) selectedNode.getParent();
+			if (selectedNode.equals(assign.getLeftHandSide())) {
+				nodeToCast= assign.getRightHandSide();
+			}
+		} else if (parentNodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+			VariableDeclarationFragment frag= (VariableDeclarationFragment) selectedNode.getParent();
+			if (selectedNode.equals(frag.getName())) {
+				nodeToCast= frag.getInitializer();
 			}
 		}
-		String simpleCastDestType= Signature.getSimpleName(castDestType);
 		
-		String cast= '(' + simpleCastDestType + ')';
-		String formatted= StubUtility.codeFormat(cast + 'x', 0, "");  //$NON-NLS-1$
-		if (formatted.charAt(formatted.length() - 1) == 'x') {
-			cast= formatted.substring(0, formatted.length() - 1);
-		}
-					
-		String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast.description", castDestType); //$NON-NLS-1$
-		InsertCorrectionProposal proposal= new InsertCorrectionProposal(label, cu, pos, cast, 1);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast.description", castType); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+		String simpleCastType= proposal.addImport(castType);
+	
+		Expression expressionCopy= (Expression) rewrite.createCopy(nodeToCast);
+		Type typeCopy= (Type) rewrite.createPlaceholder(simpleCastType, ASTRewrite.TYPE);
+		CastExpression castExpression= astRoot.getAST().newCastExpression();
+		castExpression.setExpression(expressionCopy);
+		castExpression.setType(typeCopy);
 		
-        addImportToProposal(cu, castDestType, proposal);
+		rewrite.markAsReplaced(nodeToCast, castExpression);
 		
 		proposals.add(proposal);
 		
-		if (selectedNode != null && selectedNode.getParent() instanceof VariableDeclarationFragment) {
+		if (parentNodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) selectedNode.getParent();
 			ASTNode parent= fragment.getParent();
 			Type type= null;
@@ -102,14 +104,12 @@ public class LocalCorrectionsSubProcessor {
 				}
 			}			
 			if (type != null) {
-				String castType= args[0];
-				String simpleCastType= Signature.getSimpleName(castType);
+				ImportEdit edit= new ImportEdit(cu, JavaPreferencesSettings.getCodeGenerationSettings());
+				String typeName= edit.addImport(args[0]);
 
-				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast_var.description", simpleCastType); //$NON-NLS-1$
-				ReplaceCorrectionProposal varProposal= new ReplaceCorrectionProposal(label, cu, type.getStartPosition(), type.getLength(), simpleCastType, 1);
-
-                addImportToProposal(cu, castType, varProposal);
-				
+				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast_var.description", typeName); //$NON-NLS-1$
+				ReplaceCorrectionProposal varProposal= new ReplaceCorrectionProposal(label, cu, type.getStartPosition(), type.getLength(), typeName, 1);
+				varProposal.getRootTextEdit().add(edit);	
 				proposals.add(varProposal);
 			}
 		}
@@ -196,51 +196,131 @@ public class LocalCorrectionsSubProcessor {
 
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		if (selectedNode == null) {
+			return;
+		}
+		Expression qualifier= null;
+		
+        if (selectedNode instanceof QualifiedName) {
+            qualifier= ((QualifiedName) selectedNode).getQualifier();
+        } else if (selectedNode instanceof SimpleName) {
+        	ASTNode parent= selectedNode.getParent();
+        	if (parent instanceof FieldAccess) {
+        		qualifier= ((FieldAccess) parent).getExpression();
+        	}
+        } else if (selectedNode instanceof MethodInvocation) {
+        	qualifier= ((MethodInvocation) selectedNode).getExpression();
+        }
+		if (qualifier != null) {
+			ITypeBinding typeBinding= ASTResolving.normalizeTypeBinding(qualifier.resolveTypeBinding());
+			if (typeBinding != null) {
+				ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
+				rewrite.markAsReplaced(qualifier, astRoot.getAST().newSimpleName(typeBinding.getName()));
+				
+				String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.changeaccesstostatic.description");
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+				proposal.addImport(typeBinding);
 
-		if (selectedNode != null) {
-			Expression qualifier= getQualifier(selectedNode);
-			if (qualifier != null) {
-				ITypeBinding typeBinding= ASTResolving.normalizeTypeBinding(qualifier.resolveTypeBinding());
-				if (typeBinding != null) {
-					ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
-					rewrite.markAsReplaced(qualifier, astRoot.getAST().newSimpleName(typeBinding.getName()));
-					
-					String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.changeaccesstostatic.description");
-					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
-					proposal.addImport(typeBinding);
-
-					proposals.add(proposal);
-				}
+				proposals.add(proposal);
 			}
 		}
 	}
+	
+	/**
+	 * Method addStaticMethodRequestedProposal.
+	 * @param problemPos
+	 * @param proposals
+	 */
+	public static void addStaticMethodRequestedProposal(ProblemPosition problemPos, ArrayList proposals) throws JavaModelException {
+		ICompilationUnit cu= problemPos.getCompilationUnit();
 
-	private static void addImportToProposal(ICompilationUnit cu, ITypeBinding type, CUCorrectionProposal proposal) throws CoreException {
-        addImportToProposal(cu, Bindings.getFullyQualifiedImportName(type), proposal);
-    }
-            
-    private static void addImportToProposal(ICompilationUnit cu, String typeName, CUCorrectionProposal proposal) throws CoreException {
-        ImportEdit edit= new ImportEdit(cu, JavaPreferencesSettings.getCodeGenerationSettings());
-        edit.addImport(typeName);
-        proposal.getRootTextEdit().add(edit);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		
+		IBinding binding=null;
+		if (selectedNode instanceof SimpleName) {
+			binding= ((SimpleName) selectedNode).resolveBinding();
+		} else if (selectedNode instanceof QualifiedName) {
+			binding= ((QualifiedName) selectedNode).resolveBinding();
+		} else if (selectedNode instanceof SimpleType) {
+			binding= ((SimpleType) selectedNode).resolveBinding();
+		} else if (selectedNode instanceof MethodInvocation) {
+			binding= ((MethodInvocation) selectedNode).getName().resolveBinding();
+		} else if (selectedNode instanceof SuperMethodInvocation) {
+			binding= ((SuperMethodInvocation) selectedNode).getName().resolveBinding();
+		} else if (selectedNode instanceof SuperFieldAccess) {
+			binding= ((SuperFieldAccess) selectedNode).getName().resolveBinding();	
+		} else if (selectedNode instanceof ClassInstanceCreation) {
+			binding= ((ClassInstanceCreation) selectedNode).resolveConstructorBinding();	
+		} else if (selectedNode instanceof SuperConstructorInvocation) {
+			binding= ((SuperConstructorInvocation) selectedNode).resolveConstructorBinding();
+		}
+		ITypeBinding typeBinding= null;
+		String name;
+		if (binding instanceof IMethodBinding) {
+			typeBinding= ((IMethodBinding) binding).getDeclaringClass();
+			name= binding.getName() + "()";
+		} else if (binding instanceof IVariableBinding) {
+			typeBinding= ((IVariableBinding) binding).getDeclaringClass();
+			name= binding.getName();
+		} else if (binding instanceof ITypeBinding) {
+			typeBinding= (ITypeBinding) binding;
+			name= binding.getName();
+		} else {
+			return;
+		}
+		if (typeBinding.isFromSource()) {
+			int includedModifiers= 0;
+			int excludedModifiers= 0;
+			String label;
+			switch (problemPos.getId()) {
+			case IProblem.StaticMethodRequested:
+				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changeaccesstostatic.description", name);
+				includedModifiers= Modifier.STATIC;
+				break;
+			case IProblem.NotVisibleMethod:
+			case IProblem.NotVisibleConstructor:
+			case IProblem.NotVisibleField:
+			case IProblem.NotVisibleType:
+				excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
+				includedModifiers= getNeededVisibility(selectedNode, typeBinding);
+				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changevisibility.description", new String[] { name, getVisibilityString(includedModifiers) });
+				break;
+			default:
+				return;
+			}
+			ICompilationUnit targetCU= Binding2JavaModel.findCompilationUnit(typeBinding, cu.getJavaProject());
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			proposals.add(new ModifierChangeCompletionProposal(label, targetCU, binding, selectedNode, includedModifiers, excludedModifiers, 0, image));
+		}
+	}
+	
+	private static String getVisibilityString(int code) {
+		if (Modifier.isPublic(code)) {
+			return "public";
+		}else if (Modifier.isProtected(code)) {
+			return "protected";
+		}
+		return "default";
+	}
+	
+	
+	private static int getNeededVisibility(ASTNode currNode, ITypeBinding targetType) {
+		ITypeBinding currNodeBinding= ASTResolving.getBindingOfParentType(currNode);
+		
+		ITypeBinding curr= currNodeBinding;
+		while (curr != null) {
+			if (curr.getKey().equals(targetType.getKey())) {
+				return Modifier.PROTECTED;
+			}
+			curr= curr.getSuperclass();
+		}
+		if (currNodeBinding.getPackage().getKey().equals(targetType.getKey())) {
+			return 0;
+		}
+		return Modifier.PUBLIC;
 	}
 
-    private static Expression getQualifier(ASTNode node) {
-        if (node instanceof QualifiedName) {
-            return ((QualifiedName) node).getQualifier();
-        }
-        if (node instanceof SimpleName) {
-        	ASTNode parent= node.getParent();
-        	if (parent instanceof FieldAccess) {
-        		return ((FieldAccess) parent).getExpression();
-        	}
-        	return null;
-        }
-        if (node instanceof MethodInvocation) {
-        	return ((MethodInvocation) node).getExpression();
-        }
-        return null;
-    }
 
 }

@@ -58,18 +58,19 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 		return change;
 	}
 	
-	public void addImport(String qualifiedTypeName) throws CoreException {
+	public String addImport(String qualifiedTypeName) throws CoreException {
 		if (fImportEdit == null) {
 			fImportEdit= new ImportEdit(getCompilationUnit(), JavaPreferencesSettings.getCodeGenerationSettings());
 		}
-		fImportEdit.addImport(qualifiedTypeName);
+		return fImportEdit.addImport(qualifiedTypeName);
 	}
 	
-	public void addImport(ITypeBinding binding) throws CoreException {
+	public String addImport(ITypeBinding binding) throws CoreException {
 		ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
 		if (baseType.isMember() || baseType.isTopLevel()) {
-			addImport(Bindings.getFullyQualifiedName(baseType));
+			return addImport(Bindings.getFullyQualifiedName(baseType));
 		}
+		return null;
 	}	
 	
 	protected ASTRewrite getRewrite() throws CoreException {

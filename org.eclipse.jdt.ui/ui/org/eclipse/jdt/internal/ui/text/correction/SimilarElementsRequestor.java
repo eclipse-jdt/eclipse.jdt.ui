@@ -93,21 +93,6 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	
 	private SimilarElement[] process(ICompilationUnit cu, int pos) throws JavaModelException {
 		try {
-			IBuffer buf= cu.getBuffer();
-			if (pos < buf.getLength() - 1) {
-				if ((fKind & REF_TYPES) != 0) {
-					pos++;
-				} else {
-					int prevPos= pos - 1;
-					while (prevPos >= 0 && Character.isWhitespace(buf.getChar(prevPos))) {
-						prevPos--;
-					}
-					if (prevPos >= 0 && buf.getChar(prevPos) == '(') {
-						pos++;
-					}
-				}
-			}
-			
 			cu.codeComplete(pos, this);
 			processKeywords();
 			
@@ -154,7 +139,7 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 		if (NameMatcher.isSimilarName(fName, new String(typeName))) {
 			addResult(elem);
 		}
-		addOther(elem);
+		//addOther(elem);
 	}
 	
 	private void addVariable(int kind, char[] name, char[] typePackageName, char[] typeName, int relevance) {
