@@ -2133,7 +2133,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			return;
 			
 		int anchor= fBracketMatcher.getAnchor();
-		int targetOffset= (JavaPairMatcher.RIGHT == anchor) ? offset : offset + length - 1;
+		// http://dev.eclipse.org/bugs/show_bug.cgi?id=34195
+		int targetOffset= (JavaPairMatcher.RIGHT == anchor) ? offset + 1: offset + length;
 		
 		boolean visible= false;
 		if (sourceViewer instanceof ITextViewerExtension3) {
@@ -2141,7 +2142,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			visible= (extension.modelOffset2WidgetOffset(targetOffset) > -1);
 		} else {
 			IRegion visibleRegion= sourceViewer.getVisibleRegion();
-			visible= (targetOffset >= visibleRegion.getOffset() && targetOffset < visibleRegion.getOffset() + visibleRegion.getLength());
+			// http://dev.eclipse.org/bugs/show_bug.cgi?id=34195
+			visible= (targetOffset >= visibleRegion.getOffset() && targetOffset <= visibleRegion.getOffset() + visibleRegion.getLength());
 		}
 		
 		if (!visible) {
