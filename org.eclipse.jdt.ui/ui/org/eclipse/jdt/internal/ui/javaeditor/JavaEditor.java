@@ -13,8 +13,10 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
+
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.source.ISourceViewer;
+
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -33,8 +35,10 @@ import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
@@ -204,20 +208,43 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 				int offset= range.getOffset();
 				int length= range.getLength();
 				
-				if (offset > -1 && length >= 0) {
+				if (offset < 0 || length < 0)
+					return;
 				
-					setHighlightRange(offset, length, moveCursor);
+				setHighlightRange(offset, length, moveCursor);
 					
-					if (moveCursor && (reference instanceof IMember)) {
-						range= ((IMember) reference).getNameRange();
+				if (!moveCursor)
+					return;
+											
+				offset= -1;
+				length= -1;
+				
+				if (reference instanceof IMember) {
+					range= ((IMember) reference).getNameRange();
+					if (range != null) {
 						offset= range.getOffset();
 						length= range.getLength();
-						if (range != null && offset > -1 && length > 0) {
-							if (getSourceViewer() != null) {
-								getSourceViewer().revealRange(offset, length);
-								getSourceViewer().setSelectedRange(offset, length);
-							}
-						}
+					}
+				} else if (reference instanceof IImportDeclaration) {
+					String name= ((IImportDeclaration) reference).getElementName();
+					if (name != null && name.length() > 0) {
+						String content= reference.getSource();
+						offset= range.getOffset() + content.indexOf(name);
+						length= name.length();
+					}
+				} else if (reference instanceof IPackageDeclaration) {
+					String name= ((IPackageDeclaration) reference).getElementName();
+					if (name != null && name.length() > 0) {
+						String content= reference.getSource();
+						offset= range.getOffset() + content.indexOf(name);
+						length= name.length();
+					}
+				}
+				
+				if (offset > -1 && length > 0) {
+					if (getSourceViewer() != null) {
+						getSourceViewer().revealRange(offset, length);
+						getSourceViewer().setSelectedRange(offset, length);
 					}
 				}
 				

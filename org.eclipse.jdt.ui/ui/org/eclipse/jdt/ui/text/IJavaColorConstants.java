@@ -28,12 +28,16 @@ public interface IJavaColorConstants {
 	String JAVA_SINGLE_LINE_COMMENT= "java_single_line_comment"; //$NON-NLS-1$
 	/** The color key for Java keywords in Java code. */
 	String JAVA_KEYWORD= "java_keyword"; //$NON-NLS-1$
-	/** The color key for the Java built-in types such as int and char in Java code. */
-	String JAVA_TYPE= "java_type"; //$NON-NLS-1$
 	/** The color key for string and character literals in Java code. */
 	String JAVA_STRING= "java_string"; //$NON-NLS-1$
 	/** The color key for everthing in Java code for which no other color is specified. */
 	String JAVA_DEFAULT= "java_default"; //$NON-NLS-1$
+	/** 
+	 * The color key for the Java built-in types such as int and char in Java code.
+	 * @deprecated no longer used, use <code>JAVA_KEYWORD</code> instead
+	 */
+	String JAVA_TYPE= "java_type"; //$NON-NLS-1$
+	
 	
 	/** The color key for JavaDoc keywords (<code>@foo</code>) in JavaDoc comments. */
 	String JAVADOC_KEYWORD= "java_doc_keyword"; //$NON-NLS-1$

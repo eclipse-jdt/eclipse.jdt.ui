@@ -81,10 +81,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVA_KEYWORD),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_KEYWORD + "_bold"),
-		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVA_TYPE),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_TYPE + "_bold"),
-		
+				
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVA_STRING),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_STRING + "_bold"),
 		
@@ -126,7 +123,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		{ "Multi-line comment", IJavaColorConstants.JAVA_MULTI_LINE_COMMENT },
 		{ "Single-line comment", IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT },
 		{ "Keywords", IJavaColorConstants.JAVA_KEYWORD },
-		{ "Built-in types", IJavaColorConstants.JAVA_TYPE },
 		{ "Strings", IJavaColorConstants.JAVA_STRING },
 		{ "Others", IJavaColorConstants.JAVA_DEFAULT },
 		{ "JavaDoc keywords", IJavaColorConstants.JAVADOC_KEYWORD },
@@ -184,7 +180,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		Display display= Display.getDefault();
 				
 		store.setDefault(CompilationUnitEditor.MATCHING_BRACKETS, true);
-		color= display.getSystemColor(SWT.COLOR_BLUE);
+		color= display.getSystemColor(SWT.COLOR_GRAY);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.MATCHING_BRACKETS_COLOR,  color.getRGB());
 		
 		WorkbenchChainedTextFontFieldEditor.startPropagate(store, JFaceResources.TEXT_FONT);
@@ -205,10 +201,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_KEYWORD, new RGB(127, 0, 85));
 		store.setDefault(IJavaColorConstants.JAVA_KEYWORD + "_bold", true);
-		
-		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_TYPE, new RGB(127, 0, 85));
-		store.setDefault(IJavaColorConstants.JAVA_TYPE + "_bold", true);
-		
+				
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_STRING, new RGB(42, 0, 255));
 		store.setDefault(IJavaColorConstants.JAVA_STRING + "_bold", false);
 		

@@ -103,7 +103,6 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	
 	private static String[] fgTokenProperties= {
 		IJavaColorConstants.JAVA_KEYWORD,
-		IJavaColorConstants.JAVA_TYPE,
 		IJavaColorConstants.JAVA_STRING,
 		IJavaColorConstants.JAVA_DEFAULT
 	};
@@ -162,8 +161,6 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
 		for (int i=0; i<fgKeywords.length; i++)
 			wordRule.addWord(fgKeywords[i], token);
-						
-		token= getToken(IJavaColorConstants.JAVA_TYPE);
 		for (int i=0; i<fgTypes.length; i++)
 			wordRule.addWord(fgTypes[i], token);
 		for (int i=0; i<fgConstants.length; i++)
