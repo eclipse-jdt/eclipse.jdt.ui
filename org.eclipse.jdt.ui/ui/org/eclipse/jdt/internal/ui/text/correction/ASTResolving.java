@@ -88,7 +88,7 @@ public class ASTResolving {
 			break;			
 		case ASTNode.METHOD_INVOCATION:
 			MethodInvocation methodInvocation= (MethodInvocation) parent;
-			IMethodBinding methodBinding= ASTNodes.getMethodBinding(methodInvocation.getName());
+			IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
 			if (methodBinding != null) {
 				return getParameterTypeBinding(node, methodInvocation.arguments(), methodBinding);
 			}
