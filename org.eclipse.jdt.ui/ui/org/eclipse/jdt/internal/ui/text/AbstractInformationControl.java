@@ -386,8 +386,11 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		return fStringMatcher;
 	}
 	
-	private Object getSelectedElement() {
-		return ((IStructuredSelection)fTreeViewer.getSelection()).getFirstElement();
+	/**
+	 * Implementers can modify
+	 */
+	protected Object getSelectedElement() {
+		return ((IStructuredSelection) fTreeViewer.getSelection()).getFirstElement();
 	}
 
 	private void gotoSelectedElement() {
