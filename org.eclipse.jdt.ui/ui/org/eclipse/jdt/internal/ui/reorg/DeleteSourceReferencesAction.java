@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-class DeleteSourceReferencesAction extends SourceReferenceAction{
+public class DeleteSourceReferencesAction extends SourceReferenceAction{
 	
 	public DeleteSourceReferencesAction(ISelectionProvider provider) {
 		super("&Delete", provider);
