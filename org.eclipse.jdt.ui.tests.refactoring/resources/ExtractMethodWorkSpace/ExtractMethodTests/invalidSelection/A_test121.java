@@ -7,5 +7,8 @@ public class A_test121 {
 		
 		/*]*/x= y + x;
 		y= x + y;/*[*/
+		
+		x= y;
+		y= x;
 	}
 }

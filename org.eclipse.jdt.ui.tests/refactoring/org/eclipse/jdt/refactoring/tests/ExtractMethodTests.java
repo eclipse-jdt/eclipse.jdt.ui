@@ -821,4 +821,8 @@ public class ExtractMethodTests extends RefactoringTest {
 	public void test508() throws Exception {
 		localsTest();
 	}
+	
+	public void test509() throws Exception {
+		localsTest();
+	}
 }

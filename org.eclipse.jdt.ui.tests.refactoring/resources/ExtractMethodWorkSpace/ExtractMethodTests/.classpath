@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
     <classpathentry kind="src" path=""/>
-    <classpathentry kind="lib" path="C:\Java\jdk1.2.2\jre\lib\rt.jar"/>
+    <classpathentry kind="lib" path="D:/apps/ive/lib/jclMax/classes.zip"
+        rootpath="" sourcepath="D:/apps/ive/lib/jclMax/source/source.zip"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
