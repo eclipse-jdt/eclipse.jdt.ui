@@ -1597,21 +1597,30 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			
 			Expression expression= node.getExpression();
 			if (expression != null) {
-				rewriteNode(expression, pos, ASTRewriteFormatter.NONE); //$NON-NLS-1$
+				pos= rewriteNode(expression, pos, ASTRewriteFormatter.NONE); //$NON-NLS-1$
 			}
 			
 			List updaters= node.updaters();
 			if (hasChanges(updaters)) {
 				int startOffset= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameSEMICOLON, pos);
-				getDefaultRewriter().rewriteList(updaters, startOffset, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
+				pos= getDefaultRewriter().rewriteList(updaters, startOffset, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
 			} else {
-				visitList(updaters, 0);
+				pos= visitList(updaters, pos);
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}
+		Statement body= node.getBody();
+		rewriteRequiredNode(body);
+		
+//		if (isReplaced(body)) {
+//			int start= getScanner()
+//			int endPos= body.getStartPosition() + body.getLength();
+//			rewriteBodyNode(node.getBody()); // body
+//			
+
 			
-		rewriteRequiredNode(node.getBody()); // body
+		
 		return false;
 	}
 
@@ -1626,12 +1635,13 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		ASTNode newThenStatement= thenStatement;
 		if (isReplaced(thenStatement)) {
 			try {
-				pos= getScanner().getNextStartOffset(pos, true) + 1; // after the closing parent
+				pos= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameRPAREN, pos); // after the closing parent
 				int indent= getIndent(node.getStartPosition());
 				
-				int endPos= thenStatement.getStartPosition() + thenStatement.getLength();
+				ISourceRange range= getNodeRange(thenStatement, pos - 1);
+				int endPos= range.getOffset() + range.getLength();
 				if (elseStatement != null && !isInserted(elseStatement)) {
-					endPos= getScanner().getNextStartOffset(endPos, true); // else statement
+					endPos= getScanner().getTokenStartOffset(ITerminalSymbols.TokenNameelse, pos); // else keyword
 				}
 				if (elseStatement == null || isChanged(elseStatement)) {
 					pos= rewriteBodyNode(thenStatement, pos, endPos, indent, ASTRewriteFormatter.IF_BLOCK_NO_ELSE); 
@@ -1649,7 +1659,8 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		if (elseStatement != null) {
 			if (isChanged(elseStatement)) {
 				int indent= getIndent(node.getStartPosition());
-				int endPos= elseStatement.getStartPosition() + elseStatement.getLength();
+				ISourceRange range= getNodeRange(elseStatement, pos);
+				int endPos= range.getOffset() + range.getLength();
 				if (newThenStatement.getNodeType() == ASTNode.BLOCK) {
 					rewriteBodyNode(elseStatement, pos, endPos, indent, ASTRewriteFormatter.ELSE_AFTER_BLOCK);
 				} else {

@@ -2,12 +2,10 @@ package controlStatement_out;
 
 public class TestIfThenTwo {
 	public void main() {
-		if (true)
-			{
-				bar();
-				bar();
-			}
-		else
+		if (true) {
+			bar();
+			bar();
+		} else
 			main();
 	}
 	

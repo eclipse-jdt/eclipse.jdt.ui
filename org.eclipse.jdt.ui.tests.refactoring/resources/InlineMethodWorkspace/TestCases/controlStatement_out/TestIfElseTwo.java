@@ -4,11 +4,10 @@ public class TestIfElseTwo {
 	public void main() {
 		if (true)
 			main();
-		else
-			{
-				bar();
-				bar();
-			}
+		else {
+			bar();
+			bar();
+		}
 	}
 	
 	public void foo() {
