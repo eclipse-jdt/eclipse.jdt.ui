@@ -1113,6 +1113,13 @@ public class RenameTypeTests extends RefactoringTest {
 		helperWithTextual("A" , "A", "B", "A", true, false);
 	}
 	
+	public void testEnum5() throws Exception {
+		if (BUG_79691_core_rename_enum_cu)
+			return;
+		
+		helper2("A", "B");
+	}
+	
 	public void testAnnotation1() throws Exception {
 		helper2("A", "B");
 	}
