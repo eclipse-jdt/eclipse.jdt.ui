@@ -426,7 +426,7 @@ public class SearchUtil extends JavaModelUtil {
 	}
 	
 	private static boolean isBinaryPrimitveConstantOrString(IJavaElement element) {
-		if (element.getElementType() == IJavaElement.FIELD) {
+		if (element != null && element.getElementType() == IJavaElement.FIELD) {
 			IField field= (IField)element;
 			int flags;
 			try {
