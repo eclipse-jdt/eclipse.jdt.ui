@@ -4,9 +4,49 @@
  */
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.io.File;import java.io.IOException;import java.util.Enumeration;import java.util.zip.ZipEntry;import java.util.zip.ZipFile;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IUIConstants;
-import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jdt.launching.LibraryLocation;import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.DirectoryDialog;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.help.WorkbenchHelp;
+import java.io.File;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
+
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.IUIConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusTool;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstallType;
+import org.eclipse.jdt.launching.LibraryLocation;
 
 public class AddVMDialog extends StatusDialog {
 	private static final String JAVA_LANG_OBJECT= "java/lang/Object.java"; //$NON-NLS-1$
@@ -34,6 +74,9 @@ public class AddVMDialog extends StatusDialog {
 		super(page.getShell());
 		fPreferencePage= page;
 		fStati= new IStatus[5];
+		for (int i= 0; i < fStati.length; i++) {
+			fStati[i]= new StatusInfo();
+		}
 		
 		fVMTypes= vmInstallTypes;
 		fSelectedVMType= initialVMType;
@@ -126,7 +169,7 @@ public class AddVMDialog extends StatusDialog {
 	
 	protected int getTimeout() {
 		return Integer.valueOf(fDebuggerTimeout.getText()).intValue();
-	}
+	}	
 	
 	protected Control createDialogArea(Composite ancestor) {
 		createDialogFields();
@@ -147,12 +190,16 @@ public class AddVMDialog extends StatusDialog {
 		gd.horizontalAlignment= gd.FILL;
 		fVMTypeCombo.setLayoutData(gd);
 		
-		fVMTypeCombo.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event evt) {
-				fSelectedVMType= fVMTypes[fVMTypeCombo.getSelectionIndex()];
-				vmTypeChanged();
+		SelectionListener listener= new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
 			}
-		});
+
+			public void widgetSelected(SelectionEvent e) {
+				buttonSelected(e.widget);
+			}
+		};
+		
+		fVMTypeCombo.addSelectionListener(listener);
 								
 		fVMName.doFillIntoGrid(parent, 3);
 		fJDKRoot.doFillIntoGrid(parent, 3);
@@ -170,16 +217,7 @@ public class AddVMDialog extends StatusDialog {
 		gd= new MGridData();
 		gd.horizontalSpan=3;
 		fUseDefaultLibrary.setLayoutData(gd);
-		fUseDefaultLibrary.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event evt) {
-				if (fUseDefaultLibrary.getSelection()) {
-					useDefaultSystemLibrary();
-				} else {
-					useCustomSystemLibrary();
-				}
-			}
-		});
-		
+		fUseDefaultLibrary.addSelectionListener(listener);
 		
 		fSystemLibrary.doFillIntoGrid(parent, 3);
 		fSystemLibrarySource.doFillIntoGrid(parent, 3);
@@ -189,6 +227,20 @@ public class AddVMDialog extends StatusDialog {
 		
 		return parent;
 	}
+	
+	private void buttonSelected(Widget widget) {
+		if (widget == fVMTypeCombo) {
+			fSelectedVMType= fVMTypes[fVMTypeCombo.getSelectionIndex()];
+			vmTypeChanged();
+		} else if (widget == fUseDefaultLibrary) {
+			if (fUseDefaultLibrary.getSelection()) {
+				useDefaultSystemLibrary();
+			} else {
+				useCustomSystemLibrary();
+			}
+		}
+	}	
+	
 	
 	public void create() {
 		super.create();
@@ -244,57 +296,50 @@ public class AddVMDialog extends StatusDialog {
 	
 	protected IStatus validateJDKLocation() {
 		String locationName= fJDKRoot.getText();
-		if (locationName == null || "".equals(locationName)) //$NON-NLS-1$
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
-		return getVMType().validateInstallLocation(new File(locationName));
+		if (locationName.length() == 0) {//$NON-NLS-1$
+			return new StatusInfo(IStatus.ERROR, LauncherMessages.getString("addVMDialog.enterLocation"));
+		}
+		File file= new File(locationName);
+		if (!file.exists()) {
+			return new StatusInfo(IStatus.ERROR, LauncherMessages.getString("addVMDialog.locationNotExists"));
+		}
+		return getVMType().validateInstallLocation(file);
 	}
 
 	protected IStatus validateVMName() {
+		StatusInfo status= new StatusInfo();
 		String name= fVMName.getText();
 		if (name == null || "".equals(name.trim())) { //$NON-NLS-1$
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
+			status.setError(LauncherMessages.getString("addVMDialog.enterName")); //$NON-NLS-1$
+		} else {
+			IVMInstallType type= getVMType();
+			if (fPreferencePage.isDuplicateName(type, name)) {
+				status.setError(LauncherMessages.getString("addVMDialog.duplicateName")); //$NON-NLS-1$
+			}
 		}
-		IVMInstallType type= getVMType();
-		if (fPreferencePage.isDuplicateName(type, name)) {
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.duplicateName"), null); //$NON-NLS-1$
-		}
-		return null;
+		return status;
 	}
 	
 	protected IStatus validateDebuggerTimeout() {
+		StatusInfo status= new StatusInfo();
 		String timeoutText= fDebuggerTimeout.getText();
 		long timeout= 0;
 		try {
 			timeout= Long.valueOf(timeoutText).longValue();
+			if (timeout < 0) {
+				status.setError(LauncherMessages.getString("addVMDialog.timeoutSmall")); //$NON-NLS-1$
+			} else if (timeout > Integer.MAX_VALUE) {
+				status.setError(LauncherMessages.getFormattedString("addVMDialog.timeoutLarge", Integer.toString(Integer.MAX_VALUE))); //$NON-NLS-1$
+			}			
 		} catch (NumberFormatException e) {
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.notANumber"), e); //$NON-NLS-1$
+			status.setError(LauncherMessages.getString("addVMDialog.timeoutNotANumber"));
 		}
-		if (timeout < 0) {
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.timeoutSmall"), null); //$NON-NLS-1$
-		}
-		if (timeout > Integer.MAX_VALUE) {
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.timeoutLarge")+Integer.MAX_VALUE, null); //$NON-NLS-1$
-		}
-		return null;
+		return status;
 			
 	}
 	
 	protected void updateStatusLine() {
-		int currentSeverity= IStatus.OK;
-		String currentMessage= ""; //$NON-NLS-1$
-		for (int i= 0; i < fStati.length; i++) {
-			if (fStati[i] != null) {
-				boolean isBiggerSeverity= fStati[i].getSeverity() > currentSeverity;
-				boolean isBetterErrorMessage= fStati[i].getSeverity() == currentSeverity &&
-												(currentMessage == null || "".equals(currentMessage)); //$NON-NLS-1$
-				if (isBiggerSeverity) {
-					updateStatus(fStati[i]);
-					currentSeverity= fStati[i].getSeverity();
-				}
-			}
-		}
-		if (currentSeverity == IStatus.OK)
-			updateStatus(new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null)); //$NON-NLS-1$
+		updateStatus(StatusTool.getMostSevere(fStati));
 	}
 	
 	protected void updateLibraryFieldDefaults() {
@@ -308,27 +353,29 @@ public class AddVMDialog extends StatusDialog {
 
 		String locationName= fSystemLibrary.getText();
 		if (locationName == null || "".equals(locationName)) //$NON-NLS-1$
-			return new Status(flag, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
+			return new StatusInfo(flag, LauncherMessages.getString("addVMDialog.missingJREJar")); //$NON-NLS-1$
 
 		File f= new File(locationName);
 		if (!f.isFile())
-			return new Status(flag, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.missingJREJar"), null); //$NON-NLS-1$
+			return new StatusInfo(flag, LauncherMessages.getString("addVMDialog.missingJREJar")); //$NON-NLS-1$
 		try {
 			ZipFile zip= null;
 			try {
 				zip= new ZipFile(f);
 				ZipEntry e= zip.getEntry("java/lang/Object.class"); //$NON-NLS-1$
 				if (e == null)
-					return new Status(flag, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.noObjectClass"), null); //$NON-NLS-1$
+					return new StatusInfo(flag, LauncherMessages.getString("addVMDialog.noObjectClass")); //$NON-NLS-1$
 			} catch (IOException e) {
-				return new Status(flag, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.jreJarException"), e); //$NON-NLS-1$
+				JavaPlugin.log(e);
+				return new StatusInfo(flag, LauncherMessages.getString("addVMDialog.jreJarException")); //$NON-NLS-1$
 			} finally {
 				if (zip != null)
 					zip.close();
 			}
 		} catch (IOException e) {
+			JavaPlugin.log(e);
 		}
-		return null;
+		return new StatusInfo();
 	}
 	
 	protected boolean isCustomLibraryUsed() {
@@ -336,22 +383,31 @@ public class AddVMDialog extends StatusDialog {
 	}
 	
 	protected IStatus validateSystemLibrarySource() {
+		StatusInfo status= new StatusInfo();
+		
 		String locationName= fSystemLibrarySource.getText();
-		if (locationName == null || "".equals(locationName)) //$NON-NLS-1$
-			return null;
+		if (locationName == null || "".equals(locationName)) { //$NON-NLS-1$
+			return status;
+		}
 			
 		File f= new File(locationName);
-		if (!f.isFile())
-			return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.missingJRESource"), null); //$NON-NLS-1$
-		if (determinePackagePrefix(f) == null)
-			return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, LauncherMessages.getString("addVMDialog.noObjectSource"), null); //$NON-NLS-1$
-		return null;
+		if (!f.isFile()) {
+			status.setError(LauncherMessages.getString("addVMDialog.missingJRESource"));
+		} else {
+			if (determinePackagePrefix(f) == null) {
+				status.setError(LauncherMessages.getString("addVMDialog.noObjectSource"));
+			}
+		}
+		return status;
 	}
 	
 	/**
 	 * try finding the package prefix
 	 */
 	private String determinePackagePrefix(File f) {
+		if (!f.isFile()) {
+			return null;
+		}
 		ZipFile zip= null;
 		try {
 			zip= new ZipFile(f);
@@ -379,7 +435,7 @@ public class AddVMDialog extends StatusDialog {
 	private void browseForInstallDir() {
 		DirectoryDialog dialog= new DirectoryDialog(getShell());
 		dialog.setFilterPath(fJDKRoot.getText());
-		dialog.setMessage(LauncherMessages.getString("addVMDialog.pickJRERoot")); //$NON-NLS-1$
+		dialog.setMessage(LauncherMessages.getString("addVMDialog.pickJRERootDialog.message")); //$NON-NLS-1$
 		String newPath= dialog.open();
 		if  (newPath != null)
 			fJDKRoot.setText(newPath);
@@ -404,7 +460,7 @@ public class AddVMDialog extends StatusDialog {
 		
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setFilterPath(lastUsedDir);
-		dialog.setText(LauncherMessages.getString("addVMDialog.pickJREJar")); //$NON-NLS-1$
+		dialog.setText(LauncherMessages.getString("addVMDialog.pickJREJarDialog.text")); //$NON-NLS-1$
 		dialog.setFilterExtensions(new String[] { "*.jar;*.zip"}); //$NON-NLS-2$ //$NON-NLS-1$
 		String newPath= dialog.open();
 		if  (newPath != null) {
@@ -433,7 +489,7 @@ public class AddVMDialog extends StatusDialog {
 		
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setFilterPath(lastUsedDir);
-		dialog.setText(LauncherMessages.getString("addVMDialog.pickJRESource")); //$NON-NLS-1$
+		dialog.setText(LauncherMessages.getString("addVMDialog.pickJRESourceDialog.text")); //$NON-NLS-1$
 		dialog.setFilterExtensions(new String[] { "*.jar;*.zip"}); //$NON-NLS-1$
 		String newPath= dialog.open();
 		if  (newPath != null)
@@ -477,7 +533,9 @@ public class AddVMDialog extends StatusDialog {
 	}
 	
 	private void vmTypeChanged() {
+		fStati[1]= validateJDKLocation();
 		useDefaultSystemLibrary();
+		updateStatusLine();
 	}
 
 	protected void setFieldValuesToVM(IVMInstall vm) {

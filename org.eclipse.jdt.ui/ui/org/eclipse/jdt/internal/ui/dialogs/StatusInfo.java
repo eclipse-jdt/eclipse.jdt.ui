@@ -19,9 +19,13 @@ public class StatusInfo implements IStatus {
 	private int fSeverity;
 	
 	public StatusInfo() {
-		fStatusMessage= null;
-		fSeverity= OK;
+		this(OK, null);
 	}
+	
+	public StatusInfo(int severity, String message) {
+		fStatusMessage= message;
+		fSeverity= severity;
+	}		
 	
 	public boolean isOK() {
 		return fSeverity == IStatus.OK;
