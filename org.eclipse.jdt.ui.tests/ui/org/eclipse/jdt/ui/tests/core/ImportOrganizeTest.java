@@ -201,7 +201,7 @@ public class ImportOrganizeTest extends TestCase {
 		});		
 	}
 	
-	public void test51() throws Exception {
+	public void test5() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		for (int ch= 'A'; ch < 'M'; ch++) {
 			String name= String.valueOf((char) ch);
@@ -250,4 +250,76 @@ public class ImportOrganizeTest extends TestCase {
 			"test.ID",
 		});		
 	}
+	
+	public void test6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class C {\n");
+		buf.append("  protected static class C1 {\n");
+		buf.append("    public static class C2 {\n");
+		buf.append("    }\n");
+		buf.append("  }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu1= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+				
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+
+		buf.append("import test2.A.A1;\n");		
+		buf.append("import test2.A.A1.A2;\n");
+		buf.append("import test2.A.A1.A2.A3;\n");
+		buf.append("import test2.A.B1;\n");
+		buf.append("import test2.A.B1.B2;\n");
+		buf.append("import test1.C;\n");
+		buf.append("import test1.C.C1.C2;\n");
+		
+		buf.append("public class A {\n");
+		buf.append("    public static class A1 {\n");
+		buf.append("        public static class A2 {\n");
+		buf.append("            public static class A3 {\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		
+		buf.append("    public static class B1 {\n");
+		buf.append("        public static class B2 {\n");
+		buf.append("        }\n");
+		
+		buf.append("        public static class B3 {\n");
+		buf.append("            public static class B4 extends C {\n");
+		buf.append("                B4 b4;\n");
+		buf.append("                B3 b3;\n");
+		buf.append("                B2 b2;\n");
+		buf.append("                B1 b1;\n");
+		buf.append("                A1 a1;\n");
+		buf.append("                A2 a2;\n");
+		buf.append("                A3 a3;\n");
+		buf.append("                C1 c1;\n");
+		buf.append("                C2 c2;\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		ICompilationUnit cu2= pack2.createCompilationUnit("A.java", buf.toString(), false, null);
+
+
+		String[] order= new String[0];
+		IChooseImportQuery query= createQuery("A", new String[] {}, new int[] {});
+	
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu2, order, 99, false, true, true, query);
+		op.run(null);
+		
+		assertImports(cu2, new String[] {
+			"test1.C", 
+			"test1.C.C1.C2",
+			"test2.A.A1.A2", 
+			"test2.A.A1.A2.A3"
+		});
+	}
+	
+	
+	
 }
