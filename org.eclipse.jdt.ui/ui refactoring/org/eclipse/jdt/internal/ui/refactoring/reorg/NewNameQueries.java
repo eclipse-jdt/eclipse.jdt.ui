@@ -11,19 +11,14 @@
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceStatus;
-
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
 
@@ -34,9 +29,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -44,9 +37,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.util.Resources;
 
 public class NewNameQueries implements INewNameQueries {
 
@@ -220,136 +210,4 @@ public class NewNameQueries implements INewNameQueries {
 		};	
 		return validator;
 	}			
-
-	static class OverwriteQuery {
-
-		private boolean alwaysOverwriteNonReadOnly= false;
-		private boolean alwaysOverwrite= false;
-		private boolean fCanceled= false;
-		
-		public boolean overwrite(final Object element) {
-		
-			IResource resource= ResourceUtil.getResource(element);
-
-			if (resource != null){
-				IPath location = resource.getLocation();
-				if (location == null) {
-					//undefined path variable
-					return false;
-				}
-
-				if (location.toFile().exists() == false) {
-					//link target does not exist
-					return false;
-				}
-			}
-
-			if (fCanceled)
-				return false;
-			
-			if (alwaysOverwrite) 
-				return true;
-
-			final boolean isReadOnly= isReadOnly(element);
-		
-			if (alwaysOverwriteNonReadOnly && ! isReadOnly) 
-				return true;
-
-			final Shell parentShell= JavaPlugin.getActiveWorkbenchShell();
-			final int[] result = new int[1];
-			// Dialogs need to be created and opened in the UI thread
-			Runnable query = new Runnable() {
-				public void run() {
-					try {
-						int resultId[]= {
-							IDialogConstants.YES_ID,
-							IDialogConstants.YES_TO_ALL_ID,
-							IDialogConstants.NO_ID,
-							IDialogConstants.CANCEL_ID};
-						 
-						String message= createMessage(element, isReadOnly);
-						MessageDialog dialog= new MessageDialog(
-							parentShell, 
-							ReorgMessages.getString("ReorgQueries.Confirm_Overwritting"), //$NON-NLS-1$
-							null,
-							message,
-							MessageDialog.QUESTION,
-							new String[] {
-								IDialogConstants.YES_LABEL,
-								IDialogConstants.YES_TO_ALL_LABEL,
-								IDialogConstants.NO_LABEL,
-								IDialogConstants.CANCEL_LABEL },
-							0);
-						dialog.open();
-						result[0]= resultId[dialog.getReturnCode()];
-					} catch (JavaModelException e) {
-						ExceptionHandler.handle(e, parentShell, ReorgMessages.getString("NewNameQueries.21"), ReorgMessages.getString("NewNameQueries.22")); //$NON-NLS-1$ //$NON-NLS-2$
-						result[0]= IDialogConstants.NO_ID;
-					}
-				}
-			};
-			parentShell.getDisplay().syncExec(query);
-			if (result[0] == IDialogConstants.YES_TO_ALL_ID) {
-				alwaysOverwriteNonReadOnly= true;
-				if (isReadOnly)
-					alwaysOverwrite= true;
-				return true;
-			} else if (result[0] == IDialogConstants.YES_ID) {
-				return true;
-			} else if (result[0] == IDialogConstants.CANCEL_ID) {
-				fCanceled= true;
-				return false;
-			} else if (result[0] == IDialogConstants.NO_ID) {
-				return false;
-			} 
-			Assert.isTrue(false);
-			return false;
-		}
-	
-		private String createMessage(Object element, boolean isReadOnly) throws JavaModelException{
-			
-			String[] keys;//s= {ReorgUtils2.getName(element)};
-			if (element instanceof IResource)
-				keys= new String[]{ReorgUtils.getName((IResource)element)};
-			else if (element instanceof IJavaElement)
-				keys= new String[]{ReorgUtils.getName((IJavaElement)element)};
-			else {
-				Assert.isTrue(false);
-				keys= null;
-			}
-			if (isReadOnly)
-				return ReorgMessages.getFormattedString("ReorgQueries.exists_read-only", keys); //$NON-NLS-1$
-		 	else
-				return ReorgMessages.getFormattedString("ReorgQueries.exists", keys); //$NON-NLS-1$
-		}
-
-		public boolean isCanceled(){
-			return fCanceled;
-		}
-	
-		private static boolean isReadOnly(Object element) {
-			if (element instanceof IResource)
-				return isReadOnlyResource((IResource)element);
-			else if (element instanceof IJavaElement){
-				IResource resource= ResourceUtil.getResource(element);
-				if (resource == null)
-					return false;
-				if (isReadOnlyResource(resource))
-					return true;
-				return ((IJavaElement)element).isReadOnly();
-			} else
-				return false;
-		}
-	
-		private static boolean isReadOnlyResource(IResource resource) {
-			IStatus status= Resources.makeCommittable(resource, null);
-			if (status.isOK())
-				return false;
-			if (status.getCode() == IJavaStatusConstants.VALIDATE_EDIT_CHANGED_CONTENT)
-				return false;
-			if (status.getCode() == IResourceStatus.OUT_OF_SYNC_LOCAL)
-				return false;
-			return true;	
-		}
-	}
 }
