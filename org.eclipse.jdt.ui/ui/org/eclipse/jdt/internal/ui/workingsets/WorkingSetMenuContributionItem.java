@@ -18,7 +18,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 
 import org.eclipse.jface.action.ContributionItem;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IWorkingSet;
@@ -32,18 +31,18 @@ import org.eclipse.ui.PlatformUI;
  */
 public class WorkingSetMenuContributionItem extends ContributionItem {
 
-	private IAction fAction;
+	private int fId;
 	private IWorkingSet fWorkingSet;
 	private WorkingSetFilterActionGroup fActionGroup;
 
 	/**
 	 * Constructor for WorkingSetMenuContributionItem.
 	 */
-	public WorkingSetMenuContributionItem(String id, WorkingSetFilterActionGroup actionGroup, IWorkingSet workingSet) {
-		super(id);
+	public WorkingSetMenuContributionItem(int id, WorkingSetFilterActionGroup actionGroup, IWorkingSet workingSet) {
+		super(getId(id));
 		Assert.isNotNull(actionGroup);
-		Assert.isNotNull(id);
 		Assert.isNotNull(workingSet);
+		fId= id;
 		fActionGroup= actionGroup;
 		fWorkingSet= workingSet;
 	}
@@ -53,8 +52,7 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 	 */
 	public void fill(Menu menu, int index) {
 		MenuItem mi= new MenuItem(menu, SWT.RADIO, index);
-		mi.setText(fWorkingSet.getName());
-
+		mi.setText("&" + fId + " " + fWorkingSet.getName());  //$NON-NLS-1$  //$NON-NLS-2$
 		/*
 		 * XXX: Don't set the image - would looks bad because other menu items don't provide image
 		 * XXX: Get working set specific image name from XML - would need to cache icons
@@ -75,5 +73,9 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 	 */
 	public boolean isDynamic() {
 		return true;
+	}
+
+	static String getId(int id) {
+		return WorkingSetMenuContributionItem.class.getName() + "." + id;  //$NON-NLS-1$
 	}
 }
