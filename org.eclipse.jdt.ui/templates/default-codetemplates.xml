@@ -31,6 +31,7 @@
  *
  * ${todo} %CodeTemplates.typecomment.content1
  * %CodeTemplates.typecomment.content2
+ * ${tags}
  */</template>
  
 <template name="fieldcomment" id="org.eclipse.jdt.ui.text.codetemplates.fieldcomment" description="%CodeTemplates.fieldcomment" context="fieldcomment_context" enabled="true">/**

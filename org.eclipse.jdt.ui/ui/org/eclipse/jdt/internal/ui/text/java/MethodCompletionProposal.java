@@ -125,7 +125,7 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 
 		StringBuffer buf= new StringBuffer();
 		if (addComments) {
-			String comment= CodeGeneration.getMethodComment(fType.getCompilationUnit(), declTypeName, fMethodName, empty, empty, fReturnTypeSig, null, String.valueOf('\n'));
+			String comment= CodeGeneration.getMethodComment(fType.getCompilationUnit(), declTypeName, fMethodName, empty, empty, fReturnTypeSig, empty, null, String.valueOf('\n'));
 			if (comment != null) {
 				buf.append(comment);
 				buf.append('\n');

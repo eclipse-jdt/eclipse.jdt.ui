@@ -35,6 +35,8 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
+import org.eclipse.jdt.ui.CodeGeneration;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility.GenStubSettings;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -163,7 +165,7 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 					javadocParams[count++]= params[i];
 				}				
 				String lineDelimiter= String.valueOf('\n');
-				String comment= StubUtility.getMethodComment(fType.getCompilationUnit(), fType.getElementName(), fSuperConstructor.getElementName(), javadocParams, fSuperConstructor.getExceptionTypes(), null, null, lineDelimiter);		
+				String comment= CodeGeneration.getMethodComment(fType.getCompilationUnit(), fType.getElementName(), fSuperConstructor.getElementName(), javadocParams, fSuperConstructor.getExceptionTypes(), null, null, lineDelimiter);		
 				if (comment != null)
 					buf.insert(0, comment);
 				 else {

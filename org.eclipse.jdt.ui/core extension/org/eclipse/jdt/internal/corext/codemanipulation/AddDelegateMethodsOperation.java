@@ -156,7 +156,8 @@ public class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 
 		StringBuffer buf= new StringBuffer();
 		if (addComment) {
-			String comment= CodeGeneration.getMethodComment(fType.getCompilationUnit(), fType.getElementName(), methodName, paramNames, curr.getExceptionTypes(), returnTypSig, overridden, String.valueOf('\n'));
+			String[] typeParamNames= StubUtility.getTypeParameterNames(curr.getTypeParameters());
+			String comment= CodeGeneration.getMethodComment(fType.getCompilationUnit(), fType.getElementName(), methodName, paramNames, curr.getExceptionTypes(), returnTypSig, typeParamNames, overridden, String.valueOf('\n'));
 			if (comment != null) {
 				buf.append(comment);
 				buf.append('\n');

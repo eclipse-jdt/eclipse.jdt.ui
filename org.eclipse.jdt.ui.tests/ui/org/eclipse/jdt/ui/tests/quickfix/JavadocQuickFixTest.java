@@ -19,7 +19,7 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
-import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -28,9 +28,11 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 
@@ -45,21 +47,17 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		super(name);
 	}
 
-
 	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+		return setUpTest(new TestSuite(THIS));
+	}
+	
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
 	}
 	
 	public static Test suite() {
-		if (true) {
-			return allTests();
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new JavadocQuickFixTest("testInsertAllMissing2"));
-			return new ProjectTestSetup(suite);
-		}
+		return allTests();
 	}
-
 
 	protected void setUp() throws Exception {
 		Hashtable options= TestOptions.getFormatterOptions();
@@ -67,10 +65,31 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(JavaCore.COMPILER_PB_INVALID_JAVADOC, JavaCore.ERROR);
 		options.put(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS, JavaCore.ERROR);
 		JavaCore.setOptions(options);			
 
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
+		StringBuffer comment= new StringBuffer();
+		comment.append("/**\n");
+		comment.append(" * A comment.\n");
+		comment.append(" * ${tags}\n");
+		comment.append(" */");
+		TemplateStore codeTemplateStore= JavaPlugin.getDefault().getCodeTemplateStore();
+		codeTemplateStore.findTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT).setPattern(comment.toString());
+		codeTemplateStore.findTemplate(CodeTemplateContextType.METHODCOMMENT).setPattern(comment.toString());
+		codeTemplateStore.findTemplate(CodeTemplateContextType.TYPECOMMENT).setPattern(comment.toString());
+		
+		comment= new StringBuffer();
+		comment.append("/**\n");
+		comment.append(" * A field comment for ${field}.\n");
+		comment.append(" */");
+		codeTemplateStore.findTemplate(CodeTemplateContextType.FIELDCOMMENT).setPattern(comment.toString());
+
+		comment= new StringBuffer();
+		comment.append("/**\n");
+		comment.append(" * A override comment.\n");
+		comment.append(" * ${see_to_overridden}\n");
+		comment.append(" */");
+		codeTemplateStore.findTemplate(CodeTemplateContextType.OVERRIDECOMMENT).setPattern(comment.toString());
 		
 		fJProject1= ProjectTestSetup.getProject();
 
@@ -100,7 +119,8 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		ArrayList proposals= collectCorrections2(cu, 1);
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
@@ -211,6 +231,84 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		buf.append("     */\n");
 		buf.append("    public void foo(int a, int b, int c) {\n");
 		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+		assertEqualString(preview2, expected);
+	}
+	
+	public void testMissingParam4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" */\n");
+		buf.append("public class E {\n");
+		buf.append("    /**\n");
+		buf.append("     * @param <A>\n");
+		buf.append("     *      comment on second line.\n");
+		buf.append("     * @param a\n");
+		buf.append("     */\n");
+		buf.append("    public <A, B> void foo(int a) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		ArrayList proposals= collectCorrections2(cu, 1);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" */\n");
+		buf.append("public class E {\n");
+		buf.append("    /**\n");
+		buf.append("     * @param <A>\n");
+		buf.append("     *      comment on second line.\n");
+		buf.append("     * @param <B>\n");
+		buf.append("     * @param a\n");
+		buf.append("     */\n");
+		buf.append("    public <A, B> void foo(int a) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+		assertEqualString(preview2, expected);
+	}
+	
+	public void testMissingParam5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" * @param <B> Hello\n");
+		buf.append(" */\n");
+		buf.append("public class E<A, B> {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		ArrayList proposals= collectCorrections2(cu, 1);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" * @param <A>\n");
+		buf.append(" * @param <B> Hello\n");
+		buf.append(" */\n");
+		buf.append("public class E<A, B> {\n");
 		buf.append("}\n");
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
@@ -365,14 +463,8 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		ArrayList proposals= collectCorrections2(cu, 4);
-		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
-		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
-		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= getPreviewContent(proposal);
-		
+				
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
@@ -391,24 +483,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("/**\n");
-		buf.append(" */\n");
-		buf.append("public class E {\n");
-		buf.append("    /**\n");
-		buf.append("     * @return\n");
-		buf.append("     * @throws Exception\n");
-		buf.append("     */\n");
-		buf.append("    public int foo(int a, int b) throws NullPointerException, Exception {\n");
-		buf.append("        return 1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();		
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
-		
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });	
 	}
 	
 	public void testInsertAllMissing2() throws Exception {
@@ -429,14 +504,8 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		ArrayList proposals= collectCorrections2(cu, 4);
-		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
-		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
-		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= getPreviewContent(proposal);
-		
+				
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
@@ -456,26 +525,76 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+	
+	public void testInsertAllMissing3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" */\n");
+		buf.append("public class E<S, T> {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
+		ArrayList proposals= collectCorrections2(cu, 2);
+		assertCorrectLabels(proposals);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" * @param <S>\n");
+		buf.append(" * @param <T>\n");
+		buf.append(" */\n");
+		buf.append("public class E<S, T> {\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });		
+	}
+	
+	public void testInsertAllMissing4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" */\n");
+		buf.append("public class E {\n");
+		buf.append("    /**\n");
+		buf.append("     * @param <B> test\n");
+		buf.append("     * @param b\n");
+		buf.append("     * @return a number\n");
+		buf.append("     */\n");
+		buf.append("    public <A, B> int foo(int a, int b) throws NullPointerException {\n");
+		buf.append("        return 1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		ArrayList proposals= collectCorrections2(cu, 3);
+		assertCorrectLabels(proposals);
+				
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("/**\n");
 		buf.append(" */\n");
 		buf.append("public class E {\n");
 		buf.append("    /**\n");
+		buf.append("     * @param <A>\n");
+		buf.append("     * @param <B> test\n");
 		buf.append("     * @param a\n");
 		buf.append("     * @param b\n");
 		buf.append("     * @return a number\n");
+		buf.append("     * @throws NullPointerException\n");
 		buf.append("     */\n");
-		buf.append("    public int foo(int a, int b, int c) throws NullPointerException, Exception {\n");
+		buf.append("    public <A, B> int foo(int a, int b) throws NullPointerException {\n");
 		buf.append("        return 1;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected2= buf.toString();		
+		String expected1= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
-		
-	}
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });	}
 	
 	public void testRemoveParamTag1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -771,5 +890,212 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	public void testMissingMethodComment1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("/**\n");
+		buf.append(" */\n");
+		buf.append("public class E {\n");
+		buf.append("    public <A> void foo(int a) throws IOException {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		ArrayList proposals= collectCorrections2(cu, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("/**\n");
+		buf.append(" */\n");
+		buf.append("public class E {\n");
+		buf.append("    /**\n");
+		buf.append("     * A comment.\n");
+		buf.append("     * @param <A>\n");
+		buf.append("     * @param a\n");
+		buf.append("     * @throws IOException\n");
+		buf.append("     */\n");
+		buf.append("    public <A> void foo(int a) throws IOException {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
+	
+	public void testMissingMethodComment2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" */\n");
+		buf.append("public class E {\n");
+		buf.append("    public String toString() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		ArrayList proposals= collectCorrections2(cu, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" */\n");
+		buf.append("public class E {\n");
+		buf.append("    /**\n");
+		buf.append("     * A override comment.\n");
+		buf.append("     * @see java.lang.Object#toString()\n");
+		buf.append("     */\n");
+		buf.append("    public String toString() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
+	
+	public void testMissingMethodComment3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" */\n");
+		buf.append("public class E {\n");
+		buf.append("    public void empty() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		ArrayList proposals= collectCorrections2(cu, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" */\n");
+		buf.append("public class E {\n");
+		buf.append("    /**\n");
+		buf.append("     * A comment.\n");
+		buf.append("     */\n");
+		buf.append("    public void empty() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
+
+	
+	
+	public void testMissingConstructorComment() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("/**\n");
+		buf.append(" */\n");
+		buf.append("public class E {\n");
+		buf.append("    public E(int a) throws IOException {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		ArrayList proposals= collectCorrections2(cu, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("/**\n");
+		buf.append(" */\n");
+		buf.append("public class E {\n");
+		buf.append("    /**\n");
+		buf.append("     * A comment.\n");
+		buf.append("     * @param a\n");
+		buf.append("     * @throws IOException\n");
+		buf.append("     */\n");
+		buf.append("    public E(int a) throws IOException {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
+	
+	public void testMissingTypeComment() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<A, B> {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		ArrayList proposals= collectCorrections2(cu, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" * A comment.\n");
+		buf.append(" * @param <A>\n");
+		buf.append(" * @param <B>\n");
+		buf.append(" */\n");
+		buf.append("public class E<A, B> {\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
+	
+	public void testMissingFieldComment() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" */\n");
+		buf.append("public class E {\n");
+		buf.append("    public static final int COLOR= 1;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		ArrayList proposals= collectCorrections2(cu, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" */\n");
+		buf.append("public class E {\n");
+		buf.append("    /**\n");
+		buf.append("     * A field comment for COLOR.\n");
+		buf.append("     */\n");
+		buf.append("    public static final int COLOR= 1;\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
 	
 }

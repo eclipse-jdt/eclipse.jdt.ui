@@ -493,7 +493,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		Assert.isNotNull(monitor);
 		final String separator= getLineSeperator();
 		final CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(getInputTypeCU(), true);
-		final String typeComment= CodeGeneration.getTypeComment(unit, fNewInterfaceName, separator);//$NON-NLS-1$
+		String[] typeParamNames= new String[0]; // TODO type parameter names
+		final String typeComment= CodeGeneration.getTypeComment(unit, fNewInterfaceName, typeParamNames, separator);//$NON-NLS-1$
 		final String block= createInterfaceSource(cuNode);
 		String content= CodeGeneration.getCompilationUnitContent(unit, typeComment, block, getLineSeperator());
 		if (content == null) {

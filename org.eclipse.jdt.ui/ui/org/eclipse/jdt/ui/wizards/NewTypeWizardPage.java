@@ -1855,7 +1855,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				typeName.append(JavaModelUtil.getTypeQualifiedName(getEnclosingType())).append('.');
 			}
 			typeName.append(getTypeName());
-			String comment= CodeGeneration.getTypeComment(parentCU, typeName.toString(), lineDelimiter);
+			String[] typeParamNames= new String[0];
+			String comment= CodeGeneration.getTypeComment(parentCU, typeName.toString(), typeParamNames, lineDelimiter);
 			if (comment != null && isValidComment(comment)) {
 				return comment;
 			}

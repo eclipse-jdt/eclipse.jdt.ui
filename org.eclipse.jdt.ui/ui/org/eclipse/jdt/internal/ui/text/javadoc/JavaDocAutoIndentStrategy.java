@@ -42,6 +42,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -244,7 +245,8 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 		if (document.get(sourceRange.getOffset(), sourceRange.getLength()).lastIndexOf("/**", type.getNameRange().getOffset() - sourceRange.getOffset()) + sourceRange.getOffset() != partition.getOffset()) //$NON-NLS-1$
 			return null;
 
-		String comment= CodeGeneration.getTypeComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), lineDelimiter);
+		String[] typeParamNames= StubUtility.getTypeParameterNames(type.getTypeParameters());
+		String comment= CodeGeneration.getTypeComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), typeParamNames, lineDelimiter);
 		if (comment != null) {
 			return prepareTemplateComment(comment.trim(), indentation, lineDelimiter);
 		}

@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.TypeParameter;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
@@ -101,7 +102,8 @@ public class StubUtility {
 			if (settings.methodOverwrites && returnType != null) {
 				overridden= JavaModelUtil.findMethod(methName, method.getParameterTypes(), false, definingType.getMethods());
 			}
-			String comment= getMethodComment(cu, destTypeName, methName, paramNames, method.getExceptionTypes(), returnType, overridden, lineDelimiter);
+			String[] typeParameterNames= getTypeParameterNames(method.getTypeParameters());
+			String comment= getMethodComment(cu, destTypeName, methName, paramNames, method.getExceptionTypes(), returnType, typeParameterNames, overridden, lineDelimiter);
 			if (comment != null) {
 				buf.append(comment);
 			} else {
@@ -368,10 +370,10 @@ public class StubUtility {
 		return evaluateTemplate(context, template);
 	}		
 
-	/*
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getTypeComment(ICompilationUnit, String, String)
+	/**
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getTypeComment(ICompilationUnit, String, String[], String)
 	 */		
-	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String lineDelim) throws CoreException {
+	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String[] typeParameterNames, String lineDelim) throws CoreException {
 		Template template= JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.TYPECOMMENT);
 		if (template == null) {
 			return null;
@@ -380,7 +382,35 @@ public class StubUtility {
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, Signature.getQualifier(typeQualifiedName));
 		context.setVariable(CodeTemplateContextType.TYPENAME, Signature.getSimpleName(typeQualifiedName));
-		return evaluateTemplate(context, template);
+
+		TemplateBuffer buffer;
+		try {
+			buffer= context.evaluate(template);
+		} catch (BadLocationException e) {
+			throw new CoreException(Status.CANCEL_STATUS);
+		} catch (TemplateException e) {
+			throw new CoreException(Status.CANCEL_STATUS);
+		}
+		String str= buffer.getString();
+		if (Strings.containsOnlyWhitespaces(str)) {
+			return null;
+		}
+		
+		TemplateVariable position= findTagVariable(buffer); // look if Javadoc tags have to be added
+		if (position == null) {
+			return str;
+		}
+		
+		IDocument document= new Document(str);
+		int[] tagOffsets= position.getOffsets();
+		for (int i= tagOffsets.length - 1; i >= 0; i--) { // from last to first
+			try {
+				insertTag(document, tagOffsets[i], position.getLength(), EMPTY, EMPTY, null, typeParameterNames, false, lineDelim);
+			} catch (BadLocationException e) {
+				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
+			}
+		}
+		return document.get();
 	}
 
 	private static String[] getParameterTypesQualifiedNames(IMethodBinding binding) {
@@ -434,21 +464,30 @@ public class StubUtility {
 		return buf.toString();
 	}
 	
-	/*
+	public static String[] getTypeParameterNames(ITypeParameter[] typeParameters) {
+		String[] typeParametersNames= new String[typeParameters.length];
+		for (int i= 0; i < typeParameters.length; i++) {
+			typeParametersNames[i]= typeParameters[i].getElementName();
+		}
+		return typeParametersNames;
+	}
+	
+	/**
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(IMethod,IMethod,String)
 	 */
 	public static String getMethodComment(IMethod method, IMethod overridden, String lineDelimiter) throws CoreException {
 		String retType= method.isConstructor() ? null : method.getReturnType();
 		String[] paramNames= method.getParameterNames();
+		String[] typeParameterNames= getTypeParameterNames(method.getTypeParameters());
 		
 		return getMethodComment(method.getCompilationUnit(), method.getDeclaringType().getElementName(),
-			method.getElementName(), paramNames, method.getExceptionTypes(), retType, overridden, lineDelimiter);
+			method.getElementName(), paramNames, method.getExceptionTypes(), retType, typeParameterNames, overridden, lineDelimiter);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(ICompilationUnit, String, String, String[], String[], String, IMethod, String)
+	/**
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(ICompilationUnit, String, String, String[], String[], String, String[], IMethod, String)
 	 */
-	public static String getMethodComment(ICompilationUnit cu, String typeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, IMethod overridden, String lineDelimiter) throws CoreException {
+	public static String getMethodComment(ICompilationUnit cu, String typeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, String[] typeParameterNames, IMethod overridden, String lineDelimiter) throws CoreException {
 		String templateName= CodeTemplateContextType.METHODCOMMENT;
 		if (retTypeSig == null) {
 			templateName= CodeTemplateContextType.CONSTRUCTORCOMMENT;
@@ -491,7 +530,7 @@ public class StubUtility {
 			return str;
 		}
 			
-		IDocument textBuffer= new Document(str);
+		IDocument document= new Document(str);
 		String[] exceptionNames= new String[excTypeSig.length];
 		for (int i= 0; i < excTypeSig.length; i++) {
 			exceptionNames[i]= Signature.toString(excTypeSig[i]);
@@ -500,12 +539,12 @@ public class StubUtility {
 		int[] tagOffsets= position.getOffsets();
 		for (int i= tagOffsets.length - 1; i >= 0; i--) { // from last to first
 			try {
-				insertTag(textBuffer, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, false, lineDelimiter);
+				insertTag(document, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, typeParameterNames, false, lineDelimiter);
 			} catch (BadLocationException e) {
 				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 			}
 		}
-		return textBuffer.get();
+		return document.get();
 	}
 
 	public static String getFieldComment(ICompilationUnit cu, String typeName, String fieldName, String lineDelimiter) throws CoreException {
@@ -522,7 +561,7 @@ public class StubUtility {
 	}	
 	
 	
-	/*
+	/**
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getSetterComment(ICompilationUnit, String, String, String, String, String, String, String)
 	 */
 	public static String getSetterComment(ICompilationUnit cu, String typeName, String methodName, String fieldName, String fieldType, String paramName, String bareFieldName, String lineDelimiter) throws CoreException {
@@ -544,7 +583,7 @@ public class StubUtility {
 		return evaluateTemplate(context, template);
 	}	
 	
-	/*
+	/**
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getGetterComment(ICompilationUnit, String, String, String, String, String, String)
 	 */
 	public static String getGetterComment(ICompilationUnit cu, String typeName, String methodName, String fieldName, String fieldType, String bareFieldName, String lineDelimiter) throws CoreException {
@@ -582,7 +621,7 @@ public class StubUtility {
 		return str;
 	}
 
-	/*
+	/**
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(ICompilationUnit, String, MethodDeclaration, IMethodBinding, String)
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, IMethodBinding overridden, String lineDelimiter) throws CoreException {
@@ -660,15 +699,21 @@ public class StubUtility {
 		}
 			
 		IDocument textBuffer= new Document(str);
+		List typeParams= decl.typeParameters();
+		String[] typeParamNames= new String[typeParams.size()];
+		for (int i= 0; i < typeParamNames.length; i++) {
+			TypeParameter elem= (TypeParameter) typeParams.get(i);
+			typeParamNames[i]= elem.getName().getIdentifier();
+		}
 		List params= decl.parameters();
 		String[] paramNames= new String[params.size()];
-		for (int i= 0; i < params.size(); i++) {
+		for (int i= 0; i < paramNames.length; i++) {
 			SingleVariableDeclaration elem= (SingleVariableDeclaration) params.get(i);
 			paramNames[i]= elem.getName().getIdentifier();
 		}
 		List exceptions= decl.thrownExceptions();
 		String[] exceptionNames= new String[exceptions.size()];
-		for (int i= 0; i < exceptions.size(); i++) {
+		for (int i= 0; i < exceptionNames.length; i++) {
 			exceptionNames[i]= ASTNodes.getSimpleNameIdentifier((Name) exceptions.get(i));
 		}
 		
@@ -679,7 +724,7 @@ public class StubUtility {
 		int[] tagOffsets= position.getOffsets();
 		for (int i= tagOffsets.length - 1; i >= 0; i--) { // from last to first
 			try {
-				insertTag(textBuffer, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, isDeprecated, lineDelimiter);
+				insertTag(textBuffer, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, typeParamNames, isDeprecated, lineDelimiter);
 			} catch (BadLocationException e) {
 				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 			}
@@ -698,7 +743,7 @@ public class StubUtility {
 		return null;		
 	}	
 	
-	private static void insertTag(IDocument textBuffer, int offset, int length, String[] paramNames, String[] exceptionNames, String returnType, boolean isDeprecated, String lineDelimiter) throws BadLocationException {
+	private static void insertTag(IDocument textBuffer, int offset, int length, String[] paramNames, String[] exceptionNames, String returnType, String[] typeParameterNames, boolean isDeprecated, String lineDelimiter) throws BadLocationException {
 		IRegion region= textBuffer.getLineInformationOfOffset(offset);
 		if (region == null) {
 			return;
@@ -706,35 +751,61 @@ public class StubUtility {
 		String lineStart= textBuffer.get(region.getOffset(), offset - region.getOffset());
 		
 		StringBuffer buf= new StringBuffer();
+		for (int i= 0; i < typeParameterNames.length; i++) {
+			if (buf.length() > 0) {
+				buf.append(lineDelimiter).append(lineStart);
+			}
+			buf.append("@param <").append(typeParameterNames[i]).append('>'); //$NON-NLS-1$
+		}
 		for (int i= 0; i < paramNames.length; i++) {
 			if (buf.length() > 0) {
-				buf.append(lineDelimiter); buf.append(lineStart);
+				buf.append(lineDelimiter).append(lineStart);
 			}
-			buf.append("@param "); buf.append(paramNames[i]); //$NON-NLS-1$
+			buf.append("@param ").append(paramNames[i]); //$NON-NLS-1$
 		}
 		if (returnType != null && !returnType.equals("void")) { //$NON-NLS-1$
 			if (buf.length() > 0) {
-				buf.append(lineDelimiter); buf.append(lineStart);
+				buf.append(lineDelimiter).append(lineStart);
 			}			
 			buf.append("@return"); //$NON-NLS-1$
 		}
 		if (exceptionNames != null) {
 			for (int i= 0; i < exceptionNames.length; i++) {
 				if (buf.length() > 0) {
-					buf.append(lineDelimiter); buf.append(lineStart);
+					buf.append(lineDelimiter).append(lineStart);
 				}
-				buf.append("@throws "); buf.append(exceptionNames[i]); //$NON-NLS-1$
+				buf.append("@throws ").append(exceptionNames[i]); //$NON-NLS-1$
 			}
 		}		
 		if (isDeprecated) {
 			if (buf.length() > 0) {
-				buf.append(lineDelimiter); buf.append(lineStart);
+				buf.append(lineDelimiter).append(lineStart);
 			}
 			buf.append("@deprecated"); //$NON-NLS-1$
+		}
+		if (buf.length() == 0 && isAllCommentWhitespace(lineStart)) {
+			int prevLine= textBuffer.getLineOfOffset(offset) -1;
+			if (prevLine > 0) {
+				IRegion prevRegion= textBuffer.getLineInformation(prevLine);
+				int prevLineEnd= prevRegion.getOffset() + prevRegion.getLength();
+				// clear full line
+				textBuffer.replace(prevLineEnd, offset + length - prevLineEnd, ""); //$NON-NLS-1$
+				return;
+			}
 		}
 		textBuffer.replace(offset, length, buf.toString());
 	}
 	
+	private static boolean isAllCommentWhitespace(String lineStart) {
+		for (int i= 0; i < lineStart.length(); i++) {
+			char ch= lineStart.charAt(i);
+			if (!Character.isWhitespace(ch) && ch != '*') {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	private static boolean isPrimitiveType(String typeName) {
 		char first= Signature.getElementType(typeName).charAt(0);
 		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED && first != Signature.C_TYPE_VARIABLE);

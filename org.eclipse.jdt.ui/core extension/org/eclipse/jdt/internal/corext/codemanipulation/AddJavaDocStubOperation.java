@@ -64,7 +64,8 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	}
 
 	private String createTypeComment(IType type, String lineDelimiter) throws CoreException {
-		return CodeGeneration.getTypeComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), lineDelimiter);
+		String[] typeParameterNames= StubUtility.getTypeParameterNames(type.getTypeParameters());
+		return CodeGeneration.getTypeComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), typeParameterNames, lineDelimiter);
 	}		
 	
 	private String createMethodComment(IMethod meth, String lineDelimiter) throws CoreException {
