@@ -19,6 +19,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 
@@ -41,8 +42,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class TreeHierarchyLayoutProblemsDecorator implements ILabelDecorator {
 
+	private static final int NO_ADORNMENT= 0;
 	private ImageDescriptorRegistry fRegistry;
 	private boolean fIsFlatLayout;
+	
+	private ListenerList fListenerList= new ListenerList(1);
 	
 	public TreeHierarchyLayoutProblemsDecorator(ImageDescriptorRegistry registry) {
 		if (registry == null) {
@@ -60,6 +64,9 @@ public class TreeHierarchyLayoutProblemsDecorator implements ILabelDecorator {
 			if (!fIsFlatLayout && element instanceof IPackageFragment) {
 				IPackageFragment fragment= (IPackageFragment) element;
 				
+				if(!fragment.exists())
+					return image;
+				
 				//the default package will be marked by the other decorator
 				if(fragment.isDefaultPackage())
 					return image;
@@ -76,13 +83,21 @@ public class TreeHierarchyLayoutProblemsDecorator implements ILabelDecorator {
 		return image;
 	}
 	
-	private Image decorateBasedOnHierarchy(IResource resource, Image image) {
+	public Image decorateImage(Image image, int adornment){	
+		return adornImage(image, adornment);
+	}
+	
+	
+	protected Image decorateBasedOnHierarchy(IResource resource, Image image) {
 		
-		if(resource==null)
-			return image;
-		
+		if (resource==null)
+			return image;	
 		int adornmentFlags= computeAdornmentFlags(resource);
-		if (adornmentFlags != 0) {
+		return adornImage(image, adornmentFlags);
+	}
+	
+	private Image adornImage(Image image, int adornmentFlags) {
+		if (adornmentFlags != NO_ADORNMENT && image!=null) {
 			ImageDescriptor baseImage= new ImageImageDescriptor(image);
 			Rectangle bounds= image.getBounds();
 			return fRegistry.get(new JavaElementImageDescriptor(baseImage, adornmentFlags, new Point(bounds.width, bounds.height)));
@@ -90,36 +105,43 @@ public class TreeHierarchyLayoutProblemsDecorator implements ILabelDecorator {
 		return image;
 	}
 
-	private int computeAdornmentFlags(IResource resource) {
+	/**
+	 * Computes the adornment for a resource based on the most severe
+	 * marker of its children.
+	 * 
+	 * @param resource is the IResource on which adornment is being calculated
+	 * @return int the adornment flag value
+	 */
+	public int computeAdornmentFlags(IResource resource) {
 		if (resource == null || !resource.isAccessible()) {
-			return 0;
+			return NO_ADORNMENT;
 		}
-		int info= 0;
+		int flag= NO_ADORNMENT;
 		try {
 
 			IMarker[] markers= resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ONE);
 			if (markers.length != 0) {
 				//it's already been marked by a ProblemsLabelDecorator
-				return info;
+				return NO_ADORNMENT;
 			}
-
+			//find marker with highest severity
 			markers= resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
 			if (markers != null) {
-				for (int i= 0; i < markers.length && (info != JavaElementImageDescriptor.ERROR); i++) {
+				for (int i= 0; i < markers.length && (flag != JavaElementImageDescriptor.ERROR); i++) {
 					IMarker curr= markers[i];
 
 					int priority= curr.getAttribute(IMarker.SEVERITY, -1);
-					if (priority == IMarker.SEVERITY_WARNING) {
-						info= JavaElementImageDescriptor.WARNING;
-					} else if (priority == IMarker.SEVERITY_ERROR) {
-						info= JavaElementImageDescriptor.ERROR;
+					if (priority == IMarker.SEVERITY_WARNING && flag==NO_ADORNMENT) {
+						flag= JavaElementImageDescriptor.WARNING;
+					} else if (priority == IMarker.SEVERITY_ERROR && (flag==NO_ADORNMENT || flag==JavaElementImageDescriptor.WARNING)) {
+						return JavaElementImageDescriptor.ERROR;
 					}
 				}
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}
-		return info;
+		return flag;
 	}
 
 	public void setIsFlatLayout(boolean state) {
@@ -137,7 +159,7 @@ public class TreeHierarchyLayoutProblemsDecorator implements ILabelDecorator {
 	 * @see org.eclipse.jface.viewers.IBaseLabelProvider#addListener(org.eclipse.jface.viewers.ILabelProviderListener)
 	 */
 	public void addListener(ILabelProviderListener listener) {
-		
+		fListenerList.add(listener);
 	}
 
 	/*
@@ -157,5 +179,6 @@ public class TreeHierarchyLayoutProblemsDecorator implements ILabelDecorator {
 	 * @see org.eclipse.jface.viewers.IBaseLabelProvider#removeListener(org.eclipse.jface.viewers.ILabelProviderListener)
 	 */
 	public void removeListener(ILabelProviderListener listener) {
+		fListenerList.remove(listener);
 	}
 }
