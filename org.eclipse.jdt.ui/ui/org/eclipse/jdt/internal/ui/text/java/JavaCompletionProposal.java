@@ -10,6 +10,17 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -26,6 +37,7 @@ public class JavaCompletionProposal implements ICompletionProposal {
 	private Image fImage;
 	private IContextInformation fContextInformation;
 	private ProposalInfo fProposalInfo;
+	private IImportDeclaration fImportDeclaration;
 
 	/**
 	 * Creates a new completion proposal based on the provided information.  The replacement string is
@@ -37,7 +49,7 @@ public class JavaCompletionProposal implements ICompletionProposal {
 	 * @param cursorPosition the position of the cursor following the insert relative to replacementOffset
 	 */
 	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition) {
-		this(replacementString, replacementOffset, replacementLength, cursorPosition, null, null, null, null);
+		this(replacementString, replacementOffset, replacementLength, cursorPosition, null, null, null, null, null);
 	}
 
 	/**
@@ -50,9 +62,11 @@ public class JavaCompletionProposal implements ICompletionProposal {
 	 * @param image the image to display for this proposal
 	 * @param displayString the string to be displayed for the proposal
 	 * @param contentInformation the context information associated with this proposal
-	 * @param additionalProposalInfo the additional information associated with this proposal
+	 * @param optional import declaration to be added. Can be <code>null</code>. The underlying compilation unit
+	 * is assumed to be compatible with the document passed in <code>apply</code>.
+	 * @param additionalProposalInfo the additional information associated with this proposal or <code>null</code>
 	 */
-	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition, Image image, String displayString, IContextInformation contextInformation, ProposalInfo proposalInfo) {
+	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition, Image image, String displayString, IContextInformation contextInformation, IImportDeclaration importDeclaration, ProposalInfo proposalInfo) {
 		Assert.isNotNull(replacementString);
 		Assert.isTrue(replacementOffset >= 0);
 		Assert.isTrue(replacementLength >= 0);
@@ -66,6 +80,7 @@ public class JavaCompletionProposal implements ICompletionProposal {
 		fDisplayString= displayString;
 		fContextInformation= contextInformation;
 		fProposalInfo= proposalInfo;
+		fImportDeclaration= importDeclaration;
 	}
 
 	/*
@@ -74,10 +89,39 @@ public class JavaCompletionProposal implements ICompletionProposal {
 	public void apply(IDocument document) {
 		try {
 			document.replace(fReplacementOffset, fReplacementLength, fReplacementString);
+			if (fImportDeclaration != null) {
+				applyImport(document);
+			}
 		} catch (BadLocationException x) {
 			// ignore
 		}
 	}
+	
+	private void applyImport(IDocument document) {
+		ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(fImportDeclaration, IJavaElement.COMPILATION_UNIT);
+		if (cu != null) {
+			try {
+				IType[] types= cu.getTypes();
+				if (types.length == 0 || types[0].getSourceRange().getOffset() > fReplacementOffset) {
+					// do not add import for code assist on import statements
+					return;
+				}
+
+				int oldLen= document.getLength();
+				
+				ImportsStructure impStructure= new ImportsStructure(cu);
+				impStructure.addImport(fImportDeclaration.getElementName());
+				impStructure.create(document, null);
+				
+				fCursorPosition += document.getLength() - oldLen;
+				
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
+		}
+	}
+	
+	
 	
 	/*
 	 * @see ICompletionProposal#getSelection

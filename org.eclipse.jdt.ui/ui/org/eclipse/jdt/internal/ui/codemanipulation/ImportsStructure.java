@@ -223,22 +223,33 @@ public class ImportsStructure implements IImportsStructure {
 	public IImportDeclaration[] create(boolean save, IProgressMonitor monitor) throws CoreException {
 		DocumentManager docManager= new DocumentManager(fCompilationUnit);
 		docManager.connect();
-		ArrayList created= new ArrayList();
 		try {
-			performCreate(created, docManager.getDocument());
+			IImportDeclaration[] res= create(docManager.getDocument(), monitor);			
 			if (save) {
 				docManager.save(null);
-			}	
+			}
+			return res;
 		} finally {
 			docManager.disconnect();
+		}
+	}	
+
+	/**
+	 * Creates all new elements in the import structure.
+	 * Returns all created IImportDeclaration. Does not return null
+	 */	
+	public IImportDeclaration[] create(IDocument doc, IProgressMonitor monitor) throws CoreException {
+		ArrayList created= new ArrayList();
+		try {
+			performCreate(created, doc);
+		} finally {
 			if (monitor != null) {
 				monitor.done();
 			}
 		}
-		IImportDeclaration[] result= new IImportDeclaration[created.size()];
-		created.toArray(result);
-		return result;
-	}		
+		return (IImportDeclaration[]) created.toArray(new IImportDeclaration[created.size()]);	
+	}
+			
 		
 	private int getPackageStatementEndPos() throws JavaModelException {
 		IPackageDeclaration[] packDecls= fCompilationUnit.getPackageDeclarations();

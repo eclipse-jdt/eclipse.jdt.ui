@@ -347,7 +347,7 @@ public class CompletionEvaluator {
 		ICompilationUnit preparedCU= createPreparedCU(wordStart, fCurrentPos);
 		if (preparedCU != null) {
 			ResultCollector collector= new ResultCollector();
-			collector.reset(preparedCU.getJavaProject());
+			collector.reset(fCompilationUnit.getJavaProject(), fCompilationUnit);
 			try {
 				preparedCU.codeComplete(fCurrentPos, collector);
 			} finally {

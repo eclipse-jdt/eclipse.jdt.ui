@@ -17,11 +17,12 @@ import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICodeCompletionRequestor;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
-
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
  * Bin to collect the proposal of the infrastructure on code assist in a java text.
@@ -36,6 +37,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	protected IMarker fLastProblem;
 	
 	protected IJavaProject fJavaProject;
+	protected ICompilationUnit fCompilationUnit;
 	
 	protected ArrayList[] fResults = new ArrayList[] {
 		fVariables, fFields, fMethods, fTypes, fKeywords, fModifiers, fLabels, fPackages
@@ -50,7 +52,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	 */	
 	public void acceptClass(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end) {
 		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-		fTypes.add(createCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_CLASS, new String(typeName), new String(packageName), false, info));
+		fTypes.add(createCompletionWithImport(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_CLASS, new String(typeName), new String(packageName), false, info));
 	}
 	
 	/**
@@ -97,7 +99,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	 */	
 	public void acceptInterface(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end) {
 		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-		fTypes.add(createCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_INTERFACE, new String(typeName), new String(packageName), false, info));
+		fTypes.add(createCompletionWithImport(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_INTERFACE, new String(typeName), new String(packageName), false, info));
 	}
 	
 	/**
@@ -183,7 +185,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		}
 			
 		boolean userMustCompleteParameters= (contextInformation != null && completionName.length > 0);
-		fMethods.add(createCompletion(start, end, new String(completionName), iconName, signature, new String(declaringTypeName), false, !userMustCompleteParameters, contextInformation, info));
+		fMethods.add(createCompletion(start, end, new String(completionName), iconName, signature, new String(declaringTypeName), false, !userMustCompleteParameters, contextInformation, null, info));
 	}
 	
 	/**
@@ -206,7 +208,7 @@ public class ResultCollector implements ICodeCompletionRequestor {
 	 */	
 	public void acceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end) {
 		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-		fTypes.add(createCompletion(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_CLASS, new String(typeName), new String(packageName), false, info));
+		fTypes.add(createCompletionWithImport(start, end, new String(completionName), JavaPluginImages.IMG_OBJS_CLASS, new String(typeName), new String(packageName), false, info));
 	}
 	
 	public String getErrorMessage() {
@@ -238,13 +240,24 @@ public class ResultCollector implements ICodeCompletionRequestor {
 			return JavaPluginImages.get(name);
 		return null;
 	}
-	
-	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, ProposalInfo proposalInfo) {
-		return createCompletion(start, end, completion, iconName, name, qualification, isKeyWord, true, null, proposalInfo);
+
+	protected Object createCompletionWithImport(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, ProposalInfo proposalInfo) {
+		IImportDeclaration importDeclaration= null;
+		if (qualification != null && fCompilationUnit != null) {
+			if (completion.equals(JavaModelUtil.concatenateName(qualification, name))) {
+				importDeclaration= fCompilationUnit.getImport(completion);
+				completion= name;
+			}
+		}
+		return createCompletion(start, end, completion, iconName, name, qualification, isKeyWord, true, null, importDeclaration, proposalInfo);
 	}
 	
-	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, boolean placeCursorBehindInsertion, ProposalContextInformation contextInformation, ProposalInfo proposalInfo) {
+	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, ProposalInfo proposalInfo) {
+		return createCompletion(start, end, completion, iconName, name, qualification, isKeyWord, true, null, null, proposalInfo);
+	}
 		
+	protected Object createCompletion(int start, int end, String completion, String iconName, String name, String qualification, boolean isKeyWord, boolean placeCursorBehindInsertion, ProposalContextInformation contextInformation, IImportDeclaration importDeclaration, ProposalInfo proposalInfo) {
+
 		if (qualification != null)
 			name += (" - " + qualification); //$NON-NLS-1$
 			
@@ -259,8 +272,10 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		Image icon= getIcon(iconName);
 		if (contextInformation != null)
 			contextInformation.setImage(icon);
-			
-		return new JavaCompletionProposal(completion, start, length, cursorPosition, icon, name, contextInformation, proposalInfo);
+		
+		return new JavaCompletionProposal(completion, start, length, cursorPosition, icon, name, contextInformation, importDeclaration, proposalInfo);
+
+	
 	} 
 		
 	protected int compare(Object o1, Object o2) {
@@ -300,8 +315,16 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		return collection;
 	}
 	
-	public void reset(IJavaProject jproject) {
+	/**
+	 * Specifies the context of the code assist operation.
+	 * @param jproject The Java project to which the underlying source belongs.
+	 * Needed to find types referred.
+	 * @param cu The compilation unit that is edited. Used to add import statements.
+	 * Can be <code>null</code> i no import statements should be added.
+	 */
+	public void reset(IJavaProject jproject, ICompilationUnit cu) {
 		fJavaProject= jproject;
+		fCompilationUnit= cu;
 		
 		fOffset= -1;
 		fLength= -1;
