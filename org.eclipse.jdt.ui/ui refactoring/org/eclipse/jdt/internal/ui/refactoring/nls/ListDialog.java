@@ -2,7 +2,8 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.nls;
+package org.eclipse.jdt.internal.ui.refactoring.nls;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
@@ -19,7 +20,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.dialogs.SelectionDialog;
-class ListDialog extends SelectionDialog {
+
+class ListDialog extends SelectionDialog {
 
 	private IStructuredContentProvider fContentProvider;
 	private ILabelProvider fLabelProvider;
@@ -28,7 +30,8 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 	
 	public ListDialog(Shell parent) {
 		super(parent);
-	}
+	}
+
 	protected void setInput(Object input) {
 		fInput= input;
 	}
