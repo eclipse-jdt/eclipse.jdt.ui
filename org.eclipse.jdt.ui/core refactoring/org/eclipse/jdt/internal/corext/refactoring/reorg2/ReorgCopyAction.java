@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
+import org.eclipse.jdt.internal.ui.reorg.NewNameQueries;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
@@ -102,7 +103,7 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 		 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.
 		 */
 		//TODO fix the queries
-		refactoring.setNewNameQueries(new org.eclipse.jdt.internal.ui.reorg.NewNameQueries(wizard));
+		refactoring.setNewNameQueries(new NewNameQueries(wizard));
 		refactoring.setReorgQueries(new ReorgQueries(wizard));
 		if (refactoring != null)
 			new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), false); //$NON-NLS-1$
