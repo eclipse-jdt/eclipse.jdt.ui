@@ -401,8 +401,10 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	
 	//anonymous inner class
 	public void testAnon0() throws Exception{
-		//helper2_fail();
 		helper2();
 	}		
 	
+	public void testLocal0() throws Exception{
+		helper2();
+	}			
 }
