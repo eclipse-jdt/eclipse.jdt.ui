@@ -700,10 +700,11 @@ class ReorgPolicyFactory {
 					break;
 				case IJavaElement.TYPE:
 					nodeDestination= null;
-					if (((IType) javaElementDestination).isAnonymous()) {
-						destinationContainer= ASTNodeSearchUtil.getClassInstanceCreationNode((IType) javaElementDestination, destinationCuNode);
+					IType typeDestination= (IType) javaElementDestination;
+					if (typeDestination.isAnonymous()) {
+						destinationContainer= ASTNodeSearchUtil.getClassInstanceCreationNode(typeDestination, destinationCuNode).getAnonymousClassDeclaration();
 					} else {
-						destinationContainer= ASTNodeSearchUtil.getTypeDeclarationNode((IType) javaElementDestination, destinationCuNode);
+						destinationContainer= ASTNodeSearchUtil.getTypeDeclarationNode(typeDestination, destinationCuNode);
 					}
 					break;
 				default:
