@@ -154,9 +154,9 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 					IPackageFragment frag= (IPackageFragment) element;
 
 					String name= element.getElementName();
-					if (!"".equals(fragmentname) && name.startsWith(fragmentname) && !name.equals(fragmentname)) {//$NON-NLS-1$
+					if (frag.exists() && !IPackageFragment.DEFAULT_PACKAGE_NAME.equals(fragmentname) && name.startsWith(fragmentname) && !name.equals(fragmentname)) {
 						String tail= name.substring(fragmentname.length() + 1); 
-						if (!"".equals(tail) && (tail.indexOf(".") == -1)) { //$NON-NLS-1$ //$NON-NLS-2$   
+						if (!IPackageFragment.DEFAULT_PACKAGE_NAME.equals(tail) && (tail.indexOf(".") == -1)) { //$NON-NLS-1$
 							list.add(frag);
 						}
 					}
