@@ -367,12 +367,18 @@ public class LocalCorrectionsSubProcessor {
 	}
 	
 	public static void addUnreachableCatchProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
-		ICompilationUnit cu= context.getCompilationUnit();
-
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (selectedNode == null) {
 			return;
 		}
+
+		QuickAssistProcessor.getCatchClauseToThrowsProposals(context, selectedNode, proposals);
+		
+		if (true) {
+			return;
+		}
+		
+		ICompilationUnit cu= context.getCompilationUnit();
 		
 		if (selectedNode.getNodeType() == ASTNode.BLOCK && selectedNode.getParent().getNodeType() == ASTNode.CATCH_CLAUSE ) {
 			CatchClause clause= (CatchClause) selectedNode.getParent();

@@ -79,6 +79,10 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#getAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[])
 	 */
 	public IJavaCompletionProposal[] getAssists(IInvocationContext context, IProblemLocation[] locations) throws CoreException {
+		if (locations != null && locations.length > 0) {
+			return new IJavaCompletionProposal[0];
+		}
+		
 		try {
 			ICompilationUnit cu= context.getCompilationUnit();
 			IDocument document= getDocument(cu);

@@ -69,10 +69,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (coveringNode != null) {
 			ArrayList resultingCollections= new ArrayList();
 			// quick assists that show up also if there is an error/warning
-			getCatchClauseToThrowsProposals(context, coveringNode, resultingCollections);
 			getRenameLocalProposals(context, coveringNode, resultingCollections);
 		
 			if (locations == null || locations.length == 0) {
+				getCatchClauseToThrowsProposals(context, coveringNode, resultingCollections);
 				getAssignToVariableProposals(context, coveringNode, resultingCollections);
 				getAssignParamToFieldProposals(context, coveringNode, resultingCollections);
 				getUnWrapProposals(context, coveringNode, resultingCollections);
@@ -304,7 +304,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;	
 		}
 		Statement statement= ASTResolving.findParentStatement(node);
-		if (tryStatement != statement) {
+		if (tryStatement != statement && tryStatement.getBody() != statement) {
 			return false; // an node inside a catch or finally block		
 		}
 		
@@ -356,11 +356,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}	
 
-	private boolean getCatchClauseToThrowsProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
+	public static boolean getCatchClauseToThrowsProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		CatchClause catchClause= (CatchClause) ASTResolving.findAncestor(node, ASTNode.CATCH_CLAUSE);
 		if (catchClause == null) {
 			return false;
 		}
+		
+		Statement statement= ASTResolving.findParentStatement(node);
+		if (statement != catchClause.getParent() && statement != catchClause.getBody()) {
+			return false; // selection is in a statement inside the body
+		}
+		
 		Type type= catchClause.getException().getType();
 		if (!type.isSimpleType()) {
 			return false;
@@ -376,10 +382,40 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		
 		MethodDeclaration methodDeclaration= (MethodDeclaration) bodyDeclaration;
+		{		
+			ASTRewrite rewrite= new ASTRewrite(methodDeclaration);
+			
+			removeCatchBlock(rewrite, methodDeclaration, catchClause);
+	
+			ITypeBinding binding= type.resolveBinding();
+			if (binding == null || isNotYetThrown(binding, methodDeclaration.thrownExceptions())) {
+				Name name= ((SimpleType) type).getName();
+				Name newName= (Name) ASTNode.copySubtree(catchClause.getAST(), name);
+				rewrite.markAsInserted(newName);
+				methodDeclaration.thrownExceptions().add(newName);
+			}
 		
-		ASTRewrite rewrite= new ASTRewrite(methodDeclaration);
-		AST ast= methodDeclaration.getAST();
+			String label= CorrectionMessages.getString("QuickAssistProcessor.catchclausetothrows.description"); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 4, image);
+			proposal.ensureNoModifications();
+			resultingCollections.add(proposal);
+		}
+		{
+			ASTRewrite rewrite= new ASTRewrite(methodDeclaration);
+			
+			removeCatchBlock(rewrite, methodDeclaration, catchClause);
+			String label= CorrectionMessages.getString("QuickAssistProcessor.removecatchclause.description"); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+			proposal.ensureNoModifications();
+			resultingCollections.add(proposal);
+		}
 		
+		return true;
+	}
+	
+	private static void removeCatchBlock(ASTRewrite rewrite, MethodDeclaration methodDeclaration, CatchClause catchClause) {
 		TryStatement tryStatement= (TryStatement) catchClause.getParent();
 		if (tryStatement.catchClauses().size() > 1 || tryStatement.getFinally() != null) {
 			rewrite.markAsRemoved(catchClause);
@@ -392,23 +428,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				rewrite.markAsRemoved(tryStatement);
 			}
 		}
-		ITypeBinding binding= type.resolveBinding();
-		if (binding == null || isNotYetThrown(binding, methodDeclaration.thrownExceptions())) {
-			Name name= ((SimpleType) type).getName();
-			Name newName= (Name) ASTNode.copySubtree(ast, name);
-			rewrite.markAsInserted(newName);
-			methodDeclaration.thrownExceptions().add(newName);
-		}			
-	
-		String label= CorrectionMessages.getString("QuickAssistProcessor.catchclausetothrows.description"); //$NON-NLS-1$
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
-		proposal.ensureNoModifications();
-		resultingCollections.add(proposal);
-		return true;
 	}
-	
-	private boolean isNotYetThrown(ITypeBinding binding, List thrownExcpetions) {
+
+	private static boolean isNotYetThrown(ITypeBinding binding, List thrownExcpetions) {
 		for (int i= 0; i < thrownExcpetions.size(); i++) {
 			Name name= (Name) thrownExcpetions.get(i);
 			ITypeBinding elem= (ITypeBinding) name.resolveBinding();
