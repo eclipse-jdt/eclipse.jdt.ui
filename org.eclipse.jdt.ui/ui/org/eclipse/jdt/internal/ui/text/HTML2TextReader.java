@@ -8,16 +8,19 @@ package org.eclipse.jdt.internal.ui.text;
 
 
 import java.io.IOException;
+import java.io.PushbackReader;
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jface.text.TextPresentation;
+
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
 /**
@@ -28,14 +31,14 @@ public class HTML2TextReader extends SubstitutionTextReader {
 	
 	
 	private static final String LINE_DELIM= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		
-	private static HashMap fgEntityLookup;
-	private static List fgTags;
+	private static final Map fgEntityLookup;
+	private static final Set fgTags;
 	
 	static {
 		
-		fgTags= new ArrayList();
+		fgTags= new HashSet();
 		fgTags.add("b"); //$NON-NLS-1$
+		fgTags.add("br"); //$NON-NLS-1$
 		fgTags.add("h5"); //$NON-NLS-1$
 		fgTags.add("p"); //$NON-NLS-1$
 		fgTags.add("dl"); //$NON-NLS-1$
@@ -58,14 +61,14 @@ public class HTML2TextReader extends SubstitutionTextReader {
 	private TextPresentation fTextPresentation;
 	private int fBold= 0;
 	private int fStartOffset= -1;
-	
+
 	/**
 	 * Transforms the html text from the reader to formatted text.
 	 * @param presentation If not <code>null</code>, formattings will be applied to 
 	 * the presentation.
 	*/
 	public HTML2TextReader(Reader reader, TextPresentation presentation) {
-		super(reader);
+		super(new PushbackReader(reader));
 		fTextPresentation= presentation;
 	}
 	
@@ -96,7 +99,6 @@ public class HTML2TextReader extends SubstitutionTextReader {
 	 * @see SubstitutionTextReader#computeSubstitution(char)
 	 */
 	protected String computeSubstitution(int c) throws IOException {
-		
 		if (c == '<')
 			return  processHTMLTag();
 		else if (c == '&')
@@ -104,7 +106,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 		
 		return null;
 	}
-	
+
 	private String html2Text(String html) {
 		
 		String tag= html;
@@ -113,7 +115,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 			
 		if (!fgTags.contains(tag))
 			return ""; //$NON-NLS-1$
-			
+
 		if ("b".equals(html)) { //$NON-NLS-1$
 			startBold();
 			return ""; //$NON-NLS-1$
@@ -137,6 +139,12 @@ public class HTML2TextReader extends SubstitutionTextReader {
 			stopBold();
 			return ""; //$NON-NLS-1$
 		}
+
+		if ("p".equals(html)) //$NON-NLS-1$
+			return LINE_DELIM;
+
+		if ("br".equals(html)) //$NON-NLS-1$
+			return LINE_DELIM;
 		
 		if ("/p".equals(html)) //$NON-NLS-1$
 			return LINE_DELIM;
@@ -164,9 +172,20 @@ public class HTML2TextReader extends SubstitutionTextReader {
 			ch= nextChar();
 			
 			while (ch != -1 && ch != '>') {
-				// to be done: skip strings
-				buf.append(Character.toLowerCase((char)ch));
+				buf.append(Character.toLowerCase((char) ch));
 				ch= nextChar();
+				if (ch == '"'){
+					buf.append(Character.toLowerCase((char) ch));
+					ch= nextChar();
+					while (ch != -1 && ch != '"'){
+						buf.append(Character.toLowerCase((char) ch));
+						ch= nextChar();
+					}	
+				}
+				if (ch == '<'){
+					unread(ch);
+					return '<' + buf.toString();
+				}	
 			}
 			
 			if (ch == -1)
@@ -184,6 +203,10 @@ public class HTML2TextReader extends SubstitutionTextReader {
 		} while (true);
 		 
 		return html2Text(buf.toString());
+	}
+
+	private void unread(int ch) throws IOException {
+		((PushbackReader) getReader()).unread(ch);
 	}
 
 	protected String entity2Text(String symbol) {

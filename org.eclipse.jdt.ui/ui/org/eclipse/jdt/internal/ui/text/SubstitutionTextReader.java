@@ -44,6 +44,13 @@ public abstract class SubstitutionTextReader extends SingleCharReader {
 	protected abstract String computeSubstitution(int c) throws IOException;
 	
 	/**
+	 * Returns the internal reader.
+	 */
+	protected Reader getReader() {
+		return fReader;
+	}
+	 
+	/**
 	 * Returns the next character.
 	 */
 	protected int nextChar() throws IOException {

@@ -100,7 +100,6 @@ public class HTMLPrinter {
 		if (paragraph != null) {
 			buffer.append("<p>"); //$NON-NLS-1$
 			buffer.append(paragraph);
-			buffer.append("</p>"); //$NON-NLS-1$
 		}
 	}
 	
