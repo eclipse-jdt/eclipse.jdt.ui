@@ -36,6 +36,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
@@ -230,8 +231,14 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		
 	public void setSelection(ISourceReference reference) {
 		
-		if (reference == null)
+		if (reference == null || reference instanceof ICompilationUnit) {
+			/*
+			 * If the reference is an ICompilationUnit this unit is either the input
+			 * of this editor or not being displayed. In both cases, nothing should
+			 * happend. (http://dev.eclipse.org/bugs/show_bug.cgi?id=5128)
+			 */
 			return;
+		}
 		
 		try {
 			ISourceRange range= reference.getSourceRange();
