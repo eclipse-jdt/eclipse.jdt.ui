@@ -206,7 +206,6 @@ public class JavaDocLocations {
 		try {
 			IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), project);
 			IClasspathEntry[] entries= container.getClasspathEntries();
-			IClasspathEntry[] newEntries= new IClasspathEntry[entries.length];
 			for (int i= 0; i < entries.length; i++) {
 				IClasspathEntry curr= entries[i];
 				IClasspathEntry updatedEntry= getConvertedEntry(curr, project, oldLocationMap);
@@ -214,7 +213,7 @@ public class JavaDocLocations {
 					entries[i]= updatedEntry;
 				}
 			}
-			BuildPathSupport.requestContainerUpdate(project, container, newEntries);
+			BuildPathSupport.requestContainerUpdate(project, container, entries);
 		} catch (CoreException e) {
 			// ignore
 		}
