@@ -364,7 +364,9 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		protected void createButtonsForButtonBar(Composite parent) {
 			fOpenButton= createButton(parent, OPEN_BUTTON_ID, ActionMessages.getString("FindStringsToExternalizeAction.button.label"), true); //$NON-NLS-1$
 			fOpenButton.setEnabled(false);
-			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+			
+			//looks like a 'close' but it a 'cancel'
+			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
 		}
 
 		protected void buttonPressed(int buttonId) {
