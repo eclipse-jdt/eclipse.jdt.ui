@@ -19,7 +19,8 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Widget;
 
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -37,9 +38,7 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -329,48 +328,23 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 			});
 		}
 	}
-	
-	private IResource getMappingResource(IMember member) {
-		try {
-			ICompilationUnit cu= member.getCompilationUnit();
-			if (cu != null) {
-				return cu.getCorrespondingResource();
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e.getStatus());
-		}			
-		return null;
-	}	
-	
+		
 	/**
-	 * @see TableViewer#mapElement
+	 * @see StructuredViewer#associate(Object, Item)
 	 */
-	protected void mapElement(Object element, Widget widget) {
-		super.mapElement(element, widget);
-		IResource res= getMappingResource((IMember)element);
-		if (res != null && widget instanceof Item) {
-			fProblemItemMapper.addToMap(res, (Item)widget);
+	protected void associate(Object element, Item item) {
+		if (item.getData() != element) {
+			fProblemItemMapper.addToMap(element, item);	
 		}
+		super.associate(element, item);		
 	}
 
 	/**
-	 * @see TableViewer#unmapElement
-	 */	
-	protected void unmapElement(Object element) {
-		super.unmapElement(element);
-		IResource res= getMappingResource((IMember)element);
-		if (res != null) {
-			fProblemItemMapper.removeFromMap(res, element);
-		}
-	}
-
-
-	/**
-	 * @see TableViewer#unmapAllElements
-	 */	
-	protected void unmapAllElements() {
-		super.unmapAllElements();
-		fProblemItemMapper.clearMap();
+	 * @see StructuredViewer#disassociate(Item)
+	 */
+	protected void disassociate(Item item) {
+		fProblemItemMapper.removeFromMap(item.getData(), item);
+		super.disassociate(item);	
 	}
 
 }

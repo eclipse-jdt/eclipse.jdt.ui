@@ -10,6 +10,7 @@ import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -17,11 +18,10 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 public class ProblemTreeViewer extends TreeViewer implements IProblemChangedListener {
 
-	private ProblemItemMapper fSeverityItemMapper;
+	private ProblemItemMapper fProblemItemMapper;
 
 	/**
 	 * @see TreeViewer#TreeViewer(Composite)
@@ -48,7 +48,7 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 	}
 	
 	private void initMapper() {
-		fSeverityItemMapper= new ProblemItemMapper();
+		fProblemItemMapper= new ProblemItemMapper();
 	}
 	
 	
@@ -60,71 +60,29 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 		if (control != null && !control.isDisposed()) {
 			control.getDisplay().asyncExec(new Runnable() {
 				public void run() {
-					fSeverityItemMapper.problemsChanged(changed, (ILabelProvider)getLabelProvider());
+					fProblemItemMapper.problemsChanged(changed, (ILabelProvider)getLabelProvider());
 				}
 			});
 		}
 	}
 	
 	/**
-	 * Called to get the underlying resource of an element that can show
-	 * error markers.
-	 * If the element can not show error markers, return null.
+	 * @see StructuredViewer#associate(Object, Item)
 	 */
-	protected IResource getUnderlyingResource(Object obj) throws CoreException {
-		if (obj instanceof IJavaElement) {
-			IJavaElement elem= (IJavaElement)obj;
-			
-			int type= elem.getElementType();
-			if (type < IJavaElement.TYPE) {
-				return elem.getCorrespondingResource();
-			} else {
-				IJavaElement cu= JavaModelUtility.findElementOfKind(elem, IJavaElement.COMPILATION_UNIT);
-				if (cu != null) {
-					return cu.getCorrespondingResource();
-				}
-			}
+	protected void associate(Object element, Item item) {
+		if (item.getData() != element) {
+			fProblemItemMapper.addToMap(element, item);	
 		}
-		return null;
-	}	
-	
+		super.associate(element, item);		
+	}
+
 	/**
-	 * @see TreeViewer#mapElement
+	 * @see StructuredViewer#disassociate(Item)
 	 */
-	protected void mapElement(Object element, Widget widget) {
-		super.mapElement(element, widget);
-		try {
-			IResource res= getUnderlyingResource(element);
-			if (res != null && widget instanceof Item) {
-				fSeverityItemMapper.addToMap(res, (Item)widget);
-			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e.getStatus());
-		}			
+	protected void disassociate(Item item) {
+		fProblemItemMapper.removeFromMap(item.getData(), item);
+		super.disassociate(item);	
 	}
-
-	/**
-	 * @see TreeViewer#unmapElement
-	 */	
-	protected void unmapElement(Object element) {
-		super.unmapElement(element);
-		try {
-			IResource res= getUnderlyingResource(element);
-			if (res != null) {
-				fSeverityItemMapper.removeFromMap(res, element);
-			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e.getStatus());
-		}			
-	}
-
-	/**
-	 * @see TreeViewer#unmapAllElements
-	 */	
-	protected void unmapAllElements() {
-		super.unmapAllElements();
-		fSeverityItemMapper.clearMap();
-	}	
 
 }
 

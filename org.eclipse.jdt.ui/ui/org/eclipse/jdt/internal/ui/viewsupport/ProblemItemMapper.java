@@ -9,10 +9,15 @@ import java.util.List;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Item;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.viewers.ILabelProvider;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 /**
  * Helper class for updating error markers.
@@ -92,44 +97,45 @@ import org.eclipse.jface.viewers.ILabelProvider;
 	 * @param resource The coresponding resource if the data attached to the item.
 	 * @param item The item (with an attached data element)
 	 */
-	public void addToMap(IResource resource, Item item) {
-		IPath path= resource.getFullPath();
-		Object existingMapping= fPathToItem.get(path);
-		if (existingMapping == null) {
-			fPathToItem.put(path, item);
-		} else if (existingMapping instanceof Item) {
-			ArrayList list= new ArrayList(2);
-			list.add(existingMapping);
-			list.add(item);
-			fPathToItem.put(path, list);
-		} else { // List			
-			List list= (List)existingMapping;
-			list.add(item);
-		}		
+	public void addToMap(Object element, Item item) {
+		IPath path= getCorrespondingPath(element);
+		if (path != null) {
+			Object existingMapping= fPathToItem.get(path);
+			if (existingMapping == null) {
+				fPathToItem.put(path, item);
+			} else if (existingMapping instanceof Item) {
+				if (existingMapping != item) {
+					ArrayList list= new ArrayList(2);
+					list.add(existingMapping);
+					list.add(item);
+					fPathToItem.put(path, list);
+				}
+			} else { // List			
+				List list= (List)existingMapping;
+				if (!list.contains(item)) {
+					list.add(item);
+				}
+				// leave the list for reuse
+			}
+		}
 	}
 
 	/**
 	 * Removes an element from the map.
 	 * The item corresponding to the element is removed from the map.
 	 */	
-	public void removeFromMap(IResource resource, Object element) {
-		Object existingMapping= fPathToItem.get(resource.getFullPath());
-		if (existingMapping == null) {
-			return;
-		} else if (existingMapping instanceof Item) {
-			fPathToItem.remove(resource.getFullPath());
-		} else { // List
-			List list= (List) existingMapping;
-			for (int i= 0; i < list.size(); i++) {
-				Item item= (Item) list.get(i);
-				if (!item.isDisposed()) {
-					Object data= item.getData();
-					if (data == null || data.equals(element)) {
-						list.remove(item);
-						break;
-					}
-				}
-			}			
+	public void removeFromMap(Object element, Item item) {
+		IPath path= getCorrespondingPath(element);
+		if (path != null) {
+			Object existingMapping= fPathToItem.get(path);
+			if (existingMapping == null) {
+				return;
+			} else if (existingMapping instanceof Item) {
+				fPathToItem.remove(path);
+			} else { // List
+				List list= (List) existingMapping;
+				list.remove(item);			
+			}
 		}
 	}
 	
@@ -139,6 +145,56 @@ import org.eclipse.jface.viewers.ILabelProvider;
 	public void clearMap() {
 		fPathToItem.clear();
 	}
+	
+	/**
+	 * Method that descides which elements can have error markers
+	 * Returns null if an element can not have error markers.
+	 */	
+	private static IPath getCorrespondingPath(Object element) {
+		if (element instanceof IJavaElement) {
+			return getJavaElementPath((IJavaElement)element);
+		}
+		return null;
+	}
+	
+	/**
+	 * Gets the path of the underlying resource without throwing
+	 * a JavaModelException if the resource does not exist.
+	 */
+	private static IPath getJavaElementPath(IJavaElement elem) {
+		switch (elem.getElementType()) {
+			case IJavaElement.JAVA_MODEL:
+				return null;
+			case IJavaElement.JAVA_PROJECT:
+				return ((IJavaProject)elem).getProject().getFullPath();
+			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				IPackageFragmentRoot root= (IPackageFragmentRoot)elem;
+				if (!root.isArchive()) {
+					return root.getPath();
+				}
+				return null;
+			case IJavaElement.PACKAGE_FRAGMENT:
+				String packName= elem.getElementName();
+				IPath rootPath= getCorrespondingPath(elem.getParent());
+				if (rootPath != null && packName.length() > 0) {
+					rootPath= rootPath.append(packName.replace('.', '/'));
+				}
+				return rootPath;
+			case IJavaElement.CLASS_FILE:
+			case IJavaElement.COMPILATION_UNIT:
+				IPath packPath= getCorrespondingPath(elem.getParent());
+				if (packPath != null) {
+					packPath= packPath.append(elem.getElementName());
+				}
+				return packPath;
+			default:
+				IOpenable openable= JavaModelUtility.getOpenable(elem);
+				if (openable instanceof IJavaElement) {
+					return getCorrespondingPath((IJavaElement)openable);
+				}
+				return null;
+		}
+	}	
 
 
 

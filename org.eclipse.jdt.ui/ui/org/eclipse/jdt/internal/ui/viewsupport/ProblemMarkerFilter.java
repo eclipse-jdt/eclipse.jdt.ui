@@ -168,7 +168,9 @@ public class ProblemMarkerFilter implements IResourceChangeListener {
 	}
 	  
 	private void endChange() { 
-		fireChanges(fChangedElements);
+		if (fChangedElements.size() > 0) {
+			fireChanges(fChangedElements);
+		}
 		fChangedElements= null;
 	}	
 

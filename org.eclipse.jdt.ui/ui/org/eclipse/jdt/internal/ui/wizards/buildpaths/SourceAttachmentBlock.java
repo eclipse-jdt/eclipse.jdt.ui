@@ -22,7 +22,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
@@ -65,7 +64,11 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
-
+/**
+ * UI to set the source attachment archive and root.
+ * Same implementation for both setting attachments for libraries from
+ * variable entries and for normal (internal or external) jar.
+ */
 public class SourceAttachmentBlock {
 	
 	private IStatusChangeListener fContext;
@@ -84,14 +87,20 @@ public class SourceAttachmentBlock {
 		
 	private IPath fJARPath;
 	
-	private IPath fFileName;
-	private File fResolvedFile;
-	private IPath fPrefix;
+	/**
+	 * The file to which the archive path points to.
+	 * Only set when the file exists.
+	 */
+	private File fResolvedFile; 
+
+	/**
+	 * The path to which the archive variable points.
+	 * Null if invalid path or not resolvable. Must not exist.
+	 */	
+	private IPath fFileVariablePath;
+	
 	private URL fJavaDocLocation;
-	
-	private String fFilePathVariable;
-	private String fPrefixVariable;
-	
+		
 	private IWorkspaceRoot fRoot;
 	
 	private Control fSWTWidget;
@@ -101,7 +110,9 @@ public class SourceAttachmentBlock {
 	public SourceAttachmentBlock(IWorkspaceRoot root, IStatusChangeListener context, IClasspathEntry oldEntry) {
 		fContext= context;
 				
-		fRoot= root;		
+		fRoot= root;
+		
+		// fIsVariableEntry specifies if the UI is for a variable entry
 		fIsVariableEntry= (oldEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE);
 		
 		fNameStatus= new StatusInfo();
@@ -112,6 +123,7 @@ public class SourceAttachmentBlock {
 		
 		SourceAttachmentAdapter adapter= new SourceAttachmentAdapter();
 		
+		// create the dialog fields (no widgets yet)
 		if (fIsVariableEntry) {
 			fFileNameField= new VariablePathDialogField(adapter);
 			fFileNameField.setDialogFieldListener(adapter);
@@ -140,12 +152,14 @@ public class SourceAttachmentBlock {
 			fPrefixField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.prefix.label")); //$NON-NLS-1$
 			fPrefixField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.prefix.button")); //$NON-NLS-1$
 		}	
-			
+		
+		// not used
 		fJavaDocField= new StringButtonDialogField(adapter);
 		fJavaDocField.setDialogFieldListener(adapter);
 		fJavaDocField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.label")); //$NON-NLS-1$
 		fJavaDocField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.button"));		 //$NON-NLS-1$
-			
+		
+		// set the old settings
 		if (oldEntry != null && oldEntry.getSourceAttachmentPath() != null) {
 			fFileNameField.setText(oldEntry.getSourceAttachmentPath().toString());
 		} else {
@@ -164,17 +178,20 @@ public class SourceAttachmentBlock {
 	 * Gets the source attachment path chosen by the user
 	 */
 	public IPath getSourceAttachmentPath() {
-		return fFileName;
+		if (fFileNameField.getText().length() == 0) {
+			return null;
+		}
+		return new Path(fFileNameField.getText());
 	}
 
 	/**
 	 * Gets the source attachment root chosen by the user
 	 */
 	public IPath getSourceAttachmentRootPath() {
-		if (fFileName != null) {
-			return fPrefix;
-		} else {
+		if (getSourceAttachmentPath() == null) {
 			return null;
+		} else {
+			return new Path(fPrefixField.getText());
 		}
 	}
 	
@@ -226,27 +243,31 @@ public class SourceAttachmentBlock {
 		if (fIsVariableEntry) {
 			createHelpText(composite, SWT.LEFT + SWT.WRAP, true, NewWizardMessages.getString("SourceAttachmentBlock.filename.description")); //$NON-NLS-1$
 		}			
-		
+		// archive name field
 		fFileNameField.doFillIntoGrid(composite, 4);
 		if (!fIsVariableEntry) {
+			// aditional 'browse workspace' button for normal jars
 			DialogField.createEmptySpace(composite, 3);	
 			fInternalButtonField.doFillIntoGrid(composite, 1);
 		} else {
+			// label that shows the resolved path for variable jars
 			DialogField.createEmptySpace(composite, 1);	
 			fFullPathResolvedLabel= new CLabel(composite, SWT.LEFT);
-			fFullPathResolvedLabel.setText(getResolvedLabelString(fFileNameField.getText()));
+			fFullPathResolvedLabel.setText(getResolvedLabelString(fFileNameField.getText(), true));
 			fFullPathResolvedLabel.setLayoutData(new MGridData(MGridData.HORIZONTAL_ALIGN_FILL));
 			DialogField.createEmptySpace(composite, 2);			
 		}
 		
 		// label
 		createHelpText(composite, SWT.LEFT + SWT.WRAP, true, NewWizardMessages.getString("SourceAttachmentBlock.prefix.description")); //$NON-NLS-1$
-	
+		
+		// root path field	
 		fPrefixField.doFillIntoGrid(composite, 4);
 		if (fIsVariableEntry) {
+			// label that shows the resolved path for variable jars
 			DialogField.createEmptySpace(composite, 1);	
 			fPrefixResolvedLabel= new CLabel(composite, SWT.LEFT);
-			fPrefixResolvedLabel.setText(getResolvedLabelString(fPrefixField.getText()));
+			fPrefixResolvedLabel.setText(getResolvedLabelString(fPrefixField.getText(), false));
 			fPrefixResolvedLabel.setLayoutData(new MGridData(MGridData.HORIZONTAL_ALIGN_FILL));
 			DialogField.createEmptySpace(composite, 2);
 		}
@@ -282,20 +303,17 @@ public class SourceAttachmentBlock {
 		if (field == fFileNameField) {
 			IPath jarFilePath= chooseExtJarFile();
 			if (jarFilePath != null) {
-				fFileName= jarFilePath;
-				fFileNameField.setText(fFileName.toString());
+				fFileNameField.setText(jarFilePath.toString());
 			}
 		} else if (field == fPrefixField) {
 			IPath prefixPath= choosePrefix();
 			if (prefixPath != null) {
-				fPrefix= prefixPath;
-				fPrefixField.setText(fPrefix.toString());
+				fPrefixField.setText(prefixPath.toString());
 			}
 		} else if (field == fJavaDocField) {
 			URL jdocURL= chooseJavaDocLocation();
 			if (jdocURL != null) {
-				fJavaDocLocation= jdocURL;
-				fJavaDocField.setText(fJavaDocLocation.toExternalForm());
+				fJavaDocField.setText(jdocURL.toExternalForm());
 			}
 		}			
 	}
@@ -308,8 +326,7 @@ public class SourceAttachmentBlock {
 		} else if (field == fInternalButtonField) {
 			IPath jarFilePath= chooseInternalJarFile(fFileNameField.getText());
 			if (jarFilePath != null) {
-				fFileName= jarFilePath;
-				fFileNameField.setText(fFileName.toString());
+				fFileNameField.setText(jarFilePath.toString());
 			}
 			return;
 		} else if (field == fPrefixField) {
@@ -323,13 +340,14 @@ public class SourceAttachmentBlock {
 	private void doStatusLineUpdate() {
 		fPrefixField.enableButton(canBrowsePrefix());
 		fFileNameField.enableButton(canBrowseFileName());
-
-		if (fPrefixResolvedLabel != null) {
-			fPrefixResolvedLabel.setText(getResolvedLabelString(fPrefixField.getText()));
-		}
+		
+		// set the resolved path for variable jars
 		if (fFullPathResolvedLabel != null) {
-			fFullPathResolvedLabel.setText(getResolvedLabelString(fFileNameField.getText()));
-		}			
+			fFullPathResolvedLabel.setText(getResolvedLabelString(fFileNameField.getText(), true));
+		}
+		if (fPrefixResolvedLabel != null) {
+			fPrefixResolvedLabel.setText(getResolvedLabelString(fPrefixField.getText(), false));
+		}
 		
 		IStatus status= StatusTool.getMostSevere(new IStatus[] { fNameStatus, fPrefixStatus, fJavaDocStatus });
 		fContext.statusChanged(status);
@@ -339,22 +357,34 @@ public class SourceAttachmentBlock {
 		if (!fIsVariableEntry) {
 			return true;
 		}
-		if (fFilePathVariable == null) {
-			return false;
+		// to browse with a variable JAR, the variable name must point to a directory
+		if (fFileVariablePath != null) {
+			return fFileVariablePath.toFile().isDirectory();
 		}
-		return JavaCore.getClasspathVariable(fFilePathVariable).toFile().isDirectory();	
+		return false;
 	}
 	
 	private boolean canBrowsePrefix() {
-		return (fResolvedFile != null) && (!fIsVariableEntry || fPrefixVariable != null);
+		// can browse when the archive name is poiting to a existing file
+		// and (if variable) the prefix variable name is existing
+		if (fResolvedFile != null) {
+			if (fIsVariableEntry) {
+				// prefix has valid format, is resolvable
+				return fPrefixStatus.isOK();
+			}
+			return true;
+		}
+		return false;
 	}	
 	
-	
-	
-	private String getResolvedLabelString(String path) {
+	private String getResolvedLabelString(String path, boolean osPath) {
 		IPath resolvedPath= getResolvedPath(new Path(path));
 		if (resolvedPath != null) {
-			return resolvedPath.toOSString();
+			if (osPath) {
+				return resolvedPath.toOSString();
+			} else {
+				return resolvedPath.toString();
+			}
 		}
 		return ""; //$NON-NLS-1$
 	}	
@@ -375,8 +405,6 @@ public class SourceAttachmentBlock {
 		
 	private IStatus updatePrefixStatus() {
 		StatusInfo status= new StatusInfo();
-		fPrefix= null;
-		fPrefixVariable= null;
 		
 		String prefix= fPrefixField.getText();
 		if (prefix.length() == 0) {
@@ -397,28 +425,25 @@ public class SourceAttachmentBlock {
 				if (resolvedPath.getDevice() != null) {
 					status.setError(NewWizardMessages.getString("SourceAttachmentBlock.prefix.error.deviceinvar")); //$NON-NLS-1$
 					return status;
-				}				
-				fPrefixVariable= path.segment(0);
+				}
 			} else {
 				if (path.getDevice() != null) {
 					status.setError(NewWizardMessages.getString("SourceAttachmentBlock.prefix.error.deviceinpath")); //$NON-NLS-1$
 					return status;
 				}
 			}				
-			fPrefix= path;
 		}
 		return status;
 	}
 	
 	private IStatus updateFileNameStatus() {
 		StatusInfo status= new StatusInfo();
-		fFileName= null;
 		fResolvedFile= null;
-		fFilePathVariable= null;
+		fFileVariablePath= null;
 		
 		String fileName= fFileNameField.getText();
 		if (fileName.length() == 0) {
-			// no source attachment path
+			// no source attachment
 			return status;
 		} else {
 			if (!Path.EMPTY.isValidPath(fileName)) {
@@ -431,39 +456,48 @@ public class SourceAttachmentBlock {
 				if (filePath.getDevice() != null) {
 					status.setError(NewWizardMessages.getString("SourceAttachmentBlock.filename.error.deviceinpath")); //$NON-NLS-1$
 					return status;
-				} 
-				resolvedPath= getResolvedPath(filePath);
-				if (resolvedPath == null) {
+				}
+				String varName= filePath.segment(0);
+				if (varName == null) {
+					status.setError(NewWizardMessages.getString("SourceAttachmentBlock.filename.error.notvalid")); //$NON-NLS-1$
+					return status;
+				}
+				fFileVariablePath= JavaCore.getClasspathVariable(varName);
+				if (fFileVariablePath == null) {
 					status.setError(NewWizardMessages.getString("SourceAttachmentBlock.filename.error.varnotexists")); //$NON-NLS-1$
 					return status;
 				}
-				if (fFullPathResolvedLabel != null) {
-					fFullPathResolvedLabel.setText(resolvedPath.toString());
-				}				
-				fFilePathVariable= filePath.segment(0);		
-			} else {
-				resolvedPath= filePath;
-			}
-			fFileName= filePath;
-			if (resolvedPath.isEmpty()) {
-				status.setWarning(NewWizardMessages.getString("SourceAttachmentBlock.filename.warning.varempty")); //$NON-NLS-1$
-				return status;
-			}
-	
-			File resolvedFile= resolvedPath.toFile();
-			if (!resolvedFile.isFile()) {
-				String message= NewWizardMessages.getFormattedString("SourceAttachmentBlock.filename.error.filenotexists", resolvedPath.toOSString()); //$NON-NLS-1$
-				if (fIsVariableEntry) {
-					status.setWarning(message);
-				} else {
-					status.setError(message);
+				resolvedPath= fFileVariablePath.append(filePath.removeFirstSegments(1));
+				
+				if (resolvedPath.isEmpty()) {
+					status.setWarning(NewWizardMessages.getString("SourceAttachmentBlock.filename.warning.varempty")); //$NON-NLS-1$
+					return status;
 				}
-				return status;
+				File file= resolvedPath.toFile();
+				if (!file.isFile()) {				
+					String message= NewWizardMessages.getFormattedString("SourceAttachmentBlock.filename.error.filenotexists", resolvedPath.toOSString()); //$NON-NLS-1$
+					status.setWarning(message);
+					return status;
+				}						
+				fResolvedFile= file;
+				
+			} else {
+				File file= filePath.toFile();
+				IResource res= fRoot.findMember(filePath);
+				if (res != null) {
+					file= res.getLocation().toFile();
+				}
+				if (!file.isFile()) {
+					String message=  NewWizardMessages.getFormattedString("SourceAttachmentBlock.filename.error.filenotexists", filePath.toString()); //$NON-NLS-1$
+					status.setError(message);
+					return status;
+				}
+				fResolvedFile= file;
 			}
-			fResolvedFile= resolvedFile;
+			
 		}
 		return status;
-	}	
+	}
 	
 	private IStatus updateJavaDocLocationStatus() {
 		StatusInfo status= new StatusInfo();
@@ -689,20 +723,23 @@ public class SourceAttachmentBlock {
 		ArrayList newEntries= new ArrayList(nEntries + 1);
 		int entryKind= newEntry.getEntryKind();
 		IPath jarPath= newEntry.getPath();
-		boolean added= false;
+		boolean found= false;
 		for (int i= 0; i < nEntries; i++) {
 			IClasspathEntry curr= oldClasspath[i];
 			if (curr.getEntryKind() == entryKind && curr.getPath().equals(jarPath)) {
+				// add modified entry
 				newEntries.add(newEntry);
-				added= true;
+				found= true;
 			} else {
 				newEntries.add(curr);
 			}
 		}
-		if (!added) {
-			if (newEntry.getSourceAttachmentPath() == null && !putJarOnClasspathDialog(shell)) {
+		if (!found) {
+			if (newEntry.getSourceAttachmentPath() == null || !putJarOnClasspathDialog(shell)) {
 				return null;
 			}
+			// add new
+			newEntries.add(newEntry);			
 		}
 		return (IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]);
 	}	

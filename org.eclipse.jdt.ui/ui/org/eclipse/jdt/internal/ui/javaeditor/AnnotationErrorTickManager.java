@@ -69,7 +69,7 @@ public class AnnotationErrorTickManager implements IErrorTickManager {
 		try {
 			if (annot instanceof MarkerAnnotation) {
 				IMarker marker= ((MarkerAnnotation)annot).getMarker();
-				if (marker.isSubtypeOf(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER)) {
+				if (marker.exists() && marker.isSubtypeOf(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER)) {
 					Position pos= fAnnotationModel.getPosition(annot);
 					if (pos.overlapsWith(range.getOffset(), range.getLength())) {
 						return marker;
