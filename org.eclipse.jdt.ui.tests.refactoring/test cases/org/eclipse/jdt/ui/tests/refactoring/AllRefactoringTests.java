@@ -17,6 +17,7 @@ public class AllRefactoringTests {
 
 		//--code
 		suite.addTest(ExtractMethodTests.suite());
+		suite.addTest(InlineTempTests.suite());
 
 		//--methods
 		suite.addTest(RenameVirtualMethodInClassTests.suite());
@@ -25,7 +26,6 @@ public class AllRefactoringTests {
 		suite.addTest(RenameStaticMethodTests.suite());
 		suite.addTest(RenameParametersTests.suite());
 		suite.addTest(RenameTempTests.suite());
-		suite.addTest(InlineTempTests.suite());
 		//suite.addTest(ReorderParametersTests.noSetupSuite());
 		
 		//--types
@@ -41,7 +41,9 @@ public class AllRefactoringTests {
 		//--compilation units
 		//suite.addTest(MoveCUTests.noSetupSuite());
 		suite.addTest(MultiMoveTests.suite());
-		
+
+		//--projects
+		suite.addTest(RenameJavaProjectTests.suite());		
 		return suite;
 	}
 }
