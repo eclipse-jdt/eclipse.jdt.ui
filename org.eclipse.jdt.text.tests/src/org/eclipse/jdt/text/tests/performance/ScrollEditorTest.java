@@ -102,6 +102,10 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 	protected void setUp(AbstractTextEditor editor) throws Exception { }
 	
 	protected void measure(ScrollingMode mode) throws Exception {
+		measure(mode, createPerformanceMeter(), getWarmUpRuns(), getMeasuredRuns());
+	}
+
+	protected void measure(ScrollingMode mode, PerformanceMeter performanceMeter, int warmUpRuns, int measuredRuns) throws Exception {
 		AbstractTextEditor editor= null;
 		try {
 			editor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(mode.getFile()), getEditor(), true);
@@ -109,8 +113,8 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 			EditorTestHelper.joinBackgroundActivities(editor);
 			
 			StyledText text= (StyledText) editor.getAdapter(Control.class);
-			measure(text, mode, getNullPerformanceMeter(), getWarmUpRuns());
-			measure(text, mode, createPerformanceMeter(), getMeasuredRuns());
+			measure(text, mode, getNullPerformanceMeter(), warmUpRuns);
+			measure(text, mode, performanceMeter, measuredRuns);
 			commitAllMeasurements();
 			assertAllPerformance();
 		} finally {

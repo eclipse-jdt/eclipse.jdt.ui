@@ -14,6 +14,11 @@ package org.eclipse.jdt.text.tests.performance;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+/**
+ * Measure the time spent while scrolling in the text editor.
+ * 
+ * @since 3.1
+ */
 public class ScrollTextEditorTest extends ScrollEditorTest {
 	
 	private static final Class THIS= ScrollTextEditorTest.class;
@@ -26,19 +31,41 @@ public class ScrollTextEditorTest extends ScrollEditorTest {
 		return EditorTestHelper.TEXT_EDITOR_ID;
 	}
 	
-	public void testScrollTextEditorLineWise2() throws Exception {
-		measure(LINE_WISE_NO_CARET_MOVE);
-	}
-	
+	/**
+	 * Measure the time spent while scrolling page wise in the text editor.
+	 * 
+	 * @throws Exception
+	 */
 	public void testScrollTextEditorPageWise() throws Exception {
 		measure(PAGE_WISE);
 	}
 	
+	/**
+	 * Measure the time spent while scrolling line wise in the text editor.
+	 * 
+	 * @throws Exception
+	 */
 	public void testScrollTextEditorLineWiseMoveCaret2() throws Exception {
 		measure(LINE_WISE);
 	}
 	
+	/**
+	 * Measure the time spent while scrolling and selecting line wise in the
+	 * text editor.
+	 * 
+	 * @throws Exception
+	 */
 	public void testScrollTextEditorLineWiseSelect2() throws Exception {
 		measure(LINE_WISE_SELECT);
+	}
+	
+	/**
+	 * Measure the time spent while scrolling line wise without moving the
+	 * caret in the text editor.
+	 * 
+	 * @throws Exception
+	 */
+	public void testScrollTextEditorLineWise2() throws Exception {
+		measure(LINE_WISE_NO_CARET_MOVE);
 	}
 }
