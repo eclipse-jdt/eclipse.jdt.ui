@@ -1,9 +1,14 @@
-package org.eclipse.jdt.internal.ui.text;
+/**********************************************************************
+Copyright (c) 2000, 2002 IBM Corp. and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Common Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/cpl-v10.html
 
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+Contributors:
+    IBM Corporation - Initial implementation
+**********************************************************************/
+package org.eclipse.jdt.internal.ui.text;
 
 import java.io.IOException;
 
@@ -11,16 +16,12 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.source.ICharacterPairMatcher;
 
 /**
  * Helper class for match pairs of characters.
  */
-public class JavaPairMatcher {
-	
-	
-	public static final int LEFT=	   1;
-	public static final int RIGHT= 2;
-
+public class JavaPairMatcher implements ICharacterPairMatcher {
 	
 	protected char[] fPairs;
 	protected IDocument fDocument;
@@ -37,6 +38,9 @@ public class JavaPairMatcher {
 		fPairs= pairs;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.source.ICharacterPairMatcher#match(org.eclipse.jface.text.IDocument, int)
+	 */
 	public IRegion match(IDocument document, int offset) {
 
 		fOffset= offset;
@@ -52,10 +56,16 @@ public class JavaPairMatcher {
 		return null;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.source.ICharacterPairMatcher#getAnchor()
+	 */
 	public int getAnchor() {
 		return fAnchor;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.source.ICharacterPairMatcher#dispose()
+	 */
 	public void dispose() {
 		fDocument= null;
 		if (fReader != null) {

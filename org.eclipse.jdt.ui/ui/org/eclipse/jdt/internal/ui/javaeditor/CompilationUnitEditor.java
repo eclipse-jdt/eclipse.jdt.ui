@@ -20,6 +20,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.custom.VerifyKeyListener;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Layout;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IWorkspace;
@@ -29,6 +42,69 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
+
+import org.eclipse.jface.text.AbstractHoverInformationControlManager;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.CursorLinePainter;
+import org.eclipse.jface.text.DocumentCommand;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ILineTracker;
+import org.eclipse.jface.text.IPainter;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextOperationTarget;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.ITextViewerExtension;
+import org.eclipse.jface.text.ITextViewerExtension2;
+import org.eclipse.jface.text.ITextViewerExtension3;
+import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.IWidgetTokenKeeper;
+import org.eclipse.jface.text.MarginPainter;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.AnnotationPainter;
+import org.eclipse.jface.text.source.IAnnotationAccess;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.IVerticalRuler;
+import org.eclipse.jface.text.source.MatchingCharacterPainter;
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.eclipse.ui.dialogs.SaveAsDialog;
+import org.eclipse.ui.editors.text.IStorageDocumentProvider;
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.texteditor.ContentAssistAction;
+import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.IEditorStatusLine;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.MarkerAnnotation;
+import org.eclipse.ui.texteditor.TextOperationAction;
+import org.eclipse.ui.views.tasklist.TaskList;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -37,6 +113,14 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
@@ -56,76 +140,6 @@ import org.eclipse.jdt.internal.ui.text.java.SmartBracesAutoEditStrategy;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitFlags;
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.actions.GenerateActionGroup;
-import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
-import org.eclipse.jdt.ui.actions.RefactorActionGroup;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.text.AbstractHoverInformationControlManager;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.DocumentCommand;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ILineTracker;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextOperationTarget;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.ITextViewerExtension;
-import org.eclipse.jface.text.ITextViewerExtension3;
-import org.eclipse.jface.text.ITypedRegion;
-import org.eclipse.jface.text.IWidgetTokenKeeper;
-import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.contentassist.ContentAssistant;
-import org.eclipse.jface.text.contentassist.IContentAssistant;
-import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.IVerticalRuler;
-import org.eclipse.jface.text.source.SourceViewerConfiguration;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.custom.VerifyKeyListener;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Layout;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.actions.ActionContext;
-import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
-import org.eclipse.ui.dialogs.SaveAsDialog;
-import org.eclipse.ui.editors.text.IStorageDocumentProvider;
-import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.texteditor.ContentAssistAction;
-import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.IEditorStatusLine;
-import org.eclipse.ui.texteditor.ITextEditorActionConstants;
-import org.eclipse.ui.texteditor.MarkerAnnotation;
-import org.eclipse.ui.texteditor.TextOperationAction;
-import org.eclipse.ui.views.tasklist.TaskList;
 
 
 
@@ -554,6 +568,40 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private final static String SMART_PASTE= PreferenceConstants.EDITOR_SMART_PASTE;
 	
 	
+	static class AnnotationAccess implements IAnnotationAccess {
+
+		/*
+		 * @see org.eclipse.jface.text.source.IAnnotationAccess#getType(org.eclipse.jface.text.source.Annotation)
+		 */
+		public Object getType(Annotation annotation) {
+			if (annotation instanceof IProblemAnnotation) {
+				IProblemAnnotation problemAnnotation= (IProblemAnnotation) annotation;
+				if (problemAnnotation.isRelevant())
+					return problemAnnotation.getAnnotationType();
+			}
+			return null;
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.source.IAnnotationAccess#isMultiLine(org.eclipse.jface.text.source.Annotation)
+		 */
+		public boolean isMultiLine(Annotation annotation) {
+			return true;
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.source.IAnnotationAccess#isTemporary(org.eclipse.jface.text.source.Annotation)
+		 */
+		public boolean isTemporary(Annotation annotation) {
+			if (annotation instanceof IProblemAnnotation) {
+				IProblemAnnotation problemAnnotation= (IProblemAnnotation) annotation;
+				if (problemAnnotation.isRelevant())
+					return problemAnnotation.isTemporary();
+			}
+			return false;
+		}
+	};
+	
 	private final static class AnnotationInfo {
 		public String fColorPreference;
 		public String fOverviewRulerPreference;
@@ -611,24 +659,24 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		AnnotationType.WARNING,
 		AnnotationType.ERROR
 	};
-		
+	
+	private final static char[] BRACKETS= { '{', '}', '(', ')', '[', ']' };
+
 	
 	/** The editor's save policy */
 	protected ISavePolicy fSavePolicy;
 	/** Listener to annotation model changes that updates the error tick in the tab image */
 	private JavaEditorErrorTickUpdater fJavaEditorErrorTickUpdater;
-	/** The editor's paint manager */
-	private PaintManager fPaintManager;
 	/** The editor's bracket painter */
-	private BracketPainter fBracketPainter;
+	private MatchingCharacterPainter fBracketPainter;
 	/** The editor's bracket matcher */
 	private JavaPairMatcher fBracketMatcher;
 	/** The editor's line painter */
-	private LinePainter fLinePainter;
+	private CursorLinePainter fLinePainter;
 	/** The editor's print margin ruler painter */
-	private PrintMarginPainter fPrintMarginPainter;
-	/** The editor's problem painter */
-	private ProblemPainter fProblemPainter;
+	private MarginPainter fPrintMarginPainter;
+	/** The editor's annotation painter */
+	private AnnotationPainter fProblemPainter;
 	/** The editor's tab converter */
 	private TabConverter fTabConverter;
 	/** History for structure select action */
@@ -1006,8 +1054,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return new Region(offset, length);
 	}
 
-	private final static char[] BRACKETS= { '{', '}', '(', ')', '[', ']' };
-
 	private static boolean isBracket(char character) {
 		for (int i= 0; i != BRACKETS.length; ++i)
 			if (character == BRACKETS[i])
@@ -1252,18 +1298,25 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private void startBracketHighlighting() {
 		if (fBracketPainter == null) {
 			ISourceViewer sourceViewer= getSourceViewer();
-			fBracketPainter= new BracketPainter(sourceViewer);
-			fBracketPainter.setHighlightColor(getColor(MATCHING_BRACKETS_COLOR));
-			fPaintManager.addPainter(fBracketPainter);
+			if (sourceViewer instanceof ITextViewerExtension2) {
+				ITextViewerExtension2 extension= (ITextViewerExtension2) sourceViewer;
+				fBracketPainter= new MatchingCharacterPainter(sourceViewer, new JavaPairMatcher(BRACKETS));
+				fBracketPainter.setColor(getColor(MATCHING_BRACKETS_COLOR));
+				extension.addPainter(fBracketPainter);
+			}
 		}
 	}
 	
 	private void stopBracketHighlighting() {
 		if (fBracketPainter != null) {
-			fPaintManager.removePainter(fBracketPainter);
-			fBracketPainter.deactivate(true);
-			fBracketPainter.dispose();
-			fBracketPainter= null;
+			ISourceViewer sourceViewer= getSourceViewer();
+			if (sourceViewer instanceof ITextViewerExtension2) {
+				ITextViewerExtension2 extension= (ITextViewerExtension2) sourceViewer;
+				extension.removePainter(fBracketPainter);
+				fBracketPainter.deactivate(true);
+				fBracketPainter.dispose();
+				fBracketPainter= null;
+			}
 		}
 	}
 	
@@ -1275,18 +1328,25 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private void startLineHighlighting() {
 		if (fLinePainter == null) {
 			ISourceViewer sourceViewer= getSourceViewer();
-			fLinePainter= new LinePainter(sourceViewer);
-			fLinePainter.setHighlightColor(getColor(CURRENT_LINE_COLOR));
-			fPaintManager.addPainter(fLinePainter);
+			if (sourceViewer instanceof ITextViewerExtension2) {
+				ITextViewerExtension2 extension= (ITextViewerExtension2) sourceViewer;
+				fLinePainter= new CursorLinePainter(sourceViewer);
+				fLinePainter.setHighlightColor(getColor(CURRENT_LINE_COLOR));
+				extension.addPainter(fLinePainter);
+			}
 		}
 	}
 	
 	private void stopLineHighlighting() {
 		if (fLinePainter != null) {
-			fPaintManager.removePainter(fLinePainter);
-			fLinePainter.deactivate(true);
-			fLinePainter.dispose();
-			fLinePainter= null;
+			ISourceViewer sourceViewer= getSourceViewer();
+			if (sourceViewer instanceof ITextViewerExtension2) {
+				ITextViewerExtension2 extension= (ITextViewerExtension2) sourceViewer;
+				extension.removePainter(fLinePainter);
+				fLinePainter.deactivate(true);
+				fLinePainter.dispose();
+				fLinePainter= null;
+			}
 		}
 	}
 	
@@ -1297,19 +1357,27 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	
 	private void showPrintMargin() {
 		if (fPrintMarginPainter == null) {
-			fPrintMarginPainter= new PrintMarginPainter(getSourceViewer());
-			fPrintMarginPainter.setMarginRulerColor(getColor(PRINT_MARGIN_COLOR));
-			fPrintMarginPainter.setMarginRulerColumn(getPreferenceStore().getInt(PRINT_MARGIN_COLUMN));
-			fPaintManager.addPainter(fPrintMarginPainter);
+			ISourceViewer sourceViewer= getSourceViewer();
+			if (sourceViewer instanceof ITextViewerExtension2) {
+				ITextViewerExtension2 extension= (ITextViewerExtension2) sourceViewer;
+				fPrintMarginPainter= new MarginPainter(getSourceViewer());
+				fPrintMarginPainter.setMarginRulerColor(getColor(PRINT_MARGIN_COLOR));
+				fPrintMarginPainter.setMarginRulerColumn(getPreferenceStore().getInt(PRINT_MARGIN_COLUMN));
+				extension.addPainter(fPrintMarginPainter);
+			}
 		}
 	}
 	
 	private void hidePrintMargin() {
 		if (fPrintMarginPainter != null) {
-			fPaintManager.removePainter(fPrintMarginPainter);
-			fPrintMarginPainter.deactivate(true);
-			fPrintMarginPainter.dispose();
-			fPrintMarginPainter= null;
+			ISourceViewer sourceViewer= getSourceViewer();
+			if (sourceViewer instanceof ITextViewerExtension2) {
+				ITextViewerExtension2 extension= (ITextViewerExtension2) sourceViewer;
+				extension.removePainter(fPrintMarginPainter);
+				fPrintMarginPainter.deactivate(true);
+				fPrintMarginPainter.dispose();
+				fPrintMarginPainter= null;
+			}
 		}
 	}
 	
@@ -1319,32 +1387,37 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	}
 	
 	private void startAnnotationIndication(AnnotationType annotationType) {
-		if (fProblemPainter == null) {
-			fProblemPainter= new ProblemPainter(this, getSourceViewer());
-			fPaintManager.addPainter(fProblemPainter);
+		ISourceViewer sourceViewer= getSourceViewer();
+		if (sourceViewer instanceof ITextViewerExtension2) {
+			ITextViewerExtension2 extension= (ITextViewerExtension2) sourceViewer;
+			if (fProblemPainter == null) {
+				fProblemPainter= new AnnotationPainter(sourceViewer, new AnnotationAccess());
+				extension.addPainter(fProblemPainter);
+			}
+			fProblemPainter.setAnnotationTypeColor(annotationType, getColor(annotationType));
+			fProblemPainter.addAnnotationType(annotationType);
+			fProblemPainter.paint(IPainter.CONFIGURATION);
 		}
-		fProblemPainter.setColor(annotationType, getColor(annotationType));
-		fProblemPainter.paintAnnotations(annotationType, true);
-		fProblemPainter.paint(IPainter.CONFIGURATION);
 	}
 	
 	private void shutdownAnnotationIndication() {
-		if (fProblemPainter != null) {
-			
-			if (!fProblemPainter.isPaintingAnnotations()) {
-				fPaintManager.removePainter(fProblemPainter);
-				fProblemPainter.deactivate(true);
-				fProblemPainter.dispose();
-				fProblemPainter= null;
-			} else {
-				fProblemPainter.paint(IPainter.CONFIGURATION);
+		if (!fProblemPainter.isPaintingAnnotations()) {
+			ISourceViewer sourceViewer= getSourceViewer();
+			if (sourceViewer instanceof ITextViewerExtension2) {
+				ITextViewerExtension2 extension= (ITextViewerExtension2) sourceViewer;
+				extension.removePainter(fProblemPainter);
 			}
+			fProblemPainter.deactivate(true);
+			fProblemPainter.dispose();
+			fProblemPainter= null;
+		} else {
+			fProblemPainter.paint(IPainter.CONFIGURATION);
 		}
 	}
 
 	private void stopAnnotationIndication(AnnotationType annotationType) {
 		if (fProblemPainter != null) {
-			fProblemPainter.paintAnnotations(annotationType, false);
+			fProblemPainter.removeAnnotationType(annotationType);
 			shutdownAnnotationIndication();
 		}
 	}
@@ -1490,12 +1563,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		
 		if (fSelectionHistory != null)
 			fSelectionHistory.dispose();
-		
-		if (fPaintManager != null) {
-			fPaintManager.dispose();
-			fPaintManager= null;
-		}
-		
+				
 		if (fActionGroups != null)
 			fActionGroups.dispose();		
 		
@@ -1508,8 +1576,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public void createPartControl(Composite parent) {
 		
 		super.createPartControl(parent);
-		
-		fPaintManager= new PaintManager(getSourceViewer());
 		
 		if (isBracketHighlightingEnabled())
 			startBracketHighlighting();
@@ -1817,7 +1883,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				
 				if (MATCHING_BRACKETS_COLOR.equals(p)) {
 					if (fBracketPainter != null)
-						fBracketPainter.setHighlightColor(getColor(MATCHING_BRACKETS_COLOR));
+						fBracketPainter.setColor(getColor(MATCHING_BRACKETS_COLOR));
 					return;
 				}
 				
@@ -1872,7 +1938,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					if (info.fColorPreference.equals(p)) {
 						Color color= getColor(type);
 						if (fProblemPainter != null) {
-							fProblemPainter.setColor(type, color);
+							fProblemPainter.setAnnotationTypeColor(type, color);
 							fProblemPainter.paint(IPainter.CONFIGURATION);
 						}
 						setColorInOverviewRuler(type, color);
