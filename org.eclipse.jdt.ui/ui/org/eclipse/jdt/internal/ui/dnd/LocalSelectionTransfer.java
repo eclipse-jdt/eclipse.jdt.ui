@@ -7,7 +7,7 @@ package org.eclipse.jdt.internal.ui.dnd;
 import org.eclipse.swt.dnd.ByteArrayTransfer;
 import org.eclipse.swt.dnd.TransferData;
 
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jface.viewers.ISelection;
 
 public class LocalSelectionTransfer extends ByteArrayTransfer {
 
@@ -51,11 +51,15 @@ public class LocalSelectionTransfer extends ByteArrayTransfer {
 	}
 	
 	public void javaToNative(Object object, TransferData transferData) {
-		super.javaToNative(object, transferData);
+		byte[] check= TYPE_NAME.getBytes();
+		super.javaToNative(check, transferData);
 	}
 
 	public Object nativeToJava(TransferData transferData) {
-		super.nativeToJava(transferData);
+		Object result= super.nativeToJava(transferData);
+		if (!(result instanceof byte[]) || !TYPE_NAME.equals(new String((byte[])result))) {
+			JavaPlugin.logErrorMessage("Got wrong data in org.eclipse.jdt.internal.ui.dnd.LocalSelectionTranser::nativeToJava");
+		}
 		return fSelection;
 	}
 	
