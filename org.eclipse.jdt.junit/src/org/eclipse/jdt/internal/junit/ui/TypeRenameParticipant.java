@@ -84,7 +84,7 @@ public class TypeRenameParticipant extends RenameParticipant {
 		 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#getName()
 		 */
 		public String getName() {
-			return "JUnit Launch configuration update"; 
+			return JUnitMessages.getString("TypeRenameParticipant.name");  //$NON-NLS-1$
 		}
 
 		/* (non-Javadoc)
