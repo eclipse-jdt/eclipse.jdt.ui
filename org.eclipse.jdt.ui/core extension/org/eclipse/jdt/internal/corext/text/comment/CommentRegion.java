@@ -82,7 +82,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	private final boolean fSingleLine;
 
 	/** Number of spaces representing tabulator */
-	private int fTabs;
+	private int fTabSize;
 
 	/**
 	 * <code>true</code> if tabs, not spaces, should be used for indentation
@@ -117,12 +117,12 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 		
 		if (fPreferences.containsKey(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE))
 			try {
-				fTabs= Integer.parseInt((String) fPreferences.get(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE));
+				fTabSize= Integer.parseInt((String) fPreferences.get(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE));
 			} catch (NumberFormatException e) {
-				fTabs= 4;
+				fTabSize= 4;
 			}
 		else
-			fTabs= 4;
+			fTabSize= 4;
 		fUseTab= JavaCore.TAB.equals(getPreferences().get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
 
 		final ILineTracker tracker= new ConfigurableLineTracker(new String[] { delimiter });
@@ -531,7 +531,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 			pixels= reference.length();
 			int index= -1;
 			while ((index= reference.indexOf('\t', index+1)) >= 0)
-				pixels += fTabs-1;
+				pixels += fTabSize-1;
 		}
 
 		final StringBuffer buffer= new StringBuffer();
@@ -539,8 +539,8 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 
 		if (tabs) {
 
-			final int count= spaces / fTabs;
-			final int modulo= spaces % fTabs;
+			final int count= spaces / fTabSize;
+			final int modulo= spaces % fTabSize;
 
 			for (int index= 0; index < count; index++)
 				buffer.append('\t');
@@ -573,7 +573,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 			if (reference.charAt(index) == '\t')
 				tabs++;
 		}
-		count += tabs * (fTabs - 1);
+		count += tabs * (fTabSize - 1);
 
 		return count;
 	}
@@ -595,7 +595,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 			character= reference.charAt(index);
 			if (character == '\t') {
 
-				for (int tab= 0; tab < fTabs; tab++)
+				for (int tab= 0; tab < fTabSize; tab++)
 					buffer.append(' ');
 
 			} else
