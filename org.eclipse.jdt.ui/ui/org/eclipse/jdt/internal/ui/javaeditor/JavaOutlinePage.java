@@ -438,17 +438,17 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				}
 			};
 			
-			public class MemberFilter extends ViewerFilter {
+			public class FieldFilter extends ViewerFilter {
 				public boolean select(Viewer viewer, Object parentElement, Object element) {
 					return !(element instanceof IField);
 				}
 			}; 
 			
-			public class MemberFilterAction extends JavaUIAction {
+			public class FieldFilterAction extends JavaUIAction {
 				
-				private MemberFilter fFilter= new MemberFilter();
+				private FieldFilter fFilter= new FieldFilter();
 				
-				public MemberFilterAction(ResourceBundle bundle, String prefix, boolean checked) {
+				public FieldFilterAction(ResourceBundle bundle, String prefix, boolean checked) {
 					super(bundle, prefix);
 					setImageDescriptor(org.eclipse.jdt.internal.ui.JavaPluginImages.DESC_LCL_LOCK_VIEW);
 					valueChanged(checked);
@@ -628,7 +628,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "AddEdition");
 		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "AddMethodEntryBreakpoint");
 		
-		addAction(menu, IContextMenuConstants.GROUP_SHOW, "MemberFilter");
+		addAction(menu, IContextMenuConstants.GROUP_SHOW, "FieldFilter");
 		addAction(menu, IContextMenuConstants.GROUP_SHOW, "LexicalSort");
 		
 		ContextMenuGroup.add(menu, fActionGroups, fOutlineViewer);
@@ -654,12 +654,12 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		}
 		
 //		if (toolBarManager != null) {
-//			toolBarManager.add(new MemberFilterAction(JavaPlugin.getResourceBundle(), "Outliner.FilterMembers.", false));
+//			toolBarManager.add(new FieldFilterAction(JavaPlugin.getResourceBundle(), "Outliner.FilterFields.", false));
 //			toolBarManager.add(new LexicalSortingAction(JavaPlugin.getResourceBundle(), "Outliner.LexicalSorting.", false));
 //			toolBarManager.update(true);
 //		}
 		
-		setAction("MemberFilter", new MemberFilterAction(JavaPlugin.getResourceBundle(), "Outliner.FilterMembers.", false)); 
+		setAction("FieldFilter", new FieldFilterAction(JavaPlugin.getResourceBundle(), "Outliner.FilterFields.", false)); 
 		setAction("LexicalSort", new LexicalSortingAction(JavaPlugin.getResourceBundle(), "Outliner.LexicalSorting.", false));
 	}	
 	
