@@ -340,7 +340,8 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 	private void checkNoInsertOrRemove(ASTNode node) {
-		if (isInserted(node) || isRemoved(node)) {	
+		int kind= getChangeKind(node);
+		if (kind == ASTRewrite.INSERTED || (kind == ASTRewrite.REMOVED && !isMoveSource(node))) {	
 			Assert.isTrue(false, "Can not insert or remove node " + node + " in " + node.getParent().getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
