@@ -269,7 +269,15 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		if (selElements.size() != 1) {
 			return;
 		}
-		CPListElement elem= (CPListElement) selElements.get(0);
+		Object elem= selElements.get(0);
+		if (fFoldersList.getIndexOfElement(elem) != -1) {
+			editElementEntry((CPListElement) elem);
+		} else if (elem instanceof CPListElementAttribute) {
+			editAttributeEntry((CPListElementAttribute) elem);
+		}
+	}
+
+	private void editElementEntry(CPListElement elem) {
 		CPListElement res= null;
 		
 		IResource resource= elem.getResource();
@@ -285,8 +293,21 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		if (res != null) {
 			fFoldersList.replaceElement(elem, res);
 		}
-		
 	}
+
+	private void editAttributeEntry(CPListElementAttribute elem) {
+		if (elem.getKey().equals(CPListElement.OUTPUT)) {
+			CPListElement selElement= (CPListElement) elem.getParent();
+			OutputLocationDialog dialog= new OutputLocationDialog(getShell(), selElement);
+			if (dialog.open() == OutputLocationDialog.OK) {
+				selElement.setAttribute(CPListElement.OUTPUT, dialog.getOutputLocation());
+				fFoldersList.refresh();
+				fClassPathList.dialogFieldChanged();
+			}
+		}
+	}
+
+
 	
 	private void sourcePageSelectionChanged(DialogField field) {
 		List selected= fFoldersList.getSelectedElements();
@@ -302,6 +323,10 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			return true;
 		}
 		if (elem instanceof CPListElementAttribute) {
+			String key= ((CPListElementAttribute) elem).getKey();
+			if (key.equals(CPListElement.OUTPUT)) {
+				return true;
+			}
 		}
 		return false;
 	}	
@@ -378,6 +403,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		return null;
 	}
 	
+	
+	
 	/**
 	 * Asks to change the output folder to 'proj/bin' when no source folders were existing
 	 */ 
@@ -396,12 +423,20 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	
 			
 			
-	private CPListElement[] openSourceContainerDialog(CPListElement existing) {	
+	private CPListElement[] openSourceContainerDialog(CPListElement existing) {
+		
 		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, existing == null);
-			
-		//acceptedClasses= new Class[] { IProject.class, IFolder.class };
-		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, getExistingContainers(existing));	
+		
+		IProject[] allProjects= fWorkspaceRoot.getProjects();
+		ArrayList rejectedElements= new ArrayList(allProjects.length);
+		IProject currProject= fCurrJProject.getProject();
+		for (int i= 0; i < allProjects.length; i++) {
+			if (!allProjects[i].equals(currProject)) {
+				rejectedElements.add(allProjects[i]);
+			}
+		}
+		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, rejectedElements.toArray());
 		
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();

@@ -227,16 +227,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				libentries= advDialog.getResult();
 			}
 			break;
-//		case IDX_ATTACH: /* set source attachment */
-//			List selElements= fLibrariesList.getSelectedElements();
-//			CPListElement selElement= (CPListElement) selElements.get(0);				
-//			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), fWorkspaceRoot, selElement.getClasspathEntry());
-//			if (dialog.open() == SourceAttachmentDialog.OK) {
-//				selElement.setSourceAttachment(dialog.getSourceAttachmentPath(), dialog.getSourceAttachmentRootPath());
-//				fLibrariesList.refresh();
-//				fClassPathList.refresh();
-//			}
-//			break;
 		case IDX_EDIT: /* edit */
 			editEntry();
 			return;
@@ -280,7 +270,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			CPListElement selElement= (CPListElement) elem.getParent();
 			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), fWorkspaceRoot, selElement.getClasspathEntry());
 			if (dialog.open() == SourceAttachmentDialog.OK) {
-				selElement.setSourceAttachment(dialog.getSourceAttachmentPath(), dialog.getSourceAttachmentRootPath());
+				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, dialog.getSourceAttachmentPath());
 				fLibrariesList.refresh();
 				fClassPathList.refresh();
 			}
@@ -323,7 +313,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private void libaryPageSelectionChanged(DialogField field) {
 		List selElements= fLibrariesList.getSelectedElements();
-//		fLibrariesList.enableButton(IDX_ATTACH, canDoSourceAttachment(selElements));
 		fLibrariesList.enableButton(IDX_EDIT, canEdit(selElements));
 	}
 	
@@ -641,7 +630,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 							&& entry.getPath().equals(elem.getPath())) {
 							IPath attachPath= entry.getSourceAttachmentPath();
 							if (attachPath != null && !attachPath.isEmpty()) {
-								elem.setSourceAttachment(attachPath, entry.getSourceAttachmentRootPath());
+								elem.setAttribute(CPListElement.SOURCEATTACHMENT, attachPath);
 								return;
 							}
 						}

@@ -100,6 +100,7 @@ public class BuildPathsBlock {
 	private StringButtonDialogField fBuildPathDialogField;
 	
 	private StatusInfo fClassPathStatus;
+	private StatusInfo fOutputFolderStatus;	
 	private StatusInfo fBuildPathStatus;
 
 	private IJavaProject fCurrJProject;
@@ -155,6 +156,7 @@ public class BuildPathsBlock {
 
 		fBuildPathStatus= new StatusInfo();
 		fClassPathStatus= new StatusInfo();
+		fOutputFolderStatus= new StatusInfo();
 		
 		fCurrJProject= null;
 	}
@@ -416,9 +418,8 @@ public class BuildPathsBlock {
 	private void buildPathDialogFieldChanged(DialogField field) {
 		if (field == fClassPathList) {
 			updateClassPathStatus();
-			updateBuildPathStatus();
 		} else if (field == fBuildPathDialogField) {
-			updateBuildPathStatus();
+			updateOutputLocationStatus();
 		}
 		doStatusLineUpdate();
 	}	
@@ -433,14 +434,14 @@ public class BuildPathsBlock {
 	}
 	
 	private IStatus findMostSevereStatus() {
-		return StatusUtil.getMoreSevere(fClassPathStatus, fBuildPathStatus);
+		return StatusUtil.getMostSevere(new IStatus[] { fClassPathStatus, fOutputFolderStatus, fBuildPathStatus });
 	}
 	
 	
 	/**
 	 * Validates the build path.
 	 */
-	private void updateClassPathStatus() {
+	public void updateClassPathStatus() {
 		fClassPathStatus.setOK();
 		
 		List elements= fClassPathList.getElements();
@@ -479,63 +480,51 @@ public class BuildPathsBlock {
 				
 		if (fCurrJProject.hasClasspathCycle(entries)) {
 			fClassPathStatus.setWarning(NewWizardMessages.getString("BuildPathsBlock.warning.CycleInClassPath")); //$NON-NLS-1$
-		}	
+		}
+		
+		updateBuildPathStatus();
 	}
 
 	/**
 	 * Validates output location & build path.
 	 */	
-	private void updateBuildPathStatus() {
+	private void updateOutputLocationStatus() {
 		fOutputLocationPath= null;
 		
 		String text= fBuildPathDialogField.getText();
 		if ("".equals(text)) { //$NON-NLS-1$
-			fBuildPathStatus.setError(NewWizardMessages.getString("BuildPathsBlock.error.EnterBuildPath")); //$NON-NLS-1$
+			fOutputFolderStatus.setError(NewWizardMessages.getString("BuildPathsBlock.error.EnterBuildPath")); //$NON-NLS-1$
 			return;
 		}
 		IPath path= getOutputLocation();
+		fOutputLocationPath= path;
 		
 		IResource res= fWorkspaceRoot.findMember(path);
 		if (res != null) {
 			// if exists, must be a folder or project
 			if (res.getType() == IResource.FILE) {
-				fBuildPathStatus.setError(NewWizardMessages.getString("BuildPathsBlock.error.InvalidBuildPath")); //$NON-NLS-1$
+				fOutputFolderStatus.setError(NewWizardMessages.getString("BuildPathsBlock.error.InvalidBuildPath")); //$NON-NLS-1$
 				return;
 			}
-		}
-		fOutputLocationPath= path;
+		}	
+		fOutputFolderStatus.setOK();
+		updateBuildPathStatus();
+	}
 		
+	private void updateBuildPathStatus() {
 		List elements= fClassPathList.getElements();
 		IClasspathEntry[] entries= new IClasspathEntry[elements.size()];
-		boolean outputFolderAlsoSourceFolder= false;
-		
+	
 		for (int i= elements.size()-1 ; i >= 0 ; i--) {
 			CPListElement currElement= (CPListElement)elements.get(i);
 			entries[i]= currElement.getClasspathEntry();
-			if (currElement.getEntryKind() == IClasspathEntry.CPE_SOURCE && fOutputLocationPath.equals(currElement.getPath())) {
-				outputFolderAlsoSourceFolder= true;
-			}
 		}
 		
-		IStatus status= JavaConventions.validateClasspath(fCurrJProject, entries, path);
+		IStatus status= JavaConventions.validateClasspath(fCurrJProject, entries, fOutputLocationPath);
 		if (!status.isOK()) {
 			fBuildPathStatus.setError(status.getMessage());
 			return;
 		}
-		if (res != null && res.exists() && fCurrJProject.exists()) {
-			try {
-				IPath oldOutputLocation= fCurrJProject.getOutputLocation();
-				if (!oldOutputLocation.equals(fOutputLocationPath) && !outputFolderAlsoSourceFolder) {
-					if (((IContainer)res).members().length > 0) {
-						fBuildPathStatus.setWarning(NewWizardMessages.getString("BuildPathsBlock.warning.OutputFolderNotEmpty")); //$NON-NLS-1$
-						return;
-					}
-				}
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
-			}
-		}
-				
 		fBuildPathStatus.setOK();
 	}
 	
@@ -638,10 +627,18 @@ public class BuildPathsBlock {
 			if ((res instanceof IFolder) && !res.exists()) {
 				CoreUtility.createFolder((IFolder)res, true, true, null);
 			}
+			if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+				IPath folderOutput= (IPath) entry.getAttribute(CPListElement.OUTPUT);
+				if (folderOutput != null && folderOutput.segmentCount() > 1) {
+					IFolder folder= fWorkspaceRoot.getFolder(folderOutput);
+					CoreUtility.createFolder((IFolder)folder, true, true, null);
+				}
+			}
+			
 			classpath[i]= entry.getClasspathEntry();
 						
 			// set javadoc location
-			URL javadocLocation= entry.getJavadocLocation();
+			URL javadocLocation= (URL) entry.getAttribute(CPListElement.JAVADOC);
 			if (javadocLocation != null) {
 				IPath path= entry.getPath();
 				if (entry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {

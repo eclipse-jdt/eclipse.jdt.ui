@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
+import java.io.File;
 import java.net.URL;
 
 import org.eclipse.core.resources.IFile;
@@ -105,9 +106,14 @@ class CPListLabelProvider extends LabelProvider {
 			}
 		} else if (key.equals(CPListElement.EXCLUSION)) {
 			buf.append("Exclusion filter: ");
-			String filter= (String) attrib.getValue();
-			if (filter != null) {
-				buf.append(filter);
+			IPath[] patterns= (IPath[]) attrib.getValue();
+			if (patterns != null && patterns.length > 0) {
+				for (int i= 0; i < patterns.length; i++) {
+					if (i > 0) {
+						buf.append(File.pathSeparatorChar);
+					}
+					buf.append(patterns[i].toString());
+				}
 			} else {
 				buf.append(notAvailable);
 			}
@@ -194,7 +200,7 @@ class CPListLabelProvider extends LabelProvider {
 				return fFolderImage;
 			case IClasspathEntry.CPE_LIBRARY:
 				IResource res= cpentry.getResource();
-				IPath path= cpentry.getSourceAttachmentPath();
+				IPath path= (IPath) cpentry.getAttribute(CPListElement.SOURCEATTACHMENT);
 				if (res == null) {
 					if (path == null || path.isEmpty()) {
 						return fExtJarIcon;

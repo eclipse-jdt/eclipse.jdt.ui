@@ -13,8 +13,13 @@ public abstract class BuildPathBasePage {
 			
 	protected void filterSelection(List list, int kind) {
 		for (int i= list.size()-1; i >= 0; i--) {
-			CPListElement curr= (CPListElement)list.get(i);
-			if (curr.getEntryKind() != kind) {
+			Object obj= list.get(i);
+			if (obj instanceof CPListElement) {
+				CPListElement curr= (CPListElement) obj;
+				if (curr.getEntryKind() != kind) {
+					list.remove(i);
+				}			
+			} else {
 				list.remove(i);
 			}
 		}

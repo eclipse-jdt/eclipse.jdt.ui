@@ -34,6 +34,8 @@ public class CPListElement {
 	private IResource fResource;
 	private boolean fIsExported;
 	private boolean fIsMissing;
+	
+	private CPListElement fParentContainer;
 		
 	private IClasspathEntry fCachedEntry;
 	private HashMap fAttributes;
@@ -49,6 +51,23 @@ public class CPListElement {
 		
 		fIsMissing= false;
 		fCachedEntry= null;
+		fParentContainer= null;
+		
+		switch (entryKind) {
+			case IClasspathEntry.CPE_SOURCE:
+				createAttributeElement(OUTPUT);
+				createAttributeElement(EXCLUSION);
+				break;
+			case IClasspathEntry.CPE_LIBRARY:
+			case IClasspathEntry.CPE_VARIABLE:
+				createAttributeElement(SOURCEATTACHMENT);
+				createAttributeElement(JAVADOC);
+				break;
+			case IClasspathEntry.CPE_PROJECT:
+			case IClasspathEntry.CPE_CONTAINER:
+				break;
+			default:
+		}
 	}
 	
 	public IClasspathEntry getClasspathEntry() {
@@ -62,15 +81,19 @@ public class CPListElement {
 	private IClasspathEntry newClasspathEntry() {
 		switch (fEntryKind) {
 			case IClasspathEntry.CPE_SOURCE:
-				return JavaCore.newSourceEntry(fPath);
+				IPath outputLocation= (IPath) getAttribute(OUTPUT);
+				IPath[] exclusionPattern= (IPath[]) getAttribute(EXCLUSION);
+				return JavaCore.newSourceEntry(fPath, exclusionPattern, outputLocation);
 			case IClasspathEntry.CPE_LIBRARY:
-				return JavaCore.newLibraryEntry(fPath, getSourceAttachmentPath(), getSourceAttachmentRootPath(), isExported());
+				IPath attach= (IPath) getAttribute(SOURCEATTACHMENT);
+				return JavaCore.newLibraryEntry(fPath, attach, null, isExported());
 			case IClasspathEntry.CPE_PROJECT:
 				return JavaCore.newProjectEntry(fPath, isExported());
 			case IClasspathEntry.CPE_CONTAINER:
 				return JavaCore.newContainerEntry(fPath, isExported());
 			case IClasspathEntry.CPE_VARIABLE:
-				return JavaCore.newVariableEntry(fPath, getSourceAttachmentPath(), getSourceAttachmentRootPath(), isExported());
+				IPath varAttach= (IPath) getAttribute(SOURCEATTACHMENT);
+				return JavaCore.newVariableEntry(fPath, varAttach, null, isExported());
 			default:
 				return null;
 		}
@@ -103,8 +126,7 @@ public class CPListElement {
 	public CPListElementAttribute setAttribute(String key, Object value) {
 		CPListElementAttribute attribute= (CPListElementAttribute) fAttributes.get(key);
 		if (attribute == null) {
-			attribute= new CPListElementAttribute(this, key, null);
-			fAttributes.put(key, attribute);
+			return null;
 		}
 		attribute.setValue(value);
 		attributeChanged(key);
@@ -121,7 +143,7 @@ public class CPListElement {
 		return null;
 	}
 	
-	public CPListElementAttribute createAttributeElement(String key) {
+	private CPListElementAttribute createAttributeElement(String key) {
 		CPListElementAttribute attribute= (CPListElementAttribute) fAttributes.get(key);
 		if (attribute == null) {
 			attribute= new CPListElementAttribute(this, key, null);
@@ -132,41 +154,30 @@ public class CPListElement {
 	
 	
 	public Object[] getChildren() {
-		switch (fEntryKind) {
-			case IClasspathEntry.CPE_SOURCE:
-				return new Object[] {
-					createAttributeElement(OUTPUT),
-					createAttributeElement(EXCLUSION)
-				};
-			case IClasspathEntry.CPE_LIBRARY:
-				return new CPListElementAttribute[] {
-					createAttributeElement(SOURCEATTACHMENT),
-					createAttributeElement(JAVADOC)
-				};
-			case IClasspathEntry.CPE_PROJECT:
-				return new Object[0];
-			case IClasspathEntry.CPE_CONTAINER:
-				try {
-					IClasspathContainer container= JavaCore.getClasspathContainer(fPath, fProject);
-					IClasspathEntry[] entries= container.getClasspathEntries();
-					CPListElement[] elements= new CPListElement[entries.length];
-					for (int i= 0; i < elements.length; i++) {
-						elements[i]= createFromExisting(entries[i], fProject);
-					}
-					return elements;
-				} catch (JavaModelException e) {
-					return new Object[0]; 
+		if (fEntryKind == IClasspathEntry.CPE_CONTAINER) {
+			try {
+				IClasspathContainer container= JavaCore.getClasspathContainer(fPath, fProject);
+				IClasspathEntry[] entries= container.getClasspathEntries();
+				CPListElement[] elements= new CPListElement[entries.length];
+				for (int i= 0; i < elements.length; i++) {
+					elements[i]= createFromExisting(entries[i], fProject);
+					elements[i].setParentContainer(this);
 				}
-			case IClasspathEntry.CPE_VARIABLE:
-				return new CPListElementAttribute[] {
-					createAttributeElement(SOURCEATTACHMENT),
-					createAttributeElement(JAVADOC)
-				};
-			default:
-				return null;
+				return elements;
+			} catch (JavaModelException e) {
+				return new Object[0];
+			}
 		}
+		return fAttributes.values().toArray();
 	}
 	
+	private void setParentContainer(CPListElement element) {
+		fParentContainer= element;
+	}
+	
+	private CPListElement getParentContainer() {
+		return fParentContainer;
+	}	
 	
 	public void attributeChanged(String key) {
 		fCachedEntry= null;
@@ -175,7 +186,8 @@ public class CPListElement {
 	
 	/**
 	 * Sets the paths for source annotation
-	 * @see org.eclipse.jdt.core.IPackageFragmentRoot#attachSource	
+	 * @see org.eclipse.jdt.core.IPackageFragmentRoot#attachSource
+	 * @deprecated 
 	 */	
 	public void setSourceAttachment(IPath path, IPath prefix) {
 		setAttribute(SOURCEATTACHMENT, path);
@@ -186,6 +198,7 @@ public class CPListElement {
 	 * Gets the current path prefix used when accessing the source attachment
 	 * @see org.eclipse.jdt.core.IPackageFragmentRoot#getSourceAttachmentPath	 
 	 * @return The source attachment prefix
+	 * @deprecated 
 	 */	
 	public IPath getSourceAttachmentPath() {
 		return (IPath) getAttribute(SOURCEATTACHMENT);
@@ -193,7 +206,9 @@ public class CPListElement {
 	
 	/**
 	 * Returns the root path used for accessing source attchments
-	 * @see org.eclipse.jdt.core.IPackageFragmentRoot#getSourceAttachmentRootPath
+	 * @see org.eclipse.jdt.core.
+	 * IPackageFragmentRoot#getSourceAttachmentRootPath
+	 * 	  @deprecated
 	 */
 	public IPath getSourceAttachmentRootPath() {
 		return (IPath) getAttribute(SOURCEATTACHMENTROOT);
@@ -254,6 +269,7 @@ public class CPListElement {
 	/**
 	 * Gets the Javadoc location.
 	 * @return Returns a URL
+	 * 	 	  @deprecated
 	 */
 	public URL getJavadocLocation() {
 		return (URL) getAttribute(JAVADOC);
@@ -262,10 +278,12 @@ public class CPListElement {
 	/**
 	 * Sets the Javadoc location.
 	 * @param javadocLocation The javadocLocation to set
+	 * @deprecated
 	 */
 	public void setJavadocLocation(URL javadocLocation) {
 		setAttribute(JAVADOC, javadocLocation);
 	}
+		
 
 	/**
 	 * Gets the project.
@@ -325,12 +343,12 @@ public class CPListElement {
 				isMissing= (res == null);
 				break;
 		}
-		boolean isExported= curr.isExported();
-
 		CPListElement elem= new CPListElement(project, curr.getEntryKind(), path, res);
-		elem.setSourceAttachment(curr.getSourceAttachmentPath(), curr.getSourceAttachmentRootPath());
-		elem.setExported(isExported);
-		elem.setJavadocLocation(javaDocLocation);
+		elem.setExported(curr.isExported());
+		elem.setAttribute(SOURCEATTACHMENT, curr.getSourceAttachmentPath());
+		elem.setAttribute(JAVADOC, javaDocLocation);
+		elem.setAttribute(OUTPUT, curr.getOutputLocation());
+		elem.setAttribute(EXCLUSION, curr.getExclusionPatterns());
 
 		if (project.exists()) {
 			elem.setIsMissing(isMissing);
