@@ -26,7 +26,6 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.CloseResourceAction;
-import org.eclipse.ui.actions.OpenResourceAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
@@ -43,7 +42,7 @@ public class ProjectActionGroup extends ActionGroup {
 
 	private IWorkbenchSite fSite;
 
-	private OpenResourceAction fOpenAction;
+	private OpenProjectAction fOpenAction;
 	private CloseResourceAction fCloseAction;
 
 	/**
@@ -59,7 +58,7 @@ public class ProjectActionGroup extends ActionGroup {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
 		
-		fOpenAction= new OpenResourceAction(shell);
+		fOpenAction= new OpenProjectAction(fSite);
 		fCloseAction= new CloseResourceAction(shell);
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection s= (IStructuredSelection)selection;

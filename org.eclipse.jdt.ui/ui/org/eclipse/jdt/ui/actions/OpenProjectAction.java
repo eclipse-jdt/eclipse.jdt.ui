@@ -14,12 +14,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -33,25 +31,22 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.swt.SWT;
-
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.actions.OpenResourceAction;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
-
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-import org.eclipse.jdt.internal.ui.dialogs.ListDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 /**
- * Action to open a closed project. Action presents a dialog from which the
+ * Action to open a closed project. Action either opens the closed projects
+ * provided by the strucutured selection or present a dialog from which the
  * user can select the projects to be opened.
  * 
  * <p>
@@ -59,21 +54,23 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
  * </p>
  * 
  * @since 2.0
- * @deprecated Use <tt>org.eclipse.ui.actions.OpenResourceAction</tt> instead;
- * the package explorer now displays closed projects as well.
  */
-public class OpenProjectAction extends Action implements IResourceChangeListener {
+public class OpenProjectAction extends SelectionDispatchAction implements IResourceChangeListener {
 	
-	private IWorkbenchSite fSite;
-
+	private OpenResourceAction fWorkbenchAction;
+	
 	/**
-	 * Creates a new <code>OpenProjectAction</code>.
+	 * Creates a new <code>OpenProjectAction</code>. The action requires
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
 	public OpenProjectAction(IWorkbenchSite site) {
-		Assert.isNotNull(site);
-		fSite= site;
+		super(site);
+		fWorkbenchAction= new OpenResourceAction(site.getShell());
+		setText(fWorkbenchAction.getText());
+		setToolTipText(fWorkbenchAction.getToolTipText());
 		setEnabled(hasCloseProjects());
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_PROJECT_ACTION);
 	}
@@ -82,6 +79,11 @@ public class OpenProjectAction extends Action implements IResourceChangeListener
 	 * @see IResourceChangeListener#resourceChanged(IResourceChangeEvent)
 	 */
 	public void resourceChanged(IResourceChangeEvent event) {
+		fWorkbenchAction.resourceChanged(event);
+		internalResourceChanged(event);
+	}
+	
+	private void internalResourceChanged(IResourceChangeEvent event) {
 		IResourceDelta delta = event.getDelta();
 		if (delta != null) {
 			IResourceDelta[] projDeltas = delta.getAffectedChildren(IResourceDelta.CHANGED);
@@ -94,12 +96,51 @@ public class OpenProjectAction extends Action implements IResourceChangeListener
 			}
 		}
 	}
-		
-	/*
-	 * @see IAction#run()
+	
+	//---- normal selection -------------------------------------
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.ISelection)
 	 */
-	public void run() {
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(fSite.getShell(), new JavaElementLabelProvider());
+	protected void selectionChanged(ISelection selection) {
+		setEnabled(hasCloseProjects());
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.ISelection)
+	 */
+	protected void run(ISelection selection) {
+		internalRun();
+	}
+	
+	//---- structured selection ---------------------------------------
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
+	 */
+	protected void selectionChanged(IStructuredSelection selection) {
+		if (selection.isEmpty()) {
+			setEnabled(hasCloseProjects());
+			return;
+		}
+		fWorkbenchAction.selectionChanged(selection);
+		setEnabled(fWorkbenchAction.isEnabled());
+	}
+
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
+	 */
+	protected void run(IStructuredSelection selection) {
+		if (selection.isEmpty()) {
+			internalRun();
+			return;
+		}
+		fWorkbenchAction.run();
+	}
+	
+	private void internalRun() {
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider());
 		dialog.setTitle(ActionMessages.getString("OpenProjectAction.dialog.title")); //$NON-NLS-1$
 		dialog.setMessage(ActionMessages.getString("OpenProjectAction.dialog.message")); //$NON-NLS-1$
 		dialog.setElements(getClosedProjects());
@@ -108,21 +149,19 @@ public class OpenProjectAction extends Action implements IResourceChangeListener
 		if (result != Dialog.OK)
 			return;
 		final Object[] projects= dialog.getResult();
-		final List nonJavaProjects= new ArrayList(3);
-		IWorkspaceRunnable runnable= createRunnable(projects, nonJavaProjects);
-		ProgressMonitorDialog pd= new ProgressMonitorDialog(fSite.getShell());
+		IWorkspaceRunnable runnable= createRunnable(projects);
+		ProgressMonitorDialog pd= new ProgressMonitorDialog(getShell());
 		try {
 			pd.run(true, true, new WorkbenchRunnableAdapter(runnable));
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, fSite.getShell(), 
+			ExceptionHandler.handle(e, getShell(), 
 				ActionMessages.getString("OpenProjectAction.dialog.title"), //$NON-NLS-1$
 				ActionMessages.getString("OpenProjectAction.error.message")); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 		}
-		showWarningDialog(nonJavaProjects);
 	}
 	
-	private IWorkspaceRunnable createRunnable(final Object[] projects, final List nonJavaProjects) {
+	private IWorkspaceRunnable createRunnable(final Object[] projects) {
 		return new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
 				monitor.beginTask("", projects.length); //$NON-NLS-1$
@@ -131,9 +170,6 @@ public class OpenProjectAction extends Action implements IResourceChangeListener
 					IProject project= (IProject)projects[i];
 					try {
 						project.open(new SubProgressMonitor(monitor, 1));
-						if (project.getNature(JavaCore.NATURE_ID) == null) {
-							nonJavaProjects.add(project);
-						}		
 					} catch (CoreException e) {
 						if (errorStatus == null)
 							errorStatus = new MultiStatus(JavaPlugin.getPluginId(), IStatus.ERROR, ActionMessages.getString("OpenProjectAction.error.message"), e); //$NON-NLS-1$
@@ -145,31 +181,6 @@ public class OpenProjectAction extends Action implements IResourceChangeListener
 					throw new CoreException(errorStatus);
 			}
 		};
-	}
-	
-	private void showWarningDialog(final List nonJavaProjects) {
-		int size= nonJavaProjects.size();
-		if (size > 0) {
-			ListDialog warningDialog= new ListDialog(fSite.getShell(), SWT.DIALOG_TRIM | SWT.RESIZE);
-			warningDialog.setAddCancelButton(false);
-			warningDialog.setTitle(ActionMessages.getString("OpenProjectAction.dialog.title")); //$NON-NLS-1$
-			if (size == 1)
-				warningDialog.setMessage(ActionMessages.getString("OpenProjectAction.no_java_nature.one")); //$NON-NLS-1$
-			else
-				warningDialog.setMessage(ActionMessages.getString("OpenProjectAction.no_java_nature.multiple")); //$NON-NLS-1$
-			warningDialog.setContentProvider(new IStructuredContentProvider() {
-				public Object[] getElements(Object inputElement) {
-					return ((List)inputElement).toArray();
-				}
-				public void dispose() {
-				}
-				public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-				}
-			});
-			warningDialog.setLabelProvider(new JavaElementLabelProvider());
-			warningDialog.setInput(nonJavaProjects);
-			warningDialog.open();
-		}
 	}
 	
 	private Object[] getClosedProjects() {
