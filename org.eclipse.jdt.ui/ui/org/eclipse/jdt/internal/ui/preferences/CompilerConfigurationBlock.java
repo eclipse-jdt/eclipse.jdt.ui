@@ -102,8 +102,6 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_RESOURCE_FILTER= JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER;
 	private static final String PREF_BUILD_INVALID_CLASSPATH= JavaCore.CORE_JAVA_BUILD_INVALID_CLASSPATH;
 	private static final String PREF_BUILD_CLEAN_OUTPUT_FOLDER= JavaCore.CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER;
-//	private static final String PREF_ENABLE_EXCLUSION_PATTERNS= JavaCore.CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS;
-// private static final String PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS= JavaCore.CORE_ENABLE_CLASSPATH_MULTIPLE_OUTPUT_LOCATIONS;
 	private static final String PREF_PB_INCOMPLETE_BUILDPATH= JavaCore.CORE_INCOMPLETE_CLASSPATH;
 	private static final String PREF_PB_CIRCULAR_BUILDPATH= JavaCore.CORE_CIRCULAR_CLASSPATH;
 	private static final String PREF_PB_INCOMPATIBLE_JDK_LEVEL= JavaCore.CORE_INCOMPATIBLE_JDK_LEVEL;
@@ -117,6 +115,11 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION= JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION;
 	private static final String PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING= JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING;
 	private static final String PREF_PB_UNQUALIFIED_FIELD_ACCESS= JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS;
+
+	private static final String PREF_15_PB_UNSAVE_TYPE_OPERATION= "org.eclipse.jdt.core.compiler.problem.unsafeTypeOperation"; //$NON-NLS-1$
+	private static final String PREF_15_PB_FINAL_PARAM_BOUND= "org.eclipse.jdt.core.compiler.problem.finalParameterBound"; //$NON-NLS-1$
+	
+	
 	
 	private static final String INTR_DEFAULT_COMPLIANCE= "internal.default.compliance"; //$NON-NLS-1$
 
@@ -160,7 +163,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private IStatus fComplianceStatus, fMaxNumberProblemsStatus, fResourceFilterStatus;
 
 	public CompilerConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
-		super(context, project);
+		super(context, project, getKeys());
 		
 		fComplianceControls= new ArrayList();
 			
@@ -180,36 +183,42 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		};
 	}
 	
-	private final String[] KEYS= new String[] {
-		PREF_LOCAL_VARIABLE_ATTR, PREF_LINE_NUMBER_ATTR, PREF_SOURCE_FILE_ATTR, PREF_CODEGEN_UNUSED_LOCAL,
-		PREF_CODEGEN_INLINE_JSR_BYTECODE,
-		PREF_CODEGEN_TARGET_PLATFORM, PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD,
-		PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, PREF_PB_DEPRECATION, PREF_PB_HIDDEN_CATCH_BLOCK, PREF_PB_UNUSED_LOCAL,
-		PREF_PB_UNUSED_PARAMETER, PREF_PB_SYNTHETIC_ACCESS_EMULATION, PREF_PB_NON_EXTERNALIZED_STRINGS,
-		PREF_PB_ASSERT_AS_IDENTIFIER, PREF_PB_UNUSED_IMPORT, PREF_PB_MAX_PER_UNIT, PREF_SOURCE_COMPATIBILITY, PREF_COMPLIANCE, 
-		PREF_PB_STATIC_ACCESS_RECEIVER, PREF_PB_DEPRECATION_IN_DEPRECATED_CODE, 
-		PREF_PB_NO_EFFECT_ASSIGNMENT, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD,
-		PREF_PB_UNUSED_PRIVATE, PREF_PB_CHAR_ARRAY_IN_CONCAT, 
-		PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT, PREF_PB_LOCAL_VARIABLE_HIDING, PREF_PB_FIELD_HIDING,
-		PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD, PREF_PB_INDIRECT_STATIC_ACCESS,
-		PREF_PB_SUPERFLUOUS_SEMICOLON, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT,
-		PREF_PB_UNNECESSARY_TYPE_CHECK, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION, PREF_PB_UNQUALIFIED_FIELD_ACCESS,
-		PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING, PREF_PB_DEPRECATION_WHEN_OVERRIDING,
-		PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING,
-		PREF_JAVADOC_SUPPORT,
-		PREF_PB_INVALID_JAVADOC, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY,
-		PREF_PB_MISSING_JAVADOC_TAGS, PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING,
-		PREF_PB_MISSING_JAVADOC_COMMENTS, PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY, PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING,
-		
-		PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_INCOMPLETE_BUILDPATH, PREF_PB_CIRCULAR_BUILDPATH,
-		PREF_BUILD_CLEAN_OUTPUT_FOLDER, PREF_PB_DUPLICATE_RESOURCE,
-		PREF_PB_INCOMPATIBLE_JDK_LEVEL, 
-		
-	};
-
-	
-	protected String[] getAllKeys() {
-		return KEYS;	
+	private static String[] getKeys() {
+		String[] keys= new String[] {
+				PREF_LOCAL_VARIABLE_ATTR, PREF_LINE_NUMBER_ATTR, PREF_SOURCE_FILE_ATTR, PREF_CODEGEN_UNUSED_LOCAL,
+				PREF_CODEGEN_INLINE_JSR_BYTECODE,
+				PREF_CODEGEN_TARGET_PLATFORM, PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD,
+				PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, PREF_PB_DEPRECATION, PREF_PB_HIDDEN_CATCH_BLOCK, PREF_PB_UNUSED_LOCAL,
+				PREF_PB_UNUSED_PARAMETER, PREF_PB_SYNTHETIC_ACCESS_EMULATION, PREF_PB_NON_EXTERNALIZED_STRINGS,
+				PREF_PB_ASSERT_AS_IDENTIFIER, PREF_PB_UNUSED_IMPORT, PREF_PB_MAX_PER_UNIT, PREF_SOURCE_COMPATIBILITY, PREF_COMPLIANCE, 
+				PREF_PB_STATIC_ACCESS_RECEIVER, PREF_PB_DEPRECATION_IN_DEPRECATED_CODE, 
+				PREF_PB_NO_EFFECT_ASSIGNMENT, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD,
+				PREF_PB_UNUSED_PRIVATE, PREF_PB_CHAR_ARRAY_IN_CONCAT, 
+				PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT, PREF_PB_LOCAL_VARIABLE_HIDING, PREF_PB_FIELD_HIDING,
+				PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD, PREF_PB_INDIRECT_STATIC_ACCESS,
+				PREF_PB_SUPERFLUOUS_SEMICOLON, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT,
+				PREF_PB_UNNECESSARY_TYPE_CHECK, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION, PREF_PB_UNQUALIFIED_FIELD_ACCESS,
+				PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING, PREF_PB_DEPRECATION_WHEN_OVERRIDING,
+				PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING,
+				PREF_JAVADOC_SUPPORT,
+				PREF_PB_INVALID_JAVADOC, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY,
+				PREF_PB_MISSING_JAVADOC_TAGS, PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING,
+				PREF_PB_MISSING_JAVADOC_COMMENTS, PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY, PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING,
+				
+				PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_INCOMPLETE_BUILDPATH, PREF_PB_CIRCULAR_BUILDPATH,
+				PREF_BUILD_CLEAN_OUTPUT_FOLDER, PREF_PB_DUPLICATE_RESOURCE,
+				PREF_PB_INCOMPATIBLE_JDK_LEVEL, 
+			};
+		if (JavaModelUtil.isJDTCore_1_5()) {
+			String[] newKeys= new String[] {
+					PREF_15_PB_UNSAVE_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND
+			};
+			String[] merged= new String[keys.length + newKeys.length];
+			System.arraycopy(keys, 0, merged, 0, keys.length);
+			System.arraycopy(newKeys, 0, merged, keys.length, newKeys.length);
+			keys= merged;
+		}
+		return keys;
 	}
 	
 	protected final Map getOptions(boolean inheritJavaCoreOptions) {
@@ -239,10 +248,11 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		Composite commonComposite= createStyleTabContent(folder);
 		Composite unusedComposite= createUnusedCodeTabContent(folder);
 		Composite advancedComposite= createAdvancedTabContent(folder);
+		
 		Composite javadocComposite= createJavadocTabContent(folder);
 		Composite complianceComposite= createComplianceTabContent(folder);
 		Composite othersComposite= createBuildPathTabContent(folder);
-
+		
 		TabItem item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.common.tabtitle")); //$NON-NLS-1$
 		item.setControl(commonComposite);
@@ -266,6 +276,14 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.others.tabtitle")); //$NON-NLS-1$
 		item.setControl(othersComposite);		
+		
+		if (JavaModelUtil.isJDTCore_1_5()) {
+			Composite extraComposite= create15TabContent(folder);
+			
+			item= new TabItem(folder, SWT.NONE);
+			item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.15.tabtitle")); //$NON-NLS-1$
+			item.setControl(extraComposite);		
+		}
 		
 		validateSettings(null, null);
 	
@@ -550,7 +568,6 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private Composite createBuildPathTabContent(TabFolder folder) {
 		String[] abortIgnoreValues= new String[] { ABORT, IGNORE };
 		String[] cleanIgnoreValues= new String[] { CLEAN, IGNORE };
-//		String[] enableDisableValues= new String[] { ENABLED, DISABLED };
 		
 		String[] errorWarning= new String[] { ERROR, WARNING };
 		
@@ -597,13 +614,6 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.build_clean_outputfolder.label"); //$NON-NLS-1$
 		addCheckBox(othersComposite, label, PREF_BUILD_CLEAN_OUTPUT_FOLDER, cleanIgnoreValues, 0);
-
-//		label= PreferencesMessages.getString("CompilerConfigurationBlock.enable_exclusion_patterns.label"); //$NON-NLS-1$
-//		addCheckBox(othersComposite, label, PREF_ENABLE_EXCLUSION_PATTERNS, enableDisableValues, 0);
-//
-//		label= PreferencesMessages.getString("CompilerConfigurationBlock.enable_multiple_outputlocations.label"); //$NON-NLS-1$
-//		addCheckBox(othersComposite, label, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS, enableDisableValues, 0);
-		
 		
 		description= new Label(othersComposite, SWT.WRAP);
 		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.resource_filter.description")); //$NON-NLS-1$
@@ -732,6 +742,41 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		
 		return compComposite;
 	}
+	
+	
+	private Composite create15TabContent(TabFolder folder) {
+		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
+		
+		String[] errorWarningIgnoreLabels= new String[] {
+			PreferencesMessages.getString("CompilerConfigurationBlock.error"),  //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.warning"), //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.ignore") //$NON-NLS-1$
+		};
+			
+		int nColumns= 3;
+		
+		GridLayout layout= new GridLayout();
+		layout.numColumns= nColumns;
+					
+		Composite composite= new Composite(folder, SWT.NULL);
+		composite.setLayout(layout);
+
+		Label description= new Label(composite, SWT.WRAP);
+		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.15.description")); //$NON-NLS-1$
+		GridData gd= new GridData();
+		gd.horizontalSpan= nColumns;
+		description.setLayoutData(gd);
+		
+		String label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unsafe_type_op.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_15_PB_UNSAVE_TYPE_OPERATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_final_param_bound.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_15_PB_FINAL_PARAM_BOUND, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		return composite;
+	}
+	
+	
 		
 	
 	/* (non-javadoc)
