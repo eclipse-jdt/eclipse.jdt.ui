@@ -186,6 +186,9 @@ public abstract class JavaElementAction extends Action {
 	}	
 	protected IJavaElement findType(ICompilationUnit cu, boolean silent) {
 		if (silent) {
+			//XXX fix for 1GF5ZBA: ITPJUI:WINNT - assertion failed after rightclick on a compilation unit with strange name
+			if (cu.getElementName().indexOf(".") != cu.getElementName().lastIndexOf("."))
+				return null;
 			String mainTypeName= cu.getElementName().substring(0, cu.getElementName().length() - 5);
 			IType mainType= cu.getType(mainTypeName);
 			mainTypeName= JavaModelUtility.getTypeQualifiedName((IType)mainType);

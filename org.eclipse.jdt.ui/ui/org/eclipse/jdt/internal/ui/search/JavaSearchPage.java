@@ -475,7 +475,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				break;
 			case IJavaElement.COMPILATION_UNIT:
 				ICompilationUnit cu= (ICompilationUnit)element;
-				String mainTypeName= element.getElementName().substring(0, element.getElementName().length() - 5);
+				//fix 1GF5ZBA: ITPJUI:WINNT - assertion failed after rightclick on a compilation unit with strange name
+				String mainTypeName= element.getElementName().substring(0, element.getElementName().indexOf("."));
 				IType mainType= cu.getType(mainTypeName);
 				mainTypeName= JavaModelUtility.getTypeQualifiedName(mainType);
 				try {					

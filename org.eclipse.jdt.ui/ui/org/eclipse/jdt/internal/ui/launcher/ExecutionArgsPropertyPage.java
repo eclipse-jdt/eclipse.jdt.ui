@@ -126,7 +126,8 @@ public class ExecutionArgsPropertyPage extends PropertyPage {
 			ICompilationUnit cu= (ICompilationUnit) element;
 			String name= cu.getElementName();
 			if (name.endsWith(".java")) {
-				name= name.substring(0, name.length() - 5);
+				//fix for 1GF5ZBA: ITPJUI:WINNT - assertion failed after rightclick on a compilation unit with strange name
+				name= name.substring(0, name.indexOf("."));
 				IType t= cu.getType(name);
 				if (t.exists())
 					element= t;
