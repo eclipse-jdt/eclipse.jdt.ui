@@ -63,26 +63,22 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		if (newTypeDecl != null) {
 			ASTRewrite rewrite= new ASTRewrite(newTypeDecl);
 			
-			List methods;
+			List members;
 			if (fSenderBinding.isAnonymous()) {
-				methods= ((AnonymousClassDeclaration) newTypeDecl).bodyDeclarations();
+				members= ((AnonymousClassDeclaration) newTypeDecl).bodyDeclarations();
 			} else {
-				methods= ((TypeDeclaration) newTypeDecl).bodyDeclarations();
+				members= ((TypeDeclaration) newTypeDecl).bodyDeclarations();
 			}
 			MethodDeclaration newStub= getStub(rewrite, newTypeDecl);
 			
-			if (!fIsInDifferentCU) {
-				methods.add(findInsertIndex(methods, fNode.getStartPosition()), newStub);
-			} else if (isConstructor()) {
-				methods.add(0, newStub);
+			if (isConstructor()) {
+				members.add(findConstructorInsertIndex(members), newStub);
+			} else if (!fIsInDifferentCU) {
+				members.add(findMethodInsertIndex(members, fNode.getStartPosition()), newStub);
 			} else {
-				methods.add(newStub);
+				members.add(newStub);
 			}
-			if (fIsInDifferentCU) { // if in different, select method
-				rewrite.markAsInserted(newStub, SELECTION_GROUP_DESC); 
-			} else {
-				rewrite.markAsInserted(newStub);
-			}
+			rewrite.markAsInserted(newStub, SELECTION_GROUP_DESC); 
 			return rewrite;
 		}
 		return null;
@@ -177,7 +173,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		return names[0];
 	}
 			
-	private int findInsertIndex(List decls, int currPos) {
+	private int findMethodInsertIndex(List decls, int currPos) {
 		int nDecls= decls.size();
 		for (int i= 0; i < nDecls; i++) {
 			ASTNode curr= (ASTNode) decls.get(i);
@@ -187,6 +183,21 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		}
 		return nDecls;
 	}
+	
+	private int findConstructorInsertIndex(List decls) {
+		int nDecls= decls.size();
+		int lastMethod= 0;
+		for (int i= nDecls - 1; i >= 0; i--) {
+			ASTNode curr= (ASTNode) decls.get(i);
+			if (curr instanceof MethodDeclaration) {
+				if (((MethodDeclaration) curr).isConstructor()) {
+					return i;
+				}
+				lastMethod= i;
+			}
+		}
+		return lastMethod;
+	}	
 	
 	private String getMethodName() {
 		if (fNode instanceof MethodInvocation) {

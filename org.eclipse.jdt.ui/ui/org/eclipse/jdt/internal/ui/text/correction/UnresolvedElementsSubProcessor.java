@@ -892,7 +892,8 @@ public class UnresolvedElementsSubProcessor {
 		if (targetBinding.isFromSource()) {
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, targetBinding);
 			if (targetCU != null) {
-				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconstructor.description", targetBinding.getName()); //$NON-NLS-1$
+				String[] args= new String[] { getMethodSignature( targetBinding.getName(), arguments) };
+				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconstructor.description", args); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 				proposals.add(new NewMethodCompletionProposal(label, targetCU, selectedNode, arguments, targetBinding, 1, image));
 			}

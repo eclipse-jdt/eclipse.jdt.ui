@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 
 public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal {
@@ -32,18 +33,17 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 	private int  fVariableKind;
 	private SimpleName fOriginalNode;
 	private ITypeBinding fSenderBinding;
-	private boolean fIsInDifferentCU;
-
+	
 	public NewVariableCompletionProposal(String label, ICompilationUnit cu, int variableKind, SimpleName node, ITypeBinding senderBinding, int relevance, Image image) {
 		super(label, cu, null, relevance, image);
 	
 		fVariableKind= variableKind;
 		fOriginalNode= node;
 		fSenderBinding= senderBinding;
-		fIsInDifferentCU= false;
 	}
 		
 	protected ASTRewrite getRewrite() throws CoreException {
+
 		CompilationUnit cu= ASTResolving.findParentCompilationUnit(fOriginalNode);
 		if (fVariableKind == PARAM) {
 			return doAddParam(cu);
@@ -121,12 +121,17 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 				return rewrite;
 			}
 			Statement statement= ASTResolving.findParentStatement(node);
-			if (statement != null && statement.getParent() instanceof Block) {
-				Block block= (Block) statement.getParent();
-				List statements= block.statements();
-				statements.add(0, newDecl);
-				rewrite.markAsInserted(newDecl);
-				return rewrite;
+			if (statement != null) {
+				List list= ASTNodes.getContainingList(statement);
+				while (list == null && statement.getParent() instanceof Statement) { // parent must be if, for or while
+					statement= (Statement) statement.getParent();
+					list= ASTNodes.getContainingList(statement);
+				}
+				if (list != null) {
+					list.add(list.indexOf(statement), newDecl);
+					rewrite.markAsInserted(newDecl);
+					return rewrite;					
+				}
 			}
 		}
 		return null;
@@ -136,11 +141,9 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 		SimpleName node= fOriginalNode;
 		
 		ASTNode newTypeDecl= astRoot.findDeclaringNode(fSenderBinding);
-		if (newTypeDecl != null) {
-		} else {
+		if (newTypeDecl == null) {
 			astRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
 			newTypeDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
-			fIsInDifferentCU= true;
 		}
 		
 		if (newTypeDecl != null) {
@@ -165,11 +168,8 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 							
 			decls.add(findInsertIndex(decls, node.getStartPosition()), newDecl);
 			
-			if (fIsInDifferentCU) {
-				rewrite.markAsInserted(newDecl, SELECTION_GROUP_DESC);
-			} else {
-				rewrite.markAsInserted(newDecl);
-			}
+			rewrite.markAsInserted(newDecl, SELECTION_GROUP_DESC);
+			
 			return rewrite;
 		}
 		return null;
