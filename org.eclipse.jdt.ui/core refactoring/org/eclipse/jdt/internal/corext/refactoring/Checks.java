@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
@@ -536,6 +537,18 @@ public class Checks {
 		return result;
 	}
 
-	
-	
+	public static IType findTypeInPackage(IPackageFragment pack, String name) throws JavaModelException{
+		Assert.isTrue(pack.exists());
+		Assert.isTrue(!pack.isReadOnly());
+		
+		/* ICompilationUnit.getType expects simple name*/  
+		if (name.indexOf(".") != -1) //$NON-NLS-1$
+			name= name.substring(0, name.indexOf(".")); //$NON-NLS-1$
+		ICompilationUnit[] cus= pack.getCompilationUnits();
+		for (int i= 0; i < cus.length; i++){
+			if (cus[i].getType(name).exists())
+				return cus[i].getType(name);
+		}
+		return null;
+	}	
 }
