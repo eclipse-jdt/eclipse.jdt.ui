@@ -66,12 +66,5 @@ public final class DeleteSourceReferenceEdit extends SimpleTextEdit {
 		setTextRange(new TextRange(range));
 		super.connect(buffer);
 	}
-	
-	public void perform(TextBuffer buffer) throws CoreException {
-//		TextRange range= getTextRange();
-//		fContent= buffer.getContent(range.getOffset(), range.getLength());
-		super.perform(buffer);
-	}
-	
 }
 
