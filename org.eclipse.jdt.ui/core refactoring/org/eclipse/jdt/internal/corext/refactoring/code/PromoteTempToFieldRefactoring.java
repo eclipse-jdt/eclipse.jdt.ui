@@ -230,7 +230,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 			if (fTempDeclarationNode == null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.select_declaration")); //$NON-NLS-1$
 			
-			if (! Checks.isDeclaredInMethod(fTempDeclarationNode))
+			if (! Checks.isDeclaredIn(fTempDeclarationNode, MethodDeclaration.class))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.only_declared_in_methods")); //$NON-NLS-1$
 			
 			if (isMethodParameter())
