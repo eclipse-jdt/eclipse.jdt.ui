@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.workingsets;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +24,10 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -50,6 +55,16 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 			IResourceDelta[] affectedChildren= delta.getAffectedChildren(IResourceDelta.ADDED | IResourceDelta.REMOVED, IResource.PROJECT);
 			if (affectedChildren.length > 0) {
 				updateElements(fWorkingSetModel.getActiveWorkingSets());
+			} else {
+				affectedChildren= delta.getAffectedChildren(IResourceDelta.CHANGED, IResource.PROJECT);
+				for (int i= 0; i < affectedChildren.length; i++) {
+					IResourceDelta projectDelta= affectedChildren[i];
+					if ((projectDelta.getFlags() & IResourceDelta.DESCRIPTION) != 0) {
+						updateElements(fWorkingSetModel.getActiveWorkingSets());
+						// one is enough
+						return;
+					}
+				}
 			}
 		}
 	}
@@ -76,6 +91,40 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 		}
 	}
 	private IPropertyChangeListener fWorkingSetListener;
+	
+	private class JavaElementChangeListener implements IElementChangedListener {
+		public void elementChanged(ElementChangedEvent event) {
+			processJavaDelta(new ArrayList(Arrays.asList(fWorkingSet.getElements())), event.getDelta());
+		}
+		private void processJavaDelta(List elements, IJavaElementDelta delta) {
+			IJavaElement jElement= delta.getElement();
+			int type= jElement.getElementType();
+			if (type == IJavaElement.JAVA_PROJECT) {
+				int index= elements.indexOf(jElement);
+				int kind= delta.getKind();
+				int flags= delta.getFlags();
+				if (kind == IJavaElementDelta.CHANGED) {
+					if (index != -1 && (flags & IJavaElementDelta.F_CLOSED) != 0) {
+						elements.set(index, ((IJavaProject)jElement).getProject());
+						fWorkingSet.setElements((IAdaptable[])elements.toArray(new IAdaptable[elements.size()]));
+					} else if ((flags & IJavaElementDelta.F_OPENED) != 0) {
+						index= elements.indexOf(((IJavaProject)jElement).getProject());
+						if (index != -1) {
+							elements.set(index, jElement);
+							fWorkingSet.setElements((IAdaptable[])elements.toArray(new IAdaptable[elements.size()]));
+						}
+					}
+				}
+				// don't visit below projects
+				return;
+			}
+			IJavaElementDelta[] children= delta.getAffectedChildren();
+			for (int i= 0; i < children.length; i++) {
+				processJavaDelta(elements, children[i]);
+			}
+		}
+	}
+	private IElementChangedListener fJavaElementChangeListener;
 	
 	/**
 	 * {@inheritDoc}
@@ -107,6 +156,8 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(fResourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 		fWorkingSetListener= new WorkingSetListener();
 		PlatformUI.getWorkbench().getWorkingSetManager().addPropertyChangeListener(fWorkingSetListener);
+		fJavaElementChangeListener= new JavaElementChangeListener();
+		JavaCore.addElementChangedListener(fJavaElementChangeListener, ElementChangedEvent.POST_CHANGE);
 		updateElements(fWorkingSetModel.getActiveWorkingSets());
 	}
 	
@@ -119,7 +170,9 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 			PlatformUI.getWorkbench().getWorkingSetManager().removePropertyChangeListener(fWorkingSetListener);
 			fWorkingSetListener= null;
 		}
-		
+		if (fJavaElementChangeListener != null) {
+			JavaCore.removeElementChangedListener(fJavaElementChangeListener);
+		}
 	}
 	
 	public void updateElements() {
