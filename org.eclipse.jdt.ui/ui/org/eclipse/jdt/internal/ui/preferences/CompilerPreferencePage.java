@@ -261,18 +261,17 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		
 		Label description= new Label(othersComposite, SWT.WRAP);
 		description.setText(JavaUIMessages.getString("CompilerPreferencePage.resource_filter.description")); //$NON-NLS-1$
-		GridData gd= new GridData();
+		GridData gd= new GridData(GridData.FILL);
 		gd.horizontalSpan= 2;
-		gd.widthHint= convertWidthInCharsToPixels(70);
+		gd.widthHint= convertWidthInCharsToPixels(60);
 		description.setLayoutData(gd);
 		
 		String label= JavaUIMessages.getString("CompilerPreferencePage.resource_filter.label"); //$NON-NLS-1$
 		Text text= addTextField(othersComposite, label, PREF_RESOURCE_FILTER);
 		gd= (GridData) text.getLayoutData();
 		gd.grabExcessHorizontalSpace= true;
-		gd.widthHint= convertWidthInCharsToPixels(60);
+		gd.widthHint= convertWidthInCharsToPixels(10);
 		
-
 		label= JavaUIMessages.getString("CompilerPreferencePage.build_invalid_classpath.label"); //$NON-NLS-1$
 		addCheckBox(othersComposite, label, PREF_BUILD_INVALID_CLASSPATH, abortIgnoreValues, 0);
 		
@@ -301,7 +300,7 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		description.setText(JavaUIMessages.getString("CompilerPreferencePage.warnings.description")); //$NON-NLS-1$
 		GridData gd= new GridData();
 		gd.horizontalSpan= 2;
-		gd.widthHint= convertWidthInCharsToPixels(70);
+		gd.widthHint= convertWidthInCharsToPixels(50);
 		description.setLayoutData(gd);
 
 		String label= JavaUIMessages.getString("CompilerPreferencePage.pb_unreachable_code.label"); //$NON-NLS-1$

@@ -315,8 +315,8 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		previewViewer.setDocument(fPreviewDocument);
 		Control control= previewViewer.getControl();
 		GridData gdata= new GridData(GridData.FILL_BOTH);
-		gdata.widthHint= convertWidthInCharsToPixels(80);
-		gdata.heightHint= convertHeightInCharsToPixels(15);
+		gdata.widthHint= convertWidthInCharsToPixels(30);
+		gdata.heightHint= convertHeightInCharsToPixels(5);
 		control.setLayoutData(gdata);
 		return previewViewer;
 	}

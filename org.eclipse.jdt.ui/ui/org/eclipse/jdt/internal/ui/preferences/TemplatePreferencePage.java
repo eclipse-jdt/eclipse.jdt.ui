@@ -109,7 +109,8 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		Table table= new Table(parent, SWT.CHECK | SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		
 		GridData data= new GridData(GridData.FILL_BOTH);
-		data.widthHint= convertWidthInCharsToPixels(60);
+		data.widthHint= convertWidthInCharsToPixels(3);
+		int width= data.widthHint;
 		data.heightHint= convertHeightInCharsToPixels(10);
 		table.setLayoutData(data);
 				
@@ -128,9 +129,9 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		TableColumn column3= new TableColumn(table, SWT.NONE);
 		column3.setText(TemplateMessages.getString("TemplatePreferencePage.column.description")); //$NON-NLS-1$
 		
-		tableLayout.addColumnData(new ColumnWeightData(30));
-		tableLayout.addColumnData(new ColumnWeightData(20));
-		tableLayout.addColumnData(new ColumnWeightData(70));
+		tableLayout.addColumnData(new ColumnWeightData((width / 100) * 30));
+		tableLayout.addColumnData(new ColumnWeightData((width / 100) * 30));
+		tableLayout.addColumnData(new ColumnWeightData((width / 100) * 60));
 
 		fTableViewer= new CheckboxTableViewer(table);		
 		fTableViewer.setLabelProvider(new TemplateLabelProvider());

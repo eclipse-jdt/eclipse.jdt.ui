@@ -81,7 +81,7 @@ public class JavadocConfigurationBlock {
 		fJavaDocField.doFillIntoGrid(topComp, 3);
 
 		PixelConverter converter= new PixelConverter(topComp);
-		LayoutUtil.setWidthHint(fJavaDocField.getTextControl(null), converter.convertWidthInCharsToPixels(40));
+		LayoutUtil.setWidthHint(fJavaDocField.getTextControl(null), converter.convertWidthInCharsToPixels(10));
 		LayoutUtil.setHorizontalGrabbing(fJavaDocField.getTextControl(null));
 		
 		

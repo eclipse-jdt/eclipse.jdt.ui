@@ -96,7 +96,7 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 		fJavadocSelection.setButtonLabel(JavaUIMessages.getString("JavadocPreferencePage.command.button")); //$NON-NLS-1$
 		fJavadocSelection.doFillIntoGrid(fComposite, 3);
 		LayoutUtil.setHorizontalGrabbing(fJavadocSelection.getTextControl(null));
-		LayoutUtil.setWidthHint(fJavadocSelection.getTextControl(null), convertWidthInCharsToPixels(50));
+		LayoutUtil.setWidthHint(fJavadocSelection.getTextControl(null), convertWidthInCharsToPixels(10));
 
 		initFields();
 

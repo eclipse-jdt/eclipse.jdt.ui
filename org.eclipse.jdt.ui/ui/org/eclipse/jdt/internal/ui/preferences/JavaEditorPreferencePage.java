@@ -382,7 +382,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fAppearanceForegroundColorEditor.setColorValue(rgb);		
 	}
 	
-	private Control createColorPage(Composite parent) {
+	private Control createSyntaxPage(Composite parent) {
 		
 		Composite colorComposite= new Composite(parent, SWT.NULL);
 		colorComposite.setLayout(new GridLayout());
@@ -468,8 +468,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		Control previewer= createPreviewer(colorComposite);
 		gd= new GridData(GridData.FILL_BOTH);
-		gd.widthHint= convertWidthInCharsToPixels(80);
-		gd.heightHint= convertHeightInCharsToPixels(15);
+		gd.widthHint= convertWidthInCharsToPixels(20);
+		gd.heightHint= convertHeightInCharsToPixels(5);
 		previewer.setLayoutData(gd);
 
 		
@@ -615,7 +615,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		Composite behaviorComposite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
 		behaviorComposite.setLayout(layout);
-		
+
 		String label= JavaUIMessages.getString("JavaEditorPreferencePage.textFont"); //$NON-NLS-1$
 		addTextFontEditor(behaviorComposite, label, AbstractTextEditor.PREFERENCE_FONT);
 		
@@ -809,7 +809,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.colors")); //$NON-NLS-1$
-		item.setControl(createColorPage(folder));
+		item.setControl(createSyntaxPage(folder));
 		
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.codeAssist")); //$NON-NLS-1$
