@@ -165,11 +165,35 @@ public class JavaIndenter {
 			return null;
 		
 		// add additional indent
-		indent.append(createIndent(fIndent));
-		if (fIndent < 0)
-			unindent(indent);
-		
-		return indent;
+		int visualLength= prefIndentationSize() * fIndent;
+		int referenceIndentationLength= computeVisualLength(indent);
+		return createIndentOfLength(referenceIndentationLength + visualLength);
+	}
+
+	/**
+	 * Computes the length of a <code>CharacterSequence</code>, counting
+	 * a tab character as the size until the next tab stop and every other
+	 * character as one.
+	 * 
+	 * @param indent the string to measure
+	 * @return the visual length in characters
+	 */
+	private int computeVisualLength(CharSequence indent) {
+		final int tabSize= prefTabSize();
+		int length= 0;
+		for (int i= 0; i < indent.length(); i++) {
+			char ch= indent.charAt(i);
+			switch (ch) {
+				case '\t':
+					int reminder= length % tabSize;
+					length += tabSize - reminder;
+					break;
+				case ' ':
+					length++;
+					break;
+			}
+		}
+		return length;
 	}
 
 	/**
@@ -192,19 +216,6 @@ public class JavaIndenter {
 		} catch (BadLocationException e) {
 			return indent;
 		}
-	}
-
-	/**
-	 * Reduces indentation in <code>indent</code> by one indentation unit.
-	 * 
-	 * @param indent the indentation to be modified
-	 */
-	private void unindent(StringBuffer indent) {
-		CharSequence oneIndent= createIndent();
-		int i= indent.lastIndexOf(oneIndent.toString()); //$NON-NLS-1$
-		if (i != -1) {
-			indent.delete(i, i + oneIndent.length());
-		}			
 	}
 
 	/**
@@ -262,50 +273,35 @@ public class JavaIndenter {
 		
 		return ret;
 	}
-
-	/**
-	 * Creates a string that represents the given number of indents (can be
-	 * spaces or tabs..)
-	 * 
-	 * @param indent the requested indentation level.
-	 * 
-	 * @return the indentation specified by <code>indent</code>
-	 */
-	private StringBuffer createIndent(int indent) {
-		StringBuffer oneIndent= createIndent();			
-
-		StringBuffer ret= new StringBuffer();
-		while (indent-- > 0)
-			ret.append(oneIndent);
-		
-		return ret;
-	}
 	
 	/**
-	 * Creates a string that represents one indent (can be
-	 * spaces or tabs..)
+	 * Creates a string with a visual length of the given
+	 * <code>indentationSize</code>.
 	 * 
-	 * @return one indentation
+	 * @param visualLength the requested visual length of the indentation
+	 * @return the indentation specified by <code>indentationSize</code>
 	 */
-	private StringBuffer createIndent() {
-		StringBuffer oneIndent= new StringBuffer();
-		JavaCore plugin= JavaCore.getJavaCore();
-		// get a sensible default when running without the infrastructure for testing
-		if (plugin == null) {
-			oneIndent.append('\t');
+	private StringBuffer createIndentOfLength(int visualLength) {
+		StringBuffer buf= new StringBuffer();
+		final int tabs, spaces;
+		if (JavaCore.SPACE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR))) {
+			tabs= 0;
+			spaces= visualLength;
+		} else if (JavaCore.TAB.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR))) {
+			int tabSize= prefTabSize();
+			tabs= visualLength / tabSize;
+			spaces= visualLength % tabSize;
 		} else {
-			if (JavaCore.SPACE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR))) {
-				int tabLen= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 4);
-				for (int i= 0; i < tabLen; i++)
-					oneIndent.append(' ');
-			} else if (JavaCore.TAB.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)))
-				oneIndent.append('\t');
-			else
-				oneIndent.append('\t'); // default
+			tabs= visualLength / prefIndentationSize();
+			spaces= 0;
 		}
-		return oneIndent;
+		for(int i= 0; i < tabs; i++)
+			buf.append('\t');
+		for(int i= 0; i < spaces; i++)
+			buf.append(' ');
+		return buf;
 	}
-
+	
 	/**
 	 * Returns the reference position regarding to indentation for <code>offset</code>,
 	 * or <code>NOT_FOUND</code>. This method calls
@@ -503,6 +499,7 @@ public class JavaIndenter {
 		
 		nextToken();
 		switch (fToken) {
+			case Symbols.TokenGREATERTHAN:
 			case Symbols.TokenRBRACE:
 				// skip the block and fall through
 				// if we can't complete the scope, reset the scan position
@@ -679,6 +676,7 @@ public class JavaIndenter {
 					if (isInBlock)
 						mayBeMethodBody= READ_PARENS;
 				case Symbols.TokenRBRACKET:
+				case Symbols.TokenGREATERTHAN:
 					pos= fPreviousPos;
 					if (skipScope())
 						break;
@@ -795,6 +793,7 @@ public class JavaIndenter {
 				case Symbols.TokenRPAREN:
 				case Symbols.TokenRBRACKET:
 				case Symbols.TokenRBRACE:
+				case Symbols.TokenGREATERTHAN:
 					skipScope();
 					break;
 					
@@ -840,6 +839,7 @@ public class JavaIndenter {
 				case Symbols.TokenRPAREN:
 				case Symbols.TokenRBRACKET:
 				case Symbols.TokenRBRACE:
+				case Symbols.TokenGREATERTHAN:
 					skipScope();
 					break;
 				
@@ -883,10 +883,69 @@ public class JavaIndenter {
 				return skipScope(Symbols.TokenLBRACKET, Symbols.TokenRBRACKET);
 			case Symbols.TokenRBRACE:
 				return skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE);
+			case Symbols.TokenGREATERTHAN:
+				int storedPosition= fPosition;
+				int storedToken= fToken;
+				nextToken();
+				switch (fToken) {
+					case Symbols.TokenIDENT:
+						if (!isGenericStarter(getTokenContent()))
+							break;
+					case Symbols.TokenQUESTIONMARK:
+					case Symbols.TokenGREATERTHAN:
+						if (skipScope(Symbols.TokenLESSTHAN, Symbols.TokenGREATERTHAN))
+							return true;
+				}
+				// <> are harder to detect - restore the position if we fail
+				fPosition= storedPosition;
+				fToken= storedToken;
+				return false;
+				
 			default:
 				Assert.isTrue(false);
 				return false;
 		}
+	}
+
+	/**
+	 * Returns the contents of the current token.
+	 * 
+	 * @return the contents of the current token
+	 * @since 3.1
+	 */
+	private CharSequence getTokenContent() {
+		return new DocumentCharacterIterator(fDocument, fPosition, fPreviousPos);
+	}
+
+	/**
+	 * Returns <code>true</code> if <code>identifier</code> is probably a
+	 * type variable or type name, <code>false</code> if it is rather not.
+	 * This is a heuristic.
+	 * 
+	 * @param identifier the identifier to check
+	 * @return <code>true</code> if <code>identifier</code> is probably a
+	 *         type variable or type name, <code>false</code> if not
+	 * @since 3.1
+	 */
+	private boolean isGenericStarter(CharSequence identifier) {
+		/* This heuristic allows any identifiers if they start with an upper
+		 * case. This will fail when a comparison is made with constants:
+		 * 
+		 * if (MAX > foo)
+		 * 
+		 * will try to find the matching '<' which will never come
+		 * 
+		 * Also, it will fail on lower case types and type variables
+		 */
+		int length= identifier.length();
+		if (length > 0 && Character.isUpperCase(identifier.charAt(0))) {
+			for (int i= 0; i < length; i++) {
+				if (identifier.charAt(i) == '_')
+					return false;
+			} 
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -1029,6 +1088,7 @@ public class JavaIndenter {
 				case Symbols.TokenRPAREN:
 				case Symbols.TokenRBRACKET:
 				case Symbols.TokenRBRACE:
+				case Symbols.TokenGREATERTHAN:
 					skipScope();
 					break;
 					
@@ -1091,6 +1151,21 @@ public class JavaIndenter {
 	}
 	
 	/**
+	 * Skips a generic type definition between "&lt;&gt;". The current token
+	 * is expected to be a "&gt;". If <code>true</code> is returned, the current
+	 * token points to a "&lt;"; 
+	 * 
+	 * @return <code>true</code> if a <code>[]</code> could be scanned, the
+	 *         current token is left at the LANGULAR.
+	 */
+	private boolean skipAngularBrackets() {
+		if (fToken == Symbols.TokenGREATERTHAN) {
+			return skipScope(Symbols.TokenLESSTHAN, Symbols.TokenGREATERTHAN);
+		}
+		return false;
+	}
+	
+	/**
 	 * Reads the next token in backward direction from the heuristic scanner
 	 * and sets the fields <code>fToken, fPreviousPosition</code> and <code>fPosition</code>
 	 * accordingly.
@@ -1133,15 +1208,20 @@ public class JavaIndenter {
 		 * TODO This heuristic does not recognize package private constructors
 		 * since those do have neither type nor visibility keywords.
 		 * One option would be to go over the parameter list, but that might
-		 * be empty as well - hard to do without an AST...
+		 * be empty as well, or not typed in yet - hard to do without an AST...
 		 */
 		
 		nextToken();
 		if (fToken == Symbols.TokenIDENT) { // method name
 			do nextToken();
 			while (skipBrackets()); // optional brackets for array valued return types
-			// [1.5] TODO also need to skip angular brackets for generic return types
-			return fToken == Symbols.TokenIDENT; // type name
+
+			if (hasGenerics()) {
+				// [1.5] also skip angular brackets for generic return types
+				do nextToken();
+				while (skipAngularBrackets());
+			}
+			return fToken == Symbols.TokenIDENT; // return type name
 			
 		}
 		return false;
@@ -1158,6 +1238,7 @@ public class JavaIndenter {
 	 *         header.
 	 */
 	private boolean looksLikeMethodCall() {
+		// TODO [5.0] add awareness for constructor calls with generic types: new ArrayList<String>()
 		nextToken();
 		return fToken == Symbols.TokenIDENT; // method name
 	}
@@ -1228,11 +1309,31 @@ public class JavaIndenter {
 				tabLen= -1; // results in no tabs being substituted for space runs
 			else
 				// if we use tabs, get the formatter length setting for tab width
-				tabLen= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 4);
+				tabLen= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH, 4);
 		else
 			tabLen= 4; // sensible default for testing
 
 		return tabLen;
+	}
+	
+	private int prefTabSize() {
+		int tabLen;
+		if (!isStandalone())
+			tabLen= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH, 4);
+		else
+			tabLen= 4; // sensible default for testing
+
+		return tabLen;
+	}
+	
+	private int prefIndentationSize() {
+		int indentationSize;
+		if (!isStandalone())
+			indentationSize= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, 4);
+		else
+			indentationSize= 4; // sensible default for testing
+
+		return indentationSize;
 	}
 	
 	private boolean prefArrayDimensionsDeepIndent() {
@@ -1492,4 +1593,7 @@ public class JavaIndenter {
 		return JavaCore.getPlugin() == null;
 	}
 
+	private boolean hasGenerics() {
+		return JavaCore.VERSION_1_5.compareTo(getCoreFormatterOption(JavaCore.COMPILER_SOURCE)) <= 0;
+	}
 }

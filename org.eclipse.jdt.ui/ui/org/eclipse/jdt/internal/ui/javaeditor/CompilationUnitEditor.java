@@ -1107,7 +1107,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	}
 	
 	/** Preference key for code formatter tab size */
-	private final static String CODE_FORMATTER_TAB_SIZE= DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE;
+	private final static String CODE_FORMATTER_TAB_SIZE= DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH;
 	/** Preference key for inserting spaces rather than tabs */
 	private final static String SPACES_FOR_TABS= DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR;
 	/** Preference key for automatically closing strings */
