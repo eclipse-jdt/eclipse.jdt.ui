@@ -51,9 +51,9 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 
 	/** The borders of this range */
 	private int fBorders= 0;
-	
+
 	/** Should all blank lines be cleared during formatting? */
-	private final boolean fClearBlankLines;
+	private final boolean fClear;
 
 	/** The line delimiter used in this comment region */
 	private final String fDelimiter;
@@ -82,16 +82,20 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Creates a new comment region.
 	 * 
-	 * @param strategy The comment formatting strategy used to format this comment region
-	 * @param position The typed position which forms this comment region
-	 * @param delimiter The line delimiter to use in this comment region
+	 * @param strategy
+	 *                  The comment formatting strategy used to format this comment
+	 *                  region
+	 * @param position
+	 *                  The typed position which forms this comment region
+	 * @param delimiter
+	 *                  The line delimiter to use in this comment region
 	 */
 	protected CommentRegion(final CommentFormattingStrategy strategy, final TypedPosition position, final String delimiter) {
 		super(position.getOffset(), position.getLength(), position.getType());
 
 		fStrategy= strategy;
 		fDelimiter= delimiter;
-		fClearBlankLines= fStrategy.getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES) == IPreferenceStore.TRUE;
+		fClear= fStrategy.getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES) == IPreferenceStore.TRUE;
 
 		final ISourceViewer viewer= strategy.getViewer();
 		final StyledText text= viewer.getTextWidget();
@@ -105,7 +109,6 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 			fGraphics= null;
 			fTabs= 4;
 		}
-
 
 		final ILineTracker tracker= new ConfigurableLineTracker(new String[] { delimiter });
 
@@ -123,7 +126,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 
 				range= tracker.getLineInformation(index);
 				line= CommentObjectFactory.createLine(this);
-				line.append(CommentObjectFactory.createRange(this, range.getOffset(), range.getLength()));
+				line.append(new CommentRange(range.getOffset(), range.getLength()));
 
 				fLines.add(line);
 			}
@@ -136,7 +139,8 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Appends the comment range to this comment region.
 	 * 
-	 * @param range Comment range to append to this comment region
+	 * @param range
+	 *                  Comment range to append to this comment region
 	 */
 	protected final void append(final CommentRange range) {
 		fRanges.addLast(range);
@@ -145,8 +149,11 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Applies the formatted comment region to the underlying document.
 	 * 
-	 * @param indentation Indentation of the formatted comment region
-	 * @param width The maximal width of text in this comment region measured in average character widths
+	 * @param indentation
+	 *                  Indentation of the formatted comment region
+	 * @param width
+	 *                  The maximal width of text in this comment region measured in
+	 *                  average character widths
 	 */
 	protected void applyRegion(final String indentation, final int width) {
 
@@ -173,9 +180,13 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Applies the changed content to the underlying document
 	 * 
-	 * @param change Text content to apply to the underlying document
-	 * @param position Offset measured in comment region coordinates where to apply the changed content
-	 * @param count Length of the content to be changed
+	 * @param change
+	 *                  Text content to apply to the underlying document
+	 * @param position
+	 *                  Offset measured in comment region coordinates where to apply
+	 *                  the changed content
+	 * @param count
+	 *                  Length of the content to be changed
 	 */
 	protected final void applyText(final String change, final int position, final int count) {
 
@@ -195,23 +206,37 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Can the comment range be appended to the comment line?
 	 * 
-	 * @param line Comment line where to append the comment range
-	 * @param previous Comment range which is the predecessor of the current comment range
-	 * @param next Comment range to test whether it can be appended to the comment line
-	 * @param space Amount of space in the comment line used by already inserted comment ranges
-	 * @param width The maximal width of text in this comment region measured in average character widths
-	 * @return <code>true</code> iff the comment range can be added to the line, <code>false</code> otherwise
+	 * @param line
+	 *                  Comment line where to append the comment range
+	 * @param previous
+	 *                  Comment range which is the predecessor of the current comment
+	 *                  range
+	 * @param next
+	 *                  Comment range to test whether it can be appended to the
+	 *                  comment line
+	 * @param space
+	 *                  Amount of space in the comment line used by already inserted
+	 *                  comment ranges
+	 * @param width
+	 *                  The maximal width of text in this comment region measured in
+	 *                  average character widths
+	 * @return <code>true</code> iff the comment range can be added to the
+	 *               line, <code>false</code> otherwise
 	 */
 	protected boolean canAppend(final CommentLine line, final CommentRange previous, final CommentRange next, final int space, final int width) {
 		return space == 0 || space + next.getLength() < width;
 	}
 
 	/**
-	 * Can the two current comment ranges be applied to the underlying document?
+	 * Can the two current comment ranges be applied to the underlying
+	 * document?
 	 * 
-	 * @param previous Previous comment range which was already applied
-	 * @param next Next comment range to be applied
-	 * @return <code>true</code> iff the next comment range can be applied, <code>false</code> otherwise
+	 * @param previous
+	 *                  Previous comment range which was already applied
+	 * @param next
+	 *                  Next comment range to be applied
+	 * @return <code>true</code> iff the next comment range can be applied,
+	 *               <code>false</code> otherwise
 	 */
 	protected boolean canApply(final CommentRange previous, final CommentRange next) {
 		return true;
@@ -220,7 +245,8 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Finalizes the comment region and adjusts its starting indentation.
 	 * 
-	 * @param indentation Indentation of the formatted comment region
+	 * @param indentation
+	 *                  Indentation of the formatted comment region
 	 */
 	protected void finalizeRegion(final String indentation) {
 		// Do nothing
@@ -229,7 +255,8 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Formats the comment region.
 	 * 
-	 * @param indentation Indentation of the formatted comment region
+	 * @param indentation
+	 *                  Indentation of the formatted comment region
 	 */
 	public void format(String indentation) {
 
@@ -284,11 +311,16 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Returns the line delimiter used in this comment line break.
 	 * 
-	 * @param predecessor The predecessor comment line before the line break
-	 * @param successor The successor comment line after the line break
-	 * @param previous The comment range after the line break
-	 * @param next The comment range before the line break
-	 * @param indentation Indentation of the formatted line break
+	 * @param predecessor
+	 *                  The predecessor comment line before the line break
+	 * @param successor
+	 *                  The successor comment line after the line break
+	 * @param previous
+	 *                  The comment range after the line break
+	 * @param next
+	 *                  The comment range before the line break
+	 * @param indentation
+	 *                  Indentation of the formatted line break
 	 * @return The line delimiter for this comment line break
 	 */
 	protected String getDelimiter(final CommentLine predecessor, final CommentLine successor, final CommentRange previous, final CommentRange next, final String indentation) {
@@ -296,10 +328,13 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	}
 
 	/**
-	 * Returns the range delimiter for this comment range break in this comment region.
+	 * Returns the range delimiter for this comment range break in this comment
+	 * region.
 	 * 
-	 * @param previous The previous comment range to the right of the range delimiter
-	 * @param next The next comment range to the left of the range delimiter
+	 * @param previous
+	 *                  The previous comment range to the right of the range delimiter
+	 * @param next
+	 *                  The next comment range to the left of the range delimiter
 	 * @return The delimiter for this comment range break
 	 */
 	protected String getDelimiter(final CommentRange previous, final CommentRange next) {
@@ -334,7 +369,8 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	}
 
 	/**
-	 * Returns the comment formatting strategy used to format this comment region.
+	 * Returns the comment formatting strategy used to format this comment
+	 * region.
 	 * 
 	 * @return The formatting strategy for this comment region
 	 */
@@ -345,8 +381,11 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Returns the text of this comment region in the indicated range.
 	 * 
-	 * @param position The offset of the comment range to retrieve in comment region coordinates
-	 * @param count The length of the comment range to retrieve
+	 * @param position
+	 *                  The offset of the comment range to retrieve in comment region
+	 *                  coordinates
+	 * @param count
+	 *                  The length of the comment range to retrieve
 	 * @return The content of this comment region in the indicated range
 	 */
 	protected final String getText(final int position, final int count) {
@@ -363,8 +402,10 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Does the border <code>border</code> exist?
 	 * 
-	 * @param border The type of the border. Must be a border attribute of <code>CommentRegion</code>.
-	 * @return <code>true</code> iff this border exists, <code>false</code> otherwise.
+	 * @param border
+	 *                  The type of the border. Must be a border attribute of <code>CommentRegion</code>.
+	 * @return <code>true</code> iff this border exists, <code>false</code>
+	 *               otherwise.
 	 */
 	protected final boolean hasBorder(final int border) {
 		return (fBorders & border) == border;
@@ -398,17 +439,20 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Should blank lines be cleared during formatting?
 	 * 
-	 * @return <code>true</code> iff blank lines should be cleared, <code>false</code> otherwise
+	 * @return <code>true</code> iff blank lines should be cleared, <code>false</code>
+	 *               otherwise
 	 */
-	protected final boolean isClearBlankLines() {
-		return fClearBlankLines;
+	protected final boolean isClearLines() {
+		return fClear;
 	}
 
 	/**
 	 * Is the current comment range a word?
 	 * 
-	 * @param current Comment range to test whether it is a word
-	 * @return <code>true</code> iff the comment range is a word, <code>false</code> otherwise.
+	 * @param current
+	 *                  Comment range to test whether it is a word
+	 * @return <code>true</code> iff the comment range is a word, <code>false</code>
+	 *               otherwise.
 	 */
 	protected final boolean isCommentWord(final CommentRange current) {
 
@@ -424,7 +468,8 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Is this comment region a single line region?
 	 * 
-	 * @return <code>true</code> iff this region is single line, <code>false</code> otherwise.
+	 * @return <code>true</code> iff this region is single line, <code>false</code>
+	 *               otherwise.
 	 */
 	protected final boolean isSingleLine() {
 		return fSingleLine;
@@ -440,7 +485,8 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Set the border <code>border</code> to true.
 	 * 
-	 * @param border The type of the border. Must be a border attribute of <code>CommentRegion</code>.
+	 * @param border
+	 *                  The type of the border. Must be a border attribute of <code>CommentRegion</code>.
 	 */
 	protected final void setBorder(final int border) {
 		fBorders |= border;
@@ -449,11 +495,14 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Returns the indentation string for a reference string
 	 * 
-	 * @param reference The reference string to get the indentation string for
-	 * @param tabs <code>true</code> iff the indent should use tabs, <code>false</code> otherwise.
+	 * @param reference
+	 *                  The reference string to get the indentation string for
+	 * @param tabs
+	 *                  <code>true</code> iff the indent should use tabs, <code>false</code>
+	 *                  otherwise.
 	 * @return The indentation string
 	 */
-	protected String stringToIndent(final String reference, final boolean tabs) {
+	protected final String stringToIndent(final String reference, final boolean tabs) {
 
 		int space= 1;
 		int pixels= reference.length();
@@ -462,7 +511,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 			pixels= stringToPixels(reference);
 			space= fGraphics.stringExtent(" ").x; //$NON-NLS-1$
 		}
-		
+
 		final StringBuffer buffer= new StringBuffer();
 		final int spaces= pixels / space;
 
@@ -488,10 +537,11 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Returns the length of the reference string in characters.
 	 * 
-	 * @param reference The reference string to get the length
+	 * @param reference
+	 *                  The reference string to get the length
 	 * @return The length of the string in characters
 	 */
-	protected int stringToLength(final String reference) {
+	protected final int stringToLength(final String reference) {
 
 		int tabs= 0;
 		int count= reference.length();
@@ -509,10 +559,11 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Returns the width of the reference string in pixels.
 	 * 
-	 * @param reference The reference string to get the width
+	 * @param reference
+	 *                  The reference string to get the width
 	 * @return The width of the string in pixels
 	 */
-	protected int stringToPixels(final String reference) {
+	protected final int stringToPixels(final String reference) {
 
 		final StringBuffer buffer= new StringBuffer();
 
@@ -534,7 +585,9 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Wraps the comment ranges in this comment region into comment lines.
 	 * 
-	 * @param width The maximal width of text in this comment region measured in average character widths
+	 * @param width
+	 *                  The maximal width of text in this comment region measured in
+	 *                  average character widths
 	 */
 	protected void wrapRegion(final int width) {
 

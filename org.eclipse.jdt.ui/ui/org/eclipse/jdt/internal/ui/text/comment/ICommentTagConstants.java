@@ -12,24 +12,15 @@
 package org.eclipse.jdt.internal.ui.text.comment;
 
 /**
- * Javadoc comment range attributes.
+ * Comment tag constants.
  * 
  * @since 3.0
  */
-public interface IJavaDocAttributes extends ICommentAttributes {
+public interface ICommentTagConstants {
 
-	/** Range has source code attribute */
-	public static final int JAVADOC_CODE= 1 << 1;
+	/** Comment root tags */
+	public static final String[] COMMENT_ROOT_TAGS= new String[] { "@deprecated", "@see", "@since", "@version" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
-	/** Range has the immutable region attribute */
-	public static final int JAVADOC_IMMUTABLE= 1 << 2;
-
-	/** Range has parameter tag attribute */
-	public static final int JAVADOC_PARAMETER= 1 << 3;
-
-	/** Range has root tag attribute */
-	public static final int JAVADOC_ROOT= 1 << 4;
-
-	/** Range has paragraph separator attribute */
-	public static final int JAVADOC_SEPARATOR= 1 << 5;
+	/** Tag prefix of comment tags */
+	public static final char COMMENT_TAG_PREFIX= '@';
 }

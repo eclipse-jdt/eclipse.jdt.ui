@@ -32,23 +32,27 @@ public abstract class CommentLine implements IBorderAttributes {
 	/**
 	 * Creates a new comment line.
 	 * 
-	 * @param region Comment region to create the line for
+	 * @param region
+	 *                  Comment region to create the line for
 	 */
 	protected CommentLine(final CommentRegion region) {
 		fParent= region;
 	}
 
 	/**
-	 * Gets the context information from the previous comment line and sets it for the current one.
+	 * Gets the context information from the previous comment line and sets it
+	 * for the current one.
 	 * 
-	 * @param previous The previous comment line in the associated comment region
+	 * @param previous
+	 *                  The previous comment line in the associated comment region
 	 */
 	protected abstract void adapt(final CommentLine previous);
 
 	/**
 	 * Appends the comment range to this comment line.
 	 * 
-	 * @param range Comment range to append
+	 * @param range
+	 *                  Comment range to append
 	 */
 	protected void append(final CommentRange range) {
 		fRanges.add(range);
@@ -57,9 +61,13 @@ public abstract class CommentLine implements IBorderAttributes {
 	/**
 	 * Applies the formatted lower border to the underlying document.
 	 * 
-	 * @param range Last comment range in the comment region
-	 * @param indentation Indenation of the formatted lower border
-	 * @param length The maximal length of text in this comment region measured in average character widths
+	 * @param range
+	 *                  Last comment range in the comment region
+	 * @param indentation
+	 *                  Indenation of the formatted lower border
+	 * @param length
+	 *                  The maximal length of text in this comment region measured in
+	 *                  average character widths
 	 */
 	protected void applyEnd(final CommentRange range, final String indentation, final int length) {
 
@@ -94,10 +102,15 @@ public abstract class CommentLine implements IBorderAttributes {
 	/**
 	 * Applies the formatted comment line to the underlying document.
 	 * 
-	 * @param predecessor The comment line predecessor of this line
-	 * @param last The most recently applied comment range of the previous comment line in the comment region
-	 * @param indentation Indentation of the formatted comment line
-	 * @param line The index of the comment line in the comment region
+	 * @param predecessor
+	 *                  The comment line predecessor of this line
+	 * @param last
+	 *                  The most recently applied comment range of the previous
+	 *                  comment line in the comment region
+	 * @param indentation
+	 *                  Indentation of the formatted comment line
+	 * @param line
+	 *                  The index of the comment line in the comment region
 	 * @return The first comment range in this comment line
 	 */
 	protected CommentRange applyLine(final CommentLine predecessor, final CommentRange last, final String indentation, final int line) {
@@ -133,9 +146,13 @@ public abstract class CommentLine implements IBorderAttributes {
 	/**
 	 * Applies the formatted upper border to the underlying document.
 	 * 
-	 * @param range First comment range in the comment region
-	 * @param indentation Indentation of the formatted upper border
-	 * @param length The maximal length of text in this comment region measured in average character widths
+	 * @param range
+	 *                  First comment range in the comment region
+	 * @param indentation
+	 *                  Indentation of the formatted upper border
+	 * @param length
+	 *                  The maximal length of text in this comment region measured in
+	 *                  average character widths
 	 */
 	protected void applyStart(final CommentRange range, final String indentation, final int length) {
 
@@ -189,6 +206,15 @@ public abstract class CommentLine implements IBorderAttributes {
 	}
 
 	/**
+	 * Returns the indentation reference string for this line.
+	 * 
+	 * @return The indentation reference string for this line
+	 */
+	protected String getIndentation() {
+		return ""; //$NON-NLS-1$
+	}
+
+	/**
 	 * Returns the last comment range in this comment line.
 	 * 
 	 * @return The last comment range
@@ -204,15 +230,6 @@ public abstract class CommentLine implements IBorderAttributes {
 	 */
 	protected final CommentRegion getParent() {
 		return fParent;
-	}
-
-	/**
-	 * Returns the indentation reference string for this line.
-	 * 
-	 * @return The indentation reference string for this line
-	 */
-	protected String getReference() {
-		return ""; //$NON-NLS-1$
 	}
 
 	/**
@@ -234,8 +251,10 @@ public abstract class CommentLine implements IBorderAttributes {
 	/**
 	 * Is the attribute <code>attribute</code> true?
 	 * 
-	 * @param attribute The attribute to get.
-	 * @return <code>true</code> iff this attribute is <code>true</code>, <code>false</code> otherwise.
+	 * @param attribute
+	 *                  The attribute to get.
+	 * @return <code>true</code> iff this attribute is <code>true</code>,
+	 *               <code>false</code> otherwise.
 	 */
 	protected final boolean hasAttribute(final int attribute) {
 		return (fAttributes & attribute) == attribute;
@@ -244,23 +263,26 @@ public abstract class CommentLine implements IBorderAttributes {
 	/**
 	 * Scans this line in the comment region.
 	 * 
-	 * @param line Index of this line in the comment region
+	 * @param line
+	 *                  Index of this line in the comment region
 	 */
 	protected abstract void scanLine(final int line);
 
 	/**
 	 * Set the attribute <code>attribute</code> to true.
 	 * 
-	 * @param attribute The attribute to set.
+	 * @param attribute
+	 *                  The attribute to set.
 	 */
 	protected final void setAttribute(final int attribute) {
 		fAttributes |= attribute;
 	}
 
-	/** 
+	/**
 	 * Tokenizes this line into token ranges.
 	 * 
-	 * @param line Index of this line in the comment region
+	 * @param line
+	 *                  Index of this line in the comment region
 	 */
 	protected void tokenizeLine(final int line) {
 
@@ -284,7 +306,7 @@ public abstract class CommentLine implements IBorderAttributes {
 				index++;
 
 			if (index - offset > 0) {
-				fParent.append(CommentObjectFactory.createRange(fParent, begin + offset, index - offset));
+				fParent.append(new CommentRange(begin + offset, index - offset));
 
 				offset= index;
 			}

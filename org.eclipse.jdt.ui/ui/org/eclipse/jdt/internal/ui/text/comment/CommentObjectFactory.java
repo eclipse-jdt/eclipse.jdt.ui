@@ -25,8 +25,10 @@ public class CommentObjectFactory {
 	/**
 	 * Creates a comment line for a specific comment region.
 	 * 
-	 * @param region Comment region to create the line for
-	 * @return A new comment line for the comment region, or <code>null</code> iff there is no line available for this comment type
+	 * @param region
+	 *                  Comment region to create the line for
+	 * @return A new comment line for the comment region, or <code>null</code>
+	 *               iff there is no line available for this comment type
 	 */
 	public static CommentLine createLine(final CommentRegion region) {
 
@@ -43,30 +45,17 @@ public class CommentObjectFactory {
 	}
 
 	/**
-	 * Creates a comment range for a specific comment region type.
-	 * 
-	 * @param region Comment region to get the range from
-	 * @param offset Offset of the range
-	 * @param length Length of the range
-	 * @return A new comment range for the comment region, or <code>null</code> iff there is no range available for this comment type
-	 */
-	public static CommentRange createRange(final CommentRegion region, final int offset, final int length) {
-
-		final String type= region.getType();
-
-		if (type.equals(IJavaPartitions.JAVA_DOC))
-			return new JavaDocRange(offset, length);
-
-		return new CommentRange(offset, length);
-	}
-
-	/**
 	 * Creates a comment region for a specific document partition type.
 	 * 
-	 * @param strategy The comment formatting strategy used to format this comment region
-	 * @param range Range of the comment region in the document
-	 * @param delimiter Line delimiter to use in the comment region
-	 * @return A new comment region for the comment region range in the document
+	 * @param strategy
+	 *                  The comment formatting strategy used to format this comment
+	 *                  region
+	 * @param range
+	 *                  Range of the comment region in the document
+	 * @param delimiter
+	 *                  Line delimiter to use in the comment region
+	 * @return A new comment region for the comment region range in the
+	 *               document
 	 */
 	public static CommentRegion createRegion(final CommentFormattingStrategy strategy, final TypedPosition range, final String delimiter) {
 

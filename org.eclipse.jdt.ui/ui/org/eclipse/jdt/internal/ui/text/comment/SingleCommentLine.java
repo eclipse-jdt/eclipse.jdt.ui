@@ -22,14 +22,15 @@ public class SingleCommentLine extends CommentLine {
 
 	/** Line prefix for single line comments */
 	public static final String SINGLE_COMMENT_PREFIX= "// "; //$NON-NLS-1$
-	
-	/** Is the comment a NLS tag sequence? */
-	private boolean fNlsSequence= false;
+
+	/** Is the comment a NLS locale tag sequence? */
+	private boolean fLocaleSequence= false;
 
 	/**
 	 * Creates a new single-line comment line.
 	 * 
-	 * @param region Comment region to create the line for
+	 * @param region
+	 *                  Comment region to create the line for
 	 */
 	protected SingleCommentLine(final CommentRegion region) {
 		super(region);
@@ -43,7 +44,7 @@ public class SingleCommentLine extends CommentLine {
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#applyEnd(org.eclipse.jdt.internal.ui.text.comment.CommentRange, java.lang.String, int)
+	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#applyEnd(org.eclipse.jdt.internal.ui.text.comment.CommentRange,java.lang.String, int)
 	 */
 	protected void applyEnd(final CommentRange range, final String indentation, final int length) {
 
@@ -54,7 +55,7 @@ public class SingleCommentLine extends CommentLine {
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#applyStart(org.eclipse.jdt.internal.ui.text.comment.CommentRange, java.lang.String, int)
+	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#applyStart(org.eclipse.jdt.internal.ui.text.comment.CommentRange,java.lang.String, int)
 	 */
 	protected void applyStart(final CommentRange range, final String indentation, final int length) {
 
@@ -95,10 +96,10 @@ public class SingleCommentLine extends CommentLine {
 
 		final int offset= content.indexOf(prefix);
 		if (offset >= 0) {
-			
+
 			if (content.startsWith(NLSElement.TAG_PREFIX))
-				fNlsSequence= true;
-			
+				fLocaleSequence= true;
+
 			range.trimBegin(offset + prefix.length());
 		}
 	}
@@ -107,7 +108,8 @@ public class SingleCommentLine extends CommentLine {
 	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#tokenizeLine(int)
 	 */
 	protected void tokenizeLine(final int line) {
-		if (!fNlsSequence)
+
+		if (!fLocaleSequence)
 			super.tokenizeLine(line);
 	}
 }

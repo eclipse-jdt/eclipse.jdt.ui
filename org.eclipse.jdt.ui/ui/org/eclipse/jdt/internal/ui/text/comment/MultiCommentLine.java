@@ -30,10 +30,14 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 	/** Line prefix of multi-line comment content lines */
 	public static final String MULTI_COMMENT_START_PREFIX= "/* "; //$NON-NLS-1$
 
+	/** The reference indentation of this line */
+	private String fIndentation= ""; //$NON-NLS-1$
+
 	/**
 	 * Creates a new multi-line comment line.
 	 * 
-	 * @param region Comment region to create the line for
+	 * @param region
+	 *                  Comment region to create the line for
 	 */
 	protected MultiCommentLine(final CommentRegion region) {
 		super(region);
@@ -43,7 +47,44 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#adapt(org.eclipse.jdt.internal.ui.text.comment.CommentLine)
 	 */
 	protected void adapt(final CommentLine previous) {
-		// Do nothing
+
+		if (!hasAttribute(COMMENT_ROOT) && !hasAttribute(COMMENT_PARAMETER) && !previous.hasAttribute(COMMENT_BLANKLINE))
+			fIndentation= previous.getIndentation();
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#append(org.eclipse.jdt.internal.ui.text.comment.CommentRange)
+	 */
+	protected void append(final CommentRange range) {
+
+		final MultiCommentRegion parent= (MultiCommentRegion)getParent();
+
+		if (range.hasAttribute(COMMENT_PARAMETER))
+			setAttribute(COMMENT_PARAMETER);
+		else if (range.hasAttribute(COMMENT_ROOT))
+			setAttribute(COMMENT_ROOT);
+		else if (range.hasAttribute(COMMENT_BLANKLINE))
+			setAttribute(COMMENT_BLANKLINE);
+
+		final int ranges= getSize();
+		if (ranges == 1) {
+
+			if (parent.isIndentRoots()) {
+
+				final CommentRange first= getFirst();
+				final String common= parent.getText(first.getOffset(), first.getLength()) + CommentRegion.COMMENT_RANGE_DELIMITER;
+
+				if (hasAttribute(COMMENT_ROOT))
+					fIndentation= common;
+				else if (hasAttribute(COMMENT_PARAMETER)) {
+					if (parent.isIndentDescriptions())
+						fIndentation= common + "\t"; //$NON-NLS-1$
+					else
+						fIndentation= common;
+				}
+			}
+		}
+		super.append(range);
 	}
 
 	/*
@@ -58,6 +99,15 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 	 */
 	protected String getEndingPrefix() {
 		return MULTI_COMMENT_END_PREFIX;
+	}
+
+	/**
+	 * Returns the reference indentation to use for this line.
+	 * 
+	 * @return The reference indentation for this line
+	 */
+	protected final String getIndentation() {
+		return fIndentation;
 	}
 
 	/*
@@ -166,14 +216,14 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 
 		final String content= parent.getText(begin, range.getLength());
 		final int length= content.length();
-		
+
 		while (offset < length && Character.isWhitespace(content.charAt(offset)))
 			offset++;
-		
-		CommentRange result= null;
-		if (offset >= length && !parent.isClearBlankLines() && (line > 0 && line < parent.getSize() - 1)) {
 
-			result= CommentObjectFactory.createRange(parent, begin, 0);
+		CommentRange result= null;
+		if (offset >= length && !parent.isClearLines() && (line > 0 && line < parent.getSize() - 1)) {
+
+			result= new CommentRange(begin, 0);
 			result.setAttribute(COMMENT_BLANKLINE);
 
 			parent.append(result);
@@ -219,7 +269,7 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 
 			if (index - offset > 0) {
 
-				result= CommentObjectFactory.createRange(parent, begin + offset, index - offset);
+				result= new CommentRange(begin + offset, index - offset);
 				result.setAttribute(attribute);
 
 				parent.append(result);
@@ -231,11 +281,13 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 	/**
 	 * Removes all leading and trailing occurrences from <code>line</code>.
 	 * 
-	 * @param line The string to remove the occurrences of <code>trimmable</code>
-	 * @param trimmable The string to remove from <code>line</code>
+	 * @param line
+	 *                  The string to remove the occurrences of <code>trimmable</code>
+	 * @param trimmable
+	 *                  The string to remove from <code>line</code>
 	 * @return The region of the trimmed substring within <code>line</code>
 	 */
-	protected IRegion trimLine(final String line, final String trimmable) {
+	protected final IRegion trimLine(final String line, final String trimmable) {
 
 		final int trim= trimmable.length();
 

@@ -1,42 +1,40 @@
-/*****************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Common Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/cpl-v10.html
- *****************************************************************************/
+/**
+ *    This header comment may be left unformatted.
+ */
 
-package org.eclipse.formatter.example;
+package org.eclipse.formatter.example
 
 /**
- * Example class showing the format of the new comment formatter
- * @version 1.0
+ * Example class displaying the effects of various code formatting preferences.
+ * <p> See also {@link org.eclipse.editor.syntax}. </p>
+ * 
+ * The blank line above may be cleared.
+ * @version 3.0
  */
-class File {
+public class Example extends Object {
+	/* This comment may be wrapped to multiple lines depending on the maximal line length. */
+	private int integer= 0;
+	// This single-line comment may be wrapped too...
+	private String string= "zero";
 
 	/**
-	 * Returns the number of bytes that can be read from this file input stream without blocking.
-	 * <p>Here is an example on how to use <code>availableSize</code>.</p>
-	 *
-	 * The Loop to compute the number of bytes works as follows:
+	 * This comment shows the formatting of code snippets.
 	 * <pre>
-	 * while ((size = availableSize(stream, size)) > 0) { System.out.println("available"); }
+	 * while ((size = foo(size, max)) > 0) { System.out.println("bar"); }
 	 * </pre>
-	 * For further reference consult {@link org.eclipse.formatter}.
-	 * @param stream The file input stream to return the number of available bytes for.
-	 * @param size The current number of available bytes.
-	 * @return the number of bytes that can be read from this file input stream without blocking.
-	 * @exception IOException if an I/O error occurs.
+	 * After this comment a blank line may be inserted.
+	 * @param size The size
+	 * @param max The maximum
 	 */
-	public static int availableSize(FileInputStream stream, int size) {
+	public int foo(int size, int max) {
 
-		if (size < currentSize) {
+		if (size < max) {
 		try {
 		size=(long)stream.available();
 		} catch (IOException e) {
 
 		}
-		} else if (size == currentSize) {
+		} else if (size == max) {
 		++size;
 		} else {
 		--size;

@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -33,6 +34,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Region;
@@ -389,6 +391,8 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 	private void updatePreview() {
 
 		fSourceViewer.setRedraw(false);
+		Point selection= fSourceViewer.getSelectedRange();
+
 		fPreviewDocument.set(fPreviewText);
 
 		final IFormattingContext context= new CommentFormattingContext();
@@ -409,7 +413,7 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 
 		} finally {
 
-			fSourceViewer.setSelectedRange(0, 0);
+			fSourceViewer.setSelectedRange(selection.x, selection.y);
 			context.dispose();
 
 			fSourceViewer.setRedraw(true);
