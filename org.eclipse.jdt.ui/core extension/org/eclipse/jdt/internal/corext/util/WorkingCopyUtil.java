@@ -7,10 +7,7 @@ package org.eclipse.jdt.internal.corext.util;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.JavaUI;
 
 
 public class WorkingCopyUtil {
