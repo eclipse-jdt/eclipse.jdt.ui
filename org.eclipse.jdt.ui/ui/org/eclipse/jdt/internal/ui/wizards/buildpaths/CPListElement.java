@@ -263,10 +263,10 @@ public class CPListElement {
 		if (hideOutputFolder && fEntryKind == IClasspathEntry.CPE_SOURCE) {
 			return getFilteredChildren(new String[] { OUTPUT });
 		}
-		/*if (fParentContainer != null && fEntryKind != IClasspathEntry.CPE_SOURCE) {
+		if (fParentContainer != null && fEntryKind != IClasspathEntry.CPE_SOURCE) {
 			// don't show access ruls for children of containers
 			return getFilteredChildren(new String[] { ACCESSRULES, COMBINE_ACCESSRULES });
-		}*/
+		}
 		if (fEntryKind == IClasspathEntry.CPE_PROJECT) {
 			return getFilteredChildren(new String[] { COMBINE_ACCESSRULES });
 		}
