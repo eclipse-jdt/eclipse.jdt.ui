@@ -439,23 +439,25 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			TypeInfo[] allTypes= AllTypesCache.getAllTypes(null); // all types in workspace, sorted by type name
 			TypeInfo key= new TypeInfo("", simpleTypeName, null, null, true);
 			int index= Arrays.binarySearch(allTypes, key, AllTypesCache.getTypeNameComperator());
-			
-			for (int i= index - 1; i>= 0; i--) {
-				TypeInfo curr= allTypes[i];
-				if (simpleTypeName.equals(curr.getTypeName())) {
-					processEntry(curr, typeRefsFound, namesFound);
-				} else {
-					break;
+			if (index >= 0 && index < allTypes.length) {
+				for (int i= index - 1; i>= 0; i--) {
+					TypeInfo curr= allTypes[i];
+					if (simpleTypeName.equals(curr.getTypeName())) {
+						processEntry(curr, typeRefsFound, namesFound);
+					} else {
+						break;
+					}
 				}
-			}
-			for (int i= index; i < allTypes.length; i++) {
-				TypeInfo curr= allTypes[i];
-				if (simpleTypeName.equals(curr.getTypeName())) {
-					processEntry(curr,  typeRefsFound, namesFound);
-				} else {
-					break;
+	
+				for (int i= index; i < allTypes.length; i++) {
+					TypeInfo curr= allTypes[i];
+					if (simpleTypeName.equals(curr.getTypeName())) {
+						processEntry(curr,  typeRefsFound, namesFound);
+					} else {
+						break;
+					}
 				}
-			}					
+			}			
 		}
 	}	
 
