@@ -130,10 +130,10 @@ public class ModifierCorrectionSubProcessor {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, binding, selectedNode, includedModifiers, excludedModifiers, relevance, image));
 			}
-			if (kind == TO_VISIBLE && binding.getKind() == IBinding.VARIABLE && Modifier.isPrivate(binding.getModifiers())) {
-				if (selectedNode instanceof SimpleName || selectedNode instanceof FieldAccess && ((FieldAccess) selectedNode).getExpression() instanceof ThisExpression) {
-					UnresolvedElementsSubProcessor.getVariableProposals(context, problem, proposals);
-				}
+		}
+		if (kind == TO_VISIBLE && binding.getKind() == IBinding.VARIABLE && Modifier.isPrivate(binding.getModifiers())) {
+			if (selectedNode instanceof SimpleName || selectedNode instanceof FieldAccess && ((FieldAccess) selectedNode).getExpression() instanceof ThisExpression) {
+				UnresolvedElementsSubProcessor.getVariableProposals(context, problem, proposals);
 			}
 		}
 	}
