@@ -10,21 +10,26 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
+
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -32,14 +37,9 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.InlineConstantWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
  * Inlines a constant.
@@ -151,10 +151,8 @@ public class InlineConstantAction extends SelectionDispatchAction {
 		Assert.isTrue(selectionLength >= 0);
 		if (!ActionUtil.isProcessable(getShell(), cu))
 			return;
-		
-		InlineConstantRefactoring refactoring= InlineConstantRefactoring.create(
-			cu, selectionOffset, selectionLength,
-			JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
+
+		InlineConstantRefactoring refactoring= InlineConstantRefactoring.create(cu, selectionOffset, selectionLength);
 		if (refactoring == null) {
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineConstantAction.no_constant_reference_or_declaration")); //$NON-NLS-1$
 			return;
@@ -162,8 +160,8 @@ public class InlineConstantAction extends SelectionDispatchAction {
 		try {
 			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_TITLE, true);
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineConstantAction.unexpected_exception"));	 //$NON-NLS-1$
-		}		
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineConstantAction.unexpected_exception")); //$NON-NLS-1$
+		}
 	}
 	
 	private ICompilationUnit getCompilationUnitForTextSelection() {

@@ -10,16 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSupertypeWherePossibleRefactoring;
@@ -32,14 +35,11 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.UseSupertypeWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringActions;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
  * Tries to use a super type of a class where possible.
@@ -174,7 +174,7 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 	}
 	
 	private void startRefactoring(IType type) throws JavaModelException {
-		UseSupertypeWherePossibleRefactoring refactoring= UseSupertypeWherePossibleRefactoring.create(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()));
+		UseSupertypeWherePossibleRefactoring refactoring= UseSupertypeWherePossibleRefactoring.create(type);
 		Assert.isNotNull(refactoring);
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
 		if (!ActionUtil.isProcessable(getShell(), refactoring.getInputType()))

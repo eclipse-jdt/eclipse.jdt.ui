@@ -15,17 +15,19 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
@@ -37,13 +39,10 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.PushDownWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
  * Action to push down methods and fields into subclasses.
@@ -187,10 +186,7 @@ public class PushDownAction extends SelectionDispatchAction{
 	}
 
 	private static PushDownRefactoring createNewRefactoringInstance(IMember[] members) throws JavaModelException {
-		IJavaProject project= null;
-		if (members != null && members.length > 0)
-			project= members[0].getJavaProject();
-		return PushDownRefactoring.create(members, JavaPreferencesSettings.getCodeGenerationSettings(project));
+		return PushDownRefactoring.create(members);
 	}
 
 	private static IMember[] convertToMemberArray(Object[] obj) {

@@ -12,18 +12,21 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.TextSelection;
+
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.TextSelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -34,13 +37,10 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.IntroduceFactoryWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
  * Action that encapsulates the a constructor call with a factory
@@ -175,9 +175,7 @@ public class IntroduceFactoryAction extends SelectionDispatchAction {
 	}
 
 	private static IntroduceFactoryRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
-		return IntroduceFactoryRefactoring.create(cunit, 
-				selection.getOffset(), selection.getLength(),
-				JavaPreferencesSettings.getCodeGenerationSettings(cunit.getJavaProject()));
+		return IntroduceFactoryRefactoring.create(cunit, selection.getOffset(), selection.getLength());
 	}
 
 	private RefactoringWizard createWizard(IntroduceFactoryRefactoring refactoring) {

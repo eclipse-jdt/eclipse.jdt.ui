@@ -14,33 +14,32 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.MoveProjectAction;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-
-import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 public class ReorgMoveAction extends SelectionDispatchAction {
 	public ReorgMoveAction(IWorkbenchSite site) {
@@ -92,14 +91,11 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 		IJavaElement element= selection.resolveEnclosingElement();
 		if (element == null)
 			return false;
-		return JavaMoveProcessor.isAvailable(new IResource[0], new IJavaElement[] {element}, JavaPreferencesSettings.getCodeGenerationSettings(element.getJavaProject()));
+		return JavaMoveProcessor.isAvailable(new IResource[0], new IJavaElement[] { element});
 	}
 
 	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		IJavaProject project= null;
-		if (javaElements != null && javaElements.length > 0)
-			project= javaElements[0].getJavaProject();
-		return JavaMoveProcessor.isAvailable(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(project));
+		return JavaMoveProcessor.isAvailable(resources, javaElements);
 	}
 
 	private MoveProjectAction createWorkbenchAction(IStructuredSelection selection) {
@@ -150,9 +146,6 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 	}
 
 	private JavaMoveProcessor createMoveProcessor(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		IJavaProject project= null;
-		if (javaElements != null && javaElements.length > 0)
-			project= javaElements[0].getJavaProject();
-		return JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(project));
+		return JavaMoveProcessor.create(resources, javaElements);
 	}
 }

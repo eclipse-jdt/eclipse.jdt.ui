@@ -11,28 +11,28 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.actions.ActionUtil;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.actions.InlineConstantAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.InlineMethodAction;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.actions.InlineConstantAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.InlineMethodAction;
 
 /**
  * Inlines a method, local variable or a static final field.
@@ -127,11 +127,9 @@ public class InlineAction extends SelectionDispatchAction {
 		return true;
 	}
 	
-	private boolean tryInlineConstant(ICompilationUnit cu, ITextSelection selection){
-		InlineConstantRefactoring inlineConstantRef= InlineConstantRefactoring.create(
-				cu, selection.getOffset(), selection.getLength(),
-				JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
-		if (inlineConstantRef == null)	
+	private boolean tryInlineConstant(ICompilationUnit cu, ITextSelection selection) {
+		InlineConstantRefactoring inlineConstantRef= InlineConstantRefactoring.create(cu, selection.getOffset(), selection.getLength());
+		if (inlineConstantRef == null)
 			return false;
 		fInlineConstant.run(selection);
 		return true;

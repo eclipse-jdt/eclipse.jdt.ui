@@ -14,30 +14,28 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.CopyProjectAction;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 
 public class ReorgCopyAction extends SelectionDispatchAction {
@@ -74,10 +72,7 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 	}
 	
 	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		IJavaProject project= null;
-		if (javaElements != null && javaElements.length > 0)
-			project= javaElements[0].getJavaProject();
-		return CopyRefactoring.isAvailable(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(project));
+		return CopyRefactoring.isAvailable(resources, javaElements);
 	}
 
 	private CopyProjectAction createWorkbenchAction(IStructuredSelection selection) {
@@ -123,9 +118,6 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 	}
 
 	private CopyRefactoring createRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		IJavaProject project= null;
-		if (javaElements != null && javaElements.length > 0)
-			project= javaElements[0].getJavaProject();
-		return CopyRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(project));
+		return CopyRefactoring.create(resources, javaElements);
 	}
 }
