@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>    
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+  <meta name="Author" content="Build">
+  <title>Eclipse Java UI Extensions: Classpath Container Page</title>
+</head>
+
+<body>
+<center> 
+<h1>Classpath Container Page</h1>
+</center>
+ 
+<b><i>Identifier: </i></b>org.eclipse.jdt.ui.classpathContainerPage
+<p><b><i>Description: </i></b>This extension point allows to add UI to the libraries 
+  tab of Java build path setting page to create or edit a classpath container. 
+  The extension point defines UI for an already in JDT core defined classpath 
+  container.</p>
+<p><b><i>Configuration Markup:</i></b> </p>
+<p><tt>&nbsp;&nbsp; &lt;!ELEMENT classpathContainerPage EMPTY&gt;</tt> <br>
+<tt>&nbsp;&nbsp; &lt;!ATTLIST classpathContainerPage</tt> <br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA
+#IMPLIED</tt> <br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; name&nbsp;&nbsp;&nbsp;CDATA #IMPLIED</tt>
+ <br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class&nbsp;&nbsp;CDATA #IMPLIED</tt> <br>
+<tt>&nbsp;&nbsp; &gt;</tt> </p>
+ 
+<ul>
+  <li><b>id</b> - this id must correspond to classpath container defined via the 
+    extension point <tt>org.eclipse.jdt.core.classpathVariableInitializer</tt> 
+    in JDT core.</li>
+  <li><b>name</b> - a unique name that allows to identify this classpath container 
+    in the UI. This attribute should be a translated string. </li>
+  <li><b>class</b> - the name of the class that implements this classpath container 
+    page. The class must be public and must implement <tt>org.eclipse.jdt.ui.wizards.IClasspathContainerPage</tt> 
+    with a public 0-argument constructor. </li>
+  
+</ul>
+  <b><i>Examples:</i></b> 
+<p>The following is an example of a classpath container page:</p>
+<p><tt>&nbsp;&nbsp; &lt;extension point="org.eclipse.jdt.ui.classpathContainerPage"&gt;</tt><br>
+  <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;classpathContainerPage</tt><br>
+  <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id="com.example.jre.classpathContainer"</tt><br>
+  <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; name="JRE System Libraries"</tt><br>
+  <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class="com.example.NewJDKEntryPage"</tt><br>
+  <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/classpathContainerPage&gt;</tt><br>
+  <tt>&nbsp;&nbsp; &lt;/extension&gt;</tt></p>
+<p><br>
+</p>
+<p>&nbsp;<a href="hglegal2002.htm"><img src="ngibmcpy2002.gif" alt="Copyright IBM Corporation 2000, 2002. All Rights Reserved." border="0" width="324" height="14">
+</a>
+ </p>
+  
+</body>
+</html>
