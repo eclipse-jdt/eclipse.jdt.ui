@@ -102,17 +102,16 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		pm.beginTask("", 1); //$NON-NLS-1$
+		pm.beginTask("", 3); //$NON-NLS-1$
 		pm.setTaskName(RefactoringCoreMessages.getString("AugmentRawContainerClientsRefactoring.checking_preconditions"));
 		try {
 			RefactoringStatus result= check15();
 			fAnalyzer= new AugmentRawContainerClientsAnalyzer(fElements);
-			fAnalyzer.analyzeContainerReferences(new SubProgressMonitor(pm, 1), result);
+			fAnalyzer.analyzeContainerReferences(new SubProgressMonitor(pm, 2), result);
 			
-			pm.setTaskName("Computing changes...");
 			HashMap declarationsToUpdate= fAnalyzer.getDeclarationsToUpdate();
 			fChangeManager= new TextChangeManager();
-			rewriteDeclarations(declarationsToUpdate);
+			rewriteDeclarations(declarationsToUpdate, new SubProgressMonitor(pm, 1));
 //			result.merge(performAnalysis(pm));
 			
 			IFile[] filesToModify= ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
@@ -169,13 +168,18 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 //		return new RefactoringStatus();
 //	}
 
-	private void rewriteDeclarations(HashMap/*<ICompilationUnit, List<ConstraintVariable2>>*/ declarationsToUpdate) throws CoreException {
-		//TODO: use CompilationUnitRewrite
+	private void rewriteDeclarations(HashMap/*<ICompilationUnit, List<ConstraintVariable2>>*/ declarationsToUpdate, IProgressMonitor pm) throws CoreException {
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		Set entrySet= declarationsToUpdate.entrySet();
+		pm.beginTask("", entrySet.size()); //$NON-NLS-1$
+		pm.setTaskName("Creating changes...");
 		for (Iterator iter= entrySet.iterator(); iter.hasNext();) {
 			Map.Entry entry= (Map.Entry) iter.next();
 			ICompilationUnit cu= (ICompilationUnit) entry.getKey();
+			pm.worked(1);
+			pm.subTask(cu.getElementName());
+
+			//TODO: use CompilationUnitRewrite
 			CompilationUnit compilationUnit= parser.parse(cu, false);
 			AST ast= compilationUnit.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
