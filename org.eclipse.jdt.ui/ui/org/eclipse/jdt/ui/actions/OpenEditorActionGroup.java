@@ -27,12 +27,9 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.OpenWithMenu;
 
-import org.eclipse.jdt.core.IType;
-
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**

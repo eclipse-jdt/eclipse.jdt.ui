@@ -10,27 +10,18 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.InputDialog;
-
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.views.tasklist.TaskPropertiesDialog;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 public class AddTaskAction extends SelectionDispatchAction {
 
