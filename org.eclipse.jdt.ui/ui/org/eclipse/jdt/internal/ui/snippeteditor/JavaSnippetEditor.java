@@ -55,7 +55,6 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.SWT;
@@ -194,9 +193,8 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		ITextSelection selection= (ITextSelection) getSelectionProvider().getSelection();
 		String snippet= selection.getText();
 		if (snippet.length() == 0) {
-			selectLineForEvaluation(selection);
-			selection= (ITextSelection) getSelectionProvider().getSelection();
-			snippet= selection.getText();
+			evaluationEnds();
+			return;
 		}
 		fSnippetStart= selection.getOffset();
 		fSnippetEnd= fSnippetStart + selection.getLength();
@@ -204,19 +202,6 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		evaluate(snippet);			
 	}	
 	
-	/**
-	 * A request for evaluation has occurred.  Currently, the 
-	 * selection is empty.  Select the entire line of the empty
-	 * selection.
-	 */
-	protected void selectLineForEvaluation(ITextSelection selection) {
-		IDocument doc= getDocumentProvider().getDocument(getEditorInput());
-		try {
-			IRegion region= doc.getLineInformationOfOffset(selection.getOffset());
-			selectAndReveal(region.getOffset(), region.getLength());
-		} catch (BadLocationException ble) {
-		}
-	}
 	
 	protected void buildAndLaunch() {
 		IJavaProject javaProject= getJavaProject();

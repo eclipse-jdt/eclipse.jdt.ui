@@ -24,6 +24,10 @@ public class RunInPackageAction extends SnippetAction {
 	 * The user has invoked this action.
 	 */
 	public void run() {
+		if (!fEditor.isInJavaProject()) {
+			fEditor.reportNotInJavaProjectError();
+			return;
+		}
 		Shell s= fEditor.getSite().getShell();
 		IPackageFragment result= choosePackage(s);
 		if (result != null) {
