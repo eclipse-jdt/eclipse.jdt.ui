@@ -24,7 +24,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 class RenameAnalyzeUtil {
-
+	
+	private RenameAnalyzeUtil(){}
+	
 	static RefactoringStatus analyzeRenameChanges(TextChangeManager manager,  SearchResultGroup[] oldOccurrences, SearchResultGroup[] newOccurrences) throws CoreException{
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < oldOccurrences.length; i++) {
