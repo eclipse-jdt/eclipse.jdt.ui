@@ -50,7 +50,7 @@ public class JavaCapabilityWizard extends Wizard implements ICapabilityWizard {
 	public void addPages() {
 		super.addPages();
 		IWorkspaceRoot root= JavaPlugin.getWorkspace().getRoot();
-		fJavaPage= new JavaCapatibilityConfigurationPage(JavaCore.create(fProject));
+		fJavaPage= new JavaCapatibilityConfigurationPage(fProject);
 		addPage(fJavaPage);
 	}		
 	

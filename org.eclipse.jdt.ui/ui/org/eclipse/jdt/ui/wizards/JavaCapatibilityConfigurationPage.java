@@ -26,11 +26,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.launching.JavaRuntime;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
@@ -38,15 +35,12 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 /**
  * Wizard page to be used for capability wizards that want to configure Java build page. 
  */
-public class JavaCapatibilityConfigurationPage extends WizardPage {
+public class JavaCapatibilityConfigurationPage extends NewElementWizardPage {
 	
 	private static final String PAGE_NAME= "NewJavaProjectWizardPage"; //$NON-NLS-1$
 	
 	private IJavaProject fJavaProject;
 	private BuildPathsBlock fBuildPathsBlock;
-
-	private IStatus fCurrStatus;
-	private boolean fPageVisible;
 	
 	/**
 	 * Creates a Java project wizard creation page.
@@ -56,9 +50,9 @@ public class JavaCapatibilityConfigurationPage extends WizardPage {
 	 *
 	 * @param project the project to configure
 	 */	
-	public JavaCapatibilityConfigurationPage(IJavaProject javaProject) {
+	public JavaCapatibilityConfigurationPage(IProject project) {
 		super(PAGE_NAME);
-		fJavaProject= javaProject;
+		fJavaProject= JavaCore.create(project);
 		
 		setTitle(NewWizardMessages.getString("NewJavaProjectWizardPage.title")); //$NON-NLS-1$
 		setDescription(NewWizardMessages.getString("NewJavaProjectWizardPage.description")); //$NON-NLS-1$
@@ -70,20 +64,11 @@ public class JavaCapatibilityConfigurationPage extends WizardPage {
 		};
 
 		fBuildPathsBlock= new BuildPathsBlock(ResourcesPlugin.getWorkspace().getRoot(), listener, true);
-		fBuildPathsBlock.init(javaProject, null, null);
-		
-		fCurrStatus= new StatusInfo();
-		fPageVisible= false;
+		fBuildPathsBlock.init(fJavaProject, null, null);
 	}
-	
-	
-	public boolean hasConfiguredClasspath() {
-		return fJavaProject.getProject().getFile(".classpath").exists();
-	}
-	
 	
 	/**
-	 * Sets the default classpaths to be used for the new Java project.
+	 * Sets the build paths to be used as default by the new Java project.
 	 * <p>
 	 * The caller of this method is responsible for creating the classpath entries 
 	 * for the <code>IJavaProject</code> that corresponds to the created project.
@@ -95,17 +80,15 @@ public class JavaCapatibilityConfigurationPage extends WizardPage {
 	 * </p>
 	 * 
 	 *
-	 * @param entries the default classpath entries
-	 * @param path the folder to be taken as the default output path
-	 * @param appendDefaultJRE <code>true</code> a variable entry for the
-	 *  default JRE (specified in the preferences) will be added to the classpath.
+	 * @param entries the default classpath entries or <code>null</code> to take the default
+	 * @param path the folder to be taken as the default output path or <code>null</code> to take the default
+	 * @return overrideExistingClasspath If set to true, an existing '.classpath' file is ignored. If set to <code>false</code>
+	 * the default classpath is only used if no '.classpath' exists.
 	 */
-	public void setDefaultPaths(IPath outputLocation, IClasspathEntry[] entries, boolean appendDefaultJRE) {
-		if (entries != null && appendDefaultJRE) {
-			IClasspathEntry[] newEntries= new IClasspathEntry[entries.length + 1];
-			System.arraycopy(entries, 0, newEntries, 0, entries.length);
-			newEntries[entries.length]= JavaRuntime.getJREVariableEntry();
-			entries= newEntries;
+	public void setDefaultPaths(IPath outputLocation, IClasspathEntry[] entries, boolean overrideExistingClasspath) {
+		if (!overrideExistingClasspath && fJavaProject.getProject().getFile(".classpath").exists()) {
+			entries= null;
+			outputLocation= null;
 		}
 		fBuildPathsBlock.init(fJavaProject, outputLocation, entries);
 	}
@@ -120,18 +103,7 @@ public class JavaCapatibilityConfigurationPage extends WizardPage {
 		
 		WorkbenchHelp.setHelp(control, IJavaHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
 	}
-	
-
-	/* (non-Javadoc)
-	 * @see IDialogPage#setVisible(boolean)
-	 */
-	public void setVisible(boolean visible) {
-		super.setVisible(visible);
-		fPageVisible= visible;
-		updateStatus(fCurrStatus);
-	}
-	
-	
+		
 	/**
 	 * Returns the currently configured output location. Note that the returned path must not be valid.
 	 */
@@ -194,16 +166,5 @@ public class JavaCapatibilityConfigurationPage extends WizardPage {
 		description.setNatureIds(newNatures);
 		proj.setDescription(description, monitor);
 	}		
-	
-	/* (non-Javadoc)
-	 * Updates the status line
-	 */	
-	private void updateStatus(IStatus status) {
-		fCurrStatus= status;
-		setPageComplete(!status.matches(IStatus.ERROR));
-		if (fPageVisible) {
-			StatusUtil.applyToStatusLine(this, status);
-		}
-	}
 		
 }
