@@ -46,7 +46,6 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * <code>JavaElementLabels</code> provides helper methods to render names of Java elements.
- * Client can use these methods to build an label provider.
  * 
  * @since 3.1
  */
