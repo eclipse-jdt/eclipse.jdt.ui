@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+
 import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
