@@ -20,8 +20,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.contentassist.IContentAssistProcessorExtension;
-import org.eclipse.jface.contentassist.IContentAssistSubject;
+import org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor;
+import org.eclipse.jface.contentassist.IContentAssistSubjectControl;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.ITextViewer;
@@ -44,7 +44,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  * TODO: this class is not used anywhere yet.
  * (ContentAssist should be added to all source folder dialog fields.)
  */
-public class JavaPackageFragmentRootCompletionProcessor implements IContentAssistProcessor, IContentAssistProcessorExtension {
+public class JavaPackageFragmentRootCompletionProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
 	private static final ImageDescriptorRegistry IMAGE_DESC_REGISTRY= JavaPlugin.getImageDescriptorRegistry();
 	
 	private IPackageFragmentRoot fPackageFragmentRoot;
@@ -121,19 +121,18 @@ public class JavaPackageFragmentRootCompletionProcessor implements IContentAssis
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessorExtension#computeContextInformation(org.eclipse.jface.text.contentassist.IContentAssistSubject, int)
+	 * @see ISubjectControlContentAssistProcessor#computeContextInformation(IContentAssistSubjectControl, int)
 	 */
-	public IContextInformation[] computeContextInformation(IContentAssistSubject contentAssistSubject,
+	public IContextInformation[] computeContextInformation(IContentAssistSubjectControl contentAssistSubject,
 			int documentOffset) {
 		return null;
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessorExtension#computeCompletionProposals(org.eclipse.jface.text.contentassist.IContentAssistSubject,
-	 *      int)
+	 * @see ISubjectControlContentAssistProcessor#computeCompletionProposals(IContentAssistSubjectControl, int) 
 	 */
-	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubject contentAssistSubject, int documentOffset) {
-		String input= contentAssistSubject.getDocument().get();
+	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubjectControl contentAssistSubjectControl, int documentOffset) {
+		String input= contentAssistSubjectControl.getDocument().get();
 		ICompletionProposal[] proposals= createPackagesProposals(documentOffset, input);
 		Arrays.sort(proposals, fComparator);
 		return proposals;

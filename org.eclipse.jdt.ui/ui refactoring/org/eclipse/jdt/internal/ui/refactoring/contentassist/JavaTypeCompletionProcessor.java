@@ -27,8 +27,8 @@ import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.contentassist.IContentAssistProcessorExtension;
-import org.eclipse.jface.contentassist.IContentAssistSubject;
+import org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor;
+import org.eclipse.jface.contentassist.IContentAssistSubjectControl;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.ITextViewer;
@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 
-public class JavaTypeCompletionProcessor implements IContentAssistProcessor, IContentAssistProcessorExtension {
+public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
 	
 	private static final ImageDescriptorRegistry IMAGE_DESC_REGISTRY= JavaPlugin.getImageDescriptorRegistry();
 	private static final String CLASS_NAME= "$$__$$"; //$NON-NLS-1$
@@ -145,20 +145,20 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 		return null; //no context
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessorExtension#computeContextInformation(org.eclipse.jface.text.contentassist.IContentAssistSubject, int)
+	/*
+	 * @see ISubjectControlContentAssistProcessor#computeContextInformation(IContentAssistSubjectControl, int)
 	 */
-	public IContextInformation[] computeContextInformation(IContentAssistSubject contentAssistSubject, int documentOffset) {
+	public IContextInformation[] computeContextInformation(IContentAssistSubjectControl contentAssistSubjectControl, int documentOffset) {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessorExtension#computeCompletionProposals(org.eclipse.jface.text.contentassist.IContentAssistSubject, int)
+	/*
+	 * @see ISubjectControlContentAssistProcessor#computeCompletionProposals(IContentAssistSubjectControl, int)
 	 */
-	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubject contentAssistSubject, int documentOffset) {
+	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubjectControl contentAssistSubjectControl, int documentOffset) {
 		if (fPackageFragment == null)
 			return null;
-		String input= contentAssistSubject.getDocument().get();
+		String input= contentAssistSubjectControl.getDocument().get();
 		if (documentOffset == 0)
 			return null;
 		ICompletionProposal[] proposals= internalComputeCompletionProposals(documentOffset, input);

@@ -20,8 +20,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.contentassist.IContentAssistProcessorExtension;
-import org.eclipse.jface.contentassist.IContentAssistSubject;
+import org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor;
+import org.eclipse.jface.contentassist.IContentAssistSubjectControl;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-public class JavaPackageCompletionProcessor implements IContentAssistProcessor, IContentAssistProcessorExtension {
+public class JavaPackageCompletionProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
 	
 	private IPackageFragmentRoot fPackageFragmentRoot;
 	private JavaCompletionProposalComparator fComparator;
@@ -124,21 +124,20 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessorExtension#computeContextInformation(org.eclipse.jface.text.contentassist.IContentAssistSubject, int)
+	 * @see ISubjectControlContentAssistProcessor#computeContextInformation(IContentAssistSubjectControl, int)
 	 */
-	public IContextInformation[] computeContextInformation(IContentAssistSubject contentAssistSubject,
+	public IContextInformation[] computeContextInformation(IContentAssistSubjectControl contentAssistSubjectControl,
 			int documentOffset) {
 		return null;
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessorExtension#computeCompletionProposals(org.eclipse.jface.text.contentassist.IContentAssistSubject,
-	 *      int)
+	 * @see ISubjectControlContentAssistProcessor#computeCompletionProposals(IContentAssistSubjectControl, int)
 	 */
-	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubject contentAssistSubject, int documentOffset) {
+	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubjectControl contentAssistSubjectControl, int documentOffset) {
 		if (fPackageFragmentRoot == null)
 			return null;
-		String input= contentAssistSubject.getDocument().get();
+		String input= contentAssistSubjectControl.getDocument().get();
 		ICompletionProposal[] proposals= createPackagesProposals(documentOffset, input);
 		Arrays.sort(proposals, fComparator);
 		return proposals;

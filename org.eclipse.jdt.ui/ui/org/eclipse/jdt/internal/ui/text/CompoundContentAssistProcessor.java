@@ -20,9 +20,9 @@ import java.util.Set;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.contentassist.IContentAssistProcessorExtension;
-import org.eclipse.jface.contentassist.IContentAssistSubject;
-import org.eclipse.jface.contentassist.IContextInformationValidatorExtension;
+import org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor;
+import org.eclipse.jface.contentassist.IContentAssistSubjectControl;
+import org.eclipse.jface.contentassist.ISubjectControlContextInformationValidator;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.ITextViewer;
@@ -38,7 +38,7 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
  * 
  * @since 3.0 
  */
-public class CompoundContentAssistProcessor implements IContentAssistProcessor, IContentAssistProcessorExtension {
+public class CompoundContentAssistProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
 	
 	private static class WrappedContextInformation implements IContextInformation {
 		private IContextInformation fInfo;
@@ -129,15 +129,15 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 		
 	}
 	
-	private static class CompoundContentAssistValidatorEx extends CompoundContentAssistValidator implements IContextInformationValidatorExtension {
+	private static class CompoundContentAssistValidatorEx extends CompoundContentAssistValidator implements ISubjectControlContextInformationValidator {
 
 		/*
-		 * @see org.eclipse.jface.text.contentassist.IContextInformationValidatorExtension#install(org.eclipse.jface.text.contentassist.IContextInformation, org.eclipse.jface.text.contentassist.IContentAssistSubject, int)
+		 * @see ISubjectControlContextInformationValidator#install(IContextInformation, IContentAssistSubjectControl, int)
 		 */
-		public void install(IContextInformation info, IContentAssistSubject contentAssistSubject, int documentPosition) {
+		public void install(IContextInformation info, IContentAssistSubjectControl contentAssistSubjectControl, int documentPosition) {
 			IContextInformationValidator validator= getValidator(info);
-			if (validator instanceof IContextInformationValidatorExtension)
-				((IContextInformationValidatorExtension) validator).install(info, contentAssistSubject, documentPosition);
+			if (validator instanceof ISubjectControlContextInformationValidator)
+				((ISubjectControlContextInformationValidator) validator).install(info, contentAssistSubjectControl, documentPosition);
 		}
 		
 	}
@@ -299,7 +299,7 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 		for (Iterator it= fProcessors.iterator(); it.hasNext();) {
 			IContentAssistProcessor p= (IContentAssistProcessor) it.next();
 			IContextInformationValidator v= p.getContextInformationValidator();
-			if (v instanceof IContextInformationValidatorExtension) {
+			if (v instanceof ISubjectControlContextInformationValidator) {
 				hasExtension= true;
 				break;
 			} else if (v != null) {
@@ -325,15 +325,15 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessorExtension#computeCompletionProposals(org.eclipse.jface.text.contentassist.IContentAssistSubject, int)
+	 * @see ISubjectControlContentAssistProcessor#computeCompletionProposals(IContentAssistSubjectControl, int)
 	 */
-	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubject contentAssistSubject, int documentOffset) {
+	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubjectControl contentAssistSubjectControl, int documentOffset) {
 		List ret= new LinkedList();
 		for (Iterator it= fProcessors.iterator(); it.hasNext();) {
 			Object o= it.next();
-			if (o instanceof IContentAssistProcessorExtension) {
-				IContentAssistProcessorExtension p= (IContentAssistProcessorExtension) o;
-				ICompletionProposal[] proposals= p.computeCompletionProposals(contentAssistSubject, documentOffset);
+			if (o instanceof ISubjectControlContentAssistProcessor) {
+				ISubjectControlContentAssistProcessor p= (ISubjectControlContentAssistProcessor) o;
+				ICompletionProposal[] proposals= p.computeCompletionProposals(contentAssistSubjectControl, documentOffset);
 				if (proposals != null)
 					ret.addAll(Arrays.asList(proposals));
 			}
@@ -348,19 +348,18 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 	 * The returned objects are wrapper objects around the real information containers.
 	 * </p>
 	 * 
-	 * @see org.eclipse.jface.contentassist.IContentAssistProcessorExtension#computeContextInformation(org.eclipse.jface.text.contentassist.IContentAssistSubject, int)
+	 * @see org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.contentassist.IContentAssistSubject, int)
 	 */
-	public IContextInformation[] computeContextInformation(IContentAssistSubject contentAssistSubject,
-															int documentOffset) {
+	public IContextInformation[] computeContextInformation(IContentAssistSubjectControl contentAssistSubjectControl, int documentOffset) {
 		List ret= new LinkedList();
 		for (Iterator it= fProcessors.iterator(); it.hasNext();) {
 			Object o= it.next();
-			if (o instanceof IContentAssistProcessorExtension) {
-				IContentAssistProcessorExtension p= (IContentAssistProcessorExtension) o;
-				IContextInformation[] informations= p.computeContextInformation(contentAssistSubject, documentOffset);
+			if (o instanceof ISubjectControlContentAssistProcessor) {
+				ISubjectControlContentAssistProcessor p= (ISubjectControlContentAssistProcessor) o;
+				IContextInformation[] informations= p.computeContextInformation(contentAssistSubjectControl, documentOffset);
 				if (informations != null)
 					for (int i= 0; i < informations.length; i++)
-						ret.add(new WrappedContextInformation(informations[i], (IContentAssistProcessor) p));
+						ret.add(new WrappedContextInformation(informations[i], p));
 			}
 		}
 		return (IContextInformation[]) ret.toArray(new IContextInformation[ret.size()]);

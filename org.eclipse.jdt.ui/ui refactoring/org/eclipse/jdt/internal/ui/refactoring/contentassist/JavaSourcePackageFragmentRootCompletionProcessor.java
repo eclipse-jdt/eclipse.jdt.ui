@@ -22,8 +22,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.contentassist.IContentAssistProcessorExtension;
-import org.eclipse.jface.contentassist.IContentAssistSubject;
+import org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor;
+import org.eclipse.jface.contentassist.IContentAssistSubjectControl;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -44,7 +44,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  * Simple completion processor that completes package fragment roots that are source
  * folders.
  */
-public class JavaSourcePackageFragmentRootCompletionProcessor implements IContentAssistProcessor, IContentAssistProcessorExtension {
+public class JavaSourcePackageFragmentRootCompletionProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
 
 	private char[] fProposalAutoActivationSet;
 	private IJavaModel fRoot;
@@ -86,7 +86,7 @@ public class JavaSourcePackageFragmentRootCompletionProcessor implements IConten
 		return null;
 	}
 
-	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubject contentAssistSubject, int documentOffset) {
+	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubjectControl contentAssistSubject, int documentOffset) {
 		if (fRoot == null) {
 			return null;
 		}
@@ -134,7 +134,7 @@ public class JavaSourcePackageFragmentRootCompletionProcessor implements IConten
 		return (ICompletionProposal[])proposals.toArray(new ICompletionProposal[proposals.size()]);
 	}
 
-	public IContextInformation[] computeContextInformation(IContentAssistSubject contentAssistSubject, int documentOffset) {
+	public IContextInformation[] computeContextInformation(IContentAssistSubjectControl contentAssistSubject, int documentOffset) {
 		return null;
 	}
 

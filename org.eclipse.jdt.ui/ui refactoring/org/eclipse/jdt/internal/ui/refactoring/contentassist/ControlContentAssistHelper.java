@@ -20,7 +20,7 @@ import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
-import org.eclipse.jface.contentassist.ContentAssistant;
+import org.eclipse.jface.contentassist.SubjectControlContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 
@@ -51,8 +51,8 @@ public class ControlContentAssistHelper {
 		ContentAssistHandler.createHandlerForCombo(combo, createJavaContentAssistant(processor));
 	}
 
-	public static ContentAssistant createJavaContentAssistant(IContentAssistProcessor processor) {
-		final ContentAssistant contentAssistant= new ContentAssistant();
+	public static SubjectControlContentAssistant createJavaContentAssistant(IContentAssistProcessor processor) {
+		final SubjectControlContentAssistant contentAssistant= new SubjectControlContentAssistant();
 		
 		contentAssistant.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
 		

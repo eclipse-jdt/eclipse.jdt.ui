@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.jface.contentassist.ContentAssistant;
+import org.eclipse.jface.contentassist.SubjectControlContentAssistant;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ICellModifier;
@@ -510,7 +510,7 @@ public class ChangeParametersControl extends Composite {
 
 	private void addCellEditors() {
 		class UnfocusableTextCellEditor extends TextCellEditor {
-			ContentAssistant fContentAssistant;
+			SubjectControlContentAssistant fContentAssistant;
 			public UnfocusableTextCellEditor(Composite parent) {
 				super(parent);
 			}
@@ -518,7 +518,7 @@ public class ChangeParametersControl extends Composite {
 				if (fContentAssistant == null || ! fContentAssistant.hasProposalPopupFocus())
 					super.focusLost();
 			}
-			public void setContentAssistant(ContentAssistant assistant) {
+			public void setContentAssistant(SubjectControlContentAssistant assistant) {
 				fContentAssistant= assistant;
 			}
 		}
@@ -529,7 +529,7 @@ public class ChangeParametersControl extends Composite {
 		editors[NEWNAME_PROP]= new UnfocusableTextCellEditor(getTable());
 		editors[DEFAULT_PROP]= new UnfocusableTextCellEditor(getTable());
 		
-		ContentAssistant assistant= installParameterTypeContentAssist(editors[TYPE_PROP].getControl());
+		SubjectControlContentAssistant assistant= installParameterTypeContentAssist(editors[TYPE_PROP].getControl());
 		editors[TYPE_PROP].setContentAssistant(assistant);
 		
 		for (int i = 0; i < editors.length; i++) {
@@ -612,13 +612,13 @@ public class ChangeParametersControl extends Composite {
 		fTableViewer.setCellModifier(new ParametersCellModifier());
 	}
 
-	private ContentAssistant installParameterTypeContentAssist(Control control) {
+	private SubjectControlContentAssistant installParameterTypeContentAssist(Control control) {
 		if (! (control instanceof Text))
 			return null;
 		Text text= (Text) control;
 		JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(true, false);
 		processor.setPackageFragment(fTypeContext);
-		ContentAssistant contentAssistant= ControlContentAssistHelper.createJavaContentAssistant(processor);
+		SubjectControlContentAssistant contentAssistant= ControlContentAssistHelper.createJavaContentAssistant(processor);
 		ContentAssistHandler.createHandlerForText(text, contentAssistant);
 		return contentAssistant;
 	}
