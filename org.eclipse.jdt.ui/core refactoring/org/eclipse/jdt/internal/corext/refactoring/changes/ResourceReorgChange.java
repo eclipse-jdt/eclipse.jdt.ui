@@ -22,7 +22,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IDeepCopyQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 
 abstract class ResourceReorgChange extends Change {
@@ -32,9 +31,8 @@ abstract class ResourceReorgChange extends Change {
 	private final IPath fDestinationPath;
 	private final boolean fIsDestinationProject;
 	private final INewNameQuery fNewNameQuery;
-	private final IDeepCopyQuery fDeepCopyQuery;
 
-	ResourceReorgChange(IResource res, IContainer dest, INewNameQuery nameQuery, IDeepCopyQuery deepCopyQuery){
+	ResourceReorgChange(IResource res, IContainer dest, INewNameQuery nameQuery){
 		Assert.isTrue(res instanceof IFile || res instanceof IFolder);
 		fIsFile= (res instanceof IFile);
 		fResourcePath= Utils.getResourcePath(res);
@@ -43,7 +41,6 @@ abstract class ResourceReorgChange extends Change {
 		fIsDestinationProject= (dest instanceof IProject);
 		fDestinationPath= Utils.getResourcePath(dest);
 		fNewNameQuery= nameQuery;
-		fDeepCopyQuery= deepCopyQuery;
 	}
 	
 	protected abstract void doPerform(IPath path, IProgressMonitor pm) throws CoreException;
@@ -142,19 +139,7 @@ abstract class ResourceReorgChange extends Change {
 	}
 
 	protected int getReorgFlags() {
-		if (! getResource().isLinked())
-			return IResource.NONE;
-		else if (performDeepCopy())
-			return IResource.NONE;
-		else
-			return IResource.SHALLOW;
-	}
-
-	private boolean performDeepCopy() {
-		if (fDeepCopyQuery == null)
-			return false;
-		else	
-			return fDeepCopyQuery.performDeepCopy(getResource());
+		return IResource.KEEP_HISTORY | IResource.SHALLOW;
 	}
 }
 

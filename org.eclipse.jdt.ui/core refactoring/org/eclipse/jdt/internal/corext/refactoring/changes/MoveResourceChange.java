@@ -11,12 +11,11 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IDeepCopyQuery;
 
 public class MoveResourceChange extends ResourceReorgChange {
 	
-	public MoveResourceChange(IResource res, IContainer dest, IDeepCopyQuery deepCopyQuery){
-		super(res, dest, null, deepCopyQuery);
+	public MoveResourceChange(IResource res, IContainer dest){
+		super(res, dest, null);
 	}
 	
 	/* non java-doc

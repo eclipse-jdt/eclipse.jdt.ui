@@ -27,7 +27,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IDeepCopyQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -38,15 +37,13 @@ abstract class PackageFragmentRootReorgChange extends Change {
 	private final IPath fDestinationPath;
 	private final INewNameQuery fNewNameQuery;
 	private final IPackageFragmentRootManipulationQuery fUpdateClasspathQuery;
-	private final IDeepCopyQuery fDeepCopyQuery;
 	
-	PackageFragmentRootReorgChange(IPackageFragmentRoot root, IProject destination, INewNameQuery newNameQuery, IPackageFragmentRootManipulationQuery updateClasspathQuery, IDeepCopyQuery deepCopyQuery){
+	PackageFragmentRootReorgChange(IPackageFragmentRoot root, IProject destination, INewNameQuery newNameQuery, IPackageFragmentRootManipulationQuery updateClasspathQuery){
 		Assert.isTrue(! root.isExternal());
 		fRootHandle= root.getHandleIdentifier();
 		fDestinationPath= Utils.getResourcePath(destination);
 		fNewNameQuery= newNameQuery;
 		fUpdateClasspathQuery= updateClasspathQuery;
-		fDeepCopyQuery= deepCopyQuery;
 	}
 
 	/* non java-doc
@@ -146,22 +143,6 @@ abstract class PackageFragmentRootReorgChange extends Change {
 	}
 	
 	protected int getResourceUpdateFlags(){
-		int shallowCopy= IResource.KEEP_HISTORY | IResource.SHALLOW;
-		int deepCopy= IResource.KEEP_HISTORY;
-
-		if (fDeepCopyQuery == null)
-			return shallowCopy;
-
-		IResource resource= getRoot().getResource();
-		if (resource == null)
-			return shallowCopy;
-		
-		if (! resource.isLinked())
-			return shallowCopy;
-
-		if (fDeepCopyQuery.performDeepCopy(resource))
-			return deepCopy;
-
-		return shallowCopy;
+		return IResource.KEEP_HISTORY | IResource.SHALLOW;
 	}
 }

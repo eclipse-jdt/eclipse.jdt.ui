@@ -206,7 +206,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		
 		if (fMoveRefactoring == null){
 			IPackageFragmentRootManipulationQuery query= JdtMoveAction.createUpdateClasspathQuery(getViewer().getControl().getShell());
-			fMoveRefactoring= new MoveRefactoring(fElements, JavaPreferencesSettings.getCodeGenerationSettings(), query, new ReorgQueries());
+			fMoveRefactoring= new MoveRefactoring(fElements, JavaPreferencesSettings.getCodeGenerationSettings(), query);
 		}	
 		
 		if (!canMoveElements())

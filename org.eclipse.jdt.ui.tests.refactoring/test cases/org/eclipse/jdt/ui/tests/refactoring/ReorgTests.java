@@ -22,7 +22,6 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IDeepCopyQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -79,7 +78,7 @@ public class ReorgTests extends RefactoringTest {
 		CopyRefactoring ref= new CopyRefactoring(elements, new MockCopyQueries(), null);
 		assertEquals("copy", expected, ref.checkActivation(new NullProgressMonitor()).isOK());		
 		
-		MoveRefactoring moveRef= new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings(), null, null);
+		MoveRefactoring moveRef= new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings(), null);
 		assertEquals("move", expected, moveRef.checkActivation(new NullProgressMonitor()).isOK());		
 	}
 	
@@ -223,7 +222,7 @@ public class ReorgTests extends RefactoringTest {
 			assertEquals("copy5", false, copyRef.isValidDestination(getRtJar()));
 			assertEquals("copy6", true, copyRef.isValidDestination(folder));
 	
-			MoveRefactoring moveRef= new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings(), null, null);
+			MoveRefactoring moveRef= new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings(), null);
 			assertEquals("moveRef0", false, moveRef.isValidDestination(cu));
 			assertEquals("moveRef1", true, moveRef.isValidDestination(p1));
 			assertEquals("moveRef2", false, moveRef.isValidDestination(getPackageP()));
@@ -266,7 +265,7 @@ public class ReorgTests extends RefactoringTest {
 			assertEquals("copy5", false, copyRef.isValidDestination(getRtJar()));
 			assertEquals("copy6", true, copyRef.isValidDestination(folder));
 			
-			MoveRefactoring moveRef= new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings(), null, null);
+			MoveRefactoring moveRef= new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings(), null);
 			assertEquals("moveRef0", false, moveRef.isValidDestination(cu));
 			assertEquals("moveRef0a", false, moveRef.isValidDestination(cu2));
 			assertEquals("moveRef1", true, moveRef.isValidDestination(p1));
@@ -313,7 +312,7 @@ public class ReorgTests extends RefactoringTest {
 			assertEquals("copy6", true, copyRef.isValidDestination(folder));
 			assertEquals("copy7", true, copyRef.isValidDestination(file));
 			
-			MoveRefactoring moveRef= new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings(), null, null);
+			MoveRefactoring moveRef= new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings(), null);
 			assertEquals("moveRef0", false, moveRef.isValidDestination(cu));
 			assertEquals("moveRef0a", false, moveRef.isValidDestination(cu2));
 			assertEquals("moveRef1", true, moveRef.isValidDestination(p1));
@@ -466,10 +465,6 @@ public class ReorgTests extends RefactoringTest {
 		}
 
 		public INewNameQuery createStaticQuery(String newName) {
-			return null;
-		}
-
-		public IDeepCopyQuery getDeepCopyQuery() {
 			return null;
 		}
 	}

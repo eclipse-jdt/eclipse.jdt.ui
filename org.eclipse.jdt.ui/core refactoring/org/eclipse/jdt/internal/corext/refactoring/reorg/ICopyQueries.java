@@ -21,5 +21,4 @@ public interface ICopyQueries {
 	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack);
 	public INewNameQuery createNullQuery();
 	public INewNameQuery createStaticQuery(String newName);
-	public IDeepCopyQuery getDeepCopyQuery();
 }

@@ -68,7 +68,7 @@ public class MultiMoveTests extends RefactoringTest {
 		List elems= new ArrayList();
 		elems.add(p1A);
 		elems.add(p1B);
-		MoveRefactoring ref= new MoveRefactoring(elems, JavaPreferencesSettings.getCodeGenerationSettings(), null, null);
+		MoveRefactoring ref= new MoveRefactoring(elems, JavaPreferencesSettings.getCodeGenerationSettings(), null);
 		ref.setDestination(packP2);
 		ref.setUpdateReferences(true);
 		RefactoringStatus status= performRefactoring(ref);
@@ -111,7 +111,7 @@ public class MultiMoveTests extends RefactoringTest {
 		List elems= new ArrayList();
 		elems.add(p1A);
 		elems.add(p3B);
-		MoveRefactoring ref= new MoveRefactoring(elems, JavaPreferencesSettings.getCodeGenerationSettings(), null, null);
+		MoveRefactoring ref= new MoveRefactoring(elems, JavaPreferencesSettings.getCodeGenerationSettings(), null);
 		ref.setDestination(packP2);
 		ref.setUpdateReferences(true);
 		RefactoringStatus status= performRefactoring(ref);
@@ -152,7 +152,7 @@ public class MultiMoveTests extends RefactoringTest {
 		
 		List elems= new ArrayList();
 		elems.add(p1A);
-		MoveRefactoring ref= new MoveRefactoring(elems, JavaPreferencesSettings.getCodeGenerationSettings(), null, null);
+		MoveRefactoring ref= new MoveRefactoring(elems, JavaPreferencesSettings.getCodeGenerationSettings(), null);
 		ref.setDestination(packP2);
 		ref.setUpdateReferences(true);
 		RefactoringStatus status= performRefactoring(ref);
@@ -192,7 +192,7 @@ public class MultiMoveTests extends RefactoringTest {
 		
 		List elems= new ArrayList();
 		elems.add(p1A);
-		MoveRefactoring ref= new MoveRefactoring(elems, JavaPreferencesSettings.getCodeGenerationSettings(), null, null);
+		MoveRefactoring ref= new MoveRefactoring(elems, JavaPreferencesSettings.getCodeGenerationSettings(), null);
 		ref.setDestination(packP2);
 		ref.setUpdateReferences(true);
 		RefactoringStatus status= performRefactoring(ref);

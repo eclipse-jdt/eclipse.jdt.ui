@@ -160,7 +160,7 @@ public class CopyRefactoring extends ReorgRefactoring {
 		if (newName == null )
 			newName= res.getName();
 		INewNameQuery nameQuery= fCopyQueries.createStaticQuery(newName);
-		return new CopyPackageFragmentRootChange(root, destinationProject, nameQuery,  fRootManipulationQuery, fCopyQueries.getDeepCopyQuery());
+		return new CopyPackageFragmentRootChange(root, destinationProject, nameQuery,  fRootManipulationQuery);
 	}
 	
 	IChange createChange(IProgressMonitor pm, IPackageFragment pack) throws JavaModelException{
@@ -178,7 +178,7 @@ public class CopyRefactoring extends ReorgRefactoring {
 				IContainer dest= (IContainer)root.getResource();
 				IResource res= pack.getResource();
 				INewNameQuery nameQuery= fCopyQueries.createNewResourceNameQuery(res);
-				return new CopyResourceChange(res, dest, nameQuery, fCopyQueries.getDeepCopyQuery());
+				return new CopyResourceChange(res, dest, nameQuery);
 			}else
 				return new NullChange();
 		}	
@@ -191,7 +191,7 @@ public class CopyRefactoring extends ReorgRefactoring {
 			nameQuery= fCopyQueries.createNullQuery();
 		else
 			nameQuery= fCopyQueries.createNewResourceNameQuery(res);
-		return new CopyResourceChange(res, dest, nameQuery, fCopyQueries.getDeepCopyQuery());
+		return new CopyResourceChange(res, dest, nameQuery);
 	}
 	
 	IChange createChange(IProgressMonitor pm, ICompilationUnit cu) throws JavaModelException{
@@ -217,7 +217,7 @@ public class CopyRefactoring extends ReorgRefactoring {
 				nameQuery= fCopyQueries.createNullQuery();
 			else	
 				nameQuery= fCopyQueries.createNewResourceNameQuery(res);
-			return new CopyResourceChange(res, (IContainer)dest, nameQuery, fCopyQueries.getDeepCopyQuery());
+			return new CopyResourceChange(res, (IContainer)dest, nameQuery);
 		}		
 	}
 }

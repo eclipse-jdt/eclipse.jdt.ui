@@ -29,7 +29,6 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IDeepCopyQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -39,11 +38,7 @@ public class ReorgQueries implements ICopyQueries {
 
 	private static final String EMPTY= " "; //XXX workaround for bug#16256 //$NON-NLS-1$
 
-	private IDeepCopyQuery fDeepCopyQuery;
-
 	public ReorgQueries() {
-		//just one instance, so that we get the correct 'yes to all' behavior
-		fDeepCopyQuery= new DeepCopyQuery(); 
 	}
 
 	private static String removeTrailingJava(String name) {
@@ -173,83 +168,6 @@ public class ReorgQueries implements ICopyQueries {
 		return validator;
 	}			
 
-	public IDeepCopyQuery getDeepCopyQuery() {
-		return fDeepCopyQuery;
-	}
-	
-	private static class DeepCopyQuery implements IDeepCopyQuery{
-
-		private boolean alwaysDeepCopy= false;
-		private boolean neverDeepCopy= false;
-		private boolean fCanceled= false;
-		
-		public boolean performDeepCopy(final IResource source) {
-			final Shell parentShell= JavaPlugin.getActiveWorkbenchShell();
-			final int[] result = new int[1];
-			IPath location = source.getLocation();
-		
-			if (location == null) {
-				//undefined path variable
-				return false;
-			}
-			if (location.toFile().exists() == false) {
-				//link target does not exist
-				return false;
-			}
-			if (alwaysDeepCopy) {
-				return true;
-			}
-			if (neverDeepCopy) {
-				return false;
-			}
-			// Dialogs need to be created and opened in the UI thread
-			Runnable query = new Runnable() {
-				public void run() {
-					int resultId[]= {
-						IDialogConstants.YES_ID,
-						IDialogConstants.YES_TO_ALL_ID,
-						IDialogConstants.NO_ID,
-						IDialogConstants.NO_TO_ALL_ID,
-						IDialogConstants.CANCEL_ID};
- 
-					String message= ReorgMessages.getFormattedString("ReorgQueries.deep_copy", //$NON-NLS-1$
-						new String[] {source.getFullPath().makeRelative().toString()});
-					MessageDialog dialog= new MessageDialog(
-						parentShell, 
-						ReorgMessages.getString("ReorgQueries.Linked_Resource"), //$NON-NLS-1$
-						null,
-						message,
-						MessageDialog.QUESTION,
-						new String[] {
-							IDialogConstants.YES_LABEL,
-							IDialogConstants.YES_TO_ALL_LABEL,
-							IDialogConstants.NO_LABEL,
-							IDialogConstants.NO_TO_ALL_LABEL,
-							IDialogConstants.CANCEL_LABEL },
-						0);
-					dialog.open();
-					result[0]= resultId[dialog.getReturnCode()];
-				}
-			};
-			parentShell.getDisplay().syncExec(query);
-			if (result[0] == IDialogConstants.YES_TO_ALL_ID) {
-				alwaysDeepCopy= true;
-				return true;		
-			}
-			if (result[0] == IDialogConstants.YES_ID) {
-				return true;
-			}
-			if (result[0] == IDialogConstants.NO_TO_ALL_ID) {
-				neverDeepCopy= true;
-			}
-			if (result[0] == IDialogConstants.CANCEL_ID) {
-				fCanceled= true;
-				throw new OperationCanceledException();
-			}
-			return false;
-		}
-	}
-	
 	static class OverwriteQuery {
 
 		private boolean alwaysOverwriteNonReadOnly= false;

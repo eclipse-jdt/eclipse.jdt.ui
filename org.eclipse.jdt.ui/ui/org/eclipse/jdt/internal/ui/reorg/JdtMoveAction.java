@@ -137,7 +137,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	 */
 	ReorgRefactoring createRefactoring(List elements){
 		IPackageFragmentRootManipulationQuery query= createUpdateClasspathQuery(getShell());
-		return new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings(), query, new ReorgQueries());
+		return new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings(), query);
 	}
 	
 	ElementTreeSelectionDialog createDestinationSelectionDialog(Shell parent, ILabelProvider labelProvider, StandardJavaElementContentProvider cp, ReorgRefactoring refactoring){

@@ -64,16 +64,14 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 	
 	private final CodeGenerationSettings fSettings;
 	private final IPackageFragmentRootManipulationQuery fUpdateClasspathQuery;
-	private final ICopyQueries fCopyQueries;
 	
-	public MoveRefactoring(List elements, CodeGenerationSettings settings, IPackageFragmentRootManipulationQuery updateClasspathQuery, ICopyQueries copyQueries) {
+	public MoveRefactoring(List elements, CodeGenerationSettings settings, IPackageFragmentRootManipulationQuery updateClasspathQuery) {
 		super(elements);
 		Assert.isNotNull(settings);
 		fSettings= settings;
 		fUpdateReferences= true;
 		fQualifiedNameFinder= new QualifiedNameFinder();
 		fUpdateClasspathQuery= updateClasspathQuery;
-		fCopyQueries= copyQueries;
 	}
 		
 	/* non java-doc
@@ -507,7 +505,7 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 		if (dest instanceof IPackageFragment)
 			return new MoveCompilationUnitChange(cu, (IPackageFragment)dest);
 		Assert.isTrue(dest instanceof IContainer);//this should be checked before - in preconditions
-		return new MoveResourceChange(ResourceUtil.getResource(cu), (IContainer)dest, fCopyQueries.getDeepCopyQuery());
+		return new MoveResourceChange(ResourceUtil.getResource(cu), (IContainer)dest);
 	}
 
 	/*
@@ -515,7 +513,7 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 	 */
 	IChange createChange(IProgressMonitor pm, IPackageFragmentRoot root) throws JavaModelException{
 		IProject destinationProject= getDestinationForSourceFolders(getDestination());
-		return new MovePackageFragmentRootChange(root, destinationProject, fUpdateClasspathQuery, fCopyQueries.getDeepCopyQuery());
+		return new MovePackageFragmentRootChange(root, destinationProject, fUpdateClasspathQuery);
 	}
 
 	/*
@@ -529,7 +527,7 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 	 * @see ReorgRefactoring#createChange(IResource)
 	 */	
 	IChange createChange(IProgressMonitor pm, IResource res) throws JavaModelException{
-		return new MoveResourceChange(res, getDestinationForResources(getDestination()), fCopyQueries.getDeepCopyQuery());
+		return new MoveResourceChange(res, getDestinationForResources(getDestination()));
 	}
 	
 	private void computeQualifiedNameMatches(IProgressMonitor pm) throws JavaModelException {

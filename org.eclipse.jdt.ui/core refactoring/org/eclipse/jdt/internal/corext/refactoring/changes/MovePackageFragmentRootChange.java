@@ -18,13 +18,12 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IDeepCopyQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 
 public class MovePackageFragmentRootChange extends PackageFragmentRootReorgChange {
 
-	public MovePackageFragmentRootChange(IPackageFragmentRoot root, IProject destination, IPackageFragmentRootManipulationQuery updateClasspathQuery, IDeepCopyQuery deepCopyQuery) {
-		super(root, destination, null, updateClasspathQuery, deepCopyQuery);
+	public MovePackageFragmentRootChange(IPackageFragmentRoot root, IProject destination, IPackageFragmentRootManipulationQuery updateClasspathQuery) {
+		super(root, destination, null, updateClasspathQuery);
 	}
 
 	/*
