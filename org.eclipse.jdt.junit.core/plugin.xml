@@ -59,6 +59,9 @@
                id="org.eclipse.jdt.junit.ResultView"
                relationship="fast">
          </view>
+         <newWizardShortcut
+               id="org.eclipse.jdt.junit.wizards.NewTestCaseCreationWizard">
+         </newWizardShortcut>
       </perspectiveExtension>
       <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaPerspective">
@@ -71,6 +74,9 @@
          <actionSet
                id="org.eclipse.jdt.junit.JUnitActionSet">
          </actionSet>
+         <newWizardShortcut
+               id="org.eclipse.jdt.junit.wizards.NewTestCaseCreationWizard">
+         </newWizardShortcut>
       </perspectiveExtension>
    </extension>
    <extension
