@@ -612,7 +612,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fToggleTextHover= new ToggleTextHoverAction();
 		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$		
 		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
-		fShowJavadoc= (TextOperationAction) fEditor.getAction("ShowJavaDoc");
+		fShowJavadoc= (TextOperationAction) fEditor.getAction("ShowJavaDoc"); //$NON-NLS-1$
 		
 		fTogglePresentation.setEditor(editor);
 		fToggleTextHover.setEditor(editor);
@@ -671,7 +671,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			Action action= new LexicalSortingAction();
 			toolBarManager.add(action);
 			
-			fMemberFilterActionGroup= new MemberFilterActionGroup(fOutlineViewer, "JavaOutlineViewer");
+			fMemberFilterActionGroup= new MemberFilterActionGroup(fOutlineViewer, "JavaOutlineViewer"); //$NON-NLS-1$
 			fMemberFilterActionGroup.contributeToToolBar(toolBarManager);
 		}
 	}
@@ -710,7 +710,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fMenu= manager.createContextMenu(tree);
 		tree.setMenu(fMenu);
 		
-		getSite().registerContextMenu(JavaPlugin.getDefault().getPluginId() + ".outline", manager, fOutlineViewer);
+		getSite().registerContextMenu(JavaPlugin.getDefault().getPluginId() + ".outline", manager, fOutlineViewer); //$NON-NLS-1$
 		getSite().setSelectionProvider(fOutlineViewer);
 
 		// we must create the groups after we have set the selection provider to the site

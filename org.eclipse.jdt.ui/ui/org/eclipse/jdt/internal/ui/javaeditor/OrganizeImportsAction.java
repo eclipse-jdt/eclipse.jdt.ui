@@ -83,9 +83,9 @@ public class OrganizeImportsAction extends Action {
 				int nImportsAdded= op.getNumberOfImportsAdded();
 				String message;
 				if (nImportsAdded >= 0) {
-					message= JavaEditorMessages.getFormattedString("OrganizeImportsAction.summary_added", String.valueOf(nImportsAdded));
+					message= JavaEditorMessages.getFormattedString("OrganizeImportsAction.summary_added", String.valueOf(nImportsAdded)); //$NON-NLS-1$
 				} else {
-					message= JavaEditorMessages.getFormattedString("OrganizeImportsAction.summary_removed", String.valueOf(-nImportsAdded));
+					message= JavaEditorMessages.getFormattedString("OrganizeImportsAction.summary_removed", String.valueOf(-nImportsAdded)); //$NON-NLS-1$
 				}
 				setStatusBarMessage(message);
 			} catch (InvocationTargetException e) {
@@ -103,7 +103,7 @@ public class OrganizeImportsAction extends Action {
 				}
 			}
 		} else {
-			JavaPlugin.logErrorMessage("OrganizeImportsAction.run: Working copy is null");
+			JavaPlugin.logErrorMessage("OrganizeImportsAction.run: Working copy is null"); //$NON-NLS-1$
 		}	
 	}
 	
@@ -161,9 +161,9 @@ public class OrganizeImportsAction extends Action {
 	}
 	
 	private void showParsingErrorDialog(IProblem problem) {
-		String title= JavaEditorMessages.getString("OrganizeImportsAction.error.title");
+		String title= JavaEditorMessages.getString("OrganizeImportsAction.error.title"); //$NON-NLS-1$
 		String[] args= { String.valueOf(problem.getSourceLineNumber()), problem.getMessage() };
-		String message= JavaEditorMessages.getFormattedString("OrganizeImportsAction.error.parsing.message", args);
+		String message= JavaEditorMessages.getFormattedString("OrganizeImportsAction.error.parsing.message", args); //$NON-NLS-1$
 		MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), title, message);
 	}
 	

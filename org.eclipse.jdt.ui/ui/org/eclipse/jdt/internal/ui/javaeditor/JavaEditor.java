@@ -217,8 +217,8 @@ public abstract class JavaEditor extends AbstractTextEditor {
 		 */
 //		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "ShowJavaDoc");
 		
-		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "ShowInPackageView");
-		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "OpenSuperImplementation");
+		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "ShowInPackageView"); //$NON-NLS-1$
+		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "OpenSuperImplementation"); //$NON-NLS-1$
 		
 		/*
 		 * http://dev.eclipse.org/bugs/show_bug.cgi?id=8735
@@ -483,7 +483,7 @@ public abstract class JavaEditor extends AbstractTextEditor {
 	protected void createActions() {
 		super.createActions();
 		
-		setAction("ShowJavaDoc", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION));
+		setAction("ShowJavaDoc", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION)); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		setAction("OpenSuperImplementation", new OpenSuperImplementationAction(this)); //$NON-NLS-1$
 		setAction("OpenExternalJavadoc", new OpenExternalJavadocAction(this)); //$NON-NLS-1$

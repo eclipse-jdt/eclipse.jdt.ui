@@ -22,10 +22,10 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 public abstract class StructureSelectionAction extends Action {
 
-	public static final String NEXT= "SelectNextElement";
-	public static final String PREVIOUS= "SelectPreviousElement";
-	public static final String ENCLOSING= "SelectEnclosingElement";
-	public static final String HISTORY= "RestoreLastSelection";
+	public static final String NEXT= "SelectNextElement"; //$NON-NLS-1$
+	public static final String PREVIOUS= "SelectPreviousElement"; //$NON-NLS-1$
+	public static final String ENCLOSING= "SelectEnclosingElement"; //$NON-NLS-1$
+	public static final String HISTORY= "RestoreLastSelection"; //$NON-NLS-1$
 
 	private CompilationUnitEditor fEditor;
 	private SelectionHistory fSelectionHistory;
