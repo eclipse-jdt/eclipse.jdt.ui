@@ -1028,7 +1028,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	private IType getSelectableType(IJavaElement elem) {
 		if (elem.getElementType() != IJavaElement.TYPE) {
-			return null; //(IType) getCurrentViewer().getTreeRootType();
+			return getCurrentViewer().getTreeRootType();
 		} else {
 			return (IType) elem;
 		}
@@ -1467,14 +1467,17 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (!monitor.isCanceled()) {
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
-					doRestoreState(memento, hierarchyInput);
+					// running async: check first if view still exists
+					if (fPagebook != null && !fPagebook.isDisposed()) {
+						doRestoreState(memento, hierarchyInput);
+					}
 				}
 			});
 		}
 	}
 	
 		
-	private void doRestoreState(IMemento memento, IJavaElement input) {
+	final void doRestoreState(IMemento memento, IJavaElement input) {
 		synchronized (this) {
 			if (fRestoreStateJob == null) {
 				return;
