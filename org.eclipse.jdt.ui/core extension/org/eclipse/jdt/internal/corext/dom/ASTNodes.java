@@ -35,13 +35,13 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class ASTNodes {
 
-	public static final int NODE_ONLY=					0;
+	public static final int NODE_ONLY=				0;
 	public static final int INCLUDE_FIRST_PARENT= 	1;
 	public static final int INCLUDE_ALL_PARENTS= 	2;
 	
-	public static final int WARINING=						1 << 0;
-	public static final int ERROR=							1 << 1;
-	public static final int PROBLEMS=						WARINING | ERROR;
+	public static final int WARINING=				1 << 0;
+	public static final int ERROR=					1 << 1;
+	public static final int PROBLEMS=				WARINING | ERROR;
 
 	private static final Message[] EMPTY_MESSAGES= new Message[0];
 	private static final IProblem[] EMPTY_PROBLEMS= new IProblem[0];
@@ -679,11 +679,28 @@ public class ASTNodes {
 		return tokenStart + tokenLength;
 	}		
 	
-	/*
-	 * @param List<BodyDeclaration> container
+	/**
+	 * Computes the insertion index to be used to add the given member to the
+	 * the list <code>container</code>.
+	 * @param member the member to add
+	 * @param container a list containing objects of type <code>BodyDeclaration</code>
+	 * @return the insertion index to be used
 	 */
 	public static int getInsertionIndex(BodyDeclaration member, List container) {
-		int memberType= member.getNodeType();
+		return getInsertionIndex(member.getNodeType(), container);
+	}
+	
+	/**
+	 * Computes the insertion index to be used to add a member of type <code>
+	 * memberType</code> to the the list <code>container</code>.
+	 * 
+	 * @param memberType the type of the member to be added. Valid values are: <code>
+	 *  ASTNode.TYPE_DECLARATION</code>, <code>ASTNode.INITIALIZER</code>, <code>
+	 *  ASTNode.FIELD_DECLARATION<code> and <code>ASTNode.METHOD_DECLARATION</code>.
+	 * @param container a list containing objects of type <code>BodyDeclaration</code>
+	 * @return the insertion index to be used
+	 */
+	public static int getInsertionIndex(int memberType, List container) {
 		if (memberType == ASTNode.TYPE_DECLARATION || memberType == ASTNode.INITIALIZER)
 			return 0;
 		int defaultIndex= container.size();

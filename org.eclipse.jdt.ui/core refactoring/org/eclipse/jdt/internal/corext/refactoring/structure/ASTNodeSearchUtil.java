@@ -130,6 +130,13 @@ public class ASTNodeSearchUtil {
 		return (ClassInstanceCreation)ASTNodes.getParent(getNameNode(iType, cuNode), ClassInstanceCreation.class);
 	}
 	
+	public static List getBodyDeclarationList(IType iType, CompilationUnit cuNode) throws JavaModelException {
+		if (iType.isAnonymous())
+			return getClassInstanceCreationNode(iType, cuNode).getAnonymousClassDeclaration().bodyDeclarations();
+		else
+			return getTypeDeclarationNode(iType, cuNode).bodyDeclarations();
+	}
+	
 	//returns an array becaus of the import container, which does not represent 1 node but many
 	//for fields, it returns the whole declaration node
 	public static ASTNode[] getDeclarationNodes(IJavaElement element, CompilationUnit cuNode) throws JavaModelException {

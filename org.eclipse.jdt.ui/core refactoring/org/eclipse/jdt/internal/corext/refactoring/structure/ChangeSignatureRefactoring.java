@@ -143,9 +143,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	public static boolean isAvailable(IMethod method) throws JavaModelException {
 		if (method == null)
 			return false;
-		IType declaringType= method.getDeclaringType();
-		if (declaringType != null && declaringType.isLocal())
-			return false;
 		return Checks.isAvailable(method);
 	}	
 	

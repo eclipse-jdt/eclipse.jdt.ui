@@ -61,6 +61,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -813,9 +814,9 @@ public class PushDownRefactoring extends Refactoring {
 	private void copyMembers(MemberActionInfo[] membersToCopyToSubclasses, IType[] destinationTypes, CompilationUnit declaringCuNode, ICompilationUnit cu, CompilationUnit cuNode, ASTRewrite rewrite) throws JavaModelException {
 		for (int i= 0; i < destinationTypes.length; i++) {
 			IType dest= destinationTypes[i];
-			if (cu.equals(WorkingCopyUtil.getWorkingCopyIfExists(dest.getCompilationUnit()))){
-				TypeDeclaration typeDeclaration= ASTNodeSearchUtil.getTypeDeclarationNode(dest, cuNode);
-				createAll(membersToCopyToSubclasses, typeDeclaration, declaringCuNode, rewrite);
+			if (cu.equals(WorkingCopyUtil.getWorkingCopyIfExists(dest.getCompilationUnit()))) {
+				List bodyDeclarations= ASTNodeSearchUtil.getBodyDeclarationList(dest, cuNode);
+				createAll(membersToCopyToSubclasses, bodyDeclarations, declaringCuNode, rewrite);
 			}
 		}
 	}
@@ -934,32 +935,23 @@ public class PushDownRefactoring extends Refactoring {
 		return (IMember[]) result.toArray(new IMember[result.size()]);
 	}
 
-	private void createAll(MemberActionInfo[] members, TypeDeclaration typeDeclaration, CompilationUnit declaringCuNode, ASTRewrite rewrite) throws JavaModelException {
+	private void createAll(MemberActionInfo[] members, List bodyDeclarations, CompilationUnit declaringCuNode, ASTRewrite rewrite) throws JavaModelException {
 		for (int i= 0; i < members.length; i++) {
-			create(members[i], typeDeclaration, declaringCuNode, rewrite);
+			create(members[i], bodyDeclarations, declaringCuNode, rewrite);
 		}
 	}
 	
-	private void create(MemberActionInfo info, TypeDeclaration typeDeclaration, CompilationUnit declaringCuNode, ASTRewrite rewrite) throws JavaModelException {
+	private void create(MemberActionInfo info, List bodyDeclarations, CompilationUnit declaringCuNode, ASTRewrite rewrite) throws JavaModelException {
 		if (info.isFieldInfo())
-			createField(info, typeDeclaration, declaringCuNode, rewrite);
+			createField(info, bodyDeclarations, declaringCuNode, rewrite);
 		else
-			createMethod(info, typeDeclaration, declaringCuNode, rewrite);
+			createMethod(info, bodyDeclarations, declaringCuNode, rewrite);
 	}
 
-	private void createMethod(MemberActionInfo info, TypeDeclaration typeDeclaration, CompilationUnit declaringCuNode, ASTRewrite rewrite) throws JavaModelException {
+	private void createMethod(MemberActionInfo info, List bodyDeclarations, CompilationUnit declaringCuNode, ASTRewrite rewrite) throws JavaModelException {
 		MethodDeclaration newMethod= createNewMethodDeclarationNode(info, declaringCuNode, rewrite);
 		rewrite.markAsInserted(newMethod);
-		int index= computeIndexForNewMethodDeclaration(typeDeclaration);
-		typeDeclaration.bodyDeclarations().add(index, newMethod);
-	}
-
-	private static int computeIndexForNewMethodDeclaration(TypeDeclaration typeDeclaration) {
-		int index= getIndexOfLastBodyDeclarationOfKind(typeDeclaration, ASTNode.METHOD_DECLARATION);
-		if (index == -1)
-			return 1 + getIndexOfLastBodyDeclarationOfKind(typeDeclaration, ASTNode.FIELD_DECLARATION);
-		else	
-			return 1 + index;
+		bodyDeclarations.add(ASTNodes.getInsertionIndex(newMethod, bodyDeclarations), newMethod);
 	}
 
 	private MethodDeclaration createNewMethodDeclarationNode(MemberActionInfo info, CompilationUnit declaringCuNode, ASTRewrite rewrite) throws JavaModelException {
@@ -1026,11 +1018,10 @@ public class PushDownRefactoring extends Refactoring {
 		newMethod.setReturnType(newReturnType);
 	}
 
-	private void createField(MemberActionInfo info, TypeDeclaration typeDeclaration, CompilationUnit declaringCuNode, ASTRewrite rewrite) throws JavaModelException {
+	private void createField(MemberActionInfo info, List bodyDeclarations, CompilationUnit declaringCuNode, ASTRewrite rewrite) throws JavaModelException {
 		FieldDeclaration newField= createNewFieldDeclarationNode(info, declaringCuNode, rewrite);
 		rewrite.markAsInserted(newField);
-		int index= computeIndexForNewFieldDeclaration(typeDeclaration);
-		typeDeclaration.bodyDeclarations().add(index, newField);
+		bodyDeclarations.add(ASTNodes.getInsertionIndex(newField, bodyDeclarations), newField);
 	}
 
 	private FieldDeclaration createNewFieldDeclarationNode(MemberActionInfo info, CompilationUnit declaringCuNode, ASTRewrite rewrite) throws JavaModelException {
@@ -1054,19 +1045,6 @@ public class PushDownRefactoring extends Refactoring {
 		Type newType= createPlaceholderForType(oldField.getType(), getDeclaringWorkingCopy(), rewrite);
 		newField.setType(newType);
 		return newField;
-	}
-
-	private static int computeIndexForNewFieldDeclaration(TypeDeclaration typeDeclaration) {
-		return 1 + getIndexOfLastBodyDeclarationOfKind(typeDeclaration, ASTNode.FIELD_DECLARATION);
-	}
-	
-	private static int getIndexOfLastBodyDeclarationOfKind(TypeDeclaration typeDeclaration, int nodeType) {
-		List list= typeDeclaration.bodyDeclarations();
-		for (int i= list.size() - 1; i >= 0; i--) {
-			if (((BodyDeclaration)list.get(i)).getNodeType() == nodeType)
-				return i;
-		}
-		return -1;
 	}
 
 	private int getNewModifiersForCopiedField(MemberActionInfo info, FieldDeclaration oldField) throws JavaModelException {
