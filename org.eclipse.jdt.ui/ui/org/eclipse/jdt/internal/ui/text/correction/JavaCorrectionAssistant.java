@@ -285,7 +285,7 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	}
 
 	private void restorePosition() {
-		if (fPosition != null && !fPosition.isDeleted()) {
+		if (fPosition != null && !fPosition.isDeleted() && fViewer.getDocument() != null) {
 			fViewer.setSelectedRange(fPosition.offset, fPosition.length);
 			fViewer.revealRange(fPosition.offset, fPosition.length);
 		}
