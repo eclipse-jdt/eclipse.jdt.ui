@@ -18,7 +18,9 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
@@ -992,6 +994,16 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	protected DocumentProviderOperation createSaveOperation(final Object element, final IDocument document, final boolean overwrite) throws CoreException {
 		final FileInfo info= getFileInfo(element);
 		if (info instanceof CompilationUnitInfo) {
+
+			if (info.fTextFileBuffer.getDocument() != document) {
+				// the info exists, but not for the given document
+				// -> saveAs was executed with a target that is already open 
+				// in another editor
+				// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=85519
+				Status status= new Status(IStatus.WARNING, EditorsUI.PLUGIN_ID, IStatus.ERROR, JavaEditorMessages.getString("CompilationUnitDocumentProvider.saveAsTargetOpenInEditor"), null); //$NON-NLS-1$
+				throw new CoreException(status);				
+			}
+
 			return new DocumentProviderOperation() {
 				/*
 				 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider.DocumentProviderOperation#execute(org.eclipse.core.runtime.IProgressMonitor)
