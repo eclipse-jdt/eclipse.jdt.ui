@@ -29,14 +29,14 @@ public abstract class AbstractRefactoringASTAnalyzer  extends AbstractSyntaxTree
 		Assert.isNotNull(fLineSeparatorPositions);
 		return ProblemHandler.searchLineNumber(fLineSeparatorPositions, node.sourceStart);
 	}
-	
+		protected void addFatalError(String msg){		fResult.addFatalError(msg);	}	
 	protected void addError(String msg){
 		fResult.addError(msg);
 	}
 	
 	protected void addWarning(String msg){
 		fResult.addWarning(msg);
-	}
+	}		protected void addInfo(String msg){		fResult.addInfo(msg);	}
 	
 	protected static String getFullPath(ICompilationUnit cu) {
 		Assert.isTrue(cu.exists());
