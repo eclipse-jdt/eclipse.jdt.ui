@@ -316,7 +316,7 @@ public class BuildPathsBlock {
 		}
 		
 		// inits the dialog field
-		fBuildPathDialogField.setText(outputLocation.toString());
+		fBuildPathDialogField.setText(outputLocation.makeRelative().toString());
 		fClassPathList.setElements(newClassPath);
 		fClassPathList.setCheckedElements(exportedEntries);
 
@@ -344,7 +344,7 @@ public class BuildPathsBlock {
 	 * Returns the current output location. Note that the path returned must not be valid.
 	 */	
 	public IPath getOutputLocation() {
-		return new Path(fBuildPathDialogField.getText());
+		return new Path(fBuildPathDialogField.getText()).makeAbsolute();
 	}
 	
 	/**
@@ -484,7 +484,7 @@ public class BuildPathsBlock {
 			fBuildPathStatus.setError(NewWizardMessages.getString("BuildPathsBlock.error.EnterBuildPath")); //$NON-NLS-1$
 			return;
 		}
-		IPath path= new Path(text);
+		IPath path= getOutputLocation();
 		
 		IResource res= fWorkspaceRoot.findMember(path);
 		if (res != null) {

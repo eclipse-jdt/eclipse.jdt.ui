@@ -303,7 +303,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	 */ 
 	private void askForChangingBuildPathDialog() {
 		IPath outputFolder= new Path(fOutputLocationField.getText());
-		if (outputFolder.equals(fCurrJProject.getProject().getFullPath())) {
+		if (outputFolder.segmentCount() == 1) {
 			IPath newPath= outputFolder.append("bin");
 			String title= NewWizardMessages.getString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.title"); //$NON-NLS-1$
 			String message= NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.message", newPath); //$NON-NLS-1$
