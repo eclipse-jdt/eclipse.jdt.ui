@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -198,7 +199,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#isApplicable()
 	 */
 	public boolean isApplicable() throws CoreException {
-		return Checks.isAvailable(fLocalVariable);
+		return RefactoringAvailabilityTester.isRenameAvailable(fLocalVariable);
 	}
 	
 	/*

@@ -20,18 +20,20 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 
 
 public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
@@ -49,7 +51,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	}
 
 	public boolean isApplicable() throws CoreException {
-		return super.isApplicable() && MethodChecks.isVirtual(getMethod());
+		return RefactoringAvailabilityTester.isRenameVirtualMethodAvailable(getMethod());
 	}
 	
 	//------------ preconditions -------------

@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IField;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
@@ -30,7 +31,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	}
 
 	public boolean isApplicable() throws CoreException {
-		return isAvailable() && getField().getDeclaringType().isEnum();
+		return RefactoringAvailabilityTester.isRenameEnumConstAvailable(getField());
 	}
 	
 	/*

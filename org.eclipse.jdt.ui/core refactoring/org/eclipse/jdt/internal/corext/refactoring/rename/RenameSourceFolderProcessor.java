@@ -18,14 +18,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameSourceFolderChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -56,24 +55,7 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 	}
 	
 	public boolean isApplicable() throws CoreException {
-		if (fSourceFolder == null)
-			return false;
-		if (! Checks.isAvailable(fSourceFolder))
-			return false;
-		
-		if (fSourceFolder.isArchive())
-			return false;
-		
-		if (fSourceFolder.isExternal())	
-			return false;
-			
-		if (! fSourceFolder.isConsistent())	
-			return false;
-		
-		if (fSourceFolder.getResource() instanceof IProject)
-			return false;
-
-		return true;
+		return RefactoringAvailabilityTester.isRenameAvailable(fSourceFolder);
 	}
 	
 	public String getProcessorName() {

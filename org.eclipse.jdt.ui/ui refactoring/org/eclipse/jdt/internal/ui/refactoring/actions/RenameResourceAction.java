@@ -18,17 +18,18 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcessor;
+
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameResourceAction extends SelectionDispatchAction {
 
@@ -38,16 +39,10 @@ public class RenameResourceAction extends SelectionDispatchAction {
 	
 	public void selectionChanged(IStructuredSelection selection) {
 		IResource element= getResource(selection);
-		if (element == null) {
+		if (element == null)
 			setEnabled(false);
-		} else {
-			RenameResourceProcessor processor= new RenameResourceProcessor(element);
-			try {
-				setEnabled(processor.isApplicable());
-			} catch (CoreException e) {
-				setEnabled(false);
-			}
-		}
+		else
+			setEnabled(RefactoringAvailabilityTester.isRenameAvailable(element));
 	}
 
 	public void run(IStructuredSelection selection) {
@@ -55,11 +50,10 @@ public class RenameResourceAction extends SelectionDispatchAction {
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104		
 		if (!ActionUtil.isProcessable(getShell(), resource))
 			return;
-		RenameResourceProcessor processor= new RenameResourceProcessor(resource);
+		if (!RefactoringAvailabilityTester.isRenameAvailable(resource))
+			return;
 		try {
-			if(!processor.isApplicable())
-				return;
-			RenameRefactoring refactoring= new RenameRefactoring(processor);
+			RenameRefactoring refactoring= new RenameRefactoring(new RenameResourceProcessor(resource));
 			UserInterfaceStarter starter= RenameUserInterfaceManager.getDefault().getStarter(refactoring);
 			starter.activate(refactoring, getShell(), true);
 		} catch (CoreException e) {

@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameJavaProjectChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -59,13 +59,7 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 	}
 	
 	public boolean isApplicable() throws CoreException {
-		if (fProject == null)
-			return false;
-		if (! Checks.isAvailable(fProject))	
-			return false;
-		if (! fProject.isConsistent())
-			return false;	
-		return true;
+		return RefactoringAvailabilityTester.isRenameAvailable(fProject);
 	}
 	
 	public String getProcessorName() {

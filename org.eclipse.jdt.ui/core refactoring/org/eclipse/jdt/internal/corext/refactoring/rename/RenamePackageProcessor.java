@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -129,13 +130,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	}
 	
 	public boolean isApplicable() throws CoreException {
-		if (fPackage == null)
-			return false;
-		if (! Checks.isAvailable(fPackage))
-			return false;
-		if (fPackage.isDefaultPackage())
-			return false;
-		return true;
+		return RefactoringAvailabilityTester.isRenameAvailable(fPackage);
 	}
 	
 	public String getProcessorName(){

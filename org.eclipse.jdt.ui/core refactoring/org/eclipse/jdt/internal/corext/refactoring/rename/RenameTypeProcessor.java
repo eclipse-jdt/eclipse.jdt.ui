@@ -28,6 +28,14 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -35,7 +43,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -49,6 +56,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -74,14 +82,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
-import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating {
 	
@@ -117,15 +117,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 	
 	public boolean isApplicable() throws CoreException {
-		if (fType == null)
-			return false;
-		if (fType.isAnonymous())
-			return false;
-		if (! Checks.isAvailable(fType))
-			return false;
-		if (isSpecialCase(fType))
-			return false;
-		return true;
+		return RefactoringAvailabilityTester.isRenameAvailable(fType);
 	}
 	 
 	public String getProcessorName() {
@@ -151,13 +143,13 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 	
 	private Object[] computeDerivedElements() {
-		if (!isPrimaryType())
+		if (!(Checks.isTopLevel(fType) && fType.getCompilationUnit().getElementName().equals(fType.getElementName() + ".java"))) //$NON-NLS-1$
 			return new Object[0];
 		return new Object[] { fType.getCompilationUnit() };
 	}
 	
 	private ResourceModifications computeResourceModifications() {
-		if (!isPrimaryType())
+		if (!(Checks.isTopLevel(fType) && fType.getCompilationUnit().getElementName().equals(fType.getElementName() + ".java"))) //$NON-NLS-1$
 			return null;
 		IResource resource= fType.getCompilationUnit().getResource();
 		if (resource == null)
@@ -188,7 +180,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	public Object getNewElement() {
 		IPackageFragment parent= fType.getPackageFragment();
 		ICompilationUnit cu;
-		if (isPrimaryType())
+		if (Checks.isTopLevel(fType) && fType.getCompilationUnit().getElementName().equals(fType.getElementName() + ".java")) //$NON-NLS-1$
 			cu= parent.getCompilationUnit(getNewElementName() + ".java"); //$NON-NLS-1$
 		else
 			cu= fType.getCompilationUnit();	
@@ -286,11 +278,11 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			result.merge(checkImportedTypes());	
 			pm.worked(1);
 		
-			if (mustRenameCU())
+			if (Checks.isTopLevel(fType) && (JdtFlags.isPublic(fType)))
 				result.merge(Checks.checkCompilationUnitNewName(fType.getCompilationUnit(), getNewElementName()));
 			pm.worked(1);	
 			
-			if (isPrimaryType())
+			if (Checks.isTopLevel(fType) && fType.getCompilationUnit().getElementName().equals(fType.getElementName() + ".java")) //$NON-NLS-1$
 				result.merge(checkNewPathValidity());
 			pm.worked(1);	
 			
@@ -324,7 +316,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			
 			if (fUpdateReferences){
 				pm.setTaskName(RefactoringCoreMessages.getString("RenameTypeRefactoring.searching"));	 //$NON-NLS-1$
-				fReferences= getReferences(new SubProgressMonitor(pm, 35), result);
+				fReferences= RefactoringSearchEngine.search(SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE), RefactoringScopeFactory.create(fType), new SubProgressMonitor(pm, 35), result);
 			} else
 				fReferences= new SearchResultGroup[0];
 				pm.worked(35);
@@ -450,22 +442,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		return null;
 	}
 	
-	private static boolean isSpecialCase(IType type) {
-		return type.getPackageFragment().getElementName().equals("java.lang");	 //$NON-NLS-1$
-	}
-	
-	private IJavaSearchScope createRefactoringScope() throws JavaModelException {
-		return RefactoringScopeFactory.create(fType);
-	}
-	
-	private SearchPattern createSearchPattern() {
-		return SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
-	}
-	
-	private SearchResultGroup[] getReferences(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
-		return RefactoringSearchEngine.search(createSearchPattern(), createRefactoringScope(), pm, status);
-	}
-	
 	private RefactoringStatus checkForMethodsWithConstructorNames()  throws CoreException{
 		IMethod[] methods= fType.getMethods();
 		for (int i= 0; i < methods.length; i++){
@@ -538,10 +514,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			}
 		});
 		return result;
-	}
-	
-	private boolean mustRenameCU() throws CoreException {
-		return Checks.isTopLevel(fType) && (JdtFlags.isPublic(fType));
 	}
 	
 	private static ICompilationUnit getCompilationUnit(IImportDeclaration imp) {
@@ -689,25 +661,13 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 	
 	private boolean willRenameCU() throws CoreException{
-		if (! isPrimaryType())
+		if (! (Checks.isTopLevel(fType) && fType.getCompilationUnit().getElementName().equals(fType.getElementName() + ".java"))) //$NON-NLS-1$
 			return false;
 		if (! checkNewPathValidity().isOK())
 			return false;
 		if (! Checks.checkCompilationUnitNewName(fType.getCompilationUnit(), getNewElementName()).isOK())
 			return false;
 		return true;	
-	}
-	
-	private boolean isPrimaryType(){
-		return Checks.isTopLevel(fType) && hasSameNameAsCU();
-	}
-	
-	private boolean hasSameNameAsCU() {
-		return fType.getCompilationUnit().getElementName().equals(fType.getElementName() + ".java");//$NON-NLS-1$
-	}
-	
-	private void addTextMatches(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
-		TextMatchUpdater.perform(pm, createRefactoringScope(), this, manager, fReferences);
 	}
 	
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException {
@@ -735,7 +695,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			
 			if (fUpdateTextualMatches) {
 				pm.subTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.searching_text")); //$NON-NLS-1$
-				addTextMatches(manager, new SubProgressMonitor(pm, 1));
+				TextMatchUpdater.perform(new SubProgressMonitor(pm, 1), RefactoringScopeFactory.create(fType), this, manager, fReferences);
 			}
 			
 			return manager;

@@ -18,14 +18,19 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMember;
@@ -45,6 +50,7 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -59,14 +65,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
-import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 	
@@ -100,19 +98,11 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	public String getIdentifier() {
 		return IDENTIFIER;
 	}
-	
+
 	public boolean isApplicable() throws CoreException {
-		if (fMethod == null)
-			return false;
-		if (! Checks.isAvailable(fMethod))
-			return false;
-		if (fMethod.isConstructor())
-			return false;
-		if (isSpecialCase(fMethod))
-			return false;
-		return true;
+		return RefactoringAvailabilityTester.isRenameAvailable(fMethod);
 	}
-	
+
 	public String getProcessorName() {
 		return RefactoringCoreMessages.getFormattedString(
 			"RenameMethodRefactoring.name", //$NON-NLS-1$
@@ -280,7 +270,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				pm.worked(1);
 			
 			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
-			checker.addFiles(getAllFilesToModify());
+			checker.addFiles(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits()));
 			return result;
 		} finally{
 			pm.done();
@@ -366,27 +356,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			new MethodOccurenceCollector(getMethod().getElementName()), new SubProgressMonitor(pm, 1), status);	
 	}
 
-	private static boolean isSpecialCase(IMethod method) throws CoreException {
-		if (  method.getElementName().equals("toString") //$NON-NLS-1$
-			&& (method.getNumberOfParameters() == 0)
-			&& (method.getReturnType().equals("Ljava.lang.String;")  //$NON-NLS-1$
-				|| method.getReturnType().equals("QString;") //$NON-NLS-1$
-				|| method.getReturnType().equals("Qjava.lang.String;"))) //$NON-NLS-1$
-			return true;		
-		else
-			return false;
-	}
-	
-	private static RefactoringStatus checkIfConstructorName(IMethod method, String newName) {
-		return Checks.checkIfConstructorName(method, newName, method.getDeclaringType().getElementName());
-	}
-	
 	private RefactoringStatus checkRelatedMethods() throws CoreException { 
 		RefactoringStatus result= new RefactoringStatus();
 		for (Iterator iter= fMethodsToRename.iterator(); iter.hasNext(); ) {
 			IMethod method= (IMethod)iter.next();
 			
-			result.merge(checkIfConstructorName(method, getNewElementName()));
+			result.merge(Checks.checkIfConstructorName(method, getNewElementName(), method.getDeclaringType().getElementName()));
 			
 			String[] msgData= new String[]{method.getElementName(), JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())};
 			if (! method.exists()){
@@ -401,10 +376,6 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				result.addError(RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.no_native_1", msgData));//$NON-NLS-1$
 		}
 		return result;	
-	}
-	
-	private IFile[] getAllFilesToModify() {
-		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
 	
 	private RefactoringStatus analyzeCompilationUnits() throws CoreException {
@@ -622,7 +593,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			SearchMatch[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
 				String editName= RefactoringCoreMessages.getString("RenameMethodRefactoring.update_occurrence"); //$NON-NLS-1$
-				TextChangeCompatibility.addTextEdit(textChange, editName, createTextChange(results[j]));
+				SearchMatch searchResult= results[j]; //$NON-NLS-1$
+				TextChangeCompatibility.addTextEdit(textChange, editName, new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), getNewElementName()));
 			}
 			pm.worked(1);
 			if (pm.isCanceled())
@@ -642,9 +614,5 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		ISourceRange nameRange= fMethod.getNameRange();
 		ReplaceEdit replaceEdit= new ReplaceEdit(nameRange.getOffset(), nameRange.getLength(), getNewElementName());
 		TextChangeCompatibility.addTextEdit(change, editName, replaceEdit);
-	}
-	
-	final TextEdit createTextChange(SearchMatch searchResult) {
-		return new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), getNewElementName());
 	}
 }	

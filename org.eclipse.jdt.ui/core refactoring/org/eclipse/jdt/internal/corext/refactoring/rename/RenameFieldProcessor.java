@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -95,13 +96,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	}
 	
 	public boolean isApplicable() throws CoreException {
-		return isAvailable() && ! JdtFlags.isEnum(fField);
-	}
-	
-	protected boolean isAvailable() throws CoreException {
-		if (fField == null)
-			return false;
-		return Checks.isAvailable(fField);
+		return RefactoringAvailabilityTester.isRenameFieldAvailable(fField);
 	}
 	
 	public String getProcessorName() {

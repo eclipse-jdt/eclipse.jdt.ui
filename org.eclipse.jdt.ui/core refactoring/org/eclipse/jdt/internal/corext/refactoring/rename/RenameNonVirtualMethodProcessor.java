@@ -10,11 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import org.eclipse.text.edits.ReplaceEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
@@ -25,6 +32,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
@@ -34,11 +42,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-
 public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	
 	public RenameNonVirtualMethodProcessor(IMethod method) {
@@ -46,7 +49,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	}
 	
 	public boolean isApplicable() throws CoreException {
-		return super.isApplicable() && !MethodChecks.isVirtual(getMethod());
+		return RefactoringAvailabilityTester.isRenameNonVirtualMethodAvailable(getMethod());
 	}
 	
 	//----------- preconditions --------------
@@ -150,8 +153,9 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 			ICompilationUnit cu= group.getCompilationUnit();
 			TextChange change= manager.get(cu);
 			for (int j= 0; j < results.length; j++){
+				SearchMatch searchResult= results[j];
 				String editName= RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.update"); //$NON-NLS-1$
-				TextChangeCompatibility.addTextEdit(change, editName, createTextChange(results[j]));
+				TextChangeCompatibility.addTextEdit(change, editName, new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), getNewElementName()));
 			}
 		}	
 	}

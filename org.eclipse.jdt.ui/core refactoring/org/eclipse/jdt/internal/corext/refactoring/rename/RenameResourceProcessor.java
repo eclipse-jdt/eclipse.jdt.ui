@@ -24,6 +24,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -70,13 +71,7 @@ public class RenameResourceProcessor extends RenameProcessor implements INameUpd
 	}
 	
 	public boolean isApplicable() throws JavaModelException {
-		if (fResource == null)
-			return false;
-		if (! fResource.exists())
-			return false;
-		if (! fResource.isAccessible())	
-			return false;
-		return true;			
+		return RefactoringAvailabilityTester.isRenameAvailable(fResource);
 	}
 	
 	public String getProcessorName() {
