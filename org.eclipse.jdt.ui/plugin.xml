@@ -194,6 +194,15 @@
       class="org.eclipse.jdt.internal.ui.snippeteditor.JavaSnippetEditor"
       contributorClass="org.eclipse.jdt.internal.ui.snippeteditor.SnippetEditorActionContributor">
    </editor>
+   
+   <editor id ="org.eclipse.jdt.ui.DefaultTextEditor"
+      icon="icons/full/obj16/file_obj.gif"
+      name="Properties File Editor"
+      extensions="properties"
+      class="org.eclipse.ui.editors.text.TextEditor"
+      contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor">     
+    </editor>
+
 </extension>
 
 <extension
