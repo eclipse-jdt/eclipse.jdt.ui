@@ -9,11 +9,6 @@ All Rights Reserved.
 
   <!-- java -->
 
-<!--
-  <template description="for(array, index) - iterate over array" name="for" context="java"
-  >for (int ${1} = 0; ${1} &lt; ${0}.length; ${1}++) {&#10;&#9;${cursor}&#10;}</template>
--->
-
   <template description="iterate over array" name="for" context="java"
 >for (int ${index} = 0; ${index} &lt; ${array}.length; ${index}++) {
 	${type} ${element} = ${array}[${index}];
@@ -23,12 +18,6 @@ All Rights Reserved.
   <template description="iterate over collection" name="for" context="java"
 >for (Iterator ${iterator} = ${collection}.iterator(); ${iterator}.hasNext(); ) {
 	${type} ${element} = (${type}) ${iterator}.next();
-	${cursor}
-}</template>
-
-  <template description="iterate over vector" name="for" context="java"
->for (int ${index} = 0; ${index} &lt; ${vector}.size(); ${index}++) {
-	${type} ${element} = (${type}) ${vector}.elementAt(${index});
 	${cursor}
 }</template>
 
@@ -97,14 +86,6 @@ All Rights Reserved.
 	${cursor}
 }</template>
 
-<!--
-  <template description="instanceof(object, type)" name="instanceof" context="java"
->if (${0} instanceof ${1}) {
-	${1} ${name} = (${1}) ${0};
-	${cursor}
-}</template>
--->
-
   <template description="dynamic type test and cast" name="instanceof" context="java"
 >if (${name} instanceof ${type}) {
 	${type} ${new_name} = (${type}) ${name};
@@ -112,7 +93,7 @@ All Rights Reserved.
 }</template>
 
   <template description="convert collection to array" name="toarray" context="java"
-  >${type} ${array} = (${type}[]) ${collection}.toArray(new ${type}[${collection}.size()]);</template>
+  >${type}[] ${array} = (${type}[]) ${collection}.toArray(new ${type}[${collection}.size()]);</template>
 
   <template description="copyright information" name="copyright" context="java"
 >/*

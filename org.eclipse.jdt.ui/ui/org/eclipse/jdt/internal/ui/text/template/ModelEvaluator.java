@@ -27,14 +27,11 @@ public class ModelEvaluator implements VariableEvaluator {
 	 */
 	public String evaluateVariable(String variable, int offset) {
 		if (variable.equals("cursor")) { //$NON-NLS-1$
-			fModel.append("", TemplateModel.SELECTION_START); //$NON-NLS-1$
+			fModel.append("", TemplateModel.CARET); //$NON-NLS-1$
 			return "";			 //$NON-NLS-1$
-		} else if (variable.equals("cursor-end")) { //$NON-NLS-1$
-			fModel.append("", TemplateModel.SELECTION_END); //$NON-NLS-1$
-			return ""; //$NON-NLS-1$
 		} else {
 			fModel.append(variable, TemplateModel.EDITABLE_TEXT);
-			return null;
+			return variable;
 		}
 	}
 

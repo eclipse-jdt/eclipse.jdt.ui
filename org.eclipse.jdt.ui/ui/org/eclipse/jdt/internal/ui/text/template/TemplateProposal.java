@@ -27,6 +27,8 @@ import org.eclipse.jdt.internal.ui.refactoring.changes.TextBuffer;
  */
 public class TemplateProposal implements ICompletionProposal {
 
+	private static final String MARKER= "/*${cursor}*/"; //$NON-NLS-1$
+
 	private final Template fTemplate;
 	private final TemplateContext fContext;
 
@@ -35,7 +37,7 @@ public class TemplateProposal implements ICompletionProposal {
 	private int fSelectionEnd;
 	
 	private TemplateInterpolator fInterpolator= new TemplateInterpolator();
-	private CursorSelectionEvaluator fCursorSelectionEvaluator= new CursorSelectionEvaluator();
+	private ModelEvaluator fModelEvaluator= new ModelEvaluator();
 	
 	/**
 	 * Creates a template proposal with a template and its context.
@@ -50,113 +52,93 @@ public class TemplateProposal implements ICompletionProposal {
 		fContext= context;
 	}
 
+	// XXX debug
+/*	
+	private void print(int[] positions, String message) {
+		System.out.print(message + ": ");
+		for (int i= 0; i != positions.length; i++)
+			System.out.print(":" + positions[i]);	
+		System.out.println("");
+	}
+*/
 	/**
 	 * @see ICompletionProposal#apply(IDocument)
 	 */
 	public void apply(IDocument document) {
-		int indentationLevel= guessIndentationLevel(document, fContext.getStart());
-
 		String pattern= fTemplate.getPattern();
-
-		// resolve variables automatically
 		pattern= fInterpolator.interpolate(pattern, fContext);
+		pattern= fInterpolator.interpolate(pattern, fModelEvaluator);
+		TemplateModel model= fModelEvaluator.getModel();		
+//		pattern= model.toString();
 
-		ModelEvaluator modelEvaluator= new ModelEvaluator();
-		fInterpolator.interpolate(pattern, modelEvaluator);
-		TemplateModel model= modelEvaluator.getModel();
-
-		if (model.getEditableCount() == 0) {		
-			pattern= fInterpolator.interpolate(pattern, fCursorSelectionEvaluator);
-
-			// side effect: stores selection
-			int cursorStart= fCursorSelectionEvaluator.getStart();
-			if (cursorStart == -1) {
-				fSelectionStart= pattern.length();
-				fSelectionEnd= fSelectionStart;
-			} else {		
-				fSelectionStart= cursorStart;
-				fSelectionEnd= fCursorSelectionEvaluator.getEnd();			
-			}			
-		} else {
-			// resolve variables manually
-			TemplateEditorPopup popup= new TemplateEditorPopup(fContext, model);
-	        
-			if (!popup.open()) {
-				// leave caret offset
-				fSelectionStart= fContext.getEnd() - fContext.getStart();
-				fSelectionEnd= fSelectionStart;
-				return;
-			}
-
-   			pattern= popup.getText();    
-			
-			int[] selection= popup.getSelection();
-			if (selection[0] == -1) {
-				fSelectionStart= pattern.length();
-				fSelectionEnd= fSelectionStart;
-			} else {
-				fSelectionStart= selection[0];
-				fSelectionEnd= selection[1];
-			}
-		}
-
-		if (TemplatePreferencePage.useCodeFormatter() && fTemplate.getContext().equals("java")) { //$NON-NLS-1$
+		int indentationLevel= guessIndentationLevel(document, fContext.getStart());
+		if (TemplatePreferencePage.useCodeFormatter() && fTemplate.getContext().equals(TemplateContext.JAVA)) {
 			// XXX 4360
 			// workaround for code formatter limitations
 			// handle a special case where cursor position is surrounded by whitespaces
+
+			int caretOffset= model.getCaretOffset();
+
 			boolean kludge=
-				(fSelectionStart == fSelectionEnd) &&
-				(fSelectionStart > 0) && Character.isWhitespace(pattern.charAt(fSelectionStart - 1)) &&
-				(fSelectionStart < pattern.length()) && Character.isWhitespace(pattern.charAt(fSelectionStart));
-
-			final String marker= "/*${cursor}*/"; //$NON-NLS-1$
-
+				(caretOffset > 0) && Character.isWhitespace(pattern.charAt(caretOffset - 1)) &&
+				(caretOffset < pattern.length()) && Character.isWhitespace(pattern.charAt(caretOffset));
+				
 			if (kludge)
 				pattern=
-					pattern.substring(0, fSelectionStart) + marker +
-					pattern.substring(fSelectionStart);
+					pattern.substring(0, caretOffset) + MARKER +
+					pattern.substring(caretOffset);
 
 			CodeFormatter formatter= new CodeFormatter(JavaCore.getOptions());
-			formatter.setPositionsToMap(new int[] {fSelectionStart, fSelectionEnd});
+			formatter.setPositionsToMap(model.getPositions());
 			formatter.setInitialIndentationLevel(indentationLevel);
 			pattern= formatter.formatSourceString(pattern);				
-			
-			int[] positions= formatter.getMappedPositions();
-			fSelectionStart= positions[0];
-			fSelectionEnd= positions[1];		
 
-			if (kludge)
+			int[] positions= formatter.getMappedPositions();
+			
+			// XXX workaround: the code formatter does not treat positions at the end of
+			// XXX the string properly
+			positions[positions.length - 1]= pattern.length(); 
+			
+			model.update(pattern, positions);
+			caretOffset= model.getCaretOffset();
+			
+			if (kludge) {
 				pattern=
-					pattern.substring(0, fSelectionStart) +
-					pattern.substring(fSelectionStart + marker.length());
+					pattern.substring(0, caretOffset) +
+					pattern.substring(caretOffset + MARKER.length());
+				
+				positions= model.getPositions();	
+				for (int i= 0; i != positions.length; i++) {
+					if (positions[i] > caretOffset)
+						positions[i] -= MARKER.length();
+				}		
+				model.update(pattern, positions);
+			}
 			
 		} else {
-			CodeIndentator indentator= new CodeIndentator();
-			indentator.setPositionsToMap(new int[] {fSelectionStart, fSelectionEnd});
-			indentator.setIndentationLevel(indentationLevel);
-			
+			CodeIndentator indentator= new CodeIndentator();			
+			indentator.setIndentationLevel(indentationLevel);			
+			indentator.setPositionsToMap(model.getPositions());						
 			pattern= indentator.indentate(pattern);
-
-			int[] positions= indentator.getMappedPositions();
-			fSelectionStart= positions[0];
-			fSelectionEnd= positions[1];	
+			model.update(pattern, indentator.getMappedPositions());
 		}
 
 		// strip indentation on first line
 		String finalString= trimBegin(pattern);
 		int charactersRemoved= pattern.length() - finalString.length();
-		fSelectionStart -= charactersRemoved;
-		fSelectionEnd -= charactersRemoved;
-
-		int start= fContext.getStart();
-		int length= fContext.getEnd() - start;
-
-		try {
-			document.replace(start, length, finalString);
-			fContext.getViewer().getTextWidget().showSelection();
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
+		int[] positions= model.getPositions();		
+		for (int i= 0; i != positions.length; i++) {
+			positions[i] -= charactersRemoved;
+			if (positions[i] < 0)
+				positions[i]= 0;
 		}
+		model.update(finalString, positions);
+
+		TemplateEditor popup= new TemplateEditor(fContext, model);
+		popup.enter();
+				
+		fSelectionStart= popup.getSelectionStart();
+		fSelectionEnd= popup.getSelectionEnd();	
 	}
 	
 	private static String trimBegin(String string) {
@@ -170,7 +152,7 @@ public class TemplateProposal implements ICompletionProposal {
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
 	public Point getSelection(IDocument document) {
-		return new Point(fContext.getStart() + fSelectionStart, fSelectionEnd - fSelectionStart);
+		return new Point(fSelectionStart, fSelectionEnd - fSelectionStart);
 	}
 
 	/**
@@ -178,8 +160,8 @@ public class TemplateProposal implements ICompletionProposal {
 	 */
 	public String getAdditionalProposalInfo() {
 		String pattern= fTemplate.getPattern();
-		pattern= fInterpolator.interpolate(pattern, fContext);		
-		pattern= fInterpolator.interpolate(pattern, fCursorSelectionEvaluator);
+		pattern= fInterpolator.interpolate(pattern, fContext);
+		pattern= fInterpolator.interpolate(pattern, fModelEvaluator);
 		
 		return textToHTML(pattern);
 	}
