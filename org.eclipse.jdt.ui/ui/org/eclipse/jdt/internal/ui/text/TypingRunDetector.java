@@ -76,17 +76,17 @@ public class TypingRunDetector {
 		}
 		
 		/**
-		 * Returns <code>true</code> if the receiver can extend the typing
-		 * range the last change of which is described by <code>change</code>.
+		 * Returns <code>true</code> if the receiver can extend the typing run
+		 * the last change of which is described by <code>change</code>.
 		 * 
 		 * @param change the last change in a typing run
 		 * @return <code>true</code> if the receiver is a valid extension to
-		 *         <code>change</code>,<code>false</code> otherwise
+		 *         <code>change</code>, <code>false</code> otherwise
 		 */
 		public boolean canFollow(Change change) {
 			if (fType == TypingRun.NO_CHANGE)
 				return true;
-			else if (fType.equals(TypingRun.UNKNOWN))
+			if (fType.equals(TypingRun.UNKNOWN))
 				return false;
 			if (fType.equals(change.fType)) {
 				if (fType == TypingRun.DELETE)

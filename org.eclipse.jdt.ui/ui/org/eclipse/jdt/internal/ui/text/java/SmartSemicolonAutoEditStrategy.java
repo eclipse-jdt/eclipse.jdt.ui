@@ -204,7 +204,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * Adds a space before a brace if it is inserted after a parenthesis, equal sign, or one
 	 * of the keywords <code>try, else, do</code>. 
 	 * 
-	 * @param document the document we are working on
+	 * @param doc the document we are working on
 	 * @param position the insert position of <code>character</code>
 	 * @param character the character to be inserted
 	 * @return a <code>String</code> consisting of <code>character</code> plus any additional spacing
@@ -235,7 +235,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * 
 	 * @param document the document we are working on
 	 * @param position the insert position of <code>ch</code>
-	 * @param character the character to be inserted
+	 * @param ch the character to be inserted
 	 * @return <code>true</code> if <code>ch</code> is already present at <code>location</code>, <code>false</code> otherwise
 	 */
 	private boolean alreadyPresent(IDocument document, char ch, int position) {
@@ -351,10 +351,10 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 	/**
 	 * Computes an insert position for an opening brace if <code>offset</code> maps to a position in
-	 * <code>document</code> involving a keyword taking a block after it. These are: <code>try</code>, 
+	 * <code>doc</code> involving a keyword taking a block after it. These are: <code>try</code>, 
 	 * <code>do</code>, <code>synchronized</code>, <code>static</code>, <code>finally</code>, or <code>else</code>.
 	 * 
-	 * @param document the document being modified
+	 * @param doc the document being modified
 	 * @param line the current line under investigation
 	 * @param offset the offset of the caret position, relative to the line start.
 	 * @return an insert position  relative to the line start if <code>line</code> contains one of the above keywords at or before <code>offset</code>, -1 otherwise
@@ -618,7 +618,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	 * @param position the first character position in <code>document</code> to be considered
 	 * @param partitioning the document partitioning
 	 * @param bound the first position in <code>document</code> to not consider any more, with <code>scanTo</code> &gt; <code>position</code>
-	 * @param chars an array of <code>char</code> to search for
+	 * @param ch a <code>char</code> to search for
 	 * @return the lowest position of one element in <code>chars</code> in [<code>position</code>, <code>bound</code>) that resides in a Java partition, or <code>-1</code> if none can be found
 	 */
 	private static int scanForward(IDocument document, int position, String partitioning, int bound, char ch) {
@@ -773,7 +773,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	/**
 	 * Checks whether code>document</code> contains the <code>String</code> <code>like</code> such 
 	 * that its last character is at <code>position</code>. If <code>like</code> starts with a
-	 * identifier part (as determined by {@link Character#isJavaIdentifier(char)}), it is also made
+	 * identifier part (as determined by {@link Character#isJavaIdentifierPart(char)}), it is also made
 	 * sure that <code>like</code> is preceded by some non-identifier character or stands at the
 	 * document start.
 	 * 
