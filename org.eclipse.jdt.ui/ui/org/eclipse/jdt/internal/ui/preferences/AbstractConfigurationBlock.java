@@ -42,11 +42,11 @@ import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jface.text.Assert;
 
+import org.eclipse.ui.dialogs.PreferencesUtil;
+
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
-
-import org.eclipse.ui.internal.dialogs.WorkbenchPreferenceDialog;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
@@ -336,7 +336,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 				link.setText(text);
 				link.addSelectionListener(new SelectionAdapter() {
 						public void widgetSelected(SelectionEvent e) {
-								WorkbenchPreferenceDialog.createDialogOn(target);
+								PreferencesUtil.createPreferenceDialogOn(target, null, null);
 						}
 				});
 				if (strings.length > 2)

@@ -27,12 +27,10 @@ import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.jface.preference.PreferenceManager;
 
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.internal.IWorkbenchHelpContextIds;
-import org.eclipse.ui.internal.WorkbenchPlugin;
-import org.eclipse.ui.internal.dialogs.WorkbenchPreferenceDialog;
 
 
 /**
@@ -51,16 +49,11 @@ public class OpenPreferencePageTest extends TestCase {
 	public void testOpenPreferencePage() {
 		Display display= EditorTestHelper.getActiveDisplay();
 		
-		PreferenceManager pm = WorkbenchPlugin.getDefault().getPreferenceManager();
-		assertNotNull(pm);
-		
-		PreferenceDialog d = new WorkbenchPreferenceDialog(display.getActiveShell(), pm);
-		d.create();
+		PreferenceDialog d= PreferencesUtil.createPreferenceDialogOn(null, null, null);
 		WorkbenchHelp.setHelp(d.getShell(), IWorkbenchHelpContextIds.PREFERENCE_DIALOG);
 		// HACK to get control back instantly
 		d.setBlockOnOpen(false);
 		d.open();
-		
 		EditorTestHelper.runEventQueue();
 		
 		Control control= display.getFocusControl();
@@ -74,10 +67,15 @@ public class OpenPreferencePageTest extends TestCase {
 		// setExpanded does not work - use keyboard events
 		// item.setExpanded(true);
 		SWTEventHelper.pressKeyCode(display, SWT.KEYPAD_ADD);
-		EditorTestHelper.runEventQueue(200);
-
-		item= findTreeItem(item.getItems(), "Editor");
+		long timeout= System.currentTimeMillis() + 1000;
+		TreeItem[] items= item.getItems();
+		item= null;
+		while (item == null && System.currentTimeMillis() < timeout) {
+			EditorTestHelper.runEventQueue();
+			item= findTreeItem(items, "Editor");
+		}
 		assertNotNull(item);
+		
 		EditorTestHelper.runEventQueue();
 		
 		Rectangle bounds= item.getBounds();

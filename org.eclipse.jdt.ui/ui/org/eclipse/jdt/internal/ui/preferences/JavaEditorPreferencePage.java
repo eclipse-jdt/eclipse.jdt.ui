@@ -36,12 +36,12 @@ import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
-import org.eclipse.ui.help.WorkbenchHelp;
-
-import org.eclipse.ui.internal.dialogs.WorkbenchPreferenceDialog;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -306,7 +306,7 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 		link.setText(text);
 		link.addLinkListener(new ILinkListener() {
 			public void linkSelected(String url) {
-				WorkbenchPreferenceDialog.createDialogOn(url);
+				PreferencesUtil.createPreferenceDialogOn(url, null, null);
 			}
 		});
 		
