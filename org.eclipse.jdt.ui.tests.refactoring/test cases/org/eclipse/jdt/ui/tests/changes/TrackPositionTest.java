@@ -33,7 +33,7 @@ public class TrackPositionTest extends TestCase {
 	protected void setUp() throws Exception {
 		fBuffer= TextBuffer.create("0123456789");
 		fChange= new TextBufferChange(NN, fBuffer);
-		fChange.setTrackPositionChanges(true);
+		fChange.setKeepExecutedTextEdits(true);
 	}
 	
 	protected void tearDown() throws Exception {

@@ -45,14 +45,14 @@ public class CUCorrectionProposalEnhanced extends ChangeCorrectionProposal {
 	
 	public CUCorrectionProposalEnhanced(String name, CompilationUnitChange change, int relevance) throws CoreException {
 		super(name, change, relevance);
-		change.setTrackPositionChanges(true);
+		change.setKeepExecutedTextEdits(true);
 		fIsInitialized= true;
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}	
 	
 	private static Change createCompilationUnitChange(String name, ICompilationUnit cu, boolean doSave) throws CoreException {
 		CompilationUnitChange change= new CompilationUnitChange(name, cu);
-		change.setTrackPositionChanges(true);
+		change.setKeepExecutedTextEdits(true);
 		change.setSave(doSave);
 		return change;
 	}

@@ -263,7 +263,7 @@ class RenameParametersRefactoring extends Refactoring implements IMultiRenameRef
 			
 			CompilationUnit compliationUnitNode= AST.parseCompilationUnit(getCu(), true);
 			TextChange change= new TextBufferChange(RefactoringCoreMessages.getString("RenameParametersRefactoring.rename_Paremeters"), TextBuffer.create(getCu().getSource())); //$NON-NLS-1$
-			change.setTrackPositionChanges(true);
+			change.setKeepExecutedTextEdits(true);
 		
 			wc= RefactoringAnalyzeUtil.getWorkingCopyWithNewContent(allEdits, change, getCu());
 			CompilationUnit newCUNode= AST.parseCompilationUnit(wc, true);

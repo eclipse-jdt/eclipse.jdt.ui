@@ -263,7 +263,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			
 			TextEdit[] edits= getAllEdits();
 			TextChange change= new TextBufferChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), TextBuffer.create(fCu.getSource())); //$NON-NLS-1$
-			change.setTrackPositionChanges(true);
+			change.setKeepExecutedTextEdits(true);
 
 			wc= RefactoringAnalyzeUtil.getWorkingCopyWithNewContent(edits, change, fCu);
 			CompilationUnit newCUNode= AST.parseCompilationUnit(wc, true);
