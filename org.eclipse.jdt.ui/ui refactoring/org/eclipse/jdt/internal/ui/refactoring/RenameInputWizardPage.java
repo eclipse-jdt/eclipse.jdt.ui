@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
-public class RenameInputWizardPage extends TextInputWizardPage{
+public abstract class RenameInputWizardPage extends TextInputWizardPage{
 
 	private String fHelpContextID;
 	
@@ -30,27 +30,11 @@ public class RenameInputWizardPage extends TextInputWizardPage{
 	 * Creates a new text input page.
 	 * @param isLastUserPage <code>true</code> if this page is the wizard's last
 	 *  user input page. Otherwise <code>false</code>.
-	 */
-	public RenameInputWizardPage(String message, String contextHelpId, boolean isLastUserPage) {
-		super(message, isLastUserPage);
-		fHelpContextID= contextHelpId;
-	}
-	
-	/**
-	 * Creates a new text input page.
-	 * @param isLastUserPage <code>true</code> if this page is the wizard's last
-	 *  user input page. Otherwise <code>false</code>.
 	 * @param initialSetting the initialSetting.
 	 */
-	public RenameInputWizardPage(String message, String contextHelpId, boolean isLastUserPage, String initialValue) {
-		super(message, isLastUserPage, initialValue);
+	public RenameInputWizardPage(String description, String contextHelpId, boolean isLastUserPage, String initialValue) {
+		super(description, isLastUserPage, initialValue);
 		fHelpContextID= contextHelpId;
-	}
-	
-	public void setVisible(boolean visible){
-		if (visible)
-			setDescription(RefactoringMessages.getString("RenameInputWizardPage.new_name")); //$NON-NLS-1$
-		super.setVisible(visible);	
 	}
 	
 	/* non java-doc

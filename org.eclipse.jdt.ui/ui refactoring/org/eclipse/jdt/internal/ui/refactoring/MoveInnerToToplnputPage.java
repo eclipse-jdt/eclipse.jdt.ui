@@ -19,10 +19,10 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 public class MoveInnerToToplnputPage extends TextInputWizardPage{
 
 	private final boolean fIsInitialInputValid;
-	private static final String MESSAGE = "Specify a name for the field that will be used to access the enclosing instance";
+	private static final String DESCRIPTION = "Specify a name for the field that will be used to access the enclosing instance";
 	
 	public MoveInnerToToplnputPage(String initialValue) {
-		super(MESSAGE, true, initialValue);
+		super(DESCRIPTION, true, initialValue);
 		fIsInitialInputValid= ! ("".equals(initialValue));
 	}
 

@@ -10,6 +10,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.IMessageProvider;
+
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.JavaModelException;
@@ -25,11 +27,13 @@ public class ExtractConstantInputPage extends TextInputWizardPage {
 
 	private Label fLabel;
 	private final boolean fInitialValid;
+	private final int fOriginalMessageType;
+	private final String fOriginalMessage;
 	
-	//XXX: fuse message and messageType into one object
-	public ExtractConstantInputPage(String message, int messageType, String initialValue) {
-		super(message, messageType, true, initialValue);
-	
+	public ExtractConstantInputPage(String description, int messageType, String initialValue) {
+		super(description, true, initialValue);
+	    fOriginalMessage= description;
+	    fOriginalMessageType= messageType;
 		fInitialValid= ! ("".equals(initialValue));
 	}
 
@@ -141,7 +145,11 @@ public class ExtractConstantInputPage extends TextInputWizardPage {
 		try {
 			getExtractConstantRefactoring().setConstantName(text);
 			updatePreviewLabel();
-			return getExtractConstantRefactoring().checkConstantNameOnChange();
+			RefactoringStatus result= getExtractConstantRefactoring().checkConstantNameOnChange();
+			if (fOriginalMessageType == IMessageProvider.INFORMATION && result.getSeverity() == RefactoringStatus.OK)
+				return RefactoringStatus.createInfoStatus(fOriginalMessage);
+			else 
+				return result;
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 			return RefactoringStatus.createFatalErrorStatus("Internal Error: please see log.");
@@ -170,6 +178,13 @@ public class ExtractConstantInputPage extends TextInputWizardPage {
 	 */
 	protected boolean isInitialInputValid() {
 		return fInitialValid;
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#restoreMessage()
+	 */
+	protected void restoreMessage() {
+		setMessage(fOriginalMessage, fOriginalMessageType);
 	}
 
 }
