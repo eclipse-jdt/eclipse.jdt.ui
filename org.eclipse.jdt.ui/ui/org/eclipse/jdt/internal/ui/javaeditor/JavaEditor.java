@@ -260,6 +260,9 @@ public abstract class JavaEditor extends AbstractTextEditor {
 	 */
 	public void synchronizeOutlinePageSelection() {
 		
+		if (isEditingScriptRunning())
+			return;
+		
 		ISourceViewer sourceViewer= getSourceViewer();
 		if (sourceViewer == null || fOutlinePage == null)
 			return;
