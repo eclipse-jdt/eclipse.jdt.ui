@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.jface.action.IMenuManager;
 
-import org.eclipse.ui.editors.text.EncodingActionGroup;
-
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -37,7 +35,6 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 	protected RetargetTextEditorAction fContentAssist;
 	protected RetargetTextEditorAction fContextInformation;
 	protected RetargetTextEditorAction fCorrectionAssist;
-	private EncodingActionGroup fEncodingActionGroup;
 	
 	
 	public BasicEditorActionContributor() {
@@ -56,9 +53,6 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 		
 		fCorrectionAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal."); //$NON-NLS-1$
 		fCorrectionAssist.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);
-		
-		// character encoding
-		fEncodingActionGroup= new EncodingActionGroup();
 	}
 	
 	/*
@@ -96,9 +90,6 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 
 		actionBars.setGlobalActionHandler(IDEActionFactory.ADD_TASK.getId(), getAction(textEditor, IDEActionFactory.ADD_TASK.getId())); //$NON-NLS-1$
 		actionBars.setGlobalActionHandler(IDEActionFactory.BOOKMARK.getId(), getAction(textEditor, IDEActionFactory.BOOKMARK.getId())); //$NON-NLS-1$
-		
-		// character encoding
-		fEncodingActionGroup.retarget(textEditor);
 	}
 	
 	/*
@@ -109,7 +100,5 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 		
 		// register actions that have a dynamic editor. 
 		bars.setGlobalActionHandler(JdtActionConstants.CONTENT_ASSIST, fContentAssist);
-		// character encoding
-		fEncodingActionGroup.fillActionBars(bars);
 	}	
 }
