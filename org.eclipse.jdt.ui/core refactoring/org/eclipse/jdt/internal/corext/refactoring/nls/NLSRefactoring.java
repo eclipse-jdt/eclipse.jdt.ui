@@ -36,12 +36,15 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 
+import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.StringContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
@@ -420,6 +423,12 @@ public class NLSRefactoring extends Refactoring {
 	private void checkKey(String key, RefactoringStatus result, String[] unwantedStrings){
 		if (key == null)
 			result.addFatalError(NLSMessages.getString("NLSrefactoring.null")); //$NON-NLS-1$
+
+		if (key.startsWith("!") || key.startsWith("#")){
+			Context context= new StringContext(key, new SourceRange(0, 0));
+			result.addWarning("Keys should not start with chartacters '!' or '#'", context);
+		}	
+			
 		if ("".equals(key.trim())) //$NON-NLS-1$
 			result.addFatalError(NLSMessages.getString("NLSrefactoring.empty")); //$NON-NLS-1$
 		
