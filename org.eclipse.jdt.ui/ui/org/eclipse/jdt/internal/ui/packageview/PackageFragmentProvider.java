@@ -424,7 +424,9 @@ public class PackageFragmentProvider implements  IPropertyChangeListener, ITreeC
 					public void run() {
 						Control ctrl = fViewer.getControl();
 						if (ctrl != null && !ctrl.isDisposed()) {
-							refreshGrandParent(element);
+							if (!fFoldPackages)
+								fViewer.refresh(element);
+							else refreshGrandParent(element);
 						}
 					}
 				});
