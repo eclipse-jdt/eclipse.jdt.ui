@@ -1,6 +1,5 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -12,7 +11,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -33,7 +31,6 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
@@ -44,8 +41,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
-import org.eclipse.jdt.internal.corext.refactoring.SearchResultCollector;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -61,17 +56,20 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class PullUpRefactoring extends Refactoring {
 
+	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size";
+
+	private final CodeGenerationSettings fPreferenceSettings;
 	private IMember[] fElementsToPullUp;
 	private IMethod[] fMethodsToDelete;
-	private CodeGenerationSettings fPreferenceSettings;
-	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size";
-	
+
+	//caches
 	private IType fCachedSuperType;
 	private ITypeHierarchy fCachedSuperTypeHierarchy;
 	private IType fCachedDeclaringType;
 
 	public PullUpRefactoring(IMember[] elements, CodeGenerationSettings preferenceSettings){
 		Assert.isTrue(elements.length > 0);
+		Assert.isNotNull(preferenceSettings);
 		fElementsToPullUp= sortByOffset(elements);
 		fMethodsToDelete= new IMethod[0];
 		fPreferenceSettings= preferenceSettings;
@@ -115,7 +113,7 @@ public class PullUpRefactoring extends Refactoring {
 	public IType getDeclaringType(){
 		if (fCachedDeclaringType != null)
 			return fCachedDeclaringType;
-		//all methods declared in same type - checked in precondition
+		//all members declared in same type - checked in precondition
 		fCachedDeclaringType= fElementsToPullUp[0].getDeclaringType(); //index safe - checked in constructor
 		return fCachedDeclaringType;
 	}
@@ -234,8 +232,8 @@ public class PullUpRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm)	throws JavaModelException {
 		try {
-			RefactoringStatus result= new RefactoringStatus();
 			pm.beginTask("", 3);
+			RefactoringStatus result= new RefactoringStatus();
 						
 			result.merge(checkAllElements());
 			pm.worked(1);
@@ -244,10 +242,7 @@ public class PullUpRefactoring extends Refactoring {
 			
 			if (! haveCommonDeclaringType())
 				return RefactoringStatus.createFatalErrorStatus("All selected elements must be declared in the same type.");			
-				
 			pm.worked(1);
-			if (result.hasFatalError())
-				return result;			
 
 			result.merge(checkDeclaringType());
 			pm.worked(1);
@@ -328,7 +323,7 @@ public class PullUpRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on binary elements.");	
 
 			if (member.isReadOnly())
-				return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on read-only meelementsthods.");					
+				return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on read-only elements.");					
 
 			if (! member.isStructureKnown())
 				return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements with unknown structure.");					
@@ -350,7 +345,7 @@ public class PullUpRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on abstract methods.");
 			
  		if (Flags.isNative(method.getFlags())) //for now - move to input preconditions
-			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on abstract methods.");				
+			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on native methods.");				
 
 		return null;	
 	}
@@ -359,16 +354,22 @@ public class PullUpRefactoring extends Refactoring {
 		IType declaringType= getDeclaringType();
 				
 		if (declaringType.isInterface()) //for now
-			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on interface methods.");
+			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on interface members.");
 		
 		if (declaringType.getFullyQualifiedName().equals("java.lang.Object"))
-			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on methods declared in java.lang.Object.");	
+			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in java.lang.Object.");	
 
 		if (declaringType.isBinary())
-			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on methods in subclasses of binary types.");	
+			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in binary types.");	
 
 		if (declaringType.isReadOnly())
-			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on methods in subclasses of read-only types.");	
+			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in read-only types.");	
+		
+		if (getSuperType(new NullProgressMonitor()).isBinary())
+			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in subclasses of binary types.");	
+
+		if (getSuperType(new NullProgressMonitor()).isReadOnly())
+			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in subclasses of read-only types.");	
 		
 		return null;
 	}
@@ -393,7 +394,7 @@ public class PullUpRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkAccessedTypes(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		IType[] accessedTypes= getTypesReferencedIn(fElementsToPullUp, pm);
+		IType[] accessedTypes= ReferenceFinderUtil.getTypesReferencedIn(fElementsToPullUp, pm);
 		IType superType= getSuperType(new NullProgressMonitor());
 		for (int i= 0; i < accessedTypes.length; i++) {
 			IType iType= accessedTypes[i];
@@ -411,7 +412,7 @@ public class PullUpRefactoring extends Refactoring {
 		
 		List pulledUpList= Arrays.asList(fElementsToPullUp);
 		List deletedList= Arrays.asList(getMembersToDelete(new NullProgressMonitor()));
-		IField[] accessedFields= getFieldsReferencedIn(fElementsToPullUp, pm);
+		IField[] accessedFields= ReferenceFinderUtil.getFieldsReferencedIn(fElementsToPullUp, pm);
 		
 		IType superType= getSuperType(new NullProgressMonitor());
 		for (int i= 0; i < accessedFields.length; i++) {
@@ -430,7 +431,7 @@ public class PullUpRefactoring extends Refactoring {
 		
 		List pulledUpList= Arrays.asList(fElementsToPullUp);
 		List deletedList= Arrays.asList(getMembersToDelete(new NullProgressMonitor()));
-		IMethod[] accessedMethods= getMethodsReferencedIn(fElementsToPullUp, pm);
+		IMethod[] accessedMethods= ReferenceFinderUtil.getMethodsReferencedIn(fElementsToPullUp, pm);
 		
 		IType superType= getSuperType(new NullProgressMonitor());
 		for (int i= 0; i < accessedMethods.length; i++) {
@@ -661,14 +662,14 @@ public class PullUpRefactoring extends Refactoring {
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 4);
+			pm.beginTask("preparing preview", 4);
 			
 			TextChangeManager manager= new TextChangeManager();
 			
 			addCopyMembersChange(manager);
 			pm.worked(1);
 			
-			if (! getSuperType(new NullProgressMonitor()).getCompilationUnit().equals(getDeclaringType().getCompilationUnit()))
+			if (needsAddingImports())
 				addAddImportsChange(manager, new SubProgressMonitor(pm, 1));
 			pm.worked(1);
 			
@@ -682,6 +683,10 @@ public class PullUpRefactoring extends Refactoring {
 		} finally{
 			pm.done();
 		}
+	}
+
+	private boolean needsAddingImports() throws JavaModelException {
+		return ! getSuperType(new NullProgressMonitor()).getCompilationUnit().equals(getDeclaringType().getCompilationUnit());
 	}
 	
 	private void addCopyMembersChange(TextChangeManager manager) throws CoreException {
@@ -742,13 +747,13 @@ public class PullUpRefactoring extends Refactoring {
 	
 	private void addAddImportsChange(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getSuperType(new NullProgressMonitor()).getCompilationUnit());		
-		IType[] referencedTypes= getTypesReferencedIn(fElementsToPullUp, pm);
+		IType[] referencedTypes= ReferenceFinderUtil.getTypesReferencedIn(fElementsToPullUp, pm);
 		ImportEdit importEdit= new ImportEdit(cu, fPreferenceSettings);
 		for (int i= 0; i < referencedTypes.length; i++) {
 			IType iType= referencedTypes[i];
 			importEdit.addImport(iType.getFullyQualifiedName());
 		}
-		manager.get(cu).addTextEdit("", importEdit);
+		manager.get(cu).addTextEdit("Update imports", importEdit);
 	}
 
 	private static int getTabWidth() {
@@ -842,68 +847,6 @@ public class PullUpRefactoring extends Refactoring {
 		if (methods.length == 0)
 			return null;
 		return methods[methods.length - 1];	
-	}
-		
-	//----- referenced types ----
-		
-	private static IType[] getTypesReferencedIn(IMember[] elements, IProgressMonitor pm) throws JavaModelException {
-		List referencedTypes= new ArrayList();
-		pm.beginTask("", elements.length);
-		for (int i = 0; i < elements.length; i++) {
-			referencedTypes.addAll(getTypesReferencedIn(elements[i], new SubProgressMonitor(pm, 1)));
-		}
-		pm.done();
-		return (IType[]) referencedTypes.toArray(new IType[referencedTypes.size()]);
-	}
-	
-	private static List getTypesReferencedIn(IMember element, IProgressMonitor pm) throws JavaModelException {
-		SearchResultCollector collector= new SearchResultCollector(pm);
-		new SearchEngine().searchDeclarationsOfReferencedTypes(ResourcesPlugin.getWorkspace(), element, collector);
-		return extractElements(collector);
-	}
-	
-	//----- referenced fields ----
-	
-	private static IField[] getFieldsReferencedIn(IMember[] elements, IProgressMonitor pm) throws JavaModelException {
-		List referencedFields= new ArrayList();
-		pm.beginTask("", elements.length);
-		for (int i = 0; i < elements.length; i++) {
-			referencedFields.addAll(getFieldsReferencedIn(elements[i], new SubProgressMonitor(pm, 1)));
-		}
-		pm.done();
-		return (IField[]) referencedFields.toArray(new IField[referencedFields.size()]);
-	}
-	
-	private static List getFieldsReferencedIn(IMember element, IProgressMonitor pm) throws JavaModelException {
-		SearchResultCollector collector= new SearchResultCollector(pm);
-		new SearchEngine().searchDeclarationsOfAccessedFields(ResourcesPlugin.getWorkspace(), element, collector);
-		return extractElements(collector);
-	}	
-	
-	//----- referenced methods ----
-	
-	private static IMethod[] getMethodsReferencedIn(IMember[] elements, IProgressMonitor pm) throws JavaModelException {
-		List referencedFields= new ArrayList();
-		pm.beginTask("", elements.length);
-		for (int i = 0; i < elements.length; i++) {
-			referencedFields.addAll(getMethodsReferencedIn(elements[i], new SubProgressMonitor(pm, 1)));
-		}
-		pm.done();
-		return (IMethod[]) referencedFields.toArray(new IMethod[referencedFields.size()]);
-	}
-	
-	private static List getMethodsReferencedIn(IMember element, IProgressMonitor pm) throws JavaModelException {
-		SearchResultCollector collector= new SearchResultCollector(pm);
-		new SearchEngine().searchDeclarationsOfSentMessages(ResourcesPlugin.getWorkspace(), element, collector);
-		return extractElements(collector);
-	}	
-	
-	private static List extractElements(SearchResultCollector collector){
-		List elements= new ArrayList(collector.getResults().size());
-		for (Iterator iter = collector.getResults().iterator(); iter.hasNext();) {
-			elements.add(((SearchResult) iter.next()).getEnclosingElement());
-		}
-		return elements;		
 	}
 }
 
