@@ -119,7 +119,7 @@ public abstract class AbstractJavaElementRenameChange extends JDTChange {
 			return null;
 		
 		RefactoringStatus result= new RefactoringStatus();
-		checkIfModifiable(result, resource, false);
+		checkIfModifiable(result, resource, false, false);
 		
 		return result;
 	}
