@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.packageview;
 
+import org.eclipse.core.commands.operations.IUndoContext;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -40,6 +42,7 @@ import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.OpenInNewWindowAction;
+import org.eclipse.ui.operations.UndoRedoActionGroup;
 
 import org.eclipse.ui.views.framelist.BackAction;
 import org.eclipse.ui.views.framelist.ForwardAction;
@@ -112,6 +115,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		};
 		
 		IWorkbenchPartSite site = fPart.getSite();
+		IUndoContext workspaceContext= (IUndoContext)ResourcesPlugin.getWorkspace().getAdapter(IUndoContext.class);
 		setGroups(new ActionGroup[] {
 			new NewWizardsActionGroup(site),
 			fNavigateActionGroup= new NavigateActionGroup(fPart), 
@@ -126,7 +130,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			fViewActionGroup= new ViewActionGroup(fPart.getRootMode(), workingSetListener, site),
 			fCustomFiltersActionGroup= new CustomFiltersActionGroup(fPart, viewer),
 			new LayoutActionGroup(part),
-			new WorkingSetActionGroup(part)});
+			new WorkingSetActionGroup(part),
+			new UndoRedoActionGroup(site, workspaceContext, true)});
 		
 
 		fViewActionGroup.fillFilters(viewer);
