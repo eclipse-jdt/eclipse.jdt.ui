@@ -441,7 +441,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 				}
 			} else if (expression != null) {
 				final IMethodBinding method= fDeclaration.resolveBinding();
-				if (variable != null && method != null && !JdtFlags.isStatic(variable) && Bindings.equals(variable.getDeclaringClass(), method.getDeclaringClass())) {
+				if (variable != null && method != null && !JdtFlags.isStatic(variable) && Bindings.equals(method.getDeclaringClass(), variable.getDeclaringClass())) {
 					fRewrite.replace(expression, ast.newSimpleName(fTargetName), null);
 					return false;
 				}
@@ -1481,7 +1481,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 				removable= createMethodDelegator(rewrites, declaration, references, adjustor.getAdjustments(), target, status, new SubProgressMonitor(monitor, 1));
 				if (fRemove && removable) {
 					fSourceRewrite.getASTRewrite().remove(declaration, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.remove_original_method"))); //$NON-NLS-1$
-					fSourceRewrite.getImportRemover().registerRemovedNode(declaration);
+					if (!fSourceRewrite.getCu().equals(fTargetType.getCompilationUnit()))
+						fSourceRewrite.getImportRemover().registerRemovedNode(declaration);
 				}
 			}
 			if (!fRemove || !removable)
@@ -1903,7 +1904,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final boolean target= createArgumentList(declaration, invocation.arguments(), new VisibilityAdjustingArgumentFactory(ast, rewrites, adjustments));
 		final Block block= ast.newBlock();
 		block.statements().add(createMethodInvocation(declaration, invocation));
-		remover.registerRemovedNode(declaration.getBody());
+		if (!fSourceRewrite.getCu().equals(fTargetType.getCompilationUnit()))
+			remover.registerRemovedNode(declaration.getBody());
 		rewrite.set(declaration, MethodDeclaration.BODY_PROPERTY, block, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.replace_body_with_delegation"))); //$NON-NLS-1$
 		if (fDeprecated)
 			createMethodDeprecation(declaration);
