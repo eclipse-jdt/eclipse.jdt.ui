@@ -3608,8 +3608,7 @@
             id="org.eclipse.jdt.IResourceExtender">
       </typeExtender>
    </extension>
-   <extension
-         point="org.eclipse.jdt.ui.typeExtenders">
+   <extension point="org.eclipse.jdt.ui.typeExtenders">
       <typeExtender
             methods="isCompilationUnit"
             type="org.eclipse.core.resources.IFile"
@@ -3627,6 +3626,12 @@
             type="org.eclipse.jdt.core.IJavaElement"
             class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.JavaElementExtender"
             id="org.eclipse.jdt.IJavaElementExtender">
+      </typeExtender>
+      <typeExtender
+            id="org.eclipse.jdt.IPackageFragmentExtender"
+            methods="isDefaultPackage"
+            type="org.eclipse.jdt.core.IPackageFragment"
+            class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.PackageFragmentExtender">
       </typeExtender>
       <typeExtender
             methods="isStatic, isPrivate"
@@ -3708,17 +3713,12 @@
             class="org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor"
             id="org.eclipse.jdt.renameProcessor.IPackageFragment">
          <enablement>
-            <count
-                  value="1">
+            <count value="1">
             </count>
             <iterate>
-               <test
-                     value="org.eclipse.jdt.core.IPackageFragment"
-                     property="instanceof">
-               </test>
-               <test
-                     property="isAvailable">
-               </test>
+               <test property="instanceof" value="org.eclipse.jdt.core.IPackageFragment"/>
+               <test property="isAvailable"/>
+               <not><test property="isDefaultPackage"/></not>
             </iterate>
          </enablement>
       </renameProcessor>

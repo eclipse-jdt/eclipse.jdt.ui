@@ -66,5 +66,13 @@ public class ProcessorDescriptor {
 		if (eval == TestResult.FALSE)
 			return false;
 		return true;
-	}	
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * For debugging purpose only
+	 */
+	public String toString() {
+		return "Processor: " + getId(); //$NON-NLS-1$
+	}
 }
