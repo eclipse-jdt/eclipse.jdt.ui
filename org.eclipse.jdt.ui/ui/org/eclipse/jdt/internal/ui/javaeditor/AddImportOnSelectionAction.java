@@ -187,13 +187,16 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	private void removeQualification(IDocument doc, int nameStart, TypeInfo typeInfo) throws BadLocationException {
 		String containerName= typeInfo.getTypeContainerName();
 		int containerLen= containerName.length();
-		if (containerLen > 0) {
+		int docLen= doc.getLength();
+		if ((containerLen > 0) && (nameStart + containerLen + 1 < docLen)) {
 			for (int k= 0; k < containerLen; k++) {
 				if (doc.getChar(nameStart + k) != containerName.charAt(k)) {
 					return;
 				}
 			}
-			doc.replace(nameStart, containerLen + 1, ""); //$NON-NLS-1$
+			if (doc.getChar(nameStart + containerLen) == '.') {
+				doc.replace(nameStart, containerLen + 1, ""); //$NON-NLS-1$
+			}
 		}
 	}	
 
