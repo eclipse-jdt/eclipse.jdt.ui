@@ -105,7 +105,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private IType fInputClass;
 	private String fNewInterfaceName;
 	private IMember[] fExtractedMembers;
-	private boolean fReplaceOccurrences= true; //XXX 
+	private boolean fReplaceOccurrences= false;
 	private TextChangeManager fChangeManager;
 	private Set fBadVarSet;
 	private Map fCUsToCuNodes;//ICompilationUnit -> CompilationUnit
