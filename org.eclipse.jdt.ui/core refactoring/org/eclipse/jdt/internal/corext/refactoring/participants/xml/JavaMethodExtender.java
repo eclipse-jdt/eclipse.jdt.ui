@@ -17,13 +17,13 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 
-public class MethodPropertyTester extends TypeExtender {
+public class JavaMethodExtender extends TypeExtender {
 
 	private static final String PROPERTY_IS_VIRTUAL= "isVirtual"; //$NON-NLS-1$
 	private static final String PROPERTY_IS_CONSTRUCTOR= "isConstructor";  //$NON-NLS-1$
 	private static final String PROPERTY_IS_MAIN_METHOD= "isMainMethod";  //$NON-NLS-1$
 	
-	public Object perform(Object receiver, String method, Object[] args) throws CoreException {
+	public Object invoke(Object receiver, String method, Object[] args) throws CoreException {
 		IMethod jMethod= (IMethod)receiver;
 		if (PROPERTY_IS_VIRTUAL.equals(method)) {
 			return Boolean.valueOf(MethodChecks.isVirtual(jMethod));

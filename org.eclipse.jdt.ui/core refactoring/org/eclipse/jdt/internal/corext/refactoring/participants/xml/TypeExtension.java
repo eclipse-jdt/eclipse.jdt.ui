@@ -22,6 +22,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.jdt.internal.corext.Assert;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
@@ -43,41 +45,105 @@ public class TypeExtension {
 	
 	private static final String EXT_POINT= "typeExtenders"; //$NON-NLS-1$
 	private static final String TYPE= "type"; //$NON-NLS-1$
-	private static final ITypeExtender[] EMPTY_PROPERTY_TESTER_ARRAY= new ITypeExtender[0];
-	private static final TypeExtension[] EMPTY_PROPERTY_INTERFACE_ARRAY= new TypeExtension[0];
-	
-	public static final Object NOT_LOADED= new Object();
-	private static final Object CONTINUE= new Object();
+	private static final ITypeExtender[] EMPTY_TYPE_EXTENDER_ARRAY= new ITypeExtender[0];
+	private static final TypeExtension[] EMPTY_TYPE_EXTENSION_ARRAY= new TypeExtension[0];
+
+	/* a special type extender instance that used to signal that method searching has to continue */
+	private static final ITypeExtender CONTINUE= new ITypeExtender() {
+		public boolean handles(String method) {
+			return false;
+		}
+		public boolean isLoaded() {
+			return false;
+		}
+		public boolean canLoad() {
+			return false;
+		}
+		public Object invoke(Object receiver, String method, Object[] args) throws CoreException {
+			return null;
+		}
+	};
 		
-	private static final Map fInterfaceMap= new HashMap();
-	
-	/* a special property interface that marks the end of an evaluation chain */
-	private static final TypeExtension END_POINT= new TypeExtension(null) {
-		/* package */ Object internalPerform(Object o, String name, Object[] args) {
+	/* a special type extension instance that marks the end of an evaluation chain */
+	private static final TypeExtension END_POINT= new TypeExtension() {
+		/* package */ ITypeExtender find(Object o, String name) {
 			return CONTINUE;
 		}	
 	};
 	
+	/*
+	 * Map containing all already instanciated type extension object. Key is
+	 * of type <code>Class</code>, value is of type <code>TypeExtension</code>. 
+	 */
+	private static final Map fInterfaceMap= new HashMap();
+	
+	/*
+	 * A cache to give fast access to that 100 method invocations.
+	 */
+	private static final LRUCache fMethodCache= new LRUCache(100);
+	
+	/* debugging flag to enable tracing */
+	private static final boolean TRACING;
+	static {
+		String value= Platform.getDebugOption("org.eclipse.jdt.ui/typeExtension/tracing"); //$NON-NLS-1$
+		TRACING= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
+	}
+	
+	/* the type this extension is extending */
 	private Class fType;
+	/* the list of associated extenders */
 	private ITypeExtender[] fExtenders;
 	
+	/* the extension associated with <code>fType</code>'s super class */
 	private TypeExtension fExtends;
+	/* the extensions associated with <code>fTypes</code>'s interfaces */ 
 	private TypeExtension[] fImplements;
 	
+	private TypeExtension() {
+		// special constructor to create the CONTINUE instance
+	}
+	
 	private TypeExtension(Class type) {
+		Assert.isNotNull(type);
 		fType= type;
 		synchronized (fInterfaceMap) {
 			fInterfaceMap.put(fType, this);
 		}
 	}
 	
-	public static Object perform(Object o, String method, Object[] args) throws CoreException {
-		TypeExtension pi= get(o.getClass());
-		Object result= pi.internalPerform(o, method, args);
-		if (result != CONTINUE)
-			return result;
-		throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
-			IStatus.ERROR, "Unknown method: " + method, null));
+	public static Method getMethod(Object receiver, String method) throws CoreException {
+		// TODO must synchronize access to method cache.
+		long start= 0;
+		if (TRACING)
+			start= System.currentTimeMillis();
+		
+		Class clazz= receiver.getClass();
+		Method result= new Method(clazz, method);
+		Object cached= fMethodCache.get(result);
+		if (cached != null) {
+			if (TRACING) {
+				System.out.println("[Type Extension] - method " +
+					clazz.getName() + "#" + method +
+					" found in cache: " + 
+					(System.currentTimeMillis() - start) + " ms.");
+				return (Method)cached;
+			}
+		}
+		TypeExtension extension= get(clazz);
+		ITypeExtender extender= extension.find(receiver, method);
+		if (extender == CONTINUE) {
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
+				IStatus.ERROR, "Unknown method: " + method, null));
+		}
+		result.setExtender(extender);
+		fMethodCache.put(result, result);
+		if (TRACING) {
+			System.out.println("[Type Extension] - method " +
+				clazz.getName() + "#" + method +
+				" not found in cache: " + 
+				(System.currentTimeMillis() - start) + " ms.");
+		}
+		return result;
 	}
 	
 	private static TypeExtension get(Class clazz) {
@@ -90,12 +156,12 @@ public class TypeExtension {
 		}
 	}
 	
-	/* package */ Object internalPerform(Object element, String method, Object[] args) throws CoreException {
+	/* package */ ITypeExtender find(Object element, String method) throws CoreException {
 		synchronized (this) {
 			if (fExtenders == null)
 				initialize();
 		}
-		Object result;
+		ITypeExtender result;
 		
 		// handle testers associated with this interface
 		for (int i= 0; i < fExtenders.length; i++) {
@@ -103,7 +169,7 @@ public class TypeExtension {
 			if (extender == null || !extender.handles(method))
 				continue;
 			if (extender.isLoaded()) {
-				return extender.perform(element, method, args);
+				return extender;
 			} else {
 				if (extender.canLoad()) {
 					try {
@@ -113,14 +179,14 @@ public class TypeExtension {
 						synchronized (fExtenders) {
 							fExtenders[i]= extender= temp;
 						}
-						return extender.perform(element, method, args);
+						return extender;
 					} catch (CoreException e) {
 						JavaPlugin.getDefault().getLog().log(e.getStatus());
 						// disable tester
 						fExtenders[i]= null;
 					}
 				} else {
-					return NOT_LOADED;
+					return extender;
 				}
 			}
 		}
@@ -136,7 +202,7 @@ public class TypeExtension {
 				}
 			}
 		}
-		result= fExtends.internalPerform(element, method, args);
+		result= fExtends.find(element, method);
 		if (result != CONTINUE)
 			return result;
 		
@@ -145,7 +211,7 @@ public class TypeExtension {
 			if (fImplements == null) {
 				Class[] interfaces= fType.getInterfaces();
 				if (interfaces.length == 0) {
-					fImplements= EMPTY_PROPERTY_INTERFACE_ARRAY;
+					fImplements= EMPTY_TYPE_EXTENSION_ARRAY;
 				} else {
 					fImplements= new TypeExtension[interfaces.length];
 					for (int i= 0; i < interfaces.length; i++) {
@@ -155,7 +221,7 @@ public class TypeExtension {
 			}
 		}
 		for (int i= 0; i < fImplements.length; i++) {
-			result= fImplements[i].internalPerform(element, method, args);
+			result= fImplements[i].find(element, method);
 			if (result != CONTINUE)
 				return result;
 		}
@@ -175,7 +241,7 @@ public class TypeExtension {
 				result.add(new TypeExtenderDescriptor(config));
 		}
 		if (result.size() == 0)
-			fExtenders= EMPTY_PROPERTY_TESTER_ARRAY;
+			fExtenders= EMPTY_TYPE_EXTENDER_ARRAY;
 		else
 			fExtenders= (ITypeExtender[])result.toArray(new ITypeExtender[result.size()]);
 	}

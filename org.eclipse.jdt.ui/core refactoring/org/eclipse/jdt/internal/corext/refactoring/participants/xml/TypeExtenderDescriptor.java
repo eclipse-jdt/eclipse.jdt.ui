@@ -13,8 +13,10 @@ package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPluginDescriptor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /* package */ class TypeExtenderDescriptor implements ITypeExtender {
 	
@@ -54,9 +56,9 @@ import org.eclipse.jdt.internal.corext.Assert;
 		return plugin.isPluginActivated();
 	}
 	
-	public Object perform(Object receiver, String method, Object[] args) {
-		Assert.isTrue(false);
-		return null;
+	public Object invoke(Object receiver, String method, Object[] args) throws CoreException {
+		throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
+			"Plug-in delcaring the method isn't loaded yet", null));
 	}
 	
 	public TypeExtender create() throws CoreException {

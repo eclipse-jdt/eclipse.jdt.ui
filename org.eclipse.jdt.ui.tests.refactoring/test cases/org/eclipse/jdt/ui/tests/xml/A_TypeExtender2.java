@@ -18,7 +18,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TypeExtender
 
 public class A_TypeExtender2 extends TypeExtender {
 
-	public Object perform(Object receiver, String method, Object[] args) throws CoreException {
+	public Object invoke(Object receiver, String method, Object[] args) throws CoreException {
 		if ("chaining".equals(method)) {
 			return "A2";
 		} else if ("chainOrdering".equals(method)) {

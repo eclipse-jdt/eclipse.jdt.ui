@@ -26,12 +26,12 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 
-public class JavaElementPropertyTester extends TypeExtender {
+public class JavaElementExtender extends TypeExtender {
 
 	private static final String PROPERTY_IS_AVAILABLE= "isAvailable"; //$NON-NLS-1$
 	private static final String CAN_DELETE= "canDelete"; //$NON-NLS-1$
 	
-	public Object perform(Object receiver, String method, Object[] args) throws CoreException {
+	public Object invoke(Object receiver, String method, Object[] args) throws CoreException {
 		IJavaElement jElement= (IJavaElement)receiver;
 		if (PROPERTY_IS_AVAILABLE.equals(method)) {
 			return Boolean.valueOf(Checks.isAvailable(jElement));

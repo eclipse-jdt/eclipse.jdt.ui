@@ -17,7 +17,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
-public class TypePropertyTester extends TypeExtender {
+public class JavaTypeExtender extends TypeExtender {
 
 	private static final String PROPERTY_HAS_MAIN_TYPE= "hasMainType"; //$NON-NLS-1$
 	private static final String IS_ANONYMOUES= "isAnonymous";  //$NON-NLS-1$
@@ -26,7 +26,7 @@ public class TypePropertyTester extends TypeExtender {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.properties.IPropertyEvaluator#test(java.lang.Object, java.lang.String, java.lang.String)
 	 */
-	public Object perform(Object receiver, String method, Object[] args) {
+	public Object invoke(Object receiver, String method, Object[] args) {
 		IType type= (IType)receiver;
 		if (PROPERTY_HAS_MAIN_TYPE.equals(method)) { //$NON-NLS-1$
 			try {

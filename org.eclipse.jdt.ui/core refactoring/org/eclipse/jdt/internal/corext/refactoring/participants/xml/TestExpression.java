@@ -85,9 +85,10 @@ public class TestExpression extends Expression {
 		if ("instanceof".equals(fProperty)) { //$NON-NLS-1$
 			return TestResult.valueOf(isInstanceOf(element, (String)fArgs[0]));
 		}
-		Object returnValue= TypeExtension.perform(element, fProperty, fArgs);
-		if (returnValue == TypeExtension.NOT_LOADED)
+		Method method= TypeExtension.getMethod(element, fProperty);
+		if (!method.isLoaded())
 			return TestResult.NOT_LOADED;
+		Object returnValue= method.invoke(element, fArgs);
 		if (!(returnValue instanceof Boolean)) {
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
 				"Expected result must be of type Boolean", null));

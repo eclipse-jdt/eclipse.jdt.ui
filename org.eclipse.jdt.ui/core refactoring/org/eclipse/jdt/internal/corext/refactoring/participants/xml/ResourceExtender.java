@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 
-public class ResourcePropertyTester extends TypeExtender {
+public class ResourceExtender extends TypeExtender {
 
 	private static final String PROPERTY_MATCHES_PATTERN= "matchesPattern";	 //$NON-NLS-1$
 	private static final String PROJECT_NATURE = "projectNature";	 //$NON-NLS-1$
@@ -29,7 +29,7 @@ public class ResourcePropertyTester extends TypeExtender {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.properties.IPropertyEvaluator#test(java.lang.Object, java.lang.String, java.lang.String)
 	 */
-	public Object perform(Object receiver, String method, Object[] args) {
+	public Object invoke(Object receiver, String method, Object[] args) {
 		IResource resource= (IResource)receiver;
 		if (PROPERTY_MATCHES_PATTERN.equals(method)) { //$NON-NLS-1$
 			String fileName= resource.getName();

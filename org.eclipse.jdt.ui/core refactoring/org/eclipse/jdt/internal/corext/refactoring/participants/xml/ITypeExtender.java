@@ -46,5 +46,5 @@ import org.eclipse.core.runtime.CoreException;
 	 * @param args the method arguments
 	 * @return the method's result value
 	 */
-	public Object perform(Object receiver, String method, Object[] args) throws CoreException;
+	public Object invoke(Object receiver, String method, Object[] args) throws CoreException;
 }

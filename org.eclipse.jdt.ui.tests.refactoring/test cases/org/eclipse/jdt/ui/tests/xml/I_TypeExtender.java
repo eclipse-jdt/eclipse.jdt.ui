@@ -18,7 +18,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TypeExtender
 
 public class I_TypeExtender extends TypeExtender {
 
-	public Object perform(Object receiver, String method, Object[] args) throws CoreException {
+	public Object invoke(Object receiver, String method, Object[] args) throws CoreException {
 		if ("ordering".equals(method)) {
 			return "I";
 		}

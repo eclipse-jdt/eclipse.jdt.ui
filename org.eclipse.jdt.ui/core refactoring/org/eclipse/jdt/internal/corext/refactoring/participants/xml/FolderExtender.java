@@ -10,25 +10,22 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.IFolder;
 
-import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
+public class FolderExtender extends TypeExtender {
 
-public class MemberPropertyTester extends TypeExtender {
-
-	private static final String PROPERTY_IS_STATIC= "isStatic"; //$NON-NLS-1$
-	private static final String PROPERTY_IS_PRIVATE= "isPrivate"; //$NON-NLS-1$
+	private static final String PROPERTY_IS_SOURCE_FOLDER= "isSourceFolder"; //$NON-NLS-1$
 	
-	public Object perform(Object receiver, String method, Object[] args) throws CoreException {
-		IMember member= (IMember)receiver;
-		if (PROPERTY_IS_STATIC.equals(method)) {
-			return Boolean.valueOf(JdtFlags.isStatic(member));
-		} else if (PROPERTY_IS_PRIVATE.equals(method)) {
-			return Boolean.valueOf(JdtFlags.isPrivate(member));
+	public Object invoke(Object receiver, String method, Object[] args) {
+		IFolder folder= (IFolder)receiver;
+		if (PROPERTY_IS_SOURCE_FOLDER.equals(method)) {
+			IJavaElement jElement= JavaCore.create(folder);
+			return Boolean.valueOf(jElement != null && jElement.exists() && jElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT);
 		}
 		Assert.isTrue(false);
 		return null;

@@ -8,21 +8,27 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.xml;
+package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.core.runtime.CoreException;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.TypeExtender;
-
-
-public class B_TypeExtender extends TypeExtender {
-
-	public Object invoke(Object receiver, String method, Object[] args) throws CoreException {
-		if ("overridden".equals(method)) {
-			return "B";
-		}
-		Assert.isTrue(false);
-		return null;
+/* package */ class LRUCache {
+	
+	private LinkedHashMap fCache;
+	
+	public LRUCache(final int cacheSize) {
+		fCache= new LinkedHashMap(cacheSize * 2, 0.5f, true) {
+			protected boolean removeEldestEntry(Entry eldest) {
+				return size() > cacheSize;			}
+		};
+	}
+	
+	public Object get(Object key) {
+		return fCache.get(key);
+	}
+	
+	public void put(Object key, Object value) {
+		fCache.put(key, value);
 	}
 }
