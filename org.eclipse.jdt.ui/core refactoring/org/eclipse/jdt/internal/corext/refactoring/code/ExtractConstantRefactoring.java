@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -59,6 +60,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
@@ -460,7 +462,12 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 			String newCuSource= change.getPreviewContent();
 			CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), fCu.getElementName(), fCu.getJavaProject());
-			result.merge(RefactoringAnalyzeUtil.analyzeIntroducedCompileErrors(newCuSource, newCUNode, fCompilationUnitNode));
+			IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCuSource, newCUNode, fCompilationUnitNode);
+			for (int i= 0; i < newProblems.length; i++) {
+                IProblem problem= newProblems[i];
+                if (problem.isError())
+                	result.addEntry(RefactoringStatusEntry.create(problem, newCuSource));
+            }
 	
 			return result;
 		} catch (CoreException e){
