@@ -680,9 +680,9 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void test20() throws Exception { 
-		printTestDisabledMessage("failb because of bug#9479");
-		if (true)
-			return;
+		//printTestDisabledMessage("failb because of bug#9479");
+		//if (true)
+		//	return;
 		IPackageFragment packageA= getRoot().createPackageFragment("A", true, null);
 		
 		ICompilationUnit cu= createCUfromTestFile(packageA, "A");
