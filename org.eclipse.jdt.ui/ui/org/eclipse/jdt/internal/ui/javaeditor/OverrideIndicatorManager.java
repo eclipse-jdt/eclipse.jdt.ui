@@ -98,6 +98,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 		 * Opens and reveals the defining method.
 		 */
 		public void open() {
+			boolean hasLogEntry= false;
 			CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(fJavaElement, true, null);
 			ASTNode node= null;
 			if (ast != null)
@@ -105,18 +106,19 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 			if (node instanceof MethodDeclaration) {
 				try {
 					IMethodBinding methodBinding= ((MethodDeclaration)node).resolveBinding();
-					IType type= getType(methodBinding);
-					
-					if (type != null) {
-					
-						ITypeHierarchy th= SuperTypeHierarchyCache.getTypeHierarchy(type);
-						IType[] superTypes= th.getAllSupertypes(type);
-						
-						IMethodBinding definingMethodBinding= Bindings.findMethodDefininition(methodBinding);
+					IMethodBinding definingMethodBinding= Bindings.findMethodDefininition(methodBinding);
+					if (definingMethodBinding != null) {
+						String definingTypeQualifiedName= definingMethodBinding.getDeclaringClass().getQualifiedName();
 						IType definingType= null;
-						if (definingMethodBinding != null)
-							definingType= findType(superTypes, definingMethodBinding.getDeclaringClass().getQualifiedName());
-						
+						IType type= getType(methodBinding);
+						if (type != null) {
+							ITypeHierarchy th= SuperTypeHierarchyCache.getTypeHierarchy(type);
+							IType[] superTypes= th.getAllSupertypes(type);
+							definingType= findType(superTypes, definingTypeQualifiedName);
+						} else {
+							definingType= JavaModelUtil.findType(fJavaElement.getJavaProject(), definingTypeQualifiedName);
+						}
+							
 						if (definingType != null) {
 							IMethod definingMethod= Bindings.findMethod(definingMethodBinding, definingType);
 							if (definingMethod != null) {
@@ -127,12 +129,18 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 					}
 				} catch (JavaModelException ex) {
 					JavaPlugin.log(ex.getStatus());
+					hasLogEntry= true;
 				} catch (PartInitException ex) {
 					JavaPlugin.log(ex.getStatus());
+					hasLogEntry= true;
 				}
 			}
 			String title= JavaEditorMessages.getString("OverrideIndicatorManager.open.error.title"); //$NON-NLS-1$
-			String message= JavaEditorMessages.getString("OverrideIndicatorManager.open.error.message"); //$NON-NLS-1$
+			String message;
+			if (hasLogEntry)
+				message= JavaEditorMessages.getString("OverrideIndicatorManager.open.error.messageHasLogEntry"); //$NON-NLS-1$
+			else
+				message= JavaEditorMessages.getString("OverrideIndicatorManager.open.error.message"); //$NON-NLS-1$
 			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), title, message);
 		}
 		
