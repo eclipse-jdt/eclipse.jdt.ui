@@ -29,7 +29,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * For given fields, method stubs for getters and setters are created.
  */
 public class AddGetterSetterOperation implements IWorkspaceRunnable {
-	private IField[] fFields;
+	private IField[] fGetterFields;
+	private IField[] fSetterFields;
 	private List fCreatedAccessors;
 	
 	private IRequestQuery fSkipExistingQuery;
@@ -41,7 +42,6 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	private NameProposer fNameProposer;	
 	private CodeGenerationSettings fSettings;
 	
-	
 	/**
 	 * Creates the operation.
 	 * @param fields The fields to create setter/getters for.
@@ -50,13 +50,18 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	 * @param skipExistingQuery Callback to ask if setter / getters that already exist can be skipped.
 	 *        Argument of the query is the existing method. <code>null</code> is a valid input and stands for skip all.
 	 */
-	public AddGetterSetterOperation(IField[] fields, String[] prefixes, String[] suffixes, CodeGenerationSettings settings, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery) {
+	public AddGetterSetterOperation(IField[] fields, NameProposer nameProposer, CodeGenerationSettings settings, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery) {
+		this(fields, fields, nameProposer, settings, skipFinalSettersQuery, skipExistingQuery);
+	}
+	
+	public AddGetterSetterOperation(IField[] getterFields, IField[] setterFields, NameProposer nameProposer, CodeGenerationSettings settings, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery) {
 		super();
-		fFields= fields;
+		fGetterFields= getterFields;
+		fSetterFields= setterFields;
 		fSkipExistingQuery= skipExistingQuery;
 		fSkipFinalSettersQuery= skipFinalSettersQuery;
 		fSettings= settings;
-		fNameProposer= new NameProposer(prefixes, suffixes);
+		fNameProposer= nameProposer;
 		fCreatedAccessors= new ArrayList();
 	}
 	
@@ -69,15 +74,21 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			monitor= new NullProgressMonitor();
 		}
 		try {			
-			int nFields= fFields.length;			
-			monitor.beginTask(CodeGenerationMessages.getString("AddGetterSetterOperation.description"), nFields); //$NON-NLS-1$
+			monitor.beginTask(CodeGenerationMessages.getString("AddGetterSetterOperation.description"), fGetterFields.length + fSetterFields.length); //$NON-NLS-1$
 			
-			for (int i= 0; i < nFields; i++) {
-				generateStubs(fFields[i], new SubProgressMonitor(monitor, 1));
-				if (monitor.isCanceled()) {
+			for (int i= 0; i < fGetterFields.length; i++) {
+				generateGetter(fGetterFields[i], new SubProgressMonitor(monitor, 1));
+				if (monitor.isCanceled()){
 					throw new OperationCanceledException();
-				}
+				}	
 			}
+			for (int i= 0; i < fSetterFields.length; i++) {
+				generateSetter(fSetterFields[i], new SubProgressMonitor(monitor, 1));
+				if (monitor.isCanceled()){
+					throw new OperationCanceledException();
+				}	
+			}
+			
 		} finally {
 			monitor.done();
 		}
@@ -111,10 +122,18 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		return true;
 	}	
 	
+	private void generateGetter(IField field, IProgressMonitor monitor) throws JavaModelException, OperationCanceledException {
+		generateStub(field, monitor, true);
+	}
+	
+	private void generateSetter(IField field, IProgressMonitor monitor) throws JavaModelException, OperationCanceledException {
+		generateStub(field, monitor, false);
+	}
+	
 	/**
 	 * Creates setter and getter for a given field.
 	 */
-	private void generateStubs(IField field, IProgressMonitor monitor) throws JavaModelException, OperationCanceledException {
+	private void generateStub(IField field, IProgressMonitor monitor, boolean getter) throws JavaModelException, OperationCanceledException {
 		try {
 			monitor.beginTask(CodeGenerationMessages.getFormattedString("AddGetterSetterOperation.processField", field.getElementName()), 2); //$NON-NLS-1$
 	
@@ -135,15 +154,15 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			boolean addComments= fSettings.createComments;
 			
 			// test if the getter already exists
-			String getterName= fNameProposer.proposeGetterName(fieldName, isBoolean);
+			String getterName= fNameProposer.proposeGetterName(field);
 			IMethod existingGetter= JavaModelUtil.findMethod(getterName, new String[0], false, parentType);
 			
-			String setterName= fNameProposer.proposeSetterName(fieldName);
+			String setterName= fNameProposer.proposeSetterName(field.getElementName());
 			String[] args= new String[] { field.getTypeSignature() };		
 			IMethod existingSetter= JavaModelUtil.findMethod(setterName, args, false, parentType);			
 			
-			boolean doCreateGetter= (existingGetter == null) || !querySkipExistingMethods(existingGetter);
-			boolean doCreateSetter= (!isFinal || !querySkipFinalSetters(field)) && (existingSetter == null || querySkipExistingMethods(existingSetter));
+			boolean doCreateGetter= (getter) && ((existingGetter == null) || !querySkipExistingMethods(existingGetter));
+			boolean doCreateSetter= (! getter) && ((!isFinal || !querySkipFinalSetters(field)) && (existingSetter == null || querySkipExistingMethods(existingSetter)));
 						
 			String lineDelim= StubUtility.getLineDelimiterUsed(parentType);
 			int indent= StubUtility.getIndentUsed(field);
