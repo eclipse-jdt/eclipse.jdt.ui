@@ -275,31 +275,31 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * @return the relevance for <code>proposal</code>
 	 */
 	protected int computeRelevance(CompletionProposal proposal) {
-		final int multiplier= 16;
+		final int baseRelevance= proposal.getRelevance() * 16;
 		switch (proposal.getKind()) {
 			case CompletionProposal.PACKAGE_REF:
-				return proposal.getRelevance() * multiplier + 0;
+				return baseRelevance + 0;
 			case CompletionProposal.LABEL_REF:
-				return proposal.getRelevance() * multiplier  + 1;
+				return baseRelevance + 1;
 			case CompletionProposal.KEYWORD:
-				return proposal.getRelevance() * multiplier  + 2;
+				return baseRelevance + 2;
 			case CompletionProposal.TYPE_REF:
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
-				return proposal.getRelevance() * multiplier  + 3;
+				return baseRelevance + 3;
 			case CompletionProposal.METHOD_REF:
 			case CompletionProposal.METHOD_NAME_REFERENCE:
 			case CompletionProposal.METHOD_DECLARATION:
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
-				return proposal.getRelevance() * multiplier  + 4;
+				return baseRelevance + 4;
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
-				return proposal.getRelevance() * multiplier  + 4 /* + 99 */;
+				return baseRelevance + 4 /* + 99 */;
 			case CompletionProposal.FIELD_REF:
-				return proposal.getRelevance() * multiplier  + 5;
+				return baseRelevance + 5;
 			case CompletionProposal.LOCAL_VARIABLE_REF:
 			case CompletionProposal.VARIABLE_DECLARATION:
-				return proposal.getRelevance() * multiplier  + 6;
+				return baseRelevance + 6;
 			default:
-				return proposal.getRelevance() * multiplier;
+				return baseRelevance;
 		}
 	}
 	
