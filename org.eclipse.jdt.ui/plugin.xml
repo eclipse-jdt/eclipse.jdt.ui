@@ -2300,83 +2300,6 @@
 		description= "%ActionDefinition.showInPackageView.description"
 	/>
 
-	<!-- search -->
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
-		name= "%ActionDefinition.referencesInWorkspace.name"
-		description="%ActionDefinition.referencesInWorkspace.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy"
-		name= "%ActionDefinition.referencesInHierarchy.name"
-		description="%ActionDefinition.referencesInHierarchy.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set"
-		name= "%ActionDefinition.referencesInWorkingSet.name"
-		description="%ActionDefinition.referencesInWorkingSet.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace"
-		name= "%ActionDefinition.readAccessInworkspace.name"
-		description="%ActionDefinition.readAccessInWorkspace.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy"
-		name= "%ActionDefinition.readAccessInHierarchy.name"
-		description="%ActionDefinition.readAccessInHierarchy.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set"
-		name= "%ActionDefinition.readAccessInWorkingSet.name"
-		description="%ActionDefinition.readAccessInWorkingSet.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace"
-		name= "%ActionDefinition.writeAccessInWorkspace.name"
-		description="%ActionDefinition.writeAccessInWorkspace.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy"
-		name= "%ActionDefinition.writeAccessInHierarchy.name"
-		description="%ActionDefinition.writeAccessInHierarchy.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set"
-		name= "%ActionDefinition.writeAccessInWorkingSet.name"
-		description="%ActionDefinition.writeAccessInWorkingSet.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
-		name= "%ActionDefinition.declarationsInWorkspace.name"
-		description="%ActionDefinition.declarationsInWorkspace.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy"
-		name= "%ActionDefinition.declarationsInHierarchy.name"
-		description="%ActionDefinition.declarationsInHierarchy.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set"
-		name= "%ActionDefinition.declarationsInWorkingSet.name"
-		description="%ActionDefinition.declarationsInWorkingSet.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace"
-		name= "%ActionDefinition.implementorsInWorkspace.name"
-		description="%ActionDefinition.implementorsInWorkspace.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set"
-		name= "%ActionDefinition.implementorsInWorkingSet.name"
-		description="%ActionDefinition.implementorsInWorkingSet.description"
-	/>
-	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
-		name= "%ActionDefinition.occurrencesInFile.name"
-		description="%ActionDefinition.occurrencesInFile.description"
-	/>
-	
 	<!-- Project --> 
 	<actionDefinition
 		id="org.eclipse.jdt.ui.generate.javadoc"
@@ -2391,6 +2314,167 @@
 	/>
 
 </extension>
+
+	<!-- search -->
+	<extension point="org.eclipse.ui.commands">
+		<command
+			category="org.eclipse.search.ui.category.search"
+			id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
+			name= "%ActionDefinition.referencesInWorkspace.name"
+			description="%ActionDefinition.referencesInWorkspace.description"
+		/>
+		<keyBinding
+			string="Ctrl+Shift+G"
+			scope="org.eclipse.ui.globalScope"
+			command="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
+			configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+		/>
+		<keyBinding
+			platform="carbon"
+			string="Command+Shift+G"
+			scope="org.eclipse.ui.globalScope"
+			command="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
+			configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+		/>
+		<keyBinding
+			string="Ctrl+Shift+G"
+			scope="org.eclipse.ui.globalScope"
+			command="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
+			configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+		/>
+		<keyBinding
+			platform="carbon"
+			string="Command+Shift+G"
+			scope="org.eclipse.ui.globalScope"
+			command="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
+			configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+		/>
+
+		<command
+			category="org.eclipse.search.ui.category.search"
+			id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy"
+			name= "%ActionDefinition.referencesInHierarchy.name"
+			description="%ActionDefinition.referencesInHierarchy.description"
+		/>
+		<command
+			category="org.eclipse.search.ui.category.search"
+			id="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set"
+			name= "%ActionDefinition.referencesInWorkingSet.name"
+			description="%ActionDefinition.referencesInWorkingSet.description"
+		/>
+		<command
+			category="org.eclipse.search.ui.category.search"
+			id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace"
+			name= "%ActionDefinition.readAccessInworkspace.name"
+			description="%ActionDefinition.readAccessInWorkspace.description"
+		/>
+		<command
+			category="org.eclipse.search.ui.category.search"
+			id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy"
+			name= "%ActionDefinition.readAccessInHierarchy.name"
+			description="%ActionDefinition.readAccessInHierarchy.description"
+		/>
+		<command
+			category="org.eclipse.search.ui.category.search"
+			id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set"
+			name= "%ActionDefinition.readAccessInWorkingSet.name"
+			description="%ActionDefinition.readAccessInWorkingSet.description"
+		/>
+		<command
+			category="org.eclipse.search.ui.category.search"
+			id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace"
+			name= "%ActionDefinition.writeAccessInWorkspace.name"
+			description="%ActionDefinition.writeAccessInWorkspace.description"
+		/>
+		<command
+			category="org.eclipse.search.ui.category.search"
+			id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy"
+			name= "%ActionDefinition.writeAccessInHierarchy.name"
+			description="%ActionDefinition.writeAccessInHierarchy.description"
+		/>
+		<command
+			category="org.eclipse.search.ui.category.search"
+			id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set"
+			name= "%ActionDefinition.writeAccessInWorkingSet.name"
+			description="%ActionDefinition.writeAccessInWorkingSet.description"
+		/>
+		<command
+			category="org.eclipse.search.ui.category.search"
+			id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
+			name= "%ActionDefinition.declarationsInWorkspace.name"
+			description="%ActionDefinition.declarationsInWorkspace.description"
+		/>
+		<keyBinding
+			string="Alt+G"
+			scope="org.eclipse.ui.globalScope"
+			command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
+			configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+		/>
+		<keyBinding
+			platform="carbon"
+			string="Command+G"
+			scope="org.eclipse.ui.globalScope"
+			command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
+			configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+		/>
+		<keyBinding
+			string="Ctrl+G"
+			scope="org.eclipse.ui.globalScope"
+			command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
+			configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+		/>
+		<keyBinding
+			platform="carbon"
+			string="Command+G"
+			scope="org.eclipse.ui.globalScope"
+			command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
+			configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+		/>
+
+		<command
+			category="org.eclipse.search.ui.category.search"
+			id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy"
+			name= "%ActionDefinition.declarationsInHierarchy.name"
+			description="%ActionDefinition.declarationsInHierarchy.description"
+		/>
+		<command
+			category="org.eclipse.search.ui.category.search"
+			id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set"
+			name= "%ActionDefinition.declarationsInWorkingSet.name"
+			description="%ActionDefinition.declarationsInWorkingSet.description"
+		/>
+		<command
+			category="org.eclipse.search.ui.category.search"
+			id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace"
+			name= "%ActionDefinition.implementorsInWorkspace.name"
+			description="%ActionDefinition.implementorsInWorkspace.description"
+		/>
+		<command
+			category="org.eclipse.search.ui.category.search"
+			id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set"
+			name= "%ActionDefinition.implementorsInWorkingSet.name"
+			description="%ActionDefinition.implementorsInWorkingSet.description"
+		/>
+		<command
+			category="org.eclipse.search.ui.category.search"
+			id="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
+			name= "%ActionDefinition.occurrencesInFile.name"
+			description="%ActionDefinition.occurrencesInFile.description"
+		/>
+		<keyBinding
+			string="Ctrl+Shift+U"
+			scope="org.eclipse.ui.globalScope"
+			command="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
+			configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+		/>
+		<keyBinding
+			string="Ctrl+Shift+U"
+			scope="org.eclipse.ui.globalScope"
+			command="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
+			configuration="org.eclipse.ui.emacsAcceleratorConfiguration"
+		/>
+	</extension>
+
 
 <!-- =========================================================================== -->
 <!-- Java Editor Key Bindings -->
@@ -2432,23 +2516,6 @@
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.package.view" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.navigator.view" />
 
-		<!-- search -->
-		<accelerator key="Ctrl+Shift+G" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace" />
-		<accelerator key="Ctrl+Shift+U" id="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set" />
-		<accelerator key="Alt+G" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.seach.implementors.in.working.set" />
-	
 	</acceleratorSet>	
 	
 	<acceleratorSet
@@ -2485,31 +2552,7 @@
 		
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.package.view" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.navigator.view" />
-
-		<!-- search -->
-		<accelerator key="Ctrl+Shift+G" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace" />
-		<accelerator key="Ctrl+Shift+U" id="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set" />
-		<accelerator key="Ctrl+G" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.seach.implementors.in.working.set" />
 	</acceleratorSet>
-	
-	<acceleratorSet scopeId="org.eclipse.ui.globalScope" configurationId="org.eclipse.ui.defaultAcceleratorConfiguration">
-		<!-- search --> 
-		<accelerator key="Command+Shift+G" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace" platform="carbon" /> 
-		<accelerator key="Command+G" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace" platform="carbon" /> 
-</acceleratorSet>
-	
 </extension>
 
 <extension point="org.eclipse.ui.markerResolution"> 
