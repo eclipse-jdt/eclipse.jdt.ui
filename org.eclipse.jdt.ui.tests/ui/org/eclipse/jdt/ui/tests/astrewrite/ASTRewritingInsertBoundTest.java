@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -34,8 +35,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
+import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ListRewriter;
 
 public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 
@@ -122,22 +124,17 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
-		List decls= type.bodyDeclarations();
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
-
-		decls.add(0, decl1);
-		decls.add(decl2);
-				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
 		
-		proposal.apply(null);
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertFirst(decl1, null);
+		listRewrite.insertLast(decl2, null);
+				
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -161,8 +158,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testInsert3() throws Exception {
@@ -191,22 +188,20 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
-
-		decls.add(1, decl1);
-		decls.add(3, decl2);
-				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
 		
-		proposal.apply(null);
+		ASTNode middleDecl= (ASTNode) decls.get(1);
+		
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertBefore(decl1, middleDecl, null);
+		listRewrite.insertAfter(decl2, middleDecl, null);
+				
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -230,8 +225,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	
@@ -261,28 +256,21 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
-		List decls= type.bodyDeclarations();
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
 		MethodDeclaration decl3= newMethodDeclaration(ast, "new3");
-		rewrite.markAsInserted(decl3);
 		MethodDeclaration decl4= newMethodDeclaration(ast, "new4");
-		rewrite.markAsInserted(decl4);
-
-		decls.add(0, decl1);
-		decls.add(1, decl2);
-		decls.add(decl3);
-		decls.add(decl4);	
 				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertFirst(decl1, null);
+		listRewrite.insertAfter(decl2, decl1, null);
+		listRewrite.insertLast(decl3, null);
+		listRewrite.insertAfter(decl4, decl3, null);
 		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -310,8 +298,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}	
 
 	public void testInsert1Before() throws Exception {
@@ -340,22 +328,17 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
-		List decls= type.bodyDeclarations();
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
-
-		decls.add(0, decl1);
-		decls.add(decl2);
-				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
 		
-		proposal.apply(null);
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertFirst(decl1, null);
+		listRewrite.insertLast(decl2, null);
+		
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -378,8 +361,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("\n");
 		buf.append("//c4\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testInsert2Before() throws Exception {
@@ -408,28 +391,22 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
-		List decls= type.bodyDeclarations();
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
 		FieldDeclaration decl3= newFieldDeclaration(ast, "new3");
-		rewrite.markAsInserted(decl3);
 		FieldDeclaration decl4= newFieldDeclaration(ast, "new4");
-		rewrite.markAsInserted(decl4);
-
-		decls.add(0, decl1);
-		decls.add(1, decl2);
-		decls.add(decl3);
-		decls.add(decl4);	
-				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
 		
-		proposal.apply(null);
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertFirst(decl1, null);
+		listRewrite.insertAfter(decl2, decl1, null);
+		listRewrite.insertLast(decl3, null);
+		listRewrite.insertAfter(decl4, decl3, null);
+		
+				
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -457,8 +434,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}	
 	
 	public void testInsert3Before() throws Exception {
@@ -487,22 +464,20 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
 
-		decls.add(1, decl1);
-		decls.add(3, decl2);
-				
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
+		ASTNode middleDecl= (ASTNode) decls.get(1);
 		
-		proposal.apply(null);
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertBefore(decl1, middleDecl, null);
+		listRewrite.insertAfter(decl2, middleDecl, null);
+				
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -525,8 +500,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("\n");
 		buf.append("//c4\n");
 		buf.append("}\n");	
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testRemove1() throws Exception {
@@ -554,17 +529,14 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 	
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
 		rewrite.markAsRemoved((ASTNode) decls.get(0));
 		rewrite.markAsRemoved((ASTNode) decls.get(2));
 			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -576,8 +548,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testRemove2() throws Exception {
@@ -605,16 +577,13 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 	
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
 		rewrite.markAsRemoved((ASTNode) decls.get(1));
 			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -630,8 +599,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testRemove3() throws Exception {
@@ -659,17 +628,14 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 	
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
 		rewrite.markAsRemoved((ASTNode) decls.get(1));
 		rewrite.markAsRemoved((ASTNode) decls.get(2));
 			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -681,8 +647,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testRemove4() throws Exception {
@@ -710,7 +676,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 	
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -718,10 +684,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		rewrite.markAsRemoved((ASTNode) decls.get(1));
 		rewrite.markAsRemoved((ASTNode) decls.get(2));
 			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -730,8 +693,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	
@@ -761,7 +724,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -769,17 +732,13 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		rewrite.markAsRemoved((ASTNode) decls.get(2));
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
 
-		decls.add(0, decl1);
-		decls.add(decl2);		
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertFirst(decl1, null);
+		listRewrite.insertLast(decl2, null);
 			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -797,8 +756,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testRemoveInsert2() throws Exception {
@@ -827,7 +786,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -835,23 +794,20 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		rewrite.markAsRemoved((ASTNode) decls.get(2));
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
 		MethodDeclaration decl3= newMethodDeclaration(ast, "new3");
-		rewrite.markAsInserted(decl3);
 		MethodDeclaration decl4= newMethodDeclaration(ast, "new4");
-		rewrite.markAsInserted(decl4);
-
-		decls.add(0, decl1);
-		decls.add(2, decl2);
-		decls.add(decl3);
-		decls.add(decl4);
-			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
 		
-		proposal.apply(null);
+		ASTNode firstDecl= (ASTNode) decls.get(0);
+		
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertBefore(decl1, firstDecl, null);
+		listRewrite.insertAfter(decl2, firstDecl, null);
+		listRewrite.insertLast(decl3, null);
+		listRewrite.insertAfter(decl4, decl3, null);
+		
+			
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -873,8 +829,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testRemoveInsert3() throws Exception {
@@ -903,24 +859,22 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
 		rewrite.markAsRemoved((ASTNode) decls.get(1));
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
-
-		decls.add(1, decl1);
-		decls.add(3, decl2);
-			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
 		
-		proposal.apply(null);
+		ASTNode middleDecl= (ASTNode) decls.get(1);
+		
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertBefore(decl1, middleDecl, null);
+		listRewrite.insertAfter(decl2, middleDecl, null);
+			
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -940,8 +894,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	
@@ -971,7 +925,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -979,17 +933,14 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		rewrite.markAsRemoved((ASTNode) decls.get(2));
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
-
-		decls.add(0, decl1);
-		decls.add(decl2);		
-			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
+				
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertFirst(decl1, null);
+		listRewrite.insertLast(decl2, null);
 		
-		proposal.apply(null);
+			
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1007,8 +958,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testRemoveInsert2Before() throws Exception {
@@ -1037,7 +988,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1045,23 +996,19 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		rewrite.markAsRemoved((ASTNode) decls.get(2));
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
 		FieldDeclaration decl3= newFieldDeclaration(ast, "new3");
-		rewrite.markAsInserted(decl3);
 		FieldDeclaration decl4= newFieldDeclaration(ast, "new4");
-		rewrite.markAsInserted(decl4);
 
-		decls.add(0, decl1);
-		decls.add(2, decl2);
-		decls.add(decl3);
-		decls.add(decl4);
-			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
+		ASTNode firstDecl= (ASTNode) decls.get(0);
 		
-		proposal.apply(null);
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertBefore(decl1, firstDecl, null);
+		listRewrite.insertAfter(decl2, firstDecl, null);
+		listRewrite.insertLast(decl3, null);
+		listRewrite.insertAfter(decl4, decl3, null);
+			
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1083,8 +1030,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testRemoveInsert3Before() throws Exception {
@@ -1113,24 +1060,22 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
 		rewrite.markAsRemoved((ASTNode) decls.get(1));
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
 
-		decls.add(1, decl1);
-		decls.add(3, decl2);
-			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
+		ASTNode middleDecl= (ASTNode) decls.get(1);
 		
-		proposal.apply(null);
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertBefore(decl1, middleDecl, null);
+		listRewrite.insertAfter(decl2, middleDecl, null);
+			
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1150,8 +1095,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");		
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testRemoveInsert4() throws Exception {
@@ -1180,7 +1125,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1188,17 +1133,15 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		rewrite.markAsRemoved((ASTNode) decls.get(2));
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
 
-		decls.add(1, decl1);
-		decls.add(3, decl2);		
-			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
+		ASTNode middleDecl= (ASTNode) decls.get(1);
 		
-		proposal.apply(null);
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertBefore(decl1, middleDecl, null);
+		listRewrite.insertAfter(decl2, middleDecl, null);	   
+			
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1216,8 +1159,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 
 	public void testRemoveInsert4Before() throws Exception {
@@ -1246,7 +1189,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1254,18 +1197,15 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		rewrite.markAsRemoved((ASTNode) decls.get(2));
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
 
-
-		decls.add(1, decl1);
-		decls.add(3, decl2);		
-			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
+		ASTNode middleDecl= (ASTNode) decls.get(1);
 		
-		proposal.apply(null);
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertBefore(decl1, middleDecl, null);
+		listRewrite.insertAfter(decl2, middleDecl, null);	
+			
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1281,12 +1221,12 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}	
 	
 	public void testRemoveInsert5() throws Exception {
-		// remove first and add after and befroe first, remove last and add after and before last
+		// remove first and add after and before first, remove last and add after and before last
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1311,7 +1251,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1319,23 +1259,21 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		rewrite.markAsRemoved((ASTNode) decls.get(2));
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
 		MethodDeclaration decl3= newMethodDeclaration(ast, "new3");
-		rewrite.markAsInserted(decl3);
 		MethodDeclaration decl4= newMethodDeclaration(ast, "new4");
-		rewrite.markAsInserted(decl4);
 		
-		decls.add(0, decl1);
-		decls.add(2, decl2);
-		decls.add(4, decl3);
-		decls.add(decl4);
+		ASTNode firstDecl= (ASTNode) decls.get(0);
+		ASTNode lastDecl= (ASTNode) decls.get(2);
+		
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertBefore(decl1, firstDecl, null);
+		listRewrite.insertAfter(decl2, firstDecl, null);
+		listRewrite.insertBefore(decl3, lastDecl, null);
+		listRewrite.insertAfter(decl4, lastDecl, null);
+		
 			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1357,8 +1295,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 
 	public void testRemoveInsert5Before() throws Exception {
@@ -1387,7 +1325,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1395,23 +1333,20 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		rewrite.markAsRemoved((ASTNode) decls.get(2));
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
 		FieldDeclaration decl3= newFieldDeclaration(ast, "new3");
-		rewrite.markAsInserted(decl3);
 		FieldDeclaration decl4= newFieldDeclaration(ast, "new4");
-		rewrite.markAsInserted(decl4);
 
-		decls.add(0, decl1);
-		decls.add(2, decl2);
-		decls.add(4, decl3);
-		decls.add(decl4);	
-			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
+		ASTNode firstDecl= (ASTNode) decls.get(0);
+		ASTNode lastDecl= (ASTNode) decls.get(2);
 		
-		proposal.apply(null);
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertBefore(decl1, firstDecl, null);
+		listRewrite.insertAfter(decl2, firstDecl, null);
+		listRewrite.insertBefore(decl3, lastDecl, null);
+		listRewrite.insertAfter(decl4, lastDecl, null);
+			
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1433,8 +1368,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}	
 	
 
@@ -1464,7 +1399,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1473,17 +1408,13 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		rewrite.markAsRemoved((ASTNode) decls.get(2));
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
-
-		decls.add(0, decl1);
-		decls.add(decl2);		
-			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
 		
-		proposal.apply(null);
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertFirst(decl1, null);
+		listRewrite.insertLast(decl2, null);
+			
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1497,8 +1428,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 	public void testRemoveInsert6Before() throws Exception {
@@ -1527,7 +1458,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1536,17 +1467,13 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		rewrite.markAsRemoved((ASTNode) decls.get(2));
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
 
-		decls.add(0, decl1);
-		decls.add(decl2);		
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertFirst(decl1, null);
+		listRewrite.insertLast(decl2, null);
 			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
-		
-		proposal.apply(null);
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1560,8 +1487,8 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 
@@ -1591,7 +1518,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1600,17 +1527,15 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		rewrite.markAsRemoved((ASTNode) decls.get(2));
 		
 		MethodDeclaration decl1= newMethodDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		MethodDeclaration decl2= newMethodDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
 
-		decls.add(1, decl1);
-		decls.add(3, decl2);		
-			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
+		ASTNode middleDecl= (ASTNode) decls.get(1);
 		
-		proposal.apply(null);
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertBefore(decl1, middleDecl, null);
+		listRewrite.insertAfter(decl2, middleDecl, null);
+			
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1624,11 +1549,10 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
-
 	public void testRemoveInsert7Before() throws Exception {
 		// remove all, add after first and before last
 		
@@ -1655,7 +1579,7 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		NewASTRewrite rewrite= new NewASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 		List decls= type.bodyDeclarations();
 
@@ -1664,17 +1588,15 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		rewrite.markAsRemoved((ASTNode) decls.get(2));
 		
 		FieldDeclaration decl1= newFieldDeclaration(ast, "new1");
-		rewrite.markAsInserted(decl1);
 		FieldDeclaration decl2= newFieldDeclaration(ast, "new2");
-		rewrite.markAsInserted(decl2);
 
-		decls.add(1, decl1);
-		decls.add(3, decl2);		
-			
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-		proposal.getCompilationUnitChange().setSave(true);
+		ASTNode middleDecl= (ASTNode) decls.get(1);
 		
-		proposal.apply(null);
+		ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+		listRewrite.insertBefore(decl1, middleDecl, null);
+		listRewrite.insertAfter(decl2, middleDecl, null);
+			
+		String preview= evaluateRewrite(cu, rewrite);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1688,16 +1610,11 @@ public class ASTRewritingInsertBoundTest extends ASTRewritingTest {
 		buf.append("//c4\n");
 		buf.append("}\n");	
 		
-		assertEqualString(cu.getSource(), buf.toString());
-		clearRewrite(rewrite);
+		assertEqualString(preview, buf.toString());
+
 	}
 	
 
-
-
-
-
-	
 }
 
 
