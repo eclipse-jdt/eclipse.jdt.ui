@@ -201,7 +201,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				processChildrenDelta(delta, changedTypes);
 				break;
 			case IJavaElement.COMPILATION_UNIT:
-				if (delta.getKind() == IJavaElementDelta.CHANGED && delta.getFlags() == IJavaElementDelta.F_CONTENT) {
+				if (delta.getKind() == IJavaElementDelta.CHANGED && (delta.getFlags() & IJavaElementDelta.F_CONTENT) != 0) {
 					try {
 						IType[] types= ((ICompilationUnit) element).getAllTypes();
 						for (int i= 0; i < types.length; i++) {
@@ -215,7 +215,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				}
 				break;
 			case IJavaElement.CLASS_FILE:	
-				if (delta.getKind() == IJavaElementDelta.CHANGED && delta.getFlags() == IJavaElementDelta.F_CONTENT) {
+				if (delta.getKind() == IJavaElementDelta.CHANGED && (delta.getFlags() & IJavaElementDelta.F_CONTENT) != 0) {
 					try {
 						IType type= ((IClassFile) element).getType();
 						processTypeDelta(type, changedTypes);
