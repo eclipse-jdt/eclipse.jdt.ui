@@ -17,6 +17,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
@@ -27,8 +28,6 @@ import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.search.ui.SearchUI;
 
-import org.eclipse.search.internal.ui.SearchPlugin;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -38,7 +37,6 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
@@ -85,7 +83,7 @@ public class GotoMarkerAction extends Action {
 				objectToOpen= marker.getResource();
 			editor= EditorUtility.openInEditor(objectToOpen, false);
 		} catch (CoreException ex) {
-			MessageDialog.openError(SearchPlugin.getActiveWorkbenchShell(), SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
+			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 		if (editor != null)
 			editor.gotoMarker(marker);
@@ -119,21 +117,44 @@ public class GotoMarkerAction extends Action {
 	
 	private void showInEditor(IMarker marker, IWorkbenchPage page, IEditorInput input, String editorId) {
 		IEditorPart editor= page.findEditor(input);
-		if (editor == null) {
-			if (fEditor != null && !fEditor.isDirty() && !isPinned(fEditor))
+		if (editor != null)
+			page.bringToTop(editor);
+		else {
+			boolean isOpen= false;
+			if (fEditor != null) {
+				IEditorReference[] parts= page.getEditorReferences();
+				int i= 0;
+				while (!isOpen && i < parts.length)
+					isOpen= fEditor == parts[i++].getEditor(false);
+			}
+				
+			boolean canBeReused= isOpen && !fEditor.isDirty() && !isPinned(fEditor);
+			boolean showsSameInputType= fEditor != null && fEditor.getSite().getId().equals(editorId);
+			if (canBeReused && !showsSameInputType) {
 				page.closeEditor(fEditor, false);
+				fEditor= null;
+			}
+			
+			if (canBeReused && showsSameInputType) {
+				((IReusableEditor)fEditor).setInput(input);
+				page.bringToTop(fEditor);
+				editor= fEditor;
+			} else {
 				try {
 					editor= page.openEditor(input, editorId, false);
+					if (editor instanceof IReusableEditor)
+						fEditor= editor;
+					else
+						fEditor= null;
 				} catch (PartInitException ex) {
-					MessageDialog.openError(SearchPlugin.getActiveWorkbenchShell(), SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
+					MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
 					return;
 				}
-		} else {
-			page.bringToTop(editor);
+			}
 		}
+
 		if (editor != null) {
 			editor.gotoMarker(marker);
-			fEditor = editor;
 		}
 	}
 
@@ -143,7 +164,7 @@ public class GotoMarkerAction extends Action {
 			if (view instanceof IPackagesViewPart)
 				((IPackagesViewPart)view).selectAndReveal(javaElement);
 		} catch (PartInitException ex) {
-			MessageDialog.openError(SearchPlugin.getActiveWorkbenchShell(), SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
+			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
 	
