@@ -29,12 +29,14 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.util.IClassFileReader;
 import org.eclipse.jdt.core.util.ISourceAttribute;
 
@@ -206,27 +208,27 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 		}
 	}
 
-	private void visitCompilationUnit(IFile file) throws JavaModelException {
+	private void visitCompilationUnit(IFile file) {
 		ICompilationUnit cu= JavaCore.createCompilationUnitFrom(file);
 		if (cu != null) {
 			ICompilationUnit workingCopy= null;
 			try {
 				workingCopy= (ICompilationUnit) cu.getWorkingCopy();
-				synchronized(workingCopy) {
-					workingCopy.reconcile();
-				}
+				IPath relPath= getPackagePath(workingCopy.getSource());
 				IPath packPath= file.getParent().getFullPath();
-				IPackageDeclaration[] decls= workingCopy.getPackageDeclarations();
 				String cuName= file.getName();
-				if (decls.length == 0) {
+				if (relPath == null) {
 					addToMap(fSourceFolders, packPath, new Path(cuName));
 				} else {
-					IPath relpath= new Path(decls[0].getElementName().replace('.', '/'));
-					IPath folderPath= getFolderPath(packPath, relpath);
+					IPath folderPath= getFolderPath(packPath, relPath);
 					if (folderPath != null) {
-						addToMap(fSourceFolders, folderPath, relpath.append(cuName));
-					}
-				}						
+						addToMap(fSourceFolders, folderPath, relPath.append(cuName));
+					}					
+				}				
+			} catch (JavaModelException e) {
+				// ignore
+			} catch (InvalidInputException e) {
+				// ignore
 			} finally {
 				if (workingCopy != null) {
 					workingCopy.destroy();
@@ -234,6 +236,29 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 			}
 		}
 	}
+	
+	private IPath getPackagePath(String source) throws InvalidInputException {
+		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+		scanner.setSource(source.toCharArray());
+		scanner.resetTo(0, scanner.getSource().length);
+		int tok= scanner.getNextToken();
+		if (tok != ITerminalSymbols.TokenNamepackage) {
+			return null;
+		}
+		IPath res= Path.EMPTY;
+		do {
+			tok= scanner.getNextToken();
+			if (tok == ITerminalSymbols.TokenNameIdentifier) {
+				res= res.append(new String(scanner.getCurrentTokenSource()));
+			} else {
+				return res;
+			}
+			tok= scanner.getNextToken();
+		} while (tok == ITerminalSymbols.TokenNameDOT);
+		
+		return res;
+	}
+	
 	
 	private void addToMap(HashMap map, IPath folderPath, IPath relPath) {
 		List list= (List) map.get(folderPath);
@@ -266,7 +291,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.resources.IResourceProxyVisitor#visit(org.eclipse.core.resources.IResourceProxy)
 	 */
-	public boolean visit(IResourceProxy proxy) throws CoreException {
+	public boolean visit(IResourceProxy proxy) {
 		if (proxy.getType() == IResource.FILE) {
 			String name= proxy.getName();
 			if (hasExtension(name, ".java") && isValidCUName(name)) { //$NON-NLS-1$
