@@ -54,6 +54,7 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceSorter;
 
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaModelStatus;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
@@ -478,10 +479,10 @@ public class BuildPathsBlock {
 			}
 		}
 				
-		if (fCurrJProject.hasClasspathCycle(entries)) {
+/*		if (fCurrJProject.hasClasspathCycle(entries)) {
 			fClassPathStatus.setWarning(NewWizardMessages.getString("BuildPathsBlock.warning.CycleInClassPath")); //$NON-NLS-1$
 		}
-		
+*/		
 		updateBuildPathStatus();
 	}
 
@@ -520,9 +521,9 @@ public class BuildPathsBlock {
 			entries[i]= currElement.getClasspathEntry();
 		}
 		
-		IStatus status= JavaConventions.validateClasspath(fCurrJProject, entries, fOutputLocationPath);
+		IJavaModelStatus status= JavaConventions.validateClasspath(fCurrJProject, entries, fOutputLocationPath);
 		if (!status.isOK()) {
-			fBuildPathStatus.setError(status.getMessage());
+			fBuildPathStatus.setError(status.getString());
 			return;
 		}
 		fBuildPathStatus.setOK();

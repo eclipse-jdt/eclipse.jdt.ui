@@ -2,6 +2,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -25,6 +26,8 @@ public class ClasspathContainerWizard extends Wizard {
 	private IClasspathContainerPage fContainerPage;
 	private IJavaProject fCurrProject;
 	private IClasspathEntry[] fCurrClasspath;
+	
+	private ClasspathContainerSelectionPage fSelectionWizardPage;
 
 	/**
 	 * Constructor for ClasspathContainerWizard.
@@ -79,37 +82,64 @@ public class ClasspathContainerWizard extends Wizard {
 	 * @see IWizard#addPages()
 	 */
 	public void addPages() {
-
-		if (fPageDesc == null && fEntryToEdit != null) {
+		if (fPageDesc != null) {
+			fContainerPage= getContainerPage(fPageDesc);
+			addPage(fContainerPage);			
+		} else if (fEntryToEdit == null) { // new entry: show selection page as first page
 			ClasspathContainerDescriptor[] containers= ClasspathContainerDescriptor.getDescriptors();
 
-			fPageDesc= findDescriptorPage(containers, fEntryToEdit);
-		}
+			fSelectionWizardPage= new ClasspathContainerSelectionPage(containers);
+			addPage(fSelectionWizardPage);
 
+			// add as dummy, will not be shown
+			fContainerPage= new ClasspathContainerDefaultPage();
+			addPage(fContainerPage);
+		} else { // fPageDesc == null && fEntryToEdit != null
+			ClasspathContainerDescriptor[] containers= ClasspathContainerDescriptor.getDescriptors();
+			ClasspathContainerDescriptor descriptor= findDescriptorPage(containers, fEntryToEdit);
+			fContainerPage= getContainerPage(descriptor);
+			addPage(fContainerPage);				
+		}
+		super.addPages();
+	}
+	
+	private IClasspathContainerPage getContainerPage(ClasspathContainerDescriptor pageDesc) {
 		IClasspathContainerPage containerPage= null;
-		if (fPageDesc != null) {
+		if (pageDesc != null) {
 			try {
-				containerPage= fPageDesc.createPage();
+				containerPage= pageDesc.createPage();
 			} catch (CoreException e) {
 				handlePageCreationFailed(e);
+				return null;
 			}
 		}
 
 		if (containerPage == null)	{
 			containerPage= new ClasspathContainerDefaultPage();
 		}
-		
+
 		if (containerPage instanceof IClasspathContainerPageExtension) {
 			((IClasspathContainerPageExtension) containerPage).initialize(fCurrProject, fCurrClasspath);
 		}
-		
+
 		containerPage.setSelection(fEntryToEdit);
-		fContainerPage= containerPage;
-
-		addPage(containerPage);
-
-		super.addPages();
+		containerPage.setWizard(this);
+		return containerPage;
 	}
+	
+	/* (non-Javadoc)
+	 * @see IWizard#getNextPage(IWizardPage)
+	 */
+	public IWizardPage getNextPage(IWizardPage page) {
+		if (page == fSelectionWizardPage) {
+
+			ClasspathContainerDescriptor selected= fSelectionWizardPage.getSelected();
+			fContainerPage= getContainerPage(selected);
+			return fContainerPage;
+		}
+		return super.getNextPage(page);
+	}
+	
 	
 	private void handlePageCreationFailed(CoreException e) {
 		String title= NewWizardMessages.getString("ClasspathContainerWizard.pagecreationerror.title"); //$NON-NLS-1$
@@ -125,6 +155,23 @@ public class ClasspathContainerWizard extends Wizard {
 			}
 		}
 		return null;
-	}			
+	}
+	
+
+	/* (non-Javadoc)
+	 * @see IWizard#canFinish()
+	 */
+	public boolean canFinish() {
+		if (fSelectionWizardPage != null) {
+			if (!fContainerPage.isPageComplete()) {
+				return false;
+			}
+		}
+		if (fContainerPage != null) {
+			return fContainerPage.isPageComplete();
+		}
+		return false;
+	}
+	
 	
 }

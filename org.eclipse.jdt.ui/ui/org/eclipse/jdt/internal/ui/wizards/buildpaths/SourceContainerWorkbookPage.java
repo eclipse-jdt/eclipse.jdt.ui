@@ -29,7 +29,6 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerFilter;
 
-import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceSorter;
@@ -451,7 +450,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		String title= (existing == null) ? NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.new.title") : NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
 		String message= (existing == null) ? NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.new.description") : NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.edit.description"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
+		FolderSelectionDialog dialog= new FolderSelectionDialog(getShell(), lp, cp);
 		dialog.setValidator(validator);
 		dialog.setTitle(title);
 		dialog.setMessage(message);
@@ -463,8 +462,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		} else {
 			dialog.setInitialSelection(existing.getResource());
 		}		
-		if (dialog.open() == ElementTreeSelectionDialog.OK) {
-			Object[] elements= dialog.getResult();
+		if (dialog.open() == FolderSelectionDialog.OK) {
+			Object[] elements= dialog.getResult();	
 			CPListElement[] res= new CPListElement[elements.length];
 			for (int i= 0; i < res.length; i++) {
 				IResource elem= (IResource)elements[i];
