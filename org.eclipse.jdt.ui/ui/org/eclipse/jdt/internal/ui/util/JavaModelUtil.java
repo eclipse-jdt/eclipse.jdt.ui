@@ -39,11 +39,23 @@ public class JavaModelUtil {
 	public static IType findType(IJavaProject jproject, String fullyQualifiedName) throws JavaModelException {
 		String pathStr= fullyQualifiedName.replace('.', '/') + ".java"; //$NON-NLS-1$
 		IJavaElement jelement= jproject.findElement(new Path(pathStr));
-		if (jelement instanceof ICompilationUnit) {
+		if (jelement == null) {
+			// try to find it as inner type
+			String qualifier= Signature.getQualifier(fullyQualifiedName);
+			if (qualifier.length() > 0) {
+				IType type= findType(jproject, qualifier); // recursive!
+				if (type != null) {
+					IType res= type.getType(Signature.getSimpleName(fullyQualifiedName));
+					if (res.exists()) {
+						return res;
+					}
+				}
+			}
+		} else if (jelement.getElementType() == IJavaElement.COMPILATION_UNIT) {
 			String simpleName= Signature.getSimpleName(fullyQualifiedName);
-			return ((ICompilationUnit)jelement).getType(simpleName);
-		} else if (jelement instanceof IClassFile) {
-			return ((IClassFile)jelement).getType();
+			return ((ICompilationUnit) jelement).getType(simpleName);
+		} else if (jelement.getElementType() == IJavaElement.CLASS_FILE) {
+			return ((IClassFile) jelement).getType();
 		}
 		return null;
 	}
@@ -93,10 +105,14 @@ public class JavaModelUtil {
 	public static IJavaElement findTypeContainer(IJavaProject jproject, String typeContainerName) throws JavaModelException {
 		// try to find it as type
 		IJavaElement result= findType(jproject, typeContainerName);
-		if (result != null) {
+		if (result == null) {
 			// find it as package
 			IPath path= new Path(typeContainerName.replace('.', '/'));
-			result= jproject.findPackageFragment(path);
+			result= jproject.findElement(path);
+			if (!(result instanceof IPackageFragment)) {
+				result= null;
+			}
+			
 		}
 		return result;
 	}	

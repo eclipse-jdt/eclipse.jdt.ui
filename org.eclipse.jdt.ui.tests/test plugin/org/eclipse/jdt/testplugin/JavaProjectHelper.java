@@ -181,15 +181,29 @@ public class JavaProjectHelper {
 	/**
 	 * Adds a variable entry pointing to a JRE.
 	 * The arguments specify the names of the variable to be used.
-	 * Can return null, if no JRE installation was found.
+	 * @param libVarName Name of the variable for the library
+	 * @param srcVarName Name of the variable for the source attchment. Can be <code>null</code>.
+	 * @param srcrootVarName Name of the variable for the source attchment root. Can be <code>null</code>.
+	 * @return Returns <code>null</code>, if no JRE installation was found.
 	 */	
 	public static IPackageFragmentRoot addVariableRTJar(IJavaProject jproject, String libVarName, String srcVarName, String srcrootVarName) throws CoreException {
 		IPath[] rtJarPaths= findRtJar();
 		if (rtJarPaths != null) {
+			IPath libVarPath= new Path(libVarName);
+			IPath srcVarPath= null;
+			IPath srcrootVarPath= null;
 			JavaCore.setClasspathVariable(libVarName, rtJarPaths[0], null);
-			JavaCore.setClasspathVariable(srcVarName, rtJarPaths[1], null);
-			JavaCore.setClasspathVariable(srcrootVarName, rtJarPaths[2], null);		
-			return addVariableEntry(jproject, new Path(libVarName), new Path(srcVarName), new Path(srcrootVarName));
+			if (srcVarName != null) {
+				IPath varValue= rtJarPaths[1] != null ? rtJarPaths[1] : Path.EMPTY;
+				JavaCore.setClasspathVariable(srcVarName, varValue, null);
+				srcVarPath= new Path(srcVarName);
+			}
+			if (srcrootVarName != null) {
+				IPath varValue= rtJarPaths[2] != null ? rtJarPaths[2] : Path.EMPTY;
+				JavaCore.setClasspathVariable(srcrootVarName, varValue, null);
+				srcrootVarPath= new Path(srcrootVarName);
+			}
+			return addVariableEntry(jproject, libVarPath, srcVarPath, srcrootVarPath);
 		}
 		return null;
 	}	
