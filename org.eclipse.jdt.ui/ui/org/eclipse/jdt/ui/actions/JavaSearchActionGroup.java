@@ -26,9 +26,11 @@ import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
  * Action group that adds the Java search actions to a context menu and
@@ -133,32 +135,36 @@ public class JavaSearchActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-
-		IMenuManager target= menu;
-		IMenuManager searchSubMenu= null;
-		if (fEditor != null) {
-			String groupName= SearchMessages.getString("group.search"); //$NON-NLS-1$
-			searchSubMenu= new MenuManager(groupName, ITextEditorActionConstants.GROUP_FIND);
-			searchSubMenu.add(new GroupMarker(ITextEditorActionConstants.GROUP_FIND));
-			target= searchSubMenu;
-		}
-
-		fReferencesGroup.fillContextMenu(target);
-		fDeclarationsGroup.fillContextMenu(target);
-		fImplementorsGroup.fillContextMenu(target);
-		fReadAccessGroup.fillContextMenu(target);
-		fWriteAccessGroup.fillContextMenu(target);
 		
-		if (searchSubMenu != null) {
-			searchSubMenu.add(new Separator());
-			addAction(target, fOccurrencesInFileAction);
+		if(PreferenceConstants.getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_SEARCH_MENU)) {
+			fReferencesGroup.fillContextMenu(menu);
 		} else {
-			addAction(target, IContextMenuConstants.GROUP_SEARCH, fOccurrencesInFileAction);
-		}
-		
-		// no other way to find out if we have added items.
-		if (searchSubMenu != null && searchSubMenu.getItems().length > 2) {		
-			menu.appendToGroup(ITextEditorActionConstants.GROUP_FIND, searchSubMenu);
+			IMenuManager target= menu;
+			IMenuManager searchSubMenu= null;
+			if (fEditor != null) {
+				String groupName= SearchMessages.getString("group.search"); //$NON-NLS-1$
+				searchSubMenu= new MenuManager(groupName, ITextEditorActionConstants.GROUP_FIND);
+				searchSubMenu.add(new GroupMarker(ITextEditorActionConstants.GROUP_FIND));
+				target= searchSubMenu;
+			}
+			
+			fReferencesGroup.fillContextMenu(target);
+			fDeclarationsGroup.fillContextMenu(target);
+			fImplementorsGroup.fillContextMenu(target);
+			fReadAccessGroup.fillContextMenu(target);
+			fWriteAccessGroup.fillContextMenu(target);
+			
+			if (searchSubMenu != null) {
+				searchSubMenu.add(new Separator());
+				addAction(target, fOccurrencesInFileAction);
+			} else {
+				addAction(target, IContextMenuConstants.GROUP_SEARCH, fOccurrencesInFileAction);
+			}
+			
+			// no other way to find out if we have added items.
+			if (searchSubMenu != null && searchSubMenu.getItems().length > 2) {		
+				menu.appendToGroup(ITextEditorActionConstants.GROUP_FIND, searchSubMenu);
+			}
 		}
 	}	
 
