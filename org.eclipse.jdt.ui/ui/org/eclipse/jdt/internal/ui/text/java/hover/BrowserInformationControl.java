@@ -57,9 +57,6 @@ import org.eclipse.jface.text.IInformationControlExtension3;
  * - the size computation is too small
  * - focusLost event is not sent (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=84532)
  * </p>
- * <p>
- * NOTE: This API is work in progress and may change before the final API freeze. (FIXME)
- * </p>
  * 
  * @since 3.1
  */
