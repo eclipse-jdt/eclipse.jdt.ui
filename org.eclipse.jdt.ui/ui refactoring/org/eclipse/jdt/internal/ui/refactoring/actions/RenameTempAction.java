@@ -15,7 +15,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
 
-public class RenameTempAction extends TextSelectionBasedRefactoringAction{
+class RenameTempAction extends TextSelectionBasedRefactoringAction{
 
 	public RenameTempAction() {
 		super("Rename Local Variable");
