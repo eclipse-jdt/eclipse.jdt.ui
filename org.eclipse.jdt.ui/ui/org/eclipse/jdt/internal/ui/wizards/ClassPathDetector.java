@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.util.IClassFileReader;
+import org.eclipse.jdt.core.util.ISourceAttribute;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -119,12 +120,12 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 
 			IClassFileReader reader= ToolFactory.createDefaultClassFileReader(location.toOSString(), IClassFileReader.CLASSFILE_ATTRIBUTES);
 			char[] className= reader.getClassName();
-			char[] sourceName= reader.getSourceFileAttribute().getSourceFileName();
-			if (className != null && sourceName != null) {
+			ISourceAttribute sourceAttribute= reader.getSourceFileAttribute();
+			if (className != null && sourceAttribute != null && sourceAttribute.getSourceFileName() != null) {
 				IPath packPath= file.getParent().getFullPath();
 				int idx= CharOperation.lastIndexOf('/', className) + 1;
 				IPath relPath= new Path(new String(className, 0, idx));
-				IPath cuPath= relPath.append(new String(sourceName));
+				IPath cuPath= relPath.append(new String(sourceAttribute.getSourceFileName()));
 				
 				IPath resPath= null;
 				if (idx == 0) {
