@@ -189,7 +189,7 @@ public final class ASTRewrite {
 	 * @param description Description of the change.
 	 */
 	public final void markAsInserted(ASTNode node, String description) {
-		markAsInserted(node, getDefaultBoundBehaviour(node), null);
+		markAsInserted(node, getDefaultBoundBehaviour(node), description);
 	}
 
 	/**
