@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.corext.refactoring;
+package org.eclipse.jdt.internal.corext.refactoring.util;
  
 import java.util.Collection;
 import java.util.Iterator;
