@@ -54,6 +54,9 @@ public class NLSHint {
 
     private IPackageFragment fResourceBundlePackage;
 
+	// legacy reasons
+    private final static String[] fieldNames = {"BUNDLE_NAME", "RESOURCE_BUNDLE"};
+
     public NLSHint(NLSLine[] nlsLines, ICompilationUnit cu) {
         IPackageFragment defaultPackage = (IPackageFragment) cu.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
         fPackage = defaultPackage;
@@ -86,7 +89,7 @@ public class NLSHint {
                 IType messageClass = javaProject.findType(fPackage.getElementName() + '.' + fMessageClass); 
                 if (messageClass != null) {
                     ASTNode ast = ASTCreator.createAST(messageClass.getCompilationUnit(), null);
-                    ResourceBundleNameFinder resourceBundleNameFinder = new ResourceBundleNameFinder(NLSRefactoring.BUNDLE_NAME);
+                    ResourceBundleNameFinder resourceBundleNameFinder = new ResourceBundleNameFinder(fieldNames);
                     ast.accept(resourceBundleNameFinder);
                     String resourceBundleName = resourceBundleNameFinder.getResourceBundleName() + NLSRefactoring.PROPERTY_FILE_EXT;
                     fResourceBundle = getResourceNameHelper(resourceBundleName);
@@ -101,11 +104,11 @@ public class NLSHint {
     private class ResourceBundleNameFinder extends ASTVisitor {
 
         private String fResourceBundleName;
-        private String fFieldName;
+        private String[] fFieldNames;
 
-        public ResourceBundleNameFinder(String fieldName) {
+        public ResourceBundleNameFinder(String[] fieldNames) {
             fResourceBundleName = null;            
-            fFieldName = fieldName;
+            fFieldNames = fieldNames;
         }
 
         public boolean visit(FieldDeclaration node) {
@@ -113,22 +116,24 @@ public class NLSHint {
             if (fragments.size() == 1) {
                 VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) fragments.get(0);
                 String id = variableDeclarationFragment.getName().getIdentifier();
-                if (id.equals(fFieldName)) {
-                    Expression initializer = variableDeclarationFragment.getInitializer();                    
-                    if (initializer != null) {
-                        if(initializer instanceof StringLiteral) {
-                            fResourceBundleName = ((StringLiteral) initializer).getLiteralValue();
-                        } else if (initializer instanceof MethodInvocation) {
-                            MethodInvocation methInvocation = (MethodInvocation) initializer;
-                            Expression exp = methInvocation.getExpression();
-                            if ((exp != null) && (exp instanceof TypeLiteral)) {                                
-                                SimpleType simple = (SimpleType) ((TypeLiteral) exp).getType();
-                                ITypeBinding typeBinding = simple.resolveBinding();
-                                fResourceBundleName = typeBinding.getQualifiedName();                                                                
-                            }                                                        
-                        }
-                    }
-                }
+                for (int i = 0; i < fieldNames.length; i++) {					
+                	if (id.equals(fFieldNames[i])) {
+                		Expression initializer = variableDeclarationFragment.getInitializer();                    
+                		if (initializer != null) {
+                			if(initializer instanceof StringLiteral) {
+                				fResourceBundleName = ((StringLiteral) initializer).getLiteralValue();
+                			} else if (initializer instanceof MethodInvocation) {
+                				MethodInvocation methInvocation = (MethodInvocation) initializer;
+                				Expression exp = methInvocation.getExpression();
+                				if ((exp != null) && (exp instanceof TypeLiteral)) {                                
+                					SimpleType simple = (SimpleType) ((TypeLiteral) exp).getType();
+                					ITypeBinding typeBinding = simple.resolveBinding();
+                					fResourceBundleName = typeBinding.getQualifiedName();                                                                
+                				}                                                        
+                			}
+                		}
+                	}
+				}
             }
             return true;
         }
@@ -211,15 +216,16 @@ public class NLSHint {
         ASTNode node = NodeFinder.perform(ast, region.getOffset(), region.getLength());
         if ((node != null) && (node.getParent() instanceof MethodInvocation)) {        	
             MethodInvocation methodInvocation = (MethodInvocation) node.getParent();
+            // only when nlsed String is argument of method, e.g. ignore: "nlsedString".toString()
             if (methodInvocation.arguments().indexOf(node) == 0) {
 	            IMethodBinding binding = methodInvocation.resolveMethodBinding();
-	            if (binding != null && Modifier.isStatic(binding.getModifiers())) {
+	            if ((binding != null) && Modifier.isStatic(binding.getModifiers())) {
 	                return binding.getDeclaringClass();
 	            }
             }
         }
         return null;
-    }
+    }	
     
     private IPackageFragment getPackageOfAccessorClass(ITypeBinding accessorBinding, ICompilationUnit cu) throws JavaModelException {
         return (IPackageFragment) Bindings.findCompilationUnit(accessorBinding, cu.getJavaProject()).getParent();

@@ -50,7 +50,7 @@ public class PropertyFileDocumentModell {
 
 	private int findInsertPosition(KeyValuePair keyValuePair) {
 		int insertIndex= 0;
-		while (((KeyValuePairModell)fKeyValuePairs.get(insertIndex)).compareTo(keyValuePair) < 0) {
+		while (((KeyValuePairModell) fKeyValuePairs.get(insertIndex)).compareTo(keyValuePair) < 0) {
 			insertIndex++;
 		}
 		return insertIndex;
@@ -119,7 +119,7 @@ public class PropertyFileDocumentModell {
 
 	private boolean isCommentOrWhiteSpace(String line) {
 		line= line.trim();
-		return ((line.length() == 0) || (line.startsWith("#"))); //$NON-NLS-1$
+		return ((line.length() == 0) || line.startsWith("#") || line.startsWith("!")); //$NON-NLS-1$
 	}
 
 	private InsertEdit getAdjustetInsertEdit(int insertIndex, KeyValuePairModell subsKeyValuePair) {
@@ -157,7 +157,7 @@ public class PropertyFileDocumentModell {
 
 		// TODO encode leading whitespaces !!!
 		public String getEncodedText() {
-			return fKey + '=' + escapeCommentChars(fValue) + '\n';
+			return unwindEscapeChars(fKey) + '=' + escapeCommentChars(unwindEscapeChars(fValue)) + '\n';			
 		}
 
 		public int compareTo(Object o) {
@@ -204,6 +204,61 @@ public class PropertyFileDocumentModell {
 			}
 			return sb.toString();
 		}
+		
+		private String unwindEscapeChars(String s) {
+			StringBuffer sb= new StringBuffer(s.length());
+			int length= s.length();
+			for (int i= 0; i < length; i++){
+				char c= s.charAt(i);
+				sb.append(getUnwoundString(c));
+			}
+			return sb.toString();
+		}
+		
+		private String getUnwoundString(char c){
+			switch(c){
+				case '\b' :
+					return "\\b";//$NON-NLS-1$
+				case '\t' :
+					return "\\t";//$NON-NLS-1$
+				case '\n' :
+					return "\\n";//$NON-NLS-1$
+				case '\f' :
+					return "\\f";//$NON-NLS-1$	
+				case '\r' :
+					return "\\r";//$NON-NLS-1$
+//	These can be used unescaped in properties file:
+//				case '\"' :
+//					return "\\\"";//$NON-NLS-1$
+//				case '\'' :
+//					return "\\\'";//$NON-NLS-1$
+				case '\\' :
+					return "\\\\";//$NON-NLS-1$
+//	This is only done when writing to the .properties file in NLSRefactoring.convertToPropertyValue(.)
+//				case '!':
+//					return "\\!";//$NON-NLS-1$
+//				case '#':
+//					return "\\#";//$NON-NLS-1$
+				default: 
+					if (((c < 0x0020) || (c > 0x007e))){
+						return new StringBuffer()
+							.append('\\')
+	                    	.append('u')
+	                    	.append(toHex((c >> 12) & 0xF))
+	                    	.append(toHex((c >>  8) & 0xF))
+	                    	.append(toHex((c >>  4) & 0xF))
+	                    	.append(toHex( c        & 0xF)).toString();
+						
+					} else
+						return String.valueOf(c);
+			}		
+		}
+		
+		private char toHex(int halfByte) {
+	        return HEX_DIGITS[(halfByte & 0xF)];
+	    }
+		
+		private final char[] HEX_DIGITS = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 	}
 
 	/**

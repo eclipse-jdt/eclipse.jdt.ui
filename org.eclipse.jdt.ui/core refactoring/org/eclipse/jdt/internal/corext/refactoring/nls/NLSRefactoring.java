@@ -27,6 +27,7 @@ import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -49,6 +50,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -529,14 +531,17 @@ public class NLSRefactoring extends Refactoring {
 	}
 
 	//---- resource bundle file
-	private Change createOrChangePropertyFile() throws JavaModelException {
-		if (!propertyFileExists()) {
-			return new CreateTextFileChange(getPropertyFilePath(), createPropertyFileSource(), "8859_1", "txt"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-
+	private Change createOrChangePropertyFile() throws CoreException {
 		String name= NLSMessages.getFormattedString("NLSrefactoring.Append_to_property_file", getPropertyFilePath().toString()); //$NON-NLS-1$
-		TextChange tfc= new TextFileChange(name, getPropertyFile());
+		TextChange tfc= null;
+		if (!propertyFileExists()) {
+			tfc= new DocumentChange(name, new Document());
+			addChanges(tfc, fNlsHolder.getSubstitutions(), fSubstitutionPrefix);
+			tfc.perform(new NullProgressMonitor());			
+			return new CreateTextFileChange(getPropertyFilePath(), tfc.getCurrentContent(), "ISO-8859-1", "txt"); //$NON-NLS-1$ //$NON-NLS-2$
+		}		
 
+		tfc= new TextFileChange(name, getPropertyFile());
 		try {
 			addChanges(tfc, fNlsHolder.getSubstitutions(), fSubstitutionPrefix);
 		} catch (Exception e) {
@@ -706,8 +711,8 @@ public class NLSRefactoring extends Refactoring {
 
 	public NLSLine[] getNLSLines() {
 		return fNlsHolder.getLines();
-	}
-
+	}	
+	
 	public String getPrefixHint() {
 		String cuName= fCu.getElementName();
 		if (cuName.endsWith(".java")) //$NON-NLS-1$

@@ -78,7 +78,7 @@ public class CreateFileChange extends JDTChange {
 				composite.add(new CreateFileChange(fPath, fSource));
 				return composite.perform(pm);
 			} else {
-				is= getInputStream();
+				is= getInputStream(file);
 				file.create(is, false, pm);
 				return new DeleteFileChange(file);
 			}				
@@ -93,7 +93,7 @@ public class CreateFileChange extends JDTChange {
 		}
 	}
 	
-	protected IFile getOldFile(IProgressMonitor pm){
+	protected IFile getOldFile(IProgressMonitor pm) {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			return ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
@@ -102,11 +102,19 @@ public class CreateFileChange extends JDTChange {
 		}
 	}
 
-	private InputStream getInputStream(){
-		if (fEncoding == null)
+	private InputStream getInputStream(IFile file) {
+		String encoding= fEncoding;
+		if (encoding == null) {
+			try {
+				encoding= file.getCharset();
+			} catch (CoreException e1) {
+				// fall through. Take default encoding.
+			}
+		}
+		if (encoding == null)
 			return new ByteArrayInputStream(fSource.getBytes());
 		try {
-			return new ByteArrayInputStream(fSource.getBytes(fEncoding));
+			return new ByteArrayInputStream(fSource.getBytes(encoding));
 		} catch (UnsupportedEncodingException e) {
 			return new ByteArrayInputStream(fSource.getBytes());
 		}
