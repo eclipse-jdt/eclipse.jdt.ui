@@ -18,6 +18,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
+import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -790,5 +791,18 @@ public class JavaElementLabels {
 		if (!store.getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES))
 			return ""; //$NON-NLS-1$
 		return store.getString(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW);
-	}	
+	}
+	
+	public static String getContainerEntryLabel(IPath containerPath, IJavaProject project) throws JavaModelException {
+		IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, project);
+		if (container != null) {
+			return container.getDescription();
+		}
+		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
+		if (initializer != null) {
+			return initializer.getDescription(containerPath, project);
+		}
+		return containerPath.toString();
+	}
+	
 }
