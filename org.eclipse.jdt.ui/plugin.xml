@@ -73,6 +73,7 @@
     	<view id="org.eclipse.jdt.debug.ui.DisplayView" 
         	relative="org.eclipse.debug.ui.InspectorView" 
     		relationship="stack"/> 
+    	<viewShortcut id="org.eclipse.jdt.debug.ui.DisplayView"/>
      </perspectiveExtension> 
 </extension>
 
