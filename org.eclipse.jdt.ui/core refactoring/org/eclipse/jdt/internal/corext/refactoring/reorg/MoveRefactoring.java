@@ -10,14 +10,13 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -162,6 +161,8 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 			result.merge(validateModifiesFiles());
 			return result;
+		} catch (JavaModelException e){
+			throw e;	
 		} catch (CoreException e){	
 			throw new JavaModelException(e);
 		} finally{
@@ -269,13 +270,15 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 		List result= new ArrayList();
 		result.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
 		result.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
+		if (getDestination() instanceof IPackageFragment)
+			result.addAll(Arrays.asList(ResourceUtil.getFiles(collectCus())));
 		return (IFile[]) result.toArray(new IFile[result.size()]);
 	}
 	
 	private RefactoringStatus validateModifiesFiles() throws CoreException{
 		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
-	
+
 	/* non java-doc
 	 * @see ReorgRefactoring#isValidDestinationForCusAndFiles(Object)
 	 */
@@ -496,17 +499,7 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 	private static void addAllChildren(CompositeChange collector, ICompositeChange composite){
 		collector.addAll(composite.getChildren());
 	}
-		
-	private ICompilationUnit[] collectCus(){
-		List cus= new ArrayList();
-		for (Iterator iter= getElements().iterator(); iter.hasNext(); ){
-			Object each= iter.next();
-			if (each instanceof ICompilationUnit)
-				cus.add(each);
-		}
-		return (ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()]);
-	}
-	
+			
 	/*
 	 * @see ReorgRefactoring#createChange(ICompilationUnit)
 	 */	

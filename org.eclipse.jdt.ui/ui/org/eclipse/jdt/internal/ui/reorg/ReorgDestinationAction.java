@@ -50,9 +50,11 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -64,10 +66,14 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringErrorDialogUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
@@ -82,10 +88,30 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 	}
 
 	protected boolean canOperateOn(IStructuredSelection selection) {
-		return ClipboardActionUtil.canActivate(createRefactoring(selection.toList()));
+		if (selection.isEmpty())
+			return false;
+		if (ClipboardActionUtil.hasOnlyProjects(selection))
+			return selection.size() == 1;
+		else
+			return ClipboardActionUtil.canActivate(createRefactoring(selection.toList()));
 	}
 
 	protected void run(IStructuredSelection selection) {
+		if (!needsSaving(selection)) {
+			doRun(selection);
+		} else {
+			RefactoringSaveHelper helper= new RefactoringSaveHelper();
+			try {
+				if (helper.saveEditors()) {
+					doRun(selection);
+				}
+			} finally {
+				helper.triggerBuild();
+			}
+		}
+	}
+	
+	private void doRun(IStructuredSelection selection) {
 		List elements= selection.toList();
 		if (!ensureSaved(elements, getActionName()))
 			return;
@@ -114,7 +140,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 				
 			if (! isOkToProceed(refactoring))
 				return;
-			doReorg(refactoring);
+			reorg(refactoring);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, ReorgMessages.getString("ReorgDestinationAction.exception_title"), ReorgMessages.getString("ReorgDestinationAction.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 		}	
@@ -164,13 +190,41 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		return true;
 	}
 	
- 	void doReorg(ReorgRefactoring refactoring) throws JavaModelException{
+	private boolean needsSaving(IStructuredSelection selection) {
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			Object element= (Object) iter.next();
+			if (element instanceof ICompilationUnit || element instanceof IType)
+				return true;
+		}
+		return false;
+	}
+	
+ 	void reorg(ReorgRefactoring refactoring) throws JavaModelException{
+		CheckConditionsOperation runnable= new CheckConditionsOperation(refactoring, CheckConditionsOperation.PRECONDITIONS);
+		try {
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, runnable);
+		} catch (InvocationTargetException e) {
+			ExceptionHandler.handle(e, getShell(), getActionName(), "Error occurred while performing this operation."); 
+			return;
+		} catch (InterruptedException e) {
+			Assert.isTrue(false); //cannot happen - not cancelable
+		}
+		RefactoringStatus status= runnable.getStatus();           
+		if (status == null)
+			return;
+		if (status.hasFatalError())
+			RefactoringErrorDialogUtil.open(getActionName(), status);//$NON-NLS-1$
+		else
+			doReorg(refactoring);
+	}
+	
+	private void doReorg(ReorgRefactoring refactoring) throws JavaModelException{
 		MultiStatus status= ClipboardActionUtil.perform(refactoring);
 		if (status.isOK()) 
 			return;
 		JavaPlugin.log(status);
 		ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), getActionName(), ReorgMessages.getString("ReorgDestinationAction.error"), status); //$NON-NLS-1$
-	}	
+	}
 		
 	private static boolean ensureSaved(List elements, String actionName) {
 		List unsavedEditors= new ArrayList();
@@ -280,10 +334,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 				return !(element instanceof IPackageFragment) && super.hasChildren(element);
 			}
 		};
-		ElementTreeSelectionDialog dialog= createDestinationSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), 
-																																	 new DestinationRenderer(JavaElementLabelProvider.SHOW_SMALL_ICONS	),
-																																	 cp,
-																																	 refactoring);
+		ElementTreeSelectionDialog dialog= createDestinationSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), new DestinationRenderer(JavaElementLabelProvider.SHOW_SMALL_ICONS), cp, refactoring);
 		initDialog(dialog, getActionName(), getDestinationDialogMessage(), refactoring, null);
 		
 		return openDialog(dialog);
@@ -308,7 +359,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		dialog.setInitialSelection(selection);
 	}
 	
-	ElementTreeSelectionDialog createDestinationSelectionDialog(Shell parent, ILabelProvider labelProvider, StandardJavaElementContentProvider cp, ReorgRefactoring refactoring){
+	private ElementTreeSelectionDialog createDestinationSelectionDialog(Shell parent, ILabelProvider labelProvider, StandardJavaElementContentProvider cp, ReorgRefactoring refactoring){
 		return new ElementTreeSelectionDialog(parent, labelProvider, cp);
 	}
 	

@@ -33,18 +33,6 @@ public class JdtCopyAction extends ReorgDestinationAction {
 		return ReorgMessages.getString("copyAction.destination.label"); //$NON-NLS-1$
 	}
 	
-	/* non java-doc
-	 * @see IRefactoringAction#canOperateOn(IStructuredSelection)
-	 */
-	public boolean canOperateOn(IStructuredSelection selection) {
-		if (selection.isEmpty())
-			return false;
-		if (ClipboardActionUtil.hasOnlyProjects(selection))
-			return selection.size() == 1;
-		else
-			return super.canOperateOn(selection);
-	}
-	
 	protected void run(IStructuredSelection selection) {
 		if (ClipboardActionUtil.hasOnlyProjects(selection)){
 			copyProject(selection);

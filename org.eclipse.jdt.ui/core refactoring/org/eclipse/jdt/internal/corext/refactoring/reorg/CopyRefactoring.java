@@ -4,11 +4,14 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -23,6 +26,7 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -60,15 +64,29 @@ public class CopyRefactoring extends ReorgRefactoring {
 	public final RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			return new RefactoringStatus();
+			RefactoringStatus result= new RefactoringStatus();
+			result.merge(validateModifiesFiles());
+			return result;
+		} catch (JavaModelException e){	
+			throw e;
+		} catch (CoreException e){
+			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}	
 	}
 	
-	/* non java-doc
-	 * @see ReorgRefactoring#isValidDestinationForCusAndFiles(Object)
-	 */
+	private IFile[] getAllFilesToModify() throws CoreException{
+		List result= new ArrayList();
+		if (getDestination() instanceof IPackageFragment)
+			result.addAll(Arrays.asList(ResourceUtil.getFiles(collectCus())));
+		return (IFile[]) result.toArray(new IFile[result.size()]);
+	}
+	
+	private RefactoringStatus validateModifiesFiles() throws CoreException{
+		return Checks.validateModifiesFiles(getAllFilesToModify());
+	}
+
 	boolean isValidDestinationForCusAndFiles(Object dest) throws JavaModelException {
 		return getDestinationForCusAndFiles(dest) != null;
 	}

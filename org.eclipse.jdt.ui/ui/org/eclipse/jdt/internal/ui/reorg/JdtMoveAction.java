@@ -1,7 +1,6 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -24,14 +23,12 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.MoveProjectAction;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -40,18 +37,13 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
 import org.eclipse.jdt.internal.ui.refactoring.QualifiedNameComponent;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringErrorDialogUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
@@ -68,41 +60,12 @@ public class JdtMoveAction extends ReorgDestinationAction {
 		setText(ReorgMessages.getString("moveAction.label"));//$NON-NLS-1$
 	}
 
-	public boolean canOperateOn(IStructuredSelection selection) {
-		if (selection.isEmpty())
-			return false;
-		if (ClipboardActionUtil.hasOnlyProjects(selection))
-			return selection.size() == 1;
-		else
-			return super.canOperateOn(selection);
-	}
-	
 	protected void run(IStructuredSelection selection) {
 		if (ClipboardActionUtil.hasOnlyProjects(selection)){
 			moveProject(selection);
 		}	else {
-			if (!needsSaving(selection)) {
-				super.run(selection);
-			} else {
-				RefactoringSaveHelper helper= new RefactoringSaveHelper();
-				try {
-					if (helper.saveEditors()) {
-						super.run(selection);
-					}
-				} finally {
-					helper.triggerBuild();
-				}
-			}
+			super.run(selection);
 		}
-	}
-	
-	private boolean needsSaving(IStructuredSelection selection) {
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
-			Object element= (Object) iter.next();
-			if (element instanceof ICompilationUnit || element instanceof IType)
-				return true;
-		}
-		return false;
 	}
 
 	public static ElementTreeSelectionDialog makeDialog(Shell parent, MoveRefactoring refactoring) {
@@ -158,7 +121,23 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	private static boolean isOkToMoveReadOnly(ReorgRefactoring refactoring){
 		if (! hasReadOnlyElements(refactoring))
 			return true;
-		
+
+		//we need to confirm this in all cases except for the case of moving cus to a package
+		//Then, confirmation does not make sense because jcore throws an exception anyway
+		if (refactoring.getDestination() instanceof IPackageFragment){
+			List list= refactoring.getElementsToReorg();
+			for (Iterator iter= list.iterator(); iter.hasNext();) {
+				Object element= iter.next();
+				if (! (element instanceof ICompilationUnit))
+					return askIfOkToMoveReadOnly();
+			}
+			return true;
+		} else {
+			return askIfOkToMoveReadOnly();
+		}
+	}
+	
+	private static boolean askIfOkToMoveReadOnly(){
 		return  MessageDialog.openQuestion(
 				JavaPlugin.getActiveWorkbenchShell(),
 				ReorgMessages.getString("moveAction.checkMove"),  //$NON-NLS-1$
@@ -187,28 +166,12 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	/* non java-doc
 	 * @see ReorgDestinationAction#doReorg(ReorgRefactoring) 
 	 */
-	void doReorg(ReorgRefactoring refactoring) throws JavaModelException{
+	void reorg(ReorgRefactoring refactoring) throws JavaModelException{
 		if (fShowPreview){		
 			openWizard(getShell(), refactoring);
 			return;
-		}
-	
-        CheckConditionsOperation runnable= new CheckConditionsOperation(refactoring, CheckConditionsOperation.PRECONDITIONS);
-        try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, runnable);
-		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), ReorgMessages.getString("JdtMoveAction.move"), ReorgMessages.getString("JdtMoveAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
-			return;
-		} catch (InterruptedException e) {
-			Assert.isTrue(false); //cannot happen - not cancelable
-		}
-		RefactoringStatus status= runnable.getStatus();           
-		if (status == null)
-			return;
-		if (status.hasFatalError())
-			RefactoringErrorDialogUtil.open(ReorgMessages.getString("JdtMoveAction.move"), status);//$NON-NLS-1$
-		else
-			super.doReorg(refactoring);
+		} else
+			super.reorg(refactoring);
 	}
 
 	public static void openWizard(Shell parent, ReorgRefactoring refactoring) {

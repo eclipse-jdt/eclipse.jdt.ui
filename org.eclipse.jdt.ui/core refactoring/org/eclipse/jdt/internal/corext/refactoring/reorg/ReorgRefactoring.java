@@ -794,5 +794,14 @@ public abstract class ReorgRefactoring extends Refactoring {
 		}
 	}
 	
+	ICompilationUnit[] collectCus(){
+		List cus= new ArrayList();
+		for (Iterator iter= getElements().iterator(); iter.hasNext(); ){
+			Object each= iter.next();
+			if (each instanceof ICompilationUnit)
+				cus.add(each);
+		}
+		return (ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()]);
+	}
 }
 
