@@ -3043,7 +3043,7 @@
   <propertyTester
      id="IMethodPropertyTester"
      type="org.eclipse.jdt.core.IMethod"
-     properties="isVirtual, declaringType"
+     properties="isVirtual, declaringType, isConstructor"
      class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.MethodPropertyTester"/>
      
 </extension>
@@ -3143,6 +3143,7 @@
      <objectState>
         <property name="instanceof" value="org.eclipse.jdt.core.IMethod"/>
         <property name="isVirtual" value="false"/>
+        <property name="isConstructor" value="false"/>
 	 </objectState>     
   </renameProcessor>
   

@@ -53,6 +53,10 @@
   processors. If it is the same has been computed for the element in question than 
   the preferred one can be used. Otherwise the user has to be asked.
 
+- property tester must assumes that projects with no nature have a fake simple nature 
+  called "org.eclipse.core.resource.simpleNature". Otherwise the user has to specify the
+  empty nature string in XML.
+
 ======================================= UI ===============================================
   
 - UI: Label and image of preview viewer. Must be determined by the change element
