@@ -130,31 +130,28 @@ public class NLSSourceModifier {
 	
 	private void replaceValue(NLSSubstitution substitution, TextChange change) {
 		Region region= substitution.getNLSElement().getPosition();
-		String[] args= {substitution.getInitialValue(), substitution.getValue()};
+		String[] args= {substitution.getInitialValue(), substitution.getValueNonEmpty()};
 		TextChangeCompatibility.addTextEdit(change, NLSMessages.getFormattedString("NLSSourceModifier.replace_value", args), //$NON-NLS-1$
-				new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getValue()) + '\"')); //$NON-NLS-1$ //$NON-NLS-2$
+				new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getValueNonEmpty()) + '\"')); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private void deleteAccessor(NLSSubstitution substitution, TextChange change) {
 		AccessorClassInfo accessorClassInfo= substitution.getAccessorClassInfo();
 		if (accessorClassInfo != null) {
 			Region region= accessorClassInfo.getRegion();
-			TextChangeCompatibility.addTextEdit(change, NLSMessages.getFormattedString("NLSSourceModifier.remove_accessor", accessorClassInfo.getName()), new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getValue()) + '\"')); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			TextChangeCompatibility.addTextEdit(change, NLSMessages.getFormattedString("NLSSourceModifier.remove_accessor", accessorClassInfo.getName()), new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getValueNonEmpty()) + '\"')); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 	}
 
 	// TODO: not dry
 	private String unwindEscapeChars(String s) {
-		if (s != null) {
-			StringBuffer sb= new StringBuffer(s.length());
-			int length= s.length();
-			for (int i= 0; i < length; i++) {
-				char c= s.charAt(i);
-				sb.append(getUnwoundString(c));
-			}
-			return sb.toString();
+		StringBuffer sb= new StringBuffer(s.length());
+		int length= s.length();
+		for (int i= 0; i < length; i++) {
+			char c= s.charAt(i);
+			sb.append(getUnwoundString(c));
 		}
-		return null;
+		return sb.toString();
 	}
 
 	private String getUnwoundString(char c) {
@@ -211,7 +208,7 @@ public class NLSSourceModifier {
 
 		addAccessor(sub, change, accessorName);
 		
-		String arg= sub.getState() == NLSSubstitution.EXTERNALIZED ? sub.getKey() : sub.getValue();		
+		String arg= sub.getState() == NLSSubstitution.EXTERNALIZED ? sub.getKey() : sub.getValueNonEmpty();		
 		String name= NLSMessages.getFormattedString("NLSSourceModifier.add_tag", arg); //$NON-NLS-1$
 		TextChangeCompatibility.addTextEdit(change, name, createAddTagChange(element));
 	}
@@ -220,7 +217,7 @@ public class NLSSourceModifier {
 		if (sub.getState() == NLSSubstitution.EXTERNALIZED) {
 			NLSElement element= sub.getNLSElement();
 			Region position= element.getPosition();
-			String[] args= {sub.getValue(), sub.getKey()};
+			String[] args= {sub.getValueNonEmpty(), sub.getKey()};
 			String text= NLSMessages.getFormattedString("NLSSourceModifier.externalize", args); //$NON-NLS-1$
 
 			String resourceGetter= createResourceGetter(sub.getKey(), accessorName);

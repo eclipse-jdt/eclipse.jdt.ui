@@ -165,22 +165,20 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 					NLSSubstitution substitution= (NLSSubstitution) data;
 					if (PROPERTIES[KEY_PROP].equals(property)) {
 						substitution.setKey((String) value);
-						fTableViewer.refresh(true);
 						validateKeys();
 					}
 					if (PROPERTIES[VAL_PROP].equals(property)) {
 						substitution.setValue((String) value);
 						validateKeys();
-						fTableViewer.update(substitution, new String[]{property});
 					}
 					if (PROPERTIES[STATE_PROP].equals(property)) {
 						substitution.setState(((Integer) value).intValue());
 						if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasStateChanged()) {
 							substitution.generateKey(fSubstitutions);
 						}
-						fTableViewer.update(substitution, new String[]{property});
 					}
 				}
+				fTableViewer.refresh();
 			}
 		}
 	}
@@ -264,8 +262,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				JavaElementImageDescriptor imageDescriptor= new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.ERROR, JavaElementImageProvider.SMALL_SIZE);
 				return JavaPlugin.getImageDescriptorRegistry().get(imageDescriptor);
 			} else
-				if (sub.hasDuplicateKey(fSubstitutions)) {
-					JavaElementImageDescriptor imageDescriptor= new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.WARNING, JavaElementImageProvider.SMALL_SIZE);
+				if (sub.isConflicting(fSubstitutions)) {
+					JavaElementImageDescriptor imageDescriptor= new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.ERROR, JavaElementImageProvider.SMALL_SIZE);
 					return JavaPlugin.getImageDescriptorRegistry().get(imageDescriptor);
 				} else {
 					return	getNLSImage(sub.getState());
@@ -334,11 +332,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			} else {
 				fKeyField.setText(""); //$NON-NLS-1$
 			}
-			if (substitution.getValue() == null) {
-				fValueField.setText(""); //$NON-NLS-1$
-			} else {
-				fValueField.setText(substitution.getValue());
-			}
+
+			fValueField.setText(substitution.getValueNonEmpty());
 		}
 
 		public KeyValuePair getResult() {
@@ -728,8 +723,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private void checkDuplicateKeys(RefactoringStatus status) {
 		for (int i= 0; i < fSubstitutions.length; i++) {
 			NLSSubstitution substitution= fSubstitutions[i];
-			if (hasDuplicateKey(substitution)) {
-				status.addWarning(NLSUIMessages.getString("ExternalizeWizardPage.warning.duplicatekeys")); //$NON-NLS-1$
+			if (conflictingKeys(substitution)) {
+				status.addFatalError(NLSUIMessages.getString("ExternalizeWizardPage.warning.conflicting")); //$NON-NLS-1$
 				return;
 			}
 		}
@@ -745,9 +740,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		}
 	}
 
-	private boolean hasDuplicateKey(NLSSubstitution substitution) {
+	private boolean conflictingKeys(NLSSubstitution substitution) {
 		if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
-			return substitution.hasDuplicateKey(fSubstitutions);
+			return substitution.isConflicting(fSubstitutions);
 		}
 		return false;
 	}
@@ -939,7 +934,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				substitution.setKey(kvPair.getKey());
 			}
 			substitution.setValue(kvPair.getValue());
-			fTableViewer.update(substitution, new String[]{PROPERTIES[KEY_PROP], PROPERTIES[VAL_PROP]});
 			validateKeys();
 		} finally {
 			fTableViewer.refresh();

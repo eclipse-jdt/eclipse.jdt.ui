@@ -28,6 +28,17 @@ public class PropertyFileDocumentModel {
     public PropertyFileDocumentModel(IDocument document) {
         parsePropertyDocument(document);
     }
+    
+    public int getIndex(String key) {
+    	for (int i= 0; i < fKeyValuePairs.size(); i++) {
+            KeyValuePairModell keyValuePair = (KeyValuePairModell) fKeyValuePairs.get(i);
+            if (keyValuePair.getKey().equals(key)) {
+            	return i;
+            }
+    	}
+    	return -1;
+    }
+    
 
     public InsertEdit insert(String key, String value) {
         return insert(new KeyValuePair(key, value));

@@ -10,17 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.PropertyResourceBundle;
-import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -32,7 +23,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -120,7 +110,7 @@ public class NLSRefactoring extends Refactoring {
 	}
 
 	/**
-	 * to show the pattern in the ui
+	 * to show the pattern in the UI
 	 */
 	public String getSubstitutionPattern() {
 		return fSubstitutionPattern;
@@ -151,7 +141,7 @@ public class NLSRefactoring extends Refactoring {
 		checkParameters();
 		try {
 
-			pm.beginTask(NLSMessages.getString("NLSRefactoring.checking"), 7); //$NON-NLS-1$
+			pm.beginTask(NLSMessages.getString("NLSRefactoring.checking"), 5); //$NON-NLS-1$
 
 			RefactoringStatus result= new RefactoringStatus();
 
@@ -172,13 +162,9 @@ public class NLSRefactoring extends Refactoring {
 			result.merge(checkSubstitutionPattern());
 			pm.worked(1);
 
-			result.merge(checkForDuplicateKeys());
-			pm.worked(1);
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 
-			result.merge(checkForKeysAlreadyDefined());
-			pm.worked(1);
 
 			result.merge(checkKeys());
 			pm.worked(1);
@@ -306,135 +292,6 @@ public class NLSRefactoring extends Refactoring {
 		}
 
 		return result;
-	}
-
-	private RefactoringStatus checkForKeysAlreadyDefined() throws JavaModelException {
-		if (!propertyFileExists())
-			return null;
-		RefactoringStatus result= new RefactoringStatus();
-		PropertyResourceBundle bundle= getPropertyBundle();
-		if (bundle == null) {
-			return null;
-		}
-
-		NLSSubstitution[] subs= fSubstitutions;
-
-		for (int i= 0; i < subs.length; i++) {
-			NLSSubstitution substitution= subs[i];
-			if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasStateChanged()) {
-				String key= substitution.getKey();
-				String s= getBundleString(bundle, key);
-				if (s != null) {
-					if (!s.equals(substitution.getValue())) {
-						String[] args= {key, substitution.getValue()};
-						String msg= NLSMessages.getFormattedString("NLSRefactoring.already_exists", args); //$NON-NLS-1$
-						result.addFatalError(msg);
-					} else {
-						String[] args= {key, s};
-						String msg= NLSMessages.getFormattedString("NLSRefactoring.already_in_bundle", args); //$NON-NLS-1$
-						result.addWarning(msg);
-					}
-				}
-			}
-		}
-		return result;
-	}
-
-	private boolean hasSameValue(String val, NLSSubstitution sub) {
-		return (val.equals(sub.getNLSElement().getValue()));
-	}
-
-	/**
-	 * returns <code>null</code> if not defined
-	 */
-	private String getBundleString(PropertyResourceBundle bundle, String key) {
-		try {
-			return bundle.getString(key);
-		} catch (MissingResourceException e) {
-			return null;
-		}
-	}
-
-	private PropertyResourceBundle getPropertyBundle() throws JavaModelException {
-		InputStream is= getPropertyFileInputStream();
-		if (is == null)
-			return null;
-		try {
-			PropertyResourceBundle result= new PropertyResourceBundle(is);
-			return result;
-		} catch (IOException e1) {
-			return null;
-		} finally {
-			try {
-				is.close();
-			} catch (IOException e) {
-				throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
-			}
-		}
-	}
-
-	private InputStream getPropertyFileInputStream() throws JavaModelException {
-		IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(getPropertyFilePath());
-
-		try {
-			return file.getContents();
-		} catch (CoreException e) {
-			throw new JavaModelException(e, IJavaModelStatusConstants.CORE_EXCEPTION);
-		}
-	}
-
-	private RefactoringStatus checkForDuplicateKeys() {
-		Map map= new HashMap(); //String (key) -> Set of NLSSubstitution
-		NLSSubstitution[] subs= fSubstitutions;
-		for (int i= 0; i < subs.length; i++) {
-			NLSSubstitution sub= subs[i];
-			String key= sub.getKey();
-			if (!map.containsKey(key)) {
-				map.put(key, new HashSet());
-			}
-			((Set) map.get(key)).add(sub);
-		}
-
-		RefactoringStatus result= new RefactoringStatus();
-		for (Iterator iter= map.keySet().iterator(); iter.hasNext();) {
-			Set substitutions= (Set) map.get(iter.next());
-			result.merge(checkForDuplicateKeys(substitutions));
-		}
-		return result;
-	}
-
-	/**
-	 * all elements in the parameter must be NLSSubstitutions with the same key
-	 */
-	private RefactoringStatus checkForDuplicateKeys(Set subs) {
-		if (subs.size() <= 1)
-			return null;
-
-		NLSSubstitution[] toTranslate= getEntriesToTranslate(subs);
-		if (toTranslate.length <= 1)
-			return null;
-
-		String value= toTranslate[0].getNLSElement().getValue();
-		for (int i= 0; i < toTranslate.length; i++) {
-			NLSSubstitution each= toTranslate[i];
-			if (!hasSameValue(value, each)) {
-				String msg= NLSMessages.getFormattedString("NLSRefactoring.duplicated", each.getKey());//$NON-NLS-1$
-				return RefactoringStatus.createFatalErrorStatus(msg);
-			}
-		}
-		String[] args= {toTranslate[0].getKey(), value};
-		String msg= NLSMessages.getFormattedString("NLSRefactoring.reused", args); //$NON-NLS-1$
-		return RefactoringStatus.createWarningStatus(msg);
-	}
-
-	private static NLSSubstitution[] getEntriesToTranslate(Set subs) {
-		List result= new ArrayList(subs.size());
-		for (Iterator iter= subs.iterator(); iter.hasNext();) {
-			NLSSubstitution each= (NLSSubstitution) iter.next();
-			if (each.getState() == NLSSubstitution.EXTERNALIZED)
-				result.add(each);
-		}
-		return (NLSSubstitution[]) result.toArray(new NLSSubstitution[result.size()]);
 	}
 
 	private RefactoringStatus checkKeys() {

@@ -113,6 +113,13 @@ public class NLSSubstitution {
 	public String getValue() {
 		return fValue;
 	}
+	
+	public String getValueNonEmpty() {
+		if (fValue == null) {
+			return ""; //$NON-NLS-1$
+		}
+		return fValue;
+	}
 
 	public int getState() {
 		return fState;
@@ -206,19 +213,18 @@ public class NLSSubstitution {
 		fPrefix= prefix;
 	}
 
-	public boolean hasDuplicateKey(NLSSubstitution[] substitutions) {
+	public boolean isConflicting(NLSSubstitution[] substitutions) {
 		if (fState == EXTERNALIZED) {
-			int counter= 0;
+			String currKey= getKey();
+			String currValue= getValueNonEmpty();
 			for (int i= 0; i < substitutions.length; i++) {
 				NLSSubstitution substitution= substitutions[i];
-				if (substitution.getState() == EXTERNALIZED) {
-					if (substitution.getKey().equals(getKey())) {
-						counter++;
+				if (substitution != this && substitution.getState() == EXTERNALIZED) {
+					// same key but different value
+					if (currKey.equals(substitution.getKey()) && !currValue.equals(substitution.getValue())) {
+						return true;
 					}
 				}
-			}
-			if (counter > 1) {
-				return true;
 			}
 		}
 		return false;
