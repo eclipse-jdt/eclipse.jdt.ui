@@ -23,7 +23,8 @@ public class MoveActionDelegate extends RefactoringActionDelegate {
 		super.init(window);
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(window.getSelectionService());
 		initPossibleTargets(new RefactoringAction[] {
-			new MoveAction(provider)
+			new MoveAction(provider),
+			RefactoringGroup.createMoveMembersAction(provider)
 		});
 	}
 	
