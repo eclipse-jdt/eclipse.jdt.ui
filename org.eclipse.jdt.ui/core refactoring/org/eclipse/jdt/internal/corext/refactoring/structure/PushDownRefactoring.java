@@ -626,6 +626,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 						adjustor.setStatus(status);
 						adjustor.setAdjustments(adjustments);
 						adjustor.adjustVisibility(new SubProgressMonitor(monitor, 1));
+						adjustments.remove(member);
 						adjustors.add(adjustor);
 						if (infos[offset].isFieldInfo()) {
 							final VariableDeclarationFragment oldField= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) infos[offset].getMember(), sourceRewriter.getRoot());

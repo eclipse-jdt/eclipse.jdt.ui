@@ -1004,6 +1004,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 							adjustor.setStatus(status);
 							adjustor.setAdjustments(adjustments);
 							adjustor.adjustVisibility(new SubProgressMonitor(subsub, 1));
+							adjustments.remove(member);
 							if (member instanceof IField) {
 								final VariableDeclarationFragment oldField= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) member, root);
 								FieldDeclaration newField= createNewFieldDeclarationNode(rewriter, root, (IField) member, oldField, mapping, new SubProgressMonitor(subsub, 1), status, getModifiersWithUpdatedVisibility(member, member.getFlags(), adjustments, new SubProgressMonitor(subsub, 1), true, status));
