@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.code.TempNameUtil;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.AST;
@@ -123,6 +124,8 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 			
 		if (!(fCu instanceof CompilationUnit))
 			return RefactoringStatus.createFatalErrorStatus("Internal Error");
+
+		initializeAst();
 	
 		return checkSelection();	
 	}
@@ -133,14 +136,20 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
 		RefactoringStatus result= Checks.checkFieldName(newName);
 		if (! Checks.startsWithLowerCase(newName))
-			result.addWarning("By convention, all names of  local variables start with lowercase letters.");
+			result.addWarning("By convention, all names of local variables start with lowercase letters.");
 		if (fAlreadyUsedNames.containsKey(newName))
 			result.addError("Name '" + newName + "' is already used.", JavaSourceContext.create(fCu, (ISourceRange)fAlreadyUsedNames.get(newName)));
 		return result;		
 	}
 	
 	private RefactoringStatus checkSelection() throws JavaModelException {
-		fAST= new AST(fCu);
+				
+		if (fAST.hasProblems()){
+			RefactoringStatus compileErrors= Checks.checkCompileErrors(fAST, fCu);
+			if (compileErrors.hasFatalError())
+				return compileErrors;
+		}		
+		
 		LocalDeclaration local= TempDeclarationFinder.findTempDeclaration(fAST, fCu, fSelectionStart, fSelectionLength);
 		if (local == null)
 			return RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
@@ -148,45 +157,17 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		initializeTempDeclaration(local);
 		return new RefactoringStatus();
 	}
+
+	private void initializeAst() throws JavaModelException {
+		fAST= new AST(fCu);
+	}
 	
 	private void initializeTempDeclaration(LocalDeclaration localDeclaration){
 		fTempDeclaration= localDeclaration;
-		fAlreadyUsedNames= getLocalNames(fTempDeclaration);
+		fAlreadyUsedNames= TempNameUtil.getLocalNameMap(fTempDeclaration.binding.declaringScope);
 		fCurrentName= fTempDeclaration.name();		
 	}
-	
-	//String -> ISourceRange
-	private static Map getLocalNames(LocalDeclaration localDeclaration){
-		return getLocalNames(localDeclaration.binding.declaringScope);
-	}
-	
-	//String -> ISourceRange
-	private static Map getLocalNames(BlockScope scope){
-		if (scope.locals == null)
-			return new HashMap(0);
-		Map result= new HashMap();
-		LocalVariableBinding[] locals= scope.locals;
-		for (int i= 0; i< locals.length; i++){
-			if (locals[i] == null)
-				continue;
-			if (locals[i].declaration == null)	
-				continue;
-			int offset= locals[i].declaration.sourceStart;
-			int length= locals[i].declaration.sourceEnd - locals[i].declaration.sourceStart + 1; 
-			result.put(new String(locals[i].name), new SourceRange(offset, length));
-		}	
-		
-		if (scope.subscopes == null)
-			return result;	
-		
-		for (int i= 0; i < scope.subscopes.length; i++){
-			Scope subScope= scope.subscopes[i];
-			if (subScope instanceof BlockScope)
-				result.putAll(getLocalNames((BlockScope)subScope));
-		}	
-		return result;	
-	}
-		
+			
 	/* non java-doc
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
