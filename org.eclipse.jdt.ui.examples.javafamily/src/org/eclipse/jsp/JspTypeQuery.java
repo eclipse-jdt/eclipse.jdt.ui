@@ -57,6 +57,7 @@ public class JspTypeQuery implements IIndexQuery {
 				}
 			}
 		} catch (CoreException ex) {
+			JspUIPlugin.log("jsp query internal error", ex); //$NON-NLS-1$
 		}
 	}
 

@@ -45,6 +45,7 @@ class AddJspFileToIndex extends AddFileToIndex {
 				if (location != null)
 					fContents= Util.getFileCharContent(location.toFile(), null);
 			} catch (IOException e) {
+				JspUIPlugin.log("internal error", e); //$NON-NLS-1$
 			}
 		}
 		return fContents != null;

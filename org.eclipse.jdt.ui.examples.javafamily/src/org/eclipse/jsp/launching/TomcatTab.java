@@ -71,6 +71,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	 * Constructs a new Tomcat tab
 	 */
 	public TomcatTab() {
+		super();
 	}
 		
 	/**
@@ -216,6 +217,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#dispose()
 	 */
 	public void dispose() {
+		// empty implementation
 	}
 		
 	/**

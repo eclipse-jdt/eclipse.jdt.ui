@@ -27,6 +27,7 @@ public class LaunchingMessages {
 	 * 
 	 */
 	private LaunchingMessages() {
+		super();
 	}
 	/**
 	 * @param key

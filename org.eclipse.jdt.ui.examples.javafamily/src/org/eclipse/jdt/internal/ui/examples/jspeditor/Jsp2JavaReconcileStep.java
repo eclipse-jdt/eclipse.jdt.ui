@@ -69,11 +69,11 @@ public class Jsp2JavaReconcileStep extends AbstractReconcileStep {
 	protected IReconcileResult[] reconcileModel(DirtyRegion dirtyRegion, IRegion subRegion) {
 		Assert.isTrue(getInputModel() instanceof DocumentAdapter, "wrong model"); //$NON-NLS-1$
 
-		System.out.println("reconciling jsp2java...");
+		System.out.println("reconciling jsp2java..."); //$NON-NLS-1$
 		
 		Reader reader= new StringReader(((DocumentAdapter)fInputModel).getDocument().get());
 		try {
-			String javaSource= fJspTranslator.translate(reader, "Demo");
+			String javaSource= fJspTranslator.translate(reader, "Demo"); //$NON-NLS-1$
 			fModel= new DocumentAdapter(new Document(javaSource));
 		} catch (IOException e) {
 			e.printStackTrace();

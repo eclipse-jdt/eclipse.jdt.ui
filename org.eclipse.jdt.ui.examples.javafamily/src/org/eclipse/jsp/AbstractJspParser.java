@@ -22,6 +22,7 @@ public abstract class AbstractJspParser {
 	protected int fLines= 1;
 	
 	AbstractJspParser() {
+		super();
 	}
 	
 	private int getc() throws IOException {
@@ -125,6 +126,7 @@ public abstract class AbstractJspParser {
 	}
 	
 	protected void java(char tagType, String contents, int line) {
+		// empty implementation
 	}
 
 	private void parseAttributes(int pos, String s) {
@@ -200,6 +202,7 @@ public abstract class AbstractJspParser {
 				value.setLength(0);
 			}
 		} catch (StringIndexOutOfBoundsException e) {
+			JspUIPlugin.log("error while parsing attributes", e); //$NON-NLS-1$
 		}
 		
 		if (name.length() > 0) {
@@ -213,15 +216,19 @@ public abstract class AbstractJspParser {
 	}
 	
 	protected void startTag(boolean endTag, String name, int startName) {
+		// empty implementation
 	}
 	
 	protected void tagAttribute(String attrName, String value, int startName, int startValue) {
+		// empty implementation
 	}
 	
 	protected void endTag(boolean end) {
+		// empty implementation
 	}
 	
 	protected void text(String t, int line) {
+		// empty implementation
 	}
 	
 	void parse(Reader reader) throws IOException {

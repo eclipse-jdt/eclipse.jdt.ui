@@ -53,5 +53,6 @@ public class JavaFamilyExamplePreferencePage extends PreferencePage implements I
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */
 	public void init(IWorkbench workbench) {
+		// empty implementation
 	}
 }

@@ -94,11 +94,13 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 		// A hack to temporarily disable the aboutToStart and done methods
 		IJavaSearchResultCollector collector= new IJavaSearchResultCollector() {
 			public void aboutToStart() {
+				// empty implementation
 			}
 			public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) throws CoreException {
 				fCollector.accept(resource, start, end, enclosingElement, accuracy);
 			}
 			public void done() {
+				// empty implementation
 			}
 			public IProgressMonitor getProgressMonitor() {
 				return fCollector.getProgressMonitor();

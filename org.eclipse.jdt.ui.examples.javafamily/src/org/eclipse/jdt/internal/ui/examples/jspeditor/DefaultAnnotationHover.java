@@ -49,6 +49,7 @@ public class DefaultAnnotationHover implements IAnnotationHover {
 				if (annotationLine <= line && line <= document.getLineOfOffset(position.getOffset() + position.getLength()))
 					return 2;
 			} catch (BadLocationException x) {
+				// ignored
 			}
 		}
 	

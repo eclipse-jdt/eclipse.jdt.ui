@@ -196,6 +196,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 		 * Tells this annotation model to no longer collect temporary problems.
 		 */
 		private void stopCollectingProblems() {
+			// empty implementation
 		}
 	}
 
@@ -258,7 +259,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 		if (cu == null)
 			return null;
 
-		System.out.println("reconciling java model...");
+		System.out.println("reconciling java model..."); //$NON-NLS-1$
 		
 		IBuffer buffer;
 		try {
@@ -319,7 +320,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 				IJavaProject jProject= (IJavaProject)je;
 	
 				if (!jProject.exists())  {
-					System.out.println("Abort reconciling: cannot create working copy: JSP is not in a Java project");
+					System.out.println("Abort reconciling: cannot create working copy: JSP is not in a Java project"); //$NON-NLS-1$
 					return null;
 				}
 					
@@ -334,7 +335,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 					i++;
 				}
 				if (packageFragmentRoot == null) {
-					System.out.println("Abort reconciling: cannot create working copy: JSP is not in a Java project with source package fragment root");
+					System.out.println("Abort reconciling: cannot create working copy: JSP is not in a Java project with source package fragment root"); //$NON-NLS-1$
 					return null;
 				}
 				packageFragment= packageFragmentRoot.getPackageFragment(IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH);
@@ -346,6 +347,6 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 		
 		fProblemRequestor= new ProblemRequestor();
 		
-		return packageFragment.getCompilationUnit("Demo.java").getWorkingCopy(fTemporaryWorkingCopyOwner, fProblemRequestor, getProgressMonitor());
+		return packageFragment.getCompilationUnit("Demo.java").getWorkingCopy(fTemporaryWorkingCopyOwner, fProblemRequestor, getProgressMonitor()); //$NON-NLS-1$
 	}
 }

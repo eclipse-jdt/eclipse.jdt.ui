@@ -30,6 +30,7 @@ public class JspSourceIndexer implements IIndexer {
 	}
 
 	public void setFileTypes(String[] fileTypes) {
+		// empty implementation
 	}
 
 	protected void indexFile(IDocument document) {

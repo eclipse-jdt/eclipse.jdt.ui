@@ -30,6 +30,7 @@ public class JspMatchLocatorParser extends AbstractJspParser {
 	String fClass;
 
 	public JspMatchLocatorParser() {
+		super();
 	}
 
 	protected void startTag(boolean endTag, String name, int startName) {

@@ -66,6 +66,7 @@ public void acceptImport(int declarationStart, int declarationEnd, char[] name, 
  * acceptLineSeparatorPositions method comment.
  */
 public void acceptLineSeparatorPositions(int[] positions) {
+	// empty implementation
 }
 /**
  * acceptMethodReference method comment.
@@ -83,6 +84,7 @@ public void acceptPackage(int declarationStart, int declarationEnd, char[] name)
  * acceptProblem method comment.
  */
 public void acceptProblem(IProblem problem) {
+	// empty implementation
 }
 /**
  * acceptTypeReference method comment.
@@ -158,6 +160,7 @@ public void enterClass(int declarationStart, int modifiers, char[] name, int nam
  * enterCompilationUnit method comment.
  */
 public void enterCompilationUnit() {
+	// empty implementation
 }
 /**
  * enterConstructor method comment.
@@ -215,6 +218,7 @@ public void exitClass(int declarationEnd) {
  * exitCompilationUnit method comment.
  */
 public void exitCompilationUnit(int declarationEnd) {
+	// empty implementation
 }
 /**
  * exitConstructor method comment.

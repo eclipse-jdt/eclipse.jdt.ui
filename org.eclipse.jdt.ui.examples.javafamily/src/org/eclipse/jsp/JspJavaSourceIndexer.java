@@ -44,6 +44,7 @@ public class JspJavaSourceIndexer extends SourceIndexer {
 	 * @see org.eclipse.jdt.internal.core.index.IIndexer#setFileTypes(java.lang.String[])
 	 */
 	public void setFileTypes(String[] fileTypes) {
+		// empty implementation
 	}
 
 	/* (non-Javadoc)

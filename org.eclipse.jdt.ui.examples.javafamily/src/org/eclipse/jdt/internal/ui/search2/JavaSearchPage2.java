@@ -43,6 +43,7 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jsp.JspUIPlugin;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -694,6 +695,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 					try {
 						return SelectionConverter.getStructuredSelection(part);
 					} catch (JavaModelException ex) {
+						JspUIPlugin.log("internal error", ex); //$NON-NLS-1$
 					}
 			}
 		}

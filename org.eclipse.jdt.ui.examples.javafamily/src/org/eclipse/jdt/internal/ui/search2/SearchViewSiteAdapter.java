@@ -96,6 +96,7 @@ class SearchViewSiteAdapter implements IWorkbenchPartSite {
 					provider.removeSelectionChangedListener(fListener);
 				}
 				public void setSelection(ISelection selection) {
+					// empty implementation
 				}
 			};
 	}
@@ -150,11 +151,13 @@ class SearchViewSiteAdapter implements IWorkbenchPartSite {
 	 * @see org.eclipse.ui.IWorkbenchPartSite#registerContextMenu(MenuManager, ISelectionProvider)
 	 */
 	public void registerContextMenu(MenuManager menuManager, ISelectionProvider selectionProvider) {
+		// empty implementation
 	}
 
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPartSite#registerContextMenu(String, MenuManager, ISelectionProvider)
 	 */
 	public void registerContextMenu(String menuId, MenuManager menuManager, ISelectionProvider selectionProvider) {
+		// empty implementation
 	}
 }

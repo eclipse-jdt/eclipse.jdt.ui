@@ -21,6 +21,7 @@ import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import org.eclipse.jdt.internal.compiler.util.SuffixConstants;
 import org.eclipse.jdt.internal.core.index.IDocument;
 import org.eclipse.jdt.internal.core.jdom.CompilationUnit;
+import org.eclipse.jsp.JspUIPlugin;
 
 /**
  * A SourceIndexer indexes java files using a java parser. The following items are indexed:
@@ -76,6 +77,7 @@ public class SourceIndexer extends AbstractIndexer implements SuffixConstants {
 			source = document.getCharContent();
 			name = document.getName().toCharArray();
 		} catch(Exception e){
+			JspUIPlugin.log("internal error", e); //$NON-NLS-1$
 		}
 		if (source == null || name == null) return; // could not retrieve document info (e.g. resource was discarded)
 		CompilationUnit compilationUnit = new CompilationUnit(source, name);
@@ -89,5 +91,7 @@ public class SourceIndexer extends AbstractIndexer implements SuffixConstants {
 	/**
 	 * Sets the document types the <code>IIndexer</code> handles.
 	 */
-	public void setFileTypes(String[] fileTypes){}
+	public void setFileTypes(String[] fileTypes){
+		// empty implementation
+	}
 }

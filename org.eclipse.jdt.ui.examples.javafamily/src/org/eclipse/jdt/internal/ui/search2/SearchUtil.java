@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -35,21 +36,17 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.browsing.JavaElementTypeComparator;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.search.IJavaSearchUIConstants;
 import org.eclipse.jdt.internal.ui.search.LRUWorkingSetsList;
@@ -60,7 +57,10 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * This class contains some utility methods for J Search.
  */
-public class SearchUtil extends JavaModelUtil {
+/**
+ * This class contains some utility methods for J Search.
+ */
+public class SearchUtil {
 
 	// LRU working sets
 	public static int LRU_WORKINGSET_LIST_SIZE= 3;
@@ -70,7 +70,6 @@ public class SearchUtil extends JavaModelUtil {
 	private static final String DIALOG_SETTINGS_KEY= "JavaElementSearchActions"; //$NON-NLS-1$
 	private static final String STORE_LRU_WORKING_SET_NAMES= "lastUsedWorkingSetNames"; //$NON-NLS-1$
 	
-	private static final JavaElementTypeComparator fgJavaElementTypeComparator= new JavaElementTypeComparator();
 	private static IDialogSettings fgSettingsStore;
 
 	private static final String BIN_PRIM_CONST_WARN_DIALOG_ID= "BinaryPrimitiveConstantWarningDialog"; //$NON-NLS-1$
@@ -86,29 +85,33 @@ public class SearchUtil extends JavaModelUtil {
 				return null;
 
 			if (!marker.getAttribute(IJavaSearchUIConstants.ATT_IS_WORKING_COPY, false)) {
-				if (je != null && je.exists())
+				if (je.exists())
 					return je;
 			}
-
-			if (isBinary(je) || fgJavaElementTypeComparator.compare(je, IJavaElement.COMPILATION_UNIT) > 0)
-				return je;
 			
-			ICompilationUnit cu= findCompilationUnit(je);
-			if (cu == null || !cu.exists()) {
-				cu= (ICompilationUnit)JavaCore.create(marker.getResource());
+			ICompilationUnit cu= (ICompilationUnit) je.getAncestor(IJavaElement.COMPILATION_UNIT);
+			if (cu == null) {
+				return je;
+			}
+			if (!cu.exists()) {
+				IResource res= marker.getResource();
+				if (res instanceof IFile) {
+					cu= JavaCore.createCompilationUnitFrom((IFile) res);
+					if (cu == null) {
+						return je;
+					}
+					
+				}
+			}
+			
+			if (!JavaPlugin.USE_WORKING_COPY_OWNERS) {
+				IJavaElement wcElem= JavaModelUtil.toWorkingCopy(je);
+				if (wcElem.exists()) {
+					return wcElem;
+				}
 			}
 
-			// Find working copy element
-			IWorkingCopy[] workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
-			int i= 0;
-			while (i < workingCopies.length) {
-				if (workingCopies[i].getOriginalElement().equals(cu)) {
-					je= findInWorkingCopy(workingCopies[i], je, true);
-					break;
-				}
-				i++;
-			}
-			if (je != null && !je.exists()) {
+			if (!je.exists()) {
 				IJavaElement[] jElements= cu.findElements(je);
 				if (jElements == null || jElements.length == 0)
 					je= cu.getElementAt(marker.getAttribute(IMarker.CHAR_START, 0));
@@ -152,38 +155,6 @@ public class SearchUtil extends JavaModelUtil {
 		return object != null && isSearchPlugInActivated() && (object instanceof ISearchResultViewEntry);
 	}
 	
-	private static boolean isBinary(IJavaElement jElement) {
-		
-		if (jElement instanceof IMember)
-			return ((IMember)jElement).isBinary();
-
-		IPackageFragmentRoot pkgRoot= (IPackageFragmentRoot)jElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-		if (pkgRoot != null && pkgRoot.isArchive())
-			return true;
-
-		return false;
-	}
-
-	/** 
-	 * Returns the working copy of the given java element.
-	 * @param javaElement the javaElement for which the working copyshould be found
-	 * @param reconcile indicates whether the working copy must be reconcile prior to searching it
-	 * @return the working copy of the given element or <code>null</code> if none
-	 */	
-	private static IJavaElement findInWorkingCopy(IWorkingCopy workingCopy, IJavaElement element, boolean reconcile) throws JavaModelException {
-		if (workingCopy != null) {
-			if (reconcile) {
-				synchronized (workingCopy) {
-					workingCopy.reconcile();
-					return SearchUtil.findInCompilationUnit((ICompilationUnit)workingCopy, element);
-				}
-			} else {
-				return SearchUtil.findInCompilationUnit((ICompilationUnit)workingCopy, element);
-			}
-		}
-		return null;
-	}
-
 	/**
 	 * Returns the compilation unit for the given java element.
 	 * 
@@ -193,14 +164,7 @@ public class SearchUtil extends JavaModelUtil {
 	static ICompilationUnit findCompilationUnit(IJavaElement element) {
 		if (element == null)
 			return null;
-
-		if (element.getElementType() == IJavaElement.COMPILATION_UNIT)
-			return (ICompilationUnit)element;
-			
-		if (element instanceof IMember)
-			return ((IMember)element).getCompilationUnit();
-
-		return findCompilationUnit(element.getParent());
+		return (ICompilationUnit) element.getAncestor(IJavaElement.COMPILATION_UNIT);
 	}
 
 	/*
@@ -212,9 +176,9 @@ public class SearchUtil extends JavaModelUtil {
 	 */		
 	public static IMember findInCompilationUnit(ICompilationUnit cu, IMember member) throws JavaModelException {
 		if (member.getElementType() == IJavaElement.TYPE) {
-			return findTypeInCompilationUnit(cu, getTypeQualifiedName((IType)member));
+			return JavaModelUtil.findTypeInCompilationUnit(cu, JavaModelUtil.getTypeQualifiedName((IType)member));
 		} else {
-			IType declaringType= findTypeInCompilationUnit(cu, getTypeQualifiedName(member.getDeclaringType()));
+			IType declaringType= JavaModelUtil.findTypeInCompilationUnit(cu, JavaModelUtil.getTypeQualifiedName(member.getDeclaringType()));
 			if (declaringType != null) {
 				IMember result= null;
 				switch (member.getElementType()) {
@@ -230,7 +194,7 @@ public class SearchUtil extends JavaModelUtil {
 					else
 						isConstructor= declaringType.getElementName().equals(meth.getElementName());
 					// XXX: End patch -----------------------
-					result= findMethod(meth.getElementName(), meth.getParameterTypes(), isConstructor, declaringType);
+					result= JavaModelUtil.findMethod(meth.getElementName(), meth.getParameterTypes(), isConstructor, declaringType);
 					break;
 				case IJavaElement.INITIALIZER:
 					result= declaringType.getInitializer(1);
@@ -425,5 +389,13 @@ public class SearchUtil extends JavaModelUtil {
 		char first= fieldType.charAt(0);
 		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED && first != Signature.C_ARRAY)
 			|| (first == Signature.C_RESOLVED && fieldType.substring(1, fieldType.length() - 1).equals(String.class.getName()));
+	}
+	
+	public static String getProjectScopeDescription(IType type) {
+		IJavaProject project= type.getJavaProject();
+		if (project != null)
+			return SearchMessages.getFormattedString("ProjectScope", project.getElementName()); //$NON-NLS-1$
+		else 
+			return SearchMessages.getFormattedString("ProjectScope", ""); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

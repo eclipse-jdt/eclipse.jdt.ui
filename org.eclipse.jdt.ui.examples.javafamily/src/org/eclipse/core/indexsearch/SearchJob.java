@@ -48,6 +48,7 @@ class SearchJob implements IJob {
 	 * @see org.eclipse.jdt.internal.core.search.processing.IJob#cancel()
 	 */
 	public void cancel() {
+		// intentionally left blank
 	}
 
 	/* (non-Javadoc)

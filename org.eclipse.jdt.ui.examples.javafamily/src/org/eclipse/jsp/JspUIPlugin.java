@@ -183,15 +183,6 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 		controlJSPIndexing(false);
 	}
 	
-	public static void triggerLoad() {
-	}
-
-	/*
-	 * @see org.eclipse.ui.IStartup#earlyStartup()
-	 */
-	public void earlyStartup() {
-	}
-
 	protected void initializeDefaultPreferences(IPreferenceStore prefs) {
 		TextEditorPreferenceConstants.initializeDefaultValues(prefs);
 	}

@@ -57,36 +57,42 @@ class SearchViewAdapter implements IViewPart {
 	 * @see org.eclipse.ui.IViewPart#init(IViewSite)
 	 */
 	public void init(IViewSite site) throws PartInitException {
+		// empty implementation
 	}
 
 	/*
 	 * @see org.eclipse.ui.IViewPart#init(IViewSite, IMemento)
 	 */
 	public void init(IViewSite site, IMemento memento) throws PartInitException {
+		// empty implementation
 	}
 
 	/*
 	 * @see org.eclipse.ui.IViewPart#saveState(IMemento)
 	 */
 	public void saveState(IMemento memento) {
+		// empty implementation
 	}
 
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPart#addPropertyListener(IPropertyListener)
 	 */
 	public void addPropertyListener(IPropertyListener listener) {
+		// empty implementation
 	}
 
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPart#createPartControl(Composite)
 	 */
 	public void createPartControl(Composite parent) {
+		// empty implementation
 	}
 
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPart#dispose()
 	 */
 	public void dispose() {
+		// empty implementation
 	}
 
 	/*
@@ -114,12 +120,14 @@ class SearchViewAdapter implements IViewPart {
 	 * @see org.eclipse.ui.IWorkbenchPart#removePropertyListener(IPropertyListener)
 	 */
 	public void removePropertyListener(IPropertyListener listener) {
+		// empty implementation
 	}
 
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPart#setFocus()
 	 */
 	public void setFocus() {
+		// empty implementation
 	}
 
 	/*
