@@ -94,6 +94,7 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.SelectionHistory;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectEnclosingAction;
@@ -520,7 +521,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		fActionGroups.addGroup(fGenerateActionGroup);
 		
 		// We have to keep the context menu group separate to have better control over positioning
-		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {fGenerateActionGroup, rg});
+		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {
+			fGenerateActionGroup, 
+			rg, 
+			new LocalHistoryActionGroup(this, ITextEditorActionConstants.GROUP_EDIT)});
 	}
 
 	/*
