@@ -93,7 +93,8 @@ public class MoveCuUpdateCreator {
 			for (Iterator iter= fImportEdits.keySet().iterator(); iter.hasNext();) {
 				ICompilationUnit cu= (ICompilationUnit)iter.next();
 				ImportEdit importEdit= (ImportEdit)fImportEdits.get(cu);
-				changeManager.get(cu).addTextEdit("update imports", importEdit);
+				if (importEdit != null && ! importEdit.isEmpty())
+					changeManager.get(cu).addTextEdit("update imports", importEdit);
 			}
 			return new CompositeChange("reorganize elements", changeManager.getAllChanges());
 		} catch (CoreException e){	
