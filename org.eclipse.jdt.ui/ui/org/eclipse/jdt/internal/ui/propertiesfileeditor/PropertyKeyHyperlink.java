@@ -347,9 +347,10 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		TextSearchScope result= new TextSearchScope(""); //$NON-NLS-1$
 		result.add(scope);
 		
-		// XXX: This should probably be configurable via preference
+		// XXX: Should be configurable via preference, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81117
 		result.addExtension("*.java"); //$NON-NLS-1$
 		result.addExtension("*.xml"); //$NON-NLS-1$
+		result.addExtension("*.ini"); //$NON-NLS-1$
 		
 		return result;
 	}
