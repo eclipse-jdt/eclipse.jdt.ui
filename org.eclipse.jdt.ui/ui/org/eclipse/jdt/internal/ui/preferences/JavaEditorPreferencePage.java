@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -94,6 +93,7 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 				new MarkOccurrencesConfigurationBlock(fOverlayStore),
 				new JavaEditorNavigationConfigurationBlock(fOverlayStore),
 				new FoldingConfigurationBlock(fOverlayStore),
+				new LinkedModeConfigurationBlock(fOverlayStore),
 		};
 		fBlockLabels= new String[] {
 				PreferencesMessages.getString("JavaEditorPreferencePage.general"), //$NON-NLS-1$
@@ -101,6 +101,7 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 				PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.title"), //$NON-NLS-1$
 				PreferencesMessages.getString("JavaEditorPreferencePage.navigationTab.title"), //$NON-NLS-1$
 				PreferencesMessages.getString("JavaEditorPreferencePage.folding.title"), //$NON-NLS-1$
+				PreferencesMessages.getString("JavaEditorPreferencePage.linking.title"), //$NON-NLS-1$
 		};
 	}
 	
@@ -145,7 +146,7 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 	
 	protected void updateSectionStyle(ExpandableComposite excomposite) {
 //		if (excomposite.isExpanded()) {
-			excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
+//			excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
 //		} else {
 //			excomposite.setFont(JFaceResources.getFontRegistry().get(JFaceResources.DIALOG_FONT));
 //		}

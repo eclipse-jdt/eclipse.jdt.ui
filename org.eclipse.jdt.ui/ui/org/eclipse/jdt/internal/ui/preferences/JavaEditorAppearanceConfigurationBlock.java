@@ -12,11 +12,6 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -37,51 +32,29 @@ import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
 
-import org.eclipse.jface.text.Assert;
-
 import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 
 /**
  * Configures Java Editor hover preferences.
  * 
  * @since 2.1
  */
-class JavaEditorAppearanceConfigurationBlock implements IPreferenceConfigurationBlock {
+class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock {
 
 	private final String[][] fAppearanceColorListModel= new String[][] {
 			{PreferencesMessages.getString("JavaEditorPreferencePage.matchingBracketsHighlightColor2"), PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, null}, //$NON-NLS-1$
 			{PreferencesMessages.getString("JavaEditorPreferencePage.findScopeColor2"), PreferenceConstants.EDITOR_FIND_SCOPE_COLOR, null}, //$NON-NLS-1$
 		};
 
-	private final OverlayPreferenceStore fStore;
-	private final PreferencePage fMainPreferencePage;
 	private List fAppearanceColorList;
 	private ColorEditor fAppearanceColorEditor;
 	private Button fAppearanceColorDefault;
 
-	private IStatus fStatus;
-	
-	private Map fCheckBoxes= new HashMap();
-	private SelectionListener fCheckBoxListener= new SelectionListener() {
-		public void widgetDefaultSelected(SelectionEvent e) {
-		}
-		public void widgetSelected(SelectionEvent e) {
-			Button button= (Button) e.widget;
-			fStore.setValue((String) fCheckBoxes.get(button), button.getSelection());
-		}
-	};
-	
 	private FontMetrics fFontMetrics;
 
 	public JavaEditorAppearanceConfigurationBlock(PreferencePage mainPreferencePage, OverlayPreferenceStore store) {
-		Assert.isNotNull(mainPreferencePage);
-		Assert.isNotNull(store);
-		fMainPreferencePage= mainPreferencePage;
-		fStore= store;
-		fStore.addKeys(createOverlayStoreKeys());
+		super(store, mainPreferencePage);
+		getPreferenceStore().addKeys(createOverlayStoreKeys());
 	}
 
 
@@ -231,7 +204,7 @@ class JavaEditorAppearanceConfigurationBlock implements IPreferenceConfiguration
 				int i= fAppearanceColorList.getSelectionIndex();
 				String key= fAppearanceColorListModel[i][2];
 				if (key != null)
-					fStore.setValue(key, systemDefault);
+					getPreferenceStore().setValue(key, systemDefault);
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		};
@@ -261,7 +234,7 @@ class JavaEditorAppearanceConfigurationBlock implements IPreferenceConfiguration
 				int i= fAppearanceColorList.getSelectionIndex();
 				String key= fAppearanceColorListModel[i][1];
 				
-				PreferenceConverter.setValue(fStore, key, fAppearanceColorEditor.getColorValue());
+				PreferenceConverter.setValue(getPreferenceStore(), key, fAppearanceColorEditor.getColorValue());
 			}
 		});
 		return appearanceComposite;
@@ -270,7 +243,7 @@ class JavaEditorAppearanceConfigurationBlock implements IPreferenceConfiguration
     private void handleAppearanceColorListSelection() {	
 		int i= fAppearanceColorList.getSelectionIndex();
 		String key= fAppearanceColorListModel[i][1];
-		RGB rgb= PreferenceConverter.getColor(fStore, key);
+		RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), key);
 		fAppearanceColorEditor.setColorValue(rgb);		
 		updateAppearanceColorWidgets(fAppearanceColorListModel[i][2]);
 	}
@@ -281,7 +254,7 @@ class JavaEditorAppearanceConfigurationBlock implements IPreferenceConfiguration
 			fAppearanceColorDefault.setVisible(false);
 			fAppearanceColorEditor.getButton().setEnabled(true);
 		} else {
-			boolean systemDefault= fStore.getBoolean(systemDefaultKey);
+			boolean systemDefault= getPreferenceStore().getBoolean(systemDefaultKey);
 			fAppearanceColorDefault.setSelection(systemDefault);
 			fAppearanceColorDefault.setVisible(true);
 			fAppearanceColorEditor.getButton().setEnabled(!systemDefault);
@@ -290,7 +263,7 @@ class JavaEditorAppearanceConfigurationBlock implements IPreferenceConfiguration
 
 	public void initialize() {
 
-		initializeFields();
+		super.initialize();
 		
 		for (int i= 0; i < fAppearanceColorListModel.length; i++)
 			fAppearanceColorList.add(fAppearanceColorListModel[i][0]);
@@ -305,61 +278,9 @@ class JavaEditorAppearanceConfigurationBlock implements IPreferenceConfiguration
 
 	}
 
-	void initializeFields() {
-		Iterator e= fCheckBoxes.keySet().iterator();
-		while (e.hasNext()) {
-			Button b= (Button) e.next();
-			String key= (String) fCheckBoxes.get(b);
-			b.setSelection(fStore.getBoolean(key));
-		}
-		
-	}
-
-	public void performOk() {
-	}
-
 	public void performDefaults() {
-		restoreFromPreferences();
-		initializeFields();
+		super.performDefaults();
 		handleAppearanceColorListSelection();
-
-		updateStatus();
-	}
-
-	private void restoreFromPreferences() {
-	}
-
-	IStatus getStatus() {
-		if (fStatus == null)
-			fStatus= new StatusInfo();
-		return fStatus;
-	}
-
-	private void updateStatus() {
-
-		fMainPreferencePage.setValid(fStatus.isOK());
-		StatusUtil.applyToStatusLine(fMainPreferencePage, fStatus);
-	}
-	
-	private Button addCheckBox(Composite parent, String label, String key, int indentation) {		
-		Button checkBox= new Button(parent, SWT.CHECK);
-		checkBox.setText(label);
-		
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= indentation;
-		gd.horizontalSpan= 2;
-		checkBox.setLayoutData(gd);
-		checkBox.addSelectionListener(fCheckBoxListener);
-		
-		fCheckBoxes.put(checkBox, key);
-		
-		return checkBox;
-	}
-	
-	/*
-	 * @see DialogPage#dispose()
-	 */
-	public void dispose() {
 	}
 
 	/**

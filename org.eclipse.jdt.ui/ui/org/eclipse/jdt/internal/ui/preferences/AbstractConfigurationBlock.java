@@ -37,7 +37,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jface.text.Assert;
 
@@ -165,7 +164,6 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 			excomposite.setText(label);
 			excomposite.setExpanded(false);
 			excomposite.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, true, false));
-			excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
 			
 			updateSectionStyle(excomposite);
 			manage(excomposite);
@@ -209,7 +207,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	/**
 	 * List of master/slave listeners when there's a dependency.
 	 * 
-	 * @see #createDependency(Button, String, Control)
+	 * @see #createDependency(Button, Control)
 	 * @since 3.0
 	 */
 	private ArrayList fMasterSlaveListeners= new ArrayList();
@@ -382,13 +380,19 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		return new Control[]{labelControl, textControl};
 	}
 
-	protected void createDependency(final Button master, String masterKey, final Control slave) {
-		indent(slave);
-		boolean masterState= fStore.getBoolean(masterKey);
-		slave.setEnabled(masterState);
+	protected void createDependency(final Button master, final Control slave) {
+		createDependency(master, new Control[] {slave});
+	}
+	
+	protected void createDependency(final Button master, final Control[] slaves) {
+		Assert.isTrue(slaves.length > 0);
+		indent(slaves[0]);
 		SelectionListener listener= new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
-				slave.setEnabled(master.getSelection());
+				boolean state= master.getSelection();
+				for (int i= 0; i < slaves.length; i++) {
+					slaves[i].setEnabled(state);
+				}
 			}
 
 			public void widgetDefaultSelected(SelectionEvent e) {}
@@ -475,7 +479,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		return status;
 	}
 
-	private void updateStatus(IStatus status) {
+	protected void updateStatus(IStatus status) {
 		if (fMainPage == null)
 			return;
 		fMainPage.setValid(status.isOK());

@@ -55,7 +55,7 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 	/**
 	 * List of master/slave listeners when there's a dependency.
 	 * 
-	 * @see #createDependency(Button, String, Control)
+	 * @see #createDependency(Button, Control)
 	 * @since 3.0
 	 */
 
@@ -147,7 +147,7 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.guessArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
 		Button slave= addCheckBox(composite, label, PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, 0);
-		createDependency(master, PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, slave);
+		createDependency(master, slave);
 		
 		composite= manager.createSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.autoactivationSection.title")); //$NON-NLS-1$
 		composite.setLayout(new GridLayout(2, false));

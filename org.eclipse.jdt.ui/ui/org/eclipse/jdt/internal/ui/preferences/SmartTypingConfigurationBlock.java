@@ -117,7 +117,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.escapeStrings"); //$NON-NLS-1$
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_ESCAPE_STRINGS, INDENT);
-		createDependency(master, PreferenceConstants.EDITOR_WRAP_STRINGS, slave);
+		createDependency(master, slave);
 	}
 
 	private void addPasteSection(Composite composite) {
@@ -180,7 +180,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.addJavaDocTags"); //$NON-NLS-1$
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, INDENT);
-		createDependency(master, PreferenceConstants.EDITOR_CLOSE_JAVADOCS, slave);
+		createDependency(master, slave);
 	}
 	
 	private void createMessage(final Composite composite) {
