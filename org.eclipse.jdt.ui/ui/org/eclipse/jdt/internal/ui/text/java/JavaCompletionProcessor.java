@@ -36,17 +36,15 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 
 import org.eclipse.ui.IEditorPart;
 
-
-import org.eclipse.jdt.core.CompletionRequestor;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.ICompletionRequestor;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
@@ -357,10 +355,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 				if (selection.y > 0)
 				collector.setReplacementLength(selection.y);
 				
-				if (JavaPlugin.USE_COMPLETION_REQUESTOR)
-					unit.codeComplete(offset, (CompletionRequestor) collector);
-				else
-					unit.codeComplete(offset, (ICompletionRequestor) collector);
+				unit.codeComplete(offset, collector);
 			}
 		} catch (JavaModelException x) {
 			Shell shell= viewer.getTextWidget().getShell();

@@ -27,15 +27,12 @@ import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.CompletionRequestor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.ICompletionRequestor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
-
-import org.eclipse.jdt.internal.codeassist.IExtendedCompletionRequestor;
 
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -51,7 +48,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 /**
  * Bin to collect the proposal of the infrastructure on code assist in a java text.
  */
-public class ResultCollector extends CompletionRequestor implements ICompletionRequestor, IExtendedCompletionRequestor {
+public class ResultCollector extends CompletionRequestor {
 	
 	private final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-', ' ' };
 	private final static char[] METHOD_TRIGGERS= new char[] { ';', ',', '.', '\t', '[', ' ' };
@@ -808,11 +805,6 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 	public void endReporting() {
 	}
 	
-	/* 
-	 * TODO remove once we're getting rid of ICompletionRequestor 
-	 * these are just the delegating implementation now
-	 */
-	
 	/*
 	 * @see org.eclipse.jdt.core.CompletionRequestor#completionFailure(org.eclipse.jdt.core.compiler.IProblem)
 	 */
@@ -820,121 +812,4 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 		fLastProblem= problem;
 	}
 	
-	/*
-	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptAnonymousType(char[], char[], char[][], char[][], char[][], char[], int, int, int, int)
-	 */
-	public final void acceptAnonymousType(char[] superTypePackageName, char[] superTypeName, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
-		internalAcceptAnonymousType(superTypePackageName, superTypeName, parameterPackageNames, parameterTypeNames, parameterNames, completionName, modifiers, completionStart, completionEnd, relevance);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptClass(char[], char[], char[], int, int, int, int)
-	 */
-	public final void acceptClass(char[] packageName, char[] className, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
-		internalAcceptType(packageName, className, completionName, modifiers, completionStart, completionEnd, relevance);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptField(char[], char[], char[], char[], char[], char[], int, int, int, int)
-	 */
-	public final void acceptField(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[] typePackageName, char[] typeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
-		internalAcceptField(declaringTypePackageName, declaringTypeName, name, typePackageName, typeName, completionName, modifiers, completionStart, completionEnd, relevance);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptInterface(char[], char[], char[], int, int, int, int)
-	 */
-	public final void acceptInterface(char[] packageName, char[] interfaceName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
-		internalAcceptInterface(packageName, interfaceName, completionName, modifiers, completionStart, completionEnd, relevance);
-	}
-	
-	private void internalAcceptInterface(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
-		internalAcceptType(packageName, typeName, completionName, modifiers | Flags.AccInterface, start, end, relevance);
-	}
-	
-	/*
-	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptKeyword(char[], int, int, int)
-	 */
-	public final void acceptKeyword(char[] keywordName, int completionStart, int completionEnd, int relevance) {
-		internalAcceptKeyword(keywordName, completionStart, completionEnd, relevance);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptLabel(char[], int, int, int)
-	 */
-	public final void acceptLabel(char[] labelName, int completionStart, int completionEnd, int relevance) {
-		internalAcceptLabel(labelName, completionStart, completionEnd, relevance);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptLocalVariable(char[], char[], char[], int, int, int, int)
-	 */
-	public final void acceptLocalVariable(char[] name, char[] typePackageName, char[] typeName, int modifiers, int completionStart, int completionEnd, int relevance) {
-		internalAcceptLocalVariable(name, typePackageName, typeName, modifiers, completionStart, completionEnd, relevance);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptMethod(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int, int)
-	 */
-	public final void acceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
-		internalAcceptMethod(declaringTypePackageName, declaringTypeName, selector, parameterPackageNames, parameterTypeNames, parameterNames, returnTypePackageName, returnTypeName, completionName, modifiers, completionStart, completionEnd, relevance);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptMethodDeclaration(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int, int)
-	 */
-	public final void acceptMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
-		internalAcceptMethodDeclaration(declaringTypePackageName, declaringTypeName, selector, parameterPackageNames, parameterTypeNames, parameterNames, returnTypePackageName, returnTypeName, completionName, modifiers, completionStart, completionEnd, relevance);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptModifier(char[], int, int, int)
-	 */
-	public final void acceptModifier(char[] modifierName, int completionStart, int completionEnd, int relevance) {
-		internalAcceptModifier(modifierName, completionStart, completionEnd, relevance);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptPackage(char[], char[], int, int, int)
-	 */
-	public final void acceptPackage(char[] packageName, char[] completionName, int completionStart, int completionEnd, int relevance) {
-		internalAcceptPackage(packageName, completionName, completionStart, completionEnd, relevance);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptType(char[], char[], char[], int, int, int)
-	 */
-	public final void acceptType(char[] packageName, char[] typeName, char[] completionName, int completionStart, int completionEnd, int relevance) {
-		internalAcceptType(packageName, typeName, completionName, completionStart, completionEnd, relevance);
-	}
-
-	private void internalAcceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end, int relevance) {
-		if (TypeFilter.isFiltered(packageName, typeName)) {
-			return;
-		}
-		
-		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-		fTypes.add(createTypeCompletion(start, end, new String(completionName), JavaPluginImages.DESC_OBJS_CLASS, new String(typeName), new String(packageName), info, relevance));
-	}
-	
-	/*
-	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptVariableName(char[], char[], char[], char[], int, int, int)
-	 */
-	public final void acceptVariableName(char[] typePackageName, char[] typeName, char[] name, char[] completionName, int completionStart, int completionEnd, int relevance) {
-		internalAcceptVariableName(typePackageName, typeName, name, completionName, completionStart, completionEnd, relevance);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.codeassist.IExtendedCompletionRequestor#acceptPotentialMethodDeclaration(char[], char[], char[], int, int, int)
-	 */
-	public final void acceptPotentialMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, int completionStart, int completionEnd, int relevance) {
-		internalAcceptPotentialMethodDeclaration(declaringTypePackageName, declaringTypeName, selector, completionStart, completionEnd, relevance);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptError(org.eclipse.jdt.core.compiler.IProblem)
-	 */
-	public final void acceptError(IProblem error) {
-		completionFailure(error);
-	}
 }

@@ -23,9 +23,7 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IEditorPart;
 
-import org.eclipse.jdt.core.CompletionRequestor;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.ICompletionRequestor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -91,10 +89,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	private void codeComplete(ICompilationUnit cu, int offset, ResultCollector collector) throws JavaModelException {
-		if (JavaPlugin.USE_COMPLETION_REQUESTOR)
-			cu.codeComplete(offset, (CompletionRequestor) collector);
-		else
-			cu.codeComplete(offset, (ICompletionRequestor) collector);
+		cu.codeComplete(offset, collector);
 	}
 
 	protected void setUp() throws Exception {
@@ -275,11 +270,6 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	public void testEnumCompletions() throws Exception {
-		if (!JavaPlugin.USE_COMPLETION_REQUESTOR) {
-			System.out.println("CodeCompletionTest.testEnumCompletions() disabled in legacy mode");
-			return;
-		}
-
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
