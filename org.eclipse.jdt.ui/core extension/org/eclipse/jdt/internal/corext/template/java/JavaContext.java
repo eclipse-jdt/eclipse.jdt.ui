@@ -136,7 +136,7 @@ public class JavaContext extends CompilationUnitContext {
 			return true;
 
 		return
-			template.matches(key, getContextType().getName()) &&
+			template.matches(key, getContextType().getId()) &&
 			key.length() != 0 && template.getName().toLowerCase().startsWith(key.toLowerCase());
 	}
 

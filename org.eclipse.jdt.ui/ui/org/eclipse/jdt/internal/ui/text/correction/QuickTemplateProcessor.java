@@ -134,7 +134,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 		Template[] templates= Templates.getInstance().getTemplates();
 		for (int i= 0; i != templates.length; i++) {
 			Template curr= templates[i];
-			if (context.canEvaluate(curr) && curr.getContextTypeName().equals(JavaContextType.NAME) && curr.getPattern().indexOf($_LINE_SELECTION) != -1) {
+			if (context.canEvaluate(curr) && curr.getContextTypeId().equals(JavaContextType.NAME) && curr.getPattern().indexOf($_LINE_SELECTION) != -1) {
 				// TODO using jdt proposals for the moment, as jdt expects IJavaCompletionProposals
 				TemplateProposal proposal= new TemplateProposal(curr, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
 				String[] arg= new String[] { curr.getName(), curr.getDescription() };

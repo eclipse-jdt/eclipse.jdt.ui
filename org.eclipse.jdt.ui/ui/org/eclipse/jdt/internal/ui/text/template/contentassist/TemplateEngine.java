@@ -116,7 +116,7 @@ public class TemplateEngine {
 			for (int i= 0; i != templates.length; i++) {
 				Template template= templates[i];				
 				if (context.canEvaluate(template) &&
-					template.getContextTypeName().equals(context.getContextType().getName()) &&				
+					template.getContextTypeId().equals(context.getContextType().getId()) &&				
 					(!multipleLinesSelected && template.getPattern().indexOf($_WORD_SELECTION) != -1 || (multipleLinesSelected && template.getPattern().indexOf($_LINE_SELECTION) != -1)))
 				{
 					fProposals.add(new TemplateProposal(templates[i], context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));

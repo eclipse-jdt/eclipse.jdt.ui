@@ -314,7 +314,7 @@ public class CodeTemplateBlock {
 		}
 		if (selection.size() == 1 && selection.get(0) instanceof Template) {
 			Template template= (Template) selection.get(0);
-			ContextType type= JavaPlugin.getTemplateContextRegistry().getContextType(template.getContextTypeName());
+			ContextType type= JavaPlugin.getTemplateContextRegistry().getContextType(template.getContextTypeId());
 			fTemplateProcessor.setContextType(type);
 			fPatternViewer.getDocument().set(template.getPattern());
 		} else {
@@ -353,7 +353,7 @@ public class CodeTemplateBlock {
 		String path= dialog.open();
 		if (path != null) {
 			try {
-				fTemplates.addFromFile(new File(path), false);
+				fTemplates.addFromFile(new File(path), false, null);
 			} catch (CoreException e) {
 				openReadErrorDialog(e);
 			}

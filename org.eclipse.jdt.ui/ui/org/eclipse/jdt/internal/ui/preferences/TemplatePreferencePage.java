@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -104,7 +105,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 				case 0:
 					return template.getName();
 				case 1:
-					return template.getContextTypeName();
+					return template.getContextTypeId();
 				case 2:
 					return template.getDescription();
 				default:
@@ -234,7 +235,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		fTableViewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				Template template= (Template) event.getElement();
-				template.setEnabled(event.getChecked());
 			}
 		});
 
@@ -384,8 +384,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		List list= new ArrayList(templates.length);
 		
 		for (int i= 0; i != templates.length; i++)
-			if (templates[i].isEnabled())
-				list.add(templates[i]);
+			list.add(templates[i]);
 				
 		return (Template[]) list.toArray(new Template[list.size()]);
 	}
@@ -434,7 +433,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 
 		if (selection.size() == 1) {
 			Template template= (Template) selection.getFirstElement();
-			ContextType type= JavaPlugin.getTemplateContextRegistry().getContextType(template.getContextTypeName());
+			ContextType type= JavaPlugin.getTemplateContextRegistry().getContextType(template.getContextTypeId());
 			fTemplateProcessor.setContextType(type);
 			fPatternViewer.getDocument().set(template.getPattern());
 		} else {		
@@ -464,7 +463,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		if (dialog.open() == Window.OK) {
 			fTemplates.add(template);
 			fTableViewer.refresh();
-			fTableViewer.setChecked(template, template.isEnabled());
+			fTableViewer.setChecked(template, true);
 			fTableViewer.setSelection(new StructuredSelection(template));			
 		}
 	}
@@ -496,11 +495,11 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 			} else {
 				template.setName(newTemplate.getName());
 				template.setDescription(newTemplate.getDescription());
-				template.setContext(newTemplate.getContextTypeName());
+				template.setContext(newTemplate.getContextTypeId());
 				template.setPattern(newTemplate.getPattern());
 				fTableViewer.refresh(template);
 			}
-			fTableViewer.setChecked(template, template.isEnabled());
+			fTableViewer.setChecked(template, true);
 			fTableViewer.setSelection(new StructuredSelection(template));			
 		}
 	}
@@ -515,7 +514,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 			return;
 		
 		try {
-			fTemplates.addFromFile(new File(path), true);
+			fTemplates.addFromFile(new File(path), true, ResourceBundle.getBundle(JavaTemplateMessages.class.getName()));
 			
 			fTableViewer.refresh();
 			fTableViewer.setAllChecked(false);
@@ -603,9 +602,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 	
 	private void enableAll(boolean enable) {
 		Template[] templates= fTemplates.getTemplates();
-		for (int i= 0; i != templates.length; i++)
-			templates[i].setEnabled(enable);		
-			
 		fTableViewer.setAllChecked(enable);
 	}
 	

@@ -66,9 +66,11 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 		
 	/**
 	 * Creates a template proposal with a template and its context.
+	 * 
 	 * @param template  the template
-	 * @param context   the context in which the template was requested.
-	 * @param image     the icon of the proposal.
+	 * @param context   the context in which the template was requested
+	 * @param region 	the region this proposal applies to
+	 * @param image     the icon of the proposal
 	 */	
 	public TemplateProposal(Template template, TemplateContext context, IRegion region, Image image) {
 		Assert.isNotNull(template);

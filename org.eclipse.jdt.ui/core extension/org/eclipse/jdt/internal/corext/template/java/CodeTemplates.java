@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.ResourceBundle;
 
 import org.eclipse.core.runtime.CoreException;
@@ -78,9 +79,11 @@ public class CodeTemplates extends TemplateSet {
 			addFromStream(getDefaultsAsStream(), false, true, fgResourceBundle);
 			File templateFile= getTemplateFile();
 			if (templateFile.exists()) {
-				addFromFile(templateFile, false);
+				addFromFile(templateFile, false, fgResourceBundle);
 			}
 			saveToFile(templateFile);
+			
+			Collection col= null;
 
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
@@ -93,12 +96,14 @@ public class CodeTemplates extends TemplateSet {
 
 	}	
 	
+	private void meth(Object[] arr) {}
+	
 	/**
 	 * Resets the template set.
 	 */
 	public void reset() throws CoreException {
 		clear();
-		addFromFile(getTemplateFile(), false);
+		addFromFile(getTemplateFile(), false, fgResourceBundle);
 	}
 
 	/**

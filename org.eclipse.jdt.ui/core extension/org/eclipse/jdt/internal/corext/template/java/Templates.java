@@ -56,7 +56,7 @@ public class Templates extends TemplateSet {
 		try {
 			File templateFile= getTemplateFile();
 			if (templateFile.exists()) {
-				addFromFile(templateFile, true);
+				addFromFile(templateFile, true, fgResourceBundle);
 			} else {
 				addFromStream(getDefaultsAsStream(), true, true, fgResourceBundle);
 				saveToFile(templateFile);
@@ -78,7 +78,7 @@ public class Templates extends TemplateSet {
 	 */
 	public void reset() throws CoreException {
 		clear();
-		addFromFile(getTemplateFile(), true);
+		addFromFile(getTemplateFile(), true, fgResourceBundle);
 	}
 
 	/**

@@ -161,7 +161,7 @@ public class EditTemplateDialog extends StatusDialog {
 		fContextTypes= contextTypes;
 		fValidationStatus= new StatusInfo();
 		
-		ContextType type= JavaPlugin.getTemplateContextRegistry().getContextType(template.getContextTypeName());
+		ContextType type= JavaPlugin.getTemplateContextRegistry().getContextType(template.getContextTypeId());
 		fTemplateProcessor.setContextType(type);
 	}
 	
@@ -242,7 +242,7 @@ public class EditTemplateDialog extends StatusDialog {
 		fDescriptionText.setText(fTemplate.getDescription());
 		if (fIsNameModifiable) {
 			fNameText.setText(fTemplate.getName());
-			fContextCombo.select(getIndex(fTemplate.getContextTypeName()));
+			fContextCombo.select(getIndex(fTemplate.getContextTypeId()));
 		} else {
 			fPatternEditor.getControl().setFocus();
 		}
@@ -274,7 +274,7 @@ public class EditTemplateDialog extends StatusDialog {
 		String text= document.get();
 		fTemplate.setPattern(text);
 		fValidationStatus.setOK();
-		ContextType contextType= JavaPlugin.getTemplateContextRegistry().getContextType(fTemplate.getContextTypeName());
+		ContextType contextType= JavaPlugin.getTemplateContextRegistry().getContextType(fTemplate.getContextTypeId());
 		if (contextType != null) {
 			String errorMessage= contextType.validate(text);
 			if (errorMessage != null) {

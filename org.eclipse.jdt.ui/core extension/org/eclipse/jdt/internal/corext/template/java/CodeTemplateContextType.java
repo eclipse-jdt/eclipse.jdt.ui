@@ -203,7 +203,7 @@ public class CodeTemplateContextType extends ContextType {
 	 */
 	protected String validateVariables(TemplateVariable[] variables) {
 		ArrayList required=  new ArrayList(5);
-		String contextName= getName();
+		String contextName= getId();
 		if (NEWTYPE_CONTEXTTYPE.equals(contextName)) {
 			required.add(PACKAGE_DECLARATION);
 			required.add(TYPE_DECLARATION);
