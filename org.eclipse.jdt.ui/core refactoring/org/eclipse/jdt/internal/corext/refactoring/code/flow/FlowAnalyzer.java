@@ -122,6 +122,10 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 		return result;
 	}
 	
+	protected FlowInfo accessFlowInfo(AstNode node) {
+		return (FlowInfo)fData.get(node);
+	}
+	
 	//---- Helpers to process sequential flow infos -------------------------------------
 	
 	protected GenericSequentialFlowInfo processSequential(AstNode parent, AstNode[] nodes) {

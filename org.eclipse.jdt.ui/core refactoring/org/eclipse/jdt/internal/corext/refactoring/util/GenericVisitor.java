@@ -667,8 +667,6 @@ public class GenericVisitor implements IAbstractSyntaxTreeVisitor, IParentProvid
 	}
 
 	public boolean visit(SwitchStatement node, BlockScope scope) {
-		// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=7000
-		node.sourceEnd++;
 		return visitNode(node, scope);
 	}
 
@@ -701,8 +699,6 @@ public class GenericVisitor implements IAbstractSyntaxTreeVisitor, IParentProvid
 	}
 
 	public boolean visit(TryStatement node, BlockScope scope) {
-		// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=7000
-		node.sourceEnd++;
 		return visitNode(node, scope);
 	}
 

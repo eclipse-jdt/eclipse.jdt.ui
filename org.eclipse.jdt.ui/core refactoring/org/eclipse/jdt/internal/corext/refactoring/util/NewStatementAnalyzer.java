@@ -110,8 +110,11 @@ public class NewStatementAnalyzer extends NewSelectionAnalyzer{
 		AstNode firstSelectedNode= getFirstSelectedNode();
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.AFTER) {
 			if (firstSelectedNode == node.tryBlock || firstSelectedNode == node.finallyBlock ||
-					contains(node.catchBlocks, firstSelectedNode))
+					contains(node.catchBlocks, firstSelectedNode)) {
 				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.try_statement"));
+			} else if (contains(node.catchArguments, firstSelectedNode)) {
+				invalidSelection("Operation is not applicable to a catch block's argument declaration.");
+			}
 		}
 		super.endVisit(node, scope);
 	}

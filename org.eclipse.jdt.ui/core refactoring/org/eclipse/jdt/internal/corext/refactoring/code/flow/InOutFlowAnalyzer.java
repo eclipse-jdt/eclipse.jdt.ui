@@ -4,11 +4,12 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
+import org.eclipse.jdt.internal.compiler.ast.Block;
+import org.eclipse.jdt.internal.compiler.ast.ForStatement;
+import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
+import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
@@ -45,5 +46,26 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
 		// we are only traversing selected nodes.
 		return true;
 	}
+	
+	public void endVisit(Block node, BlockScope scope) {
+		super.endVisit(node, scope);
+		clearAccessMode(accessFlowInfo(node), node.statements);
+	}
+	
+	public void endVisit(ForStatement node, BlockScope scope) {
+		super.endVisit(node, scope);
+		clearAccessMode(accessFlowInfo(node), node.initializations);
+	}
+	
+	private void clearAccessMode(FlowInfo info, Statement[] statements) {
+		if (statements == null || info == null)
+			return;
+		for (int i= 0; i < statements.length; i++) {
+			if (statements[i] instanceof LocalDeclaration) {
+				LocalDeclaration declaration= (LocalDeclaration)statements[i];
+				info.clearAccessMode(declaration.binding, fFlowContext);
+			}
+		}
+	}				
 }
 

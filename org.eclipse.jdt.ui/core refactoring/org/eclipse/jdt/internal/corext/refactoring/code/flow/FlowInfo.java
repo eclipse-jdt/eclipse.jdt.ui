@@ -251,43 +251,59 @@ public abstract class FlowInfo {
 		return fAccessModes;
 	}
 	
+	protected void clearAccessMode(LocalVariableBinding binding, FlowContext context) {
+		if (fAccessModes == null)	// all are unused
+			return;
+		fAccessModes[binding.id - context.getStartingIndex()]= UNUSED;
+	}
+	
 	protected void mergeAccessModeSequential(FlowInfo otherInfo, FlowContext context) {
 		if (!context.considerAccessMode())
 			return;
 		
 		int[] others= otherInfo.fAccessModes;
-		if (others != null) {
-			if (fAccessModes == null) {
-				fAccessModes= others;
-			} else {
-				if (context.computeArguments()) {
-					for (int i= 0; i < fAccessModes.length; i++) {
-						int accessMode= fAccessModes[i];
-						int otherMode= others[i];
-						if (accessMode == UNUSED) {
-							fAccessModes[i]= otherMode;
-						} else if (accessMode == WRITE_POTENTIAL && otherMode == READ) {
-							fAccessModes[i]= READ;
-						} else if (accessMode == WRITE_POTENTIAL && otherMode == WRITE) {
-							fAccessModes[i]= WRITE;
-						}
-					}
-				} else if (context.computeReturnValues()) {
-					for (int i= 0; i < fAccessModes.length; i++) {
-						int accessmode= fAccessModes[i];
-						int othermode= others[i];
-						if (accessmode == WRITE)
-							continue;
-						if (accessmode == WRITE_POTENTIAL) {
-							if (othermode == WRITE)
-								fAccessModes[i]= WRITE;
-							continue;
-						}
-							
-						if (others[i] != UNUSED)
-							fAccessModes[i]= othermode;
-					}
-				}
+		if (others == null)	// others are all unused. So nothing to do
+			return;
+			
+		if (fAccessModes == null) {	// all current variables are unused
+			fAccessModes= others;
+			return;
+		}
+		
+		if (context.computeArguments()) {
+			handleComputeArguments(others);
+		} else if (context.computeReturnValues()) {
+			handleComputeReturnValues(others);
+		}
+	}
+
+	private void handleComputeReturnValues(int[] others) {
+		for (int i= 0; i < fAccessModes.length; i++) {
+			int accessmode= fAccessModes[i];
+			int othermode= others[i];
+			if (accessmode == WRITE)
+				continue;
+			if (accessmode == WRITE_POTENTIAL) {
+				if (othermode == WRITE)
+					fAccessModes[i]= WRITE;
+				continue;
+			}
+		
+			if (others[i] != UNUSED)
+				fAccessModes[i]= othermode;
+		}
+	}
+
+	private void handleComputeArguments(int[] others) {
+		for (int i= 0; i < fAccessModes.length; i++) {
+			int accessMode= fAccessModes[i];
+			int otherMode= others[i];
+			if (accessMode == UNUSED) {
+				fAccessModes[i]= otherMode;
+			} else if (accessMode == WRITE_POTENTIAL && otherMode == READ) {
+				fAccessModes[i]= READ;
+			} else if (accessMode == WRITE_POTENTIAL && otherMode == WRITE) {
+				fAccessModes[i]= WRITE;
 			}
 		}
 	}
@@ -295,11 +311,23 @@ public abstract class FlowInfo {
 	protected void mergeAccessModeConditional(FlowInfo otherInfo, FlowContext context) {
 		if (!context.considerAccessMode())
 			return;
-			
+		
 		int[] others= otherInfo.fAccessModes;
-		if (others != null) {
-			if (fAccessModes == null) {
+		// first access
+		if (fAccessModes == null) {
+			if (others != null)
 				fAccessModes= others;
+			else
+				fAccessModes= new int[context.getArrayLength()];
+			return;
+		} else {	
+			if (others == null) {
+				for (int i= 0; i < fAccessModes.length; i++) {
+					int unused_index= getIndex(UNUSED);
+					fAccessModes[i]= ACCESS_MODE_CONDITIONAL_TABLE
+						[getIndex(fAccessModes[i])]
+						[unused_index];
+				}
 			} else {
 				for (int i= 0; i < fAccessModes.length; i++) {
 					fAccessModes[i]= ACCESS_MODE_CONDITIONAL_TABLE

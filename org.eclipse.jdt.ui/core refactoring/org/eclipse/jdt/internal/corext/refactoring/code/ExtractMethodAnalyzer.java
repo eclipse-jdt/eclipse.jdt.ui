@@ -302,13 +302,13 @@ import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 		flowContext.setConsiderExecutionFlow(false);
 		flowContext.setConsiderAccessMode(true);
 		flowContext.setComputeMode(FlowContext.RETURN_VALUES);
-		FlowInfo flowInfo= new InOutFlowAnalyzer(flowContext, getSelection()).analyse(getSelectedNodes(), (BlockScope)getEnclosingScope());
-		LocalVariableBinding[] returnValues= flowInfo.get(flowContext, FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL | FlowInfo.UNKNOWN);
+		FlowInfo returnInfo= new InOutFlowAnalyzer(flowContext, getSelection()).analyse(getSelectedNodes(), (BlockScope)getEnclosingScope());
+		LocalVariableBinding[] returnValues= returnInfo.get(flowContext, FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL | FlowInfo.UNKNOWN);
 		
-		flowContext.setComputeMode(FlowContext.ARGUMENTS);
-		flowInfo= new InputFlowAnalyzer(flowContext, getSelection()).analyse(fEnclosingMethod, fClassScope);
-		LocalVariableBinding[] reads= flowInfo.get(flowContext, FlowInfo.READ | FlowInfo.READ_POTENTIAL | FlowInfo.UNKNOWN);
 		int counter= 0;
+		flowContext.setComputeMode(FlowContext.ARGUMENTS);
+		FlowInfo argInfo= new InputFlowAnalyzer(flowContext, getSelection()).analyse(fEnclosingMethod, fClassScope);
+		LocalVariableBinding[] reads= argInfo.get(flowContext, FlowInfo.READ | FlowInfo.READ_POTENTIAL | FlowInfo.UNKNOWN);
 		outer: for (int i= 0; i < returnValues.length && counter <= 1; i++) {
 			LocalVariableBinding binding= returnValues[i];
 			for (int x= 0; x < reads.length; x++) {
@@ -331,7 +331,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 				return;
 		}
 		List callerLocals= new ArrayList(5);
-		LocalVariableBinding[] writes= flowInfo.get(flowContext, FlowInfo.WRITE);
+		LocalVariableBinding[] writes= argInfo.get(flowContext, FlowInfo.WRITE);
 		for (int i= 0; i < writes.length; i++) {
 			LocalVariableBinding write= writes[i];
 			if (getSelection().covers(write.declaration))
