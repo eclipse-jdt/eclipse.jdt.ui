@@ -558,12 +558,41 @@ public class JavaModelUtil {
 	 * an original the input is returned. The returned member must not exist
 	 */
 	public static IMember toOriginal(IMember member) {
+		if (member instanceof IMethod)
+			return toOriginalMethod((IMethod)member);
 		ICompilationUnit cu= member.getCompilationUnit();
 		if (cu != null && cu.isWorkingCopy())
 			return (IMember)cu.getOriginal(member);
 		return member;
 	}
 	
+	/*
+	 * XXX workaround for bug 18568
+	 * http://bugs.eclipse.org/bugs/show_bug.cgi?id=18568
+	 * to be removed once the bug is fixed
+	 */
+	private static IMethod toOriginalMethod(IMethod method) {
+		try{
+			ICompilationUnit cu= method.getCompilationUnit();
+			if (cu == null || ! cu.isWorkingCopy())
+				return method;
+			//use the workaround only if needed	
+			if (! method.getElementName().equals(method.getDeclaringType().getElementName()))
+				return (IMethod)cu.getOriginal(method);
+			
+			IType originalType = (IType)toOriginal(method.getDeclaringType());
+			IMethod[] methods = originalType.findMethods(method);
+			boolean isConstructor = method.isConstructor();
+			for (int i=0; i < methods.length; i++) {
+			  if (methods[i].isConstructor() == isConstructor) 
+				return methods[i];
+			}
+			return null;
+		} catch(JavaModelException e){
+			return null;
+		}	
+	}
+
 	/**
 	 * Returns the original cu if the given cu. If the cu is already
 	 * an original the input cu is returned. The returned cu must not exist
