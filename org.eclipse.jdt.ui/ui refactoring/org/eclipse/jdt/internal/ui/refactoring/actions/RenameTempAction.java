@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
 
-class RenameTempAction extends NewTextRefactoringAction {
+class RenameTempAction extends TextSelectionRefactoringAction {
 
 	public RenameTempAction(CompilationUnitEditor editor) {
 		super(editor);
