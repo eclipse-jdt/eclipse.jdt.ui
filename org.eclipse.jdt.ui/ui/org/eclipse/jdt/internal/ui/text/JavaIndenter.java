@@ -200,10 +200,14 @@ public class JavaIndenter {
 	 * consisting of the content in <code>fDocument</code> in the range
 	 * [start, indent), with every character replaced by a space except for
 	 * tabs, which are kept as such.
+	 * <p>
+	 * Every run of the number of spaces that make up a tab are replaced by a
+	 * tab character.
+	 * </p>
 	 * 
-	 * <p>Every run of the number of spaces that make up a tab are replaced
-	 * by a tab character.</p>
-	 * 
+	 * @param start the start of the document region to copy the indent from
+	 * @param indent the exclusive end of the document region to copy the indent
+	 *        from
 	 * @return the indentation corresponding to the document content specified
 	 *         by <code>start</code> and <code>indent</code>
 	 */
@@ -725,8 +729,9 @@ public class JavaIndenter {
 			nextToken();
 			switch (fToken) {
 				
-				// search for case, otherwise return true
+				// search for case labels, which consist of (possibly qualified) identifiers or numbers
 				case Symbols.TokenIDENT:
+				case Symbols.TokenOTHER: // dots for qualified constants
 					continue;
 				case Symbols.TokenCASE:
 					return false;
@@ -1072,6 +1077,8 @@ public class JavaIndenter {
 	 * Reads the next token in backward direction of <code>start</code> from
 	 * the heuristic scanner and sets the fields <code>fToken, fPreviousPosition</code>
 	 * and <code>fPosition</code> accordingly.
+	 * 
+	 * @param start the start offset from which to scan backwards
 	 */
 	private void nextToken(int start) {
 		fToken= fScanner.previousToken(start - 1, JavaHeuristicScanner.UNBOUND);
@@ -1133,6 +1140,8 @@ public class JavaIndenter {
 	 * Scans tokens for the matching opening peer. The internal cursor
 	 * (<code>fPosition</code>) is set to the offset of the opening peer if found.
 	 * 
+	 * @param openToken the opening peer token
+	 * @param closeToken the closing peer token
 	 * @return <code>true</code> if a matching token was found, <code>false</code>
 	 *         otherwise
 	 */
