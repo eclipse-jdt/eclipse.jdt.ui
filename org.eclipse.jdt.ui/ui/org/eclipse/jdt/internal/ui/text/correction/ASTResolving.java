@@ -565,7 +565,7 @@ public class ASTResolving {
 		if (binding == null || !binding.isFromSource() || binding.isTypeVariable() || binding.isWildcardType()) {
 			return null;
 		}
-		ASTNode node= astRoot.findDeclaringNode(binding.getTypeDeclaration());
+		ASTNode node= astRoot.findDeclaringNode(binding.getGenericType());
 		if (node == null) {
 			ICompilationUnit targetCU= Bindings.findCompilationUnit(binding, cu.getJavaProject());
 			if (targetCU != null) {

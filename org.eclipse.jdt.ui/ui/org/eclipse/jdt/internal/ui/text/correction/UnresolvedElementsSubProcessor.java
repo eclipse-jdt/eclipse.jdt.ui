@@ -225,7 +225,7 @@ public class UnresolvedElementsSubProcessor {
 		ICompilationUnit targetCU;
 		ITypeBinding senderDeclBinding;
 		if (binding != null) {
-			senderDeclBinding= binding.getTypeDeclaration();
+			senderDeclBinding= binding.getGenericType();
 			targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, binding);
 		} else { // binding is null for accesses without qualifier
 			senderDeclBinding= declaringTypeBinding;
@@ -723,7 +723,7 @@ public class UnresolvedElementsSubProcessor {
 			}				
 		}
 		if (binding != null && binding.isFromSource()) {
-			ITypeBinding senderDeclBinding= binding.getTypeDeclaration();
+			ITypeBinding senderDeclBinding= binding.getGenericType();
 			
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, senderDeclBinding);
 			if (targetCU != null) {			
@@ -931,7 +931,7 @@ public class UnresolvedElementsSubProcessor {
 		
 		ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);
 		if (targetCU != null) {
-			IMethodBinding methodDecl= methodBinding.getMethodDeclaration();
+			IMethodBinding methodDecl= methodBinding.getGenericMethod();
 			ITypeBinding[] declParameterTypes= methodDecl.getParameterTypes();
 			
 			ChangeDescription[] changeDesc= new ChangeDescription[declParameterTypes.length];
@@ -1028,7 +1028,7 @@ public class UnresolvedElementsSubProcessor {
 			proposals.add(proposal);				
 		}
 		
-		IMethodBinding methodDecl= methodRef.getMethodDeclaration();
+		IMethodBinding methodDecl= methodRef.getGenericMethod();
 		ITypeBinding declaringType= methodDecl.getDeclaringClass();
 		
 		// add parameters
@@ -1101,7 +1101,7 @@ public class UnresolvedElementsSubProcessor {
 	private static String getMethodSignature(IMethodBinding binding, boolean inOtherCU) {
 		StringBuffer buf= new StringBuffer();
 		if (inOtherCU && !binding.isConstructor()) {
-			buf.append(binding.getDeclaringClass().getTypeDeclaration().getName()).append('.'); // simple type name
+			buf.append(binding.getDeclaringClass().getGenericType().getName()).append('.'); // simple type name
 		}
 		buf.append(binding.getName());
 		return getMethodSignature(buf.toString(), binding.getParameterTypes());
@@ -1149,6 +1149,8 @@ public class UnresolvedElementsSubProcessor {
 			return buf.toString();
 		} else if (type.isWildcardType()) {
 			return "?"; //$NON-NLS-1$
+		} else if (type.isRawType()) {
+			
 		}
 		return type.getName();
 	}
@@ -1163,7 +1165,7 @@ public class UnresolvedElementsSubProcessor {
 				indexOfDiff[nDiffs++]= n;
 			}
 		}
-		ITypeBinding declaringTypeDecl= methodBinding.getDeclaringClass().getTypeDeclaration();
+		ITypeBinding declaringTypeDecl= methodBinding.getDeclaringClass().getGenericType();
 		
 		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit astRoot= context.getASTRoot();
@@ -1223,7 +1225,7 @@ public class UnresolvedElementsSubProcessor {
 						for (int i= 0; i < nDiffs; i++) {
 							changeDesc[idx1]= new SwapDescription(idx2);
 						}
-						IMethodBinding methodDecl= methodBinding.getMethodDeclaration();
+						IMethodBinding methodDecl= methodBinding.getGenericMethod();
 						ITypeBinding[] declParamTypes= methodDecl.getParameterTypes();
 						
 						ITypeBinding[] swappedTypes= new ITypeBinding[] { declParamTypes[idx1], declParamTypes[idx2] };
@@ -1253,7 +1255,7 @@ public class UnresolvedElementsSubProcessor {
 					String name= arg instanceof SimpleName ? ((SimpleName) arg).getIdentifier() : null;					
 					changeDesc[diffIndex]= new EditDescription(argTypes[diffIndex], name);
 				}
-				IMethodBinding methodDecl= methodBinding.getMethodDeclaration();
+				IMethodBinding methodDecl= methodBinding.getGenericMethod();
 				ITypeBinding[] declParamTypes= methodDecl.getParameterTypes();
 				
 				ITypeBinding[] newParamTypes= new ITypeBinding[changeDesc.length];
@@ -1388,7 +1390,7 @@ public class UnresolvedElementsSubProcessor {
 		addParameterMissmatchProposals(context, problem, similarElements, selectedNode, arguments, proposals);
 		
 		if (targetBinding.isFromSource()) {
-			ITypeBinding targetDecl= targetBinding.getTypeDeclaration();
+			ITypeBinding targetDecl= targetBinding.getGenericType();
 			
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, targetDecl);
 			if (targetCU != null) {
