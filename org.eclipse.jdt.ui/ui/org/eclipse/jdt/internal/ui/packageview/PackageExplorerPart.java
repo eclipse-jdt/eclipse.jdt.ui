@@ -372,11 +372,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 				handleDoubleClick(event);
 			}
 		});
-		fViewer.getControl().addKeyListener(new KeyAdapter() {
-			public void keyPressed(KeyEvent e) {
-				handleKeyPressed(e);
-			}
-		});
 
 		getSite().setSelectionProvider(fViewer);
 		getSite().getPage().addPartListener(fPartListener);
@@ -721,17 +716,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	}
 
 	/**
- 	 * Handles key events in viewer.
- 	 */
-	void handleKeyPressed(KeyEvent event) {
-		if (event.character == SWT.DEL && event.stateMask == 0){
-			fDeleteAction.update();
-			if (fDeleteAction.isEnabled())
-				fDeleteAction.run();
-		}
-	}
-	
-	/**
 	 * Handles double clicks in viewer.
 	 * Opens editor if file double-clicked.
 	 */
@@ -1058,6 +1042,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			fOpenCUAction.update();
 			if (fOpenCUAction.isEnabled())
 				fOpenCUAction.run();
+		} else if (event.character == SWT.DEL){
+			fDeleteAction.update();
+			if (fDeleteAction.isEnabled())
+				fDeleteAction.run();
 		}
 	}
 
