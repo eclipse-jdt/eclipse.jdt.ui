@@ -10,6 +10,7 @@ import java.util.List;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -36,7 +37,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.ui.text.java.AnonymousTypeCompletionProposal;
 
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -432,7 +432,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	public boolean visit(DoStatement node) {
 		boolean result= super.visit(node);
 		
-		int actionStart= getBuffer().indexAfter(Scanner.TokenNamedo, node.getStartPosition());
+		int actionStart= getBuffer().indexAfter(ITerminalSymbols.TokenNamedo, node.getStartPosition());
 		if (getSelection().getOffset() == actionStart) {
 			invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.after_do_keyword"), JavaSourceContext.create(fCUnit, getSelection())); //$NON-NLS-1$
 			return false;
