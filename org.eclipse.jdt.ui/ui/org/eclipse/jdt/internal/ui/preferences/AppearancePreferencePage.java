@@ -114,7 +114,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 
 		fStackBrowsingViewsVertically= new SelectionButtonDialogField(SWT.CHECK);
 		fStackBrowsingViewsVertically.setDialogFieldListener(listener);
-		fStackBrowsingViewsVertically.setLabelText("&In the Java Browsing, stack views vertically");
+		fStackBrowsingViewsVertically.setLabelText("&Stack views vertically in the Java Browsing perspective");
 
 		fCompressPackageNames= new SelectionButtonDialogField(SWT.CHECK);
 		fCompressPackageNames.setDialogFieldListener(listener);
