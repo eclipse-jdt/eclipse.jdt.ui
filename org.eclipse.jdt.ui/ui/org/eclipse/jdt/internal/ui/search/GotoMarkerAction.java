@@ -14,6 +14,7 @@ import org.eclipse.jface.action.Action;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
@@ -113,11 +114,24 @@ public class GotoMarkerAction extends Action {
 		}
 	}
 
+	private boolean isPinned(IEditorPart editor) {
+		if (editor == null)
+			return false;
+		
+		IEditorReference[] editorRefs= editor.getEditorSite().getPage().getEditorReferences();
+		int i= 0;
+		while (i < editorRefs.length) {
+			if (editor.equals(editorRefs[i].getEditor(false)))
+				return editorRefs[i].isPinned();
+			i++;
+		}
+		return false;
+	}
 	
 	private void showInEditor(IMarker marker, IWorkbenchPage page, IEditorInput input, String editorId) {
 		IEditorPart editor= page.findEditor(input);
 		if (editor == null) {
-			if (fEditor != null && !fEditor.isDirty())
+			if (fEditor != null && !fEditor.isDirty() && !isPinned(fEditor))
 				page.closeEditor(fEditor, false);
 				try {
 					editor= page.openEditor(input, editorId, false);
