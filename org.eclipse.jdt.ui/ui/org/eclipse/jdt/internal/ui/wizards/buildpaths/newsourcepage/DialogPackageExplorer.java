@@ -307,6 +307,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
     public DialogPackageExplorer() {
         fActionGroup= null;
         fCurrJProject= null;
+        fCurrentSelection= new StructuredSelection();
     }
     
     public Control createControl(Composite parent) {
