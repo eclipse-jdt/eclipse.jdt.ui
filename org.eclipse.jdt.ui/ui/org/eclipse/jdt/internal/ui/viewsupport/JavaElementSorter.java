@@ -38,11 +38,12 @@ public class JavaElementSorter extends ViewerSorter {
 	private static final int STATIC_FIELDS= 7;
 	private static final int FIELDS= 8;
 	private static final int JAVAELEMENTS= 9;
-	private static final int PACKAGEFRAGMENTROOT= 10;
-	private static final int RESOURCEPACKAGES= 11;
-	private static final int RESOURCEFOLDERS= 12;
-	private static final int RESOURCES= 13;
-	private static final int STORAGE= 14;
+	private static final int PACKAGEFRAGMENTROOTS= 10;
+	private static final int JAVAPROJECTS= 11;
+	private static final int RESOURCEPACKAGES= 12;
+	private static final int RESOURCEFOLDERS= 13;
+	private static final int RESOURCES= 14;
+	private static final int STORAGE= 15;
 	
 	private static final int OTHERS= 20;	
 
@@ -112,12 +113,14 @@ public class JavaElementSorter extends ViewerSorter {
 							return RESOURCEPACKAGES;
 						}
 						if (pack.getParent().getUnderlyingResource() instanceof IProject) {
-							return PACKAGEFRAGMENTROOT;
+							return PACKAGEFRAGMENTROOTS;
 						}
 						
 						break;
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-						return PACKAGEFRAGMENTROOT;
+						return PACKAGEFRAGMENTROOTS;
+					case IJavaElement.JAVA_PROJECT:
+						return JAVAPROJECTS;
 				}
 			
 			} catch (JavaModelException x) {
@@ -151,7 +154,7 @@ public class JavaElementSorter extends ViewerSorter {
 			case CU_MEMBERS:
 				// do not sort elements in CU or ClassFiles
 				return 0;
-			case PACKAGEFRAGMENTROOT:
+			case PACKAGEFRAGMENTROOTS:
 				int p1= getClassPathIndex(JavaModelUtil.getPackageFragmentRoot((IJavaElement)e1));
 				int p2= getClassPathIndex(JavaModelUtil.getPackageFragmentRoot((IJavaElement)e2));
 				return p1 - p2;
@@ -161,6 +164,7 @@ public class JavaElementSorter extends ViewerSorter {
 			case RESOURCEFOLDERS:
 				return ((IResource)e1).getName().compareToIgnoreCase(((IResource)e2).getName());
 			case RESOURCEPACKAGES:	
+			case JAVAPROJECTS:
 				return ((IJavaElement)e1).getElementName().compareToIgnoreCase(((IJavaElement)e2).getElementName());
 			default:
 				return ((IJavaElement)e1).getElementName().compareTo(((IJavaElement)e2).getElementName());
@@ -172,13 +176,13 @@ public class JavaElementSorter extends ViewerSorter {
 			if (fClassPath == null)
 				fClassPath= root.getJavaProject().getResolvedClasspath(true);
 		} catch (JavaModelException e) {
-			return 0;
+			return Integer.MAX_VALUE;
 		}
 		for (int i= 0; i < fClassPath.length; i++) {
 			if (fClassPath[i].getPath().equals(root.getPath()))
 				return i;
 		}
-		return 0;
+		return Integer.MAX_VALUE;
 	}	
 	
 	
