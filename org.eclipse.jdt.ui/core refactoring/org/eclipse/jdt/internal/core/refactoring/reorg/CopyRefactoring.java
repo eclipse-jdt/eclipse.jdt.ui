@@ -9,17 +9,23 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
+import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.NullChange;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.changes.AddToClasspathChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.CopyCompilationUnitChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.CopyPackageChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.CopyResourceChange;
@@ -123,7 +129,19 @@ public class CopyRefactoring extends ReorgRefactoring {
 			return new CopyCompilationUnitChange(cu, (IPackageFragment)dest, createNewName(cu, (IPackageFragment)dest));
 
 		Assert.isTrue(dest instanceof IContainer);//this should be checked before - in preconditions
-		return new CopyResourceChange(getResource(cu), (IContainer)dest, createNewName(getResource(cu), (IContainer)dest));
+		return new CopyResourceChange(Refactoring.getResource(cu), (IContainer)dest, createNewName(Refactoring.getResource(cu), (IContainer)dest));
+	}
+	
+	IChange createChange(IPackageFragmentRoot root) throws JavaModelException{
+		IResource res= root.getUnderlyingResource();
+		IProject project= getDestinationForSourceFolders(getDestination());
+		IJavaProject javaProject= JavaCore.create(project);
+		CompositeChange result= new CompositeChange("copy source folder", 2);
+		String newName= createNewName(res, project);
+		result.addChange(new CopyResourceChange(res, project, newName));
+		if (javaProject != null)
+			result.addChange(new AddToClasspathChange(javaProject, newName));
+		return result;
 	}
 	
 	IChange createChange(IPackageFragment pack) throws JavaModelException{

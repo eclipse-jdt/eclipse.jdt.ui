@@ -66,6 +66,9 @@ public abstract class ReorgRefactoring extends Refactoring {
 			
 			if (hasPackages() && hasNonPackages())
 				return RefactoringStatus.createFatalErrorStatus("");
+			
+			if (hasSourceFolders() && hasNonSourceFolders())	
+				return RefactoringStatus.createFatalErrorStatus("");
 				
 			if (! canReorgAll())
 				return RefactoringStatus.createFatalErrorStatus("");
@@ -136,6 +139,10 @@ public abstract class ReorgRefactoring extends Refactoring {
 				return isValidDestination(jp.getUnderlyingResource());	
 		}	
 		
+		//only source folders are selected
+		if (hasSourceFolders())
+			return canCopySourceFolders(dest);
+		
 		//only packages are selected
 		if (hasPackages())	
 			return canCopyPackages(dest);
@@ -177,6 +184,9 @@ public abstract class ReorgRefactoring extends Refactoring {
 		if (fExcludedElements.contains(o))
 			return null;
 		
+		if (o instanceof IPackageFragmentRoot)
+			return createChange((IPackageFragmentRoot)o);
+			
 		if (o instanceof IPackageFragment)
 			return createChange((IPackageFragment)o);
 		
@@ -190,6 +200,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 		return null;	
 	}
 	
+	abstract IChange createChange(IPackageFragmentRoot root) throws JavaModelException;
 	abstract IChange createChange(IPackageFragment pack) throws JavaModelException;
 	abstract IChange createChange(ICompilationUnit cu) throws JavaModelException;
 	abstract IChange createChange(IResource res) throws JavaModelException;
@@ -217,6 +228,15 @@ public abstract class ReorgRefactoring extends Refactoring {
 		if (result == null || result.isReadOnly())
 			return null;
 		return result;			
+	}
+	
+	static IProject getDestinationForSourceFolders(Object dest) throws JavaModelException {
+		if (dest instanceof IJavaProject)
+			return ((IJavaProject)dest).getProject();
+		
+		if (dest instanceof IProject)
+			return (IProject)dest;
+		return null;	
 	}
 	
 	static IContainer getDestinationForResources(Object dest) throws JavaModelException{
@@ -263,6 +283,17 @@ public abstract class ReorgRefactoring extends Refactoring {
 		return false;
 	}
 	
+	boolean hasSourceFolders() throws JavaModelException{
+		for (Iterator iter= getElements().iterator(); iter.hasNext();){
+			Object each= iter.next();
+			if (each instanceof IPackageFragmentRoot){
+				if (isSourceFolder((IPackageFragmentRoot)each))
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	boolean hasNonPackages(){
 		for (Iterator iter= getElements().iterator(); iter.hasNext();){
 			Object each= iter.next();
@@ -271,6 +302,18 @@ public abstract class ReorgRefactoring extends Refactoring {
 		}
 		return false;
 	}
+	
+	boolean hasNonSourceFolders()throws JavaModelException{
+		for (Iterator iter= getElements().iterator(); iter.hasNext();){
+			Object each= iter.next();
+			if (!(each instanceof IPackageFragmentRoot))
+				return true;
+			if (! isSourceFolder((IPackageFragmentRoot)each))
+				return true;
+		}
+		return false;
+	}
+	
 
 	boolean hasResources(){
 		for (Iterator iter= getElements().iterator(); iter.hasNext();){
@@ -318,6 +361,10 @@ public abstract class ReorgRefactoring extends Refactoring {
 	boolean canCopyPackages(Object dest) throws JavaModelException{
 		return getDestinationForPackages(dest) != null;	
 	}
+
+	boolean canCopySourceFolders(Object dest) throws JavaModelException{
+		return getDestinationForSourceFolders(dest) != null;	
+	}
 	
 	//---
 	/**
@@ -346,21 +393,6 @@ public abstract class ReorgRefactoring extends Refactoring {
 		return false;
 	}
 		
-	/**
-	 * Checks if <code>parent</code> isn't the parent of one of the elements given by the 
-	 * list <code>elements</code>.
-	 */
-	private static boolean destinationIsParent(List elements, IPackageFragmentRoot parent) {
-		if (parent == null)
-			return false;
-		for (Iterator iter= elements.iterator(); iter.hasNext(); ) {
-			IPackageFragment pkg= (IPackageFragment)iter.next();
-			if (parent.equals(pkg.getParent()))
-				return true;
-		}
-		return false;
-	}
-	
 	boolean destinationIsParentForResources(IContainer dest){
 		if (dest == null)
 			return false;
@@ -403,6 +435,9 @@ public abstract class ReorgRefactoring extends Refactoring {
 				return causesNameConflict((IContainer)dest, newName);
 			return true;	
 		}	
+
+		if (o instanceof IPackageFragmentRoot)
+			return causesNameConflict(getDestinationForSourceFolders(getDestination()), newName);
 		
 		if (o instanceof IPackageFragment)
 			return causesNameConflict(getDestinationForPackages(getDestination()), newName);
@@ -422,6 +457,18 @@ public abstract class ReorgRefactoring extends Refactoring {
 			return true;
 			
 		return (!c.getFullPath().isValidSegment(name));
+	}
+	
+	private boolean causesNameConflict(IJavaProject project, String name) throws JavaModelException{
+		if (project == null)
+			return false;
+		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
+		for (int i = 0; i < roots.length; i++) {
+			IPackageFragmentRoot root = roots[i];
+			if (root.getElementName().equals(name))
+				return true;
+		}
+		return false;
 	}
 	
 	private boolean causesNameConflict(IPackageFragmentRoot root, String name) throws JavaModelException{
@@ -463,8 +510,19 @@ public abstract class ReorgRefactoring extends Refactoring {
 		
 		if (o instanceof ICompilationUnit)
 			return canReorg((ICompilationUnit)o);	
+		
+		if (o instanceof IPackageFragmentRoot)	
+			return canReorg((IPackageFragmentRoot)o);
 			
 		return false;	
+	}
+	
+	private static boolean canReorg(IPackageFragmentRoot root){
+		try {
+			return isSourceFolder(root);
+		} catch (JavaModelException e) {
+			return false;
+		}
 	}
 	
 	private static boolean canReorg(IPackageFragment pkg){
@@ -502,6 +560,10 @@ public abstract class ReorgRefactoring extends Refactoring {
 		} catch (JavaModelException e) {
 			return false;
 		}
+	}
+	
+	private static boolean isSourceFolder(IPackageFragmentRoot root) throws JavaModelException{
+		return root.getKind() == IPackageFragmentRoot.K_SOURCE;
 	}
 	
 	//---

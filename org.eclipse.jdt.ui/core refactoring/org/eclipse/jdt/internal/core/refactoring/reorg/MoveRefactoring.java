@@ -10,12 +10,15 @@ import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
@@ -24,6 +27,7 @@ import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.changes.AddToClasspathChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.MovePackageChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.MoveResourceChange;
@@ -81,11 +85,19 @@ public class MoveRefactoring extends ReorgRefactoring {
 		
 		return canCopyResources(dest);	
 	}
+
+	//overridden
+	boolean canCopySourceFolders(Object dest) throws JavaModelException{
+		IJavaProject javaProject= JavaCore.create(getDestinationForSourceFolders(dest));
+		return super.canCopySourceFolders(dest) && !destinationIsParent(getElements(), javaProject);
+	}
 	
+	//overridden
 	boolean canCopyPackages(Object dest) throws JavaModelException{
 		return super.canCopyPackages(dest) && !destinationIsParent(getElements(), getDestinationForPackages(dest));
 	}
 	
+	//overridden
 	boolean canCopyResources(Object dest) throws JavaModelException{
 		return super.canCopyResources(dest) && ! destinationIsParentForResources(getDestinationForResources(dest));
 	}
@@ -97,6 +109,9 @@ public class MoveRefactoring extends ReorgRefactoring {
 		if (hasPackages())
 			return false;
 
+		if (hasSourceFolders())
+			return false;			
+			
 		if (! hasCus())	
 			return false;	
 		
@@ -232,7 +247,10 @@ public class MoveRefactoring extends ReorgRefactoring {
 		}
 		return (ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()]);
 	}
-		
+	
+	/*
+	 * @see ReorgRefactoring#createChange(ICompilationUnit)
+	 */	
 	IChange createChange(ICompilationUnit cu) throws JavaModelException{
 		Object dest= getDestinationForCusAndFiles(getDestination());
 		if (dest instanceof IPackageFragment)
@@ -240,14 +258,33 @@ public class MoveRefactoring extends ReorgRefactoring {
 		Assert.isTrue(dest instanceof IContainer);//this should be checked before - in preconditions
 		return new MoveResourceChange(getResource(cu), (IContainer)dest);
 	}
-	
+
+	/*
+	 * @see ReorgRefactoring#createChange(IPackageFragmentRoot)
+	 */
+	IChange createChange(IPackageFragmentRoot root) throws JavaModelException{
+		IResource res= root.getUnderlyingResource();
+		IProject project= getDestinationForSourceFolders(getDestination());
+		IJavaProject javaProject= JavaCore.create(project);
+		CompositeChange result= new CompositeChange("move source folder", 2);
+		result.addChange(new MoveResourceChange(res, project));
+		if (javaProject != null)
+			result.addChange(new AddToClasspathChange(javaProject, root.getElementName()));
+		return result;
+	}
+
+	/*
+	 * @see ReorgRefactoring#createChange(IPackageFragment)
+	 */		
 	IChange createChange(IPackageFragment pack) throws JavaModelException{
 		return new MovePackageChange(pack, getDestinationForPackages(getDestination()));
 	}
 	
+	/*
+	 * @see ReorgRefactoring#createChange(IResource)
+	 */	
 	IChange createChange(IResource res) throws JavaModelException{
 		return new MoveResourceChange(res, getDestinationForResources(getDestination()));
 	}
-	
 }
 
