@@ -60,6 +60,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
@@ -75,13 +76,14 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.IShowInTargetList;
-import org.eclipse.ui.part.ShowInContext;
-import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.ResourceTransfer;
+import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -107,6 +109,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.FilterUpdater;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -152,6 +155,7 @@ public class PackageExplorerPart extends ViewPart
 	
 
 	private PackageExplorerContentProvider fContentProvider;
+	private FilterUpdater fFilterUpdater;
 	
 	private PackageExplorerActionGroup fActionSet;
 	private ProblemTreeViewer fViewer; 
@@ -259,6 +263,8 @@ public class PackageExplorerPart extends ViewPart
 		
 		if (fActionSet != null)	
 			fActionSet.dispose();
+		if (fFilterUpdater != null)
+			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fFilterUpdater);
 		super.dispose();	
 	}
 
@@ -334,6 +340,9 @@ public class PackageExplorerPart extends ViewPart
 		fillActionBars();
 
 		updateTitle();
+		
+		fFilterUpdater= new FilterUpdater(fViewer);
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(fFilterUpdater);
 	}
 
 	private void initFrameActions() {
@@ -602,6 +611,7 @@ public class PackageExplorerPart extends ViewPart
 		// Drop Adapter
 		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
 			new SelectionTransferDropAdapter(fViewer),
+			// new ResourceTransferDropAdapter(fViewer),
 			new FileTransferDropAdapter(fViewer)
 		};
 		fViewer.addDropSupport(ops | DND.DROP_DEFAULT, transfers, new DelegatingDropAdapter(dropListeners));
@@ -1177,11 +1187,11 @@ public class PackageExplorerPart extends ViewPart
 	
 	void projectStateChanged(Object root) {
 		Control ctrl= fViewer.getControl();
-		if (ctrl != null && !ctrl.isDisposed()){
+		if (ctrl != null && !ctrl.isDisposed()) {
 			fViewer.refresh(root, true);
 			// trigger a syntetic selection change so that action refresh their
 			// enable state.
 			fViewer.setSelection(fViewer.getSelection());
-}
+		}
 	}
 }

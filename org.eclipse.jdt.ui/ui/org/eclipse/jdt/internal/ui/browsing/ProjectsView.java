@@ -18,6 +18,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.IShowInTargetList;
@@ -28,15 +30,18 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.FilterUpdater;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
+
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
-
 public class ProjectsView extends JavaBrowsingPart {
+
+	private FilterUpdater fFilterUpdater;
 
 	/**
 	 * Creates the the viewer of this part.
@@ -44,7 +49,19 @@ public class ProjectsView extends JavaBrowsingPart {
 	 * @param parent	the parent for the viewer
 	 */
 	protected StructuredViewer createViewer(Composite parent) {
-		return new ProblemTreeViewer(parent, SWT.MULTI);
+		ProblemTreeViewer result= new ProblemTreeViewer(parent, SWT.MULTI);
+		fFilterUpdater= new FilterUpdater(result);
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(fFilterUpdater);
+		return result;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#dispose()
+	 */
+	public void dispose() {
+		if (fFilterUpdater != null)
+			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fFilterUpdater);
+		super.dispose();
 	}
 	
 	/**
