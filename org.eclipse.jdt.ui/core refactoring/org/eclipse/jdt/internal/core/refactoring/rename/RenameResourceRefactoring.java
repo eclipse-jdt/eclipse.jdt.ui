@@ -69,10 +69,7 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 		
 		if (! fResource.isAccessible())	
 			return RefactoringStatus.createFatalErrorStatus("");
-		
-		if (fResource.isReadOnly())	
-			return RefactoringStatus.createFatalErrorStatus("");	
-		
+				
 		return new RefactoringStatus();
 	}
 	
