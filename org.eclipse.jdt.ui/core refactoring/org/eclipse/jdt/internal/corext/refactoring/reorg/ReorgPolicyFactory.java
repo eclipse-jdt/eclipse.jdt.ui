@@ -72,7 +72,6 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -120,15 +119,15 @@ class ReorgPolicyFactory {
 		//private
 	}
 	
-	public static ICopyPolicy createCopyPolicy(IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
-		return (ICopyPolicy)createReorgPolicy(true, resources, javaElements, settings);
+	public static ICopyPolicy createCopyPolicy(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
+		return (ICopyPolicy)createReorgPolicy(true, resources, javaElements);
 	}
 	
-	public static IMovePolicy createMovePolicy(IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
-		return (IMovePolicy)createReorgPolicy(false, resources, javaElements, settings);
+	public static IMovePolicy createMovePolicy(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
+		return (IMovePolicy)createReorgPolicy(false, resources, javaElements);
 	}
 	
-	private static IReorgPolicy createReorgPolicy(boolean copy, IResource[] selectedResources, IJavaElement[] selectedJavaElements, CodeGenerationSettings settings) throws JavaModelException{
+	private static IReorgPolicy createReorgPolicy(boolean copy, IResource[] selectedResources, IJavaElement[] selectedJavaElements) throws JavaModelException{
 		final IReorgPolicy NO;
 		if (copy)
 			NO= new NoCopyPolicy();
@@ -175,7 +174,7 @@ class ReorgPolicyFactory {
 			if (copy)
 				return new CopyFilesFoldersAndCusPolicy(ReorgUtils.getFiles(resources), ReorgUtils.getFolders(resources), ArrayTypeConverter.toCuArray(javaElements));
 			else
-				return new MoveFilesFoldersAndCusPolicy(ReorgUtils.getFiles(resources), ReorgUtils.getFolders(resources), ArrayTypeConverter.toCuArray(javaElements), settings);
+				return new MoveFilesFoldersAndCusPolicy(ReorgUtils.getFiles(resources), ReorgUtils.getFolders(resources), ArrayTypeConverter.toCuArray(javaElements));
 		}
 		
 		if (hasElementsSmallerThanCuOrClassFile(javaElements)){
@@ -1611,9 +1610,8 @@ class ReorgPolicyFactory {
 		private String fFilePatterns;
 		private TextChangeManager fChangeManager;
 
-		MoveFilesFoldersAndCusPolicy(IFile[] files, IFolder[] folders, ICompilationUnit[] cus, CodeGenerationSettings settings){
+		MoveFilesFoldersAndCusPolicy(IFile[] files, IFolder[] folders, ICompilationUnit[] cus){
 			super(files, folders, cus);
-			Assert.isNotNull(settings);
 			fUpdateReferences= true;
 			fUpdateQualifiedNames= false;
 			fQualifiedNameSearchResult= new QualifiedNameSearchResult();

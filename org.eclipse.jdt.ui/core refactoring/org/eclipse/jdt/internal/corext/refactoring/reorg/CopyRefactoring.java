@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
@@ -41,12 +40,12 @@ public final class CopyRefactoring extends Refactoring implements IReorgDestinat
 	private IReorgQueries fReorgQueries;
 	private ICopyPolicy fCopyPolicy;
 	
-	public static boolean isAvailable(IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
-		return isAvailable(ReorgPolicyFactory.createCopyPolicy(resources, javaElements, settings));
+	public static boolean isAvailable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
+		return isAvailable(ReorgPolicyFactory.createCopyPolicy(resources, javaElements));
 	}
 	
-	public static CopyRefactoring create(IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
-		ICopyPolicy copyPolicy= ReorgPolicyFactory.createCopyPolicy(resources, javaElements, settings);
+	public static CopyRefactoring create(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
+		ICopyPolicy copyPolicy= ReorgPolicyFactory.createCopyPolicy(resources, javaElements);
 		if (! isAvailable(copyPolicy))
 			return null;
 		return new CopyRefactoring(copyPolicy);

@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -58,7 +57,7 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.MoveProcessor"; //$NON-NLS-1$
 	
-	public static boolean isAvailable(IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
+	public static boolean isAvailable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
 		if (javaElements != null) {
 			for (int i= 0; i < javaElements.length; i++) {
 				IJavaElement element= javaElements[i];
@@ -70,11 +69,11 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 					return false;
 			}
 		}
-		return isAvailable(ReorgPolicyFactory.createMovePolicy(resources, javaElements, settings));
+		return isAvailable(ReorgPolicyFactory.createMovePolicy(resources, javaElements));
 	}
 
-	public static JavaMoveProcessor create(IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
-		IMovePolicy movePolicy= ReorgPolicyFactory.createMovePolicy(resources, javaElements, settings);
+	public static JavaMoveProcessor create(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
+		IMovePolicy movePolicy= ReorgPolicyFactory.createMovePolicy(resources, javaElements);
 		if (! isAvailable(movePolicy))
 			return null;
 		return new JavaMoveProcessor(movePolicy);
