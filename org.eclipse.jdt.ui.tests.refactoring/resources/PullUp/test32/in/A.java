@@ -6,3 +6,5 @@ class B extends A{
 		return 2 +3;
 	}
 }
+class C extends A{
+}

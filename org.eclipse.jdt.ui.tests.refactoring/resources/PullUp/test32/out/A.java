@@ -1,7 +1,7 @@
 package p;
 abstract class A{
 
-	protected abstract int m();
+	public abstract int m();
 }
 class B extends A{
 	public int m() {
@@ -11,7 +11,7 @@ class B extends A{
 class C extends A{
 
 	/**
-	 * @see p.A#m(int[])
+	 * @see p.A#m()
 	 */
 	public int m() {
 		return 0;
