@@ -1243,6 +1243,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					position += offset;
 					if (Character.getType(document.getChar(position - 1)) != Character.CONNECTOR_PUNCTUATION) {
 						setCaretPosition(position);
+						getTextWidget().showSelection();
 						fireSelectionChanged();
 						return;
 					}
@@ -1342,7 +1343,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				if (caret == selection.x)
 					text.setSelectionRange(selection.y, offset - selection.y);
 				else
-					text.setSelectionRange(selection.x, offset - selection.x);		
+					text.setSelectionRange(selection.x, offset - selection.x);
 			}
 		}
 	}
