@@ -31,11 +31,13 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IMarkerHelpRegistry;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaModelMarker;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -81,6 +83,33 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	
 	public static boolean hasCorrections(int problemId) {
 		return QuickFixProcessor.hasCorrections(problemId);
+	}
+
+	public static boolean hasCorrections(IProblemAnnotation annotation) {
+		int problemId= annotation.getId();
+		if (problemId == -1) {
+			if (annotation instanceof MarkerAnnotation) {
+				return hasCorrections(((MarkerAnnotation) annotation).getMarker());
+			}
+			return false;
+		} else {
+			return hasCorrections(problemId);
+		}
+	}
+	
+	public static boolean hasCorrections(IMarker marker) {
+		try {
+			if (marker.isSubtypeOf(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER)) {
+				int problemId= marker.getAttribute(IJavaModelMarker.ID, -1);
+				return problemId != -1 && hasCorrections(problemId);
+			} else {
+				IMarkerHelpRegistry registry= PlatformUI.getWorkbench().getMarkerHelpRegistry();
+				return registry != null && registry.hasResolutions(marker);
+			}
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+			return false;
+		}
 	}	
 	
 	private IEditorPart fEditor;

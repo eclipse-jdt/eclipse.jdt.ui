@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Iterator;
 
-import org.eclipse.core.resources.IMarker;
-
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
@@ -35,9 +33,6 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IMarkerHelpRegistry;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -166,7 +161,6 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	 */
 	private int computeOffsetWithCorrection(int startOffset, int endOffset, int offset) {
 		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
-		IMarkerHelpRegistry markerRegistry= PlatformUI.getWorkbench().getMarkerHelpRegistry();
 
 		int invocationOffset= -1;
 
@@ -175,15 +169,8 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 			IProblemAnnotation annot= (IProblemAnnotation)iter.next();
 			Position pos= model.getPosition((Annotation)annot);
 			if (isIncluded(pos, startOffset, endOffset)) {
-				int probelmId= annot.getId();
-				if (probelmId != -1) {
-					if (JavaCorrectionProcessor.hasCorrections(probelmId)) {
+				if (JavaCorrectionProcessor.hasCorrections(annot)) {
 					invocationOffset= computeBestOffset(invocationOffset, pos, offset);
-					}
-				} else if (annot instanceof MarkerAnnotation) {
-					IMarker marker= ((MarkerAnnotation)annot).getMarker();
-					if (markerRegistry.hasResolutions(marker))
-						invocationOffset= computeBestOffset(invocationOffset, pos, offset);
 				}
 			}
 		}
