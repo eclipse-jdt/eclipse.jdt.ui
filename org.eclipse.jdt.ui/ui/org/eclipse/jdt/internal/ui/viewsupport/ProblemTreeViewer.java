@@ -123,7 +123,7 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 				mapped[i]= o;
 			}
 		}
-		LabelProviderChangedEvent e= new LabelProviderChangedEvent((IBaseLabelProvider)event.getSource(), mapped);
+		super.handleLabelProviderChanged(new LabelProviderChangedEvent((IBaseLabelProvider)event.getSource(), mapped));	
 	}
 }
 
