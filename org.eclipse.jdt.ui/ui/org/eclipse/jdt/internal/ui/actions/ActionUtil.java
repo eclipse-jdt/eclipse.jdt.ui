@@ -10,23 +10,44 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectNature;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectNature;
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 /*
  * http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
  */
 public class ActionUtil {
+	
+	private ActionUtil(){
+	}
 
+	//bug 31998	we will have to disable renaming of linked packages (and cus)
+	public static boolean mustDisableJavaModelAction(Shell shell, Object element) throws JavaModelException{
+		if (!(element instanceof IPackageFragment))
+			return false;
+		
+		IResource resource= ResourceUtil.getResource(element);
+		if (resource == null || ! resource.isLinked())
+			return false;
+			
+		MessageDialog.openInformation(shell, ActionMessages.getString("ActionUtil.not_possible"), ActionMessages.getString("ActionUtil.no_linked_packages")); //$NON-NLS-1$ //$NON-NLS-2$
+		return true;
+	}
+	
 	public static boolean isProcessable(Shell shell, Object element) {
 		if (!(element instanceof IJavaElement))
 			return true;

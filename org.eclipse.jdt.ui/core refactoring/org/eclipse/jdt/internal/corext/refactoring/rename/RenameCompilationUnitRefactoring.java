@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
@@ -21,10 +22,12 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 
 public class RenameCompilationUnitRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring, ITextUpdatingRefactoring, IQualifiedNameUpdatingRefactoring {
@@ -371,7 +374,11 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 		//renaming the file is taken care of in renameTypeRefactoring
 		if (fWillRenameType)
 			return fRenameTypeRefactoring.createChange(pm);
-	
+		
+		IResource resource= ResourceUtil.getResource(fCu);
+		if (resource != null && resource.isLinked())
+			return new RenameResourceChange(resource, getNewCuName());
+		
 		return new RenameCompilationUnitChange(fCu, getNewCuName());
 	}
 	

@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyCompilationUnitChange;
@@ -214,28 +215,41 @@ public class CopyRefactoring extends ReorgRefactoring {
 	
 	IChange createChange(IProgressMonitor pm, ICompilationUnit cu) throws JavaModelException{
 		Object dest= getDestinationForCusAndFiles(getDestination());
-		if (dest instanceof IPackageFragment){
-			String newName= createNewName(cu, (IPackageFragment)dest);
-			CopyCompilationUnitChange simpleCopy= new CopyCompilationUnitChange(cu, (IPackageFragment)dest, fCopyQueries.createStaticQuery(newName));
-			if (newName == null || newName.equals(cu.getElementName()))
-				return simpleCopy;
-			
-			try {
-				IPath newPath= ResourceUtil.getResource(cu).getParent().getFullPath().append(newName);				
-				INewNameQuery nameQuery= fCopyQueries.createNewCompilationUnitNameQuery(cu);
-				return new CreateCopyOfCompilationUnitChange(newPath, cu.getSource(), cu, nameQuery); //XXX
-			} catch(CoreException e) {
-				return simpleCopy; //fallback - no ui here
-			}
-		} else {
-			Assert.isTrue(dest instanceof IContainer);//this should be checked before - in preconditions
-			IResource res= ResourceUtil.getResource(cu);
-			INewNameQuery nameQuery;
-			if (createNewName(res, (IContainer)dest) == null)
-				nameQuery= fCopyQueries.createNullQuery();
-			else	
-				nameQuery= fCopyQueries.createNewResourceNameQuery(res);
-			return new CopyResourceChange(res, (IContainer)dest, nameQuery);
-		}		
+		if (dest instanceof IPackageFragment)
+			return copyCuToPackage(cu, (IPackageFragment)dest);
+		 else 
+			return copyFileToContainer(cu, (IContainer)dest); //cast should be checked before - in preconditions
+	}
+	
+	private IChange copyFileToContainer(ICompilationUnit cu, IContainer dest) {
+		IResource res= ResourceUtil.getResource(cu);
+		INewNameQuery nameQuery;
+		if (createNewName(res, dest) == null)
+			nameQuery= fCopyQueries.createNullQuery();
+		else	
+			nameQuery= fCopyQueries.createNewResourceNameQuery(res);
+		return new CopyResourceChange(res, dest, nameQuery);
+	}
+	
+	private IChange copyCuToPackage(ICompilationUnit cu, IPackageFragment dest) {
+		//XXX workaround for bug 31998 we will have to disable renaming of linked packages (and cus)
+		IResource res= ResourceUtil.getResource(cu);
+		if (res != null && res.isLinked()){
+			if (ResourceUtil.getResource(dest) instanceof IContainer)
+				return copyFileToContainer(cu, (IContainer)ResourceUtil.getResource(dest));
+		}
+		
+		String newName= createNewName(cu, dest);
+		Change simpleCopy= new CopyCompilationUnitChange(cu, dest, fCopyQueries.createStaticQuery(newName));
+		if (newName == null || newName.equals(cu.getElementName()))
+			return simpleCopy;
+		
+		try {
+			IPath newPath= ResourceUtil.getResource(cu).getParent().getFullPath().append(newName);				
+			INewNameQuery nameQuery= fCopyQueries.createNewCompilationUnitNameQuery(cu);
+			return new CreateCopyOfCompilationUnitChange(newPath, cu.getSource(), cu, nameQuery); //XXX
+		} catch(CoreException e) {
+			return simpleCopy; //fallback - no ui here
+		}
 	}
 }

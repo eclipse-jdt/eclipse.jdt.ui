@@ -65,6 +65,7 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
@@ -113,16 +114,24 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 	}
 	
 	private void doRun(IStructuredSelection selection) {
-		List elements= selection.toList();
-		if (!ensureSaved(elements, getActionName()))
-			return;
-		ReorgRefactoring refactoring= createRefactoring(elements);
-		
-		setUnsavedFileList(refactoring, elements);
-		Object destination= selectDestination(refactoring);
-		if (destination == null)
-			return;
-		try{			
+		try{
+			List elements= selection.toList();
+
+			//XXX workaround bug 31998
+			for (Iterator iter= elements.iterator(); iter.hasNext();) {
+				Object element= iter.next();
+				if (ActionUtil.mustDisableJavaModelAction(getShell(), element))
+					return;
+			}
+			
+			if (!ensureSaved(elements, getActionName()))
+				return;
+			ReorgRefactoring refactoring= createRefactoring(elements);
+			
+			setUnsavedFileList(refactoring, elements);
+			Object destination= selectDestination(refactoring);
+			if (destination == null)
+				return;
 			String duplicate= getDuplicatedElementName(elements);
 			if (duplicate != null){
 				String message= ReorgMessages.getFormattedString("ReorgDestinationAction.duplicate", duplicate);//$NON-NLS-1$

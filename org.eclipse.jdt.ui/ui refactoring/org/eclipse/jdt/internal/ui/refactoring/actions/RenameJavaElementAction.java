@@ -136,6 +136,9 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104		
 		if (!ActionUtil.isProcessable(getShell(), element))
 			return;
+		//XXX workaround bug 31998
+		if (ActionUtil.mustDisableJavaModelAction(getShell(), element))
+			return;
 		if (support == null) {
 			support= createGeneric(element, null, RenameSupport.UPDATE_REFERENCES);
 			if (!support.preCheck().isOK())

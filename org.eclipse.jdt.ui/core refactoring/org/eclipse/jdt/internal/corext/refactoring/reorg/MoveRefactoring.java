@@ -549,9 +549,23 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 	IChange createChange(IProgressMonitor pm, ICompilationUnit cu) throws JavaModelException{
 		Object dest= getDestinationForCusAndFiles(getDestination());
 		if (dest instanceof IPackageFragment)
-			return new MoveCompilationUnitChange(cu, (IPackageFragment)dest);
-		Assert.isTrue(dest instanceof IContainer);//this should be checked before - in preconditions
-		return new MoveResourceChange(ResourceUtil.getResource(cu), (IContainer)dest);
+			return moveCuToPackage(cu, (IPackageFragment)dest);
+		else	
+			return moveFileToContainer(cu, (IContainer)dest);//cast should be checked before - in preconditions
+	}
+	
+	private IChange moveFileToContainer(ICompilationUnit cu, IContainer dest) {
+		return new MoveResourceChange(ResourceUtil.getResource(cu), dest);
+	}
+	
+	private IChange moveCuToPackage(ICompilationUnit cu, IPackageFragment dest) {
+		//XXX workaround for bug 31998 we will have to disable renaming of linked packages (and cus)
+		IResource resource= ResourceUtil.getResource(cu);
+		if (resource != null && resource.isLinked()){
+			if (ResourceUtil.getResource(dest) instanceof IContainer)
+				return moveFileToContainer(cu, (IContainer)ResourceUtil.getResource(dest));
+		}
+		return new MoveCompilationUnitChange(cu, dest);
 	}
 
 	/*
