@@ -49,14 +49,9 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	 */
 	public void launch(IEditorPart editor, String mode) {
 		IJavaElement element= null;
-		if (editor instanceof JavaEditor) {
-			JavaEditor javaEditor= (JavaEditor) editor;
-			element= elementAtOffset(javaEditor);
-		}
-		if (element == null) {
-			IEditorInput input = editor.getEditorInput();
-			element = (IJavaElement) input.getAdapter(IJavaElement.class);
-		}
+		IEditorInput input = editor.getEditorInput();
+		element = (IJavaElement) input.getAdapter(IJavaElement.class);
+
 		if (element != null) {
 			searchAndLaunch(new Object[] {element}, mode);
 		} 
