@@ -14,9 +14,10 @@
 		<import plugin="org.eclipse.ui"/>
 		<import plugin="org.eclipse.vcm.core"/>
 		<import plugin="org.eclipse.vcm.ui"/>
+		<import plugin="org.eclipse.vcm.ui.cvs"/>
 		<import plugin="org.eclipse.jdt.ui"/>
 		<import plugin="org.eclipse.jdt.core"/>
-	</requires>
+	</requires> 
 
 <runtime>
   <library name="jdtvcm.jar">  
@@ -143,6 +144,15 @@
 			enablesFor="1"
 			class="org.eclipse.vcm.internal.ui.actions.CompareWithTeamStreamAction">
 		</action>
+		
+		<action
+			id="vcm.Patch"
+			label="%GenerateDiff.label"
+			tooltip="%GenerateDiff.tooltip"
+			menubarPath="vcm.managing/manageAdvancedGroup"
+			class="org.eclipse.vcm.internal.ui.ccvs.GenerateDiffFileAction">
+		</action>
+
 
 	</objectContribution>
 
@@ -204,6 +214,14 @@
 			menubarPath="compareWithMenu/compareWithGroup"
 			enablesFor="1"
 			class="org.eclipse.vcm.internal.ui.actions.CompareWithTeamStreamAction">
+		</action>
+			
+		<action
+			id="vcm.Patch"
+			label="%GenerateDiff.label"
+			tooltip="%GenerateDiff.tooltip"
+			menubarPath="vcm.managing/manageAdvancedGroup"
+			class="org.eclipse.vcm.internal.ui.ccvs.GenerateDiffFileAction">
 		</action>
 
 	</objectContribution>
@@ -267,6 +285,15 @@
 			class="org.eclipse.vcm.internal.ui.actions.CompareWithTeamStreamAction">
 		</action>
 		
+		<action
+			id="vcm.Patch"
+			label="%GenerateDiff.label"
+			tooltip="%GenerateDiff.tooltip"
+			menubarPath="vcm.managing/manageAdvancedGroup"
+			class="org.eclipse.vcm.internal.ui.ccvs.GenerateDiffFileAction">
+		</action>
+
+		
 	</objectContribution>
 
 	<objectContribution
@@ -295,6 +322,14 @@
 			tooltip="%SyncAction.tooltip"
 			menubarPath="vcm.managing/manageGroup"
 			class="org.eclipse.vcm.internal.ui.sync.SyncAction">
+		</action>
+
+		<action
+			id="vcm.Patch"
+			label="%GenerateDiff.label"
+			tooltip="%GenerateDiff.tooltip"
+			menubarPath="vcm.managing/manageAdvancedGroup"
+			class="org.eclipse.vcm.internal.ui.ccvs.GenerateDiffFileAction">
 		</action>
 
 		<action 
