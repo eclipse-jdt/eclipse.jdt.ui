@@ -195,22 +195,6 @@
       </objectContribution>
    </extension>
    <extension
-         point="org.eclipse.ui.actionSets">
-      <actionSet
-            label="%JUnitActionSet.label"
-            visible="false"
-            id="org.eclipse.jdt.junit.JUnitActionSet">
-         <action
-               label="%GotoTestAction.label"
-               helpContextId="org.eclipse.jdt.junit.goto_referenced_test_action_context"
-               class="org.eclipse.jdt.internal.junit.ui.GotoReferencedTestAction"
-               tooltip="%GotoTestAction.tooltip"
-               menubarPath="navigate/goTo/"
-               id="junit.actions.GotoTestAction">
-         </action>
-      </actionSet>
-   </extension>
-   <extension
          id="junit_task"
          name="%Task.name"
          point="org.eclipse.core.resources.markers">
