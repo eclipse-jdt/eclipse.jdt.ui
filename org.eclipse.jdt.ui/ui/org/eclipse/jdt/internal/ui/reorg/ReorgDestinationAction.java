@@ -88,7 +88,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 		try{			
 			String duplicate= getDuplicatedElementName(elements);
 			if (duplicate != null){
-				String message= "Two or more elements named " + duplicate + " are selected."; 
+				String message= ReorgMessages.getFormattedString("ReorgDestinationAction.duplicate", duplicate);//$NON-NLS-1$
 				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell().getShell(), ReorgMessages.getString("ReorgDestinationAction.duplicate_name"),	message); //$NON-NLS-1$
 				return;
 			}
@@ -106,7 +106,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 				return;
 			doReorg(refactoring);
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, "Exception", ReorgMessages.getString("ReorgDestinationAction.exception")); //$NON-NLS-2$
+			ExceptionHandler.handle(e, ReorgMessages.getString("ReorgDestinationAction.exception_title"), ReorgMessages.getString("ReorgDestinationAction.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 		}	
 	}
 	
@@ -376,7 +376,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 						return ReorgMessages.getString("DestinationRenderer.packages"); //$NON-NLS-1$
 				}
 			} catch (JavaModelException e) {
-				ExceptionHandler.handle(e, "Exception", ReorgMessages.getString("ReorgDestinationAction.exception")); //$NON-NLS-2$
+				ExceptionHandler.handle(e, ReorgMessages.getString("ReorgDestinationAction.exception_title"), ReorgMessages.getString("ReorgDestinationAction.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 			}
 			return super.getText(element);
 		}
@@ -398,7 +398,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 					return new StatusInfo();
 				return new StatusInfo(IStatus.ERROR, "");	 //$NON-NLS-1$
 			} catch (JavaModelException e){
-				ExceptionHandler.handle(e, "Exception", ReorgMessages.getString("ReorgDestinationAction.exception")); //$NON-NLS-2$
+				ExceptionHandler.handle(e, ReorgMessages.getString("ReorgDestinationAction.exception_title"), ReorgMessages.getString("ReorgDestinationAction.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 				return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 			}	
 		}
