@@ -434,13 +434,22 @@ public class CodeTemplateBlock {
 		}
 
 		if (!file.exists() || confirmOverwrite(file)) {
+			OutputStream output= null;
 			try {
-				OutputStream output= new BufferedOutputStream(new FileOutputStream(file));
+				output= new BufferedOutputStream(new FileOutputStream(file));
 				TemplateReaderWriter writer= new TemplateReaderWriter();
 				writer.save(templates, output);
+				output.close();
 			} catch (IOException e) {
+				if (output != null) {
+					try {
+						output.close();
+					} catch (IOException e2) {
+						// ignore 
+					}
+				}
 				openWriteErrorDialog(e);
-			}		
+			}
 		}
 		
 	}
