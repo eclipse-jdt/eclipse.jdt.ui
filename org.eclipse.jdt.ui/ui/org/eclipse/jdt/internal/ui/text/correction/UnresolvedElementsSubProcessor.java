@@ -410,11 +410,13 @@ public class UnresolvedElementsSubProcessor {
 			if (targetCU != null) {			
 				String label;
 				Image image;
+				String sig= getMethodSignature(methodName, arguments);
+				
 				if (cu.equals(targetCU)) {
-					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.description", methodName); //$NON-NLS-1$
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.description", sig); //$NON-NLS-1$
 					image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE);
 				} else {
-					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", new Object[] { methodName, targetCU.getElementName() } ); //$NON-NLS-1$
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", new Object[] { sig, targetCU.getElementName() } ); //$NON-NLS-1$
 					image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 				}
 				proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, binding, 1, image));
@@ -424,7 +426,7 @@ public class UnresolvedElementsSubProcessor {
 					if (anonymDecl != null) {
 						binding= ASTResolving.getBindingOfParentType(anonymDecl.getParent());
 						if (!binding.isAnonymous()) {
-							String[] args= new String[] { methodName, binding.getName() };
+							String[] args= new String[] { sig, binding.getName() };
 							label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", args); //$NON-NLS-1$
 							image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PROTECTED);
 							proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, binding, 1, image));
@@ -490,7 +492,7 @@ public class UnresolvedElementsSubProcessor {
 				arguments.add(idx, newArg);
 			}
 			
-			String[] arg= new String[] { getMethodName(methodBinding, false) };
+			String[] arg= new String[] { getMethodSignature(methodBinding, false) };
 			String label;
 			if (diff == 1) {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addargument.description", arg); //$NON-NLS-1$
@@ -508,11 +510,13 @@ public class UnresolvedElementsSubProcessor {
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);
 			if (targetCU != null) {
 				ChangeDescription[] changeDesc= new ChangeDescription[paramTypes.length];
+				ITypeBinding[] changedTypes= new ITypeBinding[diff];
 				for (int i= diff - 1; i >= 0; i--) {
 					int idx= indexSkipped[i];
 					changeDesc[idx]= new RemoveDescription();
+					changedTypes[i]= paramTypes[idx];
 				}
-				String[] arg= new String[] { getMethodName(methodBinding, !cu.equals(targetCU)) };
+				String[] arg= new String[] { getMethodSignature(methodBinding, !cu.equals(targetCU)), getTypeNames(changedTypes) };
 				String label;
 				if (methodBinding.isConstructor()) {
 					if (diff == 1) {
@@ -527,6 +531,7 @@ public class UnresolvedElementsSubProcessor {
 						label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparams.description", arg); //$NON-NLS-1$
 					}					
 				}
+			
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, astRoot, methodBinding, changeDesc, 1, image);
 				proposals.add(proposal);
@@ -534,6 +539,17 @@ public class UnresolvedElementsSubProcessor {
 		}		
 	}
 	
+	private static String getTypeNames(ITypeBinding[] types) {
+		StringBuffer buf= new StringBuffer();
+		for (int i= 0; i < types.length; i++) {
+			if (i > 0) {
+				buf.append(", "); //$NON-NLS-1$
+			}
+			buf.append(types[i].getName());
+		}
+		return buf.toString();
+	}
+
 	private static void doMoreArguments(ICorrectionContext context, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, List proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int k= 0, nSkipped= 0;
@@ -561,7 +577,7 @@ public class UnresolvedElementsSubProcessor {
 			for (int i= diff - 1; i >= 0; i--) {
 				rewrite.markAsRemoved((Expression) arguments.get(indexSkipped[i]));
 			}
-			String[] arg= new String[] { getMethodName(methodBinding, false) };
+			String[] arg= new String[] { getMethodSignature(methodBinding, false) };
 			String label;
 			if (diff == 1) {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeargument.description", arg); //$NON-NLS-1$
@@ -579,13 +595,19 @@ public class UnresolvedElementsSubProcessor {
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);
 			if (targetCU != null) {
 				ChangeDescription[] changeDesc= new ChangeDescription[argTypes.length];
+				ITypeBinding[] changeTypes= new ITypeBinding[diff];
 				for (int i= diff - 1; i >= 0; i--) {
 					int idx= indexSkipped[i];
 					Expression arg= (Expression) arguments.get(idx);
 					String name= arg instanceof SimpleName ? ((SimpleName) arg).getIdentifier() : null;
-					changeDesc[idx]= new InsertDescription(argTypes[idx], name);
+					ITypeBinding newType= ASTResolving.normalizeTypeBinding(argTypes[idx]);
+					if (newType == null) {
+						newType= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+					}
+					changeDesc[idx]= new InsertDescription(newType, name);
+					changeTypes[i]= newType;
 				}
-				String[] arg= new String[] { getMethodName(methodBinding, !cu.equals(targetCU)) };
+				String[] arg= new String[] { getMethodSignature(methodBinding, !cu.equals(targetCU)), getTypeNames(changeTypes) };
 				String label;
 				if (methodBinding.isConstructor()) {
 					if (diff == 1) {
@@ -605,17 +627,34 @@ public class UnresolvedElementsSubProcessor {
 				proposals.add(proposal);
 			}
 		}		
-			
 	}
 	
-	
-	private static String getMethodName(IMethodBinding binding, boolean qualify) {
+	private static String getMethodSignature(IMethodBinding binding, boolean qualify) {
 		StringBuffer buf= new StringBuffer();
 		if (qualify) {
 			buf.append(binding.getDeclaringClass().getName()).append('.');
 		}
-		buf.append(binding.getName()).append('(');
-		ITypeBinding[] params= binding.getParameterTypes();
+		buf.append(binding.getName());
+		return getMethodSignature(buf.toString(), binding.getParameterTypes());
+	}
+	
+	private static String getMethodSignature(String name, List args) {
+		ITypeBinding[] params= new ITypeBinding[args.size()];
+		for (int i= 0; i < args.size(); i++) {
+			Expression expr= (Expression) args.get(i);
+			ITypeBinding curr= ASTResolving.normalizeTypeBinding(expr.resolveTypeBinding());
+			if (curr == null) {
+				curr= expr.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+			}
+			params[i]= curr;
+		}
+		return getMethodSignature(name, params);
+	}
+	
+	
+	private static String getMethodSignature(String name, ITypeBinding[] params) {
+		StringBuffer buf= new StringBuffer();
+		buf.append(name).append('(');
 		for (int i= 0; i < params.length; i++) {
 			if (i > 0) {
 				buf.append(", "); //$NON-NLS-1$
@@ -624,7 +663,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 		buf.append(')');
 		return buf.toString();
-	}
+	}	
 	
 
 	private static void doEqualNumberOfParameters(ICorrectionContext context, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, List proposals) throws CoreException {
@@ -678,7 +717,8 @@ public class UnresolvedElementsSubProcessor {
 						for (int i= 0; i < nDiffs; i++) {
 							changeDesc[idx1]= new SwapDescription(idx2);
 						}
-						String[] args=  new String[] { getMethodName(methodBinding, !targetCU.equals(cu)), String.valueOf(idx1 + 1), String.valueOf(idx2 + 1) };
+						ITypeBinding[] swappedTypes= new ITypeBinding[] { argTypes[idx1], paramTypes[idx2] };
+						String[] args=  new String[] { getMethodSignature(methodBinding, !targetCU.equals(cu)), getTypeNames(swappedTypes) };
 						String label;
 						if (methodBinding.isConstructor()) {
 							label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.swapparams.constr.description", args); //$NON-NLS-1$
@@ -704,7 +744,7 @@ public class UnresolvedElementsSubProcessor {
 					String name= arg instanceof SimpleName ? ((SimpleName) arg).getIdentifier() : null;					
 					changeDesc[diffIndex]= new EditDescription(argTypes[diffIndex], name);
 				}
-				String[] args=  new String[] { getMethodName(methodBinding, !targetCU.equals(cu)) };
+				String[] args=  new String[] { getMethodSignature(methodBinding, !targetCU.equals(cu)), getMethodSignature(methodBinding.getName(), arguments) };
 				String label;
 				if (methodBinding.isConstructor()) {
 					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changeparamsignature.constr.description", args); //$NON-NLS-1$
