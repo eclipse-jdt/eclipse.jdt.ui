@@ -69,12 +69,7 @@ public class QualifiedNameComponent extends Composite {
 		}
 	}
 	
-	public void savePatterns(IDialogSettings settings, IWizardContainer container) {
-		boolean save= true;
-		if (container instanceof Dialog) {
-			save= ((Dialog)container).getReturnCode() == IDialogConstants.OK_ID;
-		}
-		if (save)
-			settings.put(PATTERNS, fPatterns.getText());
+	public void savePatterns(IDialogSettings settings) {
+		settings.put(PATTERNS, fPatterns.getText());
 	}
 }

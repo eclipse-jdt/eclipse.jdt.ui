@@ -20,6 +20,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
@@ -83,8 +86,13 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	}
 	
 	public void dispose() {
-		if (fQualifiedNameComponent != null)
-			fQualifiedNameComponent.savePatterns(getRefactoringSettings(), getContainer());
+		if (fQualifiedNameComponent != null) {
+			boolean save= true;
+			if (getContainer() instanceof Dialog)
+				save= ((Dialog)getContainer()).getReturnCode() == IDialogConstants.OK_ID;
+			if (save)
+				fQualifiedNameComponent.savePatterns(getRefactoringSettings());
+		}
 		super.dispose();
 	}
 	

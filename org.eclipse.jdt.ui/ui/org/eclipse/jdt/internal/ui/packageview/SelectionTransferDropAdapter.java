@@ -524,7 +524,13 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 					settings.addSection(result); 
 				}
 				return result;
-			}			
+			}
+			public boolean close() {
+				if (getReturnCode() != IDialogConstants.CANCEL_ID && fQualifiedNameComponent != null) {
+					fQualifiedNameComponent.savePatterns(getRefactoringSettings());
+				}
+				return super.close();
+			}
 		}
 	}
 }

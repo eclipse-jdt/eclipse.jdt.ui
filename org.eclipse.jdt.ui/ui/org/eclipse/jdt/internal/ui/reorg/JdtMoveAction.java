@@ -318,6 +318,12 @@ public class JdtMoveAction extends ReorgDestinationAction {
 			}
 			return result;
 		}			
+		public boolean close() {
+			if (getReturnCode() != IDialogConstants.CANCEL_ID && fQualifiedNameComponent != null) {
+				fQualifiedNameComponent.savePatterns(getRefactoringSettings());
+			}
+			return super.close();
+		}
 	}
 	
 	public static IPackageFragmentRootManipulationQuery createUpdateClasspathQuery(Shell shell){
