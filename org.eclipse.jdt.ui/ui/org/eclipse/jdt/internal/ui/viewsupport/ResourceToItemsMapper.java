@@ -17,14 +17,11 @@ import java.util.Stack;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.swt.widgets.Widget;
 
-import org.eclipse.jface.viewers.ContentViewer;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.IViewerLabelProvider;
 import org.eclipse.jface.viewers.ViewerLabel;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -37,6 +34,11 @@ import org.eclipse.jdt.core.IJavaElement;
  * elements.
  */
 public class ResourceToItemsMapper {
+	
+	public static interface IContentViewerAccessor {
+		public void doUpdateItem(Widget item);
+	}
+	
 
 	private static final int NUMBER_LIST_REUSE= 10;
 
@@ -44,13 +46,13 @@ public class ResourceToItemsMapper {
 	private HashMap fResourceToItem;
 	private Stack fReuseLists;
 	
-	private ContentViewer fContentViewer;
+	private IContentViewerAccessor fContentViewerAccess;
 
-	public ResourceToItemsMapper(ContentViewer viewer) {
+	public ResourceToItemsMapper(IContentViewerAccessor viewer) {
 		fResourceToItem= new HashMap();
 		fReuseLists= new Stack();
 		
-		fContentViewer= viewer;
+		fContentViewerAccess= viewer;
 	}
 
 	/**
@@ -72,54 +74,9 @@ public class ResourceToItemsMapper {
 	}
 		
 	private void updateItem(Item item) {
-		if (!item.isDisposed()) { // defensive code
-			ILabelProvider lprovider= (ILabelProvider) fContentViewer.getLabelProvider();
-			
-			Object data= item.getData();
-			
-			// If it is an IItemLabelProvider than short circuit: patch Tod (bug 55012)
-			if (lprovider instanceof IViewerLabelProvider) {
-				IViewerLabelProvider provider= (IViewerLabelProvider) lprovider;
-				
-				ViewerLabel updateLabel= new ViewerLabel(item.getText(), item.getImage());
-				provider.updateLabel(updateLabel, data);
-				
-				if (updateLabel.hasNewImage()) {
-					item.setImage(updateLabel.getImage());
-				}
-				if (updateLabel.hasNewText()) {
-					item.setText(updateLabel.getText());
-				}
-				applyColorsAndFonts(item, updateLabel);
-			} else {
-				Image oldImage= item.getImage();
-				Image image= lprovider.getImage(data);
-				if (image != null && !image.equals(oldImage)) {
-					item.setImage(image);
-				}
-				String oldText= item.getText();
-				String text= lprovider.getText(data);
-				if (text != null && !text.equals(oldText)) {
-					item.setText(text);
-				}
-			}
-		}
+		fContentViewerAccess.doUpdateItem(item);
 	}
 
-	private void applyColorsAndFonts(Item item, ViewerLabel updateLabel) {
-		if (item instanceof TreeItem) {
-			TreeItem treeItem= (TreeItem) item;
-			treeItem.setFont(updateLabel.getFont());
-			treeItem.setForeground(updateLabel.getForeground());
-			treeItem.setBackground(updateLabel.getBackground());
-		} else if (item instanceof TableItem) {
-			TableItem tableItem= (TableItem) item;
-			tableItem.setFont(updateLabel.getFont());
-			tableItem.setForeground(updateLabel.getForeground());
-			tableItem.setBackground(updateLabel.getBackground());
-		}
-	}
-	
 	/**
 	 * Adds a new item to the map.
 	 * @param element Element to map
@@ -224,6 +181,20 @@ public class ResourceToItemsMapper {
 			return (IResource) element;
 		}
 		return null;
+	}
+
+	private void applyColorsAndFonts(Item item, ViewerLabel updateLabel) {
+		if (item instanceof TreeItem) {
+			TreeItem treeItem= (TreeItem) item;
+			treeItem.setFont(updateLabel.getFont());
+			treeItem.setForeground(updateLabel.getForeground());
+			treeItem.setBackground(updateLabel.getBackground());
+		} else if (item instanceof TableItem) {
+			TableItem tableItem= (TableItem) item;
+			tableItem.setFont(updateLabel.getFont());
+			tableItem.setForeground(updateLabel.getForeground());
+			tableItem.setBackground(updateLabel.getBackground());
+		}
 	}
 	
 }

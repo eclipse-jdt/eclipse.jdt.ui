@@ -34,7 +34,7 @@ import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
  * A <code>ProblemItemMapper</code> is contained that maps all items in
  * the tree to underlying resource
  */
-public class ProblemTreeViewer extends TreeViewer {
+public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapper.IContentViewerAccessor {
 
 	protected ResourceToItemsMapper fResourceToItemsMapper;
 
@@ -60,6 +60,13 @@ public class ProblemTreeViewer extends TreeViewer {
 	public ProblemTreeViewer(Tree tree) {
 		super(tree);
 		initMapper();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.ResourceToItemsMapper.IContentViewerAccessor#doUpdateItem(org.eclipse.swt.widgets.Widget)
+	 */
+	public void doUpdateItem(Widget item) {
+		doUpdateItem(item, item.getData(), true);
 	}
 	
 	private void initMapper() {
