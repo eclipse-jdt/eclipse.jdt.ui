@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -200,7 +201,7 @@ public final class StubUtility2 {
 		for (int i= 0; i < variableBindings.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 			var.setType(imports.addImport(variableBindings[i].getType(), ast));
-			var.setName(ast.newSimpleName(variableBindings[i].getName()));
+			var.setName(ast.newSimpleName(getParameterName(unit, variableBindings[i])));
 			parameters.add(var);
 		}
 
@@ -216,7 +217,7 @@ public final class StubUtility2 {
 			access.setName(ast.newSimpleName(variableBindings[i].getName()));
 			Assignment assignment= ast.newAssignment();
 			assignment.setLeftHandSide(access);
-			assignment.setRightHandSide(ast.newSimpleName(variableBindings[i].getName()));
+			assignment.setRightHandSide(ast.newSimpleName(getParameterName(unit, variableBindings[i])));
 			assignment.setOperator(Assignment.Operator.ASSIGN);
 			body.statements().add(ast.newExpressionStatement(assignment));
 		}
@@ -429,43 +430,6 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	private static Type createTypeNode(ITypeBinding binding, AST ast) {
-		if (binding.isPrimitive())
-			return ast.newPrimitiveType(PrimitiveType.toCode(binding.getName()));
-		ITypeBinding normalized= Bindings.normalizeTypeBinding(binding);
-		if (normalized == null)
-			return ast.newSimpleType(ast.newSimpleName("invalid")); //$NON-NLS-1$
-		else if (normalized.isTypeVariable())
-			return ast.newSimpleType(ast.newSimpleName(Bindings.getRawName(binding)));
-		else if (normalized.isWildcardType()) {
-			WildcardType type= ast.newWildcardType();
-			ITypeBinding bound= normalized.getBound();
-			if (bound != null)
-				type.setBound(createTypeNode(bound, ast), normalized.isUpperbound());
-			return type;
-		} else if (normalized.isArray())
-			return ast.newArrayType(createTypeNode(normalized.getElementType(), ast), normalized.getDimensions());
-		String qualified= Bindings.getRawQualifiedName(normalized);
-		if (qualified.length() > 0) {
-			ITypeBinding[] typeArguments= normalized.getTypeArguments();
-			if (typeArguments.length > 0) {
-				ParameterizedType type= ast.newParameterizedType(ast.newSimpleType(ast.newSimpleName(qualified)));
-				List arguments= type.typeArguments();
-				for (int index= 0; index < typeArguments.length; index++)
-					arguments.add(createTypeNode(typeArguments[index], ast));
-				return type;
-			}
-			return ast.newSimpleType(ast.newSimpleName(qualified));
-		}
-		return ast.newSimpleType(ast.newSimpleName(Bindings.getRawName(normalized)));
-	}
-
-	private static Type createTypeNode(ImportsStructure structure, ITypeBinding binding, AST ast) {
-		if (structure != null)
-			return structure.addImport(binding, ast);
-		return createTypeNode(binding, ast);
-	}
-
 	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportsStructure structure, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean annotations) throws CoreException {
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, binding.getModifiers() & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
@@ -495,7 +459,7 @@ public final class StubUtility2 {
 
 		List thrownExceptions= decl.thrownExceptions();
 		ITypeBinding[] excTypes= binding.getExceptionTypes();
-		for (int index= 0; index < excTypes.length; index++) 
+		for (int index= 0; index < excTypes.length; index++)
 			thrownExceptions.add(ASTNodeFactory.newName(ast, structure != null ? structure.addImport(excTypes[index]) : excTypes[index].getQualifiedName()));
 
 		Block body= ast.newBlock();
@@ -588,6 +552,43 @@ public final class StubUtility2 {
 			parameters.add(var);
 		}
 		return parameters;
+	}
+
+	private static Type createTypeNode(ImportsStructure structure, ITypeBinding binding, AST ast) {
+		if (structure != null)
+			return structure.addImport(binding, ast);
+		return createTypeNode(binding, ast);
+	}
+
+	private static Type createTypeNode(ITypeBinding binding, AST ast) {
+		if (binding.isPrimitive())
+			return ast.newPrimitiveType(PrimitiveType.toCode(binding.getName()));
+		ITypeBinding normalized= Bindings.normalizeTypeBinding(binding);
+		if (normalized == null)
+			return ast.newSimpleType(ast.newSimpleName("invalid")); //$NON-NLS-1$
+		else if (normalized.isTypeVariable())
+			return ast.newSimpleType(ast.newSimpleName(Bindings.getRawName(binding)));
+		else if (normalized.isWildcardType()) {
+			WildcardType type= ast.newWildcardType();
+			ITypeBinding bound= normalized.getBound();
+			if (bound != null)
+				type.setBound(createTypeNode(bound, ast), normalized.isUpperbound());
+			return type;
+		} else if (normalized.isArray())
+			return ast.newArrayType(createTypeNode(normalized.getElementType(), ast), normalized.getDimensions());
+		String qualified= Bindings.getRawQualifiedName(normalized);
+		if (qualified.length() > 0) {
+			ITypeBinding[] typeArguments= normalized.getTypeArguments();
+			if (typeArguments.length > 0) {
+				ParameterizedType type= ast.newParameterizedType(ast.newSimpleType(ast.newSimpleName(qualified)));
+				List arguments= type.typeArguments();
+				for (int index= 0; index < typeArguments.length; index++)
+					arguments.add(createTypeNode(typeArguments[index], ast));
+				return type;
+			}
+			return ast.newSimpleType(ast.newSimpleName(qualified));
+		}
+		return ast.newSimpleType(ast.newSimpleName(Bindings.getRawName(normalized)));
 	}
 
 	private static IMethodBinding findMethodBinding(IMethodBinding method, List allMethods) {
@@ -776,6 +777,10 @@ public final class StubUtility2 {
 		for (int index= 0; index < superInterfaces.length; index++) {
 			getOverridableMethods(superInterfaces[index], allMethods);
 		}
+	}
+
+	private static String getParameterName(ICompilationUnit unit, IVariableBinding binding) {
+		return NamingConventions.removePrefixAndSuffixForFieldName(unit.getJavaProject(), binding.getName(), binding.getModifiers());
 	}
 
 	private static String[] getParameterTypesQualifiedNames(IMethodBinding binding) {
