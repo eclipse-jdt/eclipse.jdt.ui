@@ -44,19 +44,22 @@ import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.compiler.env.IConstants;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.text.template.Template;
+import org.eclipse.jdt.internal.ui.text.template.Templates;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
@@ -1145,13 +1148,18 @@ public abstract class TypePage extends ContainerPage {
 		String lineDelimiter= null;	
 		if (!isInnerClass) {
 			ICompilationUnit parentCU= pack.getCompilationUnit(clName + ".java"); //$NON-NLS-1$
-			
+
 			imports= new ImportsStructure(parentCU, prefOrder, threshold, false);
 			
 			lineDelimiter= StubUtility.getLineDelimiterUsed(parentCU);
 			
 			String content= createTypeBody(imports, lineDelimiter);
 			createdType= parentCU.createType(content, null, false, new SubProgressMonitor(monitor, 5));
+
+			String fileComment= getFileComment();
+			if (fileComment != null) {
+				parentCU.getBuffer().replace(0, 0, fileComment + lineDelimiter);
+			}
 		} else {
 			IType enclosingType= getEnclosingType();
 			
@@ -1188,10 +1196,11 @@ public abstract class TypePage extends ContainerPage {
 		} 
 		monitor.worked(1);	
 		
-		String formattedContent= StubUtility.codeFormat(createdType.getSource(), indent, lineDelimiter);
 		
-		ISourceRange range= createdType.getSourceRange();
+		ISourceRange range= isInnerClass ? createdType.getSourceRange() : createdType.getCompilationUnit().getSourceRange();
 		IBuffer buf= createdType.getCompilationUnit().getBuffer();
+		String originalContent= buf.getText(range.getOffset(), range.getLength());
+		String formattedContent= StubUtility.codeFormat(originalContent, indent, lineDelimiter);
 		buf.replace(range.getOffset(), range.getLength(), formattedContent);
 		if (!isInnerClass) {
 			buf.save(new SubProgressMonitor(monitor, 1), false);
@@ -1249,6 +1258,11 @@ public abstract class TypePage extends ContainerPage {
 	 */		
 	private String createTypeBody(IImportsStructure imports, String lineDelimiter) {	
 		StringBuffer buf= new StringBuffer();
+		String typeComment= getTypeComment();
+		if (typeComment != null) {
+			buf.append(typeComment);
+			buf.append(lineDelimiter);
+		}
 		
 		int modifiers= getModifiers();
 		buf.append(Flags.toString(modifiers));
@@ -1275,6 +1289,39 @@ public abstract class TypePage extends ContainerPage {
 	protected String[] evalMethods(IType parent, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
 		return new String[0];
 	}
+	
+	/**
+	 * Called from createType to get a file comment. By default the content of template
+	 * 'filecomment' is taken.
+	 * Returns source or null, if no file comment should be added
+	 */		
+	protected String getFileComment() {
+		if (CodeGenerationPreferencePage.doFileComments()) {
+			return getTemplate("filecomment");
+		}
+		return null;
+	}
+	
+	/**
+	 * Called from createType to get a type comment. 
+	 * Returns source or null, if no type comment should be added
+	 */		
+	protected String getTypeComment() {
+		if (CodeGenerationPreferencePage.doCreateComments()) {
+			return getTemplate("typecomment");
+		}
+		return null;
+	}
+	
+	protected String getTemplate(String name) {
+		Template[] templates= Templates.getInstance().getTemplates();
+		for (int i= 0; i < templates.length; i++) {
+			if (name.equals(templates[i].getName())) {
+				return templates[i].getPattern();
+			}
+		}
+		return null;
+	}	
 	
 	/**
 	 * Creates the bodies of all unimplemented methods or/and all constructors

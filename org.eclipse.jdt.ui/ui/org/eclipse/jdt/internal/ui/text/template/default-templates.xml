@@ -128,6 +128,18 @@ public ${return_type} ${name}(${arguments}) {
  */
 </template>
 
+<template context="java" description="file comment used by the class and interface wizards" enabled="true" name="filecomment">/*
+ * (c) Copyright 2001 MyCorporation.
+ * All Rights Reserved.
+ */
+ </template>
+ 
+ <template context="java" description="type comment used by the class and interface wizards" enabled="true" name="typecomment">/**
+ * @version 	1.0
+ * @author 	${user}
+ */
+ </template>
+
   <template description="print to standard out" name="stdout" context="java"
   >System.out.println(&quot;${cursor}&quot;);</template>
 

@@ -24,7 +24,7 @@ public class WorkbenchRunnableWrapper implements IRunnableWithProgress {
 		fWorkspaceRunnable= runnable;
 	}
 
-	/*
+		/*
 	 * @see IRunnableWithProgress#run(IProgressMonitor)
 	 */
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
