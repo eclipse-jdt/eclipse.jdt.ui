@@ -1017,7 +1017,13 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(Block)
 	 */
 	public boolean visit(Block block) {
-		List list= block.statements();
+		List list=  block.statements();
+		
+		List collapsedChildren= fRewrite.getCollapsedNodes(block);
+		if (collapsedChildren != null) {
+			list= collapsedChildren; // not a real block, but a placeholder
+		}
+
 		int startPos= block.getStartPosition() + 1; // insert after left brace
 		int startIndent= 0;
 		if (!list.isEmpty() && isInserted((ASTNode) list.get(0))) { // calculate only when needed

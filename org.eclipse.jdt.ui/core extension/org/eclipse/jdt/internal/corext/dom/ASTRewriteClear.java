@@ -29,7 +29,13 @@ public class ASTRewriteClear extends ASTVisitor {
 			ASTNode element= (ASTNode) list.get(i);
 			if (fRewrite.isInserted(element)) {
 				list.remove(i);
-			}			
+			} else {
+				List collapsed= fRewrite.getCollapsedNodes(element);
+				if (collapsed != null) {
+					list.remove(i);
+					list.addAll(i, collapsed);
+				}
+			}
 		}
 	}
 	

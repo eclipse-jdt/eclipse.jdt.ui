@@ -56,7 +56,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingMoveCodeTest("testMoveForStatementToForBlock"));
+			suite.addTest(new ASTRewritingMoveCodeTest("testReplaceCollapsed"));
 			return suite;
 		}
 	}
@@ -728,6 +728,60 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		clearRewrite(rewrite);
 	}
 	
+	public void testMoveCollapsed() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            foo();\n");
+		buf.append("            i++; // comment\n");
+		buf.append("            i++;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		{
+			List statements= methodDecl.getBody().statements();
+			IfStatement ifStatement= (IfStatement) statements.get(0);
+			List ifStatementBody= ((Block) ifStatement.getThenStatement()).statements();
+			ASTNode collapsed= rewrite.collapseNodes(ifStatementBody, 0, ifStatementBody.size());
+			
+			ASTNode placeholder= rewrite.createCopy(collapsed);
+			rewrite.markAsRemoved(collapsed);
+			
+			statements.add(placeholder);
+			rewrite.markAsInserted(placeholder);
+		}	
+					
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("        }\n");
+		buf.append("        foo();\n");
+		buf.append("        i++; // comment\n");
+		buf.append("        i++;\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}	
+	
 	public void testMoveForStatementToForBlock() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -779,6 +833,55 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		clearRewrite(rewrite);
 	}
 	
+	public void testReplaceCollapsed() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            foo();\n");
+		buf.append("            i++; // comment\n");
+		buf.append("            i++;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		AST ast= astRoot.getAST();
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		{
+			List statements= methodDecl.getBody().statements();
+			IfStatement ifStatement= (IfStatement) statements.get(0);
+			List ifStatementBody= ((Block) ifStatement.getThenStatement()).statements();
+			ASTNode collapsed= rewrite.collapseNodes(ifStatementBody, 0, ifStatementBody.size());
+			
+			ASTNode newStatement= ast.newReturnStatement();
+			rewrite.markAsReplaced(collapsed, newStatement);
+		}	
+					
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            return;\n");		
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}	
 	
 	
 }

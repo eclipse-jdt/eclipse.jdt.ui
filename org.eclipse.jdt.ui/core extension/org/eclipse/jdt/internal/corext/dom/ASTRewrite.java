@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -83,11 +85,13 @@ public final class ASTRewrite {
 	public static final int JAVADOC= 7;
 	public static final int VAR_DECLARATION_FRAGMENT= 8;
 	
+	private static final String COMPOUND_CHILDREN= "collapsed"; //$NON-NLS-1$
+	
 	private ASTNode fRootNode;
 	
 	private HashMap fChangedProperties;
 	private HashMap fCopiedProperties;
-	private boolean fHasInserts;
+	private boolean fHasASTModifications;
 	
 	/**
 	 * Creates the <code>ASTRewrite</code> object.
@@ -97,7 +101,7 @@ public final class ASTRewrite {
 		fRootNode= node;
 		fChangedProperties= new HashMap();
 		fCopiedProperties= new HashMap();
-		fHasInserts= false;
+		fHasASTModifications= false;
 	}
 	
 	public ASTNode getRootNode() {
@@ -127,9 +131,9 @@ public final class ASTRewrite {
 	 * Removes all modifications applied to the given AST.
 	 */
 	public void removeModifications() {
-		if (fHasInserts) {
+		if (fHasASTModifications) {
 			fRootNode.accept(new ASTRewriteClear(this));
-			fHasInserts= false;
+			fHasASTModifications= false;
 		}
 		fChangedProperties.clear();
 		fCopiedProperties.clear();
@@ -142,10 +146,11 @@ public final class ASTRewrite {
 	 * @param node Description of the change.
 	 */
 	public final void markAsInserted(ASTNode node, String description) {
+		Assert.isTrue(getCollapsedNodes(node) == null, "Tries to insert a collapsed node"); //$NON-NLS-1$
 		ASTInsert insert= new ASTInsert();
 		insert.description= description;
 		setChangeProperty(node, insert);
-		fHasInserts= true;
+		fHasASTModifications= true;
 	}
 
 	/**
@@ -156,8 +161,8 @@ public final class ASTRewrite {
 		markAsInserted(node, null);
 	}
 	
-	public boolean hasInserts() {
-		return fHasInserts;
+	public boolean hasASTModifications() {
+		return fHasASTModifications;
 	}
 
 	/**
@@ -252,6 +257,49 @@ public final class ASTRewrite {
 			Assert.isTrue(false, "Can not create copy for elements of type " + node.getClass().getName()); //$NON-NLS-1$
 		}
 		return ASTWithExistingFlattener.createPlaceholder(node.getAST(), node, placeHolderType);
+	}
+	
+	/**
+	 * Succeeding nodes in a list are collapsed and represented by a new 'compound' node. The new compound node is inserted in the list
+	 * and replaces the collapsed node. The compound node can be used for rewriting, e.g. a copy can be created to move
+	 * a whole range of statements. This operation modifies the AST.
+	 */	
+	public final ASTNode collapseNodes(List list, int index, int length) {
+		Assert.isTrue(index >= 0 && length > 0 && list.size() >= (index + length), "Index or length out of bound"); //$NON-NLS-1$
+		
+		ASTNode firstNode= (ASTNode) list.get(index);
+		ASTNode lastNode= (ASTNode) list.get(index + length - 1);
+		assertIsInside(firstNode);
+		assertIsInside(lastNode);
+		
+		Assert.isTrue(lastNode instanceof Statement, "Can only collapse statements"); //$NON-NLS-1$
+		
+		int startPos= firstNode.getStartPosition();
+		int endPos= lastNode.getStartPosition() + lastNode.getLength();
+		
+		ArrayList children= new ArrayList(length);
+		
+		ASTNode compoundNode= fRootNode.getAST().newBlock();
+		compoundNode.setProperty(COMPOUND_CHILDREN, children);
+		compoundNode.setSourceRange(startPos, endPos - startPos);		
+		
+		for (int i= 0; i < length; i++) {
+			children.add(list.get(index));
+			list.remove(index);
+		}
+		list.add(index, compoundNode);
+		
+		fHasASTModifications= true;
+		
+		return compoundNode;
+	}
+	
+	/**
+	 * Returns the nodes that are collapsed by this compound node. If the node is not a compound node <code>null</code>
+	 * is returned.
+	 */
+	public List getCollapsedNodes(ASTNode compoundNode) {
+		return (List) compoundNode.getProperty(COMPOUND_CHILDREN);
 	}
 	
 	/**
