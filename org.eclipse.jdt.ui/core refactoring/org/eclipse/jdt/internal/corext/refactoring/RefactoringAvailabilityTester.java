@@ -260,8 +260,8 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isInferTypeArgumentsAvailable(final IStructuredSelection selection) {
-		final List list= selection.toList();
-		if (list.size() > 0) {
+		if (!selection.isEmpty()) {
+			final List list= selection.toList();
 			for (int index= 0; index < list.size(); index++) {
 				if (!(list.get(index) instanceof IJavaElement))
 					return false;
@@ -386,6 +386,17 @@ public final class RefactoringAvailabilityTester {
 		return isMoveMethodAvailable((IMethod) method);
 	}
 
+	public static boolean isPromoteTempAvailable(final ILocalVariable variable) throws JavaModelException {
+		return Checks.isAvailable(variable);
+	}
+
+	public static boolean isPromoteTempAvailable(final JavaTextSelection selection) throws JavaModelException {
+		final IJavaElement[] elements= selection.resolveElementAtOffset();
+		if (elements.length != 1)
+			return false;
+		return (elements[0] instanceof ILocalVariable) && isPromoteTempAvailable((ILocalVariable) elements[0]);
+	}
+
 	public static boolean isPullUpAvailable(IMember member) throws JavaModelException {
 		final int type= member.getElementType();
 		if (type != IJavaElement.METHOD && type != IJavaElement.FIELD && type != IJavaElement.TYPE)
@@ -498,6 +509,25 @@ public final class RefactoringAvailabilityTester {
 		return isPullUpAvailable(new IMember[] { (IMember) element});
 	}
 
+	public static boolean isSelfEncapsulateAvailable(IField field) throws JavaModelException {
+		return Checks.isAvailable(field) && !JdtFlags.isEnum(field) && !field.getDeclaringType().isAnnotation();
+	}
+
+	public static boolean isSelfEncapsulateAvailable(final IStructuredSelection selection) {
+		if (selection.size() == 1) {
+			if (selection.getFirstElement() instanceof IField)
+				return true;
+		}
+		return false;
+	}
+
+	public static boolean isSelfEncapsulateAvailable(final JavaTextSelection selection) throws JavaModelException {
+		final IJavaElement[] elements= selection.resolveElementAtOffset();
+		if (elements.length != 1)
+			return false;
+		return (elements[0] instanceof IField) && isSelfEncapsulateAvailable((IField) elements[0]);
+	}
+
 	public static boolean isUseSuperTypeAvailable(final IStructuredSelection selection) throws JavaModelException {
 		if (selection.size() == 1) {
 			IType type= null;
@@ -521,37 +551,5 @@ public final class RefactoringAvailabilityTester {
 
 	private RefactoringAvailabilityTester() {
 		// Not for instantiation
-	}
-
-	public static boolean isPromoteTempAvailable(final ILocalVariable variable) throws JavaModelException {
-		return Checks.isAvailable(variable);
-	}
-
-	public static boolean isPromoteTempAvailable(final JavaTextSelection selection) throws JavaModelException {
-		final IJavaElement[] elements= selection.resolveElementAtOffset();
-		if (elements.length != 1)
-			return false;
-		return (elements[0] instanceof ILocalVariable) && 
-			isPromoteTempAvailable((ILocalVariable)elements[0]);
-	}
-
-	public static boolean isSelfEncapsulateAvailable(IField field) throws JavaModelException {
-		return Checks.isAvailable(field) && !JdtFlags.isEnum(field) && !field.getDeclaringType().isAnnotation();
-	}
-
-	public static boolean isSelfEncapsulateAvailable(final JavaTextSelection selection) throws JavaModelException {
-		final IJavaElement[] elements= selection.resolveElementAtOffset();
-		if (elements.length != 1)
-			return false;
-		return (elements[0] instanceof IField) && 
-			isSelfEncapsulateAvailable((IField)elements[0]);
-	}
-
-	public static boolean isSelfEncapsulateAvailable(final IStructuredSelection selection) {
-		if (selection.size() == 1) {
-			if (selection.getFirstElement() instanceof IField)
-				return true;
-		}
-		return false;
 	}
 }
