@@ -143,6 +143,20 @@ public abstract class TextChange extends AbstractTextChange {
 	}
 	
 	/**
+	 * Returns the group descriptions that have been added to this change
+	 * @return GroupDescription[]
+	 */	
+	public GroupDescription[] getGroupDescriptions() {
+		GroupDescription[] res= new GroupDescription[fTextEditChanges.size()];
+		for (int i= 0; i < res.length; i++) {
+			EditChange elem= (EditChange) fTextEditChanges.get(i);
+			res[i]= elem.getGroupDescription();
+		}
+		return res;	
+	}	
+	
+	
+	/**
 	 * Returns the text edit changes managed by this text change.
 	 * 
 	 * @return the text edit changes
@@ -261,17 +275,32 @@ public abstract class TextChange extends AbstractTextChange {
 	}
 	
 	/**
+	 * Returns the new text range for given text edits. If <code>setTrackPositionChanges</code> is set to <code>false</code>
+	 * <code>null</code> is returned.
+	 * 
+	 * <p>
+	 * Note: API is under construction
+	 * </P>
+	 */
+	public TextRange getNewTextRange(TextEdit[] edits) {
+		if (!fKeepExecutedTextEdits || fCopier == null)
+			return null;		
+		
+		List copies= new ArrayList(edits.length);
+		for (int i= 0; i < edits.length; i++) {
+			TextEdit copy= fCopier.getCopy(edits[i]);
+			if (copy != null) {
+				copies.add(copy);
+			}
+		}
+		return TextEdit.getTextRange(copies);
+	}	
+	
+	/**
 	 * Note: API is under construction
 	 */
 	public TextRange getNewTextRange(EditChange editChange) {
-		if (!fKeepExecutedTextEdits || fCopier == null)
-			return null;
-		TextEdit[] edits= editChange.getGroupDescription().getTextEdits();
-		List copies= new ArrayList(edits.length);
-		for (int i= 0; i < edits.length; i++) {
-			copies.add(fCopier.getCopy(edits[i]));
-		}
-		return TextEdit.getTextRange(copies);
+		return getNewTextRange(editChange.getGroupDescription().getTextEdits());
 	}
 	
 	/* (Non-Javadoc)
