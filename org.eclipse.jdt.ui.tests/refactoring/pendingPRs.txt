@@ -16,3 +16,4 @@
 1GCUF7U: ITPJCORE:WINNT - search for method declarations: private methods are never overloaded
 1GD3LZA: ITPJCORE:WINNT - search for method occurences - NullPointerException
 1GD79XM: ITPJCORE:WINNT - search for field references - not all found
+1GDXMOZ: ITPUI:WIN98 - SubProgressMonitor::done should not clear the subtask
