@@ -164,9 +164,9 @@ public class NLSHintHelper {
 						return true;
 					
 					Expression argument= (Expression)node.arguments().get(0);
-					
-					if (argument instanceof StringLiteral) {
-						resultCollector.put(RESULT_KEY, ((StringLiteral)argument).getLiteralValue());
+					String bundleName= getBundleName(argument);
+					if (bundleName != null) {
+						resultCollector.put(RESULT_KEY, bundleName);
 						throw new STOP_VISITING();
 					}
 					
@@ -179,33 +179,43 @@ public class NLSHintHelper {
 						}
 					}
 					
-					if (argument instanceof MethodInvocation) {
-						MethodInvocation methInvocation= (MethodInvocation)argument;
-						Expression exp= methInvocation.getExpression();
-						if ((exp != null) && (exp instanceof TypeLiteral)) {
-							SimpleType simple= (SimpleType)((TypeLiteral) exp).getType();
-							ITypeBinding typeBinding= simple.resolveBinding();
-							if (typeBinding != null) {
-								resultCollector.put(RESULT_KEY, typeBinding.getQualifiedName());
-								throw new STOP_VISITING();
-							}
-						}
-					}
-					
 					return false;
 				}
 				
 				public boolean visit(VariableDeclarationFragment node) {
 					Expression initializer= node.getInitializer();
-					if (initializer instanceof StringLiteral) {
+					String bundleName= getBundleName(initializer);
+					if (bundleName != null) {
 						Object fieldNameBinding= node.getName().resolveBinding();
 						if (fieldNameBinding != null) {
-							resultCollector.put(fieldNameBinding, ((StringLiteral)initializer).getLiteralValue());
+							resultCollector.put(fieldNameBinding, bundleName);
 							if (fieldNameBinding.equals(resultCollector.get(FIELD_KEY)))
 								throw new STOP_VISITING();
 						}
 						return false;
 					}
+					return true;	
+				}
+				
+				public boolean visit(Assignment node) {
+					if (node.getLeftHandSide() instanceof Name) {
+						String bundleName= getBundleName(node.getRightHandSide());
+						if (bundleName != null) {
+							Object fieldNameBinding= ((Name)node.getLeftHandSide()).resolveBinding();
+							if (fieldNameBinding != null) {
+								resultCollector.put(fieldNameBinding, bundleName);
+								if (fieldNameBinding.equals(resultCollector.get(FIELD_KEY)))
+									throw new STOP_VISITING();
+								return false;
+							}
+						}
+					}
+					return true;
+				}
+				
+				private String getBundleName(Expression initializer) {
+					if (initializer instanceof StringLiteral)
+						return ((StringLiteral)initializer).getLiteralValue();
 					
 					if (initializer instanceof MethodInvocation) {
 						MethodInvocation methInvocation= (MethodInvocation)initializer;
@@ -213,29 +223,11 @@ public class NLSHintHelper {
 						if ((exp != null) && (exp instanceof TypeLiteral)) {
 							SimpleType simple= (SimpleType)((TypeLiteral) exp).getType();
 							ITypeBinding typeBinding= simple.resolveBinding();
-							Object fieldNameBinding= node.getName().resolveBinding();
-							if (fieldNameBinding != null && typeBinding != null) {
-								resultCollector.put(fieldNameBinding, typeBinding.getQualifiedName());
-								if (fieldNameBinding.equals(resultCollector.get(FIELD_KEY)))
-									throw new STOP_VISITING();
-								return false;
-							}
+							if (typeBinding != null)
+								return typeBinding.getQualifiedName();
 						}
 					}
-					return true;	
-				}
-				
-				public boolean visit(Assignment node) {
-					if (node.getLeftHandSide() instanceof Name && node.getRightHandSide() instanceof StringLiteral) {
-						Object fieldNameBinding= ((Name)node.getLeftHandSide()).resolveBinding();
-						if (fieldNameBinding != null) {
-							resultCollector.put(fieldNameBinding, ((StringLiteral)node.getRightHandSide()).getLiteralValue());
-							if (fieldNameBinding.equals(resultCollector.get(FIELD_KEY)))
-								throw new STOP_VISITING();
-							return false;
-						}
-					}
-					return true;
+					return null;	
 				}
 				
 			});
