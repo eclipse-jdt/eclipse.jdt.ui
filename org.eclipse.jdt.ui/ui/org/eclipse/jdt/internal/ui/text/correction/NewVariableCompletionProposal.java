@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -25,10 +26,14 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 
@@ -162,61 +167,56 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 	public static final int PARAM= 3;
 
 	private int  fVariableKind;
-	private String fVariableName;
+	private SimpleName fNode;
 	private IMember fParentMember;
-	
-	private ProblemPosition fProblemPosition;
 
-	public NewVariableCompletionProposal(IMember parentMember, ProblemPosition problemPos, String label, int variableKind, String variableName, int relevance) throws CoreException {
-		super(label, problemPos.getCompilationUnit(), relevance);
+	public NewVariableCompletionProposal(String label, int variableKind, SimpleName node, IMember parentMember, int relevance) throws CoreException {
+		super(label, parentMember.getCompilationUnit(), relevance);
 		
 		fVariableKind= variableKind;
-		fVariableName= variableName;
+		fNode= node;
 		fParentMember= parentMember;
-		fProblemPosition= problemPos;
 	}
 
 	/*
 	 * @see JavaCorrectionProposal#addEdits(CompilationUnitChange)
 	 */
 	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
-		ProblemPosition problemPos= fProblemPosition;
-		
 		ICompilationUnit cu= changeElement.getCompilationUnit();
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
 		
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		ImportEdit importEdit= new ImportEdit(cu, settings);
 
-		String content= generateStub(importEdit, selectedNode);
+		String content= generateStub(importEdit, fNode);
 		if (!importEdit.isEmpty()) {
 			changeElement.addTextEdit("Add imports", importEdit); //$NON-NLS-1$
 		}		
 
 		if (fVariableKind == LOCAL) {
 			// new local variable
-			changeElement.addTextEdit("Add local", new AddLocalVariableEdit(selectedNode, content, settings.tabWidth)); //$NON-NLS-1$
+			changeElement.addTextEdit("Add local", new AddLocalVariableEdit(fNode, content, settings.tabWidth)); //$NON-NLS-1$
 		} else if (fVariableKind == FIELD) {
 			// new field
 			changeElement.addTextEdit("Add field", createFieldEdit(content, settings.tabWidth)); //$NON-NLS-1$
 		} else if (fVariableKind == PARAM) {
 			// new parameter
-			changeElement.addTextEdit("Add parameter", new AddParameterEdit(selectedNode, content)); //$NON-NLS-1$
+			changeElement.addTextEdit("Add parameter", new AddParameterEdit(fNode, content)); //$NON-NLS-1$
 		}
 	}
 	
 	private TextEdit createFieldEdit(String content, int tabWidth) throws CoreException {
-		IType type= (fParentMember.getElementType() ==  IJavaElement.TYPE) ? (IType) fParentMember : fParentMember.getDeclaringType();
+		boolean parentIsType= (fParentMember.getElementType() ==  IJavaElement.TYPE);
+		
+		IType type= parentIsType ? (IType) fParentMember : fParentMember.getDeclaringType();
 
 		int insertPos= MemberEdit.ADD_AT_BEGINNING;
 		IJavaElement anchor= type;
-
-		IField[] field= type.getFields();
-		if (field.length > 0) {
-			anchor= field[field.length - 1];
-			insertPos= MemberEdit.INSERT_AFTER;
+		if (!parentIsType && fParentMember.getElementType() != IJavaElement.FIELD) {
+			IField[] fields= type.getFields();
+			if (fields.length > 0) {
+				anchor= fields[fields.length - 1];
+				insertPos= MemberEdit.INSERT_AFTER;
+			}
 		}
 
 		MemberEdit memberEdit= new MemberEdit(anchor, insertPos, new String[] { content }, tabWidth);
@@ -225,17 +225,34 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 		return memberEdit;
 	}	
 
+
+	private boolean isStatic(SimpleName selectedNode) {
+		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
+		if (decl instanceof MethodDeclaration) {
+			return Modifier.isStatic(((MethodDeclaration)decl).getModifiers());
+		} else if (decl instanceof Initializer) {
+			return Modifier.isStatic(((Initializer)decl).getModifiers());
+		} else if (decl instanceof FieldDeclaration) {
+			return Modifier.isStatic(((FieldDeclaration)decl).getModifiers());
+		}
+		return false;
+	}
+
 	
-	private String generateStub(ImportEdit importEdit, ASTNode selectedNode) {
+	private String generateStub(ImportEdit importEdit, SimpleName selectedNode) throws CoreException {
 		StringBuffer buf= new StringBuffer();
 		ITypeBinding varType= evaluateVariableType(importEdit, selectedNode);
-		
+				
 		if (fVariableKind == FIELD) {
 			buf.append("private "); //$NON-NLS-1$
+			if (isStatic(selectedNode)) {
+				buf.append("static "); //$NON-NLS-1$
+			}			
 		}
+		
 		buf.append(varType != null ? varType.getName() : "Object"); //$NON-NLS-1$
 		buf.append(' ');
-		buf.append(fVariableName);
+		buf.append(selectedNode.getIdentifier());
 		if (fVariableKind == LOCAL) {
 			if (varType == null || !varType.isPrimitive()) {
 				buf.append("= null"); //$NON-NLS-1$

@@ -22,30 +22,26 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
-import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
-import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
-import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -80,7 +76,8 @@ public class ASTResolving {
 		
 	private static ITypeBinding getPossibleTypeBinding(ASTNode node) {	
 		ASTNode parent= node.getParent();
-		if (parent instanceof Assignment) {
+		switch (parent.getNodeType()) {
+		case ASTNode.ASSIGNMENT:
 			Assignment assignment= (Assignment) parent;
 			if (node.equals(assignment.getLeftHandSide())) {
 				// field write access: xx= expression
@@ -88,7 +85,7 @@ public class ASTResolving {
 			}
 			// read access
 			return assignment.getLeftHandSide().resolveTypeBinding();
-		} else if (parent instanceof InfixExpression) {
+		case ASTNode.INFIX_EXPRESSION:
 			InfixExpression infix= (InfixExpression) parent;
 			InfixExpression.Operator op= infix.getOperator();
 			if (node.equals(infix.getLeftOperand())) {
@@ -107,84 +104,98 @@ public class ASTResolving {
 				return infix.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
 			}
 			return infix.getLeftOperand().resolveTypeBinding();
-		} else if (parent instanceof VariableDeclarationFragment) {
+		case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
 			VariableDeclarationFragment frag= (VariableDeclarationFragment) parent;
 			if (frag.getInitializer().equals(node)) {
-				// int val= xx;
-				VariableDeclarationStatement stmt= (VariableDeclarationStatement) frag.getParent();
-				return stmt.getType().resolveBinding();
+				ASTNode declaration= frag.getParent();
+				if (declaration instanceof VariableDeclarationStatement) {
+					return ((VariableDeclarationStatement)declaration).getType().resolveBinding();
+				} else if (declaration instanceof FieldDeclaration) {
+					return ((FieldDeclaration)declaration).getType().resolveBinding();
+				}
 			}
-		} else if (parent instanceof MethodInvocation) {
-			MethodInvocation invocation= (MethodInvocation) parent;
-			SimpleName name= invocation.getName();
-			IMethodBinding binding= ASTNodes.getMethodBinding(name);
-			if (binding != null) {
-				return getParameterTypeBinding(node, invocation.arguments(), binding);
-			}				
-		} else if (parent instanceof SuperConstructorInvocation) {
-			SuperConstructorInvocation invocation= (SuperConstructorInvocation) parent;
-			IMethodBinding binding= invocation.resolveConstructorBinding();
-			if (binding != null) {
-				return getParameterTypeBinding(node, invocation.arguments(), binding);
+			break;
+		case ASTNode.METHOD_INVOCATION:
+			MethodInvocation methodInvocation= (MethodInvocation) parent;
+			SimpleName name= methodInvocation.getName();
+			IMethodBinding methodBinding= ASTNodes.getMethodBinding(name);
+			if (methodBinding != null) {
+				return getParameterTypeBinding(node, methodInvocation.arguments(), methodBinding);
 			}
-		} else if (parent instanceof ConstructorInvocation) {
-			ConstructorInvocation invocation= (ConstructorInvocation) parent;
-			IMethodBinding binding= invocation.resolveConstructorBinding();
-			if (binding != null) {
-				return getParameterTypeBinding(node, invocation.arguments(), binding);
-			}			
-		} else if (parent instanceof ClassInstanceCreation) {
+			break;			
+		case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
+			SuperConstructorInvocation superInvocation= (SuperConstructorInvocation) parent;
+			IMethodBinding superBinding= superInvocation.resolveConstructorBinding();
+			if (superBinding != null) {
+				return getParameterTypeBinding(node, superInvocation.arguments(), superBinding);
+			}
+			break;
+		case ASTNode.CONSTRUCTOR_INVOCATION:
+			ConstructorInvocation constrInvocation= (ConstructorInvocation) parent;
+			IMethodBinding constrBinding= constrInvocation.resolveConstructorBinding();
+			if (constrBinding != null) {
+				return getParameterTypeBinding(node, constrInvocation.arguments(), constrBinding);
+			}
+			break;
+		case ASTNode.CLASS_INSTANCE_CREATION:
 			ClassInstanceCreation creation= (ClassInstanceCreation) parent;
-			IMethodBinding binding= creation.resolveConstructorBinding();
-			if (binding != null) {
-				return getParameterTypeBinding(node, creation.arguments(), binding);
+			IMethodBinding creationBinding= creation.resolveConstructorBinding();
+			if (creationBinding != null) {
+				return getParameterTypeBinding(node, creation.arguments(), creationBinding);
 			}
-		} else if (parent instanceof ParenthesizedExpression) {
+			break;
+		case ASTNode.PARENTHESIZED_EXPRESSION:
 			return getTypeBinding(parent);
-		} else if (parent instanceof ArrayAccess) {
+		case ASTNode.ARRAY_ACCESS:
 			if (((ArrayAccess) parent).getIndex().equals(node)) {
 				return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
 			}
-		} else if (parent instanceof ArrayCreation) {
+			break;
+		case ASTNode.ARRAY_CREATION:
 			if (((ArrayCreation) parent).dimensions().contains(node)) {
 				return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
-			}			
-		} else if (parent instanceof ArrayInitializer) {
-			ASTNode creation= parent.getParent();
-			if (creation instanceof ArrayCreation) {
-				return ((ArrayCreation) creation).getType().getElementType().resolveBinding();
 			}
-		} else if (parent instanceof ConditionalExpression) {
+			break;		
+		case ASTNode.ARRAY_INITIALIZER:
+			ASTNode initializerParent= parent.getParent();
+			if (initializerParent instanceof ArrayCreation) {
+				return ((ArrayCreation) initializerParent).getType().getElementType().resolveBinding();
+			}
+			break;
+		case ASTNode.CONDITIONAL_EXPRESSION:
 			ConditionalExpression expression= (ConditionalExpression) parent;
 			if (node.equals(expression.getExpression())) {
 				return parent.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
-			} else {
-				if (node.equals(expression.getElseExpression())) {
-					return expression.getThenExpression().resolveTypeBinding();
-				}
-				return expression.getElseExpression().resolveTypeBinding();
 			}
-		} else if (parent instanceof PostfixExpression) {
+			if (node.equals(expression.getElseExpression())) {
+				return expression.getThenExpression().resolveTypeBinding();
+			}
+			return expression.getElseExpression().resolveTypeBinding();
+		case ASTNode.POSTFIX_EXPRESSION:
 			return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
-		} else if (parent instanceof PrefixExpression) {
+		case ASTNode.PREFIX_EXPRESSION:
 			if (((PrefixExpression) parent).getOperator() == PrefixExpression.Operator.NOT) {
 				return parent.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
-			} else {
-				return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
 			}
-		} else if (parent instanceof IfStatement || parent instanceof WhileStatement || parent instanceof DoStatement) {
+			return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
+		case ASTNode.IF_STATEMENT:
+		case ASTNode.WHILE_STATEMENT:
+		case ASTNode.DO_STATEMENT:
 			if (node instanceof Expression) {
 				return parent.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
 			}
-		} else if (parent instanceof SwitchStatement) {
+			break;
+		case ASTNode.SWITCH_STATEMENT:
 			if (((SwitchStatement) parent).getExpression().equals(node)) {
 				return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
 			}
-		} else if (parent instanceof ReturnStatement) {
+			break;
+		case ASTNode.RETURN_STATEMENT:
 			MethodDeclaration decl= findParentMethodDeclaration(parent);
 			if (decl != null) {
 				return decl.getReturnType().resolveBinding();
 			}
+			break;
 		}
 			
 		return null;
@@ -200,11 +211,25 @@ public class ASTResolving {
 	}
 	
 	private static MethodDeclaration findParentMethodDeclaration(ASTNode node) {
-		while ((node != null) && !(node instanceof MethodDeclaration)) {
+		while ((node != null) && (node.getNodeType() != ASTNode.METHOD_DECLARATION)) {
 			node= node.getParent();
 		}
 		return (MethodDeclaration) node;
 	}
+	
+	public static BodyDeclaration findParentBodyDeclaration(ASTNode node) {
+		while ((node != null) && (!(node instanceof BodyDeclaration))) {
+			node= node.getParent();
+		}
+		return (BodyDeclaration) node;
+	}
+	
+	public static Statement findParentStatement(ASTNode node) {
+		while ((node != null) && (!(node instanceof Statement))) {
+			node= node.getParent();
+		}
+		return (Statement) node;
+	}	
 	
 	public static IScanner createScanner(ICompilationUnit cu, int pos) throws InvalidInputException, JavaModelException {
 		IScanner scanner= ToolFactory.createScanner(false, false, false, false);

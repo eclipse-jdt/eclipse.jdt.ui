@@ -6,6 +6,9 @@ import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Statement;
 
 public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	
@@ -30,6 +33,21 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	private HashSet fResult;
 	private HashSet fOthers;
 	
+
+	public static SimilarElement[] findSimilarElement(ICompilationUnit cu, SimpleName name, int kind) throws JavaModelException {
+		int pos= name.getStartPosition();
+		
+		Statement statement= ASTResolving.findParentStatement(name);
+		if (statement != null) {
+			pos= statement.getStartPosition();
+		}
+		
+		ITypeBinding binding= ASTResolving.getTypeBinding(name);
+		
+		String returnType= (binding != null) ? binding.getName() : null;
+		return findSimilarElement(cu, pos, name.getIdentifier(), kind, null, returnType);
+	}
+
 
 	public static SimilarElement[] findSimilarElement(ICompilationUnit cu, int pos, String name, int kind) throws JavaModelException {
 		return findSimilarElement(cu, pos, name, kind, null, null);
@@ -129,12 +147,22 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 		addOther(elem);
 	}
 	
-	private void addVariable(int kind, char[] name, int relevance) {
+	private void addVariable(int kind, char[] name, char[] typePackageName, char[] typeName, int relevance) {
 		String variableName= new String(name);
 		if (NameMatcher.isSimilarName(fName, variableName)) {
-			SimilarElement elem= new SimilarElement(kind, variableName, relevance);
-			addResult(elem);
+			addResult(new SimilarElement(kind, variableName, 1));
+		} else if (fPreferredType != null) {
+			StringBuffer buf= new StringBuffer();
+			if (typePackageName.length > 0) {
+				buf.append(typePackageName);
+				buf.append('.');
+			}
+			buf.append(typeName);
+			if (fPreferredType.equals(buf.toString())) {
+				addResult(new SimilarElement(kind, variableName, 0));
+			}
 		}
+		
 	}	
 	
 	/*
@@ -160,7 +188,7 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	 */
 	public void acceptField(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[] typePackageName, char[] typeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
 		if ((fKind & FIELDS) != 0) {
-			addVariable(FIELDS, name, relevance);
+			addVariable(FIELDS, name, typePackageName, typeName, relevance);
 		}
 	}
 
@@ -169,7 +197,7 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	 */
 	public void acceptLocalVariable(char[] name, char[] typePackageName, char[] typeName, int modifiers, int completionStart, int completionEnd, int relevance) {
 		if ((fKind & VARIABLES) != 0) {
-			addVariable(VARIABLES, name, relevance);
+			addVariable(VARIABLES, name,  typePackageName, typeName, relevance);
 		}
 	}
 	

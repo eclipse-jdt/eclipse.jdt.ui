@@ -1,14 +1,11 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -18,9 +15,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
@@ -29,7 +27,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnit
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class UnresolvedElementsSubProcessor {
@@ -38,14 +35,18 @@ public class UnresolvedElementsSubProcessor {
 	public static void getVariableProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		
 		ICompilationUnit cu= problemPos.getCompilationUnit();
-		IBuffer buf= cu.getBuffer();
-		String variableName= buf.getText(problemPos.getOffset(), problemPos.getLength());
-		if (variableName.indexOf('.') != -1) {
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		
+		if (!(selectedNode instanceof SimpleName)) {
 			return;
 		}
+		SimpleName node= (SimpleName) selectedNode;
+
 
 		// corrections
-		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, problemPos.getOffset(), variableName, SimilarElementsRequestor.VARIABLES);
+		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, node, SimilarElementsRequestor.VARIABLES);
 		for (int i= 0; i < elements.length; i++) {
 			SimilarElement curr= elements[i];
 			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", curr.getName()); //$NON-NLS-1$
@@ -55,25 +56,20 @@ public class UnresolvedElementsSubProcessor {
 		// new field
 		IJavaElement elem= cu.getElementAt(problemPos.getOffset());
 		if (elem instanceof IMember) {
-			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", variableName); //$NON-NLS-1$
-			proposals.add(new NewVariableCompletionProposal((IMember) elem, problemPos, label, NewVariableCompletionProposal.FIELD, variableName, 2));
+			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", node.getIdentifier()); //$NON-NLS-1$
+			proposals.add(new NewVariableCompletionProposal(label, NewVariableCompletionProposal.FIELD, node, (IMember) elem, 2));
 		}
 		if (elem instanceof IMethod) {
-			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createlocal.description", variableName); //$NON-NLS-1$
-			proposals.add(new NewVariableCompletionProposal((IMember) elem, problemPos, label, NewVariableCompletionProposal.LOCAL, variableName, 1));
+			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createlocal.description", node.getIdentifier()); //$NON-NLS-1$
+			proposals.add(new NewVariableCompletionProposal(label, NewVariableCompletionProposal.LOCAL, node, (IMember) elem, 1));
 		
-			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createparameter.description", variableName); //$NON-NLS-1$
-			proposals.add(new NewVariableCompletionProposal((IMember) elem, problemPos, label, NewVariableCompletionProposal.PARAM, variableName, 1));
+			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createparameter.description", node.getIdentifier()); //$NON-NLS-1$
+			proposals.add(new NewVariableCompletionProposal(label, NewVariableCompletionProposal.PARAM, node, (IMember) elem, 1));
 		}			
 		
-		try {
-			IScanner scanner= ASTResolving.createScanner(cu, problemPos.getOffset() + problemPos.getLength());
-			if (scanner.getNextToken() == ITerminalSymbols.TokenNameDOT) {
-				getTypeProposals(problemPos, SimilarElementsRequestor.REF_TYPES, proposals);
-			}
-		} catch (InvalidInputException e) {
+		if (node.getParent().getNodeType() == ASTNode.METHOD_INVOCATION) {
+			getTypeProposals(problemPos, SimilarElementsRequestor.REF_TYPES, proposals);
 		}
-			
 	}
 	
 	public static void getTypeProposals(ProblemPosition problemPos, int kind, ArrayList proposals) throws CoreException {
@@ -140,12 +136,13 @@ public class UnresolvedElementsSubProcessor {
 	}
 	
 	public static void getMethodProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+
+		ICompilationUnit cu= problemPos.getCompilationUnit();
+
 		String[] args= problemPos.getArguments();
 		if (args.length < 3) {
 			return;
 		}
-		
-		ICompilationUnit cu= problemPos.getCompilationUnit();
 		
 		// corrections
 		String methodName= args[1];
