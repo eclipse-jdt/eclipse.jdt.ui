@@ -329,7 +329,7 @@ public class CopyTest extends RefactoringTest {
 		IJavaElement[] javaElements= { getPackageP()};
 		IResource[] resources= {};
 		CopyRefactoring2 ref= verifyEnabled(resources, javaElements);
-		verifyInvalidDestination(ref, getPackageP());
+		verifyInvalidDestination(ref, getPackageP());//TODO not sure here, could be enabled maybe
 	}
 
 	public void testDestination_package_no_1() throws Exception{
@@ -348,7 +348,7 @@ public class CopyTest extends RefactoringTest {
 			CopyRefactoring2 ref= verifyEnabled(resources, javaElements);
 
 			Object destination=cu;
-			verifyInvalidDestination(ref, destination);
+			verifyInvalidDestination(ref, destination);//TODO not sure here, could be enabled maybe
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());			
@@ -366,7 +366,7 @@ public class CopyTest extends RefactoringTest {
 			CopyRefactoring2 ref= verifyEnabled(resources, javaElements);
 
 			Object destination= file;
-			verifyInvalidDestination(ref, destination);
+			verifyInvalidDestination(ref, destination);//TODO not sure here, could be enabled if file lives in a package
 		} finally {
 			performDummySearch();
 			file.delete(true, new NullProgressMonitor());			
@@ -399,7 +399,7 @@ public class CopyTest extends RefactoringTest {
 			CopyRefactoring2 ref= verifyEnabled(resources, javaElements);
 
 			Object destination= otherPackage;
-			verifyInvalidDestination(ref, destination);
+			verifyInvalidDestination(ref, destination);//TODO not sure here, could be enabled maybe
 		} finally {
 			performDummySearch();
 			otherPackage.delete(true, new NullProgressMonitor());
