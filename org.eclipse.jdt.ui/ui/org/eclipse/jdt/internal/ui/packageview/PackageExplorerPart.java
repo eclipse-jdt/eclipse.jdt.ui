@@ -1121,9 +1121,12 @@ public class PackageExplorerPart extends ViewPart
 	}
 
 	public void collapseAll() {
-		fViewer.getControl().setRedraw(false);		
-		fViewer.collapseToLevel(getViewPartInput(), AbstractTreeViewer.ALL_LEVELS);
-		fViewer.getControl().setRedraw(true);
+		try {
+			fViewer.getControl().setRedraw(false);		
+			fViewer.collapseToLevel(getViewPartInput(), AbstractTreeViewer.ALL_LEVELS);
+		} finally {
+			fViewer.getControl().setRedraw(true);
+		}
 	}
 	
 	public PackageExplorerPart() { 
