@@ -4,5 +4,8 @@ class A{
 	class Inner{
 	}
 }
-class I2 extends Inner{
+class I2 extends A.Inner{
+	I2(){
+		new A().super();
+	}
 }

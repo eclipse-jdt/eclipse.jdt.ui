@@ -8,11 +8,11 @@ class A{
 		}
 	}
 }
-class I2 extends Inner{
+class I2 extends A.Inner{
 	I2(){
-		super();
+		new A().super();
 	}
 	I2(int i){
-		super(i);
+		new A().super(i);
 	}
 }

@@ -3,10 +3,10 @@ package p;
 class A{
 }
 class I2 extends Inner{
-	I2(A a){
-		super(a);
+	I2(){
+		super(new A());
 	}
-	I2(A a, int i){
-		super(a, i);
+	I2(int i){
+		super(new A(), i);
 	}
 }
