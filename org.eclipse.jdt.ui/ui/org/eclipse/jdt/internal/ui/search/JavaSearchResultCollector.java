@@ -18,11 +18,13 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.IInputSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
 
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 
+import org.eclipse.search.ui.IActionGroupFactory;
 import org.eclipse.search.ui.IContextMenuContributor;
 import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.ISearchResultViewEntry;
@@ -59,17 +61,11 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	private int fPotentialMatchCount= 0;
 	private Integer[] fMessageFormatArgs= new Integer[1];
 	
-	private class ContextMenuContributor implements IContextMenuContributor {
-
-		public void fill(IMenuManager menu, IInputSelectionProvider inputProvider) {
-			JavaPlugin.createStandardGroups(menu);
-			ActionGroup searchGroup= new JavaSearchActionGroup(SearchUI.getSearchResultView());
-			searchGroup.setContext(new ActionContext(inputProvider.getSelection()));
-			searchGroup.fillContextMenu(menu);
-			searchGroup.setContext(null);
-			searchGroup.dispose();
-			OpenTypeHierarchyUtil.addToMenu(getWorbenchWindow(), menu, convertSelection(inputProvider.getSelection()));
+	private class ActionGroupFactory implements IActionGroupFactory {
+		public ActionGroup createActionGroup(ISearchResultView part) {
+			return new JavaSearchActionGroup(part);
 		}
+//			OpenTypeHierarchyUtil.addToMenu(getWorbenchWindow(), menu, convertSelection(inputProvider.getSelection()));
 		
 		private Object convertSelection(ISelection selection) {
 			Object element= SelectionUtil.getSingleElement(selection);
@@ -86,7 +82,6 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	}
 	
 	public JavaSearchResultCollector() {
-		fContextMenu= new ContextMenuContributor();
 		// This ensures that the image class is loaded correctly
 		JavaPlugin.getDefault().getImageRegistry();
 	}
@@ -104,7 +99,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 				fOperation.getSingularLabel(),
 				fOperation.getPluralLabelPattern(),
 				fOperation.getImageDescriptor(),
-				fContextMenu,
+				new ActionGroupFactory(),
 				new JavaSearchResultLabelProvider(),
 				new GotoMarkerAction(),
 				new GroupByKeyComputer(),
