@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.ISourceRange;
@@ -24,10 +23,10 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
