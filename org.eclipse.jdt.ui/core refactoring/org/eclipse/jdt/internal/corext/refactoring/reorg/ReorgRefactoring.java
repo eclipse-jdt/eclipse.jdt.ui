@@ -114,6 +114,10 @@ public abstract class ReorgRefactoring extends Refactoring {
 		Assert.isTrue(fElements.containsAll(excluded));
 		fExcludedElements= excluded;
 	}
+
+	public Set getExcludedElements(){
+		return fExcludedElements;
+	}
 	
 	public void setDestination(Object destination) throws JavaModelException{
 		if (destination instanceof IJavaProject) {
@@ -662,7 +666,8 @@ public abstract class ReorgRefactoring extends Refactoring {
 	 * Returns the actual destination for the given <code>dest</code> if the
 	 * elements to be dropped are files or compilation units.
 	 */
-	private static IPackageFragment getDestinationAsPackageFragment(Object dest) throws JavaModelException {
+	public static IPackageFragment getDestinationAsPackageFragment(Object dest) throws JavaModelException {
+	
 		if (dest instanceof IPackageFragment)
 			return (IPackageFragment)dest;
 		
@@ -675,8 +680,8 @@ public abstract class ReorgRefactoring extends Refactoring {
 		if (dest instanceof ICompilationUnit && ((ICompilationUnit)dest).getParent() instanceof IPackageFragment)
 			return (IPackageFragment)((ICompilationUnit)dest).getParent();
 			
-		if (dest instanceof IFile && (ReorgUtils.getJavaParent((IFile)dest) instanceof IPackageFragment))
-			return (IPackageFragment)ReorgUtils.getJavaParent((IFile)dest);
+		if (dest instanceof IFile)
+			return getDestinationAsPackageFragment(ReorgUtils.getJavaParent(dest));
 			
 		return null;
 	}	
