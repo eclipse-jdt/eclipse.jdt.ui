@@ -172,11 +172,9 @@ public class ExtractTempRefactoring extends Refactoring {
 			}	
 			pm.worked(1);
 			
-			if (selectedExpression.getStartPosition() != fSelectionStart){ 
-				int length= selectedExpression.getStartPosition() - fSelectionStart;
-				if (length >= 0 && ! "".equals(fCu.getBuffer().getText(fSelectionStart, length).trim())) //$NON-NLS-1$
-					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.begining")); //$NON-NLS-1$
-			}
+			if(selectionIncludesExtraneousText())
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.extraneous_text_selected")); //$NON-NLS-1$
+
 			pm.worked(1);
 			
 			if (isUsedInExplicitConstructorCall())
@@ -209,16 +207,28 @@ public class ExtractTempRefactoring extends Refactoring {
 		}		
 	}
 
+	//XXX same as in ExtractConstant
+	private static boolean isJustWhitespace(int start, int end, ICompilationUnit cu) throws JavaModelException {
+		return 0 == cu.getBuffer().getText(start, end - start).trim().length();
+	}
+	
+	private boolean selectionIncludesExtraneousText() throws JavaModelException {
+		Expression selectedExpression= getSelectedExpression();
+		if(!isJustWhitespace(fSelectionStart, selectedExpression.getStartPosition(), fCu))
+			return true;
+		if(!isJustWhitespace(selectedExpression.getStartPosition() + selectedExpression.getLength(), fSelectionStart + fSelectionLength, fCu))				
+			return true;
+		return false;
+	}
+
 	private RefactoringStatus checkExpressionBinding() throws JavaModelException{
-		Expression expression= getSelectedExpression();
-		ITypeBinding tb= expression.resolveTypeBinding();
-		if (tb == null)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.currently_no")); //$NON-NLS-1$
-		
-		if (tb.getName().equals("void")) //$NON-NLS-1$
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.no_void")); //$NON-NLS-1$
-		
-		return null;	
+		Expression selectedExpression= getSelectedExpression();
+		switch(Checks.checkExpressionIsRValue(selectedExpression)) {
+			case Checks.NOT_RVALUE_MISC:	return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression"));
+			case Checks.NOT_RVALUE_VOID:	return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.no_void"));
+			case Checks.IS_RVALUE:			return new RefactoringStatus();
+			default:						Assert.isTrue(false); return null;
+		}
 	}
 	
 	private void initializeAST() throws JavaModelException {
@@ -239,17 +249,16 @@ public class ExtractTempRefactoring extends Refactoring {
 				return null;	
 		} else if (selectedExpression instanceof ConditionalExpression) {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.single_conditional_expression")); //$NON-NLS-1$
-		} else
-			return null;
+		} else if (selectedExpression instanceof SimpleName){
+			if ((((SimpleName)selectedExpression)).isDeclaration())
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.names_in_declarations")); //$NON-NLS-1$
+		} 
+		
+		return null;
 	}
 	
 	public RefactoringStatus checkTempName(String newName) {
-		RefactoringStatus result= Checks.checkFieldName(newName);
-		if (result.hasFatalError())
-			return result;
-		if (! Checks.startsWithLowerCase(newName))
-			result.addWarning(RefactoringCoreMessages.getString("ExtractTempRefactoring.convention")); //$NON-NLS-1$
-		return result;		
+		return Checks.checkTempName(newName);
 	}
 	
 	public void setTempName(String newName) {
@@ -484,11 +493,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (! "".equals(name) || ! (expression instanceof ClassInstanceCreation)) //$NON-NLS-1$
 			return name;
 			
+			
 		ClassInstanceCreation cic= (ClassInstanceCreation)expression;
-		if (cic.getAnonymousClassDeclaration() != null)
-			return getNameIdentifier(cic.getName());
-		else
-			return ""; //fallback //$NON-NLS-1$
+		Assert.isTrue(cic.getAnonymousClassDeclaration() != null);
+		return getNameIdentifier(cic.getName());
 	}
 	
 	//recursive
