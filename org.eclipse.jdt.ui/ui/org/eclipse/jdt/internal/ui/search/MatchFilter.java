@@ -13,7 +13,11 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.SearchPattern;
+
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.ui.search.PatternQuerySpecification;
 import org.eclipse.jdt.ui.search.QuerySpecification;
@@ -30,16 +34,25 @@ abstract class  MatchFilter {
 	
 	public abstract String getID();
 	
+	private static final MatchFilter IMPORT_FILTER= new ImportFilter(); 
+	private static final MatchFilter JAVADOC_FILTER= new JavadocFilter(); 
+	private static final MatchFilter READ_FILTER= new ReadFilter(); 
+	private static final MatchFilter WRITE_FILTER= new WriteFilter(); 
+	private static final MatchFilter UNEXACT_FILTER= new UnexactMatchFilter(); 
+	private static final MatchFilter ERASURE_FILTER= new ErasureMatchFilter(); 
+	
 	private static final MatchFilter[] ALL_FILTERS= new MatchFilter[] {
-			new ImportFilter(),
-			new JavadocFilter(),
-			new ReadFilter(),
-			new WriteFilter()
-		};
+			IMPORT_FILTER,
+			JAVADOC_FILTER,
+			READ_FILTER,
+			WRITE_FILTER,
+			UNEXACT_FILTER,
+			ERASURE_FILTER
+	};
 		
-		public static MatchFilter[] allFilters() {
-			return ALL_FILTERS;
-		}
+	public static MatchFilter[] allFilters() {
+		return ALL_FILTERS;
+	}	
 }
 
 class ImportFilter extends MatchFilter {
@@ -98,11 +111,9 @@ class WriteFilter extends FieldFilter {
 	public String getName() {
 		return SearchMessages.getString("MatchFilter.WriteFilter.name"); //$NON-NLS-1$
 	}
-
 	public String getActionLabel() {
 		return SearchMessages.getString("MatchFilter.WriteFilter.actionLabel"); //$NON-NLS-1$
 	}
-
 	public String getDescription() {
 		return SearchMessages.getString("MatchFilter.WriteFilter.description"); //$NON-NLS-1$
 	}
@@ -118,14 +129,12 @@ class ReadFilter extends FieldFilter {
 	public String getName() {
 		return SearchMessages.getString("MatchFilter.ReadFilter.name"); //$NON-NLS-1$
 	}
-
 	public String getActionLabel() {
 		return SearchMessages.getString("MatchFilter.ReadFilter.actionLabel"); //$NON-NLS-1$
 	}
 	public String getDescription() {
 		return SearchMessages.getString("MatchFilter.ReadFilter.description"); //$NON-NLS-1$
 	}
-	
 	public String getID() {
 		return "filter_reads"; //$NON-NLS-1$
 	}
@@ -135,26 +144,76 @@ class JavadocFilter extends MatchFilter {
 	public boolean filters(JavaElementMatch match) {
 		return match.isJavadoc();
 	}
-
 	public String getName() {
 		return SearchMessages.getString("MatchFilter.JavadocFilter.name"); //$NON-NLS-1$
 	}
-
 	public String getActionLabel() {
 		return SearchMessages.getString("MatchFilter.JavadocFilter.actionLabel"); //$NON-NLS-1$
 	}
-
 	public String getDescription() {
 		return SearchMessages.getString("MatchFilter.JavadocFilter.description"); //$NON-NLS-1$
 	}
-
 	public boolean isApplicable(JavaSearchQuery query) {
 		return true;
 	}
 	public String getID() {
 		return "filter_javadoc"; //$NON-NLS-1$
 	}
-
 }
 
+abstract class GenericTypeFilter extends MatchFilter {
+	public boolean isApplicable(JavaSearchQuery query) {
+		QuerySpecification spec= query.getSpecification();
+		if (spec instanceof ElementQuerySpecification) {
+			ElementQuerySpecification elementSpec= (ElementQuerySpecification) spec;
+			Object element= elementSpec.getElement();
+			if (!(element instanceof IType))
+				return false;
+			ITypeParameter[] typeParameters;
+			try {
+				typeParameters= ((IType)element).getTypeParameters();
+			} catch (JavaModelException e) {
+				return false;
+			}
+			return typeParameters != null && typeParameters.length > 0;
+		}
+		return false;
+	}
+}
+
+class ErasureMatchFilter extends GenericTypeFilter {
+	public boolean filters(JavaElementMatch match) {
+		return (match.getMatchRule() & SearchPattern.R_ERASURE_MATCH) != 0;
+	}
+	public String getName() {
+		return SearchMessages.getString("MatchFilter.ErasureFilter.name"); //$NON-NLS-1$
+	}
+	public String getActionLabel() {
+		return SearchMessages.getString("MatchFilter.ErasureFilter.actionLabel"); //$NON-NLS-1$
+	}
+	public String getDescription() {
+		return SearchMessages.getString("MatchFilter.ErasureFilter.description"); //$NON-NLS-1$
+	}
+	public String getID() {
+		return "filter_erasure"; //$NON-NLS-1$
+	}
+}
+
+class UnexactMatchFilter extends GenericTypeFilter {
+	public boolean filters(JavaElementMatch match) {
+		return (match.getMatchRule() & (SearchPattern.R_EQUIVALENT_MATCH | SearchPattern.R_ERASURE_MATCH)) != 0;
+	}
+	public String getName() {
+		return SearchMessages.getString("MatchFilter.UnexactFilter.name"); //$NON-NLS-1$
+	}
+	public String getActionLabel() {
+		return SearchMessages.getString("MatchFilter.UnexactFilter.actionLabel"); //$NON-NLS-1$
+	}
+	public String getDescription() {
+		return SearchMessages.getString("MatchFilter.UnexactFilter.description"); //$NON-NLS-1$
+	}
+	public String getID() {
+		return "filter_unexact"; //$NON-NLS-1$
+	}
+}
 
