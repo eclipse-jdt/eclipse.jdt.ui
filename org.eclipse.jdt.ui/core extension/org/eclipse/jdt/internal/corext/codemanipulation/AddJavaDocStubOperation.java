@@ -45,14 +45,9 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	
 	private IMember[] fMembers;
 	
-	private ITypeHierarchy fLastTypeHierarchy;
-	
-	private CodeGenerationSettings fSettings;
-	
-	public AddJavaDocStubOperation(IMember[] members, CodeGenerationSettings settings) {
+	public AddJavaDocStubOperation(IMember[] members) {
 		super();
 		fMembers= members;
-		fSettings= settings;
 	}
 
 	private String createTypeComment(IType type, String lineDelimiter) throws CoreException {
@@ -152,7 +147,6 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 			if (buffer != null) {
 				TextBuffer.release(buffer);
 			}
-			fLastTypeHierarchy= null;			
 			
 			monitor.done();
 		}

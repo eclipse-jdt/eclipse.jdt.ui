@@ -59,8 +59,6 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	
 	private IPath fOutputLocation;
 	private IClasspathEntry[] fClasspathEntries;
-	private boolean fAddJRE;
-	
 	private BuildPathsBlock fBuildPathsBlock;
 
 	private boolean fProjectModified;
@@ -92,7 +90,6 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 		fProjectModified= true;
 		fOutputLocation= null;
 		fClasspathEntries= null;
-		fAddJRE= false;
 	}		
 	
 	/**
@@ -143,7 +140,6 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 			entries= newEntries;
 		}
 		fClasspathEntries= entries;
-		fAddJRE= appendDefaultJRE;
 		setProjectModified();
 	}
 	

@@ -32,18 +32,14 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddJavaDocStubOperation;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -199,9 +195,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	
 	public void run(IMember[] members) {
 		try {
-			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-
-			AddJavaDocStubOperation op= new AddJavaDocStubOperation(members, settings);
+			AddJavaDocStubOperation op= new AddJavaDocStubOperation(members);
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
 			dialog.run(false, true, new WorkbenchRunnableAdapter(op));					
 		} catch (InvocationTargetException e) {
