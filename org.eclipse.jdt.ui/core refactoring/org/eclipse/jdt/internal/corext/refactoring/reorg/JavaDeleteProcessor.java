@@ -60,6 +60,7 @@ import org.eclipse.ltk.core.refactoring.participants.DeleteProcessor;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 public class JavaDeleteProcessor extends DeleteProcessor {
 	
@@ -355,7 +356,12 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 
 			TextChangeManager manager= new TextChangeManager();
 			fDeleteChange= DeleteChangeCreator.createDeleteChange(manager, fResources, fJavaElements, getProcessorName());
-			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(manager.getAllCompilationUnits())));
+			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
+			if (checker != null) {
+				checker.addFiles(ResourceUtil.getFiles(manager.getAllCompilationUnits()));
+			} else {
+				result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(manager.getAllCompilationUnits())));
+			}
 			return result;
 		} catch (OperationCanceledException e) {
 			fWasCanceled= true;

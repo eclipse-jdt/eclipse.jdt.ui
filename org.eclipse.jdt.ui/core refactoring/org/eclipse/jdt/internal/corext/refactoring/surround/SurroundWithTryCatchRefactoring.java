@@ -81,7 +81,6 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 public class SurroundWithTryCatchRefactoring extends Refactoring {
 
 	private Selection fSelection;
-	private CodeGenerationSettings fSettings;
 	private ISurroundWithTryCatchQuery fQuery;
 	private SurroundWithTryCatchAnalyzer fAnalyzer;
 	private boolean fLeaveDirty;
@@ -98,7 +97,6 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	private SurroundWithTryCatchRefactoring(ICompilationUnit cu, Selection selection, CodeGenerationSettings settings, ISurroundWithTryCatchQuery query) {
 		fCUnit= cu;
 		fSelection= selection;
-		fSettings= settings;
 		fQuery= query;
 		fLeaveDirty= false;
 	}

@@ -19,11 +19,16 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class MoveResourceChange extends ResourceReorgChange {
 	
 	public MoveResourceChange(IResource res, IContainer dest){
 		super(res, dest, null);
+	}
+	
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		return super.isValid(pm, false, false);
 	}
 	
 	/* non java-doc

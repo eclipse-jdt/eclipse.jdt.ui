@@ -1713,7 +1713,7 @@ class ReorgPolicyFactory {
 		}		
 		
 		public IFile[] getAllModifiedFiles() {
-			List result= new ArrayList();
+			Set result= new HashSet();
 			result.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
 			result.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
 			if (getDestinationAsPackageFragment() != null)
