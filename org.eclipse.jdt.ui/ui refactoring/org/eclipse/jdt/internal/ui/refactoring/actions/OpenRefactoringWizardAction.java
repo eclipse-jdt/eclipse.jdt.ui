@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public abstract class OpenRefactoringWizardAction extends SelectionDispatchAction {
+abstract class OpenRefactoringWizardAction extends SelectionDispatchAction {
 
 	private Class fActivationType;
 	private Refactoring fRefactoring;
