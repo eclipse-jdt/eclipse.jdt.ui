@@ -66,7 +66,11 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 	}
 	
 	public int hashCode() {
-		return getJavaElement().hashCode();
+		IJavaElement javaElement= getJavaElement();
+		if (javaElement == null)
+			return super.hashCode();
+		
+		return javaElement.hashCode();
 	}
 	
 	//---- the factory code ---------------------------------------------------------------
@@ -281,6 +285,8 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 	}
 	
 	public static ResourceMapping create(final IPackageFragmentRoot root) {
+		if (root.isExternal())
+			return null;
 		return new PackageFragementRootResourceMapping(root);
 	}
 	
