@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -37,12 +38,19 @@ public class ASTNodeDeleteUtil {
 	}
 	
 	private static void markAsDeleted(IJavaElement element, CompilationUnit cuNode, ASTRewrite rewrite) throws JavaModelException {
-		ASTNode[] declarationNodes= ASTNodeSearchUtil.getDeclarationNode(element, cuNode);
+		ASTNode[] declarationNodes= getDeclarationNodesToDelete(element, cuNode);
 		for (int i= 0; i < declarationNodes.length; i++) {
 			ASTNode node= declarationNodes[i];
 			if (node != null)
 				rewrite.markAsRemoved(node);
 		}
+	}
+
+	private static ASTNode[] getDeclarationNodesToDelete(IJavaElement element, CompilationUnit cuNode) throws JavaModelException {
+		//fields are different because you don't delete the whole declaration but only a fragment of it
+		if (element.getElementType() == IJavaElement.FIELD)
+			return new ASTNode[] {ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) element, cuNode)};
+		return ASTNodeSearchUtil.getDeclarationNodes(element, cuNode);
 	}
 
 	//TODO use this method in pull up and push down
