@@ -246,7 +246,7 @@ public class LinkFolderDialog extends StatusDialog {
 			} else
 				if (locationStatus.isOK()) {
 					// locationStatus takes precedence over missing location warning.
-					return new StatusInfo(IStatus.WARNING, NewWizardMessages.getString("NewFolderDialog.linkTargetNonExistent")); //$NON-NLS-1$ 
+					return new StatusInfo(IStatus.ERROR, NewWizardMessages.getString("NewFolderDialog.linkTargetNonExistent")); //$NON-NLS-1$ 
 				}
 			if (locationStatus.isOK()) {
 				return new StatusInfo();
