@@ -10,28 +10,25 @@
 package org.eclipse.jdt.ui.tests.search;
 
 import java.util.List;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
-import org.eclipse.swt.events.TreeListener;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Item;
-import org.eclipse.swt.widgets.Widget;
-
-import org.eclipse.jface.viewers.AbstractTreeViewer;
-
-import org.eclipse.search.ui.text.Match;
-
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-
 import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
+import org.eclipse.jdt.internal.ui.search.JavaSearchResultPage;
 import org.eclipse.jdt.internal.ui.search.LevelTreeContentProvider;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
+import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
+import org.eclipse.search.ui.text.Match;
+import org.eclipse.swt.events.TreeListener;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Item;
+import org.eclipse.swt.widgets.Widget;
 
 /**
  */
@@ -48,6 +45,7 @@ public class TreeContentProviderTest extends TestCase {
 	}
 
 	static class MockTreeViewer extends AbstractTreeViewer {
+
 		protected void addTreeListener(Control control, TreeListener listener) {
 			// ignore
 		}
@@ -117,7 +115,16 @@ public class TreeContentProviderTest extends TestCase {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		fProvider= new LevelTreeContentProvider(new MockTreeViewer(), LevelTreeContentProvider.LEVEL_PACKAGE);
+		fProvider= new LevelTreeContentProvider(new JavaSearchResultPage() {
+			StructuredViewer fViewer= new MockTreeViewer();
+			protected StructuredViewer getViewer() {
+				return fViewer;
+			}
+			
+			public AbstractTextSearchResult getInput() {
+				return fResult;
+			}
+		}, LevelTreeContentProvider.LEVEL_PACKAGE);
 		fResult= new JavaSearchResult(null);
 		fProvider.inputChanged(null, null, fResult);
 	}

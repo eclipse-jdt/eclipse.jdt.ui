@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -146,7 +147,9 @@ public class JavaSearchQuery implements ISearchQuery {
 			return e.getStatus();
 		}
 		// TODO fix status message
-		return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "Found "+textResult.getMatchCount()+" matches.", null);
+		String message= SearchMessages.getString("JavaSearchQuery.status.ok.message"); //$NON-NLS-1$
+		MessageFormat.format(message, new Object[] { new Integer(textResult.getMatchCount()) });
+		return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, message, null);
 	}
 
 	public String getLabel() {
@@ -253,5 +256,9 @@ public class JavaSearchQuery implements ISearchQuery {
 		if (fResult == null)
 			fResult= new JavaSearchResult(this);
 		return fResult;
+	}
+	
+	QuerySpecification getSpecification() {
+		return fPatternData;
 	}
 }

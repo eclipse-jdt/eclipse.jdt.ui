@@ -13,33 +13,24 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.widgets.Control;
-
-import org.eclipse.jface.viewers.AbstractTreeViewer;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
-
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 
-/**
- * @author Thomas Mäder
- *  
- */
 public class LevelTreeContentProvider extends JavaSearchContentProvider implements ITreeContentProvider {
-	private AbstractTreeViewer fTreeViewer;
 	private Map fChildrenMap;
 	private StandardJavaElementContentProvider fContentProvider;
+	
 	public static final int LEVEL_TYPE= 1;
 	public static final int LEVEL_FILE= 2;
 	public static final int LEVEL_PACKAGE= 3;
 	public static final int LEVEL_PROJECT= 4;
+	
 	private static int[][] JAVA_ELEMENT_TYPES= {{IJavaElement.TYPE},
 			{IJavaElement.CLASS_FILE, IJavaElement.COMPILATION_UNIT},
 			{IJavaElement.PACKAGE_FRAGMENT},
@@ -51,6 +42,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 			{IResource.FOLDER}, 
 			{IResource.PROJECT}, 
 			{IResource.ROOT}};
+	
 	private static final int MAX_LEVEL= JAVA_ELEMENT_TYPES.length - 1;
 	private int fCurrentLevel;
 	static class FastJavaElementProvider extends StandardJavaElementContentProvider {
@@ -59,8 +51,8 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		}
 	}
 
-	public LevelTreeContentProvider(AbstractTreeViewer viewer, int level) {
-		fTreeViewer= viewer;
+	public LevelTreeContentProvider(JavaSearchResultPage page, int level) {
+		super(page);
 		fCurrentLevel= level;
 		fContentProvider= new FastJavaElementProvider();
 	}
@@ -109,20 +101,23 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		if (result != null) {
 			Object[] elements= result.getElements();
 			for (int i= 0; i < elements.length; i++) {
-				insert(elements[i], false);
+				if (getPage().getDisplayedMatchCount(elements[i]) > 0) {
+					insert(elements[i], false);
+				}
 			}
 		}
 	}
 
 	protected void insert(Object child, boolean refreshViewer) {
 		Object parent= getParent(child);
+		AbstractTreeViewer viewer= (AbstractTreeViewer) getPage().getViewer();
 		while (parent != null) {
 			if (insertChild(parent, child)) {
 				if (refreshViewer)
-					fTreeViewer.add(parent, child);
+					viewer.add(parent, child);
 			} else {
 				if (refreshViewer)
-					fTreeViewer.refresh(parent);
+					viewer.refresh(parent);
 				return;
 			}
 			child= parent;
@@ -130,7 +125,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		}
 		if (insertChild(fResult, child)) {
 			if (refreshViewer)
-				fTreeViewer.add(fResult, child);
+				viewer.add(fResult, child);
 		}
 	}
 
@@ -153,11 +148,12 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 	protected void remove(Object element, boolean refreshViewer) {
 		// precondition here:  fResult.getMatchCount(child) <= 0
 	
+		AbstractTreeViewer viewer= (AbstractTreeViewer) getPage().getViewer();
 		if (hasChildren(element)) {
 			if (refreshViewer)
-				fTreeViewer.refresh(element);
+				viewer.refresh(element);
 		} else {
-			if (fResult.getMatchCount(element) == 0) {
+			if (getPage().getDisplayedMatchCount(element) == 0) {
 				fChildrenMap.remove(element);
 				Object parent= getParent(element);
 				if (parent != null) {
@@ -166,11 +162,11 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 				} else {
 					removeFromSiblings(element, fResult);
 					if (refreshViewer)
-						fTreeViewer.refresh();
+						viewer.refresh();
 				}
 			} else {
 				if (refreshViewer) {
-					fTreeViewer.refresh(element);
+					viewer.refresh(element);
 				}
 			}
 		}
@@ -198,7 +194,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		if (fResult == null)
 			return;
 		for (int i= 0; i < updatedElements.length; i++) {
-			if (fResult.getMatchCount(updatedElements[i]) > 0)
+			if (getPage().getDisplayedMatchCount(updatedElements[i]) > 0)
 				insert(updatedElements[i], true);
 			else
 				remove(updatedElements[i], true);
@@ -207,17 +203,18 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 
 	public void clear() {
 		initialize(fResult);
-		fTreeViewer.refresh();
+		getPage().getViewer().refresh();
 	}
 
 	public void setLevel(int level) {
 		fCurrentLevel= level;
-		Control control= fTreeViewer.getControl();
-		if (control != null)
-			control.setRedraw(false);
 		initialize(fResult);
-		fTreeViewer.refresh();
-		if (control != null)
-			control.setRedraw(true);
+		getPage().getViewer().refresh();
+	}
+
+	public void filtersChanged(MatchFilter[] filters) {
+		super.filtersChanged(filters);
+		initialize(fResult);
+		getPage().getViewer().refresh();
 	}
 }

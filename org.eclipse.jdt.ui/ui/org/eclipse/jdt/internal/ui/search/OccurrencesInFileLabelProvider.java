@@ -13,10 +13,8 @@ package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.swt.graphics.Image;
 
 /**
  * Label provider for the <code>FindOccurrencesInFile</code> results.

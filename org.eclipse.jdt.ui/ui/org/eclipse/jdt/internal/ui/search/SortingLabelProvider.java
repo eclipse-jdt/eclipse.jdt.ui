@@ -43,7 +43,7 @@ public class SortingLabelProvider extends SearchLabelProvider implements IColorP
 	}
 		
 	public final String getText(Object element) {
-		int matchCount= fPage.getInput().getMatchCount(element);
+		int matchCount= fPage.getDisplayedMatchCount(element);
 		String text= internalGetText(element);
 		if (matchCount < 2) {
 			String label= getSingularLabel(element);

@@ -14,7 +14,6 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
-
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 
 /**

@@ -10,15 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.jface.util.Assert;
-
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.actions.ActionGroup;
-
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.NavigateActionGroup;
-
-import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.actions.ActionGroup;
 
 class NewSearchViewActionGroup extends CompositeActionGroup {
 

@@ -11,17 +11,12 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.List;
-
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-
 import org.eclipse.jface.text.IDocument;
-
 import org.eclipse.search.ui.IGroupByKeyComputer;
 import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.text.Match;

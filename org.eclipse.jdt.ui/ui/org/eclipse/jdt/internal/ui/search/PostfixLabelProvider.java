@@ -48,7 +48,7 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 			lastElement= realParent;
 			realParent= fContentProvider.getParent(realParent);
 		}
-		int matchCount= fPage.getInput().getMatchCount(element);
+		int matchCount= fPage.getDisplayedMatchCount(element);
 		String text=internalGetText(element);
 		if (matchCount < 2) {
 			String label= getSingularLabel(element);

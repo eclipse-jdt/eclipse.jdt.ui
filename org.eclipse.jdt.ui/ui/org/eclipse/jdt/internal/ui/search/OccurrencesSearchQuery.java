@@ -14,11 +14,8 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-
 import org.eclipse.jdt.core.IJavaElement;
-
 import org.eclipse.jface.text.IDocument;
-
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.Match;

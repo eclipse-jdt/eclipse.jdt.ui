@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.search;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
-
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;

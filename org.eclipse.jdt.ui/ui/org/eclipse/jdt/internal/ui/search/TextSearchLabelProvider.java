@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.jface.viewers.LabelProvider;
-
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 
 public abstract class TextSearchLabelProvider extends LabelProvider {

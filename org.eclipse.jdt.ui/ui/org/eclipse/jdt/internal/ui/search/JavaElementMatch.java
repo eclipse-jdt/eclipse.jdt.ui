@@ -17,13 +17,31 @@ import org.eclipse.search.ui.text.Match;
  */
 public class JavaElementMatch extends Match {
 	private int fAccuracy;
+	private boolean fIsWriteAccess;
+	private boolean fIsReadAccess;
+	private boolean fIsJavadoc;
 	
-	JavaElementMatch(Object element, int offset, int length, int accuracy) {
+	JavaElementMatch(Object element, int offset, int length, int accuracy, boolean isReadAccess, boolean isWriteAccess, boolean isJavadoc) {
 		super(element, offset, length);
 		fAccuracy= accuracy;
+		fIsWriteAccess= isWriteAccess;
+		fIsReadAccess= isReadAccess;
+		fIsJavadoc= isJavadoc;
 	}
 
 	public int getAccuracy() {
 		return fAccuracy;
+	}
+
+	public boolean isWriteAccess() {
+		return fIsWriteAccess;
+	}
+
+	public boolean isReadAccess() {
+		return fIsReadAccess;
+	}
+
+	public boolean isJavadoc() {
+		return fIsJavadoc;
 	}
 }

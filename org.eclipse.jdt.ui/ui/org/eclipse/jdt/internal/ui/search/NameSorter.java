@@ -11,11 +11,9 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.core.resources.IResource;
-
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
-
-import org.eclipse.jdt.core.IJavaElement;
 
 public class NameSorter extends ViewerSorter {
 	public int compare(Viewer viewer, Object e1, Object e2) {

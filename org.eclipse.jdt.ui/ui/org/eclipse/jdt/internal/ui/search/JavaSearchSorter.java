@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.search;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;

@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.search;
 
 import java.text.Collator;
 import java.util.Comparator;
-
 import org.eclipse.ui.IWorkingSet;
 
 class WorkingSetsComparator implements Comparator {

@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.search.FieldReferenceMatch;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchRequestor;
@@ -35,7 +36,14 @@ public class NewSearchResultCollector extends SearchRequestor {
 				return;
 			if (fIgnorePotentials && (match.getAccuracy() == SearchMatch.A_INACCURATE))
 				return;
-			fSearch.addMatch(new JavaElementMatch(enclosingElement, match.getOffset(), match.getLength(), match.getAccuracy()));
+			boolean isWriteAccess= false;
+			boolean isReadAccess= false;
+			if (match instanceof FieldReferenceMatch) {
+				FieldReferenceMatch fieldRef= ((FieldReferenceMatch)match);
+				isWriteAccess= fieldRef.isWriteAccess();
+				isReadAccess= fieldRef.isReadAccess();
+			}
+			fSearch.addMatch(new JavaElementMatch(enclosingElement, match.getOffset(), match.getLength(), match.getAccuracy(), isWriteAccess, isWriteAccess, match.isInsideDocComment()));
 		}
 	}
 

@@ -12,12 +12,9 @@ package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.search.ui.IGroupByKeyComputer;
-
 import org.eclipse.jdt.core.IJavaElement;
-
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.search.ui.IGroupByKeyComputer;
 
 public class GroupByKeyComputer implements IGroupByKeyComputer {
 

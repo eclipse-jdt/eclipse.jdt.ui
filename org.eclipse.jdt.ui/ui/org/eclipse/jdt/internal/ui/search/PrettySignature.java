@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class PrettySignature {
