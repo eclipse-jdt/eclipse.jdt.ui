@@ -525,10 +525,15 @@ public class CodeTemplateBlock {
 				fTemplateStore.setProjectSpecific(templateData[i].getId(), enabled);
 			}
 			node= new ProjectScope(fProject).getNode(JavaUI.ID_PLUGIN);
+			if (enabled) {
+				node.putBoolean(PREF_JAVADOC_STUBS, fCreateJavaDocComments.isSelected());
+			} else {
+				node.remove(PREF_JAVADOC_STUBS);
+			}
 		} else {
 			node= new InstanceScope().getNode(JavaUI.ID_PLUGIN);
+			node.putBoolean(PREF_JAVADOC_STUBS, fCreateJavaDocComments.isSelected());
 		}
-		node.putBoolean(PREF_JAVADOC_STUBS, fCreateJavaDocComments.isSelected());
 
 		try {
 			fTemplateStore.save();
