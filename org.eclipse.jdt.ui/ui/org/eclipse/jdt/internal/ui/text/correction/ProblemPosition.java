@@ -47,5 +47,9 @@ public class ProblemPosition extends Position {
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
+	
+	public IProblemAnnotation getAnnotation() {
+		return fAnnotation;
+	}
 
 }

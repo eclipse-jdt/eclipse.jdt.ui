@@ -6,6 +6,8 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jface.text.Position;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -22,13 +24,16 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -43,17 +48,57 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 public class UnresolvedElementsSubProcessor {
 	
 	
+	private static SimpleName getVariableNode(ASTNode selectedNode) {
+		if (selectedNode instanceof SimpleName) {
+			return (SimpleName) selectedNode;
+		} else if (selectedNode instanceof QualifiedName) {
+			QualifiedName qualifierName= (QualifiedName) selectedNode;
+			Name qualifier= qualifierName.getQualifier();
+			if (qualifier instanceof SimpleName) {
+				SimpleName simpleQualifier= (SimpleName) qualifier;
+
+			}
+		} else if (selectedNode instanceof FieldAccess) {
+			FieldAccess access= (FieldAccess) selectedNode;
+			Expression expression= access.getExpression();
+			if (expression == null || expression instanceof ThisExpression) {
+				return access.getName();
+			}
+		}		
+		return null;		
+	}
+	
+	
+	
 	public static void getVariableProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		
 		ICompilationUnit cu= problemPos.getCompilationUnit();
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
-		
-		if (!(selectedNode instanceof SimpleName)) {
+
+		SimpleName node= null;
+		if (selectedNode instanceof SimpleName) {
+			node= (SimpleName) selectedNode;
+		} else if (selectedNode instanceof QualifiedName) {
+			QualifiedName qualifierName= (QualifiedName) selectedNode;
+			Name qualifier= qualifierName.getQualifier();
+			if (qualifier instanceof SimpleName) {
+				SimpleName simpleQualifier= (SimpleName) qualifier;
+				Position pos= new Position(simpleQualifier.getStartPosition(), simpleQualifier.getLength());
+				ProblemPosition updatedProb= new ProblemPosition(pos, problemPos.getAnnotation(), problemPos.getCompilationUnit());
+				getTypeProposals(updatedProb, SimilarElementsRequestor.REF_TYPES, proposals);
+			}
+		} else if (selectedNode instanceof FieldAccess) {
+			FieldAccess access= (FieldAccess) selectedNode;
+			Expression expression= access.getExpression();
+			if (expression == null || expression instanceof ThisExpression) {
+				node= access.getName();
+			}
+		}				
+		if (node == null) {
 			return;
 		}
-		SimpleName node= (SimpleName) selectedNode;
 
 
 		// corrections
@@ -61,11 +106,11 @@ public class UnresolvedElementsSubProcessor {
 		for (int i= 0; i < elements.length; i++) {
 			SimilarElement curr= elements[i];
 			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", curr.getName()); //$NON-NLS-1$
-			proposals.add(new ReplaceCorrectionProposal(label, problemPos, curr.getName(), 3));
+			proposals.add(new ReplaceCorrectionProposal(label, problemPos.getCompilationUnit(), node.getStartPosition(), node.getLength(), curr.getName(), 3));
 		}
 		
 		// new field
-		IJavaElement elem= cu.getElementAt(problemPos.getOffset());
+		IJavaElement elem= cu.getElementAt(node.getStartPosition());
 		if (elem instanceof IMember) {
 			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", node.getIdentifier()); //$NON-NLS-1$
 			proposals.add(new NewVariableCompletionProposal(label, NewVariableCompletionProposal.FIELD, node, (IMember) elem, 2));
