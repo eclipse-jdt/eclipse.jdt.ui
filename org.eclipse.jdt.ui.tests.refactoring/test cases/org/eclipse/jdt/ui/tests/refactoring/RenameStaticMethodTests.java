@@ -37,11 +37,15 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	}
 
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
-		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(classA.getMethod(methodName, signatures));
-		ref.setNewName(newMethodName);
-		RefactoringStatus result= performRefactoring(ref);
-		assertNotNull("precondition was supposed to fail", result);
+			IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
+		try{
+			RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(classA.getMethod(methodName, signatures));
+			ref.setNewName(newMethodName);
+			RefactoringStatus result= performRefactoring(ref);
+			assertNotNull("precondition was supposed to fail", result);
+		} finally{
+			classA.getCompilationUnit().delete(true, null);
+		}	
 	}
 	
 	private void helper1() throws Exception{
@@ -50,26 +54,30 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
-		IType classA= getType(cu, "A");
-		RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(classA.getMethod(methodName, signatures));
-		ref.setUpdateReferences(updateReferences);
-		ref.setNewName(newMethodName);
-		assertEquals("was supposed to pass", null, performRefactoring(ref));
-		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
-		
-		assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
-		assertTrue("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
-		//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
-		
-		Refactoring.getUndoManager().performUndo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
-		assertEquals("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
-
-		assertTrue("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
-		assertTrue("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
-		//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
-		
-		Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
-		assertEquals("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
+		try{
+			IType classA= getType(cu, "A");
+			RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(classA.getMethod(methodName, signatures));
+			ref.setUpdateReferences(updateReferences);
+			ref.setNewName(newMethodName);
+			assertEquals("was supposed to pass", null, performRefactoring(ref));
+			assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
+			
+			assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
+			assertTrue("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
+			//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
+			
+			Refactoring.getUndoManager().performUndo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
+			assertEquals("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
+	
+			assertTrue("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
+			assertTrue("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
+			//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
+			
+			Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
+			assertEquals("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
+		} finally{
+			cu.delete(true, null);
+		}
 	}
 	private void helper2_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		helper2_0(methodName, newMethodName, signatures, true);
