@@ -412,7 +412,7 @@ public class Bindings {
 	/**
 	 * Returns all super types (classes and interfaces) for the given type.
 	 * @param type The type to get the supertypes of.
-	 * @return Returns all suepr types.
+	 * @return all super types (excluding <code>type</code>)
 	 */
 	public static ITypeBinding[] getAllSuperTypes(ITypeBinding type) {
 		Set result= new HashSet();

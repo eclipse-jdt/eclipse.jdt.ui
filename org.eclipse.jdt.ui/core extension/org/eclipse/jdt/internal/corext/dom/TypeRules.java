@@ -93,7 +93,7 @@ public class TypeRules {
 	}
 	
 	/**
-	 * Tests if a two types are assign compatible. Void types are vener compatible.
+	 * Tests if two types are assign compatible. Void types are never compatible.
 	 * @param typeToAssign The binding of the type to assign
 	 * @param definedType The type of the object that is assigned
 	 * @return boolean Returns true if definedType = typeToAssign is true
