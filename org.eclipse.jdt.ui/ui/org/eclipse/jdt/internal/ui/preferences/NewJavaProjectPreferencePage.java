@@ -69,7 +69,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
  */
 public class NewJavaProjectPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String ID= "org.eclipse.jdt.ui.preferences.NewJavaProjectPreferencePage"; //$NON-NLS-1$
+	public static final String ID= "org.eclipse.jdt.ui.preferences.BuildPathPreferencePage"; //$NON-NLS-1$
 	
 	private static final String SRCBIN_FOLDERS_IN_NEWPROJ= PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ;
 	private static final String SRCBIN_SRCNAME= PreferenceConstants.SRCBIN_SRCNAME;
