@@ -13,12 +13,41 @@ package org.eclipse.test.performance;
 
 import org.eclipse.jdt.text.tests.performance.data.MeteringSession;
 
+/**
+ * A <code>PerformanceMeter</code> is used to measure an arbitrary operation
+ * multiple times. Typical measurements include time, CPU cycle and/or memory
+ * consumption.
+ * 
+ * Example usage in a test case:
+ * <pre>
+ * public void testOpenEditor() {
+ * 	PerformanceMeter performanceMeter= Performance.getDefault().createPerformanceMeter(this);
+ * 	for (int i= 0; i < 10; i++) {
+ * 		performanceMeter.start();
+ * 		openEditor();
+ * 		performanceMeter.stop();
+ * 		closeEditor();
+ * 	}
+ * 	performanceMeter.commit();
+ * 	Performance.getDefault().assertPerformance(performanceMeter);
+ * }
+ * </pre>
+ */
 public abstract class PerformanceMeter {
 
+	/**
+	 * Called immediately before the operation to measure.
+	 */
 	public abstract void start();
 
+	/**
+	 * Called immediately after the operation to measure.
+	 */
 	public abstract void stop();
 
+	/**
+	 * Called after repeated measurement is done.
+	 */
 	public abstract void commit();
 
 	public abstract MeteringSession getSessionData();
