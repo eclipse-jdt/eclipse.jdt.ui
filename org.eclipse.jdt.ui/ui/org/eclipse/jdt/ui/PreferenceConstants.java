@@ -1023,6 +1023,15 @@ public class PreferenceConstants {
 	public final static String EDITOR_SMART_PASTE= "smartPaste"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether 'paste' should update the imports
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 3.0
+	 */
+	public final static String EDITOR_IMPORTS_ON_PASTE= "importsOnPaste"; //$NON-NLS-1$
+	
+	/**
 	 * A named preference that controls whether the 'smart home-end' feature is
 	 * enabled.
 	 * <p>
@@ -2577,6 +2586,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_SMART_HOME_END, true);
 		store.setDefault(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, true);
 		store.setDefault(PreferenceConstants.EDITOR_SMART_PASTE, true);
+		store.setDefault(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE, true);
 		store.setDefault(PreferenceConstants.EDITOR_CLOSE_STRINGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
 		store.setDefault(PreferenceConstants.EDITOR_CLOSE_BRACES, true);

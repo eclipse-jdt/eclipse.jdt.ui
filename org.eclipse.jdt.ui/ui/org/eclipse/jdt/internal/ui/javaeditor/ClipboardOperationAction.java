@@ -54,6 +54,8 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
@@ -236,10 +238,14 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	
 	
 	protected final void internalDoOperation() {
-		if (fOperationCode == ITextOperationTarget.PASTE) {
-			doPasteOperation();
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE)) {
+			if (fOperationCode == ITextOperationTarget.PASTE) {
+				doPasteWithImportsOperation();
+			} else {
+				doCutCopyWithImportsOperation();
+			}
 		} else {
-			doCutCopyOperation();
+			fOperationTarget.doOperation(fOperationCode);
 		}
 	}
 	
@@ -271,7 +277,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	}
 	
 	
-	private void doCutCopyOperation() {
+	private void doCutCopyWithImportsOperation() {
 		ITextEditor editor= getTextEditor();
 		IJavaElement inputElement= (IJavaElement) editor.getEditorInput().getAdapter(IJavaElement.class);
 		ISelection selection= editor.getSelectionProvider().getSelection();
@@ -279,7 +285,9 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		Object clipboardData= null;
 		if (inputElement != null && selection instanceof ITextSelection && !selection.isEmpty()) {
 			ITextSelection textSelection= (ITextSelection) selection;
-			clipboardData= getClipboardData(inputElement, textSelection.getOffset(), textSelection.getLength());
+			if (isNonTrivialSelection(textSelection)) {
+				clipboardData= getClipboardData(inputElement, textSelection.getOffset(), textSelection.getLength());
+			}
 		}
 		
 		fOperationTarget.doOperation(fOperationCode);
@@ -293,6 +301,20 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			clipboard.setContents(data, dataTypes);
 		}
 	}
+	
+	private boolean isNonTrivialSelection(ITextSelection selection) {
+		if (selection.getLength() < 30) {
+			String text= selection.getText();
+			for (int i= 0; i < text.length(); i++) {
+				if (!Character.isJavaIdentifierPart(text.charAt(i))) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return true;
+	}
+	
 		
 	private ClipboardData getClipboardData(IJavaElement inputElement, int offset, int length) {
 		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(inputElement, true, null);
@@ -341,7 +363,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	}
 
 
-	private void doPasteOperation() {
+	private void doPasteWithImportsOperation() {
 		ITextEditor editor= getTextEditor();
 		IJavaElement inputElement= (IJavaElement) editor.getEditorInput().getAdapter(IJavaElement.class);
 
