@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.junit.launcher;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -88,13 +89,12 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		VMRunnerConfiguration runConfig= createVMRunner(configuration, tests, port, mode);
 		runConfig.setVMArguments(execArgs.getVMArgumentsArray());
 		runConfig.setWorkingDirectory(workingDirName);
-		
+
+		Map vmAttributesMap = getVMSpecificAttributesMap(configuration);
+		runConfig.setVMSpecificAttributesMap(vmAttributesMap);
+
 		String[] bootpath = getBootpath(configuration);
 		runConfig.setBootClassPath(bootpath);
-		String[][] bootpathInfo = getBootpathExt(configuration);
-		runConfig.setPrependBootClassPath(bootpathInfo[0]);
-		runConfig.setMainBootClassPath(bootpathInfo[1]);
-		runConfig.setAppendBootClassPath(bootpathInfo[2]);
 		
 		return runConfig;
 	}
