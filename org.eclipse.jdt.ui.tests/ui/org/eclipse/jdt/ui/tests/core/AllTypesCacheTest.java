@@ -76,8 +76,7 @@ public class AllTypesCacheTest extends TestCase {
 
 
 	protected void setUp() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		assertNotNull("jre is null", JavaProjectHelper.addRTJar(fJProject1));
+		fJProject1= ProjectTestSetup.getProject();
 		
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 		assertTrue("lib does not exist",  lib != null && lib.exists());
@@ -96,7 +95,7 @@ public class AllTypesCacheTest extends TestCase {
 	}
 
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fJProject1);
+		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 		JavaProjectHelper.delete(fJProject2);		
 		
 	}

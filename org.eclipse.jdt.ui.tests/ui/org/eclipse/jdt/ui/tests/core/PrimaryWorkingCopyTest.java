@@ -17,6 +17,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.text.IDocument;
@@ -313,7 +314,9 @@ public class PrimaryWorkingCopyTest extends CoreTests {
 			
 			ICompilationUnit wcopy= (ICompilationUnit) cu1.getWorkingCopy(); // create sand box working copy
 			try {
-				assertEqualString(wcopy.getSource(), expected);			
+				assertEqualString(wcopy.getSource(), expected);
+				IResource resource= wcopy.getResource();
+				assertNotNull(resource);
 				// no save
 			} finally {
 				wcopy.destroy();

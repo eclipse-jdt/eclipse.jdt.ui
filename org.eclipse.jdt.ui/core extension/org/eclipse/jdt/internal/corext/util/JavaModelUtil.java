@@ -14,39 +14,21 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IImportContainer;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageDeclaration;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.compiler.CharOperation;
 
-import org.eclipse.jdt.internal.core.BufferFactoryWrapper;
+import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.core.BufferFactoryWrapper;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-
-import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * Utility methods for the Java Model.
@@ -557,12 +539,17 @@ public class JavaModelUtil {
 	 * an original the input is returned. The returned member might not exist
 	 */
 	public static IMember toOriginal(IMember member) {
+		if (PRIMARY_ONLY) {
+			testCompilationUnitOwner("toOriginal", member.getCompilationUnit()); //$NON-NLS-1$
+		}
 		if (member instanceof IMethod)
 			return toOriginalMethod((IMethod)member);
-		ICompilationUnit cu= member.getCompilationUnit();
+		
+		return (IMember) member.getPrimaryElement();
+		/*ICompilationUnit cu= member.getCompilationUnit();
 		if (cu != null && cu.isWorkingCopy())
 			return (IMember)cu.getOriginal(member);
-		return member;
+		return member;*/
 	}
 	
 	/*
@@ -572,14 +559,11 @@ public class JavaModelUtil {
 	 */
 	private static IMethod toOriginalMethod(IMethod method) {
 		try{
-			ICompilationUnit cu= method.getCompilationUnit();
-			if (cu == null || ! cu.isWorkingCopy())
-				return method;
 			//use the workaround only if needed	
 			if (! method.getElementName().equals(method.getDeclaringType().getElementName()))
-				return (IMethod)cu.getOriginal(method);
+				return (IMethod) method.getPrimaryElement();
 			
-			IType originalType = (IType)toOriginal(method.getDeclaringType());
+			IType originalType = (IType) toOriginal(method.getDeclaringType());
 			IMethod[] methods = originalType.findMethods(method);
 			boolean isConstructor = method.isConstructor();
 			for (int i=0; i < methods.length; i++) {
@@ -587,24 +571,31 @@ public class JavaModelUtil {
 				return methods[i];
 			}
 			return null;
-		} catch(JavaModelException e){
+		} catch (JavaModelException e){
 			return null;
 		}	
 	}
+	
+	private static boolean PRIMARY_ONLY= true;
 
 	/**
-	 * Returns the original cu if the given cu. If the cu is already
+	 * Returns the original cu if the given cu is a working copy. If the cu is already
 	 * an original the input cu is returned. The returned cu might not exist
 	 */
 	public static ICompilationUnit toOriginal(ICompilationUnit cu) {
-		if (false) {
+		if (PRIMARY_ONLY) {
 			testCompilationUnitOwner("toOriginal", cu); //$NON-NLS-1$
 		}
-		
-		if (cu != null && cu.isWorkingCopy())
-			return (ICompilationUnit) cu.getOriginal(cu);
-		return cu;
+		return cu.getPrimary();
 	}
+	
+	/**
+	 * Returns the original element if the given element is a working copy. If the cu is already
+	 * an original the input element is returned. The returned element might not exist
+	 */
+	public static IJavaElement toOriginal(IJavaElement element) {
+		return element.getPrimaryElement();
+	}	
 		
 	private static void testCompilationUnitOwner(String methodName, ICompilationUnit cu) {
 		if (cu == null) {
@@ -623,6 +614,10 @@ public class JavaModelUtil {
 	public static IMember toWorkingCopy(IMember member) {
 		ICompilationUnit cu= member.getCompilationUnit();
 		if (cu != null && !cu.isWorkingCopy()) {
+			if (PRIMARY_ONLY) {
+				testCompilationUnitOwner("toWorkingCopy(IMember)", cu); //$NON-NLS-1$
+			}
+			
 			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
 			if (workingCopy != null) {
 				IJavaElement[] members= workingCopy.findElements(member);
@@ -641,6 +636,10 @@ public class JavaModelUtil {
 	public static IPackageDeclaration toWorkingCopy(IPackageDeclaration declaration) {
 		ICompilationUnit cu= (ICompilationUnit)declaration.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (cu != null && !cu.isWorkingCopy()) {
+			if (PRIMARY_ONLY) {
+				testCompilationUnitOwner("toWorkingCopy(IPackageDeclaration)", cu); //$NON-NLS-1$
+			}	
+			
 			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
 			if (workingCopy != null) {
 				IJavaElement[] elements= workingCopy.findElements(declaration);
@@ -651,6 +650,26 @@ public class JavaModelUtil {
 		}
 		return declaration;
 	}
+	
+	public static IJavaElement toWorkingCopy(IJavaElement elem) {
+		switch (elem.getElementType()) {
+			case IJavaElement.COMPILATION_UNIT:
+				return toWorkingCopy((ICompilationUnit) elem);
+			case IJavaElement.IMPORT_CONTAINER:
+				return toWorkingCopy((IImportContainer) elem);
+			case IJavaElement.IMPORT_DECLARATION:
+				return toWorkingCopy((IImportDeclaration) elem);
+			case IJavaElement.PACKAGE_DECLARATION:
+				return toWorkingCopy((IPackageDeclaration) elem);
+			case IJavaElement.METHOD:
+			case IJavaElement.FIELD:
+			case IJavaElement.TYPE:
+			case IJavaElement.INITIALIZER:
+				return toWorkingCopy((IMember) elem);
+			default:
+				return elem;
+		}
+	}	
 
 	/**
 	 * Returns the working copy of the given import container. If the import container is already in a
@@ -659,6 +678,9 @@ public class JavaModelUtil {
 	public static IImportContainer toWorkingCopy(IImportContainer container) {
 		ICompilationUnit cu= (ICompilationUnit)container.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (cu != null && !cu.isWorkingCopy()) {
+			if (PRIMARY_ONLY) {
+				testCompilationUnitOwner("toWorkingCopy(IImportContainer)", cu); //$NON-NLS-1$
+			}	
 			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
 			if (workingCopy != null) {
 				IJavaElement[] elements= workingCopy.findElements(container);
@@ -677,6 +699,9 @@ public class JavaModelUtil {
 	public static IImportDeclaration toWorkingCopy(IImportDeclaration importDeclaration) {
 		ICompilationUnit cu= (ICompilationUnit)importDeclaration.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (cu != null && !cu.isWorkingCopy()) {
+			if (PRIMARY_ONLY) {
+				testCompilationUnitOwner("toWorkingCopy(IImportDeclaration)", cu); //$NON-NLS-1$
+			}	
 			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
 			if (workingCopy != null) {
 				IJavaElement[] elements= workingCopy.findElements(importDeclaration);
@@ -694,8 +719,9 @@ public class JavaModelUtil {
 	 * working copy or the CU has no working copy the input CU is returned.
 	 */	
 	public static ICompilationUnit toWorkingCopy(ICompilationUnit cu) {
-		//testCompilationUnitOwner("toWorkingCopy", cu); //$NON-NLS-1$
-		
+		if (PRIMARY_ONLY) {
+			testCompilationUnitOwner("toWorkingCopy(ICompilationUnit)", cu); //$NON-NLS-1$
+		}		
 		if (!cu.isWorkingCopy()) {
 			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
 			if (workingCopy != null) {

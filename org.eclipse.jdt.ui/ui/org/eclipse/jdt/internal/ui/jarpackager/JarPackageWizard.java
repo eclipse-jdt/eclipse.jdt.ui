@@ -34,13 +34,14 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
@@ -244,7 +245,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		else if (je.getElementType() == IJavaElement.JAVA_PROJECT)
 			selectedElements.add(je);
 		else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-			if (!((IPackageFragmentRoot)((IPackageFragment)je).getParent()).isArchive())
+			if (!JavaModelUtil.getPackageFragmentRoot(je).isArchive())
 				selectedElements.add(je);
 		}
 		else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
@@ -252,17 +253,11 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 					selectedElements.add(je);
 		}
 		else {
-			IJavaElement cuOrCf= JarPackagerUtil.findParentOfKind(je, IJavaElement.COMPILATION_UNIT);
-			if (cuOrCf instanceof ICompilationUnit) {
-				ICompilationUnit cu= (ICompilationUnit)cuOrCf;
-				if (!cu.isWorkingCopy() || (cu= (ICompilationUnit)cu.getOriginalElement()) != null)
-					selectedElements.add(cu);
-			} else {
-				cuOrCf= JarPackagerUtil.findParentOfKind(je, IJavaElement.CLASS_FILE);
-				if (cuOrCf instanceof IClassFile)
-					selectedElements.add(cuOrCf.getParent());
-			}
-			
+			IOpenable openable= je.getOpenable();
+			if (openable instanceof ICompilationUnit)
+				selectedElements.add(JavaModelUtil.toOriginal((ICompilationUnit) openable));
+			else if (openable instanceof IClassFile && !JavaModelUtil.getPackageFragmentRoot(je).isArchive())
+				selectedElements.add(openable);
 		}
 	}
 

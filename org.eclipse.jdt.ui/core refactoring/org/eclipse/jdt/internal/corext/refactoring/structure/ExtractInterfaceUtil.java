@@ -522,12 +522,15 @@ class ExtractInterfaceUtil {
 		// XXX: This is a layer breaker - should not access jdt.ui
 		IWorkingCopy[] copies= JavaUI.getSharedWorkingCopiesOnClasspath();
 		Set result= new HashSet(copies.length);
-		if (precedingWC1 != null && precedingWC1.isWorkingCopy())
+		ICompilationUnit original1= null, original2= null;
+		if (precedingWC1 != null && precedingWC1.isWorkingCopy()) {
 			result.add(precedingWC1);
-		if (precedingWC2 != null && precedingWC2.isWorkingCopy())
+			original1= precedingWC1.getPrimary();
+		}
+		if (precedingWC2 != null && precedingWC2.isWorkingCopy()) {
 			result.add(precedingWC2);
-		ICompilationUnit original1= WorkingCopyUtil.getOriginal(precedingWC1);
-		ICompilationUnit original2= WorkingCopyUtil.getOriginal(precedingWC2);
+			original2= precedingWC2.getPrimary();
+		}
 		for (int i= 0; i < copies.length; i++) {
 			IWorkingCopy copy= copies[i];
 			if (copy.isWorkingCopy() && copy instanceof ICompilationUnit){

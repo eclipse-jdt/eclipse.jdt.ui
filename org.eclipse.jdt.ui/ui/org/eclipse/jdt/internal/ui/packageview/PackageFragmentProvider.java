@@ -23,12 +23,10 @@ import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
@@ -47,7 +45,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 2.1
  */
-public class PackageFragmentProvider implements  IPropertyChangeListener, ITreeContentProvider, IElementChangedListener{
+public class PackageFragmentProvider implements IPropertyChangeListener {
 
 	private TreeViewer fViewer;
 	private boolean fFoldPackages;

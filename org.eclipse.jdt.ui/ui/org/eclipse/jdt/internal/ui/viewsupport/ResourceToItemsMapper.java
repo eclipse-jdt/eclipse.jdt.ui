@@ -173,7 +173,7 @@ public class ResourceToItemsMapper {
 					ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
 					if (cu != null && cu.isWorkingCopy()) {
 						// elements in working copies are mapped to the underlying resource of the original cu
-						res= cu.getOriginalElement().getResource();
+						res= cu.getResource();
 					}
 				}
 				return res; 

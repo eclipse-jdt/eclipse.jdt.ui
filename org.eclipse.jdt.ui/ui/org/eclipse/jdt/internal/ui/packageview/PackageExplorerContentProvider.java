@@ -30,20 +30,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IWorkingCopy;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.*;
 
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
@@ -259,19 +246,21 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	 * tree is fully refreshed starting at this node. The delta is processed in the
 	 * current thread but the viewer updates are posted to the UI thread.
 	 */
-	public void processDelta(IJavaElementDelta delta) throws JavaModelException {
+	private void processDelta(IJavaElementDelta delta) throws JavaModelException {
 
 		int kind= delta.getKind();
 		int flags= delta.getFlags();
 		IJavaElement element= delta.getElement();
+		int elementType= element.getElementType();
 		
-		if(element.getElementType()!= IJavaElement.JAVA_MODEL && element.getElementType()!= IJavaElement.JAVA_PROJECT){
+		
+		if (elementType != IJavaElement.JAVA_MODEL && elementType != IJavaElement.JAVA_PROJECT) {
 			IJavaProject proj= element.getJavaProject();
-			if (proj == null || !proj.getProject().isOpen())
+			if (proj == null || !proj.getProject().isOpen()) // TODO: Not needed if parent already did the 'open' check!
 				return;	
 		}
 		
-		if (!fIsFlatLayout && element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+		if (!fIsFlatLayout && elementType == IJavaElement.PACKAGE_FRAGMENT) {
 			fPackageFragmentProvider.processDelta(delta);
 			if (processResourceDeltas(delta.getResourceDeltas(), element))
 			    return;
@@ -279,27 +268,43 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			processAffectedChildren(affectedChildren);
 			return;
 		}
+		
+		if (elementType == IJavaElement.COMPILATION_UNIT) {
+			ICompilationUnit cu= (ICompilationUnit) element;
+			if (!JavaModelUtil.isPrimary(cu)) {
+				return;
+			}
+						
+			if (!getProvideWorkingCopy() && cu.isWorkingCopy()) {
+				return;
+			}
 			
-
-		if (!getProvideWorkingCopy() && isWorkingCopy(element))
-			return; 
-
-		if (element != null && element.getElementType() == IJavaElement.COMPILATION_UNIT && !isOnClassPath((ICompilationUnit)element))
-			return;
-			 
-		// handle open and closing of a project
-		if (((flags & IJavaElementDelta.F_CLOSED) != 0) || ((flags & IJavaElementDelta.F_OPENED) != 0)) {			
-			postRefresh(element);
-			return;
+			if ((kind == IJavaElementDelta.CHANGED) && !isStructuralCUChange(flags)) {
+				return; // test moved ahead
+			}
+			
+			if (!isOnClassPath(cu)) { // TODO: isOnClassPath expensive! Should be put after all cheap tests
+				return;
+			}
+			
+			if (!JavaPlugin.USE_WORKING_COPY_OWNERS && cu.isWorkingCopy()) {
+				if (kind == IJavaElementDelta.REMOVED || kind == IJavaElementDelta.ADDED) {
+					// switch between original and working copy or vice versa
+					postRefresh(JavaModelUtil.toOriginal(cu), false);
+					return;
+				}
+			}
+		}
+		
+		if (elementType == IJavaElement.JAVA_PROJECT) {
+			// handle open and closing of a project
+			if ((flags & (IJavaElementDelta.F_CLOSED | IJavaElementDelta.F_OPENED)) != 0) {			
+				postRefresh(element);
+				return;
+			}
 		}
 
 		if (kind == IJavaElementDelta.REMOVED) {
-			// when a working copy is removed all we have to do
-			// is to refresh the compilation unit
-			if (isWorkingCopy(element)) {
-				refreshWorkingCopy((IWorkingCopy)element);
-				return;
-			}
 			Object parent= internalGetParent(element);			
 			postRemove(element);
 			if (parent instanceof IPackageFragment) 
@@ -314,12 +319,6 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		}
 
 		if (kind == IJavaElementDelta.ADDED) { 
-			// when a working copy is added all we have to do
-			// is to refresh the compilation unit
-			if (isWorkingCopy(element)) {
-				refreshWorkingCopy((IWorkingCopy)element);
-				return;
-			}
 			Object parent= internalGetParent(element);
 			// we are filtering out empty subpackages, so we
 			// have to handle additions to them specially. 
@@ -343,33 +342,35 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			}
 		}
 
-		if (element instanceof ICompilationUnit) {
-			if (getProvideWorkingCopy()) {
-				element= JavaModelUtil.toOriginal((ICompilationUnit) element);
-			}
+		if (elementType == IJavaElement.COMPILATION_UNIT) {
 			if (kind == IJavaElementDelta.CHANGED) {
+				// isStructuralCUChange already performed above
+				element= JavaModelUtil.toOriginal((ICompilationUnit) element);
 				postRefresh(element);
 				updateSelection(delta);
+			}
+			return;
+		}
+		// no changes possible in class files
+		if (elementType == IJavaElement.CLASS_FILE)
+			return;
+		
+		
+		if (elementType == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+			// the contents of an external JAR has changed
+			if ((flags & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0) {
+				postRefresh(element);
 				return;
 			}
-		}
-		// we don't show the contents of a compilation or IClassFile, so don't go any deeper
-		if ((element instanceof ICompilationUnit) || (element instanceof IClassFile))
-			return;
+			// the source attachment of a JAR has changed
+			if ((flags & (IJavaElementDelta.F_SOURCEATTACHED | IJavaElementDelta.F_SOURCEDETACHED)) != 0)
+				postUpdateIcon(element);
 			
-		// the contents of an external JAR has changed
-		if (element instanceof IPackageFragmentRoot && ((flags & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0)) {
-			postRefresh(element);
-			return;
-		}
-		// the source attachment of a JAR has changed
-		if (element instanceof IPackageFragmentRoot && (((flags & IJavaElementDelta.F_SOURCEATTACHED) != 0 || ((flags & IJavaElementDelta.F_SOURCEDETACHED)) != 0)))
-			postUpdateIcon(element);
-			
-		if (isClassPathChange(delta)) {
-			 // throw the towel and do a full refresh of the affected java project. 
-			postRefresh(element.getJavaProject());
-			return;
+			if (isClassPathChange(delta)) {
+				 // throw the towel and do a full refresh of the affected java project. 
+				postRefresh(element.getJavaProject());
+				return;
+			}
 		}
 		
 		if (processResourceDeltas(delta.getResourceDeltas(), element))
@@ -377,6 +378,12 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 
 		handleAffectedChildren(delta, element);
 	}
+	
+	private static boolean isStructuralCUChange(int flags) {
+		// No refresh on working copy creation (F_PRIMARY_WORKING_COPY)
+		return ((flags & IJavaElementDelta.F_CHILDREN) != 0) || ((flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED)) == IJavaElementDelta.F_CONTENT);
+	}
+	
 		
 	private void handleAffectedChildren(IJavaElementDelta delta, IJavaElement element) throws JavaModelException {
 		
@@ -450,20 +457,6 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		return null;
 	}
 
-	/**
-	 * Refreshes the Compilation unit corresponding to the workging copy
-	 * @param iWorkingCopy
-	 */
-	private void refreshWorkingCopy(IWorkingCopy workingCopy) {
-		IJavaElement original= workingCopy.getOriginalElement();
-		if (original != null)
-			postRefresh(original, false);
-	}
-
-	private boolean isWorkingCopy(IJavaElement element) {
-		return (element instanceof IWorkingCopy) && ((IWorkingCopy)element).isWorkingCopy();
-	}
-	
 	/**
 	 * Updates the package icon
 	 */

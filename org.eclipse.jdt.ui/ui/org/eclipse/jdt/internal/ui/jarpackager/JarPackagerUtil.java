@@ -138,19 +138,6 @@ public class JarPackagerUtil {
 	}
 
 	/**
-	 * Returns the parent of the supplied java element that conforms to the given 
-	 * parent type.
-	 * 
-	 * @return the parent or <code>null</code>, if such a parent exits
-	 */
-	static IJavaElement findParentOfKind(IJavaElement element, int kind) {
-		if (element != null && element.getParent() != null) {
-			return element.getParent().getAncestor(kind);
-		}
-		return null;
-	}
-
-	/**
 	 * Tells whether the specified manifest main class is valid.
 	 * 
 	 * @return <code>true</code> if a main class is specified and valid

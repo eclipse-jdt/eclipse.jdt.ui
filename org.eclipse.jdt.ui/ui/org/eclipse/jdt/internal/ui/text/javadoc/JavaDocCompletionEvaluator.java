@@ -168,7 +168,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor {
 		fCurrentLength= length;
 		fRestrictToMatchingCase= (flags & RESTRICT_TO_MATCHING_CASE) != 0;
 		
-		IEditorInput editorInput= new FileEditorInput((IFile) cu.getOriginalElement().getResource());
+		IEditorInput editorInput= new FileEditorInput((IFile) cu.getResource());
 		fDocument= JavaUI.getDocumentProvider().getDocument(editorInput);
 		
 		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_POST_QUALIFIED | JavaElementLabelProvider.SHOW_PARAMETERS);

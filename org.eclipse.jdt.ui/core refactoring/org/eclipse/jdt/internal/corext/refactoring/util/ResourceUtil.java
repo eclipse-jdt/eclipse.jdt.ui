@@ -55,7 +55,7 @@ public class ResourceUtil {
 	 * the original element is returned.
 	 */
 	public static IResource getResource(ICompilationUnit cu) {
-		return JavaModelUtil.toOriginal(cu).getResource();
+		return cu.getResource();
 	}
 
 

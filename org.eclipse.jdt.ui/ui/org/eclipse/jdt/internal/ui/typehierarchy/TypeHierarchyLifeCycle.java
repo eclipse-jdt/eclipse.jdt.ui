@@ -229,7 +229,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				if (isWorkingCopyRemove || delta.getKind() == IJavaElementDelta.CHANGED && isPossibleStructuralChange(delta.getFlags())) {
 					try {
 						if (isWorkingCopyRemove)
-							cu= (ICompilationUnit)cu.getOriginalElement();
+							cu= JavaModelUtil.toOriginal(cu);
 						if (cu.exists()) {
 							IType[] types= cu.getAllTypes();
 							for (int i= 0; i < types.length; i++) {
@@ -263,7 +263,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	}
 
 	private boolean isWorkingCopyRemove(ICompilationUnit cu, int deltaKind) {
-		return isReconciled() && deltaKind == IJavaElementDelta.REMOVED && cu.isWorkingCopy();
+		return isReconciled() && deltaKind == IJavaElementDelta.REMOVED && cu.isWorkingCopy() && JavaPlugin.USE_WORKING_COPY_OWNERS;
 	}
 	
 	private void processTypeDelta(IType type, ArrayList changedTypes) {

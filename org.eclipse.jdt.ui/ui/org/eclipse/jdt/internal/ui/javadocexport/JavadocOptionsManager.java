@@ -1109,10 +1109,7 @@ public class JavadocOptionsManager {
 				default :
 					ICompilationUnit cu= (ICompilationUnit) je.getAncestor(IJavaElement.COMPILATION_UNIT);
 					if (cu != null) {
-						if (cu.isWorkingCopy()) {
-							cu= (ICompilationUnit) cu.getOriginalElement();
-						}
-						return cu;
+						return JavaModelUtil.toOriginal(cu);
 					}
 			}
 		} catch (JavaModelException e) {

@@ -35,7 +35,6 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -172,12 +171,9 @@ public class EditorUtility {
 	}
 	
 	private static IEditorInput getEditorInput(IJavaElement element) throws JavaModelException {
-		while (element != null) {
-			if (element instanceof IWorkingCopy && ((IWorkingCopy) element).isWorkingCopy()) 
-				element= ((IWorkingCopy) element).getOriginalElement();
-				
+		while (element != null) {			
 			if (element instanceof ICompilationUnit) {
-				ICompilationUnit unit= (ICompilationUnit) element;
+				ICompilationUnit unit= JavaModelUtil.toOriginal((ICompilationUnit) element);
 					IResource resource= unit.getResource();
 					if (resource instanceof IFile)
 						return new FileEditorInput((IFile) resource);

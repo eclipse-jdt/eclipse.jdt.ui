@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
@@ -142,6 +143,11 @@ public class ProblemTableViewer extends TableViewer {
 	 * @see org.eclipse.jface.viewers.StructuredViewer#handleInvalidSelection(org.eclipse.jface.viewers.ISelection, org.eclipse.jface.viewers.ISelection)
 	 */
 	protected void handleInvalidSelection(ISelection invalidSelection, ISelection newSelection) {
+		if (!JavaPlugin.USE_WORKING_COPY_OWNERS) {
+			super.handleInvalidSelection(invalidSelection, newSelection);
+			return;
+		}
+		
 		ISelection validNewSelection= getValidSelection(newSelection);
 		if (getComparer() == null && isShowingWorkingCopies()) {
 			// Convert to and from working copies

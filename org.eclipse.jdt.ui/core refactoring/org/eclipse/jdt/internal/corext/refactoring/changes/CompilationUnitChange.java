@@ -10,14 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class CompilationUnitChange extends TextFileChange {
 
@@ -37,7 +35,6 @@ public class CompilationUnitChange extends TextFileChange {
 	}
 	
 	private static IFile getFile(ICompilationUnit cunit) throws CoreException {
-		cunit= JavaModelUtil.toOriginal(cunit);
 		return (IFile) cunit.getResource();
 	}
 	

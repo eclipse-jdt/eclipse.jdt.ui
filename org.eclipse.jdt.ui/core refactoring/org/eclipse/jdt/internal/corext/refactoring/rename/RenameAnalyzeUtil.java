@@ -62,7 +62,7 @@ class RenameAnalyzeUtil {
 	static ICompilationUnit findWorkingCopyForCu(ICompilationUnit[] newWorkingCopies, ICompilationUnit cu){
 		ICompilationUnit originalDeclaringCu= WorkingCopyUtil.getOriginal(cu);
 		for (int i= 0; i < newWorkingCopies.length; i++) {
-			if (WorkingCopyUtil.getOriginal(newWorkingCopies[i]).equals(originalDeclaringCu))
+			if (newWorkingCopies[i].getPrimary().equals(originalDeclaringCu))
 				return newWorkingCopies[i];
 		}
 		return null;

@@ -16,6 +16,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.search.ui.ISearchResultView;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -38,40 +40,13 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
-import org.eclipse.jface.viewers.IContentProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.IOpenListener;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.OpenEvent;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.*;
 
-import org.eclipse.jface.text.ITextSelection;
-
-import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IMemento;
-import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.ISelectionListener;
-import org.eclipse.ui.IViewSite;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.IWorkbenchPartSite;
-import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.IWorkingSetManager;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.*;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.IShowInSource;
@@ -80,16 +55,12 @@ import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.search.ui.ISearchResultView;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -1205,43 +1176,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	/**
-	 * Returns the original element from which the specified working copy
-	 * element was created from. This is a handle only method, the
-	 * returned element may or may not exist.
-	 * 
-	 * @param	workingCopy the element for which to get the original
-	 * @return the original Java element or <code>null</code> if this is not a working copy element
-	 */
-	protected static IJavaElement getOriginal(IJavaElement workingCopy) {
-		ICompilationUnit cu= getCompilationUnit(workingCopy);
-		if (cu != null)
-			return ((IWorkingCopy)cu).getOriginal(workingCopy);
-		return null;
-	}
-
-	/**
-	 * Returns the compilation unit for the given java element.
-	 * 
-	 * @param	element the java element whose compilation unit is searched for
-	 * @return	the compilation unit of the given java element
-	 */
-	protected static ICompilationUnit getCompilationUnit(IJavaElement element) {
-		if (element == null)
-			return null;
-			
-		if (element instanceof IMember)
-			return ((IMember) element).getCompilationUnit();
-		
-		int type= element.getElementType();
-		if (IJavaElement.COMPILATION_UNIT == type)
-			return (ICompilationUnit) element;
-		if (IJavaElement.CLASS_FILE == type)
-			return null;
-			
-		return getCompilationUnit(element.getParent());
-	}
-
-	/**
 	 * Converts the given Java element to one which is suitable for this
 	 * view. It takes into account wether the view shows working copies or not.
 	 *
@@ -1263,11 +1197,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			return element;
 		}
 		else {
-			ICompilationUnit cu= getCompilationUnit(element);
-			if (cu != null && ((IWorkingCopy)cu).isWorkingCopy())
-				return ((IWorkingCopy)cu).getOriginal(element);
-			else
-				return element;
+			return element.getPrimaryElement();
 		}
 	}
 

@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
@@ -289,7 +290,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 				
 			if (fBrowsingPart.isAncestorOf(element, fInput)) {
 				if (element instanceof IWorkingCopy && ((IWorkingCopy)element).isWorkingCopy()) {
-					postAdjustInputAndSetSelection(((IWorkingCopy)element).getOriginal((IJavaElement)fInput));
+					postAdjustInputAndSetSelection(JavaModelUtil.toOriginal((IJavaElement) fInput));
 				} else
 					postAdjustInputAndSetSelection(null);
 			}

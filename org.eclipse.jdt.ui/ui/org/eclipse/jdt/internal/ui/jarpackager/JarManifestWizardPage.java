@@ -60,7 +60,6 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -977,9 +976,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		for (int i= 0; i < n; i++) {
 			Object element= fJarPackage.getElements()[i];
 			if (element instanceof ICompilationUnit) {
-				IJavaElement pack= JarPackagerUtil.findParentOfKind((IJavaElement)element, org.eclipse.jdt.core.IJavaElement.PACKAGE_FRAGMENT);
-				if (pack != null)
-					packages.add(pack);
+				packages.add(((ICompilationUnit) element).getParent());
 			}
 		}
 		return packages;

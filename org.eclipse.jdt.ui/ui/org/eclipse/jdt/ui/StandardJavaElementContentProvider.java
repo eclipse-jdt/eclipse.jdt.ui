@@ -198,8 +198,8 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			if (element instanceof IFolder)
 				return getResources((IFolder)element);
 			
-			if (fProvideMembers && element instanceof ISourceReference && element instanceof IParent) {
-				if (fProvideWorkingCopy && element instanceof ICompilationUnit) {
+			if (getProvideMembers() && element instanceof ISourceReference && element instanceof IParent) {
+				if (getProvideWorkingCopy() && element instanceof ICompilationUnit) {
 					element= JavaModelUtil.toWorkingCopy((ICompilationUnit) element);
 				}
 				return ((IParent)element).getChildren();
@@ -214,7 +214,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	 * @see ITreeContentProvider
 	 */
 	public boolean hasChildren(Object element) {
-		if (fProvideMembers) {
+		if (getProvideMembers()) {
 			// assume CUs and class files are never empty
 			if (element instanceof ICompilationUnit ||
 				element instanceof IClassFile) {

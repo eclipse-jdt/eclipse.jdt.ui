@@ -274,7 +274,9 @@ public class PackageExplorerPart extends ViewPart
 		
 		fViewer= createViewer(parent);
 		fViewer.setUseHashlookup(true);
-		fViewer.setComparer(new PackageExplorerElementComparer());
+		if (!JavaPlugin.USE_WORKING_COPY_OWNERS) {
+			fViewer.setComparer(new PackageExplorerElementComparer());
+		}
 		initDragAndDrop();
 		
 		setProviders();

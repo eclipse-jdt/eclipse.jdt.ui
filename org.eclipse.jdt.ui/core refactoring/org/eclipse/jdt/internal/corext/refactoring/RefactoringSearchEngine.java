@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
@@ -34,9 +33,8 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Convenience wrapper for <code>SearchEngine</code> - performs searching and sorts the results.
@@ -64,33 +62,19 @@ public class RefactoringSearchEngine {
 			}
 		};
 		new SearchEngine().search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
-		// XXX: This is a layer breaker - should not access jdt.ui
-		IWorkingCopy[] workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
+
 		List result= new ArrayList(matches.size());
 		for (Iterator iter= matches.iterator(); iter.hasNext(); ) {
 			IResource resource= (IResource)iter.next();
 			IJavaElement element= JavaCore.create(resource);
 			if (element instanceof ICompilationUnit) {
 				ICompilationUnit original= (ICompilationUnit)element;
-				IWorkingCopy wcopy= getWorkingCopy(original, workingCopies);
-				if (wcopy != null && wcopy instanceof ICompilationUnit)
-					result.add(wcopy);
-				else
-					result.add(original);
+				result.add(JavaModelUtil.toWorkingCopy(original)); // take working copy is there is one
 			}
 		}
 		return (ICompilationUnit[])result.toArray(new ICompilationUnit[result.size()]);
 	}
-	
-	private static IWorkingCopy getWorkingCopy(ICompilationUnit unit, IWorkingCopy[] workingCopies) {
-		for (int i= 0; i < workingCopies.length; i++) {
-			IWorkingCopy wcopy= workingCopies[i];
-			if (unit.equals(wcopy.getOriginalElement()))
-				return wcopy;
-		}
-		return null;
-	}
-		
+			
 	/**
 	 * Performs searching for a given <code>SearchPattern</code>.
 	 * Returns SearchResultGroup[] 
