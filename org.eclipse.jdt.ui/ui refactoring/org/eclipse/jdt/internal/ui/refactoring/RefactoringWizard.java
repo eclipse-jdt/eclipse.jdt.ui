@@ -7,8 +7,8 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 
@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -37,6 +38,7 @@ public class RefactoringWizard extends Wizard {
 	private IChange fChange;
 	private RefactoringStatus fActivationStatus= new RefactoringStatus();
 	private RefactoringStatus fStatus;
+	private boolean fHasUserInputPages;
 	
 	private String fErrorPageContextHelpId;
 	
@@ -98,6 +100,10 @@ public class RefactoringWizard extends Wizard {
 	 */	
 	public Refactoring getRefactoring(){
 		return fRefactoring;
+	}
+	
+	public boolean hasUserInputPages(){
+		return fHasUserInputPages;		
 	}
 
 	/**
@@ -198,7 +204,11 @@ public class RefactoringWizard extends Wizard {
 	 *  page.
 	 */
 	public IWizardPage computeUserInputSuccessorPage(IWizardPage caller) {
-		IChange change= createChange(CheckConditionsOperation.INPUT, RefactoringStatus.OK, true);
+		return computeUserInputSuccessorPage(caller, getContainer());
+	}
+
+	private IWizardPage computeUserInputSuccessorPage(IWizardPage caller, IRunnableContext context) {
+		IChange change= createChange(CheckConditionsOperation.INPUT, RefactoringStatus.OK, true, context);
 		// Status has been updated since we have passed true
 		RefactoringStatus status= getStatus();
 		
@@ -246,12 +256,16 @@ public class RefactoringWizard extends Wizard {
 	 *  if <code>false</code> no status updating is performed.
 	 */
 	IChange createChange(int style, int checkPassedSeverity, boolean updateStatus) {
+		return createChange(style, checkPassedSeverity, updateStatus, getContainer());
+	}
+
+	private IChange createChange(int style, int checkPassedSeverity, boolean updateStatus, IRunnableContext context){
 		CreateChangeOperation op= new CreateChangeOperation(fRefactoring, style);
 		op.setCheckPassedSeverity(checkPassedSeverity); 
 
 		InvocationTargetException exception= null;
 		try {
-			getContainer().run(true, true, op);
+			context.run(true, true, op);
 		} catch (InterruptedException e) {
 			setStatus(null);
 			return null;
@@ -416,9 +430,6 @@ public class RefactoringWizard extends Wizard {
 	
 	//---- Reimplementation of Wizard methods --------------------------------------------
 
-	/* (non-Javadoc)
-	 * Method implemented in Wizard.
-	 */
 	public boolean performFinish() {
 		Assert.isNotNull(fRefactoring);
 		
@@ -426,9 +437,22 @@ public class RefactoringWizard extends Wizard {
 		return page.performFinish();
 	}
 	
-	/* (non-Javadoc)
-	 * Method implemented in Wizard.
-	 */
+	public IWizardPage getPreviousPage(IWizardPage page) {
+		if (fHasUserInputPages)
+			return super.getPreviousPage(page);
+		if (! page.getName().equals(ErrorWizardPage.PAGE_NAME)){
+			if (fStatus.isOK())
+				return null;
+		}		
+		return super.getPreviousPage(page);		
+	}
+	
+	public IWizardPage getStartingPage() {
+		if (fHasUserInputPages)
+			return super.getStartingPage();
+		return computeUserInputSuccessorPage(null, new ProgressMonitorDialog(getShell()));
+	}
+	
 	public void addPages() {
 		if (checkActivationOnOpen()) {
 			internalCheckCondition(new BusyIndicatorRunnableContext(), CheckConditionsOperation.ACTIVATION);
@@ -438,16 +462,16 @@ public class RefactoringWizard extends Wizard {
 			// Set the status since we added the error page
 			setStatus(getStatus());	
 		} else { 
+			Assert.isTrue(getPageCount() == 0);
 			addUserInputPages();
+			if (getPageCount() > 0)
+				fHasUserInputPages= true;
 			addErrorPage();
 			addPreviewPage();	
 		}
 		setupPageTitles();
 	}
 	
-	/* (non-Javadoc)
-	 * Method implemented in Wizard.
-	 */
 	public void addPage(IWizardPage page) {
 		Assert.isTrue(page instanceof RefactoringWizardPage);
 		super.addPage(page);
