@@ -1,14 +1,11 @@
 package org.eclipse.jdt.internal.ui.text.template;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.List;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
@@ -16,9 +13,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
 import org.eclipse.jdt.internal.corext.template.ContextType;
-import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.corext.template.TemplateVariable;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class TemplateVariableProcessor implements IContentAssistProcessor {	
 
@@ -54,30 +49,45 @@ public class TemplateVariableProcessor implements IContentAssistProcessor {
 		if (fContextType == null)
 			return null;
 
-		Vector vector= new Vector();		
+		List proposals= new ArrayList();		
+		
+		String text= viewer.getDocument().get();
+		int start= getStart(text, documentOffset);
+		int end= documentOffset;
 
-		try {
-			int offset= (documentOffset > 0) && (viewer.getDocument().get(documentOffset - 1, 1).equals("$")) //$NON-NLS-1$
-				? documentOffset - 1
-				: documentOffset;		
-			int length= documentOffset - offset;
+		String string= text.substring(start, end);
+		String prefix= (string.length() >= 2)
+			? string.substring(2)
+			: null;
 
-			for (Iterator iterator= fContextType.variableIterator(); iterator.hasNext(); ) {
-				TemplateVariable variable= (TemplateVariable) iterator.next();
-				vector.add(new TemplateVariableProposal(variable, offset, length, viewer));
-			}
+		int offset= start;
+		int length= end - start;
 
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
+		for (Iterator iterator= fContextType.variableIterator(); iterator.hasNext(); ) {
+			TemplateVariable variable= (TemplateVariable) iterator.next();
 
-			Shell shell= viewer.getTextWidget().getShell();
-			MessageDialog.openError(shell, TemplateMessages.getString("TemplateVariableProcessor.error.title"), e.getMessage()); //$NON-NLS-1$
+			if (prefix == null || variable.getName().startsWith(prefix))
+				proposals.add(new TemplateVariableProposal(variable, offset, length, viewer));
 		}
 
-		ICompletionProposal[] proposals= (ICompletionProposal[]) vector.toArray(new ICompletionProposal[vector.size()]);
-		Arrays.sort(proposals, fgTemplateVariableProposalComparator);
-		
-		return proposals;
+		Collections.sort(proposals, fgTemplateVariableProposalComparator);
+		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+	}
+
+	/* Guesses the start position of the completion */
+	private int getStart(String string, int end) {
+		int start= end;
+
+		if (start >= 1 && string.charAt(start - 1) == '$')
+			return start - 1;
+				
+		while ((start != 0) && Character.isUnicodeIdentifierPart(string.charAt(start - 1)))
+			start--;
+
+		if (start >= 2 && string.charAt(start - 1) == '{' && string.charAt(start - 2) == '$')
+			return start - 2;
+			
+		return end;
 	}
 
 	/*

@@ -14,12 +14,14 @@ import java.util.Vector;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.custom.VerifyKeyListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.RGB;
@@ -49,6 +51,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
@@ -329,14 +332,22 @@ public class EditTemplateDialog extends StatusDialog {
 				updateSelectionDependentActions();
 			}
 		});
-	
-		viewer.getTextWidget().addKeyListener(new KeyListener() {
-			public void keyPressed(KeyEvent e) {
-				handleKeyPressed(e);
-			}
 
-			public void keyReleased(KeyEvent e) {}
-		});
+		if (viewer instanceof ITextViewerExtension) {
+			 ((ITextViewerExtension) viewer).prependVerifyKeyListener(new VerifyKeyListener() {
+				public void verifyKey(VerifyEvent event) {
+					handleVerifyKeyPressed(event);
+				}
+			});
+		} else {			
+			viewer.getTextWidget().addKeyListener(new KeyListener() {
+				public void keyPressed(KeyEvent e) {
+					handleKeyPressed(e);
+				}
+	
+				public void keyReleased(KeyEvent e) {}
+			});
+		}
 		
 		return viewer;
 	}
@@ -350,9 +361,30 @@ public class EditTemplateDialog extends StatusDialog {
 				fPatternEditor.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
 				break;
 
-			// XXX CTRL-Z
+			// CTRL-Z
 			case (int) 'z' - (int) 'a' + 1:
 				fPatternEditor.doOperation(ITextOperationTarget.UNDO);
+				break;				
+		}
+	}
+
+	private void handleVerifyKeyPressed(VerifyEvent event) {
+		if (!event.doit)
+			return;
+
+		if (event.stateMask != SWT.CTRL)
+			return;
+			
+		switch (event.character) {
+			case ' ':
+				fPatternEditor.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
+				event.doit= false;
+				break;
+
+			// CTRL-Z
+			case (int) 'z' - (int) 'a' + 1:
+				fPatternEditor.doOperation(ITextOperationTarget.UNDO);
+				event.doit= false;
 				break;				
 		}
 	}
