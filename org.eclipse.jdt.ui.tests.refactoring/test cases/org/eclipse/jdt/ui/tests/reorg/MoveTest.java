@@ -84,7 +84,7 @@ public class MoveTest extends RefactoringTest {
 
 	private void verifyDisabled(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
 		IJavaProject project= null;
-		if (javaElements != null && javaElements.length > 0)
+		if (javaElements != null && javaElements.length > 0 && javaElements[0] != null)
 			project= javaElements[0].getJavaProject();
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(project);
 		assertTrue("move should be disabled", ! JavaMoveProcessor.isAvailable(resources, javaElements, settings));
@@ -94,7 +94,7 @@ public class MoveTest extends RefactoringTest {
 	
 	private JavaMoveProcessor verifyEnabled(IResource[] resources, IJavaElement[] javaElements, IReorgQueries reorgQueries) throws JavaModelException {
 		IJavaProject project= null;
-		if (javaElements != null && javaElements.length > 0)
+		if (javaElements != null && javaElements.length > 0 && javaElements[0] != null)
 			project= javaElements[0].getJavaProject();
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(project);
 		assertTrue("move should be enabled", JavaMoveProcessor.isAvailable(resources, javaElements, settings));
