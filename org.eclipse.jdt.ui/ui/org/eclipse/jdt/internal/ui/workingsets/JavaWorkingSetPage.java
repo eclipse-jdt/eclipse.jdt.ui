@@ -105,7 +105,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 
 		initializeDialogUnits(parent);
 		
-		Composite composite= new Composite(parent, SWT.NULL);
+		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
 		composite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		setControl(composite);
@@ -131,7 +131,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		gd= new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_CENTER);
 		label.setLayoutData(gd);
 
-		fTree= new CheckboxTreeViewer(composite, SWT.H_SCROLL | SWT.V_SCROLL);
+		fTree= new CheckboxTreeViewer(composite, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 		gd= new GridData(GridData.FILL_BOTH | GridData.GRAB_VERTICAL);
 		gd.heightHint= convertHeightInCharsToPixels(15);
 		fTree.getControl().setLayoutData(gd);
