@@ -1640,6 +1640,13 @@
 	</keyBinding>      
 	<keyBinding
 		platform="carbon"
+		string="Ctrl+1"
+		scope="org.eclipse.jdt.ui.javaEditorScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>      
+	<keyBinding
+		platform="carbon"
 		string="Command+1"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals"
@@ -1688,6 +1695,13 @@
 	</keyBinding>
 	<keyBinding
 		platform="carbon"
+		string="Ctrl+/"
+		scope="org.eclipse.jdt.ui.javaEditorScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
 		string="Command+/"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.comment"
@@ -1708,6 +1722,13 @@
 	</keyBinding>
 	<keyBinding
 		platform="carbon"
+		string="Ctrl+\"
+		scope="org.eclipse.jdt.ui.javaEditorScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
 		string="Command+\"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.uncomment"
@@ -1724,6 +1745,13 @@
 		string="Ctrl+Shift+F"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.format"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Ctrl+Shift+F"
+		scope="org.eclipse.jdt.ui.javaEditorScope"
+		command=""
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 	<keyBinding
@@ -1761,6 +1789,13 @@
 	</keyBinding>
 	<keyBinding
 		platform="carbon"
+		string="Ctrl+Shift+M"
+		scope="org.eclipse.jdt.ui.javaEditorScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
 		string="Command+Shift+M"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.add.import"
@@ -1777,6 +1812,13 @@
 		string="Ctrl+Shift+O"
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.organize.imports"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Ctrl+Shift+O"
+		scope="org.eclipse.ui.globalScope"
+		command=""
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 	<keyBinding
@@ -2131,6 +2173,13 @@
 	</keyBinding>
 	<keyBinding
 		platform="carbon"
+		string="Ctrl+Shift+ARROW_DOWN"
+		scope="org.eclipse.jdt.ui.javaEditorScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
 		string="Command+Shift+ARROW_DOWN"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.goto.next.member"
@@ -2147,6 +2196,13 @@
 		string="Ctrl+Shift+ARROW_UP"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.goto.previous.member"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Ctrl+Shift+ARROW_UP"
+		scope="org.eclipse.jdt.ui.javaEditorScope"
+		command=""
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 	<keyBinding
@@ -2193,6 +2249,13 @@
 		string="Ctrl+Shift+P"
 		scope="org.eclipse.jdt.ui.javaEditorScope"
 		command="org.eclipse.jdt.ui.edit.text.java.goto.matching.bracket"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Ctrl+Shift+P"
+		scope="org.eclipse.jdt.ui.javaEditorScope"
+		command=""
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
 	<keyBinding
@@ -2254,6 +2317,20 @@
 		command="org.eclipse.jdt.ui.navigate.open.type"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Ctrl+Shift+T"
+		scope="org.eclipse.ui.globalScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Command+Shift+T"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.navigate.open.type"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
 
 	<command
 		id="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
@@ -2263,6 +2340,20 @@
 	</command>
 	<keyBinding
 		string="Ctrl+Shift+H"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Ctrl+Shift+H"
+		scope="org.eclipse.ui.globalScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
+	<keyBinding
+		platform="carbon"
+		string="Command+Shift+H"
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.navigate.open.type.in.hierarchy"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
@@ -2380,9 +2471,9 @@
 	/>
 	<keyBinding
 		platform="carbon"
-		string="Command+Shift+G"
+		string="Ctrl+Shift+G"
 		scope="org.eclipse.ui.globalScope"
-		command="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
+		command=""
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
 	<keyBinding
@@ -2511,6 +2602,13 @@
 	/>
 	<keyBinding
 		platform="carbon"
+		string="Ctrl+G"
+		scope="org.eclipse.ui.globalScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+	<keyBinding
+		platform="carbon"
 		string="Command+G"
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
@@ -2581,6 +2679,21 @@
 		command="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
+	<keyBinding
+		platform="carbon"
+		string="Ctrl+Shift+U"
+		scope="org.eclipse.ui.globalScope"
+		command=""
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+	<keyBinding
+		platform="carbon"
+		string="Command+Shift+U"
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+
 </extension>
 
 <extension point="org.eclipse.ui.markerResolution"> 
