@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -197,4 +199,35 @@ public class AllTypesCache {
 		return fgNumberOfCacheFlushes;
 	}
 
+	public static TypeInfo[] findTypeRefs(String simpleTypeName, IJavaSearchScope searchScope) throws JavaModelException {
+		Collection result= new ArrayList();
+		Set namesFound= new HashSet();
+		TypeInfo[] allTypes= AllTypesCache.getAllTypes(null); // all types in workspace, sorted by type name
+		TypeInfo key= new UnresolvableTypeInfo("", simpleTypeName, null, true, null); //$NON-NLS-1$
+		int index= Arrays.binarySearch(allTypes, key, AllTypesCache.getTypeNameComperator());
+		if (index >= 0 && index < allTypes.length) {
+			for (int i= index - 1; i>= 0; i--) {
+				TypeInfo curr= allTypes[i];
+				if (simpleTypeName.equals(curr.getTypeName())) {
+					if (namesFound.add(curr.getFullyQualifiedName())) {
+						result.add(curr);
+					}
+				} else {
+					break;
+				}
+			}
+	
+			for (int i= index; i < allTypes.length; i++) {
+				TypeInfo curr= allTypes[i];
+				if (simpleTypeName.equals(curr.getTypeName())) {
+					if (namesFound.add(curr.getFullyQualifiedName())) {
+						result.add(curr);
+					}
+				} else {
+					break;
+				}
+			}
+		}
+		return (TypeInfo[]) result.toArray(new TypeInfo[result.size()]);		
+	}
 }
