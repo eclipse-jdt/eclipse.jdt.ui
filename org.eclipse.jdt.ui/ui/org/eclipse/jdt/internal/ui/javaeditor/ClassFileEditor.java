@@ -45,7 +45,7 @@ public class ClassFileEditor extends JavaEditor {
 		setEditorContextMenuId("#ClassFileEditorContext"); //$NON-NLS-1$
 		setRulerContextMenuId("#ClassFileRulerContext"); //$NON-NLS-1$
 		setOutlinerContextMenuId("#ClassFileOutlinerContext"); //$NON-NLS-1$
-		setHelpContextId(IJavaHelpContextIds.CLASS_FILE_EDITOR);
+		// don't set help contextId, we install our own help context
 	}
 	
 	/**
@@ -94,7 +94,7 @@ public class ClassFileEditor extends JavaEditor {
 	protected IJavaElement getCorrespondingElement(IJavaElement element) {
 		if (getEditorInput() instanceof IClassFileEditorInput) {
 			IClassFileEditorInput input= (IClassFileEditorInput) getEditorInput();
-			IJavaElement parent= JavaModelUtil.findParentOfKind(element, IJavaElement.CLASS_FILE);
+			IJavaElement parent= element.getAncestor(IJavaElement.CLASS_FILE);
 			if (input.getClassFile().equals(parent))
 				return element;
 		}
