@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -32,6 +34,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -165,19 +169,20 @@ public class BuildPathSupport {
 
 	private static void updateContainerClasspath(IJavaProject jproject, IPath containerPath, IClasspathEntry newEntry, IProgressMonitor monitor) throws CoreException {
 		IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
-		if (container != null) {
-			IClasspathEntry[] entries= container.getClasspathEntries();
-			IClasspathEntry[] newEntries= new IClasspathEntry[entries.length];
-			for (int i= 0; i < entries.length; i++) {
-				IClasspathEntry curr= entries[i];
-				if (curr.getEntryKind() == newEntry.getEntryKind() && curr.getPath().equals(newEntry.getPath())) {
-					newEntries[i]= newEntry;
-				} else {
-					newEntries[i]= curr;
-				}
-			}
-			requestContainerUpdate(jproject, container, newEntries);
+		if (container == null) {
+			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, "Container " + containerPath + " cannot be resolved", null));  //$NON-NLS-1$//$NON-NLS-2$
 		}
+		IClasspathEntry[] entries= container.getClasspathEntries();
+		IClasspathEntry[] newEntries= new IClasspathEntry[entries.length];
+		for (int i= 0; i < entries.length; i++) {
+			IClasspathEntry curr= entries[i];
+			if (curr.getEntryKind() == newEntry.getEntryKind() && curr.getPath().equals(newEntry.getPath())) {
+				newEntries[i]= newEntry;
+			} else {
+				newEntries[i]= curr;
+			}
+		}
+		requestContainerUpdate(jproject, container, newEntries);
 		monitor.worked(1);
 	}
 
