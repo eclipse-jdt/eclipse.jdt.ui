@@ -4,7 +4,26 @@
  */
 package org.eclipse.jdt.internal.debug.ui;
 
-import java.text.MessageFormat;import java.util.HashMap;import java.util.Iterator;import java.util.List;import org.eclipse.core.resources.IMarker;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IBreakpointManager;import org.eclipse.debug.core.model.IStackFrame;import org.eclipse.debug.core.model.ITerminate;import org.eclipse.debug.ui.DebugUITools;import org.eclipse.debug.ui.IDebugModelPresentation;import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.debug.core.IJavaDebugTarget;import org.eclipse.jdt.debug.core.IJavaStackFrame;import org.eclipse.jdt.debug.core.IJavaThread;import org.eclipse.jdt.debug.core.IJavaValue;import org.eclipse.jdt.debug.core.IJavaVariable;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.launcher.DebugOverlayDescriptorFactory;import org.eclipse.jdt.internal.ui.viewsupport.OverlayIconManager;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jface.wizard.WizardDialog;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.graphics.Point;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IEditorInput;
+import java.text.MessageFormat;
+import java.util.HashMap;import java.util.Iterator;import java.util.List;import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IBreakpointManager;import org.eclipse.debug.core.model.IStackFrame;
+import org.eclipse.debug.core.model.ITerminate;
+import org.eclipse.debug.ui.DebugUITools;import org.eclipse.debug.ui.IDebugModelPresentation;import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.debug.core.IJavaDebugTarget;import org.eclipse.jdt.debug.core.IJavaStackFrame;import org.eclipse.jdt.debug.core.IJavaThread;import org.eclipse.jdt.debug.core.IJavaValue;import org.eclipse.jdt.debug.core.IJavaVariable;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.launcher.DebugOverlayDescriptorFactory;
+import org.eclipse.jdt.internal.ui.viewsupport.OverlayIconManager;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorDescriptor;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorRegistry;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * @see IDebugModelPresentation
@@ -332,7 +351,12 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	 * @see IDebugModelPresentaion
 	 */
 	public String getEditorId(IEditorInput input, Object inputObject) {
-		return EditorUtility.getEditorID(input, inputObject);
+		IEditorRegistry registry= PlatformUI.getWorkbench().getEditorRegistry();
+		IEditorDescriptor descriptor= registry.getDefaultEditor(input.getName());
+		if (descriptor != null)
+			return descriptor.getId();
+		
+		return null;
 	}
 
 	/**
