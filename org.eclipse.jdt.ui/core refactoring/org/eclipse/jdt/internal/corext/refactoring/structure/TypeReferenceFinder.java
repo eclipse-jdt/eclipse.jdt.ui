@@ -31,6 +31,7 @@ class TypeReferenceFinder extends GenericVisitor {
 	}
 	
 	public static ISourceRange[] findTypeReferenceRanges(SearchResult[] searchResults, ICompilationUnit cu) throws JavaModelException {
+//		return TypeReferenceFinder2.findTypeReferenceRanges(searchResults, cu);
 		Assert.isNotNull(searchResults);
 		if (searchResults.length == 0)
 			return new ISourceRange[0];
@@ -43,7 +44,7 @@ class TypeReferenceFinder extends GenericVisitor {
 		return (ISourceRange[]) instance.fTypeReferenceRanges.toArray(new ISourceRange[instance.fTypeReferenceRanges.size()]);
 	}
 
-	protected static boolean areReportedForSameNode_noArray(AstNode node, SearchResult searchResult) {
+	private static boolean areReportedForSameNode_noArray(AstNode node, SearchResult searchResult) {
 		int nodeEnd= ASTUtil.getSourceEnd(node) + 1;//???
 		
 		if (ASTUtil.getSourceStart(node) != searchResult.getStart())
