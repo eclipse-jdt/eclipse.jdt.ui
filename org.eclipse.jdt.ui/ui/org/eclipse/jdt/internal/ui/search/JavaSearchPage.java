@@ -10,10 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.search.ui.ISearchPage;
@@ -44,13 +42,10 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
@@ -62,6 +57,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
@@ -70,10 +66,12 @@ import org.eclipse.jdt.ui.search.PatternQuerySpecification;
 import org.eclipse.jdt.ui.search.QuerySpecification;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
@@ -171,7 +169,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	private static List fgPreviousSearchPatterns= new ArrayList(20);
 	
 	private SearchPatternData fInitialData;
-	private IStructuredSelection fStructuredSelection;
 	private IJavaElement fJavaElement;
 	private boolean fFirstTime= true;
 	private IDialogSettings fDialogSettings;
@@ -225,10 +222,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				break;
 			case ISearchPageContainer.SELECTION_SCOPE:
 				scopeDescription= SearchMessages.getString("SelectionScope"); //$NON-NLS-1$
-				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(fStructuredSelection, includeJRE);
+				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelection(), includeJRE);
 				break;
 			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE:
-				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(fStructuredSelection, includeJRE);
+				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(getContainer().getSelection(), includeJRE);
 				IProject[] projects= JavaSearchScopeFactory.getInstance().getProjects(scope);
 				if (projects.length >= 1) {
 					if (projects.length == 1)
@@ -329,40 +326,37 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		return fPattern.getText();
 	}
 
+	
+	private SearchPatternData findInPrevious(String pattern) {
+		for (Iterator iter= fgPreviousSearchPatterns.iterator(); iter.hasNext();) {
+			SearchPatternData element= (SearchPatternData) iter.next();
+			if (pattern.equals(element.getPattern())) {
+				return element;
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Return search pattern data and update previous searches.
 	 * An existing entry will be updated.
 	 */
 	private SearchPatternData getPatternData() {
 		String pattern= getPattern();
-		SearchPatternData match= null;
-		int i= 0;
-		int size= fgPreviousSearchPatterns.size();
-		while (match == null && i < size) {
-			match= (SearchPatternData) fgPreviousSearchPatterns.get(i);
-			i++;
-			if (!pattern.equals(match.getPattern()))
-				match= null;
+		SearchPatternData match= findInPrevious(pattern);
+		if (match != null) {
+			fgPreviousSearchPatterns.remove(match);
 		}
-		if (match == null) {
-			match= new SearchPatternData(
-							getSearchFor(),
-							getLimitTo(),
-							pattern,
-							fCaseSensitive.getSelection(),
-							fJavaElement,
-							getContainer().getSelectedScope(),
-							getContainer().getSelectedWorkingSets());
-			fgPreviousSearchPatterns.add(match);
-		}
-		else {
-			match.setSearchFor(getSearchFor());
-			match.setLimitTo(getLimitTo());
-			match.setCaseSensitive(fCaseSensitive.getSelection());
-			match.setJavaElement(fJavaElement);
-			match.setScope(getContainer().getSelectedScope());
-			match.setWorkingSets(getContainer().getSelectedWorkingSets());
-		}
+		match= new SearchPatternData(
+				getSearchFor(),
+				getLimitTo(),
+				pattern,
+				fCaseSensitive.getSelection(),
+				fJavaElement,
+				getContainer().getSelectedScope(),
+				getContainer().getSelectedWorkingSets());
+			
+		fgPreviousSearchPatterns.add(match);
 		return match;
 	}
 
@@ -446,7 +440,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 		Dialog.applyDialogFont(result);
 		WorkbenchHelp.setHelp(result, IJavaHelpContextIds.JAVA_SEARCH_PAGE);	
-		initSelections();
 	}
 
 	private Control createSearchJRE(Composite result) {
@@ -626,20 +619,39 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}	
 	
 	private void initSelections() {
-		fStructuredSelection= asStructuredSelection();
-		fInitialData= tryStructuredSelection(fStructuredSelection);
-		if (fInitialData == null)
-			fInitialData= trySimpleTextSelection(getContainer().getSelection());
-		if (fInitialData == null)
-			fInitialData= getDefaultInitValues();
+		ISelection sel= getContainer().getSelection();
+		SearchPatternData initData= null;
 
-		fJavaElement= fInitialData.getJavaElement();
-		fCaseSensitive.setSelection(fInitialData.isCaseSensitive());
-		fCaseSensitive.setEnabled(fInitialData.getJavaElement() == null);
-		fSearchFor[fInitialData.getSearchFor()].setSelection(true);
-		setLimitTo(fInitialData.getSearchFor());
-		fLimitTo[fInitialData.getLimitTo()].setSelection(true);		
-		fPattern.setText(fInitialData.getPattern());
+		if (sel instanceof IStructuredSelection) {
+			initData= tryStructuredSelection((IStructuredSelection) sel);
+		} else if (sel instanceof ITextSelection) {
+			IEditorPart activePart= getActiveEditor();
+			if (activePart instanceof JavaEditor) {
+				try {
+					IJavaElement[] elements= SelectionConverter.codeResolve((JavaEditor) activePart);
+					if (elements != null && elements.length > 0) {
+						initData= determineInitValuesFrom(elements[0]);
+					}
+				} catch (JavaModelException e) {
+					// ignore
+				}
+			}
+			if (initData == null) {
+				initData= trySimpleTextSelection((ITextSelection) sel);
+			}
+		}
+		if (initData == null) {
+			initData= getDefaultInitValues();
+		}
+		
+		fInitialData= initData;
+		fJavaElement= initData.getJavaElement();
+		fCaseSensitive.setSelection(initData.isCaseSensitive());
+		fCaseSensitive.setEnabled(initData.getJavaElement() == null);
+		fSearchFor[initData.getSearchFor()].setSelection(true);
+		setLimitTo(initData.getSearchFor());
+		fLimitTo[initData.getLimitTo()].setSelection(true);		
+		fPattern.setText(initData.getPattern());
 		updateUseJRE();
 	}
 
@@ -685,80 +697,42 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}
 
 	private SearchPatternData determineInitValuesFrom(IJavaElement element) {
-		int searchFor= UNKNOWN;
-		int limitTo= UNKNOWN;
-		String pattern= null;
 		try {
 			switch (element.getElementType()) {
 				case IJavaElement.PACKAGE_FRAGMENT:
-					searchFor= PACKAGE;
-					limitTo= REFERENCES;
-					pattern= element.getElementName();
-					break;
-				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-					searchFor= PACKAGE;
-					limitTo= REFERENCES;
-					pattern= element.getElementName();
-					break;
 				case IJavaElement.PACKAGE_DECLARATION:
-					searchFor= PACKAGE;
-					limitTo= REFERENCES;
-					pattern= element.getElementName();
-					break;
-				case IJavaElement.IMPORT_DECLARATION:
-					pattern= element.getElementName();
-					IImportDeclaration declaration= (IImportDeclaration)element;
+					return new SearchPatternData(PACKAGE, REFERENCES, true, element.getElementName(), element);
+				case IJavaElement.IMPORT_DECLARATION: {
+					IImportDeclaration declaration= (IImportDeclaration) element;
 					if (declaration.isOnDemand()) {
-						searchFor= PACKAGE;
-						int index= pattern.lastIndexOf('.');
-						pattern= pattern.substring(0, index);
-					} else {
-						searchFor= TYPE;
+						String name= Signature.getQualifier(declaration.getElementName());
+						return new SearchPatternData(PACKAGE, DECLARATIONS, true, name, element);
 					}
-					limitTo= DECLARATIONS;
-					break;
+					return new SearchPatternData(TYPE, DECLARATIONS, true, element.getElementName(), element);
+				}
 				case IJavaElement.TYPE:
-					searchFor= TYPE;
-					limitTo= REFERENCES;
-					pattern= JavaModelUtil.getFullyQualifiedName((IType)element);
-					break;
+					return new SearchPatternData(TYPE, REFERENCES, true, JavaModelUtil.getFullyQualifiedName((IType) element), element);
 				case IJavaElement.COMPILATION_UNIT: {
-					ICompilationUnit cu= (ICompilationUnit) element;
-					IType mainType= cu.findPrimaryType();
+					IType mainType= ((ICompilationUnit) element).findPrimaryType();
 					if (mainType != null) {
-						searchFor= TYPE;
-						element= mainType;
-						limitTo= REFERENCES;
-						pattern= JavaModelUtil.getFullyQualifiedName(mainType);
+						return new SearchPatternData(TYPE, REFERENCES, true, JavaModelUtil.getFullyQualifiedName(mainType), mainType);
 					}
 					break;
 				}
 				case IJavaElement.CLASS_FILE: {
-					IClassFile cf= (IClassFile)element;
-					IType mainType= cf.getType();
+					IType mainType= ((IClassFile) element).getType();
 					if (mainType.exists()) {
-						element= mainType;
-						searchFor= TYPE;
-						limitTo= REFERENCES;
-						pattern= JavaModelUtil.getFullyQualifiedName(mainType);
+						return new SearchPatternData(TYPE, REFERENCES, true, JavaModelUtil.getFullyQualifiedName(mainType), mainType);
 					}
 					break;
 				}
 				case IJavaElement.FIELD:
-					IField field= (IField) element;
-					searchFor= FIELD;
-					limitTo= REFERENCES;
-					pattern= PrettySignature.getFieldSignature(field);
-					break;
+					return new SearchPatternData(FIELD, REFERENCES, true, PrettySignature.getFieldSignature((IField) element), element);
 				case IJavaElement.METHOD:
 					IMethod method= (IMethod) element;
-					searchFor= method.isConstructor() ? CONSTRUCTOR : METHOD;
-					limitTo= REFERENCES;
-					pattern= PrettySignature.getMethodSignature(method);
-					break;
+					int searchFor= method.isConstructor() ? CONSTRUCTOR : METHOD;
+					return new SearchPatternData(searchFor, REFERENCES, true, PrettySignature.getMethodSignature(method), element);
 			}
-			if (searchFor != UNKNOWN && limitTo != UNKNOWN && pattern != null)
-				return new SearchPatternData(searchFor, limitTo, true, pattern, element);
 			
 		} catch (JavaModelException e) {
 			if (!e.isDoesNotExist()) {
@@ -769,27 +743,24 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		return null;	
 	}
 	
-	private SearchPatternData trySimpleTextSelection(ISelection selection) {
-		SearchPatternData result= null;
-		if (selection instanceof ITextSelection) {
-			String selectedText= ((ITextSelection) selection).getText();
-			if (selectedText != null) {
-				BufferedReader reader= new BufferedReader(new StringReader(selectedText));
-				String text;
-				try {
-					text= reader.readLine();
-					if (text == null)
-						text= ""; //$NON-NLS-1$
-				} catch (IOException ex) {
-					text= ""; //$NON-NLS-1$
-				}
-				result= new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, text, null);
+	private SearchPatternData trySimpleTextSelection(ITextSelection selection) {
+		String selectedText= selection.getText();
+		if (selectedText != null && selectedText.length() > 0) {
+			int i= 0;
+			while (i < selectedText.length() && !Strings.isLineDelimiterChar(selectedText.charAt(i))) {
+				i++;
+			}
+			if (i > 0) {
+				return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, selectedText.substring(0, i), null);
 			}
 		}
-		return result;
+		return null;
 	}
 	
 	private SearchPatternData getDefaultInitValues() {
+		if (!fgPreviousSearchPatterns.isEmpty()) {
+			return (SearchPatternData) fgPreviousSearchPatterns.get(fgPreviousSearchPatterns.size() - 1);
+		}
 		return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, "", null); //$NON-NLS-1$
 	}	
 
@@ -806,25 +777,13 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	private ISearchPageContainer getContainer() {
 		return fContainer;
 	}
-	
-	/**
-	 * Returns the structured selection from the selection.
-	 */
-	private IStructuredSelection asStructuredSelection() {
-		IWorkbenchWindow wbWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		if (wbWindow != null) {
-			IWorkbenchPage page= wbWindow.getActivePage();
-			if (page != null) {
-				IWorkbenchPart part= page.getActivePart();
-				if (part != null)
-					try {
-						return SelectionConverter.getStructuredSelection(part);
-					} catch (JavaModelException ex) {
-						// ignore handled by return
-					}
-			}
+		
+	private IEditorPart getActiveEditor() {
+		IWorkbenchPage activePage= JavaPlugin.getActivePage();
+		if (activePage != null) {
+			return activePage.getActiveEditor();
 		}
-		return StructuredSelection.EMPTY;
+		return null;
 	}
 	
 	//--------------- Configuration handling --------------
