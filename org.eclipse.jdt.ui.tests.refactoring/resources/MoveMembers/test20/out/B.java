@@ -6,7 +6,7 @@ class B{
 		A.F[ ] ff1;
 		A.F[][] fff;
 		A.F[][] fff1;
-		A.F[ ][ ] fff2;
+		p.A.F[ ][ ] fff2;
 	}
 
 }
