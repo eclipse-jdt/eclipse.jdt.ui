@@ -125,7 +125,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab implements IAddVMD
 		fProjText.setLayoutData(gd);
 		fProjText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent evt) {
-				refreshStatus();
+				updateLaunchConfigurationDialog();
 			}
 		});
 		
@@ -157,7 +157,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab implements IAddVMD
 		fTestText.setLayoutData(gd);
 		fTestText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent evt) {
-				refreshStatus();
+				updateLaunchConfigurationDialog();
 			}
 		});
 		
@@ -192,7 +192,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab implements IAddVMD
 		initializeJREComboBox();
 		fJRECombo.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent evt) {
-				refreshStatus();
+				updateLaunchConfigurationDialog();
 			}
 		});
 		
@@ -348,7 +348,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab implements IAddVMD
 		
 		IJavaProject javaProject = getJavaProject();
 		
-		SelectionDialog dialog = new TestSelectionDialog(shell, getLaunchDialog(), javaProject);
+		SelectionDialog dialog = new TestSelectionDialog(shell, getLaunchConfigurationDialog(), javaProject);
 		dialog.setTitle("Test Selection");
 		dialog.setMessage("Choose a test case or test suite:");
 		if (dialog.open() == dialog.CANCEL) {
@@ -433,15 +433,6 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab implements IAddVMD
 			return null;
 		}
 		return getJavaModel().getJavaProject(projectName);		
-	}
-	
-	/**
-	 * Convenience method to get the shell.  It is important that the shell be the one 
-	 * associated with the launch configuration dialog, and not the active workbench
-	 * window.
-	 */
-	private Shell getShell() {
-		return fTestLabel.getShell();
 	}
 	
 	/**
@@ -558,7 +549,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab implements IAddVMD
 		if (index > 0) {
 			name = name.substring(index + 1);
 		}
-		name = getLaunchDialog().generateName(name);
+		name = getLaunchConfigurationDialog().generateName(name);
 		config.rename(name);
 	}
 	
