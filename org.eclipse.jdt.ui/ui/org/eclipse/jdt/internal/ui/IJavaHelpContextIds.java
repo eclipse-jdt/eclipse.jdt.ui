@@ -85,6 +85,7 @@ public interface IJavaHelpContextIds {
 	public static final String WORKING_SET_FIND_ACTION=									PREFIX + "working_set_find_action"; //$NON-NLS-1$
 	public static final String FIND_STRINGS_TO_EXTERNALIZE_ACTION= 					PREFIX + "find_strings_to_externalize_action"; //$NON-NLS-1$
 	public static final String INLINE_TEMP_ACTION= 												PREFIX + "inline_temp_action"; //$NON-NLS-1$
+	public static final String INLINE_CONSTANT_ACTION= 												PREFIX + "inline_constant_action"; //$NON-NLS-1$
 	public static final String MODIFY_PARAMETERS_ACTION= 									PREFIX + "modify_parameters_action"; //$NON-NLS-1$
 	public static final String MOVE_ACTION= 														PREFIX + "move_action"; //$NON-NLS-1$
 	public static final String OPEN_ACTION= 														PREFIX + "open_action"; //$NON-NLS-1$

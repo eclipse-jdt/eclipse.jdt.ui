@@ -25,6 +25,7 @@ public class AllRefactoringTests {
 		suite.addTest(ExtractConstantTests.suite());
 		suite.addTest(PromoteTempToFieldTests.suite());
 		suite.addTest(ConvertAnonymousToNestedTests.suite());
+		suite.addTest(InlineConstantTests.suite());
 		
 		//-- structure
 		suite.addTest(ChangeSignatureTests.suite());
