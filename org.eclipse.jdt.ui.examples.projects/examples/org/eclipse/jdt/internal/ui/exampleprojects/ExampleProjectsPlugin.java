@@ -3,7 +3,8 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.exampleprojects;
-import java.net.MalformedURLException;
+
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.core.resources.IWorkspace;
@@ -31,7 +32,8 @@ public class ExampleProjectsPlugin extends AbstractUIPlugin {
 		super(descriptor);
 		fgPlugin= this;
 	}
-
+
+
 	/**
 	 * Returns the shared instance.
 	 */
@@ -45,7 +47,8 @@ public class ExampleProjectsPlugin extends AbstractUIPlugin {
 	public static IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
 	}
-	public ImageDescriptor getImageDescriptor(String name) {
+
+	public ImageDescriptor getImageDescriptor(String name) {
 		try {
 			URL url= new URL(getDescriptor().getInstallURL(), name);
 			return ImageDescriptor.createFromURL(url);
@@ -57,17 +60,21 @@ public class ExampleProjectsPlugin extends AbstractUIPlugin {
 	public static String getPluginId() {
 		return getDefault().getDescriptor().getUniqueIdentifier();
 	}	
-
+
+
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
 	}
-
+
+
 	public static void log(String message) {
 		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, message, null));
 	}
-
+
+
 	public static void log(Throwable e) {
 		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, "Internal Error", e)); //$NON-NLS-1$
 	}
-
+
+
 }

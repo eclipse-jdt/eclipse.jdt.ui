@@ -3,7 +3,8 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.exampleprojects;
-import java.lang.reflect.InvocationTargetException;
+
+import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -28,7 +29,8 @@ import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
-public class ExampleProjectCreationWizard extends BasicNewResourceWizard implements INewWizard, IExecutableExtension {
+
+public class ExampleProjectCreationWizard extends BasicNewResourceWizard implements INewWizard, IExecutableExtension {
 
 	private ExampleProjectCreationWizardPage[] fPages;
 	private IConfigurationElement fConfigElement;
@@ -52,7 +54,8 @@ import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 			}
 		}
 	}
-	/*
+
+	/*
 	 * @see Wizard#addPages
 	 */	
 	public void addPages() {
