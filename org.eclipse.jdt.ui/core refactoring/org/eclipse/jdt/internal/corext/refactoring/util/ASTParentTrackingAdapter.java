@@ -26,7 +26,12 @@ public class ASTParentTrackingAdapter implements IAbstractSyntaxTreeVisitor, IPa
 		Assert.isNotNull(fVisitor);
 	}
 	
+	/**
+	 *Returns <code>null</code> if there's no parent on the stack.
+	 */
 	public AstNode getParent() {
+		if (fParentStack.isEmpty())
+			return null;
 		return (AstNode)fParentStack.get(fParentStack.size() - 1);
 	}
 	
