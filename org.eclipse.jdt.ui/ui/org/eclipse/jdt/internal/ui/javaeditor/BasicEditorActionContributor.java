@@ -82,7 +82,7 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 		}
 	};	
 	
-	protected RetargetTextEditorAction fContentAssist;	
+	protected CodeAssistAction fContentAssist;	
 	protected SelectionAction fShiftRight;
 	protected SelectionAction fShiftLeft;
 	
@@ -90,7 +90,7 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 	public BasicEditorActionContributor() {
 		super();
 		
-		fContentAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal."); //$NON-NLS-1$
+		fContentAssist= new CodeAssistAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal."); //$NON-NLS-1$
 		fShiftRight= new SelectionAction("ShiftRight.", ITextOperationTarget.SHIFT_RIGHT);		 //$NON-NLS-1$
 		fShiftLeft= new SelectionAction("ShiftLeft.", ITextOperationTarget.SHIFT_LEFT); //$NON-NLS-1$
 		
