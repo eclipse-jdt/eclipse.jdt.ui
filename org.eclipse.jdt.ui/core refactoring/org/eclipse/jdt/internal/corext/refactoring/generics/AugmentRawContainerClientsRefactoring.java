@@ -30,23 +30,33 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.AugmentRawContainerClientsTCModel;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
@@ -65,7 +75,7 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 
 	private TextChangeManager fChangeManager;
 	private final IJavaElement[] fElements;
-	private AugmentRawContainerClientsAnalyzer fAnalyzer;
+	private AugmentRawContainerClientsTCModel fTCModel;
 	
 	private AugmentRawContainerClientsRefactoring(IJavaElement[] elements) {
 		fElements= elements;
@@ -101,18 +111,58 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		pm.beginTask("", 3); //$NON-NLS-1$
+	public RefactoringStatus checkFinalConditions(final IProgressMonitor pm) throws CoreException, OperationCanceledException {
+		pm.beginTask("", 4); //$NON-NLS-1$
 		pm.setTaskName(RefactoringCoreMessages.getString("AugmentRawContainerClientsRefactoring.checking_preconditions"));
 		try {
 			RefactoringStatus result= check15();
-			fAnalyzer= new AugmentRawContainerClientsAnalyzer(fElements);
-			fAnalyzer.analyzeContainerReferences(new SubProgressMonitor(pm, 2), result);
 			
-			HashMap declarationsToUpdate= fAnalyzer.getDeclarationsToUpdate();
+			IJavaProject project= fElements[0].getJavaProject();
+			fTCModel= new AugmentRawContainerClientsTCModel(project);
+			
+			pm.setTaskName("Building collections hierarchy...");
+			GenericContainers genericContainers= GenericContainers.create(project, new SubProgressMonitor(pm, 1));
+			IType[] containerTypes= genericContainers.getContainerTypes();
+			genericContainers= null;
+			
+			SearchPattern pattern= RefactoringSearchEngine.createOrPattern(containerTypes, IJavaSearchConstants.REFERENCES);
+			//TODO: Add container methods (from ContainerMethods)?
+			// -> still misses calls of kind myObj.takeList(myObj.getList()) in CU that doesn't import List
+			IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(fElements, IJavaSearchScope.SOURCES);
+			
+			pm.setTaskName("Finding affected compilation units...");
+			final ICompilationUnit[] cus= RefactoringSearchEngine.findAffectedCompilationUnits(pattern, searchScope, new SubProgressMonitor(pm, 1), result);
+			//TODO: creation of bindings in ContainerMethods should be in loop.
+			//Problem: must be completed before loop starts. => do this as first action of first call to ASTRequestor#acceptAST()
+			final AugmentRawContClConstraintCreator unitCollector= new AugmentRawContClConstraintCreator(fTCModel);
+			pm.setTaskName("Building constraints system...");
+			
+			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+			parser.setResolveBindings(true);
+			parser.setProject(project);
+			parser.createASTs(cus, new String[0], new ASTRequestor() {
+				public void acceptAST(CompilationUnit ast, ICompilationUnit source) {
+					pm.subTask(source.getElementName());
+					ast.setProperty(RefactoringASTParser.SOURCE_PROPERTY, source);
+					ast.accept(unitCollector);
+					//TODO: add required methods/cus to "toscan" list
+					fTCModel.newCu();
+				}
+				public void acceptBinding(IBinding binding, String bindingKey) {
+				}
+			}, new SubProgressMonitor(pm, 1));
+			
+			fTCModel.newCu();
+			pm.setTaskName("Solving constraints...");
+			AugmentRawContClConstraintsSolver solver= new AugmentRawContClConstraintsSolver(fTCModel);
+			solver.solveConstraints();
+			HashMap declarationsToUpdate= solver.getDeclarationsToUpdate();
+			HashMap castsToRemove= solver.getCastsToRemove();
+			solver= null; //free caches
+			
 			fChangeManager= new TextChangeManager();
-			rewriteDeclarations(declarationsToUpdate, new SubProgressMonitor(pm, 1));
-//			result.merge(performAnalysis(pm));
+			rewriteDeclarations(declarationsToUpdate, castsToRemove, new SubProgressMonitor(pm, 1));
 			
 			IFile[] filesToModify= ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 			result.merge(Checks.validateModifiesFiles(filesToModify, null));
@@ -123,6 +173,7 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 	}
 
 	private RefactoringStatus check15() {
+		//TODO: move to checkInitialConditions() and make an error iff jdk15 not available
 		RefactoringStatus result= new RefactoringStatus();
 		HashMap/*<IJavaProject, Boolean>*/ project15ness= new HashMap/*<IJavaProject, Boolean>*/();
 		
@@ -144,31 +195,7 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 		return result;
 	}
 
-//	/**
-//	 * Perform the type inference analysis and collect the results.
-//	 * @return RefactoringStatus
-//	 */
-//	private RefactoringStatus performAnalysis(IProgressMonitor pm) {
-//		AugmentRawContainerClientsAnalyzer analyzer= new AugmentRawContainerClientsAnalyzer(fOwningClass, fAffectedUnits, fConstraintOptimizations, fDebugMessages);
-//	
-//		analyzer.setModifyPublicMembers(fModifyPublicMembers);
-//		analyzer.setInferMethodTypeParms(fInferMethodTypeParms);
-//		analyzer.analyze(pm);
-//	
-//		Set	affectedCUs= analyzer.getAffectedCUs();
-//	
-//		fAffectedUnits= (ICompilationUnit[]) affectedCUs.toArray(new ICompilationUnit[affectedCUs.size()]);
-//	
-//		fDeclarationSites= analyzer.computeDeclarationSiteModifications();
-//		fAllocationSites= analyzer.computeAllocationSiteModifications();
-//		fRemovableCasts= analyzer.computeRemovableCasts();
-//	
-//		fAnalyzerStatistics= analyzer.getStatistics();
-//	
-//		return new RefactoringStatus();
-//	}
-
-	private void rewriteDeclarations(HashMap/*<ICompilationUnit, List<ConstraintVariable2>>*/ declarationsToUpdate, IProgressMonitor pm) throws CoreException {
+	private void rewriteDeclarations(HashMap /*<ICompilationUnit, List<ConstraintVariable2>>*/ declarationsToUpdate, HashMap castsToRemove, IProgressMonitor pm) throws CoreException {
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		Set entrySet= declarationsToUpdate.entrySet();
 		pm.beginTask("", entrySet.size()); //$NON-NLS-1$
@@ -191,7 +218,7 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 			}
 			
 			//TODO: create AugmentRawContainerClientsUpdate which is a mapping from CU to {declarationsToUpdate, castsToRemove, ...}
-			List casts= (List) fAnalyzer.getCastsToRemove().get(cu);
+			List casts= (List) castsToRemove.get(cu);
 			if (casts != null) {
 				for (Iterator castsIter= casts.iterator(); castsIter.hasNext();) {
 					CastVariable2 castCv= (CastVariable2) castsIter.next();
@@ -265,7 +292,6 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
 			DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.getString("Change.javaChanges"), fChangeManager.getAllChanges()); //$NON-NLS-1$
-			fAnalyzer= null; // free memory
 			return result;
 		} finally{
 			pm.done();
