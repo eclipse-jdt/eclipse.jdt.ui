@@ -665,7 +665,10 @@ public class ChangeParametersControl extends Composite {
 			return null;
 		Text text= (Text) control;
 		JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(true, false);
-		processor.setCompletionContext(fTypeContext.getCuHandle(), fTypeContext.getBeforeString(), fTypeContext.getAfterString());
+		if (fTypeContext == null)
+			processor.setCompletionContext(null, null, null);
+		else
+			processor.setCompletionContext(fTypeContext.getCuHandle(), fTypeContext.getBeforeString(), fTypeContext.getAfterString());
 		SubjectControlContentAssistant contentAssistant= ControlContentAssistHelper.createJavaContentAssistant(processor);
 		ContentAssistHandler.createHandlerForText(text, contentAssistant);
 		return contentAssistant;
