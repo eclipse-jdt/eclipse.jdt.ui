@@ -48,9 +48,10 @@ public class DisplayViewAction extends Action implements IUpdate {
 	 * enabled state accordingly.
 	 */
 	public void update() {
-		if (fOperationTarget == null && fTargetProvider != null && fOperationCode != -1)
+		if (fOperationTarget == null && fTargetProvider != null && fOperationCode != -1){
 			fOperationTarget= (ITextOperationTarget) fTargetProvider.getAdapter(ITextOperationTarget.class);
-			
+		}
+	
 		boolean isEnabled= (fOperationTarget != null && fOperationTarget.canDoOperation(fOperationCode));
 		setEnabled(isEnabled);
 	}
