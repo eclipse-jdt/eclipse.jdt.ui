@@ -46,7 +46,7 @@ public class ProblemMarkerManager implements IResourceChangeListener {
 			if (res instanceof IProject && delta.getKind() == IResourceDelta.CHANGED) {
 				try {
 					IProject project= (IProject) res;
-					if (!(project.hasNature(JavaCore.NATURE_ID) && project.isOpen())) {
+					if (!project.isAccessible() || !project.hasNature(JavaCore.NATURE_ID)) {
 						// only track open Java projects
 						return false;
 					}
