@@ -118,7 +118,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod(methodName, signature);
-		assertTrue("method does not exist", method.exists());
+		assertTrue("method " + methodName +" does not exist", method.exists());
 		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method, JavaPreferencesSettings.getCodeGenerationSettings());
 		if (returnTypeName != null)
 			ref.setNewReturnTypeName(returnTypeName);
@@ -1009,6 +1009,18 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.NONE;
 		String newReturnTypeName= null;
 		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
+	public void testAll55()throws Exception{
+		printTestDisabledMessage("test for bug 32654 [Refactoring] Change method signature with problems");
+//		String[] signature= {"[QObject;", "I", "Z"};
+//		String[] newNames= {"e"};
+//		String[] newTypes= {"boolean"};
+//		String[] newDefaultValues= {"true"};
+//		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+//		int[] newIndices= {2};
+//		helperAdd(signature, newParamInfo, newIndices);
+
 	}
 
 }
