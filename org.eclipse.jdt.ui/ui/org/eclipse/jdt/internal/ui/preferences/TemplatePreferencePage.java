@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -79,8 +80,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	private Button fFormatButton;
 	private ControlEnableState fEditorEnabler;
 	
-	private List fEditorComponents;
-	
+	private boolean fSuppressError= false; // #4354
 	private Template fCurrent;
 	
 	public TemplatePreferencePage() {
@@ -239,7 +239,12 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 				if (fCurrent == null)
 					return;
 
-				fCurrent.setName(fNameText.getText());				
+				String name= fNameText.getText();
+
+				if (fSuppressError && (name.length() != 0))
+					fSuppressError= false;
+
+				fCurrent.setName(name);				
 				fTableViewer.refresh(fCurrent);
 				updateButtons();
 			}
@@ -367,22 +372,39 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		updateButtons();
 	}
 	
+	private static boolean isValid(Template template) {
+		return
+			(template == null) ||
+			(template.getName().trim().length() != 0);		
+	}
+	
 	private void updateButtons() {
+		boolean valid= isValid(fCurrent);
 		int selectionCount= ((IStructuredSelection) fTableViewer.getSelection()).size();
 		int itemCount= fTableViewer.getTable().getItemCount();
 		
-		boolean error= (fCurrent != null) && (fCurrent.getName().length() == 0);
-		
-		fAddButton.setEnabled(!error);
+		fTableViewer.getTable().setEnabled(valid);
+		fAddButton.setEnabled(valid);
 		fRemoveButton.setEnabled(selectionCount > 0 && selectionCount <= itemCount);
-		fEnableAllButton.setEnabled(itemCount > 0);
-		fDisableAllButton.setEnabled(itemCount > 0);
-
+		fEnableAllButton.setEnabled(valid && itemCount > 0);
+		fDisableAllButton.setEnabled(valid && itemCount > 0);
+		setValid(valid);
+		
+		updateStatus(valid);
+	}
+	
+	private void updateStatus(boolean valid) {
 		StatusInfo status= new StatusInfo();
-		if (error)
-			status.setError(TemplateMessages.getString("TemplatePreferencePage.error.noname")); //$NON-NLS-1$
-		setValid(!status.matches(IStatus.ERROR));
-		StatusUtil.applyToStatusLine(this, status);			
+		
+		if (!valid) {
+			if (fSuppressError)
+				status.setError(""); //$NON-NLS-1$							
+			else
+				status.setError(TemplateMessages.getString("TemplatePreferencePage.error.noname")); //$NON-NLS-1$
+		}
+
+		if (valid || !fSuppressError)
+			StatusUtil.applyToStatusLine(this, status);			
 	}
 	
 	private static int getIndex(String context) {
@@ -436,9 +458,13 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		Template template= new Template();
 		template.setContext("java"); //$NON-NLS-1$
 
+		fSuppressError= true;
+
 		TemplateSet.getInstance().add(template);
 		fTableViewer.refresh();
 		fTableViewer.setChecked(template, template.isEnabled());
+		fTableViewer.setSelection(new StructuredSelection(template));
+		
 		enterEditor(template);
 
 		fNameText.setFocus();

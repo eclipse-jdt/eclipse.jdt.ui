@@ -10,32 +10,32 @@ All Rights Reserved.
   <!-- java -->
 
   <template description="for(array, index) - iterate over array" name="for" context="java"
-  >for (int ${1}= 0; ${1} &lt; ${0}.length; ${1}++) {&#10;&#9;${cursor}&#10;}</template>
+  >for (int ${1} = 0; ${1} &lt; ${0}.length; ${1}++) {&#10;&#9;${cursor}&#10;}</template>
 
   <template description="iterate over array" name="for" context="java"
-  >for (int ${index}= 0; ${index} &lt; ${cursor}${array}${cursor-end}.length; ${index}++) {&#10;&#9;&#10;}</template>
+  >for (int ${index} = 0; ${index} &lt; ${cursor}${array}${cursor-end}.length; ${index}++) {&#10;&#9;&#10;}</template>
 
   <template description="iterate over collection" name="for" context="java"
->for (Iterator ${iterator}= ${collection}.iterator(); ${iterator}.hasNext(); ) {
-	${element_type} ${element}= (${type}) ${iterator}.next();
+>for (Iterator ${iterator} = ${collection}.iterator(); ${iterator}.hasNext(); ) {
+	${element_type} ${element} = (${type}) ${iterator}.next();
 	${cursor}
 }</template>
 
   <template description="iterate over vector" name="for" context="java"
 >for (int ${index}= 0; ${index} &lt; ${vector}.size(); ${index}++) {
-	${element_type} ${element}= (${type}) ${vector}.elementAt(${index});
+	${element_type} ${element} = (${type}) ${vector}.elementAt(${index});
 	${cursor}
 }</template>
 
   <template description="iterate over enumeration" name="while" context="java"
 >while (${enumeration}.hasMoreElements()) {
-	${element_type} ${element}= (${type}) ${enumeration}.nextElement();
+	${element_type} ${element}i = (${type}) ${enumeration}.nextElement();
 	${cursor}
 }</template>
 
   <template description="iterate with iterator" name="while" context="java"
 >while (${iterator}.hasNext()) {
-	${element_type} ${element}= (${type}) ${iterator}.next();
+	${element_type} ${element}i = (${type}) ${iterator}.next();
 	${cursor}
 }</template>
 
@@ -65,7 +65,7 @@ All Rights Reserved.
 
   <template description="instanceof(object, type)" name="instanceof" context="java"
 >if (${0} instanceof ${1}) {
-	${1} ${cursor}name${cursor-end}= (${1}) ${0};
+	${1} ${cursor}name${cursor-end} = (${1}) ${0};
 	
 }</template>
 
