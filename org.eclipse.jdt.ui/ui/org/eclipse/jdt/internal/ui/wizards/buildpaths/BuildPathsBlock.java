@@ -630,6 +630,8 @@ public class BuildPathsBlock {
 		int nEntries= classPathEntries.size();
 		IClasspathEntry[] classpath= new IClasspathEntry[nEntries];
 		
+		ArrayList paths= new ArrayList();
+		ArrayList urls= new ArrayList();
 		
 		// create and set the class path
 		for (int i= 0; i < nEntries; i++) {
@@ -648,29 +650,31 @@ public class BuildPathsBlock {
 			
 			classpath[i]= entry.getClasspathEntry();
 						
-			// set javadoc location
-			configureJavaDoc(entry);
+			collectJavaDocLocations(entry, paths, urls);
 		}	
+		JavaUI.setLibraryJavadocLocations((IPath[]) paths.toArray(new IPath[paths.size()]), (URL[]) urls.toArray(new URL[paths.size()]));
+		
 		monitor.worked(1);
 				
 		fCurrJProject.setRawClasspath(classpath, outputLocation, new SubProgressMonitor(monitor, 7));		
 	}
 	
-	private void configureJavaDoc(CPListElement entry) {
-		if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
+	private void collectJavaDocLocations(CPListElement entry, List paths, List urls) {
+		int entryKind= entry.getEntryKind();
+		if (entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE) {
 			URL javadocLocation= (URL) entry.getAttribute(CPListElement.JAVADOC);
 			IPath path= entry.getPath();
-			if (entry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+			if (entryKind == IClasspathEntry.CPE_VARIABLE) {
 				path= JavaCore.getResolvedVariablePath(path);
 			}
 			if (path != null) {
-				JavaUI.setLibraryJavadocLocation(path, javadocLocation);
+				paths.add(path);
+				urls.add(javadocLocation);
 			}			
-		} else if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+		} else if (entryKind == IClasspathEntry.CPE_CONTAINER) {
 			Object[] children= entry.getChildren(false);
 			for (int i= 0; i < children.length; i++) {
-				CPListElement curr= (CPListElement) children[i];
-				configureJavaDoc(curr);
+				collectJavaDocLocations((CPListElement) children[i], paths, urls);
 			}
 		}
 	}

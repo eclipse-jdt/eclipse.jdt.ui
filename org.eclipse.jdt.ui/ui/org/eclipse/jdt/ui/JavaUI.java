@@ -669,6 +669,22 @@ public final class JavaUI {
 	public static void setLibraryJavadocLocation(IPath archivePath, URL url) {
 		JavaDocLocations.setLibraryJavadocLocation(archivePath, url);
 	}
+	
+	/**
+	 * Sets the Javadoc locations for archives with the given paths. 
+	 * 
+	 * @param archivePaths The paths of the libraries; this can be an workspace path
+	 * or an external path in case of an external library.
+	 * @param urls The Javadoc locations to set corresponsinmg to the archive path of the same index. These locations should contain index.html and
+	 * a file 'package-list'. <code>null</code> is a valid location entry and clears the current documentation
+	 * location. The length of the arry must be equals to the number of archive paths passed.
+	 * 
+	 * @since 3.0
+	 */
+	public static void setLibraryJavadocLocations(IPath[] archivePaths, URL[] urls) {
+		Assert.isTrue(archivePaths != null && urls != null && urls.length == archivePaths.length);
+		JavaDocLocations.setLibraryJavadocLocations(archivePaths, urls);
+	}
 
 	/**
 	 * Returns the Javadoc location for an archive or <code>null</code> if no
@@ -718,7 +734,7 @@ public final class JavaUI {
 	 * element's library or project. Example of a returned URL is <i>http://www.
 	 * junit. org/junit/javadoc</i>.
 	 * 
-	 * @param The element for which the doc URL is requested.
+	 * @param element The element for which the doc URL is requested.
 	 * 
 	 * @since 2.0
 	 */		
@@ -733,7 +749,7 @@ public final class JavaUI {
 	 * if no javadoc location has been attached to the element's library or
 	 * project.
 	 * 
-	 * @param The element for which the doc URL is requested.
+	 * @param element The element for which the doc URL is requested.
 	 * @param includeAnchor If set, the URL contains an anchor for member references:
 	 * <i>http://www.junit.org/junit/javadoc/junit/extensions/TestSetup.html#run(junit.framework.TestResult)</i>. Note
 	 * that this involves type resolving and is a more expensive call than without anchor.

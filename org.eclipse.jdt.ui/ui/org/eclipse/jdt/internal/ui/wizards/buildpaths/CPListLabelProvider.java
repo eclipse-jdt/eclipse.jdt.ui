@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
@@ -102,7 +103,24 @@ class CPListLabelProvider extends LabelProvider {
 			buf.append(NewWizardMessages.getString("CPListLabelProvider.javadoc_location.label")); //$NON-NLS-1$
 			URL path= (URL) attrib.getValue();
 			if (path != null) {
-				buf.append(path.toExternalForm());
+				String str= path.toExternalForm();
+				String prefix= JavaDocLocations.ARCHIVE_PREFIX;
+				if (str.startsWith(prefix)) {
+					int sepIndex= str.lastIndexOf('!');
+					if (sepIndex == -1) {
+						buf.append(str.substring(prefix.length()));
+					} else {
+						String archive= str.substring(prefix.length(), sepIndex);
+						String root= str.substring(sepIndex + 1);
+						if (root.length() > 0 && !root.equals(String.valueOf('/'))) {
+							buf.append(NewWizardMessages.getFormattedString("CPListLabelProvider.twopart", new String[] { archive, root })); //$NON-NLS-1$
+						} else {
+							buf.append(archive);
+						}
+					}
+				} else {
+					buf.append(str);
+				}
 			} else {
 				buf.append(notAvailable);
 			}

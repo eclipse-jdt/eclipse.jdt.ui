@@ -60,6 +60,8 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 public class JavaDocLocations {
 	
+	public static final String ARCHIVE_PREFIX= "jar:file:/"; //$NON-NLS-1$
+	
 	private static final QualifiedName QUALIFIED_NAME= new QualifiedName(JavaUI.ID_PLUGIN, "jdoclocation"); //$NON-NLS-1$
 	
 	private static final String NODE_ROOT= "javadoclocation"; //$NON-NLS-1$
@@ -132,6 +134,15 @@ public class JavaDocLocations {
 	 */
 	public static void setLibraryJavadocLocation(IPath archivePath, URL url) {
 		setJavadocBaseLocation(canonicalizedPath(archivePath), url, true);
+	}
+
+	/**
+	 * Sets the Javadocs locations for archives with given paths.
+	 */
+	public static void setLibraryJavadocLocations(IPath[] archivePaths, URL[] urls) {
+		for (int i= urls.length - 1; i >= 0 ; i--) {
+			setJavadocBaseLocation(canonicalizedPath(archivePaths[i]), urls[i], i == 0);
+		}
 	}
 	
 	/**
@@ -475,4 +486,6 @@ public class JavaDocLocations {
 		}
 		buf.append(')');
 	}
+
+
 }
