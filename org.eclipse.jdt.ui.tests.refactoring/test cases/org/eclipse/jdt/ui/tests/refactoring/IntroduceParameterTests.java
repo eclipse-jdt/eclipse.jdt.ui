@@ -31,7 +31,11 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	private static final String SLASH_OUT= "/out";
 	public IntroduceParameterTests(String name) {
 		super(name);
-	} 
+	}
+	
+	public static Test setUpTest(Test test) {
+		return new MySetup(test);
+	}
 
 	/** for the JUnit Launcher */
 	public static Test suite() {
@@ -151,6 +155,10 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	}
 
 	public void testSimple_StaticGetter1() throws Exception {
+		performOK();
+	}
+	
+	public void testSimple_Formatting1() throws Exception {
 		performOK();
 	}
 }

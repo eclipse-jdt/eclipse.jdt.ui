@@ -44,6 +44,8 @@ import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchPattern;
 
@@ -340,14 +342,14 @@ public class IntroduceParameterRefactoring extends Refactoring {
 
 		//replace selected expression
 		ASTNode newExpression= ast.newSimpleName(fParameterName);
-		fSource.getOldRewrite().replace(fSelectedExpression, newExpression,
+		fSource.getASTRewrite().replace(fSelectedExpression, newExpression,
 				fSource.createGroupDescription(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.replace"))); //$NON-NLS-1$
 		
 		//add parameter
 		SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
 		param.setName(ast.newSimpleName(fParameterName));
 		String type= fSource.getImportRewrite().addImport(fSelectedExpression.resolveTypeBinding());
-		param.setType((Type) fSource.getOldRewrite().createStringPlaceholder(type, ASTNode.SIMPLE_TYPE));
+		param.setType((Type) fSource.getASTRewrite().createStringPlaceholder(type, ASTNode.SIMPLE_TYPE));
 		fMethodDeclaration.parameters().add(param);
 		fSource.getOldRewrite().markAsInserted(param,
 				fSource.createGroupDescription(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.add_parameter"))); //$NON-NLS-1$
@@ -385,9 +387,10 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		
 		public boolean visit(MethodInvocation node) {
 			if (Bindings.equals(fMethodBinding, node.resolveMethodBinding())) {
-				Expression argument= (Expression) ASTNode.copySubtree(fCURewrite.getRoot().getAST(), fExpression);
-				node.arguments().add(argument);
-				fCURewrite.getOldRewrite().markAsInserted(argument,
+				ASTRewrite astRewrite= fCURewrite.getASTRewrite();
+				Expression argument= (Expression) astRewrite.createCopyTarget(fExpression);
+				ListRewrite listRewrite= astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY);
+				listRewrite.insertLast(argument, 
 						fCURewrite.createGroupDescription(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.add_argument"))); //$NON-NLS-1$
 			}
 			return super.visit(node);
