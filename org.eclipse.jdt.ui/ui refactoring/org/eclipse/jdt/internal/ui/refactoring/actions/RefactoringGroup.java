@@ -1,8 +1,8 @@
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
+
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.jface.action.IMenuManager;
@@ -139,7 +139,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 		String label= RefactoringResources.getResourceString("Refactoring.RenameMethod.label");
 		return new AbstractOpenRefactoringWizardAction(provider, label, IMethod.class) {
 			protected Wizard createWizard() {
-				return new RenameRefactoringWizard("Rename Method");
+				return new RenameRefactoringWizard("Refactoring.RenameMethod");
 			}
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenameVirtualMethodRefactoring(changeCreator, (IMethod)obj);
@@ -151,7 +151,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 		String label= RefactoringResources.getResourceString("Refactoring.RenameMethod.label");
 		return new AbstractOpenRefactoringWizardAction(provider, label, IMethod.class) {
 			protected Wizard createWizard() {
-				return new RenameRefactoringWizard("Rename Method");
+				return new RenameRefactoringWizard("Refactoring.RenameMethod");
 			}
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenameMethodInInterfaceRefactoring(changeCreator, (IMethod)obj);
@@ -163,7 +163,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 		String label= RefactoringResources.getResourceString("Refactoring.RenameMethod.label");
 		return new AbstractOpenRefactoringWizardAction(provider, label, IMethod.class) {
 			protected Wizard createWizard() {
-				return new RenameRefactoringWizard("Rename Method");
+				return new RenameRefactoringWizard("Refactoring.RenameMethod");
 			}
 			
 			protected Refactoring createNewRefactoringInstance(Object obj){
@@ -176,7 +176,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 		String label= RefactoringResources.getResourceString("Refactoring.RenameMethod.label");
 		return new AbstractOpenRefactoringWizardAction(provider, label, IMethod.class) {
 			protected Wizard createWizard() {
-				return new RenameRefactoringWizard("Rename Method");
+				return new RenameRefactoringWizard("Refactoring.RenameMethod");
 			}
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenameStaticMethodRefactoring(changeCreator, (IMethod)obj);
@@ -190,7 +190,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 		String label= RefactoringResources.getResourceString("Refactoring.RenameType.label");
 		return new AbstractOpenRefactoringWizardAction(provider, label, IType.class) {
 			protected Wizard createWizard() { 
-				return new RenameRefactoringWizard("Rename Type"); 
+				return new RenameRefactoringWizard("Refactoring.RenameType"); 
 			}
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenameTypeRefactoring(changeCreator, (IType)obj);
@@ -207,7 +207,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 		String label= RefactoringResources.getResourceString("Refactoring.RenamePackage.label");
 		return new AbstractOpenRefactoringWizardAction(provider, label, IPackageFragment.class) {
 			protected Wizard createWizard() { 
-				return new RenameRefactoringWizard("Rename Package"); 
+				return new RenameRefactoringWizard("Refactoring.RenamePackage"); 
 			}
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenamePackageRefactoring(changeCreator, (IPackageFragment)obj);
@@ -221,7 +221,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 		String label= RefactoringResources.getResourceString("Refactoring.RenameField.label");
 		return new AbstractOpenRefactoringWizardAction(provider, label, IField.class) {
 			protected Wizard createWizard() { 
-				return new RenameRefactoringWizard("Rename Field"); 
+				return new RenameRefactoringWizard("Refactoring.RenameField"); 
 			}
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenameFieldRefactoring(changeCreator, (IField)obj);
@@ -250,7 +250,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 		String label= RefactoringResources.getResourceString("Refactoring.RenameCompilationUnit.label");
 		return new AbstractOpenRefactoringWizardAction(provider, label, ICompilationUnit.class) {
 			protected Wizard createWizard() { 
-				return new RenameRefactoringWizard("Rename Compilation Unit"); 
+				return new RenameRefactoringWizard("Refactoring.RenameCompilationUnit"); 
 			}
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenameCompilationUnitRefactoring(changeCreator, (ICompilationUnit)obj);

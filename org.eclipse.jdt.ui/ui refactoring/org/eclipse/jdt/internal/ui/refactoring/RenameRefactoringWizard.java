@@ -1,8 +1,8 @@
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 2000
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
+
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.RefactoringStatus;
@@ -10,8 +10,17 @@ import org.eclipse.jdt.core.refactoring.tagging.IRenameRefactoring;import org.e
 
 public class RenameRefactoringWizard extends RefactoringWizard {
 	
-	public RenameRefactoringWizard(String name){
-		super(name);
+	private String fPageMessage;
+	private static final String INPUTPAGE_TITLE_SUFFIX= ".wizard.inputpage.title";
+	private static final String INPUTPAGE_MESSAGE_SUFFIX= ".wizard.inputpage.message";
+	
+	public RenameRefactoringWizard(String resourceKeyPrefix){
+		super(getInputPageResource(resourceKeyPrefix, INPUTPAGE_TITLE_SUFFIX));
+		fPageMessage= getInputPageResource(resourceKeyPrefix, INPUTPAGE_MESSAGE_SUFFIX);
+	}
+	
+	private static String getInputPageResource(String prefix, String suffix){
+		return RefactoringResources.getResourceString(prefix + suffix);
 	}
 
 	/**
@@ -20,11 +29,13 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	protected void addUserInputPages(){
 		String initialSetting= getRenameRefactoring().getCurrentName();
 		setPageTitle(getPageTitle() + ": "+ initialSetting);
-		addPage( new RenameInputWizardPage(true, initialSetting) {
+		RenameInputWizardPage page= new RenameInputWizardPage(true, initialSetting) {
 			protected RefactoringStatus validateTextField(String text) {
 				return validateNewName(text);
 			}	
-		});
+		};
+		page.setMessage(fPageMessage);
+		addPage(page);
 	}
 	
 	private IRenameRefactoring getRenameRefactoring(){

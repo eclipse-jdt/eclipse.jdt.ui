@@ -1,8 +1,8 @@
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 2000
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
+
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -14,9 +14,12 @@ import org.eclipse.jdt.core.refactoring.cus.MoveCompilationUnitRefactoring;
 
 public class MoveCompilationUnitWizard extends RefactoringWizard {
 
-	private static final String PAGE_TITLE= "Move Compilation Unit";
+	private static final String RESOURCEKEY_PREFIX= "Refactoring.MoveCompilationUnit";
+	private static final String INPUTPAGE_TITLE_SUFFIX= ".wizard.inputpage.title";
+	private static final String INPUTPAGE_MESSAGE_SUFFIX= ".wizard.inputpage.message";
+	
 	public MoveCompilationUnitWizard(){
-		super(PAGE_TITLE);
+		super(getInputPageResource(RESOURCEKEY_PREFIX, INPUTPAGE_TITLE_SUFFIX));
 	}
 
 	/**
@@ -25,12 +28,17 @@ public class MoveCompilationUnitWizard extends RefactoringWizard {
 	protected void addUserInputPages(){
 		MoveCompilationUnitRefactoring ref= getMoveCompilationUnitRefactoring();
 		setPageTitle(getPageTitle() + ": " + ref.getCompilationUnit().getElementName());
-		addPage( new MoveCompilationUnitWizardPage(true){
+		MoveCompilationUnitWizardPage page=  new MoveCompilationUnitWizardPage(true){
 			protected RefactoringStatus validateTextField(String text) {
 				return validateUserInput(text);
 			}	
-		}
-		);
+		};
+		page.setMessage(getInputPageResource(RESOURCEKEY_PREFIX, INPUTPAGE_MESSAGE_SUFFIX));
+		addPage(page);
+	}
+	
+	private static String getInputPageResource(String prefix, String suffix){
+		return RefactoringResources.getResourceString(prefix + suffix);
 	}
 	
 	private MoveCompilationUnitRefactoring getMoveCompilationUnitRefactoring(){
