@@ -182,6 +182,22 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * @see ISourceViewer#configure(SourceViewerConfiguration)
 	 */
 	public void configure(SourceViewerConfiguration configuration) {
+
+		/*
+		 * Prevent access to colors disposed in unconfigure(), see:
+		 *   https://bugs.eclipse.org/bugs/show_bug.cgi?id=53641
+		 *   https://bugs.eclipse.org/bugs/show_bug.cgi?id=86177
+		 */ 
+		StyledText textWidget= getTextWidget();
+		if (textWidget != null && !textWidget.isDisposed()) {
+			Color foregroundColor= textWidget.getForeground();
+			if (foregroundColor != null && foregroundColor.isDisposed())
+				textWidget.setForeground(null);
+			Color backgroundColor= textWidget.getBackground();
+			if (backgroundColor != null && backgroundColor.isDisposed())
+				textWidget.setBackground(null);
+		}
+		
 		super.configure(configuration);
 		if (configuration instanceof JavaSourceViewerConfiguration) {
 			JavaSourceViewerConfiguration javaSVCconfiguration= (JavaSourceViewerConfiguration)configuration;
@@ -301,17 +317,11 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 			fHierarchyPresenter.uninstall();
 			fHierarchyPresenter= null;
 		}
-		
-		StyledText textWidget= getTextWidget();
 		if (fForegroundColor != null) {
-			if (textWidget != null && !textWidget.isDisposed())
-				textWidget.setForeground(null);
 			fForegroundColor.dispose();
 			fForegroundColor= null;
 		}
 		if (fBackgroundColor != null) {
-			if (textWidget != null && !textWidget.isDisposed())
-				textWidget.setBackground(null);
 			fBackgroundColor.dispose();
 			fBackgroundColor= null;
 		}
