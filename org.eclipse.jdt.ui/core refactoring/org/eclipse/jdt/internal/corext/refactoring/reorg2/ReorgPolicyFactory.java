@@ -596,7 +596,7 @@ class ReorgPolicyFactory {
 		}
 
 		private void copyInitializerToDestination(IInitializer initializer, ASTRewrite targetRewrite, CompilationUnit destinationCuNode) throws JavaModelException {
-			BodyDeclaration newInitializer= (BodyDeclaration) targetRewrite.createPlaceholder(getUnindentedSource(initializer), ASTRewrite.BODY_DECLARATION);
+			BodyDeclaration newInitializer= (BodyDeclaration) targetRewrite.createPlaceholder(getUnindentedSource(initializer), ASTRewrite.INITIALIZER);
 			targetRewrite.markAsInserted(newInitializer);
 			TypeDeclaration targetClass= getTargetType(destinationCuNode);
 			targetClass.bodyDeclarations().add(newInitializer);
@@ -610,7 +610,7 @@ class ReorgPolicyFactory {
 		}
 
 		private void copyMethodToDestination(IMethod method, ASTRewrite targetRewrite, CompilationUnit destinationCuNode) throws JavaModelException {
-			BodyDeclaration newMethod= (BodyDeclaration) targetRewrite.createPlaceholder(getUnindentedSource(method), ASTRewrite.BODY_DECLARATION);
+			BodyDeclaration newMethod= (BodyDeclaration) targetRewrite.createPlaceholder(getUnindentedSource(method), ASTRewrite.METHOD_DECLARATION);
 			targetRewrite.markAsInserted(newMethod);
 			TypeDeclaration targetClass= getTargetType(destinationCuNode);
 			targetClass.bodyDeclarations().add(newMethod);

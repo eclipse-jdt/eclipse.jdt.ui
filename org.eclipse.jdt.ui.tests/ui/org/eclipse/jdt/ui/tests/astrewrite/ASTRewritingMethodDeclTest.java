@@ -59,7 +59,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingMethodDeclTest("testMethodComments4"));
+			suite.addTest(new ASTRewritingMethodDeclTest("testListInsert"));
 			return suite;
 		}
 	}
@@ -333,7 +333,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
-	}	
+	}
 	
 	public void testListInserts() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -526,6 +526,60 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
 	}
+
+	public void testListInsert() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public abstract void lee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException, SecurityException;\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);	
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		
+		{ // insert at first and last position & remove 2nd, add after 2nd, remove 3rd
+			MethodDeclaration methodDecl= findMethodDeclaration(type, "lee");
+			List parameters= methodDecl.parameters();
+			assertTrue("must be 3 parameters", parameters.size() == 3);
+
+			SingleVariableDeclaration newParam1= createNewParam(ast, "m1");
+			SingleVariableDeclaration newParam2= createNewParam(ast, "m2");
+			parameters.add(0, newParam1);
+			parameters.add(newParam2);
+			rewrite.markAsInserted(newParam1);
+			rewrite.markAsInserted(newParam2);
+			
+			List thrownExceptions= methodDecl.thrownExceptions();
+			assertTrue("must be 3 thrown exceptions", thrownExceptions.size() == 3);
+			
+			rewrite.markAsRemoved((ASTNode) thrownExceptions.get(1));
+			rewrite.markAsRemoved((ASTNode) thrownExceptions.get(2));
+			
+			Name newThrownException= ast.newSimpleName("InterruptedException");
+			thrownExceptions.add(2, newThrownException);
+			rewrite.markAsInserted(newThrownException);			
+		}				
+
+
+	
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public abstract void lee(float m1, int p1, int p2, int p3, float m2) throws IllegalArgumentException, InterruptedException;\n");
+		buf.append("}\n");	
+			
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
 	
 	public void testListCombinations() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -644,6 +698,62 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
 	}
+	
+	public void testListCombination() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public E(int p1, int p2, int p3) {}\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);	
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		
+		{ // delete all and insert after & insert 2 exceptions
+			MethodDeclaration methodDecl= findMethodDeclaration(type, "E");
+			List parameters= methodDecl.parameters();
+			assertTrue("must be 3 parameters", parameters.size() == 3);
+		
+			rewrite.markAsRemoved((ASTNode) parameters.get(0));
+			rewrite.markAsRemoved((ASTNode) parameters.get(1));
+			rewrite.markAsRemoved((ASTNode) parameters.get(2));
+
+			SingleVariableDeclaration newParam= createNewParam(ast, "m");
+			parameters.add(newParam);
+			rewrite.markAsInserted(newParam);
+
+			List thrownExceptions= methodDecl.thrownExceptions();
+			assertTrue("must be 0 thrown exceptions", thrownExceptions.size() == 0);
+			
+			Name newThrownException1= ast.newSimpleName("InterruptedException");
+			thrownExceptions.add(newThrownException1);
+			rewrite.markAsInserted(newThrownException1);
+			
+			Name newThrownException2= ast.newSimpleName("ArrayStoreException");
+			thrownExceptions.add(newThrownException2);
+			rewrite.markAsInserted(newThrownException2);
+			
+		}
+
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public E(float m) throws InterruptedException, ArrayStoreException {}\n");
+		buf.append("}\n");	
+			
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+	
 	
 	public void testMethodBody() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1440,7 +1550,67 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
+	}
+	
+	public void testInsertFieldAfter() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+
+		buf.append("public class DD {\n");
+		buf.append("    private int fCount1;\n");
+		buf.append("\n");	
+		buf.append("    /*\n");
+		buf.append("     *\n");
+		buf.append("     */\n");
+		buf.append("    private void foo1(){\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("DD.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		AST ast= astRoot.getAST();
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "DD");
+		{
+			List decls= type.bodyDeclarations();
+			//FieldDeclaration field= (FieldDeclaration) decls.get(0);
+
+			VariableDeclarationFragment frag= ast.newVariableDeclarationFragment();
+			frag.setName(ast.newSimpleName("fColor"));
+			FieldDeclaration newField= ast.newFieldDeclaration(frag);
+			newField.setType(ast.newPrimitiveType(PrimitiveType.CHAR));
+			newField.setModifiers(Modifier.PRIVATE);
+			
+			rewrite.markAsInserted(newField);
+			decls.add(1, newField);
+			
+		}
+
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+
+		proposal.apply(null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+
+		buf.append("public class DD {\n");
+		buf.append("    private int fCount1;\n");
+		buf.append("    private char fColor;\n");
+		buf.append("\n");
+		buf.append("    /*\n");
+		buf.append("     *\n");
+		buf.append("     */\n");
+		buf.append("    private void foo1(){\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}	
+	
+	
 	
 	
 }

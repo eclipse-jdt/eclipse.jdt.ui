@@ -475,7 +475,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
     private void addNewConstructorWithInitializing(ASTRewrite rewrite, TypeDeclaration typeDeclaration) throws CoreException {
 		String constructorSource = format(getNewConstructorSource(typeDeclaration), 0);
-		BodyDeclaration newConstructor= (BodyDeclaration)rewrite.createPlaceholder(constructorSource, ASTRewrite.BODY_DECLARATION);
+		BodyDeclaration newConstructor= (BodyDeclaration)rewrite.createPlaceholder(constructorSource, ASTRewrite.METHOD_DECLARATION);
         rewrite.markAsInserted(newConstructor);
         int constructorInsertIndex= computeInsertIndexForNewConstructor(typeDeclaration);
         typeDeclaration.bodyDeclarations().add(constructorInsertIndex, newConstructor);

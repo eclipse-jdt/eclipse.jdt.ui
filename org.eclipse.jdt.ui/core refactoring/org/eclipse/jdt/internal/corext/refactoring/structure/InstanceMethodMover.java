@@ -173,7 +173,7 @@ class InstanceMethodMover {
 		private CompilationUnitChange addNewMethodToMyClass(String newMethodText, List allTypesUsedWithoutQualification) throws CoreException {
 			TypeDeclaration myClassDeclaration= getReceiverClassDeclaration();
 			ASTRewrite rewrite= new ASTRewrite(myClassDeclaration);
-			BodyDeclaration newMethodNode= (BodyDeclaration) rewrite.createPlaceholder(newMethodText, ASTRewrite.BODY_DECLARATION);
+			BodyDeclaration newMethodNode= (BodyDeclaration) rewrite.createPlaceholder(newMethodText, ASTRewrite.METHOD_DECLARATION);
 			myClassDeclaration.bodyDeclarations().add(newMethodNode);
 			rewrite.markAsInserted(newMethodNode, RefactoringCoreMessages.getString("InstanceMethodMover.create_in_receiver")); //$NON-NLS-1$
 

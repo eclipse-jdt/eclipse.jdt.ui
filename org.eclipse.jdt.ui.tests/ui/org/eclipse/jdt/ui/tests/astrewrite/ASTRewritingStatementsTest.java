@@ -31,8 +31,6 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
 public class ASTRewritingStatementsTest extends ASTRewritingTest {
 
-	private final boolean BUG_23259= false;
-	
 	private static final Class THIS= ASTRewritingStatementsTest.class;
 	
 	private IJavaProject fJProject1;
@@ -68,393 +66,409 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		JavaProjectHelper.delete(fJProject1);
 	}
 	
-	public void testAdd() throws Exception {
+	public void testInsert1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		{	/* foo(): append a return statement */
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class C {\n");
-			buf.append("    public Object foo() {\n");
-			buf.append("        if (this.equals(new Object())) {\n");
-			buf.append("            toString();\n");
-			buf.append("        }\n");
-			buf.append("    }\n");
-			buf.append("}\n");	
-			ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
-		
-			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-			ASTRewrite rewrite= new ASTRewrite(astRoot);
-			TypeDeclaration type= findTypeDeclaration(astRoot, "C");
-			
-			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
-			Block block= methodDecl.getBody();
-			assertTrue("No block" , block != null);	
-			
-			List statements= block.statements();
-			ReturnStatement returnStatement= block.getAST().newReturnStatement();
-			returnStatement.setExpression(ASTNodeFactory.newDefaultExpression(type.getAST(), methodDecl.getReturnType(), methodDecl.getExtraDimensions()));
-			statements.add(returnStatement);
-			rewrite.markAsInserted(returnStatement);
-			
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-			proposal.getCompilationUnitChange().setSave(true);
-			
-			proposal.apply(null);
-			
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class C {\n");
-			buf.append("    public Object foo() {\n");
-			buf.append("        if (this.equals(new Object())) {\n");
-			buf.append("            toString();\n");
-			buf.append("        }\n");
-			buf.append("        return null;\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			
-			assertEqualString(cu.getSource(), buf.toString());
-			clearRewrite(rewrite);
-		}
-		{	/* hoo(): return; -> return false;  */
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class D {\n");
-			buf.append("    public Object goo() {\n");
-			buf.append("        return new Integer(3);\n");
-			buf.append("    }\n");
-			buf.append("    public void hoo(int p1, Object p2) {\n");
-			buf.append("        return;\n");
-			buf.append("    }\n");		
-			buf.append("}\n");	
-			ICompilationUnit cu= pack1.createCompilationUnit("D.java", buf.toString(), false, null);
-			
-			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-			ASTRewrite rewrite= new ASTRewrite(astRoot);
-			TypeDeclaration type= findTypeDeclaration(astRoot, "D");
-		
-			MethodDeclaration methodDecl= findMethodDeclaration(type, "hoo");
-			Block block= methodDecl.getBody();
-			assertTrue("No block" , block != null);
-			
-			List statements= block.statements();
-			assertTrue("No statements in block", !statements.isEmpty());
-			assertTrue("No ReturnStatement", statements.get(0) instanceof ReturnStatement);
-			
-			ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
-			Expression expr= block.getAST().newBooleanLiteral(false);
-			
-			returnStatement.setExpression(expr);
-			rewrite.markAsInserted(expr);
-			
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-			proposal.getCompilationUnitChange().setSave(true);
-			
-			proposal.apply(null);
-			
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class D {\n");
-			buf.append("    public Object goo() {\n");
-			buf.append("        return new Integer(3);\n");
-			buf.append("    }\n");
-			buf.append("    public void hoo(int p1, Object p2) {\n");
-			buf.append("        return false;\n");
-			buf.append("    }\n");		
-			buf.append("}\n");	
-			
-			assertEqualString(cu.getSource(), buf.toString());			
-			clearRewrite(rewrite);
-		}
-		{  // add after comment 
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E {\n");
-			buf.append("    public Object goo() {\n");
-			buf.append("        i++; //comment\n");
-			buf.append("        i++; //comment\n");					
-			buf.append("        return new Integer(3);\n");
-			buf.append("    }\n");
-			buf.append("}\n");	
-			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-			
-			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-			ASTRewrite rewrite= new ASTRewrite(astRoot);
-			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
-			AST ast= astRoot.getAST();
-		
-			MethodDeclaration methodDecl= findMethodDeclaration(type, "goo");
-			Block block= methodDecl.getBody();
-			assertTrue("No block" , block != null);
-			
-			MethodInvocation invocation1= ast.newMethodInvocation();
-			invocation1.setName(ast.newSimpleName("foo"));
-			ExpressionStatement statement1= ast.newExpressionStatement(invocation1);
-			
-			rewrite.markAsInserted(statement1);
-			
-			MethodInvocation invocation2= ast.newMethodInvocation();
-			invocation2.setName(ast.newSimpleName("foo"));
-			ExpressionStatement statement2= ast.newExpressionStatement(invocation2);
-			
-			rewrite.markAsInserted(statement2);		
-			
-			List statements= methodDecl.getBody().statements();
-			
-			rewrite.markAsRemoved((ASTNode) statements.get(1));
-			
-			statements.add(2, statement2);
-			statements.add(1, statement1);
-			
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-			proposal.getCompilationUnitChange().setSave(true);
-			
-			proposal.apply(null);
-			
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E {\n");
-			buf.append("    public Object goo() {\n");
-			buf.append("        i++; //comment\n");
-			buf.append("        foo();\n");
-			buf.append("        foo();\n");				
-			buf.append("        return new Integer(3);\n");
-			buf.append("    }\n");
-			buf.append("}\n");	
-			
-			assertEqualString(cu.getSource(), buf.toString());			
-			clearRewrite(rewrite);
-		}		
-		
-	}
+		/* foo(): append a return statement */
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class C {\n");
+		buf.append("    public Object foo() {\n");
+		buf.append("        if (this.equals(new Object())) {\n");
+		buf.append("            toString();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 	
-	public void testRemove() throws Exception {
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
+		
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		assertTrue("No block" , block != null);	
+		
+		List statements= block.statements();
+		ReturnStatement returnStatement= block.getAST().newReturnStatement();
+		returnStatement.setExpression(ASTNodeFactory.newDefaultExpression(type.getAST(), methodDecl.getReturnType(), methodDecl.getExtraDimensions()));
+		statements.add(returnStatement);
+		rewrite.markAsInserted(returnStatement);
+		
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class C {\n");
+		buf.append("    public Object foo() {\n");
+		buf.append("        if (this.equals(new Object())) {\n");
+		buf.append("            toString();\n");
+		buf.append("        }\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+
+	public void testInsert2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		
+		/* insert a statement before */
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class D {\n");
+		buf.append("    public Object goo() {\n");
+		buf.append("        Integer i= new Integer(3);\n");
+		buf.append("    }\n");
+		buf.append("    public void hoo(int p1, Object p2) {\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("D.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "D");
+		
+		MethodDeclaration methodDeclGoo= findMethodDeclaration(type, "goo");
+		List bodyStatements= methodDeclGoo.getBody().statements();
+
+		ASTNode copy= rewrite.createCopy((ASTNode) bodyStatements.get(0));
+		
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "hoo");
+		Block block= methodDecl.getBody();
+		assertTrue("No block" , block != null);
+		
+		List statements= block.statements();
+		assertTrue("No statements in block", !statements.isEmpty());
+		assertTrue("No ReturnStatement", statements.get(0) instanceof ReturnStatement);
+		
+		statements.add(0, copy);
+		rewrite.markAsInserted(copy);
+		
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class D {\n");
+		buf.append("    public Object goo() {\n");
+		buf.append("        Integer i= new Integer(3);\n");
+		buf.append("    }\n");
+		buf.append("    public void hoo(int p1, Object p2) {\n");
+		buf.append("        Integer i= new Integer(3);\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");	
+		
+		assertEqualString(cu.getSource(), buf.toString());			
+		clearRewrite(rewrite);
+	}
+
+	public void testInsert3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+	  // add after comment 
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public Object goo() {\n");
+		buf.append("        i++; //comment\n");
+		buf.append("        i++; //comment\n");					
+		buf.append("        return new Integer(3);\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		AST ast= astRoot.getAST();
+	
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "goo");
+		Block block= methodDecl.getBody();
+		assertTrue("No block" , block != null);
+		
+		MethodInvocation invocation1= ast.newMethodInvocation();
+		invocation1.setName(ast.newSimpleName("foo"));
+		ExpressionStatement statement1= ast.newExpressionStatement(invocation1);
+		
+		rewrite.markAsInserted(statement1);
+		
+		MethodInvocation invocation2= ast.newMethodInvocation();
+		invocation2.setName(ast.newSimpleName("foo"));
+		ExpressionStatement statement2= ast.newExpressionStatement(invocation2);
+		
+		rewrite.markAsInserted(statement2);		
+		
+		List statements= methodDecl.getBody().statements();
+		
+		rewrite.markAsRemoved((ASTNode) statements.get(1));
+		
+		statements.add(2, statement2);
+		statements.add(1, statement1);
+		
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public Object goo() {\n");
+		buf.append("        i++; //comment\n");
+		buf.append("        foo();\n");
+		buf.append("        foo();\n");				
+		buf.append("        return new Integer(3);\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		
+		assertEqualString(cu.getSource(), buf.toString());			
+		clearRewrite(rewrite);
+	}		
+	
+	public void testRemove1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);			
-		{	/* foo():  remove if... */
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class C {\n");
-			buf.append("    public Object foo() {\n");
-			buf.append("        if (this.equals(new Object())) {\n");
-			buf.append("            toString();\n");
-			buf.append("        }\n");
-			buf.append("    }\n");
-			buf.append("}\n");	
-			ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
-			
-			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-			ASTRewrite rewrite= new ASTRewrite(astRoot);
-			TypeDeclaration type= findTypeDeclaration(astRoot, "C");
-			
-			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
-			Block block= methodDecl.getBody();
-			assertTrue("No block" , block != null);	
-			
-			List statements= block.statements();
-			assertTrue("No statements in block", !statements.isEmpty());
-			
-			rewrite.markAsRemoved((ASTNode) statements.get(0));
-					
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-			proposal.getCompilationUnitChange().setSave(true);
-			
-			proposal.apply(null);
-			
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class C {\n");
-			buf.append("    public Object foo() {\n");
-			buf.append("    }\n");
-			buf.append("}\n");
+		/* foo():  remove if... */
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class C {\n");
+		buf.append("    public Object foo() {\n");
+		buf.append("        if (this.equals(new Object())) {\n");
+		buf.append("            toString();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
+		
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		assertTrue("No block" , block != null);	
+		
+		List statements= block.statements();
+		assertTrue("No statements in block", !statements.isEmpty());
+		
+		rewrite.markAsRemoved((ASTNode) statements.get(0));
 				
-			assertEqualString(cu.getSource(), buf.toString());
-			clearRewrite(rewrite);
-		}
-		{
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class D {\n");
-			buf.append("    public Object goo() {\n");
-			buf.append("        return new Integer(3);\n");
-			buf.append("    }\n");
-			buf.append("    public void hoo(int p1, Object p2) {\n");
-			buf.append("        return;\n");
-			buf.append("    }\n");		
-			buf.append("}\n");	
-			ICompilationUnit cu= pack1.createCompilationUnit("D.java", buf.toString(), false, null);
-			
-			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-			ASTRewrite rewrite= new ASTRewrite(astRoot);
-			TypeDeclaration type= findTypeDeclaration(astRoot, "D");
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
 		
-			MethodDeclaration methodDecl= findMethodDeclaration(type, "goo");
-			Block block= methodDecl.getBody();
-			assertTrue("No block" , block != null);
-			
-			List statements= block.statements();
-			assertTrue("No statements in block", !statements.isEmpty());
-			assertTrue("No ReturnStatement", statements.get(0) instanceof ReturnStatement);
-			
-			ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
-			Expression expr= returnStatement.getExpression();
-			rewrite.markAsRemoved(expr);
-			
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-			proposal.getCompilationUnitChange().setSave(true);
-			
-			proposal.apply(null);
-			
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class D {\n");
-			buf.append("    public Object goo() {\n");
-			buf.append("        return;\n");
-			buf.append("    }\n");
-			buf.append("    public void hoo(int p1, Object p2) {\n");
-			buf.append("        return;\n");
-			buf.append("    }\n");		
-			buf.append("}\n");	
-			
-			assertEqualString(cu.getSource(), buf.toString());			
-			clearRewrite(rewrite);
-		}
-		{  // delete 
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E {\n");
-			buf.append("    public Object goo() {\n");
-			buf.append("        i++; //comment\n");
-			buf.append("        i++; //comment\n");					
-			buf.append("        return new Integer(3);\n");
-			buf.append("    }\n");
-			buf.append("}\n");	
-			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-			
-			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-			ASTRewrite rewrite= new ASTRewrite(astRoot);
-			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		proposal.apply(null);
 		
-			MethodDeclaration methodDecl= findMethodDeclaration(type, "goo");
-			Block block= methodDecl.getBody();
-			assertTrue("No block" , block != null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class C {\n");
+		buf.append("    public Object foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
 			
-			List statements= methodDecl.getBody().statements();
-			rewrite.markAsRemoved((ASTNode) statements.get(0));
-			rewrite.markAsRemoved((ASTNode) statements.get(1));
-			rewrite.markAsRemoved((ASTNode) statements.get(2));
-			
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-			proposal.getCompilationUnitChange().setSave(true);
-			
-			proposal.apply(null);
-			
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class E {\n");
-			buf.append("    public Object goo() {\n");
-			buf.append("    }\n");
-			buf.append("}\n");	
-			
-			assertEqualString(cu.getSource(), buf.toString());			
-			clearRewrite(rewrite);
-		}
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+	public void testRemove2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);			
+	
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class D {\n");
+		buf.append("    public Object goo() {\n");
+		buf.append("        return new Integer(3);\n");
+		buf.append("    }\n");
+		buf.append("    public void hoo(int p1, Object p2) {\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("D.java", buf.toString(), false, null);
 		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "D");
+	
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "goo");
+		Block block= methodDecl.getBody();
+		assertTrue("No block" , block != null);
+		
+		List statements= block.statements();
+		assertTrue("No statements in block", !statements.isEmpty());
+		assertTrue("No ReturnStatement", statements.get(0) instanceof ReturnStatement);
+		
+		ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
+		Expression expr= returnStatement.getExpression();
+		rewrite.markAsRemoved(expr);
+		
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class D {\n");
+		buf.append("    public Object goo() {\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");
+		buf.append("    public void hoo(int p1, Object p2) {\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");	
+		
+		assertEqualString(cu.getSource(), buf.toString());			
+		clearRewrite(rewrite);
+	}
+	public void testRemove3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);			
+	
+	  // delete 
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public Object goo() {\n");
+		buf.append("        i++; //comment\n");
+		buf.append("        i++; //comment\n");					
+		buf.append("        return new Integer(3);\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+	
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "goo");
+		Block block= methodDecl.getBody();
+		assertTrue("No block" , block != null);
+		
+		List statements= methodDecl.getBody().statements();
+		rewrite.markAsRemoved((ASTNode) statements.get(0));
+		rewrite.markAsRemoved((ASTNode) statements.get(1));
+		rewrite.markAsRemoved((ASTNode) statements.get(2));
+		
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public Object goo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		
+		assertEqualString(cu.getSource(), buf.toString());			
+		clearRewrite(rewrite);
 	}
 	
-	public void testReplace() throws Exception {
+	public void testReplace1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);		
-		{	/* foo(): if.. -> return; */
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class C {\n");
-			buf.append("    public Object foo() {\n");
-			buf.append("        if (this.equals(new Object())) {\n");
-			buf.append("            toString();\n");
-			buf.append("        }\n");
-			buf.append("    }\n");
-			buf.append("}\n");	
-			ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
-			
-			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-			ASTRewrite rewrite= new ASTRewrite(astRoot);
-			TypeDeclaration type= findTypeDeclaration(astRoot, "C");
-			
-			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
-			Block block= methodDecl.getBody();
-			assertTrue("No block" , block != null);	
-			
-			List statements= block.statements();
-			assertTrue("No statements in block", !statements.isEmpty());
-			
-			ReturnStatement returnStatement= block.getAST().newReturnStatement();
-			rewrite.markAsReplaced((ASTNode) statements.get(0), returnStatement);
-					
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-			proposal.getCompilationUnitChange().setSave(true);
-			
-			proposal.apply(null);
-			
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class C {\n");
-			buf.append("    public Object foo() {\n");
-			buf.append("        return;\n");			
-			buf.append("    }\n");
-			buf.append("}\n");
-				
-			assertEqualString(cu.getSource(), buf.toString());
-			clearRewrite(rewrite);
-		}		
-		{	/* goo(): new Integer(3) -> 'null' */
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class D {\n");
-			buf.append("    public Object goo() {\n");
-			buf.append("        return new Integer(3);\n");
-			buf.append("    }\n");
-			buf.append("    public void hoo(int p1, Object p2) {\n");
-			buf.append("        return;\n");
-			buf.append("    }\n");		
-			buf.append("}\n");	
-			ICompilationUnit cu= pack1.createCompilationUnit("D.java", buf.toString(), false, null);
-			
-			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
-			ASTRewrite rewrite= new ASTRewrite(astRoot);
-			TypeDeclaration type= findTypeDeclaration(astRoot, "D");
+		/* foo(): if.. -> return; */
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class C {\n");
+		buf.append("    public Object foo() {\n");
+		buf.append("        if (this.equals(new Object())) {\n");
+		buf.append("            toString();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 		
-			MethodDeclaration methodDecl= findMethodDeclaration(type, "goo");
-			Block block= methodDecl.getBody();
-			assertTrue("No block" , block != null);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "C");
+		
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		assertTrue("No block" , block != null);	
+		
+		List statements= block.statements();
+		assertTrue("No statements in block", !statements.isEmpty());
+		
+		ReturnStatement returnStatement= block.getAST().newReturnStatement();
+		rewrite.markAsReplaced((ASTNode) statements.get(0), returnStatement);
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class C {\n");
+		buf.append("    public Object foo() {\n");
+		buf.append("        return;\n");			
+		buf.append("    }\n");
+		buf.append("}\n");
 			
-			List statements= block.statements();
-			assertTrue("No statements in block", !statements.isEmpty());
-			assertTrue("No ReturnStatement", statements.get(0) instanceof ReturnStatement);
-			
-			ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
-			Expression expr= returnStatement.getExpression();
-			Expression modified= ASTNodeFactory.newDefaultExpression(type.getAST(), methodDecl.getReturnType(), methodDecl.getExtraDimensions());
-	
-			rewrite.markAsReplaced(expr, modified);
-			
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
-			proposal.getCompilationUnitChange().setSave(true);
-			
-			proposal.apply(null);
-			
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class D {\n");
-			buf.append("    public Object goo() {\n");
-			buf.append("        return null;\n");
-			buf.append("    }\n");
-			buf.append("    public void hoo(int p1, Object p2) {\n");
-			buf.append("        return;\n");
-			buf.append("    }\n");		
-			buf.append("}\n");	
-			
-			assertEqualString(cu.getSource(), buf.toString());
-			clearRewrite(rewrite);
-		}
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
 	}
+	
+	public void testReplace2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);		
+		
+		/* goo(): new Integer(3) -> 'null' */
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class D {\n");
+		buf.append("    public Object goo() {\n");
+		buf.append("        return new Integer(3);\n");
+		buf.append("    }\n");
+		buf.append("    public void hoo(int p1, Object p2) {\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("D.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "D");
+	
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "goo");
+		Block block= methodDecl.getBody();
+		assertTrue("No block" , block != null);
+		
+		List statements= block.statements();
+		assertTrue("No statements in block", !statements.isEmpty());
+		assertTrue("No ReturnStatement", statements.get(0) instanceof ReturnStatement);
+		
+		ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
+		Expression expr= returnStatement.getExpression();
+		Expression modified= ASTNodeFactory.newDefaultExpression(type.getAST(), methodDecl.getReturnType(), methodDecl.getExtraDimensions());
+
+		rewrite.markAsReplaced(expr, modified);
+		
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class D {\n");
+		buf.append("    public Object goo() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("    public void hoo(int p1, Object p2) {\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");		
+		buf.append("}\n");	
+		
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+
 	
 	public void testBreakStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1241,13 +1255,9 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			// remove statements
 			
-			if (BUG_23259) {
-				System.out.println(getClass().getName()+"::" + getName() +" limited (bug 23259)");
-			} else {
 			rewrite.markAsRemoved((ASTNode) statements.get(0));
 			rewrite.markAsRemoved((ASTNode) statements.get(1));
 			rewrite.markAsRemoved((ASTNode) statements.get(2));
-			}
 			
 			// change case statement
 			SwitchCase caseStatement= (SwitchCase) statements.get(3);
@@ -1300,11 +1310,6 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        switch (i) {\n");
 		buf.append("            case 11 :\n");
 		buf.append("                return;\n");
-		if (BUG_23259) {		
-		buf.append("            case 1:\n");
-		buf.append("                i= 1;\n");
-		buf.append("                break;\n");
-		}	
 		buf.append("            case 10:\n");		
 		buf.append("                i= 2;\n");
 		buf.append("                break;\n");			

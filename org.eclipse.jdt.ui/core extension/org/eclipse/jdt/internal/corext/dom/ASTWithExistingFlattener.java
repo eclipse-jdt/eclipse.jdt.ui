@@ -44,9 +44,15 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 			case ASTRewrite.BLOCK:
 				placeHolder= ast.newBlock();
 				break;
-			case ASTRewrite.BODY_DECLARATION:
-				placeHolder= ast.newInitializer();
+			case ASTRewrite.METHOD_DECLARATION:
+				placeHolder= ast.newMethodDeclaration();
 				break;
+			case ASTRewrite.FIELD_DECLARATION:
+				placeHolder= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
+				break;
+			case ASTRewrite.INITIALIZER:
+				placeHolder= ast.newInitializer();
+				break;								
 			case ASTRewrite.SINGLEVAR_DECLARATION:
 				placeHolder= ast.newSingleVariableDeclaration();
 				break;

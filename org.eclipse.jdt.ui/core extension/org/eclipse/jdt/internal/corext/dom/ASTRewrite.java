@@ -16,9 +16,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
@@ -77,7 +79,6 @@ public final class ASTRewrite {
 	
 	/** Constant used to create place holder nodes */
 	public static final int UNKNOWN= -1;
-	public static final int BODY_DECLARATION= 1;
 	public static final int BLOCK= 2;
 	public static final int EXPRESSION= 3;
 	public static final int STATEMENT= 4;
@@ -86,6 +87,9 @@ public final class ASTRewrite {
 	public static final int JAVADOC= 7;
 	public static final int VAR_DECLARATION_FRAGMENT= 8;
 	public static final int TYPE_DECLARATION= 9;
+	public static final int FIELD_DECLARATION= 10;
+	public static final int METHOD_DECLARATION= 11;
+	public static final int INITIALIZER= 12;
 	
 	/** Constant used to describe the kind of the change */
 	public static final int INSERTED= 1;
@@ -353,7 +357,8 @@ public final class ASTRewrite {
 	 * Creates a target node for a source string to be inserted without being formatted. A target node can
 	 * be inserted or used to replace at the target position.
 	 * @param code String that will be inserted. The string must not have extra indent.
-	 * @param nodeType the type of the place holder. Valid values are <code>BODY_DECLARATION</code>,
+	 * @param nodeType the type of the place holder. Valid values are <code>METHOD_DECLARATION</code>,
+	 * <code>FIELD_DECLARATION</code>, <code>INITIALIZER</code>,
 	 * <code>TYPE_DECLARATION</code>, <code>BLOCK</code>, <code>STATEMENT</code>,
 	 *  <code>SINGLEVAR_DECLARATION</code>,<code> VAR_DECLARATION_FRAGMENT</code>,
 	 * <code>TYPE</code>, <code>EXPRESSION</code> and <code>JAVADOC</code> .
@@ -381,8 +386,12 @@ public final class ASTRewrite {
 			}
 		} else if (existingNode instanceof TypeDeclaration) {
 			return TYPE_DECLARATION;
-		} else if (existingNode instanceof BodyDeclaration) {
-			return BODY_DECLARATION;
+		} else if (existingNode instanceof MethodDeclaration) {
+			return METHOD_DECLARATION;
+		} else if (existingNode instanceof FieldDeclaration) {
+			return FIELD_DECLARATION;
+		} else if (existingNode instanceof Initializer) {
+			return INITIALIZER;					
 		} else if (existingNode instanceof SingleVariableDeclaration) {
 			return SINGLEVAR_DECLARATION;
 		} else if (existingNode instanceof VariableDeclarationFragment) {

@@ -196,7 +196,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 				buf.append("import java.util.Iterator;\n");
 				buf.append("import java.util.Vector;\n");				
 				buf.append("public class E {\n");
-				buf.append("    private Iterator iterator;\n");	
+				buf.append("    private Iterator iterator;\n");
 				buf.append("    public Vector goo() {\n");
 				buf.append("        return null;\n");
 				buf.append("    }\n");		
@@ -273,7 +273,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 				buf.append("package test1;\n");
 				buf.append("import java.util.Vector;\n");				
 				buf.append("public class E {\n");
-				buf.append("    private Object[] objects;\n");	
+				buf.append("    private Object[] objects;\n");
 				buf.append("    public Vector goo() {\n");
 				buf.append("        return null;\n");
 				buf.append("    }\n");		

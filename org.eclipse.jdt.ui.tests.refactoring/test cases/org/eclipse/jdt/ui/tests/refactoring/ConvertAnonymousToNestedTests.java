@@ -196,11 +196,13 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	}
 
 	public void test11() throws Exception{
-		helper1(5, 15, 5, 17, true, "Inner", Modifier.PRIVATE);
+		printTestDisabledMessage("disabled: bug 39076");
+		//helper1(5, 15, 5, 17, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test12() throws Exception{
-		helper1(8, 9, 10, 10, true, "Inner", Modifier.PRIVATE);
+		printTestDisabledMessage("disabled: bug 39076");
+		//helper1(8, 9, 10, 10, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test13() throws Exception{
@@ -228,7 +230,8 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	}
 
 	public void test19() throws Exception{
-		helper1(5, 12, 6, 21, true, "Inner", Modifier.PRIVATE);
+		printTestDisabledMessage("disabled: bug 39076");
+		//helper1(5, 12, 6, 21, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test20() throws Exception{

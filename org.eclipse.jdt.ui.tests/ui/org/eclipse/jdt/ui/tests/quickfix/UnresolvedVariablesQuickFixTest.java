@@ -279,7 +279,6 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int k;\n");
-		buf.append("\n");
 		buf.append("    private int i= k;\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
@@ -328,9 +327,8 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 				buf= new StringBuffer();
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
-				buf.append("    public int var2;\n");
-				buf.append("\n");				
 				buf.append("    private int var1;\n");
+				buf.append("    public int var2;\n");
 				buf.append("}\n");
 				assertEqualString(preview, buf.toString());
 			} else if (curr instanceof CUCorrectionProposal) {
@@ -400,9 +398,8 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public int var2;\n");
-		buf.append("\n");
 		buf.append("    protected int var1;\n");
+		buf.append("    public int var2;\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
 
@@ -652,8 +649,8 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class F {\n");
-		buf.append("    private int hash;\n");
 		buf.append("    public int mash;\n");
+		buf.append("    private int hash;\n");
 		buf.append("    void foo(E e) {\n");
 		buf.append("         e.var.hash= 2;\n");
 		buf.append("    }\n");

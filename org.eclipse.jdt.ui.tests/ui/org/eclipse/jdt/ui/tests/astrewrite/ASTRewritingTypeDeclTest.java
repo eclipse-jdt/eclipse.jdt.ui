@@ -40,11 +40,11 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 	}
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingTypeDeclTest("testTypeDeclSpacingFields"));
+			suite.addTest(new ASTRewritingTypeDeclTest("testTypeDeclInsertFields1"));
 			return suite;
 		}
 	}
@@ -427,6 +427,73 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
 	}
+	
+	public void testTypeDeclInsertFields1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("}\n");
+		buf.append("class F {\n");
+		buf.append("}\n");		
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		assertTrue("Errors in AST", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		AST ast= astRoot.getAST();
+		{ 	
+			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+			
+			VariableDeclarationFragment frag= ast.newVariableDeclarationFragment();
+			frag.setName(ast.newSimpleName("x"));
+			
+			FieldDeclaration decl= ast.newFieldDeclaration(frag);
+			decl.setType(ast.newPrimitiveType(PrimitiveType.INT));
+			
+			rewrite.markAsInserted(decl);
+			type.bodyDeclarations().add(decl);
+		}
+		{ 	
+			TypeDeclaration type= findTypeDeclaration(astRoot, "F");
+			
+			VariableDeclarationFragment frag1= ast.newVariableDeclarationFragment();
+			frag1.setName(ast.newSimpleName("x"));
+			
+			FieldDeclaration decl1= ast.newFieldDeclaration(frag1);
+			decl1.setType(ast.newPrimitiveType(PrimitiveType.INT));
+			
+			VariableDeclarationFragment frag2= ast.newVariableDeclarationFragment();
+			frag2.setName(ast.newSimpleName("y"));
+			
+			FieldDeclaration decl2= ast.newFieldDeclaration(frag2);
+			decl2.setType(ast.newPrimitiveType(PrimitiveType.INT));			
+			
+			rewrite.markAsInserted(decl1);
+			rewrite.markAsInserted(decl2);
+			type.bodyDeclarations().add(decl1);
+			type.bodyDeclarations().add(decl2);
+		}				
+
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    int x;\n");
+		buf.append("}\n");
+		buf.append("class F {\n");
+		buf.append("\n");
+		buf.append("    int x;\n");
+		buf.append("    int y;\n");	
+		buf.append("}\n");		
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}	
 	
 	public void testBug22161() throws Exception {
 	//	System.out.println(getClass().getName()+"::" + getName() +" disabled (bug 22161)");

@@ -33,6 +33,7 @@ public class Inner
 			}
 		};
 	}
+	
 	class InnerInner{
 		public void run()
 		{

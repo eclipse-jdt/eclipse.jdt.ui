@@ -611,7 +611,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private void addConstructor(TypeDeclaration declaration, ASTRewrite rewrite) throws CoreException {
-		BodyDeclaration newConst= (BodyDeclaration)rewrite.createPlaceholder(format(getNewConstructorSource(), 0), ASTRewrite.BODY_DECLARATION);
+		BodyDeclaration newConst= (BodyDeclaration)rewrite.createPlaceholder(format(getNewConstructorSource(), 0), ASTRewrite.METHOD_DECLARATION);
 		declaration.bodyDeclarations().add(0, newConst);
 		rewrite.markAsInserted(newConst);
 	}

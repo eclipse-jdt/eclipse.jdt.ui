@@ -31,6 +31,7 @@ class A
 				}
 			};
 		}
+		
 		class InnerInner{
 			public void run()
 			{

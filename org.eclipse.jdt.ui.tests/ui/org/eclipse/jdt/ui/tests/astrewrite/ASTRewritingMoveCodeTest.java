@@ -56,7 +56,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingMoveCodeTest("testMultipleCopiesOfSameNode"));
+			suite.addTest(new ASTRewritingMoveCodeTest("testMoveStatements"));
 			return suite;
 		}
 	}

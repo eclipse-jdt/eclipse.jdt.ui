@@ -1530,7 +1530,7 @@ public class PullUpRefactoring extends Refactoring {
 
 	private BodyDeclaration createNewTypeDeclarationNode(IType type, CompilationUnit declaringCuNode, ASTRewrite rewrite) throws JavaModelException {
 		TypeDeclaration oldType= ASTNodeSearchUtil.getTypeDeclarationNode(type, declaringCuNode);
-		return (BodyDeclaration)createPlaceholderForBodyDeclaration(oldType, getDeclaringWorkingCopy(), rewrite, true);
+		return (BodyDeclaration)createPlaceholderForTypeDeclaration(oldType, getDeclaringWorkingCopy(), rewrite, true);
 	}
 
 	private void copyMethodToTargetClass(IMethod method, CompilationUnit declaringCuNode, TypeDeclaration targetClass, ASTRewrite targetRewrite, IProgressMonitor pm) throws JavaModelException {
@@ -1760,8 +1760,8 @@ public class PullUpRefactoring extends Refactoring {
 		return (Type)rewrite.createPlaceholder(getBufferText(type, cu), ASTRewrite.TYPE);
 	}
 
-	private static BodyDeclaration createPlaceholderForBodyDeclaration(BodyDeclaration bodyDeclaration, ICompilationUnit cu, ASTRewrite rewrite, boolean removeIndentation) throws JavaModelException{
+	private static BodyDeclaration createPlaceholderForTypeDeclaration(BodyDeclaration bodyDeclaration, ICompilationUnit cu, ASTRewrite rewrite, boolean removeIndentation) throws JavaModelException{
 		String newBufferText= getNewText(bodyDeclaration, cu, removeIndentation);
-		return (BodyDeclaration)rewrite.createPlaceholder(newBufferText, ASTRewrite.BODY_DECLARATION);
+		return (BodyDeclaration)rewrite.createPlaceholder(newBufferText, ASTRewrite.TYPE_DECLARATION);
 	}
 }

@@ -347,22 +347,24 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			return rewriteList(list, startPos, keyword);
 		}
 		
+		protected boolean insertAfterSeparator(ASTNode node) {
+			return true;
+		}
 		
 		public int rewriteList(List list, int startPos, String keyword) {
 			fList= list;
 			fStartPos= startPos;
 			
 			int total= list.size();
-			
 			if (total == 0) {
 				return fStartPos;
 			}
-
+		
 			int currPos= -1;
 			
 			int firstNonDelete= total;
 			int lastNonInsert= -1;
-
+		
 			for (int i= 0; i < total; i++) {
 				ASTNode elem= getNode(i);
 				int currMark= getChangeKind(elem);
@@ -376,7 +378,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 					firstNonDelete= i;
 				}
 			}
-
+		
 			if (currPos == -1) {
 				if (keyword.length() > 0) {  // creating a new list -> insert keyword first (e.g. " throws ")
 					String description= getDescription(getNode(0)); // first node is insert
@@ -384,15 +386,17 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				}
 				currPos= startPos;
 			}
-			if (firstNonDelete == total) { // all deleted
+			if (firstNonDelete == total) { // all removed
 				currPos= startPos;
 			}
 			
 			final int UNDEFINED= -1;
 			
-			int prevMark= UNDEFINED;
 			ASTNode elem= getNode(0);
 			int currMark= getChangeKind(elem);
+			int prevEnd= -1;
+			boolean isAfter= true;
+		
 			for (int i= 0; i < total; i++) {
 				int nextIndex= i + 1;
 				ASTNode next= null;
@@ -404,23 +408,51 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				if (currMark == ASTRewrite.INSERTED) {
 					String description= getDescription(elem);
 					
-					if (prevMark == ASTRewrite.INSERTED || (i >= lastNonInsert && firstNonDelete < i)) { // last but not first
+					// add separator when we are last but not first 
+					boolean separatorFirst= (i  == lastNonInsert + 1 && (prevEnd != -1));
+					//	add separator when next is not a remove
+					boolean separatorAfter= (nextMark == ASTRewrite.REPLACED || nextMark == ASTRewrite.UNCHANGED || nextMark == ASTRewrite.INSERTED);
+					
+					if (separatorFirst) {
 						doTextInsert(currPos, getSeparatorString(i - 1), description);
 					}
-					doTextInsert(currPos, elem, getNodeIndent(i), true, description);
-					if (nextMark == ASTRewrite.REPLACED || nextMark == ASTRewrite.UNCHANGED) { // following an existing
-						doTextInsert(currPos, getSeparatorString(i), description);
-					}					
+					boolean insertAfterSeparator= separatorFirst || prevEnd == -1 ||  (prevEnd == currPos && isAfter) || insertAfterSeparator(elem);
+					if (insertAfterSeparator) {
+						doTextInsert(currPos, elem, getNodeIndent(i), true, description);
+						if (separatorAfter) {
+							doTextInsert(currPos, getSeparatorString(i), description);
+							isAfter= true;
+						}
+					} else { // first delimiter, then node (push existing delimiter to the back)
+						doTextInsert(prevEnd, getSeparatorString(i - 1), description);
+						doTextInsert(prevEnd, elem, getNodeIndent(i), true, description);
+						if (!separatorAfter) {
+							currPos= prevEnd;
+							isAfter= false;
+						}
+					}
 				} else {
 					if (currMark == ASTRewrite.REMOVED) {
 						int currEnd= getEndOfNode(elem);
-						int nextStart= getStartOfNextNode(nextIndex, currEnd); // start of next
+						int nextStart= currEnd;
 						
-						// extend remove range if next is delete or this is the next is the first non-delete
-						int end= (nextMark == ASTRewrite.REMOVED || (nextIndex == firstNonDelete)) ? nextStart : currEnd;
-						doTextRemoveAndVisit(currPos, end - currPos, elem);
-						
+						int start= currPos;
+						int end= currEnd;
+						if (i != lastNonInsert) {
+							nextStart= getStartOfNextNode(nextIndex, currEnd); // start of next
+							if ((prevEnd == currPos && !isAfter) && (nextIndex ==  ASTRewrite.REPLACED || nextIndex ==  ASTRewrite.UNCHANGED || nextIndex ==  ASTRewrite.INSERTED)) {
+								start= getStartOfNextNode(i, currPos); // start of curr
+								end= nextStart;
+							} else if (nextIndex == firstNonDelete || nextMark == ASTRewrite.REMOVED) {
+								end= nextStart;
+							}
+						}
+						doTextRemoveAndVisit(start, end - start, elem);
 						currPos= nextStart;
+						if (prevEnd != -1) {
+							prevEnd= end;
+							isAfter= true;
+						}
 					} else {
 						if (currMark == ASTRewrite.REPLACED) {
 							int currEnd= getEndOfNode(elem);
@@ -431,110 +463,22 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 							doTextInsert(currPos, changed, getNodeIndent(i), true, description);
 							
 							currPos= currEnd;
-						} else { // is same
+						} else { // is unchanged
 							doVisit(elem);
-							if (nextMark != ASTRewrite.UNCHANGED) { // no update needed if node is same
+							if (nextMark != ASTRewrite.UNCHANGED) { // no update needed if node is unchanged
 								currPos= getEndOfNode(elem);
 							}
 						}
+						prevEnd= currPos;
+						isAfter= false;
 						if (nextMark == ASTRewrite.REPLACED || nextMark == ASTRewrite.INSERTED) {
+							// reuse separator
 							currPos= getStartOfNextNode(nextIndex, currPos); // start of next
 						}
 					}
 				}
-				prevMark= currMark;
 				currMark= nextMark;
 				elem= next;
-			}
-			return currPos;
-		}
-		
-		public int rewriteList1(List list, int startPos, String keyword) {
-			fList= list;
-			fStartPos= startPos;
-			
-			int currPos= startPos;
-			
-			// count number of nodes before and after the rewrite
-			int total= list.size();
-			int before= 0;
-			int after= 0;
-			for (int i= 0; i < total; i++) {
-				ASTNode elem= getNode(i);
-				if (isInserted(elem)) {
-					after++;
-				} else {
-					before++;
-					if (before == 1) { // first entry
-						currPos= getStartOfNextNode(0, startPos);
-					}
-					if (!isRemoved(elem)) {
-						after++;
-					}
-				}
-			}
-		
-			if (after == 0) {
-				if (before != 0) { // all deleted
-					currPos= startPos;
-				} else {
-					return startPos; // before == 0 && after == 0
-				}
-			}
-		
-			if (before == 0 && keyword.length() > 0) {  // creating a new list -> insert keyword first (e.g. " throws ")
-				String description= getDescription((ASTNode) list.get(0)); // first node is insert
-				doTextInsert(startPos, keyword, description);
-			}
-
-			int prevEnd= currPos;
-			boolean needsSeparator= false;
-			boolean removePrevSeparator= false;
-			for (int i= 0; i < total; i++) {
-				ASTNode elem= getNode(i);
-				if (isInserted(elem)) {
-					after--;
-					
-					String description= getDescription(elem);
-					if (needsSeparator) { // last -> add comma	
-						doTextInsert(currPos, getSeparatorString(i - 1), description);
-					}
-					doTextInsert(currPos, elem, getNodeIndent(i), true, description);
-					if (after > 0) { // not the last that will be entered
-						doTextInsert(currPos, getSeparatorString(i), description);
-					}
-					needsSeparator= false;
-					removePrevSeparator= false;
-				} else {
-					before--;
-					int currEnd= getEndOfNode(elem);
-					int nextStart= getStartOfNextNode(i + 1, currEnd); // start of next
-
-					if (isRemoved(elem)) {
-						// delete including the comma
-						int offset= currPos;
-						if (removePrevSeparator && !needsSeparator) {
-							offset= prevEnd;
-							needsSeparator= true;
-						}
-						doTextRemoveAndVisit(offset, nextStart - offset, elem);
-					} else {
-						after--;
-						
-						if (isReplaced(elem)) {
-							String description= getDescription(elem);
-							ASTNode changed= getReplacingNode(elem);
-							doTextRemoveAndVisit(currPos, currEnd - currPos, elem);
-							doTextInsert(currPos, changed, getNodeIndent(i), true, description);
-						} else {
-							doVisit(elem);
-						}						
-						needsSeparator= (before == 0);
-						removePrevSeparator= (after == 0);
-					}
-					currPos= nextStart;
-					prevEnd= currEnd;
-				}
 			}
 			return currPos;
 		}
@@ -623,7 +567,14 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		
 		protected int getInitialIndent() {
 			return fInitialIndent;
-		}		
+		}
+		
+		protected boolean insertAfterSeparator(ASTNode node) {
+			if (node instanceof FieldDeclaration || node instanceof Statement) {
+				return false;
+			}
+			return true;
+		}
 				
 		protected String getSeparatorString(int nodeIndex) {
 			int newLines= fSeparatorLines == -1 ? getNewLines(nodeIndex) : fSeparatorLines;
@@ -639,24 +590,30 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		
 		private int getNewLines(int nodeIndex) {
 			ASTNode curr= getNode(nodeIndex);
-			int nodeType= curr.getNodeType();
+			ASTNode next= getNode(nodeIndex + 1);
+			
+			int currKind= curr.getNodeType();
+			int nextKind= next.getNodeType();
+
 			ASTNode last= null;
-			int additionalLines= -1;
+			ASTNode secondLast= null;
 			for (int i= 0; i < fList.size(); i++) {
 				ASTNode elem= getNode(i);
 				if (!isInserted(elem)) {
 					if (last != null) {
-						if (elem.getNodeType() == nodeType && last.getNodeType() == nodeType) {
+						if (elem.getNodeType() == nextKind && last.getNodeType() == currKind) {
 							return countEmptyLines(last);
-						} else if (additionalLines == -1) {
-							additionalLines= countEmptyLines(last);
 						}
+						secondLast= last;
 					}
 					last= elem;
 				}
 			}
-			if (additionalLines != -1) {
-				return additionalLines;
+			if (currKind == ASTNode.FIELD_DECLARATION && nextKind == ASTNode.FIELD_DECLARATION ) {
+				return 0;
+			}
+			if (secondLast != null) {
+				return countEmptyLines(secondLast);
 			}
 			return DEFAULT_SPACING;
 		}
