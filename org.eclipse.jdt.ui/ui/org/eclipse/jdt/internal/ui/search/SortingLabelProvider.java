@@ -15,7 +15,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.swt.graphics.Image;
@@ -27,8 +26,12 @@ public class SortingLabelProvider extends SearchLabelProvider implements IColorP
 	public static final int SHOW_PATH= 3;
 	
 	public SortingLabelProvider(JavaSearchResultPage page) {
-		super(page, new DecoratingJavaLabelProvider(new AppearanceAwareLabelProvider(), true));
+		super(page, new AppearanceAwareLabelProvider());
 	}	
+	
+	public void addDecorators() {
+		
+	}
 
 	public Image getImage(Object element) {
 		Image image= null;
@@ -86,7 +89,6 @@ public class SortingLabelProvider extends SearchLabelProvider implements IColorP
 				| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.D_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED;
 			flags |= JavaElementLabels.PREPEND_ROOT_PATH;
 		}
-		DecoratingJavaLabelProvider lp= (DecoratingJavaLabelProvider) getLabelProvider();
-		((AppearanceAwareLabelProvider)lp.getLabelProvider()).setTextFlags(flags);
+		getLabelProvider().setTextFlags(flags);
 	}
 }

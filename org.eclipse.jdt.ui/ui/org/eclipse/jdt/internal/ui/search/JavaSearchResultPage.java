@@ -25,6 +25,7 @@ import org.eclipse.jdt.ui.search.IMatchPresentation;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -195,7 +196,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	}
 
 	protected void configureTableViewer(TableViewer viewer) {
-		viewer.setLabelProvider(new SortingLabelProvider(this));
+		viewer.setLabelProvider(new DecoratingLabelProvider(new SortingLabelProvider(this), null));
 		fContentProvider=new JavaSearchTableContentProvider(viewer);
 		viewer.setContentProvider(fContentProvider);
 		setSortOrder(fCurrentSortOrder);
@@ -203,7 +204,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 
 	protected void configureTreeViewer(TreeViewer viewer) {
 		viewer.setSorter(new ViewerSorter());
-		viewer.setLabelProvider(new PostfixLabelProvider(this));
+		viewer.setLabelProvider(new DecoratingLabelProvider(new PostfixLabelProvider(this), null));
 		fContentProvider= new LevelTreeContentProvider(viewer, fCurrentGrouping);
 		viewer.setContentProvider(fContentProvider);
 	}
@@ -219,7 +220,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	void setSortOrder(int order) {
 		fCurrentSortOrder= order;
 		StructuredViewer viewer= getViewer();
-		((SortingLabelProvider)viewer.getLabelProvider()).setOrder(order);
+		DecoratingLabelProvider dlp= (DecoratingLabelProvider) viewer.getLabelProvider();
+		((SortingLabelProvider)dlp.getLabelProvider()).setOrder(order);
 		if (order == SortingLabelProvider.SHOW_ELEMENT_CONTAINER) {
 			viewer.setSorter(new NameSorter());
 		} else if (order == SortingLabelProvider.SHOW_PATH) {

@@ -15,6 +15,8 @@ import java.util.Iterator;
 import java.util.Map;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 import org.eclipse.jdt.ui.search.IMatchPresentation;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -36,16 +38,16 @@ public abstract class SearchLabelProvider extends LabelProvider implements IColo
 	private Map fLabelProviderMap;
 	
 	protected JavaSearchResultPage fPage;
-	private ILabelProvider fLabelProvider;
+	private AppearanceAwareLabelProvider fLabelProvider;
 
-	public SearchLabelProvider(JavaSearchResultPage page, ILabelProvider inner) {
+	public SearchLabelProvider(JavaSearchResultPage page, AppearanceAwareLabelProvider inner) {
 		fPage= page;
 		fLabelProvider= inner;
 		fLabelProviderMap= new HashMap(5);
+		fLabelProvider.addLabelDecorator(new ProblemsLabelDecorator());
 		SearchPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 	}
 	
-
 	public void propertyChange(PropertyChangeEvent event) {
 		if (fPotentialMatchFgColor == null)
 			return;
@@ -57,7 +59,7 @@ public abstract class SearchLabelProvider extends LabelProvider implements IColo
 		}
 	}
 
-	public ILabelProvider getLabelProvider() {
+	public AppearanceAwareLabelProvider getLabelProvider() {
 		return fLabelProvider;
 	}
 

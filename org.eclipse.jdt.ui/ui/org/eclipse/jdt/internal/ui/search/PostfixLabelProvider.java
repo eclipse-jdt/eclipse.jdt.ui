@@ -16,7 +16,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.graphics.Image;
 
@@ -24,7 +23,7 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 	private ITreeContentProvider fContentProvider;
 	
 	public PostfixLabelProvider(JavaSearchResultPage page) {
-		super(page, new DecoratingJavaLabelProvider(new AppearanceAwareLabelProvider(), true));
+		super(page, new AppearanceAwareLabelProvider());
 		fContentProvider= new LevelTreeContentProvider.FastJavaElementProvider();
 	}
 
