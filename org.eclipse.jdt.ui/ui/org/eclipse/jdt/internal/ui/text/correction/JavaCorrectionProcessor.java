@@ -73,11 +73,13 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			case IProblem.ShouldReturnValue:
 			case IProblem.MissingReturnType:
 			case IProblem.NonExternalizedStringLiteral:
-            case IProblem.NonStaticAccessToStaticField:
-            case IProblem.NonStaticAccessToStaticMethod:
-            case IProblem.StaticMethodRequested:
-            case IProblem.NotVisibleMethod:
-            case IProblem.NotVisibleConstructor:
+			case IProblem.NonStaticAccessToStaticField:
+			case IProblem.NonStaticAccessToStaticMethod:
+			case IProblem.StaticMethodRequested:
+			case IProblem.NotVisibleMethod:
+			case IProblem.NotVisibleConstructor:
+			case IProblem.NotVisibleField:
+			case IProblem.NonStaticFieldFromStaticInvocation:
 				return true;
 			default:
 				return false;
@@ -149,7 +151,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 						idsProcessed.add(probId);
 						collectCorrections(pp, proposals);
 						if (proposals.isEmpty()) {
-							proposals.add(new NoCorrectionProposal(pp, annot.getMessage()));
+							//proposals.add(new NoCorrectionProposal(pp, annot.getMessage()));
 						}
 					}
 				} else {
@@ -233,15 +235,15 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				case IProblem.StaticMethodRequested:
 				case IProblem.NotVisibleMethod:
 				case IProblem.NotVisibleConstructor:
-				//case IProblem.NotVisibleType:
-				//case IProblem.SuperclassNotVisible:
-				//case IProblem.InterfaceNotVisible:
-				//case IProblem.FieldTypeNotVisible:
-				//case IProblem.ArgumentTypeNotVisible:
-				//case IProblem.ReturnTypeNotVisible:
-				//case IProblem.ExceptionTypeNotVisible:
-				//case IProblem.NotVisibleField:
-				//case IProblem.NonStaticFieldFromStaticInvocation:
+				case IProblem.NotVisibleType:
+				case IProblem.SuperclassNotVisible:
+				case IProblem.InterfaceNotVisible:
+				case IProblem.FieldTypeNotVisible:
+				case IProblem.ArgumentTypeNotVisible:
+				case IProblem.ReturnTypeNotVisible:
+				case IProblem.ExceptionTypeNotVisible:
+				case IProblem.NotVisibleField:
+				case IProblem.NonStaticFieldFromStaticInvocation:
 					LocalCorrectionsSubProcessor.addStaticMethodRequestedProposal(problemPos, proposals); 
 					break;
 				default:
