@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
  */
 public class TypeFilterInputDialog extends StatusDialog {
 	
-	private class ImportOrganizeInputAdapter implements IDialogFieldListener, IStringButtonAdapter {
+	private class TypeFilterInputAdapter implements IDialogFieldListener, IStringButtonAdapter {
 		/*
 		 * @see IDialogFieldListener#dialogFieldChanged(DialogField)
 		 */
@@ -70,7 +70,7 @@ public class TypeFilterInputDialog extends StatusDialog {
 		
 		setTitle(PreferencesMessages.getString("TypeFilterInputDialog.title")); //$NON-NLS-1$
 
-		ImportOrganizeInputAdapter adapter= new ImportOrganizeInputAdapter();
+		TypeFilterInputAdapter adapter= new TypeFilterInputAdapter();
 
 		fNameDialogField= new StringButtonDialogField(adapter);
 		fNameDialogField.setLabelText(PreferencesMessages.getString("TypeFilterInputDialog.message")); //$NON-NLS-1$
