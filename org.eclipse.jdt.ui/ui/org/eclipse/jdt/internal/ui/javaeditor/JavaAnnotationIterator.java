@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+import java.util.Collections;
 import java.util.Iterator;
 
 import org.eclipse.jface.text.source.Annotation;
@@ -41,7 +42,10 @@ public class JavaAnnotationIterator implements Iterator {
 	 */
 	public JavaAnnotationIterator(IAnnotationModel model, boolean skipIrrelevants, boolean returnAllAnnotations) {
 		fReturnAllAnnotations= returnAllAnnotations;
-		fIterator= model.getAnnotationIterator();
+		if (model != null)
+			fIterator= model.getAnnotationIterator();
+		else
+			fIterator= Collections.EMPTY_LIST.iterator();
 		fSkipIrrelevants= skipIrrelevants;
 		skip();
 	}
