@@ -36,11 +36,14 @@ import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.core.dom.CompilationUnit;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -73,10 +76,11 @@ public class NLSRefactoring extends Refactoring {
 		Assert.isNotNull(cu);
 
 		fCu= cu;
-		NLSInfo nlsInfo= new NLSInfo(cu);
-		fSubstitutions= NLSHolder.create(cu, nlsInfo);
-		NLSHint nlsHint= new NLSHint(fSubstitutions, cu, nlsInfo);
 
+		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(cu, true, null);
+		NLSHint nlsHint= new NLSHint(cu, astRoot);
+
+		fSubstitutions= nlsHint.getSubstitutions();
 		setAccessorClassName(nlsHint.getAccessorClassName());
 		setAccessorClassPackage(nlsHint.getAccessorClassPackage());
 		setResourceBundleName(nlsHint.getResourceBundleName());

@@ -10,11 +10,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
+import org.eclipse.jface.text.Assert;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 /**
@@ -28,8 +38,12 @@ public class NLSHint {
 	private IPackageFragment fAccessorPackage;
 	private String fResourceBundleName;
 	private IPackageFragment fResourceBundlePackage;
+	private NLSSubstitution[] fSubstitutions;
 
-	public NLSHint(NLSSubstitution[] nlsSubstitution, ICompilationUnit cu, NLSInfo nlsInfo) {
+	public NLSHint(ICompilationUnit cu, CompilationUnit astRoot) {
+		Assert.isNotNull(cu);
+		Assert.isNotNull(astRoot);
+		
 		IPackageFragment cuPackage= (IPackageFragment) cu.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 
 		fAccessorName= NLSRefactoring.DEFAULT_ACCESSOR_CLASSNAME;
@@ -37,41 +51,93 @@ public class NLSHint {
 		fResourceBundleName= NLSRefactoring.getDefaultPropertiesFilename();
 		fResourceBundlePackage= cuPackage;
 		
-		NLSElement nlsElement= findFirstNLSElementForHint(nlsSubstitution);
-		if (nlsElement != null) {
-			ITypeBinding accessorClassBinding= nlsInfo.getAccessorClass(nlsElement);
-			if (accessorClassBinding != null) {
-				fAccessorName= accessorClassBinding.getName();
-				
-				try {
-					IPackageFragment accessorPack= nlsInfo.getPackageOfAccessorClass(accessorClassBinding);
-					if (accessorPack != null) {
-						fAccessorPackage= accessorPack;
-					}
-					
-					String fullBundleName= nlsInfo.getResourceBundle(accessorClassBinding, fAccessorPackage);
-					if (fullBundleName != null) {
-						fResourceBundleName= NLSInfo.getResourceNamePartHelper(fullBundleName);
-						IPackageFragment bundlePack= nlsInfo.getResourceBundlePackage(fullBundleName);
-						if (bundlePack != null) {
-							fResourceBundlePackage= bundlePack;
-						}
-					}
-				} catch (JavaModelException e) {
+		IJavaProject project= cu.getJavaProject();
+		NLSLine[] lines= createRawLines(cu);
+		
+		AccessorClassInfo firstAccessInfo= findFirstClassInfo(lines, astRoot);
+		
+		Properties props= firstAccessInfo != null ? NLSHintHelper.getProperties(project, firstAccessInfo.getBinding()) : new Properties();
+		
+		fSubstitutions= createSubstitutions(lines, props, astRoot);
+		
+		if (firstAccessInfo != null) {
+			fAccessorName= firstAccessInfo.getName();
+			ITypeBinding accessorClassBinding= firstAccessInfo.getBinding();
+			
+			try {
+				IPackageFragment accessorPack= NLSHintHelper.getPackageOfAccessorClass(project, accessorClassBinding);
+				if (accessorPack != null) {
+					fAccessorPackage= accessorPack;
 				}
+				
+				String fullBundleName= NLSHintHelper.getResourceBundleName(project, accessorClassBinding);
+				if (fullBundleName != null) {
+					fResourceBundleName= Signature.getSimpleName(fullBundleName) + NLSRefactoring.PROPERTY_FILE_EXT;
+					String packName= Signature.getQualifier(fullBundleName);
+					
+					IPackageFragment pack= NLSHintHelper.getResourceBundlePackage(project, packName, fResourceBundleName);
+					if (pack != null) {
+						fResourceBundlePackage= pack;
+					}
+				}
+			} catch (JavaModelException e) {
 			}
 		}
 	}
 	
-	private NLSElement findFirstNLSElementForHint(NLSSubstitution[] nlsSubstitutions) {
-		NLSSubstitution substitution;
-		for (int i= 0; i < nlsSubstitutions.length; i++) {
-			substitution= nlsSubstitutions[i];
-			if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && !substitution.hasStateChanged()) {
-				return substitution.getNLSElement();
+	private NLSSubstitution[] createSubstitutions(NLSLine[] lines, Properties props, CompilationUnit astRoot) {
+		List result= new ArrayList();
+		
+		for (int i= 0; i < lines.length; i++) {
+			NLSElement[] elements= lines[i].getElements();
+			for (int j= 0; j < elements.length; j++) {
+				NLSElement nlsElement= elements[j];
+				if (nlsElement.hasTag()) {
+					AccessorClassInfo accessorClassInfo= NLSHintHelper.getAccessorClassInfo(astRoot, nlsElement);
+					if (accessorClassInfo == null) {
+						// no accessorclass => not translated				        
+						result.add(new NLSSubstitution(NLSSubstitution.IGNORED, stripQuotes(nlsElement.getValue()), nlsElement));
+					} else {
+						String key= stripQuotes(nlsElement.getValue());
+						String value= props.getProperty(key);
+						result.add(new NLSSubstitution(NLSSubstitution.EXTERNALIZED, key, value, nlsElement, accessorClassInfo));
+					}
+				} else {
+					result.add(new NLSSubstitution(NLSSubstitution.INTERNALIZED, stripQuotes(nlsElement.getValue()), nlsElement));
+				}
+			}
+		}
+		return (NLSSubstitution[]) result.toArray(new NLSSubstitution[result.size()]);
+	}
+	
+	private static AccessorClassInfo findFirstClassInfo(NLSLine[] lines, CompilationUnit astRoot) {
+		for (int i= 0; i < lines.length; i++) {
+			NLSElement[] elements= lines[i].getElements();
+			for (int j= 0; j < elements.length; j++) {
+				NLSElement nlsElement= elements[j];
+				if (nlsElement.hasTag()) {
+					AccessorClassInfo accessorClassInfo= NLSHintHelper.getAccessorClassInfo(astRoot, nlsElement);
+					if (accessorClassInfo != null) {
+						return accessorClassInfo;
+					}
+				}
 			}
 		}
 		return null;
+	}
+
+	private static String stripQuotes(String str) {
+		return str.substring(1, str.length() - 1);
+	}
+
+	private static NLSLine[] createRawLines(ICompilationUnit cu) {
+		try {
+			return NLSScanner.scan(cu);
+		} catch (JavaModelException x) {
+			return new NLSLine[0];
+		} catch (InvalidInputException x) {
+			return new NLSLine[0];
+		}
 	}
 	
 
@@ -89,6 +155,10 @@ public class NLSHint {
 
 	public IPackageFragment getResourceBundlePackage() {
 		return fResourceBundlePackage;
+	}
+
+	public NLSSubstitution[] getSubstitutions() {
+		return fSubstitutions;
 	}
 
 

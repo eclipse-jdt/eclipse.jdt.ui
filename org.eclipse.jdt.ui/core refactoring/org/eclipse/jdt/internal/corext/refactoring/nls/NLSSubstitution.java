@@ -107,6 +107,9 @@ public class NLSSubstitution {
 		fInitialValue= value;
 	}
 
+	/**
+	 * Value can be null.
+	 */
 	public String getValue() {
 		return fValue;
 	}

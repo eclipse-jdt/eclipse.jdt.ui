@@ -12,18 +12,25 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jface.text.Document;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHolder;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSInfo;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSourceModifier;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.core.dom.CompilationUnit;
+
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-import org.eclipse.jface.text.Document;
+
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHint;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSourceModifier;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
+
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 public class NLSSourceModifierTest extends TestCase {
@@ -63,7 +70,8 @@ public class NLSSourceModifierTest extends TestCase {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         
-        NLSSubstitution[] nlsSubstitutions = NLSHolder.create(cu, new NLSInfo(cu));
+        CompilationUnit astRoot= createAST(cu);
+        NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
         NLSSubstitution.setPrefix("key.");
         nlsSubstitutions[0].setState(NLSSubstitution.EXTERNALIZED);
         nlsSubstitutions[0].generateKey(nlsSubstitutions);
@@ -91,7 +99,8 @@ public class NLSSourceModifierTest extends TestCase {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         
-        NLSSubstitution[] nlsSubstitutions = NLSHolder.create(cu, new NLSInfo(cu));
+        CompilationUnit astRoot= createAST(cu);
+        NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
         NLSSubstitution.setPrefix("key.");
         nlsSubstitutions[0].setState(NLSSubstitution.IGNORED);
         
@@ -121,7 +130,8 @@ public class NLSSourceModifierTest extends TestCase {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         
-        NLSSubstitution[] nlsSubstitutions = NLSHolder.create(cu, new NLSInfo(cu));
+        CompilationUnit astRoot= createAST(cu);
+        NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
         NLSSubstitution.setPrefix("key.");
         nlsSubstitutions[0].setState(NLSSubstitution.EXTERNALIZED);
         nlsSubstitutions[0].generateKey(nlsSubstitutions);
@@ -149,7 +159,8 @@ public class NLSSourceModifierTest extends TestCase {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         
-        NLSSubstitution[] nlsSubstitutions = NLSHolder.create(cu, new NLSInfo(cu));
+        CompilationUnit astRoot= createAST(cu);
+        NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
         NLSSubstitution.setPrefix("key.");
         nlsSubstitutions[0].setState(NLSSubstitution.INTERNALIZED);
         
@@ -166,7 +177,12 @@ public class NLSSourceModifierTest extends TestCase {
             	doc.get());
     }
     
-    public void testFromTranslatedToNotTranslated() throws Exception {
+	private NLSSubstitution[] getSubstitutions(ICompilationUnit cu, CompilationUnit astRoot) {
+		NLSHint hint= new NLSHint(cu, astRoot);
+		return hint.getSubstitutions();
+	}
+
+	public void testFromTranslatedToNotTranslated() throws Exception {
         
         String klazz =
             "package test;\n" +
@@ -187,7 +203,8 @@ public class NLSSourceModifierTest extends TestCase {
         ICompilationUnit cu= pack.createCompilationUnit("Accessor.java", accessorKlazz, false, null);
         cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         
-        NLSSubstitution[] nlsSubstitutions = NLSHolder.create(cu, new NLSInfo(cu));
+        CompilationUnit astRoot= createAST(cu);
+        NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
         NLSSubstitution.setPrefix("key.");
         nlsSubstitutions[0].setValue("whatever");
         nlsSubstitutions[0].setState(NLSSubstitution.IGNORED);
@@ -227,7 +244,8 @@ public class NLSSourceModifierTest extends TestCase {
         ICompilationUnit cu= pack.createCompilationUnit("Accessor.java", accessorKlazz, false, null);
         cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         
-        NLSSubstitution[] nlsSubstitutions = NLSHolder.create(cu, new NLSInfo(cu));
+        CompilationUnit astRoot= createAST(cu);
+        NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
         NLSSubstitution.setPrefix("key.");
         nlsSubstitutions[0].setValue("whatever");
         nlsSubstitutions[0].setState(NLSSubstitution.INTERNALIZED);
@@ -266,7 +284,8 @@ public class NLSSourceModifierTest extends TestCase {
         ICompilationUnit cu= pack.createCompilationUnit("Accessor.java", accessorKlazz, false, null);
         cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         
-        NLSSubstitution[] nlsSubstitutions = NLSHolder.create(cu, new NLSInfo(cu));
+        CompilationUnit astRoot= createAST(cu);
+        NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
         nlsSubstitutions[0].setKey("nls.0");        
         
         String defaultSubst= NLSRefactoring.getDefaultSubstitutionPattern();
@@ -282,4 +301,8 @@ public class NLSSourceModifierTest extends TestCase {
                 "}\n",  
             	doc.get());
     }
+
+	private CompilationUnit createAST(ICompilationUnit cu) {
+		return ASTCreator.createAST(cu, null);
+	}
 }

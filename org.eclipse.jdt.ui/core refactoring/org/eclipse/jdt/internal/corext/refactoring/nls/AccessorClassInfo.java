@@ -10,20 +10,26 @@ package org.eclipse.jdt.internal.corext.refactoring.nls;
 
 import org.eclipse.jface.text.Region;
 
+import org.eclipse.jdt.core.dom.ITypeBinding;
+
 
 public class AccessorClassInfo {
     
-    private String fName;
+    private ITypeBinding fBinding;
     private Region fRegion;
     
-    public AccessorClassInfo(String name, Region accessorRegion) {
+    public AccessorClassInfo(ITypeBinding typeBinding, Region accessorRegion) {
         super();
-        fName = name;
+        fBinding = typeBinding;
         fRegion = accessorRegion;
     }
+    
+	public ITypeBinding getBinding() {
+		return fBinding;
+	}
 
 	public String getName() {
-		return fName;
+		return fBinding.getName();
 	}
 
 	public Region getRegion() {
@@ -33,12 +39,12 @@ public class AccessorClassInfo {
     public boolean equals(Object obj) {
         if (obj instanceof AccessorClassInfo) {
             AccessorClassInfo cmp = (AccessorClassInfo) obj;
-            return fName.equals(cmp.fName);            
+            return fBinding == cmp.fBinding;          
         }
         return false;        
     }
     
     public int hashCode() {
-        return fName.hashCode();
+        return fBinding.hashCode();
     }
 }

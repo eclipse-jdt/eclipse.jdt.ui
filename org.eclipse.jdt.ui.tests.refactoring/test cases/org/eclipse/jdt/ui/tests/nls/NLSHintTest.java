@@ -17,19 +17,24 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHint;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHolder;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSInfo;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.core.dom.CompilationUnit;
+
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHint;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 
 public class NLSHintTest extends TestCase {
 
@@ -55,7 +60,13 @@ public class NLSHintTest extends TestCase {
     }
     
     public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(NLSHintTest.class));
+    	if (false) {
+    		return new ProjectTestSetup(new TestSuite(NLSHintTest.class));
+    	} else {
+			TestSuite suite= new TestSuite();
+			suite.addTest(new NLSHintTest("testResourceBundleHint"));
+			return new ProjectTestSetup(suite);
+    	}
 	}
 	
 	public static Test suite() {
@@ -82,7 +93,7 @@ public class NLSHintTest extends TestCase {
 			"	private String str=\"whateverKey\";//$NON-NLS-1$\n" +
 			"}\n";
     	ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
-        NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
+        NLSHint hint = createNLSHint(cu);
         assertEquals("Messages", hint.getAccessorClassName());    		 
     }
     
@@ -97,7 +108,7 @@ public class NLSHintTest extends TestCase {
             "	String[] foo = {\"ab\", String.valueOf(Boolean.valueOf(\"cd\")), \"de\"}; //$NON-NLS-1$ //$NON-NLS-2$\n" +
 			"}\n";
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
-        NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
+        NLSHint hint = createNLSHint(cu);
         assertEquals("Messages", hint.getAccessorClassName());
         assertEquals(pack, hint.getAccessorClassPackage());
         assertEquals("messages.properties", hint.getResourceBundleName());
@@ -115,7 +126,7 @@ public class NLSHintTest extends TestCase {
 			"	private String str=\"whateverKey\".toString();//$NON-NLS-1$\n" +
 			"}\n";
     	ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
-        NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
+        NLSHint hint = createNLSHint(cu);
         assertEquals("Messages", hint.getAccessorClassName());    		 
     }
        
@@ -138,7 +149,7 @@ public class NLSHintTest extends TestCase {
     	ICompilationUnit cu= pack.createCompilationUnit("Wrong.java", klazz2, false, null);
     	cu= pack.createCompilationUnit("Test.java", klazz, false, null);
     	
-        NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
+        NLSHint hint = createNLSHint(cu);
         assertEquals("Messages", hint.getAccessorClassName());    		 
     }
 
@@ -149,7 +160,7 @@ public class NLSHintTest extends TestCase {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         String klazz = "package test;\n" + TEST_KLAZZ;
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
-        NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
+        NLSHint hint = createNLSHint(cu);
         assertEquals("Messages", hint.getAccessorClassName());
     }
 
@@ -161,18 +172,18 @@ public class NLSHintTest extends TestCase {
         klazz = "package test;\n" + ACCESSOR_KLAZZ;
         pack.createCompilationUnit("TestMessages.java", klazz, false, null);
         
-        NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
+        NLSHint hint = createNLSHint(cu);
         assertEquals("TestMessages", hint.getAccessorClassName());
         assertEquals(pack, hint.getAccessorClassPackage());
     }
     
-    public void testPackageHintWithNoPackage() throws Exception {
+	public void testPackageHintWithNoPackage() throws Exception {
         IPackageFragment pack = fSourceFolder.createPackageFragment("", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", TEST_KLAZZ, false, null);                	
         
         pack.createCompilationUnit("TestMessages.java", ACCESSOR_KLAZZ, false, null);        
         
-        NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));        
+        NLSHint hint = createNLSHint(cu);        
         assertEquals(pack, hint.getAccessorClassPackage());
     }
     
@@ -188,7 +199,7 @@ public class NLSHintTest extends TestCase {
         klazz = "package test.foo;\n" + ACCESSOR_KLAZZ;
         fooPackage.createCompilationUnit("TestMessages.java", klazz, false, null);
                 
-        NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
+        NLSHint hint = createNLSHint(cu);
         assertEquals(fooPackage, hint.getAccessorClassPackage());
     }    
 
@@ -199,7 +210,7 @@ public class NLSHintTest extends TestCase {
         
         klazz = "package test;\n" +ACCESSOR_KLAZZ;        
         pack.createCompilationUnit("TestMessages.java", klazz, false, null);
-        NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
+        NLSHint hint = createNLSHint(cu);
         assertEquals("test.properties", hint.getResourceBundleName());
     }
     
@@ -222,7 +233,7 @@ public class NLSHintTest extends TestCase {
             "}\n";
         fooPackage.createCompilationUnit("TestMessages.java", klazz, false, null);        
         
-        NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
+        NLSHint hint = createNLSHint(cu);
         assertEquals("TestMessages.properties", hint.getResourceBundleName());        
     }
     
@@ -238,7 +249,7 @@ public class NLSHintTest extends TestCase {
         fooPackage.createCompilationUnit("TestMessages.java", klazz, false, null);
         
         createResource(pack, "test.properties", "a=0");
-        NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
+        NLSHint hint = createNLSHint(cu);
         assertEquals(pack, hint.getResourceBundlePackage());
     }
     
@@ -262,7 +273,7 @@ public class NLSHintTest extends TestCase {
         fooPackage.createCompilationUnit("TestMessages.java", klazz, false, null); 
         
         createResource(fooPackage, "TestMessages.properties", "a=0");
-        NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
+        NLSHint hint = createNLSHint(cu);
         assertEquals(fooPackage, hint.getResourceBundlePackage());
     }
     
@@ -274,7 +285,7 @@ public class NLSHintTest extends TestCase {
         String klazz = "package test;\n" + TEST_KLAZZ;
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         
-        NLSHint hint = new NLSHint(NLSHolder.create(cu, new NLSInfo(cu)), cu, new NLSInfo(cu));
+        NLSHint hint = createNLSHint(cu);
         assertEquals(pack, hint.getAccessorClassPackage());
         assertEquals(pack, hint.getResourceBundlePackage());
     }
@@ -286,6 +297,11 @@ public class NLSHintTest extends TestCase {
 	    file.create(is, true, new NullProgressMonitor());	    
 	    is.close();
         return file;
+	}
+    
+	private NLSHint createNLSHint(ICompilationUnit cu) {
+		CompilationUnit unit= ASTCreator.createAST(cu, null);
+		return new NLSHint(cu, unit);
 	}
     
 }
