@@ -62,13 +62,9 @@ public final class SerialVersionSubProcessor {
 
 			final ICompilationUnit unit= context.getCompilationUnit();
 			if (JavaModelUtil.isEditable(unit)) {
-				SerialVersionDefaultProposal proposal= new SerialVersionDefaultProposal(CorrectionMessages.getString("SerialVersionSubProcessor.createdefault.description"), unit, simple); //$NON-NLS-1$
-				if (proposal.canApply())
-					proposals.add(proposal);
 
-				proposal= new SerialVersionHashProposal(CorrectionMessages.getString("SerialVersionSubProcessor.createhashed.description"), unit, simple); //$NON-NLS-1$
-				if (proposal.canApply())
-					proposals.add(proposal);
+				proposals.add(new SerialVersionDefaultProposal(CorrectionMessages.getString("SerialVersionSubProcessor.createdefault.description"), unit, simple)); //$NON-NLS-1$
+				proposals.add(new SerialVersionHashProposal(CorrectionMessages.getString("SerialVersionSubProcessor.createhashed.description"), unit, simple)); //$NON-NLS-1$
 			}
 		}
 	}

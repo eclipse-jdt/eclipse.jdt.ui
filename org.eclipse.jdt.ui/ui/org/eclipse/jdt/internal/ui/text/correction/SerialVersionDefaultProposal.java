@@ -68,7 +68,7 @@ public class SerialVersionDefaultProposal extends LinkedCorrectionProposal {
 	 *        the originally selected node
 	 */
 	public SerialVersionDefaultProposal(final String label, final ICompilationUnit unit, final ASTNode node) {
-		super(label, unit, null, PROPOSAL_RELEVANCE, JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
+		super(label, unit, null, PROPOSAL_RELEVANCE, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD));
 
 		Assert.isNotNull(node);
 
@@ -94,21 +94,19 @@ public class SerialVersionDefaultProposal extends LinkedCorrectionProposal {
 	}
 
 	/**
-	 * Can this proposal be applied to the current compilation unit?
-	 * 
-	 * @return <code>true</code> if this proposal can be applied, <code>false</code> otherwise
-	 */
-	public boolean canApply() {
-		return true;
-	}
-
-	/**
 	 * Computes the default expression to initialize the serial version id with.
 	 * 
 	 * @return the default expression for the serial version id
 	 */
 	protected Expression computeDefaultExpression() {
 		return fNode.getAST().newNumberLiteral(DEFAULT_EXPRESSION);
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
+	 */
+	public String getAdditionalProposalInfo() {
+		return CorrectionMessages.getString("SerialVersionDefaultProposal.message.default.info"); //$NON-NLS-1$
 	}
 
 	/**
