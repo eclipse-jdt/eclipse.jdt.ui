@@ -84,6 +84,34 @@ public abstract class SuperTypeSet implements ITypeSet {
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet#restrictedTo(org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet)
 		 */
 		public final ITypeSet restrictedTo(final ITypeSet set) {
+			if (set instanceof SuperTypeUniverse) {
+				return this;
+			} else if (set instanceof SuperTypeSingletonSet) {
+				final SuperTypeSingletonSet singleton= (SuperTypeSingletonSet) set;
+				if (fType == singleton.fType)
+					return this;
+				else if (fType.canAssignTo(singleton.fType))
+					return singleton;
+				return this;
+			} else if (set instanceof SuperTypeTuple) {
+				if (this == set)
+					return this;
+				final SuperTypeTuple tuple= (SuperTypeTuple) set;
+				if (tuple.fSubType.canAssignTo(fType)) {
+					if (tuple.fSuperType.canAssignTo(fType))
+						return this;
+					else
+						return SuperTypeSet.createTypeSet(tuple.fSubType);
+				} else {
+					if (tuple.fSuperType.canAssignTo(fType))
+						return SuperTypeSet.createTypeSet(tuple.fSuperType);
+					else
+						return tuple;
+				}
+			} else if (set instanceof SuperTypeEmptySet) {
+				return this;
+			} else
+				Assert.isTrue(false);
 			return null;
 		}
 
@@ -137,13 +165,18 @@ public abstract class SuperTypeSet implements ITypeSet {
 				return this;
 			} else if (set instanceof SuperTypeSingletonSet) {
 				final SuperTypeSingletonSet singleton= (SuperTypeSingletonSet) set;
-
-				// TODO implement
-
+				if (singleton.fType.canAssignTo(fSuperType) && singleton.fType.canAssignTo(fSubType))
+					return this;
+				return SuperTypeSet.createTypeSet(fSubType);
 			} else if (set instanceof SuperTypeTuple) {
-
+				if (this == set)
+					return this;
+				final SuperTypeTuple tuple= (SuperTypeTuple) set;
+				if ((tuple.fSubType.canAssignTo(fSubType) || tuple.fSubType.canAssignTo(fSuperType)) && (tuple.fSuperType.canAssignTo(fSubType) || tuple.fSuperType.canAssignTo(fSuperType)))
+					return this;
+				return SuperTypeSet.createTypeSet(fSubType);
 			} else if (set instanceof SuperTypeEmptySet) {
-
+				return this;
 			} else
 				Assert.isTrue(false);
 			return null;
