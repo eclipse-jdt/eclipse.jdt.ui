@@ -127,6 +127,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	private RetargetTextEditorAction fGotoMatchingBracket;
 	private RetargetTextEditorAction fShowOutline;
 	private RetargetTextEditorAction fOpenStructure;
+	private RetargetTextEditorAction fOpenHierarchy;
 	
 	private RetargetAction fRetargetShowJavaDoc;
 	private RetargetTextEditorAction fShowJavaDoc;
@@ -185,7 +186,10 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		
 		fShowOutline= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShowOutline."); //$NON-NLS-1$
 		fShowOutline.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
-		
+
+		fOpenHierarchy= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "OpenHierarchy."); //$NON-NLS-1$
+		fOpenHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY);
+	
 		fOpenStructure= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "OpenStructure."); //$NON-NLS-1$
 		fOpenStructure.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE);
 		
@@ -256,6 +260,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		IMenuManager navigateMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_NAVIGATE);
 		if (navigateMenu != null) {
 			navigateMenu.appendToGroup(IWorkbenchActionConstants.SHOW_EXT, fShowOutline);
+			navigateMenu.appendToGroup(IWorkbenchActionConstants.SHOW_EXT, fOpenHierarchy);
 		}
 		
 		IMenuManager gotoMenu= menu.findMenuUsingPath("navigate/goTo"); //$NON-NLS-1$
@@ -300,6 +305,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fGotoMatchingBracket.setAction(getAction(textEditor, GotoMatchingBracketAction.GOTO_MATCHING_BRACKET));
 		fShowJavaDoc.setAction(getAction(textEditor, "ShowJavaDoc")); //$NON-NLS-1$
 		fShowOutline.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_OUTLINE));
+		fOpenHierarchy.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.OPEN_HIERARCHY));
 		fOpenStructure.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.OPEN_STRUCTURE));
 
 		fStructureSelectEnclosingAction.setAction(getAction(textEditor, StructureSelectionAction.ENCLOSING));

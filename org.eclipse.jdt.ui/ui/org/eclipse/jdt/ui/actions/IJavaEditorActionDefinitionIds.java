@@ -94,7 +94,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String SHOW_JAVADOC= "org.eclipse.jdt.ui.edit.text.java.show.javadoc"; //$NON-NLS-1$
 
 	/**
-	 * Action definition ID of the edit -> Show Outline action
+	 * Action definition ID of the navigate -> Show Outline action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.show.outline"</code>).
 	 * 
 	 * @since 2.1
@@ -102,7 +102,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String SHOW_OUTLINE= "org.eclipse.jdt.ui.edit.text.java.show.outline"; //$NON-NLS-1$
 	
 	/**
-	 * Action definition ID of the edit -> Open Hierarchy action
+	 * Action definition ID of the navigate -> Show Hierarchy action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.open.hierarchy"</code>).
 	 * 
 	 * @since 3.0
