@@ -120,7 +120,7 @@ public class ProposalInfo {
 	}
 	
 	private int getHoverWidth(Display display) {
-		Rectangle displayBounds= display.getBounds();
+		Rectangle displayBounds= display.getClientArea();
 		int hoverWidth= displayBounds.width - (display.getCursorLocation().x - displayBounds.x);
 		hoverWidth-= 5; // add some space to the border
 		if (hoverWidth < 200) {

@@ -13,8 +13,8 @@ import java.util.Set;
 public interface IProblemChangedListener {
 	
 	/**
-	 * @param changedElements  A set of IPath that describe the resources
-	 * the had a error marker change.
+	 * @param changedElements  A set of type <code>IPath</code> that
+	 * describe the resources that had an error marker change.
 	 */
 	void problemsChanged(Set changedElements);
 }

@@ -12,9 +12,13 @@ import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+/**
+ * Used by the JavaElementLabelProvider to evaluate the error tick state of
+ * an element.
+ */
 public class MarkerErrorTickProvider implements IErrorTickProvider {
 	
-	/**
+	/*
 	 * @see IErrorTickProvider#getErrorInfo
 	 */
 	public int getErrorInfo(IJavaElement element) {
@@ -35,7 +39,7 @@ public class MarkerErrorTickProvider implements IErrorTickProvider {
 					info= accumulateProblems(bpMarkers, info, null);
 				}
 			} else if (type == IJavaElement.TYPE || type == IJavaElement.METHOD || type == IJavaElement.INITIALIZER) {
-				// we assume that only source elements can have markers
+				// I assume that only source elements can have markers
 				ICompilationUnit cu= ((IMember)element).getCompilationUnit();
 				if (cu != null) {
 					res= element.getUnderlyingResource();
