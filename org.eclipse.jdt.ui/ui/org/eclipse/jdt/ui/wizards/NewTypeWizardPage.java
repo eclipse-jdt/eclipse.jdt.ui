@@ -1698,7 +1698,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */		
 	protected void createTypeMembers(IType newType, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		// call for compatibility
-		createTypeMembers(newType, (IImportsStructure) imports, monitor);
+		createTypeMembers(newType, imports.fImportsStructure, monitor);
 		
 		// default implementation does nothing
 		// example would be
