@@ -248,7 +248,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		StringBuffer buf= new StringBuffer();
 		buf.append("catch\n");
 		buf.append("(Exception e) {\n");
-		buf.append("}\n");
+		buf.append("}");
 		String contents= buf.toString();
 		
 		AST ast= new AST();
@@ -266,7 +266,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 		buf= new StringBuffer();
 		buf.append("catch (Exception e) {\n");
-		buf.append("}\n");
+		buf.append("}");
 		String expected= buf.toString();
 		assertEqualString(formatted, expected);
 		

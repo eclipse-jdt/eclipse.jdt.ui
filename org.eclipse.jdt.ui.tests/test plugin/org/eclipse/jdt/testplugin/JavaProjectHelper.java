@@ -200,23 +200,45 @@ public class JavaProjectHelper {
 	}
 
 	/**
-	 * Adds a source container to a IJavaProject and imports all files contained
-	 * in the given Zip file.
+	 * @deprecated use addSourceContainerWithImport(IJavaProject jproject, String containerName, File zipFile) to make sure that the zip file is correctly closed
 	 */	
 	public static IPackageFragmentRoot addSourceContainerWithImport(IJavaProject jproject, String containerName, ZipFile zipFile) throws InvocationTargetException, CoreException {
 		return addSourceContainerWithImport(jproject, containerName, zipFile, new Path[0]);
 	}
-
-
+	
 	/**
 	 * Adds a source container to a IJavaProject and imports all files contained
 	 * in the given Zip file.
-	 */	
+	 */		
+	public static IPackageFragmentRoot addSourceContainerWithImport(IJavaProject jproject, String containerName, File zipFile) throws InvocationTargetException, CoreException, IOException {
+		return addSourceContainerWithImport(jproject, containerName, zipFile, new Path[0]);
+	}
+
+	/**
+	 * @deprecated use addSourceContainerWithImport(IJavaProject jproject, String containerName, File zipFile, IPath[]) to make sure that the zip file is correctly closed
+	 */
 	public static IPackageFragmentRoot addSourceContainerWithImport(IJavaProject jproject, String containerName, ZipFile zipFile, IPath[] exclusionFilters) throws InvocationTargetException, CoreException {
 		IPackageFragmentRoot root= addSourceContainer(jproject, containerName, exclusionFilters);
 		importFilesFromZip(zipFile, root.getPath(), null);
 		return root;
 	}
+
+	/**
+	 * Adds a source container to a IJavaProject and imports all files contained
+	 * in the given Zip file.
+	 */		
+	public static IPackageFragmentRoot addSourceContainerWithImport(IJavaProject jproject, String containerName, File zipFile, IPath[] exclusionFilters) throws InvocationTargetException, CoreException, IOException {
+		ZipFile file= new ZipFile(zipFile);
+		try {
+			IPackageFragmentRoot root= addSourceContainer(jproject, containerName, exclusionFilters);
+			importFilesFromZip(file, root.getPath(), null);
+			return root;
+		} finally {
+			if (file != null) {
+				file.close();
+			}
+		}
+	}	
 
 	/**
 	 * Removes a source folder from a IJavaProject.
@@ -281,14 +303,30 @@ public class JavaProjectHelper {
 	}
 
 	/**
-	 * Creates and adds a class folder to the class path and imports all files
-	 * contained in the given Zip file.
+	 * @deprecated Use addClassFolderWithImport(IJavaProject, String, IPath, IPath, File) to make sure that the zip file is correctly closed
 	 */			
 	public static IPackageFragmentRoot addClassFolderWithImport(IJavaProject jproject, String containerName, IPath sourceAttachPath, IPath sourceAttachRoot, ZipFile zipFile) throws IOException, CoreException, InvocationTargetException {
 		IPackageFragmentRoot root= addClassFolder(jproject, containerName, sourceAttachPath, sourceAttachRoot);
 		importFilesFromZip(zipFile, root.getPath(), null);
 		return root;
 	}
+	
+	/**
+	 * Creates and adds a class folder to the class path and imports all files
+	 * contained in the given Zip file.
+	 */			
+	public static IPackageFragmentRoot addClassFolderWithImport(IJavaProject jproject, String containerName, IPath sourceAttachPath, IPath sourceAttachRoot, File zipFile) throws IOException, CoreException, InvocationTargetException {
+		ZipFile file= new ZipFile(zipFile);
+		try {
+			IPackageFragmentRoot root= addClassFolder(jproject, containerName, sourceAttachPath, sourceAttachRoot);
+			importFilesFromZip(file, root.getPath(), null);
+			return root;
+		} finally {
+			if (file != null) {
+				file.close();
+			}
+		}
+	}	
 
 	/**
 	 * Adds a library entry pointing to a JRE.

@@ -14,11 +14,13 @@ package org.eclipse.jdt.ui.tests.core;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.zip.ZipFile;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
@@ -36,9 +38,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -91,8 +90,8 @@ public class JavaModelUtilTest extends TestCase {
 
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
-		ZipFile zipfile= new ZipFile(junitSrcArchive);
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
+
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive);
 
 		File mylibJar= JavaTestPlugin.getDefault().getFileInPlugin(LIB);
 		assertTrue("lib not found", junitSrcArchive != null && junitSrcArchive.exists());

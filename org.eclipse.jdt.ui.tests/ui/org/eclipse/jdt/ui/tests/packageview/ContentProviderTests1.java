@@ -311,8 +311,8 @@ public class ContentProviderTests1 extends TestCase {
 
 		java.io.File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());//$NON-NLS-1$
-		zipfile = new ZipFile(junitSrcArchive);
-		fArchiveFragmentRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);//$NON-NLS-1$
+
+		fArchiveFragmentRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive);//$NON-NLS-1$
 		assertTrue("Unable to create zipfile archive",fArchiveFragmentRoot.exists());//$NON-NLS-1$
 		
 		fPackJunit= fArchiveFragmentRoot.getPackageFragment("junit");//$NON-NLS-1$

@@ -11,10 +11,12 @@
 package org.eclipse.jdt.ui.tests.core;
 
 import java.io.File;
-import java.util.zip.ZipFile;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.core.runtime.Path;
 
@@ -25,9 +27,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -112,8 +111,8 @@ public class ImportOrganizeTest extends CoreTests {
 	public void test1() throws Exception {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
-		ZipFile zipfile= new ZipFile(junitSrcArchive);
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
+
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive);
 
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/BaseTestRunner.java"));
 		assertNotNull("BaseTestRunner.java", cu);
@@ -153,8 +152,8 @@ public class ImportOrganizeTest extends CoreTests {
 	public void test1WithOrder() throws Exception {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
-		ZipFile zipfile= new ZipFile(junitSrcArchive);
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
+
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive);
 
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/BaseTestRunner.java"));
 		assertNotNull("BaseTestRunner.java", cu);
@@ -195,8 +194,8 @@ public class ImportOrganizeTest extends CoreTests {
 	public void test2() throws Exception {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
-		ZipFile zipfile= new ZipFile(junitSrcArchive);
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
+
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive);
 
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/LoadingTestCollector.java"));
 		assertNotNull("LoadingTestCollector.java", cu);
@@ -219,8 +218,8 @@ public class ImportOrganizeTest extends CoreTests {
 	public void test3() throws Exception {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
-		ZipFile zipfile= new ZipFile(junitSrcArchive);
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
+
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive);
 
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/TestCaseClassLoader.java"));
 		assertNotNull("TestCaseClassLoader.java", cu);
@@ -243,8 +242,8 @@ public class ImportOrganizeTest extends CoreTests {
 	public void test4() throws Exception {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
-		ZipFile zipfile= new ZipFile(junitSrcArchive);
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
+
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive);
 
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/textui/TestRunner.java"));
 		assertNotNull("TestRunner.java", cu);

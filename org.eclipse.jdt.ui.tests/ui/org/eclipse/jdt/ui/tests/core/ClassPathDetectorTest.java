@@ -11,11 +11,13 @@
 package org.eclipse.jdt.ui.tests.core;
 
 import java.io.File;
-import java.util.zip.ZipFile;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
@@ -30,9 +32,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -152,8 +151,8 @@ public class ClassPathDetectorTest extends TestCase {
 		
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
-		ZipFile zipfile= new ZipFile(junitSrcArchive);
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);		
+
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive);		
 		
 		File mylibJar= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 		assertTrue("lib not found", junitSrcArchive != null && junitSrcArchive.exists());
@@ -188,8 +187,8 @@ public class ClassPathDetectorTest extends TestCase {
 		
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
-		ZipFile zipfile= new ZipFile(junitSrcArchive);
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src1", zipfile);
+
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src1", junitSrcArchive);
 		
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJProject1, "src2");
 		IPackageFragment pack1= root.createPackageFragment("test1", false, null);
@@ -230,9 +229,9 @@ public class ClassPathDetectorTest extends TestCase {
 		
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
-		ZipFile zipfile= new ZipFile(junitSrcArchive);
+
 		IPath[] exclusionFilter= new IPath[] { new Path("src2/") };
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src1", zipfile, exclusionFilter);
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src1", junitSrcArchive, exclusionFilter);
 		
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJProject1, "src1/src2");
 		IPackageFragment pack1= root.createPackageFragment("test1", false, null);
@@ -274,8 +273,7 @@ public class ClassPathDetectorTest extends TestCase {
 	
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
-		ZipFile zipfile= new ZipFile(junitSrcArchive);
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "", zipfile);		
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "", junitSrcArchive);		
 	
 		IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
 		for (int i= 0; i < jreEntries.length; i++) {
@@ -316,9 +314,8 @@ public class ClassPathDetectorTest extends TestCase {
 		
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 		assertTrue("lib not found", lib != null && lib.exists());
-		ZipFile zipfile= new ZipFile(lib);
 		
-		IPackageFragmentRoot cfroot= JavaProjectHelper.addClassFolderWithImport(fJProject1, "cf", null, null, zipfile);
+		IPackageFragmentRoot cfroot= JavaProjectHelper.addClassFolderWithImport(fJProject1, "cf", null, null, lib);
 		
 		IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
 		for (int i= 0; i < jreEntries.length; i++) {

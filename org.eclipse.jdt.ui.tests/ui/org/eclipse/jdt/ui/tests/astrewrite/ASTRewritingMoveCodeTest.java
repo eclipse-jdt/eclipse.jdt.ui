@@ -16,24 +16,16 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.*;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.SourceModifier;
@@ -41,12 +33,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
-
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 	
@@ -1628,7 +1615,6 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		buf.append("}\n");
 
 		TextBuffer buffer= TextBuffer.create(buf.toString());
-		TextBufferEditor editor= new TextBufferEditor(buffer);
 		
 		int start= buf.toString().indexOf("while");
 		int end= buf.toString().indexOf("return;") + "return;".length();
@@ -1681,7 +1667,6 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		buf.append("}\n");
 
 		TextBuffer buffer= TextBuffer.create(buf.toString());
-		TextBufferEditor editor= new TextBufferEditor(buffer);
 		
 		int start= buf.toString().indexOf("while");
 		int end= buf.toString().indexOf("return;") + "return;".length();
