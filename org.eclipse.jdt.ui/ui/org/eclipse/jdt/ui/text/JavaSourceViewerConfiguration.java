@@ -61,6 +61,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
+import org.eclipse.jdt.internal.ui.text.CompoundContentAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
@@ -297,7 +298,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * <p>
 	 * Clients are not allowed to call this method if the new setup without
 	 * text tools is in use.
-	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IPreferenceStore, IColorManager, ITextEditor, String)</p>
+	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)</p>
 	 * <p>
 	 * FIXME: deprecate when new API is stabilized.
 	 * </p> 
@@ -331,7 +332,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * <p>
 	 * Clients are not allowed to call this method if the old setup with
 	 * text tools is in use.
-	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IPreferenceStore, IColorManager, ITextEditor, String)</p>
+	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)</p>
 	 * <p>
 	 * XXX: Note that this is work in progress and API is still subject to change.
 	 * </p>
@@ -435,16 +436,19 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 			
 			assistant.setRestoreCompletionProposalSize(getSettings("completion_proposal_size")); //$NON-NLS-1$
 			
-			IContentAssistProcessor processor= new JavaCompletionProcessor(getEditor());
-			assistant.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
-				// Register the same processor for strings and single line comments to get code completion at the start of those partitions.
-			assistant.setContentAssistProcessor(processor, IJavaPartitions.JAVA_STRING);
-			assistant.setContentAssistProcessor(processor, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
+			IContentAssistProcessor javaProcessor= new JavaCompletionProcessor(getEditor());
+			assistant.setContentAssistProcessor(javaProcessor, IDocument.DEFAULT_CONTENT_TYPE);
 			
-			processor= new WordCompletionProcessor();
-			assistant.setContentAssistProcessor(processor, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
-			assistant.setContentAssistProcessor(processor, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
-			assistant.setContentAssistProcessor(processor, IJavaPartitions.JAVA_STRING);
+			// Register the same processor for strings and single line comments to get code completion at the start of those partitions.
+			IContentAssistProcessor wordProcessor= new WordCompletionProcessor();
+			CompoundContentAssistProcessor compoundProcessor= new CompoundContentAssistProcessor();
+			compoundProcessor.add(javaProcessor);
+			compoundProcessor.add(wordProcessor);
+			
+			assistant.setContentAssistProcessor(compoundProcessor, IJavaPartitions.JAVA_STRING);
+			assistant.setContentAssistProcessor(compoundProcessor, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
+			
+			assistant.setContentAssistProcessor(wordProcessor, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
 
 			assistant.setContentAssistProcessor(new JavaDocCompletionProcessor(getEditor()), IJavaPartitions.JAVA_DOC);
 			
@@ -821,7 +825,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * <p>
 	 * Clients are not allowed to call this method if the old setup with
 	 * text tools is in use.
-	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IPreferenceStore, IColorManager, ITextEditor, String)</p>
+	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)</p>
 	 * <p>
 	 * XXX: Note that this is work in progress and API is still subject to change.
 	 * </p>
