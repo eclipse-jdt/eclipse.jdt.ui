@@ -41,8 +41,7 @@ public class StubUtility {
 		public boolean noBody;
 		
 		public GenStubSettings(CodeGenerationSettings settings) {
-			this.createComments= settings.createComments;
-			this.createNonJavadocComments= settings.createNonJavadocComments;		
+			settings.setSettings(this);	
 		}
 		
 		public GenStubSettings() {

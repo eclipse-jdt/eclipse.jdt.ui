@@ -13,6 +13,18 @@ public class CodeGenerationSettings {
 	public String[] fieldSuffixes;
 	
 	public int tabWidth;
+	
+	public void setSettings(CodeGenerationSettings settings) {
+		settings.createFileComments= createFileComments;
+		settings.createComments= createComments;
+		settings.createNonJavadocComments= createNonJavadocComments;
+		settings.importOrder= importOrder;
+		settings.importThreshold= importThreshold;
+		settings.fieldPrefixes= fieldPrefixes;
+		settings.fieldSuffixes= fieldSuffixes;
+		settings.tabWidth= tabWidth;
+	}
+	
 
 }
 
