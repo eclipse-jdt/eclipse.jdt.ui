@@ -46,11 +46,14 @@ public class ReorgCorrectionsSubProcessor {
 			proposals.add(new ReplaceCorrectionProposal(label, problemPos, newName, 1));
 			
 			String newCUName= args[1] + ".java"; //$NON-NLS-1$
-			final RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
-
-			label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.renamecu.description", newCUName); //$NON-NLS-1$
-			// rename cu
-			proposals.add(new ChangeCorrectionProposal(label, change, 2, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME)));
+			ICompilationUnit newCU= ((IPackageFragment) (cu.getParent())).getCompilationUnit(newCUName);
+			if (!newCU.exists()) {
+				RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
+	
+				label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.renamecu.description", newCUName); //$NON-NLS-1$
+				// rename cu
+				proposals.add(new ChangeCorrectionProposal(label, change, 2, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME)));
+			}
 		}
 	}
 	
@@ -71,20 +74,23 @@ public class ReorgCorrectionsSubProcessor {
 			
 			IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(cu);
 			IPackageFragment newPack= root.getPackageFragment(newPackName);
-
-			String label;
-			if (newPack.isDefaultPackage()) {
-				label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.movecu.default.description", cu.getElementName()); //$NON-NLS-1$
-			} else {
-				label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.movecu.description", new Object[] { cu.getElementName(), newPack.getElementName() }); //$NON-NLS-1$
-			}
-
 			
-			final CompositeChange composite= new CompositeChange(label);
-			composite.add(new CreatePackageChange(newPack));
-			composite.add(new MoveCompilationUnitChange(cu, newPack));
-
-			proposals.add(new ChangeCorrectionProposal(label, composite, 2, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_MOVE)));
+			ICompilationUnit newCU= newPack.getCompilationUnit(cu.getElementName());
+			if (!newCU.exists()) {
+				String label;
+				if (newPack.isDefaultPackage()) {
+					label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.movecu.default.description", cu.getElementName()); //$NON-NLS-1$
+				} else {
+					label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.movecu.description", new Object[] { cu.getElementName(), newPack.getElementName() }); //$NON-NLS-1$
+				}
+	
+				
+				CompositeChange composite= new CompositeChange(label);
+				composite.add(new CreatePackageChange(newPack));
+				composite.add(new MoveCompilationUnitChange(cu, newPack));
+	
+				proposals.add(new ChangeCorrectionProposal(label, composite, 2, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_MOVE)));
+			}
 		}
 	}
 	
@@ -115,9 +121,7 @@ public class ReorgCorrectionsSubProcessor {
 	}
 		
 	private static TextBuffer aquireTextBuffer(ICompilationUnit cu) throws CoreException {
-		if (cu.isWorkingCopy()) {
-			cu= (ICompilationUnit) cu.getOriginalElement();
-		}		
+		cu= JavaModelUtil.toOriginal(cu);
 		IFile file= (IFile) cu.getUnderlyingResource();
 		return TextBuffer.acquire(file);
 	}		
