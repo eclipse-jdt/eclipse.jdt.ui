@@ -29,8 +29,14 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITextViewerHelper;
+import org.eclipse.jface.text.ITextViewerHelperRegistry;
+import org.eclipse.jface.text.source.ISourceViewer;
+
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -94,6 +100,8 @@ import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 public class OrganizeImportsAction extends SelectionDispatchAction {
 	
 	private JavaEditor fEditor;
+	/** <code>true</code> if the query dialog is showing. */
+	private boolean fIsQueryShowing= false;
 
 	/* (non-Javadoc)
 	 * Class implements IObjectActionDelegate
@@ -411,7 +419,8 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			return;
 		if (!ActionUtil.isProcessable(getShell(), cu))
 			return;
-			
+		
+		ITextViewerHelper helper= createViewerHelper();
 		try {
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
 			
@@ -437,6 +446,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				context= progressService;
 			}
 			try {
+				registerHelper(helper);
 				progressService.runInUI(context, new WorkbenchRunnableAdapter(op, op.getScheduleRule()), op.getScheduleRule());
 				IProblem parseError= op.getParseError();
 				if (parseError != null) {
@@ -454,6 +464,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				ExceptionHandler.handle(e, getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), ActionMessages.getString("OrganizeImportsAction.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (InterruptedException e) {
 			} finally {
+				deregisterHelper(helper);
 				if (target != null) {
 					target.endCompoundChange();
 				}
@@ -493,6 +504,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				doListSelectionChanged(getCurrentPage(), ranges);
 			}
 		};
+		fIsQueryShowing= true;
 		dialog.setTitle(ActionMessages.getString("OrganizeImportsAction.selectiondialog.title")); //$NON-NLS-1$
 		dialog.setMessage(ActionMessages.getString("OrganizeImportsAction.selectiondialog.message")); //$NON-NLS-1$
 		dialog.setElements(openChoices);
@@ -510,6 +522,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			ITextSelection textSelection= (ITextSelection) sel;
 			fEditor.selectAndReveal(textSelection.getOffset(), textSelection.getLength());
 		}
+		fIsQueryShowing= false;
 		return result;
 	}
 	
@@ -528,4 +541,35 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		}
 	}
 	
+	private ITextViewerHelper createViewerHelper() {
+		return new ITextViewerHelper() {
+			public boolean isValidSubjectRegion(IRegion region) {
+				return true; // assume true, since we only register while we are active
+			}
+			public boolean hasShellFocus() {
+				return fIsQueryShowing;
+			}
+			
+		};
+	}
+	
+	private void registerHelper(ITextViewerHelper helper) {
+		if (fEditor == null)
+			return;
+		ISourceViewer viewer= fEditor.getViewer();
+		if (viewer instanceof ITextViewerHelperRegistry) {
+			ITextViewerHelperRegistry registry= (ITextViewerHelperRegistry) viewer;
+			registry.registerHelper(helper);
+		}
+	}
+
+	private void deregisterHelper(ITextViewerHelper helper) {
+		if (fEditor == null)
+			return;
+		ISourceViewer viewer= fEditor.getViewer();
+		if (viewer instanceof ITextViewerHelperRegistry) {
+			ITextViewerHelperRegistry registry= (ITextViewerHelperRegistry) viewer;
+			registry.deregisterHelper(helper);
+		}
+	}
 }

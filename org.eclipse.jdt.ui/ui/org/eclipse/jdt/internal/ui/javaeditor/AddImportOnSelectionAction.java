@@ -23,7 +23,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITextViewerHelper;
+import org.eclipse.jface.text.ITextViewerHelperRegistry;
+import org.eclipse.jface.text.source.ISourceViewer;
+
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.window.Window;
 
@@ -88,13 +93,16 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			return;
 		if (!ActionUtil.isProcessable(getShell(), cu))
 			return;
-			
+		
 		ISelection selection= fEditor.getSelectionProvider().getSelection();
 		IDocument doc= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
 		if (selection instanceof ITextSelection && doc != null) {
-			ITextSelection textSelection= (ITextSelection) selection;
-			AddImportsOperation op= new AddImportsOperation(cu, doc, textSelection.getOffset(), textSelection.getLength(), new SelectTypeQuery(getShell()));
+			final ITextSelection textSelection= (ITextSelection) selection;
+			AddImportOnSelectionAction.SelectTypeQuery query= new SelectTypeQuery(getShell());
+			AddImportsOperation op= new AddImportsOperation(cu, doc, textSelection.getOffset(), textSelection.getLength(), query);
+			ITextViewerHelper helper= createViewerHelper(textSelection, query);
 			try {
+				registerHelper(helper);
 				IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
 				progressService.runInUI(fEditor.getSite().getWorkbenchWindow(), new WorkbenchRunnableAdapter(op, op.getScheduleRule()), op.getScheduleRule());
 				IStatus status= op.getStatus();
@@ -108,10 +116,42 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 				ExceptionHandler.handle(e, getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), null); //$NON-NLS-1$
 			} catch (InterruptedException e) {
 				// Do nothing. Operation has been canceled.
+			} finally {
+				deregisterHelper(helper);
 			}
 		}		
 	}
+
+	private ITextViewerHelper createViewerHelper(final ITextSelection selection, final SelectTypeQuery query) {
+		return new ITextViewerHelper() {
+
+			public boolean isValidSubjectRegion(IRegion region) {
+				return region.getOffset() <= selection.getOffset() + selection.getLength() &&  selection.getOffset() <= region.getOffset() + region.getLength();
+			}
+
+			public boolean hasShellFocus() {
+				return query.isShowing();
+			}
+			
+		};
+	}
 	
+	private void registerHelper(ITextViewerHelper helper) {
+		ISourceViewer viewer= fEditor.getViewer();
+		if (viewer instanceof ITextViewerHelperRegistry) {
+			ITextViewerHelperRegistry registry= (ITextViewerHelperRegistry) viewer;
+			registry.registerHelper(helper);
+		}
+	}
+
+	private void deregisterHelper(ITextViewerHelper helper) {
+		ISourceViewer viewer= fEditor.getViewer();
+		if (viewer instanceof ITextViewerHelperRegistry) {
+			ITextViewerHelperRegistry registry= (ITextViewerHelperRegistry) viewer;
+			registry.deregisterHelper(helper);
+		}
+	}
+
 	private Shell getShell() {
 		return fEditor.getSite().getShell();
 	}
@@ -119,6 +159,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	private static class SelectTypeQuery implements IChooseImportQuery {
 		
 		private final Shell fShell;
+		private boolean fIsShowing;
 
 		public SelectTypeQuery(Shell shell) {
 			fShell= shell;
@@ -144,14 +185,21 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					}
 				}
 			}		
+			fIsShowing= true;
 			ElementListSelectionDialog dialog= new ElementListSelectionDialog(fShell, new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED));
 			dialog.setTitle(JavaEditorMessages.getString("AddImportOnSelection.dialog.title")); //$NON-NLS-1$
 			dialog.setMessage(JavaEditorMessages.getString("AddImportOnSelection.dialog.message")); //$NON-NLS-1$
 			dialog.setElements(results);
 			if (dialog.open() == Window.OK) {
+				fIsShowing= false;
 				return (TypeInfo) dialog.getFirstResult();
 			}
+			fIsShowing= false;
 			return null;
+		}
+		
+		boolean isShowing() {
+			return fIsShowing;
 		}
 	}
 		
