@@ -36,6 +36,12 @@
 - ISharedParticipant and propagating data to participant. That doesn't wortk for the
   current implementation. SetNewName and other methods must have an additional object
   parameter. Best is to split this into IShared and INonShared participants.
+  
+- Source folder and compilation unit processors object state attribute can be simplified
+  in the following way:
+  <objectState adaptable="org.eclipse.jdt.core.IJavaElement">
+      <property name="instanceof" value="IPackageFragmentRoot"/>
+  </objectState>
 
 ======================================= UI ===============================================
   
