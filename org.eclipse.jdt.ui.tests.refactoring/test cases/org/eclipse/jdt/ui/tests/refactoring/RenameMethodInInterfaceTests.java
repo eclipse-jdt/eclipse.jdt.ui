@@ -30,6 +30,10 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	
 	private static final Class clazz= RenameMethodInInterfaceTests.class;
 	private static final String REFACTORING_PATH= "RenameMethodInInterface/";
+	private static final String[] NO_ARGUMENTS= new String[0];
+	
+	private static final boolean BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH= true;
+	private static final boolean BUG_83290_HANDLE_VALUE_ELEMENT= true;
 
 	public RenameMethodInInterfaceTests(String name) {
 		super(name);
@@ -66,7 +70,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	}
 	
 	private void helper1() throws Exception{
-		helper1_0("m", "k", new String[0]);
+		helper1_0("m", "k", NO_ARGUMENTS);
 	}
 	
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass, boolean updateReferences) throws Exception{
@@ -99,11 +103,62 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	}
 	
 	private void helper2(boolean updateReferences) throws Exception{
-		helper2_0("m", "k", new String[0], true, updateReferences);
+		helper2_0("m", "k", NO_ARGUMENTS, true, updateReferences);
 	}
 	
 	private void helper2() throws Exception{
 		helper2(true);
+	}
+	
+// --------------------------------------------------------------------------
+	
+	public void testAnnotation0() throws Exception{
+		if (BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH) {
+			printTestDisabledMessage("BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH");
+			return;
+		}
+		helper2_0("name", "ident", NO_ARGUMENTS, true, true);
+	}
+	
+	public void testAnnotation1() throws Exception{
+		if (BUG_83290_HANDLE_VALUE_ELEMENT) {
+			printTestDisabledMessage("BUG_83290_HANDLE_VALUE_ELEMENT");
+			return;
+		}
+		if (BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH) {
+			printTestDisabledMessage("BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH");
+			return;
+		}
+		helper2_0("value", "number", NO_ARGUMENTS, true, true);
+	}
+	
+	public void testAnnotation2() throws Exception{
+		if (BUG_83290_HANDLE_VALUE_ELEMENT) {
+			printTestDisabledMessage("BUG_83290_HANDLE_VALUE_ELEMENT");
+			return;
+		}
+		if (BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH) {
+			printTestDisabledMessage("BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH");
+			return;
+		}
+		helper2_0("thing", "value", NO_ARGUMENTS, true, true);
+	}
+	
+	public void testAnnotation3() throws Exception{
+		if (BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH) {
+			printTestDisabledMessage("BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH");
+			return;
+		}
+		helper2_0("value", "num", NO_ARGUMENTS, true, true);
+	}
+	
+	public void testAnnotation4() throws Exception{
+		if (BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH) {
+			printTestDisabledMessage("BUG_83230_CORE_ANNOTATION_ELEMENT_SEARCH");
+			return;
+		}
+		// see also bug 83064
+		helper2_0("value", "num", NO_ARGUMENTS, true, true);
 	}
 	
 	public void testFail0() throws Exception{
@@ -173,7 +228,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		helper1_0("m", "k", new String[]{"QObject;"});
 	}
 	public void testFail23() throws Exception{
-		helper1_not_available("toString", new String[0]);
+		helper1_not_available("toString", NO_ARGUMENTS);
 	}
 	public void testFail24() throws Exception{
 		helper1();
@@ -195,19 +250,19 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	}
 	
 	public void testFail30() throws Exception{
-		helper1_not_available("toString", new String[0]);
+		helper1_not_available("toString", NO_ARGUMENTS);
 	}
 	
 	public void testFail31() throws Exception{
-		helper1_not_available("toString", new String[0]);
+		helper1_not_available("toString", NO_ARGUMENTS);
 	}
 	
 	public void testFail32() throws Exception{
-		helper1_0("m", "toString", new String[0]);
+		helper1_0("m", "toString", NO_ARGUMENTS);
 	}
 	
 	public void testFail33() throws Exception{
-		helper1_0("m", "toString", new String[0]);
+		helper1_0("m", "toString", NO_ARGUMENTS);
 	}
 	
 	public void testFail34() throws Exception{
@@ -219,19 +274,19 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	}
 	
 	public void testFail36() throws Exception{
-		helper1_0("m", "getClass", new String[0]);
+		helper1_0("m", "getClass", NO_ARGUMENTS);
 	}
 	
 	public void testFail37() throws Exception{
-		helper1_0("m", "hashCode", new String[0]);
+		helper1_0("m", "hashCode", NO_ARGUMENTS);
 	}
 
 	public void testFail38() throws Exception{
-		helper1_0("m", "notify", new String[0]);
+		helper1_0("m", "notify", NO_ARGUMENTS);
 	}	
 
 	public void testFail39() throws Exception{
-		helper1_0("m", "notifyAll", new String[0]);
+		helper1_0("m", "notifyAll", NO_ARGUMENTS);
 	}	
 	
 	public void testFail40() throws Exception{
@@ -243,11 +298,11 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	}	
 	
 	public void testFail42() throws Exception{
-		helper1_0("m", "wait", new String[0]);
+		helper1_0("m", "wait", NO_ARGUMENTS);
 	}	
 	
 	public void testFail43() throws Exception{
-		helper1_0("m", "wait", new String[0]);
+		helper1_0("m", "wait", NO_ARGUMENTS);
 	}	
 	
 	

@@ -329,6 +329,11 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		helper1();
 	}
 	
+	public void testFail40() throws Exception{
+		//Autoboxing -> calls to methods can be redirected due to overloading
+		helper1_0("m", "k", new String[]{Signature.SIG_INT});
+	}
+	
 	public void test1() throws Exception{
 		ParticipantTesting.reset();
 		helper2();
