@@ -600,6 +600,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				fResourceFilterStatus= validateResourceFilters();
 			} else if (PREF_PB_UNUSED_PARAMETER.equals(changedKey) ||
 					PREF_PB_DEPRECATION.equals(changedKey) ||
+					PREF_PB_INVALID_ANNOTATION.equals(changedKey) ||
 					PREF_PB_LOCAL_VARIABLE_HIDING.equals(changedKey)) {				
 				updateEnableStates();
 			} else {
@@ -626,6 +627,9 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		
 		boolean enableHiding= !checkValue(PREF_PB_LOCAL_VARIABLE_HIDING, IGNORE);
 		getCheckBox(PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD).setEnabled(enableHiding);
+
+		boolean enableJavadocErrors= !checkValue(PREF_PB_INVALID_ANNOTATION, IGNORE);
+		getCheckBox(PREF_PB_MISSING_ANNOTATION).setEnabled(enableJavadocErrors);
 	}
 
 	private IStatus validateCompliance() {
