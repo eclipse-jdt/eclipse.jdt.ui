@@ -82,7 +82,6 @@ import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -298,6 +297,7 @@ public class PackageExplorerPart extends ViewPart
 		// Set input after filter and sorter has been set. This avoids resorting and refiltering.
 		restoreFilterAndSorter();
 		fViewer.setInput(findInputElement());
+		initFrameActions();
 		initDragAndDrop();
 		initKeyListener();
 			
@@ -334,6 +334,12 @@ public class PackageExplorerPart extends ViewPart
 		fillActionBars();
 
 		updateTitle();
+	}
+
+	private void initFrameActions() {
+		fActionSet.getUpAction().update();
+		fActionSet.getBackAction().update();
+		fActionSet.getForwardAction().update();
 	}
 
 	/**

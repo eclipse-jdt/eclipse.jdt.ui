@@ -176,6 +176,33 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			return super.getParent(child);
 	}
 
+	protected Object internalGetParent(Object element) {
+		// since we insert logical package containers we have to fix
+		// up the parent for package fragment roots so that they refer
+		// to the container and containers refere to the project
+		//
+		if (element instanceof IPackageFragmentRoot) {
+			IPackageFragmentRoot root= (IPackageFragmentRoot)element;
+			IJavaProject project= root.getJavaProject();
+			try {
+				IClasspathEntry[] entries= project.getRawClasspath();
+				for (int i= 0; i < entries.length; i++) {
+					IClasspathEntry entry= entries[i];
+					if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+						if (ClassPathContainer.contains(project, entry, root)) 
+							return new ClassPathContainer(project, entry);
+					}
+				}
+			} catch (JavaModelException e) {
+				// fall through
+			}
+		}
+		if (element instanceof ClassPathContainer) {
+			return ((ClassPathContainer)element).getJavaProject();
+		}
+		return super.internalGetParent(element);
+	}
+	
 	private boolean needsToDelegateGetParent(Object element) {
 		int type= -1;
 		if (element instanceof IJavaElement)

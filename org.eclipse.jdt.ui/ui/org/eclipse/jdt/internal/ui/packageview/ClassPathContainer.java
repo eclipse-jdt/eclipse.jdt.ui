@@ -4,6 +4,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -26,6 +27,22 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 		} catch (JavaModelException e) {
 			fContainer= null;
 		}
+	}
+
+	public boolean equals(Object obj) {
+		if (obj instanceof ClassPathContainer) {
+			ClassPathContainer other = (ClassPathContainer)obj;
+			if (fProject.equals(other.fProject) &&
+				fClassPathEntry.equals(other.fClassPathEntry)) {
+				return true;	
+			}
+			
+		}
+		return false;
+	}
+
+	public int hashCode() {
+		return fProject.hashCode()*17+fClassPathEntry.hashCode();
 	}
 
 	public Object[] getPackageFragmentRoots() {
@@ -53,10 +70,19 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 	}
 
 	public Object getParent(Object o) {
-		return fProject;
+		return getJavaProject();
 	}
-	
+
 	public IJavaProject getJavaProject() {
 		return fProject;
+	}
+
+	static boolean contains(IJavaProject project, IClasspathEntry entry, IPackageFragmentRoot root) {
+		IPackageFragmentRoot[] roots= project.findPackageFragmentRoots(entry);
+		for (int i= 0; i < roots.length; i++) {
+			if (roots[i].equals(root))
+				return true;
+		}
+		return false;
 	}
 }

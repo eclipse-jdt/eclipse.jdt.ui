@@ -62,6 +62,7 @@ import org.eclipse.ui.actions.OpenInNewWindowAction;
 import org.eclipse.ui.actions.RenameResourceAction;
 import org.eclipse.ui.views.framelist.BackAction;
 import org.eclipse.ui.views.framelist.ForwardAction;
+import org.eclipse.ui.views.framelist.FrameAction;
 import org.eclipse.ui.views.framelist.FrameList;
 import org.eclipse.ui.views.framelist.GoIntoAction;
 import org.eclipse.ui.views.framelist.UpAction;
@@ -366,5 +367,16 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 
 	private boolean doubleClickGoesInto() {
 		return PreferenceConstants.DOUBLE_CLICK_GOES_INTO.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.DOUBLE_CLICK));
+	}
+
+	public FrameAction getUpAction() {
+		return fUpAction;
+	}
+
+	public FrameAction getBackAction() {
+		return fBackAction;
+	}
+	public FrameAction getForwardAction() {
+		return fForwardAction;
 	}
 }
