@@ -6,38 +6,27 @@ package org.eclipse.jdt.ui.tests.core;
 
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.zip.ZipFile;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
-import org.eclipse.jdt.internal.ui.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.codegeneration.OrganizeImportsOperation;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.codegeneration.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
 
 public class ImportOrganizeTest extends TestCase {
@@ -45,8 +34,6 @@ public class ImportOrganizeTest extends TestCase {
 	private static final Class THIS= ImportOrganizeTest.class;
 	
 	private IJavaProject fJProject1;
-
-	private static final IPath SOURCES= new Path("testresources/junit32-noUI.zip");
 
 	public ImportOrganizeTest(String name) {
 		super(name);
@@ -65,10 +52,9 @@ public class ImportOrganizeTest extends TestCase {
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 
-		IPackageFragmentRoot jdk= JavaProjectHelper.addRTJar(fJProject1);
-		assertTrue("jdk not found", jdk != null);
+		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
 
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(SOURCES);
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 		ZipFile zipfile= new ZipFile(junitSrcArchive);
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
@@ -117,49 +103,62 @@ public class ImportOrganizeTest extends TestCase {
 	}
 	
 	public void test1() throws Exception {
-		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/tests/TestTest.java"));
-		assertNotNull("TestTest.java", cu);
+		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/BaseTestRunner.java"));
+		assertNotNull("BaseTestRunner.java", cu);
+		
+		IPackageFragmentRoot root= (IPackageFragmentRoot)cu.getParent().getParent();
+		IPackageFragment pack= root.createPackageFragment("mytest", true, null);
+		
+		ICompilationUnit colidingCU= pack.getCompilationUnit("TestListener.java");
+		colidingCU.createType("public abstract class TestListener {\n}\n", null, true, null);
+		
 		
 		String[] order= new String[0];
-		IChooseImportQuery query= createQuery("TestTest", new String[] { "junit.tests.TestTest.TornDown" }, new int[] { 2 });
+		IChooseImportQuery query= createQuery("BaseTestRunner", new String[] { "junit.framework.TestListener" }, new int[] { 2 });
 		
 		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, true, query);
 		op.run(null);
 		
 		assertImports(cu, new String[] {
-			"junit.framework.AssertionFailedError",
-			"junit.framework.TestCase",
-			"junit.framework.TestResult",
-			"junit.util.StringUtil"
+			"java.io.BufferedReader",
+			"java.io.File",
+			"java.io.FileInputStream",
+			"java.io.IOException",
+			"java.io.InputStream",
+			"java.io.PrintWriter",
+			"java.io.StringReader",
+			"java.io.StringWriter",
+			"java.lang.reflect.InvocationTargetException",
+			"java.lang.reflect.Method",
+			"java.text.NumberFormat",
+			"java.util.Properties",
+			"junit.framework.Test",
+			"junit.framework.TestListener",
+			"junit.framework.TestSuite"
 		});
 	}
 		
 	public void test2() throws Exception {
-		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/util/TestCaseClassLoader.java"));
-		assertNotNull("TestCaseClassLoader.java", cu);
+		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/LoadingTestCollector.java"));
+		assertNotNull("LoadingTestCollector.java", cu);
 		
 		String[] order= new String[0];
-		IChooseImportQuery query= createQuery("TestCaseClassLoader", new String[] { }, new int[] { });
+		IChooseImportQuery query= createQuery("LoadingTestCollector", new String[] { }, new int[] { });
 		
 		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, true, query);
 		op.run(null);
 		
 		assertImports(cu, new String[] {
-			"java.io.File",
-			"java.io.FileInputStream",
-			"java.io.FileNotFoundException",
-			"java.io.IOException",
-			"java.io.InputStream",
-			"java.util.Enumeration",
-			"java.util.Properties",
-			"java.util.StringTokenizer",
-			"java.util.Vector"		
+			"java.lang.reflect.Constructor",
+			"java.lang.reflect.Method",
+			"java.lang.reflect.Modifier",
+			"junit.framework.Test"	
 		});	
 	}
 	
 	
 	public void test3() throws Exception {
-		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/util/TestCaseClassLoader.java"));
+		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/TestCaseClassLoader.java"));
 		assertNotNull("TestCaseClassLoader.java", cu);
 		
 		String[] order= new String[0];
@@ -170,10 +169,13 @@ public class ImportOrganizeTest extends TestCase {
 		
 		assertImports(cu, new String[] {
 			"java.io.*",
-			"java.util.*",	
+			"java.net.URL",
+			"java.util.*",
+			"java.util.zip.ZipEntry",
+			"java.util.zip.ZipFile",
 		});	
-	}	
-	
+	}
+		
 	public void test4() throws Exception {
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/textui/TestRunner.java"));
 		assertNotNull("TestRunner.java", cu);
@@ -186,17 +188,17 @@ public class ImportOrganizeTest extends TestCase {
 		
 		assertImports(cu, new String[] {
 			"java.io.PrintStream",
-			"java.lang.reflect.Method", 
 			"java.util.Enumeration",
+			"junit.framework.AssertionFailedError",
 			"junit.framework.Test",
 			"junit.framework.TestFailure",
-			"junit.framework.TestListener",
 			"junit.framework.TestResult",
 			"junit.framework.TestSuite",
-			"junit.util.StringUtil",
-			"junit.util.Version"
+			"junit.runner.BaseTestRunner",
+			"junit.runner.StandardTestSuiteLoader",
+			"junit.runner.TestSuiteLoader",
+			"junit.runner.Version"
 		});		
-	}	
-	
-	
+	}
+
 }

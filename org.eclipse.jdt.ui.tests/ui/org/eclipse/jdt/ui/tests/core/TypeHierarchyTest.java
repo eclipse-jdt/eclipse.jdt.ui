@@ -66,7 +66,6 @@ public class TypeHierarchyTest extends TestCase {
 		ITypeHierarchy hierarchy= type2.newSupertypeHierarchy(null);
 		IType[] allTypes= hierarchy.getAllTypes();
 		
-		System.out.println("all types in TH of B");
 		assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
 		
 		IType type= JavaModelUtil.findType(fJavaProject2, "pack1.A");

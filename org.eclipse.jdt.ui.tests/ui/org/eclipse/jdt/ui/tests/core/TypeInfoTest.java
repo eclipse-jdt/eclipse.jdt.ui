@@ -41,8 +41,6 @@ public class TypeInfoTest extends TestCase {
 	private IJavaProject fJProject1;
 	private IJavaProject fJProject2;
 
-	private static final IPath SOURCES= new Path("testresources/junit32-noUI.zip");
-
 	public TypeInfoTest(String name) {
 		super(name);
 	}
@@ -59,8 +57,18 @@ public class TypeInfoTest extends TestCase {
 
 
 	protected void setUp() throws Exception {
-			fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-			fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		assertNotNull("jre is null", JavaProjectHelper.addRTJar(fJProject1));
+		
+		fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
+		assertNotNull("jre is null", JavaProjectHelper.addRTJar(fJProject2));
+		
+		// add Junit source to project 2
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		assertTrue("Junit source", junitSrcArchive != null && junitSrcArchive.exists());
+		ZipFile zipfile= new ZipFile(junitSrcArchive);
+		JavaProjectHelper.addSourceContainerWithImport(fJProject2, "src", zipfile);
+		
 	}
 
 
@@ -72,33 +80,19 @@ public class TypeInfoTest extends TestCase {
 
 
 	public void test1() throws Exception {
-		
-		// a junit project
-		IPackageFragmentRoot jdk= JavaProjectHelper.addRTJar(fJProject2);
-		assertTrue("jdk not found", jdk != null);
-		
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(SOURCES);
-		assertTrue(junitSrcArchive != null && junitSrcArchive.exists());
-		ZipFile zipfile= new ZipFile(junitSrcArchive);
-		JavaProjectHelper.addSourceContainerWithImport(fJProject2, "src", zipfile);
-		
-
-		// external jar
-		JavaProjectHelper.addRTJar(fJProject1);
-		// required project
-		JavaProjectHelper.addRequiredProject(fJProject1, fJProject2);
-		
+	
 		// source folder
 		IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= root1.createPackageFragment("com.oti", true, null);
 		ICompilationUnit cu1= pack1.getCompilationUnit("V.java");
 		IType type1= cu1.createType("public class V {\n static class VInner {\n}\n}\n", null, true, null);
 
+		// proj1 has proj2 as prerequisit
+		JavaProjectHelper.addRequiredProject(fJProject1, fJProject2);
 
 		// internal jar
 		//IPackageFragmentRoot root2= JavaProjectHelper.addLibraryWithImport(fJProject1, JARFILE, null, null);
 		ArrayList result= new ArrayList();
-
 
 		IJavaElement[] elements= new IJavaElement[] { fJProject1 };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
@@ -147,15 +141,10 @@ public class TypeInfoTest extends TestCase {
 	}
 		
 	
-	public void test2() throws Exception {
-		// our project
-		IJavaProject fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		// external jar
-		JavaProjectHelper.addRTJar(fJProject1);
-		
+	public void test2() throws Exception {	
 		ArrayList result= new ArrayList();
 		
-		IJavaProject[] elements= new IJavaProject[] {fJProject1};
+		IJavaProject[] elements= new IJavaProject[] { fJProject2 };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 		ITypeNameRequestor requestor= new TypeInfoRequestor(result);
 		SearchEngine engine= new SearchEngine();
@@ -175,7 +164,7 @@ public class TypeInfoTest extends TestCase {
 		findTypeRef(result, "junit.extensions.TestDecorator");
 		findTypeRef(result, "junit.framework.Test");
 		findTypeRef(result, "junit.framework.TestListener");
-		findTypeRef(result, "junit.tests.TestTest.TornDown");
+		findTypeRef(result, "junit.tests.TestCaseTest.TornDown");
 
 		System.out.println("Elements found: " + result.size());
 		for (int i= 0; i < result.size(); i++) {

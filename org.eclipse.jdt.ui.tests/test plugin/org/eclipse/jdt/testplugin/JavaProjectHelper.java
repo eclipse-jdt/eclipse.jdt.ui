@@ -30,16 +30,13 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.JavaRuntime;
-import org.eclipse.jdt.launching.LibraryLocation;
-
 /**
  * Helper methods to set up a IJavaProject.
  */
 public class JavaProjectHelper {
 	
-	private static final IPath JCL_MAX= new Path("testresources/jclmax.jar");
+	public static final IPath RT_STUBS= new Path("testresources/rtstubs.jar");
+	public static final IPath JUNIT_SRC= new Path("testresources/junit37-noUI-src.zip");
 	
 
 	/**
@@ -252,8 +249,8 @@ public class JavaProjectHelper {
 	 * Try to find rt.jar
 	 */
 	public static IPath[] findRtJar() {
-		File jclMaxArchive= JavaTestPlugin.getDefault().getFileInPlugin(JCL_MAX);
-		if (jclMaxArchive != null) {
+		File jclMaxArchive= JavaTestPlugin.getDefault().getFileInPlugin(RT_STUBS);
+		if (jclMaxArchive != null && jclMaxArchive.exists()) {
 			return new IPath[] {
 				new Path(jclMaxArchive.getPath()),
 				null,
@@ -261,7 +258,8 @@ public class JavaProjectHelper {
 			};
 		}
 		
-		/**IVMInstall vmInstall= JavaRuntime.getDefaultVMInstall();
+		/*
+		IVMInstall vmInstall= JavaRuntime.getDefaultVMInstall();
 		if (vmInstall != null) {
 			LibraryLocation loc= vmInstall.getVMInstallType().getDefaultLibraryLocation(vmInstall.getInstallLocation());
 			if (loc != null) {

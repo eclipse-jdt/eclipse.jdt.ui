@@ -6,11 +6,10 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -19,6 +18,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -33,7 +33,6 @@ import org.eclipse.jdt.ui.tests.core.AddUnimplementedMethodsTest;
 
 import org.eclipse.jdt.internal.debug.ui.launcher.AddExceptionDialog;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.corext.codegeneration.CodeGenerationMessages;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
@@ -61,7 +60,6 @@ public class DialogsTest extends TestCase {
 		suite.addTest(new DialogsTest("testTwoPaneSelectionDialog"));
 		suite.addTest(new DialogsTest("testElementTreeSelectionDialog"));
 		suite.addTest(new DialogsTest("testElementListSelectionDialog"));
-		suite.addTest(new DialogsTest("testAddExceptionDialog"));
 		return suite;
 	}
 
@@ -111,14 +109,13 @@ public class DialogsTest extends TestCase {
 		ArrayList list= new ArrayList(200);
 		IProject project= jproject.getProject();
 
-		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IResource[] { project });		
+		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { jproject });		
 		AllTypesSearchEngine searchEngine= new AllTypesSearchEngine(project.getWorkspace());
 		searchEngine.searchTypes(list, searchScope, IJavaElementSearchConstants.CONSIDER_TYPES, null);
 
 		MultiElementListSelectionDialog dialog= new MultiElementListSelectionDialog(getShell(), labelProvider);
-		dialog.setTitle(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.title")); //$NON-NLS-1$
-		dialog.setMessage(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.message")); //$NON-NLS-1$
-		dialog.setPageInfoMessage(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.pageinfo")); //$NON-NLS-1$
+		dialog.setTitle("Title"); //$NON-NLS-1$
+		dialog.setMessage("Description:"); //$NON-NLS-1$
 	
 		assertTrue(list.size() > 15);
 		TypeInfo[][] refs= new TypeInfo[][] { getRefs(list, 0, 3), getRefs(list, 4, 6), getRefs(list, 10, 5) };
@@ -174,16 +171,6 @@ public class DialogsTest extends TestCase {
 		JavaProjectHelper.delete(jproject);	
 	}
 	
-	public void testAddExceptionDialog() throws Exception {	
-		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
-		JavaProjectHelper.addRTJar(jproject);
-		
-		AddExceptionDialog dialog= new AddExceptionDialog(getShell());
-
-		DialogCheck.assertDialog(dialog, this);
-		
-		JavaProjectHelper.delete(jproject);	
-	}
 
 	private static class TestLabelProvider extends LabelProvider {
 		public Image getImage(Object element) {

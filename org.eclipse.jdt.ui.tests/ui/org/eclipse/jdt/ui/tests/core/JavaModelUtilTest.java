@@ -40,7 +40,6 @@ public class JavaModelUtilTest extends TestCase {
 	private IJavaProject fJProject1;
 	private IJavaProject fJProject2;
 
-	private static final IPath SOURCES= new Path("testresources/junit32-noUI.zip");
 	private static final IPath LIB= new Path("testresources/mylib.jar");
 
 	public JavaModelUtilTest(String name) {
@@ -64,7 +63,7 @@ public class JavaModelUtilTest extends TestCase {
 		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(fJProject1, "JRE_LIB_TEST", null, null);
 		assertTrue("jdk not found", jdk != null);
 
-		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(SOURCES);
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 		ZipFile zipfile= new ZipFile(junitSrcArchive);
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
@@ -105,7 +104,7 @@ public class JavaModelUtilTest extends TestCase {
 		type= JavaModelUtil.findType(fJProject1, "junit.samples.money.IMoney");
 		assertElementName("IMoney", type, IJavaElement.TYPE);	
 
-		type= JavaModelUtil.findType(fJProject1, "junit.tests.TestTest.TornDown");
+		type= JavaModelUtil.findType(fJProject1, "junit.tests.TestCaseTest.TornDown");
 		assertElementName("TornDown", type, IJavaElement.TYPE);
 		
 		type= JavaModelUtil.findType(fJProject1, "mylib.Foo");
@@ -134,7 +133,7 @@ public class JavaModelUtilTest extends TestCase {
 		type= JavaModelUtil.findType(fJProject1, "junit.samples.money" , "IMoney");
 		assertElementName("IMoney", type, IJavaElement.TYPE);	
 
-		type= JavaModelUtil.findType(fJProject1, "junit.tests", "TestTest.TornDown");
+		type= JavaModelUtil.findType(fJProject1, "junit.tests", "TestCaseTest.TornDown");
 		assertElementName("TornDown", type, IJavaElement.TYPE);
 		
 		type= JavaModelUtil.findType(fJProject1, "mylib" , "Foo");
@@ -160,8 +159,8 @@ public class JavaModelUtilTest extends TestCase {
 		IJavaElement elem= JavaModelUtil.findTypeContainer(fJProject1, "junit.extensions");
 		assertElementName("junit.extensions", elem, IJavaElement.PACKAGE_FRAGMENT);
 
-		elem= JavaModelUtil.findTypeContainer(fJProject1, "junit.tests.TestTest");
-		assertElementName("TestTest", elem, IJavaElement.TYPE);
+		elem= JavaModelUtil.findTypeContainer(fJProject1, "junit.tests.TestCaseTest");
+		assertElementName("TestCaseTest", elem, IJavaElement.TYPE);
 		
 		elem= JavaModelUtil.findTypeContainer(fJProject1, "mylib" );
 		assertElementName("mylib", elem, IJavaElement.PACKAGE_FRAGMENT);
@@ -183,13 +182,13 @@ public class JavaModelUtilTest extends TestCase {
 	}
 	
 	public void testFindTypeInCompilationUnit() throws Exception {
-		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/tests/TestTest.java"));
-		assertElementName("TestTest.java", cu, IJavaElement.COMPILATION_UNIT);
+		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/tests/TestCaseTest.java"));
+		assertElementName("TestCaseTest.java", cu, IJavaElement.COMPILATION_UNIT);
 		
-		IType type= JavaModelUtil.findTypeInCompilationUnit(cu, "TestTest");
-		assertElementName("TestTest", type, IJavaElement.TYPE);
+		IType type= JavaModelUtil.findTypeInCompilationUnit(cu, "TestCaseTest");
+		assertElementName("TestCaseTest", type, IJavaElement.TYPE);
 		
-		type= JavaModelUtil.findTypeInCompilationUnit(cu, "TestTest.TornDown");
+		type= JavaModelUtil.findTypeInCompilationUnit(cu, "TestCaseTest.TornDown");
 		assertElementName("TornDown", type, IJavaElement.TYPE);
 		
 		cu= (ICompilationUnit) fJProject1.findElement(new Path("pack1/ReqProjType.java"));
@@ -206,21 +205,21 @@ public class JavaModelUtilTest extends TestCase {
 	}
 	
 	public void testFindMemberInCompilationUnit() throws Exception {
-		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/tests/TestTest.java"));
-		assertElementName("TestTest.java", cu, IJavaElement.COMPILATION_UNIT);
+		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/tests/TestCaseTest.java"));
+		assertElementName("TestCaseTest.java", cu, IJavaElement.COMPILATION_UNIT);
 		ArrayList children= new ArrayList();
 		
-		IType type= JavaModelUtil.findTypeInCompilationUnit(cu, "TestTest");
-		assertElementName("TestTest", type, IJavaElement.TYPE);
+		IType type= JavaModelUtil.findTypeInCompilationUnit(cu, "TestCaseTest");
+		assertElementName("TestCaseTest", type, IJavaElement.TYPE);
 		
 		children.addAll(Arrays.asList(type.getChildren()));
 		
-		type= JavaModelUtil.findTypeInCompilationUnit(cu, "TestTest.TornDown");
+		type= JavaModelUtil.findTypeInCompilationUnit(cu, "TestCaseTest.TornDown");
 		assertElementName("TornDown", type, IJavaElement.TYPE);
 		
 		children.addAll(Arrays.asList(type.getChildren()));
 		
-		assertTrue("a", children.size() == 32);
+		assertTrue("a", children.size() == 19);
 
 		for (int i= 0; i < children.size(); i++) {
 			Object curr= children.get(i);
