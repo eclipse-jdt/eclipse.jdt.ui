@@ -518,7 +518,6 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		// filter synthetic checkbox
 		fFilterSyntheticButton = new Button(container, SWT.CHECK);
 		fFilterSyntheticButton.setText("Filter s&ynthetic methods (requires VM support)");
-		fFilterSyntheticButton.setToolTipText("Don't stop in synthetic (compiler-generated) methods");
 		gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalSpan = 2;
 		fFilterSyntheticButton.setLayoutData(gd);
@@ -526,7 +525,6 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		// filter static checkbox
 		fFilterStaticButton = new Button(container, SWT.CHECK);
 		fFilterStaticButton.setText("Filter static &initializers");
-		fFilterStaticButton.setToolTipText("Don't stop in static initialization code");
 		gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalSpan = 2;
 		fFilterStaticButton.setLayoutData(gd);
@@ -534,7 +532,6 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		// filter constructor checkbox
 		fFilterConstructorButton = new Button(container, SWT.CHECK);
 		fFilterConstructorButton.setText("Filter co&nstructors");
-		fFilterConstructorButton.setToolTipText("Don't stop in constructors");
 		gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalSpan = 2;
 		fFilterConstructorButton.setLayoutData(gd);
