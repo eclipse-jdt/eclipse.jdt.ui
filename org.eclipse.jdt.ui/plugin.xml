@@ -676,6 +676,12 @@
 		name= "%installJREPageName"
 		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>
+	<page
+		id = "org.eclipse.jdt.ui.preferences.TemplatePreferencePage"
+		class="org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage"
+		name= "%templatePageName"
+		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
+	</page>
 </extension>
 
 <extension point="org.eclipse.ui.viewActions">

@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+
+<!--
+(c) Copyright IBM Corp. 2000, 2001.
+All Rights Reserved.
+-->
+
+<templates>
+
+  <!-- java -->
+
+  <template description="for(array, index) - iterate over array" name="for" context="java"
+  >for (int ${1}= 0; ${1} &lt; ${0}.length; ${1}++) {&#10;&#9;${cursor}&#10;}</template>
+
+  <template description="iterate over array" name="for" context="java"
+  >for (int ${index}= 0; ${index} &lt; ${cursor}${array}${cursor-end}.length; ${index}++) {&#10;&#9;&#10;}</template>
+
+  <template description="iterate over collection" name="for" context="java"
+>for (Iterator ${iterator}= ${collection}.iterator(); ${iterator}.hasNext(); ) {
+	${element_type} ${element}= (${type}) ${iterator}.next();
+	${cursor}
+}</template>
+
+  <template description="iterate over vector" name="for" context="java"
+>for (int ${index}= 0; ${index} &lt; ${vector}.size(); ${index}++) {
+	${element_type} ${element}= (${type}) ${vector}.elementAt(${index});
+	${cursor}
+}</template>
+
+  <template description="iterate over enumeration" name="while" context="java"
+>while (${enumeration}.hasMoreElements()) {
+	${element_type} ${element}= (${type}) ${enumeration}.nextElement();
+	${cursor}
+}</template>
+
+  <template description="iterate with iterator" name="while" context="java"
+>while (${iterator}.hasNext()) {
+	${element_type} ${element}= (${type}) ${iterator}.next();
+	${cursor}
+}</template>
+
+  <template description="do {} while ();" name="do" context="java"
+  >do {&#10;&#9;${cursor}&#10;} while ();</template>
+
+  <template description="switch {}" name="switch" context="java"
+  >switch (${cursor}) {&#10;&#9;case :&#10;&#10;}</template>
+
+  <template description="if () {}" name="if" context="java"
+  >if (${cursor}) {&#10;&#9;&#10;}</template>
+
+  <template description="else if () {}" name="elseif" context="java"
+  >else if (${cursor}) {&#10;&#9;&#10;}</template>
+
+  <template description="else {}" name="else" context="java"
+  >else {&#10;&#9;${cursor}&#10;}</template>
+
+  <template description="try catch block" name="try" context="java"
+  >try {&#10;&#9;&#10;} catch (${cursor}Exception e) {&#10;}</template>
+
+  <template description="catch block" name="catch" context="java"
+  >catch (${cursor}Exception e) {&#10;&#9;&#10;}</template>
+
+  <template description="main method" name="main" context="java"
+  >public static void main(String arguments[]) {&#10;&#9;${cursor}&#10;}</template>
+
+  <template description="instanceof(object, type)" name="instanceof" context="java"
+>if (${0} instanceof ${1}) {
+	${1} ${cursor}description${cursor-end}= (${1}) ${0};
+	
+}</template>
+
+  <template description="convert collection to array" name="toarray" context="java"
+  >(${type}[]) ${collection}.toArray(new ${type}[${collection}]);</template>
+
+  <template description="copyright information" name="copyright" context="java"
+>/*
+ * (c) Copyright ${cursor}IBM${cursor-end} Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
+</template>
+
+  <template description="print to standard out" name="System.out.println" context="java"
+  >System.out.println(&quot;${cursor}&quot;);</template>
+
+  <template description="print to standard error" name="System.err.println" context="java"
+  >System.err.println(&quot;${cursor}&quot;);</template>
+
+  <!-- javadoc -->
+
+  <template description="&lt;code&gt;&lt;/code&gt;" name="&lt;code&gt;" context="javadoc"
+  >&lt;code&gt;${cursor}&lt;/code&gt;</template>
+
+  <template description="&lt;pre&gt;&lt;/pre&gt;" name="&lt;pre&gt;" context="javadoc"
+  >&lt;pre&gt;${cursor}&lt;/pre&gt;</template>
+
+  <template description="&lt;b&gt;&lt;/b&gt;" name="&lt;b&gt;" context="javadoc"
+  >&lt;b&gt;${cursor}&lt;/b&gt;</template>
+
+  <template description="&lt;i&gt;&lt;/i&gt;" name="&lt;i&gt;" context="javadoc"
+  >&lt;i&gt;${cursor}&lt;/i&gt;</template>
+
+</templates>
