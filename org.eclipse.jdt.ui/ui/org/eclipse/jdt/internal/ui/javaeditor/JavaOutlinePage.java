@@ -73,7 +73,7 @@ import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaSourceElementSorter;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 
@@ -533,7 +533,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				
 			class LexicalSortingAction extends Action {
 				
-				private JavaSourceElementSorter fSorter= new JavaSourceElementSorter();			
+				private JavaElementSorter fSorter= new JavaElementSorter();			
 
 				public LexicalSortingAction() {
 					super();

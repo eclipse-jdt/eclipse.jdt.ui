@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
 import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
@@ -269,7 +270,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		JavaElementLabelProvider labelProvider = new JavaElementLabelProvider(labelFlags);
 		labelProvider.setErrorTickManager(new MarkerErrorTickProvider());
 		fViewer.setLabelProvider(new DecoratingLabelProvider(labelProvider, null));
-		fViewer.setSorter(new PackageViewerSorter());
+		fViewer.setSorter(new JavaElementSorter());
 		fViewer.addFilter(new EmptyInnerPackageFilter());
 		fViewer.setUseHashlookup(true);
 		fViewer.addFilter(fPatternFilter);

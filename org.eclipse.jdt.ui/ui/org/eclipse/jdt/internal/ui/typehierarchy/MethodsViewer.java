@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.ui.actions.OpenSourceReferenceAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaSourceElementSorter;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemItemMapper;
@@ -63,7 +63,7 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 	/**
 	 * Sorter that uses the unmodified labelprovider (No declaring class names)
 	 */
-	private static class MethodsViewerSorter extends JavaSourceElementSorter {
+	private static class MethodsViewerSorter extends JavaElementSorter {
 		private JavaTextLabelProvider fTextLabelProvider;
 		
 		public MethodsViewerSorter() {
