@@ -94,6 +94,8 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 	private MethodsViewerFilter fFilter;
 		
 	private OpenSourceReferenceAction fOpen;
+	
+	private TableColumn fTableColumn;
 
 	private ShowInheritedMembersAction fShowInheritedMembersAction;
 
@@ -104,15 +106,11 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		
 		fProblemItemMapper= new ProblemItemMapper();
 		
-		final Table table= getTable();
-		final TableColumn column= new TableColumn(table, SWT.NULL | SWT.MULTI | SWT.FULL_SELECTION);
-		table.addControlListener(new ControlAdapter() {
+		fTableColumn= new TableColumn(getTable(), SWT.NULL | SWT.MULTI | SWT.FULL_SELECTION);
+		
+		getTable().addControlListener(new ControlAdapter() {
 			public void controlResized(ControlEvent e) {
-				int width= table.getSize().x- 2*table.getBorderWidth();
-				if (width < 0) {
-					width= 0;
-				}
-				column.setWidth(width);
+				adjustTableColumnSize();
 			}
 		});
 
@@ -191,12 +189,27 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 				lprovider.turnOff(JavaElementLabelProvider.SHOW_POST_QUALIFIED);
 			}
 			refresh();
+			adjustTableColumnSize();
+			
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getControl().getShell(), TypeHierarchyMessages.getString("MethodsViewer.toggle.error.title"), TypeHierarchyMessages.getString("MethodsViewer.toggle.error.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
-
-
+	
+	private void adjustTableColumnSize() {
+		if (fTableColumn != null && !fTableColumn.isDisposed()) {
+			fTableColumn.pack();
+		}		
+	}
+	
+	/*
+	 * @see Viewer#inputChanged(Object, Object)
+	 */
+	protected void inputChanged(Object input, Object oldInput) {
+		super.inputChanged(input, oldInput);
+		adjustTableColumnSize();		
+	}
+	
 	/**
 	 * Returns <code>true</code> if inherited methods are shown.
 	 */	
@@ -331,5 +344,9 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		fProblemItemMapper.removeFromMap(item.getData(), item);
 		super.disassociate(item);	
 	}
+
+
+
+
 
 }
