@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 
-import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateMessages;
 import org.eclipse.jface.text.templates.persistence.TemplateSet;
 
@@ -27,6 +26,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * <code>Templates</code> gives access to the available templates.
+ * @deprecated use {@link org.eclipse.jdt.internal.ui.JavaPlugin#getTemplateStore()} instead
  */
 public class Templates extends TemplateSet {
 

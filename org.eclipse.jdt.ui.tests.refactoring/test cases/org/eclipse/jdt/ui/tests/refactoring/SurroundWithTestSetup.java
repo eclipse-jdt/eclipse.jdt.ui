@@ -23,7 +23,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 public class SurroundWithTestSetup extends TestSetup {
@@ -55,7 +58,7 @@ public class SurroundWithTestSetup extends TestSetup {
 		workspace.setDescription(description);
 		
 		fTryCatchPackage= getRoot().createPackageFragment("trycatch_in", true, null);
-		CodeTemplates.getCodeTemplate(CodeTemplates.CATCHBLOCK).setPattern("");
+		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.CATCHBLOCK).setPattern("");
 	}
 
 	protected void tearDown() throws Exception {

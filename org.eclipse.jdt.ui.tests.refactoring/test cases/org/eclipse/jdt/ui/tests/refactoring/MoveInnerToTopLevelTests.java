@@ -25,7 +25,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -51,7 +52,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		CodeTemplates.getCodeTemplate(CodeTemplates.NEWTYPE).setPattern(
+		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.NEWTYPE).setPattern(
 			"${package_declaration}" + 
 			System.getProperty("line.separator", "\n") +			"${type_declaration}");
 

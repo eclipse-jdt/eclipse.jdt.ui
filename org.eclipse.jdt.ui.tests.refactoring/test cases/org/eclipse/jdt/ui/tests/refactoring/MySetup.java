@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -66,7 +66,7 @@ public class MySetup extends TestSetup {
 		comment.append("/**\n");
 		comment.append(" * ${tags}\n");
 		comment.append(" */");
-		CodeTemplates.getCodeTemplate(CodeTemplates.CONSTRUCTORCOMMENT).setPattern(comment.toString());
+		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT).setPattern(comment.toString());
 	}
 	
 	protected void tearDown() throws Exception {

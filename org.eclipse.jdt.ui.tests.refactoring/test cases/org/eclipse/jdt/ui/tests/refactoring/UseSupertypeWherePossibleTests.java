@@ -20,8 +20,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSupertypeWherePossibleRefactoring;
-import org.eclipse.jdt.internal.corext.template.java.Templates;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class UseSupertypeWherePossibleTests extends RefactoringTest {
@@ -43,13 +43,14 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		Template[] typecomments= Templates.getInstance().getTemplates("typecomment");
-		for (int i= 0; i < typecomments.length; i++) {
-			typecomments[i].setPattern("/** typecomment template*/");	
+		Template[] templates= JavaPlugin.getDefault().getTemplateStore().getTemplates();
+		for (int i= 0; i < templates.length; i++) {
+			if (templates[i].getName().equals("typecomment"))
+				templates[i].setPattern("/** typecomment template*/");	
 		}
-		Template[] filecomments= Templates.getInstance().getTemplates("filecomment");
-		for (int i= 0; i < filecomments.length; i++) {
-			filecomments[i].setPattern("/** filecomment template */");	
+		for (int i= 0; i < templates.length; i++) {
+			if (templates[i].getName().equals("filecomment"))
+				templates[i].setPattern("/** filecomment template */");	
 		}
 	}
 		

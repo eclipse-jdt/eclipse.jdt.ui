@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * <code>CodeTemplates</code> gives access to the available code templates.
  * @since 3.0
+ * @deprecated use {@link org.eclipse.jdt.internal.ui.JavaPlugin#getCodeTemplateStore()} instead 
  */
 public class CodeTemplates extends TemplateSet {
 
