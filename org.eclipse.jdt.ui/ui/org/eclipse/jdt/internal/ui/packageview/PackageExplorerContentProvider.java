@@ -138,7 +138,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		}
 	}
 
-	private Object[] rootsAndContainers(IJavaProject project, Object[] roots) { //throws JavaModelException {
+	private Object[] rootsAndContainers(IJavaProject project, Object[] roots) { 
 		List result= new ArrayList(roots.length);
 		Set containers= new HashSet(roots.length);
 		for (int i= 0; i < roots.length; i++) {
@@ -150,7 +150,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 				} catch (JavaModelException e) {
 					continue;
 				}
-				if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) 
+				if (entry != null && entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) 
 					containers.add(entry);
 				else
 					result.add(root);
