@@ -87,7 +87,14 @@ public abstract class FindAction extends SelectionDispatchAction {
 	}
 
 	private boolean canOperateOn(IStructuredSelection sel) {
-		return sel != null && !sel.isEmpty() && canOperateOn(getJavaElement(sel, true));
+		if (sel == null || sel.isEmpty())
+			return false;
+		
+		IJavaElement je= getJavaElement(sel, true);
+		if (je != null && je.getElementType() == IJavaElement.COMPILATION_UNIT)
+			return true;
+	
+		return canOperateOn(je);
 	}
 		
 	boolean canOperateOn(IJavaElement element) {
@@ -120,6 +127,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 			return null;
 		switch (o.getElementType()) {
 			case IJavaElement.COMPILATION_UNIT:
+				if (silent)
+					return o;
 				return findType((ICompilationUnit)o, silent);
 			case IJavaElement.CLASS_FILE:
 				return findType((IClassFile)o);			
