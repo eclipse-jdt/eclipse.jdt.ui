@@ -521,7 +521,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	private ASTNode[] getReferenceNodes(IMember member, IProgressMonitor pm) throws JavaModelException{
-		return ReferenceASTNodeFinder.findReferenceNodes(member, fASTMappingManager, pm);
+		return ASTNodeSearchUtil.findReferenceNodes(member, fASTMappingManager, pm);
 	}
 		
 	private boolean isReferenceUpdatable(ASTNode varReference, Collection nodesToRemove) throws JavaModelException{
@@ -663,7 +663,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		if (cu == null)
 			return new ASTNode[0];
 		ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
-		ASTNode[] nodes= ReferenceASTNodeFinder.getAstNodes(searchResultGroup.getSearchResults(), getAST(wc));
+		ASTNode[] nodes= ASTNodeSearchUtil.getAstNodes(searchResultGroup.getSearchResults(), getAST(wc));
 		for (int i= 0; i < nodes.length; i++) {
 			nodeSet.add(nodes[i]);
 		}
@@ -993,7 +993,17 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private boolean anyVariableReferenceHasDirectProblems(VariableDeclaration varDeclaration, IProgressMonitor pm) throws JavaModelException{
+		if (isInterfaceMethodParameterDeclaration(varDeclaration))
+			return true;
 		return anyReferenceNodeHasDirectProblems(getVariableReferenceNodes(varDeclaration, pm));
+	}
+	
+	private static boolean isInterfaceMethodParameterDeclaration(VariableDeclaration varDeclaration){
+		if (! (varDeclaration.getParent() instanceof MethodDeclaration))
+			return false;
+		if (! (varDeclaration.getParent().getParent() instanceof TypeDeclaration))	
+			return false;
+		return (((TypeDeclaration)varDeclaration.getParent().getParent()).isInterface());
 	}
 	
 	private boolean anyReferenceHasDirectProblems(IMember member, IProgressMonitor pm) throws JavaModelException{
