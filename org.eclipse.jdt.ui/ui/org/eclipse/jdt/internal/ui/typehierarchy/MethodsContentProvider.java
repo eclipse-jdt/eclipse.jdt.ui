@@ -45,7 +45,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 	/**
 	 * Turn on / off showing of inherited methods
 	 */
-	public void showInheritedMethods(boolean show) throws JavaModelException {	
+	public void showInheritedMethods(boolean show) {	
 		if (show != fShowInheritedMethods) {
 			fShowInheritedMethods= show;
 			if (fViewer != null) {

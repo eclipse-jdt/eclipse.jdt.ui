@@ -30,20 +30,17 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 import org.eclipse.jdt.ui.actions.OpenAction;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 
 /**
@@ -54,25 +51,31 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 public class MethodsViewer extends ProblemTableViewer {
 	
 	private static final String TAG_SHOWINHERITED= "showinherited";		 //$NON-NLS-1$
+	private static final String TAG_SORTBYDEFININGTYPE= "sortbydefiningtype";		 //$NON-NLS-1$
 	private static final String TAG_VERTICAL_SCROLL= "mv_vertical_scroll";		 //$NON-NLS-1$
 	
 	private static final int LABEL_BASEFLAGS= AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS;
 	
-	private JavaUILabelProvider fLabelProvider;
-		
+	private HierarchyLabelProvider fLabelProvider;
+	
 	private MemberFilterActionGroup fMemberFilterActionGroup;
 	
 	private OpenAction fOpen;
 	private ShowInheritedMembersAction fShowInheritedMembersAction;
+	private SortByDefiningTypeAction fSortByDefiningTypeAction;
 	
-	public MethodsViewer(Composite parent, TypeHierarchyLifeCycle lifeCycle, IWorkbenchPart part) {
+	public MethodsViewer(Composite parent, final TypeHierarchyLifeCycle lifeCycle, IWorkbenchPart part) {
 		super(new Table(parent, SWT.MULTI));
 		
 		fLabelProvider= new HierarchyLabelProvider(lifeCycle);
-			
+	
 		setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, true, false));
 		setContentProvider(new MethodsContentProvider(lifeCycle));
-				
+		
+		HierarchyViewerSorter sorter= new HierarchyViewerSorter(lifeCycle);
+		sorter.setSortByDefiningType(false);
+		setSorter(sorter);
+		
 		fOpen= new OpenAction(part.getSite());
 		addOpenListener(new IOpenListener() {
 			public void open(OpenEvent event) {
@@ -83,36 +86,67 @@ public class MethodsViewer extends ProblemTableViewer {
 		fMemberFilterActionGroup= new MemberFilterActionGroup(this, "HierarchyMethodView"); //$NON-NLS-1$
 		
 		fShowInheritedMembersAction= new ShowInheritedMembersAction(this, false);
-		showInheritedMethods(false);
+		fSortByDefiningTypeAction= new SortByDefiningTypeAction(this, false);
 		
-		setSorter(new JavaElementSorter());
+		showInheritedMethodsNoRedraw(false);
+		sortByDefiningTypeNoRedraw(false);
 		
 		JavaUIHelp.setHelp(this, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
+	}
+
+	private void showInheritedMethodsNoRedraw(boolean on) {
+		MethodsContentProvider cprovider= (MethodsContentProvider) getContentProvider();
+		cprovider.showInheritedMethods(on);
+		fShowInheritedMembersAction.setChecked(on);
+		if (on) {
+			fLabelProvider.setTextFlags(fLabelProvider.getTextFlags() | JavaElementLabels.ALL_POST_QUALIFIED);
+		} else {
+			fLabelProvider.setTextFlags(fLabelProvider.getTextFlags() & (-1 ^ JavaElementLabels.ALL_POST_QUALIFIED));
+		}
+		if (on) {
+			sortByDefiningTypeNoRedraw(false);
+		}
+		fSortByDefiningTypeAction.setEnabled(!on);
+
 	}
 	
 	/**
 	 * Show inherited methods
 	 */
 	public void showInheritedMethods(boolean on) {
-		MethodsContentProvider cprovider= (MethodsContentProvider) getContentProvider();
+		if (on == isShowInheritedMethods()) {
+			return;
+		}		
 		try {
 			getTable().setRedraw(false);
-			cprovider.showInheritedMethods(on);
-			fShowInheritedMembersAction.setChecked(on);
-			if (fLabelProvider != null) {
-				if (on) {
-					fLabelProvider.setTextFlags(fLabelProvider.getTextFlags() | JavaElementLabels.ALL_POST_QUALIFIED);
-				} else {
-					fLabelProvider.setTextFlags(fLabelProvider.getTextFlags() & (-1 ^ JavaElementLabels.ALL_POST_QUALIFIED));
-				}
-				refresh();
-			}
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getControl().getShell(), TypeHierarchyMessages.getString("MethodsViewer.toggle.error.title"), TypeHierarchyMessages.getString("MethodsViewer.toggle.error.message")); //$NON-NLS-2$ //$NON-NLS-1$
+			showInheritedMethodsNoRedraw(on);
+			refresh();
 		} finally {
 			getTable().setRedraw(true);
-		}
+		}		
 	}
+
+	private void sortByDefiningTypeNoRedraw(boolean on) {
+		fSortByDefiningTypeAction.setChecked(on);
+		fLabelProvider.setShowDefiningType(on);
+		((HierarchyViewerSorter) getSorter()).setSortByDefiningType(on);
+	}
+
+	/**
+	 * Show the name of the defining type
+	 */
+	public void sortByDefiningType(boolean on) {
+		if (on == isShowDefiningTypes()) {
+			return;
+		}
+		try {
+			getTable().setRedraw(false);
+			sortByDefiningTypeNoRedraw(on);
+			refresh();
+		} finally {
+			getTable().setRedraw(true);
+		}		
+	}	
 		
 	/*
 	 * @see Viewer#inputChanged(Object, Object)
@@ -127,6 +161,13 @@ public class MethodsViewer extends ProblemTableViewer {
 	public boolean isShowInheritedMethods() {
 		return ((MethodsContentProvider) getContentProvider()).isShowInheritedMethods();
 	}
+	
+	/**
+	 * Returns <code>true</code> if defining types are shown.
+	 */	
+	public boolean isShowDefiningTypes() {
+		return fLabelProvider.isShowDefiningType();
+	}	
 
 	/**
 	 * Saves the state of the filter actions
@@ -135,6 +176,7 @@ public class MethodsViewer extends ProblemTableViewer {
 		fMemberFilterActionGroup.saveState(memento);
 		
 		memento.putString(TAG_SHOWINHERITED, String.valueOf(isShowInheritedMethods()));
+		memento.putString(TAG_SORTBYDEFININGTYPE, String.valueOf(isShowDefiningTypes()));
 
 		ScrollBar bar= getTable().getVerticalBar();
 		int position= bar != null ? bar.getSelection() : 0;
@@ -150,8 +192,11 @@ public class MethodsViewer extends ProblemTableViewer {
 		refresh();
 		getControl().setRedraw(true);
 		
-		boolean set= Boolean.valueOf(memento.getString(TAG_SHOWINHERITED)).booleanValue();
-		showInheritedMethods(set);
+		boolean showInherited= Boolean.valueOf(memento.getString(TAG_SHOWINHERITED)).booleanValue();
+		showInheritedMethods(showInherited);
+		
+		boolean showDefiningTypes= Boolean.valueOf(memento.getString(TAG_SORTBYDEFININGTYPE)).booleanValue();
+		sortByDefiningType(showDefiningTypes);
 		
 		ScrollBar bar= getTable().getVerticalBar();
 		if (bar != null) {
@@ -188,6 +233,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	 */
 	public void contributeToToolBar(ToolBarManager tbm) {
 		tbm.add(fShowInheritedMembersAction);
+		tbm.add(fSortByDefiningTypeAction);
 		tbm.add(new Separator());
 		fMemberFilterActionGroup.contributeToToolBar(tbm);
 	}
@@ -249,5 +295,7 @@ public class MethodsViewer extends ProblemTableViewer {
 		}
 		return null;
 	}
+
+
 
 }

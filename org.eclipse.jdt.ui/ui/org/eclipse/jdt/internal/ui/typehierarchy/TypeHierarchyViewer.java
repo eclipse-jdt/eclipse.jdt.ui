@@ -16,15 +16,12 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
-import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 
 import org.eclipse.jdt.ui.actions.OpenAction;
 
@@ -37,7 +34,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	
 	private OpenAction fOpen;
 			
-	public TypeHierarchyViewer(Composite parent, IContentProvider contentProvider, final TypeHierarchyLifeCycle lifeCycle,  IWorkbenchPart part) {
+	public TypeHierarchyViewer(Composite parent, IContentProvider contentProvider, TypeHierarchyLifeCycle lifeCycle,  IWorkbenchPart part) {
 		super(new Tree(parent, SWT.SINGLE));
 
 		HierarchyLabelProvider labelProvider= new HierarchyLabelProvider(lifeCycle);
@@ -45,25 +42,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 		setLabelProvider(new DecoratingJavaLabelProvider(labelProvider, true, false));
 			
 		setContentProvider(contentProvider);
-		setSorter(new ViewerSorter() {
-			public boolean isSorterProperty(Object element, Object property) {
-				return true;
-			}
-		
-			public int category(Object element) {
-				if (element instanceof IType) {
-					ITypeHierarchy hierarchy= lifeCycle.getHierarchy();
-					if (hierarchy != null && Flags.isInterface(hierarchy.getCachedFlags((IType)element))) {
-						return 2;
-					} else {
-						return 1;
-					}
-				} else if (element instanceof IMember) {
-					return 0;
-				}
-				return 3;
-			}
-		});
+		setSorter(new HierarchyViewerSorter(lifeCycle));
 		
 		fOpen= new OpenAction(part.getSite());
 		addOpenListener(new IOpenListener() {

@@ -8,7 +8,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ILabelDecorator;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -18,10 +17,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
  * Label provider for the hierarchy viewers. Types in the hierarchy that are not belonging to the
@@ -43,19 +44,12 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		 * @see OverrideIndicatorLabelDecorator#getOverrideIndicators(IMethod)
 		 */
 		protected int getOverrideIndicators(IMethod method) throws JavaModelException {
-			IType type= getOriginalType(method.getDeclaringType());
+			IType type= (IType) JavaModelUtil.toOriginal(method.getDeclaringType());
 			ITypeHierarchy hierarchy= fHierarchy.getHierarchy();
 			if (hierarchy != null) {
 				return findInHierarchy(type, hierarchy, method.getElementName(), method.getParameterTypes());
 			}
 			return 0;
-		}
-		
-		private IType getOriginalType(IType type) {
-			ICompilationUnit cu= type.getCompilationUnit();
-			if (cu != null && cu.isWorkingCopy())
-				return (IType) cu.getOriginal(type);
-			return type;
 		}
 	}
 	
@@ -80,13 +74,23 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		}		
 	}
 
+	private boolean fShowDefiningType;
 	private TypeHierarchyLifeCycle fHierarchy;
 
 	public HierarchyLabelProvider(TypeHierarchyLifeCycle lifeCycle) {
 		super(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS);
 		fHierarchy= lifeCycle;
+		fShowDefiningType= true;
 		addLabelDecorator(new HierarchyOverrideIndicatorLabelDecorator(lifeCycle));
 	}
+	
+	public void setShowDefiningType(boolean showDefiningType) {
+		fShowDefiningType= showDefiningType;
+	}
+	
+	public boolean isShowDefiningType() {
+		return fShowDefiningType;
+	}	
 			
 	private boolean isDifferentScope(IType type) {
 		IJavaElement input= fHierarchy.getInputElement();
@@ -104,6 +108,49 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		}
 		return true;
 	}
+	
+	private IType getDefiningType(Object element) throws JavaModelException {
+		if (!(element instanceof IMethod)) {
+			return null;
+		}
+			
+		ITypeHierarchy hierarchy= fHierarchy.getHierarchy();
+		if (hierarchy == null) {
+			return null;
+		}
+		IMethod method= (IMethod) element;
+		IType declaringType= (IType) JavaModelUtil.toOriginal(method.getDeclaringType());
+		int flags= method.getFlags();
+		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || method.isConstructor()) {
+			return declaringType;
+		}
+		IMethod res= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, declaringType, method.getElementName(), method.getParameterTypes(), false);
+		if (res == null || method.equals(res)) {
+			return declaringType;
+		}
+		return res.getDeclaringType();
+	}
+
+	/* (non-Javadoc)
+	 * @see ILabelProvider#getText
+	 */ 	
+	public String getText(Object element) {
+		String text= super.getText(element);
+		if (fShowDefiningType) {
+			try {
+				IType type= getDefiningType(element);
+				if (type != null) {
+					StringBuffer buf= new StringBuffer(text);
+					buf.append(JavaElementLabels.CONCAT_STRING);
+					JavaElementLabels.getTypeLabel(type, JavaElementLabels.T_FULLY_QUALIFIED, buf);
+					return buf.toString();			
+				}
+			} catch (JavaModelException e) {
+			}
+		}
+		return text;
+	}	
+	
 	
 	/* (non-Javadoc)
 	 * @see ILabelProvider#getImage
@@ -162,4 +209,5 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		}
 		return new JavaElementImageDescriptor(desc, adornmentFlags, JavaElementImageProvider.BIG_SIZE);
 	}
+
 }
