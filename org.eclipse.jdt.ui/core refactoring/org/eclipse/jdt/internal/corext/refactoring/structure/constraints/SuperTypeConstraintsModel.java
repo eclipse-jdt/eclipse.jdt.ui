@@ -27,7 +27,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Type;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
@@ -131,7 +130,6 @@ public final class SuperTypeConstraintsModel {
 	 * @return the usage of the constraint variable (element type: <code>ITypeConstraint2</code>)
 	 */
 	public static Collection getVariableUsage(final ConstraintVariable2 variable) {
-		Assert.isNotNull(variable);
 		final Object data= variable.getData(DATA_USAGE);
 		if (data == null)
 			return Collections.EMPTY_LIST;
@@ -158,8 +156,6 @@ public final class SuperTypeConstraintsModel {
 	 * @param constraint the type constraint
 	 */
 	public static void setVariableUsage(final ConstraintVariable2 variable, ITypeConstraint2 constraint) {
-		Assert.isNotNull(variable);
-		Assert.isNotNull(constraint);
 		final Object data= variable.getData(DATA_USAGE);
 		if (data == null)
 			variable.setData(DATA_USAGE, constraint);
@@ -204,7 +200,6 @@ public final class SuperTypeConstraintsModel {
 	 * @param superType the supertype replacement
 	 */
 	public SuperTypeConstraintsModel(final TypeEnvironment environment, TType subType, TType superType) {
-		Assert.isNotNull(environment);
 		fEnvironment= environment;
 		fSubType= subType;
 		fSuperType= superType;
@@ -218,8 +213,6 @@ public final class SuperTypeConstraintsModel {
 	 * @return the created cast variable
 	 */
 	public final ConstraintVariable2 createCastVariable(final CastExpression expression, final ConstraintVariable2 variable) {
-		Assert.isNotNull(expression);
-		Assert.isNotNull(variable);
 		ITypeBinding binding= expression.resolveTypeBinding();
 		if (binding.isArray())
 			binding= binding.getElementType();
@@ -238,8 +231,6 @@ public final class SuperTypeConstraintsModel {
 	 * @param ancestor the ancestor type constraint variable
 	 */
 	public final void createCovariantTypeConstraint(final ConstraintVariable2 descendant, final ConstraintVariable2 ancestor) {
-		Assert.isNotNull(descendant);
-		Assert.isNotNull(ancestor);
 		final ITypeConstraint2 constraint= new CovariantTypeConstraint(descendant, ancestor);
 		if (!fTypeConstraints.contains(constraint)) {
 			fTypeConstraints.add(constraint);
@@ -259,7 +250,6 @@ public final class SuperTypeConstraintsModel {
 	 * @return the created declaring type variable
 	 */
 	public final ConstraintVariable2 createDeclaringTypeVariable(ITypeBinding type) {
-		Assert.isNotNull(type);
 		if (type.isArray())
 			type= type.getElementType();
 		return (ConstraintVariable2) fConstraintVariables.addExisting(new ImmutableTypeVariable2(fEnvironment.create(type)));
@@ -307,7 +297,6 @@ public final class SuperTypeConstraintsModel {
 	 * @return the created exception variable
 	 */
 	public final ConstraintVariable2 createExceptionVariable(final Name name) {
-		Assert.isNotNull(name);
 		ITypeBinding binding= name.resolveTypeBinding();
 		if (binding.isArray())
 			binding= binding.getElementType();
@@ -323,7 +312,6 @@ public final class SuperTypeConstraintsModel {
 	 * @return the created plain type variable
 	 */
 	public final ConstraintVariable2 createImmutableTypeVariable(ITypeBinding type) {
-		Assert.isNotNull(type);
 		if (type.isArray())
 			type= type.getElementType();
 		if (isConstrainedType(type))
@@ -341,7 +329,6 @@ public final class SuperTypeConstraintsModel {
 	 * @return the created independant type variable
 	 */
 	public final ConstraintVariable2 createIndependentTypeVariable(ITypeBinding type) {
-		Assert.isNotNull(type);
 		if (type.isArray())
 			type= type.getElementType();
 		if (isConstrainedType(type))
@@ -357,7 +344,6 @@ public final class SuperTypeConstraintsModel {
 	 * @return the created method parameter variable
 	 */
 	public final ConstraintVariable2 createMethodParameterVariable(final IMethodBinding method, final int index) {
-		Assert.isNotNull(method);
 		ITypeBinding binding= method.getParameterTypes()[index];
 		if (binding.isArray())
 			binding= binding.getElementType();
@@ -379,7 +365,6 @@ public final class SuperTypeConstraintsModel {
 	 * @return the created return type variable
 	 */
 	public final ConstraintVariable2 createReturnTypeVariable(final IMethodBinding method) {
-		Assert.isNotNull(method);
 		if (!method.isConstructor()) {
 			ITypeBinding binding= method.getReturnType();
 			if (binding != null && binding.isArray())
@@ -403,8 +388,6 @@ public final class SuperTypeConstraintsModel {
 	 * @param ancestor the ancestor type constraint variable
 	 */
 	public final void createSubtypeConstraint(final ConstraintVariable2 descendant, final ConstraintVariable2 ancestor) {
-		Assert.isNotNull(descendant);
-		Assert.isNotNull(ancestor);
 		final ITypeConstraint2 constraint= new SubTypeConstraint2(descendant, ancestor);
 		if (!fTypeConstraints.contains(constraint)) {
 			fTypeConstraints.add(constraint);
@@ -421,8 +404,6 @@ public final class SuperTypeConstraintsModel {
 	 * @return the created type variable
 	 */
 	public final ConstraintVariable2 createTypeVariable(ITypeBinding type, final CompilationUnitRange range) {
-		Assert.isNotNull(type);
-		Assert.isNotNull(range);
 		if (type.isArray())
 			type= type.getElementType();
 		if (isConstrainedType(type))
@@ -437,7 +418,6 @@ public final class SuperTypeConstraintsModel {
 	 * @return the created type variable
 	 */
 	public final ConstraintVariable2 createTypeVariable(final Type type) {
-		Assert.isNotNull(type);
 		ITypeBinding binding= type.resolveBinding();
 		if (binding.isArray())
 			binding= binding.getElementType();
@@ -453,7 +433,6 @@ public final class SuperTypeConstraintsModel {
 	 * @return the created variable variable
 	 */
 	public final ConstraintVariable2 createVariableVariable(final IVariableBinding binding) {
-		Assert.isNotNull(binding);
 		ITypeBinding type= binding.getType();
 		if (type.isArray())
 			type= type.getElementType();
