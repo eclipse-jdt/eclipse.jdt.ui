@@ -118,6 +118,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		JavaProjectHelper.performDummySearch();
 		newCU.delete(true, null);
 
 		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
@@ -186,6 +187,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		JavaProjectHelper.performDummySearch();
 		newCU.delete(true, null);
 
 		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
@@ -258,6 +260,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		JavaProjectHelper.performDummySearch();
 		newCU.delete(true, null);
 	}	
 		
@@ -329,6 +332,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		JavaProjectHelper.performDummySearch();
 		newCU.delete(true, null);
 
 		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(3);
@@ -386,6 +390,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");		
 		buf.append("}\n");
 		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		JavaProjectHelper.performDummySearch();
 		newCU.delete(true, null);
 
 		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
@@ -636,6 +641,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		JavaProjectHelper.performDummySearch();
 		newCU.delete(true, null);
 
 		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(4);
