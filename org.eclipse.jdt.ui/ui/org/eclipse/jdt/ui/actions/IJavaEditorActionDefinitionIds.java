@@ -194,6 +194,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String EXTRACT_LOCAL_VARIABLE= "org.eclipse.jdt.ui.edit.text.java.extract.local.variable"; //$NON-NLS-1$
 	
 	/**
+	 * Action definition ID of the refactor -> extract constant action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.extract.constant"</code>).
+	 * 
+	 * @since 2.1
+	 */
+	public static final String EXTRACT_CONSTANT= "org.eclipse.jdt.ui.edit.text.java.extract.constant"; //$NON-NLS-1$
+
+	/**
 	 * Action definition ID of the refactor -> inline local variable action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.inline.local.variable"</code>).
 	 */

@@ -233,7 +233,15 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.ExtractTemp"</code>).
 	 */
 	public static final String EXTRACT_TEMP= "org.eclipse.jdt.ui.actions.ExtractTemp"; //$NON-NLS-1$
-	
+
+	/**
+	 * Refactor menu: name of standard Extract Constant global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ExtractConstant"</code>).
+	 * 
+	 * @since 2.1
+	 */
+	public static final String EXTRACT_CONSTANT= "org.eclipse.jdt.ui.actions.ExtractConstant"; //$NON-NLS-1$
+
 	/**
 	 * Refactor menu: name of standard Extract Method global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ExtractMethod"</code>).
@@ -255,7 +263,7 @@ public class JdtActionConstants {
 	 * @since 2.1
 	 */
 	public static final String MOVE_INNER_TO_TOP= "org.eclipse.jdt.ui.actions.MoveInnerToTop"; //$NON-NLS-1$
-
+	
 	/**
 	 * Refactor menu: name of standard Use Supertype global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.UseSupertype"</code>).

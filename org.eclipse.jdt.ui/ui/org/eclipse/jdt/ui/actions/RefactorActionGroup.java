@@ -56,7 +56,8 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fExtractInterfaceAction;
 	private SelectionDispatchAction fMoveInnerToTopAction;
 	private SelectionDispatchAction fUseSupertypeAction;
-	private SelectionDispatchAction fInlineCallAction;
+	private SelectionDispatchAction fInlineCallAction;	
+	private SelectionDispatchAction fExtractConstantAction;
 	
 	/**
 	 * Creates a new <code>RefactorActionGroup</code>. The group requires
@@ -124,6 +125,11 @@ public class RefactorActionGroup extends ActionGroup {
 		fExtractTempAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_LOCAL_VARIABLE);
 		initAction(fExtractTempAction, provider, selection);
 		editor.setAction("ExtractLocalVariable", fExtractTempAction); //$NON-NLS-1$
+
+		fExtractConstantAction= new ExtractConstantAction(editor);
+		fExtractConstantAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_CONSTANT);
+		initAction(fExtractConstantAction, provider, selection);
+		editor.setAction("ExtractConstant", fExtractConstantAction); //$NON-NLS-1$
 
 		fExtractMethodAction= new ExtractMethodAction(editor);
 		fExtractMethodAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_METHOD);
@@ -201,6 +207,7 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.PULL_UP, fPullUpAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE_TEMP, fInlineTempAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_TEMP, fExtractTempAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_CONSTANT, fExtractConstantAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_METHOD, fExtractMethodAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_INTERFACE, fExtractInterfaceAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.MOVE_INNER_TO_TOP, fMoveInnerToTopAction);
@@ -227,6 +234,7 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fPullUpAction, provider);
 		disposeAction(fInlineTempAction, provider);
 		disposeAction(fExtractTempAction, provider);
+		disposeAction(fExtractConstantAction, provider);
 		disposeAction(fExtractMethodAction, provider);
 		disposeAction(fExtractInterfaceAction, provider);
 		disposeAction(fMoveInnerToTopAction, provider);
@@ -254,6 +262,7 @@ public class RefactorActionGroup extends ActionGroup {
 		addAction(refactorSubmenu, fExtractMethodAction);
 //		addAction(refactorSubmenu, fInlineCallAction);
 		addAction(refactorSubmenu, fExtractTempAction);
+		addAction(refactorSubmenu, fExtractConstantAction);
 		addAction(refactorSubmenu, fInlineTempAction);
 		addAction(refactorSubmenu, fSelfEncapsulateField);
 		if (!refactorSubmenu.isEmpty())
