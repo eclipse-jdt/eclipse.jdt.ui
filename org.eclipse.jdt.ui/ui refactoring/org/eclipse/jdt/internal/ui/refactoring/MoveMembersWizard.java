@@ -13,13 +13,11 @@ public class MoveMembersWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
-		setPageTitle("Move " + getMoveMembersRefactoring().getMovedMembers().length + " static member(s) from \'" 
-					+ getMoveMembersRefactoring().getDeclaringType().getFullyQualifiedName() + "\'");
+		setPageTitle("Move static member(s)");
 		addPage(new MoveMembersInputPage());
 	}
 	
 	private MoveMembersRefactoring getMoveMembersRefactoring(){
 		return (MoveMembersRefactoring)getRefactoring();
 	}
-	
 }
