@@ -16,6 +16,8 @@ import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.jface.text.Assert;
+
 /**
  * An overlaying preference store.
  */
@@ -63,6 +65,7 @@ public class OverlayPreferenceStore  implements IPreferenceStore {
 	private OverlayKey[] fOverlayKeys;
 	
 	private PropertyListener fPropertyListener;
+	private boolean fLoaded;
 	
 	
 	public OverlayPreferenceStore(IPreferenceStore parent, OverlayKey[] overlayKeys) {
@@ -192,6 +195,9 @@ public class OverlayPreferenceStore  implements IPreferenceStore {
 	public void load() {
 		for (int i= 0; i < fOverlayKeys.length; i++)
 			loadProperty(fParent, fOverlayKeys[i], fStore, true);
+		
+		fLoaded= true;
+		
 	}
 	
 	public void loadDefaults() {
@@ -448,5 +454,33 @@ public class OverlayPreferenceStore  implements IPreferenceStore {
 	public void setValue(String name, boolean value) {
 		if (covers(name))
 			fStore.setValue(name, value);
+	}
+
+	/**
+	 * The keys to add to the list of overlay keys.
+	 * <p>
+	 * Note: This method must be called before {@link #load()} is called. 
+	 * </p>
+	 * 
+	 * @param keys
+	 * @since 3.0
+	 */
+	public void addKeys(OverlayKey[] keys) {
+		Assert.isTrue(!fLoaded);
+		Assert.isNotNull(keys);
+		
+		int overlayKeysLength= fOverlayKeys.length;
+		OverlayKey[] result= new OverlayKey[keys.length + overlayKeysLength];
+
+		for (int i= 0, length= overlayKeysLength; i < length; i++)
+			result[i]= fOverlayKeys[i];
+		
+		for (int i= 0, length= keys.length; i < length; i++)
+			result[overlayKeysLength + i]= keys[i];
+		
+		fOverlayKeys= result;
+		
+		if (fLoaded)
+			load();
 	}
 }

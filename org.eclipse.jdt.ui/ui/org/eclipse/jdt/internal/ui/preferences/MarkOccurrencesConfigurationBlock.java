@@ -28,8 +28,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-
 import org.eclipse.jface.text.Assert;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -45,7 +43,7 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
  */
 class MarkOccurrencesConfigurationBlock {
 
-	private IPreferenceStore fStore;
+	private OverlayPreferenceStore fStore;
 	
 	
 	private Map fCheckBoxes= new HashMap();
@@ -70,12 +68,32 @@ class MarkOccurrencesConfigurationBlock {
 
 	private StatusInfo fStatus;
 
-	public MarkOccurrencesConfigurationBlock(JavaEditorPreferencePage mainPreferencePage, IPreferenceStore store) {
+	public MarkOccurrencesConfigurationBlock(JavaEditorPreferencePage mainPreferencePage, OverlayPreferenceStore store) {
 		Assert.isNotNull(mainPreferencePage);
 		Assert.isNotNull(store);
 		fMainPreferencePage= mainPreferencePage;
 		fStore= store;
+		
+		fStore.addKeys(createOverlayStoreKeys());
 	}
+	
+	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
+		
+		ArrayList overlayKeys= new ArrayList();
+
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_OCCURRENCES));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_CONSTANT_OCCURRENCES));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_STICKY_OCCURRENCES));
+		
+		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
+		overlayKeys.toArray(keys);
+		return keys;
+	}	
 
 	/**
 	 * Creates page for mark occurrences preferences.

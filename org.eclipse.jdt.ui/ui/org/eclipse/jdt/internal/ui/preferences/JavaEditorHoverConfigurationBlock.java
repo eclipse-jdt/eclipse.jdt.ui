@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
@@ -35,7 +36,6 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.Assert;
 
@@ -70,7 +70,7 @@ class JavaEditorHoverConfigurationBlock {
 		}
 	}
 
-	private IPreferenceStore fStore;
+	private OverlayPreferenceStore fStore;
 	private HoverConfig[] fHoverConfigs;
 	private Text fModifierEditor;
 	private Button fEnableField;
@@ -82,15 +82,33 @@ class JavaEditorHoverConfigurationBlock {
 
 	private StatusInfo fStatus;
 
-	public JavaEditorHoverConfigurationBlock(JavaEditorPreferencePage mainPreferencePage, IPreferenceStore store) {
+	public JavaEditorHoverConfigurationBlock(JavaEditorPreferencePage mainPreferencePage, OverlayPreferenceStore store) {
 		Assert.isNotNull(mainPreferencePage);
 		Assert.isNotNull(store);
 		fMainPreferencePage= mainPreferencePage;
 		fStore= store;
+		fStore.addKeys(createOverlayStoreKeys());
+	}
+
+
+	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
+		
+		ArrayList overlayKeys= new ArrayList();
+	
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS));
+		
+		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
+		overlayKeys.toArray(keys);
+		return keys;
 	}
 
 	/**
 	 * Creates page for hover preferences.
+	 * 
+	 * @param parent the parent composite
+	 * @return the control for the preference page
 	 */
 	public Control createControl(Composite parent) {
 
