@@ -13,7 +13,12 @@ import java.util.ResourceBundle;import org.eclipse.jface.dialogs.MessageDialog
 public class EditorDisplayAction extends DisplayAction {
 
 	public EditorDisplayAction(IWorkbenchPart part) {
-		super(JavaEditorMessages.getResourceBundle(), "Display.", part); //$NON-NLS-1$
+		super(part);
+		
+		setText("D&isplay");
+		setToolTipText("Display");
+		setDescription("Display");
+		
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.DISPLAY_ACTION });	
 	}
 	

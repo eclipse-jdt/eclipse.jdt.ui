@@ -1,13 +1,20 @@
+package org.eclipse.jdt.internal.debug.ui.display;
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.debug.ui.display;
 
-import java.util.ResourceBundle;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.jface.text.ITextOperationTarget;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.ui.texteditor.ResourceAction;
+import org.eclipse.core.runtime.IAdaptable;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.text.ITextOperationTarget;
+
+import org.eclipse.ui.texteditor.IUpdate;
 
 
-public class DisplayViewAction extends ResourceAction implements IUpdate {
+
+public class DisplayViewAction extends Action implements IUpdate {
 	
 	/** The text operation code */
 	private int fOperationCode= -1;
@@ -17,8 +24,8 @@ public class DisplayViewAction extends ResourceAction implements IUpdate {
 	private IAdaptable fTargetProvider;
 	
 	
-	public DisplayViewAction(ResourceBundle bundle, String prefix, IAdaptable targetProvider, int operationCode) {
-		super(bundle, prefix);
+	public DisplayViewAction(IAdaptable targetProvider, int operationCode) {
+		super();
 		fTargetProvider= targetProvider;
 		fOperationCode= operationCode;
 		update();

@@ -5,10 +5,45 @@
 package org.eclipse.jdt.internal.debug.ui.display;
 
 
-import com.sun.jdi.InvocationException;import com.sun.jdi.ObjectReference;import java.util.ResourceBundle;import org.eclipse.core.resources.IMarker;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Status;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IDebugElement;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.core.model.ISourceLocator;import org.eclipse.debug.core.model.IStackFrame;import org.eclipse.debug.core.model.IThread;import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.swt.widgets.Shell;
+import com.sun.jdi.InvocationException;
+import com.sun.jdi.ObjectReference;
+import java.text.MessageFormat;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.IViewPart;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchPart;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.ui.texteditor.ResourceAction;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.debug.core.IJavaEvaluationListener;
-import org.eclipse.jdt.debug.core.IJavaEvaluationResult;import org.eclipse.jdt.debug.core.IJavaStackFrame;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.model.IDebugElement;
+import org.eclipse.debug.core.model.IDebugTarget;
+import org.eclipse.debug.core.model.ISourceLocator;
+import org.eclipse.debug.core.model.IStackFrame;
+import org.eclipse.debug.core.model.IThread;
+import org.eclipse.debug.ui.IDebugUIConstants;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.texteditor.IUpdate;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.debug.core.IJavaEvaluationListener;
+import org.eclipse.jdt.debug.core.IJavaEvaluationResult;
+import org.eclipse.jdt.debug.core.IJavaStackFrame;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -16,20 +51,14 @@ import org.eclipse.jdt.debug.core.IJavaEvaluationResult;import org.eclipse.jdt.
  * is done in the UI thread and the result is inserted into the text
  * directly.
  */
-public abstract class EvaluateAction extends ResourceAction implements IUpdate, IJavaEvaluationListener {
-	
-	protected ResourceBundle fResourceBundle;
-	protected String fPrefix;
-	
+public abstract class EvaluateAction extends Action implements IUpdate, IJavaEvaluationListener {
+		
 	protected IWorkbenchPart fWorkbenchPart;
 	protected String fExpression;
 	
 	
-	public EvaluateAction(ResourceBundle bundle, String prefix, IWorkbenchPart workbenchPart) {
-		super(bundle, prefix);
-		
-		fPrefix= prefix;
-		fResourceBundle= bundle;
+	public EvaluateAction(IWorkbenchPart workbenchPart) {
+		super();
 		fWorkbenchPart= workbenchPart;
 	}
 	
@@ -130,7 +159,7 @@ public abstract class EvaluateAction extends ResourceAction implements IUpdate, 
 		
 		IStackFrame stackFrame= getContext();
 		if (stackFrame == null) {
-			reportError(getErrorResourceString("nosfcontext"));
+			reportError(DisplayMessages.getString("Evaluate.error.message.stack_frame_context")); //$NON-NLS-1$
 			return;
 		}
 		
@@ -156,10 +185,10 @@ public abstract class EvaluateAction extends ResourceAction implements IUpdate, 
 					reportError(e);
 				}
 			} else {
-				reportError(getErrorResourceString("nosrccontext"));
+				reportError(DisplayMessages.getString("Evaluate.error.message.src_context")); //$NON-NLS-1$
 			}
 		} else {
-			reportError(getErrorResourceString("noevaladapter"));
+			reportError(DisplayMessages.getString("Evaluate.error.message.eval_adapter")); //$NON-NLS-1$
 		}
 	}
 	
@@ -216,7 +245,7 @@ public abstract class EvaluateAction extends ResourceAction implements IUpdate, 
 	}
 	
 	protected void reportError(IStatus status) {
-		ErrorDialog.openError(getShell(), getErrorResourceString("errorevaluating"), null, status);
+		ErrorDialog.openError(getShell(), DisplayMessages.getString("Evaluate.error.title.eval_problems"), null, status); //$NON-NLS-1$
 	}
 	
 	protected void reportError(Throwable exception) {
@@ -235,11 +264,9 @@ public abstract class EvaluateAction extends ResourceAction implements IUpdate, 
 			return;
 		}
 		
-		String message = getErrorResourceString("exceptionevaluating");
-		message += " " + exception.getClass();
-		if (exception.getMessage() != null) {
-			message += " - " + exception.getMessage();
-		}
+		String message= MessageFormat.format(DisplayMessages.getString("Evaluate.error.message.direct_exception"), new Object[] { exception.getClass() }); //$NON-NLS-1$
+		if (exception.getMessage() != null)
+			message= MessageFormat.format(DisplayMessages.getString("Evaluate.error.message.exception.pattern"), new Object[] { message, exception.getMessage() }); //$NON-NLS-1$
 		reportError(message);
 	}
 	
@@ -253,29 +280,26 @@ public abstract class EvaluateAction extends ResourceAction implements IUpdate, 
 	
 	protected void reportProblems(IMarker[] problems) {
 		
-		String defaultMsg= getErrorResourceString("unqualified");
+		String defaultMsg= DisplayMessages.getString("Evaluate.error.message.unqualified_error"); //$NON-NLS-1$
 		
-		StringBuffer buffer= new StringBuffer();
+		String message= ""; //$NON-NLS-1$
 		for (int i= 0; i < problems.length; i++) {
-			if (i > 0) buffer.append('\n');
-			buffer.append(problems[i].getAttribute(IMarker.MESSAGE, defaultMsg));
+			String msg= problems[i].getAttribute(IMarker.MESSAGE, defaultMsg);
+			if (i == 0)
+				message= msg;
+			else
+				message= MessageFormat.format(DisplayMessages.getString("Evaluate.error.problem_append_pattern"), new Object[] { message, msg }); //$NON-NLS-1$
 		}
 		
-		reportError(buffer.toString());
+		reportError(message);
 	}
 	
 	protected void reportWrappedException(Throwable exception) {
 		if (exception instanceof com.sun.jdi.InvocationException) {
 			InvocationException ie= (InvocationException) exception;
 			ObjectReference ref= ie.exception();
-			String message = getErrorResourceString("exceptionevaluating");
-			reportError(message + " " + ref.referenceType().name());
+			reportError(MessageFormat.format(DisplayMessages.getString("Evaluate.error.message.wrapped_exception"), new Object[] { ref.referenceType().name() })); //$NON-NLS-1$
 		} else
 			reportError(exception);
-	}
-	
-	protected String getErrorResourceString(String key) {
-		String s= fPrefix + "error." + key;
-		return getString(fResourceBundle, s, s);
 	}
 }

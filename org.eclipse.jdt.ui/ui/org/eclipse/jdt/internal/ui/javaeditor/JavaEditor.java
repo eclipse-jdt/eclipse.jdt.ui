@@ -5,7 +5,47 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-import java.util.Iterator;import java.util.ResourceBundle;import org.eclipse.core.runtime.CoreException;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.ui.IEditorActionBarContributor;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IPartService;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.part.EditorActionBarContributor;import org.eclipse.ui.texteditor.AbstractTextEditor;import org.eclipse.ui.texteditor.DefaultRangeIndicator;import org.eclipse.ui.texteditor.ITextEditorActionConstants;import org.eclipse.ui.views.contentoutline.IContentOutlinePage;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.AddMethodEntryBreakpointAction;import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
+import java.util.Iterator;
+import java.util.ResourceBundle;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+
+import org.eclipse.ui.IEditorActionBarContributor;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IPartService;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.part.EditorActionBarContributor;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.eclipse.ui.texteditor.DefaultRangeIndicator;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+
+import org.eclipse.jdt.internal.debug.ui.display.InspectAction;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.AddMethodEntryBreakpointAction;
+import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;
+import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
+import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 
 
 
@@ -255,9 +295,15 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	
 	protected void createActions() {
 		super.createActions();
+		
 		setAction("Display", new EditorDisplayAction(this)); //$NON-NLS-1$
-		setAction("Inspect", new InspectAction(this)); //$NON-NLS-1$
 		setAction("RunToLine", new RunToLineAction(this)); //$NON-NLS-1$
+		
+		Action action= new InspectAction(this);
+		action.setText("I&nspect");
+		action.setToolTipText("Inspect the Result of Evaluating the Selected Text");
+		action.setDescription("Inspect the result of evaluating the selected text");
+		setAction("Inspect", action);
 	}
 	
 	private boolean isTextSelectionEmpty() {

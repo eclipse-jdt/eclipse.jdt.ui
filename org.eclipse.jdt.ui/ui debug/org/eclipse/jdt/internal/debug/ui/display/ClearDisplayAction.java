@@ -1,21 +1,37 @@
+package org.eclipse.jdt.internal.debug.ui.display;
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.debug.ui.display;
 
-import java.util.ResourceBundle;import org.eclipse.ui.IWorkbenchPart;import org.eclipse.ui.texteditor.ResourceAction;
+import org.eclipse.jface.action.Action;
+
+import org.eclipse.ui.IWorkbenchPart;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
 
 /**
  * Clears the display.
  */
-public class ClearDisplayAction extends ResourceAction {
+public class ClearDisplayAction extends Action {
 	
 	private IWorkbenchPart fWorkbenchPart;
 
-	public ClearDisplayAction(ResourceBundle bundle, String prefix, IWorkbenchPart workbenchPart) {
-		super(bundle, prefix);
+	public ClearDisplayAction(IWorkbenchPart workbenchPart) {
 		fWorkbenchPart= workbenchPart;
+		
+		setText(DisplayMessages.getString("ClearDisplay.label")); //$NON-NLS-1$
+		setToolTipText(DisplayMessages.getString("ClearDisplay.tooltip")); //$NON-NLS-1$
+		setDescription(DisplayMessages.getString("ClearDisplay.description")); //$NON-NLS-1$
+		
+		/*
+		 * 1GEULHD: ITPJUI:ALL - Display 'clear' action should use the same icon as Console
+		 * Subsituted "clear_co.gif" for "removea_exc.gif".
+		 * Copied icons to /icons.
+		 */
+		JavaPluginImages.setImageDescriptors(this, "lcl16", "clear_co.gif"); //$NON-NLS-2$ //$NON-NLS-1$
 	}
 
 	/**

@@ -1,11 +1,23 @@
+package org.eclipse.jdt.internal.debug.ui.display;
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.debug.ui.display;
 
 
-import java.util.ResourceBundle;import org.eclipse.core.resources.IMarker;import org.eclipse.debug.core.DebugException;import org.eclipse.swt.widgets.Display;import org.eclipse.ui.IWorkbenchPart;import org.eclipse.jdt.debug.core.IJavaEvaluationResult;import org.eclipse.jdt.debug.core.IJavaValue;
+import java.text.MessageFormat;
+
+import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.debug.core.DebugException;
+
+import org.eclipse.ui.IWorkbenchPart;
+
+import org.eclipse.jdt.debug.core.IJavaEvaluationResult;
+import org.eclipse.jdt.debug.core.IJavaValue;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 /**
@@ -13,8 +25,13 @@ import java.util.ResourceBundle;import org.eclipse.core.resources.IMarker;imp
  */
 public class DisplayAction extends EvaluateAction {
 	
-	public DisplayAction(ResourceBundle bundle, String prefix, IWorkbenchPart workbenchPart) {
-		super(bundle, prefix, workbenchPart);
+	public DisplayAction(IWorkbenchPart workbenchPart) {
+		super(workbenchPart);
+		
+		setText(DisplayMessages.getString("Display.label")); //$NON-NLS-1$
+		setToolTipText(DisplayMessages.getString("Display.tooltip")); //$NON-NLS-1$
+		setDescription(DisplayMessages.getString("Display.description")); //$NON-NLS-1$
+		JavaPluginImages.setImageDescriptors(this, "tool16", "disp_sbook.gif"); //$NON-NLS-2$ //$NON-NLS-1$
 	}
 	
 	public void evaluationComplete(final IJavaEvaluationResult result) {
@@ -39,21 +56,15 @@ public class DisplayAction extends EvaluateAction {
 	
 	protected void insertResult(IJavaValue result) {
 		
-		StringBuffer resultString= new StringBuffer();
+		String resultString= " "; //$NON-NLS-1$
 		try {
 			String sig= result.getSignature();
-			if ("V".equals(sig)) {
-				resultString.append(' ');
-				resultString.append(getErrorResourceString("noreturn"));
+			if ("V".equals(sig)) { //$NON-NLS-1$
+				resultString= DisplayMessages.getString("Display.no_result_value"); //$NON-NLS-1$
 			} else {
-				if (sig != null) {
-					resultString.append(" (");
-					resultString.append(result.getReferenceTypeName());
-					resultString.append(") ");
-				} else {
-					resultString.append(' ');
-				}  
-				resultString.append(result.evaluateToString());
+				if (sig != null)
+					resultString= MessageFormat.format(DisplayMessages.getString("Display.type_name_pattern"), new Object[] { result.getReferenceTypeName() }); //$NON-NLS-1$
+				resultString= MessageFormat.format(DisplayMessages.getString("Display.result_pattern"), new Object[] { resultString, result.evaluateToString() }); //$NON-NLS-1$
 			}
 		} catch(DebugException x) {
 			reportError(x);
@@ -61,6 +72,6 @@ public class DisplayAction extends EvaluateAction {
 		
 		IDataDisplay dataDisplay= getDataDisplay();
 		if (dataDisplay != null)
-			dataDisplay.displayExpressionValue(resultString.toString());
+			dataDisplay.displayExpressionValue(resultString);
 	}
 }
