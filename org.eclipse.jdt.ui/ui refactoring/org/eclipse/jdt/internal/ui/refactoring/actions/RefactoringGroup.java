@@ -83,7 +83,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 	}
 	
 	static OpenRefactoringWizardAction createPullUpAction(StructuredSelectionProvider selectionProvider) {
-		String label= "Pull Up...";
+		String label= "Pull &Up...";
 		return new OpenRefactoringWizardAction(label, selectionProvider, IMember.class) {
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				Set memberSet= new HashSet();
@@ -98,7 +98,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 				return true;
 			}	
 			protected RefactoringWizard createWizard(Refactoring ref){
-				String title= "Pull Up";
+				String title= "Pull up";
 				//FIX ME: wrong
 				String helpId= "HELPID";
 				return new PullUpWizard((PullUpRefactoring)ref, title, helpId);

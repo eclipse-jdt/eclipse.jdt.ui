@@ -1,6 +1,10 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -19,6 +23,8 @@ public class PullUpWizard extends RefactoringWizard {
 	 */ 
 	protected void addUserInputPages(){
 		try{
+			setPageTitle(); 
+			
 			//no input page if there are no methods
 			if (JavaElementUtil.getElementsOfType(getPullUpRefactoring().getElementsToPullUp(),  IJavaElement.METHOD).length != 0)
 				addPage(new PullUpInputPage());
@@ -27,6 +33,14 @@ public class PullUpWizard extends RefactoringWizard {
 			JavaPlugin.log(e);
 			addPage(new PullUpInputPage()); 
 		}		
+	}
+
+	private void setPageTitle() throws JavaModelException {
+		IType initialSetting= getPullUpRefactoring().getDeclaringType();
+		IType superType= getPullUpRefactoring().getSuperType(new NullProgressMonitor());
+		setPageTitle(getPageTitle() + " members declared in: " 
+							 + initialSetting.getFullyQualifiedName()
+		                     + " to: " + superType.getFullyQualifiedName());
 	}
 	
 	private PullUpRefactoring getPullUpRefactoring(){
