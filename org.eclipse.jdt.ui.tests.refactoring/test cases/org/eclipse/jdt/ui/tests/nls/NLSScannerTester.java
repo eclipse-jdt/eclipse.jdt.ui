@@ -200,6 +200,21 @@ public class NLSScannerTester extends TestCase {
 		el= line.get(1);
 		assertEquals("1 has tag", true, el.hasTag());
 	}
+
+	//regression test for bug 12600
+	public void test54() throws Exception{
+		String text= 
+				"\n\"x\""
+				+ NLSElement.TAG_PREFIX + 1 
+				+ "\n";
+		NLSLine[] l= NLSScanner.scan(text);
+		NLSLine line=l[0];
+		assertEquals("1 strings", 1, line.size());
+		
+		NLSElement el= line.get(0);
+		assertEquals("0 has no tag", false, el.hasTag());
+		
+	}
 				
 }
 
