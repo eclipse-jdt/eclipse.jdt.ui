@@ -35,8 +35,8 @@ import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
-import org.eclipse.jface.text.formatter.MultiPassContentFormatter;
 import org.eclipse.jface.text.formatter.IContentFormatter;
+import org.eclipse.jface.text.formatter.MultiPassContentFormatter;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.InformationPresenter;
@@ -48,6 +48,8 @@ import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+
+import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
@@ -306,10 +308,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 */
 	private IPreferenceStore createPreferenceStore() {
 		Assert.isTrue(!isNewSetup());
+		IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
 		if (fJavaTextTools.getCorePreferenceStore() == null)
-			return fJavaTextTools.getPreferenceStore();
+			return new ChainedPreferenceStore(new IPreferenceStore[] { fJavaTextTools.getPreferenceStore(), generalTextStore});
 		
-		return new ChainedPreferenceStore(new IPreferenceStore[] { fJavaTextTools.getPreferenceStore(), new PreferencesAdapter(fJavaTextTools.getCorePreferenceStore()) });
+		return new ChainedPreferenceStore(new IPreferenceStore[] { fJavaTextTools.getPreferenceStore(), new PreferencesAdapter(fJavaTextTools.getCorePreferenceStore()), generalTextStore });
 	}
 
 	/**
