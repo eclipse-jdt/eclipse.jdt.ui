@@ -190,6 +190,10 @@ public class LinkedNodeFinder  {
 			return false;
 		}
 		
+		public boolean visit(Javadoc node) {
+			return true;
+		}
+		
 		public boolean visit(ContinueStatement node) {
 			SimpleName label= node.getLabel();
 			if (fDefiningLabel != null && isSameLabel(label) && ASTNodes.isParent(label, fDefiningLabel)) {
@@ -230,6 +234,10 @@ public class LinkedNodeFinder  {
 					}
 				}
 			}
+			return true;
+		}
+		
+		public boolean visit(Javadoc node) {
 			return true;
 		}
 		
