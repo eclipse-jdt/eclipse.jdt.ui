@@ -125,6 +125,7 @@ public class VariableCreationDialog extends StatusDialog {
 		
 		GridLayout layout= new GridLayout();
 		layout.marginWidth= 0;
+		layout.marginHeight= 0;
 		layout.numColumns= 3;
 		inner.setLayout(layout);
 		
