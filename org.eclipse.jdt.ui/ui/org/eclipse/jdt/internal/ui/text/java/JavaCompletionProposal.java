@@ -569,9 +569,12 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	
 		Color foreground= getForegroundColor(text);
 		Color background= getBackgroundColor(text);
+		
+		StyleRange range= text.getStyleRangeAtOffset(offset);
+		int fontStyle= range != null ? range.fontStyle : SWT.NORMAL;
 
 		repairPresentation(viewer);
-		fRememberedStyleRange= new StyleRange(offset, length, foreground, background);
+		fRememberedStyleRange= new StyleRange(offset, length, foreground, background, fontStyle);
 		
 		// http://dev.eclipse.org/bugs/show_bug.cgi?id=34754
 		try {
