@@ -173,24 +173,24 @@ public class CallInliner {
 	}
 
 	private static class AmbiguousMethodAnalyzer implements TypeBindingVisitor {
-		private String methodName;
-		private ITypeBinding[] types;
-		private IMethodBinding original;
+		private String fMethodName;
+		private ITypeBinding[] fTypes;
+		private IMethodBinding fOriginal;
 
 		public AmbiguousMethodAnalyzer(IMethodBinding original, ITypeBinding[] types) {
-			this.original= original;
-			this.methodName= original.getName();
-			this.types= types;
+			this.fOriginal= original;
+			this.fMethodName= original.getName();
+			this.fTypes= types;
 		}
 
 		public boolean visit(ITypeBinding node) {
 			IMethodBinding[] methods= node.getDeclaredMethods();
 			for (int i= 0; i < methods.length; i++) {
 				IMethodBinding candidate= methods[i];
-				if (candidate == original) {
+				if (candidate == fOriginal) {
 					continue;
 				}
-				if (methodName.equals(candidate.getName())) {
+				if (fMethodName.equals(candidate.getName())) {
 					if (canImplicitlyCall(candidate)) {
 						return false;
 					}
@@ -206,11 +206,11 @@ public class CallInliner {
 		 */
 		private boolean canImplicitlyCall(IMethodBinding candidate) {
 			ITypeBinding[] parameters= candidate.getParameterTypes();
-			if (parameters.length != types.length) {
+			if (parameters.length != fTypes.length) {
 				return false;
 			}
 			for (int i= 0; i < parameters.length; i++) {
-				if (!TypeRules.canAssign(types[i], parameters[i])) {
+				if (!TypeRules.canAssign(fTypes[i], parameters[i])) {
 					return false;
 				}
 			}
