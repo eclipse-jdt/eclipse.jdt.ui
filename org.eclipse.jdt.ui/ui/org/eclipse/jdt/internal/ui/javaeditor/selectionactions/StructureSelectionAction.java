@@ -101,8 +101,6 @@ public abstract class StructureSelectionAction extends Action {
 	
 	public final ISourceRange getNewSelectionRange(ISourceRange oldSourceRange, ISourceReference sr) {
 		try{
-			if (! isStructureKnown(sr))
-				return oldSourceRange;
 			CompilationUnit root= getAST(sr);
 			if (root == null)
 				return oldSourceRange;
@@ -152,12 +150,6 @@ public abstract class StructureSelectionAction extends Action {
 		} else {
 			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input);
 		}
-	}
-	
-	private boolean isStructureKnown(ISourceReference sr) throws JavaModelException {
-		if (sr instanceof ICompilationUnit)
-			return ((ICompilationUnit)sr).isStructureKnown();
-		else return true;
 	}
 	
 	private CompilationUnit getAST(ISourceReference sr) {
