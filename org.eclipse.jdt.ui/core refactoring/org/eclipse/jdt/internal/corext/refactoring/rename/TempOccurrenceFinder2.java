@@ -47,9 +47,9 @@ public class TempOccurrenceFinder2 {
 			if (!fIncludeReferences)
 				return true;	
 
-			if (fTempBinding == nameReference.resolveBinding())
-				fOffsets.add(new Integer(nameReference.getStartPosition()));
-
+			if (fTempBinding != null && fTempBinding == nameReference.resolveBinding())
+				fOffsets.add(new Integer(nameReference.getStartPosition()));	
+					
 			return true;
 		}
 
