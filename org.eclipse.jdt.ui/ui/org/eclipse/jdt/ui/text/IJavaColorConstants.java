@@ -57,6 +57,13 @@ public interface IJavaColorConstants {
 	 * @since 3.0
 	 */
 	String JAVA_METHOD_NAME= "java_method_name"; //$NON-NLS-1$
+	
+	/** The color key for operators and brackets in Java code
+	 * (value <code>"java_operator"</code>).
+	 * 
+	 * @since 3.0
+	 */
+	String JAVA_OPERATOR= "java_operator"; //$NON-NLS-1$
 
 	/**
 	 * The color key for everthing in Java code for which no other color is specified

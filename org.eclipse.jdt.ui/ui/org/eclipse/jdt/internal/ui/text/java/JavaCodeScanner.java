@@ -40,6 +40,62 @@ import org.eclipse.jdt.internal.ui.text.JavaWordDetector;
  * A Java code scanner.
  */
 public final class JavaCodeScanner extends AbstractJavaScanner {
+	
+	
+	/**
+	 * Rule to detect java operators.
+	 * 
+	 * @since 3.0
+	 */
+	protected class OperatorRule implements IRule {
+	
+		/** Java operators */
+		private final char[] JAVA_OPERATORS= { ';', '(', ')', '{', '}', '.', '=', '/', '\\', '+', '-', '*', '[', ']', '<', '>', ':', '?', '!', ',', '|', '&', '^', '%', '~'};
+		/** Token to return for this rule */
+		private final IToken fToken;
+	
+		/**
+		 * Creates a new operator rule.
+		 * 
+		 * @param token Token to use for this rule
+		 */
+		public OperatorRule(IToken token) {
+			fToken= token;
+		}
+		
+		/**
+		 * Is this character an operator character?
+		 * 
+		 * @param character Character to determine whether it is an operator character
+		 * @return <code>true</code> iff the character is an operator, <code>false</code> otherwise.
+		 */
+		public boolean isOperator(char character) {
+			for (int index= 0; index < JAVA_OPERATORS.length; index++) {
+				if (JAVA_OPERATORS[index] == character)
+					return true;
+			}
+			return false;
+		}
+	
+		/*
+		 * @see org.eclipse.jface.text.rules.IRule#evaluate(org.eclipse.jface.text.rules.ICharacterScanner)
+		 */
+		public IToken evaluate(ICharacterScanner scanner) {
+	
+			int character= scanner.read();
+			if (isOperator((char) character)) {
+				do {
+					character= scanner.read();
+				} while (isOperator((char) character));
+				scanner.unread();
+				return fToken;
+			} else {
+				scanner.unread();
+				return Token.UNDEFINED;
+			}
+		}
+	}
+	
 
 	/**
 	 * Word rule to detect java method names.
@@ -188,7 +244,8 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		IJavaColorConstants.JAVA_KEYWORD,
 		IJavaColorConstants.JAVA_STRING,
 		IJavaColorConstants.JAVA_DEFAULT,
-		IJavaColorConstants.JAVA_METHOD_NAME
+		IJavaColorConstants.JAVA_METHOD_NAME,
+		IJavaColorConstants.JAVA_OPERATOR
 	};
 	
 	private VersionedWordRule fVersionedWordRule;
@@ -242,6 +299,10 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 			rules.add(fVersionedWordRule);
 		}
+
+		// Add rule for operators and brackets
+		token= getToken(IJavaColorConstants.JAVA_OPERATOR);
+		rules.add(new OperatorRule(token));
 		
 		// Add word rule for method names.
 		token= getToken(IJavaColorConstants.JAVA_METHOD_NAME);
