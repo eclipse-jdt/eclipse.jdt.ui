@@ -4,8 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.snippeteditor;
 
-import java.io.ByteArrayOutputStream;import java.io.PrintStream;import java.lang.reflect.InvocationTargetException;import java.util.*;import org.eclipse.core.resources.*;import org.eclipse.core.runtime.*;import org.eclipse.debug.core.*;import org.eclipse.debug.core.model.IDebugElement;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.ui.DebugUITools;import org.eclipse.jdt.core.*;import org.eclipse.jdt.core.eval.IEvaluationContext;import org.eclipse.jdt.debug.core.*;import org.eclipse.jdt.internal.ui.IJavaUIStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.text.java.ResultCollector;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.dialogs.*;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.text.*;import org.eclipse.jface.text.source.ISourceViewer;import org.eclipse.jface.util.Assert;import org.eclipse.swt.custom.BusyIndicator;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.*;import org.eclipse.ui.part.EditorActionBarContributor;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.ui.texteditor.*;
-import org.eclipse.ui.plugin.AbstractUIPlugin;import com.sun.jdi.InvocationException;import com.sun.jdi.ObjectReference;
+import java.io.ByteArrayOutputStream;import java.io.PrintStream;import java.lang.reflect.InvocationTargetException;import java.util.*;import org.eclipse.core.resources.*;import org.eclipse.core.runtime.*;import org.eclipse.debug.core.*;import org.eclipse.debug.core.model.IDebugElement;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.ui.DebugUITools;import org.eclipse.jdt.core.*;import org.eclipse.jdt.core.eval.IEvaluationContext;import org.eclipse.jdt.debug.core.*;import org.eclipse.jdt.internal.ui.IJavaUIStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.text.java.ResultCollector;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.dialogs.*;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.text.*;import org.eclipse.jface.text.source.ISourceViewer;import org.eclipse.jface.util.Assert;import org.eclipse.swt.custom.BusyIndicator;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.*;import org.eclipse.ui.part.EditorActionBarContributor;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.ui.texteditor.*;import org.eclipse.ui.plugin.AbstractUIPlugin;
+import com.sun.jdi.InvocationException;import com.sun.jdi.ObjectReference;
 
 /**
  * An editor for Java snippets.
@@ -546,11 +546,42 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 					try {
 						IJavaStackFrame f= (IJavaStackFrame)jt.getTopStackFrame();
 						if (f != null) {
+							/*
+							 * fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=8776
+							 * 
+							 * The 1.0 Snippet editor does not work with the latest J9 JCLs. The reason for 
+							 * this is that the implementation of "Method.invoke(...)" has changed from being 
+							 * native, to being source. As the snippet editor attempts to position itself to 
+							 * the correct location to perform an evaluation, an assumption it makes about the 
+							 * number of frames on the stack is now invalid.							 
+							*/
+							
+							/*
+							 * original code 
 							if (e.getDetail() == DebugEvent.STEP_END && f.getLineNumber() == 9 && f.getDeclaringTypeName().equals("org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookMain1")) { //$NON-NLS-1$
 								fThread = jt;
 							} else if (e.getDetail() == DebugEvent.BREAKPOINT && jt.getBreakpoint().equals(ScrapbookLauncher.getDefault().getMagicBreakpoint(jt.getDebugTarget()))) {
 								jt.stepOver();
 							}
+							*/
+							
+							/* new code */
+							if (e.getDetail() == DebugEvent.STEP_END && 
+									f.getLineNumber() == 9 && 
+									f.getDeclaringTypeName().equals("org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookMain1")) { //$NON-NLS-1$
+								fThread = jt;
+							} else if (e.getDetail() == DebugEvent.BREAKPOINT && jt.getBreakpoint().equals(ScrapbookLauncher.getDefault().getMagicBreakpoint(jt.getDebugTarget()))) {
+								// locate the 'eval' method and step over
+								IDebugElement[]  frames = jt.getChildren();
+								for (int i = 0; i < frames.length; i++) {
+									IJavaStackFrame frame = (IJavaStackFrame)frames[i];
+									if (frame.getReceivingTypeName().equals("org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookMain1") && frame.getName().equals("eval")) { //$NON-NLS-1$ //$NON-NLS-2$
+										frame.stepOver();
+										break;
+									}
+								}
+							}
+							/* end new code */
 						}
 					} catch (DebugException ex) {
 						JavaPlugin.log(ex);
