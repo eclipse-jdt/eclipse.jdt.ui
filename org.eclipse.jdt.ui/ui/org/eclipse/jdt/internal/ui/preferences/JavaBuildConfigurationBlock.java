@@ -24,10 +24,13 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.IDialogSettings;
+
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
@@ -36,6 +39,9 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 /**
   */
 public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
+	
+	private static final String SETTINGS_SECTION_NAME= "JavaBuildConfigurationBlock"; //$NON-NLS-1$
+	private static final String SETTINGS_EXPANDED= "expanded"; //$NON-NLS-1$
 	
 	private static final Key PREF_PB_MAX_PER_UNIT= getJDTCoreKey(JavaCore.COMPILER_PB_MAX_PER_UNIT);
 	private static final Key PREF_PB_FORBIDDEN_REFERENCE= getJDTCoreKey(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE);
@@ -100,6 +106,8 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	
 
 	private Composite createBuildPathTabContent(Composite parent) {
+		IDialogSettings section= JavaPlugin.getDefault().getDialogSettings().getSection(SETTINGS_SECTION_NAME);
+		
 		String[] abortIgnoreValues= new String[] { ABORT, IGNORE };
 		String[] cleanIgnoreValues= new String[] { CLEAN, IGNORE };
 		String[] enableDisableValues= new String[] { ENABLED, DISABLED };
@@ -129,11 +137,10 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		
 		Composite composite= pageContent.getBody();
 		composite.setLayout(layout);
-				
 		
 		String label= PreferencesMessages.getString("JavaBuildConfigurationBlock.section.general"); //$NON-NLS-1$
 		ExpandableComposite excomposite= createStyleSection(composite, label, nColumns); 
-		excomposite.setExpanded(true);
+		excomposite.setExpanded(section == null || section.getBoolean(SETTINGS_EXPANDED + '0'));
 		
 		Composite othersComposite= new Composite(excomposite, SWT.NONE);
 		excomposite.setClient(othersComposite);
@@ -148,7 +155,8 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		text.setLayoutData(gd);
 
 		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.section.build_path_problems"); //$NON-NLS-1$
-		excomposite= createStyleSection(composite, label, nColumns); 
+		excomposite= createStyleSection(composite, label, nColumns);
+		excomposite.setExpanded(section != null && section.getBoolean(SETTINGS_EXPANDED + '1'));
 		
 		othersComposite= new Composite(excomposite, SWT.NONE);
 		excomposite.setClient(othersComposite);
@@ -167,7 +175,8 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		addComboBox(othersComposite, label, PREF_PB_INCOMPATIBLE_JDK_LEVEL, errorWarningIgnore, errorWarningIgnoreLabels, 0);	
 		
 		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.section.output_folder");  //$NON-NLS-1$
-		excomposite= createStyleSection(composite, label, nColumns); 
+		excomposite= createStyleSection(composite, label, nColumns);
+		excomposite.setExpanded(section != null && section.getBoolean(SETTINGS_EXPANDED + '2'));
 		
 		othersComposite= new Composite(excomposite, SWT.NONE);
 		excomposite.setClient(othersComposite);
@@ -193,7 +202,8 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		description.setLayoutData(gd);
 
 		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.section.type_restrction"); //$NON-NLS-1$
-		excomposite= createStyleSection(composite, label, nColumns); 
+		excomposite= createStyleSection(composite, label, nColumns);
+		excomposite.setExpanded(section != null && section.getBoolean(SETTINGS_EXPANDED + '3'));
 		
 		othersComposite= new Composite(excomposite, SWT.NONE);
 		excomposite.setClient(othersComposite);
@@ -203,7 +213,8 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		addComboBox(othersComposite, label, PREF_PB_FORBIDDEN_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.section.build_path_properties"); //$NON-NLS-1$
-		excomposite= createStyleSection(composite, label, nColumns); 
+		excomposite= createStyleSection(composite, label, nColumns);
+		excomposite.setExpanded(section != null && section.getBoolean(SETTINGS_EXPANDED + '4'));
 		
 		othersComposite= new Composite(excomposite, SWT.NONE);
 		excomposite.setClient(othersComposite);
@@ -214,9 +225,16 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.getString("JavaBuildConfigurationBlock.enable_multiple_outputlocations.label"); //$NON-NLS-1$
 		addCheckBox(othersComposite, label, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS, enableDisableValues, 0);
-				
 
 		return pageContent;
+	}
+	
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateSectionStyle(org.eclipse.ui.forms.widgets.ExpandableComposite)
+	 */
+	protected void updateSectionStyle(ExpandableComposite excomposite) {
+
 	}
 	
 	
@@ -296,6 +314,18 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 			}
 		}
 		return new StatusInfo();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#dispose()
+	 */
+	public void dispose() {
+		IDialogSettings section= JavaPlugin.getDefault().getDialogSettings().addNewSection(SETTINGS_SECTION_NAME);
+		for (int i= 0; i < fExpandedComposites.size(); i++) {
+			ExpandableComposite curr= (ExpandableComposite) fExpandedComposites.get(i);
+			section.put(SETTINGS_EXPANDED + i, curr.isExpanded());
+		}
+		super.dispose();
 	}
 	
 		

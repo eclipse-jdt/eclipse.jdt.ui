@@ -412,7 +412,6 @@ public abstract class OptionsConfigurationBlock {
 			}
 		});
 		
-		updateSectionStyle(excomposite);
 		fExpandedComposites.add(excomposite);
 		return excomposite;
 	}

@@ -13,17 +13,25 @@ package org.eclipse.jdt.internal.ui.preferences;
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
-import org.eclipse.ui.forms.widgets.ImageHyperlink;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -32,6 +40,10 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
   */
 public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlock {
 
+	private static final String SETTINGS_SECTION_NAME= "ProblemSeveritiesConfigurationBlock"; //$NON-NLS-1$
+	private static final String SETTINGS_EXPANDED= "expanded"; //$NON-NLS-1$
+	private static final String SETTINGS_EXPANDALL= "expand_all"; //$NON-NLS-1$
+	
 	// Preference store keys, see JavaCore.getOptions
 	private static final Key PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD= getJDTCoreKey(JavaCore.COMPILER_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD);
 	private static final Key PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME= getJDTCoreKey(JavaCore.COMPILER_PB_METHOD_WITH_CONSTRUCTOR_NAME);
@@ -81,6 +93,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	
 
 	private PixelConverter fPixelConverter;
+	private ToolItem fExpandAllCheckBox;
+	private Image fImage;
 	
 	public ProblemSeveritiesConfigurationBlock(IStatusChangeListener context, IProject project) {
 		super(context, project, getKeys());
@@ -125,6 +139,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	}
 	
 	private Composite createStyleTabContent(Composite folder) {
+		IDialogSettings section= JavaPlugin.getDefault().getDialogSettings().getSection(SETTINGS_SECTION_NAME);
+
+		
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
 		String[] errorWarningIgnoreLabels= new String[] {
@@ -149,11 +166,27 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		description.setText(PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.common.description")); //$NON-NLS-1$
 		description.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, true, false, nColumns - 1, 1));
 		
-		ImageHyperlink hyperlink= createHelpLink(composite, PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.help.link")); //$NON-NLS-1$
-		hyperlink.setToolTipText(PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.help.tooltip")); //$NON-NLS-1$
-		hyperlink.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, false, false, 1, 1));
+		//ImageHyperlink hyperlink= createHelpLink(composite, PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.help.link")); //$NON-NLS-1$
+		//hyperlink.setToolTipText(PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.help.tooltip")); //$NON-NLS-1$
+		//hyperlink.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, false, false, 1, 1));
 
+		ToolBar toolBar= new ToolBar(composite, SWT.FLAT);
+		toolBar.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, false, false, 1, 1));
 		
+		fExpandAllCheckBox= new ToolItem(toolBar, SWT.CHECK);
+		fImage= JavaPluginImages.DESC_ELCL_COLLAPSEALL.createImage(true);
+		fExpandAllCheckBox.setImage(fImage);
+		fExpandAllCheckBox.addSelectionListener(new SelectionAdapter() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				doExpandSelectionChanged();
+			}
+			public void widgetSelected(SelectionEvent e) {
+				doExpandSelectionChanged();
+			}
+		});
+		fExpandAllCheckBox.setSelection(section != null && section.getBoolean(SETTINGS_EXPANDALL));
+
+				
 		int indentStep=  fPixelConverter.convertWidthInCharsToPixels(1);
 		
 		int defaultIndent= indentStep * 0;
@@ -170,11 +203,10 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		inner= new Composite(excomposite, SWT.NONE);
 		inner.setLayout(new GridLayout(nColumns, false));
 		excomposite.setClient(inner);
-		excomposite.setExpanded(true);
+		excomposite.setExpanded(section == null || section.getBoolean(SETTINGS_EXPANDED + '0'));
 		
 		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_static_access_receiver.label"); //$NON-NLS-1$
 		addComboBox(inner, label, PREF_PB_STATIC_ACCESS_RECEIVER, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
-
 		
 		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_indirect_access_to_static.label"); //$NON-NLS-1$
 		addComboBox(inner, label, PREF_PB_INDIRECT_STATIC_ACCESS, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);	
@@ -194,7 +226,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		// --- potential_programming_problems
 		
 		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.section.potential_programming_problems"); //$NON-NLS-1$
-		excomposite= createStyleSection(composite, label, nColumns); 
+		excomposite= createStyleSection(composite, label, nColumns);
+		excomposite.setExpanded(section != null && section.getBoolean(SETTINGS_EXPANDED + '1'));
 		
 		inner= new Composite(excomposite, SWT.NONE);
 		inner.setLayout(new GridLayout(nColumns, false));
@@ -224,7 +257,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		// --- name_shadowing
 		
 		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.section.name_shadowing"); //$NON-NLS-1$
-		excomposite= createStyleSection(composite, label, nColumns); 
+		excomposite= createStyleSection(composite, label, nColumns);
+		excomposite.setExpanded(section != null && section.getBoolean(SETTINGS_EXPANDED + '2'));
 		
 		inner= new Composite(excomposite, SWT.NONE);
 		inner.setLayout(new GridLayout(nColumns, false));
@@ -249,7 +283,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		// --- deprecations
 		
 		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.section.deprecations"); //$NON-NLS-1$
-		excomposite= createStyleSection(composite, label, nColumns); 
+		excomposite= createStyleSection(composite, label, nColumns);
+		excomposite.setExpanded(section != null && section.getBoolean(SETTINGS_EXPANDED + '3'));
 		
 		inner= new Composite(excomposite, SWT.NONE);
 		inner.setLayout(new GridLayout(nColumns, false));
@@ -267,7 +302,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		// --- nls
 		
 		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.section.nls"); //$NON-NLS-1$
-		excomposite= createStyleSection(composite, label, nColumns); 
+		excomposite= createStyleSection(composite, label, nColumns);
+		excomposite.setExpanded(section != null && section.getBoolean(SETTINGS_EXPANDED + '4'));
 		
 		inner= new Composite(excomposite, SWT.NONE);
 		inner.setLayout(new GridLayout(nColumns, false));
@@ -279,7 +315,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		// --- unnecessary_code
 		
 		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.section.unnecessary_code"); //$NON-NLS-1$
-		excomposite= createStyleSection(composite, label, nColumns); 
+		excomposite= createStyleSection(composite, label, nColumns);
+		excomposite.setExpanded(section != null && section.getBoolean(SETTINGS_EXPANDED + '5'));
 	
 		inner= new Composite(excomposite, SWT.NONE);
 		inner.setLayout(new GridLayout(nColumns, false));
@@ -315,7 +352,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		// --- 1.5
 		
 		label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.section.jdk50"); //$NON-NLS-1$
-		excomposite= createStyleSection(composite, label, nColumns); 
+		excomposite= createStyleSection(composite, label, nColumns);
+		excomposite.setExpanded(section != null && section.getBoolean(SETTINGS_EXPANDED + '6'));
 		
 		inner= new Composite(excomposite, SWT.NONE);
 		inner.setLayout(new GridLayout(nColumns, false));
@@ -333,6 +371,47 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		return sc1;
 	}
 
+	/**
+	 * 
+	 */
+	protected void doExpandSelectionChanged() {
+		if (fExpandAllCheckBox.getSelection()) {
+			for (int i= 0; i < fExpandedComposites.size(); i++) {
+				ExpandableComposite curr= (ExpandableComposite) fExpandedComposites.get(i);
+				curr.setExpanded(true);
+			}
+		} else {
+			boolean expandedFound= false;
+			for (int i= 0; i < fExpandedComposites.size(); i++) {
+				ExpandableComposite curr= (ExpandableComposite) fExpandedComposites.get(i);
+				if (!expandedFound) {
+					if (curr.isExpanded()) {
+						expandedFound= true;
+					}
+				} else {
+					curr.setExpanded(false);
+				}
+			}
+			if (!expandedFound) {
+				ExpandableComposite curr= (ExpandableComposite) fExpandedComposites.get(0);
+				curr.setExpanded(true);
+			}
+		}
+		ExpandableComposite first= (ExpandableComposite) fExpandedComposites.get(0);
+		ScrolledPageContent parentScrolledComposite= getParentScrolledComposite(first);
+		if (parentScrolledComposite != null) {
+			parentScrolledComposite.reflow(true);
+		}
+		
+	}
+
+	protected void updateSectionStyle(ExpandableComposite excomposite) {
+		if (!fExpandAllCheckBox.getSelection()) {
+			super.updateSectionStyle(excomposite);
+		}
+	}
+	
+	
 	/* (non-javadoc)
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.
@@ -381,6 +460,20 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 			message= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.needsprojectbuild.message"); //$NON-NLS-1$
 		}
 		return new String[] { title, message };
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#dispose()
+	 */
+	public void dispose() {
+		IDialogSettings section= JavaPlugin.getDefault().getDialogSettings().addNewSection(SETTINGS_SECTION_NAME);
+		for (int i= 0; i < fExpandedComposites.size(); i++) {
+			ExpandableComposite curr= (ExpandableComposite) fExpandedComposites.get(i);
+			section.put(SETTINGS_EXPANDED + i, curr.isExpanded());
+		}
+		section.put(SETTINGS_EXPANDALL, fExpandAllCheckBox.getSelection());
+		fImage.dispose();
+		super.dispose();
 	}
 	
 }
