@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.SourceViewer;
@@ -38,14 +39,24 @@ class SourceContextViewer  extends SourceViewer implements IErrorContextViewer {
 		if (input instanceof SourceContextInput) {
 			SourceContextInput scinput= (SourceContextInput)input;
 			configure(scinput.configuration);
-			super.setInput(scinput.document);
-			if (scinput.sourceRange != null) {
-				int offset= scinput.sourceRange.getOffset();
-				int length= scinput.sourceRange.getLength();
-				if (offset >= 0 && length >= 0) {
-					setSelectedRange(offset, length);
-					revealRange(offset, length);
+			Control ctrl= getControl();
+			if (ctrl != null && ctrl.isDisposed())
+				ctrl= null;
+			try {
+				if (ctrl != null)
+					ctrl.setRedraw(false);
+				super.setInput(scinput.document);
+				if (scinput.sourceRange != null) {
+					int offset= scinput.sourceRange.getOffset();
+					int length= scinput.sourceRange.getLength();
+					if (offset >= 0 && length >= 0) {
+						setSelectedRange(offset, length);
+						revealRange(offset, length);
+					}
 				}
+			} finally {
+				if (ctrl != null)
+					ctrl.setRedraw(true);
 			}
 		} else {
 			super.setInput(input);
