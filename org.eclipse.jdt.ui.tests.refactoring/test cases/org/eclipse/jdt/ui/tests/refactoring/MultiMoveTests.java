@@ -42,7 +42,8 @@ public class MultiMoveTests extends RefactoringTest {
 	
 	private static void delete(IPackageFragment pack) {
 		try {
-			pack.delete(true, null);
+			if (pack.exists())
+				pack.delete(true, null);
 		} catch(JavaModelException e) {
 			//ignore
 		}
