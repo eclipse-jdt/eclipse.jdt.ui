@@ -446,7 +446,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					
 			if (! isOrderSameAsInitial())	
 				result.merge(checkReorderings(new SubProgressMonitor(pm, 1)));
-				//TODO: bogus ^: only checks for conflicting parameter names in ripple methods iff order changed.
+				//TODO: only checks for conflicting parameter names in ripple methods iff order changed.
+				// We need a common way of dealing with possible compilation errors for all occurrences.
 			else pm.worked(1);
 			
 			if (result.hasFatalError())
