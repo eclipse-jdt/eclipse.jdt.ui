@@ -58,18 +58,25 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			StringBuffer buf= new StringBuffer(c.text);
 			if (end >= start) {	// 1GEYL1R: ITPJUI:ALL - java doc edit smartness not work for class comments
 				// append to input
-				buf.append(d.get(start, end - start));				
+				String indentation= d.get(start, end - start);
+				buf.append(indentation);				
 				if (end < c.offset) {
 					if (d.getChar(end) == '/') {
 						// javadoc started on this line
 						buf.append(" * ");	 //$NON-NLS-1$
+
+						if (isNewComment(d, c.offset)) {
+							String[] lineDelimiters= d.getLegalLineDelimiters();
+							c.doit= false;
+							d.replace(c.offset, 0, lineDelimiters[0] + indentation + " */"); //$NON-NLS-1$
+						}
+
 					} else if (d.getChar(end) == '*') {
 						buf.append("* "); //$NON-NLS-1$
 					}
 				}			
 			}
-
-			
+						
 			c.text= buf.toString();
 				
 		} catch (BadLocationException excp) {
@@ -92,6 +99,29 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		}
 	}
 
+	private static boolean isNewComment(IDocument document, int commandOffset) {
+
+		try {
+			int lineIndex= document.getLineOfOffset(commandOffset) + 1;
+			if (lineIndex >= document.getNumberOfLines())
+				return true;
+
+			IRegion line= document.getLineInformation(lineIndex);
+			ITypedRegion partition= document.getPartition(commandOffset);
+			if (document.getLineOffset(lineIndex) >= partition.getOffset() + partition.getLength())
+				return true;
+
+			String string= document.get(line.getOffset(), line.getLength());				
+			if (!string.trim().startsWith("*")) //$NON-NLS-1$
+				return true;
+			
+			return false;
+			
+		} catch (BadLocationException e) {
+			return false;
+		}			
+	}
+
 	/*
 	 * @see IAutoIndentStrategy#customizeDocumentCommand
 	 */
@@ -99,7 +129,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		if (c.length == 0 && c.text != null && endsWithDelimiter(d, c.text))
 			jdocIndentAfterNewLine(d, c);
 		else if ("/".equals(c.text)) { //$NON-NLS-1$
-			jdocIndentForCommentEnd(d, c);
+			jdocIndentForCommentEnd(d, c);			
 		}
 	}
 }

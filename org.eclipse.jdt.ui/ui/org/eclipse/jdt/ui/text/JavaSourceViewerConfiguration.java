@@ -39,7 +39,6 @@ import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.reconciler.IReconciler;
-import org.eclipse.jface.text.reconciler.MonoReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.source.IAnnotationHover;
@@ -61,6 +60,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaStringAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaInformationProvider;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaTextHover;
@@ -266,6 +266,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		if (JavaPartitionScanner.JAVA_DOC.equals(contentType) ||
 				JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT.equals(contentType))
 			return new JavaDocAutoIndentStrategy();
+		else if (JavaPartitionScanner.JAVA_STRING.equals(contentType))
+			return new JavaStringAutoIndentStrategy();
 		return new JavaAutoIndentStrategy();
 	}
 

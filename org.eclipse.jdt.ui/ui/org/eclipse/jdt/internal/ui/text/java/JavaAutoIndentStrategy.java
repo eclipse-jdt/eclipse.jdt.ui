@@ -12,7 +12,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.ITypedRegion;
 
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 
 /**
@@ -218,7 +217,57 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		}
 		
 		return false;
-	}	
+	}
+	
+	private char getClosingCharacter(char openingCharacter) {
+		switch (openingCharacter) {
+		case '\"':
+		case '\'':
+			return openingCharacter;
+			
+		case '(':
+			return ')';
+			
+		case '{':
+			return '}';
+			
+		case '[':
+			return ']';
+			
+		default:
+			throw new IllegalArgumentException();
+		}
+	}
+
+	private void smartIndentAfterBlockDelimiter(IDocument document, DocumentCommand command) {
+		try {
+			final char character= command.text.charAt(0);
+
+			switch (character) {
+			case '}':
+				smartInsertAfterBracket(document, command);
+				break;
+
+			// creating closing peer character
+			case '\"':
+			case '(':
+			case '[':			
+				command.doit= false;
+				document.replace(command.offset, 0, String.valueOf(getClosingCharacter(character)));
+				break;
+
+			// try eating closing peer character
+			case ')':
+			case ']':
+				if (document.getChar(command.offset) == character)
+					command.length++;
+				break;
+			}
+
+		} catch (BadLocationException e) {
+			System.out.println(JavaTextMessages.getString("AutoIndent.error.bad_location.message1")); //$NON-NLS-1$
+		}
+	}
 
 	/*
 	 * @see org.eclipse.jface.text.IAutoIndentStrategy#customizeDocumentCommand(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.DocumentCommand)
@@ -226,8 +275,8 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 		if (c.length == 0 && c.text != null && endsWithDelimiter(d, c.text))
 			smartIndentAfterNewLine(d, c);
-		else if ("}".equals(c.text)) { //$NON-NLS-1$
-			smartInsertAfterBracket(d, c);
+		else if (c.text.length() == 1) {
+			smartIndentAfterBlockDelimiter(d, c);
 		}
 	}
 }
