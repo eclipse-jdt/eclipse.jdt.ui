@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
@@ -39,6 +40,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -50,6 +52,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
@@ -59,12 +62,15 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
@@ -91,141 +97,128 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class PullUpRefactoring extends Refactoring {
-	private static class SuperReferenceFinder {
-
-		//no instances
-		private SuperReferenceFinder(){
+	private static class SuperReferenceFinderVisitor extends ASTVisitor{
+		
+		private Collection fFoundRanges;
+		private int fMethodSourceStart;
+		private int fMethodSourceEnd;
+		private String fMethodSource;
+		private String fSuperTypeName;
+		
+		SuperReferenceFinderVisitor(IMethod method, IType superType) throws JavaModelException{
+			fFoundRanges= new ArrayList(0);
+			fMethodSourceStart= method.getSourceRange().getOffset();
+			fMethodSourceEnd= method.getSourceRange().getOffset() + method.getSourceRange().getLength();	
+			fMethodSource= method.getSource();
+			fSuperTypeName= JavaModelUtil.getFullyQualifiedName(superType);
 		}
-	
-		public static ISourceRange[] findSuperReferenceRanges(IMethod method, IType superType) throws JavaModelException{
-			Assert.isNotNull(method);
-			SuperReferenceFinderVisitor visitor= new SuperReferenceFinderVisitor(method, superType);
-			AST.parseCompilationUnit(method.getCompilationUnit(), true).accept(visitor);
-			return visitor.getSuperReferenceRanges();
+
+		ISourceRange[] getSuperReferenceRanges(){
+			return (ISourceRange[]) fFoundRanges.toArray(new ISourceRange[fFoundRanges.size()]);
 		}
-
-		private static class SuperReferenceFinderVisitor extends ASTVisitor{
 		
-			private Collection fFoundRanges;
-			private int fMethodSourceStart;
-			private int fMethodSourceEnd;
-			private String fMethodSource;
-			private String fSuperTypeName;
+		private boolean withinMethod(ASTNode node){
+			return (node.getStartPosition() >= fMethodSourceStart) && (node.getStartPosition() <= fMethodSourceEnd);
+		}
 		
-			SuperReferenceFinderVisitor(IMethod method, IType superType) throws JavaModelException{
-				fFoundRanges= new ArrayList(0);
-				fMethodSourceStart= method.getSourceRange().getOffset();
-				fMethodSourceEnd= method.getSourceRange().getOffset() + method.getSourceRange().getLength();	
-				fMethodSource= method.getSource();
-				fSuperTypeName= JavaModelUtil.getFullyQualifiedName(superType);
-			}
-
-			ISourceRange[] getSuperReferenceRanges(){
-				return (ISourceRange[]) fFoundRanges.toArray(new ISourceRange[fFoundRanges.size()]);
-			}
-		
-			private boolean withinMethod(ASTNode node){
-				return (node.getStartPosition() >= fMethodSourceStart) && (node.getStartPosition() <= fMethodSourceEnd);
-			}
-		
-			private ISourceRange getSuperRange(String scanSource){
-				IScanner scanner= ToolFactory.createScanner(false, false, false, false);
-				scanner.setSource(scanSource.toCharArray());
-				try {
-					int token = scanner.getNextToken();
-					while (token != ITerminalSymbols.TokenNameEOF) {
-						switch (token) {
-							case ITerminalSymbols.TokenNamesuper :
-								int start= scanner.getCurrentTokenEndPosition() + 1 - scanner.getCurrentTokenSource().length;
-								int end= scanner.getCurrentTokenEndPosition() + 1;
-								return new SourceRange(start, end - start);
-						}
-						token = scanner.getNextToken();
+		private ISourceRange getSuperRange(String scanSource){
+			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+			scanner.setSource(scanSource.toCharArray());
+			try {
+				int token = scanner.getNextToken();
+				while (token != ITerminalSymbols.TokenNameEOF) {
+					switch (token) {
+						case ITerminalSymbols.TokenNamesuper :
+							int start= scanner.getCurrentTokenEndPosition() + 1 - scanner.getCurrentTokenSource().length;
+							int end= scanner.getCurrentTokenEndPosition() + 1;
+							return new SourceRange(start, end - start);
 					}
-				} catch(InvalidInputException e) {
-					return new SourceRange(0, 0); //FIX ME
+					token = scanner.getNextToken();
 				}
-				return new SourceRange(0, 0);//FIX ME
+			} catch(InvalidInputException e) {
+				return new SourceRange(0, 0); //FIX ME
 			}
+			return new SourceRange(0, 0);//FIX ME
+		}
 
-			private String getSource(int start, int end){
-				return fMethodSource.substring(start - fMethodSourceStart, end - fMethodSourceStart);
-			}
+		private String getSource(int start, int end){
+			return fMethodSource.substring(start - fMethodSourceStart, end - fMethodSourceStart);
+		}
 		
-			private String getScanSource(SuperMethodInvocation node){
-				return getSource(getScanSourceOffset(node), node.getName().getStartPosition());
-			}
+		private String getScanSource(SuperMethodInvocation node){
+			return getSource(getScanSourceOffset(node), node.getName().getStartPosition());
+		}
 		
-			private String getScanSource(SuperFieldAccess node){
-				return getSource(getScanSourceOffset(node), node.getName().getStartPosition());
-			}
+		private String getScanSource(SuperFieldAccess node){
+			return getSource(getScanSourceOffset(node), node.getName().getStartPosition());
+		}
 		
-			private static int getScanSourceOffset(SuperMethodInvocation node){
-				if (node.getQualifier() == null)
-					return node.getStartPosition();
-				else
-					return node.getQualifier().getStartPosition() + node.getQualifier().getLength();			
-			}
+		private static int getScanSourceOffset(SuperMethodInvocation node){
+			if (node.getQualifier() == null)
+				return node.getStartPosition();
+			else
+				return node.getQualifier().getStartPosition() + node.getQualifier().getLength();			
+		}
 		
-			private static int getScanSourceOffset(SuperFieldAccess node){
-				if (node.getQualifier() == null)
-					return node.getStartPosition();
-				else
-					return node.getQualifier().getStartPosition() + node.getQualifier().getLength();			
-			}
+		private static int getScanSourceOffset(SuperFieldAccess node){
+			if (node.getQualifier() == null)
+				return node.getStartPosition();
+			else
+				return node.getQualifier().getStartPosition() + node.getQualifier().getLength();			
+		}
 		
-			//---- visit methods ------------------
+		//---- visit methods ------------------
 		
-			public boolean visit(SuperFieldAccess node) {
-				if (! withinMethod(node))
-					return true;
+		public boolean visit(SuperFieldAccess node) {
+			if (! withinMethod(node))
+				return true;
 			
-				ISourceRange superRange= getSuperRange(getScanSource(node));
-				fFoundRanges.add(new SourceRange(superRange.getOffset() + getScanSourceOffset(node), superRange.getLength()));
-				return true;
-			}
+			ISourceRange superRange= getSuperRange(getScanSource(node));
+			fFoundRanges.add(new SourceRange(superRange.getOffset() + getScanSourceOffset(node), superRange.getLength()));
+			return true;
+		}
 
-			public boolean visit(SuperMethodInvocation node) {
-				if (! withinMethod(node))
-					return true;
+		public boolean visit(SuperMethodInvocation node) {
+			if (! withinMethod(node))
+				return true;
 			
-				IBinding nameBinding= node.getName().resolveBinding();
-				if (nameBinding != null && nameBinding.getKind() == IBinding.METHOD){
-					ITypeBinding declaringType= ((IMethodBinding)nameBinding).getDeclaringClass();
-					if (declaringType != null && ! fSuperTypeName.equals(Bindings.getFullyQualifiedName(declaringType)))
-						return true;
-				}
-				ISourceRange superRange= getSuperRange(getScanSource(node));
-				fFoundRanges.add(new SourceRange(superRange.getOffset() + getScanSourceOffset(node), superRange.getLength()));
-				return true;
+			IBinding nameBinding= node.getName().resolveBinding();
+			if (nameBinding != null && nameBinding.getKind() == IBinding.METHOD){
+				ITypeBinding declaringType= ((IMethodBinding)nameBinding).getDeclaringClass();
+				if (declaringType != null && ! fSuperTypeName.equals(Bindings.getFullyQualifiedName(declaringType)))
+					return true;
 			}
+			ISourceRange superRange= getSuperRange(getScanSource(node));
+			fFoundRanges.add(new SourceRange(superRange.getOffset() + getScanSourceOffset(node), superRange.getLength()));
+			return true;
+		}
 		
-			//- stop nodes ---
+		//- stop nodes ---
 		
-			public boolean visit(TypeDeclarationStatement node) {
-				if (withinMethod(node))
-					return false;
-				return true;
-			}
+		public boolean visit(TypeDeclarationStatement node) {
+			if (withinMethod(node))
+				return false;
+			return true;
+		}
 
-			public boolean visit(AnonymousClassDeclaration node) {
-				if (withinMethod(node))
-					return false;
-				return true;
-			}
-
+		public boolean visit(AnonymousClassDeclaration node) {
+			if (withinMethod(node))
+				return false;
+			return true;
 		}
 	}
-
-	private final CodeGenerationSettings fPreferenceSettings;
-	private IMember[] fElementsToPullUp;
+	
+	private IMember[] fMembersToPullUp;
+	private IMethod[] fMethodsToDeclareAbstract;
 	private IMethod[] fMethodsToDelete;
 	private TextChangeManager fChangeManager;
 	private IType fTargetType;
+	private boolean fCreateMethodStubs;
 	
 	private final ASTNodeMappingManager fAstManager;
 	private final ASTRewriteManager fRewriteManager;
 	private final ImportEditManager fImportEditManager;
+	private final CodeGenerationSettings fPreferenceSettings;
 
 	//caches
 	private IType fCachedDeclaringType;
@@ -236,12 +229,14 @@ public class PullUpRefactoring extends Refactoring {
 	public PullUpRefactoring(IMember[] elements, CodeGenerationSettings preferenceSettings){
 		Assert.isTrue(elements.length > 0);
 		Assert.isNotNull(preferenceSettings);
-		fElementsToPullUp= (IMember[])SourceReferenceUtil.sortByOffset(elements);
+		fMembersToPullUp= (IMember[])SourceReferenceUtil.sortByOffset(elements);
 		fMethodsToDelete= new IMethod[0];
+		fMethodsToDeclareAbstract= new IMethod[0];
 		fPreferenceSettings= preferenceSettings;
 		fAstManager= new ASTNodeMappingManager();
 		fRewriteManager= new ASTRewriteManager(fAstManager);
 		fImportEditManager= new ImportEditManager(preferenceSettings);
+		fCreateMethodStubs= true;
 	}
 	
 	/*
@@ -266,15 +261,24 @@ public class PullUpRefactoring extends Refactoring {
 	* no validation is done here - the members must be a subset of those
 	* returned by the call to getPullableMembersOfDeclaringType
 	*/
-	public void setElementsToPullUp(IMember[] elements){
+	public void setMethodsToDeclareAbstract(IMethod[] methods) {
+		Assert.isNotNull(methods);		
+		fMethodsToDeclareAbstract= getOriginals(methods);
+	}
+
+	/*
+	* no validation is done here - the members must be a subset of those
+	* returned by the call to getPullableMembersOfDeclaringType
+	*/
+	public void setMembersToPullUp(IMember[] elements){
 		Assert.isNotNull(elements);
-		fElementsToPullUp= (IMember[])SourceReferenceUtil.sortByOffset(elements);
-		fElementsToPullUp= getOriginals(fElementsToPullUp);
+		fMembersToPullUp= (IMember[])SourceReferenceUtil.sortByOffset(elements);
+		fMembersToPullUp= getOriginals(fMembersToPullUp);
 	}
 	
 	private IMember[] getMembersToDelete(IProgressMonitor pm){
 		try{
-			IMember[] matchingFields= getMembersOfType(getMatchingElements(pm), IJavaElement.FIELD);
+			IMember[] matchingFields= getMembersOfType(getMatchingElements(pm, false), IJavaElement.FIELD);
 			return merge(getOriginals(matchingFields), fMethodsToDelete);
 		} catch (JavaModelException e){
 			//fallback
@@ -283,16 +287,24 @@ public class PullUpRefactoring extends Refactoring {
 			pm.done();
 		}
 	}
+
+	public void setCreateMethodStubs(boolean create) {
+		fCreateMethodStubs= create;
+	}
 	
-	public IMember[] getElementsToPullUp() {
-		return fElementsToPullUp;
+	public boolean getCreateMethodStubs() {
+		return fCreateMethodStubs;
+	}
+
+	public IMember[] getMembersToPullUp() {
+		return fMembersToPullUp;
 	}
 	
 	public IType getDeclaringType(){
 		if (fCachedDeclaringType != null)
 			return fCachedDeclaringType;
 		//all members declared in same type - checked in precondition
-		fCachedDeclaringType= fElementsToPullUp[0].getDeclaringType(); //index safe - checked in constructor
+		fCachedDeclaringType= fMembersToPullUp[0].getDeclaringType(); //index safe - checked in constructor
 		return fCachedDeclaringType;
 	}
 	
@@ -354,14 +366,17 @@ public class PullUpRefactoring extends Refactoring {
 		fTargetType= targetType;
 	}
 	
-	public IMember[] getMatchingElements(IProgressMonitor pm) throws JavaModelException {
+	public IMember[] getMatchingElements(IProgressMonitor pm, boolean includeMethodsToDeclareAbstract) throws JavaModelException {
 		try{	
 			Set result= new HashSet();
 			IType targetClass= getTargetClass();
-			ITypeHierarchy hierarchy= getTypeHierarchyOfTargetClass(pm);
-			IType[] subTypes= hierarchy.getAllSubtypes(targetClass);
-			for (int i = 0; i < subTypes.length; i++) {
-				result.addAll(getMatchingMembers(hierarchy, subTypes[i]));
+			Map matching= getMatchingMemberMatching(pm, includeMethodsToDeclareAbstract);
+			for (Iterator iter= matching.keySet().iterator(); iter.hasNext();) {
+				IMember	key= (IMember) iter.next();
+				if (key.getDeclaringType().equals(targetClass))
+					iter.remove();
+				else	
+					result.addAll((Set)matching.get(key));
 			}
 			return (IMember[]) result.toArray(new IMember[result.size()]);
 		} finally{
@@ -370,9 +385,9 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	public IMember[] getRequiredPullableMembers(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("Calculating required members", fElementsToPullUp.length);//not true, but not easy to give anything better
-		List queue= new ArrayList(fElementsToPullUp.length);
-		queue.addAll(Arrays.asList(fElementsToPullUp));
+		pm.beginTask("Calculating required members", fMembersToPullUp.length);//not true, but not easy to give anything better
+		List queue= new ArrayList(fMembersToPullUp.length);
+		queue.addAll(Arrays.asList(fMembersToPullUp));
 		int i= 0;
 		IMember current;
 		do{
@@ -479,12 +494,19 @@ public class PullUpRefactoring extends Refactoring {
 		}
 	}
 	
-	private Map getMatchingMembersMappingFromTypeAndAllSubtypes(ITypeHierarchy hierarchy, IType type) throws JavaModelException {
+	private Map getMatchingMembersMappingFromTypeAndAllSubtypes(ITypeHierarchy hierarchy, IType type, boolean includeMethodsToDeclareAbstract) throws JavaModelException {
 		Map result= new HashMap(); //IMember -> Set of IMembers (of the same type as key)
 		result.putAll(getMatchingMembersMapping(hierarchy, type));
 		IType[]  subTypes= hierarchy.getAllSubtypes(type);
 		for (int i = 0; i < subTypes.length; i++) {
 			mergeSets(result, getMatchingMembersMapping(hierarchy, subTypes[i]));
+		}
+		if (includeMethodsToDeclareAbstract)
+			return result;
+			
+		for (int i= 0; i < fMethodsToDeclareAbstract.length; i++) {
+			if (result.containsKey(fMethodsToDeclareAbstract[i]))
+				result.remove(fMethodsToDeclareAbstract[i]);
 		}
 		return result;
 	}
@@ -524,21 +546,22 @@ public class PullUpRefactoring extends Refactoring {
 	
 	private Map getMatchingMembersMapping(ITypeHierarchy hierarchy, IType type) throws JavaModelException {
 		Map result= new HashMap();//IMember -> Set of IMembers (of the same type as key)
-		
-		//current type
-		for (int i = 0; i < fElementsToPullUp.length; i++) {
-			if (fElementsToPullUp[i].getElementType() == IJavaElement.METHOD){
-				IMethod method= (IMethod)fElementsToPullUp[i];
+		IMember[] members= getMembersToBeCreatedInTargetClass();
+		for (int i = 0; i < members.length; i++) {
+			IMember member= members[i];
+			if (member.getElementType() == IJavaElement.METHOD){
+				IMethod method= (IMethod)member;
 				IMethod found= MemberCheckUtil.findMethod(method, type.getMethods());
 				if (found != null)
 					addToMapping(result, method, found);
-			} else if (fElementsToPullUp[i].getElementType() == IJavaElement.FIELD){
-				IField field= (IField)fElementsToPullUp[i];
+			} else if (member.getElementType() == IJavaElement.FIELD){
+				IField field= (IField)member;
 				IField found= type.getField(field.getElementName());
 				if (found.exists())
 					addToMapping(result, field, found);
 			}
 		}
+		
 		return result;		
 	}
 	
@@ -573,15 +596,15 @@ public class PullUpRefactoring extends Refactoring {
 		try {
 			pm.beginTask("", 3); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
-			fElementsToPullUp= getOriginals(fElementsToPullUp);
+			fMembersToPullUp= getOriginals(fMembersToPullUp);
 						
 			result.merge(checkDeclaringType(new SubProgressMonitor(pm, 1)));
 			pm.worked(1);
 			if (result.hasFatalError())
 				return result;			
 
-			for (int i= 0; i < fElementsToPullUp.length; i++) {
-				IMember orig= fElementsToPullUp[i];
+			for (int i= 0; i < fMembersToPullUp.length; i++) {
+				IMember orig= fMembersToPullUp[i];
 				if (orig == null || ! orig.exists()){
 					String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.does_not_exist", orig.getElementName());//$NON-NLS-1$
 					result.addFatalError(message);
@@ -599,8 +622,8 @@ public class PullUpRefactoring extends Refactoring {
 	private RefactoringStatus checkMultiDeclarationOfFields() throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		ASTNodeMappingManager astManager= new ASTNodeMappingManager();
-		for (int i= 0; i < fElementsToPullUp.length; i++) {
-			IMember member= fElementsToPullUp[i];
+		for (int i= 0; i < fMembersToPullUp.length; i++) {
+			IMember member= fMembersToPullUp[i];
 			if (member.getElementType() != IJavaElement.FIELD)
 				continue;
 			IField field= (IField)member;	
@@ -662,15 +685,16 @@ public class PullUpRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 6); //$NON-NLS-1$
+			pm.beginTask("", 7); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkFinalFields(new SubProgressMonitor(pm, 1)));
 			result.merge(checkAccesses(new SubProgressMonitor(pm, 1)));
-			result.merge(MemberCheckUtil.checkMembersInDestinationType(fElementsToPullUp, getTargetClass()));
+			result.merge(MemberCheckUtil.checkMembersInDestinationType(getMembersToBeCreatedInTargetClass(), getTargetClass()));
 			pm.worked(1);
 			result.merge(checkMembersInSubclasses(new SubProgressMonitor(pm, 1)));
 			result.merge(checkIfSkippingOverElements(new SubProgressMonitor(pm, 1)));
-			
+			if (shouldDeclareTargetClassAbstract())
+				result.merge(checkCallsToTargetClassConstructors(new SubProgressMonitor(pm, 1)));
 			if (result.hasFatalError())
 				return result;
 			
@@ -684,13 +708,28 @@ public class PullUpRefactoring extends Refactoring {
 		}	
 	}
 	
+	private RefactoringStatus checkCallsToTargetClassConstructors(IProgressMonitor pm) throws JavaModelException {
+		ASTNode[] refNodes= ConstructorReferenceFinder.getConstructorReferenceNodes(getTargetClass(), fAstManager, pm);
+		RefactoringStatus result= new RefactoringStatus();
+		String pattern= "Class ''{0}'' cannot be made abstract because it gets instantiated";
+		String msg= MessageFormat.format(pattern, new Object[]{createTypeLabel(getTargetClass())});
+		for (int i= 0; i < refNodes.length; i++) {
+			ASTNode node= refNodes[i];
+			if (node instanceof ClassInstanceCreation){
+				Context context= JavaSourceContext.create(fAstManager.getCompilationUnit(node), node);
+				result.addError(msg, context);
+			}
+		}
+		return result;
+	}
+
 	private RefactoringStatus checkIfSkippingOverElements(IProgressMonitor pm) throws JavaModelException {
 		try{
 			Set skippedSuperclassSet= getSkippedSuperclasses();
 			IType[] skippedSuperclasses= (IType[]) skippedSuperclassSet.toArray(new IType[skippedSuperclassSet.size()]);
 			RefactoringStatus result= new RefactoringStatus();
-			for (int i= 0; i < fElementsToPullUp.length; i++) {
-				IMember element= fElementsToPullUp[i];
+			for (int i= 0; i < fMembersToPullUp.length; i++) {
+				IMember element= fMembersToPullUp[i];
 				for (int j= 0; j < skippedSuperclasses.length; j++) {
 					IType type= skippedSuperclasses[j];
 					result.merge(checkIfDeclaredIn(element, type));
@@ -715,7 +754,7 @@ public class PullUpRefactoring extends Refactoring {
 		if (! fieldInType.exists())
 			return null;
 		String pattern= "Field ''{0}'' is declared in class ''{1}''. Pulling it up may result in changed program semantics.";
-		String msg= MessageFormat.format(pattern, new Object[]{createFieldLabel(fieldInType), JavaModelUtil.getFullyQualifiedName(type)});
+		String msg= MessageFormat.format(pattern, new Object[]{createFieldLabel(fieldInType), createTypeLabel(type)});
 		Context context= JavaSourceContext.create(fieldInType);
 		return RefactoringStatus.createWarningStatus(msg, context);
 	}
@@ -744,8 +783,8 @@ public class PullUpRefactoring extends Refactoring {
 
 	private RefactoringStatus checkAllElements() throws JavaModelException {
 		//just 1 error message
-		for (int i = 0; i < fElementsToPullUp.length; i++) {
-			RefactoringStatus status= checkElement(fElementsToPullUp[i]);
+		for (int i = 0; i < fMembersToPullUp.length; i++) {
+			RefactoringStatus status= checkElement(fMembersToPullUp[i]);
 			if (status != null)
 				return status;
 		}
@@ -773,24 +812,14 @@ public class PullUpRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_static_elements")); //$NON-NLS-1$
 			
 		if (member.getElementType() == IJavaElement.METHOD){
-			RefactoringStatus substatus= checkMethod((IMethod)member);
-			if (substatus != null && ! substatus.isOK())
-				return substatus;	
+			IMethod method= (IMethod) member;
+			if (method.isConstructor())
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_constructors"));			 //$NON-NLS-1$
+			
+			if (JdtFlags.isNative(method)) //for now - move to input preconditions
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_native_methods"));				 //$NON-NLS-1$
 		}
 		
-		return null;	
-	}
-	
-	private static RefactoringStatus checkMethod(IMethod method) throws JavaModelException {
-		if (method.isConstructor())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_constructors"));			 //$NON-NLS-1$
-			
-		if (JdtFlags.isAbstract(method))
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_abstract_methods")); //$NON-NLS-1$
-			
- 		if (JdtFlags.isNative(method)) //for now - move to input preconditions
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.no_native_methods"));				 //$NON-NLS-1$
-
 		return null;	
 	}
 	
@@ -820,9 +849,9 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	private boolean haveCommonDeclaringType(){
-		IType declaringType= fElementsToPullUp[0].getDeclaringType(); //index safe - checked in constructor
-		for (int i= 0; i < fElementsToPullUp.length; i++) {
-			if (! declaringType.equals(fElementsToPullUp[i].getDeclaringType()))
+		IType declaringType= fMembersToPullUp[0].getDeclaringType(); //index safe - checked in constructor
+		for (int i= 0; i < fMembersToPullUp.length; i++) {
+			if (! declaringType.equals(fMembersToPullUp[i].getDeclaringType()))
 				return false;			
 		}	
 		return true;
@@ -830,10 +859,10 @@ public class PullUpRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkFinalFields(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		pm.beginTask("", fElementsToPullUp.length); //$NON-NLS-1$
-		for (int i= 0; i < fElementsToPullUp.length; i++) {
-			if (fElementsToPullUp[i].getElementType() == IJavaElement.FIELD && JdtFlags.isFinal(fElementsToPullUp[i])){
-				Context context= JavaSourceContext.create(fElementsToPullUp[i]);
+		pm.beginTask("", fMembersToPullUp.length); //$NON-NLS-1$
+		for (int i= 0; i < fMembersToPullUp.length; i++) {
+			if (fMembersToPullUp[i].getElementType() == IJavaElement.FIELD && JdtFlags.isFinal(fMembersToPullUp[i])){
+				Context context= JavaSourceContext.create(fMembersToPullUp[i]);
 				result.addWarning(RefactoringCoreMessages.getString("PullUpRefactoring.final_fields"), context); //$NON-NLS-1$
 			}
 			pm.worked(1);
@@ -853,7 +882,7 @@ public class PullUpRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkAccessedTypes(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		IType[] accessedTypes= getTypeReferencedInMovedMembers(pm);
+		IType[] accessedTypes= getTypeReferencedInPulledUpMembers(pm);
 		IType targetClass= getTargetClass();
 		for (int i= 0; i < accessedTypes.length; i++) {
 			IType iType= accessedTypes[i];
@@ -872,9 +901,9 @@ public class PullUpRefactoring extends Refactoring {
 	private RefactoringStatus checkAccessedFields(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		
-		List pulledUpList= Arrays.asList(fElementsToPullUp);
+		List pulledUpList= Arrays.asList(fMembersToPullUp);
 		List deletedList= Arrays.asList(getMembersToDelete(new NullProgressMonitor()));
-		IField[] accessedFields= ReferenceFinderUtil.getFieldsReferencedIn(fElementsToPullUp, pm);
+		IField[] accessedFields= ReferenceFinderUtil.getFieldsReferencedIn(fMembersToPullUp, pm);
 		
 		IType targetClass= getTargetClass();
 		for (int i= 0; i < accessedFields.length; i++) {
@@ -899,16 +928,18 @@ public class PullUpRefactoring extends Refactoring {
 	private RefactoringStatus checkAccessedMethods(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		
-		List pulledUpList= Arrays.asList(fElementsToPullUp);
+		List pulledUpList= Arrays.asList(fMembersToPullUp);
+		List declaredAbstractList= Arrays.asList(fMethodsToDeclareAbstract);
 		List deletedList= Arrays.asList(getMembersToDelete(new NullProgressMonitor()));
-		IMethod[] accessedMethods= ReferenceFinderUtil.getMethodsReferencedIn(fElementsToPullUp, pm);
+		IMethod[] accessedMethods= ReferenceFinderUtil.getMethodsReferencedIn(fMembersToPullUp, pm);
 		
 		IType targetClass= getTargetClass();
 		for (int i= 0; i < accessedMethods.length; i++) {
 			IMethod method= accessedMethods[i];
 			if (! method.exists())
 				continue;
-			if (! canBeAccessedFrom(method, targetClass) && ! pulledUpList.contains(method) && ! deletedList.contains(method)){
+			boolean isNotAccessible= ! canBeAccessedFrom(method, targetClass) && ! pulledUpList.contains(method) && ! deletedList.contains(method) && ! declaredAbstractList.contains(method);
+			if (isNotAccessible){
 				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.method_not_accessible", //$NON-NLS-1$
 					new String[]{createMethodLabel(method), createTypeLabel(targetClass)});
 				result.addError(message, JavaSourceContext.create(method));
@@ -989,15 +1020,18 @@ public class PullUpRefactoring extends Refactoring {
 	}
 
 	private void checkMethodReturnTypes(IProgressMonitor pm, RefactoringStatus result, Set notDeletedMembers) throws JavaModelException {
-		Map mapping= getMatchingMemberMatching(pm);
-		for (int i= 0; i < fElementsToPullUp.length; i++) {
-			if (fElementsToPullUp[i].getElementType() != IJavaElement.METHOD)
+		Map mapping= getMatchingMemberMatching(pm, true);
+		IMember[] members= getMembersToBeCreatedInTargetClass();
+		for (int i= 0; i < members.length; i++) {
+			if (members[i].getElementType() != IJavaElement.METHOD)
 				continue;
-			IMethod method= (IMethod)fElementsToPullUp[i];
+			IMethod method= (IMethod)members[i];
 			String returnType= getReturnTypeName(method);
 			Assert.isTrue(mapping.containsKey(method));
 			for (Iterator iter= ((Set)mapping.get(method)).iterator(); iter.hasNext();) {
 				IMethod matchingMethod= (IMethod) iter.next();
+				if (method.equals(matchingMethod))
+					continue;
 				if (!notDeletedMembers.contains(matchingMethod))
 					continue;
 				if (returnType.equals(getReturnTypeName(matchingMethod)))
@@ -1009,18 +1043,21 @@ public class PullUpRefactoring extends Refactoring {
 				result.addError(message, context);	
 			}
 		}
+
 	}
 
 	private void checkFieldTypes(IProgressMonitor pm, RefactoringStatus result) throws JavaModelException {
-		Map mapping= getMatchingMemberMatching(pm);
-		for (int i= 0; i < fElementsToPullUp.length; i++) {
-			if (fElementsToPullUp[i].getElementType() != IJavaElement.FIELD)
+		Map mapping= getMatchingMemberMatching(pm, true);
+		for (int i= 0; i < fMembersToPullUp.length; i++) {
+			if (fMembersToPullUp[i].getElementType() != IJavaElement.FIELD)
 				continue;
-			IField field= (IField)fElementsToPullUp[i];
+			IField field= (IField)fMembersToPullUp[i];
 			String type= getTypeName(field);
 			Assert.isTrue(mapping.containsKey(field));
 			for (Iterator iter= ((Set)mapping.get(field)).iterator(); iter.hasNext();) {
 				IField matchingField= (IField) iter.next();
+				if (field.equals(matchingField))
+					continue;
 				if (type.equals(getTypeName(matchingField)))
 					continue;
 				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.different_field_type", //$NON-NLS-1$
@@ -1031,15 +1068,16 @@ public class PullUpRefactoring extends Refactoring {
 		}
 	}
 
-	private Map getMatchingMemberMatching(IProgressMonitor pm) throws JavaModelException {
-		return getMatchingMembersMappingFromTypeAndAllSubtypes(getTypeHierarchyOfTargetClass(pm), getTargetClass());
+	private Map getMatchingMemberMatching(IProgressMonitor pm, boolean includeMethodsToDeclareAbstract) throws JavaModelException {
+		return getMatchingMembersMappingFromTypeAndAllSubtypes(getTypeHierarchyOfTargetClass(pm), getTargetClass(), includeMethodsToDeclareAbstract);
 	}
 
 	private void checkAccessModifiers(RefactoringStatus result, Set notDeletedMembers) throws JavaModelException {
+		List toDeclareAbstract= Arrays.asList(fMethodsToDeclareAbstract);
 		for (Iterator iter= notDeletedMembers.iterator(); iter.hasNext();) {
 			IMember member= (IMember) iter.next();
 			
-			if (member.getElementType() == IJavaElement.METHOD)
+			if (member.getElementType() == IJavaElement.METHOD && ! toDeclareAbstract.contains(member))
 				checkMethodAccessModifiers(result, ((IMethod) member));
 		}
 	}
@@ -1069,7 +1107,7 @@ public class PullUpRefactoring extends Refactoring {
 
 	private Set getNotDeletedMembers() throws JavaModelException {
 		Set matchingSet= new HashSet();
-		matchingSet.addAll(Arrays.asList(getMatchingElements(new NullProgressMonitor())));
+		matchingSet.addAll(Arrays.asList(getMatchingElements(new NullProgressMonitor(), true)));
 		matchingSet.removeAll(Arrays.asList(getMembersToDelete(new NullProgressMonitor())));
 		return matchingSet;
 	}
@@ -1083,7 +1121,7 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	private static boolean isVisibilityLowerThanProtected(IMember member)throws JavaModelException {
-		return ! (JdtFlags.isPublic(member) || JdtFlags.isProtected(member));
+		return ! JdtFlags.isPublic(member) && ! JdtFlags.isProtected(member);
 	}
 	
 	//--- change creation
@@ -1101,13 +1139,27 @@ public class PullUpRefactoring extends Refactoring {
 
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
 		try{
-			pm.beginTask(RefactoringCoreMessages.getString("PullUpRefactoring.preview"), 2); //$NON-NLS-1$
-			copyMembers(new SubProgressMonitor(pm, 1));
-			if (needsAddingImports())
-				addImports(new SubProgressMonitor(pm, 1));
+			pm.beginTask(RefactoringCoreMessages.getString("PullUpRefactoring.preview"), 3); //$NON-NLS-1$
+
+			copyMembersToTargetClass(new SubProgressMonitor(pm, 1));
+
+			if (needsAddingImportsToTargetCu())
+				addImportsToTargetCu(new SubProgressMonitor(pm, 1));
 			else	
 				pm.worked(1);
+
 			deleteMembers();
+	
+			if (shouldDeclareTargetClassAbstract())
+				declareTargetTypeAbstract();
+	
+			if (shouldAddMethodStubsToConcreteSubclassesOfTargetClass())
+				addMethodStubsToNonAbstractSubclassesOfTargetClass(new SubProgressMonitor(pm, 1));
+			else	
+				pm.worked(1);
+	
+			createAbstractMethodsInTargetClass();
+			increaseVisibilityOfMethodsDeclaredAbstract();
 
 			TextChangeManager manager= new TextChangeManager();
 			fillWithRewriteEdits(manager);
@@ -1117,13 +1169,227 @@ public class PullUpRefactoring extends Refactoring {
 		}
 	}
 	
-	private void copyMembers(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", fElementsToPullUp.length);
-		for (int i = fElementsToPullUp.length - 1; i >= 0; i--) { //backwards - to preserve method order
-			if (fElementsToPullUp[i] instanceof IField)
-				copyField((IField)fElementsToPullUp[i], new SubProgressMonitor(pm, 1));
-			else if (fElementsToPullUp[i] instanceof IMethod)
-				copyMethod((IMethod)fElementsToPullUp[i], new SubProgressMonitor(pm, 1));
+	private void increaseVisibilityOfMethodsDeclaredAbstract() throws JavaModelException {
+		ASTRewrite rewrite= fRewriteManager.getRewrite(getDeclaringCu());
+		AST ast= getAST(rewrite);
+		for (int i= 0; i < fMethodsToDeclareAbstract.length; i++) {
+			IMethod method= fMethodsToDeclareAbstract[i];
+			if (! needsToChangeVisibility(method))
+				continue;
+			MethodDeclaration methodDeclaration= getMethodDeclarationNode(method);
+			MethodDeclaration newMethod= ast.newMethodDeclaration();
+			newMethod.setExtraDimensions(methodDeclaration.getExtraDimensions());
+			newMethod.setConstructor(methodDeclaration.isConstructor());
+			newMethod.setModifiers(getModifiersWithUpdatedVisibility(method, methodDeclaration.getModifiers()));
+			rewrite.markAsModified(methodDeclaration, newMethod);
+		}
+	}
+
+	private void createAbstractMethodsInTargetClass() throws JavaModelException {
+		TypeDeclaration targetClass= getTypeDeclarationNode(getTargetClass());
+		ASTRewrite rewrite= getRewriteFor(targetClass);
+		for (int i= 0; i < fMethodsToDeclareAbstract.length; i++) {
+			IMethod method= fMethodsToDeclareAbstract[i];
+			createAbstractMethodInTargetClass(method, rewrite, targetClass);
+		}
+	}
+	
+	private void createAbstractMethodInTargetClass(IMethod method, ASTRewrite rewrite, TypeDeclaration targetClass) throws JavaModelException {
+		MethodDeclaration methodDeclaration= getMethodDeclarationNode(method);
+		AST ast= getAST(rewrite);
+		MethodDeclaration newMethod= ast.newMethodDeclaration();
+		newMethod.setBody(null);
+		newMethod.setConstructor(false);
+		newMethod.setExtraDimensions(methodDeclaration.getExtraDimensions());
+		newMethod.setJavadoc(null);
+		newMethod.setModifiers(createModifiersForAbstractDeclaration(method));
+		newMethod.setName(ast.newSimpleName(methodDeclaration.getName().getIdentifier()));
+		copyReturnType(rewrite, methodDeclaration, newMethod);		
+		copyParameters(rewrite, methodDeclaration, newMethod);
+		copyThrownExceptions(methodDeclaration, newMethod);
+		targetClass.bodyDeclarations().add(newMethod);
+		rewrite.markAsInserted(newMethod);
+	}
+
+	private int createModifiersForAbstractDeclaration(IMethod method) throws JavaModelException {
+		MethodDeclaration methodDeclaration= getMethodDeclarationNode(method);
+		int modifiers= Modifier.ABSTRACT | clearFlag(Modifier.NATIVE, clearFlag(Modifier.FINAL, methodDeclaration.getModifiers()));
+		return getModifiersWithUpdatedVisibility(method, modifiers);
+	}
+	
+	private int getModifiersWithUpdatedVisibility(IMember member, int modifiers) throws JavaModelException{
+		if (needsToChangeVisibility(member))
+			return clearAccessModifiers(modifiers) | Modifier.PROTECTED;
+		else
+			return modifiers;	
+	}
+	
+	private void addMethodStubsToNonAbstractSubclassesOfTargetClass(IProgressMonitor pm) throws JavaModelException {
+		IType[] concreteSubclasses= getNonAbstractSubclassesOfTargetClass(pm);
+		IType declaringType= getDeclaringType();
+		IMethod[] methods= getAbstractMethodsAddedToTargetClass();
+		IType[] typesToImport= getTypesReferencedInDeclarations(methods);
+		for (int i= 0; i < concreteSubclasses.length; i++) {
+			IType clazz= concreteSubclasses[i];
+			if (clazz.equals(declaringType))
+				continue;
+			boolean anyStubAdded= false;
+			for (int j= 0; j < methods.length; j++) {
+				IMethod method= methods[j];
+				if (null == JavaModelUtil.findMethod(method.getElementName(), method.getParameterTypes(), method.isConstructor(), clazz)){
+					addStub(clazz, method);
+					anyStubAdded= true;
+				}
+			}
+			if (anyStubAdded)
+				addImports(typesToImport, WorkingCopyUtil.getWorkingCopyIfExists(clazz.getCompilationUnit()));
+		}
+	}
+
+	private void addStub(IType type, IMethod method) throws JavaModelException {
+		TypeDeclaration typeDeclaration= getTypeDeclarationNode(type);
+		MethodDeclaration methodDeclaration= getMethodDeclarationNode(method);
+		ASTRewrite rewrite= getRewriteFor(typeDeclaration);
+		AST ast= getAST(rewrite);
+		MethodDeclaration newMethod= ast.newMethodDeclaration();
+		newMethod.setBody(getMethodStubBody(methodDeclaration, ast));
+		newMethod.setConstructor(false);
+		newMethod.setExtraDimensions(methodDeclaration.getExtraDimensions());
+		newMethod.setJavadoc(createJavadocForStub(method, rewrite));
+		newMethod.setModifiers(createModifiersForMethodStubs(method));
+		newMethod.setName(ast.newSimpleName(methodDeclaration.getName().getIdentifier()));
+		copyReturnType(rewrite, methodDeclaration, newMethod);		
+		copyParameters(rewrite, methodDeclaration, newMethod);
+		copyThrownExceptions(methodDeclaration, newMethod);
+		typeDeclaration.bodyDeclarations().add(newMethod);
+		rewrite.markAsInserted(newMethod);
+	}
+
+	private Block getMethodStubBody(MethodDeclaration method, AST ast) {
+		Block body= ast.newBlock();
+		Type returnType= method.getReturnType();
+		ITypeBinding typeBinding= returnType.resolveBinding();
+		if (typeBinding == null)
+			return body;
+		Type returnTypeInOurAST= ASTResolving.getTypeFromTypeBinding(ast, typeBinding);
+		//cannot pass return type here - because it's from another ast
+		Expression expression= ASTResolving.getInitExpression(returnTypeInOurAST, method.getExtraDimensions());
+		if (expression != null) {
+			ReturnStatement returnStatement= ast.newReturnStatement();
+			returnStatement.setExpression(expression);
+			body.statements().add(returnStatement);
+		}
+		return body;
+	}
+
+	private Javadoc createJavadocForStub(IMethod method, ASTRewrite rewrite) throws JavaModelException {
+		if (! fPreferenceSettings.createComments)
+			return null;
+		MethodDeclaration methodDeclaration= getMethodDeclarationNode(method);
+		IMethodBinding binding= methodDeclaration.resolveBinding();
+		if (binding == null)
+			return null;
+		ITypeBinding[] params= binding.getParameterTypes();	
+		String fullTypeName= JavaModelUtil.getFullyQualifiedName(getTargetClass());
+		String[] fullParamNames= new String[params.length];
+		for (int i= 0; i < fullParamNames.length; i++) {
+			fullParamNames[i]= Bindings.getFullyQualifiedName(params[i]);
+		}
+		StringBuffer buf= new StringBuffer();
+		StubUtility.genJavaDocSeeTag(fullTypeName, binding.getName(), fullParamNames, fPreferenceSettings.createNonJavadocComments, binding.isDeprecated(), buf);
+		String comment= buf.toString();
+		Javadoc javadoc;
+		if (fPreferenceSettings.createNonJavadocComments) {
+			javadoc= (Javadoc) rewrite.createPlaceholder(comment, ASTRewrite.JAVADOC);
+		} else {
+			javadoc= getAST(rewrite).newJavadoc();
+			javadoc.setComment(comment);
+		}
+		return javadoc;
+	}
+
+	private int createModifiersForMethodStubs(IMethod method) throws JavaModelException {
+		MethodDeclaration methodDeclaration= getMethodDeclarationNode(method);
+		int modifiers= clearFlag(Modifier.NATIVE, clearFlag(Modifier.ABSTRACT, methodDeclaration.getModifiers()));
+		return getModifiersWithUpdatedVisibility(method, modifiers);
+	}
+
+	private IType[] getNonAbstractSubclassesOfTargetClass(IProgressMonitor pm) throws JavaModelException {
+		ITypeHierarchy hierarchy= getTypeHierarchyOfTargetClass(pm);
+		Set nonAbstractSubclasses= getNonAbstractSubclasses(hierarchy, getTargetClass());
+		return (IType[]) nonAbstractSubclasses.toArray(new IType[nonAbstractSubclasses.size()]);
+	}
+
+	//Set of IType
+	private static Set getNonAbstractSubclasses(ITypeHierarchy hierarchy, IType clazz) throws JavaModelException {
+		IType[] subclasses= hierarchy.getSubclasses(clazz);
+		Set result= new HashSet();
+		for (int i= 0; i < subclasses.length; i++) {
+			IType subclass= subclasses[i];
+			if (JdtFlags.isAbstract(subclass))
+				result.addAll(getNonAbstractSubclasses(hierarchy, subclass));
+			else
+				result.add(subclass);	
+		}
+		return result;
+	}
+
+	private boolean shouldAddMethodStubsToConcreteSubclassesOfTargetClass() throws JavaModelException {
+		return fCreateMethodStubs && (getAbstractMethodsAddedToTargetClass().length > 0);
+	}
+
+	private void declareTargetTypeAbstract() throws JavaModelException {
+		TypeDeclaration targetClass= getTypeDeclarationNode(getTargetClass());
+		TypeDeclaration modifiedNode= targetClass.getAST().newTypeDeclaration();
+		modifiedNode.setInterface(targetClass.isInterface());
+		modifiedNode.setModifiers(targetClass.getModifiers() | Modifier.ABSTRACT);
+		ASTRewrite rewrite= getRewriteFor(getTypeDeclarationNode(getTargetClass()));
+		rewrite.markAsModified(targetClass, modifiedNode);
+	}
+	
+	private ASTRewrite getRewriteFor(TypeDeclaration clazz) {
+		return fRewriteManager.getRewrite(ASTNodeMappingManager.getCompilationUnitNode(clazz));
+	}
+
+	private boolean shouldDeclareTargetClassAbstract() throws JavaModelException {
+		if (JdtFlags.isAbstract(getTargetClass()))
+			return false;
+		return getAbstractMethodsAddedToTargetClass().length > 0;	
+	}
+	
+	private IMember[] getMembersToBeCreatedInTargetClass(){
+		List result= new ArrayList(fMembersToPullUp.length + fMethodsToDeclareAbstract.length);
+		result.addAll(Arrays.asList(fMembersToPullUp));
+		result.addAll(Arrays.asList(fMethodsToDeclareAbstract));
+		return (IMember[]) result.toArray(new IMember[result.size()]);
+	}
+	
+	private IMethod[] getAbstractMethodsAddedToTargetClass() throws JavaModelException{
+		IMethod[] toDeclareAbstract= fMethodsToDeclareAbstract;
+		IMethod[] abstractPulledUp= getAbstractMethodsToPullUp();
+		List result= new ArrayList(toDeclareAbstract.length + abstractPulledUp.length);
+		result.addAll(Arrays.asList(toDeclareAbstract));
+		result.addAll(Arrays.asList(abstractPulledUp));
+		return (IMethod[]) result.toArray(new IMethod[result.size()]);
+	}
+
+	private IMethod[] getAbstractMethodsToPullUp() throws JavaModelException {
+		List result= new ArrayList(fMembersToPullUp.length);
+		for (int i= 0; i < fMembersToPullUp.length; i++) {
+			IMember member= fMembersToPullUp[i];
+			if (member instanceof IMethod && JdtFlags.isAbstract(member))
+				result.add(member);
+		}
+		return (IMethod[]) result.toArray(new IMethod[result.size()]);
+	}
+
+	private void copyMembersToTargetClass(IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", fMembersToPullUp.length);
+		for (int i = fMembersToPullUp.length - 1; i >= 0; i--) { //backwards - to preserve method order
+			if (fMembersToPullUp[i] instanceof IField)
+				copyFieldToTargetClass((IField)fMembersToPullUp[i], new SubProgressMonitor(pm, 1));
+			else if (fMembersToPullUp[i] instanceof IMethod)
+				copyMethodToTargetClass((IMethod)fMembersToPullUp[i], new SubProgressMonitor(pm, 1));
 		}
 		pm.done();
 	}
@@ -1133,7 +1399,7 @@ public class PullUpRefactoring extends Refactoring {
 		return declaringType.newSupertypeHierarchy(pm).getSuperclass(declaringType);
 	}
 
-	private void copyMethod(IMethod method, IProgressMonitor pm) throws JavaModelException {
+	private void copyMethodToTargetClass(IMethod method, IProgressMonitor pm) throws JavaModelException {
 		ASTRewrite targetRewrite= fRewriteManager.getRewrite(getTargetCu());
 		TypeDeclaration targetClass= getTypeDeclarationNode(getTargetClass());
 		MethodDeclaration newMethod= createNewMethodDeclarationNode(method, targetRewrite, pm);
@@ -1145,23 +1411,23 @@ public class PullUpRefactoring extends Refactoring {
 		MethodDeclaration oldMethod= getMethodDeclarationNode(method);
 		AST ast= getAST(targetRewrite);
 		MethodDeclaration newMethod= ast.newMethodDeclaration();
-		copyBody(targetRewrite, method, oldMethod, newMethod, pm);
+		copyBodyOfPulledUpMethod(targetRewrite, method, oldMethod, newMethod, pm);
 		newMethod.setConstructor(oldMethod.isConstructor());
 		newMethod.setExtraDimensions(oldMethod.getExtraDimensions());
 		copyJavadocNode(ast, oldMethod, newMethod);
 		newMethod.setModifiers(getNewModifiers(method));
 		newMethod.setName(ast.newSimpleName(oldMethod.getName().getIdentifier()));
-		copyReturnType(targetRewrite, method, oldMethod, newMethod);
-		copyParameters(targetRewrite, method, oldMethod, newMethod);
-		copyThrownExceptions(ast, oldMethod, newMethod);
+		copyReturnType(targetRewrite, oldMethod, newMethod);
+		copyParameters(targetRewrite, oldMethod, newMethod);
+		copyThrownExceptions(oldMethod, newMethod);
 		return newMethod;
 	}
 
-	private void copyBody(ASTRewrite targetRewrite, IMethod method, MethodDeclaration oldMethod, MethodDeclaration newMethod, IProgressMonitor pm) throws JavaModelException {
+	private void copyBodyOfPulledUpMethod(ASTRewrite targetRewrite, IMethod method, MethodDeclaration oldMethod, MethodDeclaration newMethod, IProgressMonitor pm) throws JavaModelException {
 		if (oldMethod.getBody() == null)
 			return;
 		Block oldBody= oldMethod.getBody();
-		ISourceRange[] superRefOffsert= SourceRange.reverseSortByOffset(SuperReferenceFinder.findSuperReferenceRanges(method, getSuperclassOfDeclaringClass(pm)));
+		ISourceRange[] superRefOffsert= SourceRange.reverseSortByOffset(findSuperReferenceRanges(method, getSuperclassOfDeclaringClass(pm)));
 		
 		String oldBodySource= getBufferText(oldBody);
 		StringBuffer newBodyCodeBuff= new StringBuffer(oldBodySource);
@@ -1178,8 +1444,15 @@ public class PullUpRefactoring extends Refactoring {
 		Block newBody= (Block)targetRewrite.createPlaceholder(newBodySource, ASTRewrite.BLOCK);
 		newMethod.setBody(newBody);
 	}
+	private static ISourceRange[] findSuperReferenceRanges(IMethod method, IType superType) throws JavaModelException{
+		Assert.isNotNull(method);
+		SuperReferenceFinderVisitor visitor= new SuperReferenceFinderVisitor(method, superType);
+		AST.parseCompilationUnit(method.getCompilationUnit(), true).accept(visitor);
+		return visitor.getSuperReferenceRanges();
+	}
 	
-	private void copyThrownExceptions(AST ast, MethodDeclaration oldMethod, MethodDeclaration newMethod) {
+	private void copyThrownExceptions(MethodDeclaration oldMethod, MethodDeclaration newMethod) {
+		AST ast= newMethod.getAST();
 		for (int i= 0, n= oldMethod.thrownExceptions().size(); i < n; i++) {
 			Name oldException= (Name)oldMethod.thrownExceptions().get(i);
 			if (oldException.isSimpleName()){
@@ -1193,7 +1466,7 @@ public class PullUpRefactoring extends Refactoring {
 		}
 	}
 	
-	private void copyParameters(ASTRewrite targetRewrite, IMethod method, MethodDeclaration oldMethod, MethodDeclaration newMethod) throws JavaModelException {
+	private void copyParameters(ASTRewrite targetRewrite, MethodDeclaration oldMethod, MethodDeclaration newMethod) throws JavaModelException {
 		for (int i= 0, n= oldMethod.parameters().size(); i < n; i++) {
 			SingleVariableDeclaration oldParam= (SingleVariableDeclaration)oldMethod.parameters().get(i);
 			SingleVariableDeclaration newParam= createPlaceholderForSingleVariableDeclaration(oldParam, targetRewrite);
@@ -1201,7 +1474,7 @@ public class PullUpRefactoring extends Refactoring {
 		}
 	}
 	
-	private void copyReturnType(ASTRewrite targetRewrite, IMethod method, MethodDeclaration oldMethod, MethodDeclaration newMethod) throws JavaModelException {
+	private void copyReturnType(ASTRewrite targetRewrite, MethodDeclaration oldMethod, MethodDeclaration newMethod) throws JavaModelException {
 		Type newReturnType= createPlaceholderForType(oldMethod.getReturnType(), targetRewrite);
 		newMethod.setReturnType(newReturnType);
 	}
@@ -1231,7 +1504,7 @@ public class PullUpRefactoring extends Refactoring {
 		}
 	}
 	
-	private void copyField(IField field, IProgressMonitor pm) throws JavaModelException {
+	private void copyFieldToTargetClass(IField field, IProgressMonitor pm) throws JavaModelException {
 		ASTRewrite rewrite= fRewriteManager.getRewrite(getTargetCu());
 		TypeDeclaration targetClass= getTypeDeclarationNode(getTargetClass());
 		FieldDeclaration newField= createNewFieldDeclarationNode(field, rewrite);
@@ -1264,10 +1537,7 @@ public class PullUpRefactoring extends Refactoring {
 	}
 
 	private int getNewModifiers(IMember member) throws JavaModelException {
-		if (needsToChangeVisibility(member))
-			return clearAccessModifiers(getModifiers(member)) | Modifier.PROTECTED;
-		else
-			return getModifiers(member);
+		return getModifiersWithUpdatedVisibility(member, getModifiers(member));
 	}
 	
 	private int getModifiers(IMember member) throws JavaModelException{
@@ -1280,20 +1550,21 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	private static int clearAccessModifiers(int flags) {
-		return clearFlag(clearFlag(clearFlag(flags, Modifier.PRIVATE), Modifier.PUBLIC), Modifier.PROTECTED);
+		return clearFlag(Modifier.PROTECTED, clearFlag(Modifier.PUBLIC, clearFlag(Modifier.PRIVATE, flags)));
 	}
 	
-	private static int clearFlag(int flags, int flag){
+	private static int clearFlag(int flag, int flags){
 		return flags & ~ flag;
 	}
 
-	private void addImports(IProgressMonitor pm) throws CoreException {
-		IType[] referencedTypes= getTypeReferencedInMovedMembers(pm);
-		ICompilationUnit cu= getTargetWorkingCopy();		
-		for (int i= 0; i < referencedTypes.length; i++) {
-			fImportEditManager.addImportTo(referencedTypes[i], cu);
+	private void addImportsToTargetCu(IProgressMonitor pm) throws CoreException {
+		addImports(getTypesThatNeedToBeImportedInTargetCu(pm), getTargetWorkingCopy());
+	}
+
+	private void addImports(IType[] typesToImport, ICompilationUnit cu) throws JavaModelException {
+		for (int i= 0; i < typesToImport.length; i++) {
+			fImportEditManager.addImportTo(typesToImport[i], cu);
 		}
-		pm.done();
 	}
 
 	private void deleteMembers() throws JavaModelException {
@@ -1338,7 +1609,7 @@ public class PullUpRefactoring extends Refactoring {
 		return WorkingCopyUtil.getWorkingCopyIfExists(member.getCompilationUnit());
 	}
 	
-	private boolean needsAddingImports() throws JavaModelException {
+	private boolean needsAddingImportsToTargetCu() throws JavaModelException {
 		return ! getTargetCu().equals(getDeclaringCu());
 	}
 	
@@ -1354,12 +1625,38 @@ public class PullUpRefactoring extends Refactoring {
 		return getTargetClass().getCompilationUnit();
 	}
 	
-	private IType[] getTypeReferencedInMovedMembers(IProgressMonitor pm) throws JavaModelException {
+	private IType[] getTypesThatNeedToBeImportedInTargetCu(IProgressMonitor pm) throws JavaModelException {
+		IType[] typesInPulledUpMembers= getTypeReferencedInPulledUpMembers(pm);
+		IType[] typesInMethodsDeclaredAbstract= getTypesReferencedInDeclarations(fMethodsToDeclareAbstract);
+		List result= new ArrayList(typesInMethodsDeclaredAbstract.length + typesInPulledUpMembers.length);
+		result.addAll(Arrays.asList(typesInMethodsDeclaredAbstract));
+		result.addAll(Arrays.asList(typesInPulledUpMembers));
+		return (IType[]) result.toArray(new IType[result.size()]);
+	}
+	
+	private IType[] getTypeReferencedInPulledUpMembers(IProgressMonitor pm) throws JavaModelException {
 		if (fTypesReferencedInMovedMembers == null)
-			fTypesReferencedInMovedMembers= ReferenceFinderUtil.getTypesReferencedIn(fElementsToPullUp, pm);
+			fTypesReferencedInMovedMembers= ReferenceFinderUtil.getTypesReferencedIn(fMembersToPullUp, pm);
 		return fTypesReferencedInMovedMembers;
 	}
-
+	
+	private IType[] getTypesReferencedInDeclarations(IMethod[] methods) throws JavaModelException{
+		ITypeBinding[] referencedTypesBindings= ReferenceFinderUtil.getTypesReferencedInDeclarations(methods, fAstManager);
+		List types= new ArrayList(referencedTypesBindings.length);
+		IJavaProject proj= getDeclaringType().getJavaProject();
+		for (int i= 0; i < referencedTypesBindings.length; i++) {
+			ITypeBinding typeBinding= referencedTypesBindings[i];
+			if (typeBinding == null)
+				continue;
+			if (typeBinding.isArray())
+				typeBinding= typeBinding.getElementType();
+			IType type= Binding2JavaModel.find(typeBinding, proj);
+			if (type != null)
+				types.add(type);
+		}
+		return (IType[]) types.toArray(new IType[types.size()]);
+	}
+	
 	private static AST getAST(ASTRewrite rewrite){
 		return rewrite.getRootNode().getAST();
 	}

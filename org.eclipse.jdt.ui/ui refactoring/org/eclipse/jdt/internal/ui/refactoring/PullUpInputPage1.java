@@ -10,26 +10,42 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ComboBoxCellEditor;
+import org.eclipse.jface.viewers.ICellModifier;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableLayout;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -38,21 +54,226 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
-public class PullUpInputPage1 extends UserInputWizardPage {
+class PullUpInputPage1 extends UserInputWizardPage {
+	
+	private static final int ROW_COUNT = 10;
+	private static class MemberActionInfoContentProvider implements IStructuredContentProvider {
+		public void dispose() {
+		}
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		}
+		public Object[] getElements(Object inputElement) {
+			return (Object[])inputElement;
+		}
+	}
+
+	private class PullUpCellModifier implements ICellModifier {
+		public Object getValue(Object element, String property) {
+			if (ACTION.equals(property)) {
+				MemberActionInfo mac= (MemberActionInfo)element;
+				return new Integer(mac.getAction());
+			}
+			return null;
+		}
+		public boolean canModify(Object element, String property) {
+			return ACTION.equals(property);
+		}
+		public void modify(Object element, String property, Object value) {
+			if (ACTION.equals(property)) {
+				int intValue= ((Integer)value).intValue();
+				MemberActionInfo mac= (MemberActionInfo)((Item)element).getData();
+				mac.setAction(intValue);
+				updateUIElements(null);
+			}
+		}
+	}
+
+	private static class EditMembersDialog extends Dialog{
+				
+		private String[] fAllowedStrings;
+		private int fSelection= -1;
+
+		public EditMembersDialog(Shell parentShell) {
+			super(parentShell);
+		}
+
+		int getSelection(){
+			return fSelection;
+		}
+		
+		protected Control createDialogArea(Composite parent) {
+			getShell().setText("Edit members");
+			
+			Composite composite = (Composite)super.createDialogArea(parent);
+			Composite innerComposite = new Composite(composite, SWT.NONE);
+			innerComposite.setLayoutData(new GridData());
+			GridLayout gl= new GridLayout();
+			gl.numColumns= 2;
+			innerComposite.setLayout(gl);
+			
+			Label label= new Label(innerComposite, SWT.NONE);
+			label.setText("&Mark selected member(s) as:");
+			label.setLayoutData(new GridData());
+
+			final Combo combo= new Combo(innerComposite, SWT.READ_ONLY);
+			for (int i = 0; i < fAllowedStrings.length; i++) {
+				combo.add(fAllowedStrings[i]);
+			}
+			combo.select(0);
+			fSelection= combo.getSelectionIndex();
+			GridData gd= new GridData();
+			gd.widthHint= convertWidthInCharsToPixels(getMaxStringLength());
+			combo.setLayoutData(gd);
+			combo.addSelectionListener(new SelectionAdapter(){
+				public void widgetSelected(SelectionEvent e) {
+					fSelection= combo.getSelectionIndex();
+				}
+			});
+			return composite;
+		}
+		
+		private int getMaxStringLength() {
+			int max= 0;
+			for (int i= 0; i < fAllowedStrings.length; i++) {
+				max= Math.max(max, fAllowedStrings[i].length());
+			}
+			return max;
+		}
+
+		void setAllowedComboChoices(String[] strings){
+			Assert.isTrue(strings.length > 0);
+			fAllowedStrings= strings;
+		}
+	}
+
+	private static class MemberActionInfo {
+		static final int NO_ACTION= 				0;
+		static final int PULL_UP_ACTION= 			1;
+		static final int DECLARE_ABSTRACT_ACTION= 2;
+		private static final String[] ALL_LABELS;     //indices in this array correspond to action numbers
+		private static final String[] LIMITED_LABELS; //indices in this array correspond to action numbers
+		private static final String NONE_LABEL= "none";
+		private static final String PULL_UP_LABEL= "pull up";
+		private static final String DECLARE_ABSTRACT_LABEL= "declare abstract in destination";
+		static{
+			ALL_LABELS= new String[3];
+			ALL_LABELS[NO_ACTION]= NONE_LABEL;
+			ALL_LABELS[PULL_UP_ACTION]= PULL_UP_LABEL;
+			ALL_LABELS[DECLARE_ABSTRACT_ACTION]= DECLARE_ABSTRACT_LABEL;
+
+			LIMITED_LABELS= new String[2];
+			LIMITED_LABELS[NO_ACTION]= NONE_LABEL;
+			LIMITED_LABELS[PULL_UP_ACTION]= PULL_UP_LABEL;
+		}
+				
+		private final IMember fMember;
+		private int fAction;
+		
+		MemberActionInfo(IMember member, int action){
+			Assert.isTrue(member instanceof IMethod || member instanceof IField);
+			Assert.isTrue(action == NO_ACTION || action == DECLARE_ABSTRACT_ACTION || action == PULL_UP_ACTION);
+			fMember= member;
+			fAction= action;
+		}
+		
+		IMember getMember(){
+			return fMember;
+		}
+		
+		int getAction(){
+			return fAction;
+		}
+		
+		void setAction(int action){
+			Assert.isTrue(action == NO_ACTION || action == DECLARE_ABSTRACT_ACTION || action == PULL_UP_ACTION);
+			fAction= action;
+		}
+		
+		String getActionLabel(){
+			if (canDeclareAbstract())
+				return ALL_LABELS[getAction()];
+			else
+				return LIMITED_LABELS[getAction()];
+		}
+
+		boolean canDeclareAbstract() { //XXX kind of bogus to have it here
+			try {
+				if (fMember instanceof IField)
+					return false;
+				else 
+					return ! JdtFlags.isAbstract(fMember);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+				return false;
+			}
+		}
+
+		String[] getAllowedLabels() {
+			if (canDeclareAbstract())
+				return ALL_LABELS;		
+			else
+				return LIMITED_LABELS;
+		}
+	}
+	
+	private static class MemberActionInfoLabelProvider extends LabelProvider implements ITableLabelProvider {
+		private final ILabelProvider fJavaElementLabelProvider= new JavaElementLabelProvider();
+
+		/*
+		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
+		 */
+		public String getColumnText(Object element, int columnIndex) {
+			MemberActionInfo mac= (MemberActionInfo)element;
+			switch (columnIndex) {
+				case MEMBER_COLUMN :
+					return fJavaElementLabelProvider.getText(mac.getMember());
+				case ACTION_COLUMN :
+					return mac.getActionLabel();
+				default :
+					Assert.isTrue(false);
+					return null;
+			}
+		}
+		/* 
+		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
+		 */
+		public Image getColumnImage(Object element, int columnIndex) {
+			MemberActionInfo mac= (MemberActionInfo)element;
+			switch (columnIndex) {
+				case MEMBER_COLUMN :
+					return fJavaElementLabelProvider.getImage(mac.getMember());
+				case ACTION_COLUMN :
+					return null;
+				default :
+					Assert.isTrue(false);
+					return null;
+			}
+		}
+	}
+	
+	private static final int MEMBER_COLUMN= 0;
+	private static final int ACTION_COLUMN= 1;
 	
 	public static final String PAGE_NAME= "PullUpMethodsInputPage1"; //$NON-NLS-1$
-	private static final int ROW_COUNT= 5;
-	private CheckboxTableViewer fTableViewer;
+	private final static String ACTION= "action"; //$NON-NLS-1$	
+	private final static String MEMBER= "member"; //$NON-NLS-1$	
+
+	private TableViewer fTableViewer;
 	private Combo fSuperclassCombo;
 	private IType[] fSuperclasses;
-	
+	private Button fEditButton;
+
+	private Button fCreateStubsButton;
 	public PullUpInputPage1() {
 		super(PAGE_NAME, false);
 		setMessage("Select the members to pull up and the desired new declaring class for them.\n" +							"If you select methods, them press Next to specify which matching methods you wish to delete.");
@@ -66,6 +287,8 @@ public class PullUpInputPage1 extends UserInputWizardPage {
 
 		createSuperTypeCombo(composite);
 		createSpacer(composite);
+		createStubCheckbox(composite);
+		createSpacer(composite);
 		createMemberTableLabel(composite);
 		createMemberTableComposite(composite);
 				
@@ -73,6 +296,16 @@ public class PullUpInputPage1 extends UserInputWizardPage {
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.PULL_UP_WIZARD_PAGE);			
 	}
 	
+	private void createStubCheckbox(Composite parent) {
+		fCreateStubsButton= new Button(parent, SWT.CHECK);
+		fCreateStubsButton.setText("&Create necessary methods stubs in non-abstract subclasses of the destination class");
+		GridData gd= new GridData();
+		gd.horizontalSpan= 2;
+		fCreateStubsButton.setLayoutData(gd);
+		fCreateStubsButton.setEnabled(false);
+		fCreateStubsButton.setSelection(getPullUpRefactoring().getCreateMethodStubs());
+	}
+
 	private void createSpacer(Composite parent) {
 		Label label= new Label(parent, SWT.NONE) ;
 		GridData gd0= new GridData();
@@ -112,19 +345,16 @@ public class PullUpInputPage1 extends UserInputWizardPage {
 		fSuperclasses= getPullUpRefactoring().getPossibleTargetClasses(pm);
 		Assert.isTrue(fSuperclasses.length > 0);
 		for (int i= 0; i < fSuperclasses.length; i++) {
-			fSuperclassCombo.add(createComboLabel(fSuperclasses[i]));
+			String comboLabel= JavaModelUtil.getFullyQualifiedName(fSuperclasses[i]);
+			fSuperclassCombo.add(comboLabel);
 		}
-		fSuperclassCombo.setSelection(new Point(fSuperclasses.length - 1, fSuperclasses.length - 1));
+		fSuperclassCombo.select(fSuperclasses.length - 1);
 		fSuperclassCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	}
-
-	private static String createComboLabel(IType superclass) {
-		return JavaModelUtil.getFullyQualifiedName(superclass);
 	}
 
 	private void createMemberTableComposite(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
-		GridData gd= new GridData(GridData.FILL_BOTH);
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= 2;
 		composite.setLayoutData(gd);
 		GridLayout gl= new GridLayout();
@@ -139,7 +369,7 @@ public class PullUpInputPage1 extends UserInputWizardPage {
 
 	private void createMemberTableLabel(Composite parent) {
 		Label label= new Label(parent, SWT.NONE) ;
-		label.setText("Select &member(s) to pull up:");
+		label.setText("&Specify actions for members:");
 		GridData gd0= new GridData();
 		gd0.horizontalSpan= 2;
 		label.setLayoutData(gd0);
@@ -153,26 +383,92 @@ public class PullUpInputPage1 extends UserInputWizardPage {
 		gl.marginWidth= 0;
 		composite.setLayout(gl);
 		
-		createSelectButton(composite, "Se&lect All", true);
-		createSelectButton(composite, "&Deselect All", false);
-
-		Button button= new Button(composite, SWT.PUSH);
-		button.setText("&Add Required Members");
-		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		SWTUtil.setButtonDimensionHint(button);
-		button.addSelectionListener(new SelectionAdapter(){
+		fEditButton= new Button(composite, SWT.PUSH);
+		fEditButton.setText("&Edit Selected...");
+		fEditButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fEditButton.setEnabled(false);
+		SWTUtil.setButtonDimensionHint(fEditButton);
+		fEditButton.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent event) {
-				PullUpInputPage1.this.checkAdditionalRequiredMembers();
+				PullUpInputPage1.this.editSelectedMembers();
+			}
+		});
+
+		Button addButton= new Button(composite, SWT.PUSH);
+		addButton.setText("&Pull Up Required Members");
+		addButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		SWTUtil.setButtonDimensionHint(addButton);
+		addButton.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent event) {
+				PullUpInputPage1.this.markAdditionalRequiredMembersAsMembersToPullUp();
 			}
 		});
 	}
 
-	private void checkAdditionalRequiredMembers() {
+	private void editSelectedMembers() {
+		ISelection preserved= fTableViewer.getSelection();
+		try{
+			EditMembersDialog dialog= new EditMembersDialog(getShell());
+			dialog.setAllowedComboChoices(getAllowedComboChoicesForSelectedMembers());
+			dialog.setBlockOnOpen(true);
+			if (dialog.open() == Dialog.CANCEL)
+				return;
+			int selection= dialog.getSelection();
+			MemberActionInfo[] selected= getSelectedMemberActionInfos();
+			for (int i = 0; i < selected.length; i++) {
+				MemberActionInfo info = selected[i];
+				info.setAction(selection);
+			}
+		} finally{
+			updateUIElements(preserved);
+		}
+	}
+
+	private void updateUIElements(ISelection preserved) {
+		fTableViewer.refresh();
+		if (preserved != null){
+			fTableViewer.getControl().setFocus();
+			fTableViewer.setSelection(preserved);
+		}
+		checkPageCompletionStatus();
+		updateButtonEnablementState(fTableViewer.getSelection());
+	}
+
+	private String[] getAllowedComboChoicesForSelectedMembers() {
+		if (canAllowAllChoices())
+			return MemberActionInfo.ALL_LABELS;
+		else
+			return MemberActionInfo.LIMITED_LABELS;
+	}
+
+	private boolean canAllowAllChoices() {
+		MemberActionInfo[] selected= getSelectedMemberActionInfos();
+		for (int i = 0; i < selected.length; i++) {
+			if (! selected[i].canDeclareAbstract())
+				return false;
+		}
+		return true;
+	}
+
+	private MemberActionInfo[] getSelectedMemberActionInfos() {
+		ISelection sel= fTableViewer.getSelection();
+		if (! (sel instanceof IStructuredSelection))
+			return new MemberActionInfo[0];
+		IStructuredSelection ss= (IStructuredSelection)sel;
+		Object[] selected= ss.toArray();
+		MemberActionInfo[] result= new MemberActionInfo[selected.length];
+		for (int i = 0; i < selected.length; i++) {
+			result[i]= (MemberActionInfo)selected[i];
+		}
+		return result;
+	}
+
+	private void markAdditionalRequiredMembersAsMembersToPullUp() {
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, new IRunnableWithProgress() {
 				public void run(IProgressMonitor pm) throws InvocationTargetException {
 					try {
-						checkAdditionalRequiredMembers(pm);						
+						markAsMembersToPullUp(getPullUpRefactoring().getRequiredPullableMembers(pm));						
 					} catch (JavaModelException e) {
 						throw new InvocationTargetException(e);
 					} finally {
@@ -187,68 +483,108 @@ public class PullUpInputPage1 extends UserInputWizardPage {
 		}
 	}
 
-	private void checkAdditionalRequiredMembers(IProgressMonitor pm) throws JavaModelException {
-		fTableViewer.setCheckedElements(getPullUpRefactoring().getRequiredPullableMembers(pm));
-	}
-	
-	private void createSelectButton(Composite composite, String label, final boolean select){
-		Button button= new Button(composite, SWT.PUSH);
-		button.setText(label);
-		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		SWTUtil.setButtonDimensionHint(button);
-		button.addSelectionListener(new SelectionAdapter(){
-			public void widgetSelected(SelectionEvent event) {
-				fTableViewer.setAllChecked(select);
-				dissallowIfNothingChecked();
-			}
-		});
-	}
-
 	private void createMemberTable(Composite parent) {
-		final Table table= new Table(parent, SWT.CHECK | SWT.MULTI | SWT.BORDER);
-		table.setHeaderVisible(false);
-		table.setLinesVisible(false);
+		TableLayoutComposite layouter= new TableLayoutComposite(parent, SWT.NONE);
+		layouter.addColumnData(new ColumnWeightData(60, true));
+		layouter.addColumnData(new ColumnWeightData(40, true));
+
+		final Table table= new Table(layouter, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
+		table.setHeaderVisible(true);
+		table.setLinesVisible(true);
 		
-		GridData tableGD= new GridData(GridData.FILL_BOTH);
-		tableGD.heightHint= table.getGridLineWidth() + table.getItemHeight() * ROW_COUNT;
-		tableGD.widthHint= 40;
-		table.setLayoutData(tableGD);
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
+		gd.heightHint= table.getHeaderHeight() + (table.getGridLineWidth() + table.getItemHeight()) * ROW_COUNT;
+		layouter.setLayoutData(gd);
+
+				
+		TableLayout tableLayout= new TableLayout();
+		table.setLayout(tableLayout);
+
+		TableColumn column0= new TableColumn(table, SWT.NONE);		
+		column0.setText("Member");
+
+		TableColumn column1= new TableColumn(table, SWT.NONE);
+		column1.setText("Action");
 		
-		fTableViewer= new CheckboxTableViewer(table);
+		fTableViewer= new TableViewer(table);
 		fTableViewer.setUseHashlookup(true);
-		fTableViewer.setContentProvider(createMemberContentProvider());
-		fTableViewer.setLabelProvider(new JavaElementLabelProvider());
-		
-		fTableViewer.setInput(getPullUpRefactoring().getPullableMembersOfDeclaringType());
-		fTableViewer.setCheckedElements(getPullUpRefactoring().getElementsToPullUp());
-		fTableViewer.addCheckStateListener(new ICheckStateListener(){
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				dissallowIfNothingChecked();
-				markCheckedMembersAsMembersToPullUp();
+		fTableViewer.setContentProvider(new MemberActionInfoContentProvider());
+		fTableViewer.setLabelProvider(new MemberActionInfoLabelProvider());
+		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener(){
+			public void selectionChanged(SelectionChangedEvent event) {
+				updateButtonEnablementState(event.getSelection());
 			}
 		});
+		
+		setTableInput();
+		markAsMembersToPullUp(getPullUpRefactoring().getMembersToPullUp());
+		setupCellEditors(table);
 	}
 
-	private void dissallowIfNothingChecked() {
-		if (fTableViewer.getCheckedElements().length == 0){
-			setErrorMessage("Select member(s) to pull up");
+	private void updateButtonEnablementState(ISelection tableSelection) {
+		if (tableSelection instanceof IStructuredSelection){
+			IStructuredSelection ss= (IStructuredSelection)tableSelection;
+			if (fEditButton != null)
+				fEditButton.setEnabled(! ss.isEmpty() && ss.size() != 0);
+		}
+		fCreateStubsButton.setEnabled(getMethodsToDeclareAbstract().length != 0);
+	}
+
+	private void setTableInput() {
+		fTableViewer.setInput(convertPullableMemberToMemberActionInfoArray());
+	}
+
+	private MemberActionInfo[] convertPullableMemberToMemberActionInfoArray() {
+		List toPullUp= Arrays.asList(getPullUpRefactoring().getMembersToPullUp());
+		IMember[] members= getPullUpRefactoring().getPullableMembersOfDeclaringType();
+		MemberActionInfo[] result= new MemberActionInfo[members.length];
+		for (int i= 0; i < members.length; i++) {
+			IMember member= members[i];
+			if (toPullUp.contains(member))
+				result[i]= new MemberActionInfo(member, MemberActionInfo.PULL_UP_ACTION);
+			else
+				result[i]= new MemberActionInfo(member, MemberActionInfo.NO_ACTION);
+		}
+		return result;
+	}
+
+	private void setupCellEditors(final Table table) {
+		final ComboBoxCellEditor comboBoxCellEditor= new ComboBoxCellEditor();
+		comboBoxCellEditor.setStyle(SWT.READ_ONLY);
+		fTableViewer.setCellEditors(new CellEditor [] {null, comboBoxCellEditor});
+		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				if (comboBoxCellEditor.getControl() == null & ! table.isDisposed())
+					comboBoxCellEditor.create(table);
+				ISelection sel= event.getSelection();
+				if (! (sel instanceof IStructuredSelection))
+					return;
+				IStructuredSelection ss= (IStructuredSelection)sel;
+				if (ss.size() != 1)
+					return;
+				MemberActionInfo mac= (MemberActionInfo)ss.getFirstElement();
+				comboBoxCellEditor.setItems(mac.getAllowedLabels());
+				comboBoxCellEditor.setValue(new Integer(mac.getAction()));
+			}
+		});
+		
+		ICellModifier cellModifier = new PullUpCellModifier();
+		fTableViewer.setCellModifier(cellModifier);
+		fTableViewer.setColumnProperties(new String[] {MEMBER, ACTION});
+	}
+		
+	private void checkPageCompletionStatus() {
+		if (areAllMembersMarkedAsWithNoAction()){
+			setErrorMessage("Select member(s) to pull up or declare abstract");
 			setPageComplete(false);
 		} else {
 			setErrorMessage(null);
 			setPageComplete(true);
 		}
 	}
-		
-	private IStructuredContentProvider createMemberContentProvider() {
-		return new IStructuredContentProvider(){
-			public void dispose() {
-			}
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			}
-			public Object[] getElements(Object inputElement) {
-				return (Object[])inputElement;
-			}
-		};
+
+	private boolean areAllMembersMarkedAsWithNoAction() {
+		return getMembersWithNoAction().length == getTableInputAsMemberActionInfoArray().length;
 	}
 
 	/*
@@ -274,7 +610,7 @@ public class PullUpInputPage1 extends UserInputWizardPage {
 	}
 
 	private boolean canSkipSecondInputPage() {
-		return getCheckedMethods().length == 0;
+		return getMethodsToPullUp().length == 0;
 	}
 
 	/*
@@ -282,39 +618,77 @@ public class PullUpInputPage1 extends UserInputWizardPage {
 	 */
 	protected boolean performFinish() {
 		initializeRefactoring();
-		getPullUpRefactoring().setMethodsToDelete(getCheckedMethods());
+		//on finish, we have to do more
+		getPullUpRefactoring().setMethodsToDelete(getMethodsToPullUp());
 		return super.performFinish();
 	}
 	
 	private void initializeRefactoring() {
-		markCheckedMembersAsMembersToPullUp();
-		setSelectedClassAsTargetClass();
-	}
-	
-	private void setSelectedClassAsTargetClass() {
+		getPullUpRefactoring().setMembersToPullUp(getMembersToPullUp());
+		getPullUpRefactoring().setMethodsToDeclareAbstract(getMethodsToDeclareAbstract());
 		getPullUpRefactoring().setTargetClass(getSelectedClass());
+		getPullUpRefactoring().setCreateMethodStubs(fCreateStubsButton.getSelection());
 	}
 	
 	private IType getSelectedClass() {
 		return fSuperclasses[fSuperclassCombo.getSelectionIndex()];
 	}
 
-	private void markCheckedMembersAsMembersToPullUp() {
-		getPullUpRefactoring().setElementsToPullUp(getCheckedMembers());
+	private void markAsMembersToPullUp(IMember[] elements){
+		setActionForMembers(elements, MemberActionInfo.PULL_UP_ACTION);
+		updateUIElements(null);
+	}
+		
+	private void setActionForMembers(IMember[] members, int action){
+		MemberActionInfo[] macs= getTableInputAsMemberActionInfoArray();
+		for (int i = 0; i < members.length; i++) {
+			for (int j = 0; j < macs.length; j++) {
+				if (macs[j].getMember().equals(members[i]))
+					macs[j].setAction(action); 
+			}
+		}
+	}	
+	
+	private MemberActionInfo[] getTableInputAsMemberActionInfoArray() {
+		return (MemberActionInfo[])fTableViewer.getInput();
 	}
 
-	private IMethod[] getCheckedMethods() {
-		Object[] checkedElements= fTableViewer.getCheckedElements();
-		List list= new ArrayList(checkedElements.length);
-		for (int i= 0; i < checkedElements.length; i++) {
-			if (checkedElements[i] instanceof IMethod)
-				list.add(checkedElements[i]);
+	private IMethod[] getMethodsToPullUp() {
+		return getMethodsForAction(MemberActionInfo.PULL_UP_ACTION);
+	}
+
+	private IMethod[] getMethodsToDeclareAbstract() {
+		return getMethodsForAction(MemberActionInfo.DECLARE_ABSTRACT_ACTION);
+	}
+	
+	private IMethod[] getMethodsForAction(int action) {
+		MemberActionInfo[] macs= getTableInputAsMemberActionInfoArray();
+		List list= new ArrayList(macs.length);
+		for (int i= 0; i < macs.length; i++) {
+			if (macs[i].getAction() == action){
+				IMember member= macs[i].getMember();
+				if (member instanceof IMethod)
+					list.add(member);
+			}		
 		}
 		return (IMethod[]) list.toArray(new IMethod[list.size()]);
 	}
+
+	private IMember[] getMembersWithNoAction(){
+		return getMembersForAction(MemberActionInfo.NO_ACTION);
+	}
 	
-	private IMember[] getCheckedMembers(){
-		List checked= Arrays.asList(fTableViewer.getCheckedElements());
-		return (IMember[]) checked.toArray(new IMember[checked.size()]);
+	private IMember[] getMembersToPullUp() {
+		return getMembersForAction(MemberActionInfo.PULL_UP_ACTION);
+	}
+	
+	private IMember[] getMembersForAction(int action) {
+		MemberActionInfo[] macs= getTableInputAsMemberActionInfoArray();
+		List result= new ArrayList(macs.length);
+		for (int i = 0; i < macs.length; i++) {
+			if (macs[i].getAction() == action)
+				result.add(macs[i].getMember());
+		}
+		return (IMember[]) result.toArray(new IMember[result.size()]);
 	}
 }
