@@ -20,7 +20,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 
@@ -57,11 +56,6 @@ public class ControlStatementsTabPage extends ModifyDialogTabPage {
 	
 	
 	
-	private final static String [] NOTINSERT_INSERT= {
-	    JavaCore.DO_NOT_INSERT,
-	    JavaCore.INSERT
-	}; 
-	
 	private CompilationUnitPreview fPreview;
 	
 	protected CheckboxPreference fThenStatementPref, fSimpleIfPref;
@@ -74,10 +68,10 @@ public class ControlStatementsTabPage extends ModifyDialogTabPage {
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 		
 		final Group generalGroup= createGroup(numColumns, composite, FormatterMessages.getString("ControlStatementsTabPage.general_group.title")); //$NON-NLS-1$
-		createOption(generalGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.general_group.insert_new_line_before_else_statements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_ELSE_IN_IF_STATEMENT, NOTINSERT_INSERT); //$NON-NLS-1$
-		createOption(generalGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.general_group.insert_new_line_before_catch_statements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_CATCH_IN_TRY_STATEMENT, NOTINSERT_INSERT); //$NON-NLS-1$
-		createOption(generalGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.general_group.insert_new_line_before_finally_statements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_FINALLY_IN_TRY_STATEMENT, NOTINSERT_INSERT); //$NON-NLS-1$
-		createOption(generalGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.general_group.insert_new_line_before_while_in_do_statements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_WHILE_IN_DO_STATEMENT, NOTINSERT_INSERT); //$NON-NLS-1$
+		createOption(generalGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.general_group.insert_new_line_before_else_statements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_ELSE_IN_IF_STATEMENT, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
+		createOption(generalGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.general_group.insert_new_line_before_catch_statements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_CATCH_IN_TRY_STATEMENT, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
+		createOption(generalGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.general_group.insert_new_line_before_finally_statements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_FINALLY_IN_TRY_STATEMENT, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
+		createOption(generalGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.general_group.insert_new_line_before_while_in_do_statements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_WHILE_IN_DO_STATEMENT, DO_NOT_INSERT_INSERT); //$NON-NLS-1$
 				
 		final Group ifElseGroup= createGroup(numColumns, composite, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.title")); //$NON-NLS-1$
 		fThenStatementPref= createOption(ifElseGroup, numColumns, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_then_on_same_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_THEN_STATEMENT_ON_SAME_LINE, FALSE_TRUE); //$NON-NLS-1$
