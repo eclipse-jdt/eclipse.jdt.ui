@@ -83,12 +83,8 @@ public class BracketInserterTest extends TestCase {
 	private static final int ARGS_OFFSET= 171;
 	private static final int BRACKETS_OFFSET= 178;
 	
-	public static Test setUpTest(Test someTest) {
-		return new JUnitProjectTestSetup(someTest);
-	}
-	
 	public static Test suite() {
-		return setUpTest(new TestSuite(BracketInserterTest.class));
+		return new TestSuite(BracketInserterTest.class);
 	}
 	
 	private JavaEditor fEditor;
