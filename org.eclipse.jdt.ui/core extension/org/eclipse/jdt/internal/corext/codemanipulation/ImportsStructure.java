@@ -462,7 +462,7 @@ public class ImportsStructure implements IImportsStructure {
 			
 			boolean doStarImport= pack.doesNeedStarImport(fImportOnDemandThreshold);
 			if (doStarImport) {
-				String starImportString= pack.getName() + ".*";
+				String starImportString= pack.getName() + ".*"; //$NON-NLS-1$
 				appendImportToBuffer(buf, starImportString, lineDelim);
 				nCreated++;
 			}
@@ -573,7 +573,7 @@ public class ImportsStructure implements IImportsStructure {
 		}
 		
 		public boolean isOnDemand() {
-			return fElementName != null && fElementName.endsWith(".*");
+			return fElementName != null && fElementName.endsWith(".*"); //$NON-NLS-1$
 		}
 			
 		public boolean isNew() {
@@ -605,7 +605,7 @@ public class ImportsStructure implements IImportsStructure {
 		 * Comment package entry
 		 */
 		public PackageEntry() {
-			this("!", -1);
+			this("!", -1); //$NON-NLS-1$
 		}
 	
 	
@@ -726,7 +726,7 @@ public class ImportsStructure implements IImportsStructure {
 		}
 		
 		public boolean isComment() {
-			return "!".equals(fName);
+			return "!".equals(fName); //$NON-NLS-1$
 		}
 		
 	}	

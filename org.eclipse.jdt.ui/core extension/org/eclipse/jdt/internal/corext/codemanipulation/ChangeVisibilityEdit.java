@@ -79,7 +79,7 @@ public class ChangeVisibilityEdit extends SimpleTextEdit {
 		}
 		String text= fVisibility;
 		if (length == 0)
-			text+= " ";
+			text+= " "; //$NON-NLS-1$
 		setTextRange(new TextRange(offset, length));
 		setText(text);
 		super.connect(editor);

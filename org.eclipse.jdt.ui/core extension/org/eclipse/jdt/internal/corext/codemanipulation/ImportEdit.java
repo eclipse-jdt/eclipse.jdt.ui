@@ -66,7 +66,7 @@ public class ImportEdit extends SimpleTextEdit {
 		int lastDotIndex= qualifiedTypeName.lastIndexOf('.');
 		if (lastDotIndex == -1)	// no default package
 			return;
-		if ("java.lang".equals(qualifiedTypeName.substring(0, lastDotIndex)))
+		if ("java.lang".equals(qualifiedTypeName.substring(0, lastDotIndex))) //$NON-NLS-1$
 			return;
 		
 		//XXX workaround for 11622, 11537 and related problems with array types
@@ -123,7 +123,7 @@ public class ImportEdit extends SimpleTextEdit {
 			setText(text);
 			setTextRange(range);
 		} else {
-			setText("");
+			setText(""); //$NON-NLS-1$
 			setTextRange(new TextRange(0,0));
 		}
 		super.connect(editor);

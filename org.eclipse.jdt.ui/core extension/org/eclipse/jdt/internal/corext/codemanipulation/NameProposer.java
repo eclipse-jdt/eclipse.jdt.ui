@@ -14,9 +14,9 @@ public class NameProposer {
 	private String[] fNamePrefixes;
 	private String[] fNameSuffixes;
 	
-	public static final String GETTER_NAME= "get";
-	public static final String GETTER_BOOL_NAME= "is";
-	public static final String SETTER_NAME= "set";
+	public static final String GETTER_NAME= CodeGenerationMessages.getString("NameProposer.getterPrefix"); //$NON-NLS-1$
+	public static final String GETTER_BOOL_NAME= CodeGenerationMessages.getString("NameProposer.queryPrefix"); //$NON-NLS-1$
+	public static final String SETTER_NAME= CodeGenerationMessages.getString("NameProposer.setterPrefix"); //$NON-NLS-1$
 
 	public NameProposer(String[] prefixes, String[] suffixes) {
 		fNamePrefixes= prefixes;

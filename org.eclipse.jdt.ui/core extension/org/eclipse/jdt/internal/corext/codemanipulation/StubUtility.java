@@ -213,7 +213,7 @@ public class StubUtility {
 			}
 			int arrayCount= Signature.getArrayCount(refTypeSig);
 			for (int i= 0; i < arrayCount; i++) {
-				buf.append("[]");
+				buf.append("[]"); //$NON-NLS-1$
 			}
 			return buf.toString();
 		}
@@ -245,11 +245,11 @@ public class StubUtility {
 	 */
 	public static void genJavaDocSeeTag(String declaringTypeName, String methodName, String[] paramTypes, boolean nonJavaDocComment, boolean isDeprecated, StringBuffer buf) {
 		// create a @see link
-		buf.append("/*");
+		buf.append("/*"); //$NON-NLS-1$
 		if (!nonJavaDocComment) {
 			buf.append('*');
 		} else {
-			buf.append(" (non-Javadoc)");
+			buf.append(" (non-Javadoc)"); //$NON-NLS-1$
 		}
 		buf.append("\n * @see "); //$NON-NLS-1$
 		buf.append(declaringTypeName);
@@ -264,7 +264,7 @@ public class StubUtility {
 		}
 		buf.append(")\n"); //$NON-NLS-1$
 		if (isDeprecated) {
-			buf.append(" * @deprecated\n");
+			buf.append(" * @deprecated\n"); //$NON-NLS-1$
 		}
 		buf.append(" */\n"); //$NON-NLS-1$
 	}	
@@ -482,11 +482,11 @@ public class StubUtility {
 				int offset= ((ISourceReference)elem).getSourceRange().getOffset();
 				int i= offset;
 				// find beginning of line
-				while (i > 0 && "\n\r".indexOf(buf.getChar(i - 1)) == -1) {
+				while (i > 0 && "\n\r".indexOf(buf.getChar(i - 1)) == -1) { //$NON-NLS-1$
 					i--;
 				}
 				int tabWidth= 4;
-				String tabWidthString= (String) JavaCore.getOptions().get("org.eclipse.jdt.core.formatter.tabulation.size");
+				String tabWidthString= (String) JavaCore.getOptions().get("org.eclipse.jdt.core.formatter.tabulation.size"); //$NON-NLS-1$
 				if (tabWidthString != null) {
 					try {
 						tabWidth= Integer.parseInt(tabWidthString);

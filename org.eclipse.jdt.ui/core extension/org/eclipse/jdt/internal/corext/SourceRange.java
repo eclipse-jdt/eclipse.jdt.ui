@@ -46,7 +46,7 @@ public class SourceRange implements ISourceRange{
 	 * for debugging only
 	 */
 	public String toString(){
-		return "<offset: " + fOffset +" length: " + fLength + "/>";
+		return "<offset: " + fOffset +" length: " + fLength + "/>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 	
 	/**

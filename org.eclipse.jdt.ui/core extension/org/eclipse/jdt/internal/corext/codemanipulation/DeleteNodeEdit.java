@@ -34,13 +34,13 @@ public final class DeleteNodeEdit extends SimpleTextEdit {
 	private int fDelimiterToken;
 
 	public DeleteNodeEdit(ASTNode node, boolean deleteLine) {
-		super(TextRange.createFromStartAndLength(node.getStartPosition(), node.getLength()), "");
+		super(TextRange.createFromStartAndLength(node.getStartPosition(), node.getLength()), ""); //$NON-NLS-1$
 		fDeleteLine= deleteLine;
 		fDelimiterToken= getDelimiterToken(node);
 	}
 
 	private DeleteNodeEdit(TextRange range, boolean deleteLine) {
-		super(range,"");
+		super(range,""); //$NON-NLS-1$
 		fDeleteLine= deleteLine;
 	}
 	

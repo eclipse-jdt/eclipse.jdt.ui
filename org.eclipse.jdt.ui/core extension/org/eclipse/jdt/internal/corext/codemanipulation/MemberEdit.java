@@ -269,7 +269,7 @@ public class MemberEdit extends SimpleTextEdit {
 		for (int i= 0; i < fSource.length; i++) {
 			if (! fUseFormatter) {
 				if (i > 0 || (i == 0 && indentFirstLine))
-					fill(buffer, initialIndentationLevel, "\t");
+					fill(buffer, initialIndentationLevel, "\t"); //$NON-NLS-1$
 			}
 			buffer.append(fSource[i]);
 			if (i < last && fAddLineSeparators)
