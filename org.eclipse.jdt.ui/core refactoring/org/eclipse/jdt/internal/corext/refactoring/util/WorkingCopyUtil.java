@@ -7,7 +7,10 @@ package org.eclipse.jdt.internal.corext.refactoring.util;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -22,10 +25,11 @@ public class WorkingCopyUtil {
 			return null;
 		if (cu.isWorkingCopy())
 			return cu;
-		ICompilationUnit[] wcs= ResourceManager.getWorkingCopies();
+		// XXX: This is a layer breaker - should not access jdt.ui			
+		IWorkingCopy[] wcs= JavaUI.getSharedWorkingCopies();
 		for(int i= 0; i < wcs.length; i++){
-			if (cu.equals(wcs[i].getOriginalElement()))
-				return wcs[i];
+			if (cu.equals(wcs[i].getOriginalElement()) && wcs[i] instanceof ICompilationUnit)
+				return (ICompilationUnit)wcs[i];
 		}
 		return cu;
 	}
