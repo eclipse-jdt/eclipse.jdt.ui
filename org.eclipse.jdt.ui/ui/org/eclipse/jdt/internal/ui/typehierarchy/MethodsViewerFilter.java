@@ -61,8 +61,11 @@ public class MethodsViewerFilter extends ViewerFilter {
 			}
 			if (element instanceof IMember) {
 				IMember member= (IMember)element;
+				if (member.getElementName().startsWith("<")) { // filter out <clinit>
+					return false;
+				}
 				int flags= member.getFlags();
-				if (hasFilter(FILTER_STATIC) && (Flags.isStatic(flags) || "<clinit>".equals(member.getElementName()))) {
+				if (hasFilter(FILTER_STATIC) && Flags.isStatic(flags)) {
 					return false;
 				}
 				if (hasFilter(FILTER_NONPUBLIC) && !Flags.isPublic(flags) && !isMemberInInterface(member)) {
