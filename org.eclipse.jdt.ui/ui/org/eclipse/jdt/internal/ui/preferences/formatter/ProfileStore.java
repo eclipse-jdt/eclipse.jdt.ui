@@ -26,6 +26,8 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -42,14 +44,66 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 
 
 public class ProfileStore {
 	
+	/**
+	 * A SAX event handler to parse the xml format for profiles. 
+	 */
+	private final static class ProfileDefaultHandler extends DefaultHandler {
+		
+		private List fProfiles;
+		private int fVersion;
+		
+		private String fName;
+		private Map fSettings;
+
+
+		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+
+			if (qName.equals(XML_NODE_SETTING)) {
+
+				final String key= attributes.getValue(XML_ATTRIBUTE_NAME);
+				final String value= attributes.getValue(XML_ATTRIBUTE_NAME);
+				fSettings.put(key, value);
+
+			} else if (qName.equals(XML_NODE_PROFILE)) {
+
+				fName= attributes.getValue(XML_ATTRIBUTE_NAME);
+				fSettings= new HashMap(200);
+
+			}
+			else if (qName.equals(XML_NODE_ROOT)) {
+
+				fProfiles= new ArrayList();
+				try {
+					fVersion= Integer.parseInt(attributes.getValue(XML_ATTRIBUTE_VERSION));
+				} catch (NumberFormatException ex) {
+					throw new SAXException(ex);
+				}
+
+			}
+		}
+		
+		public void endElement(String uri, String localName, String qName) {
+			if (qName.equals(XML_NODE_PROFILE)) {
+				fProfiles.add(new CustomProfile(fName, fSettings, fVersion));
+				fName= null;
+				fSettings= null;
+			}
+		}
+		
+		public List getProfiles() {
+			return fProfiles;
+		}
+		
+	}
 
 	/**
 	 * Identifiers for the XML file.
@@ -101,83 +155,18 @@ public class ProfileStore {
 	 */
 	private static List readProfilesFromStream(Reader reader) throws CoreException {
 		
-		Element element;
+		final ProfileDefaultHandler handler= new ProfileDefaultHandler();
 		try {
-		    final DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
-			final DocumentBuilder parser = factory.newDocumentBuilder();
-			element = parser.parse(new InputSource(reader)).getDocumentElement();
+		    final SAXParserFactory factory= SAXParserFactory.newInstance();
+			final SAXParser parser= factory.newSAXParser();
+			parser.parse(new InputSource(reader), handler);
 		} catch (Exception ex) {
 			throw createException(ex, FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message"));  //$NON-NLS-1$
 		}
-
-		if (element == null || !element.getNodeName().equalsIgnoreCase(XML_NODE_ROOT)) {
-		    throw createException(new Exception(), FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message")); //$NON-NLS-1$
-		}
-		
-		int version;
-		try {
-			version= Integer.parseInt(element.getAttribute(XML_ATTRIBUTE_VERSION));
-		} catch (NumberFormatException ex) {
-			throw createException(ex, FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message")); //$NON-NLS-1$
-		}
-		
-		final NodeList list= element.getChildNodes();
-		
-		final int length= list.getLength();
-		
-		final List profiles= new ArrayList();
-
-		for (int i= 0; i < length; i++) {
-			final Node node= list.item(i);
-			final short type= node.getNodeType();
-			if (type != Node.ELEMENT_NODE)
-			    continue; // white space 
-			final Element profileElement= (Element) node;
-			if (!profileElement.getNodeName().equalsIgnoreCase(XML_NODE_PROFILE)) {
-			    throw createException(null, FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message")); //$NON-NLS-1$
-			}	
-			final Map settings= getSettingsFromElement(profileElement);
-			final String name= profileElement.getAttribute(XML_ATTRIBUTE_NAME);
-			final CustomProfile profile= new CustomProfile(name, settings, version);
-			profiles.add(profile);
-		}
-		return profiles;
+		return handler.getProfiles();
 	}
 	
 
-
-	/**
-	 * Create a new custom profile from its XML description.
-	 */
-	private static Map getSettingsFromElement(final Element element) throws CoreException {
-
-		final Map settings= new HashMap();
-		final NodeList list= element.getChildNodes();
-		
-		for (int i= 0; i < list.getLength(); i++) {
-		    
-			final Node node= list.item(i);
-			
-			if (node.getNodeType() != Node.ELEMENT_NODE)
-			    continue; // white space
-			
-			final Element setting= (Element) node;
-			
-			if (!setting.getNodeName().equalsIgnoreCase(XML_NODE_SETTING)) {
-			    throw createException(null, FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message")); //$NON-NLS-1$
-			}	
-			
-			final String id= setting.getAttribute(XML_ATTRIBUTE_ID);
-			final String value= setting.getAttribute(XML_ATTRIBUTE_VALUE);
-			
-			settings.put(id, value);
-		}
-		return settings;
-	}
-	
-	
-	
-	
 	
 	/**
 	 * Write the available profiles to the internal XML file.
@@ -196,6 +185,7 @@ public class ProfileStore {
 	 * Save profiles to an XML stream
 	 */
 	private static void writeProfilesToStream(Collection profiles, Writer writer) throws CoreException {
+
 		try {
 			final DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
 			final DocumentBuilder builder= factory.newDocumentBuilder();		
