@@ -38,7 +38,7 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 	public static final String KEY_LIBRARY= "org.eclipse.jdt.ui.build.jdk.library.label";
 	public static final String KEY_LINKING= "org.eclipse.jdt.ui.packages.linkselection";
 	public static final String KEY_DESCRIPTION= "org.eclipse.jdt.ui.build.jdk.library.description";
-	public static final String KEY_LINK_RENAME_IN_PACKAGES_TO_REFACTORING= "org.eclipse.jdt.ui.packages.linkRenamePackageToRefactoring";
+	public static final String KEY_LINK_RENAME_IN_PACKAGES_TO_REFACTORING= "org.eclipse.jdt.ui.packages.linkRenameToRefactoring";
 
 	public static final String JDKLIB_VARIABLE= "JDK_LIBRARY";
 
@@ -75,21 +75,12 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
         );
 		addField(boolEditor);
 		
-		/* not active yet
 		boolEditor= new BooleanFieldEditor(
-			IPreferencesConstants.LINK_MOVE_CU_IN_PACKAGES_TO_REFACTORING,
-			JavaPlugin.getResourceString(KEY_LINK_MOVE_CU_IN_PACKAGES_TO_REFACTORING),
+			IPreferencesConstants.LINK_RENAME_IN_PACKAGES_TO_REFACTORING,
+			JavaPlugin.getResourceString(KEY_LINK_RENAME_IN_PACKAGES_TO_REFACTORING),
 			parent
 		);
 		addField(boolEditor);
-		
-		boolEditor= new BooleanFieldEditor(
-			IPreferencesConstants.LINK_RENAME_PACKAGE_IN_PACKAGES_TO_REFACTORING,
-			JavaPlugin.getResourceString(KEY_LINK_RENAME_PACKAGE_IN_PACKAGES_TO_REFACTORING),
-			parent
-		);
-		addField(boolEditor);
-		*/
 	}
 
 	public void init(IWorkbench workbench) {

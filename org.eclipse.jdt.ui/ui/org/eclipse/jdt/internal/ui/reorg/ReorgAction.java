@@ -57,6 +57,13 @@ public abstract class ReorgAction extends SelectionProviderAction {
 	}
 	
 	/**
+	 * Hook to update the action's enable state before it is added to the context
+	 * menu. This default implementation does nothing.
+	 */
+	public void update() {
+	}
+	
+	/**
 	 *Set self's enablement based upon the currently selected resources
 	 */
 	public void selectionChanged(IStructuredSelection selection) {

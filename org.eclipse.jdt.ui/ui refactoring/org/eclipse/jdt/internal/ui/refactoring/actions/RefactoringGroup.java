@@ -246,6 +246,9 @@ public class RefactoringGroup extends ContextMenuGroup {
 	}
 	
 	private AbstractOpenRefactoringWizardAction createRenameCUAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
+		if (linkRenameInPackagesView())
+			return null;
+			
 		String label= RefactoringResources.getResourceString("Refactoring.RenameCompilationUnit.label");
 		return new AbstractOpenRefactoringWizardAction(provider, label, ICompilationUnit.class) {
 			protected Wizard createWizard() { 

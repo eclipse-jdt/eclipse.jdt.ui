@@ -51,6 +51,8 @@ public class RenameAction extends ReorgAction {
 	private final static String INPUT_PREFIX= PREFIX+"new_name.";
 	private final static String ERROR_PREFIX= PREFIX+"error.";
 	
+	private IRefactoringRenameSupport fRefactoringSupport;
+	
 	/**
 	 *Create an instance of this class
 	 *
@@ -61,17 +63,23 @@ public class RenameAction extends ReorgAction {
 		setDescription(JavaPlugin.getResourceString(DESCRIPTION));
 	}
 
-
-
+	public void update() {
+		setEnabled(canExecute((IStructuredSelection)getSelectionProvider().getSelection()));
+	}
+	
 	/**
 	 *The user has invoked this action
 	 *
 	 *@param context org.eclipse.jface.parts.Window
 	 */
 	public void doActionPerformed() {
-		Iterator elements= getStructuredSelection().iterator();
-		if (elements.hasNext()) 
-			renameElement(elements.next());
+		Object element= getStructuredSelection().getFirstElement();
+		if (fRefactoringSupport != null) {
+			fRefactoringSupport.rename(element);
+			fRefactoringSupport= null;
+			return;
+		}	
+		renameElement(element);
 	}
 	
 	protected boolean confirmIfUnsaved(Object element) {
@@ -141,17 +149,18 @@ public class RenameAction extends ReorgAction {
 		}
 	}
 	
-	protected boolean canExecute(IStructuredSelection sel) {
-		Iterator iter= sel.iterator();
-		if (iter.hasNext()) {
-			Object o= iter.next();
-			IRenameSupport support= ReorgSupportFactory.createRenameSupport(o);
-			if (!support.canRename(o))
-				return false;
-			return !iter.hasNext();
-		} else {
+	protected boolean canExecute(IStructuredSelection selection) {
+		if (selection.size() != 1)
 			return false;
+		
+		Object element= selection.getFirstElement();
+		fRefactoringSupport= RefactoringSupportFactory.createRenameSupport(element);
+		if (fRefactoringSupport != null) {
+			return fRefactoringSupport.canRename(element);
 		}
+		
+		IRenameSupport support= ReorgSupportFactory.createRenameSupport(element);
+		return support.canRename(element);			
 	}
 	
 	private IJavaElement getJavaParent(Object element) {
@@ -172,9 +181,11 @@ public class RenameAction extends ReorgAction {
 		}
 		return o.toString();
 	}
+	
 	protected String getActionName() {
 		return JavaPlugin.getResourceString(ACTION_NAME);
 	}
+	
 	protected String getConfirmDiscardChangesMessage() {
 		JdtHackFinder.fixme("NLS");
 		return "The selected element has unsaved changes that will be discarded if you proceed";

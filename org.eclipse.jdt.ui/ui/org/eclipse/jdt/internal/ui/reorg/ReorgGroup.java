@@ -6,19 +6,20 @@
 
 package org.eclipse.jdt.internal.ui.reorg;
 
-import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.actions.SelectionProviderAction;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.GroupContext;import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.GroupContext;import org.eclipse.jdt.ui.IContextMenuConstants;
 
 public class ReorgGroup extends ContextMenuGroup {
 
 	private static final String GROUP_NAME= IContextMenuConstants.GROUP_REORGANIZE;
 
-	private SelectionProviderAction[] fActions;
+	private ReorgAction[] fActions;
 		
 	public void fill(IMenuManager manager, GroupContext context) {
 		createActions(context.getSelectionProvider());
 		
 		for (int i= 0; i < fActions.length; i++) {
-			Action action= fActions[i];
+			ReorgAction action= fActions[i];
+			action.update();
 			if (action.isEnabled())
 				manager.appendToGroup(GROUP_NAME, action);
 		}
@@ -28,7 +29,7 @@ public class ReorgGroup extends ContextMenuGroup {
 		if (fActions != null)
 			return;
 			
-		fActions= new SelectionProviderAction[] {	
+		fActions= new ReorgAction[] {	
 			new RenameAction(provider),
 			new CopyAction(provider),
 			new MoveAction(provider),
