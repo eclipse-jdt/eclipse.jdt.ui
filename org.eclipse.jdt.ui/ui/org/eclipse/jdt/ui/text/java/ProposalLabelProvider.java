@@ -324,7 +324,6 @@ public class ProposalLabelProvider {
 		switch (proposal.getKind()) {
 			case CompletionProposal.METHOD_NAME_REFERENCE:
 			case CompletionProposal.METHOD_REF:
-			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
 				return createMethodProposalLabel(proposal);
 			case CompletionProposal.METHOD_DECLARATION:
@@ -335,6 +334,7 @@ public class ProposalLabelProvider {
 				return createTypeProposalLabel(proposal);
 			case CompletionProposal.PACKAGE_REF:
 				return createPackageProposalLabel(proposal);
+			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
 			case CompletionProposal.FIELD_REF:
 				return createLabelWithTypeAndDeclaration(proposal);
 			case CompletionProposal.LOCAL_VARIABLE_REF:

@@ -533,7 +533,7 @@ public class ResultCollector extends CompletionRequestor {
 	}
 	
 	private IJavaCompletionProposal createAnnotationAttributeReferenceProposal(CompletionProposal proposal) {
-		String displayString= fLabelProvider.createLabel(proposal);
+		String displayString= fLabelProvider.createLabelWithTypeAndDeclaration(proposal);
 		ImageDescriptor descriptor= fLabelProvider.createImageDescriptor(proposal);
 		String completion= String.valueOf(proposal.getCompletion());
 		return new JavaCompletionProposal(completion, proposal.getReplaceStart(), getLength(proposal), getImage(descriptor), displayString, computeRelevance(proposal));
