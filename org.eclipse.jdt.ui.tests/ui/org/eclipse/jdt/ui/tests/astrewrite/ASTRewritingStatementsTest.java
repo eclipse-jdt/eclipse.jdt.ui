@@ -16,6 +16,8 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -23,10 +25,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.*;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
 public class ASTRewritingStatementsTest extends ASTRewritingTest {
@@ -92,7 +92,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			List statements= block.statements();
 			ReturnStatement returnStatement= block.getAST().newReturnStatement();
-			returnStatement.setExpression(ASTResolving.getInitExpression(methodDecl.getReturnType(), methodDecl.getExtraDimensions()));
+			returnStatement.setExpression(ASTNodeFactory.newDefaultExpression(type.getAST(), methodDecl.getReturnType(), methodDecl.getExtraDimensions()));
 			statements.add(returnStatement);
 			rewrite.markAsInserted(returnStatement);
 			
@@ -431,7 +431,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
 			Expression expr= returnStatement.getExpression();
-			Expression modified= ASTResolving.getInitExpression(methodDecl.getReturnType(), methodDecl.getExtraDimensions());
+			Expression modified= ASTNodeFactory.newDefaultExpression(type.getAST(), methodDecl.getReturnType(), methodDecl.getExtraDimensions());
 	
 			rewrite.markAsReplaced(expr, modified);
 			
