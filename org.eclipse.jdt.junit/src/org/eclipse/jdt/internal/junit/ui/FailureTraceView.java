@@ -17,6 +17,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
@@ -31,6 +32,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.util.Assert;
 
 /**
  * A view that shows a stack trace of a failed test.
@@ -40,13 +42,16 @@ class FailureTraceView implements IMenuListener {
 	private Table fTable;
 	private TestRunnerViewPart fTestRunner;
 	private String fInputTrace;
+	private final Clipboard fClipboard;
 	
 	private final Image fStackIcon= TestRunnerViewPart.createImage("obj16/stkfrm_obj.gif"); //$NON-NLS-1$
 	private final Image fExceptionIcon= TestRunnerViewPart.createImage("obj16/exc_catch.gif"); //$NON-NLS-1$
 
-	public FailureTraceView(Composite parent, TestRunnerViewPart testRunner) {
+	public FailureTraceView(Composite parent, TestRunnerViewPart testRunner, Clipboard clipboard) {
+		Assert.isNotNull(clipboard);
 		fTable= new Table(parent, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 		fTestRunner= testRunner;
+		fClipboard= clipboard;
 		
 		fTable.addMouseListener(new MouseAdapter() {
 			public void mouseDoubleClick(MouseEvent e){
@@ -85,7 +90,7 @@ class FailureTraceView implements IMenuListener {
 			if (a != null)
 				manager.add(a);
 		}
-		manager.add(new CopyTraceAction(FailureTraceView.this));
+		manager.add(new CopyTraceAction(FailureTraceView.this, fClipboard));
 	}
 
 	public String getTrace() {

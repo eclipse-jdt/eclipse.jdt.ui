@@ -31,6 +31,7 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
+import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -114,6 +115,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	private Image fViewImage;
 	private CounterPanel fCounterPanel;
 	private boolean fShowOnErrorOnly= false;
+	private Clipboard fClipboard;
 
 	/** 
 	 * The view that shows the stack trace of a failure
@@ -536,6 +538,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		fStackViewIcon.dispose();
 		fTestRunOKDirtyIcon.dispose();
 		fTestRunFailDirtyIcon.dispose();
+		fClipboard.dispose();
 		getSite().getKeyBindingService().unregisterAction(fRerunLastTestAction);
 	}
 
@@ -712,7 +715,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		ToolBar failureToolBar= new ToolBar(bottom, SWT.FLAT | SWT.WRAP);
 		bottom.setTopCenter(failureToolBar);
 		
-		fFailureView= new FailureTraceView(bottom, this);
+		fFailureView= new FailureTraceView(bottom, this, fClipboard);
 		bottom.setContent(fFailureView.getComposite()); 
 		CLabel label= new CLabel(bottom, SWT.NONE);
 		label.setText(JUnitMessages.getString("TestRunnerViewPart.label.failure")); //$NON-NLS-1$
@@ -760,6 +763,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
     }
 
     public void createPartControl(Composite parent) {		
+		fClipboard= new Clipboard(parent.getDisplay());
+
 		GridLayout gridLayout= new GridLayout();
 		gridLayout.marginWidth= 0;
 		parent.setLayout(gridLayout);
@@ -779,7 +784,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
 		actionBars.setGlobalActionHandler(
 			IWorkbenchActionConstants.COPY,
-			new CopyTraceAction(fFailureView));
+			new CopyTraceAction(fFailureView, fClipboard));
 
 		JUnitPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 		fOriginalViewImage= getTitleImage();

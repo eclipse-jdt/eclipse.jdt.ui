@@ -25,6 +25,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.util.Assert;
 
 /**
  * Copies a test failure stack trace to the clipboard.
@@ -32,16 +33,17 @@ import org.eclipse.jface.dialogs.MessageDialog;
 public class CopyTraceAction extends Action {
 	private FailureTraceView fView;
 	
-	private Clipboard fClipboard;
+	private final Clipboard fClipboard;
 
 	/**
 	 * Constructor for CopyTraceAction.
 	 */
-	public CopyTraceAction(FailureTraceView view) {
+	public CopyTraceAction(FailureTraceView view, Clipboard clipboard) {
 		super(JUnitMessages.getString("CopyTrace.action.label"));  //$NON-NLS-1$
+		Assert.isNotNull(clipboard);
 		WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.COPYTRACE_ACTION);
 		fView= view;
-		fClipboard= new Clipboard(fView.getComposite().getDisplay());
+		fClipboard= clipboard;
 	}
 
 	/*
