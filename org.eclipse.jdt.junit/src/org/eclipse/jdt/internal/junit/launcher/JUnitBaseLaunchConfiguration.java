@@ -94,6 +94,11 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		
 		String[] bootpath = getBootpath(configuration);
 		runConfig.setBootClassPath(bootpath);
+		String[][] bootpathInfo = getBootpathExt(configuration);
+		runConfig.setPrependBootClassPath(bootpathInfo[0]);
+		runConfig.setMainBootClassPath(bootpathInfo[1]);
+		runConfig.setAppendBootClassPath(bootpathInfo[2]);
+		
 		return runConfig;
 	}
 
@@ -101,9 +106,6 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		String testTypeName = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
 		if (pm == null)
 			pm= new NullProgressMonitor();
-//		if ((testTypeName == null) || (testTypeName.trim().length() < 1)) {
-//			abort("No test type specified", null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE); //$NON-NLS-1$
-//		}
 		
 		String containerHandle = configuration.getAttribute(LAUNCH_CONTAINER_ATTR, ""); //$NON-NLS-1$
 		if (containerHandle.length() == 0) {
