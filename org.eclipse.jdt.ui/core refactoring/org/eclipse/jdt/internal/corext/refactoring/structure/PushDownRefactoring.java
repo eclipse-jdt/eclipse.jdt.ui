@@ -131,6 +131,10 @@ public class PushDownRefactoring extends Refactoring {
 		public IMember getMember() {
 			return fMember;
 		}
+		
+		public int getAction(){
+			return fAction;
+		}
 
 		public boolean isFieldInfo() {
 			return fMember instanceof IField;
@@ -214,7 +218,7 @@ public class PushDownRefactoring extends Refactoring {
 		if (fCachedDeclaringClass != null)
 			return fCachedDeclaringClass;
 		//all members declared in same type - checked in precondition
-		fCachedDeclaringClass= fSelectedMembers[0].getDeclaringType(); //index safe - checked in constructor
+		fCachedDeclaringClass= (IType)WorkingCopyUtil.getOriginal(fSelectedMembers[0].getDeclaringType()); //index safe - checked in constructor
 		return fCachedDeclaringClass;
 	}
 
@@ -313,12 +317,22 @@ public class PushDownRefactoring extends Refactoring {
 				return result;			
 			
 			fMemberInfos= createInfosForAllPushableFieldsAndMethods(getDeclaringClass());
+			setInfoAction(MemberActionInfo.PUSH_DOWN_ACTION, fSelectedMembers);
 			return result;	
 		} finally {
 			pm.done();
 		}
 	}
 	
+	private void setInfoAction(int action, IMember[] members) {
+		List list= Arrays.asList(members);
+		for (int i= 0; i < fMemberInfos.length; i++) {
+			MemberActionInfo info= fMemberInfos[i];
+			if (list.contains(info.getMember()))
+				info.setAction(action);
+		}
+	}
+
 	private RefactoringStatus checkPossibleSubclasses(IProgressMonitor pm) throws JavaModelException {
 		IType[] modifiableSubclasses= getDestinationClassesForNonAbstractMembers(pm);
 		if (modifiableSubclasses.length == 0){
