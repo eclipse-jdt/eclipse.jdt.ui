@@ -19,9 +19,10 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.viewers.ISelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -29,13 +30,10 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IWorkbenchPart;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
@@ -105,35 +103,12 @@ public class SelectionListenerWithASTManager {
 			fCurrentJob.schedule();
 		}
 		
-		private CompilationUnit computeAST(IProgressMonitor monitor) {
+		private IJavaElement getJavaElement() {
 			IEditorInput editorInput= fPart.getEditorInput();
-			if (editorInput != null) {
-				IJavaElement element= (IJavaElement) editorInput.getAdapter(IJavaElement.class);
-				if (element instanceof ICompilationUnit) {
-					ICompilationUnit cu= (ICompilationUnit) element;
-					char[] buffer= null;
-					synchronized (element) { // sychronize on cu to avoid conflict with reconciler: bug 
-						if (!monitor.isCanceled()) {
-							try {
-								buffer= cu.getBuffer().getCharacters();
-							} catch (JavaModelException e) {
-								// ignore
-							}
-						}
-					}
-					if (buffer != null) {
-						return AST.parseCompilationUnit(buffer, cu.getElementName(), cu.getJavaProject(), null, monitor);
-					}
-				} else if (element instanceof IClassFile) {
-					try {
-						return AST.parseCompilationUnit((IClassFile) element, true, null, monitor);
-					} catch (IllegalArgumentException e) {
-						// element has no source
-						return null;
-					}
-				}				
-			}
-			return null;
+			if (editorInput != null)
+				return (IJavaElement)editorInput.getAdapter(IJavaElement.class);
+			else
+				return null;
 		}
 		
 		protected IStatus calculateASTandInform(ITextSelection selection, IProgressMonitor monitor) {
@@ -141,7 +116,7 @@ public class SelectionListenerWithASTManager {
 				return Status.CANCEL_STATUS;
 			}
 			// create AST
-			CompilationUnit astRoot= computeAST(monitor);
+			CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(getJavaElement(), true, true, monitor);
 		
 			if (astRoot != null && !monitor.isCanceled()) {
 				Object[] listeners= fAstListeners.getListeners();

@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.text.Assert;
 
@@ -42,8 +43,10 @@ import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
  * 
  * @since 3.0
  */
-public class ASTProvider implements IJavaReconcilingListener {
-	
+public final class ASTProvider implements IJavaReconcilingListener {
+
+	private static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ASTProvider"));  //$NON-NLS-1$//$NON-NLS-2$
+
 	
 	private class ActivationListener implements IPartListener2, IWindowListener {
 		
@@ -153,6 +156,7 @@ public class ASTProvider implements IJavaReconcilingListener {
 	
 	
 	private static final String AST_DISPOSED= "org.eclipse.jdt.internal.ui.astDisposed"; //$NON-NLS-1$
+	private static final String DEBUG_PREFIX= "ASTProvider > "; //$NON-NLS-1$
 	
 	
 	private JavaEditor fActiveEditor;
@@ -221,7 +225,8 @@ public class ASTProvider implements IJavaReconcilingListener {
 		if (fAST == null)
 			return;
 		
-		System.out.println("disposing AST: " + toString(fAST));
+		if (DEBUG)
+			System.out.println(DEBUG_PREFIX + "disposing AST: " + toString(fAST)); //$NON-NLS-1$
 		
 		fAST.setProperty(AST_DISPOSED, Boolean.TRUE);
 		fAST= null;
@@ -232,7 +237,7 @@ public class ASTProvider implements IJavaReconcilingListener {
 	/**
 	 * Returns a string for the given AST used for debugging.
 	 * 
-	 * @param ast the ast
+	 * @param ast the compilation unit AST
 	 * @return a string used for debugging
 	 */
 	private String toString(CompilationUnit ast) {
@@ -251,7 +256,8 @@ public class ASTProvider implements IJavaReconcilingListener {
 		if (fAST != null)
 			disposeAST();
 		
-		System.out.println("caching AST:" + toString(ast));
+		if (DEBUG && ast != null)
+			System.out.println(DEBUG_PREFIX + "caching AST:" + toString(ast)); //$NON-NLS-1$
 
 		fAST= ast;
 		fActiveJavaElement= je;
@@ -285,9 +291,10 @@ public class ASTProvider implements IJavaReconcilingListener {
 				final IJavaElement activeElement= fActiveJavaElement;
 				
 				// Wait for AST
-				System.out.println("....waiting for AST for: " + je.getElementName());
-				
 				synchronized (fWaitLock) {
+					if (DEBUG)
+						System.out.println(DEBUG_PREFIX + "waiting for AST for: " + je.getElementName()); //$NON-NLS-1$
+					
 					fWaitLock.wait();
 				}
 				
@@ -306,7 +313,9 @@ public class ASTProvider implements IJavaReconcilingListener {
 		if (progressMonitor != null && progressMonitor.isCanceled())
 			return null;
 		
-		System.out.println("created AST for: " + je.getElementName());
+		if (DEBUG)
+			System.out.println(DEBUG_PREFIX + "created AST for: " + je.getElementName()); //$NON-NLS-1$
+		
 		if (cacheAST && ast != null)
 			cache(ast, je);
 		
@@ -361,12 +370,17 @@ public class ASTProvider implements IJavaReconcilingListener {
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(org.eclipse.jdt.core.dom.CompilationUnit)
 	 */
 	public void reconciled(CompilationUnit ast) {
-		System.out.println("reconciled AST: " + toString(ast));
+		
+		if (DEBUG)
+			System.out.println(DEBUG_PREFIX + "reconciled AST: " + toString(ast)); //$NON-NLS-1$
 		
 		synchronized (fReconcileListenerLock) {
 			fIsReconciling= false;
 			if (fActiveEditor != fReconcilingEditor) {
-				System.out.println("  ignoring ast of outdated editor");
+				
+				if (DEBUG)
+					System.out.println(DEBUG_PREFIX + "  ignoring AST of outdated editor"); //$NON-NLS-1$
+				
 				return;
 			}
 			
