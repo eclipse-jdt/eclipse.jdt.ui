@@ -117,8 +117,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			pm.worked(1);
 			
 			fSource= new ASTData(fSourceCU, true);
-			fSelectedExpression= calculateSelectedExpression();
-			fMethodDeclaration= (MethodDeclaration) ASTNodes.getParent(fSelectedExpression, MethodDeclaration.class);
+			initializeSelectedExpression();
 			pm.worked(1);
 		
 			RefactoringStatus result= checkSelection(new SubProgressMonitor(pm, 5));
@@ -132,7 +131,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		}	
 	}
 
-	private Expression calculateSelectedExpression() throws JavaModelException {
+	private void initializeSelectedExpression() throws JavaModelException {
 		IASTFragment fragment= ASTFragmentFactory.createFragmentForSourceRange(
 				new SourceRange(fSelectionStart, fSelectionLength), fSource.root, fSource.unit);
 		
@@ -141,10 +140,8 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			Expression expression= ((IExpressionFragment) fragment).getAssociatedExpression();
 			if (fragment.getStartPosition() == expression.getStartPosition()
 					&& fragment.getLength() == expression.getLength())
-				return expression;
+				fSelectedExpression= expression;
 		}
-		
-		return null;
 	}
 	
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
@@ -158,6 +155,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			}	
 			pm.worked(1);
 			
+			fMethodDeclaration= (MethodDeclaration) ASTNodes.getParent(fSelectedExpression, MethodDeclaration.class);
 			if (fMethodDeclaration == null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.expression_in_method")); //$NON-NLS-1$
 			pm.worked(1);
@@ -236,9 +234,11 @@ public class IntroduceParameterRefactoring extends Refactoring {
 //--- Input setting/validation
 
 	public void setParameterName(String name) {
+		Assert.isNotNull(name);
 		fParameterName= name;
 	}
 	
+	/** must only be called <i>after</i> checkActivation() */
 	public String guessedParameterName() {
 		try {
 			//TODO: improve for variables, fields, method calls; cleanup
