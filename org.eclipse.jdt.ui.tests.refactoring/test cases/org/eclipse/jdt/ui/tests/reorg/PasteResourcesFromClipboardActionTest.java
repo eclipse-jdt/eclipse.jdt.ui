@@ -117,6 +117,7 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		fClipboard.dispose();
+		performDummySearch();
 		delete(fCuA);
 		delete(fCuB);
 		delete(fPackageQ_R);

@@ -86,6 +86,7 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 
 	protected void tearDown() throws Exception {
 		super.tearDown();
+		performDummySearch();
 		fClipboard.dispose();
 		delete(fCuA);
 		delete(fCuB);

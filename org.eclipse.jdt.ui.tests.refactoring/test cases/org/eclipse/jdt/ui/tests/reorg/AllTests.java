@@ -18,8 +18,8 @@ public class AllTests {
 	public static Test suite ( ) {
 		TestSuite suite= new TestSuite("All Reorg Tests");
 		suite.addTest(DeleteTest.suite());
-		// suite.addTest(CopyToClipboardActionTest.suite());
-		// suite.addTest(PasteActionTest.suite());
+		suite.addTest(CopyToClipboardActionTest.suite());
+		suite.addTest(PasteActionTest.suite());
 		suite.addTest(CopyTest.suite());
 		suite.addTest(MoveTest.suite());
 		suite.addTest(MultiMoveTest.suite());
@@ -29,8 +29,8 @@ public class AllTests {
 //		FIX ME - randomly fails on linux
 //		suite.addTest(PasteSourceReferenceActionTests.suite());
 		suite.addTest(DeleteSourceReferenceActionTests.suite());
-		// suite.addTest(CopyResourcesToClipboardActionTest.suite());
-		// suite.addTest(PasteResourcesFromClipboardActionTest.suite());
+		suite.addTest(CopyResourcesToClipboardActionTest.suite());
+		suite.addTest(PasteResourcesFromClipboardActionTest.suite());
 
 		return suite;
 	}

@@ -121,8 +121,9 @@ public class PasteActionTest extends RefactoringTest{
 		SourceCompareUtil.compare(cuName, getPackageP().getCompilationUnit(cuName + ".java").getSource(), getFileContents(getOutputTestFileName(cuName)));
 	}
 	
-	private static void delete(ICompilationUnit cu) {
+	private void delete(ICompilationUnit cu) throws Exception {
 		try {
+			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
 		} catch (JavaModelException e) {
 			e.printStackTrace();

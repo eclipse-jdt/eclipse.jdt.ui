@@ -50,6 +50,7 @@ public class DeleteSourceReferenceActionTests extends RefactoringTest{
 	
 	protected void tearDown() throws Exception{
 		super.tearDown();
+		performDummySearch();
 		if (fNewCuA != null && fNewCuA.exists())
 			fNewCuA.delete(false, null);		
 		if (fCuA != null && fCuA.exists())
