@@ -199,6 +199,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.FoldingActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.SelectionHistory;
@@ -2082,6 +2083,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	private IMarker fLastMarkerTarget= null;
 	protected CompositeActionGroup fActionGroups;
+
+	/**
+	 * The actiong group for folding. 
+	 * @since 3.0
+	 */
+	private FoldingActionGroup fFoldingGroup;
+
 	private CompositeActionGroup fContextMenuGroup;
 	/**
 	 * Holds the current occurrence annotations.
@@ -2828,6 +2836,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		});
 		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, sg, jsg});
 		
+		if (isProjectionEnabled())
+			fFoldingGroup= new FoldingActionGroup(this, getViewer());
+		
 		ResourceAction resAction= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION, true); //$NON-NLS-1$
 		resAction= new InformationDispatchAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", (TextOperationAction) resAction); //$NON-NLS-1$
 		resAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
@@ -3227,7 +3238,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fProjectionSupport.install();
 			
 			fProjectionModelUpdater= new JavaProjectionModelUpdater();
-			fProjectionModelUpdater.install(this, projectionViewer);		
+			fProjectionModelUpdater.install(this, projectionViewer);
+			
+			
 		}
 		
 		IInformationControlCreator informationControlCreator= new IInformationControlCreator() {
@@ -4159,6 +4172,16 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			ruler.addDecorator(1, createChangeRulerColumn());
 		
 		return ruler;
+	}
+
+	/**
+	 * Returns the folding action group, or <code>null</code> if there is none.
+	 * @return the folding action group, or <code>null</code> if there is none
+	 * 
+	 * @since 3.0
+	 */
+	protected FoldingActionGroup getFoldingActionGroup() {
+		return fFoldingGroup;
 	}
 	
 }

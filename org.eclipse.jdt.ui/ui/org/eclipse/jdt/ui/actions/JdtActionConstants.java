@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.ui.editors.text.IFoldingCommandIds;
+
 /**
  * Action ids for standard actions, for groups in the menu bar, and
  * for actions in context menus of JDT views.
@@ -234,19 +236,19 @@ public class JdtActionConstants {
 	 * Source menu: name of standard Convert Line Delimiters To Windows global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ConvertLineDelimitersToWindows"</code>).
 	 */
-	public static String CONVERT_LINE_DELIMITERS_TO_WINDOWS= "org.eclipse.jdt.ui.actions.ConvertLineDelimitersToWindows"; //$NON-NLS-1$
+	public static final String CONVERT_LINE_DELIMITERS_TO_WINDOWS= "org.eclipse.jdt.ui.actions.ConvertLineDelimitersToWindows"; //$NON-NLS-1$
 
 	/**
 	 * Source menu: name of standard Convert Line Delimiters To UNIX global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ConvertLineDelimitersToUNIX"</code>).
 	 */
-	public static String CONVERT_LINE_DELIMITERS_TO_UNIX= "org.eclipse.jdt.ui.actions.ConvertLineDelimitersToUNIX"; //$NON-NLS-1$
+	public static final String CONVERT_LINE_DELIMITERS_TO_UNIX= "org.eclipse.jdt.ui.actions.ConvertLineDelimitersToUNIX"; //$NON-NLS-1$
 
 	/**
 	 * Source menu: name of standardConvert Line Delimiters ToMac global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ConvertLineDelimitersToMac"</code>).
 	 */
-	public static String CONVERT_LINE_DELIMITERS_TO_MAC= "org.eclipse.jdt.ui.actions.ConvertLineDelimitersToMac"; //$NON-NLS-1$
+	public static final String CONVERT_LINE_DELIMITERS_TO_MAC= "org.eclipse.jdt.ui.actions.ConvertLineDelimitersToMac"; //$NON-NLS-1$
 
 	// Refactor menu
 	
@@ -520,4 +522,36 @@ public class JdtActionConstants {
 	 * @since 3.0
 	 */
 	public static final String FIND_EXCEPTION_OCCURRENCES= "org.eclipse.jdt.ui.actions.ExceptionOccurrences"; //$NON-NLS-1$		
+
+	/**
+	 * Identifier of the "collapse folding region" action.
+	 * Value: {@value}.
+	 * 
+	 * @since 3.0
+	 */
+	public static final String FOLDING_COLLAPSE= IFoldingCommandIds.FOLDING_COLLAPSE;
+
+	/**
+	 * Identifier of the "expand folding region" action.
+	 * Value: {@value}.
+	 * 
+	 * @since 3.0
+	 */
+	public static final String FOLDING_EXPAND= IFoldingCommandIds.FOLDING_EXPAND;
+
+	/**
+	 * Identifier of the "expand all foldings" action.
+	 * Value: {@value}.
+	 * 
+	 * @since 3.0
+	 */
+	public static final String FOLDING_EXPAND_ALL= IFoldingCommandIds.FOLDING_EXPAND_ALL;
+
+	/**
+	 * Identifier of the "toggle folding" action.
+	 * Value: {@value}.
+	 * 
+	 * @since 3.0
+	 */
+	public static final String FOLDING_TOGGLE= IFoldingCommandIds.FOLDING_TOGGLE;
 }

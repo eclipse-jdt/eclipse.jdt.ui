@@ -15,6 +15,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
@@ -35,6 +38,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
+import org.eclipse.jdt.internal.ui.actions.FoldingActionGroup;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 
@@ -66,7 +70,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	private RetargetTextEditorAction fGotoNextMemberAction;	
 	private RetargetTextEditorAction fGotoPreviousMemberAction;
 
-	private RetargetTextEditorAction fRemoveOccurrenceAnnotationsAction;	
+	private RetargetTextEditorAction fRemoveOccurrenceAnnotationsAction;
 	
 	public BasicJavaEditorActionContributor() {
 		super();
@@ -126,7 +130,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	/*
 	 * @see IEditorActionBarContributor#init(IActionBars, IWorkbenchPage)
 	 */
-	 public void init(IActionBars bars, IWorkbenchPage page) {
+	public void init(IActionBars bars, IWorkbenchPage page) {
 		Iterator e= fPartListeners.iterator();
 		while (e.hasNext()) 
 			page.addPartListener((RetargetAction) e.next());
@@ -165,6 +169,24 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			structureSelection.add(fStructureSelectHistoryAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, structureSelection);
 
+			final MenuManager folding= new MenuManager(JavaEditorMessages.getString("FoldingMenu.label"), "folding"); //$NON-NLS-1$ //$NON-NLS-2$
+			IAction dummy= new Action() {};
+			folding.add(dummy); // dummy, gets removed below
+			folding.addMenuListener(new IMenuListener() {
+
+				public void menuAboutToShow(IMenuManager manager) {
+					manager.removeAll();
+					IEditorPart part= getActiveEditorPart();
+					if (part instanceof JavaEditor) {
+						JavaEditor editor= (JavaEditor) part;
+						FoldingActionGroup foldingActions= editor.getFoldingActionGroup();
+						if (foldingActions != null)
+							foldingActions.fillMenu(manager);
+					}
+				}
+			});
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, folding);
+			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetShowJavaDoc);
 		}
 
@@ -223,6 +245,9 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		if (part instanceof JavaEditor) {
 			JavaEditor javaEditor= (JavaEditor) part;
 			javaEditor.getActionGroup().fillActionBars(getActionBars());
+			FoldingActionGroup foldingActions= javaEditor.getFoldingActionGroup();
+			if (foldingActions != null)
+				foldingActions.updateActionBars();
 		}
 	}
 	

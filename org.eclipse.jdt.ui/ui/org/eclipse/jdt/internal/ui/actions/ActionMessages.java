@@ -43,6 +43,16 @@ public class ActionMessages {
 	}
 	
 	/**
+	 * Returns the resource bundle managed by the receiver.
+	 * 
+	 * @return the resource bundle
+	 * @since 3.0
+	 */
+	public static ResourceBundle getResourceBundle() {
+		return RESOURCE_BUNDLE;
+	}
+	
+	/**
 	 * Returns the formatted resource string associated with the given key in the resource bundle. 
 	 * <code>MessageFormat</code> is used to format the message. If there isn't  any value 
 	 * under the given key, the key is returned.
