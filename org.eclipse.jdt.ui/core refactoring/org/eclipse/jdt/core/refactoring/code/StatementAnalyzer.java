@@ -112,7 +112,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	public void checkActivation(RefactoringStatus status) {
 		if (fEnclosingMethod == null || fLastSelectedNode == null) {
 			if (fMessage == null)
-				fMessage= "Can not extract the selection into a new method. Only statements from a method body can be extracted.";
+				fMessage= "Can create new method. Only statements from the body of a top level method can be extracted.";
 			status.addFatalError(fMessage);
 		}
 		status.merge(fStatus);
@@ -280,29 +280,22 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		if (fMode == AFTER || (fMode == UNDEFINED && fSelection.start > node.declarationSourceEnd)) // end doens't include '}'
 			return false;
 			
-		if (fMode == BEFORE && fSelection.end > node.bodyEnd) {
-			invalidSelection("Can not extract a whole method. Only statements from a method body can be extracted.");
-			return false;
-		}
-
 		boolean result= false;		
-		if (fMode == UNDEFINED && fSelection.end <= node.bodyEnd) {
-			boolean enclosed= fSelection.coveredBy(node.bodyStart, node.bodyEnd);
-			if (enclosed) {
-				fExceptionAnalyzer.visitAbstractMethodDeclaration(node, scope);
-				reset();
-				fEnclosingMethod= node;
-				fMode= BEFORE;
-				fCursorPosition= node.bodyStart - 1;
-				result= true;
-			} else {
-				invalidSelection("Can not extract the selection into a new method. Only statements from a method body can be extracted.");
-			}
+		boolean enclosed= fSelection.coveredBy(node.bodyStart, node.bodyEnd);
+		// Do a reset even if we are in BEFORE mode. We can extract a method defined
+		// inside a method.
+		if (enclosed && (fMode == UNDEFINED || fMode == BEFORE)) {
+			fExceptionAnalyzer.visitAbstractMethodDeclaration(node, scope);
+			reset();
+			fEnclosingMethod= node;
+			fMode= BEFORE;
+			fCursorPosition= node.bodyStart - 1;
+			result= true;
 		} else {
 			// treat it as a normal node (e.g. if a whole anonymous inner class is selected.
 			result= visitRange(node.declarationSourceStart, node.declarationSourceEnd, node, scope);
 			if (fMode == AFTER)
-				result= false;
+				result= false;		// don't dive into method defined after the method that contains the selection.
 		}
 		return result;
 	}
