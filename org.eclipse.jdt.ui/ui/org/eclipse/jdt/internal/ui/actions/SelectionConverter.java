@@ -107,7 +107,7 @@ public class SelectionConverter {
 			ICompilationUnit cunit= (ICompilationUnit)input;
 			if (cunit.isWorkingCopy()) {
 				synchronized (cunit) {
-					cunit.reconcile(null);
+					cunit.reconcile();
 				}
 			}
 			IJavaElement ref= cunit.getElementAt(selection.getOffset());
