@@ -294,8 +294,17 @@ public class ScopeAnalyzerTest extends CoreTests {
 	
 	public void testVariableDeclarations5() throws Exception {
 		
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
+		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack1", false, null);
 		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public interface IConstants {\n");
+		buf.append("  public final int CONST= 1;\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("IConstants.java", buf.toString(), false, null);		
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
+		buf= new StringBuffer();
 		buf.append("package test1.ae;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int fVar1, fVar2;\n");
@@ -308,7 +317,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		buf.append("    }\n");
 		buf.append("    public int goo(int param0) {\n");
 		buf.append("        int k= 0;\n");
-		buf.append("        class B extends A {\n");
+		buf.append("        class B extends A implements pack1.IConstants {\n");
 		buf.append("            int fCount2;\n");
 		buf.append("            public int foo(int param1) {\n");
 		buf.append("                return 2;\n");		
@@ -338,7 +347,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
 			
-			assertVariables(res, new String[] { "param1", "fCount2", "fCount", "k", "param0", "fVar1", "fVar2"});
+			assertVariables(res, new String[] { "param1", "fCount2", "fCount", "k", "param0", "fVar1", "fVar2", "CONST"});
 		}				
 			
 	}
