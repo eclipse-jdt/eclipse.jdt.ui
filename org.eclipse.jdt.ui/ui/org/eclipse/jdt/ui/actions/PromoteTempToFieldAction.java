@@ -83,8 +83,6 @@ public class PromoteTempToFieldAction extends SelectionDispatchAction {
 	}
 	
 	private boolean checkEnabled(ITextSelection selection) {
-		if (selection.getLength() == 0)
-			return false;
 		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
 	}
 	
