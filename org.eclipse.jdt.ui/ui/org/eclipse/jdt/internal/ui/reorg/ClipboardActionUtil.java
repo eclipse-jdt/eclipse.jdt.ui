@@ -93,10 +93,10 @@ class ClipboardActionUtil {
 
 	public static Object tryConvertingToJava(IResource resource) {
 		IJavaElement je= JavaCore.create(resource);
-		if (je != null)
-			return je;
-		else 
+		if (je == null || ! je.exists())
 			return resource;	
+		else
+			return je;
 	}
 
 	public static boolean isOneOpenProject(IResource[] resourceData) {

@@ -287,8 +287,16 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 
 	//overridden
 	boolean canCopySourceFolders(Object dest) throws JavaModelException{
+		if (! super.canCopySourceFolders(dest))
+			return false;
 		IJavaProject javaProject= JavaCore.create(getDestinationForSourceFolders(dest));
-		return super.canCopySourceFolders(dest) && !destinationIsParent(getElements(), javaProject);
+		if (javaProject == null)
+			return false;
+		if (! javaProject.exists()) //can copy - it cannot be parent of any source folder
+			return true;
+		if (destinationIsParent(getElements(), javaProject))
+			return false;
+		return true;	
 	}
 	
 	//overridden
