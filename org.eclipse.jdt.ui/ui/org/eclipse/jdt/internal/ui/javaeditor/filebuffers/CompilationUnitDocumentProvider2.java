@@ -810,10 +810,14 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 				fIsAboutToSave= true;
 				
 				// commit working copy
-				if (JavaPlugin.USE_WORKING_COPY_OWNERS)
+				if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
 					info.fCopy.commitWorkingCopy(overwrite, monitor);
-				else
+				} else {
 					info.fCopy.commit(overwrite, monitor);
+					// next call required as commiting working copies changed to no longer walk through the right buffer
+					saveDocumentContent(monitor, element, ignore, overwrite);
+				}
+					
 					
 			} catch (CoreException x) {
 				// inform about the failure
