@@ -4,37 +4,14 @@
  */
 package org.eclipse.jdt.internal.ui.packageview;
 
-import java.util.HashSet;
-import java.util.Iterator;
-
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IResourceDeltaVisitor;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModelMarker;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
-
+import java.util.HashSet;import java.util.Iterator;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IMarkerDelta;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IResourceChangeEvent;import org.eclipse.core.resources.IResourceChangeListener;import org.eclipse.core.resources.IResourceDelta;import org.eclipse.core.resources.IResourceDeltaVisitor;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaElement; import org.eclipse.jdt.core.IJavaModelMarker;import org.eclipse.jdt.core.IJavaProject; import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 
 public class ErrorTickManager implements IResourceChangeListener {
 
 	protected static final int SEVERITY_WARNING= 0;
-	protected static final int SEVERITY_ERROR= 1;
-	
-	private HashSet fChangedElements;
+	protected static final int SEVERITY_ERROR= 1; 
+
+	private HashSet fChangedElements; 
 	private HashSet fListeners;
 	private static final boolean[] fgEmpty= new boolean[2];
 	
@@ -53,7 +30,7 @@ public class ErrorTickManager implements IResourceChangeListener {
 					fInsideRoot= true;
 					return true;
 				} else {
-					if (r.isPrefixOf(fRoot))
+					if (r.isPrefixOf(fRoot))  
 						return true;
 				}
 				return false;
@@ -61,11 +38,29 @@ public class ErrorTickManager implements IResourceChangeListener {
 			
 			if (delta.getKind() == IResourceDelta.REMOVED) {
 				invalidate(r);
-			} else if (delta.getKind() == IResourceDelta.CHANGED && (delta.getFlags() & IResourceDelta.MARKERS) != 0) {
+			} else if (delta.getKind() == IResourceDelta.CHANGED && isErrorDelta(delta)) {
 				invalidate(r);
-			}
+			} 
 			return true;
 		}
+	}
+
+	private boolean isErrorDelta(IResourceDelta delta) {	
+		if ((delta.getFlags() & IResourceDelta.MARKERS) == 0)
+			return false;
+		IMarkerDelta[] markerDeltas= delta.getMarkerDeltas();
+		for (int i= 0; i < markerDeltas.length; i++) {
+			if (markerDeltas[i].isSubtypeOf(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER)) {
+				int kind= markerDeltas[i].getKind();
+				if (kind == IResourceDelta.ADDED || kind == IResourceDelta.REMOVED)
+					return true;
+				int severity= markerDeltas[i].getAttribute(IMarker.SEVERITY, -1);
+				int newSeverity= markerDeltas[i].getMarker().getAttribute(IMarker.SEVERITY, -1);
+				if (newSeverity != severity)
+					return true; 
+			}
+		}
+		return false;
 	}
 	
 	class ProjectErrorVisitor implements IResourceDeltaVisitor {
@@ -126,7 +121,8 @@ public class ErrorTickManager implements IResourceChangeListener {
 		if (path == null)
 			return;
 		while (path.segmentCount() > 0) {
-			fChangedElements.add(path);
+			if (!fChangedElements.contains(path))
+				fChangedElements.add(path);
 			path= path.removeLastSegments(1);
 		}
 	}
@@ -161,15 +157,15 @@ public class ErrorTickManager implements IResourceChangeListener {
 			return info;
 		} catch (CoreException e) {
 		}
-		return fgEmpty;
+		return fgEmpty; 
 	}
 	
 	// change propagation
 	public void beginChange() {
 		fChangedElements= new HashSet();
 	}
-	
-	public void endChange() {
+	  
+	public void endChange() { 
 		fireChanges();
 		fChangedElements= null;
 	}
