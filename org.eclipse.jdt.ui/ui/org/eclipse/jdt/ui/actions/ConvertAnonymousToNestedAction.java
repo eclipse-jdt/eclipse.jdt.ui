@@ -11,10 +11,14 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -54,25 +58,70 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_ACTION);
 	}
 
-	private static ConvertAnonymousToNestedRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
-		return ConvertAnonymousToNestedRefactoring.create(cunit, selection.getOffset(), selection.getLength());
+	private static ConvertAnonymousToNestedRefactoring createRefactoring(ICompilationUnit cunit, int offset, int length) {
+		return ConvertAnonymousToNestedRefactoring.create(cunit, offset, length);
 	}
 
 	private static RefactoringWizard createWizard(ConvertAnonymousToNestedRefactoring refactoring) {
 		return new ConvertAnonymousToNestedWizard(refactoring);
 	}
 	
+	public ConvertAnonymousToNestedAction(IWorkbenchSite site) {
+		super(site);
+		fEditor= null;
+		setText(RefactoringMessages.getString("ConvertAnonymousToNestedAction.Convert_Anonymous")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_ACTION);
+	}
+	
+	//---- Structured selection -----------------------------------------------------
+	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */
+	public void selectionChanged(IStructuredSelection selection) {
+		setEnabled(getElement(selection) != null);
+	}
+	
+	private IType getElement(IStructuredSelection selection) {
+		if (selection.size() != 1)
+			return null;
+		Object element= selection.getFirstElement();
+		if (!(element instanceof IType))
+			return null;
+		IType type= (IType)element;
+		try {
+			if (type.isAnonymous())
+				return type;
+		} catch (JavaModelException e) {
+			// fall through
+		}
+		return null;
+	}
+	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */
+	public void run(IStructuredSelection selection) {
+		IType type= getElement(selection);
+		if (type == null)
+			return;
+		ISourceRange range;
+		try {
+			range= type.getNameRange();
+			run(type.getCompilationUnit(), range.getOffset(), range.getLength());
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
+		}
+	}
+
+	//---- Text selection -----------------------------------------------------------
+	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
 	public void run(ITextSelection selection) {
-		if (!ActionUtil.isProcessable(getShell(), fEditor))
-			return;
 		try{
-			ConvertAnonymousToNestedRefactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
-			if (refactoring == null)
-				return;
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
+			run(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
 		}	
@@ -89,4 +138,14 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
 	}
 	
+	//---- helpers -------------------------------------------------------------------
+
+	private void run(ICompilationUnit unit, int offset, int length) throws JavaModelException {
+		if (!ActionUtil.isProcessable(getShell(), unit))
+			return;
+		ConvertAnonymousToNestedRefactoring refactoring= createRefactoring(unit, offset, length);
+		if (refactoring == null)
+			return;
+		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
+	}
 }

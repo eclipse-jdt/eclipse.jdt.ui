@@ -265,6 +265,9 @@ public class RefactorActionGroup extends ActionGroup {
 		
 		fIntroduceFactoryAction= new IntroduceFactoryAction(fSite);
 		initAction(fIntroduceFactoryAction, provider, selection);
+		
+		fConvertAnonymousToNestedAction= new ConvertAnonymousToNestedAction(fSite);
+		initAction(fConvertAnonymousToNestedAction, provider, selection);
 	}
 
 	private static void initAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection){
