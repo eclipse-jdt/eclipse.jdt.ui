@@ -227,7 +227,8 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	}
 
 	public void test28() throws Exception{
-		standardPassingTest();
+		printTestDisabledMessage("bug 22883");
+//		standardPassingTest();
 	}
 
 	public void test29() throws Exception{
@@ -352,6 +353,10 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		String[] names= new String[]{"m"};
 		String[][] signatures= new String[][]{new String[0]};
 		validatePassingTest("A", new String[]{"A", "A1"}, "I", names, signatures, true);
+	}
+
+	public void test58() throws Exception{
+		standardPassingTest();
 	}
 
 	public void testFail0() throws Exception{
