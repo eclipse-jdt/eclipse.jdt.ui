@@ -8,6 +8,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.Arrays;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -28,20 +38,8 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.actions.BuildAction;
-
-import org.eclipse.ui.internal.GlobalBuildAction;
+import org.eclipse.ui.actions.GlobalBuildAction;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -52,14 +50,11 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
 import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferences;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringStatusContentProvider;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringStatusEntryLabelProvider;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -243,7 +238,9 @@ public class RefactoringStarter {
 	
 	private void triggerBuild() {
 		if (fSavedFiles && ResourcesPlugin.getWorkspace().getDescription().isAutoBuilding()) {
-			new GlobalBuildAction(JavaPlugin.getDefault().getWorkbench(), IncrementalProjectBuilder.INCREMENTAL_BUILD).run();
+			new GlobalBuildAction(JavaPlugin.getDefault().getWorkbench(), 
+								  JavaPlugin.getActiveWorkbenchShell(),
+								  IncrementalProjectBuilder.INCREMENTAL_BUILD).run();
 		}
 	}
 }
