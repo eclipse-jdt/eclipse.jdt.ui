@@ -65,7 +65,9 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		
 		setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
 		setContentAssistProcessor(processor, JavaPartitionScanner.JAVA_STRING);
-	
+		setContentAssistProcessor(processor, JavaPartitionScanner.JAVA_DOC);
+		setContentAssistProcessor(processor, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT);
+		setContentAssistProcessor(processor, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT);
 	
 		enableAutoActivation(false);
 		enableAutoInsert(false);
