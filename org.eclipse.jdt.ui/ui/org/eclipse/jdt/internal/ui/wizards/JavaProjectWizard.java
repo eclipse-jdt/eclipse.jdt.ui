@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.widgets.Shell;
@@ -24,7 +25,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public class JavaProjectWizard extends NewElementWizard {
+public class JavaProjectWizard extends NewElementWizard implements IExecutableExtension {
     
     private JavaProjectWizardFirstPage fFirstPage;
     private JavaProjectWizardSecondPage fSecondPage;
