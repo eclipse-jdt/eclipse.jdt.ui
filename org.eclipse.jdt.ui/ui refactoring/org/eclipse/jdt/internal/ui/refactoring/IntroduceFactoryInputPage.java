@@ -112,7 +112,13 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 			});
 
 		// Set up the initial state of the various dialog options.
-		protectCtorCB.setSelection(true);
+		if (getUseFactoryRefactoring().canProtectConstructor())
+			protectCtorCB.setSelection(true);
+		else {
+			protectCtorCB.setSelection(false);
+			protectCtorCB.setEnabled(false);
+			getUseFactoryRefactoring().setProtectConstructor(false);
+		}
 
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.INTRODUCE_FACTORY_WIZARD_PAGE);		
 	}

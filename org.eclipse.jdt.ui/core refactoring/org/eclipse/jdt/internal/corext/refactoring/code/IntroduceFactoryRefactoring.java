@@ -104,7 +104,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * Handle for compilation unit in which the factory method/class/interface will be
 	 * generated.
 	 */
-	private ICompilationUnit fFactoryUnit;
+	private ICompilationUnit fFactoryUnitHandle;
 
 	/**
 	 * The start of the original textual selection in effect when this refactoring
@@ -133,7 +133,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	private IMethodBinding fCtorBinding;
 
 	/**
-	 * <code>ICompilationUnit</code> for class containing the constructor to be
+	 * <code>TypeDeclaration</code> for class containing the constructor to be
 	 * encapsulated.
 	 */
 	private TypeDeclaration fCtorOwningClass;
@@ -189,6 +189,11 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * located in binary classes.
 	 */
 	private boolean fCallSitesInBinaryUnits;
+
+	/**
+	 * <code>CompilationUnit</code> in which the factory is to be created.
+	 */
+	private CompilationUnit fFactoryCU;
 
 	public static IntroduceFactoryRefactoring create(ICompilationUnit cu,
 													 int selectionStart, int selectionLength,
@@ -293,15 +298,14 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			if (ctorOwningType.isBinary())
 				// Can't modify binary CU; don't know what CU to put factory method
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.constructorInBinaryClass")); //$NON-NLS-1$
-			else {
-				// Put the generated factory method inside the type that owns the constructor
-				fFactoryUnit= ctorOwningType.getCompilationUnit();
 
-				Name	ctorOwnerName= (Name) NodeFinder.perform(ASTCreator.createAST(fFactoryUnit, null),
-																 ctorOwningType.getNameRange());
-				fCtorOwningClass= (TypeDeclaration) ASTNodes.getParent(ctorOwnerName, TypeDeclaration.class);
-			}
+			// Put the generated factory method inside the type that owns the constructor
+			fFactoryUnitHandle= ctorOwningType.getCompilationUnit();
+			fFactoryCU= getASTFor(fFactoryUnitHandle);
 
+			Name	ctorOwnerName= (Name) NodeFinder.perform(fFactoryCU, ctorOwningType.getNameRange());
+
+			fCtorOwningClass= (TypeDeclaration) ASTNodes.getParent(ctorOwnerName, TypeDeclaration.class);
 			fFactoryOwningClass= fCtorOwningClass;
 
 			pm.worked(1);
@@ -669,7 +673,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 */
 	private void addAllChangesFor(SearchResultGroup rg, CompilationUnitChange unitChange) throws CoreException {
 		ICompilationUnit	unitHandle= rg.getCompilationUnit();
-		CompilationUnit		unit= (unitHandle.equals(fCUHandle) ? fCU : ASTCreator.createAST(unitHandle, null));
+		CompilationUnit		unit= getASTFor(unitHandle);
 		ASTRewrite			unitRewriter= new ASTRewrite(unit);
 		TextBuffer			buffer= null;
 		MultiTextEdit		root= new MultiTextEdit();
@@ -680,7 +684,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			fImportRewriter= new ImportRewrite(unitHandle, fCodeGenSettings);
 
 			// First create the factory method
-			if (unitHandle.equals(fFactoryUnit)) {
+			if (unitHandle.equals(fFactoryUnitHandle)) {
 				GroupDescription	factoryGD= new GroupDescription(RefactoringCoreMessages.getString("IntroduceFactory.addFactoryMethod")); //$NON-NLS-1$
 
 				createFactoryChange(unitRewriter, unit, factoryGD);
@@ -708,6 +712,28 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			if (buffer != null)
 				TextBuffer.release(buffer);
 		}
+	}
+
+	/**
+	 * Returns an AST for the given compilation unit handle.<br>
+	 * If this is the unit containing the selection or the unit in which the factory
+	 * is to reside, checks the appropriate field (<code>fCU</code> or <code>fFactoryCU</code>,
+	 * respectively) and initializes the field with a new AST only if not already done.
+	 */
+	private CompilationUnit getASTFor(ICompilationUnit unitHandle) {
+		if (unitHandle.equals(fCUHandle)) { // is this the unit containing the selection?
+			if (fCU == null) {
+				fCU= ASTCreator.createAST(unitHandle, null);
+				if (fCU.equals(fFactoryUnitHandle)) // if selection unit and factory unit are the same...
+					fFactoryCU= fCU; // ...make sure the factory unit gets initialized
+			}
+			return fCU;
+		} else if (unitHandle.equals(fFactoryUnitHandle)) { // is this the "factory unit"?
+			if (fFactoryCU == null)
+				fFactoryCU= ASTCreator.createAST(unitHandle, null);
+			return fFactoryCU;
+		} else
+			return ASTCreator.createAST(unitHandle, null);
 	}
 
 	/**
@@ -908,6 +934,14 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Returns true iff the selected constructor can be protected.
+	 * @return
+	 */
+	public boolean canProtectConstructor() {
+		return !fCtorBinding.isSynthetic() && fFactoryCU.findDeclaringNode(fCtorBinding.getKey()) != null;
 	}
 
 	/**
