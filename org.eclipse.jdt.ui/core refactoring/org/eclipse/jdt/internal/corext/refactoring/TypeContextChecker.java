@@ -158,9 +158,15 @@ public class TypeContextChecker {
 				return RefactoringStatus.createFatalErrorStatus(msg);
 			}
 			
+			if (info.isNewVarargs() && ! JavaModelUtil.is50OrHigher(fMethod.getJavaProject())) {
+				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.no_vararg_below_50", new String[]{info.getNewName()}); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(msg);
+			}
+			
 			newTypeName= ParameterInfo.stripEllipsis(newTypeName);
 			
-			Type parsedType= parseType(newTypeName);
+			List problemsCollector= new ArrayList(0);
+			Type parsedType= parseType(newTypeName, problemsCollector);
 			boolean valid= parsedType != null;
 			if (valid && parsedType instanceof PrimitiveType)
 				valid= ! PrimitiveType.VOID.equals(((PrimitiveType) parsedType).getPrimitiveTypeCode());
@@ -168,22 +174,41 @@ public class TypeContextChecker {
 				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_type_name", new String[]{newTypeName}); //$NON-NLS-1$
 				return RefactoringStatus.createFatalErrorStatus(msg);
 			}
-			return null;
+			if (problemsCollector.size() == 0)
+				return null;
+			
+			RefactoringStatus result= new RefactoringStatus();
+			for (Iterator iter= problemsCollector.iterator(); iter.hasNext();) {
+				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_type_syntax", new String[]{newTypeName, (String) iter.next()}); //$NON-NLS-1$
+				result.addError(msg);
+			}
+			return result;
 		}
 		
 		private RefactoringStatus checkReturnTypeSyntax() {
-			if ("".equals(fReturnTypeInfo.getNewTypeName().trim())) { //$NON-NLS-1$
+			String newTypeName= fReturnTypeInfo.getNewTypeName();
+			if ("".equals(newTypeName.trim())) { //$NON-NLS-1$
 				String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.return_type_not_empty"); //$NON-NLS-1$
 				return RefactoringStatus.createFatalErrorStatus(msg);
 			}
-			if (parseType(fReturnTypeInfo.getNewTypeName()) == null) {
-				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_return_type", new String[]{fReturnTypeInfo.getNewTypeName()}); //$NON-NLS-1$
+			List problemsCollector= new ArrayList(0);
+			Type parsedType= parseType(newTypeName, problemsCollector);
+			if (parsedType == null) {
+				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_return_type", new String[]{newTypeName}); //$NON-NLS-1$
 				return RefactoringStatus.createFatalErrorStatus(msg);
 			}
-			return null;
+			if (problemsCollector.size() == 0)
+				return null;
+			
+			RefactoringStatus result= new RefactoringStatus();
+			for (Iterator iter= problemsCollector.iterator(); iter.hasNext();) {
+				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_return_type_syntax", new String[]{newTypeName, (String) iter.next()}); //$NON-NLS-1$
+				result.addError(msg);
+			}
+			return result;
 		}
 
-		private Type parseType(String typeString) {
+		private Type parseType(String typeString, List/*<IProblem>*/ problemsCollector) {
 			if ("".equals(typeString.trim())) //speed up for a common case //$NON-NLS-1$
 				return null;
 			if (! typeString.trim().equals(typeString))
@@ -207,6 +232,12 @@ public class TypeContextChecker {
 			Type type= (Type)selected;
 			if (isVoidArrayType(type))
 				return null;
+			IProblem[] problems= ASTNodes.getProblems(type, ASTNodes.NODE_ONLY, ASTNodes.PROBLEMS);
+			if (problems.length > 0) {
+				for (int i= 0; i < problems.length; i++)
+					problemsCollector.add(problems[i].getMessage());
+			}
+			
 			String typeNodeRange= cuBuff.substring(type.getStartPosition(), ASTNodes.getExclusiveEnd(type));
 			if (typeString.equals(typeNodeRange))
 				return type;
