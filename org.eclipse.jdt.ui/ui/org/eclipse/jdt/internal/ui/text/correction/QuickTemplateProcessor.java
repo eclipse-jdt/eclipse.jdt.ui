@@ -28,8 +28,6 @@ import org.eclipse.jface.text.templates.Template;
 
 import org.eclipse.ui.part.FileEditorInput;
 
-import org.eclipse.ui.texteditor.templates.TemplateProposal;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -45,6 +43,7 @@ import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.Templates;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 
 
 /**
@@ -134,8 +133,9 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 
 		Template[] templates= Templates.getInstance().getTemplates();
 		for (int i= 0; i != templates.length; i++) {
-			Template curr= templates[i];				
+			Template curr= templates[i];
 			if (context.canEvaluate(curr) && curr.getContextTypeName().equals(JavaContextType.NAME) && curr.getPattern().indexOf($_LINE_SELECTION) != -1) {
+				// TODO using jdt proposals for the moment, as jdt expects IJavaCompletionProposals
 				TemplateProposal proposal= new TemplateProposal(curr, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
 				String[] arg= new String[] { curr.getName(), curr.getDescription() };
 				proposal.setDisplayString(CorrectionMessages.getFormattedString("QuickTemplateProcessor.surround.label", arg)); //$NON-NLS-1$
