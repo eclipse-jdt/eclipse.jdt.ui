@@ -304,6 +304,34 @@ public class JavaElementLabelsTest extends CoreTests {
 		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.{...}.new Object() {...}");
 	}
 			
+	public void testTypeLabelWildcards() throws Exception {
+		
+			IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+			
+			IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package org.test;\n");
+			buf.append("public class Wildcards<T> {\n");
+			buf.append("	Wildcards<? extends Number> upper;\n");
+			buf.append("	Wildcards<? super Number> lower;\n");
+			buf.append("	Wildcards<?> wild;\n");
+			buf.append("}\n");
+			String content= buf.toString();
+			ICompilationUnit cu= pack1.createCompilationUnit("Wildcards.java", content, false, null);
+
+			IJavaElement elem= cu.getElementAt(content.indexOf("upper"));
+			String lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.F_PRE_TYPE_SIGNATURE);
+			assertEqualString(lab, "Wildcards<? extends Number> upper");
+			
+			elem= cu.getElementAt(content.indexOf("lower"));
+			lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.F_PRE_TYPE_SIGNATURE);
+			assertEqualString(lab, "Wildcards<? super Number> lower");
+			
+			elem= cu.getElementAt(content.indexOf("wild"));
+			lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.F_PRE_TYPE_SIGNATURE);
+			assertEqualString(lab, "Wildcards<?> wild");
+			
+		}
 	
 		
 }

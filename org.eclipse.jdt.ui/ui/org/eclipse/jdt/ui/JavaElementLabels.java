@@ -701,8 +701,10 @@ public class JavaElementLabels {
 					buf.append(COMMA_STRING);
 				}
 				String sig= typeArgsSig[i];
-				if (sig.length() > 0) {
-					char ch= sig.charAt(0);
+				char ch= sig.charAt(0);
+				if (ch == Signature.C_STAR) { //workaround for bug 85713
+					buf.append("?"); //$NON-NLS-1$
+				} else {
 					if (ch == Signature.C_EXTENDS) {
 						buf.append("? extends "); //$NON-NLS-1$
 						sig= sig.substring(1);
@@ -710,8 +712,8 @@ public class JavaElementLabels {
 						buf.append("? super "); //$NON-NLS-1$
 						sig= sig.substring(1);
 					}
+					getTypeSignatureLabel(sig, flags, buf);
 				}
-				getTypeSignatureLabel(sig, flags, buf);
 			}
 			buf.append('>');
 		}
