@@ -120,7 +120,7 @@ public class SuperTypeHierarchyCache {
 				}
 				if (!obsoleteHierarchies.isEmpty()) {
 					for (int i= 0; i < obsoleteHierarchies.size(); i++) {
-						((HierarchyCacheEntry) fgHierarchyCache.get(i)).freeHierarchy();
+						((HierarchyCacheEntry) obsoleteHierarchies.get(i)).freeHierarchy();
 					}			
 				} else if (oldest != null) {
 					oldest.freeHierarchy();
