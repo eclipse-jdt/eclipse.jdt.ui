@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.eclipse.core.runtime.Preferences;
 
@@ -31,18 +32,21 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.ScrollBar;
+import org.eclipse.swt.widgets.Scrollable;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -50,7 +54,6 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.editors.text.EditorsUI;
-import org.eclipse.ui.model.WorkbenchViewerSorter;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -132,7 +135,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			return fDisplayName;
 		}
 	}
-
+	
 	private static class SemanticHighlightingColorListItem extends HighlightingColorListItem {
 	
 		/** Enablement preference key */
@@ -169,6 +172,8 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
 		 */
 		public String getText(Object element) {
+			if (element instanceof String)
+				return (String) element;
 			return ((HighlightingColorListItem)element).getDisplayName();
 		}
 	}
@@ -178,13 +183,13 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * 
 	 * @since 3.0
 	 */
-	private class ColorListContentProvider implements IStructuredContentProvider {
+	private class ColorListContentProvider implements ITreeContentProvider {
 	
 		/*
 		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 		 */
 		public Object[] getElements(Object inputElement) {
-			return ((java.util.List)inputElement).toArray();
+			return new String[] {fJavaCategory, fJavadocCategory, fCommentsCategory};
 		}
 	
 		/*
@@ -197,6 +202,34 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 		 */
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		}
+
+		public Object[] getChildren(Object parentElement) {
+			if (parentElement instanceof String) {
+				String entry= (String) parentElement;
+				if (fJavaCategory.equals(entry))
+					return fListModel.subList(7, fListModel.size()).toArray();
+				if (fJavadocCategory.equals(entry))
+					return fListModel.subList(0, 4).toArray();
+				if (fCommentsCategory.equals(entry))
+					return fListModel.subList(4, 7).toArray();
+			}
+			return new Object[0];
+		}
+
+		public Object getParent(Object element) {
+			if (element instanceof String)
+				return null;
+			int index= fListModel.indexOf(element);
+			if (index < 4)
+				return fJavadocCategory;
+			if (index >= 7)
+				return fJavaCategory;
+			return fCommentsCategory;
+		}
+
+		public boolean hasChildren(Object element) {
+			return element instanceof String;
 		}
 	}
 
@@ -211,20 +244,25 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * The keys of the overlay store. 
 	 */
 	private final String[][] fSyntaxColorListModel= new String[][] {
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.multiLineComment"), PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.singleLineComment"), PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.returnKeyword"), PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.keywords"), PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.strings"), PreferenceConstants.EDITOR_STRING_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.methodNames"), PreferenceConstants.EDITOR_JAVA_METHOD_NAME_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.operators"), PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.others"), PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.javaCommentTaskTags"), PreferenceConstants.EDITOR_TASK_TAG_COLOR }, //$NON-NLS-1$
 			{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocKeywords"), PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR }, //$NON-NLS-1$
 			{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocHtmlTags"), PreferenceConstants.EDITOR_JAVADOC_TAG_COLOR }, //$NON-NLS-1$
 			{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocLinks"), PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR }, //$NON-NLS-1$
-			{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocOthers"), PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR } //$NON-NLS-1$
+			{ PreferencesMessages.getString("JavaEditorPreferencePage.javaDocOthers"), PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR }, //$NON-NLS-1$
+			{ PreferencesMessages.getString("JavaEditorPreferencePage.multiLineComment"), PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR }, //$NON-NLS-1$
+			{ PreferencesMessages.getString("JavaEditorPreferencePage.singleLineComment"), PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR }, //$NON-NLS-1$
+			{ PreferencesMessages.getString("JavaEditorPreferencePage.javaCommentTaskTags"), PreferenceConstants.EDITOR_TASK_TAG_COLOR }, //$NON-NLS-1$
+			{ PreferencesMessages.getString("JavaEditorPreferencePage.keywords"), PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR }, //$NON-NLS-1$
+			{ PreferencesMessages.getString("JavaEditorPreferencePage.returnKeyword"), PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR }, //$NON-NLS-1$
+			{ PreferencesMessages.getString("JavaEditorPreferencePage.operators"), PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR }, //$NON-NLS-1$
+			{ PreferencesMessages.getString("JavaEditorPreferencePage.methodNames"), PreferenceConstants.EDITOR_JAVA_METHOD_NAME_COLOR }, //$NON-NLS-1$
+			{ PreferencesMessages.getString("JavaEditorPreferencePage.strings"), PreferenceConstants.EDITOR_STRING_COLOR }, //$NON-NLS-1$
+			{ PreferencesMessages.getString("JavaEditorPreferencePage.others"), PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR }, //$NON-NLS-1$
 	};
+	
+	private final String fJavaCategory= PreferencesMessages.getString("JavaEditorPreferencePage.coloring.category.java"); //$NON-NLS-1$
+	private final String fJavadocCategory= PreferencesMessages.getString("JavaEditorPreferencePage.coloring.category.javadoc"); //$NON-NLS-1$
+	private final String fCommentsCategory= PreferencesMessages.getString("JavaEditorPreferencePage.coloring.category.comments"); //$NON-NLS-1$
+	
 	private ColorEditor fSyntaxForegroundColorEditor;
 	private Button fBoldCheckBox;
 	private Button fEnableCheckbox;
@@ -233,42 +271,56 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * @since  3.0
 	 */
 	private Button fItalicCheckBox;
-	private JavaSourceViewer fPreviewViewer;
 	/**
 	 * Highlighting color list
 	 * @since  3.0
 	 */
-	private final java.util.List fHighlightingColorList= new ArrayList();
+	private final java.util.List fListModel= new ArrayList();
 	/**
 	 * Highlighting color list viewer
 	 * @since  3.0
 	 */
-	private TableViewer fHighlightingColorListViewer;
-	/**
-	 * Semantic Highlighting color list
-	 * @since  3.0
-	 */
-	private java.util.List fSemanticHighlightingColorList= new ArrayList();
+	private StructuredViewer fListViewer;
 	/**
 	 * Semantic highlighting manager
 	 * @since  3.0
 	 */
 	private SemanticHighlightingManager fSemanticHighlightingManager;
 	/**
+	 * The previewer.
+	 * @since 3.0
+	 */
+	private JavaSourceViewer fPreviewViewer;
+	/**
 	 * The color manager.
 	 * @since 3.1
 	 */
 	private IColorManager fColorManager;
+	/**
+	 * The font metrics.
+	 * @since 3.1
+	 */
 	private FontMetrics fFontMetrics;
 
 	public JavaEditorColoringConfigurationBlock(OverlayPreferenceStore store) {
 		super(store);
 		
 		fColorManager= new JavaColorManager(false);
+		
+		for (int i= 0, n= fSyntaxColorListModel.length; i < n; i++)
+			fListModel.add(new HighlightingColorListItem (fSyntaxColorListModel[i][0], fSyntaxColorListModel[i][1], fSyntaxColorListModel[i][1] + BOLD, fSyntaxColorListModel[i][1] + ITALIC));
+
 		SemanticHighlighting[] semanticHighlightings= SemanticHighlightings.getSemanticHighlightings();
 		for (int i= 0, n= semanticHighlightings.length; i < n; i++)
-			fSemanticHighlightingColorList.add(new SemanticHighlightingColorListItem(semanticHighlightings[i].getDisplayName(), SemanticHighlightings.getColorPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getBoldPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getItalicPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getEnabledPreferenceKey(semanticHighlightings[i])));
-
+			fListModel.add(
+					new SemanticHighlightingColorListItem(
+							semanticHighlightings[i].getDisplayName(), 
+							SemanticHighlightings.getColorPreferenceKey(semanticHighlightings[i]),
+							SemanticHighlightings.getBoldPreferenceKey(semanticHighlightings[i]),
+							SemanticHighlightings.getItalicPreferenceKey(semanticHighlightings[i]),
+							SemanticHighlightings.getEnabledPreferenceKey(semanticHighlightings[i])
+					));
+		
 		store.addKeys(createOverlayStoreKeys());
 	}
 
@@ -276,19 +328,14 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		
 		ArrayList overlayKeys= new ArrayList();
 		
-		for (int i= 0; i < fSyntaxColorListModel.length; i++) {
-			String colorKey= fSyntaxColorListModel[i][1];
-			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, colorKey));
-			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + BOLD));
-			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + ITALIC));
-		}
-		
-		for (int i= 0, n= fSemanticHighlightingColorList.size(); i < n; i++) {
-			SemanticHighlightingColorListItem item= (SemanticHighlightingColorListItem) fSemanticHighlightingColorList.get(i);
+		for (int i= 0, n= fListModel.size(); i < n; i++) {
+			HighlightingColorListItem item= (HighlightingColorListItem) fListModel.get(i);
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, item.getColorKey()));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getBoldKey()));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getItalicKey()));
-			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getEnableKey()));
+			
+			if (item instanceof SemanticHighlightingColorListItem)
+				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ((SemanticHighlightingColorListItem) item).getEnableKey()));
 		}
 		
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
@@ -354,11 +401,8 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	public void initialize() {
 		super.initialize();
 		
-		for (int i= 0, n= fSyntaxColorListModel.length; i < n; i++)
-			fHighlightingColorList.add(new HighlightingColorListItem (fSyntaxColorListModel[i][0], fSyntaxColorListModel[i][1], fSyntaxColorListModel[i][1] + BOLD, fSyntaxColorListModel[i][1] + ITALIC));
-		fHighlightingColorList.addAll(fSemanticHighlightingColorList);
-		fHighlightingColorListViewer.setInput(fHighlightingColorList);
-		fHighlightingColorListViewer.setSelection(new StructuredSelection(fHighlightingColorListViewer.getElementAt(0)));
+		fListViewer.setInput(fListModel);
+		fListViewer.setSelection(new StructuredSelection(fJavaCategory));
 	}
 
 	public void performDefaults() {
@@ -384,8 +428,13 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 	private void handleSyntaxColorListSelection() {
 		HighlightingColorListItem item= getHighlightingColorListItem();
-		if (item == null)
+		if (item == null) {
+			fEnableCheckbox.setEnabled(false);
+			fSyntaxForegroundColorEditor.getButton().setEnabled(false);
+			fBoldCheckBox.setEnabled(false);
+			fItalicCheckBox.setEnabled(false);
 			return;
+		}
 		RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), item.getColorKey());
 		fSyntaxForegroundColorEditor.setColorValue(rgb);		
 		fBoldCheckBox.setSelection(getPreferenceStore().getBoolean(item.getBoldKey()));
@@ -425,16 +474,26 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		editorComposite.setLayout(layout);
-		GridData gd= new GridData(GridData.FILL_BOTH);
+		GridData gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		editorComposite.setLayoutData(gd);		
 	
-		fHighlightingColorListViewer= new TableViewer(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
-		fHighlightingColorListViewer.setLabelProvider(new ColorListLabelProvider());
-		fHighlightingColorListViewer.setContentProvider(new ColorListContentProvider());
-		fHighlightingColorListViewer.setSorter(new WorkbenchViewerSorter());
-		gd= new GridData(SWT.BEGINNING, SWT.FILL, false, true);
-		gd.heightHint= convertHeightInCharsToPixels(5);
-		fHighlightingColorListViewer.getControl().setLayoutData(gd);
+		fListViewer= new TreeViewer(editorComposite, SWT.SINGLE | SWT.BORDER);
+		fListViewer.setLabelProvider(new ColorListLabelProvider());
+		fListViewer.setContentProvider(new ColorListContentProvider());
+		fListViewer.setSorter(null);
+		gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, true);
+		gd.heightHint= convertHeightInCharsToPixels(7);
+		int maxWidth= 0;
+		for (Iterator it= fListModel.iterator(); it.hasNext();) {
+			HighlightingColorListItem item= (HighlightingColorListItem) it.next();
+			maxWidth= Math.max(maxWidth, convertWidthInCharsToPixels(item.getDisplayName().length()));
+		}
+		ScrollBar vBar= ((Scrollable) fListViewer.getControl()).getVerticalBar();
+		if (vBar != null)
+			maxWidth += vBar.getSize().x * 3; // scrollbars and tree indentation guess
+		gd.widthHint= maxWidth;
+		
+		fListViewer.getControl().setLayoutData(gd);
 						
 		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
 		layout= new GridLayout();
@@ -486,7 +545,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		gd.heightHint= convertHeightInCharsToPixels(5);
 		previewer.setLayoutData(gd);
 		
-		fHighlightingColorListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		fListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				handleSyntaxColorListSelection();
 			}
@@ -678,8 +737,11 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * @since 3.0
 	 */
 	private HighlightingColorListItem getHighlightingColorListItem() {
-		IStructuredSelection selection= (IStructuredSelection) fHighlightingColorListViewer.getSelection();
-		return (HighlightingColorListItem) selection.getFirstElement();
+		IStructuredSelection selection= (IStructuredSelection) fListViewer.getSelection();
+		Object element= selection.getFirstElement();
+		if (element instanceof String)
+			return null;
+		return (HighlightingColorListItem) element;
 	}
 	
 	/**
