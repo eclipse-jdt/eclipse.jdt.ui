@@ -4,8 +4,9 @@
  */
 package org.eclipse.jdt.internal.ui.nls.model;
 
-import org.eclipse.jdt.internal.core.refactoring.text.ITextRegion;
 import org.eclipse.jface.util.Assert;
+
+import org.eclipse.jdt.internal.core.codemanipulation.TextRegion;
 
 public class NLSElement {
 
@@ -14,10 +15,10 @@ public class NLSElement {
 	public static final String TAG_POSTFIX= "$"; //$NON-NLS-1$
 	public static final int TAG_POSTFIX_LENGTH= TAG_POSTFIX.length();
 
-	private static class TextRegion implements ITextRegion {
+	private static class NLSTextRegion extends TextRegion {
 		int fStart;
 		int fLength;
-		public TextRegion(int start, int length) {
+		public NLSTextRegion(int start, int length) {
 			fStart= start;
 			Assert.isTrue(fStart >= 0);
 			fLength= length;
@@ -37,10 +38,10 @@ public class NLSElement {
 	/** The original string denoted by the position */
 	private String fValue;
 	/** The position of the original string */
-	private ITextRegion fPosition;
+	private TextRegion fPosition;
 	
 	/** Position of the // $NON_NLS_*$ tag */
-	private ITextRegion fTagPosition;
+	private TextRegion fTagPosition;
 	
 	/**
 	 * Creates a new NLS elemeht for the given string and position.
@@ -48,14 +49,14 @@ public class NLSElement {
 	public NLSElement(String value, int start, int length) {
 		fValue= value;
 		Assert.isNotNull(fValue);
-		fPosition= new TextRegion(start, length);
+		fPosition= new NLSTextRegion(start, length);
 	}
 	
 	/**
 	 * Returns the position of the string to be NLSed.
 	 * @return Returns the position of the string to be NLSed
 	 */
-	public ITextRegion getPosition() {
+	public TextRegion getPosition() {
 		return fPosition;
 	}
 
@@ -78,14 +79,14 @@ public class NLSElement {
 	 * Sets the tag position if one is associated with the NLS element.
 	 */	
 	public void setTagPosition(int start, int length) {
-		fTagPosition= new TextRegion(start, length);
+		fTagPosition= new NLSTextRegion(start, length);
 	}
 	
 	/**
 	 * Returns the tag position for this element. The method can return <code>null</code>.
 	 * In this case no tag has been found for this NLS element.
 	 */
-	public ITextRegion getTagPosition() {
+	public TextRegion getTagPosition() {
 		return fTagPosition;
 	}
 	
