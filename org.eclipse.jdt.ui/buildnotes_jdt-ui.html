@@ -19,25 +19,30 @@ To see which bugs have been addressed in one of the builds simply open the <a hr
 <br><br>
 ========== Eclipse Build Input May 11th 2004 ==========<br>
 <pre>
-- About the folding extension point
-  - JDT UI defines the org.eclipse.jdt.ui.foldingStructureProvider extension
-    point which allows arbitrary foldings to be contributed. The standard folding
-    allows to fold methods, javadoc, inner types, and imports.
-  - Contributed structure providers must implement IJavaFoldingStructureProvider,
-    which is responsible for keeping the folding model up to date when the document
-    changes. Folding structure changes are reflected by updating the ProjectionAnnotationModel.
-  - Additionally, contributors may specify an IJavaFoldingPreferenceBlock that 
-    will be displayed on the Java Editor preference page. User preferences for folding
-    can be shown there.
-</pre>
+- reworked Java editor preference pages:
+  - Annotations and Quick Diff sub-pages are gone: they are now centralized under
+    Workbench > Editors
+  - Hover preference page has been improved
+  - several sub-pages are now separate pages under Java > Editor
+  - merged Spelling preference sub-pages onto one page
+  - added cursor feedback when hovering over annotations in vertical ruler
+- removed Java editor related dependencies on compatibility plug-in
+- externalized all strings
+- bug fixing</pre>
 ========== Eclipse Build Input May 4th 2004 ==========<br>
 <pre>
 - Added new Folding preference page (Java > Editor) which allows to enable and
   configure folding for the Compilation Unit editor (support for the class file
   editor will follow)
-- Added a new extension-point "org.eclipse.jdt.ui.foldingStructureProviders" which
-  allows clients to contribute folding structure providers. See extension-point
-  documentation for more details.
+- JDT UI defines the org.eclipse.jdt.ui.foldingStructureProvider extension
+  point which allows arbitrary foldings to be contributed. The standard folding
+  allows to fold methods, javadoc, inner types, and imports.
+  - contributed structure providers must implement IJavaFoldingStructureProvider,
+    which is responsible for keeping the folding model up to date when the document
+    changes. Folding structure changes are reflected by updating the ProjectionAnnotationModel.
+  - additionally, contributors may specify an IJavaFoldingPreferenceBlock that 
+    will be displayed on the Java Editor preference page. User preferences for folding
+    can be shown there.
 </pre>
 ========== Eclipse Build Input April 27th 2004 ==========<br>
 <pre>
