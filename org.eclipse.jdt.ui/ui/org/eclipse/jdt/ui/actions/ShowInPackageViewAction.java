@@ -135,7 +135,8 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 				// Since the packages view shows working copy elements it can happen that we try to show an original element
 				// in the packages view. Fall back to working copy element
 				IMember member= (IMember)element;
-				if (!member.getCompilationUnit().isWorkingCopy()) {
+				// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=20047
+				if (!isWorkingCopyElement(member)) {
 					try {
 						element= EditorUtility.getWorkingCopy(member);
 						if (reveal(view, element))
@@ -203,6 +204,16 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 		return element;
 	}
 	
+	/*
+	 * Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=20047
+	 */
+	private boolean isWorkingCopyElement(IMember member) {
+		ICompilationUnit unit= member.getCompilationUnit();
+		if (unit == null)
+			return false;
+		return unit.isWorkingCopy();
+	}
+
 	private static String getDialogTitle() {
 		return ActionMessages.getString("ShowInPackageViewAction.dialog.title"); //$NON-NLS-1$
 	}
