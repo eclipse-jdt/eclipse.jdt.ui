@@ -704,11 +704,18 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	
 			pm.worked(1);
 			
-			addTypeDeclarationUpdate(manager);
-			pm.worked(1);
-			
-			addConstructorRenames(manager);
-			pm.worked(1);
+			IResource resource= ResourceUtil.getResource(fType);
+			// if we have a linked resource then we don't use CU renaming 
+			// directly. So we have to update the code by ourselves.
+			if ((resource != null && resource.isLinked()) || !willRenameCU()) {
+				addTypeDeclarationUpdate(manager);
+				pm.worked(1);
+				
+				addConstructorRenames(manager);
+				pm.worked(1);
+			} else {
+				pm.worked(2);
+			}
 			
 			if (fUpdateTextualMatches) {
 				pm.subTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.searching_text")); //$NON-NLS-1$
