@@ -2,10 +2,8 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -60,7 +58,58 @@ public class ReorderParametersTests extends RefactoringTest {
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean canRename, boolean input) throws Exception {
 		return createCU(pack, getSimpleTestFileName(canRename, input), getFileContents(getTestFileName(canRename, input)));
 	}
-	
+
+	private static ParameterInfo[] createNewParamInfos(String[] newTypes, String[] newNames, String[] newDefaultValues) {
+		ParameterInfo[] result= new ParameterInfo[newTypes.length];
+		for (int i= 0; i < newDefaultValues.length; i++) {
+			result[i]= ParameterInfo.createInfoForAddedParameter();
+			result[i].setNewName(newNames[i]);
+			result[i].setType(newTypes[i]);
+			result[i].setDefaultValue(newDefaultValues[i]);
+		}
+		return result;
+	}
+
+	private static void addInfos(List list, ParameterInfo[] newParamInfos, int[] newIndices) {
+		for (int i= newIndices.length - 1; i >= 0; i--) {
+			list.add(newIndices[i], newParamInfos[i]);
+		}
+	}
+		
+	private void helperAdd(String[] signature, ParameterInfo[] newParamInfos, int[] newIndices) throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		IType classA= getType(cu, "A");
+		IMethod method = classA.getMethod("m", signature);
+		assertTrue("method does not exist", method.exists());
+		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(method);
+		addInfos(ref.getParameterInfos(), newParamInfos, newIndices);
+		RefactoringStatus result= performRefactoring(ref);
+		assertEquals("precondition was supposed to pass", null, result);
+		
+		IPackageFragment pack= (IPackageFragment)cu.getParent();
+		String newCuName= getSimpleTestFileName(true, true);
+		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
+		assertTrue(newCuName + " does not exist", newcu.exists());
+		assertEquals("invalid renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());
+	}
+
+	private void helperAddReorderRename(String[] signature, ParameterInfo[] newParamInfos, int[] newIndices, String[] oldParamNames, String[] newParamNames, int[] permutation)  throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		IType classA= getType(cu, "A");
+		IMethod method = classA.getMethod("m", signature);
+		assertTrue("method does not exist", method.exists());
+		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(method);
+		modifyInfos(ref.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, permutation);
+		RefactoringStatus result= performRefactoring(ref);
+		assertEquals("precondition was supposed to pass", null, result);
+		
+		IPackageFragment pack= (IPackageFragment)cu.getParent();
+		String newCuName= getSimpleTestFileName(true, true);
+		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
+		assertTrue(newCuName + " does not exist", newcu.exists());
+		assertEquals("invalid renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());
+	}
+
 	private void helper1(String[] newOrder, String[] signature) throws Exception{
 		helper1(newOrder, signature, null, null);
 	}
@@ -80,6 +129,25 @@ public class ReorderParametersTests extends RefactoringTest {
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		assertEquals("invalid renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());
+	}
+
+	private void modifyInfos(List infos, ParameterInfo[] newParamInfos, int[] newIndices, String[] oldParamNames, String[] newParamNames, int[] permutation) {
+		addInfos(infos, newParamInfos, newIndices);
+		List swapped= new ArrayList(infos.size());
+		List oldNameList= Arrays.asList(oldParamNames);
+		List newNameList= Arrays.asList(newParamNames);
+		for (int i= 0; i < permutation.length; i++) {
+			if (((ParameterInfo)infos.get(i)).isAdded())
+				continue;
+			if (! swapped.contains(new Integer(i))){
+				swapped.add(new Integer(permutation[i]));
+				ParameterInfo infoI= (ParameterInfo)infos.get(i);
+				infoI.setNewName((String)newNameList.get(oldNameList.indexOf(infoI.getOldName())));
+				ParameterInfo infoI1= (ParameterInfo)infos.get(permutation[i]);
+				infoI1.setNewName((String)newNameList.get(oldNameList.indexOf(infoI1.getOldName())));
+				swap(infos, i, permutation[i]);
+			}	
+		}
 	}
 
 	private static void modifyInfos(List infos, String[] newOrder, String[] oldNames, String[] newNames) {
@@ -133,14 +201,6 @@ public class ReorderParametersTests extends RefactoringTest {
 		return -1;
 	}
 
-	private Map createRenamings(String[] oldNames, String[] newNames) {
-		Map map= new HashMap(oldNames.length);
-		for (int i = 0; i < newNames.length; i++) {
-			map.put(oldNames[i], newNames[i]);
-		}
-		return map;
-	}
-	
 	private void helperFail(String[] newOrder, String[] signature, int expectedSeverity) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
 		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(classA.getMethod("m", signature));
@@ -148,6 +208,15 @@ public class ReorderParametersTests extends RefactoringTest {
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		
 		assertEquals("Severity:", expectedSeverity, result.getSeverity());
+	}
+
+	private void helperAddFail(String[] signature, ParameterInfo[] newParamInfos, int[] newIndices, int expectedSeverity) throws Exception{
+		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
+		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(classA.getMethod("m", signature));
+		addInfos(ref.getParameterInfos(), newParamInfos, newIndices);
+		RefactoringStatus result= performRefactoring(ref);
+		assertNotNull("precondition was supposed to fail", result);		
+		assertEquals("Severity:" + result.getFirstMessage(result.getSeverity()), expectedSeverity, result.getSeverity());
 	}
 	
 	//------- tests 
@@ -158,6 +227,16 @@ public class ReorderParametersTests extends RefactoringTest {
 	
 	public void testFail1() throws Exception{
 		helperFail(new String[]{"j", "i"}, new String[]{"I", "I"}, RefactoringStatus.ERROR);
+	}
+
+	public void testFailAdd2() throws Exception{
+		String[] signature= {"I"};
+		String[] newNames= {"x"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"0"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+		helperAddFail(signature, newParamInfo, newIndices, RefactoringStatus.ERROR);
 	}
 	
 	//---------
@@ -265,13 +344,86 @@ public class ReorderParametersTests extends RefactoringTest {
 //		helper1(new String[]{"b", "a"}, new String[]{"I", "I"});
 //	}
 
-	public void test26() throws Exception{
+	public void testRenameReorder26() throws Exception{
 		helper1(new String[]{"a", "y"}, new String[]{"Z", "I"}, new String[]{"y", "a"}, new String[]{"zzz", "bb"});
 	}
 	
-	public void test27() throws Exception{
+	public void testRenameReorder27() throws Exception{
 		helper1(new String[]{"a", "y"}, new String[]{"Z", "I"}, new String[]{"y", "a"}, new String[]{"yyy", "a"});
 	}
+
+	public void testAdd28()throws Exception{
+		String[] signature= {"I"};
+		String[] newNames= {"x"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"0"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {1};
+		helperAdd(signature, newParamInfo, newIndices);
+	}
+
+	public void testAdd29()throws Exception{
+		String[] signature= {"I"};
+		String[] newNames= {"x"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"0"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+		helperAdd(signature, newParamInfo, newIndices);
+	}
+
+	public void testAdd30()throws Exception{
+		String[] signature= {"I"};
+		String[] newNames= {"x"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"0"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {1};
+		helperAdd(signature, newParamInfo, newIndices);
+	}
 	
+	public void testAdd31()throws Exception{
+		String[] signature= {"I"};
+		String[] newNames= {"x"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"0"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {1};
+		helperAdd(signature, newParamInfo, newIndices);
+	}
+
+	public void testAdd32()throws Exception{
+		String[] signature= {"I"};
+		String[] newNames= {"x"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"0"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+		helperAdd(signature, newParamInfo, newIndices);
+	}
+
+	public void testAdd33()throws Exception{
+		String[] signature= {};
+		String[] newNames= {"x"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"0"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+		helperAdd(signature, newParamInfo, newIndices);
+	}
+
+	public void testAddReorderRename34()throws Exception{
+		String[] signature= {"I", "Z"};
+		String[] newNames= {"x"};
+		String[] newTypes= {"Object"};
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {1};
+		
+		String[] oldParamNames= {"iii", "j"};
+		String[] newParamNames= {"i", "jj"};
+		int[] permutation= {2, -1, 0};
+		helperAddReorderRename(signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation);
+	}	
 }
 
