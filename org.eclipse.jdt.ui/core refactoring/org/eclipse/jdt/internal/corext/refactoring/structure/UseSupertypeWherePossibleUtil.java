@@ -68,8 +68,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
-import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
@@ -864,11 +862,7 @@ class UseSupertypeWherePossibleUtil {
 	}
 
 	private MethodDeclaration getMethodDeclarationNode(IMethod iMethod) throws JavaModelException{
-		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(iMethod.getSourceRange().getOffset(), iMethod.getSourceRange().getLength()), true);
-		getAST(iMethod.getCompilationUnit()).accept(analyzer);
-		if (! (analyzer.getFirstSelectedNode() instanceof MethodDeclaration))
-			return null;
-		return (MethodDeclaration) analyzer.getFirstSelectedNode();
+		return ASTNodeSearchUtil.getMethodDeclarationNode(iMethod, fASTMappingManager);
 	}
 	
 	private static VariableDeclarationFragment[] getVariableDeclarationFragments(VariableDeclarationStatement vds){

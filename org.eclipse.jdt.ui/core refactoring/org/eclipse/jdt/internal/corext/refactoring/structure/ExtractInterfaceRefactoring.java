@@ -478,13 +478,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			return iMethod.getSourceRange().getLength() - methodDeclaration.getBody().getLength() - preDeclarationSourceLength;
 	}
 
-	//XXX same as in the util class
 	private MethodDeclaration getMethodDeclarationNode(IMethod iMethod) throws JavaModelException{
-		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(iMethod.getSourceRange().getOffset(), iMethod.getSourceRange().getLength()), true);
-		getAST(iMethod.getCompilationUnit()).accept(analyzer);
-		if (! (analyzer.getFirstSelectedNode() instanceof MethodDeclaration))
-			return null;
-		return (MethodDeclaration) analyzer.getFirstSelectedNode();
+		return ASTNodeSearchUtil.getMethodDeclarationNode(iMethod, fASTMappingManager);
 	}
 	
 	private String createImportsSource() throws JavaModelException {

@@ -19,9 +19,6 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -79,7 +76,7 @@ class ConstructorReferenceFinder {
 
 	private ASTNode getSuperConstructorCall(IMethod constructor) throws JavaModelException {
 		Assert.isTrue(constructor.isConstructor());
-		MethodDeclaration constructorNode= getMethodDeclarationNode(constructor);
+		MethodDeclaration constructorNode= ASTNodeSearchUtil.getMethodDeclarationNode(constructor, fASTManager);
 		Assert.isTrue(constructorNode.isConstructor());
 		Block body= constructorNode.getBody();
 		Assert.isNotNull(body);
@@ -89,16 +86,4 @@ class ConstructorReferenceFinder {
 		return null;
 	}
 
-	private MethodDeclaration getMethodDeclarationNode(IMethod iMethod) throws JavaModelException {
-		Selection selection= Selection.createFromStartLength(iMethod.getNameRange().getOffset(), iMethod.getNameRange().getLength());
-		SelectionAnalyzer selectionAnalyzer= new SelectionAnalyzer(selection, true);
-		fASTManager.getAST(iMethod.getCompilationUnit()).accept(selectionAnalyzer);
-		ASTNode node= selectionAnalyzer.getFirstSelectedNode();
-		if (node == null)
-			node= selectionAnalyzer.getLastCoveringNode();
-		if (node == null)	
-			return null;
-		return (MethodDeclaration)ASTNodes.getParent(node, MethodDeclaration.class);
-	}
-	
 }
