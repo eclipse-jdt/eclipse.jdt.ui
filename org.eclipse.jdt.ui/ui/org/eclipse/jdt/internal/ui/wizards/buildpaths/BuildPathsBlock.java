@@ -12,7 +12,6 @@ import java.util.List;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
@@ -27,6 +26,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -76,9 +77,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 
 public class BuildPathsBlock {
 
@@ -513,6 +511,19 @@ public class BuildPathsBlock {
 		if (!status.isOK()) {
 			fBuildPathStatus.setError(status.getMessage());
 			return;
+		}
+		if (res != null && res.exists() && fCurrJProject.exists()) {
+			try {
+				IPath oldOutputLocation= fCurrJProject.getOutputLocation();
+				if (!oldOutputLocation.equals(fOutputLocationPath)) {
+					if (((IContainer)res).members().length > 0) {
+						fBuildPathStatus.setWarning(NewWizardMessages.getString("BuildPathsBlock.warning.OutputFolderNotEmpty")); //$NON-NLS-1$
+						return;
+					}
+				}
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
 		}
 				
 		fBuildPathStatus.setOK();
