@@ -1066,13 +1066,11 @@ JavaStructureDiffViewerCreator
 		<action id="org.eclipse.jdt.ui.actions.ShiftLeft"
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%ShiftLeftAction.label"
-      		icon="icons/full/ctool16/shift_l_edit.gif"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.ShiftRight"
       		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
       		label="%ShiftRightAction.label"
-      		icon="icons/full/ctool16/shift_r_edit.gif"
 			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.Uncomment"
