@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -200,7 +200,7 @@ public class ModifierCorrectionSubProcessor {
 				Block newBody= ast.newBlock();
 				rewrite.markAsInserted(newBody);
 				decl.setBody(newBody);
-				Expression expr= ASTResolving.getInitExpression(decl.getReturnType(), decl.getExtraDimensions());
+				Expression expr= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType(), decl.getExtraDimensions());
 				if (expr != null) {
 					ReturnStatement returnStatement= ast.newReturnStatement();
 					returnStatement.setExpression(expr);
@@ -264,7 +264,7 @@ public class ModifierCorrectionSubProcessor {
 			Block newBody= ast.newBlock();
 			rewrite.markAsInserted(newBody);
 			decl.setBody(newBody);
-			Expression expr= ASTResolving.getInitExpression(decl.getReturnType(), decl.getExtraDimensions());
+			Expression expr= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType(), decl.getExtraDimensions());
 			if (expr != null) {
 				ReturnStatement returnStatement= ast.newReturnStatement();
 				returnStatement.setExpression(expr);
@@ -332,10 +332,13 @@ public class ModifierCorrectionSubProcessor {
 		rewrite.markAsInserted(body);
 		
 		Type returnType= decl.getReturnType();
-		if (!decl.isConstructor() && !"void".equals(ASTNodes.asString(returnType))) { //$NON-NLS-1$
-			ReturnStatement returnStatement= ast.newReturnStatement();
-			returnStatement.setExpression(ASTResolving.getInitExpression(returnType, decl.getExtraDimensions()));
-			body.statements().add(returnStatement);
+		if (!decl.isConstructor()) {
+			Expression expression= ASTNodeFactory.newDefaultExpression(ast, returnType, decl.getExtraDimensions());
+			if (expression != null) {
+				ReturnStatement returnStatement= ast.newReturnStatement();
+				returnStatement.setExpression(expression);
+				body.statements().add(returnStatement);				
+			}
 		}
 
 		String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.addmissingbody.description"); //$NON-NLS-1$

@@ -70,12 +70,11 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -1395,12 +1394,8 @@ public class PullUpRefactoring extends Refactoring {
 	private static Block getMethodStubBody(MethodDeclaration method, AST ast) {
 		Block body= ast.newBlock();
 		Type returnType= method.getReturnType();
-		ITypeBinding typeBinding= returnType.resolveBinding();
-		if (typeBinding == null)
-			return body;
-		Type returnTypeInOurAST= ASTResolving.getTypeFromTypeBinding(ast, typeBinding);
-		//cannot pass return type here - because it's from another ast
-		Expression expression= ASTResolving.getInitExpression(returnTypeInOurAST, method.getExtraDimensions());
+
+		Expression expression= ASTNodeFactory.newDefaultExpression(ast, returnType, method.getExtraDimensions());
 		if (expression != null) {
 			ReturnStatement returnStatement= ast.newReturnStatement();
 			returnStatement.setExpression(expression);

@@ -126,7 +126,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			}
 			if (!fSenderBinding.isInterface() && returnType != null) {
 				ReturnStatement returnStatement= ast.newReturnStatement();
-				returnStatement.setExpression(ASTResolving.getInitExpression(returnType, 0));
+				returnStatement.setExpression(ASTNodeFactory.newDefaultExpression(ast, returnType, 0));
 				bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, String.valueOf('\n'));
 			}
 		}

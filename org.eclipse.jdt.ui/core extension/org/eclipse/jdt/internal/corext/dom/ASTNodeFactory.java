@@ -15,6 +15,7 @@ import java.util.StringTokenizer;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrimitiveType;
@@ -87,5 +88,52 @@ public class ASTNodeFactory {
 			else
 				return ast.newSimpleType(ast.newName(Bindings.getNameComponents(binding)));	
 		}
-	}	
+	}
+
+	/**
+	 * Returns an expression that is assignable to the given type. <code>null</code> is
+	 * returned if the type is the 'void' type.
+	 * 
+	 * @param ast The AST to create the expression for
+	 * @param type The type of the returned expression
+	 * @param extraDimensions Extra dimensions to the type
+	 * @return Returns the Null-literal for reference types, a boolen-literal for a boolean type, a number
+	 * literal for primitive types or <code>null</code> if the type is void.
+	 */
+	public static Expression newDefaultExpression(AST ast, Type type, int extraDimensions) {
+		if (extraDimensions == 0 && type.isPrimitiveType()) {
+			PrimitiveType primitiveType= (PrimitiveType) type;
+			if (primitiveType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
+				return type.getAST().newBooleanLiteral(false);
+			} else if (primitiveType.getPrimitiveTypeCode() == PrimitiveType.VOID) {
+				return null;				
+			} else {
+				return type.getAST().newNumberLiteral("0"); //$NON-NLS-1$
+			}
+		}
+		return type.getAST().newNullLiteral();
+	}
+
+	/**
+	 * Returns an expression that is assignable to the given typebinding. <code>null</code> is
+	 * returned if the type is the 'void' type.
+	 * 
+	 * @param ast The AST to create the expression for
+	 * @param type The type binding to which the returned expression is compatible to
+	 * @return Returns the Null-literal for reference types, a boolen-literal for a boolean type, a number
+	 * literal for primitive types or <code>null</code> if the type is void.
+	 */
+	public static Expression newDefaultExpression(AST ast, ITypeBinding type) {
+		if (type.isPrimitive()) {
+			String name= type.getName();
+			if ("boolean".equals(name)) { //$NON-NLS-1$
+				return ast.newBooleanLiteral(false);
+			} else if ("void".equals(name)) { //$NON-NLS-1$
+				return null;
+			} else {
+				return ast.newNumberLiteral("0"); //$NON-NLS-1$
+			}
+		}
+		return ast.newNullLiteral();
+	}		
 }

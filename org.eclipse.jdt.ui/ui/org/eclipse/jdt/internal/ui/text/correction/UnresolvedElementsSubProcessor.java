@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
@@ -484,7 +485,7 @@ public class UnresolvedElementsSubProcessor {
 			
 			for (int i= 0; i < diff; i++) {
 				int idx= indexSkipped[i];
-				Expression newArg= ASTResolving.getInitExpression(astRoot.getAST(), paramTypes[idx]);
+				Expression newArg= ASTNodeFactory.newDefaultExpression(astRoot.getAST(), paramTypes[idx]);
 				rewrite.markAsInserted(newArg);
 				arguments.add(idx, newArg);
 			}

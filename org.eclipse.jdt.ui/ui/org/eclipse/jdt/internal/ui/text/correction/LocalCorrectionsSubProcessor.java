@@ -521,7 +521,7 @@ public class LocalCorrectionsSubProcessor {
 			if (fragment.getInitializer() != null) {
 				return;
 			}
-			Expression expression= ASTResolving.getInitExpression(astRoot.getAST(), varBinding.getType());
+			Expression expression= ASTNodeFactory.newDefaultExpression(astRoot.getAST(), varBinding.getType());
 			if (expression == null) {
 				return;
 			}

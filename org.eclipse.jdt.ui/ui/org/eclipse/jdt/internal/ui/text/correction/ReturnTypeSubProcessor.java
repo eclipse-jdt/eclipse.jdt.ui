@@ -233,6 +233,7 @@ public class ReturnTypeSubProcessor {
 		if (selectedNode == null) {
 			return;
 		}
+		AST ast= selectedNode.getAST();
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
 		if (decl instanceof MethodDeclaration) {
 			MethodDeclaration methodDecl= (MethodDeclaration) decl;
@@ -242,7 +243,7 @@ public class ReturnTypeSubProcessor {
 				if (returnStatement.getExpression() == null) {
 					ASTRewrite rewrite= new ASTRewrite(methodDecl);
 					
-					Expression expression= ASTResolving.getInitExpression(methodDecl.getReturnType(), methodDecl.getExtraDimensions());
+					Expression expression= ASTNodeFactory.newDefaultExpression(ast, methodDecl.getReturnType(), methodDecl.getExtraDimensions());
 					if (expression != null) {
 						returnStatement.setExpression(expression);
 						rewrite.markAsInserted(expression);
@@ -259,12 +260,12 @@ public class ReturnTypeSubProcessor {
 				if (block == null) {
 					return;
 				}
-				AST ast= methodDecl.getAST();
+
 				ASTRewrite rewrite= new ASTRewrite(methodDecl);
 				
 				List statements= block.statements();
 				ReturnStatement returnStatement= ast.newReturnStatement();
-				returnStatement.setExpression(ASTResolving.getInitExpression(methodDecl.getReturnType(), methodDecl.getExtraDimensions()));
+				returnStatement.setExpression(ASTNodeFactory.newDefaultExpression(ast, methodDecl.getReturnType(), methodDecl.getExtraDimensions()));
 				statements.add(returnStatement);
 				rewrite.markAsInserted(returnStatement);
 				

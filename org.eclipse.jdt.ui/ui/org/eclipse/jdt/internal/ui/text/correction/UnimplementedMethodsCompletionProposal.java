@@ -120,7 +120,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		decl.setBody(body);
 	
 		String bodyStatement= ""; //$NON-NLS-1$
-		Expression expression= ASTResolving.getInitExpression(decl.getReturnType(), decl.getExtraDimensions());
+		Expression expression= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType(), decl.getExtraDimensions());
 		if (expression != null) {
 			ReturnStatement returnStatement= ast.newReturnStatement();
 			returnStatement.setExpression(expression);

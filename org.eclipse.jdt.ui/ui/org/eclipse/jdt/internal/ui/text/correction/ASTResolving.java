@@ -481,34 +481,6 @@ public class ASTResolving {
 		return null;
 	}
 	
-	public static Expression getInitExpression(Type type, int extraDimensions) {
-		if (extraDimensions == 0 && type.isPrimitiveType()) {
-			PrimitiveType primitiveType= (PrimitiveType) type;
-			if (primitiveType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
-				return type.getAST().newBooleanLiteral(false);
-			} else if (primitiveType.getPrimitiveTypeCode() == PrimitiveType.VOID) {
-				return null;				
-			} else {
-				return type.getAST().newNumberLiteral("0"); //$NON-NLS-1$
-			}
-		}
-		return type.getAST().newNullLiteral();
-	}
-	
-	public static Expression getInitExpression(AST ast, ITypeBinding type) {
-		if (type.isPrimitive()) {
-			String name= type.getName();
-			if ("boolean".equals(name)) { //$NON-NLS-1$
-				return ast.newBooleanLiteral(false);
-			} else if ("void".equals(name)) { //$NON-NLS-1$
-				return null;
-			} else {
-				return ast.newNumberLiteral("0"); //$NON-NLS-1$
-			}
-		}
-		return ast.newNullLiteral();
-	}	
-	
 	private static TypeDeclaration findTypeDeclaration(List decls, String name) {
 		for (Iterator iter= decls.iterator(); iter.hasNext();) {
 			ASTNode elem= (ASTNode) iter.next();
