@@ -4,24 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.util.ArrayList;
-import java.util.StringTokenizer;
-
-import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.IntegerFieldEditor;
-import org.eclipse.jface.preference.ListEditor;
-
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
-
-import org.eclipse.jdt.core.JavaConventions;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.StringInputDialog;import org.eclipse.jdt.ui.JavaUI;
+import java.util.ArrayList;import java.util.StringTokenizer;import org.eclipse.swt.graphics.GC;import org.eclipse.swt.graphics.Point;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.jface.dialogs.IInputValidator;import org.eclipse.jface.preference.FieldEditorPreferencePage;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.IntegerFieldEditor;import org.eclipse.jface.preference.ListEditor;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StringInputDialog;import org.eclipse.jdt.ui.JavaUI;
 
 /*
  * The page for setting the organize import settings
@@ -91,7 +74,22 @@ public class ImportOrganizePreferencePage extends FieldEditorPreferencePage impl
 		};
 		addField(listEditor);
 	
-		IntegerFieldEditor intEditor= new IntegerFieldEditor(PREF_ONDEMANDTHRESHOLD, JavaPlugin.getResourceString(ONDEMANDTHRESHOLD_LABEL), parent);
+		IntegerFieldEditor intEditor= new IntegerFieldEditor(PREF_ONDEMANDTHRESHOLD, JavaPlugin.getResourceString(ONDEMANDTHRESHOLD_LABEL), parent) {
+			protected void doFillIntoGrid(Composite parent, int numColumns) {
+				super.doFillIntoGrid(parent, numColumns);
+				Control text= getTextControl();
+				GridData gd= (GridData)text.getLayoutData();
+				GC gc = new GC(text);
+				try {
+					Point extent = gc.textExtent("X");
+					gd.widthHint = 5 * extent.x;
+				} finally {
+					gc.dispose();
+				}
+				gd.horizontalAlignment = gd.BEGINNING;
+				gd.grabExcessHorizontalSpace = false;
+			}
+		};
 		addField(intEditor);
 	}
 

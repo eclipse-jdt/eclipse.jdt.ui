@@ -258,7 +258,7 @@
 		id="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage">
 	</page>
-	<page name="Import Order"
+	<page name="Organize Imports"
 		id="org.eclipse.jdt.ui.preferences.ImportOrganizePreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage"
 		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
@@ -287,13 +287,8 @@
         label="%JavaActionSet.label"
 		visible="false"
 		description="%JavaActionSet.description">
-		<menu
-			id="java"
-			label="%JavaMenu.label">
-			<separator name="group.open"/>
-		</menu>
 		<action id="org.eclipse.jdt.ui.actions.OpenType"
-			menubarPath="java/group.open"
+			menubarPath="workbench/wbEnd"
 			toolbarPath="Normal/Java"			
 			label="%OpenTypeAction.label"
 			tooltip="%OpenTypeAction.tooltip"
