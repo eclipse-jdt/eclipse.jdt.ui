@@ -34,7 +34,6 @@ import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -166,31 +165,7 @@ public class JavaSearchScopeFactory {
 			}
 		}
 			
-		addJavaElements(javaElements, javaElement);
-	}
-
-	private void addJavaElements(Set javaElements, IJavaElement javaElement) {
-		switch (javaElement.getElementType()) {
-			case IJavaElement.JAVA_PROJECT:
-				addJavaElements(javaElements, (IJavaProject)javaElement);
-				break;
-			default:
-				javaElements.add(javaElement);
-		}
-		
-	}
-
-	private void addJavaElements(Set javaElements, IJavaProject javaProject) {
-		IPackageFragmentRoot[] roots;
-		try {
-			roots= javaProject.getPackageFragmentRoots();
-		} catch (JavaModelException ex) {
-			return;
-		}
-
-		for (int i= 0; i < roots.length; i++)
-			if (!roots[i].isExternal())
-				javaElements.add(roots[i]);
+		javaElements.add(javaElement);
 	}
 
 	private void addJavaElements(Set javaElements, IWorkingSet workingSet) {
@@ -199,10 +174,7 @@ public class JavaSearchScopeFactory {
 		
 		IAdaptable[] elements= workingSet.getElements();
 		for (int i= 0; i < elements.length; i++) {
-			if (elements[i] instanceof IJavaElement)
-				addJavaElements(javaElements, (IJavaElement)elements[i]);
-			else
-				addJavaElements(javaElements, elements[i]);
+			addJavaElements(javaElements, elements[i]);
 		}
 	}
 
