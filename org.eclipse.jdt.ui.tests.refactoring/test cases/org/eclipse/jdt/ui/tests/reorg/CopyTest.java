@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.reorg;
 
+import java.io.IOException;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -37,7 +39,11 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
@@ -63,14 +69,16 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	private void verifyDisabled(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		assertTrue("delete should be disabled", ! CopyRefactoring2.isAvailable(resources, javaElements));
-		CopyRefactoring2 refactoring2= CopyRefactoring2.create(resources, javaElements);
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		assertTrue("copy should be disabled", ! CopyRefactoring2.isAvailable(resources, javaElements, settings));
+		CopyRefactoring2 refactoring2= CopyRefactoring2.create(resources, javaElements, settings);
 		assertTrue(refactoring2 == null);
 	}
 
 	private CopyRefactoring2 verifyEnabled(IResource[] resources, IJavaElement[] javaElements, ICopyQueries copyQueries) throws JavaModelException {
-		assertTrue("delete should be enabled", CopyRefactoring2.isAvailable(resources, javaElements));
-		CopyRefactoring2 refactoring2= CopyRefactoring2.create(resources, javaElements);
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		assertTrue("copy should be enabled", CopyRefactoring2.isAvailable(resources, javaElements, settings));
+		CopyRefactoring2 refactoring2= CopyRefactoring2.create(resources, javaElements, settings);
 		assertNotNull(refactoring2);
 		if (copyQueries != null)
 			refactoring2.setQueries(copyQueries);
@@ -97,6 +105,20 @@ public class CopyTest extends RefactoringTest {
 		else assertTrue(false);
 		
 		assertEquals("destination was expected to be valid: " + status.getFirstMessage(status.getSeverity()), RefactoringStatus.OK, status.getSeverity());
+	}
+
+	private void verifyCopyingOfSubCuElements(ICompilationUnit[] cus, Object destination, IJavaElement[] javaElements) throws JavaModelException, Exception, IOException {
+		CopyRefactoring2 ref= verifyEnabled(new IResource[0], javaElements, new TestCopyQueries());
+		verifyValidDestination(ref, destination);
+		RefactoringStatus status= performRefactoring(ref);
+		assertNull("failed precondition", status);
+		for (int i= 0; i < cus.length; i++) {
+			SourceCompareUtil.compare("different source in " + cus[i].getElementName(), cus[i].getSource(), getFileContents(getOutputTestFileName(removeExtension(cus[i].getElementName()))));
+		}
+	}
+
+	private static String removeExtension(String fileName) {
+		return fileName.substring(0, fileName.lastIndexOf('.'));
 	}
 
 	private static class TestCopyQueries implements ICopyQueries{
@@ -1137,9 +1159,9 @@ public class CopyTest extends RefactoringTest {
 		}						
 	}
 	
-	public void testDestination_method_no_cu_with_no_main_type() throws Exception{
+	public void testDestination_method_no_cu() throws Exception{
 		ICompilationUnit cu= null;
-		ICompilationUnit otherCu= getPackageP().createCompilationUnit("C.java", "package p;class D{}class E{}", false, new NullProgressMonitor());
+		ICompilationUnit otherCu= getPackageP().createCompilationUnit("C.java", "package p;class C{}", false, new NullProgressMonitor());
 		try {
 			cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}}", false, new NullProgressMonitor());
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
@@ -1327,108 +1349,176 @@ public class CopyTest extends RefactoringTest {
 		}
 	}
 
-	public void testDestination_method_yes_itself() throws Exception{
+	public void test_method_yes_itself() throws Exception{
 		ICompilationUnit cu= null;
 		try {
-			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}}", false, new NullProgressMonitor());
+			cu= createCUfromTestFile(getPackageP(), "A");
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= { method };
-			IResource[] resources= {};
-			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
-
 			Object destination= method;
-			verifyValidDestination(ref, destination);
+
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
 		}
 	}
 
-	public void testDestination_method_yes_cu_with_main_type() throws Exception{
-		ICompilationUnit cu= null;
-		ICompilationUnit otherCu= getPackageP().createCompilationUnit("C.java", "package p;class C{}class D{}", false, new NullProgressMonitor());
-		try {
-			cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}}", false, new NullProgressMonitor());
-			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
-			IJavaElement[] javaElements= { method };
-			IResource[] resources= {};
-			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
-
-			Object destination= otherCu;
-			verifyValidDestination(ref, destination);
-		} finally {
-			performDummySearch();
-			cu.delete(true, new NullProgressMonitor());
-			otherCu.delete(true, new NullProgressMonitor());
-		}
-	}
-	public void testDestination_method_yes_other_method() throws Exception{
+//	public void test_method_yes_cu_with_main_type() throws Exception{
+//		ICompilationUnit cu= null;
+//		ICompilationUnit otherCu= createCUfromTestFile(getPackageP(), "C");
+//		try {
+//			cu= createCUfromTestFile(getPackageP(), "A");
+//			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+//			IJavaElement[] javaElements= { method };
+//			Object destination= otherCu;
+//
+//			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu, otherCu}, destination, javaElements);
+//		} finally {
+//			performDummySearch();
+//			cu.delete(true, new NullProgressMonitor());
+//			otherCu.delete(true, new NullProgressMonitor());
+//		}
+//	}
+	public void test_method_yes_other_method() throws Exception{
 		ICompilationUnit cu= null;
 		try {
-			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}void bar(){}}", false, new NullProgressMonitor());
+			cu= createCUfromTestFile(getPackageP(), "A");
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IMethod otherMethod= cu.getType("A").getMethod("bar", new String[0]);
 			IJavaElement[] javaElements= { method };
-			IResource[] resources= {};
-			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
-
 			Object destination= otherMethod;
-			verifyValidDestination(ref, destination);
+
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
 		}
 	}
 
-	public void testDestination_method_yes_field() throws Exception{
+	public void test_method_yes_field() throws Exception{
 		ICompilationUnit cu= null;
 		try {
-			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}int bar;}", false, new NullProgressMonitor());
+			cu= createCUfromTestFile(getPackageP(), "A");
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IField field= cu.getType("A").getField("bar");
 			IJavaElement[] javaElements= { method };
-			IResource[] resources= {};
-			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
-
 			Object destination= field;
-			verifyValidDestination(ref, destination);
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
 		}
 	}
 
-	public void testDestination_method_yes_type() throws Exception{
+	public void test_method_yes_type() throws Exception{
 		ICompilationUnit cu= null;
 		try {
-			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}int bar;}", false, new NullProgressMonitor());
+			cu= createCUfromTestFile(getPackageP(), "A");
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= { method };
-			IResource[] resources= {};
-			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
-
 			Object destination= cu.getType("A");
-			verifyValidDestination(ref, destination);
+
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
 		}
 	}
 	
-	public void testDestination_method_yes_initializer() throws Exception{
+	public void test_method_yes_initializer() throws Exception{
 		ICompilationUnit cu= null;
 		try {
-			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}{}}", false, new NullProgressMonitor());
+			cu= createCUfromTestFile(getPackageP(), "A");
 			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
 			IJavaElement[] javaElements= { method };
-			IResource[] resources= {};
-			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
-
 			Object destination= cu.getType("A").getInitializer(1);
-			verifyValidDestination(ref, destination);
+
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void test_field_yes_field() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IField field= cu.getType("A").getField("bar");
+			IField otherField= cu.getType("A").getField("baz");
+			IJavaElement[] javaElements= { field };
+			Object destination= otherField;
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void test_field_declared_in_multi_yes_type() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IField field= cu.getType("A").getField("bar");
+			IType type= cu.getType("A");
+			IJavaElement[] javaElements= { field };
+			Object destination= type;
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void test_fields_declared_in_multi_yes_type() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IField field1= cu.getType("A").getField("bar");
+			IField field2= cu.getType("A").getField("baz");
+			IType type= cu.getType("A");
+			IJavaElement[] javaElements= { field1, field2 };
+			Object destination= type;
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void test_type_yes_type() throws Exception{
+		ICompilationUnit cu= null;
+		ICompilationUnit otherCu= createCUfromTestFile(getPackageP(), "C");
+
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IType type= cu.getType("A");
+			IType otherType= otherCu.getType("C");
+			IJavaElement[] javaElements= { type };
+			Object destination= otherType;
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{otherCu, cu}, destination, javaElements);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+			otherCu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void test_type_yes_cu() throws Exception{
+		ICompilationUnit cu= null;
+		ICompilationUnit otherCu= createCUfromTestFile(getPackageP(), "C");
+
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IType type= cu.getType("A");
+			IJavaElement[] javaElements= { type };
+			Object destination= otherCu;
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{otherCu, cu}, destination, javaElements);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+			otherCu.delete(true, new NullProgressMonitor());
 		}
 	}
 
@@ -1449,34 +1539,29 @@ public class CopyTest extends RefactoringTest {
 		}
 	}
 
-	public void testDestination_initializer_yes_type() throws Exception{
+	public void test_initializer_yes_type() throws Exception{
 		ICompilationUnit cu= null;
 		try {
-			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}{}}", false, new NullProgressMonitor());
+			cu= createCUfromTestFile(getPackageP(), "A");
 			IInitializer initializer= cu.getType("A").getInitializer(1);
 			IJavaElement[] javaElements= { initializer };
-			IResource[] resources= {};
-			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
-
 			Object destination= cu.getType("A");
-			verifyValidDestination(ref, destination);
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
 		}
 	}
 
-	public void testDestination_initializer_yes_method() throws Exception{
+	public void test_initializer_yes_method() throws Exception{
 		ICompilationUnit cu= null;
 		try {
-			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}{}}", false, new NullProgressMonitor());
+			cu= createCUfromTestFile(getPackageP(), "A");
 			IInitializer initializer= cu.getType("A").getInitializer(1);
 			IJavaElement[] javaElements= { initializer };
-			IResource[] resources= {};
-			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
-
 			Object destination= cu.getType("A").getMethod("foo", new String[0]);
-			verifyValidDestination(ref, destination);
+
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
@@ -1491,7 +1576,7 @@ public class CopyTest extends RefactoringTest {
 			IJavaElement[] javaElements= { container };
 			IResource[] resources= {};
 			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
-
+	
 			Object destination= getPackageP();
 			verifyInvalidDestination(ref, destination);
 		} finally {
@@ -1500,19 +1585,16 @@ public class CopyTest extends RefactoringTest {
 		}
 	}
 
-	public void testDestination_import_container_yes_type_in_different_cu() throws Exception{
+	public void test_import_container_yes_type_in_different_cu() throws Exception{
 		ICompilationUnit cu= null;
-		ICompilationUnit otherCu= getPackageP().createCompilationUnit("C.java", "package p;class C{}class D{}", false, new NullProgressMonitor());
+		ICompilationUnit otherCu= createCUfromTestFile(getPackageP(), "C");
 
 		try {
-			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{void foo(){}{}}", false, new NullProgressMonitor());
+			cu= createCUfromTestFile(getPackageP(), "A");
 			IImportContainer container= cu.getImportContainer();
 			IJavaElement[] javaElements= { container };
-			IResource[] resources= {};
-			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
-
 			Object destination= otherCu.getType("C");
-			verifyValidDestination(ref, destination);
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu, otherCu}, destination, javaElements);
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
@@ -1520,25 +1602,40 @@ public class CopyTest extends RefactoringTest {
 		}
 	}
 
-	public void testDestination_import_container_yes_method_in_different_cu() throws Exception{
+	public void test_import_container_yes_method_in_different_cu() throws Exception{
 		ICompilationUnit cu= null;
-		ICompilationUnit otherCu= getPackageP().createCompilationUnit("C.java", "package p;class C{void foo(){}}", false, new NullProgressMonitor());
+		ICompilationUnit otherCu= createCUfromTestFile(getPackageP(), "C");
 
 		try {
-			cu= getPackageP().createCompilationUnit("A.java", "import java.util.*;package p;class A{}", false, new NullProgressMonitor());
+			cu= createCUfromTestFile(getPackageP(), "A");
 			IImportContainer container= cu.getImportContainer();
 			IJavaElement[] javaElements= { container };
-			IResource[] resources= {};
-			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
-
 			Object destination= otherCu.getType("C").getMethod("foo", new String[0]);
-			verifyValidDestination(ref, destination);
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu, otherCu}, destination, javaElements);
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
 			otherCu.delete(true, new NullProgressMonitor());
 		}
 	}
+
+	public void test_import_container_yes_cu() throws Exception{
+		ICompilationUnit cu= null;
+		ICompilationUnit otherCu= createCUfromTestFile(getPackageP(), "C");
+
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IImportContainer container= cu.getImportContainer();
+			IJavaElement[] javaElements= { container };
+			Object destination= otherCu;
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu, otherCu}, destination, javaElements);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+			otherCu.delete(true, new NullProgressMonitor());
+		}
+	}
+
 
 	public void testCopy_File_to_Folder() throws Exception {
 		IFolder parentFolder= (IFolder) getPackageP().getResource();
