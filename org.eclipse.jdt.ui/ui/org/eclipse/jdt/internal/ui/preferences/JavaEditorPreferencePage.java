@@ -455,6 +455,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fPreviewViewer.getTextWidget().setFont(JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT));
 		fPreviewViewer.setEditable(false);
 		
+		initializeViewerColors(fPreviewViewer);
+		
 		String content= loadPreviewContentFromFile("ColorSettingPreviewCode.txt");
 		IDocument document= new Document(content);
 		IDocumentPartitioner partitioner= fJavaTextTools.createDocumentPartitioner();
