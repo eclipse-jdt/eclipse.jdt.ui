@@ -42,10 +42,8 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * Action that encapsulates the IntroduceFactoryRefactoring refactoring for
- * association with UI entities.
- * 
- * @author rfuhrer
+ * Action that encapsulates the a constructor call with a factory
+ * method.
  * 
  * @since 3.0
  */

@@ -67,14 +67,14 @@ public class BuildActionGroup extends ActionGroup {
 		
 		fBuildAction= new BuildAction(shell, IncrementalProjectBuilder.INCREMENTAL_BUILD);
 		fBuildAction.setText(ActionMessages.getString("BuildAction.label")); //$NON-NLS-1$
-		fBuildAction.setActionDefinitionId("org.eclipse.ui.project.buildProject");
+		fBuildAction.setActionDefinitionId("org.eclipse.ui.project.buildProject"); //$NON-NLS-1$
 		
 		fFullBuildAction= new BuildAction(shell, IncrementalProjectBuilder.FULL_BUILD);
 		fFullBuildAction.setText(ActionMessages.getString("RebuildAction.label")); //$NON-NLS-1$
-		fFullBuildAction.setActionDefinitionId("org.eclipse.ui.project.rebuildProject");
+		fFullBuildAction.setActionDefinitionId("org.eclipse.ui.project.rebuildProject"); //$NON-NLS-1$
 		
 		fRefreshAction= new RefreshAction(fSite);
-		fRefreshAction.setActionDefinitionId("org.eclipse.ui.file.refresh");
+		fRefreshAction.setActionDefinitionId("org.eclipse.ui.file.refresh"); //$NON-NLS-1$
 		
 		provider.addSelectionChangedListener(fBuildAction);
 		provider.addSelectionChangedListener(fFullBuildAction);

@@ -43,7 +43,14 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * @author tip
+ * Action to generalize the type of a local or field declaration or the
+ * return type of a method declaration.
+ * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
+ * @since 3.0
  */
 public class ChangeTypeAction extends SelectionDispatchAction {
 	private CompilationUnitEditor fEditor;
@@ -62,11 +69,9 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 	/**
 	 * Creates a new <code>ChangeTypeAction</code>. The action requires that
 	 * the selection provided by the site's selection provider is of type
-	 * <code>
-	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
-	 * @param site
-	 *            the site providing context information for this action
+	 * @param site the site providing context information for this action
 	 */
 	public ChangeTypeAction(IWorkbenchSite site) {
 		super(site);
@@ -138,6 +143,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * @param selection the java text selection
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {

@@ -60,6 +60,13 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_ACTION);
 	}
 
+	/**
+	 * Creates a new <code>ConvertAnonymousToNestedAction</code>. The action requires 
+	 * that the selection provided by the site's selection provider is of type
+	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
+	 * 
+	 * @param site the site providing context information for this action
+	 */
 	public ConvertAnonymousToNestedAction(IWorkbenchSite site) {
 		super(site);
 		fEditor= null;

@@ -349,6 +349,12 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	private void fillToolBar(IToolBarManager tooBar) {
 	}
 
+	/**
+	 * Fills the given view menu with the entries managed by the
+	 * group.
+	 * 
+	 * @param viewMenu the menu to fill
+	 */
 	public void fillViewMenu(IMenuManager viewMenu) {
 		/*
 		 * Don't change the separator group name.

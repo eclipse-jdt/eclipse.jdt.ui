@@ -147,6 +147,9 @@ public class OpenAction extends SelectionDispatchAction {
 		run(selection.toArray());
 	}
 	
+	/**
+	 * Note: this method is for internal use only. Clients should not call this method.
+	 */
 	public void run(Object[] elements) {
 		if (elements == null)
 			return;

@@ -113,6 +113,9 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			run(getCompilationUnit(selection));
 	}	
 	
+	/**
+	 * Note: this method is for internal use only. Clients should not call this method.
+	 */
 	public void run(ICompilationUnit unit) {
 		if (!ActionUtil.isProcessable(getShell(), unit))
 			return;
