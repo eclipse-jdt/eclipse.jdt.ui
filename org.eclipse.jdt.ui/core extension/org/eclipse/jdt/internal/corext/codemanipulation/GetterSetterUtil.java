@@ -40,8 +40,12 @@ public class GetterSetterUtil {
 		return getGetterName(field.getJavaProject(), field.getElementName(), field.getFlags(), useIsForBoolGetters && JavaModelUtil.isBoolean(field), excludedNames);
 	}	
 	
-	private static String getGetterName(IJavaProject project, String fieldName, int flags, boolean isBoolean, String[] excludedNames){
+	public static String getGetterName(IJavaProject project, String fieldName, int flags, boolean isBoolean, String[] excludedNames){
 		return NamingConventions.suggestGetterName(project, fieldName, flags, isBoolean, excludedNames);	
+	}
+
+	public static String getSetterName(IJavaProject project, String fieldName, int flags, boolean isBoolean, String[] excludedNames){
+		return NamingConventions.suggestSetterName(project, fieldName, flags, isBoolean, excludedNames);	
 	}
 
 	public static String getSetterName(IField field, String[] excludedNames) throws JavaModelException {
