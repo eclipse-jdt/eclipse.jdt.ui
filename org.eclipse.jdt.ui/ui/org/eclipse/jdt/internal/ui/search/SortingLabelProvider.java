@@ -36,10 +36,7 @@ public class SortingLabelProvider extends SearchLabelProvider implements IColorP
 			image= getLabelProvider().getImage(element);
 		if (image != null)
 			return image;
-		ISearchUIParticipant participant= ((JavaSearchResult)fPage.getInput()).getSearchParticpant(element);
-		if (participant != null)
-			return participant.getImage(element);
-		return null;
+		return getParticipantImage(element);
 	}
 		
 	public final String getText(Object element) {
@@ -57,10 +54,7 @@ public class SortingLabelProvider extends SearchLabelProvider implements IColorP
 		String text= getLabelProvider().getText(o);
 		if (text != null && (!"".equals(text))) //$NON-NLS-1$
 			return text;
-		ISearchUIParticipant participant= ((JavaSearchResult)fPage.getInput()).getSearchParticpant(o);
-		if (participant != null)
-			return participant.getText(o);
-		return ""; //$NON-NLS-1$
+		return getParticipantText(o);	
 	}
 
 	public void setOrder(int orderFlag) {

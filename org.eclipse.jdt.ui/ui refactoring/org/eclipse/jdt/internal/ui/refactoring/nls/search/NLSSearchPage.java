@@ -182,7 +182,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				break;
 			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE :
 				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(getSelection());
-				IProject[] projects= JavaSearchScopeFactory.getInstance().getJavaProjects(scope);
+				IProject[] projects= JavaSearchScopeFactory.getInstance().getProjects(scope);
 				if (projects.length > 1)
 					scopeDescription= NLSSearchMessages.getFormattedString("EnclosingProjectsScope", projects[0].getName()); //$NON-NLS-1$
 				else if (projects.length == 1)
@@ -226,7 +226,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				break;
 			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE :
 				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(getSelection());
-				IProject[] projects= JavaSearchScopeFactory.getInstance().getJavaProjects(scope);
+				IProject[] projects= JavaSearchScopeFactory.getInstance().getProjects(scope);
 				if (projects.length > 1)
 					scopeDescription= NLSSearchMessages.getFormattedString("EnclosingProjectsScope", projects[0].getName()); //$NON-NLS-1$
 				else if (projects.length == 1)

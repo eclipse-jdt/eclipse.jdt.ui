@@ -32,10 +32,7 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 		Image image= getLabelProvider().getImage(element);
 		if (image != null)
 			return image;
-		ISearchUIParticipant participant= ((JavaSearchResult)fPage.getInput()).getSearchParticpant(element);
-		if (participant != null)
-			return participant.getImage(element);
-		return null;
+		return getParticipantImage(element);
 	}
 	
 	public String getText(Object element) {
@@ -65,11 +62,7 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 		String text= getLabelProvider().getText(element);
 		if (text != null && !"".equals(text)) //$NON-NLS-1$
 			return text;
-		ISearchUIParticipant participant= ((JavaSearchResult)fPage.getInput()).getSearchParticpant(element);
-		if (participant != null)
-			return participant.getText(element);
-		return ""; //$NON-NLS-1$
-	}
+		return getParticipantText(element);	}
 
 	private boolean isSameInformation(Object realParent, Object lastElement) {
 		if (lastElement instanceof IType) {

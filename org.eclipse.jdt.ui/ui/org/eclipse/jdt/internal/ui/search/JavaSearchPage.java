@@ -235,7 +235,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				break;
 			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE:
 				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(fStructuredSelection);
-				IProject[] projects= JavaSearchScopeFactory.getInstance().getJavaProjects(scope);
+				IProject[] projects= JavaSearchScopeFactory.getInstance().getProjects(scope);
 				if (projects.length > 1)
 					scopeDescription= SearchMessages.getFormattedString("EnclosingProjectsScope", projects[0].getName()); //$NON-NLS-1$
 				else if (projects.length == 1)
@@ -283,28 +283,24 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		// Setup search scope
 		IJavaSearchScope scope= null;
 		String scopeDescription= ""; //$NON-NLS-1$
-		HashSet concernedProjects= new HashSet();
 		
 		switch (getContainer().getSelectedScope()) {
 			case ISearchPageContainer.WORKSPACE_SCOPE:
-				collectConcernedProjects(concernedProjects, JavaPlugin.getWorkspace());
 				scopeDescription= SearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
 				scope= SearchEngine.createWorkspaceScope();
 				break;
 			case ISearchPageContainer.SELECTION_SCOPE:
-				collectConcernedProjects(concernedProjects, fStructuredSelection);
 				scopeDescription= SearchMessages.getString("SelectionScope"); //$NON-NLS-1$
 				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(fStructuredSelection);
 				break;
 			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE:
-				collectConcernedProjects(concernedProjects, fStructuredSelection);
 				scope= JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(fStructuredSelection);
-				if (concernedProjects.size() >= 1) {
-					IProject firstProject= (IProject) concernedProjects.iterator().next();
-					if (concernedProjects.size() == 1)
-						scopeDescription= SearchMessages.getFormattedString("EnclosingProjectScope", firstProject.getName()); //$NON-NLS-1$
+				IProject[] projects= JavaSearchScopeFactory.getInstance().getProjects(scope);
+				if (projects.length >= 1) {
+					if (projects.length == 1)
+						scopeDescription= SearchMessages.getFormattedString("EnclosingProjectScope", projects[0].getName()); //$NON-NLS-1$
 					else
-						scopeDescription= SearchMessages.getFormattedString("EnclosingProjectsScope", firstProject.getName()); //$NON-NLS-1$
+						scopeDescription= SearchMessages.getFormattedString("EnclosingProjectsScope", projects[0].getName()); //$NON-NLS-1$
 				} else 
 					scopeDescription= SearchMessages.getFormattedString("EnclosingProjectScope", ""); //$NON-NLS-1$ //$NON-NLS-2$
 				break;
@@ -313,7 +309,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				// should not happen - just to be sure
 				if (workingSets == null || workingSets.length < 1)
 					return false;
-				collectConcernedProjects(concernedProjects, getContainer().getSelectedWorkingSets());
 				scopeDescription= SearchMessages.getFormattedString("WorkingSetScope", SearchUtil.toString(workingSets)); //$NON-NLS-1$
 				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets());
 				SearchUtil.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
@@ -331,25 +326,15 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			data.setJavaElement(null);
 		} 
 		
-		IQueryParticipant[] participants= new IQueryParticipant[0];
-		try {
-			participants= getSearchParticipants(concernedProjects);
-		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-2$ //$NON-NLS-1$
-			return false;
-		}
-		textSearchJob= new JavaSearchQuery(querySpec, participants);
+		textSearchJob= new JavaSearchQuery(querySpec);
 		new SearchResultUpdater((JavaSearchResult) textSearchJob.getSearchResult());
 		NewSearchUI.runQuery(textSearchJob);	
 		return true;
 	}
 
-	private IQueryParticipant[] getSearchParticipants(HashSet concernedProjects) throws CoreException {
-		Map participantMap= new HashMap();
-		collectParticipants(participantMap, concernedProjects);
-		IQueryParticipant[] participants= new IQueryParticipant[participantMap.size()];
-		return (IQueryParticipant[]) participantMap.values().toArray(participants);
-	}	private int getLimitTo() {
+	
+	
+	private int getLimitTo() {
 		for (int i= 0; i < fLimitTo.length; i++) {
 			if (fLimitTo[i].getSelection())
 				return i;
@@ -960,20 +945,5 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		return null;
 	}
 	
-	private void collectParticipants(Map participants, Set projects) throws CoreException {
-		Iterator activeParticipants= SearchParticipantsPreferencePage.readActiveParticipants().values().iterator();
-		while (activeParticipants.hasNext()) {
-			IConfigurationElement participant= (IConfigurationElement) activeParticipants.next();
-			String id= participant.getAttribute("id"); //$NON-NLS-1$
-			Iterator projectElemnents= projects.iterator();
-			while (projectElemnents.hasNext()) {
-				IProject project= (IProject) projectElemnents.next();
-				if (participants.containsKey(id))
-					break;
-				if (project.hasNature(participant.getAttribute("nature"))) //$NON-NLS-1$
-					participants.put(id, participant.createExecutableExtension("class")); //$NON-NLS-1$
-			}
-		}
-	}
 
 }

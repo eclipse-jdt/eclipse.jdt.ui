@@ -10,11 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.search;
 
-import org.eclipse.swt.graphics.Image;
-
-import org.eclipse.ui.PartInitException;
-
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.search.ui.text.Match;
+import org.eclipse.ui.PartInitException;
 
 /**
  * This interface serves to display elements that a search participant has contributed to a search
@@ -27,25 +25,15 @@ import org.eclipse.search.ui.text.Match;
  * 
  */
 public interface ISearchUIParticipant {
-
 	/**
-	 * Returns the image for the label of the given element. 
-	 *
-	 * @param element the element for which to provide the label image
-	 * @return the image used to label the element, or <code>null</code>
-	 *   if there is no image for the given object
+	 * Creates a new instance of a label provider for elments that have been contributed
+	 * to a search result by the corresponding query participant. The search view
+	 * will call this method when it needs to render elements and will dipose the 
+	 * label providers when it is done with them. This method may therefore be called
+	 * multiple times.
+	 * @return A label provider for elements found by the corresponding query participant.
 	 */
-	public Image getImage(Object element);
-
-	/**
-	 * Returns the text for the label of the given element.
-	 *
-	 * @param element the element for which to provide the label text
-	 * @return the text string used to label the element, or <code>null</code>
-	 *   if there is no text label for the given object
-	 */
-	public String getText(Object element);
-
+	ILabelProvider createLabelProvider();
 	/**
 	 * Opens an editor on the given element and selects the given range of text.
 	 * The location of matches are automatically updated when a file is edited

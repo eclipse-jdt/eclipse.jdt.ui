@@ -201,7 +201,7 @@ public class JavaSearchScopeFactory {
 	}
 
 	
-	public IProject[] getJavaProjects(IJavaSearchScope scope) {
+	public IProject[] getProjects(IJavaSearchScope scope) {
 		IPath[] paths= scope.enclosingProjectsAndJars();
 		HashSet temp= new HashSet();
 		for (int i= 0; i < paths.length; i++) {

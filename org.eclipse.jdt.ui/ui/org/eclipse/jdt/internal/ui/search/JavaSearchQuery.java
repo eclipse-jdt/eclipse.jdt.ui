@@ -10,8 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -23,6 +30,7 @@ import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.preferences.SearchParticipantsPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -41,15 +49,12 @@ import org.eclipse.search.ui.text.Match;
 public class JavaSearchQuery implements ISearchQuery {
 	private ISearchResult fResult;
 	private QuerySpecification fPatternData;
-	private IQueryParticipant[] fParticipants;
+	
 	
 	public JavaSearchQuery(QuerySpecification data) {
-		this(data, getParticipants());
+		fPatternData= data;
 	}
-	
-	private static IQueryParticipant[] getParticipants() {
-		return new IQueryParticipant[0];
-	}
+
 	
 	private static class SearchRequestor implements ISearchRequestor {
 		private IQueryParticipant fParticipant;
@@ -69,11 +74,28 @@ public class JavaSearchQuery implements ISearchQuery {
 			fSearchResult= result;
 		}
 	}
-
-	public JavaSearchQuery(QuerySpecification data, IQueryParticipant[] participants) {
-		fPatternData= data;
-		fParticipants= participants;
+	
+	private IQueryParticipant[] getSearchParticipants(IProject[] concernedProjects) throws CoreException {
+		Map participantMap= new HashMap();
+		collectParticipants(participantMap, concernedProjects);
+		IQueryParticipant[] participants= new IQueryParticipant[participantMap.size()];
+		return (IQueryParticipant[]) participantMap.values().toArray(participants);
+	}	
+	
+	private void collectParticipants(Map participants, IProject[] projects) throws CoreException {
+		Iterator activeParticipants= SearchParticipantsPreferencePage.readActiveParticipants().values().iterator();
+		while (activeParticipants.hasNext()) {
+			IConfigurationElement participant= (IConfigurationElement) activeParticipants.next();
+			String id= participant.getAttribute("id"); //$NON-NLS-1$
+			for (int i= 0; i < projects.length; i++) {
+				if (participants.containsKey(id))
+					break;
+				if (projects[i].hasNature(participant.getAttribute("nature"))) //$NON-NLS-1$
+					participants.put(id, participant.createExecutableExtension("class")); //$NON-NLS-1$
+			}
+		}
 	}
+
 
 	public IStatus run(IProgressMonitor monitor) {
 		final JavaSearchResult textResult= (JavaSearchResult) getSearchResult();
@@ -85,8 +107,12 @@ public class JavaSearchQuery implements ISearchQuery {
 		try {
 
 			int totalTicks= 1000;
-			for (int i= 0; i < fParticipants.length; i++) {
-				totalTicks+= fParticipants[i].estimateTicks(fPatternData);
+			IProject[] projects= JavaSearchScopeFactory.getInstance().getProjects(fPatternData.getScope());
+			IQueryParticipant[] participants= getSearchParticipants(projects);
+			int[] ticks= new int[participants.length];
+			for (int i= 0; i < participants.length; i++) {
+				ticks[i]= participants[i].estimateTicks(fPatternData);
+				totalTicks+= ticks[i];
 			}
 			monitor.beginTask(SearchMessages.getString("JavaSearchQuery.task.label"), totalTicks); //$NON-NLS-1$
 			IProgressMonitor mainSearchPM= new SubProgressMonitor(monitor, 1000);
@@ -111,10 +137,10 @@ public class JavaSearchQuery implements ISearchQuery {
 				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, SearchMessages.getFormattedString("JavaSearchQuery.error.unsupported_pattern", stringPattern), null);  //$NON-NLS-1$
 			}
 			engine.search(JavaPlugin.getWorkspace(), pattern, fPatternData.getScope(), collector);
-			for (int i= 0; i < fParticipants.length; i++) {
-				ISearchRequestor requestor= new SearchRequestor(fParticipants[i], textResult);
-				IProgressMonitor participantPM= new SubProgressMonitor(monitor, fParticipants[i].estimateTicks(fPatternData));
-				fParticipants[i].search(requestor, fPatternData, participantPM);
+			for (int i= 0; i < participants.length; i++) {
+				ISearchRequestor requestor= new SearchRequestor(participants[i], textResult);
+				IProgressMonitor participantPM= new SubProgressMonitor(monitor, ticks[i]);
+				participants[i].search(requestor, fPatternData, participantPM);
 			}
 			matchCount= collector.getMatchCount();
 			

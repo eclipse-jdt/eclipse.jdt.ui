@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.search.ISearchUIParticipant;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.IColorProvider;
@@ -24,10 +28,12 @@ import org.eclipse.search.internal.ui.SearchPreferencePage;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 
 public abstract class SearchLabelProvider extends LabelProvider implements IColorProvider, IPropertyChangeListener {
 
 	private Color fPotentialMatchFgColor;
+	private Map fLabelProviderMap;
 	
 	protected JavaSearchResultPage fPage;
 	private ILabelProvider fLabelProvider;
@@ -35,6 +41,7 @@ public abstract class SearchLabelProvider extends LabelProvider implements IColo
 	public SearchLabelProvider(JavaSearchResultPage page, ILabelProvider inner) {
 		fPage= page;
 		fLabelProvider= inner;
+		fLabelProviderMap= new HashMap(5);
 		SearchPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 	}
 	
@@ -97,6 +104,10 @@ public abstract class SearchLabelProvider extends LabelProvider implements IColo
 		}
 		SearchPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 		fLabelProvider.dispose();
+		for (Iterator labelProviders = fLabelProviderMap.values().iterator(); labelProviders.hasNext();) {
+			ILabelProvider labelProvider = (ILabelProvider) labelProviders.next();
+			labelProvider.dispose();
+		}
 		super.dispose();
 	}
 	
@@ -112,5 +123,35 @@ public abstract class SearchLabelProvider extends LabelProvider implements IColo
 	public void removeListener(ILabelProviderListener listener) {
 		super.removeListener(listener);
 		getLabelProvider().removeListener(listener);
+	}
+
+
+	protected String getParticipantText(Object element) {
+		ILabelProvider labelProvider= getLabelProvider(element);
+		if (labelProvider != null)
+			return labelProvider.getText(element);
+		return ""; //$NON-NLS-1$
+	
+	}
+
+
+	protected Image getParticipantImage(Object element) {
+		ILabelProvider lp= getLabelProvider(element);
+		if (lp == null)
+			return null;
+		return lp.getImage(element);
+	}
+
+
+	private ILabelProvider getLabelProvider(Object element) {
+		ISearchUIParticipant participant= ((JavaSearchResult)fPage.getInput()).getSearchParticpant(element);
+		if (participant == null)
+			return null;
+		ILabelProvider lp= (ILabelProvider) fLabelProviderMap.get(participant);
+		if (lp == null) {
+			lp= participant.createLabelProvider();
+			fLabelProviderMap.put(participant, lp);
+		}
+		return lp;
 	}
 }
