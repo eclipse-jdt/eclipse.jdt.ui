@@ -7,5 +7,5 @@ interface J{
 	void m();
 }
 class C implements I, J{
-	public void m();
+	public void m(){};
 }

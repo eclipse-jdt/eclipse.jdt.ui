@@ -7,8 +7,8 @@ interface J{
 	void k();
 }
 class A{
-	public void k();
+	public void k(){};
 }
 class C extends A implements I, J{
-	public void k();
+	public void k(){};
 }

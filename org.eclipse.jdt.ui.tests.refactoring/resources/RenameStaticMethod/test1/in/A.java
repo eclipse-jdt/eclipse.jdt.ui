@@ -7,6 +7,7 @@ class A{
 	}
 	static int fred(){
 		m();
+		return 0;
 	}
 }
 class B{

@@ -1,4 +1,4 @@
 package p;
 interface A{
-	int g;
+	int g= 0;
 }

@@ -12,8 +12,8 @@ class AA extends A{
 
 class B{
 	A a;
-	B b;
-	A ab= new B();
+	AA b;
+	A ab= new AA();
 	void m(){
 		a.g= 0;
 		b.f= 0;

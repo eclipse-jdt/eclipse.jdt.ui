@@ -1,2 +1,2 @@
 package p;
-class B{};
+public class B{};
