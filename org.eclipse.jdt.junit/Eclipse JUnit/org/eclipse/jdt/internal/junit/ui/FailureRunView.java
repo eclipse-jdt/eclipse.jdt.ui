@@ -238,7 +238,8 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	}
 	
 	public void handleDoubleClick(MouseEvent e) {
-		new OpenTestAction(fRunnerViewPart, getClassName(), getMethodName()).run();
+		if (fTable.getSelectionCount() > 0) 
+			new OpenTestAction(fRunnerViewPart, getClassName(), getMethodName()).run();
 	}
 	
 	public void newTreeEntry(String treeEntry) {

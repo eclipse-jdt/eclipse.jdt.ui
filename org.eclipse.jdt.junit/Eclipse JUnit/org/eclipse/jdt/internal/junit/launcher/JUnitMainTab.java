@@ -450,9 +450,12 @@ public class JUnitMainTab implements ILaunchConfigurationTab, IAddVMDialogReques
 			return;
 		}		
 		IType type = (IType)results[0];
-		fTestText.setText(type.getFullyQualifiedName());
-		javaProject = type.getJavaProject();
-		fProjText.setText(javaProject.getElementName());
+		
+		if (type != null) {
+			fTestText.setText(type.getFullyQualifiedName());
+			javaProject = type.getJavaProject();
+			fProjText.setText(javaProject.getElementName());
+		}
 	}
 	
 	/**
