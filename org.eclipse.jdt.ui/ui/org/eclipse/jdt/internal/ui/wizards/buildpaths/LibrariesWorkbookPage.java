@@ -37,6 +37,7 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -403,6 +404,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if (dialog.open() == dialog.OK) {
 			IPath path= dialog.getVariable();
 			CPListElement elem= new CPListElement(IClasspathEntry.CPE_VARIABLE, path, null);
+			IPath resolvedPath= JavaCore.getResolvedVariablePath(path);
+			elem.setIsMissing((resolvedPath == null) || !resolvedPath.toFile().isFile());
 			return new CPListElement[] { elem };
 		}
 		return null;

@@ -4,10 +4,10 @@
 public class CPVariableElementLabelProvider extends LabelProvider {
 	
 	private Image fVariableImage;
-	
-	public CPVariableElementLabelProvider() {
+	private boolean fShowResolvedVariables;	
+	public CPVariableElementLabelProvider(boolean showResolvedVariables) {
 		ImageRegistry reg= JavaPlugin.getDefault().getImageRegistry();
-		fVariableImage= reg.get(JavaPluginImages.IMG_OBJS_ENV_VAR);
+		fVariableImage= reg.get(JavaPluginImages.IMG_OBJS_ENV_VAR);		fShowResolvedVariables= showResolvedVariables;
 	}
 	
 	/**
@@ -28,11 +28,9 @@ public class CPVariableElementLabelProvider extends LabelProvider {
 			CPVariableElement curr= (CPVariableElement)element;
 			String name= curr.getName();
 			IPath path= curr.getPath();
-			StringBuffer buf= new StringBuffer(name);			if (!curr.isReserved()) {
-				if (path != null) {
-					buf.append(" - "); //$NON-NLS-1$
-					buf.append(path.toString());
-				}			} else {				buf.append(' ');				buf.append(NewWizardMessages.getString("CPVariableElementLabelProvider.reserved")); //$NON-NLS-1$			}			return buf.toString();
+			StringBuffer buf= new StringBuffer(name);			if (curr.isReserved()) {				buf.append(' ');				buf.append(NewWizardMessages.getString("CPVariableElementLabelProvider.reserved")); //$NON-NLS-1$			}			if (fShowResolvedVariables || !curr.isReserved()) {				if (path != null) {
+					buf.append(" - "); //$NON-NLS-1$					if (!path.isEmpty()) {						buf.append(path.toString());					} else {						buf.append(NewWizardMessages.getString("CPVariableElementLabelProvider.empty")); //$NON-NLS-1$					}
+				}			}			return buf.toString();
 		}		
 		
 		

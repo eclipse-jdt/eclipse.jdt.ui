@@ -27,7 +27,7 @@ public class VariableBlock {
 				
 		VariablesAdapter adapter= new VariablesAdapter();
 		
-		CPVariableElementLabelProvider labelProvider= new CPVariableElementLabelProvider();
+		CPVariableElementLabelProvider labelProvider= new CPVariableElementLabelProvider(useAsSelectionDialog);
 		
 		fVariablesList= new ListDialogField(adapter, buttonLabels, labelProvider, 0);
 		fVariablesList.setDialogFieldListener(adapter);
@@ -43,7 +43,7 @@ public class VariableBlock {
 		String[] entries= JavaCore.getClasspathVariableNames();
 		ArrayList elements= new ArrayList(entries.length);
 		for (int i= 0; i < entries.length; i++) {
-			String name= entries[i];			CPVariableElement elem;			if (reserved.contains(name)) {				elem= new CPVariableElement(name, null, true);			} else {				IPath entryPath= JavaCore.getClasspathVariable(name);				elem= new CPVariableElement(name, entryPath, false);			}			elements.add(elem);			if (name.equals(initSelection)) {				initSelectedElement= elem;			}			
+			String name= entries[i];			CPVariableElement elem;			IPath entryPath= JavaCore.getClasspathVariable(name);			elem= new CPVariableElement(name, entryPath, reserved.contains(name));			elements.add(elem);			if (name.equals(initSelection)) {				initSelectedElement= elem;			}			
 		}
 		fVariablesList.setElements(elements);
 		

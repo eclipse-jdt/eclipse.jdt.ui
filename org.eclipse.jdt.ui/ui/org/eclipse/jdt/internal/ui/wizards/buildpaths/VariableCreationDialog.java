@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
+import java.io.File;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -204,9 +205,10 @@ public class VariableCreationDialog extends StatusDialog {
 		StatusInfo status= new StatusInfo();
 		
 		String path= fPathField.getText();
-		if (path.length() == 0) {
-			status.setError(NewWizardMessages.getString("VariableCreationDialog.error.enterpath")); //$NON-NLS-1$
-			return status;
+		if (path.length() > 0) { // empty path is ok
+			if (!new File(path).exists()) {
+				status.setWarning(NewWizardMessages.getString("VariableCreationDialog.warning.pathnotexists")); //$NON-NLS-1$
+			}
 		}
 		return status;
 	}
