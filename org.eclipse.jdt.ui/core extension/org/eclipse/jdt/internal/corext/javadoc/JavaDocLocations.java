@@ -205,6 +205,10 @@ public class JavaDocLocations {
 	private static void convertContainer(IClasspathEntry entry, IJavaProject project, Map oldLocationMap) {
 		try {
 			IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), project);
+			if (container == null) {
+				return;
+			}
+			
 			IClasspathEntry[] entries= container.getClasspathEntries();
 			for (int i= 0; i < entries.length; i++) {
 				IClasspathEntry curr= entries[i];
