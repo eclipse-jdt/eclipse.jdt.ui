@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
+import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.DisposeEvent;
@@ -474,7 +475,18 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		};
 		DragSource source= new DragSource(control, ops);
 		// Note, that the transfer agents are set by the delegating drag adapter itself.
-		source.addDragListener(new DelegatingDragAdapter(dragListeners));
+		source.addDragListener(new DelegatingDragAdapter(dragListeners) {
+			public void dragStart(DragSourceEvent event) {
+				IStructuredSelection selection= (IStructuredSelection)getSelection();
+				for (Iterator iter= selection.iterator(); iter.hasNext(); ) {
+					if (iter.next() instanceof IMember) {
+						setPossibleListeners(new TransferDragSourceListener[] {new SelectionTransferDragAdapter(fViewer)});
+						break;
+					}
+				}
+				super.dragStart(event);
+			}
+		});
 	}
 
 	/**
