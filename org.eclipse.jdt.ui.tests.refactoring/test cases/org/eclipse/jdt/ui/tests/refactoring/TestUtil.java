@@ -24,20 +24,24 @@ class TestUtil {
 	}
 	
 	static IField[] getFields(IType type, String[] names) throws JavaModelException{
+	    if (names == null )
+	        return new IField[0];
 		Set fields= new HashSet();
 		for (int i = 0; i < names.length; i++) {
 			IField field= type.getField(names[i]);
-			Assert.isTrue(field.exists());
+			Assert.isTrue(field.exists(), "field " + field.getElementName() + " does not exist");
 			fields.add(field);
 		}
 		return (IField[]) fields.toArray(new IField[fields.size()]);	
 	}
 	
 	static IMethod[] getMethods(IType type, String[] names, String[][] signatures) throws JavaModelException{
+		if (names == null || signatures == null)
+			return new IMethod[0];
 		Set methods= new HashSet();
 		for (int i = 0; i < names.length; i++) {
 			IMethod method= type.getMethod(names[i], signatures[i]);
-			Assert.isTrue(method.exists());
+			Assert.isTrue(method.exists(), "method " + method.getElementName() + " does not exist");
 			methods.add(method);
 		}
 		return (IMethod[]) methods.toArray(new IMethod[methods.size()]);	
