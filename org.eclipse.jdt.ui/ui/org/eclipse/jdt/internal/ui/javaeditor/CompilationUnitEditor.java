@@ -19,20 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.custom.VerifyKeyListener;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Layout;
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IWorkspace;
@@ -42,6 +28,19 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.custom.VerifyKeyListener;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Layout;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -106,7 +105,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -448,75 +446,76 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	/* Preference key for code formatter tab size */
 	private final static String CODE_FORMATTER_TAB_SIZE= JavaCore.FORMATTER_TAB_SIZE;
 	/** Preference key for matching brackets */
-	public final static String MATCHING_BRACKETS=  PreferenceConstants.EDITOR_MATCHING_BRACKETS;
+	private final static String MATCHING_BRACKETS=  PreferenceConstants.EDITOR_MATCHING_BRACKETS;
 	/** Preference key for matching brackets color */
-	public final static String MATCHING_BRACKETS_COLOR=  PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
+	private final static String MATCHING_BRACKETS_COLOR=  PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
 	/** Preference key for highlighting current line */
-	public final static String CURRENT_LINE= PreferenceConstants.EDITOR_CURRENT_LINE;
+	private final static String CURRENT_LINE= PreferenceConstants.EDITOR_CURRENT_LINE;
 	/** Preference key for highlight color of current line */
-	public final static String CURRENT_LINE_COLOR= PreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
+	private final static String CURRENT_LINE_COLOR= PreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
 	/** Preference key for showing print marging ruler */
-	public final static String PRINT_MARGIN= PreferenceConstants.EDITOR_PRINT_MARGIN;
+	private final static String PRINT_MARGIN= PreferenceConstants.EDITOR_PRINT_MARGIN;
 	/** Preference key for print margin ruler color */
-	public final static String PRINT_MARGIN_COLOR= PreferenceConstants.EDITOR_PRINT_MARGIN_COLOR;
+	private final static String PRINT_MARGIN_COLOR= PreferenceConstants.EDITOR_PRINT_MARGIN_COLOR;
 	/** Preference key for print margin ruler column */
-	public final static String PRINT_MARGIN_COLUMN= PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN;
+	private final static String PRINT_MARGIN_COLUMN= PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN;
 	/** Preference key for inserting spaces rather than tabs */
-	public final static String SPACES_FOR_TABS= PreferenceConstants.EDITOR_SPACES_FOR_TABS;
+	private final static String SPACES_FOR_TABS= PreferenceConstants.EDITOR_SPACES_FOR_TABS;
 	/** Preference key for error indication */
-	public final static String ERROR_INDICATION= PreferenceConstants.EDITOR_PROBLEM_INDICATION;
+	private final static String ERROR_INDICATION= PreferenceConstants.EDITOR_PROBLEM_INDICATION;
 	/** Preference key for error color */
-	public final static String ERROR_INDICATION_COLOR= PreferenceConstants.EDITOR_PROBLEM_INDICATION_COLOR;
+	private final static String ERROR_INDICATION_COLOR= PreferenceConstants.EDITOR_PROBLEM_INDICATION_COLOR;
 	/** Preference key for warning indication */
-	public final static String WARNING_INDICATION= PreferenceConstants.EDITOR_WARNING_INDICATION;
+	private final static String WARNING_INDICATION= PreferenceConstants.EDITOR_WARNING_INDICATION;
 	/** Preference key for warning color */
-	public final static String WARNING_INDICATION_COLOR= PreferenceConstants.EDITOR_WARNING_INDICATION_COLOR;
+	private final static String WARNING_INDICATION_COLOR= PreferenceConstants.EDITOR_WARNING_INDICATION_COLOR;
 	/** Preference key for task indication */
-	public final static String TASK_INDICATION= PreferenceConstants.EDITOR_TASK_INDICATION;
+	private final static String TASK_INDICATION= PreferenceConstants.EDITOR_TASK_INDICATION;
 	/** Preference key for task color */
-	public final static String TASK_INDICATION_COLOR= PreferenceConstants.EDITOR_TASK_INDICATION_COLOR;
+	private final static String TASK_INDICATION_COLOR= PreferenceConstants.EDITOR_TASK_INDICATION_COLOR;
 	/** Preference key for bookmark indication */
-	public final static String BOOKMARK_INDICATION= PreferenceConstants.EDITOR_BOOKMARK_INDICATION;
+	private final static String BOOKMARK_INDICATION= PreferenceConstants.EDITOR_BOOKMARK_INDICATION;
 	/** Preference key for bookmark color */
-	public final static String BOOKMARK_INDICATION_COLOR= PreferenceConstants.EDITOR_BOOKMARK_INDICATION_COLOR;
+	private final static String BOOKMARK_INDICATION_COLOR= PreferenceConstants.EDITOR_BOOKMARK_INDICATION_COLOR;
 	/** Preference key for search result indication */
-	public final static String SEARCH_RESULT_INDICATION= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION;
+	private final static String SEARCH_RESULT_INDICATION= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION;
 	/** Preference key for search result color */
-	public final static String SEARCH_RESULT_INDICATION_COLOR= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_COLOR;
+	private final static String SEARCH_RESULT_INDICATION_COLOR= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_COLOR;
 	/** Preference key for unknown annotation indication */
-	public final static String UNKNOWN_INDICATION= PreferenceConstants.EDITOR_UNKNOWN_INDICATION;
+	private final static String UNKNOWN_INDICATION= PreferenceConstants.EDITOR_UNKNOWN_INDICATION;
 	/** Preference key for unknown annotation color */
-	public final static String UNKNOWN_INDICATION_COLOR= PreferenceConstants.EDITOR_UNKNOWN_INDICATION_COLOR;
+	private final static String UNKNOWN_INDICATION_COLOR= PreferenceConstants.EDITOR_UNKNOWN_INDICATION_COLOR;
 	/** Preference key for linked position color */
-	public final static String LINKED_POSITION_COLOR= PreferenceConstants.EDITOR_LINKED_POSITION_COLOR;
+	private final static String LINKED_POSITION_COLOR= PreferenceConstants.EDITOR_LINKED_POSITION_COLOR;
 	/** Preference key for shwoing the overview ruler */
-	public final static String OVERVIEW_RULER= PreferenceConstants.EDITOR_OVERVIEW_RULER;
+	private final static String OVERVIEW_RULER= PreferenceConstants.EDITOR_OVERVIEW_RULER;
 	/** Preference key for error indication in overview ruler */
-	public final static String ERROR_INDICATION_IN_OVERVIEW_RULER= "errorIndicationInOverviewRuler"; //$NON-NLS-1$
+	private final static String ERROR_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_ERROR_INDICATION_IN_OVERVIEW_RULER;
 	/** Preference key for warning indication in overview ruler */
-	public final static String WARNING_INDICATION_IN_OVERVIEW_RULER= "warningIndicationInOverviewRuler"; //$NON-NLS-1$
+	private final static String WARNING_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_WARNING_INDICATION_IN_OVERVIEW_RULER;
 	/** Preference key for task indication in overview ruler */
-	public final static String TASK_INDICATION_IN_OVERVIEW_RULER= "taskIndicationInOverviewRuler"; //$NON-NLS-1$
+	private final static String TASK_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_TASK_INDICATION_IN_OVERVIEW_RULER;
 	/** Preference key for bookmark indication in overview ruler */
-	public final static String BOOKMARK_INDICATION_IN_OVERVIEW_RULER= "bookmarkIndicationInOverviewRuler"; //$NON-NLS-1$
+	private final static String BOOKMARK_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_BOOKMARK_INDICATION_IN_OVERVIEW_RULER;
 	/** Preference key for search result indication in overview ruler */
-	public final static String SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER= "searchResultIndicationInOverviewRuler"; //$NON-NLS-1$
+	private final static String SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER;
 	/** Preference key for unknown annotation indication in overview ruler */
-	public final static String UNKNOWN_INDICATION_IN_OVERVIEW_RULER= "othersIndicationInOverviewRuler"; //$NON-NLS-1$
+	private final static String UNKNOWN_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER;
 	/** Preference key for automatically closing strings */
-	public final static String CLOSE_STRINGS= "closeStrings"; //$NON-NLS-1$
+	private final static String CLOSE_STRINGS= PreferenceConstants.EDITOR_CLOSE_STRINGS;
 	/** Preference key for automatically wrapping Java strings */
-	public final static String WRAP_STRINGS= "wrapStrings"; //$NON-NLS-1$
+	private final static String WRAP_STRINGS= PreferenceConstants.EDITOR_WRAP_STRINGS;
 	/** Preference key for automatically closing brackets and parenthesis */
-	public final static String CLOSE_BRACKETS= "closeBrackets"; //$NON-NLS-1$
+	private final static String CLOSE_BRACKETS= PreferenceConstants.EDITOR_CLOSE_BRACKETS;
 	/** Preference key for automatically closing javadocs and comments */
-	public final static String CLOSE_JAVADOCS= "closeJavaDocs"; //$NON-NLS-1$
+	private final static String CLOSE_JAVADOCS= PreferenceConstants.EDITOR_CLOSE_JAVADOCS;
 	/** Preference key for automatically adding javadoc tags */
-	public final static String ADD_JAVADOC_TAGS= "addJavaDocTags"; //$NON-NLS-1$
+	private final static String ADD_JAVADOC_TAGS= PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS;
 	/** Preference key for automatically formatting javadocs */
-	public final static String FORMAT_JAVADOCS= "formatJavaDocs"; //$NON-NLS-1$
+	private final static String FORMAT_JAVADOCS= PreferenceConstants.EDITOR_FORMAT_JAVADOCS;
 	/** Preference key for smart paste */
-	public final static String SMART_PASTE= "smartPaste"; //$NON-NLS-1$
+	private final static String SMART_PASTE= PreferenceConstants.EDITOR_SMART_PASTE;
+
 	
 	
 	private final static class AnnotationInfo {
@@ -1111,7 +1110,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		if (fBracketPainter == null) {
 			ISourceViewer sourceViewer= getSourceViewer();
 			fBracketPainter= new BracketPainter(sourceViewer);
-			fBracketPainter.setHighlightColor(getColor("matchingBracketsColor"));
+			fBracketPainter.setHighlightColor(getColor(MATCHING_BRACKETS_COLOR));
 			fPaintManager.addPainter(fBracketPainter);
 		}
 	}
@@ -1127,14 +1126,14 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	
 	private boolean isBracketHighlightingEnabled() {
 		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean("matchingBrackets");
+		return store.getBoolean(MATCHING_BRACKETS);
 	}
 	
 	private void startLineHighlighting() {
 		if (fLinePainter == null) {
 			ISourceViewer sourceViewer= getSourceViewer();
 			fLinePainter= new LinePainter(sourceViewer);
-			fLinePainter.setHighlightColor(getColor("currentLineColor"));
+			fLinePainter.setHighlightColor(getColor(CURRENT_LINE_COLOR));
 			fPaintManager.addPainter(fLinePainter);
 		}
 	}
@@ -1150,13 +1149,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	
 	private boolean isLineHighlightingEnabled() {
 		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean("currentLine");
+		return store.getBoolean(CURRENT_LINE);
 	}
 	
 	private void showPrintMargin() {
 		if (fPrintMarginPainter == null) {
 			fPrintMarginPainter= new PrintMarginPainter(getSourceViewer());
-			fPrintMarginPainter.setMarginRulerColor(getColor("printMarginColor"));
+			fPrintMarginPainter.setMarginRulerColor(getColor(PRINT_MARGIN_COLOR));
 			fPrintMarginPainter.setMarginRulerColumn(getPreferenceStore().getInt(PRINT_MARGIN_COLUMN));
 			fPaintManager.addPainter(fPrintMarginPainter);
 		}
@@ -1173,7 +1172,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	
 	private boolean isPrintMarginVisible() {
 		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean("printMargin");
+		return store.getBoolean(PRINT_MARGIN);
 	}
 	
 	private void startAnnotationIndication(AnnotationType annotationType) {
@@ -1621,7 +1620,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					return;
 				}
 				
-				if ("matchingBrackets".equals(p)) {
+				if (MATCHING_BRACKETS.equals(p)) {
 					if (isBracketHighlightingEnabled())
 						startBracketHighlighting();
 					else
@@ -1629,13 +1628,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					return;
 				}
 				
-				if ("matchingBracketsColor".equals(p)) {
+				if (MATCHING_BRACKETS_COLOR.equals(p)) {
 					if (fBracketPainter != null)
-						fBracketPainter.setHighlightColor(getColor("matchingBracketsColor"));
+						fBracketPainter.setHighlightColor(getColor(MATCHING_BRACKETS_COLOR));
 					return;
 				}
 				
-				if ("currentLine".equals(p)) {
+				if (CURRENT_LINE.equals(p)) {
 					if (isLineHighlightingEnabled())
 						startLineHighlighting();
 					else
@@ -1643,7 +1642,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					return;
 				}
 				
-				if ("currentLineColor".equals(p)) {
+				if (CURRENT_LINE_COLOR.equals(p)) {
 					if (fLinePainter != null) {
 						stopLineHighlighting();
 						startLineHighlighting();
@@ -1651,7 +1650,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					return;
 				}
 				
-				if ("printMargin".equals(p)) {
+				if (PRINT_MARGIN.equals(p)) {
 					if (isPrintMarginVisible())
 						showPrintMargin();
 					else
@@ -1659,9 +1658,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					return;
 				}
 				
-				if ("printMarginColor".equals(p)) {
+				if (PRINT_MARGIN_COLOR.equals(p)) {
 					if (fPrintMarginPainter != null)
-						fPrintMarginPainter.setMarginRulerColor(getColor("printMarginColor"));
+						fPrintMarginPainter.setMarginRulerColor(getColor(PRINT_MARGIN_COLOR));
 					return;
 				}
 				
@@ -1744,7 +1743,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 */
 	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
 		String p= event.getProperty();
-		boolean affects="matchingBracketsColor".equals(p) || "currentLineColor".equals(p) || 
+		boolean affects=MATCHING_BRACKETS_COLOR.equals(p) || CURRENT_LINE_COLOR.equals(p) || 
 									ERROR_INDICATION_COLOR.equals(p) || WARNING_INDICATION_COLOR.equals(p) || TASK_INDICATION_COLOR.equals(p);
 		return affects ? affects : super.affectsTextPresentation(event);
 	}

@@ -53,8 +53,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
@@ -366,7 +364,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 
 		if (stateMask != ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK) {
 			// Ensure that no additional instance is created for default hover
-			if ((descriptor == null && JavaEditorTextHoverDescriptor.getDefaultHoverId().equals(JavaEditor.NO_HOVER_CONFIGURED_ID)) ||(descriptor != null && descriptor.isDefaultTextHoverDescriptor()))
+			if ((descriptor == null && JavaEditorTextHoverDescriptor.getDefaultHoverId().equals(PreferenceConstants.EDITOR_NO_HOVER_CONFIGURED_ID)) ||(descriptor != null && descriptor.isDefaultTextHoverDescriptor()))
 				return null;	// use default hover instance
 		}
 

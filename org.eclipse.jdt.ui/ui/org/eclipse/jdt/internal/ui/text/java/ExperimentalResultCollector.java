@@ -10,8 +10,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 
 /**
  * Bin to collect the proposal of the infrastructure on code assist in a java text.
@@ -24,7 +25,7 @@ public class ExperimentalResultCollector extends ResultCollector {
 	private static boolean appendArguments(ITextViewer viewer, int offset) {
 		
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-		if (preferenceStore.getBoolean(ContentAssistPreference.INSERT_COMPLETION))
+		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION))
 			return true;
 
 		if (viewer == null)
@@ -68,7 +69,7 @@ public class ExperimentalResultCollector extends ResultCollector {
 
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 
-		if (preferenceStore.getBoolean(ContentAssistPreference.GUESS_METHOD_ARGUMENTS)) {
+		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS)) {
 			return new ParameterGuessingProposal(
 				start, end - start, original.getImage(), original.getDisplayString(), fViewer, relevance,
 				name, parameterTypePackageNames, parameterTypeNames, parameterNames, 

@@ -19,14 +19,12 @@ import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
-
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Caution: this implementation is a layer breaker and contains some "shortcuts"
  */
-public class JavaTextHover extends AbstractJavaEditorTextHover {
-		
-	public static final String ID= "org.eclipse.jdt.internal.ui.text.java.hover.JavaTextHover"; //$NON-NLS-1$
+public class BestMatchHover extends AbstractJavaEditorTextHover {
 
 	private static class JavaEditorTextHoverDescriptorComparator implements Comparator {
 		
@@ -67,11 +65,11 @@ public class JavaTextHover extends AbstractJavaEditorTextHover {
 	protected List fInstantiatedTextHovers;
 
 
-	public JavaTextHover() {
+	public BestMatchHover() {
 		installTextHovers();
 	}
 
-	public JavaTextHover(IEditorPart editor) {
+	public BestMatchHover(IEditorPart editor) {
 		this();
 		setEditor(editor);
 	}
@@ -90,7 +88,7 @@ public class JavaTextHover extends AbstractJavaEditorTextHover {
 		while (iter.hasNext()) {
 			JavaEditorTextHoverDescriptor descriptor= (JavaEditorTextHoverDescriptor)iter.next();
 			// ensure that we don't add ourselves to the list
-			if (!ID.equals(descriptor.getId()))
+			if (!JavaPlugin.ID_BESTMATCH_HOVER.equals(descriptor.getId()))
 				fTextHoverSpecifications.add(descriptor);
 		}
 		Collections.sort(fTextHoverSpecifications, new JavaEditorTextHoverDescriptorComparator());

@@ -228,7 +228,7 @@ public final class JavaUI {
 	 * was launched with.
 	 * @deprecated
 	 */
-	public final static String ATTR_CMDLINE= JavaPlugin.getPluginId()+".launcher.cmdLine"; //$NON-NLS-1$
+	public final static String ATTR_CMDLINE= "org.eclipse.jdt.ui.launcher.cmdLine"; //$NON-NLS-1$
 
 	/**
 	 * Returns the shared images for the Java UI.

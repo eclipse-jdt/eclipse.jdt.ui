@@ -26,43 +26,43 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
 public class ContentAssistPreference {
 	
 	/** Preference key for content assist auto activation */
-	public final static String AUTOACTIVATION=  PreferenceConstants.CODEASSIST_AUTOACTIVATION;
+	private final static String AUTOACTIVATION=  PreferenceConstants.CODEASSIST_AUTOACTIVATION;
 	/** Preference key for content assist auto activation delay */
-	public final static String AUTOACTIVATION_DELAY=  PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY;
+	private final static String AUTOACTIVATION_DELAY=  PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY;
 	/** Preference key for content assist proposal color */
-	public final static String PROPOSALS_FOREGROUND=  PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND;
+	private final static String PROPOSALS_FOREGROUND=  PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND;
 	/** Preference key for content assist proposal color */
-	public final static String PROPOSALS_BACKGROUND=  PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND;
+	private final static String PROPOSALS_BACKGROUND=  PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND;
 	/** Preference key for content assist parameters color */
-	public final static String PARAMETERS_FOREGROUND=  PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND;
+	private final static String PARAMETERS_FOREGROUND=  PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND;
 	/** Preference key for content assist parameters color */
-	public final static String PARAMETERS_BACKGROUND=  PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND;
+	private final static String PARAMETERS_BACKGROUND=  PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND;
 	/** Preference key for content assist completion replacement color */
-	public final static String COMPLETION_REPLACEMENT_FOREGROUND=  PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND;
+	private final static String COMPLETION_REPLACEMENT_FOREGROUND=  PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND;
 	/** Preference key for content assist completion replacement color */
-	public final static String COMPLETION_REPLACEMENT_BACKGROUND=  PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND;
+	private final static String COMPLETION_REPLACEMENT_BACKGROUND=  PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND;
 	/** Preference key for content assist auto insert */
-	public final static String AUTOINSERT= PreferenceConstants.CODEASSIST_AUTOINSERT;
+	private final static String AUTOINSERT= PreferenceConstants.CODEASSIST_AUTOINSERT;
 	
 	/** Preference key for java content assist auto activation triggers */
-	public final static String AUTOACTIVATION_TRIGGERS_JAVA= PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA;
+	private final static String AUTOACTIVATION_TRIGGERS_JAVA= PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA;
 	/** Preference key for javadoc content assist auto activation triggers */
-	public final static String AUTOACTIVATION_TRIGGERS_JAVADOC= PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC;
+	private final static String AUTOACTIVATION_TRIGGERS_JAVADOC= PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC;
 	
 	/** Preference key for visibility of proposals */
-	public final static String SHOW_VISIBLE_PROPOSALS= PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS;
+	private final static String SHOW_VISIBLE_PROPOSALS= PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS;
 	/** Preference key for alphabetic ordering of proposals */
-	public final static String ORDER_PROPOSALS= PreferenceConstants.CODEASSIST_ORDER_PROPOSALS;
+	private final static String ORDER_PROPOSALS= PreferenceConstants.CODEASSIST_ORDER_PROPOSALS;
 	/** Preference key for case sensitivity of propsals */
-	public final static String CASE_SENSITIVITY= PreferenceConstants.CODEASSIST_CASE_SENSITIVITY;
+	private final static String CASE_SENSITIVITY= PreferenceConstants.CODEASSIST_CASE_SENSITIVITY;
 	/** Preference key for adding imports on code assist */
-	public final static String ADD_IMPORT= PreferenceConstants.CODEASSIST_ADDIMPORT;
+	private final static String ADD_IMPORT= PreferenceConstants.CODEASSIST_ADDIMPORT;
 	/** Preference key for inserting content assist */
-	public static final String INSERT_COMPLETION= PreferenceConstants.CODEASSIST_INSERT_COMPLETION;
+	private static final String INSERT_COMPLETION= PreferenceConstants.CODEASSIST_INSERT_COMPLETION;
 	/** Preference key for filling argument names on method completion */
-	public static final String FILL_METHOD_ARGUMENTS= PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES;
+	private static final String FILL_METHOD_ARGUMENTS= PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES;
 	/** Preference key for guessing argument names on method completion */
-	public static final String GUESS_METHOD_ARGUMENTS= PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS;
+	private static final String GUESS_METHOD_ARGUMENTS= PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS;
 
 	
 	private static Color getColor(IPreferenceStore store, String key, IColorManager manager) {
@@ -136,7 +136,7 @@ public class ContentAssistPreference {
 		IColorManager manager= textTools.getColorManager();		
 		
 		
-		boolean enabled= store.getBoolean(PreferenceConstants.CODEASSIST_AUTOACTIVATION);
+		boolean enabled= store.getBoolean(AUTOACTIVATION);
 		assistant.enableAutoActivation(enabled);
 		
 		int delay= store.getInt(AUTOACTIVATION_DELAY);
@@ -214,8 +214,8 @@ public class ContentAssistPreference {
 		
 		String p= event.getProperty();
 		
-		if (PreferenceConstants.CODEASSIST_AUTOACTIVATION.equals(p)) {
-			boolean enabled= store.getBoolean(PreferenceConstants.CODEASSIST_AUTOACTIVATION);
+		if (AUTOACTIVATION.equals(p)) {
+			boolean enabled= store.getBoolean(AUTOACTIVATION);
 			assistant.enableAutoActivation(enabled);
 		} else if (AUTOACTIVATION_DELAY.equals(p)) {
 			int delay= store.getInt(AUTOACTIVATION_DELAY);

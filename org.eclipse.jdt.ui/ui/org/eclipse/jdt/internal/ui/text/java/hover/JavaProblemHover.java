@@ -23,7 +23,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.IProblemAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.ProblemAnnotationIterator;
@@ -32,8 +31,6 @@ import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 
 public class JavaProblemHover extends AbstractJavaEditorTextHover {
 
-	private static final String ID= "org.eclipse.jdt.internal.ui.text.java.hover.JavaProblemHover"; //$NON-NLS-1$
-	
 	/*
 	 * Formats a message as HTML text.
 	 */
@@ -83,6 +80,6 @@ public class JavaProblemHover extends AbstractJavaEditorTextHover {
 	}
 
 	static boolean isJavaProblemHover(String id) {
-		return ID.equals(id);
+		return JavaPlugin.ID_PROBLEM_HOVER.equals(id);
 	}
 }

@@ -34,11 +34,10 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitFlags;
@@ -176,7 +175,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 				if (index != -1) {
 					
 					IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-					if (preferenceStore.getBoolean(CompilationUnitEditor.CLOSE_BRACKETS)) {
+					if (preferenceStore.getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACKETS)) {
 	
 						int newOffset= fReplacementOffset + index;
 		
@@ -424,7 +423,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 
 	private static boolean insertCompletion() {
 		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
-		return preference.getBoolean(ContentAssistPreference.INSERT_COMPLETION);
+		return preference.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
 	}
 
 	/*
@@ -445,7 +444,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	private static Color getForegroundColor(StyledText text) {
 
 		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
-		RGB rgb= PreferenceConverter.getColor(preference, ContentAssistPreference.COMPLETION_REPLACEMENT_FOREGROUND);
+		RGB rgb= PreferenceConverter.getColor(preference, PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND);
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		return textTools.getColorManager().getColor(rgb);
 	}
@@ -453,7 +452,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	private static Color getBackgroundColor(StyledText text) {
 
 		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
-		RGB rgb= PreferenceConverter.getColor(preference, ContentAssistPreference.COMPLETION_REPLACEMENT_BACKGROUND);
+		RGB rgb= PreferenceConverter.getColor(preference, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND);
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		return textTools.getColorManager().getColor(rgb);
 	}

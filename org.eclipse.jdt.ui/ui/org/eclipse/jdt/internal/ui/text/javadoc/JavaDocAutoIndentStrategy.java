@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationMessages;
 import org.eclipse.jdt.internal.corext.template.Template;
@@ -42,7 +41,6 @@ import org.eclipse.jdt.internal.corext.template.Templates;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
@@ -110,7 +108,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 						// javadoc started on this line
 						buf.append(" * "); //$NON-NLS-1$
 
-						if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(CompilationUnitEditor.CLOSE_JAVADOCS) &&
+						if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CLOSE_JAVADOCS) &&
 							isNewComment(d, c.offset))
 						{
 							String lineDelimiter= getLineDelimiter(d);
@@ -121,7 +119,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 							// evaluate method signature
 							ICompilationUnit unit= getCompilationUnit();
 
-							if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(CompilationUnitEditor.ADD_JAVADOC_TAGS) &&
+							if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS) &&
 								unit != null)
 							{
 								try {
@@ -329,7 +327,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 //		Assert.isTrue(command.length == 0);
 //		Assert.isTrue(command.text != null && command.text.length() == 1);
 		
-		if (!getPreferenceStore().getBoolean(CompilationUnitEditor.FORMAT_JAVADOCS))
+		if (!getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_FORMAT_JAVADOCS))
 			return;
 
 		int line= document.getLineOfOffset(command.offset);
@@ -619,7 +617,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * The result can be compared against the print margin.	 */
 	private static int calculateDisplayedWidth(String string) {
 
-		final int tabWidth= getPreferenceStore().getInt(JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH); 
+		final int tabWidth= getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH); 
 		
 		int column= 0;
 		for (int i= 0; i < string.length(); i++)
@@ -776,7 +774,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			JavaPlugin.log(e);
 		}
 
-		if (!getPreferenceStore().getBoolean(CompilationUnitEditor.FORMAT_JAVADOCS))
+		if (!getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_FORMAT_JAVADOCS))
 			return;
 		
 		try {

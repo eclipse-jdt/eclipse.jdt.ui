@@ -59,6 +59,41 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
  * of the plugin such as document providers and find-replace-dialogs.
  */
 public class JavaPlugin extends AbstractUIPlugin {
+
+	// TODO: Evaluate if we should move these ID's to JavaUI
+	/**
+	 * The id of the best match hover contributed for extension point
+	 * <code>javaEditorTextHovers</code>.
+	 *
+	 * @since 2.1
+	 */
+	public static String ID_BESTMATCH_HOVER= "org.eclipse.jdt.ui.BestMatchHover"; //$NON-NLS-1$
+
+	/**
+	 * The id of the source code hover contributed for extension point
+	 * <code>javaEditorTextHovers</code>.
+	 *
+	 * @since 2.1
+	 */
+	public static String ID_SOURCE_HOVER= "org.eclipse.jdt.ui.JavaSourceHover"; //$NON-NLS-1$
+
+	/**
+	 * The id of the javadoc hover contributed for extension point
+	 * <code>javaEditorTextHovers</code>.
+	 *
+	 * @since 2.1
+	 */
+	public static String ID_JAVADOC_HOVER= "org.eclipse.jdt.ui.JavadocHover"; //$NON-NLS-1$
+
+	/**
+	 * The id of the problem hover contributed for extension point
+	 * <code>javaEditorTextHovers</code>.
+	 *
+	 * @since 2.1
+	 */
+	public static String ID_PROBLEM_HOVER= "org.eclipse.jdt.ui.ProblemHover"; //$NON-NLS-1$
+
+
 		
 	private static JavaPlugin fgJavaPlugin;
 

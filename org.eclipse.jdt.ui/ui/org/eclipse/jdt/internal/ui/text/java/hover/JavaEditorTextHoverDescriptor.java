@@ -31,12 +31,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.ITextViewerExtension2;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
-
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
  * Describes a Java editor text hover.
@@ -72,42 +70,42 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 	/**
 	 * Returns the id of the configured default hover.	 */
 	public static String getDefaultHoverId() {
-		return JavaPlugin.getDefault().getPreferenceStore().getString(JavaEditor.DEFAULT_HOVER);
+		return JavaPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.EDITOR_DEFAULT_HOVER);
 	}
 
 	public static JavaEditorTextHoverDescriptor getTextHoverDescriptor(int stateMask) {
 		String key= null;
 		switch (stateMask) {
 			case ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK:
-				key= JavaEditor.DEFAULT_HOVER;
+				key= PreferenceConstants.EDITOR_DEFAULT_HOVER;
 				break;
 			case SWT.NONE:
-				key= JavaEditor.NONE_HOVER;
+				key= PreferenceConstants.EDITOR_NONE_HOVER;
 				break;
 			case SWT.CTRL:
-				key= JavaEditor.CTRL_HOVER;
+				key= PreferenceConstants.EDITOR_CTRL_HOVER;
 				break;
 			case SWT.SHIFT:
-				key= JavaEditor.SHIFT_HOVER;
+				key= PreferenceConstants.EDITOR_SHIFT_HOVER;
 				break;
 			case SWT.CTRL | SWT.ALT:
-				key= JavaEditor.CTRL_ALT_HOVER;
+				key= PreferenceConstants.EDITOR_CTRL_ALT_HOVER;
 				break;
 			case SWT.CTRL | SWT.SHIFT:
-				key= JavaEditor.CTRL_SHIFT_HOVER;
+				key= PreferenceConstants.EDITOR_CTRL_SHIFT_HOVER;
 				break;
 			case SWT.CTRL | SWT.ALT | SWT.SHIFT:
-				key= JavaEditor.CTRL_ALT_SHIFT_HOVER;
+				key= PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER;
 				break;
 			case SWT.ALT | SWT.SHIFT:
-				key= JavaEditor.ALT_SHIFT_HOVER;
+				key= PreferenceConstants.EDITOR_ALT_SHIFT_HOVER;
 				break;
 			default :
 				return null;
 		}
 		String id= JavaPlugin.getDefault().getPreferenceStore().getString(key);
-		if (JavaEditor.DEFAULT_HOVER_CONFIGURED_ID.equals(id))
-			id= JavaPlugin.getDefault().getPreferenceStore().getString(JavaEditor.DEFAULT_HOVER);
+		if (PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID.equals(id))
+			id= JavaPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.EDITOR_DEFAULT_HOVER);
 		if (id == null)
 			return null;
 
@@ -137,7 +135,7 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 			try {
 				return (IJavaEditorTextHover)fElement.createExecutableExtension(CLASS_ATTRIBUTE);
 			} catch (CoreException x) {
-				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, JavaUIMessages.getString("JavaTextHover.createTextHover"), null)); //$NON-NLS-1$
+				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, JavaHoverMessages.getString("JavaTextHover.createTextHover"), null)); //$NON-NLS-1$
 			}
 		}
 		

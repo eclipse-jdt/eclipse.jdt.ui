@@ -32,8 +32,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  */
 public class JavaSourceHover extends AbstractJavaEditorTextHover {
 
-	public static final String ID= "org.eclipse.jdt.internal.ui.text.java.hover.JavaSourceHover"; //$NON-NLS-1$
-
 	private final int LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
 		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS 
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE;

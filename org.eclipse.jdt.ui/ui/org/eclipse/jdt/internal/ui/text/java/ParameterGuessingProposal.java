@@ -19,9 +19,10 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
 
@@ -69,7 +70,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
  	private boolean appendArguments(IDocument document, int offset) {
 		
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-		if (preferenceStore.getBoolean(ContentAssistPreference.INSERT_COMPLETION) ^ fToggleEating)
+		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION) ^ fToggleEating)
 			return true;
 							
 		try {

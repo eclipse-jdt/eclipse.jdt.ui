@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -35,8 +37,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
@@ -70,6 +70,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -77,12 +78,10 @@ import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.corext.template.TemplateTranslator;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.template.TemplateVariableProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -116,21 +115,21 @@ public class EditTemplateDialog extends StatusDialog {
 			
 			assistant.setContentAssistProcessor(fProcessor, JavaPartitionScanner.JAVA_DOC);
 
-			assistant.enableAutoInsert(store.getBoolean(ContentAssistPreference.AUTOINSERT));
-			assistant.enableAutoActivation(store.getBoolean(ContentAssistPreference.AUTOACTIVATION));
-			assistant.setAutoActivationDelay(store.getInt(ContentAssistPreference.AUTOACTIVATION_DELAY));
+			assistant.enableAutoInsert(store.getBoolean(PreferenceConstants.CODEASSIST_AUTOINSERT));
+			assistant.enableAutoActivation(store.getBoolean(PreferenceConstants.CODEASSIST_AUTOACTIVATION));
+			assistant.setAutoActivationDelay(store.getInt(PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY));
 			assistant.setProposalPopupOrientation(ContentAssistant.PROPOSAL_OVERLAY);
 			assistant.setContextInformationPopupOrientation(ContentAssistant.CONTEXT_INFO_ABOVE);
 			assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
 
 			Display display= sourceViewer.getTextWidget().getDisplay();
 			
-			Color background= createColor(store, ContentAssistPreference.PROPOSALS_BACKGROUND, display);			
+			Color background= createColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, display);			
 			assistant.setContextInformationPopupBackground(background);
 			assistant.setContextSelectorBackground(background);
 			assistant.setProposalSelectorBackground(background);
 
-			Color foreground= createColor(store, ContentAssistPreference.PROPOSALS_FOREGROUND, display);
+			Color foreground= createColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, display);
 			assistant.setContextInformationPopupForeground(foreground);
 			assistant.setContextSelectorForeground(foreground);
 			assistant.setProposalSelectorForeground(foreground);

@@ -75,7 +75,7 @@
       point="org.eclipse.jdt.ui.javaEditorTextHovers">
    <hover
          class="org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover"
-         id="org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover"
+         id="org.eclipse.jdt.ui.JavadocHover"
          label="%javadocHover">
    </hover>
 </extension>
@@ -83,8 +83,8 @@
 <extension
       point="org.eclipse.jdt.ui.javaEditorTextHovers">
    <hover
-         class="org.eclipse.jdt.internal.ui.text.java.hover.JavaTextHover"
-         id="org.eclipse.jdt.internal.ui.text.java.hover.JavaTextHover"
+         class="org.eclipse.jdt.internal.ui.text.java.hover.BestMatchHover"
+         id="org.eclipse.jdt.ui.BestMatchHover"
          label="%sequentialHover">
    </hover>
 </extension>
@@ -93,7 +93,7 @@
       point="org.eclipse.jdt.ui.javaEditorTextHovers">
    <hover
          class="org.eclipse.jdt.internal.ui.text.java.hover.JavaSourceHover"
-         id="org.eclipse.jdt.internal.ui.text.java.hover.JavaSourceHover"
+         id="org.eclipse.jdt.ui.JavaSourceHover"
          label="%sourceHover">
    </hover>
 </extension>
@@ -102,7 +102,7 @@
       point="org.eclipse.jdt.ui.javaEditorTextHovers">
    <hover
          class="org.eclipse.jdt.internal.ui.text.java.hover.JavaProblemHover"
-         id="org.eclipse.jdt.internal.ui.text.java.hover.JavaProblemHover"
+         id="org.eclipse.jdt.ui.ProblemHover"
          label="%problemHover">
    </hover>
 </extension>

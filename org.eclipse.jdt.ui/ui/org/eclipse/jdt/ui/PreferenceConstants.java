@@ -10,16 +10,23 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.eclipse.ui.texteditor.WorkbenchChainedTextFontFieldEditor;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
@@ -43,7 +50,7 @@ public class PreferenceConstants {
 	 * are rendered
 	 * </p>
 	 */
-	public static final String APPEARANCE_METHOD_RETURNTYPE= "org.eclipse.jdt.ui.methodreturntype";
+	public static final String APPEARANCE_METHOD_RETURNTYPE= "org.eclipse.jdt.ui.methodreturntype";//$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if override indicators are rendered in the UI.
@@ -52,7 +59,7 @@ public class PreferenceConstants {
 	 * indicators are rendered
 	 * </p>
 	 */
-	public static final String APPEARANCE_OVERRIDE_INDICATOR= "org.eclipse.jdt.ui.overrideindicator";
+	public static final String APPEARANCE_OVERRIDE_INDICATOR= "org.eclipse.jdt.ui.overrideindicator";//$NON-NLS-1$
 
 	/**
 	 * A named preference that defines the pattern used for package name compression.
@@ -61,7 +68,7 @@ public class PreferenceConstants {
 	 * '.' will compress it to '..jdt', '1~' to 'o~.e~.jdt'.
 	 * </p>
 	 */	
-	public static final String APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW= "PackagesView.pkgNamePatternForPackagesView";
+	public static final String APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW= "PackagesView.pkgNamePatternForPackagesView";//$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if package name compression is turned on or off.
@@ -71,7 +78,7 @@ public class PreferenceConstants {
 	 * 
 	 * @see #APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW
 	 */	
-	public static final String APPEARANCE_COMPRESS_PACKAGE_NAMES= "org.eclipse.jdt.ui.compresspackagenames";
+	public static final String APPEARANCE_COMPRESS_PACKAGE_NAMES= "org.eclipse.jdt.ui.compresspackagenames";//$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if empty inner packages are folded in
@@ -82,7 +89,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @since 2.1
 	 */
-	public static final String APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= "org.eclipse.jdt.ui.flatPackagesInPackageExplorer";
+	public static final String APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= "org.eclipse.jdt.ui.flatPackagesInPackageExplorer";//$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if prefix removal during setter/getter generation is turned on or off. 
@@ -90,7 +97,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */	
-	public static final String CODEGEN_USE_GETTERSETTER_PREFIX= "org.eclipse.jdt.ui.gettersetter.prefix.enable";
+	public static final String CODEGEN_USE_GETTERSETTER_PREFIX= "org.eclipse.jdt.ui.gettersetter.prefix.enable";//$NON-NLS-1$
 
 	/**
 	 * A named preference that holds a list of prefixes to be removed from a local variable to compute setter 
@@ -101,7 +108,7 @@ public class PreferenceConstants {
 	 * 
 	 * @see #CODEGEN_USE_GETTERSETTER_PREFIX
 	 */	
-	public static final String CODEGEN_GETTERSETTER_PREFIX= "org.eclipse.jdt.ui.gettersetter.prefix.list";
+	public static final String CODEGEN_GETTERSETTER_PREFIX= "org.eclipse.jdt.ui.gettersetter.prefix.list";//$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if suffix removal during setter/getter generation is turned on or off.
@@ -109,7 +116,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */	
-	public static final String CODEGEN_USE_GETTERSETTER_SUFFIX= "org.eclipse.jdt.ui.gettersetter.suffix.enable";
+	public static final String CODEGEN_USE_GETTERSETTER_SUFFIX= "org.eclipse.jdt.ui.gettersetter.suffix.enable";//$NON-NLS-1$
 
 	/**
 	 * A named preference that holds a list of suffixes to be removed from a local variable to compute setter 
@@ -120,7 +127,7 @@ public class PreferenceConstants {
 	 * 
 	 * @see #CODEGEN_USE_GETTERSETTER_SUFFIX
 	 */	
-	public static final String CODEGEN_GETTERSETTER_SUFFIX= "org.eclipse.jdt.ui.gettersetter.suffix.list";
+	public static final String CODEGEN_GETTERSETTER_SUFFIX= "org.eclipse.jdt.ui.gettersetter.suffix.list"; //$NON-NLS-1$
 
 	/**
 	 * A name preference that controls if a JavaDoc stub gets added to newly created types and methods.
@@ -128,7 +135,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public static final String CODEGEN__JAVADOC_STUBS= "org.eclipse.jdt.ui.javadoc";
+	public static final String CODEGEN__JAVADOC_STUBS= "org.eclipse.jdt.ui.javadoc"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if a non-javadoc comment gets added to methods generated via the 
@@ -137,7 +144,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public static final String CODEGEN__NON_JAVADOC_COMMENTS= "org.eclipse.jdt.ui.seecomments";
+	public static final String CODEGEN__NON_JAVADOC_COMMENTS= "org.eclipse.jdt.ui.seecomments"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if a file comment gets added to newly created files.
@@ -145,7 +152,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public static final String CODEGEN__FILE_COMMENTS= "org.eclipse.jdt.ui.filecomments";
+	public static final String CODEGEN__FILE_COMMENTS= "org.eclipse.jdt.ui.filecomments"; //$NON-NLS-1$
 	
 	/**
 	 * A named preference that holds a list of comma separated package names. The list specifies the import order used by
@@ -154,7 +161,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>String</code>: comma separated list of package names
 	 * </p>
 	 */
-	public static final String ORGIMPORTS_IMPORTORDER= "org.eclipse.jdt.ui.importorder";
+	public static final String ORGIMPORTS_IMPORTORDER= "org.eclipse.jdt.ui.importorder"; //$NON-NLS-1$
 	
 	/**
 	 * A named preference that specifies the number of imports added before a star-import declaration is used.
@@ -162,7 +169,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Int</code>: positive value specifing the number of non star-import is used
 	 * </p>
 	 */
-	public static final String ORGIMPORTS_ONDEMANDTHRESHOLD= "org.eclipse.jdt.ui.ondemandthreshold";
+	public static final String ORGIMPORTS_ONDEMANDTHRESHOLD= "org.eclipse.jdt.ui.ondemandthreshold"; //$NON-NLS-1$
 
 	/**
 	 * A named preferences that controls if types that start with a lower case letters get added by the
@@ -171,7 +178,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public static final String ORGIMPORTS_IGNORELOWERCASE= "org.eclipse.jdt.ui.ignorelowercasenames";
+	public static final String ORGIMPORTS_IGNORELOWERCASE= "org.eclipse.jdt.ui.ignorelowercasenames"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that speficies whether children of a compilation unit are shown in the package explorer.
@@ -179,7 +186,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public static final String SHOW_CU_CHILDREN= "org.eclipse.jdt.ui.packages.cuchildren";
+	public static final String SHOW_CU_CHILDREN= "org.eclipse.jdt.ui.packages.cuchildren"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether the package explorer's selection is linked to the active editor.
@@ -187,7 +194,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public static final String LINK_PACKAGES_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktoeditor";
+	public static final String LINK_PACKAGES_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktoeditor"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether the hierarchy view's selection is linked to the active editor.
@@ -195,7 +202,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public static final String LINK_TYPEHIERARCHY_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktypehierarchytoeditor";
+	public static final String LINK_TYPEHIERARCHY_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktypehierarchytoeditor"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether the browsing view's selection is
@@ -205,7 +212,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @since 2.1
 	 */
-	public static final String LINK_BROWSING_VIEW_TO_EDITOR= "org.eclipse.jdt.ui.browsing.linktoeditor";
+	public static final String LINK_BROWSING_VIEW_TO_EDITOR= "org.eclipse.jdt.ui.browsing.linktoeditor"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether new projects are generated using source and output folder.
@@ -214,7 +221,7 @@ public class PreferenceConstants {
 	 * output folder. If <code>false</code> source and output folder equals to the project.
 	 * </p>
 	 */
-	public static final String SRCBIN_FOLDERS_IN_NEWPROJ= "org.eclipse.jdt.ui.wizards.srcBinFoldersInNewProjects";
+	public static final String SRCBIN_FOLDERS_IN_NEWPROJ= "org.eclipse.jdt.ui.wizards.srcBinFoldersInNewProjects"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that specifies the source folder name used when creating a new Java project. Value is inactive
@@ -225,7 +232,7 @@ public class PreferenceConstants {
 	 * 
 	 * @see #SRCBIN_FOLDERS_IN_NEWPROJ
 	 */
-	public static final String SRCBIN_SRCNAME= "org.eclipse.jdt.ui.wizards.srcBinFoldersSrcName";
+	public static final String SRCBIN_SRCNAME= "org.eclipse.jdt.ui.wizards.srcBinFoldersSrcName"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that specifies the output folder name used when creating a new Java project. Value is inactive
@@ -236,7 +243,7 @@ public class PreferenceConstants {
 	 * 
 	 * @see #SRCBIN_FOLDERS_IN_NEWPROJ
 	 */
-	public static final String SRCBIN_BINNAME= "org.eclipse.jdt.ui.wizards.srcBinFoldersBinName";
+	public static final String SRCBIN_BINNAME= "org.eclipse.jdt.ui.wizards.srcBinFoldersBinName"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that holds a list of possible JRE libraries used by the New Java Project wizard. An library 
@@ -256,7 +263,7 @@ public class PreferenceConstants {
 	 * @see #decodeJRELibraryDescription(String)
 	 * @see #decodeJRELibraryClasspathEntries(String)
 	 */
-	public static final String NEWPROJECT_JRELIBRARY_LIST= "org.eclipse.jdt.ui.wizards.jre.list";
+	public static final String NEWPROJECT_JRELIBRARY_LIST= "org.eclipse.jdt.ui.wizards.jre.list"; //$NON-NLS-1$
 
 	/**
 	 * A named preferences that specifies the current active JRE library.
@@ -266,7 +273,7 @@ public class PreferenceConstants {
 	 * 
 	 * @see #NEWPROJECT_JRELIBRARY_LIST
 	 */
-	public static final String NEWPROJECT_JRELIBRARY_INDEX= "org.eclipse.jdt.ui.wizards.jre.index";
+	public static final String NEWPROJECT_JRELIBRARY_INDEX= "org.eclipse.jdt.ui.wizards.jre.index"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if a new type hierarchy gets opened in a 
@@ -280,21 +287,21 @@ public class PreferenceConstants {
 	 * @see #OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE
 	 * @see #OPEN_TYPE_HIERARCHY_IN_VIEW_PART
 	 */
-	public static final String OPEN_TYPE_HIERARCHY= "org.eclipse.jdt.ui.openTypeHierarchy";
+	public static final String OPEN_TYPE_HIERARCHY= "org.eclipse.jdt.ui.openTypeHierarchy"; //$NON-NLS-1$
 
 	/**
 	 * A string value used by the named preference <code>OPEN_TYPE_HIERARCHY</code>.
 	 * 
 	 * @see #OPEN_TYPE_HIERARCHY
 	 */
-	public static final String OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE= "perspective";
+	public static final String OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE= "perspective"; //$NON-NLS-1$
 
 	/**
 	 * A string value used by the named preference <code>OPEN_TYPE_HIERARCHY</code>.
 	 * 
 	 * @see #OPEN_TYPE_HIERARCHY
 	 */
-	public static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= "viewPart";
+	public static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= "viewPart"; //$NON-NLS-1$
 	
 	/**
 	 * A named preference that controls the behaviour when double clicking on a container in the packages view. 
@@ -307,21 +314,21 @@ public class PreferenceConstants {
 	 * @see #DOUBLE_CLICK_EXPANDS
 	 * @see #DOUBLE_CLICK_GOES_INTO
 	 */
-	public static final String DOUBLE_CLICK= "packageview.doubleclick";
+	public static final String DOUBLE_CLICK= "packageview.doubleclick"; //$NON-NLS-1$
 
 	/**
 	 * A string value used by the named preference <code>DOUBLE_CLICK</code>.
 	 * 
 	 * @see #DOUBLE_CLICK
 	 */
-	public static final String DOUBLE_CLICK_GOES_INTO= "packageview.gointo";
+	public static final String DOUBLE_CLICK_GOES_INTO= "packageview.gointo"; //$NON-NLS-1$
 
 	/**
 	 * A string value used by the named preference <code>DOUBLE_CLICK</code>.
 	 * 
 	 * @see #DOUBLE_CLICK
 	 */
-	public static final String DOUBLE_CLICK_EXPANDS= "packageview.doubleclick.expands";
+	public static final String DOUBLE_CLICK_EXPANDS= "packageview.doubleclick.expands"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether Java views update their presentation while editing or when saving the
@@ -335,21 +342,21 @@ public class PreferenceConstants {
 	 * @see #UPDATE_ON_SAVE
 	 * @see #UPDATE_WHILE_EDITING
 	 */
-	public static final String UPDATE_JAVA_VIEWS= "JavaUI.update";
+	public static final String UPDATE_JAVA_VIEWS= "JavaUI.update"; //$NON-NLS-1$
 
 	/**
 	 * A string value used by the named preference <code>UPDATE_JAVA_VIEWS</code>
 	 * 
 	 * @see #UPDATE_JAVA_VIEWS
 	 */
-	public static final String UPDATE_ON_SAVE= "JavaUI.update.onSave";
+	public static final String UPDATE_ON_SAVE= "JavaUI.update.onSave"; //$NON-NLS-1$
 
 	/**
 	 * A string value used by the named preference <code>UPDATE_JAVA_VIEWS</code>
 	 * 
 	 * @see #UPDATE_JAVA_VIEWS
 	 */
-	public static final String UPDATE_WHILE_EDITING= "JavaUI.update.whileEditing";
+	public static final String UPDATE_WHILE_EDITING= "JavaUI.update.whileEditing"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that holds the path of the Javadoc command used by the Javadoc creation wizard.
@@ -357,7 +364,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>String</code>.
 	 * </p>
 	 */
-	public static final String JAVADOC_COMMAND= "command";
+	public static final String JAVADOC_COMMAND= "command"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether bracket matching highlighting is turned on or off.
@@ -365,7 +372,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public final static String EDITOR_MATCHING_BRACKETS= "matchingBrackets";
+	public final static String EDITOR_MATCHING_BRACKETS= "matchingBrackets"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that holds the color used to highlight matching brackets.
@@ -377,7 +384,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 */
-	public final static String EDITOR_MATCHING_BRACKETS_COLOR=  "matchingBracketsColor";
+	public final static String EDITOR_MATCHING_BRACKETS_COLOR=  "matchingBracketsColor"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether the current line highlighting is turned on or off.
@@ -385,7 +392,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public final static String EDITOR_CURRENT_LINE= "currentLine";
+	public final static String EDITOR_CURRENT_LINE= "currentLine"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that holds the color used to highlight the current line.
@@ -397,7 +404,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 */
-	public final static String EDITOR_CURRENT_LINE_COLOR= "currentLineColor";
+	public final static String EDITOR_CURRENT_LINE_COLOR= "currentLineColor"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether the print margin is turned on or off.
@@ -405,7 +412,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public final static String EDITOR_PRINT_MARGIN= "printMargin";
+	public final static String EDITOR_PRINT_MARGIN= "printMargin"; //$NON-NLS-1$
 	
 	/**
 	 * A named preference that holds the color used to render the print margin.
@@ -417,7 +424,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 */
-	public final static String EDITOR_PRINT_MARGIN_COLOR= "printMarginColor";
+	public final static String EDITOR_PRINT_MARGIN_COLOR= "printMarginColor"; //$NON-NLS-1$
 
 	/**
 	 * Print margin column. Int value.
@@ -454,6 +461,24 @@ public class PreferenceConstants {
 	 * </p>
 	 */
 	public final static String EDITOR_TAB_WIDTH= "org.eclipse.jdt.ui.editor.tab.width"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether the outline view selection
+	 * should stay in sync with with the element at the current cursor position.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public final static String EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE= "JavaEditor.SyncOutlineOnCursorMove"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls if correction indicators are shown in the UI.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public final static String EDITOR_CORRECTION_INDICATION= "JavaEditor.ShowTemporaryProblem"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether the editor shows problem indicators in text (squiggly lines). 
@@ -591,15 +616,145 @@ public class PreferenceConstants {
 	 */
 	public final static String EDITOR_UNKNOWN_INDICATION_COLOR= "othersIndicationColor"; //$NON-NLS-1$
 
-
-
 	/**
-	 * A named preference that controls if correction indicators are shown in the UI.
+	 * A named preference that controls whether the overview ruler shows error
+	 * indicators.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * @since 2.1
 	 */
-	public final static String EDITOR_CORRECTION_INDICATION= "JavaEditor.ShowTemporaryProblem";
+	public final static String EDITOR_ERROR_INDICATION_IN_OVERVIEW_RULER= "errorIndicationInOverviewRuler"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that controls whether the overview ruler shows warning
+	 * indicators.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public final static String EDITOR_WARNING_INDICATION_IN_OVERVIEW_RULER= "warningIndicationInOverviewRuler"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether the overview ruler shows task
+	 * indicators.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public final static String EDITOR_TASK_INDICATION_IN_OVERVIEW_RULER= "taskIndicationInOverviewRuler"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether the overview ruler shows
+	 * bookmark indicators.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public final static String EDITOR_BOOKMARK_INDICATION_IN_OVERVIEW_RULER= "bookmarkIndicationInOverviewRuler"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether the overview ruler shows
+	 * search result indicators.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public final static String EDITOR_SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER= "searchResultIndicationInOverviewRuler"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether the overview ruler shows
+	 * unknown indicators.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public final static String EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER= "othersIndicationInOverviewRuler"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether the 'close strings' feature
+	 *  is   enabled.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public final static String EDITOR_CLOSE_STRINGS= "closeStrings"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether the 'wrap strings' feature is
+	 * enabled.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public final static String EDITOR_WRAP_STRINGS= "wrapStrings"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether the 'close brackets' feature is
+	 * enabled.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public final static String EDITOR_CLOSE_BRACKETS= "closeBrackets"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether the 'close java docs' feature is
+	 * enabled.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public final static String EDITOR_CLOSE_JAVADOCS= "closeJavaDocs"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether the 'add JavaDoc tags' feature
+	 * is enabled.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public final static String EDITOR_ADD_JAVADOC_TAGS= "addJavaDocTags"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether the 'format Javadoc tags'
+	 * feature is enabled.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public final static String EDITOR_FORMAT_JAVADOCS= "formatJavaDocs"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether the 'smart paste' feature is
+	 * enabled.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public final static String EDITOR_SMART_PASTE= "smartPaste"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether the 'smart home-end' feature is
+	 * enabled.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public final static String EDITOR_SMART_HOME_END= AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END;
 
 	/**
 	 * A named preference that controls if temporary problems are evaluated and shown in the UI.
@@ -663,14 +818,11 @@ public class PreferenceConstants {
 	public final static String EDITOR_FOREGROUND_COLOR= AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND;
 
 	/**
-	 * A named preference that holds the default color used as text foreground.
+	 * A named preference that describes if the system default foreground color
+	 * is used as the text foreground.
 	 * <p>
-	 * Value is of type <code>String</code>. A RGB color value encoded as a string
-	 * using class <code>PreferenceConverter</code>
+	 * Value is of type <code>Boolean</code>.
 	 * </p>
-	 * 
-	 * @see org.eclipse.jface.resource.StringConverter
-	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 */
 	public final static String EDITOR_FOREGROUND_DEFAULT_COLOR= AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND_SYSTEM_DEFAULT;
 
@@ -687,21 +839,18 @@ public class PreferenceConstants {
 	public final static String EDITOR_BACKGROUND_COLOR= AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND;
 
 	/**
-	 * A named preference that holds the default color used as the text background.
+	 * A named preference that describes if the system default background color
+	 * is used as the text foreground.
 	 * <p>
-	 * Value is of type <code>String</code>. A RGB color value encoded as a string
-	 * using class <code>PreferenceConverter</code>
+	 * Value is of type <code>Boolean</code>. 
 	 * </p>
-	 * 
-	 * @see org.eclipse.jface.resource.StringConverter
-	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 */
 	public final static String EDITOR_BACKGROUND_DEFAULT_COLOR= AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT;
 
 	/**
 	 * Preference key suffix for bold text style preference keys.
 	 */
-	public static final String EDITOR_BOLD_SUFFIX= "_bold";
+	public static final String EDITOR_BOLD_SUFFIX= "_bold"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that holds the color used to render multi line comments.
@@ -885,8 +1034,18 @@ public class PreferenceConstants {
 	 */
 	public final static String EDITOR_JAVADOC_DEFAULT_BOLD= IJavaColorConstants.JAVADOC_DEFAULT + EDITOR_BOLD_SUFFIX;
 
-
-
+	/**
+	 * A named preference that holds the color used for 'linked-mode' underline.
+	 * <p>
+	 * Value is of type <code>String</code>. A RGB color value encoded as a string
+	 * using class <code>PreferenceConverter</code>
+	 * </p>
+	 *
+	 * @see org.eclipse.jface.resource.StringConverter
+	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 2.1
+	 */
+	public final static String EDITOR_LINK_COLOR= "linkColor"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether hover tooltips in the editor are turned on or off.
@@ -895,6 +1054,137 @@ public class PreferenceConstants {
 	 * </p>
 	 */
 	public static final String EDITOR_SHOW_HOVER= "org.eclipse.jdt.ui.editor.showHover"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that defines the hover shown when no control key is
+	 * pressed.
+	 * <p>Value is of type <code>String</code>: possible values are <code>
+	 * EDITOR_NO_HOVER_CONFIGURED_ID</code> or
+	 * <code>EDITOR_DEFAULT_HOVER_CONFIGURED_ID</code> or the hover id of a hover
+	 * contributed as <code>javaEditorTextHovers</code>.
+	 * </p>
+	 * @see #EDITOR_NO_HOVER_CONFIGURED_ID
+	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
+	 * @see JavaUI
+	 * @since 2.1
+	 */
+	public static final String EDITOR_NONE_HOVER= "noneHover"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that defines the hover shown when the
+	 * <code>CTRL</code> modifier key is pressed.
+	 * <p>Value is of type <code>String</code>: possible values are <code>
+	 * EDITOR_NO_HOVER_CONFIGURED_ID</code> or
+	 * <code>EDITOR_DEFAULT_HOVER_CONFIGURED_ID</code> or the hover id of a
+	 * hover contributed as <code>javaEditorTextHovers</code>.
+	 * </p>
+	 * @see #EDITOR_NO_HOVER_CONFIGURED_ID
+	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
+	 * @see JavaUI
+	 * @since 2.1
+	 */
+	public static final String EDITOR_CTRL_HOVER= "ctrlHover"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that defines the hover shown when the
+	 * <code>SHIFT</code> modifier key is pressed.
+	 * <p>Value is of type <code>String</code>: possible values are <code>
+	 * EDITOR_NO_HOVER_CONFIGURED_ID</code> or
+	 * <code>EDITOR_DEFAULT_HOVER_CONFIGURED_ID</code> or the hover id of a
+	 * hover contributed as <code>javaEditorTextHovers</code>.
+	 * </p>
+	 * @see #EDITOR_NO_HOVER_CONFIGURED_ID
+	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
+	 * @see JavaUI ID_*_HOVER
+	 * @since 2.1
+	 */
+	public static final String EDITOR_SHIFT_HOVER= "shiftHover"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that defines the hover shown when the
+	 * <code>CTRL + ALT</code> modifier keys is pressed.
+	 * <p>Value is of type <code>String</code>: possible values are <code>
+	 * EDITOR_NO_HOVER_CONFIGURED_ID</code> or
+	 * <code>EDITOR_DEFAULT_HOVER_CONFIGURED_ID</code> or the hover id of a
+	 * hover contributed as <code>javaEditorTextHovers</code>.
+	 * </p>
+	 * @see #EDITOR_NO_HOVER_CONFIGURED_ID
+	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
+	 * @see JavaUI ID_*_HOVER
+	 * @since 2.1
+	 */
+	public static final String EDITOR_CTRL_ALT_HOVER= "ctrlAltHover"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that defines the hover shown when the
+	 * <code>CTRL + ALT + SHIFT</code> modifier keys is pressed.
+	 * <p>Value is of type <code>String</code>: possible values are <code>
+	 * EDITOR_NO_HOVER_CONFIGURED_ID</code> or
+	 * <code>EDITOR_DEFAULT_HOVER_CONFIGURED_ID</code> or the hover id of a
+	 * hover contributed as <code>javaEditorTextHovers</code>.
+	 * </p>
+	 * @see #EDITOR_NO_HOVER_CONFIGURED_ID
+	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
+	 * @see JavaUI ID_*_HOVER
+	 * @since 2.1
+	 */
+	public static final String EDITOR_CTRL_ALT_SHIFT_HOVER= "ctrlAltShiftHover"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that defines the hover shown when the
+	 * <code>CTRL + SHIFT</code> modifier keys is pressed.
+	 * <p>Value is of type <code>String</code>: possible values are <code>
+	 * EDITOR_NO_HOVER_CONFIGURED_ID</code> or
+	 * <code>EDITOR_DEFAULT_HOVER_CONFIGURED_ID</code> or the hover id of a
+	 * hover contributed as <code>javaEditorTextHovers</code>.
+	 * </p>
+	 * @see #EDITOR_NO_HOVER_CONFIGURED_ID
+	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
+	 * @see JavaUI ID_*_HOVER
+	 * @since 2.1
+	 */
+	public static final String EDITOR_CTRL_SHIFT_HOVER= "ctrlShiftHover"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that defines the hover shown when the
+	 * <code>ALT</code> modifier key is pressed.
+	 * <p>Value is of type <code>String</code>: possible values are <code>
+	 * EDITOR_NO_HOVER_CONFIGURED_ID</code>,
+	 * <code>EDITOR_DEFAULT_HOVER_CONFIGURED_ID</code>  or the hover id of a
+	 * hover contributed as <code>javaEditorTextHovers</code>.
+	 * </p>
+	 * @see #EDITOR_NO_HOVER_CONFIGURED_ID
+	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
+	 * @see JavaUI ID_*_HOVER
+	 * @since 2.1
+	 */
+	public static final String EDITOR_ALT_SHIFT_HOVER= "altShiftHover"; //$NON-NLS-1$
+
+	/**
+	 * A string value used by the named preferences for hover configuration to
+	 * descibe that no hover should be shown for the given key modifiers.
+	 * @since 2.1
+	 */
+	public static final String EDITOR_NO_HOVER_CONFIGURED_ID= "noHoverConfiguredId"; //$NON-NLS-1$
+	
+	/**
+	 * A string value used by the named preferences for hover configuration to
+	 * descibe that the default hover should be shown for the given key
+	 * modifiers. The default hover is described by the
+	 * <code>EDITOR_DEFAULT_HOVER</code> property.
+	 * @since 2.1
+	 */
+	public static final String EDITOR_DEFAULT_HOVER_CONFIGURED_ID= "defaultHoverConfiguredId"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that defines the hover named the 'default hover'.
+	 * Value is of type <code>String</code>: possible values are <code>
+	 * EDITOR_NO_HOVER_CONFIGURED_ID</code> or <code> the hover id of a hover
+	 * contributed as <code>javaEditorTextHovers</code>.
+	 * </p>
+	 *@since 2.1
+	 */
+	public static final String EDITOR_DEFAULT_HOVER= "defaultHover"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if segmented view (show selected element only) is turned on or off.
@@ -1105,42 +1395,42 @@ public class PreferenceConstants {
 	 * @see #REFACTOR_INFO_SEVERITY
 	 * @see #REFACTOR_OK_SEVERITY
 	 */
-	public static final String REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD= "Refactoring.ErrorPage.severityThreshold";
+	public static final String REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD= "Refactoring.ErrorPage.severityThreshold"; //$NON-NLS-1$
 
 	/**
 	 * A string value used by the named preference <code>REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD</code>.
 	 * 
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
 	 */
-	public static final String REFACTOR_FATAL_SEVERITY= "4";
+	public static final String REFACTOR_FATAL_SEVERITY= "4"; //$NON-NLS-1$
 	
 	/**
 	 * A string value used by the named preference <code>REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD</code>.
 	 * 
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
 	 */	
-	public static final String REFACTOR_ERROR_SEVERITY= "3";
+	public static final String REFACTOR_ERROR_SEVERITY= "3"; //$NON-NLS-1$
 
 	/**
 	 * A string value used by the named preference <code>REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD</code>.
 	 * 
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
 	 */
-	public static final String REFACTOR_WARNING_SEVERITY= "2";
+	public static final String REFACTOR_WARNING_SEVERITY= "2"; //$NON-NLS-1$
 
 	/**
 	 * A string value used by the named preference <code>REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD</code>.
 	 * 
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
 	 */
-	public static final String REFACTOR_INFO_SEVERITY= "1";
+	public static final String REFACTOR_INFO_SEVERITY= "1"; //$NON-NLS-1$
 
 	/**
 	 * A string value used by the named preference <code>REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD</code>.
 	 * 
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
 	 */
-	public static final String REFACTOR_OK_SEVERITY= "0";
+	public static final String REFACTOR_OK_SEVERITY= "0"; //$NON-NLS-1$
 
 	/**
 	 * A named preference thet controls whether all dirty editors are automatically saved before a refactoring is
@@ -1149,7 +1439,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public static final String REFACTOR_SAVE_ALL_EDITORS= "Refactoring.savealleditors";
+	public static final String REFACTOR_SAVE_ALL_EDITORS= "Refactoring.savealleditors"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if the Java Browsing views are linked to the active editor.
@@ -1159,7 +1449,7 @@ public class PreferenceConstants {
 	 * 
 	 * @see #LINK_PACKAGES_TO_EDITOR
 	 */
-	public static final String BROWSING_LINK_VIEW_TO_EDITOR= "org.eclipse.jdt.ui.browsing.linktoeditor";
+	public static final String BROWSING_LINK_VIEW_TO_EDITOR= "org.eclipse.jdt.ui.browsing.linktoeditor"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls the layout of the Java Browsing views vertically. Boolean value.
@@ -1168,7 +1458,7 @@ public class PreferenceConstants {
 	 * If <code>false</code> they are stacked horizontal.
 	 * </p>
 	 */
-	public static final String BROWSING_STACK_VERTICALLY= "org.eclipse.jdt.ui.browsing.stackVertically";
+	public static final String BROWSING_STACK_VERTICALLY= "org.eclipse.jdt.ui.browsing.stackVertically"; //$NON-NLS-1$
 	
 	
 	/**
@@ -1184,30 +1474,30 @@ public class PreferenceConstants {
 	
 	
 	public static void initializeDefaultValues(IPreferenceStore store) {
-		store.setDefault(EDITOR_SHOW_HOVER, true);
-		store.setDefault(EDITOR_SHOW_SEGMENTS, false);
+		store.setDefault(PreferenceConstants.EDITOR_SHOW_HOVER, true);
+		store.setDefault(PreferenceConstants.EDITOR_SHOW_SEGMENTS, false);
 
 		// JavaBasePreferencePage
-		store.setDefault(LINK_PACKAGES_TO_EDITOR, true);
-		store.setDefault(LINK_TYPEHIERARCHY_TO_EDITOR, false);
-		store.setDefault(LINK_BROWSING_VIEW_TO_EDITOR, true);
-		store.setDefault(OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
-		store.setDefault(DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS);
-		store.setDefault(UPDATE_JAVA_VIEWS, UPDATE_WHILE_EDITING);	
+		store.setDefault(PreferenceConstants.LINK_PACKAGES_TO_EDITOR, true);
+		store.setDefault(PreferenceConstants.LINK_TYPEHIERARCHY_TO_EDITOR, false);
+		store.setDefault(PreferenceConstants.LINK_BROWSING_VIEW_TO_EDITOR, true);
+		store.setDefault(PreferenceConstants.OPEN_TYPE_HIERARCHY, PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
+		store.setDefault(PreferenceConstants.DOUBLE_CLICK, PreferenceConstants.DOUBLE_CLICK_EXPANDS);
+		store.setDefault(PreferenceConstants.UPDATE_JAVA_VIEWS, PreferenceConstants.UPDATE_WHILE_EDITING);	
 		
 		// AppearancePreferencePage
-		store.setDefault(APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
-		store.setDefault(APPEARANCE_METHOD_RETURNTYPE, false);
-		store.setDefault(APPEARANCE_OVERRIDE_INDICATOR, true);
-		store.setDefault(SHOW_CU_CHILDREN, true);
-		store.setDefault(BROWSING_STACK_VERTICALLY, false);
-		store.setDefault(APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
-		store.setDefault(APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, true);
+		store.setDefault(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
+		store.setDefault(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE, false);
+		store.setDefault(PreferenceConstants.APPEARANCE_OVERRIDE_INDICATOR, true);
+		store.setDefault(PreferenceConstants.SHOW_CU_CHILDREN, true);
+		store.setDefault(PreferenceConstants.BROWSING_STACK_VERTICALLY, false);
+		store.setDefault(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, true);
 
 		// ImportOrganizePreferencePage
-		store.setDefault(ORGIMPORTS_IMPORTORDER, "java;javax;org;com"); //$NON-NLS-1$
-		store.setDefault(ORGIMPORTS_ONDEMANDTHRESHOLD, 99);
-		store.setDefault(ORGIMPORTS_IGNORELOWERCASE, true);
+		store.setDefault(PreferenceConstants.ORGIMPORTS_IMPORTORDER, "java;javax;org;com"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, 99);
+		store.setDefault(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE, true);
 
 		// ClasspathVariablesPreferencePage
 		// CodeFormatterPreferencePage
@@ -1215,22 +1505,165 @@ public class PreferenceConstants {
 		// no initialization needed
 		
 		// RefactoringPreferencePage
-		store.setDefault(REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, REFACTOR_ERROR_SEVERITY);
-		store.setDefault(REFACTOR_SAVE_ALL_EDITORS, false);		
+		store.setDefault(PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, PreferenceConstants.REFACTOR_ERROR_SEVERITY);
+		store.setDefault(PreferenceConstants.REFACTOR_SAVE_ALL_EDITORS, false);		
 
 		// TemplatePreferencePage
-		store.setDefault(TEMPLATES_USE_CODEFORMATTER, true);
+		store.setDefault(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER, true);
 		
 		// CodeGenerationPreferencePage
-		store.setDefault(CODEGEN_USE_GETTERSETTER_PREFIX, false);
-		store.setDefault(CODEGEN_USE_GETTERSETTER_SUFFIX, false);
-		store.setDefault(CODEGEN_GETTERSETTER_PREFIX, "f, fg, _, m_"); //$NON-NLS-1$
-		store.setDefault(CODEGEN_GETTERSETTER_SUFFIX, "_"); //$NON-NLS-1$
-		store.setDefault(CODEGEN__JAVADOC_STUBS, true);
-		store.setDefault(CODEGEN__NON_JAVADOC_COMMENTS, false);
-		store.setDefault(CODEGEN__FILE_COMMENTS, false);		
+		store.setDefault(PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX, false);
+		store.setDefault(PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX, false);
+		store.setDefault(PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX, "f, fg, _, m_"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.CODEGEN_GETTERSETTER_SUFFIX, "_"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.CODEGEN__JAVADOC_STUBS, true);
+		store.setDefault(PreferenceConstants.CODEGEN__NON_JAVADOC_COMMENTS, false);
+		store.setDefault(PreferenceConstants.CODEGEN__FILE_COMMENTS, false);		
 
-		JavaEditorPreferencePage.initDefaults(store);		
+		// JavaEditorPreferencePage
+		/*
+		 * Ensure that the display is accessed only in the UI thread.
+		 * Ensure that there are no side effects of switching the thread.
+		 */
+		final RGB[] rgbs= new RGB[3];
+		final Display display= Display.getDefault();
+		display.syncExec(new Runnable() {
+			public void run() {
+				Color c= display.getSystemColor(SWT.COLOR_GRAY);
+				rgbs[0]= c.getRGB();
+				c= display.getSystemColor(SWT.COLOR_LIST_FOREGROUND);
+				rgbs[1]= c.getRGB();
+				c= display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
+				rgbs[2]= c.getRGB();
+			}
+		});
+
+		store.setDefault(PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR,  rgbs[0]);
+
+		store.setDefault(PreferenceConstants.EDITOR_CURRENT_LINE, true);
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_CURRENT_LINE_COLOR, new RGB(225, 235, 224));
+
+		store.setDefault(PreferenceConstants.EDITOR_PRINT_MARGIN, false);
+		store.setDefault(PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN, 80);
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_PRINT_MARGIN_COLOR, new RGB(176, 180 , 185));
+
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_FIND_SCOPE_COLOR, new RGB(185, 176 , 180));
+
+		store.setDefault(PreferenceConstants.EDITOR_PROBLEM_INDICATION, true);
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_PROBLEM_INDICATION_COLOR, new RGB(255, 0 , 128));
+		store.setDefault(PreferenceConstants.EDITOR_ERROR_INDICATION_IN_OVERVIEW_RULER, true);
+
+		store.setDefault(PreferenceConstants.EDITOR_WARNING_INDICATION, true);
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_WARNING_INDICATION_COLOR, new RGB(244, 200 , 45));
+		store.setDefault(PreferenceConstants.EDITOR_WARNING_INDICATION_IN_OVERVIEW_RULER, true);
+
+		store.setDefault(PreferenceConstants.EDITOR_TASK_INDICATION, false);
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_TASK_INDICATION_COLOR, new RGB(0, 128, 255));
+		store.setDefault(PreferenceConstants.EDITOR_TASK_INDICATION_IN_OVERVIEW_RULER, false);
+
+		store.setDefault(PreferenceConstants.EDITOR_BOOKMARK_INDICATION, false);
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_BOOKMARK_INDICATION_COLOR, new RGB(34, 164, 99));
+		store.setDefault(PreferenceConstants.EDITOR_BOOKMARK_INDICATION_IN_OVERVIEW_RULER, false);
+
+		store.setDefault(PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION, false);
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_COLOR, new RGB(192, 192, 192));
+		store.setDefault(PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER, false);
+
+		store.setDefault(PreferenceConstants.EDITOR_UNKNOWN_INDICATION, false);
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_UNKNOWN_INDICATION_COLOR, new RGB(0, 0, 0));
+		store.setDefault(PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER, false);
+
+		store.setDefault(PreferenceConstants.EDITOR_CORRECTION_INDICATION, true);
+		store.setDefault(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE, false);
+
+		store.setDefault(PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, true);
+
+		store.setDefault(PreferenceConstants.EDITOR_OVERVIEW_RULER, true);
+
+		store.setDefault(PreferenceConstants.EDITOR_LINE_NUMBER_RULER, false);
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR, new RGB(0, 0, 0));
+
+		WorkbenchChainedTextFontFieldEditor.startPropagate(store, JFaceResources.TEXT_FONT);
+
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINKED_POSITION_COLOR, new RGB(0, 200 , 100));
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINK_COLOR, new RGB(0, 0, 255));
+
+		PreferenceConverter.setDefault(store,  PreferenceConstants.EDITOR_FOREGROUND_COLOR, rgbs[1]);
+		store.setDefault(PreferenceConstants.EDITOR_FOREGROUND_DEFAULT_COLOR, true);
+
+		PreferenceConverter.setDefault(store,  PreferenceConstants.EDITOR_BACKGROUND_COLOR, rgbs[2]);
+		store.setDefault(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR, true);
+
+		store.setDefault(PreferenceConstants.EDITOR_TAB_WIDTH, 4);
+		store.setDefault(PreferenceConstants.EDITOR_SPACES_FOR_TABS, false);
+
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR, new RGB(63, 127, 95));
+		store.setDefault(PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_BOLD, false); //$NON-NLS-1$
+
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR, new RGB(63, 127, 95));
+		store.setDefault(PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_BOLD, false); //$NON-NLS-1$
+
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR, new RGB(127, 0, 85));
+		store.setDefault(PreferenceConstants.EDITOR_JAVA_KEYWORD_BOLD, true); //$NON-NLS-1$
+
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_STRING_COLOR, new RGB(42, 0, 255));
+		store.setDefault(PreferenceConstants.EDITOR_STRING_BOLD, false); //$NON-NLS-1$
+
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR, new RGB(0, 0, 0));
+		store.setDefault(PreferenceConstants.EDITOR_JAVA_DEFAULT_BOLD, false); //$NON-NLS-1$
+
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR, new RGB(127, 159, 191));
+		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_KEYWORD_BOLD, true); //$NON-NLS-1$
+
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_TAG_BOLD, new RGB(127, 127, 159));
+		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_TAG_BOLD, false); //$NON-NLS-1$
+
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR, new RGB(63, 63, 191));
+		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_LINKS_BOLD, false); //$NON-NLS-1$
+
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR, new RGB(63, 95, 191));
+		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_DEFAULT_BOLD, false);		 //$NON-NLS-1$
+
+		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION, true);
+		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 500);
+
+		store.setDefault(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
+		PreferenceConverter.setDefault(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, new RGB(254, 241, 233));
+		PreferenceConverter.setDefault(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, new RGB(0, 0, 0));
+		PreferenceConverter.setDefault(store, PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND, new RGB(254, 241, 233));
+		PreferenceConverter.setDefault(store, PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND, new RGB(0, 0, 0));
+		PreferenceConverter.setDefault(store, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND, new RGB(255, 255, 0));
+		PreferenceConverter.setDefault(store, PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND, new RGB(255, 0, 0));
+		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, "."); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, "@"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS, true);
+		store.setDefault(PreferenceConstants.CODEASSIST_CASE_SENSITIVITY, false);
+		store.setDefault(PreferenceConstants.CODEASSIST_ORDER_PROPOSALS, false);
+		store.setDefault(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
+		store.setDefault(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, true);
+		store.setDefault(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, false);
+		store.setDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
+
+		store.setDefault(PreferenceConstants.EDITOR_SMART_PASTE, true);
+		store.setDefault(PreferenceConstants.EDITOR_CLOSE_STRINGS, true);
+		store.setDefault(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
+		store.setDefault(PreferenceConstants.EDITOR_CLOSE_JAVADOCS, true);
+		store.setDefault(PreferenceConstants.EDITOR_WRAP_STRINGS, true);
+		store.setDefault(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, true);
+		store.setDefault(PreferenceConstants.EDITOR_FORMAT_JAVADOCS, true);
+
+		store.setDefault(PreferenceConstants.EDITOR_SMART_HOME_END, true);
+
+		store.setDefault(PreferenceConstants.EDITOR_DEFAULT_HOVER, JavaPlugin.ID_BESTMATCH_HOVER);
+		store.setDefault(PreferenceConstants.EDITOR_NONE_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
+		store.setDefault(PreferenceConstants.EDITOR_CTRL_HOVER, JavaPlugin.ID_SOURCE_HOVER);
+		store.setDefault(PreferenceConstants.EDITOR_SHIFT_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
+		store.setDefault(PreferenceConstants.EDITOR_CTRL_SHIFT_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
+		store.setDefault(PreferenceConstants.EDITOR_CTRL_ALT_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
+		store.setDefault(PreferenceConstants.EDITOR_ALT_SHIFT_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
+		store.setDefault(PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
+		
 		JavadocPreferencePage.initDefaults(store);
 		NewJavaProjectPreferencePage.initDefaults(store);
 		MembersOrderPreferencePage.initDefaults(store);		

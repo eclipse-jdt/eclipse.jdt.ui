@@ -760,7 +760,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		
 		
 	/* Preference key for temporary problems */
-	public final static String HANDLE_TEMPORARY_PROBLEMS= PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS;
+	private final static String HANDLE_TEMPORARY_PROBLEMS= PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS;
 	
 	
 	/** The buffer factory */

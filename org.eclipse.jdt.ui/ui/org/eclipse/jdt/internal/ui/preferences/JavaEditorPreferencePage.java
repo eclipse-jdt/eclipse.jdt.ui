@@ -63,21 +63,15 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.WorkbenchChainedTextFontFieldEditor;
 
-import org.eclipse.jdt.ui.text.IJavaColorConstants;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 
 /*
@@ -85,168 +79,166 @@ import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
  */
 public class JavaEditorPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 	
-	public static final String BOLD= "_bold"; //$NON-NLS-1$
-	public static final String PREF_SHOW_TEMP_PROBLEMS= "JavaEditor.ShowTemporaryProblem"; //$NON-NLS-1$
-	public static final String PREF_SYNC_OUTLINE_ON_CURSOR_MOVE= "JavaEditor.SyncOutlineOnCursorMove"; //$NON-NLS-1$
+	private static final String BOLD= PreferenceConstants.EDITOR_BOLD_SUFFIX;
 
 	public final OverlayPreferenceStore.OverlayKey[] fKeys= new OverlayPreferenceStore.OverlayKey[] {
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND_SYSTEM_DEFAULT),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FOREGROUND_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOREGROUND_DEFAULT_COLOR),
 
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_BACKGROUND_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR),
 
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, PreferenceConstants.EDITOR_TAB_WIDTH),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + BOLD),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_BOLD),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + BOLD),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_BOLD),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVA_KEYWORD),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_KEYWORD + BOLD),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_JAVA_KEYWORD_BOLD),
 				
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVA_STRING),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_STRING + BOLD),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_STRING_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_STRING_BOLD),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVA_DEFAULT),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_DEFAULT + BOLD),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_JAVA_DEFAULT_BOLD),
 
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVADOC_KEYWORD),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVADOC_KEYWORD + BOLD),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_JAVADOC_KEYWORD_BOLD),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVADOC_TAG),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVADOC_TAG + BOLD),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_JAVADOC_TAG_BOLD),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_JAVADOC_TAG_BOLD),
+
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_JAVADOC_LINKS_BOLD),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVADOC_LINK),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVADOC_LINK + BOLD),
-		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVADOC_DEFAULT),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVADOC_DEFAULT + BOLD),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_JAVADOC_DEFAULT_BOLD),
 				
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.MATCHING_BRACKETS_COLOR),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.MATCHING_BRACKETS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MATCHING_BRACKETS),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.CURRENT_LINE_COLOR),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CURRENT_LINE),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_CURRENT_LINE_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CURRENT_LINE),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.PRINT_MARGIN_COLOR),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, CompilationUnitEditor.PRINT_MARGIN_COLUMN),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.PRINT_MARGIN),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_PRINT_MARGIN_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_PRINT_MARGIN),
 
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FIND_SCOPE_COLOR),
 
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.LINKED_POSITION_COLOR),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.LINK_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LINKED_POSITION_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LINK_COLOR),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.ERROR_INDICATION_COLOR),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.ERROR_INDICATION),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_PROBLEM_INDICATION_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_PROBLEM_INDICATION),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.WARNING_INDICATION_COLOR),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.WARNING_INDICATION),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_WARNING_INDICATION_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_WARNING_INDICATION),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.TASK_INDICATION_COLOR),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.TASK_INDICATION),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_TASK_INDICATION_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_TASK_INDICATION),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.BOOKMARK_INDICATION_COLOR),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.BOOKMARK_INDICATION),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_BOOKMARK_INDICATION_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_BOOKMARK_INDICATION),
 
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.SEARCH_RESULT_INDICATION_COLOR),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.SEARCH_RESULT_INDICATION),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION),
 
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.UNKNOWN_INDICATION_COLOR),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.UNKNOWN_INDICATION),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_UNKNOWN_INDICATION_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_UNKNOWN_INDICATION),
 
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.ERROR_INDICATION_IN_OVERVIEW_RULER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.WARNING_INDICATION_IN_OVERVIEW_RULER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.TASK_INDICATION_IN_OVERVIEW_RULER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.BOOKMARK_INDICATION_IN_OVERVIEW_RULER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.UNKNOWN_INDICATION_IN_OVERVIEW_RULER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ERROR_INDICATION_IN_OVERVIEW_RULER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_WARNING_INDICATION_IN_OVERVIEW_RULER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_TASK_INDICATION_IN_OVERVIEW_RULER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_BOOKMARK_INDICATION_IN_OVERVIEW_RULER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, JavaEditorPreferencePage.PREF_SYNC_OUTLINE_ON_CURSOR_MOVE),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CORRECTION_INDICATION),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.OVERVIEW_RULER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_OVERVIEW_RULER),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.LINE_NUMBER_COLOR),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, JavaEditor.LINE_NUMBER_RULER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_LINE_NUMBER_RULER),
 				
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.SPACES_FOR_TABS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SPACES_FOR_TABS),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.AUTOACTIVATION),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, ContentAssistPreference.AUTOACTIVATION_DELAY),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.AUTOINSERT),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.PROPOSALS_BACKGROUND),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.PROPOSALS_FOREGROUND),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.PARAMETERS_BACKGROUND),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.PARAMETERS_FOREGROUND),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.COMPLETION_REPLACEMENT_BACKGROUND),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.COMPLETION_REPLACEMENT_FOREGROUND),		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.SHOW_VISIBLE_PROPOSALS),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.ORDER_PROPOSALS),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.CASE_SENSITIVITY),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.ADD_IMPORT),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.INSERT_COMPLETION),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.FILL_METHOD_ARGUMENTS),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.GUESS_METHOD_ARGUMENTS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_AUTOACTIVATION),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_AUTOINSERT),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND),		
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_ORDER_PROPOSALS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_CASE_SENSITIVITY),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_ADDIMPORT),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_INSERT_COMPLETION),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.SMART_PASTE),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_STRINGS),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_BRACKETS),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CLOSE_JAVADOCS),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.WRAP_STRINGS),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.ADD_JAVADOC_TAGS),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.FORMAT_JAVADOCS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_PASTE),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_STRINGS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_BRACKETS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_JAVADOCS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_WRAP_STRINGS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FORMAT_JAVADOCS),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_HOME_END),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.DEFAULT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.NONE_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.CTRL_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.SHIFT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.CTRL_SHIFT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.CTRL_ALT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.CTRL_ALT_SHIFT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.CTRL_SHIFT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.ALT_SHIFT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_DEFAULT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_NONE_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_CTRL_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_SHIFT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_CTRL_SHIFT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_CTRL_ALT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_CTRL_SHIFT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_ALT_SHIFT_HOVER),
 	};
 	
 	private final String[][] fSyntaxColorListModel= new String[][] {
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.multiLineComment"), IJavaColorConstants.JAVA_MULTI_LINE_COMMENT }, //$NON-NLS-1$
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.singleLineComment"), IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT }, //$NON-NLS-1$
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.keywords"), IJavaColorConstants.JAVA_KEYWORD }, //$NON-NLS-1$
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.strings"), IJavaColorConstants.JAVA_STRING }, //$NON-NLS-1$
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.others"), IJavaColorConstants.JAVA_DEFAULT }, //$NON-NLS-1$
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.javaDocKeywords"), IJavaColorConstants.JAVADOC_KEYWORD }, //$NON-NLS-1$
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.javaDocHtmlTags"), IJavaColorConstants.JAVADOC_TAG }, //$NON-NLS-1$
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.javaDocLinks"), IJavaColorConstants.JAVADOC_LINK }, //$NON-NLS-1$
-		{ JavaUIMessages.getString("JavaEditorPreferencePage.javaDocOthers"), IJavaColorConstants.JAVADOC_DEFAULT } //$NON-NLS-1$
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.multiLineComment"), PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR }, //$NON-NLS-1$
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.singleLineComment"), PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR }, //$NON-NLS-1$
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.keywords"), PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR }, //$NON-NLS-1$
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.strings"), PreferenceConstants.EDITOR_STRING_COLOR }, //$NON-NLS-1$
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.others"), PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR }, //$NON-NLS-1$
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.javaDocKeywords"), PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR }, //$NON-NLS-1$
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.javaDocHtmlTags"), PreferenceConstants.EDITOR_JAVADOC_TAG_BOLD }, //$NON-NLS-1$
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.javaDocLinks"), PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR }, //$NON-NLS-1$
+		{ JavaUIMessages.getString("JavaEditorPreferencePage.javaDocOthers"), PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR } //$NON-NLS-1$
 	};
 	
 	private final String[][] fAppearanceColorListModel= new String[][] {
-		{JavaUIMessages.getString("JavaEditorPreferencePage.lineNumberForegroundColor"), JavaEditor.LINE_NUMBER_COLOR}, //$NON-NLS-1$
-		{JavaUIMessages.getString("JavaEditorPreferencePage.matchingBracketsHighlightColor2"), CompilationUnitEditor.MATCHING_BRACKETS_COLOR}, //$NON-NLS-1$
-		{JavaUIMessages.getString("JavaEditorPreferencePage.currentLineHighlighColor"), CompilationUnitEditor.CURRENT_LINE_COLOR}, //$NON-NLS-1$
-		{JavaUIMessages.getString("JavaEditorPreferencePage.printMarginColor2"), CompilationUnitEditor.PRINT_MARGIN_COLOR}, //$NON-NLS-1$
-		{JavaUIMessages.getString("JavaEditorPreferencePage.findScopeColor2"), AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE}, //$NON-NLS-1$
-		{JavaUIMessages.getString("JavaEditorPreferencePage.linkedPositionColor2"), CompilationUnitEditor.LINKED_POSITION_COLOR}, //$NON-NLS-1$
-		{JavaUIMessages.getString("JavaEditorPreferencePage.linkColor2"), JavaEditor.LINK_COLOR}, //$NON-NLS-1$
+		{JavaUIMessages.getString("JavaEditorPreferencePage.lineNumberForegroundColor"), PreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR}, //$NON-NLS-1$
+		{JavaUIMessages.getString("JavaEditorPreferencePage.matchingBracketsHighlightColor2"), PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR}, //$NON-NLS-1$
+		{JavaUIMessages.getString("JavaEditorPreferencePage.currentLineHighlighColor"), PreferenceConstants.EDITOR_CURRENT_LINE_COLOR}, //$NON-NLS-1$
+		{JavaUIMessages.getString("JavaEditorPreferencePage.printMarginColor2"), PreferenceConstants.EDITOR_PRINT_MARGIN_COLOR}, //$NON-NLS-1$
+		{JavaUIMessages.getString("JavaEditorPreferencePage.findScopeColor2"), PreferenceConstants.EDITOR_FIND_SCOPE_COLOR}, //$NON-NLS-1$
+		{JavaUIMessages.getString("JavaEditorPreferencePage.linkedPositionColor2"), PreferenceConstants.EDITOR_LINKED_POSITION_COLOR}, //$NON-NLS-1$
+		{JavaUIMessages.getString("JavaEditorPreferencePage.linkColor2"), PreferenceConstants.EDITOR_LINK_COLOR}, //$NON-NLS-1$
 	};
 	
 	private final String[][] fProblemIndicationColorListModel= new String[][] {
-		{"Errors", CompilationUnitEditor.ERROR_INDICATION_COLOR, CompilationUnitEditor.ERROR_INDICATION, CompilationUnitEditor.ERROR_INDICATION_IN_OVERVIEW_RULER },
-		{"Warnings", CompilationUnitEditor.WARNING_INDICATION_COLOR, CompilationUnitEditor.WARNING_INDICATION, CompilationUnitEditor.WARNING_INDICATION_IN_OVERVIEW_RULER },
-		{"Tasks", CompilationUnitEditor.TASK_INDICATION_COLOR, CompilationUnitEditor.TASK_INDICATION, CompilationUnitEditor.TASK_INDICATION_IN_OVERVIEW_RULER },
-		{"Search Results", CompilationUnitEditor.SEARCH_RESULT_INDICATION_COLOR, CompilationUnitEditor.SEARCH_RESULT_INDICATION, CompilationUnitEditor.SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER },
-		{"Bookmarks", CompilationUnitEditor.BOOKMARK_INDICATION_COLOR, CompilationUnitEditor.BOOKMARK_INDICATION, CompilationUnitEditor.BOOKMARK_INDICATION_IN_OVERVIEW_RULER },
-		{"Others", CompilationUnitEditor.UNKNOWN_INDICATION_COLOR, CompilationUnitEditor.UNKNOWN_INDICATION, CompilationUnitEditor.UNKNOWN_INDICATION_IN_OVERVIEW_RULER }
+		{"Errors", PreferenceConstants.EDITOR_PROBLEM_INDICATION_COLOR, PreferenceConstants.EDITOR_PROBLEM_INDICATION, PreferenceConstants.EDITOR_ERROR_INDICATION_IN_OVERVIEW_RULER },
+		{"Warnings", PreferenceConstants.EDITOR_WARNING_INDICATION_COLOR, PreferenceConstants.EDITOR_WARNING_INDICATION, PreferenceConstants.EDITOR_WARNING_INDICATION_IN_OVERVIEW_RULER },
+		{"Tasks", PreferenceConstants.EDITOR_TASK_INDICATION_COLOR, PreferenceConstants.EDITOR_TASK_INDICATION, PreferenceConstants.EDITOR_TASK_INDICATION_IN_OVERVIEW_RULER },
+		{"Search Results", PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_COLOR, PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION, PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER },
+		{"Bookmarks", PreferenceConstants.EDITOR_BOOKMARK_INDICATION_COLOR, PreferenceConstants.EDITOR_BOOKMARK_INDICATION, PreferenceConstants.EDITOR_BOOKMARK_INDICATION_IN_OVERVIEW_RULER },
+		{"Others", PreferenceConstants.EDITOR_UNKNOWN_INDICATION_COLOR, PreferenceConstants.EDITOR_UNKNOWN_INDICATION, PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER }
 	};
 	
 	private OverlayPreferenceStore fOverlayStore;
@@ -318,146 +310,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	
 	public static void initDefaults(IPreferenceStore store) {
 		
-		/* 
-		 * Ensure that the display is accessed only in the UI thread.
-		 * Ensure that there are no side effects of switching the thread.
-		 */
-		final RGB[] rgbs= new RGB[3];
-		final Display display= Display.getDefault();
-		display.syncExec(new Runnable() {
-			public void run() {
-				Color c= display.getSystemColor(SWT.COLOR_GRAY);
-				rgbs[0]= c.getRGB();
-				c= display.getSystemColor(SWT.COLOR_LIST_FOREGROUND);
-				rgbs[1]= c.getRGB();
-				c= display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
-				rgbs[2]= c.getRGB();
-			}
-		});
-		
-		
-		/* 
-		 * Go on in whatever thread this is. 
-		 */
-		store.setDefault(CompilationUnitEditor.MATCHING_BRACKETS, true);
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.MATCHING_BRACKETS_COLOR,  rgbs[0]);
-		
-		store.setDefault(CompilationUnitEditor.CURRENT_LINE, true);
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.CURRENT_LINE_COLOR, new RGB(225, 235, 224));
-		
-		store.setDefault(CompilationUnitEditor.PRINT_MARGIN, false);
-		store.setDefault(CompilationUnitEditor.PRINT_MARGIN_COLUMN, 80);
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.PRINT_MARGIN_COLOR, new RGB(176, 180 , 185));
 
-		PreferenceConverter.setDefault(store, AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE, new RGB(185, 176 , 180));
-		
-		store.setDefault(CompilationUnitEditor.ERROR_INDICATION, true);
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.ERROR_INDICATION_COLOR, new RGB(255, 0 , 128));
-		store.setDefault(CompilationUnitEditor.ERROR_INDICATION_IN_OVERVIEW_RULER, true);
-		
-		store.setDefault(CompilationUnitEditor.WARNING_INDICATION, true);
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.WARNING_INDICATION_COLOR, new RGB(244, 200 , 45));
-		store.setDefault(CompilationUnitEditor.WARNING_INDICATION_IN_OVERVIEW_RULER, true);
-		
-		store.setDefault(CompilationUnitEditor.TASK_INDICATION, false);
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.TASK_INDICATION_COLOR, new RGB(0, 128, 255));
-		store.setDefault(CompilationUnitEditor.TASK_INDICATION_IN_OVERVIEW_RULER, false);
-		
-		store.setDefault(CompilationUnitEditor.BOOKMARK_INDICATION, false);
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.BOOKMARK_INDICATION_COLOR, new RGB(34, 164, 99));
-		store.setDefault(CompilationUnitEditor.BOOKMARK_INDICATION_IN_OVERVIEW_RULER, false);
-		
-		store.setDefault(CompilationUnitEditor.SEARCH_RESULT_INDICATION, false);
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.SEARCH_RESULT_INDICATION_COLOR, new RGB(192, 192, 192));
-		store.setDefault(CompilationUnitEditor.SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER, false);
-		
-		store.setDefault(CompilationUnitEditor.UNKNOWN_INDICATION, false);
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.UNKNOWN_INDICATION_COLOR, new RGB(0, 0, 0));
-		store.setDefault(CompilationUnitEditor.UNKNOWN_INDICATION_IN_OVERVIEW_RULER, false);
-		
-		store.setDefault(JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, true);
-		store.setDefault(JavaEditorPreferencePage.PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, false);
-		
-		store.setDefault(CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS, true);
-		
-		store.setDefault(CompilationUnitEditor.OVERVIEW_RULER, true);
-		
-		store.setDefault(JavaEditor.LINE_NUMBER_RULER, false);
-		PreferenceConverter.setDefault(store, JavaEditor.LINE_NUMBER_COLOR, new RGB(0, 0, 0));
-		
-		WorkbenchChainedTextFontFieldEditor.startPropagate(store, JFaceResources.TEXT_FONT);
-
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.LINKED_POSITION_COLOR, new RGB(0, 200 , 100));
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.LINK_COLOR, new RGB(0, 0, 255));
-		
-		PreferenceConverter.setDefault(store,  AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND, rgbs[1]);
-		store.setDefault(AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND_SYSTEM_DEFAULT, true);
-		
-		PreferenceConverter.setDefault(store,  AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND, rgbs[2]);		
-		store.setDefault(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT, true);
-		
-		store.setDefault(JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH, 4);
-		
-		store.setDefault(CompilationUnitEditor.SPACES_FOR_TABS, false);
-		
-		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT, new RGB(63, 127, 95));
-		store.setDefault(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + "_bold", false); //$NON-NLS-1$
-		
-		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT, new RGB(63, 127, 95));
-		store.setDefault(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + "_bold", false); //$NON-NLS-1$
-		
-		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_KEYWORD, new RGB(127, 0, 85));
-		store.setDefault(IJavaColorConstants.JAVA_KEYWORD + "_bold", true); //$NON-NLS-1$
-				
-		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_STRING, new RGB(42, 0, 255));
-		store.setDefault(IJavaColorConstants.JAVA_STRING + "_bold", false); //$NON-NLS-1$
-		
-		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_DEFAULT, new RGB(0, 0, 0));
-		store.setDefault(IJavaColorConstants.JAVA_DEFAULT + "_bold", false); //$NON-NLS-1$
-
-		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVADOC_KEYWORD, new RGB(127, 159, 191));
-		store.setDefault(IJavaColorConstants.JAVADOC_KEYWORD + "_bold", true); //$NON-NLS-1$
-		
-		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVADOC_TAG, new RGB(127, 127, 159));
-		store.setDefault(IJavaColorConstants.JAVADOC_TAG + "_bold", false); //$NON-NLS-1$
-		
-		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVADOC_LINK, new RGB(63, 63, 191));
-		store.setDefault(IJavaColorConstants.JAVADOC_LINK + "_bold", false); //$NON-NLS-1$
-		
-		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVADOC_DEFAULT, new RGB(63, 95, 191));
-		store.setDefault(IJavaColorConstants.JAVADOC_DEFAULT + "_bold", false);		 //$NON-NLS-1$
-		
-		store.setDefault(ContentAssistPreference.AUTOACTIVATION, true);
-		store.setDefault(ContentAssistPreference.AUTOACTIVATION_DELAY, 500);
-		
-		store.setDefault(ContentAssistPreference.AUTOINSERT, true);
-		PreferenceConverter.setDefault(store, ContentAssistPreference.PROPOSALS_BACKGROUND, new RGB(254, 241, 233));
-		PreferenceConverter.setDefault(store, ContentAssistPreference.PROPOSALS_FOREGROUND, new RGB(0, 0, 0));
-		PreferenceConverter.setDefault(store, ContentAssistPreference.PARAMETERS_BACKGROUND, new RGB(254, 241, 233));
-		PreferenceConverter.setDefault(store, ContentAssistPreference.PARAMETERS_FOREGROUND, new RGB(0, 0, 0));
-		PreferenceConverter.setDefault(store, ContentAssistPreference.COMPLETION_REPLACEMENT_BACKGROUND, new RGB(255, 255, 0));
-		PreferenceConverter.setDefault(store, ContentAssistPreference.COMPLETION_REPLACEMENT_FOREGROUND, new RGB(255, 0, 0));
-		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, "."); //$NON-NLS-1$
-		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, "@"); //$NON-NLS-1$
-		store.setDefault(ContentAssistPreference.SHOW_VISIBLE_PROPOSALS, true);
-		store.setDefault(ContentAssistPreference.CASE_SENSITIVITY, false);
-		store.setDefault(ContentAssistPreference.ORDER_PROPOSALS, false);
-		store.setDefault(ContentAssistPreference.ADD_IMPORT, true);
-		store.setDefault(ContentAssistPreference.INSERT_COMPLETION, true);
-		store.setDefault(ContentAssistPreference.FILL_METHOD_ARGUMENTS, false);
-		store.setDefault(ContentAssistPreference.GUESS_METHOD_ARGUMENTS, true);
-
-		store.setDefault(CompilationUnitEditor.SMART_PASTE, true);
-		store.setDefault(CompilationUnitEditor.CLOSE_STRINGS, true);
-		store.setDefault(CompilationUnitEditor.CLOSE_BRACKETS, true);
-		store.setDefault(CompilationUnitEditor.CLOSE_JAVADOCS, true);
-		store.setDefault(CompilationUnitEditor.WRAP_STRINGS, true);
-		store.setDefault(CompilationUnitEditor.ADD_JAVADOC_TAGS, true);
-		store.setDefault(CompilationUnitEditor.FORMAT_JAVADOCS, true);
-		
-		store.setDefault(AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END, true);
-		
-		JavaEditorHoverConfigurationBlock.initDefaults(store);
 	}
 
 	/*
@@ -516,7 +369,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			public void widgetSelected(SelectionEvent e) {				
 				boolean custom= fBackgroundCustomRadioButton.getSelection();
 				fBackgroundColorButton.setEnabled(custom);
-				fOverlayStore.setValue(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT, !custom);
+				fOverlayStore.setValue(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR, !custom);
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		};
@@ -614,7 +467,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				// do nothing
 			}
 			public void widgetSelected(SelectionEvent e) {
-				PreferenceConverter.setValue(fOverlayStore, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND, fBackgroundColorEditor.getColorValue());					
+				PreferenceConverter.setValue(fOverlayStore, PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR, fBackgroundColorEditor.getColorValue());					
 			}
 		});
 
@@ -654,8 +507,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fOverlayStore.addPropertyChangeListener(new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				String p= event.getProperty();
-				if (p.equals(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND) ||
-					p.equals(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT))
+				if (p.equals(PreferenceConstants.EDITOR_BACKGROUND_COLOR) ||
+					p.equals(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR))
 				{
 					initializeViewerColors(fPreviewViewer);
 				}
@@ -680,9 +533,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			StyledText styledText= viewer.getTextWidget();
 						
 			// ---------- background color ----------------------
-			Color color= store.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT)
+			Color color= store.getBoolean(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR)
 				? null
-				: createColor(store, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND, styledText.getDisplay());
+				: createColor(store, PreferenceConstants.EDITOR_BACKGROUND_COLOR, styledText.getDisplay());
 			styledText.setBackground(color);
 				
 			if (fBackgroundColor != null)
@@ -735,28 +588,28 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		addTextFontEditor(appearanceComposite, label, AbstractTextEditor.PREFERENCE_FONT);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.displayedTabWidth"); //$NON-NLS-1$
-		addTextField(appearanceComposite, label, JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH, 3, 0, true);
+		addTextField(appearanceComposite, label, PreferenceConstants.EDITOR_TAB_WIDTH, 3, 0, true);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.printMarginColumn"); //$NON-NLS-1$
-		addTextField(appearanceComposite, label, CompilationUnitEditor.PRINT_MARGIN_COLUMN, 3, 0, true);
+		addTextField(appearanceComposite, label, PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN, 3, 0, true);
 				
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.synchronizeOnCursor"); //$NON-NLS-1$
-		addCheckBox(appearanceComposite, label, JavaEditorPreferencePage.PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, 0);
+		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE, 0);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showOverviewRuler"); //$NON-NLS-1$
-		addCheckBox(appearanceComposite, label, CompilationUnitEditor.OVERVIEW_RULER, 0);
+		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_OVERVIEW_RULER, 0);
 				
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showLineNumbers"); //$NON-NLS-1$
-		addCheckBox(appearanceComposite, label, JavaEditor.LINE_NUMBER_RULER, 0);
+		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_LINE_NUMBER_RULER, 0);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightMatchingBrackets"); //$NON-NLS-1$
-		addCheckBox(appearanceComposite, label, CompilationUnitEditor.MATCHING_BRACKETS, 0);
+		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_MATCHING_BRACKETS, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightCurrentLine"); //$NON-NLS-1$
-		addCheckBox(appearanceComposite, label, CompilationUnitEditor.CURRENT_LINE, 0);
+		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_CURRENT_LINE, 0);
 				
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showPrintMargin"); //$NON-NLS-1$
-		addCheckBox(appearanceComposite, label, CompilationUnitEditor.PRINT_MARGIN, 0);
+		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_PRINT_MARGIN, 0);
 
 
 		Label l= new Label(appearanceComposite, SWT.LEFT );
@@ -835,10 +688,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		composite.setLayout(layout);
 				
 		String text= "Analyse &problems while typing";
-		addCheckBox(composite, text, CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS, 0);
+		addCheckBox(composite, text, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, 0);
 		
 		text= JavaUIMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
-		addCheckBox(composite, text, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
+		addCheckBox(composite, text, PreferenceConstants.EDITOR_CORRECTION_INDICATION, 0);
 		
 		Label label= new Label(composite, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -956,32 +809,32 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		composite.setLayout(layout);
 
 		String label= JavaUIMessages.getString("JavaEditorPreferencePage.wrapStrings"); //$NON-NLS-1$
-		addCheckBox(composite, label, CompilationUnitEditor.WRAP_STRINGS, 1);
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_WRAP_STRINGS, 1);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.smartHomeEnd"); //$NON-NLS-1$
-		addCheckBox(composite, label, AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END, 1);
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_HOME_END, 1);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.smartPaste"); //$NON-NLS-1$
-		addCheckBox(composite, label, CompilationUnitEditor.SMART_PASTE, 1);
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_PASTE, 1);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.insertSpaceForTabs"); //$NON-NLS-1$
-		addCheckBox(composite, label, CompilationUnitEditor.SPACES_FOR_TABS, 1);
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_SPACES_FOR_TABS, 1);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeStrings"); //$NON-NLS-1$
-		addCheckBox(composite, label, CompilationUnitEditor.CLOSE_STRINGS, 1);
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_STRINGS, 1);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeBrackets"); //$NON-NLS-1$
-		addCheckBox(composite, label, CompilationUnitEditor.CLOSE_BRACKETS, 1);
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_BRACKETS, 1);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeJavaDocs"); //$NON-NLS-1$
-		Button button= addCheckBox(composite, label, CompilationUnitEditor.CLOSE_JAVADOCS, 1);
+		Button button= addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_JAVADOCS, 1);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.addJavaDocTags"); //$NON-NLS-1$
-		fAddJavaDocTagsButton= addCheckBox(composite, label, CompilationUnitEditor.ADD_JAVADOC_TAGS, 1);
+		fAddJavaDocTagsButton= addCheckBox(composite, label, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, 1);
 		createDependency(button, fAddJavaDocTagsButton);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.formatJavaDocs"); //$NON-NLS-1$
-		addCheckBox(composite, label, CompilationUnitEditor.FORMAT_JAVADOCS, 1);
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_FORMAT_JAVADOCS, 1);
 	
 		return composite;
 	}
@@ -1010,56 +863,56 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		contentAssistComposite.setLayout(layout);
 
 		String label= JavaUIMessages.getString("JavaEditorPreferencePage.insertSingleProposalsAutomatically"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, ContentAssistPreference.AUTOINSERT, 0);		
+		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOINSERT, 0);		
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showOnlyProposalsVisibleInTheInvocationContext"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, ContentAssistPreference.SHOW_VISIBLE_PROPOSALS, 0);
+		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.presentProposalsInAlphabeticalOrder"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, ContentAssistPreference.ORDER_PROPOSALS, 0);
+		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_ORDER_PROPOSALS, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.automaticallyAddImportInsteadOfQualifiedName"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, ContentAssistPreference.ADD_IMPORT, 0);
+		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_ADDIMPORT, 0);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.insertCompletion"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, ContentAssistPreference.INSERT_COMPLETION, 0);
+		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_INSERT_COMPLETION, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.fillArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
-		Button button= addCheckBox(contentAssistComposite, label, ContentAssistPreference.FILL_METHOD_ARGUMENTS, 0);
+		Button button= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, 0);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.guessArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
-		fGuessMethodArgumentsButton= addCheckBox(contentAssistComposite, label, ContentAssistPreference.GUESS_METHOD_ARGUMENTS, 0);
+		fGuessMethodArgumentsButton= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, 0);
 		createDependency(button, fGuessMethodArgumentsButton);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.enableAutoActivation"); //$NON-NLS-1$
-		final Button autoactivation= addCheckBox(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION, 0);
+		final Button autoactivation= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationDelay"); //$NON-NLS-1$
-		fAutoInsertDelayText= addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_DELAY, 4, 0, true);
+		fAutoInsertDelayText= addTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 4, 0, true);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJava"); //$NON-NLS-1$
-		fAutoInsertJavaTriggerText= addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, 4, 0, false);
+		fAutoInsertJavaTriggerText= addTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, 4, 0, false);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJavaDoc"); //$NON-NLS-1$
-		fAutoInsertJavaDocTriggerText= addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, 4, 0, false);
+		fAutoInsertJavaDocTriggerText= addTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, 4, 0, false);
 								
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.backgroundForCompletionProposals"); //$NON-NLS-1$
-		addColorButton(contentAssistComposite, label, ContentAssistPreference.PROPOSALS_BACKGROUND, 0);
+		addColorButton(contentAssistComposite, label, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.foregroundForCompletionProposals"); //$NON-NLS-1$
-		addColorButton(contentAssistComposite, label, ContentAssistPreference.PROPOSALS_FOREGROUND, 0);
+		addColorButton(contentAssistComposite, label, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.backgroundForMethodParameters"); //$NON-NLS-1$
-		addColorButton(contentAssistComposite, label, ContentAssistPreference.PARAMETERS_BACKGROUND, 0);
+		addColorButton(contentAssistComposite, label, PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.foregroundForMethodParameters"); //$NON-NLS-1$
-		addColorButton(contentAssistComposite, label, ContentAssistPreference.PARAMETERS_FOREGROUND, 0);
+		addColorButton(contentAssistComposite, label, PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND, 0);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.backgroundForCompletionReplacement"); //$NON-NLS-1$
-		addColorButton(contentAssistComposite, label, ContentAssistPreference.COMPLETION_REPLACEMENT_BACKGROUND, 0);
+		addColorButton(contentAssistComposite, label, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.foregroundForCompletionReplacement"); //$NON-NLS-1$
-		addColorButton(contentAssistComposite, label, ContentAssistPreference.COMPLETION_REPLACEMENT_FOREGROUND, 0);
+		addColorButton(contentAssistComposite, label, PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND, 0);
 		
 		autoactivation.addSelectionListener(new SelectionAdapter(){
             public void widgetSelected(SelectionEvent e) {
@@ -1180,18 +1033,18 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			t.setText(fOverlayStore.getString(key));
 		}
 		
-		RGB rgb= PreferenceConverter.getColor(fOverlayStore, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND);
+		RGB rgb= PreferenceConverter.getColor(fOverlayStore, PreferenceConstants.EDITOR_BACKGROUND_COLOR);
 		fBackgroundColorEditor.setColorValue(rgb);		
 		
-		boolean default_= fOverlayStore.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT);
+		boolean default_= fOverlayStore.getBoolean(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR);
 		fBackgroundDefaultRadioButton.setSelection(default_);
 		fBackgroundCustomRadioButton.setSelection(!default_);
 		fBackgroundColorButton.setEnabled(!default_);
 
-		boolean closeJavaDocs= fOverlayStore.getBoolean(CompilationUnitEditor.CLOSE_JAVADOCS);
+		boolean closeJavaDocs= fOverlayStore.getBoolean(PreferenceConstants.EDITOR_CLOSE_JAVADOCS);
 		fAddJavaDocTagsButton.setEnabled(closeJavaDocs);
 
-		boolean fillMethodArguments= fOverlayStore.getBoolean(ContentAssistPreference.FILL_METHOD_ARGUMENTS);
+		boolean fillMethodArguments= fOverlayStore.getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES);
 		fGuessMethodArgumentsButton.setEnabled(fillMethodArguments);
 		
         updateAutoactivationControls();
@@ -1200,7 +1053,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	}
 	
     private void updateAutoactivationControls() {
-        boolean autoactivation= fOverlayStore.getBoolean(ContentAssistPreference.AUTOACTIVATION);
+        boolean autoactivation= fOverlayStore.getBoolean(PreferenceConstants.CODEASSIST_AUTOACTIVATION);
         fAutoInsertDelayText.setEnabled(autoactivation);
         fAutoInsertJavaTriggerText.setEnabled(autoactivation);
         fAutoInsertJavaDocTriggerText.setEnabled(autoactivation);
@@ -1388,11 +1241,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	}
 
 	public static boolean indicateQuixFixableProblems() {
-		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS);
+		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CORRECTION_INDICATION);
 	}
 	
 	static public boolean synchronizeOutlineOnCursorMove() {
-		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_SYNC_OUTLINE_ON_CURSOR_MOVE);
+		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE);
 	}
 
 }

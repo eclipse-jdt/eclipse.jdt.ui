@@ -44,9 +44,9 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -121,7 +121,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getProperty().equals(CompilationUnitEditor.LINKED_POSITION_COLOR)) {
+		if (event.getProperty().equals(PreferenceConstants.EDITOR_LINKED_POSITION_COLOR)) {
 			initializeHighlightColor(fViewer);
 			redrawRegion();
 		}
@@ -135,7 +135,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		StyledText text= viewer.getTextWidget();
 		if (text != null) {
 			Display display= text.getDisplay();
-			fFrameColor= createColor(fgStore, CompilationUnitEditor.LINKED_POSITION_COLOR, display);
+			fFrameColor= createColor(fgStore, PreferenceConstants.EDITOR_LINKED_POSITION_COLOR, display);
 		}
 	}
 

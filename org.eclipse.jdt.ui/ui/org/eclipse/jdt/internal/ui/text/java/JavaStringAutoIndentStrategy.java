@@ -9,8 +9,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 /**
  * Auto indent strategy for java strings
@@ -114,7 +115,7 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 			IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 				
-			if (preferenceStore.getBoolean(CompilationUnitEditor.WRAP_STRINGS) &&
+			if (preferenceStore.getBoolean(PreferenceConstants.EDITOR_WRAP_STRINGS) &&
 				hasLineDelimiters(document, command.text))
 			{
 				javaStringIndentAfterNewLine(document, command);

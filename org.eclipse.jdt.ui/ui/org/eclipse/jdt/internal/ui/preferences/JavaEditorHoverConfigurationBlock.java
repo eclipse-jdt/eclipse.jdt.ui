@@ -42,12 +42,12 @@ import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.text.java.hover.*;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaSourceHover;
-import org.eclipse.jdt.internal.ui.text.java.hover.JavaTextHover;
+import org.eclipse.jdt.internal.ui.text.java.hover.BestMatchHover;
 
 
 /**
@@ -74,9 +74,9 @@ class JavaEditorHoverConfigurationBlock {
 			fModifier= modifier;
 			fStateMask= stateMask;
 
-			if (JavaEditor.NO_HOVER_CONFIGURED_ID.equals(hoverId))
+			if (PreferenceConstants.EDITOR_NO_HOVER_CONFIGURED_ID.equals(hoverId))
 				setHoverIndex(NO_HOVER_CONFIGURED_INDEX);
-			else if (JavaEditor.DEFAULT_HOVER_CONFIGURED_ID.equals(hoverId))
+			else if (PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID.equals(hoverId))
 				setHoverIndex(DEFAULT_HOVER_CONFIGURED_INDEX);
 			else {
 				// Find index
@@ -97,9 +97,9 @@ class JavaEditorHoverConfigurationBlock {
 		private void setHoverIndex(int hoverIndex) {
 			fHoverIndex= hoverIndex;
 			if (hoverIndex == NO_HOVER_CONFIGURED_INDEX)
-				fHoverId= JavaEditor.NO_HOVER_CONFIGURED_ID;
+				fHoverId= PreferenceConstants.EDITOR_NO_HOVER_CONFIGURED_ID;
 			else if (hoverIndex == DEFAULT_HOVER_CONFIGURED_INDEX)
-				fHoverId= JavaEditor.DEFAULT_HOVER_CONFIGURED_ID;
+				fHoverId= PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID;
 			else if (hoverIndex >= 0 && hoverIndex < getContributedHovers().size())
 				fHoverId= ((JavaEditorTextHoverDescriptor)getContributedHovers().get(hoverIndex)).getId();
 			else
@@ -280,28 +280,28 @@ class JavaEditorHoverConfigurationBlock {
 		fHoverConfigs= new HoverConfig[8];
 		
 		String label= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.defaultHover"); //$NON-NLS-1$
-		fHoverConfigs[0]= new HoverConfig(label, ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK, fStore.getString(JavaEditor.DEFAULT_HOVER));
+		fHoverConfigs[0]= new HoverConfig(label, ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK, fStore.getString(PreferenceConstants.EDITOR_DEFAULT_HOVER));
 
 		label= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.modifier.none"); //$NON-NLS-1$
-		fHoverConfigs[1]= new HoverConfig(label, SWT.NONE, fStore.getString(JavaEditor.NONE_HOVER));
+		fHoverConfigs[1]= new HoverConfig(label, SWT.NONE, fStore.getString(PreferenceConstants.EDITOR_NONE_HOVER));
 
 		label= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.modifier.ctrl"); //$NON-NLS-1$		
-		fHoverConfigs[2]= new HoverConfig(label, SWT.CTRL, fStore.getString(JavaEditor.CTRL_HOVER));
+		fHoverConfigs[2]= new HoverConfig(label, SWT.CTRL, fStore.getString(PreferenceConstants.EDITOR_CTRL_HOVER));
 
 		label= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.modifier.shift"); //$NON-NLS-1$		
-		fHoverConfigs[3]= new HoverConfig(label, SWT.SHIFT, fStore.getString(JavaEditor.SHIFT_HOVER));
+		fHoverConfigs[3]= new HoverConfig(label, SWT.SHIFT, fStore.getString(PreferenceConstants.EDITOR_SHIFT_HOVER));
 
 		label= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.modifier.ctrlShift"); //$NON-NLS-1$		
-		fHoverConfigs[4]= new HoverConfig(label, SWT.CTRL | SWT.SHIFT, fStore.getString(JavaEditor.CTRL_SHIFT_HOVER));
+		fHoverConfigs[4]= new HoverConfig(label, SWT.CTRL | SWT.SHIFT, fStore.getString(PreferenceConstants.EDITOR_CTRL_SHIFT_HOVER));
 
 		label= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.modifier.ctrlAlt"); //$NON-NLS-1$		
-		fHoverConfigs[5]= new HoverConfig(label, SWT.CTRL | SWT.ALT, fStore.getString(JavaEditor.CTRL_ALT_HOVER));
+		fHoverConfigs[5]= new HoverConfig(label, SWT.CTRL | SWT.ALT, fStore.getString(PreferenceConstants.EDITOR_CTRL_ALT_HOVER));
 
 		label= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.modifier.altShift"); //$NON-NLS-1$		
-		fHoverConfigs[6]= new HoverConfig(label, SWT.ALT | SWT.SHIFT, fStore.getString(JavaEditor.ALT_SHIFT_HOVER));
+		fHoverConfigs[6]= new HoverConfig(label, SWT.ALT | SWT.SHIFT, fStore.getString(PreferenceConstants.EDITOR_ALT_SHIFT_HOVER));
 
 		label= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.modifier.ctrlAltShift"); //$NON-NLS-1$		
-		fHoverConfigs[7]= new HoverConfig(label, SWT.CTRL | SWT.ALT | SWT.SHIFT, fStore.getString(JavaEditor.CTRL_ALT_SHIFT_HOVER));
+		fHoverConfigs[7]= new HoverConfig(label, SWT.CTRL | SWT.ALT | SWT.SHIFT, fStore.getString(PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER));
 
 		fTableViewer.setInput(fHoverConfigs);
 	}
@@ -311,25 +311,14 @@ class JavaEditorHoverConfigurationBlock {
 	}
 
 	void performOk() {
-		fStore.setValue(JavaEditor.DEFAULT_HOVER, fHoverConfigs[0].fHoverId);
-		fStore.setValue(JavaEditor.NONE_HOVER, fHoverConfigs[1].fHoverId);
-		fStore.setValue(JavaEditor.CTRL_HOVER, fHoverConfigs[2].fHoverId);
-		fStore.setValue(JavaEditor.SHIFT_HOVER, fHoverConfigs[3].fHoverId);
-		fStore.setValue(JavaEditor.CTRL_SHIFT_HOVER, fHoverConfigs[4].fHoverId);
-		fStore.setValue(JavaEditor.CTRL_ALT_HOVER, fHoverConfigs[5].fHoverId);
-		fStore.setValue(JavaEditor.ALT_SHIFT_HOVER, fHoverConfigs[6].fHoverId);
-		fStore.setValue(JavaEditor.CTRL_ALT_SHIFT_HOVER, fHoverConfigs[7].fHoverId);
-	}
-
-	static void initDefaults(IPreferenceStore store) {
-		store.setDefault(JavaEditor.DEFAULT_HOVER, JavaTextHover.ID);
-		store.setDefault(JavaEditor.NONE_HOVER, JavaEditor.DEFAULT_HOVER_CONFIGURED_ID);
-		store.setDefault(JavaEditor.CTRL_HOVER, JavaSourceHover.ID);
-		store.setDefault(JavaEditor.SHIFT_HOVER, JavaEditor.DEFAULT_HOVER_CONFIGURED_ID);
-		store.setDefault(JavaEditor.CTRL_SHIFT_HOVER, JavaEditor.DEFAULT_HOVER_CONFIGURED_ID);
-		store.setDefault(JavaEditor.CTRL_ALT_HOVER, JavaEditor.DEFAULT_HOVER_CONFIGURED_ID);
-		store.setDefault(JavaEditor.ALT_SHIFT_HOVER, JavaEditor.DEFAULT_HOVER_CONFIGURED_ID);
-		store.setDefault(JavaEditor.CTRL_ALT_SHIFT_HOVER, JavaEditor.DEFAULT_HOVER_CONFIGURED_ID);
+		fStore.setValue(PreferenceConstants.EDITOR_DEFAULT_HOVER, fHoverConfigs[0].fHoverId);
+		fStore.setValue(PreferenceConstants.EDITOR_NONE_HOVER, fHoverConfigs[1].fHoverId);
+		fStore.setValue(PreferenceConstants.EDITOR_CTRL_HOVER, fHoverConfigs[2].fHoverId);
+		fStore.setValue(PreferenceConstants.EDITOR_SHIFT_HOVER, fHoverConfigs[3].fHoverId);
+		fStore.setValue(PreferenceConstants.EDITOR_CTRL_SHIFT_HOVER, fHoverConfigs[4].fHoverId);
+		fStore.setValue(PreferenceConstants.EDITOR_CTRL_ALT_HOVER, fHoverConfigs[5].fHoverId);
+		fStore.setValue(PreferenceConstants.EDITOR_ALT_SHIFT_HOVER, fHoverConfigs[6].fHoverId);
+		fStore.setValue(PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER, fHoverConfigs[7].fHoverId);
 	}
 
 	/**

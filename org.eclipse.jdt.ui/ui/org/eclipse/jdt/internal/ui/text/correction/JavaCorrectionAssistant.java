@@ -40,15 +40,13 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 import org.eclipse.jdt.ui.JavaUI;
-
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.javaeditor.IProblemAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.ProblemAnnotationIterator;
-import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 
@@ -84,10 +82,10 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 
 		IPreferenceStore store=  JavaPlugin.getDefault().getPreferenceStore();
 
-		Color c= getColor(store, ContentAssistPreference.PROPOSALS_FOREGROUND, manager);
+		Color c= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, manager);
 		setProposalSelectorForeground(c);
 		
-		c= getColor(store, ContentAssistPreference.PROPOSALS_BACKGROUND, manager);
+		c= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, manager);
 		setProposalSelectorBackground(c);
 	}
 	
