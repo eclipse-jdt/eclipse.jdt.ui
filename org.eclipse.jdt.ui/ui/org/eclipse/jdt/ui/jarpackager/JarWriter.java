@@ -15,26 +15,30 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.OperationCanceledException;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerMessages;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 
@@ -49,6 +53,8 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 public class JarWriter {
 	private JarOutputStream fJarOutputStream;
 	private JarPackageData fJarPackage;
+
+	private Set fDirectories= new HashSet();
 	
 	/**
 	 * Creates an instance which is used to create a JAR based
@@ -140,11 +146,15 @@ public class JarWriter {
 		try {
 			IPath fileLocation= resource.getLocation();
 			long lastModified= System.currentTimeMillis();
+			File file= null;
 			if (fileLocation != null) {
-				File file= new File(fileLocation.toOSString());
-				if (file.exists())
+				file= new File(fileLocation.toOSString());
+				if (file.exists()) {
 					lastModified= file.lastModified();
+				}
 			}
+			if (fJarPackage.areDirectoryEntriesIncluded())
+				addDirectories(destinationPath, file);
 			write(destinationPath, output.toByteArray(), lastModified);
 		} catch (IOException ex) {
 			// Ensure full path is visible
@@ -196,6 +206,44 @@ public class JarWriter {
 		}
 	}
 	
+	/**
+	 * Add the directory entries for the given path to the jar.
+	 * 
+	 * @param destinationPath the path to add
+	 * @param correspondingFile the corresponding file in the file system 
+	 *  or <code>null</code> if it doesn't exist
+	 * @throws IOException if an I/O error has occurred  
+	 */
+	private void addDirectories(IPath destinationPath, File correspondingFile) throws IOException {
+		String path= destinationPath.toString().replace(File.separatorChar, '/');
+		int lastSlash= path.lastIndexOf('/');
+		List directories= new ArrayList(2);
+		while(lastSlash != -1) {
+			path= path.substring(0, lastSlash + 1);
+			if (!fDirectories.add(path))
+				break;
+
+			if (correspondingFile != null)
+				correspondingFile= correspondingFile.getParentFile();
+			long timeStamp= correspondingFile != null && correspondingFile.exists() 
+				? correspondingFile.lastModified() 
+				: System.currentTimeMillis();
+				
+			JarEntry newEntry= new JarEntry(path);
+			newEntry.setMethod(ZipEntry.STORED);
+			newEntry.setSize(0);
+			newEntry.setCrc(0);
+			newEntry.setTime(timeStamp);
+			directories.add(newEntry);
+			
+			lastSlash= path.lastIndexOf('/', lastSlash - 1);
+		}
+			
+		for(int i= directories.size() - 1; i >= 0; --i) {
+			fJarOutputStream.putNextEntry((JarEntry)directories.get(i));
+		}
+	}
+
 	/**
 	 * Checks if the JAR file can be overwritten.
 	 * If the JAR package setting does not allow to overwrite the JAR

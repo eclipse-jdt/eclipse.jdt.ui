@@ -119,6 +119,9 @@ public class JarPackageData {
 	// The provider for the manifest file
 	private IManifestProvider fManifestProvider;
 	
+	// Add directory entries to the jar
+	private boolean fIncludeDirectoryEntries;
+	
 	public JarPackageData() {
 		setExportClassFiles(true);
 		setExportOutputFolders(false);
@@ -135,6 +138,7 @@ public class JarPackageData {
 		setExportErrors(true);
 		setExportWarnings(true);		
 		setBuildIfNeeded(true);
+		setIncludeDirectoryEntries(false);
 	}
 
 	// ----------- Accessors -----------
@@ -916,5 +920,28 @@ public class JarPackageData {
 	 */
 	public boolean isMainClassValid(IRunnableContext context) {
 		return JarPackagerUtil.isMainClassValid(this, context);
+	}
+
+	/**
+	 * Tells whether directory entries are added to the jar.
+	 * 
+	 * @return	<code>true</code> if directory entries are to be included
+	 * 
+	 * @since 3.1
+	 */
+	public boolean areDirectoryEntriesIncluded() {
+		return fIncludeDirectoryEntries;
+	}
+
+	/**
+	 * Sets the option to include directory entries into the jar.
+	 * 
+	 * @param includeDirectoryEntries <code>true<code> to include
+	 *  directory entries <code>false</code> otherwise
+	 *  
+	 *  @since 3.1
+	 */
+	public void setIncludeDirectoryEntries(boolean includeDirectoryEntries) {
+		fIncludeDirectoryEntries = includeDirectoryEntries;
 	}
 }

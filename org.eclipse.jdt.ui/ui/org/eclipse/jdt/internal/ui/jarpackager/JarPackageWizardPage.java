@@ -91,6 +91,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	
 	private Button		fCompressCheckbox;
 	private Button		fOverwriteCheckbox;
+	private Button		fIncludeDirectoryEntriesCheckbox;
 	private Text		fDescriptionFileText;
 
 	// dialog store id constants
@@ -104,6 +105,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	
 	private static final String STORE_COMPRESS= PAGE_NAME + ".COMPRESS"; //$NON-NLS-1$
 	private final static String STORE_OVERWRITE= PAGE_NAME + ".OVERWRITE"; //$NON-NLS-1$
+	private final static String STORE_INCLUDE_DIRECTORY_ENTRIES= PAGE_NAME + ".INCLUDE_DIRECTORY_ENTRIES"; //$NON-NLS-1$
 
 	// other constants
 	private static final int SIZING_SELECTION_WIDGET_WIDTH= 480;
@@ -177,6 +179,10 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		fCompressCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fCompressCheckbox.setText(JarPackagerMessages.getString("JarPackageWizardPage.compress.text")); //$NON-NLS-1$
 		fCompressCheckbox.addListener(SWT.Selection, this);
+		
+		fIncludeDirectoryEntriesCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
+		fIncludeDirectoryEntriesCheckbox.setText(JarPackagerMessages.getString("JarPackageWizardPage.includeDirectoryEntries.text")); //$NON-NLS-1$
+		fIncludeDirectoryEntriesCheckbox.addListener(SWT.Selection, this);
 
 		fOverwriteCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fOverwriteCheckbox.setText(JarPackagerMessages.getString("JarPackageWizardPage.overwrite.text")); //$NON-NLS-1$
@@ -249,6 +255,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 
 			// options
 			settings.put(STORE_COMPRESS, fJarPackage.isCompressed());
+			settings.put(STORE_INCLUDE_DIRECTORY_ENTRIES, fJarPackage.areDirectoryEntriesIncluded());
 			settings.put(STORE_OVERWRITE, fJarPackage.allowOverwrite());
 		}
 		// Allow subclasses to save values
@@ -291,6 +298,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		
 		// options
 		fCompressCheckbox.setSelection(fJarPackage.isCompressed());
+		fIncludeDirectoryEntriesCheckbox.setSelection(fJarPackage.areDirectoryEntriesIncluded());
 		fOverwriteCheckbox.setSelection(fJarPackage.allowOverwrite());
 	}
 
@@ -308,6 +316,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 
 			// options
 			fJarPackage.setCompress(settings.getBoolean(STORE_COMPRESS));
+			fJarPackage.setIncludeDirectoryEntries(settings.getBoolean(STORE_INCLUDE_DIRECTORY_ENTRIES));
 			fJarPackage.setOverwrite(settings.getBoolean(STORE_OVERWRITE));
 						
 			// destination
@@ -347,6 +356,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 
 		// options
 		fJarPackage.setCompress(fCompressCheckbox.getSelection());
+		fJarPackage.setIncludeDirectoryEntries(fIncludeDirectoryEntriesCheckbox.getSelection());
 		fJarPackage.setOverwrite(fOverwriteCheckbox.getSelection());
 	}
 
