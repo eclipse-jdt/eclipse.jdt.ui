@@ -71,23 +71,6 @@ public abstract class FindOccurrencesEngine {
 		}
 	}
 	
-	private static class NameNodeFinder extends ASTVisitor {
-		Name result;
-		public static Name perform(ASTNode root) {
-			NameNodeFinder finder= new NameNodeFinder();
-			root.accept(finder);
-			return finder.result;
-		}
-		public boolean visit(SimpleName node) {
-			result= node;
-			return false;
-		}
-		public boolean visit(QualifiedName node) {
-			result= node;
-			return false;
-		}
-	}
-	
 	private static class FindOccurencesClassFileEngine extends FindOccurrencesEngine {
 		private IClassFile fClassFile;
 		
@@ -205,11 +188,7 @@ public abstract class FindOccurrencesEngine {
 		ASTNode node= NodeFinder.perform(root, offset, length);
 		if (node instanceof Name)
 			return (Name)node;
-		
-		Name name= NameNodeFinder.perform(node);
-		if (name == null || name.getStartPosition() != node.getStartPosition() || name.getLength() != node.getLength())
-			return null;
-		return name;
+		return null;
 	}
 	
 	private ISearchResultView startSearch(String fileName, final Name name) {

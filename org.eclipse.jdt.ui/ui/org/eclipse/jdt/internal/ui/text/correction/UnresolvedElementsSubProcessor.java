@@ -70,6 +70,8 @@ public class UnresolvedElementsSubProcessor {
 			ASTNode parent= node.getParent();
 			if (parent instanceof MethodInvocation && node.equals(((MethodInvocation)parent).getExpression())) {
 				similarNodeKind |= SimilarElementsRequestor.CLASSES;
+			} else if (parent instanceof SimpleType) {
+				similarNodeKind= SimilarElementsRequestor.REF_TYPES;
 			}
 		} else if (selectedNode instanceof QualifiedName) {
 			QualifiedName qualifierName= (QualifiedName) selectedNode;
@@ -85,6 +87,9 @@ public class UnresolvedElementsSubProcessor {
 					similarNodeKind= SimilarElementsRequestor.REF_TYPES;
 				}
 			}
+			if (selectedNode.getParent() instanceof SimpleType) {
+				similarNodeKind= SimilarElementsRequestor.REF_TYPES;
+			}			
 		} else if (selectedNode instanceof FieldAccess) {
 			FieldAccess access= (FieldAccess) selectedNode;
 			Expression expression= access.getExpression();
@@ -96,9 +101,6 @@ public class UnresolvedElementsSubProcessor {
 			}
 		} else if (selectedNode instanceof SuperFieldAccess) {
 			binding= declaringTypeBinding.getSuperclass();	
-		} else if (selectedNode instanceof SimpleType) {
-			similarNodeKind= SimilarElementsRequestor.REF_TYPES;
-			node= ((SimpleType) selectedNode).getName();
 		}
 		if (node == null) {
 			return;
@@ -187,6 +189,9 @@ public class UnresolvedElementsSubProcessor {
 		int kind= SimilarElementsRequestor.ALL_TYPES;
 		
 		ASTNode parent= selectedNode.getParent();
+		while (parent.getLength() == selectedNode.getLength()) { // get parent of type and variablefragment
+			parent= parent.getParent(); 
+		}
 		switch (parent.getNodeType()) {
 			case ASTNode.TYPE_DECLARATION:
 				TypeDeclaration typeDeclaration=(TypeDeclaration) parent;

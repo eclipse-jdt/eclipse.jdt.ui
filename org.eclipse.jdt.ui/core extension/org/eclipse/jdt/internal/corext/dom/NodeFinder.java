@@ -63,14 +63,20 @@ public class NodeFinder extends GenericVisitor {
 			fCoveringNode= node;
 		}
 		if (fStart <= nodeStart && nodeEnd <= fEnd) {
-			fCoveredNode= node;
+			if (fCoveringNode == node) { // nodeStart == fStart && nodeEnd == fEnd
+				fCoveredNode= node;
+				return true; // look further for node with same length as parent
+			} else if (fCoveredNode == null) { // no better found
+				fCoveredNode= node;
+			}
 			return false;
 		}
 		return true;
 	}
 
 	/**
-	 * Returns the covered node.
+	 * Returns the covered node. If more than one nodes are covered by the selection, the
+	 * returned node is first covered node found in a top-down traversal of the AST
 	 * @return ASTNode
 	 */
 	public ASTNode getCoveredNode() {
@@ -78,7 +84,8 @@ public class NodeFinder extends GenericVisitor {
 	}
 
 	/**
-	 * Returns the covering node.
+	 * Returns the covering node. If more than one nodes are covering the selection, the
+	 * returned node is last covering node found in a top-down traversal of the AST
 	 * @return ASTNode
 	 */
 	public ASTNode getCoveringNode() {
