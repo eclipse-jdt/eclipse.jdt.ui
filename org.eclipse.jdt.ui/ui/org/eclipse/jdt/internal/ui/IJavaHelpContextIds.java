@@ -284,6 +284,12 @@ public interface IJavaHelpContextIds {
 	public static final String RENAME_TYPE_ERROR_WIZARD_PAGE= 				PREFIX + "rename_type_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_FIELD_WIZARD_PAGE= 							PREFIX + "rename_field_wizard_page_context"; //$NON-NLS-1$
 	public static final String RENAME_FIELD_ERROR_WIZARD_PAGE= 				PREFIX + "rename_field_error_wizard_page_context"; //$NON-NLS-1$
+	public static final String RENAME_RESOURCE_WIZARD_PAGE= 							PREFIX + "rename_resource_wizard_page_context"; //$NON-NLS-1$
+	public static final String RENAME_RESOURCE_ERROR_WIZARD_PAGE= 				PREFIX + "rename_resource_error_wizard_page_context"; //$NON-NLS-1$
+	public static final String RENAME_JAVA_PROJECT_WIZARD_PAGE= 							PREFIX + "rename_java_project_wizard_page_context"; //$NON-NLS-1$
+	public static final String RENAME_JAVA_PROJECT_ERROR_WIZARD_PAGE= 				PREFIX + "rename_java_project_error_wizard_page_context"; //$NON-NLS-1$
+	public static final String RENAME_SOURCE_FOLDER_WIZARD_PAGE= 							PREFIX + "rename_source_folder_wizard_page_context"; //$NON-NLS-1$
+	public static final String RENAME_SOURCE_FOLDER_ERROR_WIZARD_PAGE= 				PREFIX + "rename_source_folder_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String SEF_WIZARD_PAGE= 										PREFIX + "self_encapsulate_field_wizard_page_context"; //$NON-NLS-1$
 	public static final String SEF_ERROR_WIZARD_PAGE= 								PREFIX + "self_encapsulate_field_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String USE_SUPERTYPE_WIZARD_PAGE= 						PREFIX + "use_supertype_wizard_page_context"; //$NON-NLS-1$
