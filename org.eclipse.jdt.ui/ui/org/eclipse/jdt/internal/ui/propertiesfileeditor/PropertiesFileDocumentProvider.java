@@ -62,7 +62,7 @@ public class PropertiesFileDocumentProvider extends TextFileDocumentProvider {
 			return null;
 		
 		IContentDescription description= file.getContentDescription();
-		if (description == null || !isSubtype(description.getContentType(), JAVA_PROPERTIES_FILE_CONTENT_TYPE))
+		if (description == null || description.getContentType() == null || !description.getContentType().isKindOf(JAVA_PROPERTIES_FILE_CONTENT_TYPE))			
 			return null;
 
 		return super.createFileInfo(element);
@@ -77,24 +77,5 @@ public class PropertiesFileDocumentProvider extends TextFileDocumentProvider {
 			return null;
 		
 		return super.createSaveOperation(element, document, overwrite);
-	}
-
-	/**
-	 * Returns <code>true</code> if the candidate content type is a
-	 * subtype of the content type.
-	 * 
-	 * @param candidateType the candidate content type
-	 * @param contentType the content type
-	 * @return <code>true</code> if the candidate content type is a
-	 *         subtype of the content type
-	 */
-	private boolean isSubtype(IContentType candidateType, IContentType contentType) {
-		if (candidateType == null)
-			return false;
-		
-		if (contentType.equals(candidateType))
-			return true;
-		
-		return isSubtype(candidateType.getBaseType(), contentType);
 	}
 }
