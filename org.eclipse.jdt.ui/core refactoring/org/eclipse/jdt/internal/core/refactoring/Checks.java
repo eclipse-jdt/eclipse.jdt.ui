@@ -136,14 +136,14 @@ public class Checks {
 	}
 	
 	/**
-	 * Returns <code>null</code> if the new name is ok ie. no other file with that name exists.
+	 * Returns ok status if the new name is ok ie. no other file with that name exists.
 	 * @param newName just a simple name - no extension.
 	 */
 	public static RefactoringStatus checkCompilationUnitNewName(ICompilationUnit cu, String newName) throws JavaModelException{
 		if (resourceExists(renamedResourcePath(Refactoring.getResource(cu).getFullPath(), newName)))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("Checks.cu_name_used", newName));//$NON-NLS-1$
 		else
-			return null;
+			return new RefactoringStatus();
 	}
 	
 	/**
