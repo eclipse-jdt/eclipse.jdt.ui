@@ -277,8 +277,13 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			
 			if (fInput != null && fInput.equals(element))
 				postRefresh(null);
-			
-			
+
+			if (parent instanceof IPackageFragment && fBrowsingPart.isValidElement(parent))  {
+				// refresh if package gets empty (might be filtered)
+				if (isPackageFragmentEmpty((IPackageFragment)parent) && fViewer.testFindItem(parent) != null)
+						postRefresh(null);
+			}
+
 			return;
 		}
 		if (kind == IJavaElementDelta.ADDED && delta.getMovedFromElement() != null && element instanceof ICompilationUnit)
