@@ -12,11 +12,11 @@ package org.eclipse.jdt.ui.text;
 
 import java.util.Vector;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -27,6 +27,7 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
@@ -49,7 +50,10 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
@@ -63,6 +67,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaInformationProvider;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaSourceHover;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaTextHover;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
@@ -344,11 +349,29 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		return new JavaAnnotationHover();
 	}
 
+	public int[] getConfiguredTextHoverStateMasks(ISourceViewer sourceViewer, String contentType) {
+		return new int[] { ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK, SWT.CTRL};
+	}
+	
+	/*
+	 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String, int)
+	 */
+	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
+		if (stateMask == ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK)	
+			return new JavaTextHover(getEditor());
+		if (stateMask == SWT.CTRL) {
+			IJavaEditorTextHover textHover= new JavaSourceHover();
+			textHover.setEditor(getEditor());
+			return textHover;
+		}
+		return null;
+	}
+
 	/*
 	 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String)
 	 */
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
-		return new JavaTextHover(getEditor());
+		return getTextHover(sourceViewer, contentType, ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK);
 	}
 	
 	/*
