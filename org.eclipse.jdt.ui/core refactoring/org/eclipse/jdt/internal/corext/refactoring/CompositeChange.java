@@ -33,9 +33,14 @@ public class CompositeChange extends Change implements ICompositeChange {
 	private String fName;
 	
 	public CompositeChange(){
-		this(RefactoringCoreMessages.getString("CompositeChange.CompositeChange"), new ArrayList(5)); //$NON-NLS-1$
+		this(RefactoringCoreMessages.getString("CompositeChange.CompositeChange")); //$NON-NLS-1$
 	}
-		
+
+	public CompositeChange(String name, IChange[] changes){
+		this(name, new ArrayList(changes.length));
+		addAll(changes);
+	}
+			
 	public CompositeChange(String name){
 		this(name, new ArrayList(5));
 	}
@@ -78,10 +83,23 @@ public class CompositeChange extends Change implements ICompositeChange {
 	public final IChange getUndoChange(){
 		return fUndoChange;
 	}
-		
-	public void addChange(IChange change){
+
+	public void addAll(IChange[] changes){
+		for (int i= 0; i < changes.length; i++) {
+			add(changes[i]);
+		}
+	}
+	
+	public void add(IChange change){
 		if (change != null)
-			fChanges.add(change);
+			fChanges.add(change);	
+	}
+	
+	/**
+	 *@deprecated use add
+	 */ 	
+	public void addChange(IChange change){
+		add(change);
 	}
 	
 	public IChange[] getChildren() {
