@@ -72,10 +72,14 @@ public abstract class StructuredSelectionProvider {
 					IJavaElement assist= getEditorInput(editor);
 					if (assist instanceof ICompilationUnit) {
 						IJavaElement ref= ((ICompilationUnit)assist).getElementAt(selection.getOffset());
-						return new StructuredSelection(ref);	
+						if (ref != null) {
+							return new StructuredSelection(ref);
+						}
 					} else if (assist instanceof IClassFile) {
 						IJavaElement ref= ((IClassFile)assist).getElementAt(selection.getOffset());
-						return new StructuredSelection(ref);
+						if (ref != null) {
+							return new StructuredSelection(ref);
+						}
 					}
 				} catch (JavaModelException e) {
 					ExceptionHandler.handle(e, "Selection Converter", "Unexpected exception while converting text selection.");
