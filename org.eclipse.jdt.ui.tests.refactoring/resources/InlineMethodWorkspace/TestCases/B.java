@@ -1,5 +1,6 @@
 public class B {
 	public void foo() {
-		System.out.println("Eclipse");
+		A a= null;
+		a.bar();
 	}
 }
