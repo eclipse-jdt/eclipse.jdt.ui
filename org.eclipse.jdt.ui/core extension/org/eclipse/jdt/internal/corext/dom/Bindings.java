@@ -48,6 +48,8 @@ public class Bindings {
 	public static String asPackageQualifiedName(ITypeBinding type) {
 		if (type.isPrimitive())
 			return type.getName();
+		if (type.isArray())
+			return asPackageQualifiedName(type.getElementType());	
 		IPackageBinding packageBinding= type.getPackage();
 		if (packageBinding.isUnnamed())
 			return asQualifiedName(type);
