@@ -121,7 +121,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
  * It is specified to show the content of ICompilationUnits and IClassFiles.
  * Pulishes its context menu under <code>JavaPlugin.getDefault().getPluginId() + ".outline"</code>.
  */
-class JavaOutlinePage extends Page implements IContentOutlinePage, IAdaptable {
+public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdaptable {
 
 			static Object[] NO_CHILDREN= new Object[0];
    

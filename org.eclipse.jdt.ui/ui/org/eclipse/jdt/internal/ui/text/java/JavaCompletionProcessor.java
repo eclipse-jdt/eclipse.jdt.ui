@@ -95,11 +95,10 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	private final static String ENABLED= "enabled"; //$NON-NLS-1$
 	private final static String DISABLED= "disabled"; //$NON-NLS-1$
 	
-	
-	
+		
+	protected IWorkingCopyManager fManager;
 	private IEditorPart fEditor;
 	private ResultCollector fCollector;
-	private IWorkingCopyManager fManager;
 	private IContextInformationValidator fValidator;
 	
 	private char[] fProposalAutoActivationSet;

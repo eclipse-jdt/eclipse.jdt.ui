@@ -102,12 +102,12 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			
 			ICompilationUnit fCopy;
 			
-			CompilationUnitInfo(IDocument document, IAnnotationModel model, _FileSynchronizer fileSynchronizer, ICompilationUnit copy) {
+			public CompilationUnitInfo(IDocument document, IAnnotationModel model, _FileSynchronizer fileSynchronizer, ICompilationUnit copy) {
 				super(document, model, fileSynchronizer);
 				fCopy= copy;
 			}
 			
-			void setModificationStamp(long timeStamp) {
+			public void setModificationStamp(long timeStamp) {
 				fModificationStamp= timeStamp;
 			}
 		};
