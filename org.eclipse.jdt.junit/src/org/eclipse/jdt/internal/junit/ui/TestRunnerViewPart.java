@@ -1259,9 +1259,12 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 					String name= className;
 					if (testName != null) 
 						name+= "."+testName; //$NON-NLS-1$
-					ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy("Rerun "+name); //$NON-NLS-1$
+					String configName= JUnitMessages.getFormattedString("TestRunnerViewPart.configName", name); //$NON-NLS-1$
+					ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy(configName); 
 					// fix for bug: 64838  junit view run single test does not use correct class [JUnit] 
 					tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, className);
+					// reset the container
+					tmp.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, ""); //$NON-NLS-1$
 					if (testName != null) {
 						tmp.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testName);
 						//	String args= "-rerun "+testId;
