@@ -903,6 +903,83 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
 	}
 	
+	public void testUncaughtException3() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");	
+		buf.append("import java.text.ParseException;\n");	
+		buf.append("public class E {\n");
+		buf.append("    public String goo() throws IOException, ParseException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("    /**\n");
+		buf.append("     * Not much to say here.\n");
+		buf.append("     * @throws ParseException Parsing failed\n");
+		buf.append("     */\n");
+		buf.append("    public void foo() throws ParseException {\n");
+		buf.append("        goo().substring(2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+	
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");	
+		buf.append("import java.text.ParseException;\n");	
+		buf.append("public class E {\n");
+		buf.append("    public String goo() throws IOException, ParseException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("    /**\n");
+		buf.append("     * Not much to say here.\n");
+		buf.append("     * @throws ParseException Parsing failed\n");
+		buf.append("     * @throws IOException\n");
+		buf.append("     */\n");
+		buf.append("    public void foo() throws ParseException, IOException {\n");
+		buf.append("        goo().substring(2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+		 
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");	
+		buf.append("import java.text.ParseException;\n");	
+		buf.append("public class E {\n");
+		buf.append("    public String goo() throws IOException, ParseException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("    /**\n");
+		buf.append("     * Not much to say here.\n");
+		buf.append("     * @throws ParseException Parsing failed\n");
+		buf.append("     */\n");
+		buf.append("    public void foo() throws ParseException {\n");
+		buf.append("        try {\n");		
+		buf.append("            goo().substring(2);\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        } catch (ParseException e) {\n");
+		buf.append("        }\n");							
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+	}
+	
 	public void testUncaughtExceptionRemoveMoreSpecific() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

@@ -11,6 +11,7 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -143,6 +144,16 @@ public class LocalCorrectionsSubProcessor {
 			MethodDeclaration methodDecl= (MethodDeclaration) decl;
 			IMethodBinding binding= methodDecl.resolveBinding();
 			if (binding != null) {
+				ITypeBinding[] methodExceptions= binding.getExceptionTypes();
+				ArrayList unhandledExceptions= new ArrayList(uncaughtExceptions.length);
+				for (int i= 0; i < uncaughtExceptions.length; i++) {
+					ITypeBinding curr= uncaughtExceptions[i];
+					if (!canRemoveException(curr, methodExceptions)) {
+						unhandledExceptions.add(curr);
+					}
+				}
+				uncaughtExceptions= (ITypeBinding[]) unhandledExceptions.toArray(new ITypeBinding[unhandledExceptions.size()]);
+
 				List exceptions= methodDecl.thrownExceptions();
 				int nExistingExceptions= exceptions.size();
 				ChangeDescription[] desc= new ChangeDescription[nExistingExceptions + uncaughtExceptions.length];
