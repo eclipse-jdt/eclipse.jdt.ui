@@ -139,8 +139,10 @@ public class JavaStructureCreator implements IStructureCreator {
 			
 			Document doc= new Document(contents);
 			IDocumentPartitioner dp= JavaCompareUtilities.createJavaPartitioner();
-			doc.setDocumentPartitioner(dp);
-			dp.connect(doc);
+			if (dp != null) {
+				doc.setDocumentPartitioner(dp);
+				dp.connect(doc);
+			}
 			
 			boolean isEditable= false;
 			if (input instanceof IEditableContent)
@@ -177,9 +179,11 @@ public class JavaStructureCreator implements IStructureCreator {
 			
 			Document doc= new Document(contents);
 			IDocumentPartitioner dp= JavaCompareUtilities.createJavaPartitioner();
-			doc.setDocumentPartitioner(dp);
-			dp.connect(doc);
-						
+			if (dp != null) {
+				doc.setDocumentPartitioner(dp);
+				dp.connect(doc);
+			}
+			
 			// we hook into the root node to intercept all node changes
 			JavaNode root= new JavaNode(doc, false);
 			JavaParseTreeBuilder builder= new JavaParseTreeBuilder(root, buffer);
@@ -383,7 +387,7 @@ public class JavaStructureCreator implements IStructureCreator {
 		while (je != null) {
 			// each path component has a name that uses the same
 			// conventions as a JavaNode name
-			String name= getJavaElementID(je);
+			String name= JavaCompareUtilities.getJavaElementID(je);
 			if (name == null)
 				return null;
 			args.add(name);
@@ -432,61 +436,12 @@ public class JavaStructureCreator implements IStructureCreator {
 	}
 
 	/**
-	 * Returns a name for the given Java element that uses the same conventions
-	 * as the JavaNode name of a corresponding element.
-	 */
-	private static String getJavaElementID(IJavaElement je) {
-		
-		if (je instanceof IMember && ((IMember)je).isBinary())
-			return null;
-			
-		StringBuffer sb= new StringBuffer();
-		
-		switch (je.getElementType()) {
-		case JavaElement.COMPILATION_UNIT:
-			sb.append(JavaElement.JEM_COMPILATIONUNIT);
-			break;
-		case JavaElement.TYPE:
-			sb.append(JavaElement.JEM_TYPE);
-			sb.append(je.getElementName());
-			break;
-		case JavaElement.FIELD:
-			sb.append(JavaElement.JEM_FIELD);
-			sb.append(je.getElementName());
-			break;
-		case JavaElement.METHOD:
-			sb.append(JavaElement.JEM_METHOD);
-			sb.append(JavaElementLabels.getElementLabel(je, JavaElementLabels.M_PARAMETER_TYPES));
-			break;
-		case JavaElement.INITIALIZER:
-			String id= je.getHandleIdentifier();
-			int pos= id.lastIndexOf(JavaElement.JEM_INITIALIZER);
-			if (pos >= 0)
-				sb.append(id.substring(pos));
-			break;
-		case JavaElement.PACKAGE_DECLARATION:
-			sb.append(JavaElement.JEM_PACKAGEDECLARATION);
-			break;
-		case JavaElement.IMPORT_CONTAINER:
-			sb.append('<');
-			break;
-		case JavaElement.IMPORT_DECLARATION:
-			sb.append(JavaElement.JEM_IMPORTDECLARATION);
-			sb.append(je.getElementName());			
-			break;
-		default:
-			return null;
-		}
-		return sb.toString();
-	}
-	
-	/**
 	 * Returns true if the given IJavaElement maps to a JavaNode.
 	 * The JavaHistoryAction uses this function to determine whether
 	 * a selected Java element can be replaced by some piece of
 	 * code from the local history.
 	 */
 	static boolean hasEdition(IJavaElement je) {
-		return getJavaElementID(je) != null;
+		return JavaCompareUtilities.getJavaElementID(je) != null;
 	}
 }

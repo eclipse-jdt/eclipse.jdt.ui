@@ -129,6 +129,7 @@ public class MemberEdit extends SimpleTextEdit {
 				}
 				break;
 			default:
+				Assert.isTrue(false); // ADD_AT_BEGINNING implemented only for IJavaElement.TYPE
 				return;
 			}
 			break;
@@ -164,6 +165,7 @@ public class MemberEdit extends SimpleTextEdit {
 				offset= buffer.getLength();
 				break;
 			default:
+				Assert.isTrue(false); // ADD_AT_END implemented only for TYPE and COMPILATION_UNIT
 				return;
 			}
 			break;
@@ -183,12 +185,16 @@ public class MemberEdit extends SimpleTextEdit {
 			TextRegion region= buffer.getLineInformation(line);
 			offset= region.getOffset();
 			break;
+		
+		default:
+			Assert.isTrue(false); // unknown insertion kind
+			break;
 		}
 		
-		if (offset >= 0) {
-			setPosition(new TextPosition(offset, length));
-			setText(sb.toString());
-		}
+		Assert.isTrue(offset >= 0); // we better should have a valid insertion point
+
+		setPosition(new TextPosition(offset, length));
+		setText(sb.toString());
 		
 		super.connect(buffer);
 	}

@@ -47,6 +47,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		String errorMessage= CompareMessages.getString("ReplaceFromHistory.internalErrorMessage"); //$NON-NLS-1$
 		
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
+		// shell can be null; as a result error dialogs won't be parented
 		
 		ISelection selection= fSelectionProvider.getSelection();
 		IMember input= getEditionElement(selection);

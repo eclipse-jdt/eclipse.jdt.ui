@@ -56,6 +56,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		String errorMessage= CompareMessages.getString("AddFromHistory.internalErrorMessage"); //$NON-NLS-1$
 		
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
+		// shell can be null; as a result error dialogs won't be parented
 		
 		ICompilationUnit cu= null;
 		IParent parent= null;

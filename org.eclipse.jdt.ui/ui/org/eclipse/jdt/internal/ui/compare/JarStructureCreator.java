@@ -8,7 +8,7 @@ import org.eclipse.compare.ZipFileStructureCreator;
 
 /**
  * A JarStructureCreator is the same as a ZipFileStructureCreator
- * but shows a different name in the enclosing pane.
+ * but has a different name.
  */
 public class JarStructureCreator extends ZipFileStructureCreator {
 

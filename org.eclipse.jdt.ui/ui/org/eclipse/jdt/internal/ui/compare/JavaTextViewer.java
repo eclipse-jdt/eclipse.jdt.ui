@@ -28,7 +28,7 @@ import org.eclipse.compare.structuremergeviewer.ICompareInput;
 public class JavaTextViewer extends Viewer {
 		
 	private SourceViewer fSourceViewer;
-	private ICompareInput fInput;
+	private Object fInput;
 	
 	
 	JavaTextViewer(Composite parent) {
@@ -41,7 +41,7 @@ public class JavaTextViewer extends Viewer {
 	}
 		
 	public Control getControl() {
-		return fSourceViewer.getTextWidget();
+		return fSourceViewer.getControl();
 	}
 	
 	public void setInput(Object input) {
@@ -50,11 +50,14 @@ public class JavaTextViewer extends Viewer {
 			Document document= new Document(getString(input));
 			
 			IDocumentPartitioner partitioner= JavaCompareUtilities.createJavaPartitioner();
-			document.setDocumentPartitioner(partitioner);
-			partitioner.connect(document);
+			if (partitioner != null) {
+				document.setDocumentPartitioner(partitioner);
+				partitioner.connect(document);
+			}
 
 			fSourceViewer.setDocument(document);
 		}
+		fInput= input;
 	}
 	
 	public Object getInput() {

@@ -13,8 +13,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
 import org.eclipse.compare.*;
 
 /**
- * Makes the IStreamContentAccessor and ITypedElement protocols
- * available to for a TextBuffer.
+ * Implements the IStreamContentAccessor and ITypedElement protocols
+ * for a TextBuffer.
  */
 class JavaTextBufferNode implements ITypedElement, IStreamContentAccessor {
 	

@@ -12,6 +12,7 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.util.Assert;
 
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
@@ -51,7 +52,7 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	 * @param length the number of characters of the java element in the underlying document
 	 */
 	public JavaNode(JavaNode parent, int type, String name, int start, int length) {
-		super(type, buildID(type, name), parent.getDocument(), start, length);
+		super(type, JavaCompareUtilities.buildID(type, name), parent.getDocument(), start, length);
 		fParent= parent;
 		if (parent != null) {
 			parent.addChild(this);
@@ -66,54 +67,9 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	 * @param editable whether the document can be modified
 	 */
 	public JavaNode(IDocument document, boolean editable) {
-		super(CU, buildID(CU, "root"), document, 0, document.getLength()); //$NON-NLS-1$
+		super(CU, JavaCompareUtilities.buildID(CU, "root"), document, 0, document.getLength()); //$NON-NLS-1$
 		fIsEditable= editable;
 	}	
-
-	/**
-	 * Returns a name which identifies the given typed name.
-	 * The type is encoded as a single character at the beginning of the string.
-	 */
-	private static String buildID(int type, String name) {
-		StringBuffer sb= new StringBuffer();
-		switch (type) {
-		case CU:
-			sb.append(JavaElement.JEM_COMPILATIONUNIT);
-			break;
-		case CLASS:
-		case INTERFACE:
-			sb.append(JavaElement.JEM_TYPE);
-			sb.append(name);
-			break;
-		case FIELD:
-			sb.append(JavaElement.JEM_FIELD);
-			sb.append(name);
-			break;
-		case CONSTRUCTOR:
-		case METHOD:
-			sb.append(JavaElement.JEM_METHOD);
-			sb.append(name);
-			break;
-		case INIT:
-			sb.append(JavaElement.JEM_INITIALIZER);
-			sb.append(name);
-			break;
-		case PACKAGE:
-			sb.append(JavaElement.JEM_PACKAGEDECLARATION);
-			break;
-		case IMPORT:
-			sb.append(JavaElement.JEM_IMPORTDECLARATION);
-			sb.append(name);
-			break;
-		case IMPORT_CONTAINER:
-			sb.append('<');
-			break;
-		default:
-			// should not happen
-			break;
-		}
-		return sb.toString();
-	}
 
 	public String getInitializerCount() {
 		return Integer.toString(fInitializerCount++);
@@ -191,40 +147,35 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 		if (image == null) {
 			ImageDescriptor d= null;
 			
-			try {
-				switch (getTypeCode()) {
-				case CU:
-					d= JavaPluginImages.DESC_OBJS_CUNIT;
-					break;
-				case PACKAGE:
-					d= JavaPluginImages.DESC_OBJS_PACKDECL;
-					break;
-				case IMPORT:
-					d= JavaPluginImages.DESC_OBJS_IMPDECL;
-					break;
-				case IMPORT_CONTAINER:
-					d= JavaPluginImages.DESC_OBJS_IMPCONT;
-					break;
-				case CLASS:
-					d= JavaPluginImages.DESC_OBJS_CLASS;
-					break;
-				case INTERFACE:
-					d= JavaPluginImages.DESC_OBJS_INTERFACE;
-					break;
-				case INIT:
-				case METHOD:
-				case CONSTRUCTOR:
-					d= JavaCompareUtilities.getImageDescriptor("obj16/compare_method.gif"); //$NON-NLS-1$
-					break;
-				case FIELD:
-					d= JavaCompareUtilities.getImageDescriptor("obj16/compare_field.gif"); //$NON-NLS-1$
-					break;					
-				default:
-					break;
-				}
-			} catch (NullPointerException ex) {
-			} catch (ExceptionInInitializerError ex) {
-			} catch (NoClassDefFoundError ex) {
+			switch (getTypeCode()) {
+			case CU:
+				d= JavaPluginImages.DESC_OBJS_CUNIT;
+				break;
+			case PACKAGE:
+				d= JavaPluginImages.DESC_OBJS_PACKDECL;
+				break;
+			case IMPORT:
+				d= JavaPluginImages.DESC_OBJS_IMPDECL;
+				break;
+			case IMPORT_CONTAINER:
+				d= JavaPluginImages.DESC_OBJS_IMPCONT;
+				break;
+			case CLASS:
+				d= JavaPluginImages.DESC_OBJS_CLASS;
+				break;
+			case INTERFACE:
+				d= JavaPluginImages.DESC_OBJS_INTERFACE;
+				break;
+			case INIT:
+			case METHOD:
+			case CONSTRUCTOR:
+				d= JavaCompareUtilities.getImageDescriptor("obj16/compare_method.gif"); //$NON-NLS-1$
+				break;
+			case FIELD:
+				d= JavaCompareUtilities.getImageDescriptor("obj16/compare_field.gif"); //$NON-NLS-1$
+				break;					
+			default:
+				break;
 			}
 	
 			if (d == null)
