@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -588,8 +589,17 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_STRING);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_CHARACTER);
-		presenter.setSizeConstraints(40, 20, true, true);
+		presenter.setSizeConstraints(20, 20, true, false);
+		presenter.setRestoreInformationControlBounds(getSettings("outline_presenter_bounds"), true, true); //$NON-NLS-1$
 		return presenter;
+	}
+	
+	private IDialogSettings getSettings(String sectionName) {
+		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings().getSection(sectionName);
+		if (settings == null)
+			settings= JavaPlugin.getDefault().getDialogSettings().addNewSection(sectionName);
+		
+		return settings;
 	}
 	
 	public IInformationPresenter getHierarchyPresenter(ISourceViewer sourceViewer, boolean doCodeResolve) {
@@ -603,7 +613,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_STRING);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_CHARACTER);
-		presenter.setSizeConstraints(50, 20, true, true);
+		presenter.setSizeConstraints(50, 20, true, false);
+		presenter.setRestoreInformationControlBounds(getSettings("hierarchy_presenter_bounds"), true, true); //$NON-NLS-1$
 		return presenter;
 	}
 }

@@ -15,6 +15,8 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusListener;
@@ -59,6 +61,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
+import org.eclipse.jface.text.IInformationControlExtension3;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommand;
@@ -78,9 +81,10 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
  * 
  * @since 2.1
  */
-public abstract class AbstractInformationControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension2, DisposeListener {
+public abstract class AbstractInformationControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension2, IInformationControlExtension3, DisposeListener {
 
 
+	
 	/**
 	 * The NamePatternFilter selects the elements which
 	 * match the given string patterns.
@@ -186,7 +190,6 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	private static final int BORDER= 1;
 	/** Right margin in pixels. */
 	private static final int RIGHT_MARGIN= 3;
-
 	/** The control's shell */
 	private Shell fShell;
 	/** The composite */
@@ -195,17 +198,22 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	private Text fFilterText;
 	/** The control's tree widget */
 	private TreeViewer fTreeViewer;
-	/** The control width constraint */
-	//private int fMaxWidth= -1;
-	/** The control height constraint */
-	//private int fMaxHeight= -1;
+	/** The control's width constraint */
+	//private int fMaxWidthInChars= -1;
+	/** The control's height constraint */
+	//private int fMaxHeightInChars= -1;
 	/** The current string matcher */
 	private StringMatcher fStringMatcher;
 	private ICommand fInvokingCommand;
 	private Label fStatusField;
 	private Font fStatusTextFont;
-//	private Controle fFocusWidget;
 	private KeySequence[] fInvokingCommandKeySequences;
+	/**
+	 * Remebers the bounds for this information control.
+	 * @since 3.0
+	 */
+	private Rectangle fBounds;
+
 	
 	/**
 	 * Creates a tree information control with the given shell as parent. The given
@@ -320,6 +328,22 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		installFilter();
 		
 		addDisposeListener(this);
+		
+		fShell.addControlListener(new ControlAdapter() {
+			/**
+			 * {@inheritDoc}
+			 */
+			public void controlMoved(ControlEvent e) {
+				fBounds= fShell.getBounds();
+			}
+			
+			/**
+			 * {@inheritDoc}
+			 */
+			public void controlResized(ControlEvent e) {
+				fBounds= fShell.getBounds();
+			}
+		});
 	}
 	
 	/**
@@ -632,7 +656,6 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		fComposite= null;
 		fFilterText= null;
 		fStatusTextFont= null;
-	
 	}
 
 	/**
@@ -646,8 +669,15 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 * {@inheritDoc}
 	 */
 	public void setSizeConstraints(int maxWidth, int maxHeight) {
-		//fMaxWidth= maxWidth;
-		//fMaxHeight= maxHeight;
+		if (maxWidth > -1 && maxHeight > -1) {
+			GridData gd= new GridData(GridData.FILL_BOTH);
+			if (maxWidth > -1)
+				gd.widthHint= maxWidth; 
+			if (maxHeight > -1)
+				gd.heightHint= maxHeight;
+			
+			fShell.setLayoutData(gd);
+		}
 	}
 
 	/**
@@ -659,6 +689,14 @@ public abstract class AbstractInformationControl implements IInformationControl,
 
 	/**
 	 * {@inheritDoc}
+	 * @since 3.0
+	 */
+	public Rectangle getBounds() {
+		return fBounds;
+	}
+	
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setLocation(Point location) {
 		Rectangle trim= fShell.computeTrim(0, 0, 0, 0);
@@ -667,7 +705,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		location.y += trim.y - textLocation.y;		
 		fShell.setLocation(location);		
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
