@@ -23,29 +23,29 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 
-public class ReferenceASTNodeFinder {
+public class ASTNodeSearchUtil {
 
-	private ReferenceASTNodeFinder() {
+	private ASTNodeSearchUtil() {
 	}
 	
 	public static ASTNode[] findReferenceNodes(IJavaElement element, ASTNodeMappingManager astManager, IProgressMonitor pm) throws JavaModelException{
-		SearchResultGroup[] referenceGroups= getReferences(element, pm);
-		List result= new ArrayList();
-		for (int i= 0; i < referenceGroups.length; i++) {
-			ICompilationUnit referencedCu= referenceGroups[i].getCompilationUnit();
-			if (referencedCu == null)
-				continue;
-			result.addAll(Arrays.asList(getAstNodes(referenceGroups[i].getSearchResults(), astManager.getAST(referencedCu))));
-		}
-		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);		
-	}
-	
-	private static SearchResultGroup[] getReferences(IJavaElement element, IProgressMonitor pm) throws JavaModelException{
 		ISearchPattern pattern= SearchEngine.createSearchPattern(element, IJavaSearchConstants.REFERENCES);
 		IJavaSearchScope scope= RefactoringScopeFactory.create(element);
-		return RefactoringSearchEngine.search(pm, scope, pattern);
+		return searchNodes(scope, pattern, astManager, pm);
 	}
-
+	
+	public static ASTNode[] searchNodes(IJavaSearchScope scope, ISearchPattern pattern, ASTNodeMappingManager astManager, IProgressMonitor pm) throws JavaModelException{
+		SearchResultGroup[] searchResultGroups= RefactoringSearchEngine.search(pm, scope, pattern);
+		List result= new ArrayList();
+		for (int i= 0; i < searchResultGroups.length; i++) {
+			ICompilationUnit referencedCu= searchResultGroups[i].getCompilationUnit();
+			if (referencedCu == null)
+				continue;
+			result.addAll(Arrays.asList(getAstNodes(searchResultGroups[i].getSearchResults(), astManager.getAST(referencedCu))));
+		}
+		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);		
+	}	
+	
 	public static ASTNode[] getAstNodes(SearchResult[] searchResults, CompilationUnit cuNode) {
 		List result= new ArrayList(searchResults.length);
 		for (int i= 0; i < searchResults.length; i++) {
