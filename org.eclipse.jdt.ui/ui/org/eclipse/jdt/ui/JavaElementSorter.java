@@ -194,6 +194,15 @@ public class JavaElementSorter extends ViewerSorter {
 		if (cat1 == PACKAGEFRAGMENTROOTS) {
 			IPackageFragmentRoot root1= getPackageFragmentRoot(e1);
 			IPackageFragmentRoot root2= getPackageFragmentRoot(e2);
+			if (root1 == null) {
+				if (root2 == null) {
+					return 0;
+				} else {
+					return 1;
+				}
+			} else if (root2 == null) {
+				return -1;
+			}			
 			if (!root1.getPath().equals(root2.getPath())) {
 				int p1= getClassPathIndex(root1);
 				int p2= getClassPathIndex(root2);
@@ -210,7 +219,7 @@ public class JavaElementSorter extends ViewerSorter {
 		String name1= ((IJavaElement) e1).getElementName();
 		String name2= ((IJavaElement) e2).getElementName();
 		
-		if (e1 instanceof IType) { // hanlde anonymous types
+		if (e1 instanceof IType) { // handle anonymous types
 			if (name1.length() == 0) {
 				if (name2.length() == 0) {
 					try {
@@ -254,8 +263,8 @@ public class JavaElementSorter extends ViewerSorter {
 			Object[] roots= cp.getPackageFragmentRoots();
 			if (roots.length > 0)
 				return (IPackageFragmentRoot)roots[0];
-			// non resolvable - return a dummy package fragment root
-			return cp.getJavaProject().getPackageFragmentRoot("Non-Resolvable");  //$NON-NLS-1$
+			// non resolvable - return null
+			return null;
 		}
 		return JavaModelUtil.getPackageFragmentRoot((IJavaElement)element);
 	}
