@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 public class MembersOrderPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
@@ -201,6 +202,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		sortLabel.setLayoutData(gridData);
 
 		fSortOrderList.doFillIntoGrid(composite, span);
+		LayoutUtil.setHorizontalGrabbing(fSortOrderList.getListControl(null));
 	}
 
 	/**
