@@ -1,6 +1,5 @@
 package p2;
 
-import p1.Nestor;
 import p1.Nestor.Nestee;
 
 public class B {
