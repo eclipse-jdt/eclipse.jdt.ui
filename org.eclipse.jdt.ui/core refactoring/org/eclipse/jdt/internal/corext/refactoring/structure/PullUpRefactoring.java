@@ -222,17 +222,16 @@ public class PullUpRefactoring extends HierarchyRefactoring {
 				list.add(members[i]);
 		}	
 	}
+
 	private static boolean isPullable(IMember member) throws JavaModelException {
-		if (member.getElementType() != IJavaElement.METHOD && 
-			member.getElementType() != IJavaElement.FIELD &&
-			member.getElementType() != IJavaElement.TYPE)
-				return false;
-		
-		if (! Checks.isAvailable(member))
+		if (member.getElementType() != IJavaElement.METHOD && member.getElementType() != IJavaElement.FIELD && member.getElementType() != IJavaElement.TYPE)
 			return false;
-	
-		if (member instanceof IType){
-			if (! JdtFlags.isStatic(member))
+		if (JdtFlags.isEnum(member))
+			return false;
+		if (!Checks.isAvailable(member))
+			return false;
+		if (member instanceof IType) {
+			if (!JdtFlags.isStatic(member))
 				return false;
 		}
 		if (member instanceof IMethod ){
@@ -243,8 +242,7 @@ public class PullUpRefactoring extends HierarchyRefactoring {
 			if (JdtFlags.isNative(method)) //for now - move to input preconditions
 				return false;
 		}
-
-		return true;	
+		return true;
 	}
 	
 	public ITypeHierarchy getTypeHierarchyOfTargetClass(IProgressMonitor pm) throws JavaModelException {
