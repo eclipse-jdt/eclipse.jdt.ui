@@ -56,10 +56,10 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 	};
 	
 	private Object fSearchPageScoreComputer;
-	private static IResourceLocator fgResourceLocator= new ResourceLocator();
-	private static JavaWorkbenchAdapter fgJavaWorkbenchAdapter= new JavaWorkbenchAdapter();
-	private static ITaskListResourceAdapter fgTaskListAdapter= new JavaTaskListAdapter();
-	private static JavaElementContainmentAdapter fgJavaElementContainmentAdapter= new JavaElementContainmentAdapter();
+	private static IResourceLocator fgResourceLocator;
+	private static JavaWorkbenchAdapter fgJavaWorkbenchAdapter;
+	private static ITaskListResourceAdapter fgTaskListAdapter;
+	private static JavaElementContainmentAdapter fgJavaElementContainmentAdapter;
 	
 	public Class[] getAdapterList() {
 		updateLazyLoadedAdapters();
@@ -79,17 +79,17 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 		} if (fSearchPageScoreComputer != null && ISearchPageScoreComputer.class.equals(key)) {
 			return fSearchPageScoreComputer;
 		} if (IWorkbenchAdapter.class.equals(key)) {
-			return fgJavaWorkbenchAdapter;
+			return getJavaWorkbenchAdapter();
 		} if (IResourceLocator.class.equals(key)) {
-			return fgResourceLocator;
+			return getResourceLocator();
 		} if (IPersistableElement.class.equals(key)) {
 			return new PersistableJavaElementFactory(java);
 		} if (IContributorResourceAdapter.class.equals(key)) {
 			return this;
 		} if (ITaskListResourceAdapter.class.equals(key)) {
-			return fgTaskListAdapter;
+			return getTaskListAdapter();
 		} if (IContainmentAdapter.class.equals(key)) {
-			return fgJavaElementContainmentAdapter;
+			return getJavaElementContainmentAdapter();
 		}
 		return null; 
 	}
@@ -164,4 +164,28 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 			IContainmentAdapter.class
 		};
 	}
+	
+	private static IResourceLocator getResourceLocator() {
+		if (fgResourceLocator == null)
+			fgResourceLocator= new ResourceLocator();
+		return fgResourceLocator;
+	}
+	
+	private static JavaWorkbenchAdapter getJavaWorkbenchAdapter() {
+		if (fgJavaWorkbenchAdapter == null) 
+			fgJavaWorkbenchAdapter= new JavaWorkbenchAdapter();
+		return fgJavaWorkbenchAdapter;
+	}
+
+	private static ITaskListResourceAdapter getTaskListAdapter() {
+		if (fgTaskListAdapter == null)
+			fgTaskListAdapter= new JavaTaskListAdapter();
+		return fgTaskListAdapter;
+	}
+
+	private static JavaElementContainmentAdapter getJavaElementContainmentAdapter() {
+		if (fgJavaElementContainmentAdapter == null)
+			fgJavaElementContainmentAdapter= new JavaElementContainmentAdapter();
+		return fgJavaElementContainmentAdapter;
+	}	
 }
