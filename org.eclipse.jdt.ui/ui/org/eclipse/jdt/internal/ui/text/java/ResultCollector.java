@@ -91,22 +91,6 @@ public class ResultCollector extends CompletionRequestor {
 	/*
 	 * @see ICompletionRequestor#acceptClass
 	 */	
-	protected void internalAcceptType(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
-		if (TypeFilter.isFiltered(packageName, typeName)) {
-			return;
-		}
-		
-		ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, modifiers, false);
-		if (Flags.isDeprecated(modifiers))
-			descriptor= getDeprecatedDescriptor(descriptor);
-
-		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-		fTypes.add(createTypeCompletion(start, end, new String(completionName), descriptor, new String(typeName), new String(packageName), info, relevance));
-	}
-	
-	/*
-	 * @see ICompletionRequestor#acceptClass
-	 */	
 	protected void internalAcceptType(CompletionProposal typeProposal) {
 		char[] signature= typeProposal.getSignature();
 		char[] packageName= Signature.getSignatureQualifier(signature); 
@@ -215,101 +199,118 @@ public class ResultCollector extends CompletionRequestor {
 		return buf.toString();
 	}
 	
-	/*
-	 * @see ICompletionRequestor#acceptMethod
-	 */
-	protected void internalAcceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] name,
-			char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames,
-			char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers,
-			int start, int end, int relevance) {
-		
-		if (completionName == null)
+	private void internalAcceptMethod(CompletionProposal method) {
+		String rawDeclaringType= SignatureUtil.stripSignatureToFQN(String.valueOf(method.getDeclarationSignature()));
+		if (TypeFilter.isFiltered(rawDeclaringType))
 			return;
 		
-		if (TypeFilter.isFiltered(declaringTypePackageName, declaringTypeName)) {
-			return;
-		}
-	
-		JavaCompletionProposal proposal= createMethodCallCompletion(declaringTypeName, name, parameterPackageNames, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end, relevance);
-		boolean isConstructor= returnTypeName == null ? true : returnTypeName.length == 0;
-		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, isConstructor));
+		String parameterList= createUnboundedParameterList(method);
+		JavaCompletionProposal proposal= createMethodCallCompletion(method, parameterList);
+		proposal.setProposalInfo(new MethodProposalInfo(fJavaProject, method));
 
-		boolean hasOpeningBracket= completionName.length == 0 || (completionName.length > 0 && completionName[completionName.length - 1] == ')');
-	
-		ProposalContextInformation contextInformation= null;
-		if (hasOpeningBracket && parameterTypeNames.length > 0) {
-			contextInformation= new ProposalContextInformation();
-			contextInformation.setInformationDisplayString(getParameterSignature(parameterTypeNames, parameterNames));		
-			contextInformation.setContextDisplayString(proposal.getDisplayString());
-			contextInformation.setImage(proposal.getImage());
-			int position= (completionName.length == 0) ? fContextOffset : -1;
-			contextInformation.setContextInformationPosition(position);
-			proposal.setContextInformation(contextInformation);
-		}
-	
-		boolean userMustCompleteParameters= (contextInformation != null && completionName.length > 0);
-		char[] triggers= userMustCompleteParameters ? METHOD_WITH_ARGUMENTS_TRIGGERS : METHOD_TRIGGERS;
-		proposal.setTriggerCharacters(triggers);
-		
-		if (userMustCompleteParameters) {
-			// set the cursor before the closing bracket
-			proposal.setCursorPosition(completionName.length - 1);
-		}
-		
-		fMethods.add(proposal);	
-	}
-	
-	protected void internalAcceptMethod(CompletionProposal method) {
-		char[] declaringTypePackageName= Signature.getSignatureQualifier(method.getDeclarationSignature());
-		char[] declaringTypeName= Signature.getSignatureSimpleName(method.getDeclarationSignature());
-		char[] name= method.getName();
-		char[] signature= SignatureUtil.unboundedSignature(method.getSignature());
-		char[][] parameterPackageNames= getParameterPackages(signature);
-		char[][] parameterTypeNames= getParameterTypes(signature);
-		char[][] parameterNames= method.findParameterNames(null) == null ? CharOperation.NO_CHAR_CHAR : method.findParameterNames(null);
-		char[] returnTypeName= Signature.getSignatureSimpleName(Signature.getReturnType(signature));
 		char[] completionName= method.getCompletion();
-		int modifiers= method.getFlags();
-		int start= method.getReplaceStart();
-		int end= method.getReplaceEnd();
-		int relevance= method.getRelevance();
-
-		if (completionName == null)
-			return;
-		
-		if (TypeFilter.isFiltered(declaringTypePackageName, declaringTypeName)) {
-			return;
-		}
-		
-		JavaCompletionProposal proposal= createMethodCallCompletion(declaringTypeName, name, parameterPackageNames, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end, relevance);
-		boolean isConstructor= returnTypeName == null || returnTypeName.length == 0;
-		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, isConstructor));
-
-		boolean hasOpeningBracket= completionName.length == 0 || (completionName.length > 0 && completionName[completionName.length - 1] == ')');
-	
-		ProposalContextInformation contextInformation= null;
-		if (hasOpeningBracket && parameterTypeNames.length > 0) {
-			contextInformation= new ProposalContextInformation();
-			contextInformation.setInformationDisplayString(getParameterSignature(parameterTypeNames, parameterNames));		
-			contextInformation.setContextDisplayString(proposal.getDisplayString());
+		boolean hasParameters= Signature.getParameterCount(SignatureUtil.fix83600(method.getSignature())) > 0;
+		if (hasParameters) {
+			ProposalContextInformation contextInformation= new ProposalContextInformation();
+			contextInformation.setInformationDisplayString(parameterList);
 			contextInformation.setImage(proposal.getImage());
-			int position= (completionName.length == 0) ? fContextOffset : -1;
-			contextInformation.setContextInformationPosition(position);
+			contextInformation.setContextDisplayString(proposal.getDisplayString());
+			contextInformation.setContextInformationPosition(completionName.length == 0 ? fContextOffset : -1);
+
 			proposal.setContextInformation(contextInformation);
 		}
 	
-		boolean userMustCompleteParameters= (contextInformation != null && completionName.length > 0);
-		char[] triggers= userMustCompleteParameters ? METHOD_WITH_ARGUMENTS_TRIGGERS : METHOD_TRIGGERS;
-		proposal.setTriggerCharacters(triggers);
+		proposal.setTriggerCharacters(hasParameters ? METHOD_WITH_ARGUMENTS_TRIGGERS : METHOD_TRIGGERS);
 		
-		if (userMustCompleteParameters) {
+		if (hasParameters && completionName.length > 0) {
 			// set the cursor before the closing bracket
 			proposal.setCursorPosition(completionName.length - 1);
 		}
 		
 		fMethods.add(proposal);	
 	}
+	
+	/**
+	 * Creates and returns a parameter list of the given method proposal
+	 * suitable for display. The list does not include parentheses.
+	 * 
+	 * @param methodProposal the method proposal to create the parameter list
+	 *        for
+	 * @return the list of comma-separated parameters suitable for display
+	 * @since 3.1
+	 */
+	protected final String createUnboundedParameterList(CompletionProposal methodProposal) {
+		char[] signature= SignatureUtil.fix83600(methodProposal.getSignature());
+		char[][] parameterNames= methodProposal.findParameterNames(null);
+		char[][] parameterTypes= Signature.getParameterTypes(signature);
+		for (int i= 0; i < parameterTypes.length; i++) {
+			parameterTypes[i]= computeTypeDisplayName(SignatureUtil.getLowerBound(parameterTypes[i]));
+		}
+		return getParameterSignature(parameterTypes, parameterNames);
+	}
+
+	private char[] computeTypeDisplayName(char[] typeSignature) {
+		char[] displayName= Signature.getSimpleName(Signature.toCharArray(typeSignature));
+		boolean useShortGenerics= false;
+		if (useShortGenerics) {
+			StringBuffer buf= new StringBuffer();
+			buf.append(displayName);
+			int pos= buf.indexOf("? extends "); //$NON-NLS-1$
+			if (pos >= 0)
+				buf.replace(pos, pos + 10, "+"); //$NON-NLS-1$
+			pos= buf.indexOf("? super "); //$NON-NLS-1$
+			if (pos >= 0)
+				buf.replace(pos, pos + 9, "-"); //$NON-NLS-1$
+			return buf.toString().toCharArray();
+		} else {
+			return displayName;
+		}
+	}
+
+	protected JavaCompletionProposal createMethodCallCompletion(CompletionProposal methodProposal, String parameterList) {
+		ImageDescriptor descriptor= createMemberDescriptor(methodProposal.getFlags());
+		String displayName= createMethodDisplayString(methodProposal, parameterList).toString();
+		String completion= String.valueOf(methodProposal.getCompletion());
+		int start= methodProposal.getReplaceStart();
+		int end= methodProposal.getReplaceEnd();
+		int relevance= methodProposal.getRelevance();
 		
+		return createCompletion(start, end, completion, descriptor, displayName, relevance);
+	}
+
+	protected final ImageDescriptor createMemberDescriptor(int modifiers) {
+		ImageDescriptor desc= JavaElementImageProvider.getMethodImageDescriptor(false, modifiers);
+
+		if (Flags.isDeprecated(modifiers))
+		 	desc= getDeprecatedDescriptor(desc);
+
+		if (Flags.isStatic(modifiers))
+			desc= getStaticDescriptor(desc);
+		
+		return desc;
+	}
+	
+	protected final StringBuffer createMethodDisplayString(CompletionProposal methodProposal, String parameterList) {
+		
+		char[] signature= methodProposal.getSignature();
+		
+		StringBuffer nameBuffer= new StringBuffer();
+		nameBuffer.append(methodProposal.getName());
+		nameBuffer.append('(');
+		nameBuffer.append(parameterList);
+		nameBuffer.append(")  "); //$NON-NLS-1$
+		
+		char[] returnType= computeTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(signature)));
+		nameBuffer.append(returnType);
+
+		char[] declaringType= Signature.getSignatureSimpleName(Signature.getTypeErasure(methodProposal.getDeclarationSignature()));
+		nameBuffer.append(" - "); //$NON-NLS-1$
+		nameBuffer.append(declaringType);
+
+		return nameBuffer;
+	}
+	
+
 	/*
 	 * @see ICompletionRequestor#acceptModifier
 	 */	
@@ -447,13 +448,6 @@ public class ResultCollector extends CompletionRequestor {
 		}
 		return nameBuffer;
 	}
-
-	protected JavaCompletionProposal createMethodCallCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypePackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end, int relevance) {
-		ImageDescriptor descriptor= getMemberDescriptor(modifiers);
-		StringBuffer nameBuffer= getMethodDisplayString(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName);
-		return createCompletion(start, end, new String(completionName), descriptor, nameBuffer.toString(), relevance);
-	}
-
 
 	protected JavaCompletionProposal createAnonymousTypeCompletion(char[] declaringTypePackageName, char[] declaringTypeName, char[][] parameterTypeNames, char[][] parameterNames, char[] completionName, int start, int end, int relevance) {
 		StringBuffer declTypeBuf= new StringBuffer();
@@ -654,6 +648,9 @@ public class ResultCollector extends CompletionRequestor {
 
 	/* copied from CompletionRequestorWrapper */
 	public void accept(CompletionProposal proposal) {
+		if (isIgnored(proposal.getKind()))
+			return;
+		
 		switch(proposal.getKind()) {
 			case CompletionProposal.KEYWORD:
 				internalAcceptKeyword(

@@ -40,6 +40,9 @@ import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -53,51 +56,27 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  */
 public class ParameterGuessingProposal extends JavaCompletionProposal {
 
-	private final char[] fName;
+	private final String fName;
 	private final char[][] fParameterNames;
-	private final char[][] fParamaterTypePackageNames;
-	private final char[][] fParameterTypeNames;
 	private final int fCodeAssistOffset;
 	private final ICompilationUnit fCompilationUnit;
-	private final ITextViewer fViewer;
+	
 	private IRegion fSelectedRegion; // initialized by apply()
 	private ICompletionProposal[][] fChoices; // initialized by guessParameters()
 	private IPositionUpdater fUpdater;
+	private final char[] fSignature;
 		
-	/**
-	 * Creates a template proposal with a template and its context.
-	 * @param replacementString
-	 * @param replacementOffset
-	 * @param replacementLength
-	 * @param image     the icon of the proposal.
-	 * @param displayString
-	 * @param viewer
-	 * @param relevance
-	 * @param name
-	 * @param paramaterTypePackageNames
-	 * @param parameterTypeNames
-	 * @param parameterNames
-	 * @param codeAssistOffset
-	 * @param compilationUnit
-	 */		
-	public ParameterGuessingProposal(
-		String replacementString, int replacementOffset, int replacementLength, Image image,
-	    String displayString, ITextViewer viewer, int relevance,
-		char[] name,  char[][] paramaterTypePackageNames, char[][] parameterTypeNames, char[][] parameterNames,  
-		int codeAssistOffset, ICompilationUnit compilationUnit)
-	{
-		super(replacementString, replacementOffset, replacementLength, image, displayString, relevance); //$NON-NLS-1$		
+ 	public ParameterGuessingProposal(String name, char[] signature, int offset, int length, Image image, String displayName, ITextViewer viewer, int relevance, char[][] parameterNames, int codeAssistOffset, ICompilationUnit compilationUnit) {
+ 		super(name, offset, length, image, displayName, relevance, viewer);
 
 		fName= name;
-		fParamaterTypePackageNames= paramaterTypePackageNames;
-		fParameterTypeNames= parameterTypeNames;
+		fSignature= signature;
 		fParameterNames= parameterNames;
-		fViewer= viewer;
 		fCodeAssistOffset= codeAssistOffset;
 		fCompilationUnit= compilationUnit;
-	}
- 
- 	private boolean appendArguments(IDocument document, int offset) {
+ 	}
+
+	private boolean appendArguments(IDocument document, int offset) {
 		
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION) ^ fToggleEating)
@@ -149,14 +128,14 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 				positionLengths= new int[0];
 				positions= new Position[0];
 				
-				replacementString= new String(fName);
+				replacementString= fName;
 			}
 
 			setReplacementString(replacementString);
 		
 			super.apply(document, trigger, offset);
 
-			if (parameterCount > 0 && fViewer != null) {
+			if (parameterCount > 0 && fTextViewer != null) {
 				LinkedModeModel model= new LinkedModeModel();
 				for (int i= 0; i != parameterCount; i++) {
 					LinkedPositionGroup group= new LinkedPositionGroup();
@@ -177,8 +156,8 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 					model.addLinkingListener(new EditorHighlightingSynchronizer(editor));
 				}
 								
-				LinkedModeUI ui= new EditorLinkedModeUI(model, fViewer);
-				ui.setExitPosition(fViewer, baseOffset + replacementString.length(), 0, Integer.MAX_VALUE);
+				LinkedModeUI ui= new EditorLinkedModeUI(model, fTextViewer);
+				ui.setExitPosition(fTextViewer, baseOffset + replacementString.length(), 0, Integer.MAX_VALUE);
 				ui.setExitPolicy(new ExitPolicy(')'));
 				ui.setCyclingMode(LinkedModeUI.CYCLE_WHEN_NO_PARENT);
 				ui.setDoContextInfo(true);
@@ -221,7 +200,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 	private ICompletionProposal[][] guessParameters(int offset, IDocument document, Position[] positions) throws JavaModelException {
 		// find matches in reverse order.  Do this because people tend to declare the variable meant for the last
 		// parameter last.  That is, local variables for the last parameter in the method completion are more
-		// likely to be closer to the point of codecompletion. As an example consider a "delegation" completion:
+		// likely to be closer to the point of code completion. As an example consider a "delegation" completion:
 		// 
 		// 		public void myMethod(int param1, int param2, int param3) {
 		// 			someOtherObject.yourMethod(param1, param2, param3);
@@ -247,13 +226,14 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 				fCompilationUnit.reconcile(ICompilationUnit.NO_AST, false, null, null);
 			}
 			
+			String[][] parameterTypes= getParameterSignatures();
 			ParameterGuesser guesser= new ParameterGuesser(fCodeAssistOffset, fCompilationUnit);
 			for (int i= fParameterNames.length - 1; i >= 0; i--) {
 				positions[i]= new Position(0,0);
 				String paramName= new String(fParameterNames[i]);
 				ICompletionProposal[] parameters= guesser.parameterProposals(
-					new String(fParamaterTypePackageNames[i]),
-					new String(fParameterTypeNames[i]),
+					parameterTypes[i][0],
+					parameterTypes[i][1],
 					paramName,
 					positions[i],
 					document);
@@ -271,6 +251,19 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 		}		
 	}
 	
+	private String[][] getParameterSignatures() {
+		char[] signature= SignatureUtil.fix83600(fSignature);
+		char[][] types= Signature.getParameterTypes(signature);
+		String[][] ret= new String[types.length][2];
+		
+		for (int i= 0; i < types.length; i++) {
+			char[] type= SignatureUtil.getLowerBound(types[i]);
+			ret[i][0]= String.valueOf(Signature.getSignatureQualifier(type));
+			ret[i][1]= String.valueOf(Signature.getSignatureSimpleName(type));
+		}
+		return ret;
+	}
+
 	/**
 	 * Creates the completion string. Offsets and Lengths are set to the offsets and lengths
 	 * of the parameters.
@@ -313,7 +306,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 	}
 
 	private void openErrorDialog(Exception e) {
-		Shell shell= fViewer.getTextWidget().getShell();
+		Shell shell= fTextViewer.getTextWidget().getShell();
 		MessageDialog.openError(shell, JavaTextMessages.getString("ParameterGuessingProposal.error.msg"), e.getMessage()); //$NON-NLS-1$
 	}	
 

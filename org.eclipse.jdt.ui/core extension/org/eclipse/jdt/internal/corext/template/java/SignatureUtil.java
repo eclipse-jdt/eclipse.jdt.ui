@@ -10,17 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.compiler.CharOperation;
-
-import org.eclipse.jdt.internal.core.util.Util;
 
 /**
  * Utilities for Signature operations.
@@ -44,10 +36,12 @@ public final class SignatureUtil {
 	 * variable gets declared in the same context.
 	 */
 	private static final String NULL_TYPE_SIGNATURE= "TNULL;"; //$NON-NLS-1$
+	private static final char[] NULL_TYPE_SIGNATURE_ARRAY= NULL_TYPE_SIGNATURE.toCharArray();
 	/**
 	 * The signature of <code>java.lang.Object</code> ({@value}).
 	 */
 	private static final String OBJECT_SIGNATURE= "Ljava.lang.Object;"; //$NON-NLS-1$
+	private static final char[] OBJECT_SIGNATURE_ARRAY= OBJECT_SIGNATURE.toCharArray();
 
 	private SignatureUtil() {
 		// do not instantiate
@@ -68,8 +62,8 @@ public final class SignatureUtil {
 	
 	/**
 	 * Returns the upper bound of a type signature. Returns the signature of <code>java.lang.Object</code> if
-	 * <code>signature</code> is a lower bound (<code>(? super T)</code>); returns
-	 * the signature of the type <code>T</code> of an upper bound (<code>(? extends T)</code>)
+	 * <code>signature</code> is a lower bound (<code>? super T</code>); returns
+	 * the signature of the type <code>T</code> of an upper bound (<code>? extends T</code>)
 	 * or <code>signature</code> itself if it is not a bound signature.
 	 * 
 	 * @param signature the signature
@@ -89,9 +83,37 @@ public final class SignatureUtil {
 	}
 
 	/**
+	 * Returns the upper bound of a type signature. Returns the signature of <code>java.lang.Object</code> if
+	 * <code>signature</code> is a lower bound (<code>? super T</code>); returns
+	 * the signature of the type <code>T</code> of an upper bound (<code>? extends T</code>)
+	 * or <code>signature</code> itself if it is not a bound signature.
+	 * 
+	 * @param signature the signature
+	 * @return the upper bound signature of <code>signature</code>
+	 */
+	public static char[] getUpperBound(char[] signature) {
+		if (signature.length < 1)
+			return signature;
+		
+		if (signature[0] == Signature.C_STAR)
+			return OBJECT_SIGNATURE_ARRAY;
+		
+		if (signature[0] == Signature.C_SUPER)
+			return OBJECT_SIGNATURE_ARRAY;
+		
+		if (signature[0] == Signature.C_EXTENDS) {
+			char[] type= new char[signature.length - 1];
+			System.arraycopy(signature, 1, type, 0, signature.length - 1);
+			return type;
+		}
+		
+		return signature;
+	}
+
+	/**
 	 * Returns the lower bound of a type signature. Returns the null type
-	 * signature if <code>signature</code> is a wildcard or upper bound (<code>(? extends T)</code>);
-	 * returns the signature of the type <code>T</code> of a lower bound (<code>(? super T)</code>)
+	 * signature if <code>signature</code> is a wildcard or upper bound (<code>? extends T</code>);
+	 * returns the signature of the type <code>T</code> of a lower bound (<code>? super T</code>)
 	 * or <code>signature</code> itself if it is not a bound signature.
 	 * 
 	 * @param signature the signature
@@ -111,6 +133,34 @@ public final class SignatureUtil {
 	}
 
 	/**
+	 * Returns the lower bound of a type signature. Returns the null type
+	 * signature if <code>signature</code> is a wildcard or upper bound (<code>? extends T</code>);
+	 * returns the signature of the type <code>T</code> of a lower bound (<code>? super T</code>)
+	 * or <code>signature</code> itself if it is not a bound signature.
+	 * 
+	 * @param signature the signature
+	 * @return the lower bound signature of <code>signature</code>
+	 */
+	public static char[] getLowerBound(char[] signature) {
+		if (signature.length < 1)
+			return signature;
+		
+		if (signature[0] == Signature.C_STAR)
+			return NULL_TYPE_SIGNATURE_ARRAY;
+		
+		if (signature[0] == Signature.C_SUPER) {
+			char[] type= new char[signature.length - 1];
+			System.arraycopy(signature, 1, type, 0, signature.length - 1);
+			return type;
+		}
+		
+		if (signature[0] == Signature.C_EXTENDS)
+			return NULL_TYPE_SIGNATURE_ARRAY;
+		
+		return signature;
+	}
+
+	/**
 	 * Returns the fully qualified type name of the given signature, with any
 	 * type parameters and arrays erased.
 	 * 
@@ -120,12 +170,7 @@ public final class SignatureUtil {
 	public static String stripSignatureToFQN(String signature) throws IllegalArgumentException {
 		signature= Signature.getTypeErasure(signature);
 		signature= Signature.getElementType(signature);
-		String simpleName= Signature.getSignatureSimpleName(signature);
-		String qualifier= Signature.getSignatureQualifier(signature);
-		if (qualifier.length() > 0)
-			return Signature.toQualifiedName(new String[] {qualifier, simpleName});
-		else
-			return simpleName;
+		return Signature.toString(signature);
 	}
 	
 	/**
@@ -175,8 +220,8 @@ public final class SignatureUtil {
 	 * Takes a method signature
 	 * <code>[&lt; typeVariableName : formalTypeDecl &gt;] ( paramTypeSig1* ) retTypeSig</code>
 	 * and returns it with any parameter signatures filtered through
-	 * <code>getUpperBound</code> and the return type filtered through
-	 * <code>getLowerBound</code>. Any preceding formal type variable
+	 * <code>getLowerBound</code> and the return type filtered through
+	 * <code>getUpperBound</code>. Any preceding formal type variable
 	 * declarations are removed.
 	 * <p>
 	 * TODO this is a temporary workaround for
@@ -190,8 +235,35 @@ public final class SignatureUtil {
 		if (signature == null || signature.length < 2)
 			return signature;
 		
+		final boolean BUG_83600= true;
 		// XXX the signatures from CompletionRequestor contain a superfluous '+'
 		// before type parameters to parameter types
+		if (BUG_83600) {
+			signature= fix83600(signature);
+		}
+		
+		StringBuffer res= new StringBuffer("("); //$NON-NLS-1$
+		char[][] parameters= Signature.getParameterTypes(signature);
+		for (int i= 0; i < parameters.length; i++) {
+			char[] param= parameters[i];
+			res.append(getLowerBound(param));
+		}
+		res.append(')');
+		res.append(getUpperBound(Signature.getReturnType(signature)));
+		return res.toString().toCharArray();
+	}
+
+	/**
+	 * TODO this is a temporary workaround for
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=83600
+	 * 
+	 * @param signature the method signature to convert
+	 * @return the fixed signature
+	 */
+	public static char[] fix83600(char[] signature) {
+		if (signature == null || signature.length < 2)
+			return signature;
+		
 		StringBuffer sig= new StringBuffer();
 		sig.append(signature);
 		do {
@@ -204,109 +276,6 @@ public final class SignatureUtil {
 				break;
 			sig.deleteCharAt(pos);
 		} while (true);
-		signature= sig.toString().toCharArray();
-		
-		int pos= 0;
-		Map methodTypeDecls= new HashMap();
-		if (signature[pos] == Signature.C_GENERIC_START) {
-			// read type declarations
-			int nextColon= CharOperation.indexOf(Signature.C_COLON, signature, pos + 1);
-			do {
-				int id_end= Util.scanIdentifier(signature, pos + 1);
-				String typeVar= String.valueOf(signature, pos + 1, id_end - pos);
-				methodTypeDecls.put(typeVar, new ArrayList());
-				pos= id_end;
-				while (nextColon != -1) {
-					while (CharOperation.indexOf(Signature.C_COLON, signature, nextColon + 1) == nextColon + 1)
-						nextColon++; // skip empty class bound
-					
-					int sig_end= Util.scanTypeArgumentSignature(signature, nextColon + 1);
-					String typeBound= String.valueOf(signature, nextColon + 1, sig_end - nextColon);
-					((List) methodTypeDecls.get(typeVar)).add(typeBound);
-					pos= sig_end;
-					if (CharOperation.indexOf(Signature.C_COLON, signature, pos + 1) == pos + 1)
-						nextColon= pos + 1;
-					else
-						nextColon= -1;
-				}
-				nextColon= CharOperation.indexOf(Signature.C_COLON, signature, pos + 1);
-			} while (nextColon != -1);
-			pos++;
-			if (signature[pos] != Signature.C_GENERIC_END)
-				throw new IllegalArgumentException(String.valueOf(signature));
-			pos++;
-		}
-		
-		if (signature[pos] != Signature.C_PARAM_START)
-			throw new IllegalArgumentException(String.valueOf(signature));
-		pos++;
-		
-		// read arguments and return type
-		StringBuffer res= new StringBuffer("("); //$NON-NLS-1$
-		boolean isReturnType= false;
-		while (pos < signature.length) {
-			char ch= signature[pos];
-			switch (ch) {
-				case Signature.C_STAR:
-					pos++;
-					if (isReturnType)
-						res.append(OBJECT_SIGNATURE); // return type is at least Object
-					else
-						res.append(NULL_TYPE_SIGNATURE); // no lower bound!
-					break;
-				case Signature.C_SUPER:
-					int end= Util.scanTypeSignature(signature, pos + 1);
-					if (isReturnType)
-						res.append(OBJECT_SIGNATURE); // return type is at least Object
-					else
-						res.append(replaceTypeVariableBySingleBound(signature, pos + 1, end, methodTypeDecls));
-					pos= end + 1;
-					break;
-				case Signature.C_EXTENDS:
-					end= Util.scanTypeSignature(signature, pos + 1);
-					if (isReturnType)
-						res.append(replaceTypeVariableBySingleBound(signature, pos + 1, end, methodTypeDecls));
-					else
-						res.append(NULL_TYPE_SIGNATURE); // no lower bound
-					pos= end + 1;
-					break;
-				case Signature.C_PARAM_END:
-					pos++;
-					res.append(Signature.C_PARAM_END);
-					isReturnType= true;
-					break;
-				default:
-					end= Util.scanTypeSignature(signature, pos);
-					String typeSig= replaceTypeVariableBySingleBound(signature, pos, end, methodTypeDecls);
-					res.append(typeSig);
-					pos= end + 1;
-					break;
-			}
-		}
-		
-		return res.toString().toCharArray();
+		return sig.toString().toCharArray();
 	}
-
-	/*
-	 * Replace a type variable by its bound if the variable is declared in the
-	 * method declaration and contains a single bound. Return the type signature
-	 * of the bound, or the type itself if not a type variable or the variable
-	 * is not declared in the method or the bound has multiple bounds.
-	 */
-	private static String replaceTypeVariableBySingleBound(char[] signature, int pos, int end, Map methodTypeDecls) {
-		String typeSig= String.valueOf(signature, pos, end - pos + 1);
-		// don't do early resolution for now
-		if (true)
-			return typeSig;
-		if (Signature.getTypeSignatureKind(typeSig) == Signature.TYPE_VARIABLE_SIGNATURE) {
-			String typeVar= Signature.getSignatureSimpleName(typeSig);
-			if (methodTypeDecls.containsKey(typeVar)) {
-				List types= (List) methodTypeDecls.get(typeVar);
-				if (types.size() == 1)
-					typeSig= (String) types.get(0); // only replace single matches - multi-matches have to be resolved later
-			}
-		}
-		return typeSig;
-	}
-
 }

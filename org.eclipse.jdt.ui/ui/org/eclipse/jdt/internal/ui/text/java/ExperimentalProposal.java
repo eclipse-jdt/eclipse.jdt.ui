@@ -15,6 +15,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -29,6 +30,8 @@ import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -38,38 +41,47 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  */
 public class ExperimentalProposal extends JavaCompletionProposal {
 
-	private int[] fPositionOffsets;
-	private int[] fPositionLengths;
+	private final char[][] fParameterNames;
 
 	private IRegion fSelectedRegion; // initialized by apply()
 		
-	/**
-	 * Creates a template proposal with a template and its context.
-	 */		
-	public ExperimentalProposal(String replacementString, int replacementOffset, int replacementLength, Image image,
-	    String displayString, int[] positionOffsets, int[] positionLengths, ITextViewer viewer, int relevance)
-	{
-		super(replacementString, replacementOffset, replacementLength, image, displayString, relevance, viewer);		
-
-		fPositionOffsets= positionOffsets;
-		fPositionLengths= positionLengths;
+	public ExperimentalProposal(String name, char[] signature, char[][] parameterNames, int offset, int length, Image image, String displayName, ITextViewer viewer, int relevance) {
+		super(name, offset, length, image, displayName, relevance, viewer);
+		fParameterNames= parameterNames;
 	}
 
 	/*
 	 * @see ICompletionProposalExtension#apply(IDocument, char)
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
+		int baseOffset= getReplacementOffset();
+
+		String replacementString;
+		int parameterCount;
+		int[] positionOffsets, positionLengths;
+		if (appendArguments(document, offset)) {
+			parameterCount= fParameterNames.length;
+			positionOffsets= new int[parameterCount];
+			positionLengths= new int[parameterCount];
+			replacementString= computeReplacementString(baseOffset, positionOffsets, positionLengths, document);
+		} else {
+			parameterCount= 0;
+			positionOffsets= new int[0];
+			positionLengths= new int[0];
+			
+			replacementString= getReplacementString();
+		}
+
+		setReplacementString(replacementString);
+		
 		super.apply(document, trigger, offset);
 
-		int replacementOffset= getReplacementOffset();
-		String replacementString= getReplacementString();
-
-		if (fPositionOffsets.length > 0 && fTextViewer != null) {
+		if (positionOffsets.length > 0 && fTextViewer != null) {
 			try {
 				LinkedModeModel model= new LinkedModeModel();
-				for (int i= 0; i != fPositionOffsets.length; i++) {
+				for (int i= 0; i != positionOffsets.length; i++) {
 					LinkedPositionGroup group= new LinkedPositionGroup();
-					group.addPosition(new LinkedPosition(document, replacementOffset + fPositionOffsets[i], fPositionLengths[i], LinkedPositionGroup.NO_STOP));
+					group.addPosition(new LinkedPosition(document, baseOffset + positionOffsets[i], positionLengths[i], LinkedPositionGroup.NO_STOP));
 					model.addGroup(group);
 				}
 				
@@ -80,7 +92,7 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 				}
 				
 				LinkedModeUI ui= new EditorLinkedModeUI(model, fTextViewer);
-				ui.setExitPosition(fTextViewer, replacementOffset + replacementString.length(), 0, Integer.MAX_VALUE);
+				ui.setExitPosition(fTextViewer, baseOffset + replacementString.length(), 0, Integer.MAX_VALUE);
 				ui.setDoContextInfo(true);
 				ui.enter();
 	
@@ -91,9 +103,28 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 				openErrorDialog(e);
 			}		
 		} else
-			fSelectedRegion= new Region(replacementOffset + replacementString.length(), 0);
+			fSelectedRegion= new Region(baseOffset + replacementString.length(), 0);
 	}
 	
+	private String computeReplacementString(int baseOffset, int[] offsets, int[] lengths, IDocument document) {
+		StringBuffer buffer= new StringBuffer(getReplacementString());
+		int count= fParameterNames.length;
+		offsets= new int[count];
+		lengths= new int[count];
+		
+		buffer.append('(');
+		for (int i= 0; i != count; i++) {
+			if (i != 0)
+				buffer.append(", "); //$NON-NLS-1$
+				
+			offsets[i]= buffer.length();
+			buffer.append(fParameterNames[i]);
+			lengths[i]= buffer.length() - offsets[i];
+		}
+		buffer.append(')');
+		return buffer.toString();
+	}
+
 	/**
 	 * Returns the currently active java editor, or <code>null</code> if it 
 	 * cannot be determined.
@@ -123,4 +154,28 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 		MessageDialog.openError(shell, JavaTextMessages.getString("ExperimentalProposal.error.msg"), e.getMessage()); //$NON-NLS-1$
 	}	
 
+	private boolean appendArguments(IDocument document, int offset) {
+		
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION) ^ fToggleEating)
+			return true;
+							
+		try {
+			IRegion region= document.getLineInformationOfOffset(offset);
+			String line= document.get(region.getOffset(), region.getLength());
+			
+			int index= offset - region.getOffset();
+			while (index != line.length() && Character.isUnicodeIdentifierPart(line.charAt(index)))
+				++index;
+			
+			if (index == line.length())
+				return true;
+				
+			return line.charAt(index) != '(';
+		
+		} catch (BadLocationException e) {
+			return true;
+		}
+	}
+ 
 }

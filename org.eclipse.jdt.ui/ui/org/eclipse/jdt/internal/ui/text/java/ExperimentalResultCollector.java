@@ -10,12 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.Signature;
@@ -29,98 +27,32 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class ExperimentalResultCollector extends ResultCollector {
 
-	private static boolean appendArguments(ITextViewer viewer, int offset) {
-		
-		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION))
-			return true;
+	protected JavaCompletionProposal createMethodCallCompletion(CompletionProposal methodProposal, String parameterList) {
+		char[] completion= methodProposal.getCompletion();
+		// super class' behavior if this is not a normal completion or has no
+		// parameters
+		if ((completion.length == 0) || ((completion.length == 1) && completion[0] == ')') || parameterList.length() == 0)
+			return super.createMethodCallCompletion(methodProposal, parameterList);
 
-		if (viewer == null)
-			return true;
-							
-		try {
-			IDocument document= viewer.getDocument();		
-			IRegion region= document.getLineInformationOfOffset(offset);
-			String line= document.get(region.getOffset(), region.getLength());
-			
-			int index= offset - region.getOffset();
-			while (index != line.length() && Character.isUnicodeIdentifierPart(line.charAt(index)))
-				++index;
-			
-			if (index == line.length())
-				return true;
-				
-			return line.charAt(index) != '(';
-		
-		} catch (BadLocationException e) {
-			return true;
-		}
-	}
-	
-	/**
-	 * Creates a proposal that includes a best guess for each parameter. Best guesses are computed by the 
-	 * {@link ParameterGuesser} when the {@link org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)}
-	 * method is called.
-	 */
-	protected JavaCompletionProposal createMethodCallCompletion(char[] declaringTypeName, char[] name,
-		char[][] parameterTypePackageNames, char[][] parameterTypeNames, char[][] parameterNames,
-		char[] returnTypeName, char[] completionName, int modifiers, int start, int end, int relevance)
-	{		
-		// handle empty code completion
-		if ((completionName.length == 0) || ((completionName.length == 1) && completionName[0] == ')'))
-			return super.createMethodCallCompletion(declaringTypeName, name,
-					parameterTypePackageNames, parameterTypeNames, parameterNames, returnTypeName,
-					completionName, modifiers, start, end, relevance);
-		
-		// use original code for 0-argument methods
-		if (parameterNames.length == 0)
-			return super.createMethodCallCompletion(declaringTypeName, name,
-					parameterTypePackageNames, parameterTypeNames, parameterNames, returnTypeName,
-					completionName, modifiers, start, end, relevance);			
+		ImageDescriptor descriptor= createMemberDescriptor(methodProposal.getFlags());
+		Image image= getImage(descriptor);
+		String displayName= createMethodDisplayString(methodProposal, parameterList).toString();
+		int start= methodProposal.getReplaceStart();
+		int end= methodProposal.getReplaceEnd();
+		int relevance= methodProposal.getRelevance();
+		String name= String.valueOf(methodProposal.getName());
+		char[] signature= methodProposal.getSignature();
+		char[][] parameterNames= methodProposal.findParameterNames(null);
 
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-
 		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS)) {
-			return new ParameterGuessingProposal(
-				new StringBuffer().append(name).append('(').toString(), start, end - start, getImage(getMemberDescriptor(modifiers)), getMethodDisplayString(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName).toString(), fTextViewer, relevance,
-				name, parameterTypePackageNames, parameterTypeNames, parameterNames, 
-				fCodeAssistOffset, fCompilationUnit);
-				
+			return new ParameterGuessingProposal(name, signature, start, end - start, image, displayName, fTextViewer, relevance, parameterNames, fCodeAssistOffset, fCompilationUnit);
 		} else {
-			int count;
-			int[] offsets;
-			int[] lengths;
-	
-			StringBuffer buffer= new StringBuffer();	
-			buffer.append(name);
-			
-			if (appendArguments(fTextViewer, start)) {				
-				count= parameterNames.length;
-				offsets= new int[count];
-				lengths= new int[count];
-				
-				buffer.append('(');
-				for (int i= 0; i != count; i++) {
-					if (i != 0)
-						buffer.append(", "); //$NON-NLS-1$
-						
-					offsets[i]= buffer.length();
-					buffer.append(parameterNames[i]);
-					lengths[i]= buffer.length() - offsets[i];
-				}
-				buffer.append(')');
-
-			} else {
-				count= 0;
-				offsets= new int[0];
-				lengths= new int[0];				
-			}
-			
-			ExperimentalProposal experimental= new ExperimentalProposal(buffer.toString(), start, end - start, getImage(getMemberDescriptor(modifiers)), getMethodDisplayString(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName).toString(), offsets, lengths, fTextViewer, relevance);
+			ExperimentalProposal experimental= new ExperimentalProposal(name, signature, parameterNames, start, end - start, image, displayName, fTextViewer, relevance);
 			return experimental;
 		}
+
 	}
-	
 	
 	protected JavaCompletionProposal createTypeCompletion(CompletionProposal typeProposal) {
 		char[] signature= typeProposal.getSignature();
