@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -52,11 +53,9 @@ public class TypesView extends JavaBrowsingPart {
 	 * @see org.eclipse.jface.viewers.ILabelProvider
 	 */
 	protected JavaUILabelProvider createLabelProvider() {
-		AppearanceAwareLabelProvider lprovider= new AppearanceAwareLabelProvider(
+		return new AppearanceAwareLabelProvider(
 						AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS,
 						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
-		lprovider.addLabelDecorator(new TopLevelTypeProblemsLabelDecorator(null));
-		return lprovider;
 	}
 
 	/**
@@ -205,4 +204,13 @@ public class TypesView extends JavaBrowsingPart {
 		if (!selectedElements.equals(currentInput))
 			setInput(selectedElements);
 	}
+	/*
+	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createDecoratingLabelProvider(org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider)
+	 */
+	protected DecoratingLabelProvider createDecoratingLabelProvider(JavaUILabelProvider provider) {
+		DecoratingLabelProvider decoratingLabelProvider= super.createDecoratingLabelProvider(provider);
+		provider.addLabelDecorator(new TopLevelTypeProblemsLabelDecorator(null));
+		return decoratingLabelProvider;
+	}
+
 }
