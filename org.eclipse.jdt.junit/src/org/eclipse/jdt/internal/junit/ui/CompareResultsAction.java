@@ -30,7 +30,6 @@ public class CompareResultsAction extends Action {
 		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/compare.gif"));  //$NON-NLS-1$
 		//WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.ENABLEFILTER_ACTION);
 		fView= view;
-		setEnabled(false);
 	}
 
 	/*
