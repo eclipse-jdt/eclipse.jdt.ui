@@ -86,12 +86,6 @@ public class ReturnTypeSubProcessor {
 			ASTRewrite rewrite= new ASTRewrite(declaration);
 			rewrite.markAsRemoved(declaration.getReturnType());
 			
-			ReturnStatementCollector collector= new ReturnStatementCollector();
-			declaration.accept(collector);
-			for (Iterator iter= collector.returnStatements(); iter.hasNext();) {
-				rewrite.markAsRemoved((ASTNode) iter.next());
-			}		
-				
 			String label= CorrectionMessages.getString("ReturnTypeSubProcessor.constrnamemethod.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
