@@ -83,7 +83,7 @@ public class CodeFormatterUtil {
 	}	
 	
 	/**
-	 * @deprecated
+	 * @deprecated Port to <code>format2</code>
 	 */
 	public static String format(int kind, String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
 		return format(kind, string, 0, string.length(), indentationLevel, positions, lineSeparator, options);
@@ -91,9 +91,13 @@ public class CodeFormatterUtil {
 	
 	
 	/**
-	 * @deprecated
+	 * @deprecated Port to <code>format2</code>
 	 */	
 	public static String format(int kind, String string, int start, int end, int indentationLevel, int[] positions, String lineSeparator, Map options) {
+		if (OLD_FUNC) {
+			return old_formatter(string, indentationLevel, positions, lineSeparator, options);
+		}
+		
 		int offset= start;
 		int length= end - start;
 		
@@ -121,7 +125,7 @@ public class CodeFormatterUtil {
 	}
 	
 	/**
-	 * @deprecated
+	 * @deprecated Port to <code>format2</code>
 	 */	
 	public static String format(ASTNode node, String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
 		if (OLD_FUNC) {
@@ -162,18 +166,7 @@ public class CodeFormatterUtil {
 		return string;
 	}
 	
-	private static void testSame(String a, String b, int[] p1, int[] p2) {
-		if (!a.equals(b)) {
-			System.out.println("diff: " + a + ", " + b); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		if (p1 != null) {
-			for (int i= 0; i < p2.length; i++) {
-				if (p1[i] != p2[i]) {
-					System.out.println("diff: " + p1[i] + ", " + p2[i]); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}
-		}
-	}
+
 	
 	
 	public static TextEdit format2(int kind, String string, int offset, int length, int indentationLevel, String lineSeparator, Map options) {
@@ -190,76 +183,6 @@ public class CodeFormatterUtil {
 		return format2(kind, string, 0, string.length(), indentationLevel, lineSeparator, options);
 	}
 	
-	private static IScanner getTokenScanner(String str) {
-		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
-		scanner.setSource(str.toCharArray());
-		scanner.resetTo(0, str.length());
-		return scanner;
-	}
-	
-	private static TextEdit emulateNewWithOld(String string, int offset, int length, int indentationLevel, String lineSeparator, Map options) {
-		String formatted= old_formatter(string, indentationLevel, null, lineSeparator, options);
-		
-		IScanner origScanner= getTokenScanner(string);
-		IScanner newScanner= getTokenScanner(formatted);
-		
-		TextEdit result= new MultiTextEdit();
-		
-		int end= offset + length;
-		try {
-			int origNextStart= 0; // original whitespace start
-			int newNextStart= 0;
-			do {
-				int origTok= origScanner.getNextToken();
-				int newTok= newScanner.getNextToken();
-				Assert.isTrue(origTok == newTok);
-				
-				int origStart= origNextStart;
-				int newStart= newNextStart;					
-				int origEnd, newEnd;
-				if (origTok == ITerminalSymbols.TokenNameEOF) {
-					origEnd= string.length();
-					newEnd= formatted.length();
-					origNextStart= -1; // eof
-				} else {
-					origEnd= origScanner.getCurrentTokenStartPosition();
-					newEnd= newScanner.getCurrentTokenStartPosition();
-					origNextStart= origScanner.getCurrentTokenEndPosition() + 1;
-					newNextStart= newScanner.getCurrentTokenEndPosition() + 1;
-				}
-				if (origStart >= offset && origEnd > offset && origStart < end && origEnd <= end) {
-					if (isDifferent(string, origStart, origEnd, formatted, newStart, newEnd)) {
-						ReplaceEdit edit= new ReplaceEdit(origStart, origEnd - origStart, formatted.substring(newStart, newEnd));
-						result.addChild(edit);
-					}
-				}
-			} while (origNextStart != -1);
-			if (indentationLevel > 0) {
-				result.addChild(new InsertEdit(offset, createIndentString(indentationLevel)));
-			}
-			return result;
-		} catch (MalformedTreeException e) {
-			JavaPlugin.log(e);
-			Assert.isTrue(false, e.getMessage());
-		} catch (InvalidInputException e) {
-			JavaPlugin.log(e);
-			Assert.isTrue(false, e.getMessage());
-		}
-		return null;
-	}
-
-	private static boolean isDifferent(String old, int oldStart, int oldEnd, String formatted, int formStart, int formEnd) {
-		if (oldEnd - oldStart != formEnd - formStart) {
-			return true;
-		}
-		for (int i= oldStart, j= formStart; i < oldEnd; i++, j++) {
-			if (old.charAt(i) != formatted.charAt(j)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	/**
 	 * Format the source whose kind is described by the passed AST node. This AST node is only used for type tests. It can be
 	 * a dummy node with no content.
@@ -320,7 +243,79 @@ public class CodeFormatterUtil {
 			edit= shifEdit(edit, prefix.length());
 		}
 		return edit;
+	}	
+		
+	private static TextEdit emulateNewWithOld(String string, int offset, int length, int indentationLevel, String lineSeparator, Map options) {
+		String formatted= old_formatter(string, indentationLevel, null, lineSeparator, options);
+		
+		IScanner origScanner= getTokenScanner(string);
+		IScanner newScanner= getTokenScanner(formatted);
+		
+		TextEdit result= new MultiTextEdit();
+		
+		int end= offset + length;
+		try {
+			int origNextStart= 0; // original whitespace start
+			int newNextStart= 0;
+			do {
+				int origTok= origScanner.getNextToken();
+				int newTok= newScanner.getNextToken();
+				Assert.isTrue(origTok == newTok);
+				
+				int origStart= origNextStart;
+				int newStart= newNextStart;					
+				int origEnd, newEnd;
+				if (origTok == ITerminalSymbols.TokenNameEOF) {
+					origEnd= string.length();
+					newEnd= formatted.length();
+					origNextStart= -1; // eof
+				} else {
+					origEnd= origScanner.getCurrentTokenStartPosition();
+					newEnd= newScanner.getCurrentTokenStartPosition();
+					origNextStart= origScanner.getCurrentTokenEndPosition() + 1;
+					newNextStart= newScanner.getCurrentTokenEndPosition() + 1;
+				}
+				if (origStart >= offset && origEnd > offset && origStart < end && origEnd <= end) {
+					if (isDifferent(string, origStart, origEnd, formatted, newStart, newEnd)) {
+						ReplaceEdit edit= new ReplaceEdit(origStart, origEnd - origStart, formatted.substring(newStart, newEnd));
+						result.addChild(edit);
+					}
+				}
+			} while (origNextStart != -1);
+			if (indentationLevel > 0) {
+				result.addChild(new InsertEdit(offset, createIndentString(indentationLevel)));
+			}
+			return result;
+		} catch (MalformedTreeException e) {
+			JavaPlugin.log(e);
+			Assert.isTrue(false, e.getMessage());
+		} catch (InvalidInputException e) {
+			JavaPlugin.log(e);
+			Assert.isTrue(false, e.getMessage());
+		}
+		return null;
 	}
+	
+	private static IScanner getTokenScanner(String str) {
+		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
+		scanner.setSource(str.toCharArray());
+		scanner.resetTo(0, str.length());
+		return scanner;
+	}
+
+	private static boolean isDifferent(String old, int oldStart, int oldEnd, String formatted, int formStart, int formEnd) {
+		if (oldEnd - oldStart != formEnd - formStart) {
+			return true;
+		}
+		for (int i= oldStart, j= formStart; i < oldEnd; i++, j++) {
+			if (old.charAt(i) != formatted.charAt(j)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
 	
 	private static TextEdit shifEdit(TextEdit oldEdit, int diff) {
 		TextEdit newEdit;
@@ -346,6 +341,19 @@ public class CodeFormatterUtil {
 			}
 		}
 		return newEdit;
+	}
+	
+	private static void testSame(String a, String b, int[] p1, int[] p2) {
+		if (!a.equals(b)) {
+			System.out.println("diff: " + a + ", " + b); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		if (p1 != null) {
+			for (int i= 0; i < p2.length; i++) {
+				if (p1[i] != p2[i]) {
+					System.out.println("diff: " + p1[i] + ", " + p2[i]); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
+		}
 	}
 	
 	private static Document createDocument(String string) {
