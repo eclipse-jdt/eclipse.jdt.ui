@@ -1026,6 +1026,12 @@ JavaStructureDiffViewerCreator
       		label="%Refactoring.inlineMethodAction.label"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.inline.method"
 			retarget="true" />
+
+		<action id="org.eclipse.jdt.ui.actions.PromoteTemp"
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
+      		label="%Refactoring.promoteTempAction.label"
+			definitionId="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
+			retarget="true" />
 			
 		<action id="org.eclipse.jdt.ui.actions.ExtractTemp"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
@@ -1470,6 +1476,7 @@ JavaStructureDiffViewerCreator
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.promote.local.variable" />
 
 	<!-- navigate -->
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.open.editor" />
@@ -1558,6 +1565,7 @@ JavaStructureDiffViewerCreator
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.promote.local.variable" />
 			
 		<!-- navigate -->
 		<accelerator key="F3" id="org.eclipse.jdt.ui.edit.text.java.open.editor" />
@@ -1635,6 +1643,7 @@ JavaStructureDiffViewerCreator
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.promote.local.variable" />
 	
 		<!-- navigate -->
 		<accelerator key="F3" id="org.eclipse.jdt.ui.edit.text.java.open.editor" />
