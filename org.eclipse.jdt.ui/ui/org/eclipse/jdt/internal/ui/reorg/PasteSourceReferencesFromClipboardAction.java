@@ -52,12 +52,12 @@ public class PasteSourceReferencesFromClipboardAction extends SelectionDispatchA
 
 	public boolean canOperateOn(IStructuredSelection selection) {
 		try{
-			if (! isAnythingToPaste())
-				return false;
-				
 			if (selection.size() != 1)
 				return false;				
-			
+
+			if (! isAnythingToPaste())
+				return false;
+							
 			Object selected= selection.getFirstElement();
 			if (selected instanceof IClassFile)
 				return false;
