@@ -36,5 +36,15 @@
             id="org.eclipse.jdt.astview.views.ASTView">
       </view>
    </extension>
+   
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            name="ASTView"
+            description="AST View"
+            category="org.eclipse.ui.category.views"
+            id="org.eclipse.jdt.astview.views.ASTView">
+      </command>
+   </extension>
 
 </plugin>
