@@ -4,11 +4,12 @@
  */
 package org.eclipse.jdt.internal.ui.reorg;
 
+import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 public class ReorgMessages {
-	private static final String RESOURCE_BUNDLE= "org.eclipse.jdt.internal.ui.reorg.ReorgMessages";//$NON-NLS-1$
+	private static final String RESOURCE_BUNDLE= ReorgMessages.class.getName();
 	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
 	//no instances
 	private ReorgMessages() {
@@ -18,7 +19,15 @@ public class ReorgMessages {
 		try {
 			return fgResourceBundle.getString(key);
 		} catch (MissingResourceException e) {
-			return "!" + key + "!";//$NON-NLS-2$ //$NON-NLS-1$
+			return '!' + key + '!';
 		}
 	}
+	
+	public static String getFormattedString(String key, String arg) {
+		return getFormattedString(key, new String[] { arg });
+	}
+	
+	public static String getFormattedString(String key, String[] args) {
+		return MessageFormat.format(getString(key), args);	
+	}	
 }
