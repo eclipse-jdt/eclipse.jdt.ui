@@ -1,14 +1,11 @@
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import java.util.HashMap;
-
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ILabelDecorator;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -18,12 +15,14 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
  * Label provider for the hierarchy viewers. Types in the hierarchy that are not belonging to the
@@ -62,31 +61,25 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 
 	private static class FocusDescriptor extends CompositeImageDescriptor {
 		private ImageDescriptor fBase;
-		private Point fSize;
-		public FocusDescriptor(ImageDescriptor base, Point size) {
+		public FocusDescriptor(ImageDescriptor base) {
 			fBase= base;
-			fSize= size;
 		}
 		protected void drawCompositeImage(int width, int height) {
 			drawImage(fBase.getImageData(), 0, 0);
 			drawImage(JavaPluginImages.DESC_OVR_FOCUS.getImageData(), 0, 0);
 		}
 		protected Point getSize() {
-			return fSize;
+			return JavaElementImageProvider.BIG_SIZE;
 		}
 		public int hashCode() {
-			return fBase.hashCode() | fSize.hashCode();
+			return fBase.hashCode();
 		}
 		public boolean equals(Object object) {
-			if (!FocusDescriptor.class.equals(object.getClass()))
-				return false;				
-			FocusDescriptor other= (FocusDescriptor)object;
-			return (fBase.equals(other.fBase) && fSize.equals(other.fSize));
+			return object != null && FocusDescriptor.class.equals(object.getClass()) && ((FocusDescriptor)object).fBase.equals(fBase);
 		}		
 	}
 
 	private TypeHierarchyLifeCycle fHierarchy;
-	private static final Point IMAGE_SIZE= new Point(16,16);
 
 	public HierarchyLabelProvider(TypeHierarchyLifeCycle lifeCycle) {
 		super(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS, getDecorators(lifeCycle));
@@ -123,7 +116,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 			ImageDescriptor desc= getTypeImageDescriptor((IType) element);
 			if (desc != null) {
 				if (element.equals(fHierarchy.getInputElement())) {
-					desc= new FocusDescriptor(desc, IMAGE_SIZE);
+					desc= new FocusDescriptor(desc);
 				}
 				result= JavaPlugin.getImageDescriptorRegistry().get(desc);
 			}
@@ -146,58 +139,28 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		}
 		
 		int flags= hierarchy.getCachedFlags(type);
-		if (Flags.isInterface(flags)) {
-			if (isDifferentScope(type)) {
-				return JavaPluginImages.DESC_OBJS_INTERFACEALT;
-			} else if (type.getDeclaringType() != null) {
-				return getInnerInterfaceImageDescriptor(flags);
-			} else {
-				return getInterfaceImageDescriptor(flags);
-			}
-		} else {
-			if (isDifferentScope(type)) {
-				return JavaPluginImages.DESC_OBJS_CLASSALT;
-			} else if (type.getDeclaringType() != null) {
-				return getInnerClassImageDescriptor(flags);
-			} else {
-				return getClassImageDescriptor(flags);
-			}
-		}
-	}
-	
-	private ImageDescriptor getClassImageDescriptor(int flags) {
-		if (Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPrivate(flags))
+		if (flags == -1) {
 			return JavaPluginImages.DESC_OBJS_CLASS;
-		else
-			return JavaPluginImages.DESC_OBJS_CLASS_DEFAULT;
+		}
+		
+		boolean isInterface= Flags.isInterface(flags);
+		boolean isInner= (type.getDeclaringType() != null);
+		ImageDescriptor desc;
+		if (isDifferentScope(type)) {
+			desc= isInterface ? JavaPluginImages.DESC_OBJS_INTERFACEALT : JavaPluginImages.DESC_OBJS_CLASSALT;
+		} else {
+			desc= JavaElementImageProvider.getTypeImageDescriptor(isInterface, isInner, flags);
+		}
+		int adornmentFlags= 0;
+		if (Flags.isFinal(flags)) {
+			adornmentFlags |= JavaElementImageDescriptor.FINAL;
+		}
+		if (Flags.isAbstract(flags) && !isInterface) {
+			adornmentFlags |= JavaElementImageDescriptor.ABSTRACT;
+		}
+		if (Flags.isStatic(flags)) {
+			adornmentFlags |= JavaElementImageDescriptor.STATIC;
+		}
+		return new JavaElementImageDescriptor(desc, adornmentFlags, JavaElementImageProvider.BIG_SIZE);
 	}
-	
-	private ImageDescriptor getInnerClassImageDescriptor(int flags) {
-		if (Flags.isPublic(flags))
-			return JavaPluginImages.DESC_OBJS_INNER_CLASS_PUBLIC;
-		else if (Flags.isPrivate(flags))
-			return JavaPluginImages.DESC_OBJS_INNER_CLASS_PRIVATE;
-		else if (Flags.isProtected(flags))
-			return JavaPluginImages.DESC_OBJS_INNER_CLASS_PROTECTED;
-		else
-			return JavaPluginImages.DESC_OBJS_INNER_CLASS_DEFAULT;
-	}
-	
-	private ImageDescriptor getInterfaceImageDescriptor(int flags) {
-		if (Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPrivate(flags))
-			return JavaPluginImages.DESC_OBJS_INTERFACE;
-		else
-			return JavaPluginImages.DESC_OBJS_INTERFACE_DEFAULT;
-	}
-	
-	private ImageDescriptor getInnerInterfaceImageDescriptor(int flags) {
-		if (Flags.isPublic(flags))
-			return JavaPluginImages.DESC_OBJS_INNER_INTERFACE_PUBLIC;
-		else if (Flags.isPrivate(flags))
-			return JavaPluginImages.DESC_OBJS_INNER_INTERFACE_PRIVATE;
-		else if (Flags.isProtected(flags))
-			return JavaPluginImages.DESC_OBJS_INNER_INTERFACE_PROTECTED;
-		else
-			return JavaPluginImages.DESC_OBJS_INTERFACE_DEFAULT;
-	}		
 }

@@ -104,15 +104,15 @@ public class JavaElementImageProvider {
 		
 	}
 	
-	private boolean showOverlayIcons(int flags) {
+	private static boolean showOverlayIcons(int flags) {
 		return (flags & OVERLAY_ICONS) != 0;
 	}
 		
-	private boolean useSmallSize(int flags) {
+	private static boolean useSmallSize(int flags) {
 		return (flags & SMALL_ICONS) != 0;
 	}
 	
-	private boolean useLightIcons(int flags) {
+	private static boolean useLightIcons(int flags) {
 		return (flags & LIGHT_TYPE_ICONS) != 0;
 	}	
 	
@@ -156,35 +156,11 @@ public class JavaElementImageProvider {
 				case IJavaElement.INITIALIZER:
 				case IJavaElement.METHOD:
 					IMember member= (IMember) element;
-					if (member.getDeclaringType().isInterface())
-						return JavaPluginImages.DESC_MISC_PUBLIC;
-					
-					flags= member.getFlags();
-					if (Flags.isPublic(flags))
-						return JavaPluginImages.DESC_MISC_PUBLIC;
-					if (Flags.isProtected(flags))
-						return JavaPluginImages.DESC_MISC_PROTECTED;
-					if (Flags.isPrivate(flags))
-						return JavaPluginImages.DESC_MISC_PRIVATE;
-					
-					return JavaPluginImages.DESC_MISC_DEFAULT;
-					
+					return getMethodImageDescriptor(member.getDeclaringType().isInterface(), member.getFlags());				
+				
 				case IJavaElement.FIELD:
-					// This is for testing. We are trying to use different icons for fields and methods. But first try was
-					// not very successful.
-					IField field= (IField)element;
-					if (field.getDeclaringType().isInterface())
-						return JavaPluginImages.DESC_FIELD_PUBLIC;
-					
-					flags= field.getFlags();
-					if (Flags.isPublic(flags))
-						return JavaPluginImages.DESC_FIELD_PUBLIC;
-					if (Flags.isProtected(flags))
-						return JavaPluginImages.DESC_FIELD_PROTECTED;
-					if (Flags.isPrivate(flags))
-						return JavaPluginImages.DESC_FIELD_PRIVATE;
-					
-					return JavaPluginImages.DESC_FIELD_DEFAULT;
+					IField field= (IField) element;
+					return getMethodImageDescriptor(field.getDeclaringType().isInterface(), field.getFlags());				
 					
 				case IJavaElement.PACKAGE_DECLARATION:
 					return JavaPluginImages.DESC_OBJS_PACKDECL;
@@ -197,28 +173,13 @@ public class JavaElementImageProvider {
 				
 				case IJavaElement.TYPE: {
 					IType type= (IType) element;
+					boolean isInterface= type.isInterface();
 					
 					if (useLightIcons(renderFlags)) {
-						if (type.isClass())
-							return JavaPluginImages.DESC_OBJS_CLASSALT;
-						else 
-							return JavaPluginImages.DESC_OBJS_INTERFACEALT;
-					}					
-
-					IJavaElement parent= type.getParent();
-					int typeType= parent != null ? parent.getElementType() : 0;
-					flags= type.getFlags();
-					if (parent == null || typeType == IJavaElement.COMPILATION_UNIT || typeType == IJavaElement.CLASS_FILE) {
-						if (type.isClass())
-							return getClassImageDescriptor(flags);
-						else
-							return getInterfaceImageDescriptor(flags);
-					} else {
-						if (type.isClass())
-							return getInnerClassImageDescriptor(flags);
-						else
-							return getInnerInterfaceImageDescriptor(flags);
+						return isInterface ? JavaPluginImages.DESC_OBJS_INTERFACEALT : JavaPluginImages.DESC_OBJS_CLASSALT;
 					}
+					boolean isInner= type.getDeclaringType() != null;
+					return getTypeImageDescriptor(isInterface, isInner, type.getFlags());
 				}
 
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT: {
@@ -298,6 +259,9 @@ public class JavaElementImageProvider {
 			return JavaPluginImages.DESC_OBJS_GHOST;
 		}
 	}
+	
+	public void dispose() {
+	}	
 
 	// ---- Methods to compute the adornments flags ---------------------------------
 	
@@ -332,7 +296,7 @@ public class JavaElementImageProvider {
 		return flags;
 	}
 		
-	private boolean confirmAbstract(IMember element) throws JavaModelException {
+	private static boolean confirmAbstract(IMember element) throws JavaModelException {
 		// never show the abstract symbol on interfaces or members in interfaces
 		if (element.getElementType() == IJavaElement.TYPE) {
 			return ((IType) element).isClass();
@@ -340,7 +304,7 @@ public class JavaElementImageProvider {
 		return element.getDeclaringType().isClass();
 	}
 	
-	private boolean isInterfaceField(IMember element) throws JavaModelException {
+	private static boolean isInterfaceField(IMember element) throws JavaModelException {
 		// always show the final && static symbol on interface fields
 		if (element.getElementType() == IJavaElement.FIELD) {
 			return element.getDeclaringType().isInterface();
@@ -348,22 +312,57 @@ public class JavaElementImageProvider {
 		return false;
 	}	
 	
-	private boolean confirmSynchronized(IJavaElement member) {
+	private static boolean confirmSynchronized(IJavaElement member) {
 		// Synchronized types are allowed but meaningless.
 		return member.getElementType() != IJavaElement.TYPE;
 	}
 	
-	public void dispose() {
+	public static ImageDescriptor getMethodImageDescriptor(boolean isInInterface, int flags) {
+		if (Flags.isPublic(flags) || isInInterface)
+			return JavaPluginImages.DESC_MISC_PUBLIC;
+		if (Flags.isProtected(flags))
+			return JavaPluginImages.DESC_MISC_PROTECTED;
+		if (Flags.isPrivate(flags))
+			return JavaPluginImages.DESC_MISC_PRIVATE;
+		
+		return JavaPluginImages.DESC_MISC_DEFAULT;
+	}
+		
+	public static ImageDescriptor getFieldImageDescriptor(boolean isInInterface, int flags) {
+		if (Flags.isPublic(flags) || isInInterface)
+			return JavaPluginImages.DESC_FIELD_PUBLIC;
+		if (Flags.isProtected(flags))
+			return JavaPluginImages.DESC_FIELD_PROTECTED;
+		if (Flags.isPrivate(flags))
+			return JavaPluginImages.DESC_FIELD_PRIVATE;
+			
+		return JavaPluginImages.DESC_FIELD_DEFAULT;
+	}		
+	
+	public static ImageDescriptor getTypeImageDescriptor(boolean isInterface, boolean isInner, int flags) {
+		if (isInner) {
+			if (isInterface) {
+				return getInnerInterfaceImageDescriptor(flags);
+			} else {
+				return getInnerClassImageDescriptor(flags);
+			}
+		} else {
+			if (isInterface) {
+				return getInterfaceImageDescriptor(flags);
+			} else {
+				return getClassImageDescriptor(flags);
+			}
+		}
 	}
 
-	private ImageDescriptor getClassImageDescriptor(int flags) {
+	private static ImageDescriptor getClassImageDescriptor(int flags) {
 		if (Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPrivate(flags))
 			return JavaPluginImages.DESC_OBJS_CLASS;
 		else
 			return JavaPluginImages.DESC_OBJS_CLASS_DEFAULT;
 	}
 	
-	private ImageDescriptor getInnerClassImageDescriptor(int flags) {
+	private static ImageDescriptor getInnerClassImageDescriptor(int flags) {
 		if (Flags.isPublic(flags))
 			return JavaPluginImages.DESC_OBJS_INNER_CLASS_PUBLIC;
 		else if (Flags.isPrivate(flags))
@@ -374,14 +373,14 @@ public class JavaElementImageProvider {
 			return JavaPluginImages.DESC_OBJS_INNER_CLASS_DEFAULT;
 	}
 	
-	private ImageDescriptor getInterfaceImageDescriptor(int flags) {
+	private static ImageDescriptor getInterfaceImageDescriptor(int flags) {
 		if (Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPrivate(flags))
 			return JavaPluginImages.DESC_OBJS_INTERFACE;
 		else
 			return JavaPluginImages.DESC_OBJS_INTERFACE_DEFAULT;
 	}
 	
-	private ImageDescriptor getInnerInterfaceImageDescriptor(int flags) {
+	private static ImageDescriptor getInnerInterfaceImageDescriptor(int flags) {
 		if (Flags.isPublic(flags))
 			return JavaPluginImages.DESC_OBJS_INNER_INTERFACE_PUBLIC;
 		else if (Flags.isPrivate(flags))
