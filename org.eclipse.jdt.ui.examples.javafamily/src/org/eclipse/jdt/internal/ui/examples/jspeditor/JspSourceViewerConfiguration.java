@@ -16,10 +16,13 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
+import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.text.reconcilerpipe.DefaultAnnotationHover;
 
 /**
  * Configuration information for a simple JSP source viewer.
@@ -47,5 +50,12 @@ public class JspSourceViewerConfiguration extends SourceViewerConfiguration {
 		reconciler.setProgressMonitor(new NullProgressMonitor());		
 		reconciler.setDelay(500);
 		return reconciler;
+	}
+
+	/*
+	 * @see SourceViewerConfiguration#getAnnotationHover(ISourceViewer)
+	 */
+	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
+		return new DefaultAnnotationHover();
 	}
 }
