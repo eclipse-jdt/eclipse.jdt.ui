@@ -1638,6 +1638,20 @@
 	</editorContribution>
 </extension>
 
+<extension point="org.eclipse.ui.popupMenus">
+	<viewerContribution
+		targetID="#CompilationUnitRulerContext"
+		id="org.eclipse.jdt.internal.ui.javaeditor.QuickFixRulerMenuAction">
+		<action
+			label="%Dummy.label"
+			helpContextId="org.eclipse.jdt.ui.quick_fix_action"
+			class="org.eclipse.jdt.internal.ui.javaeditor.JavaSelectRulerAction"
+			menubarPath="additions"
+			id="org.eclipse.jdt.internal.ui.javaeditor.JavaSelectRulerMenuAction">
+		</action>
+	</viewerContribution>
+</extension>
+
 <!-- =========================================================================== -->
 <!-- Java Working Set Page                                                       -->
 <!-- =========================================================================== -->
@@ -1863,11 +1877,11 @@
 		command="org.eclipse.jdt.ui.edit.text.java.format"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
 	</keyBinding>
-
-    <command
+      
+	<command
         name="%ActionDefinition.quickformat.name"
         description="%ActionDefinition.quickformat.description"
-        category="org.eclipse.jdt.ui.category.source"
+ 		category="org.eclipse.jdt.ui.category.source"
         id="org.eclipse.jdt.ui.edit.text.java.quick.format">
     </command>
 
