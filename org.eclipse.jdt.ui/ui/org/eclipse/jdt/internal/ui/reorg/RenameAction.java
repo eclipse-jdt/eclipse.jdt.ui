@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
-import org.eclipse.jdt.internal.ui.refactoring.*;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSupportFactory;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class RenameAction extends ReorgAction {
 	
@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 		try{
 			fRefactoringSupport.rename(getStructuredSelection().getFirstElement());
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, RefactoringMessages.getString("RenameAction.rename"), RefactoringMessages.getString("RenameAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, ReorgMessages.getString("RenameAction.rename"), ReorgMessages.getString("RenameAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}	
 	}
 	
