@@ -13,12 +13,18 @@ package org.eclipse.jdt.internal.corext.dom;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -35,13 +41,16 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 public class ASTNodes {
 
@@ -89,6 +98,38 @@ public class ASTNodes {
 			return visitor.fResult;
 		}
 	}
+	
+	private static class ListFinder extends ASTVisitor {
+		private List result;
+		private ASTNode fNode;
+		public ListFinder(ASTNode node) {
+			fNode= node;
+		}
+		public boolean visit(AnonymousClassDeclaration node) {
+			test(node.bodyDeclarations());
+			return false;
+		}
+		public boolean visit(Block node) {
+			test(node.statements());
+			return false;
+		}
+		public boolean visit(SwitchStatement node) {
+			test(node.statements());
+			return false;
+		}
+		public boolean visit(TypeDeclaration node) {
+			test(node.bodyDeclarations());
+			return false;
+		}
+		private boolean test(List nodes) {
+			if (nodes.indexOf(fNode) != -1) {
+				result= nodes;
+				return true;
+			}
+			return false;
+		}
+	}
+	
 
 	private ASTNodes() {
 		// no instance;
@@ -117,6 +158,21 @@ public class ASTNodes {
 			}
 		}
 		return result.toString();
+    }
+    
+    /**
+     * Returns the list that contains the given ASTNode. If the node
+     * isn't part of any list, <code>null</code> is returned.
+     * 
+     * @param node the node in question 
+     * @return the list that contains the node or <code>null</code>
+     */
+    public static List getContainingList(ASTNode node) {
+    	if (node.getParent() == null)
+    		return null;
+    	ListFinder finder= new ListFinder(node);
+    	node.getParent().accept(finder);
+    	return finder.result;
     }
     
 	public static ASTNode findDeclaration(IBinding binding, ASTNode root) {
@@ -339,6 +395,32 @@ public class ASTNodes {
 		return -1;
 	}
 	
+	/**
+	 * Expands the range of the node passed in <code>nodes</code> to cover all comments
+	 * determined by <code>start</code> and <code>length</code> in the given text buffer. 
+	 */
+	public static void expandRange(ASTNode[] nodes, TextBuffer buffer, int start, int length) throws CoreException {
+		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
+		scanner.setSource(buffer.getContent(start, length).toCharArray());
+		TokenScanner tokenizer= new TokenScanner(scanner);
+		ASTNode node= nodes[0]; 
+		int pos= tokenizer.getNextStartOffset(0, false);
+		int newStart= start + pos;
+		if (newStart < node.getStartPosition())
+			node.setSourceRange(newStart, node.getLength() + node.getStartPosition() - newStart);
+		
+		node= nodes[nodes.length - 1];
+		int scannerStart= node.getStartPosition() + node.getLength() - start;
+		pos= scannerStart;
+		try {
+			while (true) {
+				pos= tokenizer.getNextEndOffset(pos, false); 
+			}
+		} catch (CoreException e) {
+		}
+		node.setSourceRange(node.getStartPosition(), node.getLength() + pos - scannerStart);
+	}
+	
 	public static IProblem[] getProblems(ASTNode node, int scope, int severity) {
 		ASTNode root= node.getRoot();
 		if (!(root instanceof CompilationUnit))
@@ -450,5 +532,5 @@ public class ASTNodes {
 			l.add(((QualifiedName)name).getName().getIdentifier());
 			return l;
 		}
-	}
+	}	
 }

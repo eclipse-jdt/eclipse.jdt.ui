@@ -2,21 +2,18 @@ package trycatch_out;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URL;
 
-public class TestWrappedLocal4 {
-
+class TestDeclarationInitializer {
 	public void foo() {
 		File file= null;
 		
-		/*]*/int i, x;
+		URL url;
 		try {
-			i = 10;
-			x = 20;
-			file.toURL();
+			url = file.toURL();
 		} catch (MalformedURLException e) {
 		}/*[*/
 		
-		i= 20;
+		url= null;
 	}
-
 }

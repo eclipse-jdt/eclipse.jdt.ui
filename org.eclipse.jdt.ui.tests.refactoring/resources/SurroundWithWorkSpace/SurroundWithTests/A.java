@@ -1,16 +1,12 @@
-class A {
+import java.io.File;
+import java.net.URL;
 
-void gd(){}
- 
-static String sfs(){
-		return "d";
-	}
-	int f(int dy){
-		return Integer.parseInt(this.ss());
-	}
-	
-	
-	private String ss() {
-		return "Hello";
+class A {
+	public void foo() {
+		File file= null;
+		
+		URL url= file.toURL();
+		
+		url= null;
 	}
 }

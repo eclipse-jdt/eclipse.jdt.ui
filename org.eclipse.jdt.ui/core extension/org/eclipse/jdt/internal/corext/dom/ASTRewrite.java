@@ -216,6 +216,19 @@ public final class ASTRewrite {
 	}
 
 	/**
+	 * Marks the node <code>node</code> as replaced with the nodes provided in <code>
+	 * replacements</code>. The given node must be a member of the passed list <code>
+	 * container</code>.
+	 * 
+	 * @param node the node to be replaced
+	 * @param container the list <code>node</code> is a member of
+	 * @param replacements the replacing nodes
+	 */	
+	public final void markAsReplaced(ASTNode node, List container, ASTNode[] replacements) {
+		markAsReplaced(node, container, replacements, null);
+	}
+
+	/**
 	 * Marks an node as modified. The modifiued node describes changes like changed modifiers,
 	 * or operators: This is only for properties that are not children nodes of type ASTNode.
 	 * @param node The node to be marked as modified.
@@ -229,6 +242,32 @@ public final class ASTRewrite {
 		modify.modifiedNode= modifiedNode;
 		modify.description= description;
 		setChangeProperty(node, modify);
+	}
+
+	/**
+	 * Marks the node <code>node</code> as replaced with the nodes provided in <code>
+	 * replacements</code>. The given node must be a member of the passed list <code>
+	 * container</code>.
+	 * 
+	 * @param node the node to be replaced
+	 * @param container the list <code>node</code> is a member of
+	 * @param replacements the replacing nodes
+	 * @param description the description of the change
+	 */	
+	public final void markAsReplaced(ASTNode node, List container, ASTNode[] replacements, String description) {
+		if (replacements == null || replacements.length == 0) {
+			markAsRemoved(node, description);
+			return;
+		}
+		Assert.isNotNull(container, "Replacing a node with a list of nodes requires access to container"); //$NON-NLS-1$
+		int index= container.indexOf(node);
+		Assert.isTrue(index != -1, "Node must be a member of the given list container"); //$NON-NLS-1$
+		markAsReplaced(node, replacements[0], description);
+		for (int i= 1; i < replacements.length; i++) {
+			ASTNode replacement= replacements[i];
+			markAsInserted(replacement, description);
+			container.add(++index, replacement);
+		}
 	}
 
 	/**
@@ -361,6 +400,10 @@ public final class ASTRewrite {
 	
 	public final boolean isModified(ASTNode node) {
 		return getChangeProperty(node) instanceof ASTModify;
+	}
+	
+	public final boolean isCollapsed(ASTNode node) {
+		return node.getProperty(COMPOUND_CHILDREN) instanceof List;
 	}
 	
 	public final String getDescription(ASTNode node) {

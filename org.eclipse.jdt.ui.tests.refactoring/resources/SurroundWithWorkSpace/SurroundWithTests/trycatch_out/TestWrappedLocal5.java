@@ -10,6 +10,7 @@ public class TestWrappedLocal5 {
 		
 		/*]*/int i, x;
 		try {
+			
 			file.toURL();
 		} catch (MalformedURLException e) {
 		}/*[*/

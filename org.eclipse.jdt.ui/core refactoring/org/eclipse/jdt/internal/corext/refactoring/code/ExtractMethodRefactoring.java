@@ -23,8 +23,6 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -57,10 +55,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.ContainerFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SimpleNameRenamer;
-import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -369,22 +365,25 @@ public class ExtractMethodRefactoring extends Refactoring {
 				// This is cheap since the compilation unit is already open in a editor.
 				buffer= TextBuffer.create((IFile)WorkingCopyUtil.getOriginal(fCUnit).getResource());
 				
-				expandNodeRange(buffer);
+				ASTNodes.expandRange(fAnalyzer.getSelectedNodes(), buffer, fSelectionStart, fSelectionLength);
 				ASTNode target= getTargetNode();
 				
 				MethodDeclaration mm= createNewMethod(fMethodName, true, target);
 				fRewriter.markAsInserted(mm, RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName)); //$NON-NLS-1$
-				ContainerFinder position= new ContainerFinder(method);
-				position.getContainer().add(position.getIndex() + 1, mm);
+				List container= ASTNodes.getContainingList(method);
+				container.add(container.indexOf(method) + 1, mm);
 				
 				String description= RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName); //$NON-NLS-1$
 				ASTNode[] callNodes= createCallNodes();
 				fRewriter.markAsReplaced(target, callNodes[0], description);
-				position= new ContainerFinder(target);
-				for (int i= 1; i < callNodes.length; i++) {
-					ASTNode node= callNodes[i];
-					position.getContainer().add(position.getIndex() + i, node);
-					fRewriter.markAsInserted(node, description);
+				if (callNodes.length > 1) {
+					container= ASTNodes.getContainingList(target);
+					int index= container.indexOf(target);
+					for (int i= 1; i < callNodes.length; i++) {
+						ASTNode node= callNodes[i];
+						container.add(index + i, node);
+						fRewriter.markAsInserted(node, description);
+					}
 				}
 			
 				if (!fImportEdit.isEmpty()) {
@@ -475,29 +474,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 	
 	//---- Code generation -----------------------------------------------------------------------
 	
-	private void expandNodeRange(TextBuffer buffer) throws CoreException {
-		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
-		scanner.setSource(buffer.getContent(fSelectionStart, fSelectionLength).toCharArray());
-		TokenScanner tokenizer= new TokenScanner(scanner);
-		ASTNode[] nodes= fAnalyzer.getSelectedNodes();
-		ASTNode node= nodes[0]; 
-		int pos= tokenizer.getNextStartOffset(0, false);
-		int newStart= fSelectionStart + pos;
-		if (newStart < node.getStartPosition())
-			node.setSourceRange(newStart, node.getLength() + node.getStartPosition() - newStart);
-		
-		node= nodes[nodes.length - 1];
-		int start= node.getStartPosition() + node.getLength() - fSelectionStart;
-		pos= start;
-		try {
-			while (true) {
-				pos= tokenizer.getNextEndOffset(pos, false); 
-			}
-		} catch (CoreException e) {
-		}
-		node.setSourceRange(node.getStartPosition(), node.getLength() + pos - start);
-	}
-	
 	private ASTNode getTargetNode() {
 		ASTNode result;
 		ASTNode[] nodes= fAnalyzer.getSelectedNodes();
@@ -505,8 +481,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 			return nodes[0];
 		} else {
 			ASTNode first= nodes[0];
-			ContainerFinder finder= new ContainerFinder(first);
-			result= fRewriter.collapseNodes(finder.getContainer(), finder.getIndex(), nodes.length);
+			List container= ASTNodes.getContainingList(first);
+			result= fRewriter.collapseNodes(container, container.indexOf(first), nodes.length);
 		}
 		return result;
 	}
