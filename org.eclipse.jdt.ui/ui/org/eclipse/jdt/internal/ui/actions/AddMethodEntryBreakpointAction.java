@@ -4,13 +4,30 @@
  */
 package org.eclipse.jdt.internal.ui.actions;
 
-import org.eclipse.core.resources.IMarker;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.DebugPlugin;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.texteditor.IUpdate;
+
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.debug.core.JDIDebugModel;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * Adds a method entry breakpoint on a single selected element of type IMethod 
  */
-public class AddMethodEntryBreakpointAction extends JavaUIAction implements IUpdate {
+public class AddMethodEntryBreakpointAction extends Action implements IUpdate {
 	
 	private ISelectionProvider fSelectionProvider;
 	
