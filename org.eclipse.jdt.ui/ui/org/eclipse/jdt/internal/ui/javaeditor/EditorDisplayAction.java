@@ -5,7 +5,21 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-import java.util.ResourceBundle;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.ui.IViewPart;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchPart;import org.eclipse.ui.PartInitException;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.debug.ui.display.DisplayAction;import org.eclipse.jdt.internal.debug.ui.display.DisplayView;import org.eclipse.jdt.internal.debug.ui.display.IDataDisplay;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import java.util.ResourceBundle;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.internal.debug.ui.display.DisplayAction;
+import org.eclipse.jdt.internal.debug.ui.display.DisplayView;
+import org.eclipse.jdt.internal.debug.ui.display.IDataDisplay;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Displays the result of an evaluation in the java editor
@@ -14,11 +28,6 @@ public class EditorDisplayAction extends DisplayAction {
 
 	public EditorDisplayAction(IWorkbenchPart part) {
 		super(part);
-		
-		setText(JavaEditorMessages.getString("EditorDisplay.label")); //$NON-NLS-1$
-		setToolTipText(JavaEditorMessages.getString("EditorDisplay.tooltip")); //$NON-NLS-1$
-		setDescription(JavaEditorMessages.getString("EditorDisplay.description")); //$NON-NLS-1$
-		
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.DISPLAY_ACTION });	
 	}
 	

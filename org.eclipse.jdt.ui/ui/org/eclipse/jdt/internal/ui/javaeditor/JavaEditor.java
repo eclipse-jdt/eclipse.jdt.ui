@@ -297,12 +297,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		
 		setAction("Display", new EditorDisplayAction(this)); //$NON-NLS-1$
 		setAction("RunToLine", new RunToLineAction(this)); //$NON-NLS-1$
-		
-		Action action= new InspectAction(this);
-		action.setText(JavaEditorMessages.getString("JavaEditor.Inspect.label")); //$NON-NLS-1$
-		action.setToolTipText(JavaEditorMessages.getString("JavaEditor.Inspect.tooltip")); //$NON-NLS-1$
-		action.setDescription(JavaEditorMessages.getString("JavaEditor.Inspect.description")); //$NON-NLS-1$
-		setAction("Inspect", action); //$NON-NLS-1$
+		setAction("Inspect", new InspectAction(this)); //$NON-NLS-1$
 	}
 	
 	private boolean isTextSelectionEmpty() {
