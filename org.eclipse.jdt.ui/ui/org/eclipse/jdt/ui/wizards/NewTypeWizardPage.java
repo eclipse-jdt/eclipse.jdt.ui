@@ -1531,7 +1531,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected String getFileComment(ICompilationUnit parentCU) {
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN__FILE_COMMENTS)) {
 			String template= getTemplate("filecomment", parentCU, 0); //$NON-NLS-1$
-			if (isValidComment(template)) {
+			if (template != null && isValidComment(template)) {
 				return template;
 			}			
 		}
@@ -1563,7 +1563,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected String getTypeComment(ICompilationUnit parentCU) {
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN__JAVADOC_STUBS)) {
 			String template= getTemplate("typecomment", parentCU, 0); //$NON-NLS-1$
-			if (isValidComment(template)) {
+			if (template != null && isValidComment(template)) {
 				return template;
 			}
 		}
