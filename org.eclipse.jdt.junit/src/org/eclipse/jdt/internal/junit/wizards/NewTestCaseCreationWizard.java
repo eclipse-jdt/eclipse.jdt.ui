@@ -50,7 +50,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 		fPage= new NewTestCaseCreationWizardPage();
 		fPage2= new NewTestCaseCreationWizardPage2(fPage);
 		addPage(fPage);
-		fPage.init(getSelection(),fPage2);
+		fPage.init(getSelection(), fPage2);
 		addPage(fPage2);
 	}	
 	

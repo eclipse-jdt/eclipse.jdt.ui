@@ -11,8 +11,6 @@
 
 package org.eclipse.jdt.internal.junit.util;
 
-import org.eclipse.swt.SWT;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICodeFormatter;
@@ -25,11 +23,10 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
-
-import org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager;
+import org.eclipse.swt.SWT;
 
 /**
  * Utility methods for code generation.

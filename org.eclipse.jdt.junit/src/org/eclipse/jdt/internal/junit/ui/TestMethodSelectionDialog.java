@@ -17,7 +17,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -57,7 +56,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		public void aboutToStart() {
 		}
 	
-		public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) throws CoreException {
+		public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) {
 			if (enclosingElement.getElementName().startsWith("test")) //$NON-NLS-1$
 				fResult.add(enclosingElement);
 		}
