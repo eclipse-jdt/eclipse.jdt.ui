@@ -135,6 +135,7 @@ public final class AutoOrganizingTextEdit extends TextEdit {
 			parent.internalAdd(edit);
 			return;
 		}
+		children= new ArrayList(children); // clone the list
 		// Can be optimize using binary search
 		for (Iterator iter= children.iterator(); iter.hasNext();) {
 			TextEdit child= (TextEdit)iter.next();
@@ -143,12 +144,19 @@ public final class AutoOrganizingTextEdit extends TextEdit {
 				return;
 			}
 		}
-		for (int i= 0; i < children.size(); i++) {
+		for (int i= children.size() - 1; i >= 0; i--) {
 			TextEdit child= (TextEdit)children.get(i);
 			if (edit.getTextRange().covers(child.getTextRange())) {
 				parent.remove(i);
 				edit.internalAdd(child);
 				parent.internalAdd(edit);
+				for (int r= i  - 1; r >= 0; r--) {
+					TextEdit child2= (TextEdit) children.get(r);
+					if (edit.getTextRange().covers(child2.getTextRange())) {
+						parent.remove(r);
+						edit.internalAdd(child2);
+					}
+				}
 				return;
 			}
 		}
