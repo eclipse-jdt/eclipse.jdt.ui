@@ -128,11 +128,17 @@ public class ModifyParametersRefactoring extends Refactoring {
 	}
 	
 	public RefactoringStatus checkParameters(){
+		if (fMethod.getNumberOfParameters() == 0 && fParameterInfos.isEmpty())
+			return RefactoringStatus.createFatalErrorStatus("No parameters were added");
+		if (areNamesSameAsInitial() && isOrderSameAsInitial())
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ModifyParamatersRefactoring.no_changes")); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
-		if (result.isOK())
-			checkForDuplicateNames(result);
-		if (result.isOK())	
-			checkAllNames(result);
+		checkForDuplicateNames(result);
+		if (result.hasFatalError())
+			return result;
+		checkAllNames(result);
+		if (result.hasFatalError())
+			return result;
 		checkAddedParameters(result);	
 		return result;
 	}
@@ -215,8 +221,6 @@ public class ModifyParametersRefactoring extends Refactoring {
 		if (fMethod.isConstructor())
 			return RefactoringStatus.createFatalErrorStatus("This refactoring is not implemented for constructors");
 
-		if (fMethod.getNumberOfParameters() == 0)
-			return RefactoringStatus.createFatalErrorStatus("This refactoring is not implemented for methods with no parameters");
 		return result;
 	}
 	
@@ -263,20 +267,21 @@ public class ModifyParametersRefactoring extends Refactoring {
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask(RefactoringCoreMessages.getString("ModifyParamatersRefactoring.checking_preconditions"), 2); //$NON-NLS-1$
-			if (areNamesSameAsInitial() && isOrderSameAsInitial())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ModifyParamatersRefactoring.no_changes")); //$NON-NLS-1$
-			
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkParameters());
+			if (result.hasFatalError())
+				return result;
+
 			if (mustAnalyzeAst()) 
 				result.merge(analyzeAst()); 
 			if (result.hasFatalError())
 				return result;
+
 			if (! isOrderSameAsInitial())	
 				result.merge(checkReorderings(new SubProgressMonitor(pm, 1)));	
-
 			if (result.hasFatalError())
 				return result;
+
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 			result.merge(validateModifiesFiles());
 			return result;
