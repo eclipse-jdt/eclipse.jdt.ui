@@ -86,13 +86,13 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	     	// XXX workaround for 6385
 	     	if (leftString.length() == 0) {
 	     	    JavaPlugin.log(new StringIndexOutOfBoundsException("type name was empty"));
-	     		return -1;
+	     		return rightString.length() == 0 ? 0 : -1;
 	     	}
 	     	
 	     	// XXX	
 	     	if (rightString.length() == 0) {
 	     	    JavaPlugin.log(new StringIndexOutOfBoundsException("type name was empty"));
-	     		return +1;
+	     		return leftString.length() == 0 ? 0 : +1;
 	     	}
 	     		     	
 	     	if (Character.isLowerCase(leftString.charAt(0)) &&
