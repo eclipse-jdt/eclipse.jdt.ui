@@ -12,7 +12,6 @@ import java.io.InputStreamReader;
 import junit.framework.TestCase;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -27,10 +26,11 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.core.JavaModelManager;
+
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
-import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
@@ -51,8 +51,6 @@ public abstract class RefactoringTest extends TestCase {
 	protected static final String TEST_OUTPUT_INFIX= "/out/";
 	protected static final String CONTAINER= "src";
 	
-	private static final IProgressMonitor fgNullProgressMonitor= new NullProgressMonitor();
-
 	public RefactoringTest(String name) {
 		super(name);
 	}
@@ -127,11 +125,11 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	protected final RefactoringStatus performRefactoring(IRefactoring ref) throws JavaModelException {
-		RefactoringStatus status= ref.checkPreconditions(fgNullProgressMonitor);
+		RefactoringStatus status= ref.checkPreconditions(new NullProgressMonitor());
 		if (!status.isOK())
 			return status;
 
-		IChange change= ref.createChange(fgNullProgressMonitor);
+		IChange change= ref.createChange(new NullProgressMonitor());
 		performChange(change);
 		
 		// XXX: this should be done by someone else
@@ -141,9 +139,9 @@ public abstract class RefactoringTest extends TestCase {
 	}
 	
 	protected void performChange(IChange change) throws JavaModelException{
-		change.aboutToPerform(new ChangeContext(new TestExceptionHandler()), fgNullProgressMonitor);
+		change.aboutToPerform(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 		try {
-			change.perform(new ChangeContext(new TestExceptionHandler()), fgNullProgressMonitor);
+			change.perform(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 		} finally {
 			change.performed();
 		}
