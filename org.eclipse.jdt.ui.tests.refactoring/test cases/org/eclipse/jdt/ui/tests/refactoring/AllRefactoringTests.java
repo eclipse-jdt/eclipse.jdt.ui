@@ -23,6 +23,7 @@ public class AllRefactoringTests {
 		suite.addTest(ExtractTempTests.suite());
 		suite.addTest(RenameTempTests.suite());
 		suite.addTest(ExtractConstantTests.suite());
+		suite.addTest(PromoteTempToFieldTests.suite());
 		
 		//-- structure
 		suite.addTest(ChangeSignatureTests.suite());
