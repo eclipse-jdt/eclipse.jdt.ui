@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
@@ -109,11 +108,11 @@ public class ASTResolving {
 	}
 	
 	
-	public static ITypeBinding getTypeBinding(ASTNode node) {
-		return getTypeBinding(getPossibleTypeBinding(node));
+	public static ITypeBinding guessBindingForReference(ASTNode node) {
+		return getTypeBinding(getPossibleReferenceBinding(node));
 	}
 		
-	private static ITypeBinding getPossibleTypeBinding(ASTNode node) {	
+	private static ITypeBinding getPossibleReferenceBinding(ASTNode node) {	
 		ASTNode parent= node.getParent();
 		switch (parent.getNodeType()) {
 		case ASTNode.ASSIGNMENT:
@@ -181,7 +180,7 @@ public class ASTResolving {
 			}
 			break;
 		case ASTNode.PARENTHESIZED_EXPRESSION:
-			return getTypeBinding(parent);
+			return guessBindingForReference(parent);
 		case ASTNode.ARRAY_ACCESS:
 			if (((ArrayAccess) parent).getIndex().equals(node)) {
 				return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
@@ -251,7 +250,80 @@ public class ASTResolving {
 		return null;
 	}
 	
-	private static MethodDeclaration findParentMethodDeclaration(ASTNode node) {
+    public static ITypeBinding guessBindingForTypeReference(ASTNode node, boolean ignoreDeclarations) {
+    	return getTypeBinding(getPossibleTypeBinding(node, ignoreDeclarations));
+    }
+    	
+    private static ITypeBinding getPossibleTypeBinding(ASTNode node, boolean ignoreDeclarations) {
+    	AST ast= node.getAST();
+    	ASTNode parent= node.getParent();
+    	while (parent instanceof Type) {
+    		parent= parent.getParent();
+    	}
+    	switch (parent.getNodeType()) {
+    	case ASTNode.METHOD_DECLARATION:
+			MethodDeclaration decl= (MethodDeclaration) parent;
+			if (decl.thrownExceptions().contains(node)) {
+				return ast.resolveWellKnownType("java.lang.Exception");
+			}
+			break;
+		case ASTNode.INSTANCEOF_EXPRESSION:
+			InstanceofExpression instanceofExpression= (InstanceofExpression) parent;
+			return instanceofExpression.getLeftOperand().resolveTypeBinding();
+    	case ASTNode.VARIABLE_DECLARATION_STATEMENT:
+    		if (ignoreDeclarations) {
+    			return null;
+    		}
+    		return guessVariableType(((VariableDeclarationStatement) parent).fragments());
+		case ASTNode.FIELD_DECLARATION:
+    		if (ignoreDeclarations) {
+    			return null;
+    		}		
+			return guessVariableType(((FieldDeclaration) parent).fragments());
+		case ASTNode.VARIABLE_DECLARATION_EXPRESSION:
+    		if (ignoreDeclarations) {
+    			return null;
+    		}		
+			return guessVariableType(((VariableDeclarationExpression) parent).fragments());
+		case ASTNode.SINGLE_VARIABLE_DECLARATION:
+    		if (ignoreDeclarations) {
+    			return null;
+    		}		
+			SingleVariableDeclaration varDecl= (SingleVariableDeclaration) parent;
+			if (varDecl.getInitializer() != null) {
+				return varDecl.getInitializer().resolveTypeBinding();
+			}
+			break;
+		case ASTNode.ARRAY_CREATION:
+			ArrayCreation creation= (ArrayCreation) parent;
+			if (creation.getInitializer() != null) {
+				return creation.getInitializer().resolveTypeBinding();
+			}
+			return getPossibleReferenceBinding(parent);
+        case ASTNode.CATCH_CLAUSE:
+        case ASTNode.THROW_STATEMENT:
+            return ast.resolveWellKnownType("java.lang.Exception"); //$NON-NLS-1$
+        case ASTNode.TYPE_LITERAL:
+        case ASTNode.CLASS_INSTANCE_CREATION:
+        case ASTNode.CAST_EXPRESSION:
+        	return getPossibleReferenceBinding(parent);
+            					
+     	}   	
+    	return null;
+    }
+    
+   	private static ITypeBinding guessVariableType(List fragments) {
+		for (Iterator iter= fragments.iterator(); iter.hasNext();) {
+			VariableDeclarationFragment frag= (VariableDeclarationFragment) iter.next();
+			if (frag.getInitializer() != null) {
+				return frag.getInitializer().resolveTypeBinding();
+			}
+		}
+		return null;
+	} 
+	
+	
+	public static MethodDeclaration findParentMethodDeclaration(ASTNode node) {
 		while ((node != null) && (node.getNodeType() != ASTNode.METHOD_DECLARATION)) {
 			node= node.getParent();
 		}
@@ -444,6 +516,20 @@ public class ASTResolving {
 		return null;
 	}
 	
+	public static String getQualifier(Name name) {
+		if (name.isQualifiedName()) {
+			return ASTNodes.asString(((QualifiedName) name).getQualifier());
+		}
+		return "";
+	}
+	
+	public static String getSimpleName(Name name) {
+		if (name.isQualifiedName()) {
+			return ((QualifiedName) name).getName().getIdentifier();
+		} else {
+			return ((SimpleName) name).getIdentifier();
+		}
+	}	
 	
 	
 }

@@ -43,7 +43,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new UnresolvedTypesQuickFixTest("testTypeInFieldDecl"));
+			suite.addTest(new UnresolvedTypesQuickFixTest("testTypeInStatement"));
 			return suite;
 		}
 	}
@@ -207,7 +207,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("import java.util.ArrayList;\n");		
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
-		buf.append("        ArrayListist v= new ArrayList();\n");
+		buf.append("        ArrayList v= new ArrayListist();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -220,7 +220,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
-		assertNumberOf("proposals", proposals.size(), 4);
+		assertNumberOf("proposals", proposals.size(), 3);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
@@ -235,21 +235,8 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 		
-		proposal= (CUCorrectionProposal) proposals.get(1);
-		preview= proposal.getCompilationUnitChange().getPreviewContent();
 		
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.lang.reflect.Array;\n");	
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        Array v= new ArrayList();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
-		
-		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
+		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
 		newCUWizard.setShowDialog(false);
 		newCUWizard.apply(null);
 		
@@ -267,7 +254,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
 		newCU.delete(true, null);
 
-		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(3);
+		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
 		newCUWizard.setShowDialog(false);
 		newCUWizard.apply(null);
 		
@@ -284,6 +271,89 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	}	
 		
 
+	public void testArrayTypeInStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.*;\n");		
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Serializable[] v= new ArrayListExtra[10];\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 4);
 
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Serializable[] v= new Serializable[10];\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		preview= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.*;\n");
+		buf.append("import java.util.ArrayList;\n");		
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Serializable[] v= new ArrayList[10];\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+		
+		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
+		newCUWizard.setShowDialog(false);
+		newCUWizard.apply(null);
+		
+		ICompilationUnit newCU= pack1.getCompilationUnit("ArrayListExtra.java");
+		assertTrue("Nothing created", newCU.exists());
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("\n");
+		buf.append("public class ArrayListExtra implements Serializable {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		newCU.delete(true, null);
+
+		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(3);
+		newCUWizard.setShowDialog(false);
+		newCUWizard.apply(null);
+		
+		newCU= pack1.getCompilationUnit("ArrayListExtra.java");
+		assertTrue("Nothing created", newCU.exists());
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("\n");
+		buf.append("public interface ArrayListExtra extends Serializable {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+	}	
 
 }

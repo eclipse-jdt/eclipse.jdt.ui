@@ -50,7 +50,7 @@ public class NameMatcher {
 			nMatched++;
 		}
 		
-		if (nMatched == name1len) {
+		if (nMatched == name2len) {
 			return 200;
 		}
 		
@@ -58,7 +58,7 @@ public class NameMatcher {
 			return -1;
 		}
 		
-		int tolerance= name1len / 4 + 1;
+		int tolerance= name2len / 4 + 1;
 		return (tolerance - (k - i)) * 256 / tolerance;
 	}
 	

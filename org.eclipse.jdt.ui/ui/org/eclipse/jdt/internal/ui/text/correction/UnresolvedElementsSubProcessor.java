@@ -19,35 +19,17 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.text.Position;
-
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ConstructorInvocation;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.ThisExpression;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.*;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -99,16 +81,16 @@ public class UnresolvedElementsSubProcessor {
 		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, node, similarNodeKind);
 		for (int i= 0; i < elements.length; i++) {
 			SimilarElement curr= elements[i];
-			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", curr.getName()); //$NON-NLS-1$
-			proposals.add(new ReplaceCorrectionProposal(label, problemPos.getCompilationUnit(), node.getStartPosition(), node.getLength(), curr.getName(), 3));
+			if ((curr.getKind() & SimilarElementsRequestor.VARIABLES) != 0) {
+				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", curr.getName()); //$NON-NLS-1$
+				proposals.add(new ReplaceCorrectionProposal(label, problemPos.getCompilationUnit(), node.getStartPosition(), node.getLength(), curr.getName(), 3));
+			}
 		}
 		// add type proposals
 		if ((similarNodeKind & SimilarElementsRequestor.ALL_TYPES) != 0) {
-			ProblemPosition newProblemPos= createProblemPosition(node, problemPos);
-			addSimilarTypeProposals(elements, node.getIdentifier(), newProblemPos, proposals);
-			addNewTypeProposals(node.getIdentifier(), newProblemPos, SimilarElementsRequestor.REF_TYPES, proposals);
+			addSimilarTypeProposals(elements, cu, node, proposals);
+			addNewTypeProposals(cu, node, SimilarElementsRequestor.REF_TYPES, proposals);
 		}
-		
 
 		// new variables
 		BodyDeclaration bodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
@@ -135,70 +117,96 @@ public class UnresolvedElementsSubProcessor {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
 		
-		// corrections
-		String typeName= cu.getBuffer().getText(problemPos.getOffset(), problemPos.getLength());
-		int bracketIndex= typeName.indexOf('[');
-		if (bracketIndex != -1) {
-			typeName= typeName.substring(0, bracketIndex);
+		Name node= null;
+		if (selectedNode instanceof SimpleType) {
+			node= ((SimpleType) selectedNode).getName();
+		} else if (selectedNode instanceof ArrayType) {
+			Type elementType= ((ArrayType) selectedNode).getElementType();
+			if (elementType.isSimpleType()) {
+				node= ((SimpleType) elementType).getName();
+			}
+		} else if (selectedNode instanceof Name) {
+			node= (Name) selectedNode;
+		} else {
+			return;
 		}
 		
-		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, problemPos.getOffset(), typeName, kind);
-		addSimilarTypeProposals(elements, typeName, problemPos, proposals);
+		if (node.isSimpleName()) {
+			String typeName= ((SimpleName) node).getIdentifier();
+			SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, node.getStartPosition(), typeName, kind);
+			addSimilarTypeProposals(elements, cu, (SimpleName) node, proposals);
+		}
 		
 		// add type
-		addNewTypeProposals(typeName, problemPos, kind, proposals);
+		addNewTypeProposals(cu, node, kind, proposals);
 	}
 
-	public static void addSimilarTypeProposals(SimilarElement[] elements, String typeName, ProblemPosition problemPos, ArrayList proposals) throws JavaModelException {
-		ICompilationUnit cu= problemPos.getCompilationUnit();
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+	private static void addSimilarTypeProposals(SimilarElement[] elements, ICompilationUnit cu, SimpleName node, ArrayList proposals) throws JavaModelException {
+		// try to resolve type in context -> highest severity
+		String resolvedTypeName= null;
+		ITypeBinding binding= ASTResolving.guessBindingForTypeReference(node, false);
+		if (binding != null) {
+			if (binding.isArray()) {
+				binding= binding.getElementType();
+			}
+			resolvedTypeName= Bindings.getFullyQualifiedName(binding);
+			proposals.add(createTypeRefChangeProposal(cu, resolvedTypeName, node, 5));
+		}
+		// add all similar elements
 		for (int i= 0; i < elements.length; i++) {
 			SimilarElement elem= elements[i];
-			if ((elem.getKind() & SimilarElementsRequestor.ALL_TYPES) == 0) {
-				continue;
-			}
-
-			String fullName= elem.getName();
-			
-			ImportEdit importEdit= new ImportEdit(cu, settings);				
-			String simpleName= importEdit.addImport(fullName);
-						
-			boolean importOnly= simpleName.equals(typeName);
-			
-			CUCorrectionProposal proposal= new CUCorrectionProposal("", cu, 0); //$NON-NLS-1$
-			proposals.add(proposal);
-			
-			TextEdit root= proposal.getRootTextEdit();
-			
-			if (!importEdit.isEmpty()) {
-				root.add(importEdit); //$NON-NLS-1$
-			}
-			if (!importOnly) {
-				root.add(SimpleTextEdit.createReplace(problemPos.getOffset(), typeName.length(), simpleName)); //$NON-NLS-1$
-				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.description", simpleName)); //$NON-NLS-1$
-				proposal.setRelevance(3);
-			} else {
-				proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL));
-				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importtype.description", fullName)); //$NON-NLS-1$
-				proposal.setRelevance(5);
+			if ((elem.getKind() & SimilarElementsRequestor.ALL_TYPES) != 0) {
+				String fullName= elem.getName();
+				if (!fullName.equals(resolvedTypeName)) {
+					proposals.add(createTypeRefChangeProposal(cu, fullName, node, 3));
+				}
 			}
 		}
 	}
 
-	public static void addNewTypeProposals(String typeName, ProblemPosition problemPos, int kind, ArrayList proposals) {
+	private static CUCorrectionProposal createTypeRefChangeProposal(ICompilationUnit cu, String fullName, SimpleName node, int relevance) throws JavaModelException {
+		CUCorrectionProposal proposal= new CUCorrectionProposal("", cu, 0); //$NON-NLS-1$
+
+		ImportEdit importEdit= new ImportEdit(cu, JavaPreferencesSettings.getCodeGenerationSettings());				
+		String simpleName= importEdit.addImport(fullName);
+		
+		TextEdit root= proposal.getRootTextEdit();
+		
+		if (!importEdit.isEmpty()) {
+			root.add(importEdit); //$NON-NLS-1$
+		}
+		if (simpleName.equals(node.getIdentifier())) { // import only
+			proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL));
+			proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importtype.description", fullName)); //$NON-NLS-1$
+			proposal.setRelevance(relevance + 1);
+		} else {			
+			root.add(SimpleTextEdit.createReplace(node.getStartPosition(), node.getLength(), simpleName)); //$NON-NLS-1$
+			proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.description", simpleName)); //$NON-NLS-1$
+			proposal.setRelevance(relevance);
+		}
+		return proposal;
+	}
+
+	private static void addNewTypeProposals(ICompilationUnit cu, Name node, int kind, ArrayList proposals) {
+		String typeName= ASTResolving.getSimpleName(node);
 		String addedCUName= typeName + ".java"; //$NON-NLS-1$
 		if (!JavaConventions.validateCompilationUnitName(addedCUName).matches(IStatus.ERROR)) {
-			ICompilationUnit cu= problemPos.getCompilationUnit();
-			IPackageFragment pack= (IPackageFragment) cu.getParent();
-			final ICompilationUnit addedCU= pack.getCompilationUnit(addedCUName);
+			ICompilationUnit addedCU;
+			if (node.isSimpleName()) {
+				addedCU= ((IPackageFragment) cu.getParent()).getCompilationUnit(addedCUName);
+			} else {
+				IPackageFragmentRoot root= (IPackageFragmentRoot) cu.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+				String packName= ASTResolving.getQualifier(node);
+				addedCU= root.getPackageFragment(packName).getCompilationUnit(addedCUName);
+			}
 			if (!addedCU.exists()) {
 				if ((kind & SimilarElementsRequestor.CLASSES) != 0) {
 					String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createclassusingwizard.description", typeName); //$NON-NLS-1$
-		            proposals.add(new NewCUCompletionUsingWizardProposal(label, typeName, true, problemPos, 0));
+		            proposals.add(new NewCUCompletionUsingWizardProposal(label, cu, node, true, 0));
 				}
 				if ((kind & SimilarElementsRequestor.INTERFACES) != 0) {
 					String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createinterfaceusingwizard.description", typeName); //$NON-NLS-1$
-		            proposals.add(new NewCUCompletionUsingWizardProposal(label, typeName, false, problemPos, 0));
+		            proposals.add(new NewCUCompletionUsingWizardProposal(label, cu, node, false, 0));
 				}				
 			}
 		}

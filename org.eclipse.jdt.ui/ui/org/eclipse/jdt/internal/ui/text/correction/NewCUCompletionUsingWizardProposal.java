@@ -12,7 +12,6 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -25,15 +24,10 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ArrayCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.InstanceofExpression;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.Name;
 
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
@@ -57,18 +51,18 @@ import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
 
 public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal {
 	
-	private final String fNewTypeName;
-	private final boolean fIsClass;
-    private final ProblemPosition fProblemPos;
+	private Name fNode;
+	private ICompilationUnit fCompilationUnit;
+	private boolean fIsClass;
 
 	private boolean fShowDialog;
 
-    public NewCUCompletionUsingWizardProposal(String name, String newTypeName, boolean isClass, ProblemPosition problemPos, int severity) {
+    public NewCUCompletionUsingWizardProposal(String name, ICompilationUnit cu, Name node, boolean isClass, int severity) {
         super(name, null, severity, null);
         
-        fNewTypeName= newTypeName;
+        fCompilationUnit= cu;
+        fNode= node;
         fIsClass= isClass;
-        fProblemPos= problemPos;
     	
         if (isClass) {
             setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS));
@@ -80,7 +74,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
     
 	public void apply(IDocument document) {
 		NewElementWizard wizard= createWizard();
-		wizard.init(JavaPlugin.getDefault().getWorkbench(), new StructuredSelection(fProblemPos.getCompilationUnit()));
+		wizard.init(JavaPlugin.getDefault().getWorkbench(), new StructuredSelection(fCompilationUnit));
 		
 		if (fShowDialog) {
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
@@ -119,93 +113,47 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
         IWizardPage[] pages= wizard.getPages();
         Assert.isTrue(pages.length > 0 && pages[0] instanceof NewTypeWizardPage);
 
-        NewTypeWizardPage page= (NewTypeWizardPage) pages[0];
-        page.setTypeName(fNewTypeName, false);
-        
+		NewTypeWizardPage page= (NewTypeWizardPage) pages[0];
+		fillInWizardPageName(page);
 		fillInWizardPageSuperTypes(page);
 		return page;
 	}
+	
+	/**
+	 * Fill-in the "Package" and "Name" fields.
+	 * @param page the wizard page.
+	 */
+	private void fillInWizardPageName(NewTypeWizardPage page) {
+		page.setTypeName(ASTResolving.getSimpleName(fNode), true);
+		if (fNode.isQualifiedName()) {
+			String packName= ASTResolving.getQualifier(fNode);
+			IPackageFragmentRoot root= (IPackageFragmentRoot) fCompilationUnit.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+			page.setPackageFragment(root.getPackageFragment(packName), true);
+		}
+	}	
+	
 
 	/**
 	 * Fill-in the "Super Class" and "Super Interfaces" fields.
 	 * @param page the wizard page.
 	 */
 	private void fillInWizardPageSuperTypes(NewTypeWizardPage page) {
-        List superInterfaces = new ArrayList();
-        
-		for (Iterator i = getSuperTypes(fProblemPos).iterator(); i.hasNext();) {
-			ITypeBinding type = (ITypeBinding) i.next();
-                        
-		    if (type.isClass()) {
-		        page.setSuperClass(Bindings.getFullyQualifiedName(type), true);
-		    } else if (type.isInterface()) {
-				superInterfaces.add(Bindings.getFullyQualifiedName(type));
-		    }
+        ITypeBinding type= ASTResolving.guessBindingForTypeReference(fNode, true);
+        if (type != null) {
+        	if (type.isArray()) {
+        		type= type.getElementType();
+        	}
+        	if (type.isTopLevel() || type.isMember()) {
+			    if (type.isClass() && fIsClass) {
+			        page.setSuperClass(Bindings.getFullyQualifiedName(type), true);
+			    } else if (type.isInterface()) {
+			    	List superInterfaces = new ArrayList();
+			    	superInterfaces.add(Bindings.getFullyQualifiedName(type));
+			    	page.setSuperInterfaces(superInterfaces, true);
+			    }
+        	}
 		}
-        
-        page.setSuperInterfaces(superInterfaces, true);
 	}
-    
-    /**
-     * @return a list of {@link ITypeBinding}s representing the super types of the type
-     * needing correction. The list may be empty, in which case the only supertype is Object.
-     */
-    private List getSuperTypes(ProblemPosition problemPos) {
-        List superTypes= new ArrayList();
-        ICompilationUnit cu= fProblemPos.getCompilationUnit();
-        CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
-
-		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
-		if (selectedNode != null) {
-			ITypeBinding type= getBindingForTypeReference(selectedNode.getAST(), selectedNode);
-			if (type != null) {
-				if (type.isArray()) {
-					type= type.getElementType();
-				}
-				if (type.isClass() || type.isInterface()) {
-					superTypes.add(type);            
-				}
-			}
-        }
-        return superTypes;
-    }
-    
-    private ITypeBinding getBindingForTypeReference(AST ast, ASTNode node) {
-    	ASTNode parent= node.getParent();
-    	switch (parent.getNodeType()) {
-    	case ASTNode.METHOD_DECLARATION:
-			MethodDeclaration decl= (MethodDeclaration) parent;
-			if (decl.thrownExceptions().contains(node)) {
-				return ast.resolveWellKnownType("java.lang.Exception");
-			}
-			break;
-		case ASTNode.INSTANCEOF_EXPRESSION:
-			InstanceofExpression instanceofExpression= (InstanceofExpression) parent;
-			return instanceofExpression.getLeftOperand().resolveTypeBinding();
-    	case ASTNode.VARIABLE_DECLARATION_STATEMENT:
-    		VariableDeclarationStatement statement= (VariableDeclarationStatement) parent;
-    		List fragments= statement.fragments();
-    		for (Iterator iter= fragments.iterator(); iter.hasNext();) {
-				VariableDeclarationFragment frag= (VariableDeclarationFragment) iter.next();
-				if (frag.getInitializer() != null) {
-					return frag.getInitializer().resolveTypeBinding();
-				}
-			}
-			break;
-		case ASTNode.ARRAY_CREATION:
-			ArrayCreation creation= (ArrayCreation) parent;
-			if (creation.getInitializer() != null) {
-				return creation.getInitializer().resolveTypeBinding();
-			}
-			break;
-        case ASTNode.CATCH_CLAUSE:
-            return ast.resolveWellKnownType("java.lang.Exception"); //$NON-NLS-1$						
-     	}   	
-    	return null;
-    
-    }    
-    
-    
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()

@@ -17,29 +17,8 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Initializer;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal {
@@ -187,7 +166,7 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 	}
 		
 	private Type evaluateVariableType(AST ast) throws CoreException {
-		ITypeBinding binding= ASTResolving.getTypeBinding(fOriginalNode);
+		ITypeBinding binding= ASTResolving.guessBindingForReference(fOriginalNode);
 		if (binding != null) {
 			addImport(binding);
 			return ASTResolving.getTypeFromTypeBinding(ast, binding);
@@ -197,7 +176,7 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 
 
 	/**
-	 * Returns the variableKind.
+	 * Returns the variable kind.
 	 * @return int
 	 */
 	public int getVariableKind() {

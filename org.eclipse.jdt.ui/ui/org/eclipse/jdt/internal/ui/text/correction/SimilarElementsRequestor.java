@@ -50,7 +50,7 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 				// foo(| code assist here returns only method declaration
 			}
 		} 
-		ITypeBinding binding= ASTResolving.getTypeBinding(name);
+		ITypeBinding binding= ASTResolving.guessBindingForReference(name);
 		
 		String returnType= (binding != null) ? binding.getName() : null;
 		return findSimilarElement(cu, pos, name.getIdentifier(), kind, nArguments, returnType);
