@@ -98,7 +98,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 			if (res.length > 1) {
 				// keep first entry at first position
-				Arrays.sort(res, 0, res.length, new JavaCompletionProposalComparator());
+				Arrays.sort(res, 1, res.length - 1, new JavaCompletionProposalComparator());
 			}
 			return res;
 		}
