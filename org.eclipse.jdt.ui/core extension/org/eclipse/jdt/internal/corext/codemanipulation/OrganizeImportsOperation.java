@@ -303,7 +303,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 		
 		public boolean visit(MemberRef node) {
-			Name name= node.getName();
+			Name name= node.getQualifier();
 			if (name != null) {
 				typeRefFound(name);
 			}
