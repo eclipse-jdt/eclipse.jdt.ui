@@ -28,12 +28,8 @@ import org.eclipse.jdt.internal.core.refactoring.Assert;
 		return node.sourceStart < start && end < node.sourceEnd;		
 	}
 	
-	public boolean enclosedBy(TypeDeclaration node) {
-		return node.declarationSourceStart < start && end < node.declarationSourceEnd;
-	}
-	
-	public boolean enclosedBy(AbstractMethodDeclaration node) {
-		return node.bodyStart <= start && end <= node.bodyEnd;
+	public boolean enclosedBy(int sourceStart, int sourceEnd) {
+		return sourceStart < start && end < sourceEnd;
 	}
 	
 	// cover* methods do a closed interval check.
@@ -46,6 +42,10 @@ import org.eclipse.jdt.internal.core.refactoring.Assert;
 		return start <= position && position <= end;
 	}
 	
+	public boolean covers(int sourceStart, int sourceEnd) {
+		return start <= sourceStart && sourceEnd <= end;
+	}
+	
 	public boolean coveredBy(AstNode node) {
 		return coveredBy(node.sourceStart, node.sourceEnd);
 	}
@@ -54,8 +54,8 @@ import org.eclipse.jdt.internal.core.refactoring.Assert;
 		return sourceStart <= start && end <= sourceEnd;
 	}
 	
-	public boolean endsIn(AstNode node) {
-		return node.sourceStart <= end && end < node.sourceEnd;
+	public boolean endsIn(int sourceStart, int sourceEnd) {
+		return sourceStart <= end && end < sourceEnd;
 	}
 	
 	public boolean intersects(AstNode node) {

@@ -36,7 +36,7 @@ public class ExtractMethodAction extends JavaUIAction implements IUpdate {
 	 * @param editor the text editor.
 	 */
 	public ExtractMethodAction(ITextEditor editor) {
-		super("Extract Method");
+		super("Extract Method...");
 		fEditor= editor;
 		Assert.isNotNull(fEditor);
 	}

@@ -280,7 +280,7 @@ public class ExtractMethodRefactoring extends Refactoring{
 	}
 	
 	private RefactoringStatus mergeTextSelectionStatus(RefactoringStatus status) {
-		status.addFatalError("TextSelection doesn't mark a set of statements");
+		status.addFatalError("Selection doesn't mark a set of statements. Only statements from a method body be extracted.");
 		return status;	
 	}
 	

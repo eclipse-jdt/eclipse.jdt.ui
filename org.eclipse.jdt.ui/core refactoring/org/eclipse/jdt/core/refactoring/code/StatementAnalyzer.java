@@ -52,10 +52,10 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	private int[] fLineSeparatorPositions;	
 	private String fMessage;
 	
-	private Statement fFirstSelectedStatement;
+	private AstNode fFirstSelectedNode;
 	private AstNode fParentOfFirstSelectedStatment;
-	private Statement fLastSelectedStatement;
-	private Statement fLastSelectedStatementWithSameParentAsFirst;
+	private AstNode fLastSelectedNode;
+	private AstNode fLastSelectedNodeWithSameParentAsFirst;
 	private boolean fNeedsSemicolon;
 	
 	private AbstractMethodDeclaration fEnclosingMethod;
@@ -111,15 +111,15 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	 * Checks if the refactoring can be activated.
 	 */
 	public void checkActivation(RefactoringStatus status) {
-		if (fEnclosingMethod == null || fLastSelectedStatement == null) {
+		if (fEnclosingMethod == null || fLastSelectedNode == null) {
 			if (fMessage == null)
-				fMessage= "TextSelection doesn't mark a text range that can be extracted";
+				fMessage= "Can not extract the selection into a new method. Only statements from a method body can be extracted.";
 			status.addFatalError(fMessage);
 		}
 		status.merge(fStatus);
-		if (fFirstSelectedStatement == fLastSelectedStatementWithSameParentAsFirst &&
-				fFirstSelectedStatement instanceof ReturnStatement) {
-			status.addFatalError("Can not extract single return statement");
+		if (fFirstSelectedNode == fLastSelectedNodeWithSameParentAsFirst &&
+				fFirstSelectedNode instanceof ReturnStatement) {
+			status.addFatalError("Can not extract a single return statement.");
 		}
 		fLocalVariableAnalyzer.checkActivation(status);
 		fLocalTypeAnalyzer.checkActivation(status);
@@ -155,7 +155,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	 * Returns the ending position of the last selected statement.
 	 */
 	public int getLastSelectedStatementEnd() {
-		return fLastSelectedStatement.sourceEnd;
+		return fLastSelectedNode.sourceEnd;
 	}
 	
 	public String getSignature(String methodName) {
@@ -191,8 +191,8 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	
 	private void reset() {
 		fMode= UNDEFINED;
-		fFirstSelectedStatement= null;
-		fLastSelectedStatement= null;
+		fFirstSelectedNode= null;
+		fLastSelectedNode= null;
 		fEnclosingMethod= null;
 		fStatus= new RefactoringStatus();
 		fMessage= null;
@@ -205,51 +205,55 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		fCursorPosition= Integer.MAX_VALUE;
 	}
 	
-	private boolean visitStatement(Statement statement, BlockScope scope) {
+	private boolean visitNode(AstNode node, Scope scope) {
+		return visitRange(node.sourceStart, node.sourceEnd, node, scope);
+	}
+	
+	private boolean visitRange(int start, int end, AstNode node, Scope scope) {
 		boolean result= true;
 		switch(fMode) {
 			case UNDEFINED:
 				return false;			
 			case BEFORE:
-				if (fCursorPosition < fSelection.start && fSelection.covers(statement)) {
-					startFound(statement);
+				if (fCursorPosition < fSelection.start && fSelection.covers(start, end)) {
+					startFound(node);
 				}
 				break;
 			case SELECTED:
-				if (fSelection.endsIn(statement)) { // Selection ends in the middle of a statement
-					invalidSelection("TextSelection ends in the middle of a statement");
+				if (fSelection.endsIn(start, end)) { // Selection ends in the middle of a statement
+					invalidSelection("Can't extract selection that ends in the middle of a statement.");
 					return false;
-				} else if (statement.sourceEnd > fSelection.end) {
+				} else if (start > fSelection.end) {
 					fMode= AFTER;
 				} else {
-					trackLastSelectedStatement(statement);
+					trackLastSelectedNode(node);
 					fNeedsSemicolon= true;
 				}
 				break;
 			case AFTER:
 				break;
 		}
-		trackLastEnd(statement);
+		trackLastEnd(node);
 		return result;
 	}
 	
-	private void startFound(Statement statement) {
+	private void startFound(AstNode node) {
 		fMode= SELECTED;
-		fFirstSelectedStatement= statement;
+		fFirstSelectedNode= node;
 		fParentOfFirstSelectedStatment= getParent();
-		fLastSelectedStatement= statement;
-		fLastSelectedStatementWithSameParentAsFirst= statement;
+		fLastSelectedNode= node;
+		fLastSelectedNodeWithSameParentAsFirst= node;
 	}
 	
-	private void trackLastSelectedStatement(Statement statement) {
-		fLastSelectedStatement= statement;
+	private void trackLastSelectedNode(AstNode node) {
+		fLastSelectedNode= node;
 		if (fParentOfFirstSelectedStatment == getParent())
-			fLastSelectedStatementWithSameParentAsFirst= statement;
+			fLastSelectedNodeWithSameParentAsFirst= node;
 	}
 	
-	private void trackLastEnd(Statement statement) {
-		if (statement.sourceEnd > fCursorPosition)
-			fCursorPosition= statement.sourceEnd;
+	private void trackLastEnd(AstNode node) {
+		if (node.sourceEnd > fCursorPosition)
+			fCursorPosition= node.sourceEnd;
 	}
 	
 	private void trackLastEnd(int end) {
@@ -258,7 +262,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 	
 	private boolean visitAssignment(Assignment assignment, BlockScope scope, boolean compound) {
-		if (visitStatement(assignment, scope)) {
+		if (visitNode(assignment, scope)) {
 			fLocalVariableAnalyzer.visitLhsOfAssignment(assignment.lhs, scope, fMode, compound);
 			assignment.expression.traverse(this, scope);
 			
@@ -268,14 +272,36 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 	
 	private boolean visitAbstractMethodDeclaration(AbstractMethodDeclaration node, Scope scope) {
-		boolean result= fSelection.enclosedBy(node);
-		if (result) {
-			fExceptionAnalyzer.visitAbstractMethodDeclaration(node, scope);
-			reset();
-			fEnclosingMethod= node;
-			fMode= BEFORE;
+		
+		// Skip methods not covered by the selection
+		if (fMode == AFTER || (fMode == UNDEFINED && fSelection.start > node.declarationSourceEnd)) // end doens't include '}'
+			return false;
+			
+		if (fMode == BEFORE && fSelection.end > node.bodyEnd) {
+			invalidSelection("Can not extract a whole method. Only statements from a method body can be extracted.");
+			return false;
 		}
-		return result;	
+
+		boolean result= false;		
+		if (fMode == UNDEFINED && fSelection.end <= node.bodyEnd) {
+			boolean enclosed= fSelection.coveredBy(node.bodyStart, node.bodyEnd);
+			if (enclosed) {
+				fExceptionAnalyzer.visitAbstractMethodDeclaration(node, scope);
+				reset();
+				fEnclosingMethod= node;
+				fMode= BEFORE;
+				fCursorPosition= node.bodyStart - 1;
+				result= true;
+			} else {
+				invalidSelection("Can not extract the selection into a new method. Only statements from a method body can be extracted.");
+			}
+		} else {
+			// treat it as a normal node (e.g. if a whole anonymous inner class is selected.
+			result= visitRange(node.declarationSourceStart, node.declarationSourceEnd, node, scope);
+			if (fMode == AFTER)
+				result= false;
+		}
+		return result;
 	}
 	
 	private void endVisitAbstractMethodDeclaration(AbstractMethodDeclaration node, Scope scope) {
@@ -285,7 +311,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 	
 	private boolean visitLocalTypeDeclaration(TypeDeclaration declaration, BlockScope scope) {
-		boolean result= visitStatement(declaration, scope);
+		boolean result= visitNode(declaration, scope);
 		fLocalTypeAnalyzer.visitLocalTypeDeclaration(declaration, scope, fMode);
 		return result;
 	}
@@ -297,7 +323,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	
 	private boolean visitImplicitBranchTarget(Statement statement, BlockScope scope) {
 		fImplicitBranchTargets.push(statement);
-		return visitStatement(statement, scope);
+		return visitNode(statement, scope);
 	}
 	
 	private void endVisitImplicitBranchTarget(Statement statement, BlockScope scope) {
@@ -305,16 +331,16 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 	
 	private boolean visitBranchStatement(BranchStatement statement, BlockScope scope, String name) {
-		boolean result= visitStatement(statement, scope);
+		boolean result= visitNode(statement, scope);
 		Statement target= findTarget(statement);
 		String label= "label"; //* new String(statement.label);
 		if (target != null) {
 			if (isSelected(target)) {
 				if (fMode != SELECTED)
-					fStatus.addError("Selected block contains a " + name + " target but not all corresponding " + name + " statements are selected");
+					fStatus.addError("Selection contains a " + name + " target but not all corresponding " + name + " statements are selected.");
 			} else {
 				if (fMode == SELECTED)
-					fStatus.addError("Selected block contains a " + name + " statement but the corresponding " + name + " target isn't selected");
+					fStatus.addError("Selection contains a " + name + " statement but the corresponding " + name + " target isn't selected.");
 			}
 		} else {
 			fStatus.addFatalError("Can not find break target");
@@ -335,13 +361,13 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 	
 	private void checkLastSelectedStatement() {
-		if (fLastSelectedStatementWithSameParentAsFirst instanceof ReturnStatement) {
-			ReturnStatement statement= (ReturnStatement)fLastSelectedStatementWithSameParentAsFirst;
+		if (fLastSelectedNodeWithSameParentAsFirst instanceof ReturnStatement) {
+			ReturnStatement statement= (ReturnStatement)fLastSelectedNodeWithSameParentAsFirst;
 			if (statement.expression == null) {
 				fPotentialReturnMessage= null;
 				fLocalVariableAnalyzer.setExtractedReturnStatement(statement);
 			} else {
-				invalidSelection("Can only extract void return statement");
+				invalidSelection("Can only extract void return statement.");
 			}
 		} else {
 			handlePotentialReturnMessage();
@@ -366,7 +392,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 
 	public boolean visitBinaryExpression(BinaryExpression binaryExpression, BlockScope scope, int returnType) {
 		int currentScanPosition= fCursorPosition;
-		if (!visitStatement(binaryExpression, scope))
+		if (!visitNode(binaryExpression, scope))
 			return false;
 		if (fMode != SELECTED)
 			return true;
@@ -375,7 +401,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 			if (returnType == TypeIds.T_undefined)
 				returnType= binaryExpression.bits & binaryExpression.ReturnTypeIDMASK;
 			if (returnType == TypeIds.T_undefined) {
-				invalidSelection("Can not determine return type of the expression to be extracted");
+				invalidSelection("Can not determine return type of the expression to be extracted.");
 				return false;
 			}
 			fLocalVariableAnalyzer.setExpressionReturnType(TypeReference.baseTypeReference(returnType, 0));
@@ -435,21 +461,28 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 	
 	public boolean visit(TypeDeclaration typeDeclaration, CompilationUnitScope scope) {
-		return fSelection.enclosedBy(typeDeclaration);
+		return fSelection.enclosedBy(typeDeclaration.declarationSourceStart,
+			typeDeclaration.declarationSourceEnd);
 	}
 	
 	//---- Type -------------------------------------------------------------------
 	
 	public boolean visit(Clinit clinit, ClassScope scope) {
-		return fSelection.enclosedBy(clinit);
+		return visitAbstractMethodDeclaration(clinit, scope);
+	}
+	
+	public void endVisit(Clinit clinit, ClassScope scope) {
+		endVisitAbstractMethodDeclaration(clinit, scope);
 	}
 	
 	public boolean visit(TypeDeclaration typeDeclaration, ClassScope scope) {
-		return fSelection.enclosedBy(typeDeclaration);
+		return fSelection.enclosedBy(typeDeclaration.declarationSourceStart,
+			typeDeclaration.declarationSourceEnd);
 	}
 	
 	public boolean visit(MemberTypeDeclaration memberTypeDeclaration, ClassScope scope) {
-		return fSelection.enclosedBy(memberTypeDeclaration);
+		return fSelection.enclosedBy(memberTypeDeclaration.declarationSourceStart,
+			memberTypeDeclaration.declarationSourceEnd);
 	}
 	
 	public boolean visit(FieldDeclaration fieldDeclaration, MethodScope scope) {
@@ -509,11 +542,11 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 	
 	public boolean visit(AnonymousLocalTypeDeclaration anonymousTypeDeclaration, BlockScope scope) {
-		return visitStatement(anonymousTypeDeclaration, scope);
+		return visitNode(anonymousTypeDeclaration, scope);
 	}
 	
 	public boolean visit(LocalDeclaration localDeclaration, BlockScope scope) {
-		return visitStatement(localDeclaration, scope);
+		return visitNode(localDeclaration, scope);
 	}
 
 	public boolean visit(FieldReference fieldReference, BlockScope scope) {
@@ -541,7 +574,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(QualifiedNameReference qualifiedNameReference, BlockScope scope) {
-		boolean result= visitStatement(qualifiedNameReference, scope);
+		boolean result= visitNode(qualifiedNameReference, scope);
 		if (result) {
 			fLocalVariableAnalyzer.visit(qualifiedNameReference, scope, fMode);
 		}
@@ -557,7 +590,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(SingleNameReference singleNameReference, BlockScope scope) {
-		boolean result= visitStatement(singleNameReference, scope);
+		boolean result= visitNode(singleNameReference, scope);
 		if (result) {
 			fLocalVariableAnalyzer.visit(singleNameReference, scope, fMode);
 			fLocalTypeAnalyzer.visit(singleNameReference, scope, fMode);
@@ -576,18 +609,18 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	//---- Statements -------------------------------------------------------------
 	
 	public boolean visit(AllocationExpression allocationExpression, BlockScope scope) {
-		return visitStatement(allocationExpression, scope);
+		return visitNode(allocationExpression, scope);
 	}
 	public boolean visit(AND_AND_Expression and_and_Expression, BlockScope scope) {
 		return visitBinaryExpression(and_and_Expression, scope, TypeIds.T_boolean);
 	}
 	
 	public boolean visit(ArrayAllocationExpression arrayAllocationExpression, BlockScope scope) {
-		return visitStatement(arrayAllocationExpression, scope);
+		return visitNode(arrayAllocationExpression, scope);
 	}
 	
 	public boolean visit(ArrayInitializer arrayInitializer, BlockScope scope) {
-		return visitStatement(arrayInitializer, scope);
+		return visitNode(arrayInitializer, scope);
 	}
 	
 	public boolean visit(Assignment assignment, BlockScope scope) {
@@ -599,7 +632,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(Block block, BlockScope scope) {
-		boolean result= visitStatement(block, scope);
+		boolean result= visitNode(block, scope);
 		
 		if (fSelection.intersects(block)) {
 			reset();
@@ -625,19 +658,19 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(Case caseStatement, BlockScope scope) {
-		return visitStatement(caseStatement, scope);
+		return visitNode(caseStatement, scope);
 	}
 
 	public boolean visit(CastExpression castExpression, BlockScope scope) {
-		return visitStatement(castExpression, scope);
+		return visitNode(castExpression, scope);
 	}
 
 	public boolean visit(CharLiteral charLiteral, BlockScope scope) {
-		return visitStatement(charLiteral, scope);
+		return visitNode(charLiteral, scope);
 	}
 
 	public boolean visit(ClassLiteralAccess classLiteral, BlockScope scope) {
-		return visitStatement(classLiteral, scope);
+		return visitNode(classLiteral, scope);
 	}
 
 	public boolean visit(CompoundAssignment compoundAssignment, BlockScope scope) {
@@ -645,7 +678,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(ConditionalExpression conditionalExpression, BlockScope scope) {
-		return visitStatement(conditionalExpression, scope);
+		return visitNode(conditionalExpression, scope);
 	}
 
 	public boolean visit(Continue continueStatement, BlockScope scope) {
@@ -656,7 +689,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(DefaultCase defaultCaseStatement, BlockScope scope) {
-		return visitStatement(defaultCaseStatement, scope);
+		return visitNode(defaultCaseStatement, scope);
 	}
 
 	public boolean visit(DoStatement doStatement, BlockScope scope) {
@@ -680,11 +713,11 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 			}
 				
 			if (fSelection.start == actionStart) {
-				invalidSelection("Selection may not start right after the do keyword");
+				invalidSelection("Selection may not start right after the do keyword.");
 				return false;
 			}
 				
-			invalidSelection("Selection must either cover whole do-while statement or parts of the action block");
+			invalidSelection("Selection must either cover whole do-while statement or parts of the action block.");
 			return false;
 		}
 		return true;
@@ -697,7 +730,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(DoubleLiteral doubleLiteral, BlockScope scope) {
-		return visitStatement(doubleLiteral, scope);
+		return visitNode(doubleLiteral, scope);
 	}
 
 	public boolean visit(EqualExpression equalExpression, BlockScope scope) {
@@ -705,19 +738,19 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(ExplicitConstructorCall explicitConstructor, BlockScope scope) {
-		return visitStatement(explicitConstructor, scope);
+		return visitNode(explicitConstructor, scope);
 	}
 
 	public boolean visit(ExtendedStringLiteral extendedStringLiteral, BlockScope scope) {
-		return visitStatement(extendedStringLiteral, scope);
+		return visitNode(extendedStringLiteral, scope);
 	}
 
 	public boolean visit(FalseLiteral falseLiteral, BlockScope scope) {
-		return visitStatement(falseLiteral, scope);
+		return visitNode(falseLiteral, scope);
 	}
 
 	public boolean visit(FloatLiteral floatLiteral, BlockScope scope) {
-		return visitStatement(floatLiteral, scope);
+		return visitNode(floatLiteral, scope);
 	}
 
 	public boolean visit(ForStatement forStatement, BlockScope scope) {
@@ -768,7 +801,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 	
 	public boolean visit(IfStatement ifStatement, BlockScope scope) {
-		if (!visitStatement(ifStatement, scope))
+		if (!visitNode(ifStatement, scope))
 			return false;
 			
 		int nextStart= fBuffer.indexOfStatementCharacter(ifStatement.sourceEnd + 1);
@@ -779,7 +812,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 			if ((fCursorPosition= getIfElseBodyStart(ifStatement, nextStart) - 1) >= 0)
 				return true;
 				
-			invalidSelection("Selection must either cover whole if-then-else statement or parts of then or else block");
+			invalidSelection("Selection must either cover whole if-then-else statement or parts of then or else block.");
 			return false;
 		}
 		return true;
@@ -812,30 +845,30 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 	
 	public boolean visit(InstanceOfExpression instanceOfExpression, BlockScope scope) {
-		return visitStatement(instanceOfExpression, scope);
+		return visitNode(instanceOfExpression, scope);
 	}
 
 	public boolean visit(IntLiteral intLiteral, BlockScope scope) {
-		return visitStatement(intLiteral, scope);
+		return visitNode(intLiteral, scope);
 	}
 
 	public boolean visit(LabeledStatement labeledStatement, BlockScope scope) {
 		fLabeledStatements.add(labeledStatement);
-		return visitStatement(labeledStatement, scope);
+		return visitNode(labeledStatement, scope);
 	}
 
 	public boolean visit(LongLiteral longLiteral, BlockScope scope) {
-		return visitStatement(longLiteral, scope);
+		return visitNode(longLiteral, scope);
 	}
 
 	public boolean visit(MessageSend messageSend, BlockScope scope) {
-		boolean result= visitStatement(messageSend, scope);
+		boolean result= visitNode(messageSend, scope);
 		fExceptionAnalyzer.visitMessageSend(messageSend, scope, fMode);
 		return result;
 	}
 
 	public boolean visit(NullLiteral nullLiteral, BlockScope scope) {
-		return visitStatement(nullLiteral, scope);
+		return visitNode(nullLiteral, scope);
 	}
 
 	public boolean visit(OR_OR_Expression or_or_Expression, BlockScope scope) {
@@ -843,30 +876,30 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(PostfixExpression postfixExpression, BlockScope scope) {
-		boolean result= visitStatement(postfixExpression, scope);
+		boolean result= visitNode(postfixExpression, scope);
 		fLocalVariableAnalyzer.visitPostfixPrefixExpression(postfixExpression, scope, fMode);
 		return result;
 	}
 
 	public boolean visit(PrefixExpression prefixExpression, BlockScope scope) {
-		boolean result= visitStatement(prefixExpression, scope);
+		boolean result= visitNode(prefixExpression, scope);
 		fLocalVariableAnalyzer.visitPostfixPrefixExpression(prefixExpression, scope, fMode);
 		return result;
 	}
 
 	public boolean visit(QualifiedAllocationExpression qualifiedAllocationExpression, BlockScope scope) {
-		return visitStatement(qualifiedAllocationExpression, scope);
+		return visitNode(qualifiedAllocationExpression, scope);
 	}
 
 	public boolean visit(ReturnStatement returnStatement, BlockScope scope) {
 		fAdjustedSelectionEnd= fBuffer.indexOfLastCharacterBeforeLineBreak(fCursorPosition);
-		boolean result= visitStatement(returnStatement, scope);
+		boolean result= visitNode(returnStatement, scope);
 		if (fMode == StatementAnalyzer.SELECTED) {
 			if (fPotentialReturnMessage != null) {
 				fStatus.addFatalError(fPotentialReturnMessage);
 				fPotentialReturnMessage= null;
 			}
-			String message= "Selected block contains a return statement at line " + getLineNumber(returnStatement);
+			String message= "Can not extract to new method since selection contains a return statement at line " + getLineNumber(returnStatement) + ".";
 			if (fParentOfFirstSelectedStatment != getParent()) {
 				fStatus.addFatalError(message);
 			} else {
@@ -877,7 +910,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(StringLiteral stringLiteral, BlockScope scope) {
-		return visitStatement(stringLiteral, scope);
+		return visitNode(stringLiteral, scope);
 	}
 
 	public boolean visit(SwitchStatement switchStatement, BlockScope scope) {
@@ -889,7 +922,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		if (isPartOfNodeSelected(switchStatement)) {
 			int lastEnd= getCaseBodyStart(switchStatement) - 1;
 			if (lastEnd < 0) {
-				invalidSelection("Selection must either cover whole switch statement or parts of a single case block");
+				invalidSelection("Selection must either cover whole switch statement or parts of a single case block.");
 				return false;
 			} else {
 				fCursorPosition= lastEnd;
@@ -935,7 +968,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(SynchronizedStatement synchronizedStatement, BlockScope scope) {
-		if (!visitStatement(synchronizedStatement, scope))
+		if (!visitNode(synchronizedStatement, scope))
 			return false;
 		
 		if (isPartOfNodeSelected(synchronizedStatement)) {
@@ -944,32 +977,32 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 				return true;
 			}
 				
-			invalidSelection("Seleciton must either cover whole synchronized statement or parts of the synchronized block");
+			invalidSelection("Seleciton must either cover whole synchronized statement or parts of the synchronized block.");
 			return false;
 		}
 		return true;
 	}
 
 	public boolean visit(ThrowStatement throwStatement, BlockScope scope) {
-		return visitStatement(throwStatement, scope);
+		return visitNode(throwStatement, scope);
 	}
 
 	public boolean visit(TrueLiteral trueLiteral, BlockScope scope) {
-		return visitStatement(trueLiteral, scope);
+		return visitNode(trueLiteral, scope);
 	}
 
 	public boolean visit(TryStatement tryStatement, BlockScope scope) {
 		// Include "}" into sourceEnd;
 		tryStatement.sourceEnd++;
 		
-		if (!visitStatement(tryStatement, scope))
+		if (!visitNode(tryStatement, scope))
 			return false;
 			
 		fExceptionAnalyzer.visitTryStatement(tryStatement, scope, fMode);
 		
 		if (isPartOfNodeSelected(tryStatement)) {
 			if (fSelection.intersects(tryStatement)) {
-				invalidSelection("Selection must either cover whole try statement or parts of try, catch, or finally block");
+				invalidSelection("Selection must either cover whole try statement or parts of try, catch, or finally block.");
 				return false;
 			} else {
 				int lastEnd;		
@@ -1009,7 +1042,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 	
 	public boolean visit(UnaryExpression unaryExpression, BlockScope scope) {
-		return visitStatement(unaryExpression, scope);
+		return visitNode(unaryExpression, scope);
 	}
 
 	public boolean visit(WhileStatement whileStatement, BlockScope scope) {

@@ -232,7 +232,12 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 			if (i > 0)
 				result.append(", ");
 			LocalVariableBinding binding= (LocalVariableBinding)fUsedLocals.get(i);
-			TypeReference typeRef= binding.declaration.type;
+			LocalDeclaration declaration= binding.declaration;
+			TypeReference typeRef= declaration.type;
+			String modifiers= declaration.modifiersString(declaration.modifiers);
+			if (modifiers.length() != 0) {
+				result.append(modifiers);
+			}
 			result.append(typeRef.toStringExpression(0));
 			result.append(" ");
 			result.append(binding.readableName());
