@@ -242,6 +242,7 @@ public class LinkedUIControl {
 				connect();
 				if ((flags & ILinkedListener.SELECT) != 0)
 					select();
+				ensureAnnotationModelInstalled();
 				redraw();
 			}
 		}
@@ -798,6 +799,18 @@ public class LinkedUIControl {
 			}
 		}
 	}
+	
+	private void uninstallAnnotationModel(LinkedUITarget target) {
+		ITextViewer viewer= target.getViewer();
+		if (viewer instanceof ISourceViewer) {
+			ISourceViewer sv= (ISourceViewer) viewer;
+			IAnnotationModel model= sv.getAnnotationModel();
+			if (model instanceof IAnnotationModelExtension) {
+				IAnnotationModelExtension ext= (IAnnotationModelExtension) model;
+				ext.removeAnnotationModel(getUniqueKey());
+			}
+		}
+	}
 
 	private void switchViewer(IDocument oldDoc, IDocument newDoc, LinkedPosition pos) {
 		if (oldDoc != newDoc) {
@@ -818,6 +831,7 @@ public class LinkedUIControl {
 				fCurrentTarget= target;
 				target.enter();
 				connect();
+				ensureAnnotationModelInstalled();
 			}
 		}
 	}
@@ -852,6 +866,7 @@ public class LinkedUIControl {
 		((IPostSelectionProvider) viewer).addPostSelectionChangedListener(fSelectionListener);
 
 		createAnnotationModel();
+		
 		fCurrentTarget.fWidget.showSelection();
 		fCurrentTarget.fWidget.addVerifyListener(fCaretListener);
 		fCurrentTarget.fWidget.addModifyListener(fCaretListener);
@@ -898,6 +913,11 @@ public class LinkedUIControl {
 			text.removeModifyListener(fCaretListener);
 			text.removeVerifyListener(fCaretListener);
 		}
+		
+		// this one is asymmetric: we don't install the model in
+		// connect, but leave it to its callers to ensure they
+		// have the model installed if they need it
+		uninstallAnnotationModel(fCurrentTarget);
 
 		// don't remove the verify key listener to let it keep its position
 		// in the listener queue
@@ -917,8 +937,9 @@ public class LinkedUIControl {
 		
 //		// debug trace
 //		JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, "leaving linked mode", null));
+		if (fCurrentTarget.fAnnotationModel != null)
+			fCurrentTarget.fAnnotationModel.removeAllAnnotations();
 		disconnect();
-		redraw();
 		
 		for (int i= 0; i < fTargets.length; i++) {
 			if (fCurrentTarget.fKeyListener != null) {
@@ -931,21 +952,13 @@ public class LinkedUIControl {
 			
 			if (fTargets[i].fAnnotationModel != null) {
 				fTargets[i].fAnnotationModel.removeAllAnnotations();
+				fTargets[i].fAnnotationModel.disconnect(fCurrentTarget.getViewer().getDocument());
 				fTargets[i].fAnnotationModel= null;
 			}
 			
-			ITextViewer vi= fTargets[i].getViewer();
-			if (vi instanceof ISourceViewer) {
-				ISourceViewer sv= (ISourceViewer) vi;
-				IAnnotationModel model= sv.getAnnotationModel();
-				
-				if (model instanceof IAnnotationModelExtension) {
-					IAnnotationModelExtension ext= (IAnnotationModelExtension) model;
-					ext.removeAnnotationModel(getUniqueKey());
-				}
-				
-			}
+			uninstallAnnotationModel(fTargets[i]);
 		}
+
 		
 		if (fExitPosition != null)
 			fExitPosition.getDocument().removePosition(fExitPosition);

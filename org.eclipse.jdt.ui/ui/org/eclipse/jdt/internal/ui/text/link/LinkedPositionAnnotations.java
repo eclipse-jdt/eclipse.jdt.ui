@@ -253,20 +253,6 @@ final class LinkedPositionAnnotations extends AnnotationModel {
 	}
 	
 	/*
-	 * @see org.eclipse.jface.text.source.AnnotationModel#connect(org.eclipse.jface.text.IDocument)
-	 */
-	public void connect(IDocument document) {
-		fDocument= document;
-	}
-	
-	/*
-	 * @see org.eclipse.jface.text.source.AnnotationModel#disconnect(org.eclipse.jface.text.IDocument)
-	 */
-	public void disconnect(IDocument document) {
-		fDocument= null;
-	}
-
-	/*
 	 * @see org.eclipse.jface.text.source.AnnotationModel#addPosition(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.Position)
 	 */
 	protected void addPosition(IDocument document, Position position) {
