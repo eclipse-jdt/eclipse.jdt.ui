@@ -21,7 +21,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 
@@ -117,15 +116,15 @@ public class ClasspathModifierQueries {
          * @return an output folder query which will be needed 
          * when adding the folder to the build path
          * 
-         * @see IOutputFolderQuery
+         * @see OutputFolderQuery
          */
-        public IOutputFolderQuery getOutputFolderQuery();
+        public OutputFolderQuery getOutputFolderQuery();
     }
     /**
      * Query to get information about whether the project should be removed as
      * source folder and update build folder to <code>outputLocation</code>
      */
-    public static abstract class IOutputFolderQuery {
+    public static abstract class OutputFolderQuery {
         protected IPath fDesiredOutputLocation;
         
         /**
@@ -137,7 +136,7 @@ public class ClasspathModifierQueries {
          * equals the current project's output location (for example if 
          * it is not intended to change the output location at this time).
          */
-        public IOutputFolderQuery(IPath outputLocation) {
+        public OutputFolderQuery(IPath outputLocation) {
             if (outputLocation != null)
                 fDesiredOutputLocation= outputLocation.makeAbsolute();
         }
@@ -292,9 +291,9 @@ public class ClasspathModifierQueries {
          * @return query giving information about output and source folders
          * @throws JavaModelException
          * 
-         * @see IOutputFolderQuery
+         * @see OutputFolderQuery
          */
-        public IOutputFolderQuery getOutputFolderQuery(IPath outputLocation) throws JavaModelException;
+        public OutputFolderQuery getOutputFolderQuery(IPath outputLocation) throws JavaModelException;
     }
 
     /**
@@ -374,65 +373,62 @@ public class ClasspathModifierQueries {
      * @param outputLocation the desired project's output location
      * @return an <code>IOutputFolderQuery</code> that can be executed
      * 
-     * @see IOutputFolderQuery
+     * @see OutputFolderQuery
      * @see org.eclipse.jdt.internal.corext.buildpath.AddToClasspathOperation
      * @see org.eclipse.jdt.internal.corext.buildpath.CreateFolderOperation
      */
-    public static IOutputFolderQuery getDefaultFolderQuery(final Shell shell, IPath outputLocation) {
-        return new IOutputFolderQuery(outputLocation) {
-            private final IPath[] fOutputLocation= new IPath[1];
-            private boolean removeProject;
+    public static OutputFolderQuery getDefaultFolderQuery(final Shell shell, IPath outputLocation) {
+		
+        return new OutputFolderQuery(outputLocation) {
+			protected IPath fOutputLocation;
+			protected boolean fRemoveProject;
+			
             public boolean doQuery(final boolean editingOutputFolder,  final OutputFolderValidator validator, final IJavaProject project) throws JavaModelException {
-                final boolean[] result= new boolean[1];
-                removeProject= false;
-                fOutputLocation[0]= project.getOutputLocation();
-                Display.getDefault().syncExec(new Runnable() {
-                    public void run() {                        
-                        Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
-                        
-                        String title= NewWizardMessages.getString("ClasspathModifier.ChangeOutputLocationDialog.title"); //$NON-NLS-1$$
-                        MessageDialog dialog;
-                        
-                        IPath newOutputFolder= null;
-                        String message;
-                        if (fDesiredOutputLocation.segmentCount() == 1) {
-                            String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
-                            newOutputFolder= fDesiredOutputLocation.append(outputFolderName);
-                            newOutputFolder= getValidPath(newOutputFolder, validator);
-                            message= NewWizardMessages.getFormattedString("ClasspathModifier.ChangeOutputLocationDialog.project.outputLocation", newOutputFolder); //$NON-NLS-1$
-                            dialog= new MessageDialog(sh, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.OK_LABEL}, 0);
-                        } else {
-                            newOutputFolder= fDesiredOutputLocation;
-                            newOutputFolder= getValidPath(newOutputFolder, validator);
-                            if (editingOutputFolder && newOutputFolder != null) {
-                                fOutputLocation[0]= newOutputFolder;
-                                result[0]= true;
-                                return; // show no dialog
-                            }
-                            message= NewWizardMessages.getString("ClasspathModifier.ChangeOutputLocationDialog.project.message"); //$NON-NLS-1$
-                            removeProject= true;
-                            dialog= new MessageDialog(sh, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);
-                        }
-                        
-                        int code= dialog.open();
-                        boolean ok= code == IDialogConstants.OK_ID;
-                        if (ok) {
-                            if (newOutputFolder != null) {
-                                fOutputLocation[0]= newOutputFolder;
-                            }
-                        }
-                        result[0]= ok;
-                    }
-                });
+                final boolean[] result= { false };
+                fRemoveProject= false;
+                fOutputLocation= project.getOutputLocation();
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {                        
+						Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
+						
+						String title= NewWizardMessages.getString("ClasspathModifier.ChangeOutputLocationDialog.title"); //$NON-NLS-1$$
+						
+						if (fDesiredOutputLocation.segmentCount() == 1) {
+							String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
+							IPath newOutputFolder= fDesiredOutputLocation.append(outputFolderName);
+							newOutputFolder= getValidPath(newOutputFolder, validator);
+							String message= NewWizardMessages.getFormattedString("ClasspathModifier.ChangeOutputLocationDialog.project.outputLocation", newOutputFolder); //$NON-NLS-1$
+							fRemoveProject= true;
+							if (MessageDialog.openQuestion(sh, title, message)) {
+								fOutputLocation= newOutputFolder;
+								result[0]= true;
+							}
+						} else {
+							IPath newOutputFolder= fDesiredOutputLocation;
+							newOutputFolder= getValidPath(newOutputFolder, validator);
+							if (editingOutputFolder) {
+								fOutputLocation= newOutputFolder;
+								result[0]= true;
+								return; // show no dialog
+							}
+							String message= NewWizardMessages.getString("ClasspathModifier.ChangeOutputLocationDialog.project.message"); //$NON-NLS-1$
+							fRemoveProject= true;
+							if (MessageDialog.openQuestion(sh, title, message)) {
+								fOutputLocation= newOutputFolder;
+								result[0]= true;
+							}
+						}
+					}
+				});
                 return result[0];
             }
             
             public IPath getOutputLocation() {
-                return fOutputLocation[0];
+                return fOutputLocation;
             }
             
             public boolean removeProjectFromClasspath() {
-                return removeProject;
+                return fRemoveProject;
             }
             
             private IPath getValidPath(IPath newOutputFolder, OutputFolderValidator validator) {
@@ -458,33 +454,35 @@ public class ClasspathModifierQueries {
      * @see ClasspathModifierQueries.IInclusionExclusionQuery
      * @see org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation
      */
-    public static IInclusionExclusionQuery getDefaultInclusionExclusionQuery(final Shell shell) {
-        return new IInclusionExclusionQuery() {
-            final boolean[] result= new boolean[1];
-            final IPath[][] inclusionPattern= new IPath[1][1];
-            final IPath[][] exclusionPattern= new IPath[1][1];
-            public boolean doQuery(final CPListElement element, final boolean focusOnExcluded) {
-                Display.getDefault().syncExec(new Runnable() {
-                    public void run() {
-                        Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
-                        ExclusionInclusionDialog dialog= new ExclusionInclusionDialog(sh, element, focusOnExcluded);
-                        result[0]= dialog.open() == Window.OK;
-                        inclusionPattern[0]= dialog.getInclusionPattern();
-                        exclusionPattern[0]= dialog.getExclusionPattern();
-                    }
-                });
-                return result[0];
-            }
-            
-            public IPath[] getInclusionPattern() {
-                return inclusionPattern[0];
-            }
-            
-            public IPath[] getExclusionPattern() {
-                return exclusionPattern[0];
-            }
-        };
-    }
+	public static IInclusionExclusionQuery getDefaultInclusionExclusionQuery(final Shell shell) {
+		return new IInclusionExclusionQuery() {
+			
+			protected IPath[] fInclusionPattern;
+			protected IPath[] fExclusionPattern;
+			
+			public boolean doQuery(final CPListElement element, final boolean focusOnExcluded) {
+				final boolean[] result= { false };
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
+						ExclusionInclusionDialog dialog= new ExclusionInclusionDialog(sh, element, focusOnExcluded);
+						result[0]= dialog.open() == Window.OK;
+						fInclusionPattern= dialog.getInclusionPattern();
+						fExclusionPattern= dialog.getExclusionPattern();
+					}
+				});
+				return result[0];
+			}
+			
+			public IPath[] getInclusionPattern() {
+				return fInclusionPattern;
+			}
+			
+			public IPath[] getExclusionPattern() {
+				return fExclusionPattern;
+			}
+		};
+	}
 
     /**
      * A default query for the output location.
@@ -503,25 +501,27 @@ public class ClasspathModifierQueries {
      */
     public static IOutputLocationQuery getDefaultOutputLocationQuery(final Shell shell, final IPath projectOutputLocation, final List classpathList) {
         return new IOutputLocationQuery() {
-            final boolean[] result= new boolean[1];
-            final IPath[] path= new IPath[1];
-            public boolean doQuery(final CPListElement element) {
+
+            protected IPath fOutputLocation;
+
+			public boolean doQuery(final CPListElement element) {
+	            final boolean[] result= new boolean[1];
                 Display.getDefault().syncExec(new Runnable() {
                     public void run() {
                         Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
                         OutputLocationDialog dialog= new OutputLocationDialog(sh, element, classpathList);
                         result[0]= dialog.open() == Window.OK;
-                        path[0]= dialog.getOutputLocation();
+                        fOutputLocation= dialog.getOutputLocation();
                     }
                 });
                 return result[0];
             }
             
             public IPath getOutputLocation() {
-                return path[0];
+                return fOutputLocation;
             }
             
-            public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery(IPath p) {
+            public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath p) {
                 return getDefaultFolderQuery(shell, projectOutputLocation);
             }
         };
@@ -547,8 +547,8 @@ public class ClasspathModifierQueries {
      */
     public static IFolderCreationQuery getDefaultFolderCreationQuery(final Shell shell, final Object selection) {
         return new IFolderCreationQuery() {
-            final boolean[] isSourceFolder= {false};
-            final IFolder[] folder= {null};
+            protected boolean fIsSourceFolder;
+			protected IFolder fFolder;
             
             public boolean doQuery() {
                 final boolean[] isOK= {false};
@@ -574,8 +574,8 @@ public class ClasspathModifierQueries {
                         ExtendedNewFolderDialog dialog= new ExtendedNewFolderDialog(sh, container, javaProjectSelected);
                         isOK[0]= dialog.open() == Window.OK;
                         if (isOK[0]) {
-                            folder[0]= dialog.getCreatedFolder();
-                            isSourceFolder[0]= dialog.isSourceFolder();
+                            fFolder= dialog.getCreatedFolder();
+                            fIsSourceFolder= dialog.isSourceFolder();
                         }
                     }
                 });
@@ -583,11 +583,11 @@ public class ClasspathModifierQueries {
             }
             
             public boolean isSourceFolder() {
-                return isSourceFolder[0];
+                return fIsSourceFolder;
             }
     
             public IFolder getCreatedFolder() {
-                return folder[0];
+                return fFolder;
             }
             
         };
@@ -610,7 +610,7 @@ public class ClasspathModifierQueries {
      */
     public static ILinkToQuery getDefaultLinkQuery(final Shell shell, final IJavaProject project, final IPath desiredOutputLocation) {
         return new ILinkToQuery() {
-            final IFolder[] folder= {null};
+            protected IFolder fFolder;
             
             public boolean doQuery() {
                 final boolean[] isOK= {false};
@@ -621,17 +621,17 @@ public class ClasspathModifierQueries {
                         LinkFolderDialog dialog= new LinkFolderDialog(sh, project.getProject());
                         isOK[0]= dialog.open() == Window.OK;
                         if (isOK[0])
-                            folder[0]= dialog.getCreatedFolder();
+                            fFolder= dialog.getCreatedFolder();
                     }
                 });
                 return isOK[0];
             }
 
             public IFolder getCreatedFolder() {
-                return folder[0];
+                return fFolder;
             }
 
-            public IOutputFolderQuery getOutputFolderQuery() {
+            public OutputFolderQuery getOutputFolderQuery() {
                 return getDefaultFolderQuery(shell, desiredOutputLocation);
             }
             

@@ -11,28 +11,14 @@
 
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
-import java.io.ByteArrayInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -42,8 +28,6 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -78,13 +62,12 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     public static final String OPEN_SETTING= "org.eclipse.jdt.internal.ui.wizards.buildpaths.NewSourceContainerPage.openSetting";  //$NON-NLS-1$
     
     private ListDialogField fClassPathList;
-    private List fOriginalState;
     private HintTextGroup fHintTextGroup;
     private DialogPackageExplorer fPackageExplorer;
     private SelectionButtonDialogField fUseFolderOutputs;
-    private IDocument fCPContent;
-    private IDocument fProjectContent;
-    
+
+	private IJavaProject fJavaProject;
+
     /**
      * Constructor of the <code>NewSourceContainerWorkbookPage</code> which consists of 
      * a tree representing the project, a toolbar with the available actions, an area 
@@ -97,15 +80,15 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
      */
     public NewSourceContainerWorkbookPage(ListDialogField classPathList, StringDialogField outputLocationField, IRunnableContext context) {
         fClassPathList= classPathList;
-        fOriginalState= fClassPathList.getElements();
     
         fUseFolderOutputs= new SelectionButtonDialogField(SWT.CHECK);
         fUseFolderOutputs.setSelection(false);
         fUseFolderOutputs.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.folders.check")); //$NON-NLS-1$
         
-        fPackageExplorer= new DialogPackageExplorer();
-        fHintTextGroup= new HintTextGroup(fPackageExplorer, outputLocationField, fUseFolderOutputs, context);
-    }
+		fPackageExplorer= new DialogPackageExplorer();
+		fHintTextGroup= new HintTextGroup(fPackageExplorer, outputLocationField, fUseFolderOutputs, context);
+
+     }
     
     /**
      * Initialize the controls displaying
@@ -115,104 +98,28 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
      * Must be called before initializing the 
      * controls using <code>getControl(Composite)</code>.
      * 
-     * @param jProject the current java project
+     * @param javaProject the current java project
      */
-    public void init(IJavaProject jProject) {
-        IJavaProject javaProject= jProject;
-        fHintTextGroup.setJavaProject(jProject);
+    public void init(IJavaProject javaProject) {
+		fJavaProject= javaProject;
+        fHintTextGroup.setJavaProject(javaProject);
         
-        saveFile(javaProject.getProject());
-        fPackageExplorer.setContentProvider();
         fPackageExplorer.setInput(javaProject);
-        try {
-            if (ClasspathModifier.hasOutputFolders(javaProject, null)) {
-                fUseFolderOutputs.setSelection(true);
-                fUseFolderOutputs.dialogFieldChanged();
-            }
-            else {
-                fUseFolderOutputs.setSelection(false);
-                fUseFolderOutputs.dialogFieldChanged();
-            }
-        } catch (JavaModelException e) {
-            ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("NewSourceContainerWorkbookPage.Exception.init"), e.getMessage()); //$NON-NLS-1$
-            fUseFolderOutputs.setSelection(false);
-        }
+		
+		boolean useFolderOutputs= false;
+		List cpelements= fClassPathList.getElements();
+		for (int i= 0; i < cpelements.size() && !useFolderOutputs; i++) {
+			CPListElement cpe= (CPListElement) cpelements.get(i);
+			if (cpe.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+				if (cpe.getAttribute(CPListElement.OUTPUT) != null) {
+					useFolderOutputs= true;
+				}
+			}
+		}
+		fUseFolderOutputs.setSelection(useFolderOutputs);
     }
     
-    /**
-     * Create a copy of the files ".classpath" and
-     * ".project" to restore later in case of an
-     * undo operation
-     * 
-     * @param project the current project
-     * 
-     * @see #restoreFile(IFile, IDocument)
-     * @see #undoAll()
-     */
-    private void saveFile(IProject project) {
-        IFile cPFile= project.getFile(".classpath"); //$NON-NLS-1$
-        IFile projectFile= project.getFile(".project"); //$NON-NLS-1$
-        fCPContent= null;
-        fProjectContent= null;
-        try {
-            if (cPFile.exists())
-                fCPContent= getDocument(cPFile.getFullPath());
-            if (projectFile.exists())
-                fProjectContent= getDocument(projectFile.getFullPath());
-        } catch (CoreException e) {
-            ExceptionHandler.handle(e, getShell(), 
-                    NewWizardMessages.getString("NewSourceContainerWorkbookPage.Exception.saveFile"),  //$NON-NLS-1$
-                    e.getMessage());
-        }
-    }
-    
-    /**
-     * Restore the previously saved content in
-     * <code>document</code> in the given <code>
-     * file</code>
-     * 
-     * @param file the file to store the content to; if
-     * <code>file.exists()</code> then the file is deleted
-     * first.
-     * 
-     * @param document contains the content to be
-     * stored to the given <code>file</code>
-     */
-    private void restoreFile(IFile file, IDocument document) {            
-        if (document == null || file == null || !file.exists())
-            return;
-
-        try {
-            file.delete(true, null);
-            if (file.getLocation() == null)
-                return;
-            file.create(new ByteArrayInputStream(document.get().getBytes()), true, null);
-        } catch (CoreException e) {
-            ExceptionHandler.handle(e, getShell(), 
-                    NewWizardMessages.getFormattedString("NewSourceContainerWorkbookPage.Exception.restoreFile", file.getName()),  //$NON-NLS-1$
-                    e.getMessage());
-        }
-    }
-    
-    /**
-     * Gets the content of a file at the
-     * given <code>IPath</code>
-     * 
-     * @param path the path to a file
-     * @return returns an <code>IDocument</code> with
-     * the content of the file at the given path
-     */
-    private IDocument getDocument(IPath path) throws CoreException{
-        try {
-            FileBuffers.getTextFileBufferManager().connect(path, new NullProgressMonitor());
-            ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(path);
-            IDocument document= buffer.getDocument();
-            return document;
-        } finally {
-            FileBuffers.getTextFileBufferManager().disconnect(path, new NullProgressMonitor());
-        }
-    }
-    
+     
     /**
      * Initializ controls and return composite containing
      * these controls.
@@ -240,6 +147,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         
         ViewerPane pane= new ViewerPane(sashForm, SWT.BORDER | SWT.FLAT);
         pane.setContent(fPackageExplorer.createControl(pane));
+		fPackageExplorer.setContentProvider();
         
         final ExpandableComposite excomposite= new ExpandableComposite(sashForm, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
         excomposite.setText(NewWizardMessages.getString("NewSourceContainerWorkbookPage.HintTextGroup.title")); //$NON-NLS-1$
@@ -259,10 +167,14 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         
         excomposite.setClient(fHintTextGroup.createControl(excomposite));
         fUseFolderOutputs.doFillIntoGrid(body, 1);
+		
+	    final DialogPackageExplorerActionGroup actionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, this);
+		   
+		
         fUseFolderOutputs.setDialogFieldListener(new IDialogFieldListener() {
             public void dialogFieldChanged(DialogField field) {
-                Button button= ((SelectionButtonDialogField)field).getSelectionButton(null);
-                if (button.getSelection()) {
+                boolean isUseFolders= fUseFolderOutputs.isSelected();
+                if (isUseFolders) {
                     ResetAllOutputFoldersOperation op= new ResetAllOutputFoldersOperation(NewSourceContainerWorkbookPage.this, fHintTextGroup);
                     try {
                         op.run(null);
@@ -271,14 +183,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
                                 NewWizardMessages.getFormattedString("NewSourceContainerWorkbookPage.Exception.Title", op.getName()), e.getMessage()); //$NON-NLS-1$
                     }
                 }
-            }
-        });
-        final DialogPackageExplorerActionGroup actionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, this);
-        fUseFolderOutputs.getSelectionButton(null).addSelectionListener(new SelectionListener(){
-
-            public void widgetSelected(SelectionEvent event) {
-                boolean show= fUseFolderOutputs.getSelectionButton(null).getSelection();
-                fPackageExplorer.showOutputFolders(show);
+				fPackageExplorer.showOutputFolders(isUseFolders);
                 try {
                     ISelection selection= fPackageExplorer.getSelection();
                     actionGroup.refresh(new DialogExplorerActionContext(selection, fHintTextGroup.getJavaProject()));
@@ -287,10 +192,6 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
                             NewWizardMessages.getString("NewSourceContainerWorkbookPage.Exception.refresh"), e.getMessage()); //$NON-NLS-1$
                 }
             }
-
-            public void widgetDefaultSelected(SelectionEvent e) {
-            }
-            
         });
         
         // Create toolbar with actions on the left
@@ -404,34 +305,35 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
      * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#setSelection(java.util.List)
      */
     public void setSelection(List selection) {
+		// page switch
+		
         if (selection.size() == 0)
             return;
-        IJavaProject project= ((CPListElement)selection.get(0)).getJavaProject();
-        List cpEntries= new ArrayList();
-        for(int i= 0; i < selection.size(); i++) {
-            CPListElement element= (CPListElement) selection.get(i);
-            IPackageFragmentRoot root= project.findPackageFragmentRoots(element.getClasspathEntry())[0];
-            if (root.getPath().equals(root.getJavaProject().getPath()))
-                cpEntries.add(project);
-            else
-                cpEntries.add(root);
-        }
-        
+	    
+		List cpEntries= new ArrayList();
+		
+		for (int i= 0; i < selection.size(); i++) {
+			CPListElement element= (CPListElement) selection.get(i);
+			if (element.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+				cpEntries.add(element);
+			}
+		}
+		
         // refresh classpath
         List list= fClassPathList.getElements();
         IClasspathEntry[] entries= new IClasspathEntry[list.size()];
         for(int i= 0; i < list.size(); i++) {
-            CPListElement entry= (CPListElement)list.get(i);
+            CPListElement entry= (CPListElement) list.get(i);
             entries[i]= entry.getClasspathEntry(); 
         }
         try {
-            project.setRawClasspath(entries, null);
+			fJavaProject.setRawClasspath(entries, null);
             fPackageExplorer.refresh();
         } catch (JavaModelException e) {
             JavaPlugin.log(e);
         }
         
-        fHintTextGroup.setSelection(cpEntries);
+        fPackageExplorer.setSelection(cpEntries);
     }
 
     /* (non-Javadoc)
@@ -441,31 +343,6 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         return kind == IClasspathEntry.CPE_SOURCE;
     }
     
-    /**
-     * Undo all changes. This includes: <br> 
-     * <li> Restore the ".classpath" and ".project" files.
-     * <li> Deleting all newly created folders
-     * 
-     * @see HintTextGroup#deleteCreatedResources()
-     */
-    public void undoAll() {
-        if (fHintTextGroup.getJavaProject() == null) // Project not initialized yet
-            return;
-        IProject project= fHintTextGroup.getJavaProject().getProject();
-        IFile cPFile= project.getFile(".classpath");  //$NON-NLS-1$
-        IFile projectFile= project.getFile(".project"); //$NON-NLS-1$
-        
-        restoreFile(cPFile, fCPContent);
-        restoreFile(projectFile, fProjectContent);
-        
-        fClassPathList.setElements(fOriginalState);
-        
-        fHintTextGroup.deleteCreatedResources();
-        
-        fCPContent= null;
-        fProjectContent= null;
-    }
-
     /**
      * Update <code>fClassPathList</code>.
      */

@@ -177,7 +177,7 @@ public class OutputLocationDialog extends StatusDialog {
 				
 		String pathStr= fContainerDialogField.getText();
 		if (pathStr.length() == 0) {
-			fContainerFieldStatus.setOK();
+			fContainerFieldStatus.setError(""); //$NON-NLS-1$
 			return;
 		}
 		IPath projectPath= fCurrProject.getFullPath();

@@ -347,8 +347,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
             
             if (type == fLastType)
                 return;
-        }
-        if (selectedElements.size() == 1 || identicalTypes(selectedElements, project)) {
+        } else if (selectedElements.size() == 1 || identicalTypes(selectedElements, project)) {
             type= getType(selectedElements.get(0), project);
         }
         
@@ -484,6 +483,10 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @throws JavaModelException 
      */
     private boolean identicalTypes(List elements, IJavaProject project) throws JavaModelException {
+		if (elements.size() == 0) {
+			return false;
+		}
+		
         Object firstElement= elements.get(0);
         int firstType= getType(firstElement, project);
         for(int i= 1; i < elements.size(); i++) {

@@ -27,14 +27,14 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputFolderQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 
 
 /**
  * Operation to add objects (of type <code>IFolder</code> or <code>
  * IJavaElement</code> to the classpath.
  * 
- * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier#addToClasspath(List, IJavaProject, IOutputFolderQuery, IProgressMonitor)
+ * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier#addToClasspath(List, IJavaProject, OutputFolderQuery, IProgressMonitor)
  * @see org.eclipse.jdt.internal.corext.buildpath.RemoveFromClasspathOperation
  */
 public class AddToClasspathOperation extends ClasspathModifierOperation {
@@ -67,7 +67,7 @@ public class AddToClasspathOperation extends ClasspathModifierOperation {
         try {
             List elements= getSelectedElements();
             IJavaProject project= fInformationProvider.getJavaProject();
-            IOutputFolderQuery query= fInformationProvider.getOutputFolderQuery();
+            OutputFolderQuery query= fInformationProvider.getOutputFolderQuery();
             result= addToClasspath(elements, project, query, monitor);
         } catch (CoreException e) {
             fException= e;

@@ -18,6 +18,8 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.jdt.core.IJavaProject;
+
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
@@ -65,6 +67,12 @@ public class ClasspathOrderingWorkbookPage extends BuildPathBasePage {
 	 */
 	public boolean isEntryKind(int kind) {
 		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#init(org.eclipse.jdt.core.IJavaProject)
+	 */
+	public void init(IJavaProject javaProject) {
 	}
 
 }

@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputFolderQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 
 
 /**
@@ -59,7 +59,7 @@ public final class CreateFolderOperation extends ClasspathModifierOperation {
         List result= null;
         try {
             IFolderCreationQuery folderQuery= fInformationProvider.getFolderCreationQuery();
-            IOutputFolderQuery outputQuery= fInformationProvider.getOutputFolderQuery();
+            OutputFolderQuery outputQuery= fInformationProvider.getOutputFolderQuery();
             IJavaProject project= fInformationProvider.getJavaProject();
             result= createFolder(folderQuery, outputQuery, project, monitor);
         } catch (CoreException e) {

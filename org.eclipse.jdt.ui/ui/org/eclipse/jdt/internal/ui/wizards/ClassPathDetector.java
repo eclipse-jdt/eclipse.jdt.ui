@@ -20,15 +20,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceProxy;
 import org.eclipse.core.resources.IResourceProxyVisitor;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -58,6 +62,8 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 	private IPath fResultOutputFolder;
 	private IClasspathEntry[] fResultClasspath;
 	
+	private IProgressMonitor fMonitor;
+	
 	private static class CPSorter implements Comparator {
 		private Collator fCollator= Collator.getInstance();
 		public int compare(Object o1, Object o2) {
@@ -68,18 +74,20 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 	}
 	
 	
-	public ClassPathDetector(IProject project) throws CoreException {
+	public ClassPathDetector(IProject project, IProgressMonitor monitor) throws CoreException {
 		fSourceFolders= new HashMap();
 		fJARFiles= new HashSet(10);
 		fClassFiles= new ArrayList(100);
 		fProject= project;
 			
-		project.accept(this, IResource.NONE);
-			
 		fResultClasspath= null;
 		fResultOutputFolder= null;
+		
+		if (monitor == null) {
+			monitor = new NullProgressMonitor();
+		}
 			
-		detectClasspath();
+		detectClasspath(monitor);
 	}
 	
 	
@@ -95,30 +103,56 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 	
 	/**
 	 * Method detectClasspath.
+	 * @param monitor The progress monitor (not null)
+	 * @throws CoreException 
 	 */
-	private void detectClasspath() {
-		ArrayList cpEntries= new ArrayList();
-		
-		detectSourceFolders(cpEntries);
-		IPath outputLocation= detectOutputFolder(cpEntries);
-		
-		detectLibraries(cpEntries, outputLocation);
+	private void detectClasspath(IProgressMonitor monitor) throws CoreException {
+		try {
+			monitor.beginTask(NewWizardMessages.getString("ClassPathDetector.operation.description"), 4); //$NON-NLS-1$
 			
-		if (cpEntries.isEmpty() && fClassFiles.isEmpty()) {
-			return;
-		}
-		IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
-		for (int i= 0; i < jreEntries.length; i++) {
-			cpEntries.add(jreEntries[i]);
-		}
-		
-		IClasspathEntry[] entries= (IClasspathEntry[]) cpEntries.toArray(new IClasspathEntry[cpEntries.size()]);
-		if (!JavaConventions.validateClasspath(JavaCore.create(fProject), entries, outputLocation).isOK()) {
-			return;
-		}
+			fMonitor= monitor;
+			fProject.accept(this, IResource.NONE);
+			monitor.worked(1);
 			
-		fResultClasspath= entries;
-		fResultOutputFolder= outputLocation;
+			ArrayList cpEntries= new ArrayList();
+
+			detectSourceFolders(cpEntries);
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
+			monitor.worked(1);
+			
+			
+			IPath outputLocation= detectOutputFolder(cpEntries);
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
+			monitor.worked(1);
+
+			detectLibraries(cpEntries, outputLocation);
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
+			monitor.worked(1);
+
+			if (cpEntries.isEmpty() && fClassFiles.isEmpty()) {
+				return;
+			}
+			IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
+			for (int i= 0; i < jreEntries.length; i++) {
+				cpEntries.add(jreEntries[i]);
+			}
+
+			IClasspathEntry[] entries= (IClasspathEntry[]) cpEntries.toArray(new IClasspathEntry[cpEntries.size()]);
+			if (!JavaConventions.validateClasspath(JavaCore.create(fProject), entries, outputLocation).isOK()) {
+				return;
+			}
+
+			fResultClasspath= entries;
+			fResultOutputFolder= outputLocation;
+		} finally {
+			monitor.done();
+		}
 	}
 	
 	private IPath findInSourceFolders(IPath path) {
@@ -314,6 +348,10 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 	 * @see org.eclipse.core.resources.IResourceProxyVisitor#visit(org.eclipse.core.resources.IResourceProxy)
 	 */
 	public boolean visit(IResourceProxy proxy) {
+		if (fMonitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		
 		if (proxy.getType() == IResource.FILE) {
 			String name= proxy.getName();
 			if (hasExtension(name, ".java") && isValidCUName(name)) { //$NON-NLS-1$

@@ -16,7 +16,11 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -80,5 +84,9 @@ public abstract class BuildPathBasePage {
 		}
 		return false;
 	}
+
+	public abstract void init(IJavaProject javaProject);
+
+	public abstract Control getControl(Composite parent);
 	
 }

@@ -130,8 +130,7 @@ public class BuildPathsBlock {
 	
 	private int fPageIndex;
 	
-    private NewSourceContainerWorkbookPage fNewSourceContainerPage;
-	private SourceContainerWorkbookPage fSourceContainerPage;
+	private BuildPathBasePage fSourceContainerPage;
 	private ProjectsWorkbookPage fProjectsPage;
 	private LibrariesWorkbookPage fLibrariesPage;
 	
@@ -140,16 +139,16 @@ public class BuildPathsBlock {
 	private String fUserSettingsTimeStamp;
 	private long fFileTimeStamp;
     
-    private IRunnableContext fRunnableContext= null;
-    private boolean fUseNewPage= false;
+    private IRunnableContext fRunnableContext;
+    private boolean fUseNewPage;
 		
-	public BuildPathsBlock(IRunnableContext runnableContext, IStatusChangeListener context, int pageToShow) {
+	public BuildPathsBlock(IRunnableContext runnableContext, IStatusChangeListener context, int pageToShow, boolean useNewPage) {
 		fWorkspaceRoot= JavaPlugin.getWorkspace().getRoot();
 		fContext= context;
+		fUseNewPage= useNewPage;
 		
 		fPageIndex= pageToShow;
 		
-        fNewSourceContainerPage= null;
 		fSourceContainerPage= null;
 		fLibrariesPage= null;
 		fProjectsPage= null;
@@ -211,15 +210,12 @@ public class BuildPathsBlock {
         item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKFRAG_ROOT));
 		
         if (fUseNewPage) {
-            fNewSourceContainerPage= new NewSourceContainerWorkbookPage(fClassPathList, fBuildPathDialogField, fRunnableContext);
-            item.setData(fNewSourceContainerPage);     
-            item.setControl(fNewSourceContainerPage.getControl(folder));
+			fSourceContainerPage= new NewSourceContainerWorkbookPage(fClassPathList, fBuildPathDialogField, fRunnableContext);
+        } else {
+			fSourceContainerPage= new SourceContainerWorkbookPage(fClassPathList, fBuildPathDialogField);
         }
-        else {
-            fSourceContainerPage= new SourceContainerWorkbookPage(fWorkspaceRoot, fClassPathList, fBuildPathDialogField);
-            item.setData(fSourceContainerPage);     
-            item.setControl(fSourceContainerPage.getControl(folder));
-        }
+        item.setData(fSourceContainerPage);     
+        item.setControl(fSourceContainerPage.getControl(folder));
 		
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();	
 		Image projectImage= workbench.getSharedImages().getImage(IDE.SharedImages.IMG_OBJ_PROJECT);
@@ -250,10 +246,7 @@ public class BuildPathsBlock {
 		item.setControl(ordpage.getControl(folder));
 				
 		if (fCurrJProject != null) {
-            if (fSourceContainerPage != null)
-                fSourceContainerPage.init(fCurrJProject);
-            else
-                fNewSourceContainerPage.init(fCurrJProject);
+			fSourceContainerPage.init(fCurrJProject);
 			fLibrariesPage.init(fCurrJProject);
 			fProjectsPage.init(fCurrJProject);
 		}		
@@ -288,7 +281,6 @@ public class BuildPathsBlock {
 		}
 		return JavaPlugin.getActiveWorkbenchShell();
 	}
-	
 	
 	/**
 	 * Initializes the classpath for the given project. Multiple calls to init are allowed,
@@ -340,23 +332,23 @@ public class BuildPathsBlock {
 		fClassPathList.setElements(newClassPath);
 		fClassPathList.setCheckedElements(exportedEntries);
 		
+		initializeTimeStamps();
+		updateUI();
+	}
+	
+	protected void updateUI() {
 		if (Display.getCurrent() != null) {
-			updateUI();
+			doUpdateUI();
 		} else {
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
-					updateUI();
+					doUpdateUI();
 				}
 			});
 		}
-		initializeTimeStamps();
 	}
-    
-    public void useNewSourcePage() {
-        fUseNewPage= true;
-    }
-	
-	protected void updateUI() {
+
+	protected void doUpdateUI() {
 		fBuildPathDialogField.refresh();
 		fClassPathList.refresh();
 	
@@ -365,13 +357,6 @@ public class BuildPathsBlock {
 			fProjectsPage.init(fCurrJProject);
 			fLibrariesPage.init(fCurrJProject);
 		}
-        else {
-            if (fNewSourceContainerPage != null) {
-                fNewSourceContainerPage.init(fCurrJProject);
-                fProjectsPage.init(fCurrJProject);
-                fLibrariesPage.init(fCurrJProject);
-            }
-        }
 		doStatusLineUpdate();
 	}
 	
@@ -673,44 +658,33 @@ public class BuildPathsBlock {
 		monitor.setTaskName(NewWizardMessages.getString("BuildPathsBlock.operationdesc_java")); //$NON-NLS-1$
 		monitor.beginTask("", 10); //$NON-NLS-1$
 		try {
-			internalConfigureJavaProject(fClassPathList.getElements(), getOutputLocation(), monitor);
+			IRemoveOldBinariesQuery reorgQuery= getRemoveOldBinariesQuery(null);
+			// remove old .class files
+			if (reorgQuery != null) {
+				IPath oldOutputLocation= fCurrJProject.getOutputLocation();
+				if (!getOutputLocation().equals(oldOutputLocation)) {
+					IResource res= fWorkspaceRoot.findMember(oldOutputLocation);
+					if (res instanceof IContainer && hasClassfiles(res)) {
+						if (reorgQuery.doQuery(oldOutputLocation)) {
+							removeOldClassfiles(res);
+						}
+					}
+				}		
+			}
+			
+			internalConfigureJavaProject(fClassPathList.getElements(), getOutputLocation(), reorgQuery, monitor);
 		} finally {
 			monitor.done();
 		}
+		updateUI();
 	}
-    
-    /**
-     * Undo all changes (e.g. creation of folders).
-     *
-     *@see NewSourceContainerWorkbookPage#undoAll()
-     */
-    public void undoAll() {
-        if (fUseNewPage && fNewSourceContainerPage != null) {
-            fNewSourceContainerPage.undoAll();
-        }
-    }
-	
+    	
 	/*
 	 * Creates the Java project and sets the configured build path and output location.
 	 * If the project already exists only build paths are updated.
 	 */
-	private void internalConfigureJavaProject(List classPathEntries, IPath outputLocation, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+	private void internalConfigureJavaProject(List classPathEntries, IPath outputLocation, IRemoveOldBinariesQuery reorgQuery, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		// 10 monitor steps to go
-		
-		IRemoveOldBinariesQuery reorgQuery= getRemoveOldBinariesQuery(null);
-
-		// remove old .class files
-		if (reorgQuery != null) {
-			IPath oldOutputLocation= fCurrJProject.getOutputLocation();
-			if (!outputLocation.equals(oldOutputLocation)) {
-				IResource res= fWorkspaceRoot.findMember(oldOutputLocation);
-				if (res instanceof IContainer && hasClassfiles(res)) {
-					if (reorgQuery.doQuery(oldOutputLocation)) {
-						removeOldClassfiles(res);
-					}
-				}
-			}		
-		}
 		
 		// create and set the output path first
 		if (!fWorkspaceRoot.exists(outputLocation)) {

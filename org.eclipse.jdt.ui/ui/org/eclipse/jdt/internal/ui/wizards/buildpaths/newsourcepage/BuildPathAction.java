@@ -59,7 +59,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputFolderQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
 
 /**
@@ -227,7 +227,7 @@ public class BuildPathAction extends SelectionDispatchAction implements IClasspa
      * 
      * @throws JavaModelException if the project output location can not be retrieved
      */
-    public IOutputFolderQuery getOutputFolderQuery() throws JavaModelException {
+    public OutputFolderQuery getOutputFolderQuery() throws JavaModelException {
         return ClasspathModifierQueries.getDefaultFolderQuery(getShell(), fJavaProject.getOutputLocation().makeRelative());
     }
 

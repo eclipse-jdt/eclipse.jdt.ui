@@ -378,15 +378,11 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      * <code>fPackageViewer</code>
      */
     public void setContentProvider() {
-        PackageContentProvider contentProvider= null;
-        PackageLabelProvider labelProvider;
-        if (contentProvider == null) {
-            contentProvider= new PackageContentProvider();
-            labelProvider= new PackageLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
-            AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS);
-            fPackageViewer.setContentProvider(contentProvider);
-            fPackageViewer.setLabelProvider(new DecoratingJavaLabelProvider(labelProvider, false));
-        }
+		PackageContentProvider contentProvider= new PackageContentProvider();
+		PackageLabelProvider labelProvider= new PackageLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
+				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS);
+		fPackageViewer.setContentProvider(contentProvider);
+		fPackageViewer.setLabelProvider(new DecoratingJavaLabelProvider(labelProvider, false));
     }
     
     /**

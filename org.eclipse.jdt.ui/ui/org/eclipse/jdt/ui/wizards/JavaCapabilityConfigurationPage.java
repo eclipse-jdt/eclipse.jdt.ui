@@ -79,12 +79,22 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
                     updateStatus(status);
                 }
             };
-            fBuildPathsBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), listener, 0);
-            fBuildPathsBlock.useNewSourcePage();
+            fBuildPathsBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), listener, 0, useNewSourcePage());
         }
         return fBuildPathsBlock;
     }
 	
+	/**
+	 * Clients can override this method to choose if the new source page is used. The new source page
+	 * requires that the project is already created as Java project. The page will directly manipulate the classpath.
+	 * By default <code>false</code> is returned.
+	 * @return Returns <code>true</code> if the new source page should be used.
+	 * @since 3.1
+	 */
+	protected boolean useNewSourcePage() {
+		return false;
+	}
+
 	/**
 	 * Initializes the page with the project and default classpaths.
 	 * <p>
@@ -111,8 +121,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 		}
 		getBuildPathsBlock().init(jproject, defaultOutputLocation, defaultEntries);
 		fJavaProject= jproject;
-	}
-	
+	}	
 
 	/* (non-Javadoc)
 	 * @see WizardPage#createControl
@@ -219,13 +228,4 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 			monitor.done();
 		}			
 	}
-    
-    /**
-     * Cancel the operation.
-     *
-     *@see BuildPathsBlock#undoAll()
-     */
-    public void performCancel() {
-        getBuildPathsBlock().undoAll();
-    }
 }

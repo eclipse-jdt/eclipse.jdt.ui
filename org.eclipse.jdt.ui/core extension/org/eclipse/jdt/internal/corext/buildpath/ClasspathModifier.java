@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputFolderQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
 
@@ -131,9 +131,9 @@ public class ClasspathModifier {
      * @throws CoreException 
      * @throws OperationCanceledException 
      * @see ClasspathModifierQueries.IFolderCreationQuery
-     * @see ClasspathModifierQueries.IOutputFolderQuery
+     * @see ClasspathModifierQueries.OutputFolderQuery
      */
-    protected List createFolder(IFolderCreationQuery folderQuery, IOutputFolderQuery outputQuery, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException{
+    protected List createFolder(IFolderCreationQuery folderQuery, OutputFolderQuery outputQuery, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException{
         if (folderQuery.doQuery()) {
             IFolder folder= folderQuery.getCreatedFolder();
             List folderList= new ArrayList();
@@ -168,9 +168,9 @@ public class ClasspathModifier {
      * empty list if the operation was aborted
      * @throws CoreException 
      * @throws OperationCanceledException 
-     * @see ClasspathModifierQueries.IOutputFolderQuery
+     * @see ClasspathModifierQueries.OutputFolderQuery
      */
-    protected List addToClasspath(List elements, IJavaProject project, IOutputFolderQuery query, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+    protected List addToClasspath(List elements, IJavaProject project, OutputFolderQuery query, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
         if (monitor == null)
             monitor= new NullProgressMonitor();
         try {
@@ -638,7 +638,7 @@ public class ClasspathModifier {
         List entries= getExistingEntries(project);
         element= getClasspathEntry(entries, element);
         if (query.doQuery(element)) {
-            IOutputFolderQuery outputFolderQuery= query.getOutputFolderQuery(query.getOutputLocation());
+            OutputFolderQuery outputFolderQuery= query.getOutputFolderQuery(query.getOutputLocation());
             if (outputFolderQuery.getDesiredOutputLocation().segmentCount() == 1) {
                 if (!outputFolderQuery.doQuery(true, getTrueValidator(project), project))
                     return null;
@@ -1816,7 +1816,7 @@ public class ClasspathModifier {
      * 
      * @param newEntries
      * 
-     * @see #addToClasspath(List, IJavaProject, IOutputFolderQuery, IProgressMonitor)
+     * @see #addToClasspath(List, IJavaProject, OutputFolderQuery, IProgressMonitor)
      * @see #removeFromClasspath(List, IJavaProject, IProgressMonitor)
      */
     private void fireEvent(List newEntries) {
