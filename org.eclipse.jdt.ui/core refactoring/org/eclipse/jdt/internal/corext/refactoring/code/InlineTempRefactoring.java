@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PostfixExpression;
@@ -209,7 +210,11 @@ public class InlineTempRefactoring extends Refactoring {
     	if (parent instanceof VariableDeclarationFragment){
     		VariableDeclarationFragment vdf= (VariableDeclarationFragment)parent;
     		if (vdf.getInitializer().equals(firstSelected))
-    			return false;	
+    			return false;
+    	} else if (parent instanceof MethodInvocation){
+    		MethodInvocation mi= (MethodInvocation)parent;
+    		if (mi.arguments().contains(firstSelected))
+    			return false;
     	}
         return true;
     }
