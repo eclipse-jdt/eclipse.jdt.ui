@@ -2,6 +2,7 @@ feature.properties
 feature.xml
 cpl*.html
 license.html
+about.html
 notice.html
 buildnotes*.htm
 buildnotes*.html
