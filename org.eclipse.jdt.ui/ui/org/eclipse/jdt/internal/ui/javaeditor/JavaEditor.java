@@ -67,6 +67,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.information.IInformationProvider;
@@ -197,13 +198,12 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 
 		/** The session is active. */
 		private boolean fActive;
-
 		/** The currently active style range. */
 		private IRegion fActiveRegion;
-		
+		/** The currently active style range as position. */
+		private Position fRememberedPosition;
 		/** The hand cursor. */
 		private Cursor fCursor;
-		
 		/** The link color. */
 		private Color fColor;
 
@@ -671,13 +671,37 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		 * @see org.eclipse.jface.text.IDocumentListener#documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent)
 		 */
 		public void documentAboutToBeChanged(DocumentEvent event) {
+			if (fActive && fActiveRegion != null) {
+				fRememberedPosition= new Position(fActiveRegion.getOffset(), fActiveRegion.getLength());
+				try {
+					event.getDocument().addPosition(fRememberedPosition);
+				} catch (BadLocationException x) {
+					fRememberedPosition= null;
+				}
+			}
 		}
 
 		/*
 		 * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
 		 */
 		public void documentChanged(DocumentEvent event) {
-			deactivate(true);
+			if (fRememberedPosition != null && !fRememberedPosition.isDeleted()) {
+				event.getDocument().removePosition(fRememberedPosition);
+				fActiveRegion= new Region(fRememberedPosition.getOffset(), fRememberedPosition.getLength());
+			}
+			fRememberedPosition= null;
+			
+			ISourceViewer viewer= getSourceViewer();
+			if (viewer != null) {
+				StyledText widget= viewer.getTextWidget();
+				if (widget != null && !widget.isDisposed()) {
+					widget.getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							deactivate();
+						}
+					});
+				}
+			}
 		}
 
 		/*
