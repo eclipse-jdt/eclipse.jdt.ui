@@ -107,6 +107,10 @@ public class RemoteTestRunner implements TestListener {
 	 */
 	private Vector fRerunRequests= new Vector(10);
 	/**
+	 * Thread reading from the socket
+	 */
+	private ReaderThread fReaderThread;
+	/**
 	 * Reader thread that processes messages from the client.
 	 */
 	private class ReaderThread extends Thread {
@@ -268,9 +272,8 @@ public class RemoteTestRunner implements TestListener {
 	 * Connects to the remote ports and runs the tests.
 	 */
 	protected void run() {
-		if (!connect()) {
+		if (!connect())
 			return;
-		} 
 			
 		fTestResult= new TestResult();
 		fTestResult.addListener(this);
@@ -564,7 +567,8 @@ public class RemoteTestRunner implements TestListener {
 				fClientSocket= new Socket(fHost, fPort);
 				fWriter= new PrintWriter(fClientSocket.getOutputStream(), false/*true*/);
 				fReader= new BufferedReader(new InputStreamReader(fClientSocket.getInputStream()));
-				new ReaderThread().start();
+				fReaderThread= new ReaderThread();
+				fReaderThread.start();
 				return true;
 			} catch(IOException e){
 				exception= e;
@@ -587,8 +591,13 @@ public class RemoteTestRunner implements TestListener {
 			fWriter.close();
 			fWriter= null;
 		}
-		
 		try {
+			if (fReaderThread != null)   {
+				// interrupt reader thread so that we don't block on close
+				// on a lock held by the BufferedReader
+				// fix for bug: 38955
+				fReaderThread.interrupt();
+			}
 			if (fReader != null) {
 				fReader.close();
 				fReader= null;
