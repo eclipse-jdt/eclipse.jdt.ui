@@ -411,14 +411,14 @@ public class PreferenceConstants {
 	/**
 	 * A named preference that holds a list of possible JRE libraries used by the New Java Project wizard. An library 
 	 * consists of a description and an arbitrary number of <code>IClasspathEntry</code>s, that will represent the 
-	 * JRE on the new project's classpath. 
+	 * JRE on the new project's class path. 
 	 * <p>
 	 * Value is of type <code>String</code>: a semicolon separated list of encoded JRE libraries. 
 	 * <code>NEWPROJECT_JRELIBRARY_INDEX</code> defines the currently used library. Clients
 	 * should use the method <code>encodeJRELibrary</code> to encode a JRE library into a string
 	 * and the methods <code>decodeJRELibraryDescription(String)</code> and <code>
 	 * decodeJRELibraryClasspathEntries(String)</code> to decode the description and the array
-	 * of classpath entries from an encoded string.
+	 * of class path entries from an encoded string.
 	 * </p>
 	 * 
 	 * @see #NEWPROJECT_JRELIBRARY_INDEX
@@ -1164,7 +1164,7 @@ public class PreferenceConstants {
 	public static final String EDITOR_ITALIC_SUFFIX= "_italic"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that holds the color used to render multi line comments.
+	 * A named preference that holds the color used to render multi-line comments.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
 	 * using class <code>PreferenceConverter</code>
@@ -1184,18 +1184,18 @@ public class PreferenceConstants {
 	public final static String EDITOR_TEXT_FONT= "org.eclipse.jdt.ui.editors.textfont"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls whether multi line comments are rendered in bold.
+	 * A named preference that controls whether multi-line comments are rendered in bold.
 	 * <p>
-	 * Value is of type <code>Boolean</code>. If <code>true</code> multi line comments are rendered
+	 * Value is of type <code>Boolean</code>. If <code>true</code> multi-line comments are rendered
 	 * in bold. If <code>false</code> the are rendered using no font style attribute.
 	 * </p>
 	 */
 	public final static String EDITOR_MULTI_LINE_COMMENT_BOLD= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + EDITOR_BOLD_SUFFIX; 
 
 	/**
-	 * A named preference that controls whether multi line comments are rendered in italic.
+	 * A named preference that controls whether multi-line comments are rendered in italic.
 	 * <p>
-	 * Value is of type <code>Boolean</code>. If <code>true</code> multi line comments are rendered
+	 * Value is of type <code>Boolean</code>. If <code>true</code> multi-line comments are rendered
 	 * in italic. If <code>false</code> the are rendered using no italic font style attribute.
 	 * </p>
 	 * 
@@ -1690,7 +1690,7 @@ public class PreferenceConstants {
 	 * @see #EDITOR_DEFAULT_HOVER_CONFIGURED_ID
 	 * @see JavaUI ID_*_HOVER
 	 * @since 2.1
-	 * @deprecated Will be removed in one of the next builds.
+	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 */
 	public static final String EDITOR_CTRL_SHIFT_HOVER= "ctrlShiftHover"; //$NON-NLS-1$
 
@@ -2892,10 +2892,10 @@ public class PreferenceConstants {
 	}
 	
 	/**
-	 * Decodes an encoded JRE library and returns its classpath entries.
+	 * Decodes an encoded JRE library and returns its class path entries.
 	 * 
-	 * @return the array of classpath entries of an encoded JRE library.
-	 * 
+	 * @param encodedLibrary the encoded JRE library
+	 * @return the array of class path entries of an encoded JRE library.
 	 * @see #encodeJRELibrary(String, IClasspathEntry[])
 	 */
 	public static IClasspathEntry[] decodeJRELibraryClasspathEntries(String encodedLibrary) {
@@ -2907,7 +2907,7 @@ public class PreferenceConstants {
 	 * This is a convenience method to access the named preference <code>NEWPROJECT_JRELIBRARY_LIST
 	 * </code> with the index defined by <code> NEWPROJECT_JRELIBRARY_INDEX</code>.
 	 *
-	 * @return the current default set of classpath entries
+	 * @return the current default set of class path entries
 	 *  
 	 * @see #NEWPROJECT_JRELIBRARY_LIST
 	 * @see #NEWPROJECT_JRELIBRARY_INDEX
