@@ -1622,7 +1622,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	
-	public void testUndefinedConstructorInDefaultConstructor3() throws Exception {
+	public void testUndefinedConstructorWithEnclosing1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1660,6 +1660,88 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        }\n");	
 		buf.append("    }\n");
 		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testUndefinedConstructorWithEnclosing2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public static class SubF {\n");
+		buf.append("        public SubF(int i) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public class SubE extends F.SubF {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public class SubE extends F.SubF {\n");
+		buf.append("\n");
+		buf.append("        public SubE(int i) {\n");
+		buf.append("            super(i);\n");		
+		buf.append("        }\n");	
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	
+	public void testUndefinedConstructorWithEnclosing3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public static class SubF {\n");
+		buf.append("        public SubF(int i) {\n");
+		buf.append("        }\n");
+		buf.append("        public class SubF2 extends SubF {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public static class SubF {\n");
+		buf.append("        public SubF(int i) {\n");
+		buf.append("        }\n");
+		buf.append("        public class SubF2 extends SubF {\n");
+		buf.append("\n");
+		buf.append("            public SubF2(int i) {\n");
+		buf.append("                super(i);\n");		
+		buf.append("            }\n");	
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
 		assertEqualString(preview, buf.toString());
 	}
 	

@@ -22,17 +22,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Javadoc;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
@@ -113,8 +102,9 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		List parameters= newStub.parameters();
 		for (int i= 0; i < parameters.size(); i++) {
 			SingleVariableDeclaration curr= (SingleVariableDeclaration) parameters.get(i);
-			markAsLinked(rewrite, curr.getType(), false, "arg_type_" + i); //$NON-NLS-1$
-			markAsLinked(rewrite, curr.getName(), false, "arg_name_" + i); //$NON-NLS-1$
+			String name= curr.getName().getIdentifier();
+			markAsLinked(rewrite, curr.getType(), false, "arg_type_" + name); //$NON-NLS-1$
+			markAsLinked(rewrite, curr.getName(), false, "arg_name_" + name); //$NON-NLS-1$
 		}
 	}	
 	
@@ -124,17 +114,24 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		decl.setConstructor(true);
 		decl.setName(ast.newSimpleName(name));
 		Block body= ast.newBlock();
-		decl.setBody(body);		
-	
-		String bodyStatement= ""; //$NON-NLS-1$
+		decl.setBody(body);
+		
+		SuperConstructorInvocation invocation= null;
+		
+		List parameters= decl.parameters();
+		String[] paramNames= getArgumentNames(binding);
+		
+		ITypeBinding enclosingInstance= getEnclosingInstance();
+		if (enclosingInstance != null) {
+			invocation= addEnclosingInstanceAccess(rewrite, parameters, paramNames, enclosingInstance);
+		}
+
 		if (binding == null) {
 			decl.setModifiers(Modifier.PUBLIC);
 		} else {
 			decl.setModifiers(binding.getModifiers());
 		
-			List parameters= decl.parameters();
 			ITypeBinding[] params= binding.getParameterTypes();
-			String[] paramNames= getArgumentNames(binding);
 			for (int i= 0; i < params.length; i++) {
 				String paramTypeName= getImportRewrite().addImport(params[i]);
 				SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
@@ -150,15 +147,19 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 				thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
 			}
 		
-			SuperConstructorInvocation invocation= ast.newSuperConstructorInvocation();
+			if (invocation == null) {
+				invocation= ast.newSuperConstructorInvocation();
+			}
+			
 			List arguments= invocation.arguments();
 			for (int i= 0; i < paramNames.length; i++) {
 				Name argument= ast.newSimpleName(paramNames[i]);
 				arguments.add(argument);
-				markAsLinked(rewrite, argument, false, "arg_name_" + i); //$NON-NLS-1$
+				markAsLinked(rewrite, argument, false, "arg_name_" + paramNames[i]); //$NON-NLS-1$
 			}
-			bodyStatement= ASTNodes.asFormattedString(invocation, 0, String.valueOf('\n'));
 		}
+		
+		String bodyStatement= (invocation == null) ? "" : ASTNodes.asFormattedString(invocation, 0, String.valueOf('\n')); //$NON-NLS-1$
 		String placeHolder= CodeGeneration.getMethodBodyContent(getCompilationUnit(), name, name, true, bodyStatement, String.valueOf('\n')); 	
 		if (placeHolder != null) {
 			ASTNode todoNode= rewrite.createPlaceholder(placeHolder, NewASTRewrite.STATEMENT);
@@ -173,9 +174,60 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		}
 		return decl;
 	}
+	
+	private SuperConstructorInvocation addEnclosingInstanceAccess(ASTRewrite rewrite, List parameters, String[] paramNames, ITypeBinding enclosingInstance) throws CoreException {
+		AST ast= rewrite.getAST();
+		SuperConstructorInvocation invocation= ast.newSuperConstructorInvocation();
+		
+		String paramTypeName= getImportRewrite().addImport(enclosingInstance);
+		
+		SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
+		var.setType(ASTNodeFactory.newType(ast, paramTypeName));
+		String[] enclosingArgNames= StubUtility.getArgumentNameSuggestions(getCompilationUnit().getJavaProject(), enclosingInstance.getName(), paramNames);
+		String firstName= enclosingArgNames[0];
+		var.setName(ast.newSimpleName(firstName));
+		parameters.add(var);
+		
+		Name enclosing= ast.newSimpleName(firstName);
+		invocation.setExpression(enclosing);
+		
+		String key= "arg_name_" + firstName; //$NON-NLS-1$
+		markAsLinked(rewrite, enclosing, false, key);
+		for (int i= 0; i < enclosingArgNames.length; i++) {
+			addLinkedModeProposal(key, enclosingArgNames[i]); // alternative names
+		}
+		return invocation;
+	}
+
+	private ITypeBinding getEnclosingInstance() {
+		ITypeBinding currBinding= fTypeNode.resolveBinding();
+		if (currBinding == null || Modifier.isStatic(currBinding.getModifiers())) {
+			return null;
+		}
+		ITypeBinding superBinding= currBinding.getSuperclass();
+		if (superBinding == null || superBinding.getDeclaringClass() == null || Modifier.isStatic(superBinding.getModifiers())) {
+			return null;
+		}
+		ITypeBinding enclosing= superBinding.getDeclaringClass();
+		
+		while (currBinding != null) {
+			if (Bindings.isSuperType(enclosing, currBinding)) {
+				return null; // enclosing in scope
+			}
+			if (Modifier.isStatic(currBinding.getModifiers())) {
+				return null; // no more enclosing instances
+			}
+			currBinding= currBinding.getDeclaringClass();
+		}
+		return enclosing;
+	}
 
 
 	private String[] getArgumentNames(IMethodBinding binding) {
+		if (binding == null) {
+			return new String[0];
+		}
+		
 		int nParams= binding.getParameterTypes().length;
 		if (nParams > 0) {
 			try {
