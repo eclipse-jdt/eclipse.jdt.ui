@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Decorator prepared for the switch to use lightweight label decorators:
- * uncomment the lbale decorator entries in plugin.xml and change
+ * uncomment the label decorator entries in plugin.xml and change
  * USE_LIGHTWEIGHT to true.
  * Certain views don't want problems or override indicators, so they signal this
  * in the constructor. So on each getImage the corrsponding decorators are
