@@ -590,7 +590,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		if (type.isArray() && type.getElementType().isPrimitive())
 			return null;
 
-		ImportRewrite rewrite= new ImportRewrite(fCu, fSettings);
+		ImportRewrite rewrite= new ImportRewrite(fCu);
 		rewrite.addImport(type);
 		if (rewrite.isEmpty())
 			return null;

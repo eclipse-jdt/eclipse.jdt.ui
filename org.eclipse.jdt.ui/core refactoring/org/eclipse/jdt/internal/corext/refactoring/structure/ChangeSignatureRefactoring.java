@@ -947,7 +947,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			else
 				cuNode= new RefactoringASTParser(AST.LEVEL_2_0).parse(cu, true);
 			OldASTRewrite rewrite= new OldASTRewrite(cuNode);
-			ImportRewrite importRewrite= new ImportRewrite(cu, fCodeGenerationSettings);
+			ImportRewrite importRewrite= new ImportRewrite(cu);
 			ASTNode[] nodes= ASTNodeSearchUtil.findNodes(group.getSearchResults(), cuNode);
 			for (int j= 0; j < nodes.length; j++) {
 				createOccurrenceUpdate(nodes[j], rewrite, importRewrite, result).updateNode();

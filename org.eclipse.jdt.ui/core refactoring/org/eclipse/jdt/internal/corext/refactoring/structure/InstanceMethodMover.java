@@ -209,7 +209,7 @@ class InstanceMethodMover {
 		}
 
 		private ImportRewrite createImportRewrite(List types, ICompilationUnit cu) throws CoreException {
-			ImportRewrite importEdit= new ImportRewrite(cu, fCodeGenSettings);
+			ImportRewrite importEdit= new ImportRewrite(cu);
 			for(Iterator it= types.iterator(); it.hasNext();)
 				importEdit.addImport((ITypeBinding) it.next());
 			return importEdit;

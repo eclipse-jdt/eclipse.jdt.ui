@@ -112,7 +112,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		public ASTData(ICompilationUnit u, boolean resolveBindings, CodeGenerationSettings settings) throws CoreException {
 			this(u, resolveBindings);
 			groups= new ArrayList();
-			imports= new ImportRewrite(unit, settings);
+			imports= new ImportRewrite(unit);
 		}
 		public ICompilationUnit unit;
 		public CompilationUnit root;
@@ -127,7 +127,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		}
 		public void reset(CodeGenerationSettings settings) throws CoreException {
 			clearRewrite();
-			imports= new ImportRewrite(unit, settings);
+			imports= new ImportRewrite(unit);
 		}
 		public void clearRewrite() {
 			rewriter.removeModifications();

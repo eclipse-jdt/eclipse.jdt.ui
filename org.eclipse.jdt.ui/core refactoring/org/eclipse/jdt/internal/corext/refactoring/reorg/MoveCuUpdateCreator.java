@@ -252,7 +252,7 @@ public class MoveCuUpdateCreator {
 	private ImportRewrite getImportRewrite(ICompilationUnit cu) throws CoreException{
 		if (fImportRewrites.containsKey(cu))	
 			return (ImportRewrite)fImportRewrites.get(cu);
-		ImportRewrite importEdit= new ImportRewrite(cu, fSettings);
+		ImportRewrite importEdit= new ImportRewrite(cu);
 		fImportRewrites.put(cu, importEdit);
 		return importEdit;	
 	}

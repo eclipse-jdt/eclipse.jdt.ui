@@ -43,7 +43,7 @@ class ImportRewriteManager {
 		if (hasImportEditFor(cu))
 			return (ImportRewrite)fImportRewrites.get(cu);
 
-		ImportRewrite edit= new ImportRewrite(cu, fPreferenceSettings);
+		ImportRewrite edit= new ImportRewrite(cu);
 		fImportRewrites.put(cu, edit);
 		return edit;
 	}

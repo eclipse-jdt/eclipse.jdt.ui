@@ -215,7 +215,7 @@ public class CallInliner {
 		fCUnit= unit;
 		fBuffer= TextBuffer.acquire(getFile(fCUnit));
 		fSourceProvider= provider;
-		fImportEdit= new ImportRewrite(fCUnit, settings);
+		fImportEdit= new ImportRewrite(fCUnit);
 		fLocals= new ArrayList(3);
 	}
 

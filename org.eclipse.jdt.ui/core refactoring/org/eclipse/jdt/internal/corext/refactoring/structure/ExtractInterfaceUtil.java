@@ -223,7 +223,7 @@ class ExtractInterfaceUtil {
 			    TextChange change= getTextChange(manager, cu);
 			    if (!cus.contains(cu)) {
 			        cus.add(cu);
-			        ImportRewrite importRewrite= new ImportRewrite(cu, settings);
+			        ImportRewrite importRewrite= new ImportRewrite(cu);
 			        cuToImportType.put(cu, importRewrite.addImport(supertypeToUse.getFullyQualifiedName()));
 			        TextEdit importEdit= importRewrite.createEdit(new Document(cu.getSource()));
 			        TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractInterfaceUtil.update_imports"), importEdit);

@@ -43,7 +43,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -120,7 +119,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	
 	public ImportRewrite getImportRewrite() throws CoreException {
 		if (fImportRewrite == null) {
-			fImportRewrite= new ImportRewrite(getCompilationUnit(), JavaPreferencesSettings.getCodeGenerationSettings());
+			fImportRewrite= new ImportRewrite(getCompilationUnit());
 		}
 		return fImportRewrite;
 	}

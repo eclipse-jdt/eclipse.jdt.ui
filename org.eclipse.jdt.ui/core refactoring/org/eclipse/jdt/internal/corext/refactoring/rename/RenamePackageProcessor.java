@@ -69,8 +69,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -675,7 +673,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	}
 	
 	private ImportRewrite newImportRewrite(ICompilationUnit cu) throws CoreException {
-		ImportRewrite rewrite= new ImportRewrite(cu, JavaPreferencesSettings.getCodeGenerationSettings());
+		ImportRewrite rewrite= new ImportRewrite(cu);
 		rewrite.setFilterImplicitImports(false);
 		return rewrite;
 	}

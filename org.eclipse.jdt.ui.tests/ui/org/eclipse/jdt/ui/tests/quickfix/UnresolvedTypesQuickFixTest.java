@@ -76,7 +76,8 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 				
 		fJProject1= ProjectTestSetup.getProject();
 
-		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.NEWTYPE).setPattern("");
+		String newFileTemplate= "${package_declaration}\n\n${type_declaration}";
+		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.NEWTYPE).setPattern(newFileTemplate);
 		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.TYPECOMMENT).setPattern("");
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");

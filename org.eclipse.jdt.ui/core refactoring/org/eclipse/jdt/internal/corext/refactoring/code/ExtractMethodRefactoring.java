@@ -167,7 +167,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		Assert.isNotNull(cu);
 		Assert.isNotNull(settings);
 		fCUnit= cu;
-		fImportRewriter= new ImportRewrite(cu, settings);
+		fImportRewriter= new ImportRewrite(cu);
 		fMethodName= "extracted"; //$NON-NLS-1$
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;

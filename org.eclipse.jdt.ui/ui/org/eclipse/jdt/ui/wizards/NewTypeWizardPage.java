@@ -1454,20 +1454,23 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 			
 			// add imports for superclass/interfaces, so types can be resolved correctly
+			
 			ICompilationUnit cu= createdType.getCompilationUnit();	
 			boolean needsSave= !cu.isWorkingCopy();
+			
 			imports.create(needsSave, new SubProgressMonitor(monitor, 1));
-	
+				
 			JavaModelUtil.reconcile(cu);
-		
+				
+				// set up again
+			imports= new ImportsManager(imports.getImportsStructure().getCompilationUnit());
+			
 			createTypeMembers(createdType, imports, new SubProgressMonitor(monitor, 1));
 	
 			// add imports
 			imports.create(needsSave, new SubProgressMonitor(monitor, 1));
 			
-			if (removeUnused(cu, imports)) {
-				imports.create(needsSave, null);
-			}
+			removeUnusedImports(cu, needsSave);
 			
 			JavaModelUtil.reconcile(cu);
 			
@@ -1504,21 +1507,27 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 	}	
 	
-	private boolean removeUnused(ICompilationUnit cu, ImportsManager imports) {
+	private void removeUnusedImports(ICompilationUnit cu, boolean needsSave) throws CoreException {
 		ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 		CompilationUnit root= (CompilationUnit) parser.createAST(null);
 		IProblem[] problems= root.getProblems();
-		boolean importRemoved= false;
+		ArrayList res= new ArrayList();
 		for (int i= 0; i < problems.length; i++) {
 			if (problems[i].getID() == IProblem.UnusedImport) {
 				String imp= problems[i].getArguments()[0];
-				imports.removeImport(imp);
-				importRemoved=true;
+				res.add(imp);
 			}
 		}
-		return importRemoved;
+		if (!res.isEmpty()) {
+			ImportsManager imports= new ImportsManager(cu);
+			for (int i= 0; i < res.size(); i++) {
+				String curr= (String) res.get(i);
+				imports.removeImport(curr);
+			}
+			imports.create(needsSave, null);
+		}
 	}
 
 	/**

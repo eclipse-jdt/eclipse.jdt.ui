@@ -95,8 +95,6 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -1117,7 +1115,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * update a CompilationUnit's imports after changing the type of declarations
 	 */
 	private String updateImports(ICompilationUnit icu, TextBuffer buffer, MultiTextEdit rootEdit) throws CoreException{	
-		ImportRewrite rewrite= new ImportRewrite(icu, JavaPreferencesSettings.getCodeGenerationSettings());
+		ImportRewrite rewrite= new ImportRewrite(icu);
 		String typeName= rewrite.addImport(fSelectedType.getFullyQualifiedName());
 		rootEdit.addChild(rewrite.createEdit(buffer.getDocument()));
 		return typeName;

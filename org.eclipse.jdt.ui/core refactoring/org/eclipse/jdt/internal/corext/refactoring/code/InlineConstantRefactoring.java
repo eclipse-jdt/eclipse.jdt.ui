@@ -667,7 +667,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			}
 			
 			fInlineEdits= new ArrayList();
-			fImportRewrite= new ImportRewrite(fUnit, fCodeGenSettings);
+			fImportRewrite= new ImportRewrite(fUnit);
 			fEditProblems= new RefactoringStatus();
 			
 			if(fUnit.getSource() == null) {

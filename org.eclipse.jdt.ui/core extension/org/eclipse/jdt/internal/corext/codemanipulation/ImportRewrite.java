@@ -39,23 +39,24 @@ public final class ImportRewrite {
 	
 	private ImportsStructure fImportsStructure;
 	
-	public ImportRewrite(ICompilationUnit cu, String[] preferenceOrder, int importThreshold) throws CoreException {
+	private ImportRewrite(ICompilationUnit cu, String[] preferenceOrder, int importThreshold) throws CoreException {
 		Assert.isNotNull(cu);
 		Assert.isNotNull(preferenceOrder);
 		fImportsStructure= new ImportsStructure(cu, preferenceOrder, importThreshold, true);
 	}
 	
+	/**
+	 * Creates a import rewriter with the settings as configured in the preferences
+	 * @param cunit The compilation unit that contains the imports to change.
+	 * @throws CoreException
+	 */
 	public ImportRewrite(ICompilationUnit cunit) throws CoreException {
 		this(cunit, JavaPreferencesSettings.getImportOrderPreference(PreferenceConstants.getPreferenceStore()), JavaPreferencesSettings.getImportNumberThreshold(PreferenceConstants.getPreferenceStore()));
 	}
 	
-	public ImportRewrite(ICompilationUnit cunit, CodeGenerationSettings settings) throws CoreException {
-		this(cunit, settings.importOrder, settings.importThreshold);
-	}
-	
 	public final TextEdit createEdit(IDocument document) throws CoreException {
 		try {
-			IRegion region= fImportsStructure.getReplaceRange(document);
+			IRegion region= fImportsStructure.getReplaceRange();
 			String text= fImportsStructure.getReplaceString(document, region);
 			if (text == null) {
 				return new MultiTextEdit(region.getOffset(), 0);
@@ -89,7 +90,7 @@ public final class ImportRewrite {
 	 * a best match algorithm. If an import already exists, the import is
 	 * not added.
 	 * @param qualifiedTypeName The fully qualified name of the type to import
-	 * @return Retuns the simple type name that can be used in the code or the
+	 * @return Returns the simple type name that can be used in the code or the
 	 * fully qualified type name if an import conflict prevented the import.
 	 * The type name can contain dimensions.
 	 */
@@ -103,7 +104,7 @@ public final class ImportRewrite {
 	 * not added.  The type binding can be an array binding. No import is added for unnamed
 	 * types (local or anonymous types)
 	 * @param binding The type binding of the type to be added
-	 * @return Retuns the simple type name that can be used in the code or the
+	 * @return Returns the simple type name that can be used in the code or the
 	 * fully qualified type name if an import conflict prevented the import.
 	 */
 	public String addImport(ITypeBinding binding) {

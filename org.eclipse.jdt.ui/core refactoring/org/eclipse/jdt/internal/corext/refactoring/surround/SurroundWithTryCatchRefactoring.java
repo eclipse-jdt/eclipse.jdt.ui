@@ -170,7 +170,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			buffer= TextBuffer.acquire(getFile());
 			ASTNodes.expandRange(fAnalyzer.getSelectedNodes(), buffer, fSelection.getOffset(), fSelection.getLength());
 			fRewriter= new OldASTRewrite(fAnalyzer.getEnclosingBodyDeclaration());
-			fImportRewrite= new ImportRewrite(fCUnit, fSettings);
+			fImportRewrite= new ImportRewrite(fCUnit);
 			
 			fScope= CodeScopeBuilder.perform(fAnalyzer.getEnclosingBodyDeclaration(), fSelection).
 				findScope(fSelection.getOffset(), fSelection.getLength());

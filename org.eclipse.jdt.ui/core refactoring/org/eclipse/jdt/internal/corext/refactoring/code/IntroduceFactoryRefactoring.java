@@ -703,7 +703,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		try {
 			unitChange.setEdit(root);
 			buffer= TextBuffer.acquire((IFile) unitHandle.getResource());
-			fImportRewriter= new ImportRewrite(unitHandle, fCodeGenSettings);
+			fImportRewriter= new ImportRewrite(unitHandle);
 
 			// First create the factory method
 			if (unitHandle.equals(fFactoryUnitHandle)) {

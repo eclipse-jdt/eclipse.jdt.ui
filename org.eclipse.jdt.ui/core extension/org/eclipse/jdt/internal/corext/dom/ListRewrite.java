@@ -53,6 +53,14 @@ public final class ListRewrite {
 	}
 	
 	/**
+	 * Returns the ASTRewrite that this list rewrite belongs.
+	 * @return The parent AST rewrite instance.
+	 */
+	public ASTRewrite getASTRewrite() {
+		return fRewriter;
+	}
+	
+	/**
 	 * Removes the given node from its parent's list property in the rewriter.
 	 * The node must be contained in the list.
 	 * The AST itself is not actually modified in any way; rather, the rewriter
@@ -136,7 +144,7 @@ public final class ListRewrite {
 		if (index == -1) {
 			throw new IllegalArgumentException("Node does not exist"); //$NON-NLS-1$
 		}
-		insertAt(node, index + 1, editGroup);
+		internalInsertAt(node, index + 1, true, editGroup);
 	}
 	
 	/**
@@ -169,7 +177,7 @@ public final class ListRewrite {
 		if (index == -1) {
 			throw new IllegalArgumentException("Node does not exist"); //$NON-NLS-1$
 		}
-		insertAt(node, index, editGroup);
+		internalInsertAt(node, index, false, editGroup);
 	}
 	
 	/**
@@ -186,7 +194,10 @@ public final class ListRewrite {
      * @see #insertAt(ASTNode, int, TextEditGroup)
 	 */
 	public void insertFirst(ASTNode node, TextEditGroup editGroup) {
-		insertAt(node, 0, editGroup);
+		if (node == null) { 
+			throw new IllegalArgumentException();
+		}
+		internalInsertAt(node, 0, false, editGroup);
 	}
 	
 	/**
@@ -203,7 +214,10 @@ public final class ListRewrite {
      * @see #insertAt(ASTNode, int, TextEditGroup)
 	 */
 	public void insertLast(ASTNode node, TextEditGroup editGroup) {
-		insertAt(node, -1, editGroup);
+		if (node == null) { 
+			throw new IllegalArgumentException();
+		}
+		internalInsertAt(node, -1, true, editGroup);
 	}
 
 	/**
@@ -234,14 +248,19 @@ public final class ListRewrite {
 		if (node == null) { 
 			throw new IllegalArgumentException();
 		}
+		internalInsertAt(node, index, isInsertBoundToPreviousByDefault(node), editGroup);
+	}
+	
+	private void internalInsertAt(ASTNode node, int index, boolean boundToPrevious, TextEditGroup editGroup) {
 		RewriteEvent event= getEvent().insert(node, index);
-		if (isInsertBoundToPreviousByDefault(node)) {
+		if (boundToPrevious) {
 			getRewriteStore().setInsertBoundToPrevious(node);
 		}
 		if (editGroup != null) {
 			getRewriteStore().setEventEditGroup(event, editGroup);
-		}
+		}		
 	}
+	
 	
 	private ASTNode createTargetNode(ASTNode first, ASTNode last, boolean isMove) {
 		if (first == null || last == null) {

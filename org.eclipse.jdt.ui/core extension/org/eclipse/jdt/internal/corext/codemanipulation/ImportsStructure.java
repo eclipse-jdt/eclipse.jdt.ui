@@ -73,6 +73,7 @@ public final class ImportsStructure implements IImportsStructure {
 	
 	private int fNumberOfImportsCreated;
 	private boolean fHasChanges= false;
+	private IRegion fReplaceRange;
 	
 	private static final String JAVA_LANG= "java.lang"; //$NON-NLS-1$
 	
@@ -96,19 +97,21 @@ public final class ImportsStructure implements IImportsStructure {
 		
 		fPackageEntries= new ArrayList(20);
 		
-		if (restoreExistingImports && container.exists()) {
-			IDocument document= null;
-			try {
-				document= aquireDocument();
+		IDocument document= null;
+		try {
+			document= aquireDocument();
+			if (restoreExistingImports && container.exists()) {
 				addExistingImports(document, cu.getImports());
-			} catch (BadLocationException e) {
-				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
-			} finally {
-				if (document != null) {
-					releaseDocument(document);
-				}
-			 }
-		}	
+			}
+			fReplaceRange= evaluateReplaceRange(document);
+			
+		} catch (BadLocationException e) {
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
+		} finally {
+			if (document != null) {
+				releaseDocument(document);
+			}
+		 }
 		
 		addPreferenceOrderHolders(preferenceOrder);
 		
@@ -484,7 +487,7 @@ public final class ImportsStructure implements IImportsStructure {
 			if (cmp == 0) {
 				bestMatch.sortIn(decl);
 			} else {
-				// create a new packageentry
+				// create a new package entry
 				String group= bestMatch.getGroupID();
 				if (group != null) {
 					if (!typeContainerName.startsWith(group)) {
@@ -570,12 +573,9 @@ public final class ImportsStructure implements IImportsStructure {
 		IDocument document= null;
 		try {
 			document= aquireDocument();
-			
-			IRegion textRange= getReplaceRange(document);
-
-			String replaceString= getReplaceString(document, textRange);
+			String replaceString= getReplaceString(document, fReplaceRange);
 			if (replaceString != null) {
-				document.replace(textRange.getOffset(), textRange.getLength(), replaceString);
+				document.replace(fReplaceRange.getOffset(), fReplaceRange.getLength(), replaceString);
 				if (save) {
 					commitDocument(document);
 				}
@@ -624,12 +624,12 @@ public final class ImportsStructure implements IImportsStructure {
 			}
 		}
 	}
+	
+	public IRegion getReplaceRange() {
+		return fReplaceRange;
+	}
 		
-	/**
-	 * Get the replace positons.
-	 * @param document The textBuffer
-	 */
-	public IRegion getReplaceRange(IDocument document) throws JavaModelException, BadLocationException {
+	private IRegion evaluateReplaceRange(IDocument document) throws JavaModelException, BadLocationException {
 		JavaModelUtil.reconcile(fCompilationUnit);
 
 		IImportContainer container= fCompilationUnit.getImportContainer();
@@ -928,7 +928,7 @@ public final class ImportsStructure implements IImportsStructure {
 		 * @param name Name of the package entry. e.g. org.eclipse.jdt.ui, containing imports like
 		 * org.eclipse.jdt.ui.JavaUI.
 		 * @param group The index of the preference order entry assigned
-		 *    different group ids will result in spacers between the entries
+		 *    different group id's will result in spacers between the entries
 		 */
 		public PackageEntry(String name, String group) {
 			fName= name;
