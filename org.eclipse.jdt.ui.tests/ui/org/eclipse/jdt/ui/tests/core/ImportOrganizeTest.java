@@ -1379,6 +1379,51 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
+	
+	public void testVisibility_bug67644() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("public class A {\n");
+		buf.append("	public class AX {\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= sourceFolder.createPackageFragment("pack2", false, null);
+
+		buf= new StringBuffer();
+		buf.append("package pack2;\n");
+		buf.append("\n");
+		buf.append("import pack1.A;\n");
+		buf.append("import pack1.AX;\n");
+		buf.append("public class B {\n");
+		buf.append("	public void foo() {\n");
+		buf.append("	  Object x= new A().new AX();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("B.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("testVisibility_bug67644", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack2;\n");
+		buf.append("\n");
+		buf.append("import pack1.A;\n");
+		buf.append("public class B {\n");
+		buf.append("	public void foo() {\n");
+		buf.append("	  Object x= new A().new AX();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
 
 	
 	

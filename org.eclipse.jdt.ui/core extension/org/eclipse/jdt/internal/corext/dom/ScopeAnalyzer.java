@@ -237,8 +237,21 @@ public class ScopeAnalyzer {
 			if (binding != null) {
 				addTypeDeclarations(binding, flags);
 			}
+
+			if (hasFlag(TYPES, flags)) {
+				ASTNode normalized= ASTNodes.getNormalizedNode(selector);
+				
+				// bug 67644: in 'a.new X()', all member types of A are visible as location of X. 
+				if (normalized.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY) {
+					Expression expr= ((ClassInstanceCreation) normalized.getParent()).getExpression();
+					if (expr != null && expr.resolveTypeBinding() != null) {
+						addTypeDeclarations(expr.resolveTypeBinding(), flags & TYPES);
+					}
+				}
+			}
+			
 			if (hasFlag(CHECK_VISIBILITY, flags)) {
-				firterNonVisible(parentTypeBinding);
+				filterNonVisible(parentTypeBinding);
 			}
 			return (IBinding[]) fRequestor.toArray(new IBinding[fRequestor.size()]);
 		} finally {
@@ -266,7 +279,7 @@ public class ScopeAnalyzer {
 			}
 			
 			if (hasFlag(CHECK_VISIBILITY, flags)) {
-				firterNonVisible(binding);
+				filterNonVisible(binding);
 			}
 			return (IBinding[]) fRequestor.toArray(new IBinding[fRequestor.size()]);
 		} finally {
@@ -274,7 +287,7 @@ public class ScopeAnalyzer {
 		}
 	}
 	
-	private void firterNonVisible(ITypeBinding binding) {
+	private void filterNonVisible(ITypeBinding binding) {
 		// remove non-visible declarations
 		for (int i= fRequestor.size() - 1; i >= 0; i--) {
 			if (!isVisible((IBinding) fRequestor.get(i), binding)) {
