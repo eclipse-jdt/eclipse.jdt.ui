@@ -67,18 +67,19 @@
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="viewId" type="string">
+         <attribute name="targetId" type="string">
             <annotation>
                <documentation>
-                  the id of the view where this filter is contributed.  If this attribute is missing, then the filter will
-be contributed to all views which use the &lt;samp&gt;org.eclipse.jdt.ui.actions.customFiltersActionGroup&lt;/samp&gt;.
+                  the id of the target where this filter is contributed.  If this attribute is missing, then the filter will
+be contributed to all views which use the &lt;samp&gt;org.eclipse.jdt.ui.actions.customFiltersActionGroup&lt;/samp&gt;. This
+replaces the deprecated attributed &quot;viewId&quot;.
                </documentation>
             </annotation>
          </attribute>
          <attribute name="enabled" type="boolean">
             <annotation>
                <documentation>
-                  the filter will be enabled if this attribute is present and its value is &quot;true&quot;.  Most likely the user will be able to override this setting in the UI.
+                  the filter will be enabled if this attribute is present and its value is &quot;true&quot;. Most likely the user will be able to override this setting in the UI.
                </documentation>
             </annotation>
          </attribute>
@@ -117,7 +118,7 @@ then the pattern attribute must not provided.
    id=&quot;org.eclipse.jdt.ui.PackageExplorer.LibraryFilter&quot;
    name=&quot;%HideReferencedLibraries.label&quot;
    description=&quot;%HideReferencedLibraries.description&quot;
-   viewId=&quot;org.eclipse.jdt.ui.PackageExplorer&quot;
+   targetId=&quot;org.eclipse.jdt.ui.PackageExplorer&quot;
    class=&quot;org.eclipse.jdt.internal.ui.filters.LibraryFilter&quot;
    enabled=&quot;false&quot;&gt;
   &lt;/filter&gt;

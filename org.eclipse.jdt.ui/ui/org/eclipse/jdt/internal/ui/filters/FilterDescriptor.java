@@ -45,7 +45,11 @@ public class FilterDescriptor implements Comparable {
 
 	private static final String PATTERN_ATTRIBUTE= "pattern"; //$NON-NLS-1$	
 	private static final String ID_ATTRIBUTE= "id"; //$NON-NLS-1$
+	/**
+	 * @deprecated as of 3.0 use {@link FilterDescriptor#TARGET_ID_ATTRIBUTE}
+	 */
 	private static final String VIEW_ID_ATTRIBUTE= "viewId"; //$NON-NLS-1$
+	private static final String TARGET_ID_ATTRIBUTE= "targetId"; //$NON-NLS-1$
 	private static final String CLASS_ATTRIBUTE= "class"; //$NON-NLS-1$
 	private static final String NAME_ATTRIBUTE= "name"; //$NON-NLS-1$
 	private static final String ENABLED_ATTRIBUTE= "enabled"; //$NON-NLS-1$
@@ -75,12 +79,12 @@ public class FilterDescriptor implements Comparable {
 	 * Returns all Java element filters which
 	 * are contributed to the given view.
 	 */
-	public static FilterDescriptor[] getFilterDescriptors(String viewId) {
+	public static FilterDescriptor[] getFilterDescriptors(String targetId) {
 		FilterDescriptor[] filterDescs= FilterDescriptor.getFilterDescriptors();
 		List result= new ArrayList(filterDescs.length);
 		for (int i= 0; i < filterDescs.length; i++) {
-			String vid= filterDescs[i].getViewId();
-			if (vid == null || vid.equals(viewId))
+			String tid= filterDescs[i].getTargetId();
+			if (tid == null || tid.equals(targetId))
 				result.add(filterDescs[i]);
 		}
 		return (FilterDescriptor[])result.toArray(new FilterDescriptor[result.size()]);
@@ -132,11 +136,11 @@ public class FilterDescriptor implements Comparable {
 	 */
 	public String getId() {
 		if (isPatternFilter()) {
-			String viewId= getViewId();
-			if (viewId == null)
+			String targetId= getTargetId();
+			if (targetId == null)
 				return PATTERN_FILTER_ID_PREFIX + getPattern();
 			else
-				return viewId + PATTERN_FILTER_ID_PREFIX + getPattern();
+				return targetId + PATTERN_FILTER_ID_PREFIX + getPattern();
 		} else
 			return fElement.getAttribute(ID_ATTRIBUTE);
 	}
@@ -168,9 +172,17 @@ public class FilterDescriptor implements Comparable {
 	 * Returns the filter's viewId.
 	 * 
 	 * @return the view ID or <code>null</code> if the filter is for all views
+	 * @since 3.0
 	 */
-	public String getViewId() {
+	public String getTargetId() {
+		String tid= fElement.getAttribute(TARGET_ID_ATTRIBUTE);
+		
+		if (tid != null)
+			return tid;
+		
+		// Backwards compatibility code
 		return fElement.getAttribute(VIEW_ID_ATTRIBUTE);
+		
 	}
 
 	/**
