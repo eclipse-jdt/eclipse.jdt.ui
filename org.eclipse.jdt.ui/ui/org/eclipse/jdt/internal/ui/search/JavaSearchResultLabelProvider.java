@@ -18,15 +18,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaImageLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 
 public class JavaSearchResultLabelProvider extends LabelProvider {
 
-	private JavaImageLabelProvider fImageProvider;
-	private JavaTextLabelProvider fTextProvider;
+	private JavaElementLabelProvider fLabelProvider;
 	
 	// LRU Cache
 	private IMarker fLastMarker;
@@ -35,8 +32,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 	public static final JavaSearchResultLabelProvider INSTANCE= new JavaSearchResultLabelProvider();
 
 	public JavaSearchResultLabelProvider() {
-		fImageProvider= new JavaImageLabelProvider(JavaElementLabelProvider.SHOW_OVERLAY_ICONS);
-		fTextProvider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_CONTAINER | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
+		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_OVERLAY_ICONS | JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_CONTAINER | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
 	}	
 
 	public String getText(Object o) {
@@ -45,15 +41,15 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 		if (javaElement == null)
 			return ""; //$NON-NLS-1$
 		if (javaElement instanceof IImportDeclaration)
-			return fTextProvider.getTextLabel(((IImportDeclaration)javaElement).getParent().getParent());
-		return fTextProvider.getTextLabel((IJavaElement)javaElement);
+			return fLabelProvider.getText(((IImportDeclaration)javaElement).getParent().getParent());
+		return fLabelProvider.getText((IJavaElement)javaElement);
 	}
 
 	public Image getImage(Object o) {
 		IJavaElement javaElement= getJavaElement(o);
 		if (javaElement == null)
 			return null;
-		return fImageProvider.getLabelImage((IJavaElement)javaElement);
+		return fLabelProvider.getImage((IJavaElement)javaElement);
 	}
 
 	private IJavaElement getJavaElement(Object o) {
