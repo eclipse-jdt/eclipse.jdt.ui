@@ -1088,9 +1088,9 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testAll57()throws Exception{
-		printTestDisabledMessage("test for 39633 classcast exception when refactoring change method signature [refactoring]");
-		if (true)
-			return;
+//		printTestDisabledMessage("test for 39633 classcast exception when refactoring change method signature [refactoring]");
+//		if (true)
+//			return;
 		String[] signature= {"I", "QString;", "QString;"};
 		String[] newNames= null;
 		String[] newTypes= null;

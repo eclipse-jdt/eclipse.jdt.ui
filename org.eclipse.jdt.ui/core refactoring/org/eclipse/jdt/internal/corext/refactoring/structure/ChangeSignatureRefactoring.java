@@ -874,7 +874,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			}
 			ASTNode[] nodes= ASTNodeSearchUtil.getAstNodes(group.getSearchResults(), cuNode);
 			for (int j= 0; j < nodes.length; j++) {
-				updateMethodOccurrenceNode(cu, rewrite, nodes[j]);
+				updateMethodOccurrenceNode(rewrite, nodes[j]);
 			}
 			if (isNoArgConstructor && subtypeMapping.containsKey(cu)){
 				Set subtypes= (Set)subtypeMapping.get(cu);
@@ -892,14 +892,14 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return manager;
 	}
 
-	private void updateMethodOccurrenceNode(ICompilationUnit cu, ASTRewrite rewrite, ASTNode node) throws JavaModelException {
+	private void updateMethodOccurrenceNode(ASTRewrite rewrite, ASTNode node) throws JavaModelException {
 		if (isReferenceNode(node))
 			updateReferenceNode(node, rewrite);
 		else	
-			updateDeclarationNode(node, rewrite, cu);
+			updateDeclarationNode(node, rewrite);
 	}	
 	
-	//ICompilationUnit -> Set of IType
+	//Map<ICompilationUnit, Set<IType>>
 	private Map createSubclassMapping(IProgressMonitor pm) throws JavaModelException{
 		IType[] subtypes= getSubclasses(pm);
 		Map result= new HashMap();
@@ -1014,7 +1014,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		rewrite.removeModifications();
 	}
 	
-	private void updateDeclarationNode(ASTNode methodOccurrence, ASTRewrite rewrite, ICompilationUnit cu) throws JavaModelException {
+	private void updateDeclarationNode(ASTNode methodOccurrence, ASTRewrite rewrite) throws JavaModelException {
 		MethodDeclaration methodDeclaration= getMethodDeclaration(methodOccurrence);
 		if (methodDeclaration == null) //can be null - see bug 27236
 			return;
@@ -1022,7 +1022,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			changeReturnType(methodDeclaration, rewrite);
 		changeParameterTypes(methodDeclaration, rewrite);
 				
-		if (needsVisibilityUpdate(methodDeclaration, cu))
+		if (needsVisibilityUpdate(methodDeclaration))
 			changeVisibility(methodDeclaration, rewrite);
 		reshuffleElements(methodOccurrence, methodDeclaration.parameters(), rewrite);
 	}
@@ -1123,23 +1123,15 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return JdtFlags.clearAccessModifiers(md.getModifiers()) | fVisibility;
 	}
 	
-	private static IMethod getMethod(MethodDeclaration methodDeclaration, ICompilationUnit cu) throws JavaModelException{
-		return (IMethod)cu.getElementAt(methodDeclaration.getName().getStartPosition());
-	}
-	
-	private boolean needsVisibilityUpdate(MethodDeclaration methodDeclaration, ICompilationUnit cu) throws JavaModelException {
-		return needsVisibilityUpdate(getMethod(methodDeclaration, cu));
-	}
-	
-	private boolean needsVisibilityUpdate(IMethod method) throws JavaModelException {
+	private boolean needsVisibilityUpdate(MethodDeclaration methodDeclaration) throws JavaModelException {
 		if (isVisibilitySameAsInitial())
 			return false;
 		if (isIncreasingVisibility())
-			return JdtFlags.isHigherVisibility(fVisibility, JdtFlags.getVisibilityCode(method));
+			return JdtFlags.isHigherVisibility(fVisibility, JdtFlags.getVisibilityCode(methodDeclaration));
 		else
-			return JdtFlags.isHigherVisibility(JdtFlags.getVisibilityCode(method), fVisibility);
+			return JdtFlags.isHigherVisibility(JdtFlags.getVisibilityCode(methodDeclaration), fVisibility);
 	}
-
+	
 	private boolean isIncreasingVisibility() throws JavaModelException{
 		return JdtFlags.isHigherVisibility(fVisibility, JdtFlags.getVisibilityCode(fMethod));
 	}
