@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
+import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -23,4 +24,13 @@ class NLSUIMessages {
 			return '!' + key + '!';
 		}
 	}
+	
+	public static String getFormattedString(String key, String arg) {
+		return getFormattedString(key, new String[] { arg });
+	}
+	
+	public static String getFormattedString(String key, String[] args) {
+		return MessageFormat.format(getString(key), args);	
+	}	
+	
 }
