@@ -357,12 +357,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	protected void createControl(Composite parent, int styles) {
 		super.createControl(parent, styles);
 
-		// TODO replace w/ preference
-		if (Boolean.getBoolean("org.eclipse.jdt.smart_backspace")) {
-			fBackspaceManager= new SmartBackspaceManager();
-			fBackspaceManager.install(this);
-		}
-
+		fBackspaceManager= new SmartBackspaceManager();
 	}
 	
 	/**

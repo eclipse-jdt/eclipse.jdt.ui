@@ -103,16 +103,6 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		if (fCharacter == BRACECHAR && !store.getBoolean(PreferenceConstants.EDITOR_SMART_OPENING_BRACE))
 			return;
 		
-		// TODO replace with preference
-		if (!Boolean.getBoolean("org.eclipse.jdt.smart_backspace")) {
-			try {
-				if (!TextUtilities.getContentType(document, fPartitioning, command.offset, true).equals(IDocument.DEFAULT_CONTENT_TYPE))
-					return;
-			} catch (BadLocationException e1) {
-				// ignore
-			}
-		}
-
 		IWorkbenchPage page= JavaPlugin.getActivePage();
 		if (page == null)
 			return;
