@@ -28,8 +28,8 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 
 /**
- * Find all nodes connected to a given binding or node. e.g. Declartion of a field and all references.
- * For types this includes also the constructor declaration, for methods also overrridden methods
+ * Find all nodes connected to a given binding or node. e.g. Declaration of a field and all references.
+ * For types this includes also the constructor declaration, for methods also overridden methods
  * or methods overriding (if existing in the same AST)  
   */
 
@@ -40,8 +40,8 @@ public class LinkedNodeFinder  {
 	
 	
 	/**
-	 * Find all nodes connected to the given binding. e.g. Declartion of a field and all references.
-	 * For types this includes also the constructor declaration, for methods also overrridden methods
+	 * Find all nodes connected to the given binding. e.g. Declaration of a field and all references.
+	 * For types this includes also the constructor declaration, for methods also overridden methods
 	 * or methods overriding (if existing in the same AST)
 	 * @param root The root of the AST tree to search
 	 * @param binding The binding of the searched nodes
@@ -219,8 +219,8 @@ public class LinkedNodeFinder  {
 		public boolean visit(MethodDeclaration node) {
 			if (node.isConstructor() && fBinding.getKind() == IBinding.TYPE) {
 				ASTNode typeNode= node.getParent();
-				if (typeNode instanceof TypeDeclaration) {
-					if (fBinding == ((TypeDeclaration) typeNode).resolveBinding()) {
+				if (typeNode instanceof AbstractTypeDeclaration) {
+					if (fBinding == ((AbstractTypeDeclaration) typeNode).resolveBinding()) {
 						fResult.add(node.getName());
 					}
 				}
@@ -237,7 +237,27 @@ public class LinkedNodeFinder  {
 			}
 			return true;
 		}		
-		
+
+		public boolean visit(EnumDeclaration node) {
+			if (fBinding.getKind() == IBinding.METHOD) {
+				IMethodBinding binding= (IMethodBinding) fBinding;
+				if (binding.isConstructor() && binding.getDeclaringClass() == node.resolveBinding()) {
+					fResult.add(node.getName());
+				}
+			}
+			return true;
+		}		
+
+		public boolean visit(AnnotationTypeDeclaration node) {
+			if (fBinding.getKind() == IBinding.METHOD) {
+				IMethodBinding binding= (IMethodBinding) fBinding;
+				if (binding.isConstructor() && binding.getDeclaringClass() == node.resolveBinding()) {
+					fResult.add(node.getName());
+				}
+			}
+			return true;
+		}		
+
 		public boolean visit(SimpleName node) {
 			IBinding binding= node.resolveBinding();
 			

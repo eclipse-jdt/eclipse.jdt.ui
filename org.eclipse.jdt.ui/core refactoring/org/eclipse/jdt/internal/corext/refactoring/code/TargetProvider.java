@@ -198,6 +198,9 @@ abstract class TargetProvider {
 			}
 			return true;
 		}
+		
+		// TODO account for enums and annotations
+	
 		public boolean visit(TypeDeclaration node) {
 			fBodies.add(fCurrent);
 			fCurrent= null;

@@ -310,18 +310,21 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 			return fTempDeclarationNode.getName().getIdentifier();
 		}
 	}
-	
+
 	private String[] getNamesOfFieldsInDeclaringType() {
-		TypeDeclaration type= getEnclosingType();
-		FieldDeclaration[] fields= type.getFields();
-		List result= new ArrayList(fields.length);
-		for (int i= 0; i < fields.length; i++) {
-			for (Iterator iter= fields[i].fragments().iterator(); iter.hasNext();) {
-				VariableDeclarationFragment field= (VariableDeclarationFragment)iter.next();
-				result.add(field.getName().getIdentifier());
+		final AbstractTypeDeclaration type= getEnclosingType();
+		if (type instanceof TypeDeclaration) {
+			FieldDeclaration[] fields= ((TypeDeclaration) type).getFields();
+			List result= new ArrayList(fields.length);
+			for (int i= 0; i < fields.length; i++) {
+				for (Iterator iter= fields[i].fragments().iterator(); iter.hasNext();) {
+					VariableDeclarationFragment field= (VariableDeclarationFragment) iter.next();
+					result.add(field.getName().getIdentifier());
+				}
 			}
+			return (String[]) result.toArray(new String[result.size()]);
 		}
-		return (String[])result.toArray(new String[result.size()]);
+		return new String[] {};
 	}
 
 	private int getTempTypeArrayDimensions() {
@@ -401,31 +404,34 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     		pm.done();
     	}
     }
+
     private RefactoringStatus checkClashesInConstructors() {
-    	Assert.isTrue(fInitializeIn == INITIALIZE_IN_CONSTRUCTOR);
-    	Assert.isTrue(! isDeclaredInAnonymousClass());
-    	TypeDeclaration declaringType= (TypeDeclaration)getMethodDeclaration().getParent();
-		MethodDeclaration[] methods= declaringType.getMethods();
-		for (int i= 0; i < methods.length; i++) {
-            MethodDeclaration method= methods[i];
-            if (! method.isConstructor())
-            	continue;
-            NameCollector nameCollector= new NameCollector(method){
-            	protected boolean visitNode(ASTNode node) {
-            		return true;
-            	}
-            };	
-            method.accept(nameCollector);
-            List names= nameCollector.getNames();
-            if (names.contains(fFieldName)){
-				String[] keys= {fFieldName, BindingLabels.getFullyQualified(method.resolveBinding())};
-            	String msg= RefactoringCoreMessages.getFormattedString("PromoteTempToFieldRefactoring.Name_conflict", keys); //$NON-NLS-1$
-            	return RefactoringStatus.createFatalErrorStatus(msg);
-            }	
-        }    	
-    	return null;
-    }
-    
+		Assert.isTrue(fInitializeIn == INITIALIZE_IN_CONSTRUCTOR);
+		Assert.isTrue(!isDeclaredInAnonymousClass());
+		final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) getMethodDeclaration().getParent();
+		if (declaration instanceof TypeDeclaration) {
+			MethodDeclaration[] methods= ((TypeDeclaration) declaration).getMethods();
+			for (int i= 0; i < methods.length; i++) {
+				MethodDeclaration method= methods[i];
+				if (!method.isConstructor())
+					continue;
+				NameCollector nameCollector= new NameCollector(method) {
+					protected boolean visitNode(ASTNode node) {
+						return true;
+					}
+				};
+				method.accept(nameCollector);
+				List names= nameCollector.getNames();
+				if (names.contains(fFieldName)) {
+					String[] keys= { fFieldName, BindingLabels.getFullyQualified(method.resolveBinding())};
+					String msg= RefactoringCoreMessages.getFormattedString("PromoteTempToFieldRefactoring.Name_conflict", keys); //$NON-NLS-1$
+					return RefactoringStatus.createFatalErrorStatus(msg);
+				}
+			}
+		}
+		return null;
+	}
+
     private RefactoringStatus checkClashesWithExistingFields(){
         FieldDeclaration[] existingFields= getFieldDeclarations(getBodyDeclarationListOfDeclaringType());
         for (int i= 0; i < existingFields.length; i++) {
@@ -499,41 +505,39 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     
     private void addInitializersToConstructors(ASTRewrite rewrite) throws CoreException {
     	Assert.isTrue(! isDeclaredInAnonymousClass());
-    	TypeDeclaration typeDeclaration= (TypeDeclaration)getMethodDeclaration().getParent();
-    	MethodDeclaration[] allConstructors= getAllConstructors(typeDeclaration);
-    	if (allConstructors.length == 0){
-            addNewConstructorWithInitializing(rewrite, typeDeclaration);
+    	final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration)getMethodDeclaration().getParent();
+    	final MethodDeclaration[] constructors= getAllConstructors(declaration);
+    	if (constructors.length == 0){
+            addNewConstructorWithInitializing(rewrite, declaration);
     	} else {
-    		for (int i= 0; i < allConstructors.length; i++) {
-                MethodDeclaration constructor= allConstructors[i];
-                if (shouldInsertTempInitialization(constructor))
-                    addFieldInitializationToConstructor(rewrite, constructor);
+    		for (int index= 0; index < constructors.length; index++) {
+                if (shouldInsertTempInitialization(constructors[index]))
+                    addFieldInitializationToConstructor(rewrite, constructors[index]);
             }
     	}
     }
 
-    private void addNewConstructorWithInitializing(ASTRewrite rewrite, TypeDeclaration typeDeclaration) throws CoreException {
-		String constructorSource= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, getNewConstructorSource(typeDeclaration), 0, null, getLineSeperator(), fCu.getJavaProject());
+    private void addNewConstructorWithInitializing(ASTRewrite rewrite, AbstractTypeDeclaration declaration) throws CoreException {
+		String constructorSource= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, getNewConstructorSource(declaration), 0, null, getLineSeperator(), fCu.getJavaProject());
 		BodyDeclaration newConstructor= (BodyDeclaration) rewrite.createStringPlaceholder(constructorSource, ASTNode.METHOD_DECLARATION);
-		int constructorInsertIndex= computeInsertIndexForNewConstructor(typeDeclaration);
-		rewrite.getListRewrite(typeDeclaration, typeDeclaration.getBodyDeclarationsProperty()).insertAt(newConstructor, constructorInsertIndex, null);
+		rewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newConstructor, computeInsertIndexForNewConstructor(declaration), null);
 	}
 
 	private String getEnclosingTypeName() {
 		return getEnclosingType().getName().getIdentifier();
 	}
 	
-	private TypeDeclaration getEnclosingType() {
-		return (TypeDeclaration)ASTNodes.getParent(getTempDeclarationStatement(), TypeDeclaration.class);
+	private AbstractTypeDeclaration getEnclosingType() {
+		return (AbstractTypeDeclaration)ASTNodes.getParent(getTempDeclarationStatement(), AbstractTypeDeclaration.class);
 	}
 	
-	private String getNewConstructorSource(TypeDeclaration typeDeclaration) throws CoreException {
+	private String getNewConstructorSource(AbstractTypeDeclaration declaration) throws CoreException {
 		String lineDelimiter= getLineSeperator();
 		String bodyStatement= fFieldName + '=' + getTempInitializerCode() + ';';
 		String constructorBody= CodeGeneration.getMethodBodyContent(fCu, getEnclosingTypeName(), getEnclosingTypeName(), true, bodyStatement, lineDelimiter);
 		if (constructorBody == null)
 			constructorBody= ""; //$NON-NLS-1$
-		return getNewConstructorComment() + getModifierStringForDefaultConstructor(typeDeclaration) + ' ' + getEnclosingTypeName() + '(' + "){" +  //$NON-NLS-1$
+		return getNewConstructorComment() + JdtFlags.getVisibilityString(declaration.getModifiers()) + ' ' + getEnclosingTypeName() + '(' + "){" +  //$NON-NLS-1$
 		lineDelimiter + constructorBody + lineDelimiter + '}';
 	}
 	
@@ -555,18 +559,18 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 			return "";//$NON-NLS-1$
 	}
 
-	private int computeInsertIndexForNewConstructor(TypeDeclaration typeDeclaration) {
-    	List bodyDeclarations= typeDeclaration.bodyDeclarations();
-    	if (bodyDeclarations.isEmpty())
+	private int computeInsertIndexForNewConstructor(AbstractTypeDeclaration declaration) {
+    	List declarations= declaration.bodyDeclarations();
+    	if (declarations.isEmpty())
 	        return 0;
-		int firstMethodIndex= findFirstMethodIndex(typeDeclaration);
-		if (firstMethodIndex == -1)
-			return bodyDeclarations.size();
+		int index= findFirstMethodIndex(declaration);
+		if (index == -1)
+			return declarations.size();
 		else	
-			return firstMethodIndex;
+			return index;
     }
     
-    private int findFirstMethodIndex(TypeDeclaration typeDeclaration) {
+    private int findFirstMethodIndex(AbstractTypeDeclaration typeDeclaration) {
     	for (int i= 0, n= typeDeclaration.bodyDeclarations().size(); i < n; i++) {
             if (typeDeclaration.bodyDeclarations().get(i) instanceof MethodDeclaration)
             	return i;
@@ -580,10 +584,6 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         rewrite.getListRewrite(constructor.getBody(), Block.STATEMENTS_PROPERTY).insertLast(createExpressionStatementThatInitializesField(rewrite), null);
     }
     
-    private static String getModifierStringForDefaultConstructor(TypeDeclaration typeDeclaration) {
-    	return JdtFlags.getVisibilityString(typeDeclaration.getModifiers());
-    }
-    
     private static boolean shouldInsertTempInitialization(MethodDeclaration constructor){
     	Assert.isTrue(constructor.isConstructor());
         if (constructor.getBody() == null)
@@ -595,17 +595,20 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         	return false;
 		return true;        
     }
-    
-    private static MethodDeclaration[] getAllConstructors(TypeDeclaration typeDeclaration){
-    	MethodDeclaration[] allMethods= typeDeclaration.getMethods();
-    	List result= new ArrayList(Math.min(allMethods.length, 1));
-		for (int i= 0; i < allMethods.length; i++) {
-            MethodDeclaration declaration= allMethods[i];
-            if (declaration.isConstructor())
-            	result.add(declaration);
-        }    	
-    	return (MethodDeclaration[]) result.toArray(new MethodDeclaration[result.size()]);
-    }
+
+    private static MethodDeclaration[] getAllConstructors(AbstractTypeDeclaration typeDeclaration) {
+		if (typeDeclaration instanceof TypeDeclaration) {
+			MethodDeclaration[] allMethods= ((TypeDeclaration) typeDeclaration).getMethods();
+			List result= new ArrayList(Math.min(allMethods.length, 1));
+			for (int i= 0; i < allMethods.length; i++) {
+				MethodDeclaration declaration= allMethods[i];
+				if (declaration.isConstructor())
+					result.add(declaration);
+			}
+			return (MethodDeclaration[]) result.toArray(new MethodDeclaration[result.size()]);
+		}
+		return new MethodDeclaration[] {};
+	}
     
     private Change createChange(ASTRewrite rewrite) throws CoreException{
         final TextChange result= new CompilationUnitChange("", fCu); //$NON-NLS-1$

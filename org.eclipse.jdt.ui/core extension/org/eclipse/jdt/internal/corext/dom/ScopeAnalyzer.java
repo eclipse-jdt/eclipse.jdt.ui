@@ -158,13 +158,12 @@ public class ScopeAnalyzer {
 		} else {
 			ITypeBinding declaringClass= binding.getDeclaringClass();
 			if (declaringClass != null) {
-				addTypeDeclarations(declaringClass, flags); // recursivly add inherited 
+				addTypeDeclarations(declaringClass, flags); // Recursively add inherited 
 			} else if (hasFlag(TYPES, flags)) {
 				if (fRoot.findDeclaringNode(binding) != null) {
 					List types= fRoot.types();
 					for (int i= 0; i < types.size(); i++) {
-						TypeDeclaration decl= (TypeDeclaration) types.get(i);
-						addResult(decl.resolveBinding());
+						addResult(((AbstractTypeDeclaration) types.get(i)).resolveBinding());
 					}
 				}
 			}
@@ -177,7 +176,7 @@ public class ScopeAnalyzer {
 			return;
 		}
 		
-		if (node instanceof TypeDeclaration || node instanceof AnonymousClassDeclaration) {
+		if (node instanceof AbstractTypeDeclaration || node instanceof AnonymousClassDeclaration) {
 			addLocalDeclarations(node.getParent(), flags);
 			
 			ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(node.getParent());

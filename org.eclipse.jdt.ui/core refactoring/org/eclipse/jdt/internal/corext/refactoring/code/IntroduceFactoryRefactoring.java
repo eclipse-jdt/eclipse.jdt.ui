@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -53,7 +54,6 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -77,7 +77,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -140,7 +139,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * <code>TypeDeclaration</code> for class containing the constructor to be
 	 * encapsulated.
 	 */
-	private TypeDeclaration fCtorOwningClass;
+	private AbstractTypeDeclaration fCtorOwningClass;
 
 	/**
 	 * The name to be given to the generated factory method.
@@ -156,7 +155,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	/**
 	 * The class that will own the factory method/class/interface.
 	 */
-	private TypeDeclaration fFactoryOwningClass;
+	private AbstractTypeDeclaration fFactoryOwningClass;
 
 	/**
 	 * The newly-generated factory method.
@@ -311,7 +310,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	
 			Name	ctorOwnerName= (Name) NodeFinder.perform(fFactoryCU, ctorOwningType.getNameRange());
 	
-			fCtorOwningClass= (TypeDeclaration) ASTNodes.getParent(ctorOwnerName, TypeDeclaration.class);
+			fCtorOwningClass= (AbstractTypeDeclaration) ASTNodes.getParent(ctorOwnerName, AbstractTypeDeclaration.class);
 			fFactoryOwningClass= fCtorOwningClass;
 	
 			pm.worked(1);
@@ -634,7 +633,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		// Need to use a qualified name for the factory method if we're not
 		// in the context of the class holding the factory.
-		TypeDeclaration	callOwner= (TypeDeclaration) ASTNodes.getParent(ctorCall, TypeDeclaration.class);
+		AbstractTypeDeclaration	callOwner= (AbstractTypeDeclaration) ASTNodes.getParent(ctorCall, AbstractTypeDeclaration.class);
 		ITypeBinding callOwnerBinding= callOwner.resolveBinding();
 
 		if (callOwnerBinding == null ||
@@ -861,7 +860,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				throw new JavaModelException(new JavaModelStatus(IStatus.ERROR,
 					RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHit", //$NON-NLS-1$
 						new Object[] { expr.toString(), unitHandle.getElementName() })));
-		} else if (node instanceof SimpleName && (node.getParent() instanceof MethodDeclaration || node.getParent() instanceof TypeDeclaration)) {
+		} else if (node instanceof SimpleName && (node.getParent() instanceof MethodDeclaration || node.getParent() instanceof AbstractTypeDeclaration)) {
 			// We seem to have been given a hit for an implicit call to the base-class constructor.
 			// Do nothing with this (implicit) call, but have to make sure we make the derived class
 			// doesn't lose access to the base-class constructor (so make it 'protected', not 'private').
@@ -888,13 +887,13 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		fFactoryMethod= createFactoryMethod(ast, fCtorBinding, unitRewriter);
 
-		TypeDeclaration	factoryOwner= (TypeDeclaration) unit.findDeclaringNode(fFactoryOwningClass.resolveBinding().getKey());
+		AbstractTypeDeclaration	factoryOwner= (AbstractTypeDeclaration) unit.findDeclaringNode(fFactoryOwningClass.resolveBinding().getKey());
 		fImportRewriter.addImport(fCtorOwningClass.resolveBinding());
 
 		int	idx= ASTNodes.getInsertionIndex(fFactoryMethod, factoryOwner.bodyDeclarations());
 
 		if (idx < 0) idx= 0; // Guard against bug in getInsertionIndex()
-		unitRewriter.getListRewrite(factoryOwner, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertAt(fFactoryMethod, idx, gd);
+		unitRewriter.getListRewrite(factoryOwner, factoryOwner.getBodyDeclarationsProperty()).insertAt(fFactoryMethod, idx, gd);
 	}
 
 	/*
@@ -986,12 +985,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	}
 
 	/**
-	 * Returns true iff the given <code>TypeDeclaration</code> has a method with
+	 * Returns true iff the given <code>AbstractTypeDeclaration</code> has a method with
 	 * the given name.
 	 * @param type
 	 * @param name
 	 */
-	private boolean hasMethod(TypeDeclaration type, String name) {
+	private boolean hasMethod(AbstractTypeDeclaration type, String name) {
 		List	decls= type.bodyDeclarations();
 
 		for (Iterator iter = decls.iterator(); iter.hasNext();) {
@@ -1056,7 +1055,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 					fFactoryCU= getASTFor(factoryUnitHandle);
 					fFactoryUnitHandle= factoryUnitHandle;
 				}
-				fFactoryOwningClass= ASTNodeSearchUtil.getTypeDeclarationNode(factoryType, fFactoryCU);
+				fFactoryOwningClass= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(fFactoryCU, factoryType.getNameRange()), AbstractTypeDeclaration.class);
 
 				String factoryPkg= factoryType.getPackageFragment().getElementName();
 				String ctorPkg= fCtorOwningClass.resolveBinding().getPackage().getName();

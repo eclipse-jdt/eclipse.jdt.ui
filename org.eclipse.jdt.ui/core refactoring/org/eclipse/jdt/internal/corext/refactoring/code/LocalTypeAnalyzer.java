@@ -15,7 +15,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -42,21 +45,21 @@ public class LocalTypeAnalyzer extends ASTVisitor {
 		analyzer.check(result);
 		return result;
 	}
-	
+
 	private LocalTypeAnalyzer(Selection selection) {
 		fSelection= selection;
 	}
-	
+
 	public boolean visit(SimpleName node) {
 		if (node.isDeclaration())
 			return true;
 		IBinding binding= node.resolveBinding();
 		if (binding instanceof ITypeBinding)
-			processLocalTypeBinding((ITypeBinding)binding, fSelection.getVisitSelectionMode(node));
-			
+			processLocalTypeBinding((ITypeBinding) binding, fSelection.getVisitSelectionMode(node));
+
 		return true;
 	}
-	
+
 	public boolean visit(TypeDeclaration node) {
 		int mode= fSelection.getVisitSelectionMode(node);
 		switch (mode) {
@@ -69,7 +72,33 @@ public class LocalTypeAnalyzer extends ASTVisitor {
 		}
 		return true;
 	}
-	
+
+	public boolean visit(AnnotationTypeDeclaration node) {
+		int mode= fSelection.getVisitSelectionMode(node);
+		switch (mode) {
+			case Selection.BEFORE:
+				fTypeDeclarationsBefore.add(node);
+				break;
+			case Selection.SELECTED:
+				fTypeDeclarationsSelected.add(node);
+				break;
+		}
+		return true;
+	}
+
+	public boolean visit(EnumDeclaration node) {
+		int mode= fSelection.getVisitSelectionMode(node);
+		switch (mode) {
+			case Selection.BEFORE:
+				fTypeDeclarationsBefore.add(node);
+				break;
+			case Selection.SELECTED:
+				fTypeDeclarationsSelected.add(node);
+				break;
+		}
+		return true;
+	}
+
 	private void processLocalTypeBinding(ITypeBinding binding, int mode) {
 		switch (mode) {
 			case Selection.SELECTED:
@@ -89,7 +118,7 @@ public class LocalTypeAnalyzer extends ASTVisitor {
 	
 	private boolean checkBinding(List declarations, ITypeBinding binding) {
 		for (Iterator iter= declarations.iterator(); iter.hasNext();) {
-			TypeDeclaration declaration= (TypeDeclaration)iter.next();
+			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration)iter.next();
 			if (declaration.resolveBinding() == binding) {
 				return true;
 			}
@@ -102,5 +131,5 @@ public class LocalTypeAnalyzer extends ASTVisitor {
 			status.addFatalError(fBeforeTypeReferenced);
 		if (fSelectedTypeReferenced != null)
 			status.addFatalError(fSelectedTypeReferenced);
-	}	
+	}
 }

@@ -18,7 +18,6 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -27,7 +26,6 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
@@ -156,8 +154,12 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 
 		if (fragment.getInitializer() != null) {
 
-			final ChildListPropertyDescriptor descriptor= (node.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION) ? AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY : TypeDeclaration.BODY_DECLARATIONS_PROPERTY;
-			rewrite.getListRewrite(node, descriptor).insertAt(declaration, 0, null);
+			if (node instanceof AbstractTypeDeclaration)
+				rewrite.getListRewrite(node, ((AbstractTypeDeclaration) node).getBodyDeclarationsProperty()).insertAt(declaration, 0, null);
+			else if (node instanceof AnonymousClassDeclaration)
+				rewrite.getListRewrite(node, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY).insertAt(declaration, 0, null);
+			else
+				Assert.isTrue(false);
 
 			addLinkedPositions(rewrite, fragment);
 		}

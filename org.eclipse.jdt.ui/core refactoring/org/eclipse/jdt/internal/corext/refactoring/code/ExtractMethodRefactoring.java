@@ -31,11 +31,14 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -151,6 +154,18 @@ public class ExtractMethodRefactoring extends Refactoring {
 			return true;
 		}
 		public boolean visit(TypeDeclaration node) {
+			result.add(node.getName().getIdentifier());
+			// don't dive into type declaration since they open a new
+			// context.
+			return false;
+		}
+		public boolean visit(EnumDeclaration node) {
+			result.add(node.getName().getIdentifier());
+			// don't dive into type declaration since they open a new
+			// context.
+			return false;
+		}
+		public boolean visit(AnnotationTypeDeclaration node) {
 			result.add(node.getName().getIdentifier());
 			// don't dive into type declaration since they open a new
 			// context.
@@ -376,7 +391,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		
 		fAnalyzer.aboutToCreateChange();
 		BodyDeclaration declaration= fAnalyzer.getEnclosingBodyDeclaration();
-		TypeDeclaration type= (TypeDeclaration)ASTNodes.getParent(declaration, TypeDeclaration.class);
+		AbstractTypeDeclaration type= (AbstractTypeDeclaration)ASTNodes.getParent(declaration, AbstractTypeDeclaration.class);
 		fRewriter= new OldASTRewrite(type);
 		String sourceMethodName= declaration.getNodeType() == ASTNode.METHOD_DECLARATION 
 			? ((MethodDeclaration)declaration).getName().getIdentifier()
@@ -544,7 +559,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	
 	private void initializeDuplicates() {
 		ASTNode start= fAnalyzer.getEnclosingBodyDeclaration();
-		while(!(start instanceof TypeDeclaration) && !(start instanceof AnonymousClassDeclaration)) {
+		while(!(start instanceof AbstractTypeDeclaration) && !(start instanceof AnonymousClassDeclaration)) {
 			start= start.getParent();
 		}
 		
@@ -574,13 +589,13 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private ASTNode getNextParent(ASTNode node) {
 		do {
 			node= node.getParent();
-		} while (node != null && !((node instanceof TypeDeclaration) || (node instanceof AnonymousClassDeclaration)));
+		} while (node != null && !((node instanceof AbstractTypeDeclaration) || (node instanceof AnonymousClassDeclaration)));
 		return node;
 	}
 	
 	private ITypeBinding resolveBinding(ASTNode node) {
-		if (node instanceof TypeDeclaration) {
-			return ((TypeDeclaration)node).resolveBinding();
+		if (node instanceof AbstractTypeDeclaration) {
+			return ((AbstractTypeDeclaration)node).resolveBinding();
 		} else if (node instanceof AnonymousClassDeclaration) {
 			return ((AnonymousClassDeclaration)node).resolveBinding();
 		}
@@ -744,8 +759,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (code) {
 			result.setBody(createMethodBody(selection));
 			if (fGenerateJavadoc) {
-				TypeDeclaration enclosingType= 
-					(TypeDeclaration)ASTNodes.getParent(fAnalyzer.getEnclosingBodyDeclaration(), TypeDeclaration.class);
+				AbstractTypeDeclaration enclosingType= 
+					(AbstractTypeDeclaration)ASTNodes.getParent(fAnalyzer.getEnclosingBodyDeclaration(), AbstractTypeDeclaration.class);
 				String string= CodeGeneration.getMethodComment(fCUnit, enclosingType.getName().getIdentifier(), result, null, lineDelimiter);
 				if (string != null) {
 					Javadoc javadoc= (Javadoc)fRewriter.createStringPlaceholder(string, ASTNode.JAVADOC);

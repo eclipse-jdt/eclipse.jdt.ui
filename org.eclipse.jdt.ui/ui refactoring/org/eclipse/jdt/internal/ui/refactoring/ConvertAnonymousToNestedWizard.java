@@ -134,7 +134,8 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 		public void addDeclareAsStaticCheckbox(Composite result) {
 			GridData gd;
 			final Button declareAsStaticCheckbox= new Button(result, SWT.CHECK);
-			declareAsStaticCheckbox.setEnabled(getConvertRefactoring().isStaticModifierOptional());
+			ConvertAnonymousToNestedRefactoring r= getConvertRefactoring();
+			declareAsStaticCheckbox.setEnabled((!r.mustInnerClassBeStatic() && !r.isLocalInnerType()));
 			declareAsStaticCheckbox.setSelection(getConvertRefactoring().getDeclareStatic());
 			declareAsStaticCheckbox.setText(RefactoringMessages.getString("ConvertAnonymousToNestedInputPage.declare_static")); //$NON-NLS-1$
 			gd= new GridData(GridData.FILL_HORIZONTAL);

@@ -341,16 +341,16 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		}	
 	}
 
-	private void modifyInputTypeCu(ICompilationUnit typeCu, CompilationUnit typeCuNode, OldASTRewrite typeCuRewrite, AbstractTypeDeclaration td) throws CoreException, JavaModelException {
+	private void modifyInputTypeCu(ICompilationUnit typeCu, CompilationUnit typeCuNode, OldASTRewrite typeCuRewrite, AbstractTypeDeclaration declaration) throws CoreException, JavaModelException {
 		deleteExtractedFields(typeCuNode, typeCu, typeCuRewrite);
 		if (fInputType.isInterface())
 			deleteExtractedMethods(typeCuNode, typeCu, typeCuRewrite);
-		Type newInterface= td.getAST().newSimpleType(td.getAST().newSimpleName(fNewInterfaceName));
-		if (td instanceof TypeDeclaration)
-			((TypeDeclaration) td).superInterfaceTypes().add(newInterface);
-		else if (td instanceof EnumDeclaration)
-			((EnumDeclaration) td).superInterfaceTypes().add(newInterface);
-		typeCuRewrite.markAsInserted(newInterface);
+		Type type= declaration.getAST().newSimpleType(declaration.getAST().newSimpleName(fNewInterfaceName));
+		if (declaration instanceof TypeDeclaration)
+			((TypeDeclaration) declaration).superInterfaceTypes().add(type);
+		else if (declaration instanceof EnumDeclaration)
+			((EnumDeclaration) declaration).superInterfaceTypes().add(type);
+		typeCuRewrite.markAsInserted(type);
 	}
 
 	private static void setContent(ICompilationUnit cu, String newContent) throws JavaModelException {

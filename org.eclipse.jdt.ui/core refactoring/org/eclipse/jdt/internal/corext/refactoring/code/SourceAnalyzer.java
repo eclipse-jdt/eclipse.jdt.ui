@@ -27,9 +27,11 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -85,6 +87,12 @@ class SourceAnalyzer  {
 				fInterruptedExecutionFlow= true;
 			}
 			return true;
+		}
+		public boolean visit(EnumDeclaration node) {
+			return false;
+		}		
+		public boolean visit(AnnotationTypeDeclaration node) {
+			return false;
 		}
 		public boolean visit(TypeDeclaration node) {
 			return false;

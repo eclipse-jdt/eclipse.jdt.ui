@@ -613,13 +613,13 @@ public class PasteAction extends SelectionDispatchAction{
 				}
 			}
 
-			// returns TypeDeclaration, CompilationUnit or null
-			private ASTNode getDestinationNodeForSourceElement(IJavaElement destinationElement, int elementType, CompilationUnit cuNode) throws JavaModelException {
-				IType ancestorType= getAncestorType(destinationElement);
-				if (ancestorType != null)
-					return ASTNodeSearchUtil.getTypeDeclarationNode(ancestorType, cuNode);
-				if (elementType == IJavaElement.TYPE || elementType == IJavaElement.PACKAGE_DECLARATION || elementType == IJavaElement.IMPORT_DECLARATION || elementType == IJavaElement.IMPORT_CONTAINER)
-					return cuNode;
+			// returns AbstractTypeDeclaration, CompilationUnit or null
+			private ASTNode getDestinationNodeForSourceElement(IJavaElement destination, int kind, CompilationUnit unit) throws JavaModelException {
+				final IType ancestor= getAncestorType(destination);
+				if (ancestor != null)
+					return ASTNodeSearchUtil.getAbstractTypeDeclarationNode(ancestor, unit);
+				if (kind == IJavaElement.TYPE || kind == IJavaElement.PACKAGE_DECLARATION || kind == IJavaElement.IMPORT_DECLARATION || kind == IJavaElement.IMPORT_CONTAINER)
+					return unit;
 				return null;	
 			}
 			

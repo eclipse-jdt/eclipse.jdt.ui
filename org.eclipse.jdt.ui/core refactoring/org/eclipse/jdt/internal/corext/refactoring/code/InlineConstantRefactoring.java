@@ -30,11 +30,14 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -330,15 +333,15 @@ public class InlineConstantRefactoring extends Refactoring {
 					if(declaration instanceof AnonymousClassDeclaration)
 						return ((AnonymousClassDeclaration) declaration).resolveBinding();
 					
-					if(declaration instanceof TypeDeclaration)
-						return ((TypeDeclaration) declaration).resolveBinding();
+					if(declaration instanceof AbstractTypeDeclaration)
+						return ((AbstractTypeDeclaration) declaration).resolveBinding();
 					
 					Assert.isTrue(false);
 					return null;
 				}
 		
 				private static ASTNode getContainingClassOrInterfaceDeclaration(ASTNode node) {
-					while(node != null && !(node instanceof TypeDeclaration) && !(node instanceof AnonymousClassDeclaration)) {
+					while(node != null && !(node instanceof AbstractTypeDeclaration) && !(node instanceof AnonymousClassDeclaration)) {
 						node= node.getParent();	
 					}
 					return node;	
@@ -353,7 +356,7 @@ public class InlineConstantRefactoring extends Refactoring {
 						return fNamesDeclaredLocallyAtNewLocation;
 					
 					BodyDeclaration enclosingBodyDecl= (BodyDeclaration) ASTNodes.getParent(fNewLocation, BodyDeclaration.class);
-					Assert.isTrue(!(enclosingBodyDecl instanceof TypeDeclaration));
+					Assert.isTrue(!(enclosingBodyDecl instanceof AbstractTypeDeclaration));
 					
 					return fNamesDeclaredLocallyAtNewLocation= getLocallyDeclaredNames(enclosingBodyDecl);
 				}
@@ -370,25 +373,38 @@ public class InlineConstantRefactoring extends Refactoring {
 					if(scope instanceof FieldDeclaration)
 						return result;
 					
-					scope.accept(
-						new HierarchicalASTVisitor() {
-							public boolean visit(VariableDeclaration varDecl) {
-								result.add(varDecl.getName().getIdentifier());
-								return false;	
-							}
-							
-							public boolean visit(TypeDeclaration typeDecl) {
-								Assert.isTrue(typeDecl.getParent() instanceof TypeDeclarationStatement);
-								
-								result.add(typeDecl.getName().getIdentifier());
-								return false;	
-							}
-							
-							public boolean visit(AnonymousClassDeclaration anonDecl) {
-								return false;
-							}
+					scope.accept(new HierarchicalASTVisitor() {
+
+						public boolean visit(VariableDeclaration varDecl) {
+							result.add(varDecl.getName().getIdentifier());
+							return false;
 						}
-					);
+
+						public boolean visit(TypeDeclaration node) {
+							Assert.isTrue(node.getParent() instanceof TypeDeclarationStatement);
+
+							result.add(node.getName().getIdentifier());
+							return false;
+						}
+
+						public boolean visit(EnumDeclaration node) {
+							Assert.isTrue(node.getParent() instanceof TypeDeclarationStatement);
+
+							result.add(node.getName().getIdentifier());
+							return false;
+						}
+
+						public boolean visit(AnnotationTypeDeclaration node) {
+							Assert.isTrue(node.getParent() instanceof TypeDeclarationStatement);
+
+							result.add(node.getName().getIdentifier());
+							return false;
+						}
+
+						public boolean visit(AnonymousClassDeclaration anonDecl) {
+							return false;
+						}
+					});
 					return result;
 				}
 					

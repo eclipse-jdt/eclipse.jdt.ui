@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -130,7 +131,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 	}
 	
 	public static Match[] perform(ASTNode start, ASTNode[] snippet) {
-		Assert.isTrue(start instanceof TypeDeclaration || start instanceof AnonymousClassDeclaration);
+		Assert.isTrue(start instanceof AbstractTypeDeclaration || start instanceof AnonymousClassDeclaration);
 		SnippetFinder finder= new SnippetFinder(snippet);
 		start.accept(finder);
 		for (Iterator iter = finder.fResult.iterator(); iter.hasNext();) {
