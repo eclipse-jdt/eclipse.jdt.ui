@@ -24,14 +24,17 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 
 public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal {
 	
@@ -81,14 +84,15 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 	protected ASTRewrite getRewrite() throws CoreException {
 		ASTNode methodDecl= fRoot.findDeclaringNode(fSenderBinding);
 		ASTNode newMethodDecl= null;
+		CompilationUnit astRoot= fRoot;
 		boolean isInDifferentCU;
 		if (methodDecl != null) {
 			isInDifferentCU= false;
 			newMethodDecl= methodDecl;
 		} else {
 			isInDifferentCU= true;
-			CompilationUnit newRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
-			newMethodDecl= newRoot.findDeclaringNode(fSenderBinding.getKey());
+			astRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
+			newMethodDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
 		}
 		if (newMethodDecl instanceof MethodDeclaration) {
 			ASTRewrite rewrite= new ASTRewrite(newMethodDecl);
@@ -100,7 +104,7 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 	
 	private final String NAME_SUGGESTION= "name_suggestion"; //$NON-NLS-1$
 	
-	protected void modifySignature(ASTRewrite rewrite, MethodDeclaration methodDecl, boolean isInDifferentCU) {
+	protected void modifySignature(ASTRewrite rewrite, MethodDeclaration methodDecl, boolean isInDifferentCU) throws CoreException {
 		String rewriteDesc= isInDifferentCU ? SELECTION_GROUP_DESC : null;
 		List parameters= methodDecl.parameters();
 		// create a copy to not loose the indexes
@@ -118,8 +122,9 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 			} else if (curr instanceof InsertDescription) {
 				InsertDescription desc= (InsertDescription) curr;
 				SingleVariableDeclaration newNode= ast.newSingleVariableDeclaration();
-
-				newNode.setType(ASTResolving.getTypeFromTypeBinding(ast, desc.type));
+				String type= addImport(desc.type);
+				newNode.setType(ASTNodeFactory.newType(ast, type));
+				
 				// set name later
 				newNode.setProperty(NAME_SUGGESTION, desc.name);
 
@@ -134,7 +139,8 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 				EditDescription desc= (EditDescription) curr;
 
 				SingleVariableDeclaration newNode= ast.newSingleVariableDeclaration();
-				newNode.setType(ASTResolving.getTypeFromTypeBinding(ast, desc.type));
+				String type= addImport(desc.type);
+				newNode.setType(ASTNodeFactory.newType(ast, type));
 				//	set name later
 				newNode.setProperty(NAME_SUGGESTION, desc.name);
 				
@@ -150,6 +156,15 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 				
 				usedNames.add(decl1.getName().getIdentifier());
 				k++;	
+			}
+		}
+		
+		if (!createdVariables.isEmpty()) {
+			// avoid take a name of a local variable inside
+			CompilationUnit root= (CompilationUnit) methodDecl.getRoot();
+			IBinding[] bindings= (new ScopeAnalyzer()).getDeclarationsAfter(root, methodDecl.getBody().getStartPosition(), ScopeAnalyzer.VARIABLES);
+			for (int i= 0; i < bindings.length; i++) {
+				usedNames.add(bindings[i].getName());
 			}
 		}
 		

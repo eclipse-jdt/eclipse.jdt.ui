@@ -43,11 +43,11 @@ public class ScopeAnalyzerTest extends CoreTests {
 	}
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ScopeAnalyzerTest("testVariableDeclarations5"));
+			suite.addTest(new ScopeAnalyzerTest("testDeclarationsAfter"));
 			return suite;
 		}
 	}
@@ -352,6 +352,73 @@ public class ScopeAnalyzerTest extends CoreTests {
 			
 	}
 
+	public void testDeclarationsAfter() throws Exception {
+				
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1.ae;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int goo(final int param0) {\n");
+		buf.append("        int k= 0;\n");
+		buf.append("        try {\n");
+		buf.append("            for (int i= 0; i < 10; i++) {\n");
+		buf.append("                k += i;\n");
+		buf.append("            }\n");
+		buf.append("        } catch (Exception x) {\n");
+		buf.append("           return 9;\n");					 
+		buf.append("        };\n");
+		buf.append("        Runnable run= new Runnable() {\n");
+		buf.append("            int fInner;\n");		
+		buf.append("            public void run() {\n");
+		buf.append("                int x1= 0;\n");
+		buf.append("                x1 += param0;\n");
+		buf.append("                {\n");
+		buf.append("                    for (int i= 0, j= 0; i < 10; i++) {\n");
+		buf.append("                        x1 += i;\n");
+		buf.append("                        int x2= 0;\n");
+		buf.append("                    }\n");
+		buf.append("                }\n");		
+		buf.append("            }\n");		
+		buf.append("        };\n");			
+		buf.append("        return 3;\n");
+		buf.append("    }\n");			
+		buf.append("}\n");
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		assertNoProblems(astRoot);
+		{
+			String str= "int k= 0;";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.VARIABLES;
+			IBinding[] res= new ScopeAnalyzer().getDeclarationsAfter(astRoot, offset, flags);
+			
+			assertVariables(res, new String[] { "k", "i", "x", "run"});
+		}
+		
+		{
+			String str= "return 9;";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.VARIABLES;
+			IBinding[] res= new ScopeAnalyzer().getDeclarationsAfter(astRoot, offset, flags);
+			
+			assertVariables(res, new String[] { });
+		}
+		
+		{
+			String str= "x1 += param0;";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.VARIABLES;
+			IBinding[] res= new ScopeAnalyzer().getDeclarationsAfter(astRoot, offset, flags);
+			
+			assertVariables(res, new String[] { "i", "j", "x2" });
+		}				
+			
+	}
+
 	public void testTypeDeclarations1() throws Exception {
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
@@ -567,8 +634,8 @@ public class ScopeAnalyzerTest extends CoreTests {
 	
 	private static final String[] OBJ_METHODS= new String[] { "getClass", 
 		"hashCode", "equals", "clone", "toString", "notify", "notifyAll", "wait", "wait",
-		"wait", "finalize" }; 
-		
+		"wait", "finalize" };
+
 	private void assertMethods(IBinding[] res, String[] expectedNames, boolean addObjectMethods) {
 		String[] names= new String[res.length];		
 		for (int i= 0; i < res.length; i++) {

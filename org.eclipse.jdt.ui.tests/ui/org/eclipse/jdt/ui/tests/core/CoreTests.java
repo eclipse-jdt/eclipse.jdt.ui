@@ -38,7 +38,8 @@ public class CoreTests extends TestCase {
 		//suite.addTest(new TestSuite(NameProposerTest.class));
 		suite.addTest(new TestSuite(TextBufferTest.class));
 		suite.addTest(new TestSuite(TypeInfoTest.class));	
-		suite.addTest(new TestSuite(CallHierarchyTest.class));	
+		suite.addTest(new TestSuite(CallHierarchyTest.class));
+		suite.addTest(new TestSuite(ScopeAnalyzerTest.class));	
 		return suite;
 	}
 

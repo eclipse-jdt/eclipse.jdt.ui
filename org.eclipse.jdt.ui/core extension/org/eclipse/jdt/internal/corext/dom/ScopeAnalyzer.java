@@ -229,6 +229,31 @@ public class ScopeAnalyzer {
 		}
 	}
 	
+	public IBinding[] getDeclarationsAfter(CompilationUnit root, int offset, int flags) {
+		fRoot= root;
+		try {		
+			NodeFinder finder= new NodeFinder(offset, 0);
+			root.accept(finder);
+			ASTNode node= finder.getCoveringNode();
+			if (node == null) {
+				return null;
+			}
+			
+			ASTNode declaration= ASTResolving.findParentStatement(node);
+			while (declaration instanceof Statement && declaration.getNodeType() != ASTNode.BLOCK) {
+				declaration= declaration.getParent();
+			}
+
+			if (declaration instanceof Block) {
+				DeclarationsAfterVisitor visitor= new DeclarationsAfterVisitor(node.getStartPosition(), flags);
+				declaration.accept(visitor);
+			}
+			return (IBinding[]) fRequestor.toArray(new IBinding[fRequestor.size()]);
+		} finally {
+			clearLists();			
+		}
+	}
+	
 	
 	private class ScopeAnalyzerVisitor extends HierarchicalASTVisitor {
 		
@@ -243,7 +268,7 @@ public class ScopeAnalyzer {
 		private boolean isInside(ASTNode node) {
 			int start= node.getStartPosition();
 			int end= start + node.getLength();
-				
+					
 			return start <= fPosition && fPosition < end;
 		}
 		
@@ -309,7 +334,45 @@ public class ScopeAnalyzer {
 			return isInside(node);
 		}
 
-	}	
+	}
+	
+	private class DeclarationsAfterVisitor extends HierarchicalASTVisitor {
+		private int fPosition;
+		private int fFlags;
+		
+		public DeclarationsAfterVisitor(int position, int flags) {
+			fPosition= position;
+			fFlags= flags;
+		}
+		
+		public boolean visit(ASTNode node) {
+			return true;
+		}
+		
+		public boolean visit(VariableDeclaration node) {
+			if (hasFlag(VARIABLES, fFlags) && fPosition < node.getStartPosition()) {
+				IVariableBinding binding= node.resolveBinding();
+				if (binding != null) {
+					fRequestor.add(binding);
+				}				
+			}
+			return false;
+		}
+		
+		public boolean visit(AnonymousClassDeclaration node) {
+			return false;
+		}
+
+		public boolean visit(TypeDeclarationStatement node) {
+			if (hasFlag(TYPES, fFlags) && fPosition < node.getStartPosition()) {
+				ITypeBinding binding= node.getTypeDeclaration().resolveBinding();
+				if (binding != null && fTypesVisited.add(binding)) {
+					fRequestor.add(binding);
+				}
+			}
+			return false;
+		}
+	}
 	
 	private void addLocalDeclarations(ASTNode node, int flags) {
 		if (hasFlag(VARIABLES, flags) || hasFlag(TYPES, flags)) {

@@ -490,7 +490,12 @@ public class UnresolvedElementsSubProcessor {
 			}
 			
 			String[] arg= new String[] { getMethodName(methodBinding, false) };
-			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addarguments.description", arg); //$NON-NLS-1$
+			String label;
+			if (diff == 1) {
+				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addargument.description", arg); //$NON-NLS-1$
+			} else {
+				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addarguments.description", arg); //$NON-NLS-1$
+			}			
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
 			proposal.ensureNoModifications();
@@ -507,7 +512,12 @@ public class UnresolvedElementsSubProcessor {
 					changeDesc[idx]= new RemoveDescription();
 				}
 				String[] arg= new String[] { getMethodName(methodBinding, !cu.equals(targetCU)) };
-				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparam.description", arg); //$NON-NLS-1$
+				String label;
+				if (diff == 1) {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparam.description", arg); //$NON-NLS-1$
+				} else {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeparams.description", arg); //$NON-NLS-1$
+				}
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, astRoot, methodBinding, changeDesc, 1, image);
 				proposals.add(proposal);
@@ -542,9 +552,13 @@ public class UnresolvedElementsSubProcessor {
 			for (int i= diff - 1; i >= 0; i--) {
 				rewrite.markAsRemoved((Expression) arguments.get(indexSkipped[i]));
 			}
-			
 			String[] arg= new String[] { getMethodName(methodBinding, false) };
-			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removearguments.description", arg); //$NON-NLS-1$
+			String label;
+			if (diff == 1) {
+				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removeargument.description", arg); //$NON-NLS-1$
+			} else {
+				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.removearguments.description", arg); //$NON-NLS-1$
+			}			
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
 			proposal.ensureNoModifications();
@@ -563,7 +577,12 @@ public class UnresolvedElementsSubProcessor {
 					changeDesc[idx]= new InsertDescription(argTypes[idx], name);
 				}
 				String[] arg= new String[] { getMethodName(methodBinding, !cu.equals(targetCU)) };
-				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparams.description", arg); //$NON-NLS-1$
+				String label;
+				if (diff == 1) {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparam.description", arg); //$NON-NLS-1$
+				} else {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addparams.description", arg); //$NON-NLS-1$
+				}			
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, targetCU, astRoot, methodBinding, changeDesc, 1, image);
 				proposals.add(proposal);
@@ -724,7 +743,33 @@ public class UnresolvedElementsSubProcessor {
 				arguments= ((ConstructorInvocation) selectedNode).arguments();
 			}			
 		}
-		if (targetBinding != null && targetBinding.isFromSource()) {
+		if (targetBinding == null) {
+			return;
+		}
+		IMethodBinding[] methods= targetBinding.getDeclaredMethods();
+		ArrayList similarElements= new ArrayList();
+		IMethodBinding defConstructor= null;
+		for (int i= 0; i < methods.length; i++) {
+			IMethodBinding curr= methods[i];
+			if (curr.isConstructor()) {
+				if (curr.getParameterTypes().length == 0) {
+					defConstructor= curr;
+				} else {
+					similarElements.add(curr);
+				}
+			}
+		}
+		if (defConstructor != null) {
+			// default constructor could be implicit (bug 36819). Only add when we're sure its not.
+			// Misses the case when in other type
+			if (!similarElements.isEmpty() || (astRoot.findDeclaringNode(defConstructor) != null)) {
+				similarElements.add(defConstructor);
+			}
+		}
+		
+		addParameterMissmatchProposals(context, similarElements, arguments, proposals);
+		
+		if (targetBinding.isFromSource()) {
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, targetBinding);
 			if (targetCU != null) {
 				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconstructor.description", targetBinding.getName()); //$NON-NLS-1$
