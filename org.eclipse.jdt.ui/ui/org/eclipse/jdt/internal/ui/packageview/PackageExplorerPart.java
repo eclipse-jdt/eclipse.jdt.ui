@@ -284,7 +284,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer.setUseHashlookup(true);
 		fViewer.addFilter(fPatternFilter);
 		fViewer.addFilter(fLibraryFilter);
-		fViewer.addFilter(fBinaryFilter);
+		//fViewer.addFilter(fBinaryFilter);
 		fViewer.addFilter(fWorkingSetFilter);
 		if(fMemento != null) 
 			restoreFilters();
