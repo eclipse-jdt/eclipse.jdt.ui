@@ -108,11 +108,11 @@ public final class JavaUI {
 
 	/**
 	 * The id of the Java action set for open actions
-	 * (value <code>"org.eclipse.jdt.ui.OpenActionSet"</code>).
+	 * (value <code>"org.eclipse.jdt.ui.A_OpenActionSet"</code>).
 	 * 
 	 * @since 2.0
 	 */
-	public static final String ID_OPEN_ACTION_SET= "org.eclipse.jdt.ui.OpenActionSet"; //$NON-NLS-1$
+	public static final String ID_OPEN_ACTION_SET= "org.eclipse.jdt.ui.A_OpenActionSet"; //$NON-NLS-1$
 
 	/**
 	 * The id of the Java Search action set

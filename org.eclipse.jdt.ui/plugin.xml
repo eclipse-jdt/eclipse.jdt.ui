@@ -830,10 +830,6 @@ JavaStructureDiffViewerCreator
 		visible="false"
 		description="%JavaActionSet.description">
 
-		<!-- =========================================================================== -->
-		<!-- Navigate Menu                                                               -->
-		<!-- =========================================================================== -->
-			
       	<menu
             id="navigate"
             label="%NavigateMenu.label"
@@ -850,6 +846,57 @@ JavaStructureDiffViewerCreator
 			class="org.eclipse.jdt.internal.ui.actions.OpenTypeAction"/>
 	</actionSet>
 </extension>
+
+<!-- Begin Java Open action contributions  -->
+<!-- Action sets are contributed after they have been sorted. To enfore that   -->
+<!-- the open action set is contributed before the CodeActionSet we prefix it  -->
+<!-- with an A_                                                                -->
+
+<extension point="org.eclipse.ui.actionSets">
+	<actionSet
+		id="org.eclipse.jdt.ui.A_OpenActionSet"
+        label="%OpenActionSet.label"
+        description= "%OpenActionSet.description"
+		visible="false">
+
+      	<menu
+            id="navigate"
+            label="%NavigateMenu.label"
+            path="edit">
+         	<separator name="openGroup"/>
+      	</menu>
+      	
+		<action id="org.eclipse.jdt.ui.actions.OpenTypeHierarchy"
+      		menubarPath="navigate/openGroup"
+      		label="%OpenTypeHierarchyAction.label"
+			retarget="true" />
+			
+		<action id="org.eclipse.jdt.ui.actions.Open"
+      		menubarPath="navigate/openGroup"
+      		label="%OpenAction.label"
+			tooltip="%OpenAction.tooltip"
+			description="%OpenAction.description"
+			retarget="true" 
+			allowLabelUpdate="true"/>
+	</actionSet>			
+</extension>
+
+<extension point="org.eclipse.ui.actionSetPartAssociations">
+	<actionSetPartAssociation
+		targetID="org.eclipse.jdt.ui.A_OpenActionSet">
+		<part id="org.eclipse.search.SearchResultView"/>
+		<part id="org.eclipse.jdt.ui.PackageExplorer"/>
+		<part id="org.eclipse.jdt.ui.TypeHierarchy" />
+		<part id="org.eclipse.jdt.ui.CompilationUnitEditor"/>
+		<part id="org.eclipse.jdt.ui.ClassFileEditor"/>
+		<part id="org.eclipse.jdt.ui.ProjectsView"/>
+		<part id="org.eclipse.jdt.ui.PackagesView"/>
+		<part id="org.eclipse.jdt.ui.TypesView"/>
+		<part id="org.eclipse.jdt.ui.MembersView"/>
+	</actionSetPartAssociation>
+</extension>
+
+<!-- End Java Open action contributions  -->
 
 <extension point="org.eclipse.ui.actionSets">
 	<actionSet
@@ -1121,11 +1168,8 @@ JavaStructureDiffViewerCreator
 
 <!-- End Java Action Set (Adding the source, refactor and navigate menu -->
 
-
 <!-- Begin Java Search action set -->
 <extension point="org.eclipse.ui.actionSets">
-
-
 	<actionSet
 		id="org.eclipse.jdt.ui.SearchActionSet"
         label="%JavaSearchActionSet.label"
@@ -1268,48 +1312,6 @@ JavaStructureDiffViewerCreator
 </extension>
 
 <!-- End Java contributions for Search view -->
-
-
-<!-- Begin Java Open action contributions  -->
-
-<extension point="org.eclipse.ui.actionSets">
-	<actionSet
-		id="org.eclipse.jdt.ui.OpenActionSet"
-        label="%OpenActionSet.label"
-        description= "%OpenActionSet.description"
-		visible="false">
-
-		<action id="org.eclipse.jdt.ui.actions.OpenTypeHierarchy"
-      		menubarPath="navigate/openGroup"
-      		label="%OpenTypeHierarchyAction.label"
-			retarget="true" />
-			
-		<action id="org.eclipse.jdt.ui.actions.Open"
-      		menubarPath="navigate/openGroup"
-      		label="%OpenAction.label"
-			tooltip="%OpenAction.tooltip"
-			description="%OpenAction.description"
-			retarget="true" 
-			allowLabelUpdate="true"/>
-	</actionSet>			
-</extension>
-
-<extension point="org.eclipse.ui.actionSetPartAssociations">
-	<actionSetPartAssociation
-		targetID="org.eclipse.jdt.ui.OpenActionSet">
-		<part id="org.eclipse.search.SearchResultView"/>
-		<part id="org.eclipse.jdt.ui.PackageExplorer"/>
-		<part id="org.eclipse.jdt.ui.TypeHierarchy" />
-		<part id="org.eclipse.jdt.ui.CompilationUnitEditor"/>
-		<part id="org.eclipse.jdt.ui.ClassFileEditor"/>
-		<part id="org.eclipse.jdt.ui.ProjectsView"/>
-		<part id="org.eclipse.jdt.ui.PackagesView"/>
-		<part id="org.eclipse.jdt.ui.TypesView"/>
-		<part id="org.eclipse.jdt.ui.MembersView"/>
-	</actionSetPartAssociation>
-</extension>
-
-<!-- End Java Open action contributions  -->
 
 <extension
 	point="org.eclipse.ui.popupMenus">         
