@@ -34,7 +34,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#showMatch(org.eclipse.search.ui.text.Match, int, int)
 	 */
-	protected void showMatch(Match match, int currentOffset, int currentLength) throws PartInitException {
+	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
 		IEditorPart editor= null;
 		JavaElementLine element= (JavaElementLine) match.getElement();
 		IJavaElement javaElement= element.getJavaElement();
@@ -46,6 +46,8 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 			return;
 		}
 
+		if (editor != null && activate)
+			editor.getEditorSite().getPage().activate(editor);
 		if (editor instanceof ITextEditor) {
 			ITextEditor textEditor= (ITextEditor) editor;
 			textEditor.selectAndReveal(currentOffset, currentLength);

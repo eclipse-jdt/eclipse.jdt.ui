@@ -44,6 +44,8 @@ public interface IMatchPresentation {
 	 * through the file buffer infrastructure (see {@link org.eclipse.core.filebuffers.ITextFileBufferManager}). 
 	 * When a file buffer is saved, the current positions are written back to the 
 	 * match.
+	 * If the <code>activate</code> parameter is <code>true</code> the opened editor
+	 * shoud have be activated. Otherwise the focus should not be changed.
 	 * 
 	 * @param match
 	 *            The match to show
@@ -51,8 +53,10 @@ public interface IMatchPresentation {
 	 *            The current start offset of the match
 	 * @param currentLength
 	 *            The current length of the selection
+	 * @param activate
+	 * 			  Whether to activate the editor the match is shown in.
 	 * @throws PartInitException
 	 *             If an editor can't be opened.
 	 */
-	void showMatch(Match match, int currentOffset, int currentLength) throws PartInitException;
+	void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException;
 }

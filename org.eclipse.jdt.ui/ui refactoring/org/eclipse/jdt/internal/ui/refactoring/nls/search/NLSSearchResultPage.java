@@ -35,9 +35,11 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage {
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#showMatch(org.eclipse.search.ui.text.Match,
 	 *      int, int)
 	 */
-	protected void showMatch(Match match, int currentOffset, int currentLength) throws PartInitException {
+	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
 		try {
 			IEditorPart editor= fEditorOpener.open(match);
+			if (editor != null && activate)
+				editor.getEditorSite().getPage().activate(editor);
 			if (editor instanceof ITextEditor) {
 				ITextEditor textEditor= (ITextEditor) editor;
 				textEditor.selectAndReveal(currentOffset, currentLength);

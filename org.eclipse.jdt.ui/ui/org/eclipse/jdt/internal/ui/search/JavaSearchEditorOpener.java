@@ -50,7 +50,6 @@ public class JavaSearchEditorOpener {
 	}
 
 	private IEditorPart showWithoutReuse(Object element, IWorkbenchPage wbPage) throws PartInitException, JavaModelException {
-		IEditorPart editor= null;
 		return EditorUtility.openInEditor(element, false);
 	}
 

@@ -125,7 +125,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		fActionGroup= new NewSearchViewActionGroup(part);
 	}
 	
-	public void showMatch(Match match, int offset, int length) throws PartInitException {
+	public void showMatch(Match match, int offset, int length, boolean activate) throws PartInitException {
 		IEditorPart editor;
 		try {
 			editor= fEditorOpener.open(match);
@@ -133,6 +133,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			throw new PartInitException(e.getStatus());
 		}
 		
+		if (editor != null && activate)
+			editor.getEditorSite().getPage().activate(editor);
 		Object element= match.getElement();
 		if (editor instanceof ITextEditor) {
 			ITextEditor textEditor= (ITextEditor) editor;
@@ -146,7 +148,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			JavaSearchResult result= (JavaSearchResult) getInput();
 			IMatchPresentation participant= result.getSearchParticpant(element);
 			if (participant != null)
-				participant.showMatch(match, offset, length);
+				participant.showMatch(match, offset, length, activate);
 		}
 	}
 	
