@@ -45,6 +45,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	private static final String MATCHES= SearchMessages.getString("SearchResultCollector.matches"); //$NON-NLS-1$
 	private static final String DONE= SearchMessages.getString("SearchResultCollector.done"); //$NON-NLS-1$
 	private static final String SEARCHING= SearchMessages.getString("SearchResultCollector.searching"); //$NON-NLS-1$
+	private static final Integer POTENTIAL_MATCH_VALUE= new Integer(POTENTIAL_MATCH);
 	
 	private IProgressMonitor fMonitor;
 	private IContextMenuContributor fContextMenu;
@@ -105,7 +106,12 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	 */
 	public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) throws CoreException {
 		IMarker marker= resource.createMarker(SearchUI.SEARCH_MARKER);
-		HashMap attributes= new HashMap(4);
+		HashMap attributes;
+		if (accuracy == POTENTIAL_MATCH) {
+			attributes= new HashMap(6);
+			attributes.put(IJavaSearchUIConstants.ATT_ACCURACY, POTENTIAL_MATCH_VALUE);
+		} else
+			attributes= new HashMap(5);
 		JavaCore.addJavaElementMarkerAttributes(attributes, enclosingElement);
 		attributes.put(IJavaSearchUIConstants.ATT_JE_HANDLE_ID, enclosingElement.getHandleIdentifier());
 		attributes.put(IMarker.CHAR_START, new Integer(Math.max(start, 0)));

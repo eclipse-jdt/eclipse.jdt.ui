@@ -16,6 +16,7 @@ import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -43,17 +44,27 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 
 	public String getText(Object o) {
 		fLastMarker= null;
-		IJavaElement javaElement= getJavaElement(o);
+		IJavaElement javaElement= getJavaElement(o); // sets fLastMarker as side effect
+		boolean isAccurate= true;
+		if (fLastMarker != null && (fLastMarker.getAttribute(IJavaSearchUIConstants.ATT_ACCURACY, -1) == IJavaSearchResultCollector.POTENTIAL_MATCH))
+			isAccurate= false;
 		if (javaElement == null) {
-			IMarker marker= getMarker(o);
-			if (marker != null)
-				return fLabelProvider.getText(marker.getResource());
+			if (fLastMarker != null) {
+				if (isAccurate) 
+					return fLabelProvider.getText(fLastMarker.getResource());
+				else
+					return "?: " + fLabelProvider.getText(fLastMarker.getResource());
+			}
 			else
 				return ""; //$NON-NLS-1$
 		}
 		if (javaElement instanceof IImportDeclaration)
 			javaElement= ((IImportDeclaration)javaElement).getParent().getParent();
-		return fTextLabelProvider.getTextLabel((IJavaElement)javaElement);
+
+		if (isAccurate) 
+			return fTextLabelProvider.getTextLabel((IJavaElement)javaElement);
+		else
+			return "?: " + fTextLabelProvider.getTextLabel((IJavaElement)javaElement);
 	}
 
 	public Image getImage(Object o) {

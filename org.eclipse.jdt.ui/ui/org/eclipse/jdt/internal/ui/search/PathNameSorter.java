@@ -5,6 +5,9 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -18,6 +21,8 @@ import org.eclipse.search.ui.SearchUI;
  */
 public class PathNameSorter extends ViewerSorter {
 
+	private ILabelProvider fLabelProvider;
+	
 	/*
 	 * Overrides method from ViewerSorter
 	 */
@@ -29,23 +34,32 @@ public class PathNameSorter extends ViewerSorter {
 
 		if (e1 instanceof ISearchResultViewEntry) {
 			entry1= (ISearchResultViewEntry)e1;
-			name1= entry1.getResource().getFullPath().toString();
+			name1= fLabelProvider.getText(e1);
 		}
 		if (e2 instanceof ISearchResultViewEntry) {
 			entry2= (ISearchResultViewEntry)e2;
-			name2= entry2.getResource().getFullPath().toString();
+			name2= fLabelProvider.getText(e2);
 		}
 		if (name1 == null)
 			name1= ""; //$NON-NLS-1$
 		if (name2 == null)
 			name2= ""; //$NON-NLS-1$
 			
-		// Sort by marker start position if resource is equal.
-		if (entry1 != null && entry2 != null && entry1.getResource() == entry2.getResource() && entry1.getResource() != null) {
+		IResource resource= null;
+		if (entry1 != null)
+			resource= entry1.getResource();
+		if (resource != null && entry2 != null && resource == entry2.getResource()) {
+
+			if (resource instanceof IProject || resource.getFileExtension().equalsIgnoreCase("jar") || resource.getFileExtension().equalsIgnoreCase("zip"))
+				// binary archives
+				return getCollator().compare(name1, name2);
+
+			// Sort by marker start position if resource is equal.			
 			int startPos1= -1;
 			int startPos2= -1;
 			IMarker marker1= entry1.getSelectedMarker();
 			IMarker marker2= entry2.getSelectedMarker();
+
 			if (marker1 != null)
 				startPos1= marker1.getAttribute(IMarker.CHAR_START, -1);
 			if (marker2 != null)
@@ -72,9 +86,9 @@ public class PathNameSorter extends ViewerSorter {
 		if (view == null)
 			return;
 		
-		ILabelProvider labelProvider= view.getLabelProvider();
-		if (labelProvider instanceof JavaSearchResultLabelProvider)
-			((JavaSearchResultLabelProvider)labelProvider).setOrder(JavaSearchResultLabelProvider.SHOW_PATH);
+		fLabelProvider= view.getLabelProvider();
+		if (fLabelProvider instanceof JavaSearchResultLabelProvider)
+			((JavaSearchResultLabelProvider)fLabelProvider).setOrder(JavaSearchResultLabelProvider.SHOW_PATH);
 		super.sort(viewer, elements);
 	}
 }
