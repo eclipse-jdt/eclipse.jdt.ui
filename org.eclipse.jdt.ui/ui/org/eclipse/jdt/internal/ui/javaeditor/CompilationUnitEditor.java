@@ -1417,7 +1417,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @since 3.0
 	 */
 	protected void installOverrideIndicator(IAnnotationModel model) {
-		super.installOverrideIndicator(model);
+		uninstallOverrideIndicator();
+		fOverrideAndImplementsIndicator= new OverrideIndicatorManager(model, getInputJavaElement(), null);		
 		addReconcileListener(fOverrideAndImplementsIndicator);
 	}
 	
