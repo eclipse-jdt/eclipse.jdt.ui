@@ -81,7 +81,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * type <code>ICompilationUnit</code>, <code>IPackage
  * </code>, <code>IPackageFragmentRoot/code> and
  * <code>IJavaProject</code>.
- *
+ * </p>
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
