@@ -18,7 +18,6 @@ public class DisplayValue {
 	private final String fScaledUnit;
 	private final String fScaledScalar;
 	
-	
 	public DisplayValue(String unit, String value) {
 		fScaledUnit= unit;
 		fScaledScalar= value;
@@ -35,7 +34,6 @@ public class DisplayValue {
 	public String getDisplayString() {
 		return getScaledValue() + getScaledUnit();
 	}
-	
 	
 	public String toString() {
 		return getDisplayString();

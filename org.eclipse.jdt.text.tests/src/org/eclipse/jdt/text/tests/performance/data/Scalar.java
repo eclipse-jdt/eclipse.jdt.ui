@@ -32,6 +32,7 @@ public class Scalar {
 	}
 	
 	public String toString() {
+		// TODO get rid of perfmsr dependency
 		Dimension dim= PerfMsrDimensions.getDimension(fDimension);
 		if (dim == null)
 			return "Scalar [dimension= " + fDimension + ", magnitude= " + fMagnitude + "]";

@@ -17,7 +17,7 @@ import java.util.Map;
  * @since 3.1
  */
 public class DataPoint {
-	private String fKind;
+	private String fKind; // TODO this is perfmsr dependent
 	private Map fScalars;
 	
 	DataPoint(String kind, Map values) {
@@ -34,6 +34,7 @@ public class DataPoint {
 	}
 	
 	public Scalar getScalar(Dimension dimension) {
+		// TODO get rid of perfmsr dependency
 		return (Scalar) fScalars.get(PerfMsrDimensions.getPerfMsrId(dimension));
 	}
 	
