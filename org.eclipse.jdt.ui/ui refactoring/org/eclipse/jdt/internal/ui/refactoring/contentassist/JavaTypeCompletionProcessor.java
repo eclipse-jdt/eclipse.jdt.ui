@@ -55,10 +55,10 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 public class JavaTypeCompletionProcessor implements IContentAssistProcessor, IContentAssistProcessorExtension {
 	
-	private static final String CLASS_NAME= "$$__$$";
-	private static final String CU_NAME= CLASS_NAME + ".java";
-	private static final String CU_START= "public class " + CLASS_NAME + " { ";
-	private static final String CU_END= " }";
+	private static final String CLASS_NAME= "$$__$$"; //$NON-NLS-1$
+	private static final String CU_NAME= CLASS_NAME + ".java"; //$NON-NLS-1$
+	private static final String CU_START= "public class " + CLASS_NAME + " { ";  //$NON-NLS-1$ //$NON-NLS-2$
+	private static final String CU_END= " }"; //$NON-NLS-1$
 	
 	private IPackageFragmentRoot fRoot;
 	private JavaCompletionProposalComparator fComparator;
@@ -78,7 +78,7 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
-		Assert.isTrue(false, "ITextViewer not supported");
+		Assert.isTrue(false, "ITextViewer not supported"); //$NON-NLS-1$
 		return null;
 	}
 	
@@ -86,7 +86,7 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)
 	 */
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
-		Assert.isTrue(false, "ITextViewer not supported");
+		Assert.isTrue(false, "ITextViewer not supported"); //$NON-NLS-1$
 		return null;
 	}
 	
@@ -129,7 +129,7 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessorExtension#computeCompletionProposals(org.eclipse.jface.text.contentassist.IContentAssistSubject, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubject contentAssistSubject, int documentOffset) {
-		String input= "";
+		String input= ""; //$NON-NLS-1$
 		try {
 			input= contentAssistSubject.getDocument().get(0, documentOffset);
 		} catch (BadLocationException e) {
@@ -139,7 +139,7 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 			return null;
 		
 		String cuString= CU_START + input + CU_END;
-		IPackageFragment defaultPackage= fRoot.getPackageFragment("");
+		IPackageFragment defaultPackage= fRoot.getPackageFragment(""); //$NON-NLS-1$
 		ICompilationUnit cu= defaultPackage.getCompilationUnit(CU_NAME);
 		try {
 			/*
@@ -238,7 +238,7 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 			if (typeQualifier.length() > 0) {
 				buf.append(typeQualifier);
 			} else if (containerName != null) {
-//TODO				buf.append(JavaTextMessages.getString("ResultCollector.default_package")); //$NON-NLS-1$
+				buf.append("(default package)");
 			}
 			String name= buf.toString();
 			
