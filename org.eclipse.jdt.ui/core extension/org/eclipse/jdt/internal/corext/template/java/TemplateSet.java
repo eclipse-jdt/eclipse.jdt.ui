@@ -50,7 +50,6 @@ import org.eclipse.jface.text.templates.ContextType;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateException;
-import org.eclipse.jface.text.templates.TemplateMessages;
 
 /**
  * <code>TemplateSet</code> manages a collection of templates and makes them
@@ -146,7 +145,7 @@ public class TemplateSet {
 				String context= getAttributeValue(attributes, CONTEXT_ATTRIBUTE);
 
 				if (name == null || description == null || context == null)
-					throw new SAXException(TemplateMessages.getString("TemplateSet.error.missing.attribute")); //$NON-NLS-1$
+					throw new SAXException(JavaTemplateMessages.getString("TemplateSet.error.missing.attribute")); //$NON-NLS-1$
 
 				StringBuffer buffer= new StringBuffer();
 				NodeList children= node.getChildNodes();
@@ -212,7 +211,7 @@ public class TemplateSet {
 				return '!' + key + '!';
 			}
 		} else
-			return TemplateMessages.getString(key); // default messages
+			return JavaTemplateMessages.getString(key); // default messages
 	}
 
 	protected String validateTemplate(Template template) {
@@ -319,14 +318,14 @@ public class TemplateSet {
 			code= TEMPLATE_IO_EXCEPTION;
 //		IStatus status= JavaUIStatus.createError(code, TemplateMessages.getString("TemplateSet.error.read"), t); //$NON-NLS-1$
 //		throw new JavaUIException(status);
-		throw new CoreException(new Status(IStatus.ERROR, "org.eclipse.jface.text", code, TemplateMessages.getString("TemplateSet.error.read"), t)); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new CoreException(new Status(IStatus.ERROR, "org.eclipse.jface.text", code, JavaTemplateMessages.getString("TemplateSet.error.read"), t)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	private static void throwWriteException(Throwable t) throws CoreException {
 //		IStatus status= JavaUIStatus.createError(IJavaStatusConstants.TEMPLATE_IO_EXCEPTION,
 //			TemplateMessages.getString("TemplateSet.error.write"), t); //$NON-NLS-1$
 //		throw new JavaUIException(status);
-		throw new CoreException(new Status(IStatus.ERROR, "org.eclipse.jface.text", TEMPLATE_IO_EXCEPTION, TemplateMessages.getString("TemplateSet.error.write"), t)); //$NON-NLS-1$ //$NON-NLS-2$
+		throw new CoreException(new Status(IStatus.ERROR, "org.eclipse.jface.text", TEMPLATE_IO_EXCEPTION, JavaTemplateMessages.getString("TemplateSet.error.write"), t)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
