@@ -40,7 +40,9 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		CodeTemplates.getCodeTemplate(CodeTemplates.TYPECOMMENT).setPattern("/** typecomment template*/");
+		CodeTemplates.getCodeTemplate(CodeTemplates.NEWTYPE).setPattern(
+			"${package_declaration}" + 
+			System.getProperty("line.separator", "\n") +			"${type_declaration}");
 		Hashtable options= JavaCore.getOptions();
 		fCompactPref= options.get(JavaCore.FORMATTER_COMPACT_ASSIGNMENT);
 		options.put(JavaCore.FORMATTER_COMPACT_ASSIGNMENT, JavaCore.COMPACT);
