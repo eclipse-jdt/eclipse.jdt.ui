@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IActionBars;
@@ -34,7 +35,7 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.PullUpAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RenameAction;
 
 /**
- * Action group that adds the reorganize (cut, copy, paste, ..) and the refactor actions 
+ * Action group that adds refactor actions (e.g. Rename..., Move..., etc.)
  * to a context menu and the global menu bar.
  * 
  * <p>
@@ -46,6 +47,7 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RenameAction;
 public class RefactorActionGroup extends ActionGroup {
 
 	private IWorkbenchSite fSite;
+	private boolean fIsEditorOwner;
 
  	private SelectionDispatchAction fSelfEncapsulateField;
  	private SelectionDispatchAction fMoveAction;
@@ -74,60 +76,74 @@ public class RefactorActionGroup extends ActionGroup {
 		this(page.getSite());
 	}
 	
+	/**
+	 * Creates a new <code>RefactorActionGroup</code>.
+	 * <p>
+	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * </p>
+	 * 
+	 * @param ediitor the editor that owns this action group
+	 */
 	public RefactorActionGroup(CompilationUnitEditor editor) {
+		fSite= editor.getEditorSite();
+		fIsEditorOwner= true;
+		ISelectionProvider provider= editor.getSelectionProvider();
+		ISelection selection= provider.getSelection();
+		
 		fRenameAction= new RenameAction(editor);
-		initAction(fRenameAction, editor.getSelectionProvider());
+		fRenameAction.update(selection);
 		
 		fSelfEncapsulateField= new SelfEncapsulateFieldAction(editor);
-		initAction(fSelfEncapsulateField, editor.getSelectionProvider());
+		fSelfEncapsulateField.update(selection);
 		
 		fInlineTempAction= new InlineTempAction(editor);
-		initAction(fInlineTempAction, editor.getSelectionProvider());
+		fInlineTempAction.update(selection);
 		
 		fExtractTempAction= new ExtractTempAction(editor);
-		initAction(fExtractTempAction, editor.getSelectionProvider());
+		fExtractTempAction.update(selection);
 
 		fExtractMethodAction= new ExtractMethodAction(editor);
-		initAction(fExtractMethodAction, editor.getSelectionProvider());
+		fExtractMethodAction.update(selection);
 		
 		fModifyParametersAction= new ModifyParametersAction(editor);
-		initAction(fModifyParametersAction, editor.getSelectionProvider());
+		fModifyParametersAction.update(selection);
 
 		fPullUpAction= new PullUpAction(editor);
-		initAction(fPullUpAction, editor.getSelectionProvider());		
+		fPullUpAction.update(selection);
 		
 		fMoveAction= new MoveAction(editor);
-		initAction(fMoveAction, editor.getSelectionProvider());		
+		fMoveAction.update(selection);
 	}
 
 	private RefactorActionGroup(IWorkbenchSite site) {
 		fSite= site;
+		fIsEditorOwner= false;
+		ISelectionProvider provider= fSite.getSelectionProvider();
+		ISelection selection= provider.getSelection();
+		
 		fMoveAction= new MoveAction(site);
-		initAction(fMoveAction, fSite.getSelectionProvider());
+		initAction(fMoveAction, provider, selection);
 		
 		fRenameAction= new RenameAction(site);
-		initAction(fRenameAction, fSite.getSelectionProvider());
+		initAction(fRenameAction, provider, selection);
 		
 		fModifyParametersAction= new ModifyParametersAction(fSite);
-		initAction(fModifyParametersAction, fSite.getSelectionProvider());
+		initAction(fModifyParametersAction, provider, selection);
 		
 		fPullUpAction= new PullUpAction(fSite);
-		initAction(fPullUpAction, fSite.getSelectionProvider());
+		initAction(fPullUpAction, provider, selection);
 		
 		fSelfEncapsulateField= new SelfEncapsulateFieldAction(fSite);
-		fSelfEncapsulateField.update();
-		if (!isEditorOwner()) {
-			fSite.getSelectionProvider().addSelectionChangedListener(fSelfEncapsulateField);
-		}
+		initAction(fSelfEncapsulateField, provider, selection);
 	}
 
-	private static void initAction(SelectionDispatchAction action, ISelectionProvider provider){
-		action.update();
+	private static void initAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection){
+		action.update(selection);
 		provider.addSelectionChangedListener(action);
 	};
 	
 	private boolean isEditorOwner() {
-		return false;
+		return fIsEditorOwner;
 	}
 	
 	/* (non-Javadoc)
@@ -151,6 +167,22 @@ public class RefactorActionGroup extends ActionGroup {
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
 		addRefactorSubmenu(menu);
+	}
+	
+	/*
+	 * @see ActionGroup#dispose()
+	 */
+	public void dispose() {
+		ISelectionProvider provider= fSite.getSelectionProvider();
+		provider.removeSelectionChangedListener(fSelfEncapsulateField);
+		provider.removeSelectionChangedListener(fMoveAction);
+		provider.removeSelectionChangedListener(fRenameAction);
+		provider.removeSelectionChangedListener(fModifyParametersAction);
+		provider.removeSelectionChangedListener(fPullUpAction);
+		provider.removeSelectionChangedListener(fInlineTempAction);
+		provider.removeSelectionChangedListener(fExtractTempAction);
+		provider.removeSelectionChangedListener(fExtractMethodAction);
+		super.dispose();
 	}
 	
 	private void addRefactorSubmenu(IMenuManager menu) {

@@ -142,6 +142,17 @@ public class OpenViewActionGroup extends ActionGroup {
 			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fOpenPropertiesDialog);
 	}
 
+	/*
+	 * @see ActionGroup#dispose()
+	 */
+	public void dispose() {
+		ISelectionProvider provider= fSite.getSelectionProvider();
+		provider.removeSelectionChangedListener(fOpenSuperImplementation);
+		provider.removeSelectionChangedListener(fOpenExternalJavadoc);
+		provider.removeSelectionChangedListener(fOpenTypeHierarchy);
+		super.dispose();
+	}
+	
 	private void setGlobalActionHandlers(IActionBars actionBars) {
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_SUPER_IMPLEMENTATION, fOpenSuperImplementation);
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_EXTERNAL_JAVA_DOC, fOpenExternalJavadoc);

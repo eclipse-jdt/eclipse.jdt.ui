@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
 public class CCPActionGroup extends ActionGroup {
 
 	private IWorkbenchSite fSite;
+	private Clipboard fClipboard;
 
  	private SelectionDispatchAction[] fActions;
 
@@ -45,8 +46,7 @@ public class CCPActionGroup extends ActionGroup {
 	private SelectionDispatchAction fCopyAction;
 	private SelectionDispatchAction fPasteAction;
 	private SelectionDispatchAction fCutAction;
-
-	private Clipboard fClipboard;
+	
 	/**
 	 * Creates a new <code>CCPActionGroup</code>.
 	 * 
@@ -56,6 +56,11 @@ public class CCPActionGroup extends ActionGroup {
 		this(part.getSite());
 	}
 	
+	/**
+	 * Creates a new <code>CCPActionGroup</code>.
+	 * 
+	 * @param page the page that owns this action group
+	 */
 	public CCPActionGroup(Page page) {
 		this(page.getSite());
 	}

@@ -115,6 +115,15 @@ public class OpenEditorActionGroup extends ActionGroup {
 		}
 	}
 
+	/*
+	 * @see ActionGroup#dispose()
+	 */
+	public void dispose() {
+		ISelectionProvider provider= fSite.getSelectionProvider();
+		provider.removeSelectionChangedListener(fOpen);
+		super.dispose();
+	}
+	
 	private void setGlobalActionHandlers(IActionBars actionBars) {
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN, fOpen);
 	}

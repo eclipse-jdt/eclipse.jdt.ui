@@ -40,6 +40,7 @@ public class ShowActionGroup extends ActionGroup {
 
 	private boolean fIsPackageExplorer;
 
+	private IWorkbenchSite fSite;
 	private ShowInPackageViewAction fShowInPackagesViewAction;
 	private ShowInNavigatorViewAction fShowInNavigatorViewAction;
 
@@ -71,16 +72,18 @@ public class ShowActionGroup extends ActionGroup {
 	public ShowActionGroup(JavaEditor part) {
 		fShowInPackagesViewAction= new ShowInPackageViewAction(part);
 		fShowInNavigatorViewAction= new ShowInNavigatorViewAction(part);
-		initialize(part.getSite().getSelectionProvider() , true);
+		initialize(part.getSite(), true);
 	}
 
 	private ShowActionGroup(IWorkbenchSite site) {
 		fShowInPackagesViewAction= new ShowInPackageViewAction(site);
 		fShowInNavigatorViewAction= new ShowInNavigatorViewAction(site);
-		initialize(site.getSelectionProvider() , false);		
+		initialize(site , false);		
 	}
 
-	private void initialize(ISelectionProvider provider, boolean isJavaEditor) {
+	private void initialize(IWorkbenchSite site, boolean isJavaEditor) {
+		fSite= site;
+		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
 		fShowInPackagesViewAction.update(selection);
 		fShowInNavigatorViewAction.update(selection);
@@ -105,6 +108,16 @@ public class ShowActionGroup extends ActionGroup {
 		super.fillContextMenu(menu);
 		if (!fIsPackageExplorer)
 			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fShowInPackagesViewAction);
+	}
+	
+	/*
+	 * @see ActionGroup#dispose()
+	 */
+	public void dispose() {
+		ISelectionProvider provider= fSite.getSelectionProvider();
+		provider.removeSelectionChangedListener(fShowInPackagesViewAction);
+		provider.removeSelectionChangedListener(fShowInNavigatorViewAction);
+		super.dispose();
 	}
 	
 	private void setGlobalActionHandlers(IActionBars actionBar) {

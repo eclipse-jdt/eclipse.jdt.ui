@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -43,6 +44,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
  */
 public class GenerateActionGroup extends ActionGroup {
 	
+	private IWorkbenchSite fSite;
+	
 	private OverrideMethodsAction fOverrideMethods;
 	private AddGetterSetterAction fAddGetterSetter;
 	private AddUnimplementedConstructorsAction fAddUnimplementedConstructors;
@@ -64,6 +67,7 @@ public class GenerateActionGroup extends ActionGroup {
 	 * </p>
 	 */
 	public GenerateActionGroup(CompilationUnitEditor editor) {
+		fSite= editor.getSite();
 		ISelectionProvider provider= editor.getSite().getSelectionProvider();
 		ISelection selection= provider.getSelection();
 		
@@ -97,7 +101,8 @@ public class GenerateActionGroup extends ActionGroup {
 	}
 
 	private GenerateActionGroup(IWorkbenchSite site) {
-		ISelectionProvider provider= site.getSelectionProvider();
+		fSite= site;
+		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
 		
 		fOverrideMethods= new OverrideMethodsAction(site);
@@ -154,6 +159,22 @@ public class GenerateActionGroup extends ActionGroup {
 		appendToGroup(menu, fOrganizeImports);
 	}
 
+	/* (non-Javadoc)
+	 * Method declared in ActionGroup
+	 */
+	public void dispose() {
+		ISelectionProvider provider= fSite.getSelectionProvider();
+		provider.removeSelectionChangedListener(fOverrideMethods);
+		provider.removeSelectionChangedListener(fAddGetterSetter);
+		provider.removeSelectionChangedListener(fAddUnimplementedConstructors);
+		provider.removeSelectionChangedListener(fAddJavaDocStub);
+		provider.removeSelectionChangedListener(fAddBookmark);
+		provider.removeSelectionChangedListener(fExternalizeStrings);
+		provider.removeSelectionChangedListener(fFindStringsToExternalize);
+		provider.removeSelectionChangedListener(fOrganizeImports);
+		super.dispose();
+	}
+	
 	private void setGlobalActionHandlers(IActionBars actionBar) {
 		actionBar.setGlobalActionHandler(JdtActionConstants.OVERRIDE_METHODS, fOverrideMethods);
 		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_GETTER_SETTER, fAddGetterSetter);

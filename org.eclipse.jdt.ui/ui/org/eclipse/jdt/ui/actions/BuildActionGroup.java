@@ -22,6 +22,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.BuildAction;
 import org.eclipse.ui.actions.RefreshAction;
@@ -36,7 +37,9 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
  * 
  * @since 2.0
  */
-public class BuildActionGroup extends ActionGroup{
+public class BuildActionGroup extends ActionGroup {
+
+	private IWorkbenchSite fSite;
 	
 	private BuildAction fBuildAction;
 	private BuildAction fFullBuildAction;
@@ -48,8 +51,9 @@ public class BuildActionGroup extends ActionGroup{
 	 * @param part the view part that owns this action group
 	 */
 	public BuildActionGroup(IViewPart part) {
-		Shell shell= part.getSite().getShell();
-		ISelectionProvider provider= part.getSite().getSelectionProvider();
+		fSite= part.getSite();
+		Shell shell= fSite.getShell();
+		ISelectionProvider provider= fSite.getSelectionProvider();
 		
 		fBuildAction= new BuildAction(shell, IncrementalProjectBuilder.INCREMENTAL_BUILD);
 		fBuildAction.setText(ActionMessages.getString("BuildAction.label")); //$NON-NLS-1$
@@ -88,6 +92,17 @@ public class BuildActionGroup extends ActionGroup{
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
 	}
+	
+	/* (non-Javadoc)
+	 * Method declared in ActionGroup
+	 */
+	public void dispose() {
+		ISelectionProvider provider= fSite.getSelectionProvider();
+		provider.removeSelectionChangedListener(fBuildAction);
+		provider.removeSelectionChangedListener(fFullBuildAction);
+		provider.removeSelectionChangedListener(fRefreshAction);
+		super.dispose();
+	}	
 	
 	private void setGlobalActionHandlers(IActionBars actionBar) {
 		actionBar.setGlobalActionHandler(IWorkbenchActionConstants.BUILD_PROJECT, fBuildAction);
