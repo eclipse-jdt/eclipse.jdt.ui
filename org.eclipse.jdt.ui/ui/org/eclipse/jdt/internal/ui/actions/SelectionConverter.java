@@ -147,7 +147,7 @@ public class SelectionConverter {
 	}
 		
 	public static IJavaElement[] codeResolve(JavaEditor editor) throws JavaModelException {
-			return codeResolve(getInput(editor), (ITextSelection)editor.getSelectionProvider().getSelection());
+		return codeResolve(getInput(editor), (ITextSelection)editor.getSelectionProvider().getSelection());
 	}
 
 	/**
@@ -210,6 +210,14 @@ public class SelectionConverter {
 
 	private static IJavaElement[] codeResolve(IJavaElement input, ITextSelection selection) throws JavaModelException {
 			if (input instanceof ICodeAssist) {
+				if (input instanceof ICompilationUnit) {
+					ICompilationUnit cunit= (ICompilationUnit)input;
+					if (cunit.isWorkingCopy()) {
+						synchronized (cunit) {
+							cunit.reconcile();
+						}
+					}
+				}
 				IJavaElement[] elements= ((ICodeAssist)input).codeSelect(selection.getOffset(), selection.getLength());
 				if (elements != null && elements.length > 0)
 					return elements;
