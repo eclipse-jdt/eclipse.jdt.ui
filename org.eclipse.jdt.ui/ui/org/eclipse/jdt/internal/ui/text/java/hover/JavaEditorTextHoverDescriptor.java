@@ -279,8 +279,9 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 				// Fix modifier string
 				int stateMask= hovers[i].fStateMask;
 				if (stateMask == -1)
-					stateMask= 0;
-				hovers[i].fModifierString= EditorUtility.getModifierString(stateMask);
+					hovers[i].fModifierString= ""; //$NON-NLS-1$
+				else
+					hovers[i].fModifierString= EditorUtility.getModifierString(stateMask);
 			}
 		}
 	}

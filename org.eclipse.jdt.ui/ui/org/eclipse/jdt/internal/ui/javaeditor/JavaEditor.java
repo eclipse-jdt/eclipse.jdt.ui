@@ -287,8 +287,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			if (fKeyModifierMask == -1) {
 				// Fallback to stored state mask
 				fKeyModifierMask= getPreferenceStore().getInt(BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK);
-				if (fKeyModifierMask == 0)
-					fKeyModifierMask= -1;
 			};
 		}
 
