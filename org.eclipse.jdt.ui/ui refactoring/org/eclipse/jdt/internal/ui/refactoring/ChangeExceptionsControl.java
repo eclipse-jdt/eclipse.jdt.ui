@@ -16,7 +16,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -59,6 +58,7 @@ import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -255,14 +255,14 @@ public class ChangeExceptionsControl extends Composite {
 		dialog.setValidator(new ISelectionStatusValidator() {
 			public IStatus validate(Object[] selection) {
 				if (selection.length == 0)
-					return JavaUIStatus.createError(IStatus.ERROR, "", null); //$NON-NLS-1$
+					return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 				TypeInfo info= (TypeInfo) selection[0];
 				try {
 					IType type= info.resolveType(scope);
 					return checkException(type);
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
-					return Status.OK_STATUS;
+					return StatusInfo.OK_STATUS;
 				}
 			}
 		});
@@ -279,7 +279,7 @@ public class ChangeExceptionsControl extends Composite {
 		while (curr != null) {
 			String name= curr.getFullyQualifiedName();
 			if ("java.lang.Throwable".equals(name)) //$NON-NLS-1$
-				return Status.OK_STATUS;
+				return StatusInfo.OK_STATUS;
 			curr= hierarchy.getSuperclass(curr);
 		}
 		return JavaUIStatus.createError(IStatus.ERROR,

@@ -23,6 +23,8 @@ import org.eclipse.jdt.ui.JavaUI;
  */
 public class StatusInfo implements IStatus {
 	
+	public static final IStatus OK_STATUS= new StatusInfo();
+	
 	private String fStatusMessage;
 	private int fSeverity;
 	

@@ -189,7 +189,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			if (status.matches(IStatus.ERROR)) {
 				return new StatusInfo(IStatus.ERROR, "Name contains invalid characters."); //$NON-NLS-1$
 			}
-			return Status.OK_STATUS;
+			return StatusInfo.OK_STATUS;
 		}
 		
 		public CPUserLibraryElement getNewLibrary() {
