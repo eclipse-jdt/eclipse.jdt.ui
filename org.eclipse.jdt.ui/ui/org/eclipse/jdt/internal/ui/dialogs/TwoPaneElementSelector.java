@@ -210,6 +210,9 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 	 * Selects an element in the lower pane.
 	 */
 	protected void setLowerSelectedElement(Object element) {
+		if (fQualifierElements == null)
+			return;
+		
 		// find matching index
 		int i;
 		for (i= 0; i != fQualifierElements.length; i++)
