@@ -36,13 +36,13 @@ public class ScrollTextEditorTest extends ScrollEditorTest {
 	}
 	
 	public void testScrollTextEditorLineWise1() {
-		setScrollingMode(LINE_WISE);
+		setScrollingMode(LINE_WISE_NO_CARET_MOVE);
 		setPreloadEvents(false);
 		measureScrolling(N_OF_RUNS);
 	}
 
 	public void testScrollTextEditorLineWise2() {
-		setScrollingMode(LINE_WISE);
+		setScrollingMode(LINE_WISE_NO_CARET_MOVE);
 		setPreloadEvents(false);
 		measureScrolling(N_OF_RUNS);
 	}
@@ -54,13 +54,13 @@ public class ScrollTextEditorTest extends ScrollEditorTest {
 	}
 
 	public void testScrollTextEditorLineWisePreloaded1() {
-		setScrollingMode(LINE_WISE);
+		setScrollingMode(LINE_WISE_NO_CARET_MOVE);
 		setPreloadEvents(true);
 		measureScrolling(N_OF_RUNS);
 	}
 	
 	public void testScrollTextEditorLineWisePreloaded2() {
-		setScrollingMode(LINE_WISE);
+		setScrollingMode(LINE_WISE_NO_CARET_MOVE);
 		setPreloadEvents(true);
 		measureScrolling(N_OF_RUNS);
 	}
@@ -78,26 +78,38 @@ public class ScrollTextEditorTest extends ScrollEditorTest {
 	}
 
 	public void testScrollTextEditorLineWiseMoveCaret1() {
-		setScrollingMode(LINE_WISE_MOVE_CARET);
+		setScrollingMode(LINE_WISE);
 		setPreloadEvents(false);
 		measureScrolling(N_OF_RUNS);
 	}
 	
 	public void testScrollTextEditorLineWiseMoveCaret2() {
-		setScrollingMode(LINE_WISE_MOVE_CARET);
+		setScrollingMode(LINE_WISE);
 		setPreloadEvents(false);
 		measureScrolling(N_OF_RUNS);
 	}
 
 	public void testScrollTextEditorLineWiseMoveCaretPreloaded1() {
-		setScrollingMode(LINE_WISE_MOVE_CARET);
+		setScrollingMode(LINE_WISE);
 		setPreloadEvents(true);
 		measureScrolling(N_OF_RUNS);
 	}
 	
 	public void testScrollTextEditorLineWiseMoveCaretPreloaded2() {
-		setScrollingMode(LINE_WISE_MOVE_CARET);
+		setScrollingMode(LINE_WISE);
 		setPreloadEvents(true);
+		measureScrolling(N_OF_RUNS);
+	}
+
+	public void testScrollTextEditorLineWiseSelect1() {
+		setScrollingMode(LINE_WISE_SELECT);
+		setPreloadEvents(false);
+		measureScrolling(N_OF_RUNS);
+	}
+	
+	public void testScrollTextEditorLineWiseSelect2() {
+		setScrollingMode(LINE_WISE_SELECT);
+		setPreloadEvents(false);
 		measureScrolling(N_OF_RUNS);
 	}
 

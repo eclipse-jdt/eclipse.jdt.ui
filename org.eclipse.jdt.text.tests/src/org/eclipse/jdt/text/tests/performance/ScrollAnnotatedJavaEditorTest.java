@@ -90,7 +90,7 @@ public class ScrollAnnotatedJavaEditorTest extends ScrollEditorTest {
 	}
 	
 	public void testScrollJavaEditorLineWise() {
-		setScrollingMode(LINE_WISE);
+		setScrollingMode(LINE_WISE_NO_CARET_MOVE);
 		setPreloadEvents(false);
 		measureScrolling(N_OF_RUNS);
 	}
@@ -102,7 +102,7 @@ public class ScrollAnnotatedJavaEditorTest extends ScrollEditorTest {
 	}
 
 	public void testScrollJavaEditorLineWisePreloaded() {
-		setScrollingMode(LINE_WISE);
+		setScrollingMode(LINE_WISE_NO_CARET_MOVE);
 		setPreloadEvents(true);
 		measureScrolling(N_OF_RUNS);
 	}
@@ -114,14 +114,26 @@ public class ScrollAnnotatedJavaEditorTest extends ScrollEditorTest {
 	}
 
 	public void testScrollJavaEditorLineWiseMoveCaret() {
-		setScrollingMode(LINE_WISE_MOVE_CARET);
+		setScrollingMode(LINE_WISE);
 		setPreloadEvents(false);
 		measureScrolling(N_OF_RUNS);
 	}
 
 	public void testScrollJavaEditorLineWiseMoveCaretPreloaded() {
-		setScrollingMode(LINE_WISE_MOVE_CARET);
+		setScrollingMode(LINE_WISE);
 		setPreloadEvents(true);
+		measureScrolling(N_OF_RUNS);
+	}
+
+	public void testScrollTextEditorLineWiseSelect1() {
+		setScrollingMode(LINE_WISE_SELECT);
+		setPreloadEvents(false);
+		measureScrolling(N_OF_RUNS);
+	}
+	
+	public void testScrollTextEditorLineWiseSelect2() {
+		setScrollingMode(LINE_WISE_SELECT);
+		setPreloadEvents(false);
 		measureScrolling(N_OF_RUNS);
 	}
 

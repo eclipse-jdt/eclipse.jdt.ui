@@ -30,7 +30,9 @@ public abstract class ScrollEditorTest extends TestCase {
 	private static final int[] CTRL_HOME= new int[] { SWT.CTRL, SWT.HOME };
 	private static final int[] CTRL_DOWN= new int[] { SWT.CTRL, SWT.ARROW_DOWN };
 	private static final int[] PG_DOWN= new int[] { SWT.PAGE_DOWN };
+	private static final int[] SHIFT_PG_DOWN= new int[] { SWT.SHIFT, SWT.PAGE_DOWN };
 	private static final int[] DOWN= new int[] { SWT.ARROW_DOWN };
+	private static final int[] SHIFT_DOWN= new int[] { SWT.SHIFT, SWT.ARROW_DOWN };
 	private static final int[] PG_UP= new int[] { SWT.PAGE_UP };
 	
 	protected abstract static class ScrollingMode {
@@ -49,12 +51,22 @@ public abstract class ScrollEditorTest extends TestCase {
 			return numberOfLines / visibleLines;
 		}
 	};
-	public static final ScrollingMode LINE_WISE= new ScrollingMode(CTRL_DOWN, PG_UP) {
+	public static final ScrollingMode PAGE_WISE_SELECT= new ScrollingMode(SHIFT_PG_DOWN, CTRL_HOME) {
+		int computeOperations(int numberOfLines, int visibleLines) {
+			return numberOfLines / visibleLines;
+		}
+	};
+	public static final ScrollingMode LINE_WISE_NO_CARET_MOVE= new ScrollingMode(CTRL_DOWN, PG_UP) {
 		int computeOperations(int numberOfLines, int visibleLines) {
 			return numberOfLines - visibleLines;
 		}
 	};
-	public static final ScrollingMode LINE_WISE_MOVE_CARET= new ScrollingMode(DOWN, CTRL_HOME) {
+	public static final ScrollingMode LINE_WISE= new ScrollingMode(DOWN, CTRL_HOME) {
+		int computeOperations(int numberOfLines, int visibleLines) {
+			return numberOfLines - 1;
+		}
+	};
+	public static final ScrollingMode LINE_WISE_SELECT= new ScrollingMode(SHIFT_DOWN, CTRL_HOME) {
 		int computeOperations(int numberOfLines, int visibleLines) {
 			return numberOfLines - 1;
 		}

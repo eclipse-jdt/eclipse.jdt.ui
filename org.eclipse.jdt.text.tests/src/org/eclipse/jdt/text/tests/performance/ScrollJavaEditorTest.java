@@ -22,13 +22,13 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 	private IFile fFile;
 
 	public void testScrollJavaEditorLineWise1() {
-		setScrollingMode(LINE_WISE);
+		setScrollingMode(LINE_WISE_NO_CARET_MOVE);
 		setPreloadEvents(false);
 		measureScrolling(N_OF_RUNS);
 	}
 
 	public void testScrollJavaEditorLineWise2() {
-		setScrollingMode(LINE_WISE);
+		setScrollingMode(LINE_WISE_NO_CARET_MOVE);
 		setPreloadEvents(false);
 		measureScrolling(N_OF_RUNS);
 	}
@@ -40,13 +40,13 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 	}
 
 	public void testScrollJavaEditorLineWisePreloaded1() {
-		setScrollingMode(LINE_WISE);
+		setScrollingMode(LINE_WISE_NO_CARET_MOVE);
 		setPreloadEvents(true);
 		measureScrolling(N_OF_RUNS);
 	}
 	
 	public void testScrollJavaEditorLineWisePreloaded2() {
-		setScrollingMode(LINE_WISE);
+		setScrollingMode(LINE_WISE_NO_CARET_MOVE);
 		setPreloadEvents(true);
 		measureScrolling(N_OF_RUNS);
 	}
@@ -64,26 +64,38 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 	}
 
 	public void testScrollJavaEditorLineWiseMoveCaret1() {
-		setScrollingMode(LINE_WISE_MOVE_CARET);
+		setScrollingMode(LINE_WISE);
 		setPreloadEvents(false);
 		measureScrolling(N_OF_RUNS);
 	}
 	
 	public void testScrollJavaEditorLineWiseMoveCaret2() {
-		setScrollingMode(LINE_WISE_MOVE_CARET);
+		setScrollingMode(LINE_WISE);
 		setPreloadEvents(false);
 		measureScrolling(N_OF_RUNS);
 	}
 
 	public void testScrollJavaEditorLineWiseMoveCaretPreloaded1() {
-		setScrollingMode(LINE_WISE_MOVE_CARET);
+		setScrollingMode(LINE_WISE);
 		setPreloadEvents(true);
 		measureScrolling(N_OF_RUNS);
 	}
 	
 	public void testScrollJavaEditorLineWiseMoveCaretPreloaded2() {
-		setScrollingMode(LINE_WISE_MOVE_CARET);
+		setScrollingMode(LINE_WISE);
 		setPreloadEvents(true);
+		measureScrolling(N_OF_RUNS);
+	}
+
+	public void testScrollTextEditorLineWiseSelect1() {
+		setScrollingMode(LINE_WISE_SELECT);
+		setPreloadEvents(false);
+		measureScrolling(N_OF_RUNS);
+	}
+	
+	public void testScrollTextEditorLineWiseSelect2() {
+		setScrollingMode(LINE_WISE_SELECT);
+		setPreloadEvents(false);
 		measureScrolling(N_OF_RUNS);
 	}
 
