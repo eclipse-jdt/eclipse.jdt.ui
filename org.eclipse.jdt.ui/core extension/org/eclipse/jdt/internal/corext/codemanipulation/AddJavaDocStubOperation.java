@@ -84,7 +84,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		if (inheritedMethod != null) {
 			boolean nonJavaDocComments= fSettings.createNonJavadocComments;
 			boolean isDeprecated= Flags.isDeprecated(inheritedMethod.getFlags());
-			StubUtility.genJavaDocSeeTag(JavaModelUtil.getFullyQualifiedName(inheritedMethod.getDeclaringType()), inheritedMethod.getElementName(), inheritedMethod.getParameterTypes(), nonJavaDocComments, isDeprecated, buf);
+			StubUtility.genJavaDocSeeTag(inheritedMethod.getDeclaringType(), inheritedMethod.getElementName(), inheritedMethod.getParameterTypes(), nonJavaDocComments, isDeprecated, buf);
 		} else {
 			String desc= "Method " + meth.getElementName(); //$NON-NLS-1$
 			StubUtility.genJavaDocStub(desc, meth.getParameterNames(), meth.getReturnType(), meth.getExceptionTypes(), buf);

@@ -82,7 +82,7 @@ public class StubUtility {
 				// java doc
 				if (settings.methodOverwrites) {
 					boolean isDeprecated= Flags.isDeprecated(flags);
-					genJavaDocSeeTag(JavaModelUtil.getFullyQualifiedName(declaringtype), methodName, paramTypes, settings.createNonJavadocComments, isDeprecated, buf);
+					genJavaDocSeeTag(declaringtype, methodName, paramTypes, settings.createNonJavadocComments, isDeprecated, buf);
 				} else {
 					// generate a default java doc comment
 					String desc= "Method " + methodName; //$NON-NLS-1$
@@ -247,7 +247,7 @@ public class StubUtility {
 	/**
 	 * Generates a '@see' tag to the defined method.
 	 */
-	public static void genJavaDocSeeTag(String declaringTypeName, String methodName, String[] paramTypes, boolean nonJavaDocComment, boolean isDeprecated, StringBuffer buf) {
+	public static void genJavaDocSeeTag(IType declaringType, String methodName, String[] paramTypes, boolean nonJavaDocComment, boolean isDeprecated, StringBuffer buf) throws JavaModelException {
 		// create a @see link
 		buf.append("/*"); //$NON-NLS-1$
 		if (!nonJavaDocComment) {
@@ -256,7 +256,7 @@ public class StubUtility {
 			buf.append(" (non-Javadoc)"); //$NON-NLS-1$
 		}
 		buf.append("\n * @see "); //$NON-NLS-1$
-		buf.append(declaringTypeName);
+		buf.append(JavaModelUtil.getFullyQualifiedName(declaringType));
 		buf.append('#'); 
 		buf.append(methodName);
 		buf.append('(');
@@ -264,7 +264,7 @@ public class StubUtility {
 			if (i > 0) {
 				buf.append(", "); //$NON-NLS-1$
 			}
-			buf.append(Signature.getSimpleName(Signature.toString(paramTypes[i])));
+			buf.append(JavaModelUtil.getResolvedTypeName(paramTypes[i], declaringType));
 		}
 		buf.append(")\n"); //$NON-NLS-1$
 		if (isDeprecated) {
@@ -485,7 +485,7 @@ public class StubUtility {
 				int offset= ((ISourceReference)elem).getSourceRange().getOffset();
 				int i= offset;
 				// find beginning of line
-				while (i > 0 && Strings.isLineDelimiterChar(buf.getChar(i - 1)) ){
+				while (i > 0 && !Strings.isLineDelimiterChar(buf.getChar(i - 1)) ){
 					i--;
 				}
 				return Strings.computeIndent(buf.getText(i, offset - i), CodeFormatterUtil.getTabWidth());
