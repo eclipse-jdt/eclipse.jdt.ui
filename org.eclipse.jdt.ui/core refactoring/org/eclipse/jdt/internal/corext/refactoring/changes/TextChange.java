@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -49,7 +50,7 @@ public abstract class TextChange extends AbstractTextChange {
 		public abstract TextRange getTextRange();
 		public abstract Object getModifiedElement();
 
-		protected abstract void addTo(TextBufferEditor editor, boolean copy, HashMap positionMap) throws CoreException;
+		protected abstract void addTo(TextBufferEditor editor, boolean copy, Map positionMap) throws CoreException;
 		abstract Object getEdit();
 	}
 
@@ -59,7 +60,7 @@ public abstract class TextChange extends AbstractTextChange {
 			super(name, change);
 			fEdit= edit;
 		}
-		protected void addTo(TextBufferEditor editor, boolean copy, HashMap positionMap) throws CoreException {
+		protected void addTo(TextBufferEditor editor, boolean copy, Map positionMap) throws CoreException {
 			TextEdit edit= copy ? fEdit.copy() : fEdit;
 			if (positionMap != null)
 				positionMap.put(fEdit, edit);
@@ -82,7 +83,7 @@ public abstract class TextChange extends AbstractTextChange {
 			super(name, change);
 			fEdit= edit;
 		}
-		protected void addTo(TextBufferEditor editor, boolean copy, HashMap positionMap) throws CoreException {
+		protected void addTo(TextBufferEditor editor, boolean copy, Map positionMap) throws CoreException {
 			MultiTextEdit edit= copy ? fEdit.copy() : fEdit;
 			if (positionMap != null)
 				positionMap.put(fEdit, edit);
@@ -100,7 +101,7 @@ public abstract class TextChange extends AbstractTextChange {
 	}
 
 	private List fTextEditChanges;
-	private HashMap fPositionMap;
+	private Map fPositionMap;
 
 	/**
 	 * Creates a new <code>TextChange</code> with the given name.
@@ -284,7 +285,7 @@ public abstract class TextChange extends AbstractTextChange {
 		}		
 	}
 	
-	protected HashMap getPositionMap() {
+	protected Map getPositionMap() {
 		return fPositionMap;
 	}
 	

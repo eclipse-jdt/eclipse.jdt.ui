@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -75,7 +75,7 @@ public class CompilationUnitChange extends TextFileChange {
 	public String getPreviewContent(ISourceReference element, EditChange[] changes) throws CoreException {
 		TextBuffer buffer= createTextBuffer();
 		TextBufferEditor editor= new TextBufferEditor(buffer);
-		HashMap positionMap= getPositionMap();
+		Map positionMap= getPositionMap();
 		for (int i= 0; i < changes.length; i++) {
 			EditChange change= changes[i];
 			Assert.isTrue(change.getTextChange() == this);
