@@ -120,6 +120,8 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		fExcludeInOthersFields.setDialogFieldListener(adapter);
 		fExcludeInOthersFields.setLabelText(NewWizardMessages.getString("NewSourceFolderWizardPage.exclude.label")); //$NON-NLS-1$
 		
+		fExcludeInOthersFields.setEnabled(JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS)));
+		
 		fRootStatus= new StatusInfo();
 		fProjectStatus= new StatusInfo();
 	}
@@ -361,21 +363,26 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 
 				IJavaModelStatus status= JavaConventions.validateClasspath(fCurrJProject, fNewEntries, fNewOutputLocation);
 				if (!status.isOK()) {
-					if (fIsProjectAsSourceFolder && fOutputLocation.equals(projPath)) {
+					if (fOutputLocation.equals(projPath)) {
 						fNewOutputLocation= projPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME));
 						IStatus status2= JavaConventions.validateClasspath(fCurrJProject, fNewEntries, fNewOutputLocation);
 						if (status2.isOK()) {
-							fRootStatus.setWarning(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.warning.ReplaceSFandOL", fNewOutputLocation.makeRelative().toString())); //$NON-NLS-1$
+							if (fIsProjectAsSourceFolder) {
+								fRootStatus.setInfo(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.warning.ReplaceSFandOL", fNewOutputLocation.makeRelative().toString())); //$NON-NLS-1$
+							} else {
+								fRootStatus.setInfo(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.warning.ReplaceOL", fNewOutputLocation.makeRelative().toString())); //$NON-NLS-1$
+							}
 							return;
 						}
 					}
 					fRootStatus.setError(status.getMessage());
+					return;
 				} else if (fIsProjectAsSourceFolder) {
-					fRootStatus.setWarning(NewWizardMessages.getString("NewSourceFolderWizardPage.warning.ReplaceSF")); //$NON-NLS-1$
+					fRootStatus.setInfo(NewWizardMessages.getString("NewSourceFolderWizardPage.warning.ReplaceSF")); //$NON-NLS-1$
 					return;
 				}
 				if (!modified.isEmpty()) {
-					fRootStatus.setWarning(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.warning.AddedExclusions", String.valueOf(modified.size()))); //$NON-NLS-1$
+					fRootStatus.setInfo(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.warning.AddedExclusions", String.valueOf(modified.size()))); //$NON-NLS-1$
 					return;
 				}
 			}
