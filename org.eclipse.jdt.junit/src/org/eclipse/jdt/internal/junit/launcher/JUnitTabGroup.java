@@ -11,10 +11,10 @@ import org.eclipse.debug.ui.CommonTab;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
-import org.eclipse.jdt.internal.debug.ui.launcher.JavaArgumentsTab;
-import org.eclipse.jdt.internal.debug.ui.launcher.JavaClasspathTab;
-import org.eclipse.jdt.internal.debug.ui.launcher.JavaJRETab;
-
+import org.eclipse.jdt.debug.ui.launchConfigurations.JavaArgumentsTab;
+import org.eclipse.jdt.debug.ui.launchConfigurations.JavaClasspathTab;
+import org.eclipse.jdt.debug.ui.launchConfigurations.JavaJRETab;
+ 
 public class JUnitTabGroup extends AbstractLaunchConfigurationTabGroup {
 	/**
 	 * @see ILaunchConfigurationTabGroup#createTabs(ILaunchConfigurationDialog, String)
