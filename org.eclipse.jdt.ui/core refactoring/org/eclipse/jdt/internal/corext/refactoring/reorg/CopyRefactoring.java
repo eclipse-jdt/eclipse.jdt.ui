@@ -59,10 +59,9 @@ public class CopyRefactoring extends ReorgRefactoring {
 	}
 	
 	public static CopyRefactoring create(List elements, ICopyQueries copyQueries, IPackageFragmentRootManipulationQuery updateClasspathQuery) throws JavaModelException{
-		CopyRefactoring ref= new CopyRefactoring(elements, copyQueries, updateClasspathQuery);
-		if (! ref.canActivate())
+		if (! isAvailable(elements))
 			return null;
-		return ref;
+		return new CopyRefactoring(elements, copyQueries, updateClasspathQuery);
 	}
 	
 	/* non java-doc

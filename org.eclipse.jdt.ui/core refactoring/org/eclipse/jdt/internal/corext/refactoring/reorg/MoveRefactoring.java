@@ -82,10 +82,9 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 	}
 	
 	public static MoveRefactoring create(List elements, CodeGenerationSettings settings, IPackageFragmentRootManipulationQuery updateClasspathQuery) throws JavaModelException {
-		MoveRefactoring ref= new MoveRefactoring(elements, settings, updateClasspathQuery);
-		if (! ref.canActivate())
+		if (! isAvailable(elements))
 			return null;
-		return ref;
+		return new MoveRefactoring(elements, settings, updateClasspathQuery);
 	}
 	
 	/* non java-doc
@@ -116,7 +115,7 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 				} else {
 					return false;
 				}
-				if (parent instanceof IPackageFragment && ((IPackageFragment)parent).isDefaultPackage())
+				if (JavaElementUtil.isDefaultPackage(parent))
 					return false;
 			} else {
 				if (!last.equals(element.getClass()))

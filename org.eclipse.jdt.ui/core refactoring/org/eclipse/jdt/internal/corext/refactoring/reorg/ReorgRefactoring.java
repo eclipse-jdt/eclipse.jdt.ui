@@ -75,26 +75,26 @@ public abstract class ReorgRefactoring extends Refactoring {
 		fUnsavedFiles= unsavedFiles;
 	}
 	
-	final boolean canActivate() throws JavaModelException{
-		if (getElements().isEmpty())
+	public static final boolean isAvailable(List elements) throws JavaModelException{
+		if (elements.isEmpty())
 			return false;
 			
-		if (hasParentCollision(getElements()))
+		if (hasParentCollision(elements))
 			return false;
 			
-		if (hasNonCusOrFiles() && (hasCus() || hasFiles()))
+		if (hasNonCusOrFiles(elements) && (hasCus(elements) || hasFiles(elements)))
 			return false;
 			
-		if (hasPackages() && hasNonPackages())
+		if (hasPackages(elements) && hasNonPackages(elements))
 			return false;
 			
-		if (hasSourceFolders() && hasNonSourceFolders())	
+		if (hasSourceFolders(elements) && hasNonSourceFolders(elements))
 			return false;
 				
-		if (! canReorgAll())
+		if (! canReorgAll(elements))
 			return false;
 						
-		return true;
+		return true;		
 	}
 	
 	/* non java-doc
@@ -103,7 +103,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 	public final RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			if (canActivate())
+			if (isAvailable(getElements()))
 				return new RefactoringStatus();
 			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 		} finally{
@@ -322,8 +322,8 @@ public abstract class ReorgRefactoring extends Refactoring {
 	}
 	
 	//-------
-	boolean hasCus(){
-		for (Iterator iter= getElements().iterator(); iter.hasNext();){
+	private static boolean hasCus(List elements){
+		for (Iterator iter= elements.iterator(); iter.hasNext();){
 			Object each= iter.next();
 			if (each instanceof ICompilationUnit)
 				return true;
@@ -331,8 +331,12 @@ public abstract class ReorgRefactoring extends Refactoring {
 		return false;
 	}
 	
-	boolean hasFiles(){
-		for (Iterator iter= getElements().iterator(); iter.hasNext();){
+	boolean hasCus(){
+		return hasCus(getElements());
+	}
+	
+	private static boolean hasFiles(List elements){
+		for (Iterator iter= elements.iterator(); iter.hasNext();){
 			Object each= iter.next();
 			if (each instanceof IFile)
 				return true;
@@ -340,17 +344,25 @@ public abstract class ReorgRefactoring extends Refactoring {
 		return false;
 	}
 	
-	boolean hasPackages(){
-		for (Iterator iter= getElements().iterator(); iter.hasNext();){
+	boolean hasFiles(){
+		return hasFiles(getElements());
+	}
+	
+	private static boolean hasPackages(List elements){
+		for (Iterator iter= elements.iterator(); iter.hasNext();){
 			Object each= iter.next();
 			if (each instanceof IPackageFragment)
 				return true;
 		}
 		return false;
 	}
+
+	boolean hasPackages(){
+		return hasPackages(getElements());
+	}
 	
-	boolean hasSourceFolders() throws JavaModelException{
-		for (Iterator iter= getElements().iterator(); iter.hasNext();){
+	private static boolean hasSourceFolders(List elements) throws JavaModelException{
+		for (Iterator iter= elements.iterator(); iter.hasNext();){
 			Object each= iter.next();
 			if (each instanceof IPackageFragmentRoot){
 				if (isSourceFolder((IPackageFragmentRoot)each))
@@ -359,18 +371,25 @@ public abstract class ReorgRefactoring extends Refactoring {
 		}
 		return false;
 	}
+	boolean hasSourceFolders() throws JavaModelException{
+		return hasSourceFolders(getElements());
+	}
 	
-	boolean hasNonPackages(){
-		for (Iterator iter= getElements().iterator(); iter.hasNext();){
+	private static boolean hasNonPackages(List elements){
+		for (Iterator iter= elements.iterator(); iter.hasNext();){
 			Object each= iter.next();
 			if (! (each instanceof IPackageFragment))
 				return true;
 		}
 		return false;
 	}
+
+	boolean hasNonPackages(){
+		return hasNonPackages(getElements());
+	}
 	
-	boolean hasNonSourceFolders()throws JavaModelException{
-		for (Iterator iter= getElements().iterator(); iter.hasNext();){
+	private static boolean hasNonSourceFolders(List elements)throws JavaModelException{
+		for (Iterator iter= elements.iterator(); iter.hasNext();){
 			Object each= iter.next();
 			if (!(each instanceof IPackageFragmentRoot))
 				return true;
@@ -380,7 +399,10 @@ public abstract class ReorgRefactoring extends Refactoring {
 		return false;
 	}
 	
-
+	boolean hasNonSourceFolders()throws JavaModelException{
+		return hasNonSourceFolders(getElements());
+	}
+	
 	boolean hasResources(){
 		for (Iterator iter= getElements().iterator(); iter.hasNext();){
 			Object each= iter.next();
@@ -398,14 +420,18 @@ public abstract class ReorgRefactoring extends Refactoring {
 		}
 		return false;
 	}	
-	
-	boolean hasNonCusOrFiles(){
-		for (Iterator iter= getElements().iterator(); iter.hasNext();){
+
+	static boolean hasNonCusOrFiles(List elements){
+		for (Iterator iter= elements.iterator(); iter.hasNext();){
 			Object each= iter.next();
 			if (! (each instanceof ICompilationUnit) && ! (each instanceof IFile))
 				return true;
 		}
 		return false;
+	}
+	
+	boolean hasNonCusOrFiles(){
+		return hasNonCusOrFiles(getElements());
 	}
 
 	private boolean hasLinkedResources() {
@@ -590,14 +616,13 @@ public abstract class ReorgRefactoring extends Refactoring {
 		return null;
 	}		
 	//
-	private boolean canReorgAll(){
-		for (Iterator iter= getElements().iterator(); iter.hasNext();){
+	private static boolean canReorgAll(List elements){
+		for (Iterator iter= elements.iterator(); iter.hasNext();){
 			if (! canReorg(iter.next()))
 				return false;
 		}
 		return true;
 	}
-	
 	private static boolean canReorg(Object o){
 		if (o instanceof IPackageFragment)
 			return canReorg((IPackageFragment)o);
