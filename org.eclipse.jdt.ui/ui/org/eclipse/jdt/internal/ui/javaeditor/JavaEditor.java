@@ -71,6 +71,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -114,6 +115,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.ISourceViewerExtension2;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.LineChangeHover;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
@@ -138,6 +140,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.AnnotationPreference;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.ExtendedTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -146,6 +149,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
+import org.eclipse.ui.texteditor.PreferencesAdapter;
 import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextEditorAction;
@@ -160,6 +164,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
@@ -198,6 +203,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPr
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.OccurrencesFinder;
+import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
@@ -291,6 +297,388 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		}
 	}
 	
+	
+	/**
+	 * Adapts an options {@link java.util.Map} to {@link org.eclipse.jface.preference.IPreferenceStore}.
+	 * <p>
+	 * This preference store is read-only i.e. write access
+	 * throws an {@link java.lang.UnsupportedOperationException}.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	private static class OptionsAdapter implements IPreferenceStore {
+
+
+		/**
+		 * A property change event filter.
+		 */
+		public interface IPropertyChangeEventFilter {
+
+			/**
+			 * Should the given event be filtered?
+			 * @param event The property change event.
+			 * @return <code>true</code> iff the given event should be filtered.
+			 */
+			public boolean isFiltered(PropertyChangeEvent event);
+
+		}
+		/**
+		 * Property change listener. Listens for events in the options Map and
+		 * fires a {@link org.eclipse.jface.util.PropertyChangeEvent}
+		 * on this adapter with arguments from the received event.
+		 */
+		private class PropertyChangeListener implements IPropertyChangeListener {
+
+			/**
+			 * {@inheritDoc}
+			 */
+			public void propertyChange(PropertyChangeEvent event) {
+				if (getFilter().isFiltered(event))
+					return;
+				
+				if (event.getNewValue() == null)
+					fOptions.remove(event.getProperty());
+				else
+					fOptions.put(event.getProperty(), event.getNewValue());
+				
+				firePropertyChangeEvent(event.getProperty(), event.getOldValue(), event.getNewValue());
+			}
+		}
+
+		/** Listeners on this adapter */
+		private ListenerList fListeners= new ListenerList();
+
+		/** Listener on the adapted options Map */
+		private IPropertyChangeListener fListener= new PropertyChangeListener();
+
+		/** Adapted options Map */
+		private Map fOptions;
+
+		/** Preference store through which events are received. */
+		private IPreferenceStore fMockupPreferenceStore;
+
+		/** Property event filter. */
+		private IPropertyChangeEventFilter fFilter;
+		
+		/**
+		 * Initialize with the given options.
+		 * 
+		 * @param options The options to wrap.
+		 */
+		public OptionsAdapter(Map options, IPreferenceStore mockupPreferenceStore, IPropertyChangeEventFilter filter) {
+			fMockupPreferenceStore= mockupPreferenceStore;
+			fOptions= options;
+			setFilter(filter);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void addPropertyChangeListener(IPropertyChangeListener listener) {
+			if (fListeners.size() == 0)
+				fMockupPreferenceStore.addPropertyChangeListener(fListener);
+			fListeners.add(listener);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void removePropertyChangeListener(IPropertyChangeListener listener) {
+			fListeners.remove(listener);
+			if (fListeners.size() == 0)
+				fMockupPreferenceStore.removePropertyChangeListener(fListener);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean contains(String name) {
+			return fOptions.containsKey(name);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void firePropertyChangeEvent(String name, Object oldValue, Object newValue) {
+			PropertyChangeEvent event= new PropertyChangeEvent(this, name, oldValue, newValue);
+			Object[] listeners= fListeners.getListeners();
+			for (int i= 0; i < listeners.length; i++)
+				((IPropertyChangeListener) listeners[i]).propertyChange(event);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean getBoolean(String name) {
+			boolean value= BOOLEAN_DEFAULT_DEFAULT;
+			String s= (String) fOptions.get(name);
+			if (s != null)
+				value= s.equals(TRUE);
+			return value;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean getDefaultBoolean(String name) {
+			return BOOLEAN_DEFAULT_DEFAULT;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public double getDefaultDouble(String name) {
+			return DOUBLE_DEFAULT_DEFAULT;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public float getDefaultFloat(String name) {
+			return FLOAT_DEFAULT_DEFAULT;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public int getDefaultInt(String name) {
+			return INT_DEFAULT_DEFAULT;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public long getDefaultLong(String name) {
+			return LONG_DEFAULT_DEFAULT;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public String getDefaultString(String name) {
+			return STRING_DEFAULT_DEFAULT;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public double getDouble(String name) {
+			double value= DOUBLE_DEFAULT_DEFAULT;
+			String s= (String) fOptions.get(name);
+			if (s != null) {
+				try {
+					value= new Double(s).doubleValue();
+				} catch (NumberFormatException e) {
+				}
+			}
+			return value;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public float getFloat(String name) {
+			float value= FLOAT_DEFAULT_DEFAULT;
+			String s= (String) fOptions.get(name);
+			if (s != null) {
+				try {
+					value= new Float(s).floatValue();
+				} catch (NumberFormatException e) {
+				}
+			}
+			return value;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public int getInt(String name) {
+			int value= INT_DEFAULT_DEFAULT;
+			String s= (String) fOptions.get(name);
+			if (s != null) {
+				try {
+					value= new Integer(s).intValue();
+				} catch (NumberFormatException e) {
+				}
+			}
+			return value;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public long getLong(String name) {
+			long value= LONG_DEFAULT_DEFAULT;
+			String s= (String) fOptions.get(name);
+			if (s != null) {
+				try {
+					value= new Long(s).longValue();
+				} catch (NumberFormatException e) {
+				}
+			}
+			return value;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public String getString(String name) {
+			String value= (String) fOptions.get(name);
+			if (value == null)
+				value= STRING_DEFAULT_DEFAULT;
+			return value;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean isDefault(String name) {
+			return false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean needsSaving() {
+			return !fOptions.isEmpty();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void putValue(String name, String value) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setDefault(String name, double value) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setDefault(String name, float value) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setDefault(String name, int value) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setDefault(String name, long value) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setDefault(String name, String defaultObject) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setDefault(String name, boolean value) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setToDefault(String name) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setValue(String name, double value) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setValue(String name, float value) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setValue(String name, int value) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setValue(String name, long value) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setValue(String name, String value) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setValue(String name, boolean value) {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * Returns the adapted options Map.
+		 * 
+		 * @return Returns the adapted options Map.
+		 */
+		public Map getOptions() {
+			return fOptions;
+		}
+
+		/**
+		 * Returns the mockup preference store, events are received through this preference store.
+		 * @return Returns the mockup preference store.
+		 */
+		public IPreferenceStore getMockupPreferenceStore() {
+			return fMockupPreferenceStore;
+		}
+
+		/**
+		 * Set the event filter to the given filter.
+		 * 
+		 * @param filter The new filter.
+		 */
+		public void setFilter(IPropertyChangeEventFilter filter) {
+			fFilter= filter;
+		}
+		
+		/**
+		 * Returns the event filter.
+		 * 
+		 * @return The event filter.
+		 */
+		public IPropertyChangeEventFilter getFilter() {
+			return fFilter;
+		}
+	}
+
+	
 	/*
 	 * Link mode.  
 	 */
@@ -352,16 +740,16 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			
 			updateKeyModifierMask();
 			
-			IPreferenceStore preferenceStore= getPreferenceStore();
+			IPreferenceStore preferenceStore= getNewPreferenceStore();
 			preferenceStore.addPropertyChangeListener(this);
 		}
 		
 		private void updateKeyModifierMask() {
-			String modifiers= getPreferenceStore().getString(BROWSER_LIKE_LINKS_KEY_MODIFIER);
+			String modifiers= getNewPreferenceStore().getString(BROWSER_LIKE_LINKS_KEY_MODIFIER);
 			fKeyModifierMask= computeStateMask(modifiers);
 			if (fKeyModifierMask == -1) {
 				// Fallback to stored state mask
-				fKeyModifierMask= getPreferenceStore().getInt(BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK);
+				fKeyModifierMask= getNewPreferenceStore().getInt(BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK);
 			}
 		}
 
@@ -405,7 +793,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			if (document != null)
 				document.removeDocumentListener(this);
 				
-			IPreferenceStore preferenceStore= getPreferenceStore();
+			IPreferenceStore preferenceStore= getNewPreferenceStore();
 			if (preferenceStore != null)
 				preferenceStore.removePropertyChangeListener(this);
 			
@@ -444,7 +832,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				return;
 
 			Display display= text.getDisplay();
-			fColor= createColor(getPreferenceStore(), JavaEditor.LINK_COLOR, display);
+			fColor= createColor(getNewPreferenceStore(), JavaEditor.LINK_COLOR, display);
 		}
 
 		/**
@@ -1111,15 +1499,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		}
 	}
 
-	private class PropertyChangeListener implements org.eclipse.core.runtime.Preferences.IPropertyChangeListener {
-		/*
-		 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
-		 */
-		public void propertyChange(org.eclipse.core.runtime.Preferences.PropertyChangeEvent event) {
-			handlePreferencePropertyChanged(event);
-		}
-	}
-	
 	/**
 	 * This action implements smart home.
 	 * 
@@ -1207,7 +1586,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
 			
 				// Check whether we are in a java code partititon and the preference is enabled
-				final IPreferenceStore store= getPreferenceStore();
+				final IPreferenceStore store= getNewPreferenceStore();
 				final ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, position);
 				if (!store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
 					super.run();
@@ -1386,7 +1765,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset()) - 1;
 			
 				// Check whether we are in a java code partititon and the preference is enabled
-				final IPreferenceStore store= getPreferenceStore();
+				final IPreferenceStore store= getNewPreferenceStore();
 				if (!store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
 					super.run();
 					return;				
@@ -1680,8 +2059,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	private InformationPresenter fInformationPresenter;
 	/** History for structure select action */
 	private SelectionHistory fSelectionHistory;
-	/** The preference property change listener for java core. */
-	private org.eclipse.core.runtime.Preferences.IPropertyChangeListener fPropertyChangeListener= new PropertyChangeListener();
 	/**
 	 * Indicates whether this editor is about to update any annotation views.
 	 * @since 3.0
@@ -1748,11 +2125,11 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools, this, IJavaPartitions.JAVA_PARTITIONING));
 		setRangeIndicator(new DefaultRangeIndicator());
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		setPreferenceStore(store);
+		IPreferenceStore newStore= createNewPreferenceStore(null);
+		setNewPreferenceStore(newStore, JavaPlugin.getDefault().getPreferenceStore());
 		setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope" });  //$NON-NLS-1$
-		fMarkOccurrenceAnnotations= store.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
-		fStickyOccurrenceAnnotations= store.getBoolean(PreferenceConstants.EDITOR_STICKY_OCCURRENCES);
+		fMarkOccurrenceAnnotations= newStore.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
+		fStickyOccurrenceAnnotations= newStore.getBoolean(PreferenceConstants.EDITOR_STICKY_OCCURRENCES);
 	}
 	
 	/*
@@ -1792,10 +2169,83 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @see AbstractTextEditor#affectsTextPresentation(PropertyChangeEvent)
 	 */
 	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
-		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		return textTools.affectsBehavior(event);
+		return affectsBehavior(event) || super.affectsTextPresentation(event);
 	}
 		
+	/**
+	 * Determines whether the preference change encoded by the given event
+	 * changes the behavior of one of its contained components.
+	 * 
+	 * @param event the event to be investigated
+	 * @return <code>true</code> if event causes a behavioral change
+	 * @since 3.0
+	 */
+	protected boolean affectsBehavior(PropertyChangeEvent event) {
+		JavaSourceViewerConfiguration configuration= (JavaSourceViewerConfiguration) getSourceViewerConfiguration();
+		return  ((AbstractJavaScanner) configuration.getCodeScanner()).affectsBehavior(event)
+			|| ((AbstractJavaScanner) configuration.getMultilineCommentScanner()).affectsBehavior(event)
+			|| ((AbstractJavaScanner) configuration.getSinglelineCommentScanner()).affectsBehavior(event)
+			|| ((AbstractJavaScanner) configuration.getStringScanner()).affectsBehavior(event)
+			|| ((AbstractJavaScanner) configuration.getJavaDocScanner()).affectsBehavior(event);
+	}
+	
+	/**
+	 * Adapts the behavior of the contained components to the change
+	 * encoded in the given event.
+	 * 
+	 * @param event the event to which to adapt
+	 * @since 3.0
+	 */
+	private void adaptTaskTagDependents(PropertyChangeEvent event) {
+		JavaSourceViewerConfiguration svc= (JavaSourceViewerConfiguration) getSourceViewerConfiguration();
+		if (((AbstractJavaScanner) svc.getCodeScanner()).affectsBehavior(event))
+			((AbstractJavaScanner) svc.getCodeScanner()).adaptToPreferenceChange(event);
+		if (((AbstractJavaScanner) svc.getMultilineCommentScanner()).affectsBehavior(event))
+			((AbstractJavaScanner) svc.getMultilineCommentScanner()).adaptToPreferenceChange(event);
+		if (((AbstractJavaScanner) svc.getSinglelineCommentScanner()).affectsBehavior(event))
+			((AbstractJavaScanner) svc.getSinglelineCommentScanner()).adaptToPreferenceChange(event);
+		if (((AbstractJavaScanner) svc.getStringScanner()).affectsBehavior(event))
+			((AbstractJavaScanner) svc.getStringScanner()).adaptToPreferenceChange(event);
+		if (((AbstractJavaScanner) svc.getJavaDocScanner()).affectsBehavior(event))
+			((AbstractJavaScanner) svc.getJavaDocScanner()).adaptToPreferenceChange(event);
+	}
+
+	/**
+	 * Creates and returns the preference store for this Java editor with the given input.
+	 *
+	 * @param input The editor input for which to create the preference store
+	 *
+	 * @since 3.0
+	 */
+	private IPreferenceStore createNewPreferenceStore(IEditorInput input) {
+		List stores= new ArrayList(3);
+
+		IJavaProject project= EditorUtility.getJavaProject(input);
+		if (project != null)
+			stores.add(new OptionsAdapter(project.getOptions(false), JavaPlugin.getDefault().getMockupPreferenceStore(), new OptionsAdapter.IPropertyChangeEventFilter() {
+
+				public boolean isFiltered(PropertyChangeEvent event) {
+					IJavaElement inputJavaElement= getInputJavaElement();
+					IJavaProject javaProject= inputJavaElement != null ? inputJavaElement.getJavaProject() : null;
+					if (javaProject == null)
+						return true;
+					
+					return !javaProject.getProject().equals(event.getSource());
+				}
+				
+			}));
+		
+		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
+		stores.add(tools.getPreferenceStore());
+		if (tools.getCorePreferenceStore() != null)
+			stores.add(new PreferencesAdapter(tools.getCorePreferenceStore()));
+		
+		if (stores.size() == 1)
+			return (IPreferenceStore) stores.get(0);
+		
+		return new ChainedPreferenceStore((IPreferenceStore[]) stores.toArray(new IPreferenceStore[stores.size()]));
+	}
+
 	/**
 	 * Sets the outliner's context menu ID.
 	 */
@@ -2152,10 +2602,50 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @see AbstractTextEditor#doSetInput
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
-		super.doSetInput(input);
 		if (fEncodingSupport != null)
 			fEncodingSupport.reset();
 		setOutlinePageInput(fOutlinePage, input);
+		
+		ISourceViewer sourceViewer= getSourceViewer();
+		if (!(sourceViewer instanceof ISourceViewerExtension2)) {
+			setNewPreferenceStore(createNewPreferenceStore(input));
+			super.doSetInput(input);
+			return;
+		}
+
+		// uninstall & unregister preference store listener
+		if (isBrowserLikeLinks())
+			disableBrowserLikeLinks();
+		getSourceViewerDecorationSupport(sourceViewer).uninstall();
+		((ISourceViewerExtension2)sourceViewer).unconfigure();
+		
+		setNewPreferenceStore(createNewPreferenceStore(input));
+		
+		// install & register preference store listener 
+		sourceViewer.configure(getSourceViewerConfiguration());
+		getSourceViewerDecorationSupport(sourceViewer).install(getNewPreferenceStore());
+		if (isBrowserLikeLinks())
+			enableBrowserLikeLinks();
+		
+		super.doSetInput(input);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void setNewPreferenceStore(IPreferenceStore store, IPreferenceStore pre_3_0_Store) {
+		super.setNewPreferenceStore(store, pre_3_0_Store);
+		if (getSourceViewerConfiguration() instanceof JavaSourceViewerConfiguration)
+			((JavaSourceViewerConfiguration)getSourceViewerConfiguration()).setNewPreferenceStore(store);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void setNewPreferenceStore(IPreferenceStore store) {
+		super.setNewPreferenceStore(store);
+		if (getSourceViewerConfiguration() instanceof JavaSourceViewerConfiguration)
+			((JavaSourceViewerConfiguration)getSourceViewerConfiguration()).setNewPreferenceStore(store);
 	}
 	
 	/*
@@ -2179,12 +2669,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		if (fEncodingSupport != null) {
 			fEncodingSupport.dispose();
 			fEncodingSupport= null;
-		}
-		
-		if (fPropertyChangeListener != null) {
-			Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
-			preferences.removePropertyChangeListener(fPropertyChangeListener);
-			fPropertyChangeListener= null;
 		}
 		
 		if (fBracketMatcher != null) {
@@ -2350,6 +2834,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					}
 				}
 			}
+			if (COMPILER_TASK_TAGS.equals(event.getProperty()))
+				adaptTaskTagDependents(event);
 			
 		} finally {
 			super.handlePreferenceStoreChanged(event);
@@ -2376,7 +2862,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @return <code>true</code> if the browser like links should be enabled
 	 */
 	private boolean isBrowserLikeLinks() {
-		IPreferenceStore store= getPreferenceStore();
+		IPreferenceStore store= getNewPreferenceStore();
 		return store.getBoolean(BROWSER_LIKE_LINKS);
 	}
 	
@@ -2400,21 +2886,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		}
 	}
 	
-	/**
-	 * Handles a property change event describing a change
-	 * of the java core's preferences and updates the preference
-	 * related editor properties.
-	 * 
-	 * @param event the property change event
-	 */
-	protected void handlePreferencePropertyChanged(org.eclipse.core.runtime.Preferences.PropertyChangeEvent event) {
-		if (COMPILER_TASK_TAGS.equals(event.getProperty())) {
-			ISourceViewer sourceViewer= getSourceViewer();
-			if (sourceViewer != null && affectsTextPresentation(new PropertyChangeEvent(event.getSource(), event.getProperty(), event.getOldValue(), event.getNewValue())))
-				sourceViewer.invalidateTextPresentation();
-		}
-	}
-
 	/**
 	 * Returns a segmentation of the line of the given viewer's input document appropriate for
 	 * bidi rendering. The default implementation returns only the string literals of a java code
@@ -2565,9 +3036,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 */
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
-		
-		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
-		preferences.addPropertyChangeListener(fPropertyChangeListener);			
 		
 		IInformationControlCreator informationControlCreator= new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell shell) {
@@ -3300,7 +3768,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @see org.eclipse.ui.texteditor.ExtendedTextEditor#createCompositeRuler()
 	 */
 	protected CompositeRuler createCompositeRuler() {
-		if (!getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER))
+		if (!getNewPreferenceStore().getBoolean(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER))
 			return super.createCompositeRuler();
 		
 		CompositeRuler ruler= new CompositeRuler();
