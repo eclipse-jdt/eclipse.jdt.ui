@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  * 
  * @since 2.1
  */
-public class JavadocHover extends JavaElementHover {
+public class JavadocHover extends AbstractJavaEditorTextHover {
 
 	private final int LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
 		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS 

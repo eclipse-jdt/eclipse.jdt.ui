@@ -1,10 +1,15 @@
+/**********************************************************************
+Copyright (c) 2000, 2002 IBM Corp. and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Common Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/cpl-v10.html
+
+Contributors:
+    IBM Corporation - Initial implementation
+**********************************************************************/
+
 package org.eclipse.jdt.internal.ui.text.java.hover;
-
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
-
 
 import java.util.Iterator;
 
@@ -17,25 +22,15 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
-import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.IProblemAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.ProblemAnnotationIterator;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 
 
-
-public class JavaProblemHover implements IJavaEditorTextHover {
-	
-	private CompilationUnitEditor fCompilationUnitEditor;
-	
-	/**
-	 * Creates a new problem hover.
-	 */
-	public JavaProblemHover() {
-	}
+public class JavaProblemHover extends AbstractJavaEditorTextHover {
 	
 	/*
 	 * Formats a message as HTML text.
@@ -53,11 +48,11 @@ public class JavaProblemHover implements IJavaEditorTextHover {
 	 */
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 		
-		if (fCompilationUnitEditor == null)
+		if (getEditor() == null)
 			return null;
 			
 		IDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
-		IAnnotationModel model= provider.getAnnotationModel(fCompilationUnitEditor.getEditorInput());
+		IAnnotationModel model= provider.getAnnotationModel(getEditor().getEditorInput());
 		
 		if (model != null) {
 			Iterator e= new ProblemAnnotationIterator(model, true);
@@ -76,19 +71,12 @@ public class JavaProblemHover implements IJavaEditorTextHover {
 	}
 	
 	/*
-	 * @see ITextHover#getHoverRegion(ITextViewer, int)
-	 */
-	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
-		return null;
-	}
-	
-	/*
 	 * @see IJavaEditorTextHover#setEditor(IEditorPart)
 	 */
 	public void setEditor(IEditorPart editor) {
 		if (editor instanceof CompilationUnitEditor)
-			fCompilationUnitEditor= (CompilationUnitEditor) editor;
+			super.setEditor(editor);
 		else
-			fCompilationUnitEditor= null;
+			super.setEditor(null);
 	}
 }

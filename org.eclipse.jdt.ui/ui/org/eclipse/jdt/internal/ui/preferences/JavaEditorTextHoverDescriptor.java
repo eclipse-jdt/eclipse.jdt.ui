@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 /**
  * Describes a Java editor text hover.
  */
-class JavaEditorTextHoverDescriptor implements Comparable {
+public class JavaEditorTextHoverDescriptor implements Comparable {
 
 	private final static String JAVA_EDITOR_TEXT_HOVER_EXTENSION_POINT= "org.eclipse.jdt.ui.javaEditorTextHovers"; //$NON-NLS-1$
 	private final static String HOVER_TAG= "hover"; //$NON-NLS-1$
@@ -51,7 +51,7 @@ class JavaEditorTextHoverDescriptor implements Comparable {
 	/**
 	 * Creates the Java editor text hover.
 	 */
-	IJavaEditorTextHover createTextHover() {
+	public IJavaEditorTextHover createTextHover() {
 		try {
 			return (IJavaEditorTextHover)fElement.createExecutableExtension(CLASS_ATTRIBUTE);
 		} catch (CoreException x) {
@@ -114,6 +114,16 @@ class JavaEditorTextHoverDescriptor implements Comparable {
 		}
 		Collections.sort(result);
 		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (obj == null || !obj.getClass().equals(this.getClass()) || getId() == null)
+			return false;
+		return getId().equals(((JavaEditorTextHoverDescriptor)obj).getId());
+	}
+
+	public int hashCode() {
+		return getId().hashCode();
 	}
 
 	/* 

@@ -8,6 +8,7 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
     IBM Corporation - Initial implementation
 **********************************************************************/
+
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import java.io.IOException;
@@ -29,7 +30,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 /**
  * Provides source as hover info for Java elements.
  */
-public class JavaSourceHover extends JavaElementHover {
+public class JavaSourceHover extends AbstractJavaEditorTextHover {
 
 	private final int LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
 		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS 

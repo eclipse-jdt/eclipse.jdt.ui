@@ -8,6 +8,7 @@ http://www.eclipse.org/legal/cpl-v10.html
 Contributors:
     IBM Corporation - Initial implementation
 **********************************************************************/
+
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import org.eclipse.jface.text.IRegion;
@@ -34,14 +35,13 @@ import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
  * 
  * @since 2.1
  */
-public abstract class JavaElementHover implements IJavaEditorTextHover {
-	
+public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHover {
+
+
 	private IEditorPart fEditor;
 	
-	public JavaElementHover() {
-	}
 
-	/**
+	/*
 	 * @see IJavaEditorTextHover#setEditor(IEditorPart)
 	 */
 	public void setEditor(IEditorPart editor) {
@@ -51,7 +51,7 @@ public abstract class JavaElementHover implements IJavaEditorTextHover {
 	protected IEditorPart getEditor() {
 		return fEditor;
 	}
-	
+
 	protected ICodeAssist getCodeAssist() {
 		if (fEditor != null) {
 			IEditorInput input= fEditor.getEditorInput();
@@ -78,6 +78,7 @@ public abstract class JavaElementHover implements IJavaEditorTextHover {
 	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
 	 */
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
+	
 		ICodeAssist resolve= getCodeAssist();
 		if (resolve != null) {
 			try {
@@ -102,7 +103,7 @@ public abstract class JavaElementHover implements IJavaEditorTextHover {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Provides hover information for the given Java elements.
 	 * 

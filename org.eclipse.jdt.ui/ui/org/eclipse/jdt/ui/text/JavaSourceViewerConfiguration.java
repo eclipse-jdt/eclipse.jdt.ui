@@ -52,11 +52,10 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorHoverConfigurationBlock;
+import org.eclipse.jdt.internal.ui.preferences.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
@@ -69,6 +68,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverProxy;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaInformationProvider;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
@@ -362,10 +362,16 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		if (!enabled)
 			return null;
 
-		IJavaEditorTextHover textHover= JavaEditorHoverConfigurationBlock.getTextHover(stateMask);
-		if (textHover != null)	
-			textHover.setEditor(getEditor());
-		return textHover;
+		JavaEditorTextHoverDescriptor descriptor= JavaEditorHoverConfigurationBlock.getTextHoverDescriptor(stateMask);
+
+		if (stateMask != ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK) {
+			// Ensure that no additional instance is created for default hover
+			JavaEditorTextHoverDescriptor defaultDescriptor= JavaEditorHoverConfigurationBlock.getTextHoverDescriptor(ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK);
+			if (defaultDescriptor != null && descriptor != null && defaultDescriptor.equals(descriptor))
+				return null;	// use default hover instance
+		}
+
+		return new JavaEditorTextHoverProxy(descriptor, getEditor());
 	}
 
 	/*
