@@ -79,7 +79,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private JavaTextTools fJavaTextTools;
 	private ErrorTickManager fErrorTickManager;
 	
-	private ConfigurableOption[] fCodeFormatterOptions;
 	
 	public static JavaPlugin getDefault() {
 		return fgJavaPlugin;
@@ -221,8 +220,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 		manager.registerAdapters(new ResourceAdapterFactory(), IResource.class);
 				
 		fErrorTickManager= new ErrorTickManager();
-	
-		fCodeFormatterOptions= CodeFormatter.getDefaultOptions(Locale.getDefault());		
 	}
 		
 	/* (non - Javadoc)
@@ -248,8 +245,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 			fJavaTextTools.dispose();
 			fJavaTextTools= null;
 		}
-		
-		fCodeFormatterOptions= null;
 	}
 	
 	private IWorkbenchPage internalGetActivePage() {
@@ -286,7 +281,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	public ConfigurableOption[] getCodeFormatterOptions() {
-		return fCodeFormatterOptions;
+		return CodeFormatterPreferencePage.getCurrentOptions();
 	}
 	
 	/**

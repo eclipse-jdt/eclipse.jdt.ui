@@ -46,30 +46,33 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 //TODO
 // statusbar instead of message
 //
-class CodeFormatterUIModel
-	{
-		private ConfigurableOption[] fNewOptions;
-		
-		private static ConfigurableOption[] fgCurrentOptions;
-		
-		private static IPreferenceStore fgPreferenceStore;
 
-		public static final int INDENTATION_LEVEL = 0;
-		
-		public CodeFormatterUIModel() {
-			
-			fNewOptions= getDefaultOptions();
-			updateOptions(fNewOptions, fgCurrentOptions);
-		}
-		
-		public static void init(IPreferenceStore store) {
 
-			fgPreferenceStore = store;
-			loadDefaults();
-		}
+public class CodeFormatterPreferencePage extends PreferencePage implements IWorkbenchPreferencePage{
+
+	
+	private String fPreviewBuffer;
+	private static final String fgpreviewFile= "CodeFormatterPreviewCode.txt";
+	
+	private Composite fMainPanel;
+	private Button[] fCheckOptions;
+	private Text[] fTextOptions;
+	private Button fApplyButton;
+	private Button fDefaultButton;
+	private StyledText fPreviewText;
+		
+	private ConfigurableOption[] fNewOptions;
+		
+	private static ConfigurableOption[] fgCurrentOptions;
+		
+	private static IPreferenceStore fgPreferenceStore;
+
+	public static final int INDENTATION_LEVEL = 0;
+		
+
 
 		
-		public static ConfigurableOption[] getDefaultOptions()
+		private static ConfigurableOption[] getDefaultOptions()
 		{
 			return CodeFormatter.getDefaultOptions(Locale.getDefault());
 		}
@@ -79,42 +82,24 @@ class CodeFormatterUIModel
 			return fgCurrentOptions;
 		}
 
-		public ConfigurableOption[] getNewOptions()
+		private ConfigurableOption[] getNewOptions()
 		{
 			return fNewOptions;
 		}
 		
 		private static  void loadDefaults() {
 			fgCurrentOptions= CodeFormatter.getDefaultOptions(Locale.getDefault());
-			//fgPreferenceStore= new PreferenceStore(name);
-		//try {
-		//	fgPreferenceStore.load();
-		//} catch (IOException io) {
-		//	io.printStackTrace();
-		//}
 		}
 		
-		public void savePreferences() throws IOException {
+		private void savePreferences() throws IOException {
 		for (int i= 0; i < fgCurrentOptions.length; i++) {
-			String preferenceID= getClass().getName() + "." + fgCurrentOptions[i].getID();
+			String preferenceID= "CodeFormatterPreferencePage" + "." + fgCurrentOptions[i].getID();
 			fgPreferenceStore.setValue(preferenceID, String.valueOf(fgCurrentOptions[i].getCurrentValueIndex()));
-			fgPreferenceStore.setDefault(preferenceID, String.valueOf(fgCurrentOptions[i].getCurrentValueIndex()));
 		}
-		//fgPreferenceStore.save();
 		}
 
-		public void initPreferences()
-		 {
-		 	for (int i= 0; i < fgCurrentOptions.length; i++) {
-			String preferenceID= getClass().getName() + "." + fgCurrentOptions[i].getID();
 
-			if (fgPreferenceStore.contains(preferenceID))
-				fgCurrentOptions[i].setValueIndex(fgPreferenceStore.getInt(preferenceID));
-			
-		 }
-	}
-
-	public static Hashtable findCategories(ConfigurableOption[] options) {
+	private static Hashtable findCategories(ConfigurableOption[] options) {
 
 		Hashtable OptionCategories= new Hashtable(options.length);
 		for (int i= 0; i < options.length; i++) {
@@ -135,7 +120,7 @@ class CodeFormatterUIModel
 	* Sorts categories in descending order
 	*/
 	 
-	public static String[] sortCategories(Hashtable OptionCategories) {
+	private static String[] sortCategories(Hashtable OptionCategories) {
 		ArrayList SortedOptionCategories= new ArrayList(OptionCategories.size());
 		Enumeration categories= OptionCategories.keys();
 		while (categories.hasMoreElements()) {
@@ -154,7 +139,7 @@ class CodeFormatterUIModel
 	* Finds center of a sorted categories
 	*/
 	
-	public static int findCategoryCenter(String[] SortedOptionCategories, Hashtable OptionCategories)
+	private static int findCategoryCenter(String[] SortedOptionCategories, Hashtable OptionCategories)
 	{
 		int middle = SortedOptionCategories.length;
 		int sizeLeft=0; 
@@ -174,49 +159,35 @@ class CodeFormatterUIModel
 		return middle;
 	}
 	
-	public static void updateOptions(ConfigurableOption[] current, ConfigurableOption[] update) {
+	private static void updateOptions(ConfigurableOption[] current, ConfigurableOption[] update) {
 		for (int i= 0; i < current.length; i++) {
 			current[i].setValueIndex(update[i].getCurrentValueIndex());
 		}
-	}
-}
-
-
-public class CodeFormatterPreferencePage extends PreferencePage implements IWorkbenchPreferencePage{
-
-	
-	private String fPreviewBuffer;
-	private static final String fgpreviewFile= "CodeFormatterPreviewCode.txt";
-	private CodeFormatterUIModel fModel;
-	private Composite fMainPanel;
-	private Button[] fCheckOptions;
-	private Text[] fTextOptions;
-	private Button fApplyButton;
-	private Button fDefaultButton;
-	private StyledText fPreviewText;
-		
-		
+	}	
 	public void init(IWorkbench workbench) {
 		
 	}	
 	
 	public CodeFormatterPreferencePage() {
-		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());	
-		fModel = new CodeFormatterUIModel();
-		fModel.initPreferences();
+		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
+		fNewOptions= getDefaultOptions();
+		
+		updateOptions(fNewOptions, fgCurrentOptions);		
 		fPreviewBuffer= loadPreviewFile(fgpreviewFile);
 	}
 
-	//BUG in JavaPlugin : initDefaults(store) is not called on startup
 	
 	public static void initDefaults(IPreferenceStore store) {
-		CodeFormatterUIModel.init(store);		
+			fgPreferenceStore = store;
+			loadDefaults();
+		 	for (int i= 0; i < fgCurrentOptions.length; i++) {
+				String preferenceID= "CodeFormatterPreferencePage" + "." + fgCurrentOptions[i].getID();
+				if (fgPreferenceStore.contains(preferenceID))
+				fgCurrentOptions[i].setValueIndex(fgPreferenceStore.getInt(preferenceID));
+			}
 	}
 		
-	public static ConfigurableOption[] getCurrentOptions() {
-		return CodeFormatterUIModel.getCurrentOptions();
-	}
-
+	
 
 	private  String loadPreviewFile(String fn) {
 		String separator= System.getProperty("line.separator");
@@ -233,9 +204,13 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 			io.printStackTrace();
 		}
 		return btxt.toString();
-	}
+	}	
 
-	public Control createContents(Composite parent) {
+	/**
+	* Choose one of the Simple, Category, OptimizedCategory or Custom Layouts
+	*/ 
+	
+	public Control createContents(Composite parent) {		
 		fMainPanel= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
@@ -245,14 +220,13 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		//createCustomLayout(fMainPanel);
 		createOptimizedCategoryLayout(fMainPanel);
 		createPreview(fMainPanel);
-		//createMainControls(fMainPanel);	
 		return (Control)fMainPanel;
 	}
 
 
 	public void performDefaults() {
 		super.performDefaults();
-		CodeFormatterUIModel.updateOptions(fModel.getNewOptions(), CodeFormatterUIModel.getDefaultOptions());
+		 updateOptions(fNewOptions,  getDefaultOptions());
 		for (int i= 0; i < fCheckOptions.length; i++) {
 			ConfigurableOption option= retrieveOption(fCheckOptions[i]);
 			int defaultValue= option.getCurrentValueIndex();
@@ -265,14 +239,14 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 			fTextOptions[i].setText(String.valueOf(defaultValue));
 			option.setValueIndex(defaultValue);
 		}
-		updatePreview(fModel.getNewOptions());
+		updatePreview(fNewOptions);
 	}
 
 	public boolean performOk()
 	{
-		CodeFormatterUIModel.updateOptions(CodeFormatterUIModel.getCurrentOptions(), fModel.getNewOptions());
+		 updateOptions( getCurrentOptions(), fNewOptions);
 		try {
-			fModel.savePreferences();
+			savePreferences();
 		} catch (IOException io) {
 			io.printStackTrace();
 		}
@@ -281,7 +255,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	
 	public void performApply() {
 		performOk();
-		updatePreview(fModel.getNewOptions());
+		updatePreview(fNewOptions);
 	}
 
 	private void createCategoryLayout(Composite parent)
@@ -296,8 +270,8 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		gd.verticalAlignment= GridData.FILL;
 		panel.setLayoutData(gd);
 		panel.setLayout(gl);
-		Hashtable OptionCategories= CodeFormatterUIModel.findCategories(fModel.getNewOptions());
-		String[] SortedOptionCategories = CodeFormatterUIModel.sortCategories(OptionCategories);
+		Hashtable OptionCategories=  findCategories(fNewOptions);
+		String[] SortedOptionCategories =  sortCategories(OptionCategories);
 		ArrayList checkOptions= new ArrayList();
 		ArrayList textOptions= new ArrayList();
 		for (int cat= 0; cat < SortedOptionCategories.length; cat++) {
@@ -311,9 +285,9 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	
 	private void createOptimizedCategoryLayout(Composite parent)
 	{
-		Hashtable OptionCategories= CodeFormatterUIModel.findCategories(fModel.getNewOptions());
-		String[] SortedOptionCategories = CodeFormatterUIModel.sortCategories(OptionCategories);
-		int categoryMiddle = CodeFormatterUIModel.findCategoryCenter(SortedOptionCategories, OptionCategories);
+		Hashtable OptionCategories=  findCategories(fNewOptions);
+		String[] SortedOptionCategories =  sortCategories(OptionCategories);
+		int categoryMiddle =  findCategoryCenter(SortedOptionCategories, OptionCategories);
 		ArrayList checkOptions= new ArrayList();
 		ArrayList textOptions= new ArrayList();
 		Composite panel= new Composite(parent, SWT.NONE);
@@ -360,7 +334,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	}
 	
 	private void createCustomLayout(Composite parent) {
-		Hashtable OptionCategories= CodeFormatterUIModel.findCategories(fModel.getNewOptions());
+		Hashtable OptionCategories=  findCategories(fNewOptions);
 		
 		ArrayList checkOptions= new ArrayList();
 		ArrayList textOptions= new ArrayList();
@@ -440,16 +414,17 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		panel.setLayout(gl);
 		ArrayList checkOptions= new ArrayList();
 		ArrayList textOptions= new ArrayList();
-		for (int i= 0; i < CodeFormatterUIModel.getCurrentOptions().length; i++) {
-			ConfigurableOption opt= CodeFormatterUIModel.getCurrentOptions()[i];
+		for (int i= 0; i <  getCurrentOptions().length; i++) {
+			ConfigurableOption opt=  getCurrentOptions()[i];
 			if (opt.getPossibleValues() == ConfigurableOption.NoDiscreteValue)
-				textOptions.add(createTextOption(opt.getName(), opt.getDescription(), fModel.getNewOptions()[i], panel, fTextfieldListener));
+				textOptions.add(createTextOption(opt.getName(), opt.getDescription(), fNewOptions[i], panel, fTextfieldListener));
 			else
 				if (opt.getPossibleValues().length == 2)
-					checkOptions.add(createCheckOption(opt.getName(), opt.getDescription(), fModel.getNewOptions()[i], panel, fCheckboxListener));
+					checkOptions.add(createCheckOption(opt.getName(), opt.getDescription(), fNewOptions[i], panel, fCheckboxListener));
 				else
 					;
 		}
+		System.out.println("ok");
 		fCheckOptions= (Button[]) checkOptions.toArray(new Button[checkOptions.size()]);
 		fTextOptions= (Text[]) textOptions.toArray(new Text[textOptions.size()]);
 	}
@@ -520,7 +495,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		gd0.verticalAlignment= GridData.FILL;
 		pan.setLayoutData(gd0);
 		
-		fPreviewText= new StyledText(pan, SWT.MULTI);
+		fPreviewText= new StyledText(pan, SWT.MULTI| SWT.V_SCROLL);
 		GridData gd= new GridData();
 		gd.grabExcessHorizontalSpace= true;
 		gd.horizontalAlignment= GridData.FILL;
@@ -529,7 +504,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		gd.widthHint= 400;
 		fPreviewText.setLayoutData(gd);
 		fPreviewText.setFont(JFaceResources.getFontRegistry().get(JFaceResources.TEXT_FONT));
-		updatePreview(fModel.getNewOptions());
+		updatePreview(fNewOptions);
 		Label ltxt= new Label(pan, SWT.CENTER);
 		GridData lgd= new GridData();
 		lgd.horizontalAlignment= GridData.FILL;
@@ -540,7 +515,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	public void updatePreview(final ConfigurableOption[] options) {
 		if (fPreviewText== null)
 			return;
-		fPreviewText.setText(CodeFormatter.format(fPreviewBuffer, CodeFormatterUIModel.INDENTATION_LEVEL, options));
+		fPreviewText.setText(CodeFormatter.format(fPreviewBuffer,  INDENTATION_LEVEL, options));
 	}
 
 	private ConfigurableOption retrieveOption(Widget widget) {
@@ -583,7 +558,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	//			return;
 	//		}
 	//		option.setValueIndex(val);
-	//		updatePreview(fModel.getNewOptions());
+	//		updatePreview(fNewOptions);
 	//	}
 //
 //	};
@@ -607,7 +582,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 				return;
 			}
 			option.setValueIndex(val);
-			updatePreview(fModel.getNewOptions());
+			updatePreview(fNewOptions);
 		}
 
 	};
@@ -621,12 +596,14 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 				option.setValueIndex(0);
 			else
 				option.setValueIndex(1);
-			updatePreview(fModel.getNewOptions());
+			updatePreview(fNewOptions);
 		}
 	};
 
 	
-//TESTING
+/** 
+* For  testing
+*/
 	public static void main(String[] args) throws IOException {
 		Display display= new Display();
 		Shell shell= new Shell(display);
