@@ -457,8 +457,8 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
 	}
 
 	public void testFail30() throws Exception{
-		printTestDisabledMessage("bug#19851");
-//		helper2("j");
+//		printTestDisabledMessage("bug#19851");
+		helper2("j");
 	}
 	
 }
