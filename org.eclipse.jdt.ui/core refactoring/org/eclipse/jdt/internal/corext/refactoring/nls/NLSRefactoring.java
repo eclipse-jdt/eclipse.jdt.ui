@@ -244,8 +244,11 @@ public class NLSRefactoring extends Refactoring {
 
 	private IFile[] getAllFilesToModify() throws CoreException{
 		List files= new ArrayList(2);
-		if (willModifySource())
-			files.add(ResourceUtil.getFiles(new ICompilationUnit[]{fCu}));
+		if (willModifySource()){
+			IFile file= ResourceUtil.getFile(fCu);
+			if (file != null)
+				files.add(file);
+		}	
 		
 		if (willModifyPropertyFile() && propertyFileExists())
 			files.add(getPropertyFile());
