@@ -189,7 +189,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		IRunnableWithProgress op= new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 
-				final boolean noProgressMonitor= Platform.getInstanceLocation().equals(fCurrProjectLocation);
+				final boolean noProgressMonitor= Platform.getLocation().equals(fCurrProjectLocation);
 
 				if (monitor == null || noProgressMonitor) {
 					monitor= new NullProgressMonitor();

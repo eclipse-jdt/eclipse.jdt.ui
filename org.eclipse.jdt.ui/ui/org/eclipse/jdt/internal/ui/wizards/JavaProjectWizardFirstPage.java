@@ -211,7 +211,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		}
 
 		protected String getDefaultPath(String name) {
-			final IPath path= Platform.getInstanceLocation().append(name);
+			final IPath path= Platform.getLocation().append(name);
 			return path.toOSString();
 		}
 
@@ -230,7 +230,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 
 		public IPath getLocation() {
 			if (isInWorkspace()) {
-				return Platform.getInstanceLocation();
+				return Platform.getLocation();
 			}
 			return new Path(fLocationField.getText().trim());
 		}
@@ -379,7 +379,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 
 			// check whether the location has the workspace as prefix
 			IPath projectPath= new Path(location);
-			if (!fLocationGroup.isInWorkspace() && Platform.getInstanceLocation().isPrefixOf(projectPath)) {
+			if (!fLocationGroup.isInWorkspace() && Platform.getLocation().isPrefixOf(projectPath)) {
 				setErrorMessage(NewWizardMessages.getString("JavaProjectWizardFirstPage.Message.cannotCreateInWorkspace")); //$NON-NLS-1$
 				setPageComplete(false);
 				return;
