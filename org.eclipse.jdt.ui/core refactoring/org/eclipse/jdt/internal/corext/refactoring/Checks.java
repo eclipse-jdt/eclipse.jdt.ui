@@ -34,8 +34,11 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Name;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -56,6 +59,11 @@ public class Checks {
 	 */
 	private Checks(){
 	}
+	
+	/* Constants returned by checkExpressionIsRValue */
+	public static final int IS_RVALUE= 0;
+	public static final int NOT_RVALUE_MISC= 1;
+	public static final int NOT_RVALUE_VOID= 2;
 
 	/**
 	 * Checks if method will have a constructor name after renaming.
@@ -618,5 +626,30 @@ public class Checks {
 		} finally{
 			pm.done();
 		}	
+	}
+	
+	public static boolean isRValue(Expression e) {
+		return checkExpressionIsRValue(e) == IS_RVALUE;
+	}
+	
+	
+	/**	 * @param e	 * @return int
+	 *          Checks.IS_RVALUE		if e is an rvalue
+	 *          Checks.NOT_RVALUE_VOID  if e is not an rvalue because its type is void
+	 *          Checks.NOT_RVALUE_MISC  if e is not an rvalue for some other reason	 */
+	public static int checkExpressionIsRValue(Expression e) {
+		if(e instanceof Name) {
+			if(!(((Name) e).resolveBinding() instanceof IVariableBinding)) {
+				return NOT_RVALUE_MISC;
+			}
+		}
+		
+		ITypeBinding tb= e.resolveTypeBinding();
+		if (tb == null)
+			return NOT_RVALUE_MISC;
+		else if (tb.getName().equals("void")) //$NON-NLS-1$
+			return NOT_RVALUE_VOID;
+
+		return IS_RVALUE;		
 	}
 }
