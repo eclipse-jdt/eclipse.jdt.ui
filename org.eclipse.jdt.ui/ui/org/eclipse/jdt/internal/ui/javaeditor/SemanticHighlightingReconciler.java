@@ -353,7 +353,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 							return Status.CANCEL_STATUS;
 						fJob= this;
 					}
-					CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(element, ASTProvider.WAIT_ACTIVE_ONLY, monitor);
+					CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(element, ASTProvider.WAIT_YES, monitor);
 					reconciled(ast, false, monitor);
 					synchronized (fJobLock) {
 						fJob= null;
