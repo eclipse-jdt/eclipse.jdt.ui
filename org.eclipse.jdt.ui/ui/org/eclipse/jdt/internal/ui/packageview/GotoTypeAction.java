@@ -8,7 +8,9 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.dialogs.SelectionDialog;
@@ -45,13 +47,13 @@ class GotoTypeAction extends Action {
 			dialog= JavaUI.createTypeDialog(shell, new ProgressMonitorDialog(shell),
 				SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES, false);
 		} catch (JavaModelException e) {
-			String title= PackagesMessages.getString("GotoType.dialog.title"); //$NON-NLS-1$
+			String title= getDialogTitle();
 			String message= PackagesMessages.getString("GotoType.error.message"); //$NON-NLS-1$
 			ExceptionHandler.handle(e, title, message);
 			return;
 		}
 	
-		dialog.setTitle(PackagesMessages.getString("GotoType.dialog.title")); //$NON-NLS-1$
+		dialog.setTitle(getDialogTitle());
 		dialog.setMessage(PackagesMessages.getString("GotoType.dialog.message")); //$NON-NLS-1$
 		if (dialog.open() == IDialogConstants.CANCEL_ID) {
 			return;
@@ -79,7 +81,20 @@ class GotoTypeAction extends Action {
 			PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
 			if (view != null) {
 				view.selectReveal(new StructuredSelection(element));
+				if (!element.equals(getSelectedElement(view))) {
+					MessageDialog.openInformation(fPackageExplorer.getSite().getShell(), 
+						getDialogTitle(), 
+						PackagesMessages.getFormattedString("PackageExplorer.element_not_present", element.getElementName())); //$NON-NLS-1$
+				}
 			}
 		}
+	}
+	
+	private Object getSelectedElement(PackageExplorerPart view) {
+		return ((IStructuredSelection)view.getSite().getSelectionProvider().getSelection()).getFirstElement();
+	}	
+	
+	private String getDialogTitle() {
+		return PackagesMessages.getString("GotoType.dialog.title"); //$NON-NLS-1$
 	}
 }

@@ -20,6 +20,7 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -305,6 +306,8 @@ public class PackageExplorerActionGroup extends CompositeActionGroup implements 
 					fZoomInAction.run();
 				}
 			} else {
+				if (element instanceof ICompilationUnit && OpenStrategy.getOpenMethod() == OpenStrategy.DOUBLE_CLICK)
+					return;
 				viewer.setExpandedState(element, !viewer.getExpandedState(element));
 			}
 		}

@@ -11,8 +11,10 @@ import java.util.Set;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.action.Action;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
 
@@ -47,7 +49,7 @@ class GotoPackageAction extends Action {
 		try {
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 			SelectionDialog dialog= createAllPackagesDialog(shell);
-			dialog.setTitle(PackagesMessages.getString("GotoPackage.dialog.title")); //$NON-NLS-1$
+			dialog.setTitle(getDialogTitle());
 			dialog.setMessage(PackagesMessages.getString("GotoPackage.dialog.message")); //$NON-NLS-1$
 			dialog.open();		
 			Object[] res= dialog.getResult();
@@ -57,7 +59,7 @@ class GotoPackageAction extends Action {
 		}
 	}
 	
-	SelectionDialog createAllPackagesDialog(Shell shell) throws JavaModelException{
+	private SelectionDialog createAllPackagesDialog(Shell shell) throws JavaModelException{
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(
 			shell, 
 			new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_ROOT|JavaElementLabelProvider.SHOW_POST_QUALIFIED)
@@ -67,7 +69,7 @@ class GotoPackageAction extends Action {
 		return dialog;
 	}
 	
-	Object[] collectPackages() throws JavaModelException {
+	private Object[] collectPackages() throws JavaModelException {
 		IWorkspaceRoot wsroot= JavaPlugin.getWorkspace().getRoot();
 		IJavaModel model= JavaCore.create(wsroot);
 		IJavaProject[] projects= model.getJavaProjects();
@@ -89,7 +91,7 @@ class GotoPackageAction extends Action {
 		return allPackages.toArray();
 	}
 	
-	void appendPackages(List all, IJavaElement[] packages) {
+	private void appendPackages(List all, IJavaElement[] packages) {
 		for (int i= 0; i < packages.length; i++) {
 			IJavaElement element= packages[i];
 			if (fFilter.select(null, null, element))
@@ -97,11 +99,25 @@ class GotoPackageAction extends Action {
 		}
 	}
 		
-	void gotoPackage(IPackageFragment p) {
+	private void gotoPackage(IPackageFragment p) {
 		fPackageExplorer.selectReveal(new StructuredSelection(p));
+		if (!p.equals(getSelectedElement())) {
+			MessageDialog.openInformation(fPackageExplorer.getSite().getShell(), 
+				getDialogTitle(), 
+				PackagesMessages.getFormattedString("PackageExplorer.element_not_present", p.getElementName())); //$NON-NLS-1$
+		}
 	}
 	
-	boolean showLibraries()  {
+	private boolean showLibraries()  {
 		return fPackageExplorer.getLibraryFilter().getShowLibraries();
 	}
+	
+	private Object getSelectedElement() {
+		return ((IStructuredSelection)fPackageExplorer.getSite().getSelectionProvider().getSelection()).getFirstElement();
+	}	
+	
+	private String getDialogTitle() {
+		return PackagesMessages.getString("GotoPackage.dialog.title"); //$NON-NLS-1$
+	}
+	
 }

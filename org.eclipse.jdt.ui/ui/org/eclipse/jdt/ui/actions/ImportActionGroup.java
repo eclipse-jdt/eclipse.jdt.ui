@@ -18,6 +18,9 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.actions.ActionGroup;
@@ -38,6 +41,11 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 public class ImportActionGroup extends ActionGroup {
 
 	private static final String GROUP_IMPORT= "group.import"; //$NON-NLS-1$
+	
+	private static final int FAILED= 1 << 0;
+	private static final int IMPORT= 1 << 1;
+	private static final int EXPORT= 1 << 2;
+	private static final int IMPORT_EXPORT= IMPORT | EXPORT;
 
 	private ImportResourcesAction fImportAction;
 	private ExportResourcesAction fExportAction;
@@ -61,10 +69,13 @@ public class ImportActionGroup extends ActionGroup {
 		if (selection == null)
 			return;
 			
-		if (checkSelection(selection)) {
+		int mode= checkSelection(selection);
+		if ((mode & FAILED) == 0) {
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new Separator(GROUP_IMPORT));
-			menu.appendToGroup(GROUP_IMPORT, fImportAction);
-			menu.appendToGroup(GROUP_IMPORT, fExportAction);
+			if ((mode  & IMPORT) != 0)
+				menu.appendToGroup(GROUP_IMPORT, fImportAction);
+			if ((mode & EXPORT) != 0)
+				menu.appendToGroup(GROUP_IMPORT, fExportAction);
 		}
 		super.fillContextMenu(menu);
 	}
@@ -81,15 +92,32 @@ public class ImportActionGroup extends ActionGroup {
 		return null;
 	}
 	
-	private boolean checkSelection(IStructuredSelection selection) {
+	private int checkSelection(IStructuredSelection selection) {
+		int result= 0;
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
 			Object element= (Object) iter.next();
-			if (!(element instanceof IJavaElement))
-				return false;
-			int type= ((IJavaElement)element).getElementType();
-			if (type != IJavaElement.JAVA_PROJECT && type != IJavaElement.PACKAGE_FRAGMENT_ROOT && type != IJavaElement.PACKAGE_FRAGMENT)
-				return false;
+			if (element instanceof IJavaElement) {
+				int type= ((IJavaElement)element).getElementType();
+				switch (type) {
+					case IJavaElement.JAVA_PROJECT:
+					case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+					case IJavaElement.PACKAGE_FRAGMENT:
+						result= result | IMPORT_EXPORT;
+						break;
+					case IJavaElement.COMPILATION_UNIT:
+						result= result | EXPORT;
+						break;
+					default:
+						return FAILED;
+				}
+			} else if (element instanceof IContainer) {
+				result= result | IMPORT_EXPORT;
+			} else if (element instanceof IFile) {
+				result= result | EXPORT;
+			} else {
+				return FAILED;
+			}
 		}
-		return true;
+		return result;
 	}
 }
