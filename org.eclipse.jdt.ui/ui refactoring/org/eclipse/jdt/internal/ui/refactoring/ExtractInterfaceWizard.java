@@ -35,13 +35,11 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -70,14 +68,12 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		private Button fReplaceAllCheckbox;
 		private Button fDeclarePublicCheckbox;
 		private Button fDeclareAbstractCheckbox;
-		private Button fGenerateAnnotationsCheckbox;
 		private Button fGenerateCommentsCheckbox;
 		private CheckboxTableViewer fTableViewer;
 		private static final String DESCRIPTION = RefactoringMessages.getString("ExtractInterfaceInputPage.description"); //$NON-NLS-1$
 		private static final String SETTING_PUBLIC= 		"Public";//$NON-NLS-1$
 		private static final String SETTING_ABSTRACT= 		"Abstract";//$NON-NLS-1$
 		private static final String SETTING_REPLACE= "Replace"; //$NON-NLS-1$
-		private static final String SETTING_ANNOTATIONS= "Annotations"; //$NON-NLS-1$
 		private static final String SETTING_COMMENTS= "Comments"; //$NON-NLS-1$
 
 		public ExtractInterfaceInputPage() {
@@ -89,7 +85,6 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			setControl(result);
 			GridLayout layout= new GridLayout();
 			layout.numColumns= 2;
-			layout.verticalSpacing= 8;
 			result.setLayout(layout);
 		
 			Label label= new Label(result, SWT.NONE);
@@ -118,21 +113,8 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			Dialog.applyDialogFont(result);
 			addMemberListComposite(result);
 			addGenerateCommentsCheckbox(result);
-			addGenerateAnnotationsCheckbox(result);
 			initializeCheckboxes();
 			updateUIElementEnablement();
-		}
-
-		private void addGenerateAnnotationsCheckbox(Composite result) {
-			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
-			String title= RefactoringMessages.getString("ExtractInterfaceWizard.generate.annotations"); //$NON-NLS-1$
-			fGenerateAnnotationsCheckbox= createCheckbox(result,  title, false);
-			processor.setAnnotations(fGenerateAnnotationsCheckbox.getSelection());
-			fGenerateAnnotationsCheckbox.addSelectionListener(new SelectionAdapter(){
-				public void widgetSelected(SelectionEvent e) {
-					processor.setAnnotations(fGenerateAnnotationsCheckbox.getSelection());
-				}
-			});		
 		}
 
 		private void addGenerateCommentsCheckbox(Composite result) {
@@ -179,13 +161,10 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		}
 
 		protected void updateUIElementEnablement() {
-			final IJavaProject project= getExtractInterfaceRefactoring().getExtractInterfaceProcessor().getType().getJavaProject();
-			boolean annotations= JavaModelUtil.is50OrHigher(project);
-			boolean anyMethodsChecked= containsMethods(getCheckedMembers());
-			fDeclarePublicCheckbox.setEnabled(anyMethodsChecked);
-			fDeclareAbstractCheckbox.setEnabled(anyMethodsChecked);
-			fGenerateCommentsCheckbox.setEnabled(anyMethodsChecked);
-			fGenerateAnnotationsCheckbox.setEnabled(anyMethodsChecked && annotations);
+			final boolean enabled= containsMethods(getCheckedMembers());
+			fDeclarePublicCheckbox.setEnabled(enabled);
+			fDeclareAbstractCheckbox.setEnabled(enabled);
+			fGenerateCommentsCheckbox.setEnabled(enabled);
 		}
 
 		private static boolean containsMethods(IMember[] members) {
@@ -349,7 +328,6 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			processor.setExtractedMembers(getCheckedMembers());
 			processor.setAbstract(fDeclareAbstractCheckbox.getSelection());
 			processor.setPublic(fDeclarePublicCheckbox.getSelection());
-			processor.setAnnotations(fGenerateAnnotationsCheckbox.getSelection());
 			processor.setComments(fGenerateCommentsCheckbox.getSelection());
 		}
 		
@@ -362,7 +340,6 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		 * @see org.eclipse.jface.dialogs.IDialogPage#dispose()
 		 */
 		public void dispose() {
-			fGenerateAnnotationsCheckbox= null;
 			fGenerateCommentsCheckbox= null;
 			fReplaceAllCheckbox= null;
 			fTableViewer= null;
@@ -372,8 +349,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		private void initializeCheckboxes() {
 			initializeCheckBox(fDeclarePublicCheckbox, SETTING_PUBLIC, true);
 			initializeCheckBox(fDeclareAbstractCheckbox, SETTING_ABSTRACT, true);	
-			initializeCheckBox(fReplaceAllCheckbox, SETTING_REPLACE, true);				
-			initializeCheckBox(fGenerateAnnotationsCheckbox, SETTING_ANNOTATIONS, false);				
+			initializeCheckBox(fReplaceAllCheckbox, SETTING_REPLACE, true);					
 			initializeCheckBox(fGenerateCommentsCheckbox, SETTING_COMMENTS, true);				
 		}
 
@@ -387,7 +363,6 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 
 		private void storeDialogSettings(){
 			JavaPlugin.getDefault().getDialogSettings().put(SETTING_PUBLIC, fDeclarePublicCheckbox.getSelection());
-			JavaPlugin.getDefault().getDialogSettings().put(SETTING_ANNOTATIONS, fGenerateAnnotationsCheckbox.getSelection());
 			JavaPlugin.getDefault().getDialogSettings().put(SETTING_ABSTRACT, fDeclareAbstractCheckbox.getSelection());
 			JavaPlugin.getDefault().getDialogSettings().put(SETTING_REPLACE, fReplaceAllCheckbox.getSelection());
 			JavaPlugin.getDefault().getDialogSettings().put(SETTING_COMMENTS, fGenerateCommentsCheckbox.getSelection());
