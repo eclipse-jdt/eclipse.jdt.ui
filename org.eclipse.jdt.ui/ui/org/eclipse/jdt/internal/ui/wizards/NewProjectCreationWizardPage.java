@@ -36,6 +36,8 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 
 	private IPath fCurrProjectLocation;
 	protected IProject fCurrProject;
+	
+	protected boolean fCanRemoveContent;
 
 	/**
 	 * Constructor for NewProjectCreationWizardPage.
@@ -45,6 +47,7 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 		fMainPage= mainPage;
 		fCurrProjectLocation= null;
 		fCurrProject= null;
+		fCanRemoveContent= false;
 	}
 	
 	/* (non-Javadoc)
@@ -62,6 +65,12 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 	private void changeToNewProject() {
 		IProject newProjectHandle= fMainPage.getProjectHandle();
 		IPath newProjectLocation= fMainPage.getLocationPath();
+		
+		if (fMainPage.useDefaults()) {
+			fCanRemoveContent= !newProjectLocation.append(fMainPage.getProjectName()).toFile().exists();
+		} else {
+			fCanRemoveContent= !newProjectLocation.toFile().exists();
+		}
 				
 		final boolean initialize= !(newProjectHandle.equals(fCurrProject) && newProjectLocation.equals(fCurrProjectLocation));
 		
@@ -89,7 +98,7 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 	protected void updateProject(boolean initialize, IProgressMonitor monitor) throws CoreException, InterruptedException {
 		fCurrProject= fMainPage.getProjectHandle();
 		fCurrProjectLocation= fMainPage.getLocationPath();
-		boolean noProgressMonitor= !initialize && !fCurrProjectLocation.toFile().exists();
+		boolean noProgressMonitor= !initialize && fCanRemoveContent;
 		
 		if (monitor == null || noProgressMonitor ) {
 			monitor= new NullProgressMonitor();
@@ -149,12 +158,13 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 				monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.removeproject.desc"), 3);				 //$NON-NLS-1$
 
 				try {
-					fCurrProject.delete(false, false, monitor);
+					fCurrProject.delete(fCanRemoveContent, false, monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				} finally {
 					monitor.done();
 					fCurrProject= null;
+					fCanRemoveContent= false;
 				}
 			}
 		};
