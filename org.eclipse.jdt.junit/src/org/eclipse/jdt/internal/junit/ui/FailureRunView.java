@@ -71,7 +71,7 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		addListeners();	
 	}
 
-	void disposeIcons() {
+	private void disposeIcons() {
 		fErrorIcon.dispose();
 		fFailureIcon.dispose();
 		fFailureTabIcon.dispose();
@@ -93,7 +93,7 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		int index= fTable.getSelectionIndex();
 		if (index == -1)
 			return null;
-		return getTestInfo(fTable.getItem(index)).fTestId;
+		return getTestInfo(fTable.getItem(index)).getTestId();
 	}
 	
 	private String getClassName() {
@@ -141,7 +141,7 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		for (int i= 0; i < items.length; i++) {
 			TableItem tableItem= items[i];
 			TestRunInfo info= getTestInfo(tableItem);		
-			if (info.fTestId.equals(testId)){
+			if (info.getTestId().equals(testId)){
 				fTable.setSelection(new TableItem[] { tableItem });
 				fTable.showItem(tableItem);
 				return;
@@ -159,7 +159,7 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	
 	public void endTest(String testId){
 		TestRunInfo testInfo= fRunnerViewPart.getTestInfo(testId);
-		if(testInfo == null || testInfo.fStatus == ITestRunListener.STATUS_OK) 
+		if(testInfo == null || testInfo.getStatus() == ITestRunListener.STATUS_OK) 
 			return;
 
 		TableItem tableItem= new TableItem(fTable, SWT.NONE);
@@ -168,8 +168,8 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	}
 
 	private void updateTableItem(TestRunInfo testInfo, TableItem tableItem) {
-		tableItem.setText(testInfo.fTestName);
-		if (testInfo.fStatus == ITestRunListener.STATUS_FAILURE)
+		tableItem.setText(testInfo.getTestName());
+		if (testInfo.getStatus() == ITestRunListener.STATUS_FAILURE)
 			tableItem.setImage(fFailureIcon);
 		else
 			tableItem.setImage(fErrorIcon);
@@ -180,7 +180,7 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		TableItem[] items= fTable.getItems();
 		for (int i= 0; i < items.length; i++) {
 			TestRunInfo info= getTestInfo(items[i]);
-			if (info.fTestId.equals(testId))
+			if (info.getTestId().equals(testId))
 				return items[i];
 		}
 		return null;
@@ -194,11 +194,11 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		fTable.removeAll();
 	}
 
-	protected void testSelected() {
+	private void testSelected() {
 		fRunnerViewPart.handleTestSelected(getSelectedTestId());
 	}
 	
-	protected void addListeners() {
+	private void addListeners() {
 		fTable.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				activate();
@@ -227,7 +227,7 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		});
 	}
 	
-	public void handleDoubleClick(MouseEvent e) {
+	void handleDoubleClick(MouseEvent e) {
 		if (fTable.getSelectionCount() > 0) 
 			new OpenTestAction(fRunnerViewPart, getClassName(), getMethodName()).run();
 	}
@@ -239,15 +239,15 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	 * @see ITestRunView#testStatusChanged(TestRunInfo)
 	 */
 	public void testStatusChanged(TestRunInfo info) {
-		TableItem item= findItem(info.fTestId);
+		TableItem item= findItem(info.getTestId());
 		if (item != null) {
-			if (info.fStatus == ITestRunListener.STATUS_OK) {
+			if (info.getStatus() == ITestRunListener.STATUS_OK) {
 				item.dispose();
 				return;
 			}
 			updateTableItem(info, item);
 		} 
-		if (item == null && info.fStatus != ITestRunListener.STATUS_OK) {
+		if (item == null && info.getStatus() != ITestRunListener.STATUS_OK) {
 			item= new TableItem(fTable, SWT.NONE);
 			updateTableItem(info, item);
 		}

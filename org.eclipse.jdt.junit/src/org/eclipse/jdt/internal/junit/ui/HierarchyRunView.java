@@ -39,7 +39,6 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	 */
 	private Tree fTree;
 	
-	public static final int IS_SUITE= -1;	
 	/**
 	 * Helper used to resurrect test hierarchy
 	 */
@@ -99,7 +98,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		addListeners();
 	}
 
-	void disposeIcons() {
+	private void disposeIcons() {
 		fErrorIcon.dispose();
 		fFailureIcon.dispose();
 		fOkIcon.dispose();
@@ -132,18 +131,25 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		return ((TestRunInfo)treeItems[0].getData());
 	}	
 	
+	private boolean isSuiteSelected() {
+		TreeItem[] treeItems= fTree.getSelection();
+		if(treeItems.length != 1) 
+			return false;
+		return treeItems[0].getItems().length > 0;
+	}	
+	
 	private String getClassName() {
 		TestRunInfo testInfo= getTestInfo();
 		if (testInfo == null) 
 			return null;
-		return extractClassName(testInfo.fTestName);
+		return extractClassName(testInfo.getTestName());
 	}
 	
 	public String getSelectedTestId() {
 		TestRunInfo testInfo= getTestInfo();
 		if (testInfo == null) 
 			return null;
-		return testInfo.fTestId;
+		return testInfo.getTestId();
 	}
 		
 	private String extractClassName(String testNameString) {
@@ -176,25 +182,25 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 			
 		updateItem(treeItem, testInfo);
 			
-		if (testInfo.fTrace != null)
+		if (testInfo.getTrace() != null)
 			fTree.showItem(treeItem);
 	}
 
 	private void updateItem(TreeItem treeItem, TestRunInfo testInfo) {
 		treeItem.setData(testInfo);
-		if(testInfo.fStatus == ITestRunListener.STATUS_OK) {
+		if(testInfo.getStatus() == ITestRunListener.STATUS_OK) {
 			treeItem.setImage(fOkIcon);	
 			return;
 		}
 		
-		if (testInfo.fStatus == ITestRunListener.STATUS_FAILURE) 
+		if (testInfo.getStatus() == ITestRunListener.STATUS_FAILURE) 
 			treeItem.setImage(fFailureIcon);
-		else if (testInfo.fStatus == ITestRunListener.STATUS_ERROR)
+		else if (testInfo.getStatus() == ITestRunListener.STATUS_ERROR)
 			treeItem.setImage(fErrorIcon);
-		propagateStatus(treeItem, testInfo.fStatus);	
+		propagateStatus(treeItem, testInfo.getStatus());	
 	}
 
-	void propagateStatus(TreeItem item, int status) {
+	private void propagateStatus(TreeItem item, int status) {
 		TreeItem parent= item.getParentItem();
 		if (parent == null)
 			return;
@@ -226,27 +232,10 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		fTreeItemMap= new HashMap();
 	}
 	
-	protected void testSelected() {
+	private void testSelected() {
 		fTestRunnerPart.handleTestSelected(getSelectedTestId());
 	}
 	
-	public void menuAboutToShow(IMenuManager manager) {
-		if (fTree.getSelectionCount() > 0) {
-			final TreeItem treeItem= fTree.getSelection()[0];
-			TestRunInfo testInfo= (TestRunInfo) treeItem.getData();
-			if (testInfo.fStatus == IS_SUITE) {	
-				String className= getTestLabel();
-				int index= className.length();
-				if ((index= className.indexOf('@')) > 0)
-					className= className.substring(0, index);
-				manager.add(new OpenTestAction(fTestRunnerPart, className));
-			} else {
-				manager.add(new OpenTestAction(fTestRunnerPart, getClassName(), getTestLabel()));
-				manager.add(new RerunAction(fTestRunnerPart, getSelectedTestId(), getClassName(), getTestLabel()));
-			}
-		}
-	}	
-
 	private void addListeners() {
 		fTree.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
@@ -272,20 +261,31 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	
 	void handleDoubleClick(MouseEvent e) {
 		TestRunInfo testInfo= getTestInfo();
-		if(testInfo == null) 
-			return;
+		String testLabel= testInfo.getTestName();
+		OpenTestAction action= null;
 		
-		if ((testInfo.fStatus == IS_SUITE)) {
-			String className= getTestLabel();
-			int index= className.length();
-			if ((index= className.indexOf('@')) > 0)
-				className= className.substring(0, index);
-			(new OpenTestAction(fTestRunnerPart, className)).run();							
-		}
-		else {
-			(new OpenTestAction(fTestRunnerPart, getClassName(), getTestLabel())).run();
-		}							
+		if (isSuiteSelected()) 	
+			action= new OpenTestAction(fTestRunnerPart, testLabel);
+		else 
+			action= new OpenTestAction(fTestRunnerPart, getClassName(), getTestLabel());
+
+		if (action != null && action.isEnabled())
+			action.run();													
 	}
+
+	public void menuAboutToShow(IMenuManager manager) {
+		if (fTree.getSelectionCount() > 0) {
+			TreeItem treeItem= fTree.getSelection()[0];
+			TestRunInfo testInfo= (TestRunInfo) treeItem.getData();
+			String testLabel= testInfo.getTestName();
+			if (isSuiteSelected()) {	
+				manager.add(new OpenTestAction(fTestRunnerPart, testLabel));
+			} else {
+				manager.add(new OpenTestAction(fTestRunnerPart, getClassName(), getTestLabel()));
+				manager.add(new RerunAction(fTestRunnerPart, getSelectedTestId(), getClassName(), getTestLabel()));
+			}
+		}
+	}	
 	
 	public void newTreeEntry(String treeEntry) {
 		// format: testId","testName","isSuite","testcount
@@ -311,12 +311,10 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		}
 	
 		if(fSuiteInfos.size() == 0){
-			testInfo.fStatus= IS_SUITE;
 			treeItem= new TreeItem(fTree, SWT.NONE);
 			treeItem.setImage(fSuiteIcon);
 			fSuiteInfos.addElement(new SuiteInfo(treeItem, testCount));
 		} else if(isSuite.equals("true")) { //$NON-NLS-1$
-			testInfo.fStatus= IS_SUITE;
 			treeItem= new TreeItem(((SuiteInfo) fSuiteInfos.lastElement()).fTreeItem, SWT.NONE);
 			treeItem.setImage(fHierarchyIcon);
 			((SuiteInfo)fSuiteInfos.lastElement()).fTestCount -= 1;
@@ -332,7 +330,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	}
 	
 	private void mapTest(TestRunInfo info, TreeItem item) {
-		fTreeItemMap.put(info.fTestId, item);
+		fTreeItemMap.put(info.getTestId(), item);
 	}
 	
 	private TreeItem findTreeItem(String testId) {
@@ -346,7 +344,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	 * @see ITestRunView#testStatusChanged(TestRunInfo, int)
 	 */
 	public void testStatusChanged(TestRunInfo newInfo) {
-		Object o= fTreeItemMap.get(newInfo.fTestId);
+		Object o= fTreeItemMap.get(newInfo.getTestId());
 		if (o instanceof TreeItem) {
 			updateItem((TreeItem)o, newInfo);
 			return;

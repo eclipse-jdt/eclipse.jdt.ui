@@ -44,4 +44,12 @@ public class OpenEditorAtLineAction extends OpenEditorAction {
 	protected IJavaElement findElement(IJavaProject project, String className) throws JavaModelException {
 		return project.findType(className);
 	}
+
+	public boolean isEnabled() {
+		try {
+			return getLaunchedProject().findType(getClassName()) != null;
+		} catch (JavaModelException e) {
+		}
+		return false;
+	}
 }

@@ -112,7 +112,7 @@ class FailureTraceView implements IMenuListener {
 		return null;
 	}
 	
-	void disposeIcons(){
+	private void disposeIcons(){
 		if (fExceptionIcon != null && !fExceptionIcon.isDisposed()) 
 			fExceptionIcon.dispose();
 		if (fStackIcon != null && !fStackIcon.isDisposed()) 
@@ -122,7 +122,7 @@ class FailureTraceView implements IMenuListener {
 	/**
 	 * Returns the composite used to present the trace
 	 */
-	public Composite getComposite(){
+	Composite getComposite(){
 		return fTable;
 	}
 	
@@ -155,7 +155,7 @@ class FailureTraceView implements IMenuListener {
 		fTable.setRedraw(true);
 	}
 
-	protected void fillTable(String trace) {
+	private void fillTable(String trace) {
 		StringReader stringReader= new StringReader(trace);
 		BufferedReader bufferedReader= new BufferedReader(stringReader);
 		String line;

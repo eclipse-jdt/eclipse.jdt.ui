@@ -299,8 +299,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 				if(isDisposed()) 
 					return;	
 				if (fFirstFailure != null) {
-					fActiveRunView.setSelectedTest(fFirstFailure.fTestId);
-					handleTestSelected(fFirstFailure.fTestId);
+					fActiveRunView.setSelectedTest(fFirstFailure.getTestId());
+					handleTestSelected(fFirstFailure.getTestId());
 				}
 				updateViewIcon();
 				if (fDirtyListener == null) {
@@ -392,8 +392,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 			testInfo= new TestRunInfo(testId, testName);
 			fTestInfos.put(testName, testInfo);
 		}
-		testInfo.fTrace= trace;
-		testInfo.fStatus= status;
+		testInfo.setTrace(trace);
+		testInfo.setStatus(status);
 		if (status == ITestRunListener.STATUS_ERROR)
 			fErrors++;
 		else
@@ -421,28 +421,28 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		}
 		TestRunInfo info= getTestInfo(testId);
 		updateTest(info, status);
-		if (info.fTrace == null || !info.fTrace.equals(trace)) {
-			info.fTrace= trace;
-			showFailure(info.fTrace);
+		if (info.getTrace() == null || !info.getTrace().equals(trace)) {
+			info.setTrace(trace);
+			showFailure(info.getTrace());
 		}
 	}
 
 	private void updateTest(TestRunInfo info, final int status) {
-		if (status == info.fStatus)
+		if (status == info.getStatus())
 			return;
-		if (info.fStatus == ITestRunListener.STATUS_OK) {
+		if (info.getStatus() == ITestRunListener.STATUS_OK) {
 			if (status == ITestRunListener.STATUS_FAILURE) 
 				fFailures++;
 			else if (status == ITestRunListener.STATUS_ERROR)
 				fErrors++;
-		} else if (info.fStatus == ITestRunListener.STATUS_ERROR) {
+		} else if (info.getStatus() == ITestRunListener.STATUS_ERROR) {
 			if (status == ITestRunListener.STATUS_OK) 
 				fErrors--;
 			else if (status == ITestRunListener.STATUS_FAILURE) {
 				fErrors--;
 				fFailures++;
 			}
-		} else if (info.fStatus == ITestRunListener.STATUS_FAILURE) {
+		} else if (info.getStatus() == ITestRunListener.STATUS_FAILURE) {
 			if (status == ITestRunListener.STATUS_OK) 
 				fFailures--;
 			else if (status == ITestRunListener.STATUS_ERROR) {
@@ -450,7 +450,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 				fErrors++;
 			}
 		}			
-		info.fStatus= status;	
+		info.setStatus(status);	
 		final TestRunInfo finalInfo= info;
 		postAsyncRunnable(new Runnable() {
 			public void run() {
@@ -834,7 +834,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		if (testInfo == null) {
 			showFailure(""); //$NON-NLS-1$
 		} else {
-			showFailure(testInfo.fTrace);
+			showFailure(testInfo.getTrace());
 		}
 	}
 

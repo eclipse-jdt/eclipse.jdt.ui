@@ -796,7 +796,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 	public static void initializeDefaults(IPreferenceStore store) {
 		store.setDefault(IJUnitPreferencesConstants.DO_FILTER_STACK, true);
-		store.setDefault(IJUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, false);
+		store.setDefault(IJUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, true);
 
 		String list= store.getString(IJUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST);
 

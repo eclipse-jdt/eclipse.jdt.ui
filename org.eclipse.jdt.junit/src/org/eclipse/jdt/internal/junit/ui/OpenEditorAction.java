@@ -40,7 +40,7 @@ public abstract class OpenEditorAction extends Action {
 	public void run() {
 		ITextEditor textEditor= null;
 		try {
-			IJavaElement element= findElement(fTestRunner.getLaunchedProject(), fClassName);
+			IJavaElement element= findElement(getLaunchedProject(), fClassName);
 			if (element == null) {
 				MessageDialog.openError(fTestRunner.getSite().getShell(), 
 					JUnitMessages.getString("OpenEditorAction.error.cannotopen.title"), JUnitMessages.getString("OpenEditorAction.error.cannotopen.message")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -59,7 +59,16 @@ public abstract class OpenEditorAction extends Action {
 		reveal(textEditor);
 	}
 	
+	protected IJavaProject getLaunchedProject() {
+		return fTestRunner.getLaunchedProject();
+	}
+	
+	protected String getClassName() {
+		return fClassName;
+	}
+
 	protected abstract IJavaElement findElement(IJavaProject project, String className) throws JavaModelException;
 	
 	protected abstract void reveal(ITextEditor editor);
+	
 }

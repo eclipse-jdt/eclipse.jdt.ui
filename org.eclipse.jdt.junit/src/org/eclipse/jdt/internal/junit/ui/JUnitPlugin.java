@@ -158,7 +158,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	}
 
 	static ImageDescriptor getImageDescriptor(String relativePath) {
-		try {
+		try { 
 			return ImageDescriptor.createFromURL(makeIconFileURL(relativePath));
 		} catch (MalformedURLException e) {
 			// should not happen
@@ -204,7 +204,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 			
 		try { // show the result view if it isn't shown yet
 			TestRunnerViewPart  testRunner= (TestRunnerViewPart)page.findView(TestRunnerViewPart.NAME);
-			// TODO: have force the creation of view part contents 
+			// TODO: have to force the creation of view part contents 
 			// otherwise the UI will not be updated
 			if(testRunner == null || ! testRunner.isCreated()) {
 				IWorkbenchPart activePart= page.getActivePart();
