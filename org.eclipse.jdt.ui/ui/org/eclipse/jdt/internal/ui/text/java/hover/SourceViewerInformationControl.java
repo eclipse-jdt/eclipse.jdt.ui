@@ -168,7 +168,10 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 			fStatusField.setFont(fStatusTextFont);
 			GridData gd2= new GridData(GridData.FILL_VERTICAL | GridData.FILL_HORIZONTAL | GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_BEGINNING);
 			fStatusField.setLayoutData(gd2);
-			fStatusField.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+
+			// Regarding the color see bug 41128
+			fStatusField.setForeground(display.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
+
 			fStatusField.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 		}
 	}
