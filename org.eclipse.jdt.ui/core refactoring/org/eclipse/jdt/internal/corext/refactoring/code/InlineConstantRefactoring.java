@@ -51,7 +51,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -533,7 +533,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		private final CodeGenerationSettings fCodeGenSettings;
 		 
 		private List fInlineEdits;
-		private ImportEdit fImportEdit;		
+		private ImportRewrite fImportRewrite;		
 		private RefactoringStatus fEditProblems;
 		private boolean fSomeReferencesCannotBeInlined;
 		
@@ -650,9 +650,9 @@ public class InlineConstantRefactoring extends Refactoring {
 			return false;			
 		}
 		
-		public TextEdit[] getEdits(RefactoringStatus status) throws JavaModelException {
+		public TextEdit[] getEdits(RefactoringStatus status) throws CoreException {
 			if(fInlineEdits != null) {
-				Assert.isNotNull(fImportEdit);
+				Assert.isNotNull(fImportRewrite);
 				Assert.isNotNull(fEditProblems);
 				
 				status.merge(fEditProblems);
@@ -660,7 +660,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			}
 			
 			fInlineEdits= new ArrayList();
-			fImportEdit= new ImportEdit(fUnit, fCodeGenSettings);
+			fImportRewrite= new ImportRewrite(fUnit, fCodeGenSettings);
 			fEditProblems= new RefactoringStatus();
 			
 			if(fUnit.getSource() == null) {
@@ -676,19 +676,21 @@ public class InlineConstantRefactoring extends Refactoring {
 			return getAllEditsAsArray();
 		}
 		
-		private TextEdit[] getAllEditsAsArray() {
+		private TextEdit[] getAllEditsAsArray() throws CoreException {
 			List allEdits= getAllEdits();
 			return (TextEdit[]) allEdits.toArray(new TextEdit[allEdits.size()]);	
 		}
 		
-		private List getAllEdits() {
+		private List getAllEdits() throws CoreException {
 			List allEdits= new ArrayList(fInlineEdits);
-			if(!fImportEdit.isEmpty())
-				allEdits.add(fImportEdit);
+			if(!fImportRewrite.isEmpty()) {
+				allEdits.add(fImportRewrite.createEdit(
+					TextBuffer.create(fImportRewrite.getCompilationUnit().getBuffer().getContents())));
+			}
 			return allEdits;			
 		}
 		
-		public TextEdit[] getEdits() throws JavaModelException {
+		public TextEdit[] getEdits() throws CoreException {
 			return getEdits(new RefactoringStatus());	
 		}
 		
@@ -729,7 +731,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		}
 		
 		private void addImportForType(ITypeBinding type) {
-			fImportEdit.addImport(type.getQualifiedName());	
+			fImportRewrite.addImport(type.getQualifiedName());	
 		}
 				
 		private String prepareInitializerFor(Expression reference, Set newTypes, RefactoringStatus status) throws JavaModelException {
@@ -750,7 +752,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			return edit;
 		}
 
-		public boolean checkReferences(RefactoringStatus result) throws JavaModelException {
+		public boolean checkReferences(RefactoringStatus result) throws CoreException {
 			Assert.isNotNull(result);
 			
 			getEdits(result);

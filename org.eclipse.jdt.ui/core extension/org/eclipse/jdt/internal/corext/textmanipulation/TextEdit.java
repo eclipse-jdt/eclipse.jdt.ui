@@ -356,7 +356,7 @@ public abstract class TextEdit {
 		if (edits.length == deleted) {
 			return null;
 		} else {
-			return TextRange.createFromStartAndExclusiveEnd(offset, end);
+			return new TextRange(offset, end - offset);
 		}
 	}
 		

@@ -98,7 +98,8 @@ public class TempDeclarationFinder {
 		
 		private boolean visitVariableDeclaration(VariableDeclaration vd) {
 			if (vd.getInitializer() != null){
-				TextRange declarationRange= TextRange.createFromStartAndExclusiveEnd(vd.getStartPosition(), vd.getInitializer().getStartPosition());
+				int start= vd.getStartPosition();
+				TextRange declarationRange= new TextRange(start, vd.getInitializer().getStartPosition() - start);
 				if (getSelection().coveredBy(declarationRange))
 					return addNodeAndStop(vd);
 				else 

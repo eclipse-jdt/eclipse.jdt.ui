@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 public class ExtractMethodRefactoring extends Refactoring {
 
 	private ICompilationUnit fCUnit;
-	private ImportEdit fImportEdit;
+	private ImportRewrite fImportRewriter;
 	private int fSelectionStart;
 	private int fSelectionLength;
 	private AST fAST;
@@ -129,18 +129,18 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 * @param cu the compilation unit which is going to be modified.
 	 * @param accessor a callback object to access the source this refactoring is working on.
 	 */
-	private ExtractMethodRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) throws JavaModelException {
+	private ExtractMethodRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) throws CoreException {
 		Assert.isNotNull(cu);
 		Assert.isNotNull(settings);
 		fCUnit= cu;
-		fImportEdit= new ImportEdit(cu, settings);
+		fImportRewriter= new ImportRewrite(cu, settings);
 		fMethodName= "extracted"; //$NON-NLS-1$
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fVisibility= -1;
 	}
 	
-	public static ExtractMethodRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) throws JavaModelException {
+	public static ExtractMethodRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) throws CoreException {
 		return new ExtractMethodRefactoring(cu, selectionStart, selectionLength, settings);
 	}
 	
@@ -340,7 +340,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			
 			try {
 				// This is cheap since the compilation unit is already open in a editor.
-				buffer= TextBuffer.create((IFile)WorkingCopyUtil.getOriginal(fCUnit).getResource());
+				buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(fCUnit).getResource());
 				
 				ASTNode[] selectedNodes= fAnalyzer.getSelectedNodes();
 				ASTNodes.expandRange(selectedNodes, buffer, fSelectionStart, fSelectionLength);
@@ -366,11 +366,12 @@ public class ExtractMethodRefactoring extends Refactoring {
 				
 				replaceDuplicates();
 			
-				if (!fImportEdit.isEmpty()) {
-					root.add(fImportEdit);
+				if (!fImportRewriter.isEmpty()) {
+					TextEdit edit= fImportRewriter.createEdit(buffer);
+					root.add(edit);
 					result.addGroupDescription(new GroupDescription(
 						RefactoringCoreMessages.getString("ExtractMethodRefactoring.organize_imports"), //$NON-NLS-1$
-						new TextEdit[] {fImportEdit}
+						new TextEdit[] {edit}
 					));
 				}
 				
@@ -589,7 +590,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}
 		result.setModifiers(modifiers);
 		if (fAnalyzer.isExpressionSelected()) {
-			String type= fImportEdit.addImport(ASTNodes.asString(fAnalyzer.getReturnType()));
+			String type= fImportRewriter.addImport(ASTNodes.asString(fAnalyzer.getReturnType()));
 			result.setReturnType(ASTNodeFactory.newType(fAST, type));
 		} else {
 			result.setReturnType((Type)ASTNode.copySubtree(fAST, fAnalyzer.getReturnType()));
@@ -611,7 +612,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		ITypeBinding[] exceptionTypes= fAnalyzer.getExceptions(fThrowRuntimeExceptions, fAST);
 		for (int i= 0; i < exceptionTypes.length; i++) {
 			ITypeBinding exceptionType= exceptionTypes[i];
-			exceptions.add(ASTNodeFactory.newName(fAST, fImportEdit.addImport(exceptionType)));
+			exceptions.add(ASTNodeFactory.newName(fAST, fImportRewriter.addImport(exceptionType)));
 		}
 		if (code)
 			result.setBody(createMethodBody(selection));

@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
  * Text edit to replace a range in a document with a different
  * string
  */
-public class ReplaceEdit extends SimpleTextEdit {
+public final class ReplaceEdit extends SimpleTextEdit {
 	
 	private String fText;
 	
@@ -35,7 +35,7 @@ public class ReplaceEdit extends SimpleTextEdit {
 	 * 
 	 * @param other the edit to copy from
 	 */
-	protected ReplaceEdit(ReplaceEdit other) {
+	private ReplaceEdit(ReplaceEdit other) {
 		super(other);
 		fText= other.fText;
 	}

@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -314,7 +315,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				ICompilationUnit cu= cuRange.getCompilationUnit();
 				if(! cu.equals(typeCu))
 					continue;
-				TextRange oldRange= getOldRange(edits, new TextRange(cuRange.getSourceRange()), change);
+				ISourceRange sourceRange= cuRange.getSourceRange();
+				TextRange oldRange= getOldRange(edits, new TextRange(sourceRange.getOffset(), sourceRange.getLength()), change);
 				String typeName= fInputType.getElementName();
 				int offset= Regions.getExclusiveEnd(oldRange) - typeName.length();
 				TextEdit edit= SimpleTextEdit.createReplace(offset, typeName.length(), fNewInterfaceName);

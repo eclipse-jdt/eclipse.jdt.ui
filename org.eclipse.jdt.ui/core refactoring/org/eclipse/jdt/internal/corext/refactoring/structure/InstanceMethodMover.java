@@ -62,7 +62,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
@@ -193,14 +193,15 @@ class InstanceMethodMover {
 			
 			TextChange cuChange= manager.get(getReceiverClassCU());
 			cuChange.addTextEdit(RefactoringCoreMessages.getString("InstanceMethodMover.create_in_receiver"), edit); //$NON-NLS-1$
+			ImportRewrite importRewrite= createImportRewrite(allTypesUsedWithoutQualification, getReceiverClassCU());
 			cuChange.addTextEdit(
 				RefactoringCoreMessages.getString("InstanceMethodMover.add_imports"), //$NON-NLS-1$
-				createImportEdit(allTypesUsedWithoutQualification, getReceiverClassCU())
+				importRewrite.createEdit(buffer)
 			);
 		}
 
-		private TextEdit createImportEdit(List types, ICompilationUnit cu) throws JavaModelException {
-			ImportEdit importEdit= new ImportEdit(cu, fCodeGenSettings);
+		private ImportRewrite createImportRewrite(List types, ICompilationUnit cu) throws CoreException {
+			ImportRewrite importEdit= new ImportRewrite(cu, fCodeGenSettings);
 			for(Iterator it= types.iterator(); it.hasNext();)
 				importEdit.addImport((ITypeBinding) it.next());
 			return importEdit;
@@ -1491,7 +1492,7 @@ class InstanceMethodMover {
 		}
 		
 		private TextRange createTextRange() {
-			return TextRange.createFromStartAndLength(fMethodNode.getStartPosition(), fMethodNode.getLength());	
+			return new TextRange(fMethodNode.getStartPosition(), fMethodNode.getLength());	
 		}
 		
 		private ASTRewrite createRewrite() {

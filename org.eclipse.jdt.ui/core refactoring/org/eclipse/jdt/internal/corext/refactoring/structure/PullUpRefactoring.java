@@ -228,7 +228,7 @@ public class PullUpRefactoring extends Refactoring {
 	private IType fTargetType;
 	private boolean fCreateMethodStubs;
 	
-	private final ImportEditManager fImportEditManager;
+	private final ImportRewriteManager fImportManager;
 	private final CodeGenerationSettings fPreferenceSettings;
 
 	//caches
@@ -245,7 +245,7 @@ public class PullUpRefactoring extends Refactoring {
 		fMethodsToDelete= new IMethod[0];
 		fMethodsToDeclareAbstract= new IMethod[0];
 		fPreferenceSettings= preferenceSettings;
-		fImportEditManager= new ImportEditManager(preferenceSettings);
+		fImportManager= new ImportRewriteManager(preferenceSettings);
 		fCreateMethodStubs= true;
 		fCachedMembersReferences= new HashMap(2);
 	}
@@ -738,7 +738,7 @@ public class PullUpRefactoring extends Refactoring {
 	
 	private void clearCaches() {
 		fCachedTypesReferencedInPulledUpMembers= null;
-		fImportEditManager.clear();
+		fImportManager.clear();
 		fCachedMembersReferences.clear();
 		fCachedTargetClassHierarchy= null;
 	}
@@ -1327,8 +1327,8 @@ public class PullUpRefactoring extends Refactoring {
 		rewrite.rewriteNode(textBuffer, resultingEdits);
 
 		TextChange textChange= manager.get(cu);
-		if (fImportEditManager.hasImportEditFor(cu))
-			resultingEdits.add(fImportEditManager.getImportEdit(cu));
+		if (fImportManager.hasImportEditFor(cu))
+			resultingEdits.add(fImportManager.getImportRewrite(cu).createEdit(textBuffer));
 		textChange.addTextEdit(RefactoringCoreMessages.getString("PullUpRefactoring.42"), resultingEdits); //$NON-NLS-1$
 		rewrite.removeModifications();
 	}
@@ -1761,9 +1761,9 @@ public class PullUpRefactoring extends Refactoring {
 		addImports(getTypesThatNeedToBeImportedInTargetCu(pm, declaringCuNode), getTargetWorkingCopy());
 	}
 
-	private void addImports(IType[] typesToImport, ICompilationUnit cu) throws JavaModelException {
+	private void addImports(IType[] typesToImport, ICompilationUnit cu) throws CoreException {
 		for (int i= 0; i < typesToImport.length; i++) {
-			fImportEditManager.addImportTo(typesToImport[i], cu);
+			fImportManager.addImportTo(typesToImport[i], cu);
 		}
 	}
 

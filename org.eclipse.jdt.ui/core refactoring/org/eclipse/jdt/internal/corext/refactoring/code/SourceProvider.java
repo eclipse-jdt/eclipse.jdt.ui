@@ -37,7 +37,7 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -294,7 +294,7 @@ public class SourceProvider {
 	}
 	
 	private void updateTypes(CallContext context) {
-		ImportEdit importer= context.importer;
+		ImportRewrite importer= context.importer;
 		for (Iterator iter= fAnalyzer.getUsedTypes().iterator(); iter.hasNext();) {
 			Name element= (Name)iter.next();
 			ITypeBinding binding= ASTNodes.getTypeBinding(element);
@@ -358,7 +358,7 @@ public class SourceProvider {
 				if (node.getNodeType() == ASTNode.RETURN_STATEMENT) {
 					rs= (ReturnStatement)node;
 				} else {
-					result.add(TextRange.createFromStartAndLength(node.getStartPosition(), node.getLength()));
+					result.add(new TextRange(node.getStartPosition(), node.getLength()));
 				}
 				break;
 			default: {
@@ -374,7 +374,7 @@ public class SourceProvider {
 		}
 		if (rs != null) {
 			Expression exp= rs.getExpression();
-			result.add(TextRange.createFromStartAndLength(exp.getStartPosition(), exp.getLength()));
+			result.add(new TextRange(exp.getStartPosition(), exp.getLength()));
 		}
 		return result;
 	}
@@ -383,7 +383,7 @@ public class SourceProvider {
 		int start= ((ASTNode)statements.get(0)).getStartPosition();
 		ASTNode last= (ASTNode)statements.get(end);
 		int length = last.getStartPosition() - start + last.getLength();
-		TextRange range= TextRange.createFromStartAndLength(start, length);
+		TextRange range= new TextRange(start, length);
 		return range;
 	}
 	

@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -27,8 +30,6 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.code.ExtractMethodWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 
 /**
  * Extracts the code selected inside a compilation unit editor into a new method.
@@ -68,7 +69,7 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 			if (refactoring == null)
 				return;
 			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
-		} catch (JavaModelException e){
+		} catch (CoreException e){
 			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
 		}
 	}
@@ -80,7 +81,7 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 		setEnabled(checkEnabled(selection));
 	}
 	
-	private static ExtractMethodRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) throws JavaModelException {
+	private static ExtractMethodRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) throws CoreException {
 		return ExtractMethodRefactoring.create(
 			cunit, 
 			selection.getOffset(), selection.getLength(),

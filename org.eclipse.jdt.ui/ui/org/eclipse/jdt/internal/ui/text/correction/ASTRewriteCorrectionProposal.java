@@ -17,7 +17,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -29,12 +29,12 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
 	private ASTRewrite fRewrite;
-	private ImportEdit fImportEdit;
+	private ImportRewrite fImportRewrite;
 
 	public ASTRewriteCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) {
 		super(name, cu, relevance, image);
 		fRewrite= rewrite;
-		fImportEdit= null;
+		fImportRewrite= null;
 	}
 	
 
@@ -51,22 +51,22 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 				rewrite.rewriteNode(buffer, rootEdit);
 				rewrite.removeModifications();
 			}
+			if (fImportRewrite != null && !fImportRewrite.isEmpty()) {
+				rootEdit.add(fImportRewrite.createEdit(buffer));
+			}
 		} finally {
 			if (buffer != null) {
 				TextBuffer.release(buffer);
 			}
 		}
-		if (fImportEdit != null && !fImportEdit.isEmpty()) {
-			rootEdit.add(fImportEdit);
-		}
 		return change;
 	}
 	
-	private ImportEdit getImportEdit() throws CoreException {
-		if (fImportEdit == null) {
-			fImportEdit= new ImportEdit(getCompilationUnit(), JavaPreferencesSettings.getCodeGenerationSettings());
+	private ImportRewrite getImportEdit() throws CoreException {
+		if (fImportRewrite == null) {
+			fImportRewrite= new ImportRewrite(getCompilationUnit(), JavaPreferencesSettings.getCodeGenerationSettings());
 		}
-		return fImportEdit;
+		return fImportRewrite;
 	}
 	
 	

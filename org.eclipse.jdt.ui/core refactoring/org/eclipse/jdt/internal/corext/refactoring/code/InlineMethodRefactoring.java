@@ -40,7 +40,7 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -228,11 +228,12 @@ public class InlineMethodRefactoring extends Refactoring {
 				if (!added) {
 					fChangeManager.remove(unit);
 				} else {
-					ImportEdit importer= inliner.getImportEdit();
-					if (!importer.isEmpty()) {
-						root.add(importer);
+					ImportRewrite rewrite= inliner.getImportEdit();
+					if (!rewrite.isEmpty()) {
+						TextEdit edit= rewrite.createEdit(inliner.getBuffer());
+						root.add(edit);
 						change.addGroupDescription(
-							new GroupDescription(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.import"), new TextEdit[] {importer})); //$NON-NLS-1$
+							new GroupDescription(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.import"), new TextEdit[] {edit})); //$NON-NLS-1$
 					}
 				}
 			} catch (JavaModelException e){

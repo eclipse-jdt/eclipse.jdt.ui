@@ -159,7 +159,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 	
 	public TextRange getTextRange() throws CoreException {
 		ISourceRange range= ((ISourceReference)fJavaElement).getSourceRange();
-		return TextRange.createFromStartAndLength(range.getOffset(), range.getLength());
+		return new TextRange(range.getOffset(), range.getLength());
 	}	
 }
 

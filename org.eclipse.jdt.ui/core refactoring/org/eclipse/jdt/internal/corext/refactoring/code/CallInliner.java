@@ -52,7 +52,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
@@ -75,7 +75,7 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 public class CallInliner {
 
 	private ICompilationUnit fCUnit;
-	private ImportEdit fImportEdit;
+	private ImportRewrite fImportEdit;
 	private TextBuffer fBuffer;
 	private SourceProvider fSourceProvider;
 	
@@ -195,14 +195,18 @@ public class CallInliner {
 		fCUnit= unit;
 		fBuffer= TextBuffer.acquire(getFile(fCUnit));
 		fSourceProvider= provider;
-		fImportEdit= new ImportEdit(fCUnit, settings);
+		fImportEdit= new ImportRewrite(fCUnit, settings);
 	}
 
 	public void dispose() {
 		TextBuffer.release(fBuffer);
 	}
 	
-	public ImportEdit getImportEdit() {
+	/* package */ TextBuffer getBuffer() {
+		return fBuffer;
+	}
+	
+	public ImportRewrite getImportEdit() {
 		return fImportEdit;
 	}
 	

@@ -121,7 +121,8 @@ class RenameAnalyzeUtil {
 	}
 	
 	private static TextRange createTextRange(SearchResult searchResult) {
-		return TextRange.createFromStartAndExclusiveEnd(searchResult.getStart(), searchResult.getEnd());
+		int start= searchResult.getStart();
+		return new TextRange(start, searchResult.getEnd() - start);
 	}
 	private static SearchResultGroup findOccurrenceGroup(IResource resource, SearchResultGroup[] newOccurrences){
 		for (int i= 0; i < newOccurrences.length; i++) {

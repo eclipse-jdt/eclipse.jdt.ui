@@ -1617,7 +1617,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		int start= buf.toString().indexOf("while");
 		int end= buf.toString().indexOf("return;") + "return;".length();
 		
-		TextRange range= TextRange.createFromStartAndExclusiveEnd(start, end);
+		TextRange range= new TextRange(start, end - start);
 		String content= buffer.getContent(range.getOffset(), range.getLength());
 		SourceModifier modifier= SourceModifier.createMoveModifier(2, "    ", 4);
 		MultiTextEdit edit= new MultiTextEdit(0, content.length());
@@ -1669,7 +1669,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		int start= buf.toString().indexOf("while");
 		int end= buf.toString().indexOf("return;") + "return;".length();
 		
-		TextRange range= TextRange.createFromStartAndExclusiveEnd(start, end);
+		TextRange range= new TextRange(start, end - start);
 		String content= buffer.getContent(range.getOffset(), range.getLength());
 		SourceModifier modifier= SourceModifier.createMoveModifier(2, "            ", 4);
 		MultiTextEdit edit= new MultiTextEdit(0, content.length());

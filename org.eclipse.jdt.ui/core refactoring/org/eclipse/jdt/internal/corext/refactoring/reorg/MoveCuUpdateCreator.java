@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IBuffer;
@@ -39,7 +40,7 @@ import org.eclipse.jdt.core.search.ISearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
@@ -50,7 +51,9 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactor
 import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.ReplaceEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class MoveCuUpdateCreator {
 	
@@ -58,7 +61,7 @@ public class MoveCuUpdateCreator {
 	private IPackageFragment fDestination;
 	private CodeGenerationSettings fSettings;
 	
-	private Map fImportEdits; //ICompilationUnit -> ImportEdit
+	private Map fImportRewrites; //ICompilationUnit -> ImportEdit
 	
 	public MoveCuUpdateCreator(ICompilationUnit cu, IPackageFragment pack, CodeGenerationSettings settings){
 		this(new ICompilationUnit[]{cu}, pack, settings);
@@ -71,7 +74,7 @@ public class MoveCuUpdateCreator {
 		fCus= convertToOriginals(cus);
 		fDestination= pack;
 		fSettings= settings;
-		fImportEdits= new HashMap();
+		fImportRewrites= new HashMap();
 	}
 	
 	private static ICompilationUnit[] convertToOriginals(ICompilationUnit[] cus){
@@ -93,11 +96,21 @@ public class MoveCuUpdateCreator {
 			addUpdates(changeManager, new SubProgressMonitor(pm, 1));
 			addImportsToDestinationPackage(new SubProgressMonitor(pm, 1));
 			
-			for (Iterator iter= fImportEdits.keySet().iterator(); iter.hasNext();) {
+			for (Iterator iter= fImportRewrites.keySet().iterator(); iter.hasNext();) {
 				ICompilationUnit cu= (ICompilationUnit)iter.next();
-				ImportEdit importEdit= (ImportEdit)fImportEdits.get(cu);
-				if (importEdit != null && ! importEdit.isEmpty())
-					changeManager.get(cu).addTextEdit(RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_imports"), importEdit); //$NON-NLS-1$
+				ImportRewrite importRewrite= (ImportRewrite)fImportRewrites.get(cu);
+				if (importRewrite != null && ! importRewrite.isEmpty()) {
+					TextBuffer buffer= null;
+					try {
+						buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(cu).getResource());
+						changeManager.get(cu).addTextEdit(
+							RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_imports"), 
+							importRewrite.createEdit(buffer)); //$NON-NLS-1$
+					} finally {
+						if (buffer != null)
+							TextBuffer.release(buffer);
+					}
+				}
 			}
 			return changeManager;
 		} catch (JavaModelException e){
@@ -159,7 +172,7 @@ public class MoveCuUpdateCreator {
 				if (!reference.isImportDeclaration()) {
 					reference.addEdit(changeManager.get(referencingCu), fDestination.getElementName());
 				} else {	
-					ImportEdit importEdit= getImportEdit(referencingCu);
+					ImportRewrite importEdit= getImportRewrite(referencingCu);
 					IImportDeclaration importDecl= (IImportDeclaration)results[j].getEnclosingElement();
 					importEdit.removeImport(importDecl.getElementName());
                     importEdit.addImport(createStringForNewImport(movedUnit, importDecl));
@@ -172,8 +185,8 @@ public class MoveCuUpdateCreator {
         return new StringBuffer(importDecl.getElementName()).replace(0, movedUnit.getParent().getElementName().length(), fDestination.getElementName()).toString();
     }
 	
-	private void removeImportsToDestinationPackageTypes(ICompilationUnit movedUnit) throws JavaModelException{
-		ImportEdit importEdit= getImportEdit(movedUnit);
+	private void removeImportsToDestinationPackageTypes(ICompilationUnit movedUnit) throws CoreException{
+		ImportRewrite importEdit= getImportRewrite(movedUnit);
 		IType[] destinationTypes= getDestinationPackageTypes();
 		for (int i= 0; i < destinationTypes.length; i++) {
 			importEdit.removeImport(JavaModelUtil.getFullyQualifiedName(destinationTypes[i]));
@@ -189,11 +202,11 @@ public class MoveCuUpdateCreator {
 		return (IType[]) types.toArray(new IType[types.size()]);
 	}
 	
-	private void addImportToSourcePackageTypes(ICompilationUnit movedUnit, IProgressMonitor pm) throws JavaModelException{
+	private void addImportToSourcePackageTypes(ICompilationUnit movedUnit, IProgressMonitor pm) throws CoreException{
 		List cuList= Arrays.asList(fCus);
 		IType[] allCuTypes= movedUnit.getAllTypes();
 		IType[] referencedTypes= ReferenceFinderUtil.getTypesReferencedIn(allCuTypes, pm);
-		ImportEdit importEdit= getImportEdit(movedUnit);
+		ImportRewrite importEdit= getImportRewrite(movedUnit);
 		importEdit.setFilterImplicitImports(false);
 		IPackageFragment srcPack= (IPackageFragment)movedUnit.getParent();
 		for (int i= 0; i < referencedTypes.length; i++) {
@@ -221,24 +234,24 @@ public class MoveCuUpdateCreator {
 		}
 	}
 	
-	private boolean addImport(boolean force, IPackageFragment pack, ICompilationUnit cu) throws JavaModelException {		
+	private boolean addImport(boolean force, IPackageFragment pack, ICompilationUnit cu) throws CoreException {		
 		if (pack.isDefaultPackage())
 			return false;
 
 		if (cu.getImport(pack.getElementName() + ".*").exists())  //$NON-NLS-1$
 			return false;
 
-		ImportEdit importEdit= getImportEdit(cu);
+		ImportRewrite importEdit= getImportRewrite(cu);
 		importEdit.setFilterImplicitImports(!force);
 		importEdit.addImport(pack.getElementName() + ".*"); //$NON-NLS-1$
 		return true;
 	}
 	
-	private ImportEdit getImportEdit(ICompilationUnit cu) throws JavaModelException{
-		if (fImportEdits.containsKey(cu))	
-			return (ImportEdit)fImportEdits.get(cu);
-		ImportEdit importEdit= new ImportEdit(cu, fSettings);
-		fImportEdits.put(cu, importEdit);
+	private ImportRewrite getImportRewrite(ICompilationUnit cu) throws CoreException{
+		if (fImportRewrites.containsKey(cu))	
+			return (ImportRewrite)fImportRewrites.get(cu);
+		ImportRewrite importEdit= new ImportRewrite(cu, fSettings);
+		fImportRewrites.put(cu, importEdit);
 		return importEdit;	
 	}
 	

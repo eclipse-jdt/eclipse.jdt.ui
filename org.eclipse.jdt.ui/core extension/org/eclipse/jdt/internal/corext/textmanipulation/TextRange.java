@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
-import org.eclipse.jdt.core.ISourceRange;
-
 import org.eclipse.jdt.internal.corext.Assert;
 
 public final class TextRange {
@@ -47,27 +45,6 @@ public final class TextRange {
 	public TextRange(TextRange other) {
 		fOffset= other.fOffset;
 		fLength= other.fLength;
-	}
-	
-	public static TextRange createFromStartAndLength(int start, int length) {
-		return new TextRange(start, length);
-	}
-	
-	public static TextRange createFromStartAndInclusiveEnd(int start, int end) {
-		return new TextRange(start, end - start + 1);
-	}
-	
-	public static TextRange createFromStartAndExclusiveEnd(int start, int end) {
-		return new TextRange(start, end - start);
-	}
-	
-	/**
-	 * Creates a new range from the given source range.
-	 * 
-	 * @param range the source range denoting offset and length
-	 */
-	public TextRange(ISourceRange range) {
-		this(range.getOffset(), range.getLength());
 	}
 	
 	/**

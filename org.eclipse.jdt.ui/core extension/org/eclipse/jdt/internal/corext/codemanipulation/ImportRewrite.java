@@ -13,40 +13,37 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-
-import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.MalformedTreeException;
-import org.eclipse.jdt.internal.corext.textmanipulation.PerformEditException;
+import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.ReplaceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 /**
- * A special edit that allows add imports to a import container in a structured way.
- * Additionally this edit honors the Organize Imports preferences
+ * A rewriter for imports that considers the organize import 
+ * settings.
  */
-public final class ImportEdit extends TextEdit {
+public final class ImportRewrite {
 	
 	private ImportsStructure fImportsStructure;
 	
-	public ImportEdit(ICompilationUnit cunit, CodeGenerationSettings settings) throws JavaModelException {
-		super(0, 0);
+	public ImportRewrite(ICompilationUnit cunit, CodeGenerationSettings settings) throws CoreException {
 		Assert.isNotNull(cunit);
 		Assert.isNotNull(settings);
-		TextBuffer buffer= TextBuffer.create(cunit.getBuffer().getContents());
-		try {
-			fImportsStructure= new ImportsStructure(cunit, settings.importOrder, settings.importThreshold, true, buffer);
-			setRegion(fImportsStructure.getReplaceRange(buffer));
-		} catch (JavaModelException e) {
-			throw e;
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
+		fImportsStructure= new ImportsStructure(cunit, settings.importOrder, settings.importThreshold, true);
+	}
+	
+	public final TextEdit createEdit(TextBuffer buffer) throws CoreException {
+		TextRange region= fImportsStructure.getReplaceRange(buffer);
+		String text= fImportsStructure.getReplaceString(buffer, region);
+		if (text == null) {
+			return new MultiTextEdit(region.getOffset(), 0);
 		}
+		return new ReplaceEdit(region.getOffset(), region.getLength(), text);		
 	}
 	
 	public final void rewrite(TextBuffer buffer, TextEdit rootEdit) throws MalformedTreeException, CoreException {
@@ -57,27 +54,8 @@ public final class ImportEdit extends TextEdit {
 		}
 	}
 	
-	/**
-	 * Copy constrcutor
-	 */
-	private ImportEdit(ImportEdit other) {
-		super(other);
-		fImportsStructure= other.fImportsStructure;
-	}
-	
-	/* non Java-doc
-	 * @see TextEdit#doPerform
-	 */
-	public void perform(IDocument document) throws PerformEditException {
-		try {
-			TextRange range= getTextRange();
-			String text= fImportsStructure.getReplaceString(
-				new TextBuffer(document), range);
-			if (text != null)
-				performReplace(document, text);
-		} catch (JavaModelException e) {
-			throw new PerformEditException(this, e.getMessage(), e);
-		}
+	public ICompilationUnit getCompilationUnit() {
+		return fImportsStructure.getCompilationUnit();
 	}
 	
 	/**
@@ -148,12 +126,5 @@ public final class ImportEdit extends TextEdit {
 	public boolean isEmpty() {
 		return !fImportsStructure.hasChanges();
 	}
-	
-	/* non Java-doc
-	 * @see TextEdit#connect
-	 */
-	protected TextEdit doCopy() {
-		return new ImportEdit(this);
-	}	
 }
 

@@ -17,9 +17,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.graphics.Image;
-
-import org.eclipse.ui.ISharedImages;
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -27,19 +25,51 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import org.eclipse.jdt.ui.text.java.*;
+import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.ui.ISharedImages;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -48,6 +78,9 @@ import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.InsertDescription;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.RemoveDescription;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.SwapDescription;
+
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class UnresolvedElementsSubProcessor {
 	
@@ -305,7 +338,7 @@ public class UnresolvedElementsSubProcessor {
 		addNewTypeProposals(cu, node, kind, 0, proposals);
 	}
 
-	private static void addSimilarTypeProposals(int kind, ICompilationUnit cu, Name node, int relevance, Collection proposals) throws JavaModelException {
+	private static void addSimilarTypeProposals(int kind, ICompilationUnit cu, Name node, int relevance, Collection proposals) throws CoreException {
 		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, node, kind);
 		
 		// try to resolve type in context -> highest severity
@@ -330,33 +363,41 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	private static CUCorrectionProposal createTypeRefChangeProposal(ICompilationUnit cu, String fullName, Name node, int relevance) throws JavaModelException {
-		CUCorrectionProposal proposal= new CUCorrectionProposal("", cu, 0); //$NON-NLS-1$
-
-		ImportEdit importEdit= new ImportEdit(cu, JavaPreferencesSettings.getCodeGenerationSettings());				
-		String simpleName= importEdit.addImport(fullName);
-		
-		TextEdit root= proposal.getRootTextEdit();
-		
-		if (!importEdit.isEmpty()) {
-			root.add(importEdit); //$NON-NLS-1$
-		}
-		String packName= Signature.getQualifier(fullName);
-		String[] arg= { simpleName, packName };
-		if (node.isSimpleName() && simpleName.equals(((SimpleName) node).getIdentifier())) { // import only
-			proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL));
-			proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importtype.description", arg)); //$NON-NLS-1$
-			proposal.setRelevance(relevance + 20);
-		} else {			
-			root.add(SimpleTextEdit.createReplace(node.getStartPosition(), node.getLength(), simpleName)); //$NON-NLS-1$
-			if (packName.length() == 0) {
-				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.nopack.description", simpleName)); //$NON-NLS-1$
-			} else {
-				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.description", arg)); //$NON-NLS-1$
+	private static CUCorrectionProposal createTypeRefChangeProposal(ICompilationUnit cu, String fullName, Name node, int relevance) throws CoreException {
+		TextBuffer buffer= null;
+		try {
+			buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(cu).getResource());
+			
+			CUCorrectionProposal proposal= new CUCorrectionProposal("", cu, 0); //$NON-NLS-1$
+	
+			ImportRewrite importRewrite= new ImportRewrite(cu, JavaPreferencesSettings.getCodeGenerationSettings());				
+			String simpleName= importRewrite.addImport(fullName);
+			
+			TextEdit root= proposal.getRootTextEdit();
+			
+			if (!importRewrite.isEmpty()) {
+				root.add(importRewrite.createEdit(buffer)); //$NON-NLS-1$
 			}
-			proposal.setRelevance(relevance);
+			String packName= Signature.getQualifier(fullName);
+			String[] arg= { simpleName, packName };
+			if (node.isSimpleName() && simpleName.equals(((SimpleName) node).getIdentifier())) { // import only
+				proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL));
+				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importtype.description", arg)); //$NON-NLS-1$
+				proposal.setRelevance(relevance + 20);
+			} else {			
+				root.add(SimpleTextEdit.createReplace(node.getStartPosition(), node.getLength(), simpleName)); //$NON-NLS-1$
+				if (packName.length() == 0) {
+					proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.nopack.description", simpleName)); //$NON-NLS-1$
+				} else {
+					proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.description", arg)); //$NON-NLS-1$
+				}
+				proposal.setRelevance(relevance);
+			}
+			return proposal;
+		} finally {
+			if (buffer != null)
+				TextBuffer.release(buffer);
 		}
-		return proposal;
 	}
 
 	private static void addNewTypeProposals(ICompilationUnit cu, Name refNode, int kind, int relevance, Collection proposals) throws JavaModelException {
@@ -997,11 +1038,18 @@ public class UnresolvedElementsSubProcessor {
 				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importexplicit.description", qualifiedTypeName); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL);
 				CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, 5, image);
-				ImportEdit importEdit= new ImportEdit(cu, JavaPreferencesSettings.getCodeGenerationSettings());
-				importEdit.addImport(qualifiedTypeName);
-				importEdit.setFindAmbiguosImports(true);
-				proposal.getRootTextEdit().add(importEdit);
-				proposals.add(proposal);			
+				TextBuffer buffer= null;
+				try {
+					buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(cu).getResource());
+					ImportRewrite importRewrite= new ImportRewrite(cu, JavaPreferencesSettings.getCodeGenerationSettings());
+					importRewrite.addImport(qualifiedTypeName);
+					importRewrite.setFindAmbiguosImports(true);
+					proposal.getRootTextEdit().add(importRewrite.createEdit(buffer));
+					proposals.add(proposal);
+				} finally {
+					if (buffer != null)
+						TextBuffer.release(buffer);
+				}			
 			}
 		}
 	}	

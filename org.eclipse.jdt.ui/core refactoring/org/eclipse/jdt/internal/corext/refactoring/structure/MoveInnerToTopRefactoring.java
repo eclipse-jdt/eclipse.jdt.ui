@@ -77,6 +77,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -112,7 +113,7 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 public class MoveInnerToTopRefactoring extends Refactoring{
 	
 	private static final String THIS_KEYWORD= "this"; //$NON-NLS-1$
-	private final ImportEditManager fImportEditManager;
+	private final ImportRewriteManager fImportManager;
 	private final CodeGenerationSettings fCodeGenerationSettings;
 	private IType fType;
 	private TextChangeManager fChangeManager;
@@ -129,7 +130,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		Assert.isNotNull(codeGenerationSettings);
 		fType= type;
 		fCodeGenerationSettings= codeGenerationSettings;
-		fImportEditManager= new ImportEditManager(codeGenerationSettings);
+		fImportManager= new ImportRewriteManager(codeGenerationSettings);
 		fEnclosingInstanceFieldName= getInitialNameForEnclosingInstanceField();
 		fMarkInstanceFieldAsFinal= true; //default
 		fDeclaringCuNode= AST.parseCompilationUnit(getDeclaringCu(), true);
@@ -334,7 +335,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		} catch(CoreException e){
 			throw new JavaModelException(e);
 		} finally{
-			fImportEditManager.clear();	
+			fImportManager.clear();	
 		}
 	}
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
@@ -555,12 +556,14 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		rewrite.removeModifications();
 	}
 
-	private TextEdit getRewriteTextEdit(ICompilationUnit cu, ASTRewrite rewrite) throws JavaModelException {
+	private TextEdit getRewriteTextEdit(ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
 		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
 		TextEdit resultingEdit= new MultiTextEdit();
 		rewrite.rewriteNode(textBuffer, resultingEdit);
-		if (fImportEditManager.hasImportEditFor(cu))
-			resultingEdit.add(fImportEditManager.getImportEdit(cu));
+		if (fImportManager.hasImportEditFor(cu)) {
+			ImportRewrite importRewrite= fImportManager.getImportRewrite(cu);
+			resultingEdit.add(importRewrite.createEdit(textBuffer));
+		}
 		return resultingEdit;
 	}
 
@@ -775,24 +778,24 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		rewrite.markAsModified(type, modified);
 	}
 	
-	private void updateTypeReference(ASTNode node, ASTRewrite rewrite, ICompilationUnit cu) throws JavaModelException{
+	private void updateTypeReference(ASTNode node, ASTRewrite rewrite, ICompilationUnit cu) throws CoreException{
 		ImportDeclaration enclosingImport= getEnclosingImportDeclaration(node);
 		if (enclosingImport != null){
 			updateReferenceInImport(enclosingImport, node, cu);
 		} else {
 			boolean updated= updateReference(node, rewrite);
 			if (updated && ! getInputTypePackage().equals(cu.getParent()))
-				fImportEditManager.addImportTo(getNewFullyQualifiedNameOfInputType(), cu);
+				fImportManager.addImportTo(getNewFullyQualifiedNameOfInputType(), cu);
 		}
 	}
 	
-	private void updateReferenceInImport(ImportDeclaration enclosingImport, ASTNode node, ICompilationUnit cu) throws JavaModelException {
+	private void updateReferenceInImport(ImportDeclaration enclosingImport, ASTNode node, ICompilationUnit cu) throws CoreException {
 		IBinding importBinding= enclosingImport.resolveBinding();
 		if (!(importBinding instanceof ITypeBinding))
 			return;
 		//TODO see bug 36879
-		fImportEditManager.removeImportTo(getSourceOfImport(enclosingImport, importBinding), cu);
-		fImportEditManager.addImportTo(getSourceForModifiedImport(node, cu), cu);	
+		fImportManager.removeImportTo(getSourceOfImport(enclosingImport, importBinding), cu);
+		fImportManager.addImportTo(getSourceForModifiedImport(node, cu), cu);	
 	}
 
 	private String getSourceOfImport(ImportDeclaration enclosingImport, IBinding importBinding){

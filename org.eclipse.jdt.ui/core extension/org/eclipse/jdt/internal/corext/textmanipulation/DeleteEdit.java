@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
 /**
  * Text edit to delete a range in a document.
  */
-public class DeleteEdit extends SimpleTextEdit {
+public final class DeleteEdit extends SimpleTextEdit {
 	
 	/**
 	 * Constructs a new delete edit.
@@ -31,7 +31,7 @@ public class DeleteEdit extends SimpleTextEdit {
 	 * 
 	 * @param other the edit to copy from
 	 */
-	protected DeleteEdit(DeleteEdit other) {
+	private DeleteEdit(DeleteEdit other) {
 		super(other);
 	}
 	

@@ -40,7 +40,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -83,7 +83,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	private ICompilationUnit fCUnit;
 	private CompilationUnit fRootNode;
 	private ASTRewrite fRewriter;
-	private ImportEdit fImportEdit;
+	private ImportRewrite fImportRewrite;
 	private CodeScopeBuilder.Scope fScope;
 	private ASTNode fSelectedNode;
 	private List fStatementsOfSelectedNode;
@@ -167,7 +167,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			buffer= TextBuffer.acquire(getFile());
 			ASTNodes.expandRange(fAnalyzer.getSelectedNodes(), buffer, fSelection.getOffset(), fSelection.getLength());
 			fRewriter= new ASTRewrite(fAnalyzer.getEnclosingBodyDeclaration());
-			fImportEdit= new ImportEdit(fCUnit, fSettings);
+			fImportRewrite= new ImportRewrite(fCUnit, fSettings);
 			
 			fScope= CodeScopeBuilder.perform(fAnalyzer.getEnclosingBodyDeclaration(), fSelection).
 				findScope(fSelection.getOffset(), fSelection.getLength());
@@ -195,9 +195,10 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				}
 			}
 			
-			if (!fImportEdit.isEmpty()) {
-				root.add(fImportEdit);
-				result.addGroupDescription(new GroupDescription(NN, new TextEdit[] {fImportEdit} ));
+			if (!fImportRewrite.isEmpty()) {
+				TextEdit edit= fImportRewrite.createEdit(buffer);
+				root.add(edit);
+				result.addGroupDescription(new GroupDescription(NN, new TextEdit[] {edit} ));
 			}
 			MultiTextEdit change= new MultiTextEdit();
 			fRewriter.rewriteNode(buffer, change);
@@ -310,7 +311,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
 		for (int i= 0; i < exceptions.length; i++) {
 			ITypeBinding exception= exceptions[i];
-			String type= fImportEdit.addImport(exception);
+			String type= fImportRewrite.addImport(exception);
 			CatchClause catchClause= getAST().newCatchClause();
 			tryStatement.catchClauses().add(catchClause);
 			SingleVariableDeclaration decl= getAST().newSingleVariableDeclaration();

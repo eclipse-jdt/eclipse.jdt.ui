@@ -15,10 +15,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
@@ -46,7 +47,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
@@ -69,6 +70,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class ExtractConstantRefactoring extends Refactoring {
 
@@ -368,10 +370,12 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus checkCompilation() throws JavaModelException {
+		TextBuffer buffer= null;
 		try{
 			RefactoringStatus result= new RefactoringStatus();
 			
-			TextEdit[] edits= getAllEdits();
+			buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(fCu).getResource());
+			TextEdit[] edits= getAllEdits(buffer);
 			TextChange change= new TextBufferChange(RefactoringCoreMessages.getString("ExtractConstantRefactoring.rename"), TextBuffer.create(fCu.getSource())); //$NON-NLS-1$
 			change.addTextEdit("", edits);//$NON-NLS-1$
 
@@ -389,7 +393,10 @@ public class ExtractConstantRefactoring extends Refactoring {
 			throw e;
 		} catch (CoreException e){
 			throw new JavaModelException(e);	
-		} 
+		} finally {
+			if (buffer != null)
+				TextBuffer.release(buffer);
+		}
 	}
 
 	// !! similar to ExtractTempRefactoring equivalent
@@ -398,12 +405,14 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+		TextBuffer buffer= null;
 		try {
+			buffer= TextBuffer.acquire((IFile)WorkingCopyUtil.getOriginal(fCu).getResource());
 			pm.beginTask(RefactoringCoreMessages.getString("ExtractConstantRefactoring.preview"), 3); //$NON-NLS-1$
 			TextChange change= new CompilationUnitChange(RefactoringCoreMessages.getString("ExtractConstantRefactoring.extract_constant"), fCu); //$NON-NLS-1$
 			addConstantDeclaration(change);
 			pm.worked(1);
-			addImportIfNeeded(change);
+			addImportIfNeeded(change, buffer);
 			pm.worked(1);
 			addReplaceExpressionWithConstant(change);
 			pm.worked(1);
@@ -414,14 +423,16 @@ public class ExtractConstantRefactoring extends Refactoring {
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		} finally {
+			if (buffer != null)
+				TextBuffer.release(buffer);
 			pm.done();
 		}
 	}
 
-	private TextEdit[] getAllEdits() throws CoreException {
+	private TextEdit[] getAllEdits(TextBuffer buffer) throws CoreException {
 		Collection edits= new ArrayList(3);
 		edits.add(createConstantDeclarationEdit());
-		TextEdit importEdit= createImportEditIfNeeded();
+		TextEdit importEdit= createImportEditIfNeeded(buffer);
 		if (importEdit != null)
 			edits.add(importEdit);
 		TextEdit[] replaceEdits= createReplaceExpressionWithConstantEdits();
@@ -527,19 +538,19 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 		
 	// !! almost identical to version in ExtractTempRefactoring
-	private TextEdit createImportEditIfNeeded() throws JavaModelException {
+	private TextEdit createImportEditIfNeeded(TextBuffer buffer) throws CoreException {
 		ITypeBinding type= getSelectedExpression().getAssociatedExpression().resolveTypeBinding();
 		if (type.isPrimitive())
 			return null;
 		if (type.isArray() && type.getElementType().isPrimitive())
 			return null;
 
-		ImportEdit importEdit= new ImportEdit(fCu, fSettings);
-		importEdit.addImport(type);
-		if (importEdit.isEmpty())
+		ImportRewrite rewrite= new ImportRewrite(fCu, fSettings);
+		rewrite.addImport(type);
+		if (rewrite.isEmpty())
 			return null;
 		else
-			return importEdit;
+			return rewrite.createEdit(buffer);
 	}
 
 	// !!! very similar to (same as) equivalent in ExtractTempRefactoring
@@ -577,8 +588,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	// !!! very similar to equivalent in ExtractTempRefactoring
-	private void addImportIfNeeded(TextChange change) throws CoreException {
-		TextEdit importEdit= createImportEditIfNeeded();
+	private void addImportIfNeeded(TextChange change, TextBuffer buffer) throws CoreException {
+		TextEdit importEdit= createImportEditIfNeeded(buffer);
 		if (importEdit != null)
 			change.addTextEdit(RefactoringCoreMessages.getString("ExtractConstantRefactoring.update_imports"), importEdit); //$NON-NLS-1$
 	}

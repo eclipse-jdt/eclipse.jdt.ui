@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IDocument;
 
-public final class MultiTextEdit extends TextEdit {
+public class MultiTextEdit extends TextEdit {
 
 	private boolean fDefined;
 

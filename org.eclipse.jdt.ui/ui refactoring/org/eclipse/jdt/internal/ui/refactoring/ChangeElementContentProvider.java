@@ -186,7 +186,7 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 		try {
 			while(true) {
 				ISourceReference ref= (ISourceReference)result;
-				TextRange sRange= TextRange.createFromStartAndLength(ref.getSourceRange().getOffset(), ref.getSourceRange().getLength());
+				TextRange sRange= new TextRange(ref.getSourceRange().getOffset(), ref.getSourceRange().getLength());
 				if (result.getParent() == null || edit.coveredBy(sRange))
 					break;
 				result= result.getParent();

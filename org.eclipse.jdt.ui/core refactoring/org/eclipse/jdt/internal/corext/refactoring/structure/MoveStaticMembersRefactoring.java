@@ -53,7 +53,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -102,25 +102,25 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			rewriter= new ASTRewrite(root);
 		}
 		
-		public ASTData(ICompilationUnit u, boolean resolveBindings, CodeGenerationSettings settings) throws JavaModelException {
+		public ASTData(ICompilationUnit u, boolean resolveBindings, CodeGenerationSettings settings) throws CoreException {
 			this(u, resolveBindings);
 			groups= new ArrayList();
-			imports= new ImportEdit(unit, settings);
+			imports= new ImportRewrite(unit, settings);
 		}
 		public ICompilationUnit unit;
 		public CompilationUnit root;
 		public ASTRewrite rewriter;
 		public List groups;
-		public ImportEdit imports;
+		public ImportRewrite imports;
 		
 		public GroupDescription createGroupDescription(String name) {
 			GroupDescription result= new GroupDescription(name);
 			groups.add(result);
 			return result;
 		}
-		public void reset(CodeGenerationSettings settings) throws JavaModelException {
+		public void reset(CodeGenerationSettings settings) throws CoreException {
 			clearRewrite();
-			imports= new ImportEdit(unit, settings);
+			imports= new ImportRewrite(unit, settings);
 		}
 		public void clearRewrite() {
 			rewriter.removeModifications();
@@ -133,7 +133,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 				MultiTextEdit edit= new MultiTextEdit();
 				rewriter.rewriteNode(buffer, edit);
 				if (!imports.isEmpty())
-					edit.add(imports);
+					edit.add(imports.createEdit(buffer));
 				result.setEdit(edit);
 				result.addGroupDescriptions((GroupDescription[])groups.toArray(new GroupDescription[groups.size()]));
 			} finally {
@@ -740,7 +740,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		pm.worked(1);
 	}
 	
-	private ASTData getASTData(ICompilationUnit unit) throws JavaModelException {
+	private ASTData getASTData(ICompilationUnit unit) throws CoreException {
 		if (fSource.unit.equals(unit))
 			return fSource;
 		if (fTarget.unit.equals(unit))

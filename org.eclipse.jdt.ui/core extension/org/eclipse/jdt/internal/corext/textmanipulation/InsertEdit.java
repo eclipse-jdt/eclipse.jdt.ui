@@ -14,7 +14,7 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
  * Text edit to insert a text at a given position in a 
  * document.
  */
-public class InsertEdit extends SimpleTextEdit {
+public final class InsertEdit extends SimpleTextEdit {
 	
 	private String fText;
 	
@@ -34,7 +34,7 @@ public class InsertEdit extends SimpleTextEdit {
 	 * 
 	 * @param other the edit to copy from
 	 */
-	protected InsertEdit(InsertEdit other) {
+	private InsertEdit(InsertEdit other) {
 		super(other);
 		fText= other.fText;
 	}

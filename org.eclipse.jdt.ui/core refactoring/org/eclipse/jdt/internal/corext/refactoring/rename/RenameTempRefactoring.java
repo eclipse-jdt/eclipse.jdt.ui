@@ -101,7 +101,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 				if (decl == null)
 					return super.visit(node);
 				boolean keysEqual= fKey.equals(RefactoringAnalyzeUtil.getFullBindingKey(decl));
-				boolean rangeInSet= fRanges.contains(TextRange.createFromStartAndLength(node.getStartPosition(), node.getLength()));
+				boolean rangeInSet= fRanges.contains(new TextRange(node.getStartPosition(), node.getLength()));
 	
 				if (keysEqual && !rangeInSet)
 					fProblemNodes.add(node);

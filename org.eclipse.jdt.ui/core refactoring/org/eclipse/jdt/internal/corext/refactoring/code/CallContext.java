@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 
 public class CallContext {
@@ -20,9 +20,9 @@ public class CallContext {
 	public boolean receiverIsStatic;
 	public CodeScopeBuilder.Scope scope;
 	public int callMode;
-	public ImportEdit importer;
+	public ImportRewrite importer;
 
-	public CallContext(CodeScopeBuilder.Scope s, int cm, ImportEdit i) {
+	public CallContext(CodeScopeBuilder.Scope s, int cm, ImportRewrite i) {
 		super();
 		scope= s;
 		callMode= cm;

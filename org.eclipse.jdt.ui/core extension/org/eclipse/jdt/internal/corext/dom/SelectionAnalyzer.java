@@ -69,7 +69,8 @@ public class SelectionAnalyzer extends GenericVisitor {
 			return null;
 		ASTNode firstNode= (ASTNode)fSelectedNodes.get(0);
 		ASTNode lastNode= (ASTNode)fSelectedNodes.get(fSelectedNodes.size() - 1);
-		return TextRange.createFromStartAndExclusiveEnd(firstNode.getStartPosition(), lastNode.getStartPosition() + lastNode.getLength());
+		int start= firstNode.getStartPosition();
+		return new TextRange(start, lastNode.getStartPosition() + lastNode.getLength() - start);
 	}
 	
 	public ASTNode getLastCoveringNode() {

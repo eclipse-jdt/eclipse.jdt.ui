@@ -327,7 +327,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 					start= statement.getStartPosition();
 				} else {
 					if (info.isReturn() || info.isPartialReturn() || info.branches()) {
-						result.add(TextRange.createFromStartAndInclusiveEnd(start, end), info);
+						result.add(new TextRange(start, end - start + 1), info);
 						info= createSequential();
 						start= statement.getStartPosition();
 					}
@@ -337,7 +337,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			}
 			end= statement.getStartPosition() + statement.getLength() - 1;
 		}
-		result.add(TextRange.createFromStartAndInclusiveEnd(start, end), info);
+		result.add(new TextRange(start, end - start + 1), info);
 		return result;
 	}
 	

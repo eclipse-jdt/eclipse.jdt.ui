@@ -97,7 +97,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 	private final List fParameterInfos;
 	private final CodeGenerationSettings fCodeGenerationSettings;
-	private final ImportEditManager fImportEditManager;
+	private final ImportRewriteManager fImportManager;
 
 	private TextChangeManager fChangeManager;
 	private IMethod fMethod;
@@ -118,7 +118,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		fParameterInfos= createParameterInfoList(method);
 		fDescriptionGroups= new HashSet(0);
 		fCodeGenerationSettings= codeGenerationSettings;
-		fImportEditManager= new ImportEditManager(fCodeGenerationSettings);
+		fImportManager= new ImportRewriteManager(fCodeGenerationSettings);
 		fReturnTypeName= getInitialReturnTypeName();
 		fVisibility= getInitialMethodVisibility();
 	}
@@ -470,10 +470,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	private void clearManagers() {
-		fImportEditManager.clear();
+		fImportManager.clear();
 	}
 
-	private RefactoringStatus collectAndCheckImports(IProgressMonitor pm) throws JavaModelException {
+	private RefactoringStatus collectAndCheckImports(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		List notDeleted= getNotDeletedInfos();
 		pm.beginTask("", notDeleted.size()); //$NON-NLS-1$
@@ -493,7 +493,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	//returns true iff succeeded
-	private boolean tryResolvingType(String typeName) throws JavaModelException{
+	private boolean tryResolvingType(String typeName) throws CoreException {
 		String[][] fqns= getMethod().getDeclaringType().resolveType(typeName);
 		if (fqns == null || fqns.length != 1)
 			return false;
@@ -502,7 +502,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return true;
 	}
 	
-	private RefactoringStatus tryFinidingInTypeCache(String typeName, ParameterInfo info, IProgressMonitor pm) throws JavaModelException{
+	private RefactoringStatus tryFinidingInTypeCache(String typeName, ParameterInfo info, IProgressMonitor pm) throws CoreException {
 		List typeRefsFound= findTypeInfos(typeName, pm);
 
 		if (typeRefsFound.size() == 0){
@@ -537,10 +537,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return typeRefsFound;
 	}
 	
-	private void importToAllCusOfRippleMethods(String fullName) throws JavaModelException {
+	private void importToAllCusOfRippleMethods(String fullName) throws CoreException {
 		for (int i= 0; i < fRippleMethods.length; i++) {
 			ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(fRippleMethods[i].getCompilationUnit());
-			fImportEditManager.addImportTo(fullName, wc);
+			fImportManager.addImportTo(fullName, wc);
 		}
 	}	
 	
@@ -989,8 +989,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		rewrite.rewriteNode(textBuffer, resultingEdits, fDescriptionGroups);
 
 		TextChange textChange= manager.get(cu);
-		if (fImportEditManager.hasImportEditFor(cu))
-			resultingEdits.add(fImportEditManager.getImportEdit(cu));
+		if (fImportManager.hasImportEditFor(cu))
+			resultingEdits.add(fImportManager.getImportRewrite(cu).createEdit(textBuffer));
 		textChange.addTextEdit(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.modify_parameters"), resultingEdits); //$NON-NLS-1$
 		rewrite.removeModifications();
 	}

@@ -218,7 +218,7 @@ public class PushDownRefactoring extends Refactoring {
 	private IMember[] fSelectedMembers;
 	private TextChangeManager fChangeManager;
 	
-	private final ImportEditManager fImportEditManager;
+	private final ImportRewriteManager fImportManager;
 
 	//caches
 	private IType fCachedDeclaringClass;
@@ -229,7 +229,7 @@ public class PushDownRefactoring extends Refactoring {
 		Assert.isNotNull(members);
 		Assert.isNotNull(preferenceSettings);
 		fSelectedMembers= (IMember[])SourceReferenceUtil.sortByOffset(members);
-		fImportEditManager= new ImportEditManager(preferenceSettings);
+		fImportManager= new ImportRewriteManager(preferenceSettings);
 	}
 
 	public static PushDownRefactoring create(IMember[] members, CodeGenerationSettings preferenceSettings) throws JavaModelException{
@@ -517,7 +517,7 @@ public class PushDownRefactoring extends Refactoring {
 
 	private void clearCaches() {
 		fTypesReferencedInPushedDownMembers= null;
-		fImportEditManager.clear();
+		fImportManager.clear();
 	}
 
 	private RefactoringStatus checkReferencesToPushedDownMembers(IProgressMonitor pm) throws JavaModelException {
@@ -823,8 +823,8 @@ public class PushDownRefactoring extends Refactoring {
 		rewrite.rewriteNode(textBuffer, resultingEdits);
 
 		TextChange textChange= manager.get(cu);
-		if (fImportEditManager.hasImportEditFor(cu))
-			resultingEdits.add(fImportEditManager.getImportEdit(cu));
+		if (fImportManager.hasImportEditFor(cu))
+			resultingEdits.add(fImportManager.getImportRewrite(cu).createEdit(textBuffer));
 		textChange.addTextEdit(RefactoringCoreMessages.getString("PushDownRefactoring.25"), resultingEdits); //$NON-NLS-1$
 		rewrite.removeModifications();
 	}
@@ -839,7 +839,7 @@ public class PushDownRefactoring extends Refactoring {
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
 
-	private void addImportsToSubclasses(IProgressMonitor pm) throws JavaModelException {
+	private void addImportsToSubclasses(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 4); //$NON-NLS-1$
 		IMember[] allMembers= MemberActionInfo.getMembers(getInfosForMembersToBeCreatedInSubclassesOfDeclaringClass());
 		IMember[] nonAbstractMembers= getNonAbstractMembers(allMembers);
@@ -852,13 +852,13 @@ public class PushDownRefactoring extends Refactoring {
 		pm.done();
 	}
 	
-	private void addImportsToTypesReferencedInMembers(IMember[] members, IType[] destinationClasses, IProgressMonitor pm) throws JavaModelException{
+	private void addImportsToTypesReferencedInMembers(IMember[] members, IType[] destinationClasses, IProgressMonitor pm) throws CoreException{
 		pm.beginTask("", 1); //$NON-NLS-1$
 		IType[] typesReferenced= getTypesReferencedIn(members, pm);
 		for (int i= 0; i < destinationClasses.length; i++) {
 			ICompilationUnit cu= getWorkingCopyOfCu(destinationClasses[i]);
 			for (int j= 0; j < typesReferenced.length; j++) {
-				fImportEditManager.addImportTo(typesReferenced[j], cu);
+				fImportManager.addImportTo(typesReferenced[j], cu);
 			}
 		}
 		pm.done();
