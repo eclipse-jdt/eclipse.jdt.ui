@@ -251,6 +251,30 @@ public class ChangeSignatureTests extends RefactoringTest {
 		assertEquals("Severity:" + result.getFirstMessage(result.getSeverity()), expectedSeverity, result.getSeverity());
 	}
 	
+	private void helperDoAllFail(String methodName, 
+								String[] signature, 
+							  	ParameterInfo[] newParamInfos, 
+							  	int[] newIndices, 
+							  	String[] oldParamNames, 
+							  	String[] newParamNames, 
+							  	int[] permutation, 
+							  	int newVisibility,
+							  	int[] deleted,
+							  	int expectedSeverity)  throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, false);
+		IType classA= getType(cu, "A");
+		IMethod method = classA.getMethod(methodName, signature);
+		assertTrue("method does not exist", method.exists());
+		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method);
+		markAsDeleted(ref.getParameterInfos(), deleted);	
+		modifyInfos(ref.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, permutation);
+		if (newVisibility != JdtFlags.VISIBILITY_CODE_INVALID)
+			ref.setVisibility(newVisibility);
+		RefactoringStatus result= performRefactoring(ref);
+		assertNotNull("precondition was supposed to fail", result);	
+		assertEquals("Severity:" + result.getFirstMessage(result.getSeverity()), expectedSeverity, result.getSeverity());		
+	}
+	
 	//------- tests 
 	
 	public void testFail0() throws Exception{
@@ -290,6 +314,24 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] newIndices= {0};
 		helperAddFail(signature, newParamInfo, newIndices, RefactoringStatus.FATAL);
 	}
+	
+	public void testFailDoAll5()throws Exception{
+		String[] signature= {"I"};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"i", "j"};
+		String[] newParamNames= {"i", "j"};
+		int[] permutation= {0};
+		int[] deletedIndices= {0};
+		int newVisibility= JdtFlags.VISIBILITY_CODE_PACKAGE;
+		int expectedSeverity= RefactoringStatus.WARNING;
+		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, expectedSeverity);
+	}	
+	
 	
 	//---------
 	public void test0() throws Exception{
