@@ -483,7 +483,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				return true;
 			if (pp instanceof MethodInvocation){
 				MethodInvocation mi= (MethodInvocation)pp;
-				if (parentNode == mi.getExpression() && ! isMethodInvocationOk(mi))
+				if (parentNode.getParent() == mi.getExpression() && ! isMethodInvocationOk(mi))
 					return true;
 			}	
 		}
