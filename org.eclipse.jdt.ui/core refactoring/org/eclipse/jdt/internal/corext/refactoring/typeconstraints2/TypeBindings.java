@@ -126,7 +126,8 @@ public class TypeBindings {
 				ITypeBinding superType = superTypes[j];
 				if (superType == null) continue nextSuperType;
 				if (canAssign(otherRefType, superType)) {//otherRefType.isCompatibleWith(superType)) {
-					break nextSuperType;
+//					break nextSuperType; // bug 77668
+					continue nextSuperType;
 				} else {
 					superTypes[j] = null;
 					if (--remaining == 0) return null;
