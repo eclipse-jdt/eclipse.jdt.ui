@@ -162,7 +162,6 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		int firstLine= buffer.getLineOfOffset(start);
 		int lastLine= buffer.getLineOfOffset(end);
 		int offset= buffer.getLineInformationOfOffset(start).getOffset();
-		TextRegion region;
 		for (int i= locals.length - 1; i >= 0; i--) {
 			change.addTextEdit(NN, SimpleTextEdit.createInsert(start, createLocal(buffer, locals[i], delimiter, indent)));
 		}
