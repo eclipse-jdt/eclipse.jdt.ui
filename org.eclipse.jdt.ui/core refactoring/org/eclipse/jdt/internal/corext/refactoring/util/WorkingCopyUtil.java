@@ -8,8 +8,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 
-import org.eclipse.jdt.internal.corext.refactoring.util.ResourceManager;
-
 public class WorkingCopyUtil {
 
 	//no instances
@@ -17,6 +15,8 @@ public class WorkingCopyUtil {
 	}
 	
 	public static ICompilationUnit getWorkingCopyIfExists(ICompilationUnit cu){
+		if (cu == null)
+			return null;
 		if (cu.isWorkingCopy())
 			return cu;
 		ICompilationUnit[] wcs= ResourceManager.getWorkingCopies();
