@@ -261,7 +261,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 
 		public void selectionChanged() {
 			ISourceReference element= computeHighlightRangeSourceReference();
-			synchronizeOutlinePage(element);
+			if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE))
+				synchronizeOutlinePage(element);
 			setSelection(element, false);
 			updateStatusLine();
 			updateOccurrences();
@@ -2311,14 +2312,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			}
 			
 			if (PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE.equals(property)) {
-				if ((event.getNewValue() instanceof Boolean) && ((Boolean)event.getNewValue()).booleanValue()) {
-					fEditorSelectionChangedListener= new EditorSelectionChangedListener();
-					fEditorSelectionChangedListener.install(getSelectionProvider());
+				if ((event.getNewValue() instanceof Boolean) && ((Boolean)event.getNewValue()).booleanValue())
 					fEditorSelectionChangedListener.selectionChanged();
-				} else {
-					fEditorSelectionChangedListener.uninstall(getSelectionProvider());
-					fEditorSelectionChangedListener= null;
-				}
 				return;
 			}
 			
@@ -2569,10 +2564,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		fInformationPresenter.setSizeConstraints(60, 10, true, true);		
 		fInformationPresenter.install(getSourceViewer());
 		
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE)) {
-			fEditorSelectionChangedListener= new EditorSelectionChangedListener();
-			fEditorSelectionChangedListener.install(getSelectionProvider());
-		}
+		fEditorSelectionChangedListener= new EditorSelectionChangedListener();
+		fEditorSelectionChangedListener.install(getSelectionProvider());
 		
 		if (isBrowserLikeLinks())
 			enableBrowserLikeLinks();
