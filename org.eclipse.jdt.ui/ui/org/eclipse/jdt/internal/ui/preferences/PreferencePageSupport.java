@@ -10,15 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.IPreferencePage;
-import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.jface.preference.PreferenceManager;
-import org.eclipse.jface.preference.PreferenceNode;
 import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 /**
  *
@@ -40,19 +37,7 @@ public class PreferencePageSupport {
 	 * @return Returns <code>true</code> if the user ended the page by pressing OK.
 	 */
 	public static boolean showPreferencePage(Shell shell, String id, IPreferencePage page) {
-		final IPreferenceNode targetNode = new PreferenceNode(id, page);
-		
-		PreferenceManager manager = new PreferenceManager();
-		manager.addToRoot(targetNode);
-		final PreferenceDialog dialog = new PreferenceDialog(shell, manager);
-		final boolean [] result = new boolean[] { false };
-		BusyIndicator.showWhile(shell.getDisplay(), new Runnable() {
-			public void run() {
-				dialog.create();
-				dialog.setMessage(targetNode.getLabelText());
-				result[0]= (dialog.open() == Window.OK);
-			}
-		});
-		return result[0];
+		// inline when PreferencesUtil is finalized (see bug 63656) 
+		return PreferencesUtil.createPreferenceDialogOn(id, new String[] { id }, null).open() == Window.OK;
 	}	
 }
