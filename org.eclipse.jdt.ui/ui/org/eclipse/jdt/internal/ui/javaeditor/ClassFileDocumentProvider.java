@@ -104,6 +104,11 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 				}
 			}
 
+			if (((delta.getFlags() & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0) && input.equals(element)) {
+				handleDeleted(fInput);
+				return true;
+			}			
+
 			if (((delta.getFlags() & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0) && input.equals(element)) {
 				handleDeleted(fInput);
 				return true;
