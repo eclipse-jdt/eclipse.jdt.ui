@@ -436,7 +436,7 @@ public class CodeTemplateBlock {
 				Writer output= new FileWriter(file);
 				TemplateReaderWriter writer= new TemplateReaderWriter();
 				writer.save(templates, output);
-			} catch (Exception e) {
+			} catch (IOException e) {
 				openWriteErrorDialog(e);
 			}		
 		}
