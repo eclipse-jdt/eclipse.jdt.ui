@@ -137,7 +137,7 @@
 			nameFilter="AllTests.java">
 			<action
 				id="updateTestSuite"
-				label="Update TestSuite..."
+				label="Update Test Suite..."
 				tooltip="Update JUnit TestSuite with new test classes"
 		
 				enablesFor="1"
