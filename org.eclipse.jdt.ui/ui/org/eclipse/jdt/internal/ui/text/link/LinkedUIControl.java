@@ -843,10 +843,10 @@ public class LinkedUIControl {
 		Shell shell= fCurrentTarget.fShell;
 		fCurrentTarget.fShell= null;
 		
-		if (shell != null)
+		if (shell != null && !shell.isDisposed())
 			shell.removeShellListener(fCloser);
 		
-		if (text != null) {
+		if (text != null && !text.isDisposed()) {
 			text.removeModifyListener(fCaretListener);
 			text.removeVerifyListener(fCaretListener);
 			text.removePaintListener(fPainter);
