@@ -117,6 +117,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		{PreferencesMessages.getString("JavaEditorPreferencePage.printMarginColor2"), ExtendedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR}, //$NON-NLS-1$
 		{PreferencesMessages.getString("JavaEditorPreferencePage.findScopeColor2"), PreferenceConstants.EDITOR_FIND_SCOPE_COLOR}, //$NON-NLS-1$
 		{PreferencesMessages.getString("JavaEditorPreferencePage.linkedPositionColor2"), PreferenceConstants.EDITOR_LINKED_POSITION_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.linkedPositionSlaveColor2"), PreferenceConstants.EDITOR_LINKED_POSITION_SLAVE_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.linkedPositionTargetColor2"), PreferenceConstants.EDITOR_LINKED_POSITION_TARGET_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.linkedPositionExitColor2"), PreferenceConstants.EDITOR_LINKED_POSITION_EXIT_COLOR}, //$NON-NLS-1$
 		{PreferencesMessages.getString("JavaEditorPreferencePage.linkColor2"), PreferenceConstants.EDITOR_LINK_COLOR}, //$NON-NLS-1$
 	};
 	
@@ -268,6 +271,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FIND_SCOPE_COLOR));
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LINKED_POSITION_COLOR));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LINKED_POSITION_SLAVE_COLOR));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LINKED_POSITION_TARGET_COLOR));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LINKED_POSITION_EXIT_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_LINK_COLOR));
 		
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CORRECTION_INDICATION));

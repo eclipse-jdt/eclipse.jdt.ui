@@ -44,10 +44,11 @@ import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension;
-import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IWorkbenchPage;
@@ -138,12 +139,18 @@ public class LinkedUIControl {
 		
 		/** The registered listener, or <code>null</code>. */
 		LinkedUIKeyListener fKeyListener;
+		
+		/** The cached custom annotation model. */
+		LinkedPositionAnnotations fAnnotationModel;
 	}
 
 	private static final class EmptyTarget extends LinkedUITarget {
 
 		private ITextViewer fTextViewer;
 
+		/**
+		 * @param viewer the viewer
+		 */
 		public EmptyTarget(ITextViewer viewer) {
 			Assert.isNotNull(viewer);
 			fTextViewer= viewer;
@@ -456,7 +463,7 @@ public class LinkedUIControl {
 		}
 
 		/**
-		 * @param b
+		 * @param enabled the new enabled state
 		 */
 		public void setEnabled(boolean enabled) {
 			fIsEnabled= enabled;
@@ -486,7 +493,7 @@ public class LinkedUIControl {
 						if (offset >= 0 && length >= 0) {
 							LinkedPosition find= new LinkedPosition(doc, offset, length, LinkedPositionGroup.NO_STOP);
 							LinkedPosition pos= fEnvironment.findPosition(find);
-							if (pos == null && fExitPosition.includes(find))
+							if (pos == null && fExitPosition != null && fExitPosition.includes(find))
 								pos= fExitPosition;
 								
 							if (pos != null)
@@ -613,8 +620,11 @@ public class LinkedUIControl {
 		fIterator.setCycling(!fEnvironment.isNested());
 		fEnvironment.addLinkedListener(fLinkedListener);
 
-		fPainter= new LinkedUIPainter(fCurrentTarget.getViewer());
-		fPainter.setColor(getFrameColor());
+		fPainter= new LinkedUIPainter(fCurrentTarget.getViewer(), fEnvironment);
+		fPainter.setMasterColor(getColor(PreferenceConstants.EDITOR_LINKED_POSITION_COLOR));
+		fPainter.setSlaveColor(getColor(PreferenceConstants.EDITOR_LINKED_POSITION_SLAVE_COLOR));
+		fPainter.setTargetColor(getColor(PreferenceConstants.EDITOR_LINKED_POSITION_TARGET_COLOR));
+		fPainter.setExitColor(getColor(PreferenceConstants.EDITOR_LINKED_POSITION_EXIT_COLOR));
 
 		fAssistant= new ContentAssistant2();
 		fAssistant.setDocumentPartitioning(IJavaPartitions.JAVA_PARTITIONING);
@@ -746,23 +756,26 @@ public class LinkedUIControl {
 		
 		// mark navigation history
 		JavaPlugin.getActivePage().getNavigationHistory().markLocation(JavaPlugin.getActivePage().getActiveEditor());
-
+	
 		// undo
 		ITextViewerExtension extension= (ITextViewerExtension) fCurrentTarget.getViewer();
 		IRewriteTarget target= extension.getRewriteTarget();
 		if (fFramePosition != null)
 			target.endCompoundChange();
-
+	
 		redraw();
 		IDocument oldDoc= fFramePosition == null ? null : fFramePosition.getDocument();
 		IDocument newDoc= pos.getDocument();
+		if (fCurrentTarget.fAnnotationModel != null)
+			fCurrentTarget.fAnnotationModel.switchToPosition(fEnvironment, pos);
 		switchViewer(oldDoc, newDoc);
 		fFramePosition= pos;
 
-		if (fFramePosition != null)
+		if (fFramePosition != null && fFramePosition != fExitPosition)
 			target.beginCompoundChange();
-
-		fPainter.setPosition(fFramePosition);
+	
+		fPainter.setMasterPosition(fFramePosition);
+		
 		if (select)
 			select();
 		if (fFramePosition == fExitPosition && !fIterator.isCycling())
@@ -803,18 +816,9 @@ public class LinkedUIControl {
 	}
 
 	private void redraw() {
-		if (fFramePosition == null)
-			return;
-
-		IRegion widgetRange= asWidgetRange(fFramePosition);
-		if (widgetRange == null) {
-			leave(ILinkedListener.EXIT_ALL);
-			return;
-		}
-
-		StyledText text= fCurrentTarget.fWidget;
-		if (text != null && !text.isDisposed())
-			text.redrawRange(widgetRange.getOffset(), widgetRange.getLength(), true);
+		if (fCurrentTarget.fAnnotationModel != null)
+			fCurrentTarget.fAnnotationModel.switchToPosition(fEnvironment, fFramePosition);
+		fPainter.redraw();
 	}
 
 	private void connect() {
@@ -833,7 +837,23 @@ public class LinkedUIControl {
 		
 		((IPostSelectionProvider) viewer).addPostSelectionChangedListener(fSelectionListener);
 
+		if (viewer instanceof ISourceViewer) {
+			ISourceViewer sv= (ISourceViewer) viewer;
+			IAnnotationModel model= sv.getAnnotationModel();
+			if (model instanceof IAnnotationModelExtension) {
+				IAnnotationModelExtension ext= (IAnnotationModelExtension) model;
+				IAnnotationModel ourModel= ext.getAnnotationModel(getUniqueKey());
+				if (ourModel == null) {
+					LinkedPositionAnnotations lpa= new LinkedPositionAnnotations();
+					lpa.setTargets(fIterator.getPositions());
+					ext.addAnnotationModel(getUniqueKey(), lpa);
+					fCurrentTarget.fAnnotationModel= lpa;
+				}
+			}
+		}
 		fPainter.setViewer(viewer);
+		fPainter.setTargetPositions(fIterator.getPositions());
+		fPainter.setExitPosition(fExitPosition);
 		fCurrentTarget.fWidget.addPaintListener(fPainter);
 		fCurrentTarget.fWidget.showSelection();
 		fCurrentTarget.fWidget.addVerifyListener(fCaretListener);
@@ -845,6 +865,10 @@ public class LinkedUIControl {
 		fCurrentTarget.fShell.addShellListener(fCloser);
 
 		fAssistant.install(viewer);
+	}
+
+	private String getUniqueKey() {
+		return "linked.annotationmodelkey."+toString(); //$NON-NLS-1$
 	}
 
 	private void disconnect() {
@@ -872,6 +896,17 @@ public class LinkedUIControl {
 		// don't remove the verify key listener to let it keep its position
 		// in the listener queue
 		fCurrentTarget.fKeyListener.setEnabled(false);
+		fCurrentTarget.fAnnotationModel.removeAllAnnotations();
+		if (viewer instanceof ISourceViewer) {
+			ISourceViewer sv= (ISourceViewer) viewer;
+			IAnnotationModel model= sv.getAnnotationModel();
+			if (model instanceof IAnnotationModelExtension) {
+				IAnnotationModelExtension ext= (IAnnotationModelExtension) model;
+				ext.removeAnnotationModel(getUniqueKey());
+			}
+		}
+
+		
 		((IPostSelectionProvider) viewer).removePostSelectionChangedListener(fSelectionListener);
 
 		redraw();
@@ -888,14 +923,34 @@ public class LinkedUIControl {
 		
 //		// debug trace
 //		JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, "leaving linked mode", null));
-		fPainter.dispose();
 		disconnect();
 		redraw();
+		fPainter.dispose();
 		
 		for (int i= 0; i < fTargets.length; i++) {
 			if (fCurrentTarget.fKeyListener != null) {
 				((ITextViewerExtension) fTargets[i].getViewer()).removeVerifyKeyListener(fCurrentTarget.fKeyListener);
 				fCurrentTarget.fKeyListener= null;
+			}
+		}
+		
+		for (int i= 0; i < fTargets.length; i++) {
+			
+			if (fTargets[i].fAnnotationModel != null) {
+				fTargets[i].fAnnotationModel.removeAllAnnotations();
+				fTargets[i].fAnnotationModel= null;
+			}
+			
+			ITextViewer vi= fTargets[i].getViewer();
+			if (vi instanceof ISourceViewer) {
+				ISourceViewer sv= (ISourceViewer) vi;
+				IAnnotationModel model= sv.getAnnotationModel();
+				
+				if (model instanceof IAnnotationModelExtension) {
+					IAnnotationModelExtension ext= (IAnnotationModelExtension) model;
+					ext.removeAnnotationModel(getUniqueKey());
+				}
+				
 			}
 		}
 		
@@ -929,34 +984,11 @@ public class LinkedUIControl {
 		fEnvironment.exit(flags);
 	}
 
-	private IRegion asWidgetRange(Position position) {
-		ITextViewer viewer= fCurrentTarget.getViewer();
-		if (viewer instanceof ITextViewerExtension3) {
-
-			ITextViewerExtension3 extension= (ITextViewerExtension3) viewer;
-			return extension.modelRange2WidgetRange(new Region(position.getOffset(), position.getLength()));
-
-		} else {
-
-			IRegion region= viewer.getVisibleRegion();
-			if (includes(region, position))
-				return new Region(position.getOffset() - region.getOffset(), position.getLength());
-		}
-
-		return null;
-	}
-
-	private static boolean includes(IRegion region, Position position) {
-		return
-			position.getOffset() >= region.getOffset() &&
-			position.getOffset() + position.getLength() <= region.getOffset() + region.getLength();
-	}
-
-	private Color getFrameColor() {
+	private Color getColor(String key) {
 		StyledText text= fCurrentTarget.getViewer().getTextWidget();
 		if (text != null) {
 			Display display= text.getDisplay();
-			return createColor(JavaPlugin.getDefault().getPreferenceStore(), PreferenceConstants.EDITOR_LINKED_POSITION_COLOR, display);
+			return createColor(JavaPlugin.getDefault().getPreferenceStore(), key, display);
 		}
 		return null;
 	}

@@ -31,6 +31,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IPositionUpdater;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.IDocumentExtension.IReplace;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
@@ -671,7 +672,7 @@ public class LinkedEnvironment {
 	 * @param position
 	 * @return
 	 */
-	LinkedPositionGroup getGroupForPosition(LinkedPosition position) {
+	LinkedPositionGroup getGroupForPosition(Position position) {
 		for (Iterator it= fGroups.iterator(); it.hasNext(); ) {
 			LinkedPositionGroup group= (LinkedPositionGroup) it.next();
 			if (group.contains(position))

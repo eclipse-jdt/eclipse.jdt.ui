@@ -49,6 +49,7 @@ class TabStopIterator {
 	
 	/** The comparator to sort the list of positions. */
 	private static final Comparator fComparator= new SequenceComparator();
+	
 	/** The iteration sequence. */
 	private final ArrayList fList;
 	/** The size of <code>fList</code>. */
@@ -197,5 +198,9 @@ class TabStopIterator {
 	 */
 	public boolean isCycling() {
 		return fIsCycling;
+	}
+	
+	public LinkedPosition[] getPositions() {
+		return (LinkedPosition[]) fList.toArray(new LinkedPosition[0]);
 	}
 }

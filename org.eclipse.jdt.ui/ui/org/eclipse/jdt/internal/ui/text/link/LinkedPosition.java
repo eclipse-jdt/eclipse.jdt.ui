@@ -34,6 +34,7 @@ class LinkedPosition extends Position {
 	 * @param document the document
 	 * @param offset the offset of the position
 	 * @param length the length of the position
+	 * @param sequence the iteration sequence rank
 	 */
 	public LinkedPosition(IDocument document, int offset, int length, int sequence) {
 		super(offset, length);
@@ -134,6 +135,13 @@ class LinkedPosition extends Position {
 	 */
 	public void setSequenceNumber(int sequence) {
 		fSequenceNumber= sequence;
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.Position#hashCode()
+	 */
+	public int hashCode() {
+		return fDocument.hashCode() | super.hashCode() | fSequenceNumber;
 	}
 
 }

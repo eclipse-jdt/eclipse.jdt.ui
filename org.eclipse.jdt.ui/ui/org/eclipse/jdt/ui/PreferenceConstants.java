@@ -1085,6 +1085,45 @@ public class PreferenceConstants {
 	public final static String EDITOR_LINKED_POSITION_COLOR= "linkedPositionColor"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that holds the color used to render linked slave positions inside code templates.
+	 * <p>
+	 * Value is of type <code>String</code>. A RGB color value encoded as a string
+	 * using class <code>PreferenceConverter</code>
+	 * </p>
+	 * 
+	 * @see org.eclipse.jface.resource.StringConverter
+	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 3.0
+	 */
+	public final static String EDITOR_LINKED_POSITION_SLAVE_COLOR= "linkedPositionColor.slave"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that holds the color used to render linked target positions inside code templates.
+	 * <p>
+	 * Value is of type <code>String</code>. A RGB color value encoded as a string
+	 * using class <code>PreferenceConverter</code>
+	 * </p>
+	 * 
+	 * @see org.eclipse.jface.resource.StringConverter
+	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 3.0
+	 */
+	public final static String EDITOR_LINKED_POSITION_TARGET_COLOR= "linkedPositionColor.target"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that holds the color used to render the exit position inside code templates.
+	 * <p>
+	 * Value is of type <code>String</code>. A RGB color value encoded as a string
+	 * using class <code>PreferenceConverter</code>
+	 * </p>
+	 * 
+	 * @see org.eclipse.jface.resource.StringConverter
+	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 3.0
+	 */
+	public final static String EDITOR_LINKED_POSITION_EXIT_COLOR= "linkedPositionColor.exit"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that holds the color used as the text foreground.
 	 * This value has not effect if the system default color is used.
 	 * <p>
@@ -2149,7 +2188,10 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_LINE_NUMBER_RULER, false);
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINE_NUMBER_RULER_COLOR, new RGB(0, 0, 0));
 
-		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINKED_POSITION_COLOR, new RGB(0, 200 , 100));
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINKED_POSITION_COLOR, new RGB(121, 121, 121));
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINKED_POSITION_SLAVE_COLOR, new RGB(0, 200, 100));
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINKED_POSITION_TARGET_COLOR, new RGB(121, 121, 121));
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINKED_POSITION_EXIT_COLOR, new RGB(0, 200 , 100));
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINK_COLOR, new RGB(0, 0, 255));
 
 		store.setDefault(PreferenceConstants.EDITOR_FOREGROUND_DEFAULT_COLOR, true);

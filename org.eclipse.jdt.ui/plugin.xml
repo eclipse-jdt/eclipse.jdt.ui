@@ -560,6 +560,68 @@
             icon="icons/full/obj16/brkp_obj.gif"
             annotationImageProvider="org.eclipse.jdt.internal.ui.javaeditor.BreakpointImageProvider">
       </specification>
+
+      <!-- linked annotations -->
+      <specification
+            annotationType="org.eclipse.jdt.ui.link.master"
+            colorPreferenceValue="180,215,255"
+            colorPreferenceKey="linked.focus.color"
+            isGoToPreviousNavigationTarget="false"
+            isGoToPreviousNavigationTargetKey="linked.focus.navigation.previous"
+            showInNextPrevDropdownToolbarAction="false"
+            showInNextPrevDropdownToolbarActionKey="linked.focus.navigation.dropdown"
+            isGoToNextNavigationTarget="false"
+            isGoToNextNavigationTargetKey="linked.focus.navigation.next"
+            contributesToHeader="false"
+            overviewRulerPreferenceValue="false"
+            presentationLayer="4"
+            label="%linked.focus.label"
+            textPreferenceValue="false"
+            textPreferenceKey="linked.focus.text"
+            highlightPreferenceKey="linked.focus.highlight"
+            highlightPreferenceValue="true"
+            overviewRulerPreferenceKey="linked.focus.overviewruler">
+      </specification>      
+      <specification
+            annotationType="org.eclipse.jdt.ui.link.slave"
+            colorPreferenceValue="180,215,255"
+            colorPreferenceKey="linked.slave.color"
+            isGoToPreviousNavigationTarget="false"
+            isGoToPreviousNavigationTargetKey="linked.slave.navigation.previous"
+            showInNextPrevDropdownToolbarAction="false"
+            showInNextPrevDropdownToolbarActionKey="linked.slave.navigation.dropdown"
+            isGoToNextNavigationTarget="false"
+            isGoToNextNavigationTargetKey="linked.slave.navigation.next"
+            contributesToHeader="false"
+            overviewRulerPreferenceValue="false"
+            presentationLayer="4"
+            label="%linked.slave.label"
+            textPreferenceValue="false"
+            textPreferenceKey="linked.slave.text"
+            highlightPreferenceKey="linked.slave.highlight"
+            highlightPreferenceValue="true"
+            overviewRulerPreferenceKey="linked.slave.overviewruler">
+      </specification>      
+      <specification
+            annotationType="org.eclipse.jdt.ui.link.target"
+            colorPreferenceValue="252,255,150"
+            colorPreferenceKey="linked.target.color"
+            isGoToPreviousNavigationTarget="false"
+            isGoToPreviousNavigationTargetKey="linked.target.navigation.previous"
+            showInNextPrevDropdownToolbarAction="false"
+            showInNextPrevDropdownToolbarActionKey="linked.target.navigation.dropdown"
+            isGoToNextNavigationTarget="false"
+            isGoToNextNavigationTargetKey="linked.target.navigation.next"
+            contributesToHeader="false"
+            overviewRulerPreferenceValue="false"
+            presentationLayer="4"
+            label="%linked.target.label"
+            textPreferenceValue="false"
+            textPreferenceKey="linked.target.text"
+            highlightPreferenceKey="linked.target.highlight"
+            highlightPreferenceValue="false"
+            overviewRulerPreferenceKey="linked.target.overviewruler">
+      </specification>
    </extension>
    <extension
          id="org.eclipse.jdt.ui.JavaDocumentSetupParticipant"
