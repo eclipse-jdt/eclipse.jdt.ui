@@ -268,10 +268,13 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	}
 	
 	public void test17() throws Exception{
-//		printTestDisabledMessage("text for bug 66250 ");
-		printTestDisabledMessage("corner case: reference A.f to p.A#f");
-		if (false)
-			helper2("f", "g", false, true);
+//		printTestDisabledMessage("test for bug 66250, 79131 (corner case: reference "A.f" to p.A#f)");
+		helper2("f", "g", false, true);
+	}
+	
+	public void test18() throws Exception{
+//		printTestDisabledMessage("test for 79131 (corner case: reference "A.f" to p.A#f)");
+		helper2("field", "member", false, true);
 	}
 	
 	public void testBug5821() throws Exception{

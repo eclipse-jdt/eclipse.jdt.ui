@@ -116,32 +116,34 @@ public class RefactoringScanner {
 
 	private boolean hasWrongQualifier(String value, int nameStart) {
 		// only works for references without whitespace
-		int qualifierEnd= nameStart - 1;
-		int qualifierStart= qualifierEnd - fQualifier.length();
-		if (qualifierStart < 0)
+		int qualifierAfter= nameStart - 1;
+		if (qualifierAfter < 0)
 			return false;
 		
-		char charBeforeName= value.charAt(qualifierEnd);
+		char charBeforeName= value.charAt(qualifierAfter);
 		if (! isQualifierSeparator(charBeforeName))
 			return false;
-		
-		if (qualifierEnd > 0) {
-			char charBeforeSeparator= value.charAt(qualifierEnd - 1);
-			if (! Character.isJavaIdentifierPart(charBeforeSeparator))
-				return false; // case: "look at #f" -> should be updated
-		}
 			
-		String srcQualifier= value.substring(qualifierStart, qualifierEnd);
-		if (! srcQualifier.equals(fQualifier))
-			return true; // fails to update if srcQualifier contains whitespace
-		
-		if (qualifierStart > 0) {
-			// check case "p.A" -> "p.B" with reference "another.p.A":
-			char charBeforeQualifier= value.charAt(qualifierStart - 1);
-			if (isQualifierSeparator(charBeforeQualifier)) //$NON-NLS-1$
-				return true;
+		for (int i= 0; i < fQualifier.length() ; i++) {
+			int qualifierCharPos= qualifierAfter - 1 - i;
+			if (qualifierCharPos < 0)
+				return false;
+			
+			char qualifierChar= value.charAt(qualifierCharPos);
+			char goalQualifierChar= fQualifier.charAt(fQualifier.length() - 1 - i);
+			if (qualifierChar != goalQualifierChar)
+				return isQualifierPart(qualifierChar);
+		}
+		int beforeQualifierPos= qualifierAfter - fQualifier.length() - 1;
+		if (beforeQualifierPos >= 0) {
+			char beforeQualifierChar= value.charAt(beforeQualifierPos);
+			return isQualifierPart(beforeQualifierChar);
 		}
 		return false;
+	}
+
+	private boolean isQualifierPart(char ch) {
+		return Character.isJavaIdentifierPart(ch) || isQualifierSeparator(ch);
 	}
 
 	private boolean isQualifierSeparator(char c) {
