@@ -100,7 +100,7 @@ public class EditorUtility {
 	public static IEditorPart openInEditor(Object inputElement, boolean activate) throws JavaModelException, PartInitException {
 		
 		if (inputElement instanceof IFile)
-			return openInEditor((IFile) inputElement);
+			return openInEditor((IFile) inputElement, activate);
 		
 		IEditorInput input= getEditorInput(inputElement);
 		if (input instanceof IFileEditorInput) {
@@ -128,8 +128,6 @@ public class EditorUtility {
 			IWorkbenchPage p= JavaPlugin.getDefault().getActivePage();
 			if (p != null) {
 				IEditorPart e= p.openEditor(file, null, activate);
-				// if (activate)
-				// 	p.activate(e);
 				return e;
 			}
 		}
