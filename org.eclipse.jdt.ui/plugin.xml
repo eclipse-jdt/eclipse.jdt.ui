@@ -1134,6 +1134,10 @@
             class="org.eclipse.jdt.internal.ui.compare.JavaTextViewerCreator"
             id="org.eclipse.jdt.internal.ui.compare.JavaTextViewerCreator">
       </viewer>
+      <contentTypeBinding
+			contentTypeId="org.eclipse.jdt.core.javaSource"
+            contentMergeViewerId="org.eclipse.jdt.internal.ui.compare.JavaTextViewerCreator">
+	  </contentTypeBinding>
    </extension>
    <extension
          point="org.eclipse.compare.contentMergeViewers">
@@ -1145,6 +1149,10 @@
       <contentTypeBinding
 			contentTypeId="org.eclipse.core.runtime.javaProperties"
             contentMergeViewerId="org.eclipse.compare.TextMergeViewerCreator">
+	  </contentTypeBinding>
+      <contentTypeBinding
+			contentTypeId="org.eclipse.jdt.core.javaSource"
+            contentMergeViewerId="org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator">
 	  </contentTypeBinding>
    </extension>
    <extension
