@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.browsing;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFolder;
@@ -37,9 +38,6 @@ import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * 
- * XXX: not yet reviewed - part of experimental logical packages view
- * 
  * Tree content provider for the hierarchical layout in the packages view.
  * <p>
  * XXX: The standard Java browsing part content provider needs and calls
@@ -195,10 +193,14 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 				if(parent instanceof IPackageFragment) {
 					IPackageFragment pkgFragment= (IPackageFragment)parent;
 					LogicalPackage logicalPkg= findLogicalPackage(pkgFragment);
-					if (logicalPkg != null)
+					if (logicalPkg != null) 
 						return logicalPkg;
-					else 
-						return pkgFragment;
+					else {
+						LogicalPackage lp= createLogicalPackage(pkgFragment);
+						if(lp == null)
+							return pkgFragment;
+						else return lp;
+					}
 				} 
 				return parent;
 				
@@ -212,8 +214,12 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 					LogicalPackage logicalPkg= findLogicalPackage(pkgFragment);
 					if (logicalPkg != null)
 						return logicalPkg;
-					else
-						return pkgFragment;
+					else {
+						LogicalPackage lp= createLogicalPackage(pkgFragment);
+						if(lp == null)
+							return pkgFragment;
+						else return lp;
+					}
 				} else
 					return fragment.getJavaProject();
 			} 
@@ -221,6 +227,46 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
+		return null;
+	}
+	
+	/*
+	 * Check if the given IPackageFragment should be the member of a
+	 * LogicalPackage and if so creates the LogicalPackage and adds it to the
+	 * map.
+	 */
+	private LogicalPackage createLogicalPackage(IPackageFragment pkgFragment) {
+		if(!fInputIsProject)
+			return null;
+		
+		List fragments= new ArrayList();
+		try {
+			IPackageFragmentRoot[] roots= pkgFragment.getJavaProject().getPackageFragmentRoots();
+			for (int i= 0; i < roots.length; i++) {
+				IPackageFragmentRoot root= roots[i];
+				IPackageFragment fragment= root.getPackageFragment(pkgFragment.getElementName());
+				if(fragment.exists() && !fragment.equals(pkgFragment))
+					fragments.add(fragment);
+			}
+			if(!fragments.isEmpty()) {
+				LogicalPackage logicalPackage= new LogicalPackage(pkgFragment);
+				fMapToLogicalPackage.put(getKey(pkgFragment), logicalPackage);
+				Iterator iter= fragments.iterator();
+				while(iter.hasNext()){
+					IPackageFragment f= (IPackageFragment)iter.next();
+					if(logicalPackage.belongs(f)){
+						logicalPackage.add(f);
+						fMapToLogicalPackage.put(getKey(f), logicalPackage);
+					}
+				}
+				
+				return logicalPackage;
+			}
+				
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		
 		return null;
 	}
 

@@ -36,6 +36,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.PartInitException;
 
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -43,8 +44,11 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -118,7 +122,6 @@ public class PackagesView extends JavaBrowsingPart{
 	private PackageViewerWrapper fWrappedViewer;
 	
 	private MultiActionGroup fSwitchActionGroup;
-	private IJavaElement fLastInput;
 	private boolean fLastInputWasProject;
 	
 	/**
@@ -146,7 +149,6 @@ public class PackagesView extends JavaBrowsingPart{
 	
 	public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
-
 		//this must be created before all actions and filters
 		fWrappedViewer= new PackageViewerWrapper();
 		restoreLayoutState(memento);
@@ -504,19 +506,30 @@ public class PackagesView extends JavaBrowsingPart{
 		actionBars.updateActionBars();
 	}
 	
-	/*
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#findInputForJavaElement(org.eclipse.jdt.core.IJavaElement)
-	 */
 	protected IJavaElement findInputForJavaElement(IJavaElement je) {
-		if (isValidInput(je)){
-			fLastInputWasProject= je.getElementType() == IJavaElement.JAVA_PROJECT;
-			return je;
-		} else if (fLastInputWasProject && je != null) {
-			return je.getJavaProject();	
-		} else
-			return super.findInputForJavaElement(je);
+		if(je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT || je.getElementType() == IJavaElement.JAVA_PROJECT)
+			return findInputForJavaElement(je, true);
+		else
+			return findInputForJavaElement(je, false);
+			
 	}
 	
+	protected IJavaElement findInputForJavaElement(IJavaElement je, boolean canChangeInputType) {
+		if (je == null || !je.exists())
+			return null;
+
+		if (isValidInput(je)) {
+
+			//don't update if input must be project (i.e. project is used as source folder)
+			if (canChangeInputType)
+				fLastInputWasProject= je.getElementType() == IJavaElement.JAVA_PROJECT;
+			return je;
+		} else if (fLastInputWasProject) {
+			return je.getJavaProject();
+		} else
+			return findInputForJavaElement(je.getParent(), canChangeInputType);
+	}
+		
 	/**
 	 * Override the getText and getImage methods for the DecoratingLabelProvider
 	 * to handel the decoration of logical packages.
@@ -545,7 +558,7 @@ public class PackagesView extends JavaBrowsingPart{
 						Image decoratedImage= decorator.decorateImage(image, fragment);
 						if(decoratedImage != null)
 							image= decoratedImage;
-			}
+					}
 					return image;
 				} else return super.getImage(element);
 			}
