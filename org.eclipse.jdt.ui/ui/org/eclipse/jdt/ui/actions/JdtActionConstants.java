@@ -341,6 +341,12 @@ public class JdtActionConstants {
 	public static final String FIND_REFERENCES_IN_WORKSPACE= "org.eclipse.jdt.ui.actions.ReferencesInWorkspace"; //$NON-NLS-1$
 
 	/**
+	 * Search menu: name of standard Find References in Project global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ReferencesInProject"</code>).
+	 */
+	public static final String FIND_REFERENCES_IN_PROJECT= "org.eclipse.jdt.ui.actions.ReferencesInProject"; //$NON-NLS-1$
+
+	/**
 	 * Search menu: name of standard Find References in Hierarchy global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ReferencesInHierarchy"</code>).
 	 */
@@ -359,6 +365,12 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.DeclarationsInWorkspace"</code>).
 	 */
 	public static final String FIND_DECLARATIONS_IN_WORKSPACE= "org.eclipse.jdt.ui.actions.DeclarationsInWorkspace"; //$NON-NLS-1$
+
+	/**
+	 * Search menu: name of standard Find Declarations in Project global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.DeclarationsInProject"</code>).
+	 */
+	public static final String FIND_DECLARATIONS_IN_PROJECT= "org.eclipse.jdt.ui.actions.DeclarationsInProject"; //$NON-NLS-1$
 
 	/**
 	 * Search menu: name of standard Find Declarations in Hierarchy global action

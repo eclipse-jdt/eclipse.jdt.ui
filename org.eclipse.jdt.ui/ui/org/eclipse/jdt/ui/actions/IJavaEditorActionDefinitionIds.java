@@ -387,6 +387,12 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"</code>).
 	 */
 	public static final String SEARCH_REFERENCES_IN_WORKSPACE= "org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"; //$NON-NLS-1$
+
+	/**
+	 * Action definition ID of the search -> references in project action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.search.references.in.project"</code>).
+	 */
+	public static final String SEARCH_REFERENCES_IN_PROJECT= "org.eclipse.jdt.ui.edit.text.java.search.references.in.project"; //$NON-NLS-1$
 	
 	/**
 	 * Action definition ID of the search -> references in hierarchy action
@@ -441,6 +447,11 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"</code>).
 	 */
 	public static final String SEARCH_DECLARATIONS_IN_WORKSPACE= "org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"; //$NON-NLS-1$
+	/**
+	 * Action definition ID of the search -> declarations in project action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.search.declarations.in.project"</code>).
+	 */
+	public static final String SEARCH_DECLARATIONS_IN_PROJECTS= "org.eclipse.jdt.ui.edit.text.java.search.declarations.in.project"; //$NON-NLS-1$
 	/**
 	 * Action definition ID of the search -> declarations in hierarchy action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy"</code>).

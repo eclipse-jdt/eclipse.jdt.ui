@@ -1471,6 +1471,12 @@
       			allowLabelUpdate="true"
 				definitionId="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy"
 				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.DeclarationsInProject"
+    	  		menubarPath="org.eclipse.search.menu/declarationsSubMenu/group1"
+      			label="%InProject.label"
+      			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.project"
+				retarget="true" />	
 			<action id="org.eclipse.jdt.ui.actions.DeclarationsInWorkspace"
     	  		menubarPath="org.eclipse.search.menu/declarationsSubMenu/group1"
       			label="%DeclarationsInWorkspace.label"
@@ -1495,6 +1501,12 @@
       			label="%InHierarchy.label"
       			allowLabelUpdate="true"
 				definitionId="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy"
+				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.ReferencesInProject"
+    	  		menubarPath="org.eclipse.search.menu/referencesSubMenu/group1"
+      			label="%InProject.label"
+      			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.references.in.project"
 				retarget="true" />	
 			<action id="org.eclipse.jdt.ui.actions.ReferencesInWorkspace"
     	  		menubarPath="org.eclipse.search.menu/referencesSubMenu/group1"
@@ -2642,6 +2654,19 @@
 
 	<command
 		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.references.in.project"
+		name= "%ActionDefinition.referencesInProject.name"
+		description="%ActionDefinition.referencesInProject.description"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+
+	<command
+		category="org.eclipse.search.ui.category.search"
 		id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy"
 		name= "%ActionDefinition.referencesInHierarchy.name"
 		description="%ActionDefinition.referencesInHierarchy.description"
@@ -2768,6 +2793,19 @@
 		string="Command+G"
 		scope="org.eclipse.ui.globalScope"
 		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+
+	<command
+		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.project"
+		name= "%ActionDefinition.declarationsInProject.name"
+		description="%ActionDefinition.declarationsInProject.description"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.project"
 		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
 	/>
 

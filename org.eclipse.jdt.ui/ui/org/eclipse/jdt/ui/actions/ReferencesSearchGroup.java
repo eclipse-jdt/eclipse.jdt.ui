@@ -53,6 +53,7 @@ public class ReferencesSearchGroup extends ActionGroup  {
 	private String fGroupId;
 	
 	private FindReferencesAction fFindReferencesAction;
+	private FindReferencesInProjectAction fFindReferencesInProjectAction;
 	private FindReferencesInHierarchyAction fFindReferencesInHierarchyAction;
 	private FindReferencesInWorkingSetAction fFindReferencesInWorkingSetAction;
 
@@ -68,6 +69,7 @@ public class ReferencesSearchGroup extends ActionGroup  {
 		fGroupId= IContextMenuConstants.GROUP_SEARCH;
 
 		fFindReferencesAction= new FindReferencesAction(site);
+		fFindReferencesInProjectAction= new FindReferencesInProjectAction(site);
 		fFindReferencesInHierarchyAction= new FindReferencesInHierarchyAction(site);
 		fFindReferencesInWorkingSetAction= new FindReferencesInWorkingSetAction(site);
 
@@ -75,6 +77,7 @@ public class ReferencesSearchGroup extends ActionGroup  {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
 		registerAction(fFindReferencesAction, provider, selection);
+		registerAction(fFindReferencesInProjectAction, provider, selection);
 		registerAction(fFindReferencesInHierarchyAction, provider, selection);
 		registerAction(fFindReferencesInWorkingSetAction, provider, selection);
 	}
@@ -92,6 +95,10 @@ public class ReferencesSearchGroup extends ActionGroup  {
 		fFindReferencesAction= new FindReferencesAction(editor);
 		fFindReferencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKSPACE);
 		fEditor.setAction("SearchReferencesInWorkspace", fFindReferencesAction); //$NON-NLS-1$
+
+		fFindReferencesInProjectAction= new FindReferencesInProjectAction(fEditor);
+		fFindReferencesInProjectAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_PROJECT);
+		fEditor.setAction("SearchReferencesInProject", fFindReferencesInProjectAction); //$NON-NLS-1$
 
 		fFindReferencesInHierarchyAction= new FindReferencesInHierarchyAction(fEditor);
 		fFindReferencesInHierarchyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_HIERARCHY);
@@ -113,6 +120,7 @@ public class ReferencesSearchGroup extends ActionGroup  {
 	protected FindAction[] getActions(ISelection sel) {
 		ArrayList actions= new ArrayList(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 3);
 		actions.add(fFindReferencesAction);
+		actions.add(fFindReferencesInProjectAction);
 		actions.add(fFindReferencesInHierarchyAction);
 		actions.add(fFindReferencesInWorkingSetAction);
 
@@ -168,10 +176,12 @@ public class ReferencesSearchGroup extends ActionGroup  {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		if (provider != null) {
 			disposeAction(fFindReferencesAction, provider);
+			disposeAction(fFindReferencesInProjectAction, provider);
 			disposeAction(fFindReferencesInHierarchyAction, provider);
 			disposeAction(fFindReferencesInWorkingSetAction, provider);
 		}
 		fFindReferencesAction= null;
+		fFindReferencesInProjectAction= null;
 		fFindReferencesInHierarchyAction= null;
 		fFindReferencesInWorkingSetAction= null;
 		updateGlobalActionHandlers();
@@ -181,6 +191,7 @@ public class ReferencesSearchGroup extends ActionGroup  {
 	private void updateGlobalActionHandlers() {
 		if (fActionBars != null) {
 			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_REFERENCES_IN_WORKSPACE, fFindReferencesAction);
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_REFERENCES_IN_PROJECT, fFindReferencesInProjectAction);
 			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_REFERENCES_IN_HIERARCHY, fFindReferencesInHierarchyAction);
 			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_REFERENCES_IN_WORKING_SET, fFindReferencesInWorkingSetAction);
 		}
