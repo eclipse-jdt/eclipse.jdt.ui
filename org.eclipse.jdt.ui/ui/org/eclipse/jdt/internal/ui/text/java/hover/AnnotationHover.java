@@ -19,8 +19,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationAccess;
-import org.eclipse.jface.text.source.IAnnotationAccessExtension;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.IEditorPart;
@@ -40,7 +38,7 @@ import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 public class AnnotationHover extends AbstractJavaEditorTextHover {
 
 	private IPreferenceStore fStore= JavaPlugin.getDefault().getPreferenceStore();
-	private IAnnotationAccess fAnnotationAccess= new DefaultMarkerAnnotationAccess();
+	private DefaultMarkerAnnotationAccess fAnnotationAccess= new DefaultMarkerAnnotationAccess();
 	private AnnotationPreferenceLookup fPreferenceLookup= new AnnotationPreferenceLookup();
 	
 	/*
@@ -62,10 +60,6 @@ public class AnnotationHover extends AbstractJavaEditorTextHover {
 		if (getEditor() == null)
 			return null;
 		
-		IAnnotationAccessExtension annotationAccessExtension= null;
-		if (fAnnotationAccess instanceof IAnnotationAccessExtension)
-			annotationAccessExtension= (IAnnotationAccessExtension) fAnnotationAccess;
-			
 		IDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
 		IAnnotationModel model= provider.getAnnotationModel(getEditor().getEditorInput());
 		
@@ -82,9 +76,7 @@ public class AnnotationHover extends AbstractJavaEditorTextHover {
 
 				Position p= model.getPosition(a);
 				
-				int l= IAnnotationAccessExtension.DEFAULT_LAYER;
-				if (fAnnotationAccess != null)
-					l= annotationAccessExtension.getLayer(a);
+				int l= fAnnotationAccess.getLayer(a);
 				
 				if (l > layer && p != null && p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
 					String msg= a.getText();
