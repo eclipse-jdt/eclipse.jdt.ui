@@ -6,8 +6,10 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -23,6 +25,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.debug.core.IJavaBreakpoint;
+import org.eclipse.jdt.debug.core.IJavaLineBreakpoint;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -129,7 +133,10 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 				}
 				if (type != null) {
 					if (!JDIDebugModel.lineBreakpointExists(type, lineNumber)) {
-						JDIDebugModel.createLineBreakpoint(type, lineNumber, line.getOffset(), line.getOffset() + line.getLength(), 0);
+						Map attributes = new HashMap(10);
+						JavaCore.addJavaElementMarkerAttributes(attributes, type);
+						attributes.put("org.eclipse.jdt.debug.ui.JAVA_ELEMENT_HANDLE_ID", type.getHandleIdentifier());
+						IJavaLineBreakpoint bp = JDIDebugModel.createLineBreakpoint(getBreakpointResource(type), type.getFullyQualifiedName(), lineNumber, line.getOffset(), line.getOffset() + line.getLength(), 0, true, attributes);
 					}
 				}
 			}
@@ -163,4 +170,24 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 			ErrorDialog.openError(shell, JavaEditorMessages.getString("ManageBreakpoints.error.removing.title1"), JavaEditorMessages.getString("ManageBreakpoints.error.removing.message1"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
+	
+	/**
+	 * Returns the resource on which a breakpoint marker should
+	 * be created for the given member. The resource returned is the 
+	 * associated file, or project in the case of a class file in 
+	 * a jar.
+	 * 
+	 * @param member member in which a breakpoint is being created
+	 * @return resource the resource on which a breakpoint marker
+	 *  should be created
+	 * @exception CoreException if an exception occurrs accessing the
+	 *  underlying resource or Java model elements
+	 */
+	public IResource getBreakpointResource(IMember member) throws CoreException {
+		IResource res = member.getUnderlyingResource();
+		if (res == null) {
+			res = member.getJavaProject().getProject();
+		}
+		return res;
+	}	
 }
