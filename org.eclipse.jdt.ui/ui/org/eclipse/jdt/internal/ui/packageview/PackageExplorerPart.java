@@ -1293,6 +1293,12 @@ public class PackageExplorerPart extends ViewPart
 
 		ISelection selection= context.getSelection();
 		if (selection != null) {
+			// fix for 64634 Navigate/Show in/Package Explorer doesn't work 
+			if (selection instanceof IStructuredSelection) {
+				IStructuredSelection structuredSelection= ((IStructuredSelection) selection);
+				if (structuredSelection.size() == 1)  
+					return tryToReveal(structuredSelection.getFirstElement());
+			}
 			selectReveal(selection);
 			return true;
 		}
