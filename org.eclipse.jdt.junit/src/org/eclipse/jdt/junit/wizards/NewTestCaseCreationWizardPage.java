@@ -395,14 +395,14 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	protected void createConstructor(IType type, IImportsStructure imports) throws JavaModelException {
 		ITypeHierarchy typeHierarchy= null;
 		IType[] superTypes= null;
-		String constr= ""; //$NON-NLS-1$
+		String constr;
 		IMethod methodTemplate= null;
 		if (type.exists()) {
 			typeHierarchy= type.newSupertypeHierarchy(null);
 			superTypes= typeHierarchy.getAllSuperclasses(type);
 			for (int i= 0; i < superTypes.length; i++) {
 				if (superTypes[i].exists()) {
-					IMethod constrMethod= superTypes[i].getMethod(superTypes[i].getElementName(), new String[] {"Ljava.lang.String;"}); //$NON-NLS-1$
+					IMethod constrMethod= superTypes[i].getMethod(superTypes[i].getElementName(), new String[] {"Ljava.lang.String;"});
 					if (constrMethod.exists() && constrMethod.isConstructor()) {
 						methodTemplate= constrMethod;
 						break;
@@ -410,21 +410,18 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				}
 			}
 		}
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		if (methodTemplate != null) {
+			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 			GenStubSettings genStubSettings= new GenStubSettings(settings);
 			genStubSettings.fCallSuper= true;				
 			genStubSettings.fMethodOverwrites= true;
 			constr= JUnitStubUtility.genStub(getTypeName(), methodTemplate, genStubSettings, imports);
 		} else {
-			StringBuffer field= new StringBuffer();
-			if (settings.createComments)
-				field.append("/**\n * The name of the test case.\n */\n"); //$NON-NLS-1$
-			field.append("private String fName;\n\n"); //$NON-NLS-1$
-			type.createField(field.toString(), null, true, null);
-			if (settings.createComments)
-				constr="/**\n * Constructs a test case with the given name.\n */\n"; //$NON-NLS-1$
-			constr += "public "+getTypeName()+"(String name) {\nfName= name;\n}\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			String field="/**\n * the name of the test case\n */\n" +
+						"private String fName;\n\n";
+			type.createField(field, null, true, null);
+			constr="/**\n * Constructs a test case with the given name.\n */\n" + //$NON-NLS-1$
+				"public "+getTypeName()+"(String name) {\nfName= name;\n}\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		type.createMethod(constr, null, true, null);	
 		fIndexOfFirstTestMethod++;
@@ -450,7 +447,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			}
 			main.append(".TestRunner.run(" + getTypeName() + ".class);"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		main.append("}\n\n"); //$NON-NLS-1$
+		main.append("}\n"); //$NON-NLS-1$
 		type.createMethod(main.toString(), null, false, null);	
 		fIndexOfFirstTestMethod++;		
 	}
@@ -458,7 +455,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	protected void createSetUp(IType type, IImportsStructure imports) throws JavaModelException {
 		ITypeHierarchy typeHierarchy= null;
 		IType[] superTypes= null;
-		String setUp= ""; //$NON-NLS-1$
+		String setUp;
 		IMethod methodTemplate= null;
 		if (type.exists()) {
 			typeHierarchy= type.newSupertypeHierarchy(null);
@@ -473,16 +470,15 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				}
 			}
 		}
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		if (methodTemplate != null) {
+			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 			GenStubSettings genStubSettings= new GenStubSettings(settings);
 			genStubSettings.fCallSuper= true;				
 			genStubSettings.fMethodOverwrites= true;
 			setUp= JUnitStubUtility.genStub(getTypeName(), methodTemplate, genStubSettings, imports);
 		} else {
-			if (settings.createComments)
-				setUp= "/**\n * Sets up the fixture, for example, open a network connection.\n * This method is called before a test is executed.\n * @throws Exception\n */\n"; //$NON-NLS-1$
-			setUp+= "protected void "+SETUP+"() throws Exception {}\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			setUp="/**\n * Sets up the fixture, for example, open a network connection.\n * This method is called before a test is executed.\n * @throws Exception\n */\n" + //$NON-NLS-1$
+				"protected void "+SETUP+"() throws Exception {}\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		type.createMethod(setUp, null, false, null);	
 		fIndexOfFirstTestMethod++;
@@ -491,7 +487,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	protected void createTearDown(IType type, IImportsStructure imports) throws JavaModelException {
 		ITypeHierarchy typeHierarchy= null;
 		IType[] superTypes= null;
-		String tearDown= ""; //$NON-NLS-1$
+		String tearDown;
 		IMethod methodTemplate= null;
 		if (type.exists()) {
 			if (typeHierarchy == null) {
@@ -508,16 +504,15 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				}
 			}
 		}
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		if (methodTemplate != null) {
+			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 			GenStubSettings genStubSettings= new GenStubSettings(settings);				
 			genStubSettings.fCallSuper= true;
 			genStubSettings.fMethodOverwrites= true;
 			tearDown= JUnitStubUtility.genStub(getTypeName(), methodTemplate, genStubSettings, imports);
 		} else {
-			if (settings.createComments)
-				tearDown="/**\n * Tears down the fixture, for example, close a network connection.\n * This method is called after a test is executed.\n * @throws Exception\n */\n"; //$NON-NLS-1$ 
-			tearDown+= "protected void "+TEARDOWN+"() throws Exception {}\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			tearDown="/**\n * Tears down the fixture, for example, close a network connection.\n * This method is called after a test is executed.\n * @throws Exception\n */\n" + //$NON-NLS-1$
+				"protected void "+TEARDOWN+"() throws Exception {}\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}				
 		type.createMethod(tearDown, null, false, null);	
 		fIndexOfFirstTestMethod++;
@@ -599,13 +594,9 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 							methodName.append("Array"); //$NON-NLS-1$
 					}
 				}
-
-				if (newMethodsNames.contains(methodName.toString())) {
-					int suffix= 1;
-					while (newMethodsNames.contains(methodName.toString() + Integer.toString(suffix)))
-						suffix++;
-					methodName.append(Integer.toString(suffix));
-				}
+				
+				if (newMethodsNames.contains(methodName.toString()))
+					methodName.append("1"); //$NON-NLS-1$
 				newMethodsNames.add(new String(methodName));
 				newMethod.append("public void "+methodName.toString()+"() {}\n\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				type.createMethod(newMethod.toString(), null, false, null);	
