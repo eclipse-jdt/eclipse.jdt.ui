@@ -12,6 +12,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.IInputSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -34,6 +36,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
+
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
@@ -52,6 +55,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	private ISearchResultView fView;
 	private JavaSearchOperation fOperation;
 	private int fMatchCount= 0;
+	private boolean fFoundPotentialMatch;
 	private Integer[] fMessageFormatArgs= new Integer[1];
 	
 	private class ContextMenuContributor implements IContextMenuContributor {
@@ -86,6 +90,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	 * @see IJavaSearchResultCollector#aboutToStart().
 	 */
 	public void aboutToStart() {
+		fFoundPotentialMatch= false;
 		fView= SearchUI.getSearchResultView();
 		fMatchCount= 0;
 		if (fView != null) {
@@ -95,7 +100,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 				fOperation.getPluralLabelPattern(),
 				fOperation.getImageDescriptor(),
 				fContextMenu,
-				JavaSearchResultLabelProvider.INSTANCE,
+				new JavaSearchResultLabelProvider(fView),
 				new GotoMarkerAction(),
 				new GroupByKeyComputer(),
 				fOperation);
@@ -112,6 +117,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 		HashMap attributes;
 		Object groupKey= enclosingElement;
 		if (accuracy == POTENTIAL_MATCH) {
+			fFoundPotentialMatch= true;
 			attributes= new HashMap(6);
 			attributes.put(IJavaSearchUIConstants.ATT_ACCURACY, POTENTIAL_MATCH_VALUE);
 			if (groupKey == null)
@@ -145,15 +151,28 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 			getProgressMonitor().setTaskName(MessageFormat.format(DONE, new String[]{matchesString}));
 		}
 
-		if (fView != null)
+		if (fView != null) {
+			if (fFoundPotentialMatch && PotentialMatchDialog.shouldExplain())
+				explainPotentialMatch();
 			fView.searchFinished();
+		}
 
 		// Cut no longer unused references because the collector might be re-used
 		fView= null;
 		fMonitor= null;
 	}
+
+	private void explainPotentialMatch() {
+		// Make sure we are doing it in the right thread.
+		final Shell shell= fView.getSite().getShell();
+		shell.getDisplay().syncExec(new Runnable() {
+			public void run() {
+				PotentialMatchDialog.open(shell);
+			}
+		});
+	}
 	
-	/**
+	/*
 	 * @see IJavaSearchResultCollector#getProgressMonitor().
 	 */
 	public IProgressMonitor getProgressMonitor() {
