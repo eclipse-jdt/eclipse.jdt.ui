@@ -586,7 +586,7 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 		
 		Label label;
 		label= new Label(colorComposite, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.element")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.coloring.element")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	
 		Composite editorComposite= new Composite(colorComposite, SWT.NONE);

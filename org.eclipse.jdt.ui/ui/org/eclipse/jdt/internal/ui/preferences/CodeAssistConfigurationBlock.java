@@ -12,15 +12,8 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -37,12 +30,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
 
-import org.eclipse.jface.text.Assert;
-
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
@@ -50,12 +39,9 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
  * 
  * @since 3.0
  */
-class CodeAssistConfigurationBlock implements IPreferenceConfigurationBlock {
+class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 
 
-	private OverlayPreferenceStore fStore;
-	private PreferencePage fMainPreferencePage;
-	
 	private List fContentAssistColorList;
 	private ColorEditor fContentAssistColorEditor;
     private Control fAutoInsertDelayText;
@@ -72,7 +58,6 @@ class CodeAssistConfigurationBlock implements IPreferenceConfigurationBlock {
 	 * @see #createDependency(Button, String, Control)
 	 * @since 3.0
 	 */
-	private ArrayList fMasterSlaveListeners= new ArrayList();
 
 	private final String[][] fContentAssistColorListModel= new String[][] {
 			{PreferencesMessages.getString("JavaEditorPreferencePage.backgroundForCompletionProposals"), PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND }, //$NON-NLS-1$
@@ -84,42 +69,11 @@ class CodeAssistConfigurationBlock implements IPreferenceConfigurationBlock {
 		};
 
 	
-	private Map fCheckBoxes= new HashMap();
-	private SelectionListener fCheckBoxListener= new SelectionListener() {
-		public void widgetDefaultSelected(SelectionEvent e) {
-		}
-		public void widgetSelected(SelectionEvent e) {
-			Button button= (Button) e.widget;
-			fStore.setValue((String) fCheckBoxes.get(button), button.getSelection());
-		}
-	};
-	
-	private Map fTextFields= new HashMap();
-	private ModifyListener fTextFieldListener= new ModifyListener() {
-		public void modifyText(ModifyEvent e) {
-			Text text= (Text) e.widget;
-			fStore.setValue((String) fTextFields.get(text), text.getText());
-		}
-	};
-
-	private ArrayList fNumberFields= new ArrayList();
-	private ModifyListener fNumberFieldListener= new ModifyListener() {
-		public void modifyText(ModifyEvent e) {
-			numberFieldChanged((Text) e.widget);
-		}
-	};
-	
-	
 	public CodeAssistConfigurationBlock(PreferencePage mainPreferencePage, OverlayPreferenceStore store) {
-		Assert.isNotNull(mainPreferencePage);
-		Assert.isNotNull(store);
-		fStore= store;
-		fStore.addKeys(createOverlayStoreKeys());
-		fMainPreferencePage= mainPreferencePage;
+		super(store, mainPreferencePage);
 	}
 
-
-	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
+	protected OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 		
 		ArrayList overlayKeys= new ArrayList();
 	
@@ -155,41 +109,49 @@ class CodeAssistConfigurationBlock implements IPreferenceConfigurationBlock {
 	 * @return the control for the preference page
 	 */
 	public Control createControl(Composite parent) {
+		SectionManager manager= new SectionManager();
+		Composite contents= manager.createSectionComposite(parent);
+		Composite composite;
 		
-		PixelConverter pixelConverter= new PixelConverter(parent);
-
-		Composite contentAssistComposite= new Composite(parent, SWT.NONE);
-		GridLayout layout= new GridLayout(); 
-		layout.numColumns= 2;
-		contentAssistComposite.setLayout(layout);
+		composite= manager.createStyleSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.insertionSection.title")); //$NON-NLS-1$
+		composite.setLayout(new GridLayout(2, false));
 		
-		addCompletionRadioButtons(contentAssistComposite);
+		addCompletionRadioButtons(composite);
 		
 		String label;		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.insertSingleProposalsAutomatically"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOINSERT, 0);		
+		addCheckBox(composite, label, PreferenceConstants.CODEASSIST_AUTOINSERT, 0);		
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.completePrefixes"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, 0);		
+		addCheckBox(composite, label, PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, 0);		
+		
+		composite= manager.createStyleSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.sortingSection.title")); //$NON-NLS-1$
+		composite.setLayout(new GridLayout(2, false));
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.showOnlyProposalsVisibleInTheInvocationContext"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS, 0);
+		addCheckBox(composite, label, PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS, 0);
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.presentProposalsInAlphabeticalOrder"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_ORDER_PROPOSALS, 0);
+		addCheckBox(composite, label, PreferenceConstants.CODEASSIST_ORDER_PROPOSALS, 0);
+		
+		composite= manager.createStyleSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.advancedSection.title")); //$NON-NLS-1$
+		composite.setLayout(new GridLayout(2, false));
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.automaticallyAddImportInsteadOfQualifiedName"); //$NON-NLS-1$
-		addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_ADDIMPORT, 0);
+		addCheckBox(composite, label, PreferenceConstants.CODEASSIST_ADDIMPORT, 0);
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.fillArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
-		Button master= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, 0);
+		Button master= addCheckBox(composite, label, PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, 0);
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.guessArgumentNamesOnMethodCompletion"); //$NON-NLS-1$
-		Button slave= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, 0);
+		Button slave= addCheckBox(composite, label, PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, 0);
 		createDependency(master, PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, slave);
 		
+		composite= manager.createStyleSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.autoactivationSection.title")); //$NON-NLS-1$
+		composite.setLayout(new GridLayout(2, false));
+		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.enableAutoActivation"); //$NON-NLS-1$
-		final Button autoactivation= addCheckBox(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION, 0);
+		final Button autoactivation= addCheckBox(composite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION, 0);
 		autoactivation.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				updateAutoactivationControls();
@@ -198,40 +160,43 @@ class CodeAssistConfigurationBlock implements IPreferenceConfigurationBlock {
 		
 		Control[] labelledTextField;
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.autoActivationDelay"); //$NON-NLS-1$
-		labelledTextField= addLabelledTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 4, 0, true);
+		labelledTextField= addLabelledTextField(composite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 4, 0, true);
 		fAutoInsertDelayLabel= getLabelControl(labelledTextField);
 		fAutoInsertDelayText= getTextControl(labelledTextField);
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJava"); //$NON-NLS-1$
-		labelledTextField= addLabelledTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, 4, 0, false);
+		labelledTextField= addLabelledTextField(composite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, 4, 0, false);
 		fAutoInsertJavaTriggerLabel= getLabelControl(labelledTextField);
 		fAutoInsertJavaTriggerText= getTextControl(labelledTextField);
 		
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJavaDoc"); //$NON-NLS-1$
-		labelledTextField= addLabelledTextField(contentAssistComposite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, 4, 0, false);
+		labelledTextField= addLabelledTextField(composite, label, PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, 4, 0, false);
 		fAutoInsertJavaDocTriggerLabel= getLabelControl(labelledTextField);
 		fAutoInsertJavaDocTriggerText= getTextControl(labelledTextField);
 		
+		composite= manager.createStyleSection(PreferencesMessages.getString("CodeAssistConfigurationBlock.appearanceSection.title")); //$NON-NLS-1$
+		composite.setLayout(new GridLayout(2, false));
 		
-		Label l= new Label(contentAssistComposite, SWT.LEFT);
+		Label l= new Label(composite, SWT.LEFT);
 		l.setText(PreferencesMessages.getString("JavaEditorPreferencePage.codeAssist.colorOptions")); //$NON-NLS-1$
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		l.setLayoutData(gd);
 		
-		Composite editorComposite= new Composite(contentAssistComposite, SWT.NONE);
-		layout= new GridLayout();
+		Composite editorComposite= new Composite(composite, SWT.NONE);
+		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		editorComposite.setLayout(layout);
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
+		gd= new GridData(SWT.BEGINNING, SWT.FILL, false, true);
 		gd.horizontalSpan= 2;
 		editorComposite.setLayoutData(gd);		
 		
+		PixelConverter pixelConverter= new PixelConverter(parent);
 		fContentAssistColorList= new List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
-		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
-		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(8);
+		gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false);
+		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(9); // limit initial size, but allow to take all it can.
 		fContentAssistColorList.setLayoutData(gd);
 		
 		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
@@ -270,34 +235,13 @@ class CodeAssistConfigurationBlock implements IPreferenceConfigurationBlock {
 				int i= fContentAssistColorList.getSelectionIndex();
 				String key= fContentAssistColorListModel[i][1];
 				
-				PreferenceConverter.setValue(fStore, key, fContentAssistColorEditor.getColorValue());
+				PreferenceConverter.setValue(getPreferenceStore(), key, fContentAssistColorEditor.getColorValue());
 			}
 		});
 		
-		contentAssistComposite.layout(false);
+		contents.layout();
 		
-		return contentAssistComposite;
-	}
-	
-	private void createDependency(final Button master, String masterKey, final Control slave) {
-		indent(slave);
-		boolean masterState= fStore.getBoolean(masterKey);
-		slave.setEnabled(masterState);
-		SelectionListener listener= new SelectionListener() {
-			public void widgetSelected(SelectionEvent e) {
-				slave.setEnabled(master.getSelection());
-			}
-
-			public void widgetDefaultSelected(SelectionEvent e) {}
-		};
-		master.addSelectionListener(listener);
-		fMasterSlaveListeners.add(listener);
-	}
-
-	private static void indent(Control control) {
-		GridData gridData= new GridData();
-		gridData.horizontalIndent= 20;
-		control.setLayoutData(gridData);		
+		return contents;
 	}
 	
 	private static Text getTextControl(Control[] labelledTextField){
@@ -306,46 +250,6 @@ class CodeAssistConfigurationBlock implements IPreferenceConfigurationBlock {
 
 	private static Label getLabelControl(Control[] labelledTextField){
 		return (Label)labelledTextField[0];
-	}
-
-	/**
-	 * Returns an array of size 2:
-	 *  - first element is of type <code>Label</code>
-	 *  - second element is of type <code>Text</code>
-	 * Use <code>getLabelControl</code> and <code>getTextControl</code> to get the 2 controls.
-	 * 
-	 * @param composite 	the parent composite
-	 * @param label			the text field's label
-	 * @param key			the preference key
-	 * @param textLimit		the text limit
-	 * @param indentation	the field's indentation
-	 * @param isNumber		<code>true</code> iff this text field is used to e4dit a number
-	 * @return the controls added
-	 */
-	private Control[] addLabelledTextField(Composite composite, String label, String key, int textLimit, int indentation, boolean isNumber) {
-		
-		PixelConverter pixelConverter= new PixelConverter(composite);
-		
-		Label labelControl= new Label(composite, SWT.NONE);
-		labelControl.setText(label);
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= indentation;
-		labelControl.setLayoutData(gd);
-		
-		Text textControl= new Text(composite, SWT.BORDER | SWT.SINGLE);		
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.widthHint= pixelConverter.convertWidthInCharsToPixels(textLimit + 1);
-		textControl.setLayoutData(gd);
-		textControl.setTextLimit(textLimit);
-		fTextFields.put(textControl, key);
-		if (isNumber) {
-			fNumberFields.add(textControl);
-			textControl.addModifyListener(fNumberFieldListener);
-		} else {
-			textControl.addModifyListener(fTextFieldListener);
-		}
-			
-		return new Control[]{labelControl, textControl};
 	}
 
 	private void addCompletionRadioButtons(Composite contentAssistComposite) {
@@ -361,7 +265,7 @@ class CodeAssistConfigurationBlock implements IPreferenceConfigurationBlock {
 		SelectionListener completionSelectionListener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {				
 				boolean insert= fCompletionInsertsRadioButton.getSelection();
-				fStore.setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, insert);
+				getPreferenceStore().setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, insert);
 			}
 		};
 		
@@ -392,39 +296,18 @@ class CodeAssistConfigurationBlock implements IPreferenceConfigurationBlock {
 		
 	}
 
-	void initializeFields() {
-		Iterator e= fCheckBoxes.keySet().iterator();
-		while (e.hasNext()) {
-			Button b= (Button) e.next();
-			String key= (String) fCheckBoxes.get(b);
-			b.setSelection(fStore.getBoolean(key));
-		}
+	protected void initializeFields() {
+		super.initializeFields();
 		
-		e= fTextFields.keySet().iterator();
-		while (e.hasNext()) {
-			Text t= (Text) e.next();
-			String key= (String) fTextFields.get(t);
-			t.setText(fStore.getString(key));
-		}
-		
-		boolean completionInserts= fStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
+		boolean completionInserts= getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
 		fCompletionInsertsRadioButton.setSelection(completionInserts);
 		fCompletionOverwritesRadioButton.setSelection(! completionInserts);
 		
 		updateAutoactivationControls();
-        
-        updateStatus(validatePositiveNumber("0")); //$NON-NLS-1$
-        
-        // Update slaves
-        Iterator iter= fMasterSlaveListeners.iterator();
-        while (iter.hasNext()) {
-            SelectionListener listener= (SelectionListener)iter.next();
-            listener.widgetSelected(null);
-        }
-	}
+ 	}
 	
     private void updateAutoactivationControls() {
-        boolean autoactivation= fStore.getBoolean(PreferenceConstants.CODEASSIST_AUTOACTIVATION);
+        boolean autoactivation= getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_AUTOACTIVATION);
         fAutoInsertDelayText.setEnabled(autoactivation);
 		fAutoInsertDelayLabel.setEnabled(autoactivation);
 
@@ -435,63 +318,16 @@ class CodeAssistConfigurationBlock implements IPreferenceConfigurationBlock {
 		fAutoInsertJavaDocTriggerLabel.setEnabled(autoactivation);
     }
 
-	public void performOk() {
-	}
-
-	public  void performDefaults() {
+	public void performDefaults() {
 		handleContentAssistColorListSelection();
-		initializeFields();
+		super.performDefaults();
 	}
 	
 	private void handleContentAssistColorListSelection() {	
 		int i= fContentAssistColorList.getSelectionIndex();
 		String key= fContentAssistColorListModel[i][1];
-		RGB rgb= PreferenceConverter.getColor(fStore, key);
+		RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), key);
 		fContentAssistColorEditor.setColorValue(rgb);
-	}
-	
-	private void numberFieldChanged(Text textControl) {
-		String number= textControl.getText();
-		IStatus status= validatePositiveNumber(number);
-		if (!status.matches(IStatus.ERROR))
-			fStore.setValue((String) fTextFields.get(textControl), number);
-		updateStatus(status);
-	}
-	
-	private IStatus validatePositiveNumber(String number) {
-		StatusInfo status= new StatusInfo();
-		if (number.length() == 0) {
-			status.setError(PreferencesMessages.getString("JavaEditorPreferencePage.empty_input")); //$NON-NLS-1$
-		} else {
-			try {
-				int value= Integer.parseInt(number);
-				if (value < 0)
-					status.setError(PreferencesMessages.getFormattedString("JavaEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
-			} catch (NumberFormatException e) {
-				status.setError(PreferencesMessages.getFormattedString("JavaEditorPreferencePage.invalid_input", number)); //$NON-NLS-1$
-			}
-		}
-		return status;
-	}
-	
-	private void updateStatus(IStatus status) {
-		fMainPreferencePage.setValid(status.isOK());
-		StatusUtil.applyToStatusLine(fMainPreferencePage, status);
-	}
-	
-	private Button addCheckBox(Composite parent, String label, String key, int indentation) {		
-		Button checkBox= new Button(parent, SWT.CHECK);
-		checkBox.setText(label);
-		
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.horizontalIndent= indentation;
-		gd.horizontalSpan= 2;
-		checkBox.setLayoutData(gd);
-		checkBox.addSelectionListener(fCheckBoxListener);
-		
-		fCheckBoxes.put(checkBox, key);
-		
-		return checkBox;
 	}
 	
 	/*
