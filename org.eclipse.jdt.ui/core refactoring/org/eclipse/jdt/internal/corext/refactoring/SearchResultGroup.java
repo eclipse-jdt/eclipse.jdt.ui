@@ -10,29 +10,40 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+import org.eclipse.jdt.internal.corext.Assert;
+
 public class SearchResultGroup {
 
 	private final IResource fResouce;
-	private final SearchResult[] fSearchResults;
+	private final List fSearchResults;
 	
 	public SearchResultGroup(IResource res, SearchResult[] results){
+		Assert.isNotNull(results);
 		fResouce= res;
-		fSearchResults= results;
+		fSearchResults= new ArrayList(Arrays.asList(results));//have to is this way to allow adding
 	}
 
+	public void add(SearchResult result) {
+		Assert.isNotNull(result);
+		fSearchResults.add(result);		
+	}
+	
 	public IResource getResource() {
 		return fResouce;
 	}
-
+	
 	public SearchResult[] getSearchResults() {
-		return fSearchResults;
+		return (SearchResult[]) fSearchResults.toArray(new SearchResult[fSearchResults.size()]);
 	}
 	
 	public static IResource[] getResources(SearchResultGroup[] searchResultGroups){
@@ -48,6 +59,4 @@ public class SearchResultGroup {
 			return null;
 		return getSearchResults()[0].getCompilationUnit();
 	}
-
 }
-
