@@ -68,10 +68,13 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 	
 	private InferTypeArgumentsTCModel fTCModel;
 	private ICompilationUnit fCU;
+
+	private final boolean fAssumeCloneReturnsSameType;
 	
 
-	public InferTypeArgumentsConstraintCreator(InferTypeArgumentsTCModel model) {
+	public InferTypeArgumentsConstraintCreator(InferTypeArgumentsTCModel model, boolean assumeCloneReturnsSameType) {
 		fTCModel= model;
+		fAssumeCloneReturnsSameType= assumeCloneReturnsSameType;
 	}
 	
 	public boolean visit(CompilationUnit node) {
@@ -120,7 +123,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			return;
 		
 		Assignment.Operator op= node.getOperator();
-		if (op == Assignment.Operator.PLUS_ASSIGN && (lhs.resolveTypeBinding() == node.getAST().resolveWellKnownType("java.lang.String"))) {
+		if (op == Assignment.Operator.PLUS_ASSIGN && (lhs.resolveTypeBinding() == node.getAST().resolveWellKnownType("java.lang.String"))) { //$NON-NLS-1$
 			//Special handling for automatic String conversion: do nothing; the RHS can be anything.
 		} else {
 			createElementEqualsConstraints(left, right);
@@ -150,6 +153,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			return;
 		
 		fTCModel.makeCastVariable(node, expressionCv);
+		createElementEqualsConstraints(expressionCv, typeCv);
 		
 		boolean eitherIsIntf= type.resolveBinding().isInterface() || expression.resolveTypeBinding().isInterface();
 		if (eitherIsIntf)
@@ -330,6 +334,17 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 	
 	private void doVisitMethodInvocationReturnType(MethodInvocation node, IMethodBinding methodBinding, Expression receiver, Map/*<String, IndependentTypeVariable2>*/ methodTypeVariables) {
 		ITypeBinding declaredReturnType= methodBinding.getMethodDeclaration().getReturnType();
+		if (fAssumeCloneReturnsSameType
+				&& "clone".equals(methodBinding.getName()) //$NON-NLS-1$
+				&& methodBinding.getParameterTypes().length == 0
+				&& receiver != null
+				&& receiver.resolveTypeBinding() != declaredReturnType) {
+			ConstraintVariable2 expressionCv= getConstraintVariable(receiver);
+			// [retVal] =^= [receiver]:
+			setConstraintVariable(node, expressionCv);
+			return;
+		}
+		
 		if (declaredReturnType.isTypeVariable()) {
 			ConstraintVariable2 methodTypeVariableCv= (ConstraintVariable2) methodTypeVariables.get(declaredReturnType.getKey());
 			if (methodTypeVariableCv != null) {

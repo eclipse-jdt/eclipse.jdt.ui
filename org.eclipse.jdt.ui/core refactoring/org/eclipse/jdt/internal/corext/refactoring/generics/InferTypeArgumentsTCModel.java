@@ -462,8 +462,12 @@ public class InferTypeArgumentsTCModel {
 			ITypeBinding[] referenceTypeArguments= reference.getTypeArguments();
 			ITypeBinding[] referenceTypeParameters= reference.getTypeDeclaration().getTypeParameters();
 			for (int i= 0; i < referenceTypeParameters.length; i++) {
-				ITypeBinding referenceTypeArgument= referenceTypeArguments[i];
 				ITypeBinding referenceTypeParameter= referenceTypeParameters[i];
+				ITypeBinding referenceTypeArgument;
+				if (reference.isRawType())
+					referenceTypeArgument= referenceTypeParameter.getErasure();
+				else
+					referenceTypeArgument= referenceTypeArguments[i];
 				ConstraintVariable2 referenceTypeArgumentCv;
 				if (referenceTypeArgument.isTypeVariable()) {
 					referenceTypeArgumentCv= (ConstraintVariable2) methodTypeVariables.get(referenceTypeArgument.getKey());
@@ -543,12 +547,13 @@ public class InferTypeArgumentsTCModel {
 				|| type.isRawType();
 	}
 
-	public void makeCastVariable(CastExpression castExpression, ConstraintVariable2 expressionCv) {
+	public CastVariable2 makeCastVariable(CastExpression castExpression, ConstraintVariable2 expressionCv) {
 		ITypeBinding typeBinding= castExpression.resolveTypeBinding();
 		ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(castExpression);
 		CompilationUnitRange range= new CompilationUnitRange(cu, castExpression);
 		CastVariable2 castCv= new CastVariable2(fTypeEnvironment.create(typeBinding), range, expressionCv);
 		fCastVariables.add(castCv);
+		return castCv;
 	}
 	
 }

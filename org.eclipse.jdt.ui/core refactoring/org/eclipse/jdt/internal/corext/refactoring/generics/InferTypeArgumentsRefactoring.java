@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.generics;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,19 +34,21 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -71,6 +74,9 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	private TextChangeManager fChangeManager;
 	private final IJavaElement[] fElements;
 	private InferTypeArgumentsTCModel fTCModel;
+
+	private boolean fAssumeCloneReturnsSameType;
+	private boolean fLeaveUnconstrainedRaw;
 	
 	private InferTypeArgumentsRefactoring(IJavaElement[] elements) {
 		fElements= elements;
@@ -94,6 +100,22 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		return RefactoringCoreMessages.getString("InferTypeArgumentsRefactoring.name"); //$NON-NLS-1$
 	}
 	
+	public void setAssumeCloneReturnsSameType(boolean assume) {
+		fAssumeCloneReturnsSameType= assume;
+	}
+	
+	public boolean getAssumeCloneReturnsSameType() {
+		return fAssumeCloneReturnsSameType;
+	}
+	
+	public void setLeaveUnconstrainedRaw(boolean raw) {
+		fLeaveUnconstrainedRaw= raw;
+	}
+	
+	public boolean getLeaveUnconstrainedRaw() {
+		return fLeaveUnconstrainedRaw;
+	}
+	
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#checkInitialConditions(org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -107,14 +129,14 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public RefactoringStatus checkFinalConditions(final IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		pm.beginTask("", 4); //$NON-NLS-1$
+		HashMap/*<IJavaProject, List<JavaElement>>*/ projectsToElements= getJavaElementsPerProject(fElements);
+		pm.beginTask("", projectsToElements.size() + 1); //$NON-NLS-1$
 		pm.setTaskName(RefactoringCoreMessages.getString("InferTypeArgumentsRefactoring.checking_preconditions")); //$NON-NLS-1$
 		try {
-			HashMap/*<IJavaProject, List<JavaElement>>*/ projectsToElements= getJavaElementsPerProject(fElements);
 			RefactoringStatus result= check15();
 			
 			fTCModel= new InferTypeArgumentsTCModel();
-			final InferTypeArgumentsConstraintCreator unitCollector= new InferTypeArgumentsConstraintCreator(fTCModel);
+			final InferTypeArgumentsConstraintCreator unitCollector= new InferTypeArgumentsConstraintCreator(fTCModel, fAssumeCloneReturnsSameType);
 			
 			pm.setTaskName("Building constraints system...");
 			
@@ -135,7 +157,6 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 						pm.subTask(source.getElementName());
 						ast.setProperty(RefactoringASTParser.SOURCE_PROPERTY, source);
 						ast.accept(unitCollector);
-						//TODO: add required methods/cus to "toscan" list
 						fTCModel.newCu();
 					}
 
@@ -157,7 +178,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			rewriteDeclarations(declarationsToUpdate, castsToRemove, new SubProgressMonitor(pm, 1));
 			
 			IFile[] filesToModify= ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
-			result.merge(Checks.validateModifiesFiles(filesToModify, null));
+			result.merge(Checks.validateModifiesFiles(filesToModify, getValidationContext()));
 			return result;
 		} finally {
 			pm.done();
@@ -181,22 +202,18 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 
 	private RefactoringStatus check15() {
 		//TODO: move to checkInitialConditions() and make an error iff jdk15 not available
+		// Problem: only FATAL errors from checkInitialConditions() are shown to the user.
 		RefactoringStatus result= new RefactoringStatus();
-		HashMap/*<IJavaProject, Boolean>*/ project15ness= new HashMap/*<IJavaProject, Boolean>*/();
+		HashSet/*<IJavaProject>*/ checkedProjects= new HashSet/*<IJavaProject>*/();
 		
 		for (int i= 0; i < fElements.length; i++) {
 			IJavaProject javaProject= fElements[i].getJavaProject();
-			if (! project15ness.containsKey(javaProject)) {
-				String sourceLevel= javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
-				boolean is15= ! JavaCore.VERSION_1_1.equals(sourceLevel)
-						&& ! JavaCore.VERSION_1_2.equals(sourceLevel)
-						&& ! JavaCore.VERSION_1_3.equals(sourceLevel)
-						&& ! JavaCore.VERSION_1_4.equals(sourceLevel);
-				if (! is15) {
+			if (! checkedProjects.contains(javaProject)) {
+				if (! JavaModelUtil.is50OrHigher(javaProject)) {
 					String message= "Changes in project '" + javaProject.getElementName() + "' will not compile until compiler source level is raised to 1.5.";
 					result.addError(message);
 				}
-				project15ness.put(javaProject, Boolean.valueOf(is15));
+				checkedProjects.add(javaProject);
 			}
 		}
 		return result;
@@ -212,7 +229,6 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			pm.worked(1);
 			pm.subTask(cu.getElementName());
 
-			//TODO: use CompilationUnitRewrite
 			CompilationUnitRewrite rewrite= new CompilationUnitRewrite(cu);
 			rewrite.setResolveBindings(false);
 			List cvs= (List) entry.getValue();
@@ -226,9 +242,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			if (casts != null) {
 				for (Iterator castsIter= casts.iterator(); castsIter.hasNext();) {
 					CastVariable2 castCv= (CastVariable2) castsIter.next();
-					CastExpression castExpression= (CastExpression) castCv.getRange().getNode(rewrite.getRoot());
-					Expression newExpression= (Expression) rewrite.getASTRewrite().createMoveTarget(castExpression.getExpression());
-					rewrite.getASTRewrite().replace(castExpression, newExpression, null); //TODO: use ImportRemover
+					rewriteCastVariable(castCv, rewrite);
 				}
 			}
 			
@@ -289,8 +303,17 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 						Type typeArgument;
 						TType chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(elementCv);
 						if (chosenType == null) { // couldn't infer an element type (no constraints)
-							// every guess could be wrong => leave the whole thing raw:
-							return;
+							if (fLeaveUnconstrainedRaw) {
+								// every guess could be wrong => leave the whole thing raw:
+								return;
+							} else {
+								if (unboundedWildcardAllowed(originalType)) {
+									typeArgument= rewrite.getAST().newWildcardType();
+								} else {
+									String object= rewrite.getImportRewrite().addImport("java.lang.Object"); //$NON-NLS-1$
+									typeArgument= (Type) rewrite.getASTRewrite().createStringPlaceholder(object, ASTNode.SIMPLE_TYPE);
+								}
+							}
 //							ASTNode originalTypeParent= originalType.getParent();
 //							if (originalTypeParent instanceof ClassInstanceCreation) {
 //								//No ? allowed. Take java.lang.Object.
@@ -322,6 +345,33 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			}
 			
 		}
+	}
+
+	private boolean unboundedWildcardAllowed(Type originalType) {
+		ASTNode parent= originalType.getParent();
+		while (parent instanceof Type)
+			parent= parent.getParent();
+		
+		if (parent instanceof ClassInstanceCreation) {
+			return false;
+		} else if (parent instanceof TypeLiteral) {
+			return false;
+		}
+		return true;
+	}
+
+	private void rewriteCastVariable(CastVariable2 castCv, CompilationUnitRewrite rewrite) {
+		CastExpression castExpression= (CastExpression) castCv.getRange().getNode(rewrite.getRoot());
+		Expression expression= castExpression.getExpression();
+		ASTNode nodeToReplace;
+		if (castExpression.getParent() instanceof ParenthesizedExpression)
+			nodeToReplace= castExpression.getParent();
+		else
+			nodeToReplace= castExpression;
+		
+		Expression newExpression= (Expression) rewrite.getASTRewrite().createMoveTarget(expression);
+		rewrite.getASTRewrite().replace(nodeToReplace, newExpression, null);
+		rewrite.getImportRemover().registerRemovedNode(nodeToReplace);
 	}
 
 	/*

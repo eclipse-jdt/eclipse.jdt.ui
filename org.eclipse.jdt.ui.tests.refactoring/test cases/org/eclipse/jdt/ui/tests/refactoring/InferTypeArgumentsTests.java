@@ -46,6 +46,9 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	
 	private static final Class clazz= InferTypeArgumentsTests.class;
 	private static final String REFACTORING_PATH= "InferTypeArguments/";
+
+	private boolean fAssumeCloneReturnsSameType= false;
+	private boolean fLeaveUnconstrainedRaw= true;
 	
 	public static Test suite() {
 		return new Java15Setup(new TestSuite(clazz));
@@ -91,7 +94,8 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		if (! initialStatus.isOK())
 			return false;
 		
-		// set client options here (from instance variables)
+		refactoring.setAssumeCloneReturnsSameType(fAssumeCloneReturnsSameType);
+		refactoring.setLeaveUnconstrainedRaw(fLeaveUnconstrainedRaw);
 
 		PerformRefactoringOperation op= new PerformRefactoringOperation(
 				refactoring, CheckConditionsOperation.FINAL_CONDITIONS);
@@ -267,12 +271,12 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	
 	public void testCuCollectionsMin() throws Exception {
 		printTestDisabledMessage("inference of method type arguments does not work yet");
-//TODO		performCuOK();
+//		performCuOK(); //TODO
 	}
 	
 	public void testCuAddStringInteger() throws Exception {
 		printTestDisabledMessage("currently, we don't follow flow through variables of type Object");
-//TODO		performCuOK();
+//		performCuOK(); //TODO
 	}
 	
 	public void testCuAddStringIntegerA() throws Exception {
@@ -281,7 +285,7 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		
 	public void testCuInferFromCast() throws Exception {
 		printTestDisabledMessage("not implemented yet");
-//		performCuOK();
+//		performCuOK(); //TODO
 	}
 	
 	public void testCuRippleMethods() throws Exception {
@@ -348,5 +352,10 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 			return;
 		}
 		performCuOK();
+	}
+	
+	public void testCuMapEntry01() throws Exception {
+		printTestDisabledMessage("not implemented yet");
+//		performCuOK(); //TODO
 	}
 }
