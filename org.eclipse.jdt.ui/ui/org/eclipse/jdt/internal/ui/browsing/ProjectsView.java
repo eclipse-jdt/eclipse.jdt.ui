@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -77,6 +78,11 @@ public class ProjectsView extends JavaBrowsingPart {
 	protected String getHelpContextId() {
 		return IJavaHelpContextIds.PROJECTS_VIEW;
 	}
+	
+	protected String getLinkToEditorKey() {
+		return PreferenceConstants.LINK_BROWSING_PROJECTS_TO_EDITOR;
+	}
+
 
 	/**
 	 * Adds additional listeners to this view.

@@ -44,11 +44,9 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
  */
 public class JavaBasePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	private static final String LINK_TYPEHIERARCHY_TO_EDITOR= PreferenceConstants.LINK_TYPEHIERARCHY_TO_EDITOR;
 	private static final String OPEN_TYPE_HIERARCHY= PreferenceConstants.OPEN_TYPE_HIERARCHY;
 	private static final String OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE= PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE;
 	private static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART;
-	private static final String LINK_BROWSING_VIEW_TO_EDITOR= PreferenceConstants.LINK_BROWSING_VIEW_TO_EDITOR;
 
 	private static final String DOUBLE_CLICK= PreferenceConstants.DOUBLE_CLICK;
 	private static final String DOUBLE_CLICK_GOES_INTO= PreferenceConstants.DOUBLE_CLICK_GOES_INTO;
@@ -187,13 +185,13 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		result.setLayout(layout);
 		
 		// new Label(composite, SWT.NONE); // spacer
-		Group linkSettings= new Group(result, SWT.NONE);
-		linkSettings.setLayout(new GridLayout());
-		linkSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		linkSettings.setText(PreferencesMessages.getString("JavaBasePreferencePage.linkSettings.text")); //$NON-NLS-1$
-		addCheckBox(linkSettings, PreferencesMessages.getString("JavaBasePreferencePage.linkJavaBrowsingViewsCheckbox.text"), LINK_BROWSING_VIEW_TO_EDITOR); //$NON-NLS-1$
+		// Group linkSettings= new Group(result, SWT.NONE);
+		// linkSettings.setLayout(new GridLayout());
+		// linkSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		// linkSettings.setText(PreferencesMessages.getString("JavaBasePreferencePage.linkSettings.text")); //$NON-NLS-1$
+		//addCheckBox(linkSettings, PreferencesMessages.getString("JavaBasePreferencePage.linkJavaBrowsingViewsCheckbox.text"), LINK_BROWSING_VIEW_TO_EDITOR); //$NON-NLS-1$
 		//addCheckBox(linkSettings, PreferencesMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR); //$NON-NLS-1$
-		addCheckBox(linkSettings, PreferencesMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), LINK_TYPEHIERARCHY_TO_EDITOR); //$NON-NLS-1$
+		//addCheckBox(linkSettings, PreferencesMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), LINK_TYPEHIERARCHY_TO_EDITOR); //$NON-NLS-1$
 
 		// new Label(result, SWT.NONE); // spacer
 

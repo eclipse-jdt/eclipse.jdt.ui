@@ -154,6 +154,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private IPartListener2 fPartListener;
 
 	private int fCurrentOrientation;
+	private boolean fLinkingEnabled;
 	
 	private boolean fIsVisible;
 	private boolean fNeedRefresh;	
@@ -178,6 +179,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private JavaUILabelProvider fPaneLabelProvider;
 	
 	private ToggleViewAction[] fViewActions;
+	private ToggleLinkingAction fToggleLinkingAction;
 	private HistoryDropDownAction fHistoryDropDownAction;
 	private ToggleOrientationAction[] fToggleOrientationActions;
 	private EnableMemberFilterAction fEnableMemberFilterAction;
@@ -237,7 +239,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fShowQualifiedTypeNamesAction= new ShowQualifiedTypeNamesAction(this, false);
 		
 		fFocusOnTypeAction= new FocusOnTypeAction(this);
-		
+				
 		fPaneLabelProvider= new JavaUILabelProvider();
 		
 		fAddStubAction= new AddMethodStubAction();
@@ -282,6 +284,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			}
 		};
 		
+		fLinkingEnabled= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.LINK_TYPEHIERARCHY_TO_EDITOR);
 	}
 
 	/**
@@ -728,6 +731,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		// will fill the main tool bar
 		setOrientation(orientation);
 		
+		if (fMemento != null) { // restore state before creating action
+			restoreLinkingEnabled(fMemento);
+		}
+		fToggleLinkingAction= new ToggleLinkingAction(this);
+
 		// set the filter menu items
 		IActionBars actionBars= getViewSite().getActionBars();
 		IMenuManager viewMenu= actionBars.getMenuManager();
@@ -736,6 +744,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 		viewMenu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		viewMenu.add(fShowQualifiedTypeNamesAction);
+		viewMenu.add(fToggleLinkingAction);
 		
 	
 		// fill the method viewer toolbar
@@ -1236,7 +1245,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					if (changedTypes.length == 1) {
 						getCurrentViewer().refresh(changedTypes[0]);
 					} else {
-						updateHierarchyViewer(false);
+						updateHierarchyViewer();
 					}
 				} else {
 					getCurrentViewer().update(changedTypes, new String[] { IBasicPropertyConstants.P_TEXT, IBasicPropertyConstants.P_IMAGE } );
@@ -1312,8 +1321,14 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 			
 		fMethodsViewer.saveState(memento);
+		
+		saveLinkingEnabled(memento);
 	}
 	
+	private void saveLinkingEnabled(IMemento memento) {
+		memento.putInteger(PreferenceConstants.LINK_TYPEHIERARCHY_TO_EDITOR, fLinkingEnabled ? 1 : 0);
+	}
+
 	/**
 	 * Restores the type hierarchy settings from a memento.
 	 */
@@ -1359,6 +1374,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fMethodsViewer.restoreState(memento);
 	}
 	
+	private void restoreLinkingEnabled(IMemento memento) {
+		Integer val= memento.getInteger(PreferenceConstants.LINK_TYPEHIERARCHY_TO_EDITOR);
+		if (val != null) {
+			fLinkingEnabled= val.intValue() != 0;
+		}
+	}
+	
 	
 	/**
 	 * view part becomes visible
@@ -1376,7 +1398,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * Link selection to active editor.
 	 */
 	protected void editorActivated(IEditorPart editor) {
-		if (!PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.LINK_TYPEHIERARCHY_TO_EDITOR)) {
+		if (!isLinkingEnabled()) {
 			return;
 		}
 		if (fInputElement == null) {
@@ -1430,5 +1452,18 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		};
 	}
 	
+	boolean isLinkingEnabled() {
+		return fLinkingEnabled;
+	}
+	
+	public void setLinkingEnabled(boolean enabled) {
+		fLinkingEnabled= enabled;
+		if (enabled) {
+			IEditorPart editor = getSite().getPage().getActiveEditor();
+			if (editor != null) {
+				editorActivated(editor);
+			}
+		}
+	}
 
 }

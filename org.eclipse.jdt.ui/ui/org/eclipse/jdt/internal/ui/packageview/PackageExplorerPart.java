@@ -193,6 +193,8 @@ public class PackageExplorerPart extends ViewPart
 	/* (non-Javadoc)
 	 * Method declared on IViewPart.
 	 */
+	private boolean fLinkingEnabled;
+
 	public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
 		fMemento= memento;
@@ -283,6 +285,10 @@ public class PackageExplorerPart extends ViewPart
 		site.registerContextMenu(menuMgr, fViewer);
 		site.setSelectionProvider(fViewer);
 		site.getPage().addPartListener(fPartListener);
+		
+		if (fMemento != null) {
+			restoreLinkingEnabled(fMemento);
+		}
 		
 		makeActions(); // call before registering for selection changes
 		
@@ -651,17 +657,17 @@ public class PackageExplorerPart extends ViewPart
 		selectReveal(new StructuredSelection(element));
 	}
 	
-	/**
-	 * Returns whether the preference to link selection to active editor is enabled.
-	 */
 	boolean isLinkingEnabled() {
-		/*
-		 * linking was removed in 2.1
-		 * the key we use now is internal and
-		 * false will normally be returned by this method.
-		 */ 
-		return PreferenceConstants.getPreferenceStore().getBoolean("org.eclipse.jdt.internal.ui.packages.linktoeditor"); //$NON-NLS-1$
+		return fLinkingEnabled;
 	}
+	
+	/**
+	 * Initializes the linking enabled setting from the preference store.
+	 */
+	private void initLinkingEnabled() {
+		fLinkingEnabled= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.LINK_PACKAGES_TO_EDITOR);
+	}
+
 
 	/**
 	 * Links to editor (if option enabled)
@@ -700,12 +706,16 @@ public class PackageExplorerPart extends ViewPart
 		saveExpansionState(memento);
 		saveSelectionState(memento);
 		saveLayoutState(memento);
-		
+		saveLinkingEnabled(memento);
 		// commented out because of http://bugs.eclipse.org/bugs/show_bug.cgi?id=4676
 		//saveScrollState(memento, fViewer.getTree());
 		fActionSet.saveFilterAndSorterState(memento);
 	}
 	
+	private void saveLinkingEnabled(IMemento memento) {
+		memento.putInteger(PreferenceConstants.LINK_PACKAGES_TO_EDITOR, fLinkingEnabled ? 1 : 0);
+	}
+
 	/**
 	 * Saves the current layout state.
 	 * 
@@ -768,7 +778,6 @@ public class PackageExplorerPart extends ViewPart
 		}
 	}
 
-
 	private void restoreFilterAndSorter() {
 		fViewer.setSorter(new JavaElementSorter());
 		if (fMemento != null)	
@@ -780,6 +789,13 @@ public class PackageExplorerPart extends ViewPart
 		restoreSelectionState(memento);
 		// commented out because of http://bugs.eclipse.org/bugs/show_bug.cgi?id=4676
 		//restoreScrollState(memento, fViewer.getTree());
+	}
+
+	private void restoreLinkingEnabled(IMemento memento) {
+		Integer val= memento.getInteger(PreferenceConstants.LINK_PACKAGES_TO_EDITOR);
+		if (val != null) {
+			fLinkingEnabled= val.intValue() != 0;
+		}
 	}
 
 	protected void restoreScrollState(IMemento memento, Tree tree) {
@@ -1065,6 +1081,7 @@ public class PackageExplorerPart extends ViewPart
 	}
 	
 	public PackageExplorerPart() { 
+		initLinkingEnabled();
 	}
 
 	public boolean show(ShowInContext context) {
@@ -1091,5 +1108,19 @@ public class PackageExplorerPart extends ViewPart
 					getViewer().getSelection());
 			}
 		};
+	}
+
+	/**
+	 * @see IResourceNavigator#setLinkingEnabled(boolean)
+	 * @since 2.1
+	 */
+	public void setLinkingEnabled(boolean enabled) {
+		fLinkingEnabled= enabled;
+		if (enabled) {
+			IEditorPart editor = getSite().getPage().getActiveEditor();
+			if (editor != null) {
+				editorActivated(editor);
+			}
+		}
 	}
 }

@@ -87,6 +87,10 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 		return IJavaHelpContextIds.MEMBERS_VIEW;
 	}
 
+	protected String getLinkToEditorKey() {
+		return PreferenceConstants.LINK_BROWSING_MEMBERS_TO_EDITOR;
+	}
+
 	/**
 	 * Creates the the viewer of this part.
 	 * 
@@ -101,6 +105,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	protected void fillToolBar(IToolBarManager tbm) {
 		tbm.add(new LexicalSortingAction(getViewer(), JavaUI.ID_MEMBERS_VIEW));
 		fMemberFilterActionGroup.contributeToToolBar(tbm);
+		super.fillToolBar(tbm);
 	}
 	
 	/**

@@ -49,6 +49,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -256,6 +257,10 @@ public class PackagesView extends JavaBrowsingPart{
 	 */
 	protected String getHelpContextId() {
 		return IJavaHelpContextIds.PACKAGES_BROWSING_VIEW;
+	}
+
+	protected String getLinkToEditorKey() {
+		return PreferenceConstants.LINK_BROWSING_PACKAGES_TO_EDITOR;
 	}
 
 	/**

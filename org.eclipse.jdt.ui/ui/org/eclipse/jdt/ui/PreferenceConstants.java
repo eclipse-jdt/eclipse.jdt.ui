@@ -224,7 +224,6 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
-	 * @deprecated back linking is no longer supported 
 	 */
 	public static final String LINK_PACKAGES_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktoeditor"; //$NON-NLS-1$
 
@@ -237,15 +236,44 @@ public class PreferenceConstants {
 	public static final String LINK_TYPEHIERARCHY_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktypehierarchytoeditor"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls whether the browsing view's selection is
+	 * A named preference that controls whether the projects view's selection is
 	 * linked to the active editor.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 * @since 2.1
 	 */
-	public static final String LINK_BROWSING_VIEW_TO_EDITOR= "org.eclipse.jdt.ui.browsing.linktoeditor"; //$NON-NLS-1$
+	public static final String LINK_BROWSING_PROJECTS_TO_EDITOR= "org.eclipse.jdt.ui.browsing.projectstoeditor"; //$NON-NLS-1$
 
+	/**
+	 * A named preference that controls whether the packages view's selection is
+	 * linked to the active editor.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public static final String LINK_BROWSING_PACKAGES_TO_EDITOR= "org.eclipse.jdt.ui.browsing.packagestoeditor"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether the types view's selection is
+	 * linked to the active editor.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public static final String LINK_BROWSING_TYPES_TO_EDITOR= "org.eclipse.jdt.ui.browsing.typestoeditor"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether the members view's selection is
+	 * linked to the active editor.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public static final String LINK_BROWSING_MEMBERS_TO_EDITOR= "org.eclipse.jdt.ui.browsing.memberstoeditor"; //$NON-NLS-1$
 	/**
 	 * A named preference that controls whether new projects are generated using source and output folder.
 	 * <p>
@@ -1582,13 +1610,17 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_SHOW_SEGMENTS, false);
 
 		// JavaBasePreferencePage
-		store.setDefault(PreferenceConstants.LINK_PACKAGES_TO_EDITOR, true);
+		store.setDefault(PreferenceConstants.LINK_PACKAGES_TO_EDITOR, false);
 		store.setDefault(PreferenceConstants.LINK_TYPEHIERARCHY_TO_EDITOR, false);
-		store.setDefault(PreferenceConstants.LINK_BROWSING_VIEW_TO_EDITOR, true);
 		store.setDefault(PreferenceConstants.OPEN_TYPE_HIERARCHY, PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
 		store.setDefault(PreferenceConstants.DOUBLE_CLICK, PreferenceConstants.DOUBLE_CLICK_EXPANDS);
 		store.setDefault(PreferenceConstants.UPDATE_JAVA_VIEWS, PreferenceConstants.UPDATE_WHILE_EDITING);	
 		
+		store.setDefault(PreferenceConstants.LINK_BROWSING_PROJECTS_TO_EDITOR, true);
+		store.setDefault(PreferenceConstants.LINK_BROWSING_PACKAGES_TO_EDITOR, true);
+		store.setDefault(PreferenceConstants.LINK_BROWSING_TYPES_TO_EDITOR, true);
+		store.setDefault(PreferenceConstants.LINK_BROWSING_MEMBERS_TO_EDITOR, true);
+
 		// AppearancePreferencePage
 		store.setDefault(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE, false);

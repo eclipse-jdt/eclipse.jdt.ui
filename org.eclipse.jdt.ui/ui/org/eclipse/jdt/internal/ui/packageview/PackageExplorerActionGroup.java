@@ -81,6 +81,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	private RenameResourceAction fRenameResourceAction;
 	private MoveResourceAction fMoveResourceAction;
 	
+	private ToggleLinkingAction fToggleLinkingAction;
+
 	private NavigateActionGroup fNavigateActionGroup;
 	private BuildActionGroup fBuildActionGroup;
 	private CCPActionGroup fCCPActionGroup;
@@ -130,8 +132,9 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		fGotoTypeAction= new GotoTypeAction(fPart);
 		fGotoPackageAction= new GotoPackageAction(fPart);
 		fGotoResourceAction= new GotoResourceAction(fPart);
-		fCollapseAllAction= new CollapseAllAction(fPart);
-		
+		fCollapseAllAction= new CollapseAllAction(fPart);	
+		fToggleLinkingAction = new ToggleLinkingAction(fPart); 
+
 		fMemberFilterActionGroup= new MemberFilterActionGroup(fPart.getViewer(), "PackageView", true);  //$NON-NLS-1$
 		
 		provider.addSelectionChangedListener(this);
@@ -230,12 +233,16 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		
 		toolBar.add(new Separator());
 		toolBar.add(fCollapseAllAction);
+		toolBar.add(fToggleLinkingAction);
+
 	}
 	
 	/* package */ void fillViewMenu(IMenuManager menu) {
 		if (showCompilationUnitChildren()) {
 			fMemberFilterActionGroup.contributeToViewMenu(menu);
 		}
+		menu.add(fToggleLinkingAction);
+
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$		
 	}

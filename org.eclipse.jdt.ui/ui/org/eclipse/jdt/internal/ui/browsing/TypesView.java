@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 public class TypesView extends JavaBrowsingPart {
 
 	private SelectAllAction fSelectAllAction;
@@ -147,6 +148,10 @@ public class TypesView extends JavaBrowsingPart {
 		return IJavaHelpContextIds.TYPES_VIEW;
 	}
 	
+	protected String getLinkToEditorKey() {
+		return PreferenceConstants.LINK_BROWSING_TYPES_TO_EDITOR;
+	}
+
 	protected void createActions() {
 		super.createActions();
 		fSelectAllAction= new SelectAllAction((TableViewer)getViewer());

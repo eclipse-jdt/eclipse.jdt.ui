@@ -153,14 +153,19 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private OpenEditorActionGroup fOpenEditorGroup;
 	private CCPActionGroup fCCPActionGroup;
 	private BuildActionGroup fBuildActionGroup;
+	private ToggleLinkingAction fToggleLinkingAction;
 	protected CompositeActionGroup fActionGroups;
+
 
 	// Filters
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
 	
 	protected IWorkbenchPart fPreviousSelectionProvider;
 	protected Object fPreviousSelectedElement;
-			
+		
+	// Linking
+	private boolean fLinkingEnabled;
+		
 	/*
 	 * Ensure selection changed events being processed only if
 	 * initiated by user interaction with this part.
@@ -197,6 +202,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		}
 	};
 
+	public JavaBrowsingPart() {
+		super();
+		initLinkingEnabled();
+	}
 
 	/*
 	 * Implements method from IViewPart.
@@ -220,9 +229,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			fWorkingSetFilterActionGroup.saveState(memento);
 		if (fHasCustomFilter)
 			fCustomFiltersActionGroup.saveState(memento);
-		
 		saveSelectionState(memento);
+		saveLinkingEnabled(memento);
 	}	
+
+	private void saveLinkingEnabled(IMemento memento) {
+		memento.putInteger(getLinkToEditorKey(), fLinkingEnabled ? 1 : 0);
+	}
 
 	private void saveSelectionState(IMemento memento) {
 		Object elements[]= ((IStructuredSelection) fViewer.getSelection()).toArray();
@@ -295,11 +308,19 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		return null;
 	}
 
+	private void restoreLinkingEnabled(IMemento memento) {
+		Integer val= memento.getInteger(getLinkToEditorKey());
+		if (val != null) {
+			fLinkingEnabled= val.intValue() != 0;
+		}
+	}
+
 	/**
 	 * Creates the search list inner viewer.
 	 */
 	public void createPartControl(Composite parent) {
 		Assert.isTrue(fViewer == null);
+		
 
 		fTypeComparator= new JavaElementTypeComparator();
 
@@ -315,6 +336,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		
 		createContextMenu();
 		getSite().setSelectionProvider(fViewer);
+
+		if (fMemento != null) { // initialize linking state before creating the actions
+			restoreLinkingEnabled(fMemento);
+		}
 
 		createActions(); // call before registering for selection changes
 		addKeyListener();
@@ -436,6 +461,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	protected void fillActionBars(IActionBars actionBars) {
 		IToolBarManager toolBar= actionBars.getToolBarManager();
 		fillToolBar(toolBar);
+		
+
 		if (fHasWorkingSetFilter)
 			fWorkingSetFilterActionGroup.fillActionBars(getViewSite().getActionBars());		
 
@@ -445,6 +472,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		
 		if (fHasCustomFilter)
 			fCustomFiltersActionGroup.fillActionBars(actionBars);
+			
+		IMenuManager menu= actionBars.getMenuManager();
+		menu.add(fToggleLinkingAction);
 	}
 	
 	//---- IWorkbenchPart ------------------------------------------------------
@@ -556,6 +586,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		// Custom filter group
 		if (fHasCustomFilter)
 			fCustomFiltersActionGroup= new CustomFiltersActionGroup(this, fViewer);
+	
+		fToggleLinkingAction= new ToggleLinkingAction(this);
 	}
 	
 	/**
@@ -730,6 +762,14 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		updateTitle();
 	}
 
+	boolean isLinkingEnabled() {
+		return fLinkingEnabled;
+	}
+
+	private void initLinkingEnabled() {
+		fLinkingEnabled= PreferenceConstants.getPreferenceStore().getBoolean(getLinkToEditorKey());
+	}
+
 	private void setViewerInput(Object input) {
 		fProcessSelectionEvents= false;
 		fViewer.setInput(input);
@@ -884,6 +924,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 * @return	the string used as ID for the Help context
 	 */
 	abstract protected String getHelpContextId();
+
+	/**
+	 * Returns the preference key for the link to editor setting.
+	 * 
+	 * @return	the string used as key into the preference store
+	 */
+	abstract protected String getLinkToEditorKey();
 
 	/**
 	 * Adds additional listeners to this view.
@@ -1312,7 +1359,17 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 	
 	private boolean linkBrowsingViewSelectionToEditor() {
-		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.LINK_BROWSING_VIEW_TO_EDITOR);
+		return isLinkingEnabled();
+	}
+
+	public void setLinkingEnabled(boolean enabled) {
+		fLinkingEnabled= enabled;
+		if (enabled) {
+			IEditorPart editor = getSite().getPage().getActiveEditor();
+			if (editor != null) {
+				setSelectionFromEditor(editor);
+			}
+		}
 	}
 
 }
