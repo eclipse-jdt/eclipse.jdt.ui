@@ -5,7 +5,9 @@
 package org.eclipse.jdt.internal.debug.ui;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -32,10 +34,13 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.IDebugEventListener;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.ITerminate;
+import org.eclipse.debug.core.model.IThread;
+import org.eclipse.debug.core.model.IValue;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
@@ -59,6 +64,7 @@ import org.eclipse.jdt.debug.core.IJavaValue;
 import org.eclipse.jdt.debug.core.IJavaVariable;
 import org.eclipse.jdt.debug.core.IJavaWatchpoint;
 
+import org.eclipse.jdt.internal.core.refactoring.NullChange;
 import org.eclipse.jdt.internal.ui.IPreferencesConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -71,7 +77,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 /**
  * @see IDebugModelPresentation
  */
-public class JDIModelPresentation extends LabelProvider implements IDebugModelPresentation, IPropertyChangeListener {
+public class JDIModelPresentation extends LabelProvider implements IDebugModelPresentation, IPropertyChangeListener, IDebugEventListener {
 
 	protected HashMap fAttributes= new HashMap(3);
 
@@ -123,15 +129,169 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	protected final static String ACCESSANDMODIFICATION= WATCHPOINT + "accessandmodification";
 
 	protected static final String fgStringName= "java.lang.String";
+	
+	/**
+	 * The siganture of <code>java.lang.Object.toString()</code>,
+	 * used to evaluate 'toString()' for displaying details of values.
+	 */
+	private static final String fgToStringSignature = "()Ljava/lang/String;"; //$NON-NLS-1$
+	/**
+	 * The selector of <code>java.lang.Object.toString()</code>,
+	 * used to evaluate 'toString()' for displaying details of values.
+	 */
+	private static final String fgToString = "toString"; //$NON-NLS-1$
 
 	protected JavaElementLabelProvider fJavaLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
+	
+	/**
+	 * A pool of threads per VM that are suspended. The
+	 * table is updated as threads suspend/resume. Used
+	 * to perform 'toString' evaluations. Keys are debug
+	 * targets, and values are <code>List</code>s of
+	 * threads.
+	 */
+	private Hashtable fThreadPool; 
 
 	public JDIModelPresentation() {
 		super();
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.addPropertyChangeListener(this);
+		DebugPlugin.getDefault().addDebugEventListener(this);
+		initializeThreadPool();
+	}
+	
+	public void dispose() {
+		super.dispose();
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.removePropertyChangeListener(this);
+		DebugPlugin.getDefault().removeDebugEventListener(this);
+		fThreadPool.clear();
 	}
 
+	/**
+	 * Initializes the thread pool with all suspended Java threads
+	 */
+	protected void initializeThreadPool() {
+		fThreadPool = new Hashtable();
+		IDebugTarget[] targets= DebugPlugin.getDefault().getLaunchManager().getDebugTargets();
+		for (int i = 0; i < targets.length; i++) {
+			if (targets[i] instanceof IJavaDebugTarget) {
+				List suspended = new ArrayList();
+				fThreadPool.put(targets[i], suspended);
+				try {
+					IThread[] threads = targets[i].getThreads();
+					for (int j = 0; j < threads.length; j++) {
+						if (threads[j].isSuspended()) {
+							suspended.add(threads[j]);
+						}
+					}
+				} catch (DebugException e) {
+					DebugUIUtils.logError(e);
+				}
+			}
+		}
+		
+	}
+	
+	/**
+	 * Returns the "toString" of the given value
+	 * 
+	 * @see IDebugModelPresentation#getDetail(IValue)
+	 */
+	public String getDetail(IValue v) {
+		if (v instanceof IJavaValue) {
+			// get a thread for an evaluation
+			IJavaValue value = (IJavaValue)v;
+			IJavaThread thread = getEvaluationThread((IJavaDebugTarget)value.getDebugTarget());
+			if (thread != null) {
+				try {
+					return evaluateToString(value, thread);
+				} catch (DebugException e) {
+					// return the exception's message
+					return e.getStatus().getMessage();
+				}
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns a thread from the specified VM that can be
+	 * used for an evaluationm or <code>null</code> if
+	 * none.
+	 * <p>
+	 * This presentation maintains a pool of suspended
+	 * threads per VM. Any suspended thread in the same
+	 * VM may be used.
+	 * </p>
+	 * 
+	 * @param debug target the target in which a thread is 
+	 * 	required
+	 * @return thread or <code>null</code>
+	 */
+	protected IJavaThread getEvaluationThread(IJavaDebugTarget target) {
+		List threads = (List)fThreadPool.get(target);
+		if (threads != null && !threads.isEmpty()) {
+			return (IJavaThread)threads.get(0);
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns the result of sending 'toString' to the given
+	 * value (unless the value is null or is a primitive). If the
+	 * evaluation takes > 3 seconds, this method returns.
+	 * 
+	 * @param value the value to send the message 'toString'
+	 * @param thread the thread in which to perform the message
+	 *  send
+	 * @return the result of sending 'toString', as a String
+	 * @exception DebugException if thrown by a model element
+	 */
+	protected synchronized String evaluateToString(final IJavaValue value, final IJavaThread thread) throws DebugException {
+		String sig = value.getJavaType().getSignature();
+		if (sig == null) {
+			return "null";
+		}
+		if (sig.length() == 1 || !thread.isSuspended()) {
+			// primitive or thread is no longer suspended
+			return value.getValueString();
+		}
+		
+		final IJavaValue[] toString = new IJavaValue[1];
+		final DebugException[] ex = new DebugException[1];
+		Runnable eval= new Runnable() {
+			public void run() {
+				try {
+					toString[0] = value.sendMessage(JDIModelPresentation.fgToString, JDIModelPresentation.fgToStringSignature, null, thread, false);
+				} catch (DebugException e) {
+					ex[0]= e;
+				}					
+				synchronized (JDIModelPresentation.this) {
+					JDIModelPresentation.this.notifyAll();
+				}
+			}
+		};
+		
+		int timeout = 3000;
+		Thread evalThread = new Thread(eval);
+		evalThread.start();
+		try {
+			wait(timeout);
+		} catch (InterruptedException e) {
+		}
+		
+		if (ex[0] != null) {
+			throw ex[0];
+		}
+		
+		if (toString[0] != null) {
+			return toString[0].getValueString();
+		}	
+		
+		return "Error: timeout evaluating #toString()";
+	}
+			
 	/**
 	 * Returns a label for the item
 	 */
@@ -1001,4 +1161,30 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 			}
 		}
 	}
+	/**
+	 * When a thread suspends, add it to the thread pool for that
+	 * VM. When a thread resumes, remove it from the thread pool.
+	 * 
+	 * @see IDebugEventListener#handleDebugEvent(DebugEvent)
+	 */
+	public void handleDebugEvent(DebugEvent event) {
+		if (event.getSource() instanceof IJavaThread) {
+			IJavaThread thread = (IJavaThread)event.getSource();
+			if (event.getKind() == DebugEvent.RESUME) {
+				List threads = (List)fThreadPool.get(thread.getDebugTarget());
+				if (threads != null) {
+					threads.remove(thread);
+				}
+			} else if (event.getKind() == DebugEvent.SUSPEND) {
+				IDebugTarget target = thread.getDebugTarget();
+				List threads = (List)fThreadPool.get(target);
+				if (threads == null) {
+					threads = new ArrayList();
+					fThreadPool.put(target, threads);
+				}
+				threads.add(thread);	
+			}
+		}
+	}
+
 }
