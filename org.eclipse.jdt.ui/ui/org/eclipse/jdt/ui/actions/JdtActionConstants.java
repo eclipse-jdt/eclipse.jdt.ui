@@ -181,10 +181,10 @@ public class JdtActionConstants {
 	public static final String EXTERNALIZE_STRINGS= "org.eclipse.jdt.ui.actions.ExternalizeStrings"; //$NON-NLS-1$
 	
 	/**
-	 * Source menu: name of standard Convert Line Delimiters To DOS global action
-	 * (value <code>"org.eclipse.jdt.ui.actions.ConvertLineDelimitersToDOS"</code>).
+	 * Source menu: name of standard Convert Line Delimiters To Windows global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ConvertLineDelimitersToWindows"</code>).
 	 */
-	public static String CONVERT_LINE_DELIMITERS_TO_DOS= "org.eclipse.jdt.ui.actions.ConvertLineDelimitersToDOS"; //$NON-NLS-1$
+	public static String CONVERT_LINE_DELIMITERS_TO_WINDOWS= "org.eclipse.jdt.ui.actions.ConvertLineDelimitersToWindows"; //$NON-NLS-1$
 
 	/**
 	 * Source menu: name of standard Convert Line Delimiters To UNIX global action

@@ -1070,18 +1070,21 @@ JavaStructureDiffViewerCreator
 			<separator name="group1"/>
 		</menu>
 
-		<action id="org.eclipse.jdt.ui.actions.ConvertLineDelimitersToDOS"
-      		menubarPath="org.eclipse.jdt.ui.source.menu/convertSubMenu/group1"
-      		label="%ConvertLineDelimitersToDOSAction.label"
-			retarget="true" />
-		<action id="org.eclipse.jdt.ui.actions.ConvertLineDelimitersToUNIX"
-      		menubarPath="org.eclipse.jdt.ui.source.menu/convertSubMenu/group1"
-      		label="%ConvertLineDelimitersToUNIXAction.label"
-			retarget="true" />	
 		<action id="org.eclipse.jdt.ui.actions.ConvertLineDelimitersToMac"
       		menubarPath="org.eclipse.jdt.ui.source.menu/convertSubMenu/group1"
       		label="%ConvertLineDelimitersToMacAction.label"
+      		allowLabelUpdate="true"
 			retarget="true" />	
+		<action id="org.eclipse.jdt.ui.actions.ConvertLineDelimitersToUNIX"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/convertSubMenu/group1"
+      		label="%ConvertLineDelimitersToUNIXAction.label"
+      		allowLabelUpdate="true"
+			retarget="true" />	
+		<action id="org.eclipse.jdt.ui.actions.ConvertLineDelimitersToWindows"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/convertSubMenu/group1"
+      		label="%ConvertLineDelimitersToWindowsAction.label"
+      		allowLabelUpdate="true"
+			retarget="true" />
 
 	</actionSet>			
 </extension>
@@ -1130,6 +1133,15 @@ JavaStructureDiffViewerCreator
 	<editorContribution
 		id="org.eclipse.ui.texteditor.ruler.actions"
 		targetID="org.eclipse.jdt.ui.CompilationUnitEditor">
+
+		<action
+			id="org.eclipse.ui.texteditor.BookmarkRulerAction"
+			actionID="ConvertLineDelimitersToDOS"
+			label="%Dummy.label"
+            helpContextId="org.eclipse.ui.bookmark_action_context"
+			class="org.eclipse.ui.texteditor.BookmarkRulerAction">
+		</action>
+
 		<action
 			id="org.eclipse.ui.texteditor.BookmarkRulerAction"
 			actionID="RulerDoubleClick"
