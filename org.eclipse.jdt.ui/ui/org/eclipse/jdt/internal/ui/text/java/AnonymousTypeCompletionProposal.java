@@ -3,11 +3,20 @@ package org.eclipse.jdt.internal.ui.text.java;
 import java.util.ArrayList;
 
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.util.Assert;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -15,11 +24,6 @@ import org.eclipse.jdt.internal.ui.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.util.Assert;
-import org.eclipse.swt.graphics.Image;
 
 public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 	
@@ -82,12 +86,14 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 		try {
 			fImportStructure= new ImportsStructure(fCompilationUnit);
 			
+			// construct replacement text
 			StringBuffer buf= new StringBuffer();
 			buf.append(getReplacementString());
 			buf.append(" {\n");
 			createStubs(buf, fImportStructure);
 			buf.append("};");
 			
+			// use the code formatter
 			String lineDelim= StubUtility.getLineDelimiterFor(document);
 			int tabWidth= CodeFormatterPreferencePage.getTabSize();
 			IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
