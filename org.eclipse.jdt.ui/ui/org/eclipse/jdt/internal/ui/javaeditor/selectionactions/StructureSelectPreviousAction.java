@@ -63,10 +63,14 @@ public class StructureSelectPreviousAction extends StructureSelectionAction {
 		ASTNode[] siblingNodes= StructureSelectionAction.getChildNodes(parent);
 		if (siblingNodes == null || siblingNodes.length == 0)
 			return parent;
-		if (node == siblingNodes[0])
+		if (node == siblingNodes[0]) {
 			return parent;
-		else
-			return siblingNodes[StructureSelectionAction.findIndex(siblingNodes, node) - 1];
+		} else {
+			int index= StructureSelectionAction.findIndex(siblingNodes, node);
+			if (index < 1)
+				return parent;
+			return siblingNodes[index - 1];
+		}
 	}
 }
 
