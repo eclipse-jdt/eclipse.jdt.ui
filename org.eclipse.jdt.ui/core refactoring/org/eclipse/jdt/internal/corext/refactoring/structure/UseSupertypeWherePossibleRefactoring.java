@@ -30,7 +30,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.RefactoringWorkignCopyOwner;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class UseSupertypeWherePossibleRefactoring extends Refactoring{
@@ -164,7 +163,7 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	private void updateReferences(TextChangeManager manager, IProgressMonitor pm) throws JavaModelException, CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			ExtractInterfaceUtil.updateReferences(manager, fInputType, fSuperTypeToUse, new RefactoringWorkignCopyOwner(), true, new SubProgressMonitor(pm, 1));
+			ExtractInterfaceUtil.updateReferences(manager, fInputType, fSuperTypeToUse, new RefactoringWorkingCopyOwner(), true, new SubProgressMonitor(pm, 1));
 		} finally {
 			pm.done();
 		}

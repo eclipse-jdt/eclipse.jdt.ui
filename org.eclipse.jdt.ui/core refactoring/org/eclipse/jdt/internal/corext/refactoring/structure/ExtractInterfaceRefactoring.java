@@ -73,7 +73,6 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.internal.corext.util.RefactoringWorkignCopyOwner;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
@@ -96,7 +95,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		fInputType= type;
 		fCodeGenerationSettings= codeGenerationSettings;
 		fExtractedMembers= new IMember[0];
-		fWorkingCopyOwner= new RefactoringWorkignCopyOwner();
+		fWorkingCopyOwner= new RefactoringWorkingCopyOwner();
 	}
 	
 	public static ExtractInterfaceRefactoring create(IType type, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{

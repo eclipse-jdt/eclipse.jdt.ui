@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.util;
+package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -16,8 +16,7 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
 
 import org.eclipse.jdt.internal.core.BufferManager;
 
-
-public class RefactoringWorkignCopyOwner extends WorkingCopyOwner{
+class RefactoringWorkingCopyOwner extends WorkingCopyOwner{
 	
 	BufferManager d= new BufferManager();
 	public IBuffer createBuffer(ICompilationUnit workingCopy) {
