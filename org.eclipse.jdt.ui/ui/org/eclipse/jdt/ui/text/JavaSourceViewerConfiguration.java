@@ -686,7 +686,6 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 				int shellStyle= SWT.RESIZE;
 				int style= SWT.V_SCROLL | SWT.H_SCROLL;
 				return new DefaultInformationControl(parent, shellStyle, style, new HTMLTextPresenter(false));
-				// return new HoverBrowserControl(parent);
 			}
 		};
 	}
