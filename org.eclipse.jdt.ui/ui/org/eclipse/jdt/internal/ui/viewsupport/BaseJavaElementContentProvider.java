@@ -332,8 +332,17 @@ public class BaseJavaElementContentProvider implements ITreeContentProvider {
 			IPackageFragmentRoot parent= (IPackageFragmentRoot)((IPackageFragment)element).getParent();
 			return skipProjectPackageFragmentRoot(parent);
 		}
-		if (element instanceof IJavaElement)
-			return ((IJavaElement)element).getParent();
+		if (element instanceof IJavaElement) {
+			IJavaElement candidate= ((IJavaElement)element).getParent();
+			// If the parent is a CU we might have shown working copy elements below CU level. If so
+			// return the original element instead of the working copy.
+			if (candidate != null && candidate.getElementType() == IJavaElement.COMPILATION_UNIT) {
+				ICompilationUnit unit= (ICompilationUnit)candidate;
+				if (unit.isWorkingCopy())
+					candidate= unit.getOriginalElement();
+			}
+			return candidate;
+		}
 		return null;
 	}
 	

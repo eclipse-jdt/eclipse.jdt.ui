@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -20,13 +21,16 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
@@ -125,16 +129,37 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 			Object selectedElement= element;
 			if (showMembers) {
 				view.selectReveal(new StructuredSelection(element));
-				selectedElement= ((IStructuredSelection)view.getSite().getSelectionProvider().getSelection()).getFirstElement();
+				selectedElement= getSelectedElement(view);
+				// Since the packages view shows working copy elements it can happen that we try to show an original element
+				// in the packages view. Fall back to working copy element
+				if (!element.equals(selectedElement) && element instanceof IMember) {
+					IMember member= (IMember)element;
+					if (!member.getCompilationUnit().isWorkingCopy()) {
+						try {
+							element= EditorUtility.getWorkingCopy(member);
+							view.selectReveal(new StructuredSelection(element));
+							selectedElement= getSelectedElement(view);
+						} catch (JavaModelException e) {
+						}
+					}
+				}
 			}
-			if (selectedElement != element) {
+			if (!element.equals(selectedElement)) {
 				element= getVisibleParent(element);
 				if (element != null) {
 					view.selectReveal(new StructuredSelection(element));
+					selectedElement= getSelectedElement(view);
+					if (!element.equals(selectedElement)) {
+						MessageDialog.openInformation(getShell(), getDialogTitle(), "Couldn't reveal the selected element in Packages View. May be the element is filtered out.");
+					}
 				}
 			}
 			return;
 		}
+	}
+
+	private Object getSelectedElement(PackageExplorerPart view) {
+		return ((IStructuredSelection)view.getSite().getSelectionProvider().getSelection()).getFirstElement();
 	}
 	
 	private IJavaElement getVisibleParent(IJavaElement element) {
