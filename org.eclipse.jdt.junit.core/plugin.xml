@@ -43,7 +43,7 @@
          point="org.eclipse.ui.views">
       <view
             name="%View.label"
-            icon="icons/full/cview16/junit.gif"
+            icon="icons/full/eview16/junit.gif"
             category="org.eclipse.jdt.ui.java"
             fastViewWidthRatio="0.40"
             class="org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart"
@@ -149,7 +149,7 @@
       </category>
       <wizard
             name="%TestCaseWizard.name"
-            icon="icons/full/ctool16/new_testcase.gif"
+            icon="icons/full/etool16/new_testcase.gif"
             category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
             id="org.eclipse.jdt.junit.wizards.NewTestCaseCreationWizard">
          <class class="org.eclipse.jdt.internal.junit.wizards.NewTestCaseCreationWizard">
@@ -161,7 +161,7 @@
       </wizard>
       <wizard
             name="%TestSuiteWizard.name"
-            icon="icons/full/ctool16/new_testsuite.gif"
+            icon="icons/full/etool16/new_testsuite.gif"
             category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
             class="org.eclipse.jdt.internal.junit.wizards.NewTestSuiteCreationWizard"
             id="org.eclipse.jdt.junit.wizards.NewTestSuiteCreationWizard">

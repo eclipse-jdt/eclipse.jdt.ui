@@ -26,7 +26,7 @@ public class CompareResultsAction extends Action {
 		setToolTipText(JUnitMessages.getString("CompareResultsAction.tooltip"));  //$NON-NLS-1$
 		
 		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/compare.gif"));  //$NON-NLS-1$
-		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/compare.gif"));  //$NON-NLS-1$
+		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/compare.gif"));  //$NON-NLS-1$
 		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/compare.gif"));  //$NON-NLS-1$
 		//WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.ENABLEFILTER_ACTION);
 		fView= view;

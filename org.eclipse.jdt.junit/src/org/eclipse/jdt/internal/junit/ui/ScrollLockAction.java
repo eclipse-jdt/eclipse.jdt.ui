@@ -26,7 +26,7 @@ public class ScrollLockAction extends Action {
 		fRunnerViewPart= viewer;
 		setToolTipText(JUnitMessages.getString("ScrollLockAction.action.tooltip")); //$NON-NLS-1$
 		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/lock.gif")); //$NON-NLS-1$
-		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/lock.gif")); //$NON-NLS-1$
+		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/lock.gif")); //$NON-NLS-1$
 		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/lock.gif")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(
 			this,

@@ -173,11 +173,11 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	 */
 	private RemoteTestRunnerClient fTestRunnerClient;
 
-	final Image fStackViewIcon= TestRunnerViewPart.createImage("cview16/stackframe.gif");//$NON-NLS-1$
-	final Image fTestRunOKIcon= TestRunnerViewPart.createImage("cview16/junitsucc.gif"); //$NON-NLS-1$
-	final Image fTestRunFailIcon= TestRunnerViewPart.createImage("cview16/juniterr.gif"); //$NON-NLS-1$
-	final Image fTestRunOKDirtyIcon= TestRunnerViewPart.createImage("cview16/junitsuccq.gif"); //$NON-NLS-1$
-	final Image fTestRunFailDirtyIcon= TestRunnerViewPart.createImage("cview16/juniterrq.gif"); //$NON-NLS-1$
+	final Image fStackViewIcon= TestRunnerViewPart.createImage("eview16/stackframe.gif");//$NON-NLS-1$
+	final Image fTestRunOKIcon= TestRunnerViewPart.createImage("eview16/junitsucc.gif"); //$NON-NLS-1$
+	final Image fTestRunFailIcon= TestRunnerViewPart.createImage("eview16/juniterr.gif"); //$NON-NLS-1$
+	final Image fTestRunOKDirtyIcon= TestRunnerViewPart.createImage("eview16/junitsuccq.gif"); //$NON-NLS-1$
+	final Image fTestRunFailDirtyIcon= TestRunnerViewPart.createImage("eview16/juniterrq.gif"); //$NON-NLS-1$
 	
 	// Persistence tags.
 	static final String TAG_PAGE= "page"; //$NON-NLS-1$
@@ -209,7 +209,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			setText(JUnitMessages.getString("TestRunnerViewPart.stopaction.text"));//$NON-NLS-1$
 			setToolTipText(JUnitMessages.getString("TestRunnerViewPart.stopaction.tooltip"));//$NON-NLS-1$
 			setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/stop.gif")); //$NON-NLS-1$
-			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/stop.gif")); //$NON-NLS-1$
+			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/stop.gif")); //$NON-NLS-1$
 			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/stop.gif")); //$NON-NLS-1$
 		}
 
@@ -223,7 +223,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			setText(JUnitMessages.getString("TestRunnerViewPart.rerunaction.label")); //$NON-NLS-1$
 			setToolTipText(JUnitMessages.getString("TestRunnerViewPart.rerunaction.tooltip")); //$NON-NLS-1$
 			setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/relaunch.gif")); //$NON-NLS-1$
-			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/relaunch.gif")); //$NON-NLS-1$
+			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
 			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
 		}
 		
@@ -240,12 +240,12 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_HORIZONTAL) {
 				setText(JUnitMessages.getString("TestRunnerViewPart.toggle.horizontal.label")); //$NON-NLS-1$
 				setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/th_horizontal.gif")); //$NON-NLS-1$
-				setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/th_horizontal.gif")); //$NON-NLS-1$
+				setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_horizontal.gif")); //$NON-NLS-1$
 				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_horizontal.gif")); //$NON-NLS-1$				
 			} else if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_VERTICAL) {
 				setText(JUnitMessages.getString("TestRunnerViewPart.toggle.vertical.label")); //$NON-NLS-1$
 				setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/th_vertical.gif")); //$NON-NLS-1$
-				setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/th_vertical.gif")); //$NON-NLS-1$
+				setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_vertical.gif")); //$NON-NLS-1$
 				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_vertical.gif")); //$NON-NLS-1$				
 			}
 			fOrientation= orientation;

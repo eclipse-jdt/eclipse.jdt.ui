@@ -27,7 +27,7 @@ public class EnableStackFilterAction extends Action {
 		setToolTipText(JUnitMessages.getString("EnableStackFilterAction.action.tooltip")); //$NON-NLS-1$
 		
 		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/cfilter.gif")); //$NON-NLS-1$
-		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/cfilter.gif")); //$NON-NLS-1$
+		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/cfilter.gif")); //$NON-NLS-1$
 		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/cfilter.gif")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJUnitHelpContextIds.ENABLEFILTER_ACTION);
 
