@@ -34,25 +34,25 @@ public class MethodChecks {
 		
 	public static RefactoringStatus checkIfOverridesAnother(IMethod method, IProgressMonitor pm) throws JavaModelException {
 		IMethod overrides= MethodChecks.overridesAnotherMethod(method, pm);
-		if (overrides != null){
-			Context context= JavaSourceContext.create(overrides);
-			String msg= "The selected method overrides method \'" + JavaElementUtil.createMethodSignature(overrides) + "\'"
-							 + " declared in type \'" + overrides.getDeclaringType().getFullyQualifiedName() + "\'. Reform the operation there.";
-			return RefactoringStatus.createFatalErrorStatus(msg, context);
-		}	
-		return null;		
+		if (overrides == null)
+			return null;
+
+		Context context= JavaSourceContext.create(overrides);
+		String msg= "The selected method overrides method \'" + JavaElementUtil.createMethodSignature(overrides) + "\'"
+						 + " declared in type \'" + overrides.getDeclaringType().getFullyQualifiedName() + "\'. Reform the operation there.";
+		return RefactoringStatus.createFatalErrorStatus(msg, context);
 	}
 	
 	public static RefactoringStatus checkIfComesFromInterface(IMethod method, IProgressMonitor pm) throws JavaModelException {
 		IMethod inInterface= MethodChecks.isDeclaredInInterface(method, pm);
 			
-		if (inInterface != null){
-			Context context= JavaSourceContext.create(inInterface);
-			String msg= "The selected method is an implementation of method \'" + JavaElementUtil.createMethodSignature(inInterface) + "\'"
-							 + " declared in type \'" + inInterface.getDeclaringType().getFullyQualifiedName() + "\'.";
-			return RefactoringStatus.createFatalErrorStatus(msg, context);
-		}	
-		return null;
+		if (inInterface == null)
+			return null;
+
+		Context context= JavaSourceContext.create(inInterface);
+		String msg= "The selected method is an implementation of method \'" + JavaElementUtil.createMethodSignature(inInterface) + "\'"
+						 + " declared in type \'" + inInterface.getDeclaringType().getFullyQualifiedName() + "\'.";
+		return RefactoringStatus.createFatalErrorStatus(msg, context);
 	}
 	
 	//works for virtual methods
