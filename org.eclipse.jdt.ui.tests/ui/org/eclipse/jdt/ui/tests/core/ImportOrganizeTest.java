@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.corext.util.TypeInfo;
 public class ImportOrganizeTest extends CoreTests {
 	
 	private static final Class THIS= ImportOrganizeTest.class;
+	private static final boolean BUG_82140= true;
 	
 	private IJavaProject fJProject1;
 
@@ -2351,5 +2352,114 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
+
+	public void testAnnotationImports1() throws Exception {
+		if (BUG_82140) {
+			return;
+		}
 		
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("public @interface MyAnnot1 {\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("MyAnnot1.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("public @interface MyAnnot2 {\n");
+		buf.append("    int value();\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("MyAnnot2.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("public @interface MyAnnot3 {\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("MyAnnot3.java", buf.toString(), false, null);
+
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("@MyAnnot3 public class Test2 {\n");
+		buf.append("    @MyAnnot1 Object e;\n");
+		buf.append("    @MyAnnot2(1) void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test2.java", buf.toString(), false, null);
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import pack0.MyAnnot1;\n");
+		buf.append("import pack0.MyAnnot2;\n");
+		buf.append("import pack0.MyAnnot3;\n");
+		buf.append("\n");
+		buf.append("@MyAnnot3 public class Test2 {\n");
+		buf.append("    @MyAnnot1 Object e;\n");
+		buf.append("    @MyAnnot2 void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testAnnotationImports2() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("public @interface MyAnnot1 {\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("MyAnnot1.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("public @interface MyAnnot2 {\n");
+		buf.append("    char value();\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("MyAnnot2.java", buf.toString(), false, null);
+
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("@MyAnnot1()\n");
+		buf.append("@MyAnnot2(File.separatorChar)\n");
+		buf.append("public @interface Test2 {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test2.java", buf.toString(), false, null);
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import pack0.MyAnnot1;\n");
+		buf.append("import pack0.MyAnnot2;\n");
+		buf.append("\n");
+		buf.append("@MyAnnot1()\n");
+		buf.append("@MyAnnot2(File.separatorChar)\n");
+		buf.append("public @interface Test2 {\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	
 }

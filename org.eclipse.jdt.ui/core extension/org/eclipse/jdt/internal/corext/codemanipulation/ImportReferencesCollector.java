@@ -184,6 +184,9 @@ public class ImportReferencesCollector extends GenericVisitor {
 	 * @see ASTVisitor#visit(PackageDeclaration)
 	 */
 	public boolean visit(PackageDeclaration node) {
+		if (node.getAST().apiLevel() >= AST.JLS3) {
+			doVisitChildren(node.annotations());
+		}
 		return false;
 	}				
 
@@ -264,6 +267,32 @@ public class ImportReferencesCollector extends GenericVisitor {
 		possibleStaticImportFound(node);
 		return false;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.MarkerAnnotation)
+	 */
+	public boolean visit(MarkerAnnotation node) {
+		typeRefFound(node.getTypeName());
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.MarkerAnnotation)
+	 */
+	public boolean visit(NormalAnnotation node) {
+		typeRefFound(node.getTypeName());
+		doVisitChildren(node.values());
+		return false;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.MarkerAnnotation)
+	 */
+	public boolean visit(SingleMemberAnnotation node) {
+		typeRefFound(node.getTypeName());
+		doVisitNode(node.getValue());
+		return false;
+	}
 
 	/*
 	 * @see ASTVisitor#visit(TypeDeclaration)
@@ -298,6 +327,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		doVisitNode(node.getJavadoc());
 		
 		if (node.getAST().apiLevel() >= AST.JLS3) {
+			doVisitChildren(node.modifiers());
 			doVisitChildren(node.typeParameters());
 		}
 		
