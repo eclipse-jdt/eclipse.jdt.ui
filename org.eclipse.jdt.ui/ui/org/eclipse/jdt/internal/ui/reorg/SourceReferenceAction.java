@@ -145,15 +145,19 @@ abstract class SourceReferenceAction extends RefactoringAction {
 			if (! (element instanceof IJavaElement)) //can this happen ?
 				wcList.add(element); 
 			ICompilationUnit cu= SourceReferenceUtil.getCompilationUnit(element);
-			ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
-			try {
-				IJavaElement wcElement= JavaModelUtil.findInCompilationUnit(wc, (IJavaElement)element);
-				if (wcElement != null && wcElement.exists())
-					wcList.add(wcElement);
-			} catch(JavaModelException e) {
-				JavaPlugin.log(e); //cannot show dialog here
-				//do nothing - do not add to selection (?)
-			}
+			if (cu.isWorkingCopy()){
+				wcList.add(element);
+			} else {
+				ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
+				try {
+					IJavaElement wcElement= JavaModelUtil.findInCompilationUnit(wc, (IJavaElement)element);
+					if (wcElement != null && wcElement.exists())
+						wcList.add(wcElement);
+				} catch(JavaModelException e) {
+					JavaPlugin.log(e); //cannot show dialog here
+					//do nothing - do not add to selection (?)
+				}
+			}	
 		}
 		return (ISourceReference[]) wcList.toArray(new ISourceReference[wcList.size()]);
 	}	
