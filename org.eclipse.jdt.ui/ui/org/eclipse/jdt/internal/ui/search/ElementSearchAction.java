@@ -3,8 +3,8 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.search;import java.lang.reflect.InvocationTargetException;
-
 import java.util.Iterator;
+
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.runtime.CoreException;
 
@@ -19,7 +19,6 @@ import org.eclipse.search.ui.SearchUI;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -27,6 +26,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  
 /**
@@ -117,11 +117,33 @@ public abstract class ElementSearchAction extends JavaElementAction {
 		else if (element instanceof IMember)
 			type= ((IMember)element).getDeclaringType();
 		if (type != null) {
-			return type;
+			ICompilationUnit cu= type.getCompilationUnit();
+			if (cu == null)
+				return type;
+				
+			IType wcType= (IType)getWorkingCopy(type);
+			if (wcType != null)
+				return wcType;
+			else
+				return type;
 		}
 		return null;
 	}
-
+	
+	/**
+	 * Tries to find the given element in a workingcopy.
+	 */
+	protected static IJavaElement getWorkingCopy(IJavaElement input) {
+		try {
+			if (input instanceof ICompilationUnit)
+				return EditorUtility.getWorkingCopy((ICompilationUnit)input);
+			else
+				return EditorUtility.getWorkingCopy(input, true);
+		} catch (JavaModelException ex) {
+		}
+		return null;
+	}
+	
 	public static void updateLRUWorkingSet(IWorkingSet workingSet) {
 		getLRUWorkingSets().add(workingSet);
 
