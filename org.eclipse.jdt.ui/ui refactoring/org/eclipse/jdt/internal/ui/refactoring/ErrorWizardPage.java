@@ -115,8 +115,7 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 		}
 		public void update() {
 			boolean enabled= false;
-			List entries= null;
-			if (fStatus != null && !(entries= fStatus.getEntries()).isEmpty()) {
+			if (fStatus != null && !fStatus.getEntries().isEmpty()) {
 				int index= fTableViewer.getTable().getSelectionIndex();
 				enabled= index == -1 || index > 0;
 			}

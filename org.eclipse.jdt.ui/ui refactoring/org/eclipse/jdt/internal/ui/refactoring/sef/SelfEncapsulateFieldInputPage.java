@@ -145,7 +145,6 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	}
 	
 	private void createFieldAccessBlock(Composite result, RowLayouter layouter) {
-		int indent= convertWidthInCharsToPixels(2);
 		Label label= new Label(result, SWT.LEFT);
 		label.setText(RefactoringMessages.getString("SelfEncapsulateField.field_access")); //$NON-NLS-1$
 		
