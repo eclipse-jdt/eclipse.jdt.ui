@@ -193,9 +193,10 @@ public class NewGroup extends ContextMenuGroup {
 		if (added) {
 			manager.add(new Separator());
 			manager.add(fNewWizardAction);
-			
-			menu.appendToGroup(GROUP_NAME, manager);
-		}	
+		}
+		else
+			manager.add(fNewWizardAction);
+		menu.appendToGroup(GROUP_NAME, manager);
 	}
 	
 	public String getGroupName() {
