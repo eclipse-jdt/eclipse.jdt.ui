@@ -53,6 +53,8 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -605,6 +607,10 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				return true;
 			if (parentNode instanceof QualifiedName)	
 				return true;
+			if (parentNode instanceof ThisExpression)	
+				return true;
+			if (parentNode instanceof SuperMethodInvocation)	
+				return true;
 				
 			if (parentNode instanceof MethodDeclaration){
 				MethodDeclaration md= (MethodDeclaration)parentNode;
@@ -754,6 +760,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		if (! JdtFlags.isPublic(iMethod))
 			return false;
 		if (JdtFlags.isStatic(iMethod))
+			return false;
+		if (iMethod.isConstructor())	
 			return false;
 		return true;		
 	}
