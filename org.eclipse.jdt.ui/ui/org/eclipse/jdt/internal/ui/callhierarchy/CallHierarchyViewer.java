@@ -27,9 +27,6 @@ import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.IWorkbenchPartSite;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
-
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 class CallHierarchyViewer extends TreeViewer {
@@ -53,8 +50,6 @@ class CallHierarchyViewer extends TreeViewer {
         fContentProvider = new CallHierarchyContentProvider(fPart);
         setContentProvider(fContentProvider);
         setLabelProvider(new CallHierarchyLabelProvider());
-
-        JavaUIHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
 
         fOpen= new OpenLocationAction(part, part.getSite());
         addOpenListener(new IOpenListener() {

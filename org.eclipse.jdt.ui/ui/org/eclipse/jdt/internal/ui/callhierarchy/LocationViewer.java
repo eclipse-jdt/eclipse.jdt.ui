@@ -30,9 +30,6 @@ import org.eclipse.jface.viewers.TableViewer;
 
 import org.eclipse.ui.IWorkbenchPartSite;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
-
 class LocationViewer extends TableViewer {
     private final String columnHeaders[] = {
         CallHierarchyMessages.getString("LocationViewer.ColumnIcon.header"),//$NON-NLS-1$
@@ -53,8 +50,6 @@ class LocationViewer extends TableViewer {
         setInput(new ArrayList());
 
         createColumns();
-        
-        JavaUIHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
     }
 
     /**
