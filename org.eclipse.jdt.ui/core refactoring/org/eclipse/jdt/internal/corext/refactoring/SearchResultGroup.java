@@ -4,6 +4,9 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.resources.IResource;
 
 public class SearchResultGroup {
@@ -22,6 +25,14 @@ public class SearchResultGroup {
 
 	public SearchResult[] getSearchResults() {
 		return fSearchResults;
+	}
+	
+	public static IResource[] getResources(SearchResultGroup[] searchResultGroups){
+		Set resourceSet= new HashSet(searchResultGroups.length);
+		for (int i= 0; i < searchResultGroups.length; i++) {
+			resourceSet.add(searchResultGroups[i].getResource());
+		}
+		return (IResource[]) resourceSet.toArray(new IResource[resourceSet.size()]);
 	}
 }
 
