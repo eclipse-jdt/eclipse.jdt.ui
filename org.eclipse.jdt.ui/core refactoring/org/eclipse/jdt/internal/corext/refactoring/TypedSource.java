@@ -19,18 +19,18 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -46,7 +46,16 @@ import org.eclipse.jdt.internal.corext.util.Strings;
  * @see org.eclipse.jdt.core.ISourceReference
  */
 public class TypedSource {
-	
+
+	private static class SourceTuple {
+
+		private SourceTuple(ICompilationUnit unit) {
+			this.unit= unit;
+		}
+		private ICompilationUnit unit;
+		private CompilationUnit node;
+	}
+
 	private final String fSource;
 	private final int fType;
 
@@ -117,11 +126,9 @@ public class TypedSource {
 		List result= new ArrayList(javaElements.length);
 		for (Iterator iter= grouped.keySet().iterator(); iter.hasNext();) {
 			ICompilationUnit cu= (ICompilationUnit) iter.next();
-			ASTParser p= ASTParser.newParser(AST.JLS3);
-			p.setSource(cu);
-			CompilationUnit cuNode= (CompilationUnit) p.createAST(null);
 			for (Iterator iterator= ((List) grouped.get(cu)).iterator(); iterator.hasNext();) {
-				TypedSource[] ts= createTypedSources((IJavaElement) iterator.next(), cu, cuNode);
+				SourceTuple tuple= new SourceTuple(cu);
+				TypedSource[] ts= createTypedSources((IJavaElement) iterator.next(), tuple);
 				if (ts != null)
 					result.addAll(Arrays.asList(ts));				
 			}
@@ -129,60 +136,58 @@ public class TypedSource {
 		return (TypedSource[]) result.toArray(new TypedSource[result.size()]);		
 	}
 
-	private static TypedSource[] createTypedSources(IJavaElement elem, ICompilationUnit cu, CompilationUnit cuNode) throws CoreException {
+	private static TypedSource[] createTypedSources(IJavaElement elem, SourceTuple tuple) throws CoreException {
 		if (! ReorgUtils.isInsideCompilationUnit(elem))
 			return null;
-		//import containers are different because you cannot paste them directly (there's no AST node for them)
 		if (elem.getElementType() == IJavaElement.IMPORT_CONTAINER) 
-			return createTypedSourcesForImportContainer(cu, cuNode, (IImportContainer)elem);
-		//fields need to be handled differently because of the multi-declaration case
+			return createTypedSourcesForImportContainer(tuple, (IImportContainer)elem);
 		else if (elem.getElementType() == IJavaElement.FIELD) 
-			return new TypedSource[] {create(getFieldSource((IField)elem, cu, cuNode), elem.getElementType())};
-		return new TypedSource[] {create(getSourceOfDeclararationNode(elem, cu, cuNode), elem.getElementType())};
+			return new TypedSource[] {create(getFieldSource((IField)elem, tuple), elem.getElementType())};
+		return new TypedSource[] {create(getSourceOfDeclararationNode(elem, tuple.unit), elem.getElementType())};
 	}
 
-	private static TypedSource[] createTypedSourcesForImportContainer(ICompilationUnit cu, CompilationUnit cuNode, IImportContainer container) throws JavaModelException, CoreException {
+	private static TypedSource[] createTypedSourcesForImportContainer(SourceTuple tuple, IImportContainer container) throws JavaModelException, CoreException {
 		IJavaElement[] imports= container.getChildren();
 		List result= new ArrayList(imports.length);
 		for (int i= 0; i < imports.length; i++) {
-			result.addAll(Arrays.asList(createTypedSources(imports[i], cu, cuNode)));
+			result.addAll(Arrays.asList(createTypedSources(imports[i], tuple)));
 		}
 		return (TypedSource[]) result.toArray(new TypedSource[result.size()]);
 	}
 
-	private static String getFieldSource(IField field, ICompilationUnit unit, CompilationUnit node) throws CoreException {
-		StringBuffer buff= new StringBuffer();
-		IBuffer buffer= unit.getBuffer();
-		BodyDeclaration bodyDeclaration= ASTNodeSearchUtil.getFieldOrEnumConstantDeclaration(field, node);
-		if (bodyDeclaration instanceof FieldDeclaration) {
-			VariableDeclarationFragment declarationFragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, node);
-			FieldDeclaration declaration= ASTNodeSearchUtil.getFieldDeclarationNode(field, node);
+	private static String getFieldSource(IField field, SourceTuple tuple) throws CoreException {
+		if (Flags.isEnum(field.getFlags())) {
+			String source= field.getSource();
+			if (source != null)
+				return source;
+		} else {
+			if (tuple.node == null) {
+				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				parser.setSource(tuple.unit);
+				tuple.node= (CompilationUnit) parser.createAST(null);
+			}
+			FieldDeclaration declaration= ASTNodeSearchUtil.getFieldDeclarationNode(field, tuple.node);
 			if (declaration.fragments().size() == 1)
-				return getSourceOfDeclararationNode(field, unit, node);
+				return getSourceOfDeclararationNode(field, tuple.unit);
+			VariableDeclarationFragment declarationFragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, tuple.node);
+			IBuffer buffer= tuple.unit.getBuffer();
+			StringBuffer buff= new StringBuffer();
 			buff.append(buffer.getText(declaration.getStartPosition(), ((ASTNode) declaration.fragments().get(0)).getStartPosition() - declaration.getStartPosition()));
 			buff.append(buffer.getText(declarationFragment.getStartPosition(), declarationFragment.getLength()));
 			buff.append(";"); //$NON-NLS-1$
-		} else if (bodyDeclaration instanceof EnumConstantDeclaration) {
-			EnumConstantDeclaration declaration= (EnumConstantDeclaration) bodyDeclaration;
-			buff.append(buffer.getText(declaration.getStartPosition(), declaration.getLength()));
+			return buff.toString();
 		}
-		return buff.toString();
+		return ""; //$NON-NLS-1$
 	}
 
-	private static String getSourceOfDeclararationNode(IJavaElement elem, ICompilationUnit cu, CompilationUnit cuNode) throws JavaModelException, CoreException {
+	private static String getSourceOfDeclararationNode(IJavaElement elem, ICompilationUnit cu) throws JavaModelException, CoreException {
 		Assert.isTrue(elem.getElementType() != IJavaElement.IMPORT_CONTAINER);
-		ASTNode[] nodes= ASTNodeSearchUtil.getDeclarationNodes(elem, cuNode);
-		if (nodes != null && nodes.length == 1) {
-			// begin fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66880
-			ASTNode node = nodes[0];
-			int start= cuNode.getExtendedStartPosition(node);
-			if (start == -1)
-				start= node.getStartPosition();
-			int length= cuNode.getExtendedLength(node);
-			if (length == 0)
-				length= node.getLength();
-			return Strings.trimIndentation(cu.getBuffer().getText(start, length), CodeFormatterUtil.getTabWidth(cu.getJavaProject()), false);
-		} else 
-			return ""; //$NON-NLS-1$
+		if (elem instanceof ISourceReference) {
+			ISourceReference reference= (ISourceReference) elem;
+			String source= reference.getSource();
+			if (source != null)
+				return Strings.trimIndentation(source, CodeFormatterUtil.getTabWidth(cu.getJavaProject()), false);
+		}
+		return ""; //$NON-NLS-1$
 	}
 }
