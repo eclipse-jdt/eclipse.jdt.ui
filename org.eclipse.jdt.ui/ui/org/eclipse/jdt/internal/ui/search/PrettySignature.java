@@ -35,8 +35,11 @@ public class PrettySignature {
 	public static String getMethodSignature(IMethod method) {
 		StringBuffer buffer= new StringBuffer();
 		buffer.append(JavaModelUtil.getFullyQualifiedName(method.getDeclaringType()));
-		buffer.append('.');
-		buffer.append(getUnqualifiedMethodSignature(method));
+		boolean isConstructor= method.getElementName().equals(method.getDeclaringType().getElementName());
+		if (!isConstructor) {
+			buffer.append('.');
+		}
+		buffer.append(getUnqualifiedMethodSignature(method, !isConstructor));
 		
 		return buffer.toString();
 	}
@@ -45,9 +48,11 @@ public class PrettySignature {
 		return type.getElementName();
 	}
 	
-	public static String getUnqualifiedMethodSignature(IMethod method) {
+	public static String getUnqualifiedMethodSignature(IMethod method, boolean includeName) {
 		StringBuffer buffer= new StringBuffer();
-		buffer.append(method.getElementName());
+		if (includeName) {
+			buffer.append(method.getElementName());
+		}
 		buffer.append('(');
 		
 		String[] types= method.getParameterTypes();
@@ -61,5 +66,9 @@ public class PrettySignature {
 		buffer.append(')');
 		
 		return buffer.toString();
+	}
+
+	public static String getUnqualifiedMethodSignature(IMethod method) {
+		return getUnqualifiedMethodSignature(method, true);
 	}	
 }
