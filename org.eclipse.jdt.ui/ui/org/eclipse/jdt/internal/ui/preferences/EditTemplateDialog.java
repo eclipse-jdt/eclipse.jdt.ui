@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.ui.text.template.TemplateInterpolator;
 import org.eclipse.jdt.internal.ui.text.template.TemplateMessages;
 import org.eclipse.jdt.internal.ui.text.template.TemplateVariableDialog;
 import org.eclipse.jdt.internal.ui.text.template.VariableEvaluator;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
  * Dialog to edit a template.
@@ -183,7 +184,7 @@ public class EditTemplateDialog extends StatusDialog {
 		filler.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 		
 		fInsertVariableButton= new Button(composite, SWT.NONE);
-		fInsertVariableButton.setLayoutData(new GridData());
+		fInsertVariableButton.setLayoutData(getButtonGridData(fInsertVariableButton));
 		fInsertVariableButton.setText(TemplateMessages.getString("EditTemplateDialog.insert.variable")); //$NON-NLS-1$
 		fInsertVariableButton.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
@@ -200,6 +201,13 @@ public class EditTemplateDialog extends StatusDialog {
 		fPatternEditor.getDocument().set(fTemplate.getPattern());
 
 		return composite;
+	}
+
+	private static GridData getButtonGridData(Button button) {
+		GridData data= new GridData(GridData.FILL_HORIZONTAL);
+		data.heightHint= SWTUtil.getButtonHeigthHint(button);
+	
+		return data;
 	}
 
 	private static Label createLabel(Composite parent, String name) {
