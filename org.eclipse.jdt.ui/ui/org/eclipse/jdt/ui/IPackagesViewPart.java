@@ -4,10 +4,11 @@
  */
 package org.eclipse.jdt.ui;
 
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.IViewPart;
 
 /**
- * The standard packages view presents a Java-centric view of the workspace.
+ * The standard Packages view presents a Java-centric view of the workspace.
  * Within Java projects, the resource hierarchy is organized into Java packages
  * as described by the project's classpath. Note that this view shows both Java 
  * elements and ordinary resources.
@@ -25,4 +26,9 @@ public interface IPackagesViewPart extends IViewPart {
 	 * @param element the element to be revealed
 	 */
 	void selectAndReveal(Object element);
+	
+	/**
+	 * Returns the TreeViewer shown in the Packages view.
+	 */
+	TreeViewer getTreeViewer();
 }

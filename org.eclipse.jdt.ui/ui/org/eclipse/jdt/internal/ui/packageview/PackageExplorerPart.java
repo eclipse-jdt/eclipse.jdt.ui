@@ -813,6 +813,13 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		return fViewer;
 	}
 	
+	/**
+ 	 * Returns the TreeViewer.
+ 	 */
+	public TreeViewer getTreeViewer() {
+		return fViewer;
+	}
+	
 	boolean isExpandable(Object element) {
 		if (fViewer == null)
 			return false;
