@@ -66,7 +66,7 @@ import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 public abstract class JUnitBaseLaunchConfiguration implements ILaunchConfigurationDelegate {
 	public static final String PORT_ATTR= JUnitPlugin.PLUGIN_ID+".PORT";
 	public static final String TESTTYPE_ATTR= JUnitPlugin.PLUGIN_ID+".TESTTYPE";
-
+	
 	/**
 	 * @see ILaunchConfigurationDelegate#launch(ILaunchConfiguration, String)
 	 */
@@ -96,7 +96,8 @@ public abstract class JUnitBaseLaunchConfiguration implements ILaunchConfigurati
 			initializeDefaults(configuration, javaElement);			
 		} else if (object instanceof IEditorInput) {
 			IJavaElement javaElement = (IJavaElement) ((IEditorInput)object).getAdapter(IJavaElement.class);
-			initializeDefaults(configuration, javaElement);
+			if (javaElement != null)
+				initializeDefaults(configuration, javaElement);
 		}
 	}
 	
@@ -332,11 +333,6 @@ public abstract class JUnitBaseLaunchConfiguration implements ILaunchConfigurati
 		String runPerspID = configuration.getAttribute(IDebugUIConstants.ATTR_TARGET_RUN_PERSPECTIVE, (String)null);
 		String debugPerspID = configuration.getAttribute(IDebugUIConstants.ATTR_TARGET_DEBUG_PERSPECTIVE, (String)null);
 				
-		// hack to pass additional info with launch
-		ILaunchConfigurationWorkingCopy wc= (ILaunchConfigurationWorkingCopy)configuration;
-		wc.setAttribute(PORT_ATTR, port);
-		wc.setAttribute(TESTTYPE_ATTR, testType.getHandleIdentifier());
-
 		// Launch the configuration
 		VMRunnerResult result = runner.run(runConfig);
 		
@@ -353,6 +349,8 @@ public abstract class JUnitBaseLaunchConfiguration implements ILaunchConfigurati
 		// Create & return Launch
 		ISourceLocator sourceLocator = new JavaUISourceLocator(javaProject);
 		Launch launch = new Launch(configuration, mode, sourceLocator, result.getProcesses(), result.getDebugTarget());
+		launch.setAttribute(PORT_ATTR, Integer.toString(port));
+		launch.setAttribute(TESTTYPE_ATTR, testType.getHandleIdentifier());
 		return launch;
 	}	
 	

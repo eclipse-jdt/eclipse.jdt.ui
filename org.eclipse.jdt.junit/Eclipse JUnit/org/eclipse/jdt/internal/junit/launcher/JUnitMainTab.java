@@ -438,7 +438,7 @@ public class JUnitMainTab implements ILaunchConfigurationTab, IAddVMDialogReques
 		IJavaProject javaProject = getJavaProject();
 		
 		//TO DO should not use the workbenchWindow as the runnable context
-		SelectionDialog dialog = new TestSelectionDialog(shell, workbenchWindow, javaProject);
+		SelectionDialog dialog = new TestSelectionDialog(shell, getLaunchDialog(), javaProject);
 		dialog.setTitle("Test Selection");
 		dialog.setMessage("Choose a test case or test suite:");
 		if (dialog.open() == dialog.CANCEL) {

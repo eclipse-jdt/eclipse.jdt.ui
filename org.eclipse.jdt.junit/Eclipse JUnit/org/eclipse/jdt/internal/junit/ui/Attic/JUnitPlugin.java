@@ -140,21 +140,14 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 			// new launch configs
 			ILaunchConfiguration config= launch.getLaunchConfiguration();
 			if (config != null) {
-				try {
-					ILaunchConfigurationType type= config.getType(); 
-					// TO DO should not know about org.eclipse.pde.junit.launchconfig
-					if (type.getIdentifier().equals("org.eclipse.jdt.junit.launchconfig") ||
-						type.getIdentifier().equals("org.eclipse.pde.junit.launchconfig")) {
-						port= config.getAttribute(JUnitBaseLaunchConfiguration.PORT_ATTR, 4500);
-						String testTypeHandle= config.getAttribute(JUnitBaseLaunchConfiguration.TESTTYPE_ATTR, "");
-						IJavaElement element= JavaCore.create(testTypeHandle);
-						if (element instanceof IType) 
-							launchedType= (IType)element;
-					}
-				} catch(CoreException e) {
-					ErrorDialog.openError(getActiveWorkbenchShell(), 
-						"Could not show JUnit Result View", e.getMessage(), e.getStatus()
-					);
+				// test whether the launch defines the JUnit attributes
+				String portStr= launch.getAttribute(JUnitBaseLaunchConfiguration.PORT_ATTR);
+				String typeStr= launch.getAttribute(JUnitBaseLaunchConfiguration.TESTTYPE_ATTR);
+				if (portStr != null && typeStr != null) {
+					port= Integer.parseInt(portStr);
+					IJavaElement element= JavaCore.create(typeStr);
+					if (element instanceof IType) 
+						launchedType= (IType)element;
 				}
 			}	
 		}
