@@ -58,6 +58,7 @@ public class InlineTempRefactoring extends Refactoring {
 	//the following fields are set after the construction
 	private VariableDeclaration fTempDeclaration;
 	private CompilationUnit fCompilationUnitNode;
+	private boolean fSaveChanges;
 
 	public InlineTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
@@ -66,8 +67,12 @@ public class InlineTempRefactoring extends Refactoring {
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= cu;
+		fSaveChanges= true;//XX
 	}
 	
+	public void setSaveChanges(boolean save){
+		fSaveChanges= save;
+	}
 	/*
 	 * @see IRefactoring#getName()
 	 */
@@ -140,7 +145,7 @@ public class InlineTempRefactoring extends Refactoring {
 		
 		if (fTempDeclaration == null){
 			String message= RefactoringCoreMessages.getString("InlineTempRefactoring.select_temp");//$NON-NLS-1$
-			return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCompilationUnitNode, fCu, message);
+			return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCompilationUnitNode, message);
 		}	
 
 		if (fTempDeclaration.getParent() instanceof FieldDeclaration)
@@ -189,7 +194,8 @@ public class InlineTempRefactoring extends Refactoring {
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask(RefactoringCoreMessages.getString("InlineTempRefactoring.preview"), 2); //$NON-NLS-1$
-			TextChange change= new CompilationUnitChange(RefactoringCoreMessages.getString("InlineTempRefactoring.inline"), fCu); //$NON-NLS-1$
+			CompilationUnitChange change= new CompilationUnitChange(RefactoringCoreMessages.getString("InlineTempRefactoring.inline"), fCu); //$NON-NLS-1$
+			change.setSave(fSaveChanges);
 			inlineTemp(change, new SubProgressMonitor(pm, 1));
 			removeTemp(change);
 			return change;
