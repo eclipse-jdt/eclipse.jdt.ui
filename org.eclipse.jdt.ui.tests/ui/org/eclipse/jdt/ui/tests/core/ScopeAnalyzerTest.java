@@ -65,7 +65,6 @@ public class ScopeAnalyzerTest extends CoreTests {
 		
 		Hashtable options= JavaCore.getDefaultOptions();
 		options.put(JavaCore.COMPILER_PB_HIDDEN_CATCH_BLOCK, JavaCore.IGNORE);
-		options.put(JavaCore.COMPILER_PB_UNREACHABLE_CODE, JavaCore.IGNORE);
 		
 		JavaCore.setOptions(options);		
 	}
@@ -143,13 +142,14 @@ public class ScopeAnalyzerTest extends CoreTests {
 		buf.append("            for (int i= 0, j= 0; i < 9; i++) {\n");
 		buf.append("                System.out.println(i + j);\n");
 		buf.append("                j++;\n");
+		buf.append("                throw new IOException();\n");		
 		buf.append("            }\n");
 		buf.append("            return 8;\n");			
 		buf.append("        } catch (IOException e) {\n");
 		buf.append("           int k= 0;\n");
 		buf.append("           return k;\n");
 		buf.append("        } catch (Exception x) {\n");
-		buf.append("           return 9;\n");					 
+		buf.append("           x= null;\n");					 
 		buf.append("        };\n");
 		buf.append("        return count;\n");		
 		buf.append("    }\n");			
@@ -190,7 +190,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		}
 		
 		{
-			String str= "return 9;";
+			String str= "x= null;";
 			int offset= buf.toString().indexOf(str);
 			
 			int flags= ScopeAnalyzer.VARIABLES;
@@ -373,7 +373,6 @@ public class ScopeAnalyzerTest extends CoreTests {
 		buf.append("                   int insideDo= 0;\n");
 		buf.append("                   return -1;\n");
 		buf.append("                } while (true);\n");
-		buf.append("                return 2;\n");
 		buf.append("            case 3:\n;");
 		buf.append("                int temp2= 9;\n");
 		buf.append("                Math.min(1.0f, 2.0f);\n");
