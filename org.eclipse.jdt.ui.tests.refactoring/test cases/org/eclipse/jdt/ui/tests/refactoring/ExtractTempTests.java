@@ -515,8 +515,8 @@ public class ExtractTempTests extends RefactoringTest {
 
 	public void testFail18() throws Exception{
 //		printTestDisabledMessage("regression test for bug#8149");
-		printTestDisabledMessage("regression test for bug#37547");
-//		failHelper1(4, 27, 4, 28, false, false, "temp", RefactoringStatus.FATAL);
+//		printTestDisabledMessage("regression test for bug#37547");
+		failHelper1(4, 27, 4, 28, false, false, "temp", RefactoringStatus.ERROR);
 	}	
 
 	public void testFail19() throws Exception{
@@ -566,5 +566,4 @@ public class ExtractTempTests extends RefactoringTest {
 //		printTestDisabledMessage("test for bug 29513");
 		failHelper1(7, 17, 7, 28, true, false, "temp", RefactoringStatus.WARNING);
 	}	
-
 }
