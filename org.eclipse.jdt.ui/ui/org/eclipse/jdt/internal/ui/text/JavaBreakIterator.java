@@ -19,6 +19,9 @@ import org.eclipse.jface.text.Assert;
 /**
  * A java break iterator. It returns all breaks, including before and after 
  * whitespace, and it returns all camelcase breaks.
+ * <p>
+ * A line break may be any of "\n", "\r", "\r\n", "\n\r".
+ * </p>
  * 
  * @since 3.0
  */
