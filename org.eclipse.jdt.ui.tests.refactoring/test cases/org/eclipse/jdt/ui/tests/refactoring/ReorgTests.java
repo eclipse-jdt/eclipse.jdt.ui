@@ -29,15 +29,9 @@ public class ReorgTests extends RefactoringTest {
 	}
 	
 	public static Test suite() {
-		TestSuite suite= new TestSuite(clazz.getName());
-		suite.addTest(noSetupSuite());
-		return new MySetup(suite);
+		return new MySetup(new TestSuite(clazz));
 	}
 	
-	public static Test noSetupSuite() {
-		return new TestSuite(clazz);
-	}
-
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}	

@@ -12,10 +12,10 @@ public class RenameMethodTests {
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite(clazz.getName());
-		suite.addTest(RenameVirtualMethodInClassTests.noSetupSuite());
-		suite.addTest(RenameMethodInInterfaceTests.noSetupSuite());
-		suite.addTest(RenamePrivateMethodTests.noSetupSuite());	
-		suite.addTest(RenameStaticMethodTests.noSetupSuite());
+		suite.addTest(RenameVirtualMethodInClassTests.suite());
+		suite.addTest(RenameMethodInInterfaceTests.suite());
+		suite.addTest(RenamePrivateMethodTests.suite());	
+		suite.addTest(RenameStaticMethodTests.suite());
 		return new MySetup(suite);
 	}
 }

@@ -14,41 +14,34 @@ public class AllRefactoringTests {
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite(clazz.getName());
-		suite.addTest(noSetupSuite());						
-		return new MySetup(suite);
-	}
-	
-	public static Test noSetupSuite() {
-		TestSuite suite= new TestSuite(clazz.getName());
-		
+
 		//--code
-		//suite.addTest(ExtractMethodTests.noSetupSuite());
-		
+		suite.addTest(ExtractMethodTests.suite());
+
 		//--methods
-		suite.addTest(RenameVirtualMethodInClassTests.noSetupSuite());
-		suite.addTest(RenameMethodInInterfaceTests.noSetupSuite());
-		suite.addTest(RenamePrivateMethodTests.noSetupSuite());	
-		suite.addTest(RenameStaticMethodTests.noSetupSuite());
-		suite.addTest(RenameParametersTests.noSetupSuite());
-		suite.addTest(RenameTempTests.noSetupSuite());
+		suite.addTest(RenameVirtualMethodInClassTests.suite());
+		suite.addTest(RenameMethodInInterfaceTests.suite());
+		suite.addTest(RenamePrivateMethodTests.suite());	
+		suite.addTest(RenameStaticMethodTests.suite());
+		suite.addTest(RenameParametersTests.suite());
+		suite.addTest(RenameTempTests.suite());
 		//suite.addTest(ReorderParametersTests.noSetupSuite());
 		
 		//--types
-		suite.addTest(RenameTypeTests.noSetupSuite());	
+		suite.addTest(RenameTypeTests.suite());	
 		
 		//--packages
-		suite.addTest(RenamePackageTests.noSetupSuite());
+		suite.addTest(RenamePackageTests.suite());
 		
 		//--fields
-		suite.addTest(RenamePrivateFieldTests.noSetupSuite());
-		suite.addTest(RenameNonPrivateFieldTests.noSetupSuite());
+		suite.addTest(RenamePrivateFieldTests.suite());
+		suite.addTest(RenameNonPrivateFieldTests.suite());
 		
 		//--compilation units
 		//suite.addTest(MoveCUTests.noSetupSuite());
-		suite.addTest(MultiMoveTests.noSetupSuite());
-
+		suite.addTest(MultiMoveTests.suite());
+		
 		return suite;
 	}
-	
 }
  

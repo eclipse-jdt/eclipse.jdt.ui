@@ -13,8 +13,8 @@ public class RenameFieldTests {
 	
 	public static Test suite() {
 		TestSuite suite= new TestSuite(clazz.getName());
-		suite.addTest(RenameNonPrivateFieldTests.noSetupSuite());
-		suite.addTest(RenamePrivateFieldTests.noSetupSuite());
+		suite.addTest(RenameNonPrivateFieldTests.suite());
+		suite.addTest(RenamePrivateFieldTests.suite());
 		return new MySetup(suite);
 	}
 }

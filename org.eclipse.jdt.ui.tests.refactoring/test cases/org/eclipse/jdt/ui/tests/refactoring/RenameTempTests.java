@@ -28,15 +28,9 @@ import org.eclipse.jdt.internal.core.refactoring.rename.RenameTempRefactoring;
 	}
 	
 	public static Test suite() {
-		TestSuite suite= new TestSuite(clazz.getName());
-		suite.addTest(noSetupSuite());
-		return new MySetup(suite);
+		return new MySetup(new TestSuite(clazz));
 	}
 	
-	public static Test noSetupSuite() {
-		return new TestSuite(clazz);
-	}
-		
 	private String getSimpleTestFileName(boolean canRename, boolean input){
 		String fileName = "A_" + getName();
 		if (canRename)

@@ -29,13 +29,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	}
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite(clazz.getName());
-		suite.addTest(noSetupSuite());
-		return new MySetup(suite);
-	}
-
-	public static Test noSetupSuite() {
-		return new TestSuite(clazz);
+		return new MySetup(new TestSuite(clazz));
 	}
 
 	protected String getRefactoringPath() {

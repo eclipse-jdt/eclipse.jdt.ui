@@ -14,18 +14,13 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 public class RenameSourceFolderChangeTests extends RefactoringTest {
 	
 	private static final Class clazz= RenameSourceFolderChangeTests.class;
+
 	public RenameSourceFolderChangeTests(String name){
 		super(name);
 	}
 	
 	public static Test suite() {
-		TestSuite suite= new TestSuite(clazz.getName());
-		suite.addTest(noSetupSuite());
-		return new MySetup(suite);
-	}
-	
-	public static Test noSetupSuite() {
-		return new TestSuite(clazz);
+		return new MySetup(new TestSuite(clazz));
 	}
 	
 	public void test0() throws Exception {
