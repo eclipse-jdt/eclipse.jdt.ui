@@ -185,16 +185,16 @@ public class TypeConstraintTests extends RefactoringTest {
 		String[] strings= {"Decl(B:f(A, Object)) =^= p.B", "[Parameter(1,B:f(A, Object))] =^= [a4]", "[B:f(A, Object)]_returnType =^= A", "[null] <= [B:f(A, Object)]_returnType", "[A:f(A, Object)]_returnType =^= A", "[Parameter(1,A:f(A, Object))] =^= [a1]", "Decl(A:f(A, Object)) =^= p.A", "[Parameter(0,B:f(A, Object))] =^= [a3]", "[null] <= [A:f(A, Object)]_returnType", "[Parameter(0,A:f(A, Object))] =^= [a0]"};
 		testConstraints(strings);
 	}	
-//
-//	public void testConstraints14() throws Exception{
-//		String[] strings= {};
-//		testConstraints(strings);
-//	}	
-//
-//	public void testConstraints15() throws Exception{
-//		String[] strings= {};
-//		testConstraints(strings);
-//	}	
+
+	public void testConstraints14() throws Exception{
+		String[] strings= {"[A:f(A)]_returnType == [B:f(A)]_returnType", "[Parameter(0,A:f(A))] == [Parameter(0,B:f(A))]", "[B:f(A)]_returnType =^= A", "Decl(B:f(A)) < Decl(A:f(A))", "[A:f(A)]_returnType =^= A", "Decl(B:f(A)) < Decl(I:f(A))", "[null] <= [A:f(A)]_returnType", "[Parameter(0,A:f(A))] =^= [a0]", "[I:f(A)]_returnType =^= A", "Decl(A:f(A)) =^= p.A", "[ax] =^= B", "[Parameter(0,B:f(A))] =^= [a3]", "[null] <= [B:f(A)]_returnType", "[a3] <= [Parameter(0,B:f(A))]", "[ax.f(a3)] =^= [B:f(A)]_returnType", "[ax] <= Decl(I:f(A)) or [ax] <= Decl(A:f(A))", "Decl(B:f(A)) =^= p.B", "[I:f(A)]_returnType == [B:f(A)]_returnType", "[Parameter(0,I:f(A))] == [Parameter(0,B:f(A))]", "[null] <= [ax]", "[Parameter(0,I:f(A))] =^= [ai]", "Decl(I:f(A)) =^= p.I"};
+		testConstraints(strings);
+	}	
+
+	public void testConstraints15() throws Exception{
+		String[] strings= {"[Parameter(0,A:f(A))] =^= [a0]", "[I:f(A)]_returnType == [B:f(A)]_returnType", "[Parameter(0,I:f(A))] == [Parameter(0,B:f(A))]", "[null] <= [A:f(A)]_returnType", "[A:f(A)]_returnType == [B:f(A)]_returnType", "[Parameter(0,A:f(A))] == [Parameter(0,B:f(A))]", "Decl(B:f(A)) < Decl(A:f(A))", "[super.f(a3)] =^= [A:f(A)]_returnType", "Decl(A:f(A)) =^= p.A", "[null] <= [B:f(A)]_returnType", "[Parameter(0,I:f(A))] =^= [ai]", "[Parameter(0,B:f(A))] =^= [a3]", "[A:f(A)]_returnType =^= A", "Decl(B:f(A)) =^= p.B", "Decl(I:f(A)) =^= p.I", "Decl(B:f(A)) < Decl(I:f(A))", "[a3] <= [Parameter(0,A:f(A))]", "[I:f(A)]_returnType =^= A", "[B:f(A)]_returnType =^= A"};
+		testConstraints(strings);
+	}	
 
 	public void testConstraints16() throws Exception{
 		String[] strings= {"Decl(A:aField) =^= p.A", "Decl(A:f()) =^= p.A", "[this] =^= p.A", "[this] =^= p.A", "[this] <= [aTemp]", "[this] <= [aField]", "[this] <= [a]", "[a] =^= A", "[aField] =^= A", "[aTemp] =^= A", "[this] =^= p.A"};
@@ -206,15 +206,15 @@ public class TypeConstraintTests extends RefactoringTest {
 		testConstraints(strings);
 	}	
 
-//	public void testConstraints18() throws Exception{
-//		String[] strings= {};
-//		testConstraints(strings);
-//	}	
-//
-//	public void testConstraints19() throws Exception{
-//		String[] strings= {};
-//		testConstraints(strings);
-//	}	
+	public void testConstraints18() throws Exception{
+		String[] strings= {"[Parameter(0,B:B(A))] =^= [a1]", "Decl(B:B(A)) =^= p.B", "[Parameter(0,A:A(A))] =^= [a0]", "Decl(A:A(A)) =^= p.A", "[a1] <= [Parameter(0,A:A(A))]"};
+		testConstraints(strings);
+	}	
+
+	public void testConstraints19() throws Exception{
+		String[] strings= {"[super.aField] =^= p.A", "[a] =^= A", "Decl(B:f()) =^= p.B", "[a] <= [super.aField]", "[null] <= [a]", "Decl(A:aField) =^= p.A", "[aField] =^= A"};
+		testConstraints(strings);
+	}	
 
 	public void testConstraints20() throws Exception{
 		String[] strings= {"Decl(B:aField) =^= p.B", "Decl(A:aField) =^= p.A", "Decl(B:aField) < Decl(A:aField)", "[aField] =^= A", "[aField] =^= A"};
@@ -231,63 +231,6 @@ public class TypeConstraintTests extends RefactoringTest {
 		testConstraints(strings);
 	}	
 	
-//	private void testBadVars(String[] badVars, String[] initiallyBadVars) throws Exception {
-//		CompilationUnit cuNode= getCuNode();
-//		ConstraintCollector collector= new ConstraintCollector();
-//		cuNode.accept(collector);
-//		ITypeConstraint[] constraints= collector.getConstraints();
-//		assertAllSatisfied(constraints);
-//		ITypeBinding classBinding= ((TypeDeclaration)cuNode.types().get(0)).resolveBinding();
-//		assertTrue("isClass", classBinding.isClass());
-//		ITypeBinding interfaceBinding= ((TypeDeclaration)cuNode.types().get(1)).resolveBinding();
-//		assertTrue("isInterface", interfaceBinding.isInterface());
-//
-//		Set setOfAll= new HashSet(Arrays.asList(ExtractInterfaceUtil.getAllOfType(constraints, classBinding)));
-//		ConstraintVariable[] initiallyBad= ExtractInterfaceUtil.getInitialBad(setOfAll, constraints, interfaceBinding);
-//		List initiallyBadStrings= allToStrings(initiallyBad);
-//		assertEquals(initiallyBadStrings.toString(), initiallyBadVars.length, initiallyBadStrings.size());
-//		for (int i= 0; i < initiallyBadVars.length; i++) {
-//			assertTrue(initiallyBadVars[i], initiallyBadStrings.contains(initiallyBadVars[i]));
-//		}
-//
-//		//TODO fix		
-////		ConstraintVariable[] bad= ExtractInterfaceUtil.getBad(constraints, classBinding, interfaceBinding);
-////		List badStrings= allToStrings(bad);
-////		assertEquals(badStrings.toString(), badVars.length, badStrings.size());
-////		for (int i= 0; i < badVars.length; i++) {
-////			assertTrue(badVars[i], badStrings.contains(badVars[i]));
-////		}
-//	}
-	
-//	public void testBad0() throws Exception{
-////		String[] badVars= {"[a2]"};
-////		testBadVars(badVars);
-//	}
-//
-//	public void testBad1() throws Exception{
-//		String[] initialBad= {"[a2]"};
-//		String[] badVars= {"[a2]"};
-//		testBadVars(badVars, initialBad);
-//	}
-//
-//	public void testBad2() throws Exception{
-//		String[] initialBad= {"[a2]"};
-//		String[] badVars= {"[a1]", "[a2]"};
-//		testBadVars(badVars, initialBad);
-//	}
-//
-//	public void testBad3() throws Exception{
-//		String[] initialBad= {"[a2]"};
-//		String[] badVars= {"[a1]", "[a2]"};
-//		testBadVars(badVars, initialBad);
-//	}
-//
-//	public void testBad4() throws Exception{
-//		String[] initialBad= {"[a2]"};
-//		String[] badVars= {"[a2]", "[(A)a1]"};
-//		testBadVars(badVars, initialBad);
-//	}
-
 	public void testUpdatableExtractInterfaceRanges0() throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP());
 		IType theInterface= cu.getType("Bag");
