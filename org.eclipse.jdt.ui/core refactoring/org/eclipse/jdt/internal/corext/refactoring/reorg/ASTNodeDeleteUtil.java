@@ -41,7 +41,7 @@ public class ASTNodeDeleteUtil {
 		for (int i= 0; i < javaElements.length; i++) {
 			markAsDeleted(removed, javaElements[i], cuNode, rewrite, null);
 		}
-		propagateFieldDeclarationNodeDeletions(removed, cuNode, rewrite);
+		propagateFieldDeclarationNodeDeletions(removed, cuNode, rewrite, null);
 	}
 
 	public static void markAsDeleted(IJavaElement[] javaElements, CompilationUnit cuNode, ASTRewrite rewrite, TextEditGroup group) throws JavaModelException {
@@ -49,7 +49,7 @@ public class ASTNodeDeleteUtil {
 		for (int i= 0; i < javaElements.length; i++) {
 			markAsDeleted(removed, javaElements[i], cuNode, rewrite, group);
 		}
-		propagateFieldDeclarationNodeDeletions(removed, cuNode, rewrite);
+		propagateFieldDeclarationNodeDeletions(removed, cuNode, rewrite, group);
 	}
 
 	private static void markAsDeleted(List list, IJavaElement element, CompilationUnit cuNode, ASTRewrite rewrite, TextEditGroup group) throws JavaModelException {
@@ -81,7 +81,7 @@ public class ASTNodeDeleteUtil {
 		return ASTNodeSearchUtil.getDeclarationNodes(element, cuNode);
 	}
 
-	private static void propagateFieldDeclarationNodeDeletions(final List removed, final CompilationUnit cuNode, final ASTRewrite rewrite) {
+	private static void propagateFieldDeclarationNodeDeletions(final List removed, final CompilationUnit cuNode, final ASTRewrite rewrite, final TextEditGroup group) {
 		Set removedNodes= getRemovedNodes(removed, cuNode, rewrite);
 		for (Iterator iter= removedNodes.iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
@@ -89,7 +89,7 @@ public class ASTNodeDeleteUtil {
 				if (node.getParent() instanceof FieldDeclaration) {
 					FieldDeclaration fd= (FieldDeclaration) node.getParent();
 					if (!removed.contains(fd) && removedNodes.containsAll(fd.fragments()))
-						rewrite.remove(fd, null);
+						rewrite.remove(fd, group);
 				}
 			}
 		}
