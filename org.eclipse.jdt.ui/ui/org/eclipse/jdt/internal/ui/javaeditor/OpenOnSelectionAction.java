@@ -40,26 +40,10 @@ import org.eclipse.jdt.internal.ui.actions.AbstractOpenJavaElementAction;
  */
 public class OpenOnSelectionAction extends AbstractOpenJavaElementAction {
 	
-	
-	class SelectionChangedListener implements ISelectionChangedListener {
-		
-		/*
-		 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
-		 */
-		public void selectionChanged(SelectionChangedEvent event) {
-			ISelection s= event.getSelection();
-			if (s instanceof ITextSelection) {
-				ITextSelection ts= (ITextSelection) s;
-				setEnabled(ts.getLength() > 0);
-			}
-		}
-	};
-	
 		
 	private String fDialogTitle;
 	private String fDialogMessage;
 	protected ITextEditor fEditor;
-	protected ISelectionChangedListener fListener= new SelectionChangedListener();
 	
 	
 	/**
@@ -91,19 +75,8 @@ public class OpenOnSelectionAction extends AbstractOpenJavaElementAction {
 		fDialogMessage= message;
 	}
 	
-	public void setContentEditor(ITextEditor editor) {
-		
-		if (fEditor != null) {
-			ISelectionProvider p= fEditor.getSelectionProvider();
-			if (p != null) p.removeSelectionChangedListener(fListener);
-		}
-		
+	public void setContentEditor(ITextEditor editor) {	
 		fEditor= editor;
-		
-		if (fEditor != null) {
-			ISelectionProvider p= fEditor.getSelectionProvider();
-			if (p != null) p.addSelectionChangedListener(fListener);
-		}
 	}
 	
 	protected ICodeAssist getCodeAssist() {	
@@ -126,19 +99,14 @@ public class OpenOnSelectionAction extends AbstractOpenJavaElementAction {
 		if (resolve != null && fEditor.getSelectionProvider() != null) {
 			ITextSelection selection= (ITextSelection) fEditor.getSelectionProvider().getSelection();
 			try {
-				if (selection.getLength() > 0) {
-					IJavaElement[] result= resolve.codeSelect(selection.getOffset(), selection.getLength());
-					if (result != null && result.length > 0) {
-						List filtered= filterResolveResults(result);
-						IJavaElement selected= selectJavaElement(filtered, getShell(), fDialogTitle, fDialogMessage);
-						if (selected != null) {
-							open(selected);
-							return;
-						}
+				IJavaElement[] result= resolve.codeSelect(selection.getOffset(), selection.getLength());
+				if (result != null && result.length > 0) {
+					List filtered= filterResolveResults(result);
+					IJavaElement selected= selectJavaElement(filtered, getShell(), fDialogTitle, fDialogMessage);
+					if (selected != null) {
+						open(selected);
+						return;
 					}
-				} else {
-					openOnEmptySelection(selection);
-					return;
 				}
 			} catch (JavaModelException x) {
 				JavaPlugin.log(x.getStatus());
@@ -149,11 +117,7 @@ public class OpenOnSelectionAction extends AbstractOpenJavaElementAction {
 		
 		getShell().getDisplay().beep();		
 	}
-	
-	protected void openOnEmptySelection(ITextSelection selection) throws JavaModelException, PartInitException {
-		getShell().getDisplay().beep();
-	}
-	
+
 	protected Shell getShell() {
 		return fEditor.getSite().getShell();
 	}					

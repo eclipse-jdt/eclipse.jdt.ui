@@ -49,7 +49,6 @@ public class OpenHierarchyOnSelectionAction extends OpenOnSelectionAction {
 	
 	/**
 	 * Overwrites OpenOnSelectionAction#setContentEditor
-	 * No installation of a selection listener -> empty selection ok
 	 */
 	public void setContentEditor(ITextEditor editor) {
 		fEditor= editor;
@@ -61,15 +60,5 @@ public class OpenHierarchyOnSelectionAction extends OpenOnSelectionAction {
 	 */
 	protected void open(IJavaElement element) throws JavaModelException, PartInitException {
 		OpenTypeHierarchyUtil.open(element, fEditor.getSite().getWorkbenchWindow());
-	}
-		
-	/**
-	 * @see OpenOnSelectionAction#openOnEmptySelection(ITextSelection)
-	 */
-	protected void openOnEmptySelection(ITextSelection selection) throws JavaModelException, PartInitException {
-		if (fEditor instanceof JavaEditor) {
-			JavaEditor editor= (JavaEditor) fEditor;
-			open(editor.getElementAt(selection.getOffset()));
-		}
 	}
 }
