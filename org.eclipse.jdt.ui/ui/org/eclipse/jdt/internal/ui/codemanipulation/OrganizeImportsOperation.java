@@ -4,13 +4,43 @@
  */
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
-import java.util.ArrayList;import java.util.List;import java.util.Locale;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.internal.compiler.IProblem;import org.eclipse.jdt.internal.compiler.IProblemFactory;import org.eclipse.jdt.internal.compiler.ISourceElementRequestor;import org.eclipse.jdt.internal.compiler.SourceElementParser;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;import org.eclipse.jdt.internal.ui.util.TypeRef;import org.eclipse.jdt.internal.ui.util.TypeRefLabelProvider;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.jface.viewers.ILabelProvider;
+
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+
+import org.eclipse.jdt.internal.compiler.IProblem;
+import org.eclipse.jdt.internal.compiler.IProblemFactory;
+import org.eclipse.jdt.internal.compiler.ISourceElementRequestor;
+import org.eclipse.jdt.internal.compiler.SourceElementParser;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
+import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
+import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
+import org.eclipse.jdt.internal.ui.util.TypeRef;
+import org.eclipse.jdt.internal.ui.util.TypeRefLabelProvider;
 
 
 public class OrganizeImportsOperation extends WorkspaceModifyOperation {
-	
-	private static final String OP_DESC= "OrganizeImportsOperation.description";
-	private static final String DIALOG= "OrganizeImportsOperation.dialog";
 	
 	private ICompilationUnit fCompilationUnit;	
 	private IImportDeclaration[] fCreatedImports;
@@ -48,7 +78,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 				monitor= new NullProgressMonitor();
 			}			
 			
-			monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), 3);
+			monitor.beginTask(CodeManipulationMessages.getString("OrganizeImportsOperation.description"), 3); //$NON-NLS-1$
 			
 			String[] references= findTypeReferences(fCompilationUnit);
 			if (references == null) {
@@ -73,8 +103,8 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 					oldSingleImports.add(curr.getElementName());
 				}			
 			}
-			oldDemandImports.add("");
-			oldDemandImports.add("java.lang");
+			oldDemandImports.add(""); //$NON-NLS-1$
+			oldDemandImports.add("java.lang"); //$NON-NLS-1$
 			oldDemandImports.add(fCompilationUnit.getParent().getElementName());			
 			
 			monitor.worked(1);
@@ -115,9 +145,9 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 		ILabelProvider labelProvider= new TypeRefLabelProvider(TypeRefLabelProvider.SHOW_FULLYQUALIFIED);
 		
 		MultiElementListSelectionDialog dialog= new MultiElementListSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), labelProvider, true, false);
-		dialog.setTitle(JavaPlugin.getResourceString(DIALOG + ".title"));
-		dialog.setMessage(JavaPlugin.getResourceString(DIALOG + ".message"));
-		dialog.setPageInfoMessage(JavaPlugin.getResourceString(DIALOG + ".pageinfo"));
+		dialog.setTitle(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.title")); //$NON-NLS-1$
+		dialog.setMessage(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.message")); //$NON-NLS-1$
+		dialog.setPageInfoMessage(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.pageinfo")); //$NON-NLS-1$
 		
 		if (dialog.open(openChoices) == dialog.OK) {
 			Object[] result= dialog.getResult();
@@ -254,7 +284,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 		}
 		
 		public String getLocalizedMessage(int problemId, String[] problemArguments) {
-			return "" + problemId;
+			return "" + problemId; //$NON-NLS-1$
 		}
 	}	
 	

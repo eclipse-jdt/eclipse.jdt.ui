@@ -4,7 +4,16 @@
  */
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
-import java.util.ArrayList;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import java.util.ArrayList;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
+
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 
 /**
  * Add method stubs to a type (the parent type)
@@ -12,8 +21,6 @@ import java.util.ArrayList;import org.eclipse.core.runtime.CoreException;impo
  * If the parent type is open in an editor, be sure to pass over its working copy.
  */
 public class AddMethodStubOperation extends WorkspaceModifyOperation {
-	
-	private static final String OP_DESC= "AddMethodStubOperation.description";
 	
 	private IType fType;
 	private IMethod[] fInheritedMethods;
@@ -34,7 +41,7 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 				monitor= new NullProgressMonitor();
 			}			
 			
-			monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), fInheritedMethods.length + 1);
+			monitor.beginTask(CodeManipulationMessages.getString("AddMethodStubOperation.description"), fInheritedMethods.length + 1); //$NON-NLS-1$
 			
 			IMethod[] existingMethods= fType.getMethods();
 			ArrayList createdMethods= new ArrayList();

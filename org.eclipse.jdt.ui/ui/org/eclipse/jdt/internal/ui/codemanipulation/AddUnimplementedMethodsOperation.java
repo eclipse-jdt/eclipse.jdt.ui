@@ -4,17 +4,25 @@
  */
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
+import java.util.ArrayList;
 
-import java.util.ArrayList;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
+
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 
 /**
  * Evaluate all unimplemented methods and create them
  * If the type is open in an editor, be sure to pass over the types working working copy.
  */
 public class AddUnimplementedMethodsOperation extends WorkspaceModifyOperation {
-	
-	private static final String OP_DESC= "AddUnimplementedMethodsOperation.description";
-	
+
 	private IType fType;
 	private IMethod[] fCreatedMethods;
 	private boolean fDoSave;
@@ -32,7 +40,7 @@ public class AddUnimplementedMethodsOperation extends WorkspaceModifyOperation {
 				monitor= new NullProgressMonitor();
 			}			
 			
-			monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), 3);
+			monitor.beginTask(CodeManipulationMessages.getString("AddUnimplementedMethodsOperation.description"), 3); //$NON-NLS-1$
 			
 			ITypeHierarchy hierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
 			monitor.worked(1);

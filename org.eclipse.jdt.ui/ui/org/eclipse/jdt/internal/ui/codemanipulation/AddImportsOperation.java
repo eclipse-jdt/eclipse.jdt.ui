@@ -4,7 +4,17 @@
  */
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
-import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
 
 /**
  * Add imports to a compilation unit.
@@ -13,8 +23,6 @@ import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.I
  * If the compilation unit is open in an editor, be sure to pass over its working copy.
  */
 public class AddImportsOperation extends WorkspaceModifyOperation {
-	
-	private static final String OP_DESC= "AddImportsOperation.description";
 	
 	private ICompilationUnit fCompilationUnit;
 	private IJavaElement[] fImports;
@@ -42,7 +50,7 @@ public class AddImportsOperation extends WorkspaceModifyOperation {
 			}			
 			
 			int nImports= fImports.length;
-			monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), 2);
+			monitor.beginTask(CodeManipulationMessages.getString("AddImportsOperation.description"), 2); //$NON-NLS-1$
 			
 			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit);
 			
@@ -54,7 +62,7 @@ public class AddImportsOperation extends WorkspaceModifyOperation {
 					impStructure.addImport(packageName, type.getElementName());
 				} else if (imp instanceof IPackageFragment) {
 					String packageName= ((IPackageFragment)imp).getElementName();
-					impStructure.addImport(packageName, "*");
+					impStructure.addImport(packageName, "*"); //$NON-NLS-1$
 				}
 			}
 			monitor.worked(1);

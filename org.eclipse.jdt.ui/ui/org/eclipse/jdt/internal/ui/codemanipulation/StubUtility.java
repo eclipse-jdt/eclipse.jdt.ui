@@ -4,7 +4,42 @@
  */
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
-import java.util.ArrayList;import java.util.List;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IBuffer;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.core.search.IJavaSearchConstants;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.core.search.ITypeNameRequestor;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.internal.compiler.ConfigurableOption;import org.eclipse.jdt.internal.formatter.CodeFormatter;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.util.TypeRef;import org.eclipse.jdt.internal.ui.util.TypeRefRequestor;import org.eclipse.jface.text.BadLocationException;import org.eclipse.jface.text.IDocument;import org.eclipse.swt.SWT;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.swt.SWT;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.ITypeNameRequestor;
+import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.internal.compiler.ConfigurableOption;
+import org.eclipse.jdt.internal.formatter.CodeFormatter;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.internal.ui.util.TypeRef;
+import org.eclipse.jdt.internal.ui.util.TypeRefRequestor;
 
 public class StubUtility {
 
@@ -23,37 +58,37 @@ public class StubUtility {
 		int lastParam= paramTypes.length -1;		
 		if (!method.isConstructor()) {
 			// java doc
-			buf.append("\t/**\n\t");
-			buf.append(" * @see "); buf.append(declaringtype.getElementName()); buf.append('#');
+			buf.append("\t/**\n\t"); //$NON-NLS-1$
+			buf.append(" * @see "); buf.append(declaringtype.getElementName()); buf.append('#'); //$NON-NLS-1$
 			buf.append(method.getElementName());
 			buf.append('(');
 			for (int i= 0; i <= lastParam; i++) {
 				buf.append(Signature.getSimpleName(Signature.toString(paramTypes[i])));
 				if (i < lastParam) {
-					buf.append(", ");
+					buf.append(", "); //$NON-NLS-1$
 				}
 			}
-			buf.append(")\n\t");
-			buf.append(" */\n\t");
+			buf.append(")\n\t"); //$NON-NLS-1$
+			buf.append(" */\n\t"); //$NON-NLS-1$
 		} else {
-			buf.append("\t/**\n\t");
-			buf.append(" * Constructor for "); buf.append(parenttype.getElementName()); buf.append("\n\t");
-			buf.append(" */\n\t");
+			buf.append("\t/**\n\t"); //$NON-NLS-1$
+			buf.append(" * Constructor for "); buf.append(parenttype.getElementName()); buf.append("\n\t"); //$NON-NLS-2$ //$NON-NLS-1$
+			buf.append(" */\n\t"); //$NON-NLS-1$
 		}		
 		int flags= method.getFlags();
 		if (Flags.isPublic(flags) || (declaringtype.isInterface() && parenttype.isClass())) {
-			buf.append("public ");
+			buf.append("public "); //$NON-NLS-1$
 		} else if (Flags.isProtected(flags)) {
-			buf.append("protected ");
+			buf.append("protected "); //$NON-NLS-1$
 		}
 		if (Flags.isSynchronized(flags)) {
-			buf.append("synchronized ");
+			buf.append("synchronized "); //$NON-NLS-1$
 		}		
 		if (Flags.isVolatile(flags)) {
-			buf.append("volatile ");
+			buf.append("volatile "); //$NON-NLS-1$
 		}
 		if (Flags.isStrictfp(flags)) {
-			buf.append("strictfp ");
+			buf.append("strictfp "); //$NON-NLS-1$
 		}
 			
 		if (!method.isConstructor()) {
@@ -79,61 +114,61 @@ public class StubUtility {
 			buf.append(' ');
 			buf.append(paramNames[i]);
 			if (i < lastParam) {
-				buf.append(", ");
+				buf.append(", "); //$NON-NLS-1$
 			}
 		}
 		buf.append(')');
 		String[] excTypes= method.getExceptionTypes();
 		int lastExc= excTypes.length - 1;
 		if (lastExc >= 0) {
-			buf.append(" throws ");
+			buf.append(" throws "); //$NON-NLS-1$
 			for (int i= 0; i <= lastExc; i++) {
 				String excTypeSig= excTypes[i];
 				String excTypeFrm= Signature.toString(excTypeSig);
 				resolveAndAdd(excTypeSig, declaringtype, imports);
 				buf.append(Signature.getSimpleName(excTypeFrm));
 				if (i < lastExc) {
-					buf.append(", ");
+					buf.append(", "); //$NON-NLS-1$
 				}
 			}
 		}
 		if (parenttype.isInterface()) {
-			buf.append(";\n\n");
+			buf.append(";\n\n"); //$NON-NLS-1$
 		} else {
-			buf.append(" {\n\t");
+			buf.append(" {\n\t"); //$NON-NLS-1$
 			if (Flags.isAbstract(method.getFlags()) || declaringtype.isInterface()) {
 				String retTypeSig= method.getReturnType();
 				if (retTypeSig != null && !retTypeSig.equals(Signature.SIG_VOID)) {
 					buf.append('\t');
 					if (!isBuiltInType(retTypeSig) || Signature.getArrayCount(retTypeSig) > 0) {
-						buf.append("return null;\n\t");
+						buf.append("return null;\n\t"); //$NON-NLS-1$
 					} else if (retTypeSig.equals(Signature.SIG_BOOLEAN)) {
-						buf.append("return false;\n\t");
+						buf.append("return false;\n\t"); //$NON-NLS-1$
 					} else {
-						buf.append("return 0;\n\t");
+						buf.append("return 0;\n\t"); //$NON-NLS-1$
 					}
 				}
 			} else {
 				buf.append('\t');
 				if (!method.isConstructor()) {
 					if (!Signature.SIG_VOID.equals(method.getReturnType())) {
-						buf.append("return ");
+						buf.append("return "); //$NON-NLS-1$
 					}
-					buf.append("super.");
+					buf.append("super."); //$NON-NLS-1$
 					buf.append(method.getElementName());
 				} else {
-					buf.append("super");
+					buf.append("super"); //$NON-NLS-1$
 				}
 				buf.append('(');			
 				for (int i= 0; i <= lastParam; i++) {
 					buf.append(paramNames[i]);
 					if (i < lastParam) {
-						buf.append(", ");
+						buf.append(", "); //$NON-NLS-1$
 					}
 				}
-				buf.append(");\n\t");
+				buf.append(");\n\t"); //$NON-NLS-1$
 			}
-			buf.append("}\n\n");			
+			buf.append("}\n\n");			 //$NON-NLS-1$
 		}
 		return buf.toString();
 	}
@@ -414,16 +449,16 @@ public class StubUtility {
 				if (ch == SWT.CR) {
 					if (i + 1 < length) {
 						if (buf.getChar(i + 1) == SWT.LF) {
-							return "\r\n";
+							return "\r\n"; //$NON-NLS-1$
 						}
 					}
-					return "\r";
+					return "\r"; //$NON-NLS-1$
 				} else if (ch == SWT.LF) {
-					return "\n";
+					return "\n"; //$NON-NLS-1$
 				}
 			}
 		}
-		return System.getProperty("line.separator", "\n");
+		return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -438,7 +473,7 @@ public class StubUtility {
 		} catch (BadLocationException e) {
 		}
 		if (lineDelim == null) {
-			String systemDelimiter= System.getProperty("line.separator", "\n");
+			String systemDelimiter= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			String[] lineDelims= doc.getLegalLineDelimiters();
 			for (int i= 0; i < lineDelims.length; i++) {
 				if (lineDelims[i].equals(systemDelimiter)) {

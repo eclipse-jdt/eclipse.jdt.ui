@@ -4,7 +4,17 @@
  */
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
-import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IField;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.internal.compiler.ConfigurableOption;import org.eclipse.jdt.internal.formatter.CodeFormatter;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
+
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.Signature;
 
 /**
  * For a given field, method stubs for getter and setters are created
@@ -12,8 +22,6 @@ import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.I
  * If the field is open in an editor, be sure to pass over its working copy.
  */
 public class AddGetterSetterOperation extends WorkspaceModifyOperation {
-	
-	private static final String OP_DESC= "AddGetterSetterOperation.description";
 	
 	private IField fField;
 	private IMethod fCreatedSetter, fCreatedGetter;
@@ -35,10 +43,10 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 						return fieldname.substring(1);
 					}
 					if (firstLetter == '_') {
-						return "" + Character.toUpperCase(secondLetter) + fieldname.substring(2);
+						return "" + Character.toUpperCase(secondLetter) + fieldname.substring(2); //$NON-NLS-1$
 					}
 				}
-				return "" + Character.toUpperCase(firstLetter) + fieldname.substring(1);
+				return "" + Character.toUpperCase(firstLetter) + fieldname.substring(1); //$NON-NLS-1$
 			}
 		}
 		return fieldname;
@@ -49,7 +57,7 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 		if (accessorName.length() > 0) {
 			char firstLetter= accessorName.charAt(0);
 			if (!Character.isLowerCase(firstLetter)) {
-				return "" + Character.toLowerCase(firstLetter) + accessorName.substring(1);
+				return "" + Character.toLowerCase(firstLetter) + accessorName.substring(1); //$NON-NLS-1$
 			}
 		}
 		return accessorName;
@@ -63,7 +71,7 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 			if (monitor == null) {
 				monitor= new NullProgressMonitor();
 			}
-			monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), 2);
+			monitor.beginTask(CodeManipulationMessages.getString("AddGetterSetterOperation.description"), 2); //$NON-NLS-1$
 			
 			String fieldName= fField.getElementName();
 			String accessorName= evalAccessorName(fieldName);
@@ -78,21 +86,21 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 			int indent= StubUtility.getIndentUsed(parentType) + 1;
 			
 			// test if the getter already exists
-			String getterName= "get" + accessorName;
+			String getterName= "get" + accessorName; //$NON-NLS-1$
 			if (StubUtility.findMethod(getterName, new String[0], false, parentType) == null) {
 				// create the getter stub
 				StringBuffer buf= new StringBuffer();
-				buf.append("\t/**\n");
-				buf.append("\t * Gets the "); buf.append(argname); buf.append("\n");
-				buf.append("\t * @return Returns a "); buf.append(typeName); buf.append("\n");
-				buf.append("\t */\n\t");
-				buf.append("public ");
+				buf.append("\t/**\n"); //$NON-NLS-1$
+				buf.append("\t * Gets the "); buf.append(argname); buf.append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
+				buf.append("\t * @return Returns a "); buf.append(typeName); buf.append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
+				buf.append("\t */\n\t"); //$NON-NLS-1$
+				buf.append("public "); //$NON-NLS-1$
 				if (isStatic) {
-					buf.append("static ");
+					buf.append("static "); //$NON-NLS-1$
 				}
 				buf.append(typeName);
 				buf.append(' '); buf.append(getterName);
-				buf.append("() {\n\t\treturn "); buf.append(fieldName); buf.append(";\n\t}\n");
+				buf.append("() {\n\t\treturn "); buf.append(fieldName); buf.append(";\n\t}\n"); //$NON-NLS-2$ //$NON-NLS-1$
 				
 				String formattedContent= StubUtility.codeFormat(buf.toString(), indent, lineDelim) + lineDelim;					
 				
@@ -102,27 +110,27 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 			monitor.worked(1);
 						
 			// test if the setter already exists
-			String setterName= "set" + accessorName;
+			String setterName= "set" + accessorName; //$NON-NLS-1$
 			String[] args= new String[] { fField.getTypeSignature() };
 			if (StubUtility.findMethod(setterName, args, false, parentType) == null) {		
 				// create the setter stub
 								
 				StringBuffer buf= new StringBuffer();
-				buf.append("\t/**\n");
-				buf.append("\t * Sets the "); buf.append(argname); buf.append("\n");
-				buf.append("\t * @param "); buf.append(argname); buf.append(" The "); buf.append(argname); buf.append(" to set\n");
-				buf.append("\t */\n\t");
-				buf.append("public ");
+				buf.append("\t/**\n"); //$NON-NLS-1$
+				buf.append("\t * Sets the "); buf.append(argname); buf.append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
+				buf.append("\t * @param "); buf.append(argname); buf.append(" The "); buf.append(argname); buf.append(" to set\n"); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-2$
+				buf.append("\t */\n\t"); //$NON-NLS-1$
+				buf.append("public "); //$NON-NLS-1$
 				if (isStatic) {
-					buf.append("static ");
+					buf.append("static "); //$NON-NLS-1$
 				}
-				buf.append("void "); buf.append(setterName);
+				buf.append("void "); buf.append(setterName); //$NON-NLS-1$
 				buf.append('('); buf.append(typeName); buf.append(' '); 
-				buf.append(argname); buf.append(") {\n\t\t");
+				buf.append(argname); buf.append(") {\n\t\t"); //$NON-NLS-1$
 				if (argname.equals(fieldName)) {
-					buf.append("this.");
+					buf.append("this."); //$NON-NLS-1$
 				}
-				buf.append(fieldName); buf.append("= "); buf.append(argname); buf.append(";\n\t}\n");
+				buf.append(fieldName); buf.append("= "); buf.append(argname); buf.append(";\n\t}\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				String formattedContent= StubUtility.codeFormat(buf.toString(), indent, lineDelim) + lineDelim;				
 				

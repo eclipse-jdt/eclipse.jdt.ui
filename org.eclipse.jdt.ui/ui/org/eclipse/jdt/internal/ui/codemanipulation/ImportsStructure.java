@@ -4,7 +4,25 @@
  */
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
-import java.util.ArrayList;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jface.text.BadLocationException;import org.eclipse.jface.text.IDocument;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IImportContainer;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.IPackageDeclaration;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.internal.ui.util.DocumentManager;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import java.util.ArrayList;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.internal.ui.util.DocumentManager;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 public class ImportsStructure implements IImportsStructure {
 	
@@ -91,7 +109,7 @@ public class ImportsStructure implements IImportsStructure {
 	private PackageEntry findBestMatch(String newName) {
 		int bestMatchLen= -1;
 		PackageEntry bestMatch= null;
-		String bestName= "";
+		String bestName= ""; //$NON-NLS-1$
 		
 		for (int i= 0; i < fPackageEntries.size(); i++) {
 			boolean isBetterMatch;
@@ -292,7 +310,7 @@ public class ImportsStructure implements IImportsStructure {
 					
 					if (nImports >= fImportOnDemandThreshold) {
 						// assume no existing imports
-						String starimport= packName + ".*";
+						String starimport= packName + ".*"; //$NON-NLS-1$
 						lastPos= insertImport(buf, lastPos, starimport, lineDelim);
 						created.add(fCompilationUnit.getImport(starimport));
 					} else {
@@ -330,7 +348,7 @@ public class ImportsStructure implements IImportsStructure {
 
 	
 	private boolean isImportNeeded(String packName, IType[] cuTypes) {
-		if (packName.length() == 0 || "java.lang".equals(packName)) {
+		if (packName.length() == 0 || "java.lang".equals(packName)) { //$NON-NLS-1$
 			return false;
 		}
 		if (cuTypes.length > 0) {
@@ -352,7 +370,7 @@ public class ImportsStructure implements IImportsStructure {
 			buf.append(lineDelim);
 			pos= buf.length();
 		}
-		name.append("import ");
+		name.append("import "); //$NON-NLS-1$
 		name.append(importName);
 		name.append(';');
 		if (pos < buf.length()) {
