@@ -104,7 +104,9 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	private boolean fAllowAddImports;
 	
 	private TemplateEngine fTemplateEngine;
-	private ExperimentalResultCollector fExperimentalCollector;	
+	private ExperimentalResultCollector fExperimentalCollector;
+	
+	private int fNumberOfComputedResults= 0;
 	
 	
 	public JavaCompletionProcessor(IEditorPart editor) {
@@ -181,6 +183,8 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#getErrorMessage()
 	 */
 	public String getErrorMessage() {
+		if (fNumberOfComputedResults == 0)
+			return "No completions available.";
 		return fCollector.getErrorMessage();
 	}
 
@@ -352,6 +356,8 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 			System.arraycopy(results, 0, total, templateResults.length, results.length);
 			results= total;
 		}
+		
+		fNumberOfComputedResults= (results == null ? 0 : results.length);
 		
 		/*
 		 * Order here and not in result collector to make sure that the order

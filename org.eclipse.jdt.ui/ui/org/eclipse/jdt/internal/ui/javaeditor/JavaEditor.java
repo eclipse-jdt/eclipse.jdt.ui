@@ -5,6 +5,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
@@ -32,7 +34,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.source.AnnotationColumn;
-// import org.eclipse.jface.text.source.AnnotationRulerColumn;
 import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
@@ -50,14 +51,17 @@ import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.editors.text.DefaultEncodingSupport;
+import org.eclipse.ui.editors.text.IEncodingSupport;
 import org.eclipse.ui.part.EditorActionBarContributor;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.StatusTextEditor;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -84,15 +88,20 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
+import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+
+
+
+
 
 
 
 /**
  * Java specific text editor.
  */
-public abstract class JavaEditor extends AbstractTextEditor {
+public abstract class JavaEditor extends StatusTextEditor {
 		
 	/**
 	 * "Smart" runnable for updating the outline page's selection.
@@ -153,6 +162,8 @@ public abstract class JavaEditor extends AbstractTextEditor {
 	private int fIgnoreOutlinePageSelection;
 	/** The line number ruler column */
 	private LineNumberRulerColumn fLineNumberRulerColumn;
+	/** This editor's encoding support */
+	private DefaultEncodingSupport fEncodingSupport;
 	
 	protected CompositeActionGroup fActionGroups;
 	private CompositeActionGroup fContextMenuGroup;
@@ -317,6 +328,10 @@ public abstract class JavaEditor extends AbstractTextEditor {
 				fOutlinePage= createOutlinePage();
 			return fOutlinePage;
 		}
+		
+		if (IEncodingSupport.class.equals(required))
+			return fEncodingSupport;
+			
 		return super.getAdapter(required);
 	}
 	
@@ -396,7 +411,7 @@ public abstract class JavaEditor extends AbstractTextEditor {
 		
 	public void setSelection(IJavaElement element) {
 		
-		if (element == null || element instanceof ICompilationUnit) {
+		if (element == null || element instanceof ICompilationUnit || element instanceof IClassFile) {
 			/*
 			 * If the element is an ICompilationUnit this unit is either the input
 			 * of this editor or not being displayed. In both cases, nothing should
@@ -490,11 +505,60 @@ public abstract class JavaEditor extends AbstractTextEditor {
 	}
 	
 	/*
+	 * @see StatusTextEditor#getStatusHeader(IStatus)
+	 */
+	protected String getStatusHeader(IStatus status) {
+		if (fEncodingSupport != null) {
+			String message= fEncodingSupport.getStatusHeader(status);
+			if (message != null)
+				return message;
+		}
+		return super.getStatusHeader(status);
+	}
+	
+	/*
+	 * @see StatusTextEditor#getStatusBanner(IStatus)
+	 */
+	protected String getStatusBanner(IStatus status) {
+		if (fEncodingSupport != null) {
+			String message= fEncodingSupport.getStatusBanner(status);
+			if (message != null)
+				return message;
+		}
+		return super.getStatusBanner(status);
+	}
+	
+	/*
+	 * @see StatusTextEditor#getStatusMessage(IStatus)
+	 */
+	protected String getStatusMessage(IStatus status) {
+		if (fEncodingSupport != null) {
+			String message= fEncodingSupport.getStatusMessage(status);
+			if (message != null)
+				return message;
+		}
+		return super.getStatusMessage(status);
+	}
+	
+	/*
 	 * @see AbstractTextEditor#doSetInput
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
+		if (fEncodingSupport != null)
+			fEncodingSupport.reset();
 		setOutlinePageInput(fOutlinePage, input);
+	}
+	
+	/*
+	 * @see IWorkbenchPart#dispose()
+	 */
+	public void dispose() {
+		if (fEncodingSupport != null) {
+				fEncodingSupport.dispose();
+				fEncodingSupport= null;
+		}
+		super.dispose();
 	}
 	
 	protected void createActions() {
@@ -512,6 +576,9 @@ public abstract class JavaEditor extends AbstractTextEditor {
 		Action action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 		setAction("ShowJavaDoc", action);				
+	
+		fEncodingSupport= new DefaultEncodingSupport();
+		fEncodingSupport.initialize(this);
 	}
 	
 	private boolean isTextSelectionEmpty() {

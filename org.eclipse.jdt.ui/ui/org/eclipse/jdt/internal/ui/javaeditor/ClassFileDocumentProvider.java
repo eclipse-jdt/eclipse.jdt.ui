@@ -147,13 +147,13 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	/*
 	 * @see StorageDocumentProvider#setDocumentContent(IDocument, IEditorInput)
 	 */
-	protected boolean setDocumentContent(IDocument document, IEditorInput editorInput) throws CoreException {
+	protected boolean setDocumentContent(IDocument document, IEditorInput editorInput, String encoding) throws CoreException {
 		if (editorInput instanceof IClassFileEditorInput) {
 			IClassFile classFile= ((IClassFileEditorInput) editorInput).getClassFile();
 			document.set(classFile.getSource());
 			return true;
 		}
-		return super.setDocumentContent(document, editorInput);
+		return super.setDocumentContent(document, editorInput, encoding);
 	}
 	
 	/**

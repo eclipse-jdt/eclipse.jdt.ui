@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultLineTracker;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.ILineTracker;
@@ -346,15 +347,28 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 						IResource resource= original.getCorrespondingResource();
 						if (resource instanceof IFile) {
 							IFileEditorInput providerKey= new FileEditorInput((IFile) resource);
-							IDocument document= internalGetDocument(providerKey);
-							return new DocumentAdapter(unit, document, new DefaultLineTracker(), CompilationUnitDocumentProvider.this, providerKey);
+							
+							IDocument document= null;
+							IStatus status= null;
+							
+							try {
+								document= internalGetDocument(providerKey);
+							} catch (CoreException x) {
+								status= x.getStatus();
+								document= new Document();
+								initializeDocument(document);
+							}
+							
+							DocumentAdapter adapter= new DocumentAdapter(unit, document, new DefaultLineTracker(), CompilationUnitDocumentProvider.this, providerKey);
+							adapter.setStatus(status);
+							return adapter;
 						}
 						
 					} catch (CoreException x) {
 						handleCoreException(x, JavaUIMessages.getString("CompilationUnitDocumentProvider.problemsCreatingBuffer")); //$NON-NLS-1$
 					}
 				}
-				return null;
+				return DocumentAdapter.NULL;
 			}
 		};
 		
@@ -445,9 +459,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				
 				DocumentAdapter a= null;
 				try {
-					a= (DocumentAdapter)c.getBuffer();
-				} catch (ClassCastException cce) {
-					IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, JavaStatusConstants.TEMPLATE_IO_EXCEPTION, "Shared working copy has wrong buffer", cce); //$NON-NLS-1$
+					a= (DocumentAdapter) c.getBuffer();
+				} catch (ClassCastException x) {
+					IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, JavaStatusConstants.TEMPLATE_IO_EXCEPTION, "Shared working copy has wrong buffer", x); //$NON-NLS-1$
 					throw new CoreException(status);
 				}
 				
@@ -456,6 +470,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				
 				CompilationUnitInfo info= new CompilationUnitInfo(a.getDocument(), m, f, c);
 				info.setModificationStamp(computeModificationStamp(input.getFile()));
+				info.fStatus= a.getStatus();
 				
 				if (r instanceof IProblemRequestorExtension) {
 					IProblemRequestorExtension extension= (IProblemRequestorExtension) r;
@@ -560,18 +575,21 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		return new CompilationUnitAnnotationModel(input.getFile());
 	}
 	
-	/*
-	 * @see AbstractDocumentProvider#createDocument(Object)
-	 */
-	protected IDocument createDocument(Object element) throws CoreException {
-		IDocument document= super.createDocument(element);
+	protected void initializeDocument(IDocument document) {
 		if (document != null) {
 			JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 			IDocumentPartitioner partitioner= tools.createDocumentPartitioner();
 			document.setDocumentPartitioner(partitioner);
 			partitioner.connect(document);
 		}
-		
+	}
+	
+	/*
+	 * @see AbstractDocumentProvider#createDocument(Object)
+	 */
+	protected IDocument createDocument(Object element) throws CoreException {
+		IDocument document= super.createDocument(element);
+		initializeDocument(document);
 		return document;
 	}
 	
@@ -585,24 +603,35 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		ElementInfo elementInfo= getElementInfo(element);		
 		if (elementInfo instanceof CompilationUnitInfo) {
 			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
-			if (info.fCanBeSaved) {
-				try {
+			
+			IDocument document;
+			IStatus status= null;
+			
+			try {
+				
+				ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
+				IResource resource= original.getUnderlyingResource();
+				if (resource instanceof IFile) {
+					IFileEditorInput input= new FileEditorInput((IFile) resource);
+					document= super.createDocument(input);
+				} else
+					document= new Document();
 					
-					ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
-					
-					fireElementContentAboutToBeReplaced(element);
-					
-					removeUnchangedElementListeners(element, info);
-					info.fDocument.set(original.getSource());
-					info.fCanBeSaved= false;
-					addUnchangedElementListeners(element, info);
-					
-					fireElementContentReplaced(element);
-					
-				} catch (JavaModelException x) {
-					throw new CoreException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE, x));
-				}
+			} catch (CoreException x) {
+				document= new Document();
+				status= x.getStatus();
 			}
+			
+			fireElementContentAboutToBeReplaced(element);
+			
+			removeUnchangedElementListeners(element, info);
+			info.fDocument.set(document.get());
+			info.fCanBeSaved= false;
+			info.fStatus= status;
+			addUnchangedElementListeners(element, info);
+			
+			fireElementContentReplaced(element);
+			
 		} else {
 			super.resetDocument(element);
 		}

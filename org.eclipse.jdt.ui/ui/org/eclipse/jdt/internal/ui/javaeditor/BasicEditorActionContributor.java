@@ -19,6 +19,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.RetargetAction;
+import org.eclipse.ui.editors.text.EncodingActionGroup;
 import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
@@ -36,20 +37,33 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 	protected RetargetTextEditorAction fContextInformation;
 	protected RetargetTextEditorAction fCorrectionAssist;
 	protected RetargetTextEditorAction fShowJavaDoc;
+	
+	/** Encoding action group */
+	private EncodingActionGroup fEncodingActionGroup;
+
+
 
 	public BasicEditorActionContributor() {
+		
 		fContentAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal."); //$NON-NLS-1$
 		fContextInformation= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation."); //$NON-NLS-1$
 		fCorrectionAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal."); //$NON-NLS-1$
 		fShowJavaDoc= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc."); //$NON-NLS-1$
 		
 		fRetargetShowJavaDoc= new RetargetAction(JdtActionConstants.SHOW_JAVA_DOC, JavaEditorMessages.getString("ShowJavaDoc.label")); //$NON-NLS-1$
+	
+		// character encoding
+		fEncodingActionGroup= new EncodingActionGroup();
 	}
 	
 	public void init(IActionBars bars) {
 		super.init(bars);
+		
 		// register actions that have a dynamic editor. 
 		bars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fShowJavaDoc);
+		
+		// character encoding
+		fEncodingActionGroup.fillActionBars(bars);
 	}
 
 	/**
@@ -95,6 +109,9 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 		
 		actionBars.setGlobalActionHandler(JdtActionConstants.SHIFT_RIGHT, getAction(textEditor, "ShiftRight")); //$NON-NLS-1$
 		actionBars.setGlobalActionHandler(JdtActionConstants.SHIFT_LEFT, getAction(textEditor, "ShiftLeft")); //$NON-NLS-1$
+		
+		// character encoding
+		fEncodingActionGroup.retarget(textEditor);
 	}
 	
 	private void registerListeners(IEditorPart part) {

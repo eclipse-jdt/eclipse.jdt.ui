@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -559,9 +560,12 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 */
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
 		super.editorContextMenuAboutToShow(menu);		
-		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Comment"); //$NON-NLS-1$
-		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Uncomment"); //$NON-NLS-1$
 		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, "Format"); //$NON-NLS-1$
+		
+		MenuManager submenu= new MenuManager("&Add", ITextEditorActionConstants.GROUP_ADD);
+		addAction(submenu, ITextEditorActionConstants.BOOKMARK);
+		addAction(submenu, ITextEditorActionConstants.ADD_TASK);
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_ADD, submenu);
 		
 		ActionContext context= new ActionContext(getSelectionProvider().getSelection());
 		fContextMenuGroup.setContext(context);
@@ -1112,6 +1116,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		
 		if (fActionGroups != null)
 			fActionGroups.dispose();
+		
 		super.dispose();
 	}
 	

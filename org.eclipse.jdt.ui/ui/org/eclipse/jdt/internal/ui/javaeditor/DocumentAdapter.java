@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
@@ -43,6 +44,77 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * This class is <code>public</code> for test purposes only.
  */
 public class DocumentAdapter implements IBuffer, IDocumentListener {
+	
+		/**
+		 * Internal implementation of a NULL instanceof IBuffer.
+		 */
+		static private class NullBuffer implements IBuffer {
+			
+			public void addBufferChangedListener(IBufferChangedListener listener) {}
+		
+			public void append(char[] text) {}
+		
+			public void append(String text) {}
+		
+			public void close() {}
+		
+			public char getChar(int position) {
+				return 0;
+			}
+		
+			public char[] getCharacters() {
+				return null;
+			}
+		
+			public String getContents() {
+				return null;
+			}
+		
+			public int getLength() {
+				return 0;
+			}
+		
+			public IOpenable getOwner() {
+				return null;
+			}
+		
+			public String getText(int offset, int length) {
+				return null;
+			}
+		
+			public IResource getUnderlyingResource() {
+				return null;
+			}
+		
+			public boolean hasUnsavedChanges() {
+				return false;
+			}
+		
+			public boolean isClosed() {
+				return false;
+			}
+		
+			public boolean isReadOnly() {
+				return true;
+			}
+		
+			public void removeBufferChangedListener(IBufferChangedListener listener) {}
+		
+			public void replace(int position, int length, char[] text) {}
+		
+			public void replace(int position, int length, String text) {}
+		
+			public void save(IProgressMonitor progress, boolean force) throws JavaModelException {}
+		
+			public void setContents(char[] contents) {}
+		
+			public void setContents(String contents) {}
+		};
+		
+	
+	/** NULL implementing <code>IBuffer</code> */
+	public final static IBuffer NULL= new NullBuffer();
+		
 	
 	/**
 	 *  Executes a document set content call in the ui thread.
@@ -98,6 +170,8 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	
 	private List fBufferListeners= new ArrayList(3);
 	
+	private IStatus fStatus;
+	
 	/**
 	 * This method is <code>public</code> for test purposes only.
 	 */
@@ -113,6 +187,20 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 		fProviderKey= providerKey;
 		
 		fDocument.addPrenotifiedDocumentListener(this);
+	}
+	
+	/**
+	 * Sets the status of this document adapter.
+	 */
+	public void setStatus(IStatus status) {
+		fStatus= status;
+	}
+	
+	/**
+	 * Returns the status of this document adapter.
+	 */
+	public IStatus getStatus() {
+		return fStatus;
 	}
 	
 	/**

@@ -8,6 +8,7 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.rules.ICharacterScanner;
@@ -138,10 +139,16 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		
 		// Add generic whitespace rule.
 		rules.add(new WhitespaceRule(new JavaWhitespaceDetector()));
-
-
+		
+		
 		// Add word rule for new keywords, 4077
-		Object version= JavaCore.getOptions().get(SOURCE_VERSION);
+		Object version= null;
+		try {
+			version= JavaCore.getOptions().get(SOURCE_VERSION);
+		} catch (NullPointerException x) {
+			// plugin not initialized - happens in test code
+		}
+		
 		if (version instanceof String) {
 			fVersionedWordRule= new VersionedWordRule(new JavaWordDetector(), "1.4", true, (String) version); //$NON-NLS-1$
 			
@@ -151,7 +158,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 			rules.add(fVersionedWordRule);
 		}
-
+		
 		
 		// Add word rule for keywords, types, and constants.
 		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
