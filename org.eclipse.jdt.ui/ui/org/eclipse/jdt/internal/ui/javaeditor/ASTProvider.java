@@ -139,8 +139,12 @@ public final class ASTProvider {
 		 * @see org.eclipse.ui.IPartListener2#partClosed(org.eclipse.ui.IWorkbenchPartReference)
 		 */
 		public void partClosed(IWorkbenchPartReference ref) {
-			if (isActiveEditor(ref))
+			if (isActiveEditor(ref)) {
+				if (DEBUG)
+					System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "closed active editor: " + ref.getTitle()); //$NON-NLS-1$ //$NON-NLS-2$
+
 				activeJavaEditorChanged(null);
+			}
 		}
 		
 		/*
@@ -196,8 +200,12 @@ public final class ASTProvider {
 		 * @see org.eclipse.ui.IWindowListener#windowClosed(org.eclipse.ui.IWorkbenchWindow)
 		 */
 		public void windowClosed(IWorkbenchWindow window) {
-			if (fActiveEditor != null && fActiveEditor.getSite() != null && window == fActiveEditor.getSite().getWorkbenchWindow()) 
+			if (fActiveEditor != null && fActiveEditor.getSite() != null && window == fActiveEditor.getSite().getWorkbenchWindow()) { 
+				if (DEBUG)
+					System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "closed active editor: " + fActiveEditor.getTitle()); //$NON-NLS-1$ //$NON-NLS-2$
+
 				activeJavaEditorChanged(null);
+			}
 			window.getPartService().removePartListener(this);
 		}
 
@@ -280,7 +288,7 @@ public final class ASTProvider {
 		}
 		
 		if (DEBUG)
-			System.out.println(DEBUG_PREFIX + "active editor is: " + toString(javaElement)); //$NON-NLS-1$
+			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "active editor is: " + toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$
 
 		synchronized (fReconcileLock) {
 			if (fIsReconciling && !fReconcilingJavaElement.equals(javaElement)) {
@@ -327,7 +335,7 @@ public final class ASTProvider {
 			return;
 		
 		if (DEBUG)
-			System.out.println(DEBUG_PREFIX + "about to reconcile: " + toString(javaElement)); //$NON-NLS-1$
+			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "about to reconcile: " + toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		synchronized (fReconcileLock) {
 			fIsReconciling= true;
@@ -345,7 +353,7 @@ public final class ASTProvider {
 			return;
 		
 		if (DEBUG)
-			System.out.println(DEBUG_PREFIX + "disposing AST: " + toString(fAST)); //$NON-NLS-1$
+			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "disposing AST: " + toString(fAST) + " for: " + toString(fActiveJavaElement)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		fAST= null;
 		
@@ -391,14 +399,14 @@ public final class ASTProvider {
 	 */
 	private synchronized void cache(CompilationUnit ast, IJavaElement javaElement) {
 		
-		if (javaElement == null || !javaElement.equals(fActiveJavaElement)) {
-			if (DEBUG)
-				System.out.println(DEBUG_PREFIX + "caching AST: don't cache inactive: " + toString(javaElement)); //$NON-NLS-1$
+		if (fActiveJavaElement != null && !fActiveJavaElement.equals(javaElement)) {
+			if (DEBUG && javaElement != null) // don't report call from disposeAST()
+				System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "don't cache AST for inactive: " + toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 		
 		if (DEBUG && (javaElement != null || ast != null)) // don't report call from disposeAST()
-			System.out.println(DEBUG_PREFIX + "caching AST:" + toString(ast) + " for: " + toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$
+			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "caching AST: " + toString(ast) + " for: " + toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		if (fAST != null)
 			disposeAST();
@@ -434,8 +442,13 @@ public final class ASTProvider {
 		synchronized (this) {
 			isActiveElement= je.equals(fActiveJavaElement);
 			if (isActiveElement) {
-				if (fAST != null || waitFlag == WAIT_NO)
+				if (fAST != null || waitFlag == WAIT_NO) {
+					
+					if (DEBUG)
+						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "returning cached AST for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+					
 					return fAST;
+				}
 			}
 		}
 		if (isActiveElement && isReconciling(je)) {
@@ -445,7 +458,7 @@ public final class ASTProvider {
 				// Wait for AST
 				synchronized (fWaitLock) {
 					if (DEBUG)
-						System.out.println(DEBUG_PREFIX + "waiting for AST for: " + je.getElementName()); //$NON-NLS-1$
+						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "waiting for AST for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 					
 					fWaitLock.wait();
 				}
@@ -454,7 +467,7 @@ public final class ASTProvider {
 				synchronized (this) {
 					if (activeElement == fActiveJavaElement) {
 						if (DEBUG)
-							System.out.println(DEBUG_PREFIX + "...got AST for: " + je.getElementName()); //$NON-NLS-1$
+							System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "...got AST for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 						
 						return fAST;
 					}
@@ -474,7 +487,7 @@ public final class ASTProvider {
 			if (progressMonitor != null && progressMonitor.isCanceled())
 				ast= null;
 			else if (DEBUG)
-				System.out.println(DEBUG_PREFIX + "created AST for: " + je.getElementName()); //$NON-NLS-1$
+				System.err.println(getThreadName() + " - " + DEBUG_PREFIX + "created AST for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 		} finally {
 			if (isActiveElement)
 				reconciled(ast, je);
@@ -573,7 +586,7 @@ public final class ASTProvider {
 	void reconciled(CompilationUnit ast, IJavaElement javaElement) {
 		
 		if (DEBUG)
-			System.out.println(DEBUG_PREFIX + "reconciled AST: " + toString(ast)); //$NON-NLS-1$
+			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "reconciled: " + toString(javaElement) + ", AST: " + toString(ast)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		synchronized (fReconcileLock) {
 		
@@ -581,7 +594,7 @@ public final class ASTProvider {
 			if (javaElement == null || !javaElement.equals(fReconcilingJavaElement)) {
 				
 				if (DEBUG)
-					System.out.println(DEBUG_PREFIX + "  ignoring AST of out-dated editor"); //$NON-NLS-1$
+					System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "  ignoring AST of out-dated editor"); //$NON-NLS-1$ //$NON-NLS-2$
 
 				// Signal - threads might wait for wrong element
 				synchronized (fWaitLock) {
@@ -593,6 +606,14 @@ public final class ASTProvider {
 			
 			cache(ast, javaElement);
 		}
+	}
+	
+	private String getThreadName() {
+		String name= Thread.currentThread().getName();
+		if (name != null)
+			return name;
+		else
+			return Thread.currentThread().toString();
 	}
 }
 
