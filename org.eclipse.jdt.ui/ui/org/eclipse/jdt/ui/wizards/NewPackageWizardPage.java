@@ -236,7 +236,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 					if (pack.containsJavaResources() || !pack.hasSubpackages()) {
 						status.setError(NewWizardMessages.getString("NewPackageWizardPage.error.PackageExists")); //$NON-NLS-1$
 					} else {
-						status.setWarning(NewWizardMessages.getString("NewPackageWizardPage.warning.PackageNotShown"));  //$NON-NLS-1$
+						status.setError(NewWizardMessages.getString("NewPackageWizardPage.warning.PackageNotShown"));  //$NON-NLS-1$
 					}
 				}
 			} catch (JavaModelException e) {
