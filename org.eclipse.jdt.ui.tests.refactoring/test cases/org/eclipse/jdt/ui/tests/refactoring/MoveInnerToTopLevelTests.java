@@ -13,6 +13,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
@@ -81,11 +83,17 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		assertEquals("precondition check was supposed to pass", null, performRefactoring(ref));
 
 		for (int i= 0; i < cus.length; i++) {
-			assertEquals("incorrect changes in " + cus[i].getElementName(), getFileContents(getOutputTestFileName(cuNames[i])), cus[i].getSource());
+			String actual= cus[i].getSource();
+			String expected= getFileContents(getOutputTestFileName(cuNames[i]));
+			SourceCompareUtil.compare(actual, expected);
+			assertEquals("incorrect changes in " + cus[i].getElementName(), expected, actual);
 		}
 
 		ICompilationUnit newCu= clas.getPackageFragment().getCompilationUnit(className + ".java");
-		assertEquals("incorrect new cu created", getFileContents(getOutputTestFileName(className)), newCu.getSource());
+		String expected= getFileContents(getOutputTestFileName(className));
+		String actual= newCu.getSource();
+		SourceCompareUtil.compare(actual, expected);
+		assertEquals("incorrect new cu created", expected, actual);
 	}
 	private void validatePassingTest(String parentClassName, String className, String[] cuNames, String[] packageNames, String enclosingInstanceName) throws Exception {
 		validatePassingTest(parentClassName, className, cuNames, packageNames, enclosingInstanceName, false);
@@ -340,6 +348,11 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 //		printTestDisabledMessage("test for bug 26252");
         validatePassingTest("A", "I", new String[]{"A"}, new String[]{"p"}, "a", true);
     }
+
+	public void test_nonstatic_34() throws Exception{
+//		printTestDisabledMessage("test for bug 31861");
+		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true);
+	}
 
 	public void testFail_nonstatic_0() throws Exception{
 		validateFailingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", RefactoringStatus.ERROR);
