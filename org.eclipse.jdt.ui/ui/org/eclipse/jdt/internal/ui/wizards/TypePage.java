@@ -104,7 +104,7 @@ public abstract class TypePage extends ContainerPage {
 		
 		public InterfacesListLabelProvider() {
 			super();
-			fInterfaceImage= JavaPlugin.getDefault().getImageRegistry().get(JavaPluginImages.IMG_OBJS_INTERFACE);
+			fInterfaceImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_INTERFACE);
 		}
 		
 		public Image getImage(Object element) {
@@ -1039,6 +1039,7 @@ public abstract class TypePage extends ContainerPage {
 				packages= froot.getChildren();
 			}
 		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
 		}
 		if (packages == null) {
 			packages= new IJavaElement[0];
@@ -1065,8 +1066,21 @@ public abstract class TypePage extends ContainerPage {
 		if (root == null) {
 			return null;
 		}
+		
+		// the search scop only contains source folders
+		ArrayList elementsInScope= new ArrayList();
+		try {
+			IPackageFragmentRoot[] pfrs= root.getJavaProject().getPackageFragmentRoots();
+			for (int i= 0; i < pfrs.length; i++) {
+				if (pfrs[i].getKind() == IPackageFragmentRoot.K_SOURCE) {
+					elementsInScope.add(pfrs[i]);
+				}
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
 
-		IJavaElement[] elements= new IJavaElement[] { root.getJavaProject() };
+		IJavaElement[] elements= (IJavaElement[]) elementsInScope.toArray(new IJavaElement[elementsInScope.size()]);
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 			
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_TYPES);
