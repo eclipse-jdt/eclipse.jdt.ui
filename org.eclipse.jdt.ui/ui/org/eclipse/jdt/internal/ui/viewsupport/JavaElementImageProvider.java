@@ -160,7 +160,7 @@ public class JavaElementImageProvider {
 				
 				case IJavaElement.FIELD:
 					IField field= (IField) element;
-					return getMethodImageDescriptor(field.getDeclaringType().isInterface(), field.getFlags());				
+					return getFieldImageDescriptor(field.getDeclaringType().isInterface(), field.getFlags());				
 					
 				case IJavaElement.PACKAGE_DECLARATION:
 					return JavaPluginImages.DESC_OBJS_PACKDECL;
@@ -329,6 +329,9 @@ public class JavaElementImageProvider {
 	}
 		
 	public static ImageDescriptor getFieldImageDescriptor(boolean isInInterface, int flags) {
+		// new icons not in place. So use normal method icons
+		return getMethodImageDescriptor(isInInterface, flags);
+		/*
 		if (Flags.isPublic(flags) || isInInterface)
 			return JavaPluginImages.DESC_FIELD_PUBLIC;
 		if (Flags.isProtected(flags))
@@ -337,6 +340,7 @@ public class JavaElementImageProvider {
 			return JavaPluginImages.DESC_FIELD_PRIVATE;
 			
 		return JavaPluginImages.DESC_FIELD_DEFAULT;
+		*/
 	}		
 	
 	public static ImageDescriptor getTypeImageDescriptor(boolean isInterface, boolean isInner, int flags) {
