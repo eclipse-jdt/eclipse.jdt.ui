@@ -459,8 +459,8 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	private final Category fEnumConstArgumentsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ENUM_CONSTANT,
 	    "enum Example {" + //$NON-NLS-1$
-	    "CANCELLED, RUNNING, WAITING, FINISHED }", //$NON-NLS-1$
-	    FormatterMessages.getString("LineWrappingTabPage.enum_arguments") //$NON-NLS-1$
+	    "GREEN(0, 255, 0), RED(255, 0, 0)  }", //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.enum_constant_arguments") //$NON-NLS-1$
 	);
 	
 	private final Category fEnumDeclInterfacesCategory= new Category(
@@ -565,8 +565,8 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		methodDeclarations.children.add(fMethodThrowsClauseCategory);
 
 		final Category enumDeclarations= new Category(FormatterMessages.getString("LineWrappingTabPage.enum_decls")); //$NON-NLS-1$
-		enumDeclarations.children.add(fEnumConstArgumentsCategory);
 		enumDeclarations.children.add(fEnumDeclInterfacesCategory);
+		enumDeclarations.children.add(fEnumConstArgumentsCategory);
 		
 		final Category functionCalls= new Category(FormatterMessages.getString("LineWrappingTabPage.function_calls")); //$NON-NLS-1$
 		functionCalls.children.add(fMessageSendArgumentsCategory);
