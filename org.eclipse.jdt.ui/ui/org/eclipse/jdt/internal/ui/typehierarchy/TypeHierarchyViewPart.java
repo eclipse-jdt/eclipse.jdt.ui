@@ -167,6 +167,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private boolean fIsVisible;
 	private boolean fNeedRefresh;	
 	private boolean fIsEnableMemberFilter;
+	private boolean fIsRefreshRunnablePosted;
 	
 	private int fCurrentViewerIndex;
 	private TypeHierarchyViewer[] fAllViewers;
@@ -202,6 +203,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	public TypeHierarchyViewPart() {
 		fSelectedType= null;
 		fInputElement= null;
+		fIsVisible= false;
+		fIsRefreshRunnablePosted= false;
 		
 		boolean isReconciled= PreferenceConstants.UPDATE_WHILE_EDITING.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.UPDATE_JAVA_VIEWS));
 
@@ -1208,14 +1211,21 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	protected void doTypeHierarchyChanged(final TypeHierarchyLifeCycle typeHierarchy, final IType[] changedTypes) {
 		if (!fIsVisible) {
 			fNeedRefresh= true;
+			return;
 		}
+		if (fIsRefreshRunnablePosted) {
+			return;
+		}
+		
 		Display display= getDisplay();
 		if (display != null) {
+			fIsRefreshRunnablePosted= true;
 			display.asyncExec(new Runnable() {
 				public void run() {
 					if (fPagebook != null && !fPagebook.isDisposed()) {
 						doTypeHierarchyChangedOnViewers(changedTypes);
 					}
+					fIsRefreshRunnablePosted= false;
 				}
 			});
 		}
