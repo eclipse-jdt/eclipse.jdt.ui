@@ -43,7 +43,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		public int compare(Object o1, Object o2) {
 			ICompletionProposal c1= (ICompletionProposal) o1;
 			ICompletionProposal c2= (ICompletionProposal) o2;
-			return c1.getDisplayString().compareTo(c2.getDisplayString());
+			return c1.getDisplayString().compareToIgnoreCase(c2.getDisplayString());
 		}
 	};
 	

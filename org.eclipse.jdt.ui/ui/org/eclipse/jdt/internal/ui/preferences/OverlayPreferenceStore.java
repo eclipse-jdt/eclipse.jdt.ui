@@ -47,7 +47,7 @@ public class OverlayPreferenceStore  implements IPreferenceStore {
 		public void propertyChange(PropertyChangeEvent event) {
 			OverlayKey key= findOverlayKey(event.getProperty());
 			if (key != null)
-				copy(fParent, key, fStore, false, false); 
+				propagateProperty(fParent, key, fStore); 
 		}
 	};
 	
@@ -77,58 +77,115 @@ public class OverlayPreferenceStore  implements IPreferenceStore {
 		return (findOverlayKey(key) != null);
 	}
 	
-	private void copy(IPreferenceStore orgin, OverlayKey key, IPreferenceStore target, boolean copyDefaults, boolean forceInitialization) {
+	private void propagateProperty(IPreferenceStore orgin, OverlayKey key, IPreferenceStore target) {
+		
+		if (orgin.isDefault(key.fKey)) {
+			if (!target.isDefault(key.fKey))
+				target.setToDefault(key.fKey);
+			return;
+		}
+		
 		TypeDescriptor d= key.fDescriptor;
 		if (BOOLEAN == d) {
-			if (forceInitialization)
-				target.setValue(key.fKey, true);
-			target.setValue(key.fKey, orgin.getBoolean(key.fKey));
-			if (copyDefaults) 
-				target.setDefault(key.fKey, orgin.getDefaultBoolean(key.fKey));
+			
+			boolean originValue= orgin.getBoolean(key.fKey);
+			boolean targetValue= target.getBoolean(key.fKey);
+			if (targetValue != originValue)
+				target.setValue(key.fKey, originValue);
+				
 		} else if (DOUBLE == d) {
-			if (forceInitialization)
-				target.setValue(key.fKey, 1.0D);
-			target.setValue(key.fKey, orgin.getDouble(key.fKey));
-			if (copyDefaults) 
-				target.setDefault(key.fKey, orgin.getDefaultDouble(key.fKey));
+			
+			double originValue= orgin.getDouble(key.fKey);
+			double targetValue= target.getDouble(key.fKey);
+			if (targetValue != originValue)
+				target.setValue(key.fKey, originValue);
+		
 		} else if (FLOAT == d) {
-			if (forceInitialization)
-				target.setValue(key.fKey, 1.0F);
-			target.setValue(key.fKey, orgin.getFloat(key.fKey));
-			if (copyDefaults) 
-				target.setDefault(key.fKey, orgin.getDefaultFloat(key.fKey));
+			
+			float originValue= orgin.getFloat(key.fKey);
+			float targetValue= target.getFloat(key.fKey);
+			if (targetValue != originValue)
+				target.setValue(key.fKey, originValue);
+				
 		} else if (INT == d) {
-			if (forceInitialization)
-				target.setValue(key.fKey, 1);
-			target.setValue(key.fKey, orgin.getInt(key.fKey));
-			if (copyDefaults) 
-				target.setDefault(key.fKey, orgin.getDefaultInt(key.fKey));
+
+			int originValue= orgin.getInt(key.fKey);
+			int targetValue= target.getInt(key.fKey);
+			if (targetValue != originValue)
+				target.setValue(key.fKey, originValue);
+
 		} else if (LONG == d) {
-			if (forceInitialization)
-				target.setValue(key.fKey, 1L);
-			target.setValue(key.fKey, orgin.getLong(key.fKey));
-			if (copyDefaults) 
-				target.setDefault(key.fKey, orgin.getDefaultLong(key.fKey));
+
+			long originValue= orgin.getLong(key.fKey);
+			long targetValue= target.getLong(key.fKey);
+			if (targetValue != originValue)
+				target.setValue(key.fKey, originValue);
+
 		} else if (STRING == d) {
-			if (forceInitialization)
-				target.setValue(key.fKey, "1");
-			target.setValue(key.fKey, orgin.getString(key.fKey));
-			if (copyDefaults) 
-				target.setDefault(key.fKey, orgin.getDefaultString(key.fKey));
+
+			String originValue= orgin.getString(key.fKey);
+			String targetValue= target.getString(key.fKey);
+			if (targetValue != null && originValue != null && !targetValue.equals(originValue))
+				target.setValue(key.fKey, originValue);
+
 		}
 	}
 	
-	private void copy(IPreferenceStore orgin, IPreferenceStore target, boolean copyDefaults, boolean forceInitialization) {
+	public void propagate() {
 		for (int i= 0; i < fOverlayKeys.length; i++)
-			copy(orgin, fOverlayKeys[i], target, copyDefaults, forceInitialization);
+			propagateProperty(fStore, fOverlayKeys[i], fParent);
+	}
+	
+	private void loadProperty(IPreferenceStore orgin, OverlayKey key, IPreferenceStore target, boolean forceInitialization) {
+		TypeDescriptor d= key.fDescriptor;
+		if (BOOLEAN == d) {
+			
+			if (forceInitialization)
+				target.setValue(key.fKey, true);
+			target.setValue(key.fKey, orgin.getBoolean(key.fKey));
+			target.setDefault(key.fKey, orgin.getDefaultBoolean(key.fKey));
+			
+		} else if (DOUBLE == d) {
+			
+			if (forceInitialization)
+				target.setValue(key.fKey, 1.0D);
+			target.setValue(key.fKey, orgin.getDouble(key.fKey));
+			target.setDefault(key.fKey, orgin.getDefaultDouble(key.fKey));
+			
+		} else if (FLOAT == d) {
+			
+			if (forceInitialization)
+				target.setValue(key.fKey, 1.0F);
+			target.setValue(key.fKey, orgin.getFloat(key.fKey));
+			target.setDefault(key.fKey, orgin.getDefaultFloat(key.fKey));
+			
+		} else if (INT == d) {
+			
+			if (forceInitialization)
+				target.setValue(key.fKey, 1);
+			target.setValue(key.fKey, orgin.getInt(key.fKey));
+			target.setDefault(key.fKey, orgin.getDefaultInt(key.fKey));
+			
+		} else if (LONG == d) {
+			
+			if (forceInitialization)
+				target.setValue(key.fKey, 1L);
+			target.setValue(key.fKey, orgin.getLong(key.fKey));
+			target.setDefault(key.fKey, orgin.getDefaultLong(key.fKey));
+			
+		} else if (STRING == d) {
+			
+			if (forceInitialization)
+				target.setValue(key.fKey, "1");
+			target.setValue(key.fKey, orgin.getString(key.fKey));
+			target.setDefault(key.fKey, orgin.getDefaultString(key.fKey));
+			
+		}
 	}
 	
 	public void load() {
-		copy(fParent, fStore, true, true);
-	}
-	
-	public void propagate() {
-		copy(fStore, fParent, false, false);
+		for (int i= 0; i < fOverlayKeys.length; i++)
+			loadProperty(fParent, fOverlayKeys[i], fStore, true);
 	}
 	
 	public void loadDefaults() {
