@@ -120,6 +120,7 @@ public abstract class UndoManagerAction implements IWorkbenchWindowActionDelegat
 			// Don't execute in separate thread since it updates the UI.
 			dialog.run(false, false, op);
 		} catch (InvocationTargetException e) {
+			Refactoring.getUndoManager().flush();
 			ExceptionHandler.handle(e, RefactoringMessages.getString("UndoManagerAction.error"), RefactoringMessages.getString("UndoManagerAction.internal_error")); //$NON-NLS-2$ //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// Opertation isn't cancelable.

@@ -10,6 +10,7 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 /**
  * A change context is used to give an <code>IChange</code> object access to several workspace
@@ -73,7 +74,7 @@ public class ChangeContext {
 		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		for (int i= 0; i < fUnsavedFiles.length; i++) {
 			if (fUnsavedFiles[i].equals(file)) {
-				status.addFatalError(file.getFullPath().toString());
+				status.addFatalError(RefactoringCoreMessages.getFormattedString("Change.is_unsaved", file.getFullPath().toString()));
 				fHandledUnsavedFiles.add(file);
 				return;
 			}

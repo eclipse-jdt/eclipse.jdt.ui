@@ -107,7 +107,7 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 		if (context.getUnsavedFiles().length == 0)
 			return result;
 		
-		result.merge(checkIfUnsaved((IPackageFragmentRoot)getModifiedLanguageElement(), context, pm));
+		result.merge(checkIfModifiable((IPackageFragmentRoot)getModifiedLanguageElement(), context, pm));
 		
 		return result;
 	}

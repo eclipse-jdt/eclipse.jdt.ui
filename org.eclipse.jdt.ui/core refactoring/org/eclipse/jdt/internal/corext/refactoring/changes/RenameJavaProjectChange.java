@@ -61,7 +61,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 			
 			pm.beginTask("", roots.length); //$NON-NLS-1$
 			for (int i= 0; i < roots.length; i++) {
-				result.merge(checkIfUnsaved(roots[i], context, new SubProgressMonitor(pm, 1)));
+				result.merge(checkIfModifiable(roots[i], context, new SubProgressMonitor(pm, 1)));
 			}
 		} catch (JavaModelException e) {
 			handleJavaModelException(e, result);
