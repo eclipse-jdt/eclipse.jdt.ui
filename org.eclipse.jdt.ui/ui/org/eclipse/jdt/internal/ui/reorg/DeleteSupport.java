@@ -5,7 +5,7 @@
 
 package org.eclipse.jdt.internal.ui.reorg;
 
-import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.ISourceManipulation;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.ISourceManipulation;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;
 
 public class DeleteSupport implements IDeleteSupport {
 	public boolean canDelete(Object o) {
@@ -48,7 +48,7 @@ public class DeleteSupport implements IDeleteSupport {
 		return o instanceof IResource;
 	}
 
-	public void delete(Object o, IProgressMonitor pm) throws JavaModelException, CoreException {
+	public void delete(Object o, boolean deleteProjectContent, IProgressMonitor pm) throws JavaModelException, CoreException {
 		IProgressMonitor subPM= new SubProgressMonitor(pm, 10);
 		if (o instanceof IPackageFragmentRoot) {
 			IPackageFragmentRoot root= (IPackageFragmentRoot)o;
@@ -72,7 +72,12 @@ public class DeleteSupport implements IDeleteSupport {
 			IResource res= (IResource)o;
 			if (!res.exists())
 				return;
-			res.delete(true, subPM);
+			// 1GEZU7T: ITPJUI:ALL - Track workbench changes to DeleteAction
+			if (res instanceof IProject) {
+				((IProject)res).delete(deleteProjectContent, true, subPM);
+			} else {
+				res.delete(true, subPM);
+			}
 		}
 	}
 	

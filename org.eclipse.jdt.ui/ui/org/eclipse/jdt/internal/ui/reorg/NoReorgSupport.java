@@ -63,7 +63,8 @@ public class NoReorgSupport implements ICopySupport, IMoveSupport, IDeleteSuppor
 		return false;
 	}
 
-	public void delete(Object p0, IProgressMonitor p1) throws JavaModelException, CoreException {
+	public void delete(Object p0, boolean deleteProjectContent, IProgressMonitor p1) throws JavaModelException, CoreException {
+		// 1GEZU7T: ITPJUI:ALL - Track workbench changes to DeleteAction
 	}
 
 	public boolean canDelete(Object p0) {

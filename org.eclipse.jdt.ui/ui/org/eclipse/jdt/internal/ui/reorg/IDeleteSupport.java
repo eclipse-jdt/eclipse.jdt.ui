@@ -15,7 +15,9 @@ import org.eclipse.jdt.core.JavaModelException;
  */
 public interface IDeleteSupport {
 	boolean canDelete(Object o);
-	void delete(Object o, IProgressMonitor pm) throws JavaModelException, CoreException;
+	
+	// 1GEZU7T: ITPJUI:ALL - Track workbench changes to DeleteAction
+	void delete(Object o, boolean deleteProjectContent, IProgressMonitor pm) throws JavaModelException, CoreException;
 	/**
 	 * @returns the segment count of the path of the underlying resource (or 0 if the
 	 		path length can't be determined.
