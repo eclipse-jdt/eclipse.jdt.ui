@@ -741,10 +741,12 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				if (page == null)
 					return;
 
-				if (JavaBrowsingPreferencePage.openEditorOnSingleClick())
-					new ShowInEditorAction().run(event.getSelection(), page);
-				else if (page.equals(JavaPlugin.getActivePage()) && JavaBrowsingPart.this.equals(page.getActivePart()))
-					linkToEditor((IStructuredSelection)event.getSelection());
+				if (page.equals(JavaPlugin.getActivePage()) && JavaBrowsingPart.this.equals(page.getActivePart())) {
+					if (JavaBrowsingPreferencePage.openEditorOnSingleClick())
+						new ShowInEditorAction().run(event.getSelection(), page);
+					else
+						linkToEditor((IStructuredSelection)event.getSelection());
+				}
 			}
 		});
 
