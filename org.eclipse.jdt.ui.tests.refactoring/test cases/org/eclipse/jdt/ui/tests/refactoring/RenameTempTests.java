@@ -459,7 +459,8 @@ public class RenameTempTests extends RefactoringTest{
 	}
 	
 	public void testFail26() throws Exception{
-		helper2("j");
+		printTestDisabledMessage("Test disable until it is clear how 1.4 treats this");
+		// helper2("j");
 	}
 	
 	public void testFail27() throws Exception{
