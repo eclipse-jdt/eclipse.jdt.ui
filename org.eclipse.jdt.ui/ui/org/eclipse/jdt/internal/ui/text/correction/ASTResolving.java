@@ -118,8 +118,9 @@ public class ASTResolving {
 		case ASTNode.ARRAY_ACCESS:
 			if (((ArrayAccess) parent).getIndex().equals(node)) {
 				return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
+			} else {
+				return getPossibleReferenceBinding(parent);
 			}
-			break;
 		case ASTNode.ARRAY_CREATION:
 			if (((ArrayCreation) parent).dimensions().contains(node)) {
 				return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
@@ -175,6 +176,8 @@ public class ASTResolving {
 				return getPossibleReferenceBinding(parent);
 			}
 			break;
+			case ASTNode.SUPER_FIELD_ACCESS:
+				return getPossibleReferenceBinding(parent);
 		case ASTNode.QUALIFIED_NAME:
 			if (node.equals(((QualifiedName) parent).getName())) {
 				return getPossibleReferenceBinding(parent);

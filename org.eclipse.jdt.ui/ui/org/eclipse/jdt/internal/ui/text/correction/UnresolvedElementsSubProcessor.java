@@ -28,7 +28,6 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
@@ -53,7 +52,7 @@ public class UnresolvedElementsSubProcessor {
 			return;
 		}
 		
-		// type that defines the variable, null if local
+		// type that defines the variable
 		ITypeBinding binding= null;
 		ITypeBinding declaringTypeBinding= ASTResolving.getBindingOfParentType(selectedNode);
 		if (declaringTypeBinding == null) {
@@ -61,79 +60,73 @@ public class UnresolvedElementsSubProcessor {
 		}
 		
 
-		// possible kind of the node
-		int similarNodeKind= SimilarElementsRequestor.VARIABLES;
+		// possible type kind of the node
+		boolean suggestVariablePropasals= true;
+		int typeKind= 0;
 		
 		Name node= null;
-		if (selectedNode instanceof SimpleName) {
-			node= (SimpleName) selectedNode;
-			ASTNode parent= node.getParent();
-			if (parent instanceof MethodInvocation && node.equals(((MethodInvocation)parent).getExpression())) {
-				similarNodeKind |= SimilarElementsRequestor.CLASSES;
-			} else if (parent instanceof SimpleType) {
-				similarNodeKind= SimilarElementsRequestor.REF_TYPES;
-			}
-		} else if (selectedNode instanceof QualifiedName) {
-			QualifiedName qualifierName= (QualifiedName) selectedNode;
-			ITypeBinding qualifierBinding= qualifierName.getQualifier().resolveTypeBinding();
-			if (qualifierBinding != null) {
-				node= qualifierName.getName();
-				binding= qualifierBinding;
-			} else {
-				node= qualifierName.getQualifier();
-				if (node.isSimpleName()) {
-					similarNodeKind |= SimilarElementsRequestor.REF_TYPES;
+		switch (selectedNode.getNodeType()) {
+			case ASTNode.SIMPLE_NAME:
+				node= (SimpleName) selectedNode;
+				ASTNode parent= node.getParent();
+				if (parent instanceof MethodInvocation && node.equals(((MethodInvocation)parent).getExpression())) {
+					typeKind= SimilarElementsRequestor.CLASSES;
+				} else if (parent instanceof SimpleType) {
+					suggestVariablePropasals= false;
+					typeKind= SimilarElementsRequestor.REF_TYPES;
+				}
+				break;		
+			case ASTNode.QUALIFIED_NAME:
+				QualifiedName qualifierName= (QualifiedName) selectedNode;
+				ITypeBinding qualifierBinding= qualifierName.getQualifier().resolveTypeBinding();
+				if (qualifierBinding != null) {
+					node= qualifierName.getName();
+					binding= qualifierBinding;
 				} else {
-					similarNodeKind= SimilarElementsRequestor.REF_TYPES;
+					node= qualifierName.getQualifier();
+					typeKind= SimilarElementsRequestor.REF_TYPES;
+					suggestVariablePropasals= node.isSimpleName();
 				}
-			}
-			if (selectedNode.getParent() instanceof SimpleType) {
-				similarNodeKind= SimilarElementsRequestor.REF_TYPES;
-			}			
-		} else if (selectedNode instanceof FieldAccess) {
-			FieldAccess access= (FieldAccess) selectedNode;
-			Expression expression= access.getExpression();
-			if (expression != null) {
-				binding= expression.resolveTypeBinding();
-				if (binding != null) {
-					node= access.getName();
+				if (selectedNode.getParent() instanceof SimpleType) {
+					typeKind= SimilarElementsRequestor.REF_TYPES;
+					suggestVariablePropasals= false;
 				}
-			}
-		} else if (selectedNode instanceof SuperFieldAccess) {
-			binding= declaringTypeBinding.getSuperclass();	
-		}
-		if (node == null) {
-			return;
+				break;		
+			case ASTNode.FIELD_ACCESS:
+				FieldAccess access= (FieldAccess) selectedNode;
+				Expression expression= access.getExpression();
+				if (expression != null) {
+					binding= expression.resolveTypeBinding();
+					if (binding != null) {
+						node= access.getName();
+					}
+				}
+				break;
+			case ASTNode.SUPER_FIELD_ACCESS:
+				binding= declaringTypeBinding.getSuperclass();
+				node= ((SuperFieldAccess) selectedNode).getName();
+				break;
+			default:	
 		}
 		
-		// avoid corrections like int i= i;
-		String assignedName= null;
-		ASTNode parent= node.getParent();
-		if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			assignedName= ((VariableDeclarationFragment) parent).getName().getIdentifier();
-		}
+		if (node == null) {
+			return;
+		}		
 
-		// corrections
-		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, node, similarNodeKind);
-		for (int i= 0; i < elements.length; i++) {
-			SimilarElement curr= elements[i];
-			if ((curr.getKind() & SimilarElementsRequestor.VARIABLES) != 0 && !curr.getName().equals(assignedName)) {
-				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", curr.getName()); //$NON-NLS-1$
-				proposals.add(new ReplaceCorrectionProposal(label, cu, node.getStartPosition(), node.getLength(), curr.getName(), 3));
-			}
-		}
 		// add type proposals
-		if ((similarNodeKind & SimilarElementsRequestor.ALL_TYPES) != 0) {
+		if (typeKind != 0) {
 			int relevance= Character.isUpperCase(ASTResolving.getSimpleName(node).charAt(0)) ? 3 : 0;
-			addSimilarTypeProposals(elements, cu, node, relevance + 1, proposals);
+			addSimilarTypeProposals(typeKind, cu, node, relevance + 1, proposals);
 			addNewTypeProposals(cu, node, SimilarElementsRequestor.REF_TYPES, relevance, proposals);
 		}
 		
-		if ((similarNodeKind & SimilarElementsRequestor.VARIABLES) == 0) {
+		if (!suggestVariablePropasals) {
 			return;
 		}
 		
 		SimpleName simpleName= node.isSimpleName() ? (SimpleName) node : ((QualifiedName) node).getName();
+
+		addSimilarVariableProposals(cu, astRoot, simpleName, proposals);
 
 		// new variables
 		ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, binding);
@@ -179,6 +172,42 @@ public class UnresolvedElementsSubProcessor {
 		
 	}
 	
+	private static void addSimilarVariableProposals(ICompilationUnit cu, CompilationUnit astRoot, SimpleName node, List proposals) {
+		IBinding[] varsInScope= (new ScopeAnalyzer()).getDeclarationsInScope(astRoot, node.getStartPosition(), ScopeAnalyzer.VARIABLES);
+		if (varsInScope.length > 0) {
+			// avoid corrections like int i= i;
+			String assignedName= null;
+			ASTNode parent= node.getParent();
+			if (parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+				assignedName= ((VariableDeclarationFragment) parent).getName().getIdentifier();
+			}			
+			
+			ITypeBinding guessedType= ASTResolving.guessBindingForReference(node);
+			if (astRoot.getAST().resolveWellKnownType("java.lang.Object") == guessedType) { //$NON-NLS-1$
+				guessedType= null; // too many suggestions
+			}
+			
+			String identifier= node.getIdentifier();
+			for (int i= 0; i < varsInScope.length; i++) {
+				IVariableBinding curr= (IVariableBinding) varsInScope[i];
+				String currName= curr.getName();
+				if (!currName.equals(assignedName)) {
+					int relevance= 0;
+					if (NameMatcher.isSimilarName(currName, identifier)) {
+						relevance += 3; // variable with a similar name than the unresolved variable
+					}
+					if (guessedType != null && ASTResolving.canAssign(guessedType, curr.getType())) {
+						relevance += 2; // unresolved variable can be assign to this variable 						
+					}
+					if (relevance > 0) {
+						String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", currName); //$NON-NLS-1$
+						proposals.add(new ReplaceCorrectionProposal(label, cu, node.getStartPosition(), node.getLength(), currName, relevance));
+					}
+				}
+			}			
+		}
+	}
+
 	public static void getTypeProposals(ICorrectionContext context, List proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		
@@ -189,7 +218,7 @@ public class UnresolvedElementsSubProcessor {
 		int kind= SimilarElementsRequestor.ALL_TYPES;
 		
 		ASTNode parent= selectedNode.getParent();
-		while (parent.getLength() == selectedNode.getLength()) { // get parent of type and variablefragment
+		while (parent.getLength() == selectedNode.getLength()) { // get parent of type or variablefragment
 			parent= parent.getParent(); 
 		}
 		switch (parent.getNodeType()) {
@@ -245,14 +274,16 @@ public class UnresolvedElementsSubProcessor {
 			return;
 		}
 		
-		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, node, kind);
-		addSimilarTypeProposals(elements, cu, node, 3, proposals);
+		// change to simlar type proposals
+		addSimilarTypeProposals(kind, cu, node, 3, proposals);
 		
 		// add type
 		addNewTypeProposals(cu, node, kind, 0, proposals);
 	}
 
-	private static void addSimilarTypeProposals(SimilarElement[] elements, ICompilationUnit cu, Name node, int relevance, List proposals) throws JavaModelException {
+	private static void addSimilarTypeProposals(int kind, ICompilationUnit cu, Name node, int relevance, List proposals) throws JavaModelException {
+		SimilarElement[] elements= SimilarElementsRequestor.findSimilarElement(cu, node, kind);
+		
 		// try to resolve type in context -> highest severity
 		String resolvedTypeName= null;
 		ITypeBinding binding= ASTResolving.guessBindingForTypeReference(node);
@@ -260,7 +291,7 @@ public class UnresolvedElementsSubProcessor {
 			if (binding.isArray()) {
 				binding= binding.getElementType();
 			}
-			resolvedTypeName= Bindings.getFullyQualifiedName(binding);
+			resolvedTypeName= binding.getQualifiedName();
 			proposals.add(createTypeRefChangeProposal(cu, resolvedTypeName, node, relevance + 2));
 		}
 		// add all similar elements
