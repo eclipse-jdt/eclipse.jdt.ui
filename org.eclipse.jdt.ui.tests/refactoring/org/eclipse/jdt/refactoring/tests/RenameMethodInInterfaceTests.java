@@ -376,5 +376,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	public void test44() throws Exception{
 		helper2();
 	}
-	
+	public void test45() throws Exception{
+		helper2();
+	}
 }
