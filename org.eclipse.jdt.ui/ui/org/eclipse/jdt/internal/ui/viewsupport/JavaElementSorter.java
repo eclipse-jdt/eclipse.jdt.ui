@@ -157,6 +157,9 @@ public class JavaElementSorter extends ViewerSorter {
 			case PACKAGEFRAGMENTROOTS:
 				int p1= getClassPathIndex(JavaModelUtil.getPackageFragmentRoot((IJavaElement)e1));
 				int p2= getClassPathIndex(JavaModelUtil.getPackageFragmentRoot((IJavaElement)e2));
+				if (p1 == p2) {
+					return ((IJavaElement)e1).getElementName().compareTo(((IJavaElement)e2).getElementName());
+				}
 				return p1 - p2;
 			case STORAGE:
 				return ((IStorage)e1).getName().compareToIgnoreCase(((IStorage)e2).getName());
