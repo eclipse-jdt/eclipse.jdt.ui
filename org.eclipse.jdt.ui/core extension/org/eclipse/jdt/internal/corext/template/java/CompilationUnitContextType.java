@@ -21,17 +21,6 @@ import org.eclipse.jdt.internal.corext.template.TemplateVariable;
  */
 public abstract class CompilationUnitContextType extends ContextType {
 	
-	/** the document */
-	protected IDocument fDocument;
-
-	/** the completion offset within the document string */
-	protected int fOffset;
-	/** the completion length */
-	protected int fLength;
-
-	/** the associated compilation unit, may be <code>null</code> */
-	protected ICompilationUnit fCompilationUnit;
-
 	protected static class ReturnType extends TemplateVariable {
 	 	public ReturnType() {
 	 	 	super(JavaTemplateMessages.getString("CompilationUnitContextType.variable.name.return.type"), JavaTemplateMessages.getString("CompilationUnitContextType.variable.description.return.type")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -169,14 +158,7 @@ public abstract class CompilationUnitContextType extends ContextType {
 		super(name);	
 	}
 
-	/**
-	 * Sets context parameters. Needs to be called before createContext().
-	 */
-	public void setContextParameters(IDocument document, int offset, int length, ICompilationUnit compilationUnit) {
-		fDocument= document;
-		fOffset= offset;
-		fLength= length;
-		fCompilationUnit= compilationUnit;
-	}
+	public abstract CompilationUnitContext createContext(IDocument document, int completionPosition, int i, ICompilationUnit compilationUnit);
+
 
 }

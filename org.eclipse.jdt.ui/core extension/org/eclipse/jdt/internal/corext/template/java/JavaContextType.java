@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.corext.template.java;
 
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 
@@ -137,11 +139,12 @@ public class JavaContextType extends CompilationUnitContextType {
 		addVariable(new Todo());
 	}
 	
-	/*
-	 * @see ContextType#createContext()
-	 */	
-	public TemplateContext createContext() {
-		return new JavaContext(this, fDocument, fOffset, fLength, fCompilationUnit);
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, int, int, org.eclipse.jdt.core.ICompilationUnit)
+	 */
+	public CompilationUnitContext createContext(IDocument document, int offset, int length, ICompilationUnit compilationUnit) {
+		return new JavaContext(this, document, offset, length, compilationUnit);
 	}
 
 }

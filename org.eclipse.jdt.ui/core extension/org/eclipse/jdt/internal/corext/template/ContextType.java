@@ -73,11 +73,6 @@ public abstract class ContextType implements ITemplateEditor {
 	 	return fVariables.values().iterator();   
 	}
 
-	/**
-	 * Creates a template context.
-	 */
-	public abstract TemplateContext createContext();
-
     /*
      * @see ITemplateEditor#edit(TemplateBuffer)
      */

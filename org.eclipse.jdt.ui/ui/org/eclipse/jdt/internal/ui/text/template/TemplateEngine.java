@@ -89,8 +89,8 @@ public class TemplateEngine {
 			} catch (BadLocationException e) {}
 		}
 
-		((CompilationUnitContextType) fContextType).setContextParameters(document, completionPosition, selection.y, compilationUnit);
-		CompilationUnitContext context= (CompilationUnitContext) fContextType.createContext();
+		
+		CompilationUnitContext context= ((CompilationUnitContextType) fContextType).createContext(document, completionPosition, selection.y, compilationUnit);
 		context.setVariable("selection", selectedText); //$NON-NLS-1$
 		int start= context.getStart();
 		int end= context.getEnd();

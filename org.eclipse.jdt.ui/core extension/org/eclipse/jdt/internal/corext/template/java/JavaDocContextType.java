@@ -4,7 +4,10 @@
  */
 package org.eclipse.jdt.internal.corext.template.java;
 
-import org.eclipse.jdt.internal.corext.template.TemplateContext;
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+
 
 /**
  * A context type for javadoc.
@@ -35,11 +38,11 @@ public class JavaDocContextType extends CompilationUnitContextType {
 		addVariable(new Project());
 	}
 	
-	/*
-	 * @see ContextType#createContext()
-	 */	
-	public TemplateContext createContext() {
-		return new JavaDocContext(this, fDocument, fOffset, fLength, fCompilationUnit);
-	}
-
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, int, int, org.eclipse.jdt.core.ICompilationUnit)
+	 */
+	public CompilationUnitContext createContext(IDocument document, int offset, int length, ICompilationUnit compilationUnit) {
+		return new JavaContext(this, document, offset, length, compilationUnit);
+	}	
+	
 }
