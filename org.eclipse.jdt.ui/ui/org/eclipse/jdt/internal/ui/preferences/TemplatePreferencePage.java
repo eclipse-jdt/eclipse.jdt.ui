@@ -114,8 +114,8 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 
 		TableLayout tableLayout= new TableLayout();
 		table.setLayout(tableLayout);
-		
-		TableColumn column1= table.getColumn(0);
+
+		TableColumn column1= new TableColumn(table, SWT.NULL);		
 		column1.setText(TemplateMessages.getString("TemplatePreferencePage.column.name")); //$NON-NLS-1$
 
 		TableColumn column2= new TableColumn(table, SWT.NULL);
