@@ -54,21 +54,21 @@ public class AugmentRawContainerClientsTests extends RefactoringTest {
 		AugmentRawContainerClientsRefactoring refactoring= AugmentRawContainerClientsRefactoring.create(elements);
 		
 		NullProgressMonitor pm= new NullProgressMonitor();
-		RefactoringStatus status= refactoring.checkInitialConditions(pm);
-		assertEquals("wrong initial condition status", expectedInitialStatus, status.getSeverity());
-		if (! status.isOK())
+		RefactoringStatus initialStatus= refactoring.checkInitialConditions(pm);
+		assertEquals("wrong initial condition status: " + initialStatus, expectedInitialStatus, initialStatus.getSeverity());
+		if (! initialStatus.isOK())
 			return;
 		
 		// set client options here (from instance variables)
 
-		status.merge(refactoring.checkFinalConditions(pm)); //TODO: check final conditions only once!
-		assertEquals("wrong final condition status", expectedFinalStatus, status.getSeverity());
-		if (status.getSeverity() == RefactoringStatus.FATAL)
-			return;
-		
 		PerformRefactoringOperation op= new PerformRefactoringOperation(
 				refactoring, CheckConditionsOperation.FINAL_CONDITIONS);
 		JavaCore.run(op, new NullProgressMonitor());
+		RefactoringStatus finalStatus= op.getConditionStatus();
+		assertEquals("wrong final condition status: " + finalStatus, expectedFinalStatus, finalStatus.getSeverity());
+		if (finalStatus.getSeverity() == RefactoringStatus.FATAL)
+			return;
+		
 		assertTrue("Validation check failed", !op.getValidationStatus().hasFatalError());
 		assertNotNull("No Undo", op.getUndoChange());
 			
