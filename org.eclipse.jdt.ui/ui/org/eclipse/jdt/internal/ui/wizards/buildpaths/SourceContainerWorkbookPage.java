@@ -229,7 +229,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		if (field == fFoldersList) {
 			if (index == IDX_ADD) {
 				List elementsToAdd= new ArrayList(10);
-				if (fCurrJProject.exists()) {
+				if (fCurrJProject.getProject().exists()) {
 					CPListElement[] srcentries= openSourceContainerDialog(null);
 					if (srcentries != null) {
 						for (int i= 0; i < srcentries.length; i++) {
