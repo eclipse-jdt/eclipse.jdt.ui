@@ -16,6 +16,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,20 +28,24 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -73,8 +81,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.ui.CodeGeneration;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
@@ -85,6 +91,7 @@ import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
+import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -92,14 +99,13 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAwareSourceRangeComputer;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.CodeGeneration;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Extracts a method in a compilation unit based on a text selection range.
@@ -112,6 +118,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private int fSelectionLength;
 	private AST fAST;
 	private ASTRewrite fRewriter;
+	private IDocument fDocument;
 	private ExtractMethodAnalyzer fAnalyzer;
 	private int fVisibility;
 	private String fMethodName;
@@ -419,12 +426,12 @@ public class ExtractMethodRefactoring extends Refactoring {
 		ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 		try {
 			bufferManager.connect(path, new SubProgressMonitor(pm, 1));
-			IDocument document= bufferManager.getTextFileBuffer(path).getDocument();
+			fDocument= bufferManager.getTextFileBuffer(path).getDocument();
 			
 			ASTNode[] selectedNodes= fAnalyzer.getSelectedNodes();
-			fRewriter.setTargetSourceRangeComputer(new SelectionAwareSourceRangeComputer(
-				selectedNodes, document, fSelectionStart, fSelectionLength));
-			MethodDeclaration mm= createNewMethod(fMethodName, true, selectedNodes, document.getLineDelimiter(0));
+			fRewriter.setTargetSourceRangeComputer(new SelectionAwareSourceRangeComputer(selectedNodes,
+				fDocument, fSelectionStart, fSelectionLength));
+			MethodDeclaration mm= createNewMethod(fMethodName, true, selectedNodes, fDocument.getLineDelimiter(0));
 
 			TextEditGroup insertDesc= new TextEditGroup(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName)); //$NON-NLS-1$
 			result.addTextEditGroup(insertDesc);
@@ -446,14 +453,14 @@ public class ExtractMethodRefactoring extends Refactoring {
 			replaceDuplicates(result);
 		
 			if (!fImportRewriter.isEmpty()) {
-				TextEdit edit= fImportRewriter.createEdit(document);
+				TextEdit edit= fImportRewriter.createEdit(fDocument);
 				root.addChild(edit);
 				result.addTextEditGroup(new TextEditGroup(
 					RefactoringCoreMessages.getString("ExtractMethodRefactoring.organize_imports"), //$NON-NLS-1$
 					new TextEdit[] {edit}
 				));
 			}
-			root.addChild(fRewriter.rewriteAST(document, null));
+			root.addChild(fRewriter.rewriteAST(fDocument, null));
 		} catch (BadLocationException e) {
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
 				e.getMessage(), e));
@@ -484,6 +491,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 		try {
 			method= createNewMethod(methodName, false, null, String.valueOf('\n'));
 		} catch (CoreException cannotHappen) {
+			// we don't generate a code block and java comments.
+			Assert.isTrue(false);
+		} catch (BadLocationException e) {
 			// we don't generate a code block and java comments.
 			Assert.isTrue(false);
 		}
@@ -692,7 +702,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}		
 	}
 	
-	private MethodDeclaration createNewMethod(String name, boolean code, ASTNode[] selectedNodes, String lineDelimiter) throws CoreException {
+	private MethodDeclaration createNewMethod(String name, boolean code, ASTNode[] selectedNodes, String lineDelimiter) throws CoreException, BadLocationException {
 		MethodDeclaration result= fAST.newMethodDeclaration();
 		int modifiers= fVisibility;
 		if (Modifier.isStatic(fAnalyzer.getEnclosingBodyDeclaration().getModifiers()) || fAnalyzer.getForceStatic()) {
@@ -748,7 +758,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private Block createMethodBody(ASTNode[] selectedNodes) {
+	private Block createMethodBody(ASTNode[] selectedNodes) throws BadLocationException, CoreException {
 		Block result= fAST.newBlock();
 		ListRewrite statements= fRewriter.getListRewrite(result, Block.STATEMENTS_PROPERTY);
 		
@@ -826,5 +836,41 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 	public ICompilationUnit getCompilationUnit() {
 		return fCUnit;
+	}
+	
+	private String getMethodBodySource(ASTNode[] selectedNodes) throws BadLocationException, CoreException {
+		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
+		String documentPortionToScan= fDocument.get(fSelectionStart, fSelectionLength);
+		scanner.setSource(documentPortionToScan.toCharArray());
+		TokenScanner tokenizer= new TokenScanner(scanner);
+		int pos= tokenizer.getNextStartOffset(0, false);
+		ASTNode currentNode= selectedNodes[0];
+		int start= Math.min(fSelectionStart + pos, currentNode.getStartPosition());
+		
+		currentNode= selectedNodes[selectedNodes.length - 1];
+		int scannerStart= currentNode.getStartPosition() + currentNode.getLength() - fSelectionStart;
+		tokenizer.setOffset(scannerStart);
+		pos= scannerStart;
+		int token= -1;
+		try {
+			while (true) {
+				token= tokenizer.readNext(false);
+				pos= tokenizer.getCurrentEndOffset();
+			}
+		} catch (CoreException e) {
+		}
+		if (token == ITerminalSymbols.TokenNameCOMMENT_LINE) {
+			int index= pos - 1;
+			while(index >= 0 && Strings.isLineDelimiterChar(documentPortionToScan.charAt(index))) {
+				pos--;
+				index--;
+			}
+		}
+		int end= Math.max(fSelectionStart + pos, currentNode.getStartPosition() + currentNode.getLength());
+		
+		String[] lines= Strings.convertIntoLines(fDocument.get(start, end - start));
+		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(fCUnit.getJavaProject()), false);
+		
+		return Strings.concatenate(lines, fDocument.getLineDelimiter(0));
 	}
 }

@@ -66,19 +66,23 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 		if (fSelectedNodes.length == 0)
 			return;
 		
+		fRanges.put(fSelectedNodes[0], super.computeSourceRange(fSelectedNodes[0]));
+		int last= fSelectedNodes.length - 1;
+		fRanges.put(fSelectedNodes[last], super.computeSourceRange(fSelectedNodes[last]));
+		
 		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 		String documentPortionToScan= fDocument.get(fSelectionStart, fSelectionLength);
 		scanner.setSource(documentPortionToScan.toCharArray());
 		TokenScanner tokenizer= new TokenScanner(scanner);
 		int pos= tokenizer.getNextStartOffset(0, false);
-		ASTNode firstNode= fSelectedNodes[0];
-		int newStart= Math.min(fSelectionStart + pos, firstNode.getStartPosition());
-		SourceRange range= super.computeSourceRange(firstNode);
-		SourceRange firstRange= new SourceRange(newStart, range.getLength() + range.getStartPosition() - newStart);
-		fRanges.put(firstNode, firstRange);
 		
-		ASTNode lastNode= fSelectedNodes[fSelectedNodes.length - 1];
-		int scannerStart= lastNode.getStartPosition() + lastNode.getLength() - fSelectionStart;
+		ASTNode currentNode= fSelectedNodes[0];
+		int newStart= Math.min(fSelectionStart + pos, currentNode.getStartPosition());
+		SourceRange range= (SourceRange)fRanges.get(currentNode);
+		fRanges.put(currentNode, new SourceRange(newStart, range.getLength() + range.getStartPosition() - newStart));
+		
+		currentNode= fSelectedNodes[last];
+		int scannerStart= currentNode.getStartPosition() + currentNode.getLength() - fSelectionStart;
 		tokenizer.setOffset(scannerStart);
 		pos= scannerStart;
 		int token= -1;
@@ -97,9 +101,8 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 			}
 		}
 		
-		int newEnd= Math.max(fSelectionStart + pos, lastNode.getStartPosition() + lastNode.getLength());
-		range= firstNode == lastNode ? firstRange : super.computeSourceRange(lastNode);
-		SourceRange lastRange= new SourceRange(range.getStartPosition(), newEnd - range.getStartPosition());
-		fRanges.put(lastNode, lastRange);
+		int newEnd= Math.max(fSelectionStart + pos, currentNode.getStartPosition() + currentNode.getLength());
+		range= (SourceRange)fRanges.get(currentNode);
+		fRanges.put(currentNode, new SourceRange(range.getStartPosition(), newEnd - range.getStartPosition()));
 	}
 }
