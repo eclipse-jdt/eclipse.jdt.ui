@@ -262,6 +262,32 @@ public class Bindings {
 		return null;
 	}
 
+	/**
+	 * Finds the field specified by <code>fieldName</code> in
+	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such field
+	 * exists. If the field is defined in more than one super type only the first match is 
+	 * returned. First the super class is exaimined and than the implemented interfaces.
+	 * @param type The type to search the field in
+	 * @param fieldName The name of the field to find
+	 */
+	public static IVariableBinding findFieldInHierarchy(ITypeBinding type, String fieldName) {
+		IVariableBinding field= findFieldInType(type, fieldName);
+		if (field != null)
+			return field;
+		ITypeBinding superClass= type.getSuperclass();
+		if (superClass != null) {
+			field= findFieldInType(type, fieldName);
+			if (field != null)
+				return field;			
+		}
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			field= findFieldInType(type, fieldName);
+			if (field != null) // no private fields in interfaces
+				return field;
+		}
+		return null;
+	}
 
 
 	/**
@@ -440,6 +466,7 @@ public class Bindings {
 		}
 		return false;
 	}
+	
 
 	// find IJavaElements for bindings
 

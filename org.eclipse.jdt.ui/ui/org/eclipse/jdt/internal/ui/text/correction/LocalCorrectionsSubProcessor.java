@@ -16,49 +16,21 @@ import java.util.List;
 
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CastExpression;
-import org.eclipse.jdt.core.dom.CatchClause;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.TryStatement;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
-import org.eclipse.swt.graphics.Image;
-
-import org.eclipse.jface.text.IDocument;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
@@ -75,15 +47,11 @@ import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
-
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
   */
@@ -118,9 +86,9 @@ public class LocalCorrectionsSubProcessor {
 			}
 		}
 
-		ASTRewriteCorrectionProposal castProposal= getCastProposal(context, castType, nodeToCast, 5);
-		if (castProposal != null) {
-			proposals.add(castProposal);
+		ITypeBinding binding= nodeToCast.resolveTypeBinding();
+		if (binding == null || canCast(castType, binding)) {
+			proposals.add(createCastProposal(context, castType, nodeToCast, 5));
 		}
 		
 		ITypeBinding currBinding= nodeToCast.resolveTypeBinding();
@@ -231,18 +199,11 @@ public class LocalCorrectionsSubProcessor {
 			}
 			return (targetCode != null && targetCode != PrimitiveType.BOOLEAN && castCode != PrimitiveType.BOOLEAN);
 		} else {
-			return targetCode == null;
+			return targetCode == null; // can not check
 		}
 	}
 	
-	
-
-	public static ASTRewriteCorrectionProposal getCastProposal(IInvocationContext context, String castType, Expression nodeToCast, int relevance) throws CoreException {
-		ITypeBinding binding= nodeToCast.resolveTypeBinding();
-		if (binding != null && !canCast(castType, binding)) {
-			return null;
-		}
-		
+	public static ASTRewriteCorrectionProposal createCastProposal(IInvocationContext context, String castType, Expression nodeToCast, int relevance) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit astRoot= context.getASTRoot();
 		

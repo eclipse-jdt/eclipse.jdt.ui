@@ -515,8 +515,58 @@ public class UnresolvedElementsSubProcessor {
 				}
 			}
 		}
+		
+		if (!isSuperInvocation) {
+			ASTNode parent= invocationNode.getParent();
+			while (parent instanceof Expression && parent.getNodeType() != ASTNode.CAST_EXPRESSION) {
+				parent= parent.getParent();
+			}
+			if (!isSuperInvocation && parent instanceof CastExpression) {
+				addMissingCastParentsProposal(cu, (CastExpression) parent, sender, nameNode, getArgumentTypes(arguments), proposals);
+			}
+		}
+		
 	}
+
+	private static void addMissingCastParentsProposal(ICompilationUnit cu, CastExpression expression, Expression accessExpression, SimpleName accessSelector, ITypeBinding[] paramTypes, Collection proposals) throws CoreException {
+		ITypeBinding castType= expression.getType().resolveBinding();
+		if (castType == null) {
+			return;
+		}
+		if (paramTypes != null) {
+			if (Bindings.findMethodInHierarchy(castType, accessSelector.getIdentifier(), paramTypes) == null) {
+				return;
+			}
+		} else if (Bindings.findFieldInHierarchy(castType, accessSelector.getIdentifier()) == null) {
+			return;
+		}
+		ITypeBinding bindingToCast= accessExpression.resolveTypeBinding();
+		if (bindingToCast != null && !TypeRules.canCast(castType, bindingToCast)) {
+			return;
+		}
+		
+		IMethodBinding res= Bindings.findMethodInHierarchy(castType, accessSelector.getIdentifier(), paramTypes);
+		if (res != null) {
+			AST ast= expression.getAST();
+			ASTRewrite rewrite= new ASTRewrite(expression.getParent());
+			CastExpression newCast= ast.newCastExpression();
+			newCast.setType((Type) ASTNode.copySubtree(ast, expression.getType()));
+			newCast.setExpression((Expression) rewrite.createCopy(accessExpression));
+			ParenthesizedExpression parents= ast.newParenthesizedExpression();
+			parents.setExpression(newCast);
 			
+			ASTNode node= rewrite.createCopy(expression.getExpression());
+			rewrite.markAsReplaced(expression, node);
+			rewrite.markAsReplaced(accessExpression, parents);
+
+			String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.missingcastbrackets.description"); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 8, image);
+			proposal.ensureNoModifications();
+			proposals.add(proposal);				
+		}
+	}
+
 	private static void addParameterMissmatchProposals(IInvocationContext context, IProblemLocation problem, List similarElements, List arguments, Collection proposals) throws CoreException {
 		int nSimilarElements= similarElements.size();
 		ITypeBinding[] argTypes= getArgumentTypes(arguments);
@@ -831,12 +881,15 @@ public class UnresolvedElementsSubProcessor {
 		if (nDiffs == 1) { // one argument missmatching: try to fix
 			int idx= indexOfDiff[0];
 			Expression nodeToCast= (Expression) arguments.get(idx);
-			String castType= paramTypes[idx].getQualifiedName();			
-			ASTRewriteCorrectionProposal proposal= LocalCorrectionsSubProcessor.getCastProposal(context, castType, nodeToCast, 6);
-			if (proposal != null) { // null returned when no cast is possible
-				proposals.add(proposal);
-				String[] arg= new String[] { getArgumentName(cu, arguments, idx), castType };
+			ITypeBinding castType= paramTypes[idx];
+			ITypeBinding binding= nodeToCast.resolveTypeBinding();
+			if (binding == null || TypeRules.canCast(castType, binding)) {
+				String castTypeName= castType.getQualifiedName();
+				ASTRewriteCorrectionProposal proposal= LocalCorrectionsSubProcessor.createCastProposal(context, castTypeName, nodeToCast, 6);
+				String[] arg= new String[] { getArgumentName(cu, arguments, idx), castTypeName};
 				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addargumentcast.description", arg)); //$NON-NLS-1$
+				proposal.ensureNoModifications();
+				proposals.add(proposal);
 			}
 		}
 		if (nDiffs == 2) { // try to swap
