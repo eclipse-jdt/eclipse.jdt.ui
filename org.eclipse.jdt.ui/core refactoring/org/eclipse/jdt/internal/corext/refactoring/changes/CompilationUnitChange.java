@@ -78,7 +78,12 @@ public class CompilationUnitChange extends TextFileChange {
 		ISourceRange range= element.getSourceRange();
 		int offset= buffer.getLineInformationOfOffset(range.getOffset()).getOffset();
 		int length= range.getLength() + range.getOffset() - offset + delta;
-		return buffer.getContent(offset, length);
+		if (length > 0) {
+			return buffer.getContent(offset, length);
+		} else {
+			// source reference got removed.
+			return ""; //$NON-NLS-1$
+		}
 	}
 }
 
