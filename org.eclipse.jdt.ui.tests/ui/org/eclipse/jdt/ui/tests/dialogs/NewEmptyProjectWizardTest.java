@@ -959,7 +959,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
         IPath oldOutputPath= fProject.getPath();
         CPListElement elem= CPListElement.createFromExisting(root.getRawClasspathEntry(), fProject); 
         CPListElementAttribute outputFolder= new CPListElementAttribute(elem, CPListElement.OUTPUT, 
-                elem.getAttribute(CPListElement.OUTPUT));
+                elem.getAttribute(CPListElement.OUTPUT), true);
         
         final IPath editedOutputPath= oldOutputPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME) + "3");
         ClasspathModifierQueries.IOutputLocationQuery query= new ClasspathModifierQueries.IOutputLocationQuery() {
@@ -994,7 +994,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
         IPath oldOutputPath= fProject.getPath();
         CPListElement elem= CPListElement.createFromExisting(root.getRawClasspathEntry(), fProject); 
         CPListElementAttribute outputFolder= new CPListElementAttribute(elem, CPListElement.OUTPUT, 
-                elem.getAttribute(CPListElement.OUTPUT));
+                elem.getAttribute(CPListElement.OUTPUT), true);
         
         final IPath editedOutputPath= oldOutputPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME) + "3");
         ClasspathModifierQueries.IOutputLocationQuery query= new ClasspathModifierQueries.IOutputLocationQuery() {
