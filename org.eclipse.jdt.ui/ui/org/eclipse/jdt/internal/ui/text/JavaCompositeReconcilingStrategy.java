@@ -18,16 +18,14 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
-import org.eclipse.jdt.internal.ui.text.spelling.SpellReconcileStrategy;
+import org.eclipse.jdt.internal.ui.text.spelling.newapi.JavaSpellingReconcileStrategy;
 
 /**
  * Reconciling strategy for Java code. This is a composite strategy containing the
- * regular java model reconciler and the comment spell checking strategy. 
+ * regular java model reconciler and the comment spelling strategy. 
  * 
  * @since 3.0 
  */
@@ -47,7 +45,7 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 		fJavaStrategy= new JavaReconcilingStrategy(editor);
 		setReconcilingStrategies(new IReconcilingStrategy[] {
 			fJavaStrategy,
-			new SpellReconcileStrategy(editor, documentPartitioning, PreferenceConstants.getPreferenceStore())
+			new JavaSpellingReconcileStrategy(editor, JavaPlugin.getDefault().getCombinedPreferenceStore())
 		});
 	}
 	

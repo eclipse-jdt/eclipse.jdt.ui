@@ -12,7 +12,9 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -209,6 +211,12 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	/** The status for the proposal threshold */
 	private IStatus fThresholdStatus= new StatusInfo();
 
+	/** All controls */
+	private Control[] fAllControls;
+	
+	/** All previously enabled controls */
+	private Control[] fEnabledControls;
+	
 	/**
 	 * Creates a new spelling configuration block.
 	 * 
@@ -265,6 +273,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		GridLayout layout= new GridLayout(); layout.numColumns= 1;
 		composite.setLayout(layout);
 
+		List allControls= new ArrayList();
 		final PixelConverter converter= new PixelConverter(parent);
 
 		layout= new GridLayout();
@@ -276,29 +285,36 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		user.setText(PreferencesMessages.getString("SpellingPreferencePage.preferences.user")); //$NON-NLS-1$
 		user.setLayout(new GridLayout());		
 		user.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		allControls.add(user);
 
 		String label= PreferencesMessages.getString("SpellingPreferencePage.enable.label"); //$NON-NLS-1$
 		final Button master= addCheckBox(user, label, PREF_SPELLING_CHECK_SPELLING, trueFalse, 0);
+		allControls.add(master);
 
 		label= PreferencesMessages.getString("SpellingPreferencePage.ignore.digits.label"); //$NON-NLS-1$
 		Control slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_DIGITS, trueFalse, 20);
 		createSelectionDependency(master, slave);
+		allControls.add(slave);
 
 		label= PreferencesMessages.getString("SpellingPreferencePage.ignore.mixed.label"); //$NON-NLS-1$
 		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_MIXED, trueFalse, 20);
 		createSelectionDependency(master, slave);
+		allControls.add(slave);
 
 		label= PreferencesMessages.getString("SpellingPreferencePage.ignore.sentence.label"); //$NON-NLS-1$
 		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_SENTENCE, trueFalse, 20);
 		createSelectionDependency(master, slave);
+		allControls.add(slave);
 
 		label= PreferencesMessages.getString("SpellingPreferencePage.ignore.upper.label"); //$NON-NLS-1$
 		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_UPPER, trueFalse, 20);
 		createSelectionDependency(master, slave);
+		allControls.add(slave);
 
 		label= PreferencesMessages.getString("SpellingPreferencePage.ignore.url.label"); //$NON-NLS-1$
 		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_URLS, trueFalse, 20);
 		createSelectionDependency(master, slave);
+		allControls.add(slave);
 
 		final Group engine= new Group(composite, SWT.NONE);
 		engine.setText(PreferencesMessages.getString("SpellingPreferencePage.preferences.engine")); //$NON-NLS-1$
@@ -306,17 +322,22 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		layout.numColumns= 4;
 		engine.setLayout(layout);
 		engine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		allControls.add(engine);
 
 		label= PreferencesMessages.getString("SpellingPreferencePage.dictionary.label"); //$NON-NLS-1$
 		final Set locales= SpellCheckEngine.getAvailableLocales();
 
 		Combo combo= addComboBox(engine, label, PREF_SPELLING_LOCALE, getDictionaryCodes(locales), getDictionaryLabels(locales), 0);
 		combo.setEnabled(locales.size() > 1);
+		allControls.add(combo);
+		allControls.add(fLabels.get(combo));
 		
 		new Label(engine, SWT.NONE); // placeholder
 
 		label= PreferencesMessages.getString("SpellingPreferencePage.workspace.dictionary.label"); //$NON-NLS-1$
 		fDictionaryPath= addTextField(engine, label, PREF_SPELLING_USER_DICTIONARY, 0, 0);
+		allControls.add(fDictionaryPath);
+		allControls.add(fLabels.get(fDictionaryPath));
 
 		
 		Button button= new Button(engine, SWT.PUSH);
@@ -329,6 +350,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		});
 		button.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		SWTUtil.setButtonDimensionHint(button);
+		allControls.add(button);
 		
 		layout= new GridLayout();
 		layout.numColumns= 3;
@@ -339,6 +361,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		layout.numColumns= 3;
 		advanced.setLayout(layout);		
 		advanced.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		allControls.add(advanced);
 		
 		label= PreferencesMessages.getString("SpellingPreferencePage.proposals.threshold"); //$NON-NLS-1$
 		Text text= addTextField(advanced, label, PREF_SPELLING_PROPOSAL_THRESHOLD, 0, 0);
@@ -346,10 +369,15 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		data.widthHint= converter.convertWidthInCharsToPixels(4);
 		text.setLayoutData(data);
+		allControls.add(text);
+		allControls.add(fLabels.get(text));
 		
 		label= PreferencesMessages.getString("SpellingPreferencePage.enable.contentassist.label"); //$NON-NLS-1$
-		addCheckBox(advanced, label, PREF_SPELLING_ENABLE_CONTENTASSIST, trueFalse, 0);
+		button= addCheckBox(advanced, label, PREF_SPELLING_ENABLE_CONTENTASSIST, trueFalse, 0);
+		allControls.add(button);
 
+		fAllControls= (Control[]) allControls.toArray(new Control[allControls.size()]);
+		
 		return composite;
 	}
 
@@ -404,5 +432,27 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		event.display= curr.getDisplay();
 		event.widget= curr;
 		curr.notifyListeners(SWT.Selection, event);
+	}
+	
+	/**
+	 * @since 3.1
+	 */
+	protected void setEnabled(boolean enabled) {
+		if (enabled && fEnabledControls != null) {
+			for (int i= fEnabledControls.length - 1; i >= 0; i--)
+				fEnabledControls[i].setEnabled(true);
+			fEnabledControls= null;
+		}
+		if (!enabled && fEnabledControls == null) {
+			List enabledControls= new ArrayList();
+			for (int i= fAllControls.length - 1; i >= 0; i--) {
+				Control control= fAllControls[i];
+				if (control.isEnabled()) {
+					enabledControls.add(control);
+					control.setEnabled(false);
+				}
+			}
+			fEnabledControls= (Control[]) enabledControls.toArray(new Control[enabledControls.size()]);
+		}
 	}
 }

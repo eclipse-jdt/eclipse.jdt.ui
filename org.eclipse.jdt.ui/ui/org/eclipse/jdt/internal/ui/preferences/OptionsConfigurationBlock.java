@@ -167,7 +167,7 @@ public abstract class OptionsConfigurationBlock {
 	private SelectionListener fSelectionListener;
 	private ModifyListener fTextModifyListener;
 
-	protected final IStatusChangeListener fContext;
+	protected IStatusChangeListener fContext;
 	protected final IProject fProject; // project or null
 	protected final Key[] fAllKeys;
 	

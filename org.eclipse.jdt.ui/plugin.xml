@@ -1066,12 +1066,6 @@
             class="org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage"
             id="org.eclipse.jdt.ui.preferences.MembersOrderPreferencePage">
       </page>
-      <page 
-            name="%spellingPrefName"
-            category= "org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.SpellingPreferencePage"
-            id = "org.eclipse.jdt.ui.preferences.SpellingPreferencePage">
-      </page>	
    </extension>
 <!-- =========================================================================== -->
 <!-- Work in Progress                                                            -->
@@ -4692,4 +4686,14 @@
            id="org.eclipse.jdt.ui.serial.support">
     	</launchConfigurationType>
 	</extension>
+
+    <extension point="org.eclipse.ui.workbench.texteditor.spellingEngine">
+        <engine
+              preferencesClass="org.eclipse.jdt.internal.ui.preferences.SpellingPreferenceBlock"
+              label="%defaultSpellingEngine.label"
+              class="org.eclipse.jdt.internal.ui.text.spelling.newapi.DefaultSpellingEngine"
+              default="true"
+              id="org.eclipse.jdt.internal.ui.text.spelling.newapi.DefaultSpellingEngine">
+        </engine>
+    </extension>
 </plugin>

@@ -1,0 +1,304 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+
+package org.eclipse.jdt.internal.ui.text.spelling.newapi;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.content.IContentDescription;
+import org.eclipse.core.runtime.content.IContentType;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.reconciler.DirtyRegion;
+import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
+import org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension;
+import org.eclipse.jface.text.source.IAnnotationModel;
+
+import org.eclipse.ui.editors.text.EditorsUI;
+
+import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.IDocumentProviderExtension4;
+import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
+import org.eclipse.ui.texteditor.spelling.SpellingContext;
+import org.eclipse.ui.texteditor.spelling.SpellingProblem;
+
+import org.eclipse.jdt.core.IProblemRequestor;
+import org.eclipse.jdt.core.compiler.IProblem;
+
+import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckPreferenceKeys;
+
+/**
+ * Reconcile strategy for spell checking comments.
+ * 
+ * @since 3.1
+ */
+public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
+
+	/**
+	 * Spelling problem to be accepted by problem requesters.
+	 */
+	private class CoreSpellingProblem implements IProblem {
+
+		/** The id of the problem */
+		public static final int SPELLING= 0x80000000;
+
+		/** The end offset of the problem */
+		private int fSourceEnd= 0;
+
+		/** The line number of the problem */
+		private int fLineNumber= 1;
+
+		/** The start offset of the problem */
+		private int fSourceStart= 0;
+
+		/** The description of the problem */
+		private String fMessage;
+
+		/** The misspelled word */
+		private String fWord;
+
+		public CoreSpellingProblem(int start, int end, int line, String message, String word) {
+			super();
+			fSourceStart= start;
+			fSourceEnd= end;
+			fLineNumber= line;
+			fMessage= message;
+			fWord= word;
+		}
+		/*
+		 * @see org.eclipse.jdt.core.compiler.IProblem#getArguments()
+		 */
+		public String[] getArguments() {
+
+			String prefix= ""; //$NON-NLS-1$
+			String postfix= ""; //$NON-NLS-1$
+
+			try {
+
+				IRegion line= fDocument.getLineInformationOfOffset(fSourceStart);
+
+				prefix= fDocument.get(line.getOffset(), fSourceStart - line.getOffset());
+				postfix= fDocument.get(fSourceEnd + 1, line.getOffset() + line.getLength() - fSourceEnd);
+
+			} catch (BadLocationException exception) {
+				// Do nothing
+			}
+			// XXX: lost functionality through missing 'sentence' and 'match' flag?
+			return new String[] { fWord, prefix, postfix, Boolean.toString(false), Boolean.toString(false)};
+		}
+
+		/*
+		 * @see org.eclipse.jdt.core.compiler.IProblem#getID()
+		 */
+		public int getID() {
+			return SPELLING;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.core.compiler.IProblem#getMessage()
+		 */
+		public String getMessage() {
+			return fMessage;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.core.compiler.IProblem#getOriginatingFileName()
+		 */
+		public char[] getOriginatingFileName() {
+			return fEditor.getEditorInput().getName().toCharArray();
+		}
+
+		/*
+		 * @see org.eclipse.jdt.core.compiler.IProblem#getSourceEnd()
+		 */
+		public int getSourceEnd() {
+			return fSourceEnd;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.core.compiler.IProblem#getSourceLineNumber()
+		 */
+		public int getSourceLineNumber() {
+			return fLineNumber;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.core.compiler.IProblem#getSourceStart()
+		 */
+		public int getSourceStart() {
+			return fSourceStart;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.core.compiler.IProblem#isError()
+		 */
+		public boolean isError() {
+			return false;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.core.compiler.IProblem#isWarning()
+		 */
+		public boolean isWarning() {
+			return true;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.core.compiler.IProblem#setSourceStart(int)
+		 */
+		public void setSourceStart(int sourceStart) {
+			fSourceStart= sourceStart;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.core.compiler.IProblem#setSourceEnd(int)
+		 */
+		public void setSourceEnd(int sourceEnd) {
+			fSourceEnd= sourceEnd;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.core.compiler.IProblem#setSourceLineNumber(int)
+		 */
+		public void setSourceLineNumber(int lineNumber) {
+			fLineNumber= lineNumber;
+		}
+	}
+
+	private class SpellingProblemCollector implements ISpellingProblemCollector {
+
+		/*
+		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#accept(org.eclipse.ui.texteditor.spelling.SpellingProblem)
+		 */
+		public void accept(SpellingProblem problem) {
+			if (fRequester != null) {
+				try {
+					int line= fDocument.getLineOfOffset(problem.getOffset()) + 1;
+					String word= fDocument.get(problem.getOffset(), problem.getLength());
+					CoreSpellingProblem iProblem= new CoreSpellingProblem(problem.getOffset(), problem.getOffset() + problem.getLength() - 1, line, problem.getMessage(), word);
+					fRequester.acceptProblem(iProblem);
+				} catch (BadLocationException x) {
+					// drop this SpellingProblem
+				}
+			}
+		}
+
+
+		/*
+		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#beginReporting()
+		 */
+		public void beginReporting() {
+			if (fRequester != null)
+				fRequester.beginReporting();
+		}
+
+		/*
+		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#endReporting()
+		 */
+		public void endReporting() {
+			if (fRequester != null)
+				fRequester.endReporting();
+		}
+	}
+	
+	/** The text editor to operate on. */
+	private ITextEditor fEditor;
+
+	/** The preference store to use. */
+	private IPreferenceStore fPreferences;
+
+	/** The document to operate on. */
+	private IDocument fDocument;
+
+	/** The progress monitor. */
+	private IProgressMonitor fProgressMonitor;
+	
+	/** The problem requester. */
+	private IProblemRequestor fRequester;
+	
+	/** The spelling problem collector. */
+	private ISpellingProblemCollector fCollector= new SpellingProblemCollector();
+
+	/**
+	 * Creates a new comment reconcile strategy.
+	 * 
+	 * @param editor the text editor to operate on
+	 * @param store the preference store to get the preferences from
+	 */
+	public JavaSpellingReconcileStrategy(ITextEditor editor, IPreferenceStore store) {
+		fEditor= editor;
+		fPreferences= store;
+		updateProblemRequester();
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension#initialReconcile()
+	 */
+	public void initialReconcile() {
+		reconcile(new Region(0, fDocument.getLength()));
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.reconciler.DirtyRegion,org.eclipse.jface.text.IRegion)
+	 */
+	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
+		reconcile(subRegion);
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
+	 */
+	public void reconcile(IRegion region) {
+		if (fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_CHECK_SPELLING) && fRequester != null) {
+			SpellingContext context= new SpellingContext();
+			context.setContentType(getContentType());
+			EditorsUI.getSpellingService().check(fDocument, context, fCollector, fProgressMonitor);
+		}
+	}
+
+	private IContentType getContentType() {
+		IDocumentProvider documentProvider= fEditor.getDocumentProvider();
+		if (documentProvider instanceof IDocumentProviderExtension4) {
+			IContentDescription desc= ((IDocumentProviderExtension4) documentProvider).getContentDescription(fEditor.getEditorInput());
+			if (desc != null)
+				return desc.getContentType();
+		}
+		return null;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#setDocument(org.eclipse.jface.text.IDocument)
+	 */
+	public void setDocument(IDocument document) {
+		fDocument= document;
+		updateProblemRequester();
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension#setProgressMonitor(org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	public void setProgressMonitor(IProgressMonitor monitor) {
+		fProgressMonitor= monitor;
+	}
+
+	/**
+	 * Update the problem requester based on the current editor
+	 */
+	private void updateProblemRequester() {
+		IAnnotationModel model= fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
+		fRequester= (model instanceof IProblemRequestor) ? (IProblemRequestor) model : null;
+	}
+}
