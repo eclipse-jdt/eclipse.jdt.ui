@@ -96,7 +96,7 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 					}
 				}
 			} catch (CoreException x) {
-				JavaPlugin.logErrorStatus(JavaEditorMessages.getString("BreakpointRulerAction.error.retrieving.message"), x.getStatus()); //$NON-NLS-1$
+				JavaPlugin.logErrorStatus(JavaEditorMessages.getString("ManageBreakpoints.error.retrieving.message"), x.getStatus()); //$NON-NLS-1$
 			}
 		}
 		return breakpoints;
@@ -143,13 +143,13 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 			}
 		} catch (DebugException e) {
 			Shell shell= getTextEditor().getSite().getShell();
-			ErrorDialog.openError(shell, JavaEditorMessages.getString("BreakpointRulerAction.error.adding.title1"), JavaEditorMessages.getString("BreakpointRulerAction.error.adding.message1"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
+			ErrorDialog.openError(shell, JavaEditorMessages.getString("ManageBreakpoints.error.adding.title1"), JavaEditorMessages.getString("ManageBreakpoints.error.adding.message1"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 		} catch (CoreException e) {
 			Shell shell= getTextEditor().getSite().getShell();
-			ErrorDialog.openError(shell, JavaEditorMessages.getString("BreakpointRulerAction.error.adding.title2"), JavaEditorMessages.getString("BreakpointRulerAction.error.adding.message2"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
+			ErrorDialog.openError(shell, JavaEditorMessages.getString("ManageBreakpoints.error.adding.title2"), JavaEditorMessages.getString("ManageBreakpoints.error.adding.message2"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 		} catch (BadLocationException e) {
 			Shell shell= getTextEditor().getSite().getShell();
-			ErrorDialog.openError(shell, JavaEditorMessages.getString("BreakpointRulerAction.error.adding.title3"), JavaEditorMessages.getString("BreakpointRulerAction.error.adding.message3"), null); //$NON-NLS-2$ //$NON-NLS-1$
+			ErrorDialog.openError(shell, JavaEditorMessages.getString("ManageBreakpoints.error.adding.title3"), JavaEditorMessages.getString("ManageBreakpoints.error.adding.message3"), null); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
 	
@@ -167,7 +167,7 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 			
 		} catch (CoreException e) {
 			Shell shell= getTextEditor().getSite().getShell();
-			ErrorDialog.openError(shell, JavaEditorMessages.getString("BreakpointRulerAction.error.removing.title1"), JavaEditorMessages.getString("BreakpointRulerAction.errro.removing.message1"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
+			ErrorDialog.openError(shell, JavaEditorMessages.getString("ManageBreakpoints.error.removing.title1"), JavaEditorMessages.getString("ManageBreakpoints.error.removing.message1"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
 }
