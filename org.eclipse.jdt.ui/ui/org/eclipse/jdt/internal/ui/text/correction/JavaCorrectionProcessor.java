@@ -111,7 +111,8 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			Position pos= model.getPosition((Annotation) annot);
 			
 			ProblemPosition pp = new ProblemPosition(pos, annot, cu);
-			if (pp.overlapsWith(documentOffset, 1)) {
+			int start= pp.getOffset();
+			if (documentOffset >= start && documentOffset <= (start +  pp.getLength())) {
 				Integer probId= new Integer(annot.getId());
 				if (!idsProcessed.contains(probId)) {
 					idsProcessed.add(probId);
