@@ -1087,4 +1087,24 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperDoAll("HistoryFrame", "HistoryFrame", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}
 
+	public void testAll57()throws Exception{
+		printTestDisabledMessage("test for 39633 classcast exception when refactoring change method signature [refactoring]");
+		if (true)
+			return;
+		String[] signature= {"I", "QString;", "QString;"};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= null;
+
+		String[] oldParamNames= {"i", "hello", "goodbye"};
+		String[] newParamNames= oldParamNames;
+		int[] permutation= {0, 2, 1};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= null;
+		helperDoAll("TEST.X", "method", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
 }
