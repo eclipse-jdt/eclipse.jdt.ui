@@ -58,6 +58,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.util.ViewerPane;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class OverrideMethodDialog extends SourceActionDialog {
 
@@ -253,7 +254,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 	private CompilationUnit fUnit= null;
 
 	public OverrideMethodDialog(Shell parent, CompilationUnitEditor editor, IType type, boolean isSubType) throws JavaModelException {
-		super(parent, new SourceActionLabelProvider(), new OverrideMethodContentProvider(), editor, type, false);
+		super(parent, new BindingLabelProvider(), new OverrideMethodContentProvider(), editor, type, false);
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		fUnit= parser.parse(type.getCompilationUnit(), true);
 		ITypeBinding binding= null;

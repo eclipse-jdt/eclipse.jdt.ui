@@ -54,13 +54,13 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-import org.eclipse.jdt.internal.ui.dialogs.SourceActionLabelProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
  * Creates constructors for a type based on existing fields.
@@ -322,7 +322,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			return;
 		}
 
-		GenerateConstructorUsingFieldsSelectionDialog dialog= new GenerateConstructorUsingFieldsSelectionDialog(getShell(), new SourceActionLabelProvider(), provider, fEditor, type, bindings);
+		GenerateConstructorUsingFieldsSelectionDialog dialog= new GenerateConstructorUsingFieldsSelectionDialog(getShell(), new BindingLabelProvider(), provider, fEditor, type, bindings);
 		dialog.setCommentString(ActionMessages.getString("SourceActionDialog.createConstructorComment")); //$NON-NLS-1$
 		dialog.setTitle(ActionMessages.getString("GenerateConstructorUsingFieldsAction.dialog.title")); //$NON-NLS-1$
 		dialog.setInitialSelections(provider.getInitiallySelectedElements());

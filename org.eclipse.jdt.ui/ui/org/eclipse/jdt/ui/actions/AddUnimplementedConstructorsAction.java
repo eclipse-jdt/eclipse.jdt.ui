@@ -74,7 +74,6 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.SourceActionLabelProvider;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -83,6 +82,7 @@ import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
  * Creates unimplemented constructors for a type.
@@ -481,7 +481,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			return;
 		}
 
-		AddUnimplementedConstructorsDialog dialog= new AddUnimplementedConstructorsDialog(shell, new SourceActionLabelProvider(), provider, fEditor, type);
+		AddUnimplementedConstructorsDialog dialog= new AddUnimplementedConstructorsDialog(shell, new BindingLabelProvider(), provider, fEditor, type);
 		dialog.setCommentString(ActionMessages.getString("SourceActionDialog.createConstructorComment")); //$NON-NLS-1$
 		dialog.setTitle(ActionMessages.getString("AddUnimplementedConstructorsAction.dialog.title")); //$NON-NLS-1$
 		dialog.setInitialSelections(constructors);

@@ -82,7 +82,6 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.SourceActionLabelProvider;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -90,6 +89,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
  * Creates delegate methods for a type's fields. Opens a dialog with a list of fields for
@@ -268,7 +268,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 	}
 
-	private static class AddDelegateMethodsLabelProvider extends SourceActionLabelProvider {
+	private static class AddDelegateMethodsLabelProvider extends BindingLabelProvider {
 
 		public Image getImage(Object element) {
 			if (element instanceof IBinding[]) {

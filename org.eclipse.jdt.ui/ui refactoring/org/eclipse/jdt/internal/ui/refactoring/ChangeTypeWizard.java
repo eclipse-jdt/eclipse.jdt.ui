@@ -47,7 +47,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 
-import org.eclipse.jdt.internal.ui.dialogs.SourceActionLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 
 /**
@@ -91,7 +91,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 	/**
 	 * A JavaElementLabelProvider that supports graying out of invalid types.
 	 */
-	private class ChangeTypeLabelProvider extends SourceActionLabelProvider 
+	private class ChangeTypeLabelProvider extends BindingLabelProvider 
 										  implements IColorProvider {
 		
 		private Color fGrayColor;

@@ -44,9 +44,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.SourceActionLabelProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionDialog {
 
@@ -117,7 +117,7 @@ class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionDialog {
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		label.setLayoutData(gd);
 
-		SourceActionLabelProvider provider= new SourceActionLabelProvider();
+		BindingLabelProvider provider= new BindingLabelProvider();
 		final Combo combo= new Combo(composite, SWT.READ_ONLY);
 		for (int i= 0; i < fSuperConstructors.length; i++) {
 			combo.add(provider.getText(fSuperConstructors[i]));
