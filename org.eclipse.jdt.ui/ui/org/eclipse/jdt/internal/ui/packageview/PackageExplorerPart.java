@@ -766,7 +766,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 */
 	private void initRefreshKey() {
 		fViewer.getControl().addKeyListener(new KeyAdapter() {
-			public void keyPressed(KeyEvent event) {
+			public void keyReleased(KeyEvent event) {
 				if (event.keyCode == SWT.F5) {
 					fRefreshAction.selectionChanged(
 						(IStructuredSelection) fViewer.getSelection());
