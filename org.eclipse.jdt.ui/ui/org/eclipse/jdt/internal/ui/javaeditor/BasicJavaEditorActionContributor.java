@@ -169,23 +169,25 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			structureSelection.add(fStructureSelectHistoryAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, structureSelection);
 
-			final MenuManager folding= new MenuManager(JavaEditorMessages.getString("FoldingMenu.label"), "folding"); //$NON-NLS-1$ //$NON-NLS-2$
-			IAction dummy= new Action() {};
-			folding.add(dummy); // dummy, gets removed below
-			folding.addMenuListener(new IMenuListener() {
+			if (Boolean.getBoolean("org.eclipse.jdt.internal.ui.projection")) {
+				final MenuManager folding= new MenuManager(JavaEditorMessages.getString("FoldingMenu.label"), "folding"); //$NON-NLS-1$ //$NON-NLS-2$
+				IAction dummy= new Action() {};
+				folding.add(dummy); // dummy, gets removed below
+				folding.addMenuListener(new IMenuListener() {
 
-				public void menuAboutToShow(IMenuManager manager) {
-					manager.removeAll();
-					IEditorPart part= getActiveEditorPart();
-					if (part instanceof JavaEditor) {
-						JavaEditor editor= (JavaEditor) part;
-						FoldingActionGroup foldingActions= editor.getFoldingActionGroup();
-						if (foldingActions != null)
-							foldingActions.fillMenu(manager);
+					public void menuAboutToShow(IMenuManager manager) {
+						manager.removeAll();
+						IEditorPart part= getActiveEditorPart();
+						if (part instanceof JavaEditor) {
+							JavaEditor editor= (JavaEditor) part;
+							FoldingActionGroup foldingActions= editor.getFoldingActionGroup();
+							if (foldingActions != null)
+								foldingActions.fillMenu(manager);
+						}
 					}
-				}
-			});
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, folding);
+				});
+				editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, folding);
+			}
 			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetShowJavaDoc);
 		}
