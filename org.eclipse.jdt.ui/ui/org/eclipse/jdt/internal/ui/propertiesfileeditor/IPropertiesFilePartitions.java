@@ -34,6 +34,9 @@ public interface IPropertiesFilePartitions {
 	
 	/**
 	 * The name of a property value partition.
+	 * <p>
+	 * Note: The value partition may contain assignment characters at their beginning
+	 * </p>
 	 * Value: {@value}
 	 */
 	String PROPERTY_VALUE= "__pf_roperty_value"; //$NON-NLS-1$
