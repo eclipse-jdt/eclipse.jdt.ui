@@ -69,9 +69,6 @@ public class SnippetFinder extends GenericVisitor {
 	}
 	
 	private class Matcher extends ASTMatcher {
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.core.dom.ASTMatcher#match(org.eclipse.jdt.core.dom.SimpleName, java.lang.Object)
-		 */
 		public boolean match(SimpleName candidate, Object s) {
 			if (!(s instanceof SimpleName))
 				return false;
@@ -81,12 +78,10 @@ public class SnippetFinder extends GenericVisitor {
 			IBinding sb= snippet.resolveBinding();
 			if (cb == null || sb == null)
 				return false;
-			if (Bindings.equals(cb, sb))
-				return true;
 			IVariableBinding vcb= ASTNodes.getVariableBinding(candidate);
 			IVariableBinding vsb= ASTNodes.getVariableBinding(snippet);
 			if (vcb == null || vsb == null)
-				return false;
+				return Bindings.equals(cb, sb);
 			if (!vcb.isField() && !vsb.isField() && Bindings.equals(vcb.getType(), vsb.getType())) {
 				SimpleName mapped= fMatch.getMappedName(vsb);
 				if (mapped != null) {
@@ -97,7 +92,7 @@ public class SnippetFinder extends GenericVisitor {
 				fMatch.addLocal(vsb, candidate);
 				return true;
 			}
-			return false;	
+			return Bindings.equals(cb, sb);	
 		}
 	}
 

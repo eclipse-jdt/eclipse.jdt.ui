@@ -163,6 +163,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		performTest(fgTestSetup.getWikiPackage(), "A", COMPARE_WITH_OUTPUT, "wiki_out");
 	}
 	
+	protected void duplicatesTest() throws Exception {
+		performTest(fgTestSetup.getDuplicatesPackage(), "A", COMPARE_WITH_OUTPUT, "duplicates_out");
+	}
+	
 	//=====================================================================================
 	// Testing selections
 	//=====================================================================================
@@ -1498,6 +1502,28 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	
 	public void test904() throws Exception {
 		parameterNameTest(new String[] {"xx", "zz"}, new int[] {1, 0});
+	}
+	
+	//---- Test duplicate code snippets ----------------------------------------
+	
+	public void test950() throws Exception {
+		duplicatesTest();
+	}
+	
+	public void test951() throws Exception {
+		duplicatesTest();
+	}
+	
+	public void test952() throws Exception {
+		duplicatesTest();
+	}
+	
+	public void test953() throws Exception {
+		duplicatesTest();
+	}
+	
+	public void test954() throws Exception {
+		duplicatesTest();
 	}
 	
 	//---- Test copied from http://c2.com/cgi/wiki?RefactoringBenchmarksForExtractMethod
