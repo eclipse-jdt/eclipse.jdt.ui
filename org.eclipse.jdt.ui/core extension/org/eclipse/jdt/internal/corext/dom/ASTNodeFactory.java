@@ -109,14 +109,14 @@ public class ASTNodeFactory {
 		if (extraDimensions == 0 && type.isPrimitiveType()) {
 			PrimitiveType primitiveType= (PrimitiveType) type;
 			if (primitiveType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
-				return type.getAST().newBooleanLiteral(false);
+				return ast.newBooleanLiteral(false);
 			} else if (primitiveType.getPrimitiveTypeCode() == PrimitiveType.VOID) {
 				return null;				
 			} else {
-				return type.getAST().newNumberLiteral("0"); //$NON-NLS-1$
+				return ast.newNumberLiteral("0"); //$NON-NLS-1$
 			}
 		}
-		return type.getAST().newNullLiteral();
+		return ast.newNullLiteral();
 	}
 
 	/**
