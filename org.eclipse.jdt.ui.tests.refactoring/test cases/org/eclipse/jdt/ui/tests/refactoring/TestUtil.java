@@ -1,7 +1,9 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.core.IField;
@@ -47,4 +49,44 @@ class TestUtil {
 		return (IMethod[]) methods.toArray(new IMethod[methods.size()]);	
 	}
 	
+	static IField[] findFields(IField[] fields, String[] namesOfFieldsToPullUp) {
+		List found= new ArrayList(fields.length);
+		for (int i= 0; i < fields.length; i++) {
+			IField field= fields[i];
+			for (int j= 0; j < namesOfFieldsToPullUp.length; j++) {
+				String name= namesOfFieldsToPullUp[j];
+				if (field.getElementName().equals(name))
+					found.add(field);					
+			}
+		}
+		return (IField[]) found.toArray(new IField[found.size()]);
+	}
+
+	static IMethod[] findMethods(IMethod[] selectedMethods, String[] namesOfMethods, String[][] signaturesOfMethods){
+		List found= new ArrayList(selectedMethods.length);
+		for (int i= 0; i < selectedMethods.length; i++) {
+			IMethod method= selectedMethods[i];
+			String[] paramTypes= method.getParameterTypes();
+			for (int j= 0; j < namesOfMethods.length; j++) {
+				String methodName= namesOfMethods[j];
+				if (! methodName.equals(method.getElementName()))
+					continue;
+				String[] methodSig= signaturesOfMethods[j];
+				if (! areSameSignatures(paramTypes, methodSig))
+					continue;
+				found.add(method);	
+			}
+		}
+		return (IMethod[]) found.toArray(new IMethod[found.size()]);
+	}
+	
+	static boolean areSameSignatures(String[] s1, String[] s2){
+		if (s1.length != s2.length)
+			return false;
+		for (int i= 0; i < s1.length; i++) {
+			if (! s1[i].equals(s2[i]))
+				return false;
+		}
+		return true;
+	}
 }
