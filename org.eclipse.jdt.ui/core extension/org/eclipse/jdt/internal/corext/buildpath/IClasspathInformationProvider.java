@@ -20,10 +20,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jdt.core.IJavaProject;
 
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IFolderCreationQuery;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IInclusionExclusionQuery;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IOutputFolderQuery;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IOutputLocationQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
 
 
 /**
@@ -109,9 +106,9 @@ public interface IClasspathInformationProvider {
      * @return an <code>IOutputFolderQuery</code>, must not be 
      * <code>null</code>
      * 
-     * @see ClasspathModifier#getDefaultFolderQuery(Shell, IPath)
+     * @see ClasspathModifierQueries#getDefaultFolderQuery(Shell, IPath)
      */
-    public IOutputFolderQuery getOutputFolderQuery();
+    public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery();
     
     /**
      * Method to retrieve an <code>IInclusionExclusionQuery</code> from 
@@ -120,9 +117,9 @@ public interface IClasspathInformationProvider {
      * @return an <code>IInclusionExclusionQuery</code>, must not be 
      * <code>null</code>
      * 
-     * @see ClasspathModifier#getDefaultInclusionExclusionQuery(Shell)
+     * @see ClasspathModifierQueries#getDefaultInclusionExclusionQuery(Shell)
      */
-    public IInclusionExclusionQuery getInclusionExclusionQuery();
+    public ClasspathModifierQueries.IInclusionExclusionQuery getInclusionExclusionQuery();
     
     /**
      * Method to retrieve an <code>IOutputLocationQuery</code> from 
@@ -131,9 +128,9 @@ public interface IClasspathInformationProvider {
      * @return an <code>IOutputLocationQuery</code>, must not be 
      * <code>null</code>
      * 
-     * @see ClasspathModifier#getDefaultOutputLocationQuery(Shell, IPath, List)
+     * @see ClasspathModifierQueries#getDefaultOutputLocationQuery(Shell, IPath, List)
      */
-    public IOutputLocationQuery getOutputLocationQuery();
+    public ClasspathModifierQueries.IOutputLocationQuery getOutputLocationQuery();
     
     /**
      * Method to retrieve an <code>IFolderCreationQuery</code> from 
@@ -142,7 +139,7 @@ public interface IClasspathInformationProvider {
      * @return an <code>IFolderCreationQuery</code>, must not be 
      * <code>null</code>
      * 
-     * @see ClasspathModifier#getDefaultFolderCreationQuery(Shell, Object, int)
+     * @see ClasspathModifierQueries#getDefaultFolderCreationQuery(Shell, Object, int)
      */
-    public IFolderCreationQuery getFolderCreationQuery();
+    public ClasspathModifierQueries.IFolderCreationQuery getFolderCreationQuery();
 }

@@ -22,6 +22,8 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 
 /**
  * Operation to edit the inclusion / exclusion filters of an
@@ -44,7 +46,7 @@ public class EditOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public EditOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider);
+        super(listener, informationProvider, IClasspathInformationProvider.EDIT);
     }
     
     /**
@@ -61,17 +63,17 @@ public class EditOperation extends ClasspathModifierOperation {
             oldOutputLocation= project.getOutputLocation();
             if (selection instanceof IJavaElement) {
                 IJavaElement javaElement= (IJavaElement)selection;
-                IInclusionExclusionQuery query= fInformationProvider.getInclusionExclusionQuery();
+                ClasspathModifierQueries.IInclusionExclusionQuery query= fInformationProvider.getInclusionExclusionQuery();
                 result= editFilters(javaElement, project, query, monitor);
             } else {
                 CPListElement selElement= ((CPListElementAttribute)selection).getParent();
-                IOutputLocationQuery query= fInformationProvider.getOutputLocationQuery();
+                ClasspathModifierQueries.IOutputLocationQuery query= fInformationProvider.getOutputLocationQuery();
                 result= editOutputFolder(selElement, project, query, monitor);
             }
         } catch (CoreException e) {
             fException= e;
             result= null;
         }
-        super.handleResult(result, oldOutputLocation, IClasspathInformationProvider.EDIT, monitor);
+        super.handleResult(result, oldOutputLocation, monitor);
     }
 }

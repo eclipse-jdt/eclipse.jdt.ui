@@ -43,7 +43,7 @@ public class UnexcludeOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public UnexcludeOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider);
+        super(listener, informationProvider, IClasspathInformationProvider.UNEXCLUDE);
     }
     
     /**
@@ -63,6 +63,6 @@ public class UnexcludeOperation extends ClasspathModifierOperation {
             fException= e;
             result= null;
         }
-        super.handleResult(result, oldOutputLocation, IClasspathInformationProvider.UNEXCLUDE, monitor);
+        super.handleResult(result, oldOutputLocation, monitor);
     }
 }

@@ -14,6 +14,8 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -32,12 +34,12 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.ui.actions.ActionContext;
-
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
@@ -52,6 +54,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListLabelProvider;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup.DialogExplorerActionContext;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
 
 /**
@@ -94,9 +97,13 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
          */
         public Object[] getChildren(Object element) {
             Object[] children= super.getChildren(element);
-            if (element instanceof IPackageFragmentRoot && isSelected()) {
+            if ((element instanceof IPackageFragmentRoot || (element instanceof IJavaProject && fCurrJProject.isOnClasspath(fCurrJProject))) && isSelected()) {
                 try {
-                    IClasspathEntry entry= ((IPackageFragmentRoot) element).getRawClasspathEntry();
+                    IClasspathEntry entry;
+                    if (element instanceof IPackageFragmentRoot)
+                        entry= ((IPackageFragmentRoot) element).getRawClasspathEntry();
+                    else
+                        entry= ClasspathModifier.getClasspathEntryFor(fCurrJProject.getPath(), fCurrJProject);
                     CPListElement parent= CPListElement.createFromExisting(entry, fCurrJProject);                    
                     CPListElementAttribute outputFolder= new CPListElementAttribute(parent, CPListElement.OUTPUT, 
                             parent.getAttribute(CPListElement.OUTPUT));
@@ -136,6 +143,11 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
             if (element instanceof CPListElementAttribute)
                 return outputFolderLabel.getImage(element);
             return super.getImage(element);
+        }
+        
+        public void dispose() {
+            outputFolderLabel.dispose();
+            super.dispose();
         }
     }
     
@@ -228,6 +240,11 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
         menuMgr.addMenuListener(this);
         fContextMenu= menuMgr.createContextMenu(fPackageViewer.getTree());
         fPackageViewer.getTree().setMenu(fContextMenu);
+        parent.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                fContextMenu.dispose();
+            }
+        });
         
         return fPackageViewer.getControl();
     }
@@ -238,12 +255,20 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      * context menu with available actions. If no 
      * context menu is needed, then this method does not 
      * have to be called.
+     * 
+     * Should only be called once.
      *  
      * @param actionGroup the action group to be used for 
      * the context menu.
      */
-    public void setActionGroup(DialogPackageExplorerActionGroup actionGroup) {
+    public void setActionGroup(final DialogPackageExplorerActionGroup actionGroup) {
         fActionGroup= actionGroup;
+        fPackageViewer.getControl().addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                if (actionGroup != null)
+                    actionGroup.dispose();
+            }
+        });
     }
     
     /**
@@ -285,6 +310,10 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
         ISelection selection= new StructuredSelection(project);
         fPackageViewer.setSelection(selection);
         fPackageViewer.expandToLevel(2);
+    }
+    
+    public void refresh() {
+        fPackageViewer.refresh(true);
     }
     
     /**
@@ -366,7 +395,11 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      */
     public void selectionChanged(SelectionChangedEvent event) {
         fCurrentSelection= ((IStructuredSelection)event.getSelection()).getFirstElement();
-        if (fActionGroup != null)
-            fActionGroup.setContext(new ActionContext(new StructuredSelection(new Object[] {fCurrentSelection, fCurrJProject})));
+        try {
+            if (fActionGroup != null)
+                fActionGroup.setContext(new DialogExplorerActionContext(fCurrentSelection, fCurrJProject));
+        } catch (JavaModelException e) {
+            JavaPlugin.log(e);
+        }
     }
 }

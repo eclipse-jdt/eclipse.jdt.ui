@@ -36,7 +36,7 @@ public class ResetAllOutputFoldersOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public ResetAllOutputFoldersOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider);
+        super(listener, informationProvider, IClasspathInformationProvider.CREATE_FOLDER);
     }
     
     /**
@@ -55,6 +55,6 @@ public class ResetAllOutputFoldersOperation extends ClasspathModifierOperation {
             fException= e;
             result= null;
         }
-        super.handleResult(result, oldOutputLocation, IClasspathInformationProvider.CREATE_FOLDER, monitor);
+        super.handleResult(result, oldOutputLocation, monitor);
     }
 }

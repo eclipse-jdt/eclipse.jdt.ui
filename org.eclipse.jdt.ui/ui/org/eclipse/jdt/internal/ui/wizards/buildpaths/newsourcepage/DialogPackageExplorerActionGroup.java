@@ -26,6 +26,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.actions.ActionContext;
 
@@ -79,6 +80,38 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
  */
 public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     
+    public static class DialogExplorerActionContext extends ActionContext {
+        private IJavaProject fJavaProject;
+        private Object fSelectedElement;
+
+        /**
+         * Constructor to create an action context for the dialog package explorer.
+         * It is just a getter for the actual project and the selected element 
+         * which are used to compute the actions that are available.
+         * 
+         * For reasons of completeness, the selection of the super class 
+         * <code>ActionContext</code> is also set, but is not intendet to be used.
+         * 
+         * @param selectedElement the currently selected element
+         * @param jProject the element's Java project
+         */
+        public DialogExplorerActionContext(Object selectedElement, IJavaProject jProject) {
+            super(null);
+            fJavaProject= jProject;
+            fSelectedElement= selectedElement;
+            IStructuredSelection structuredSelection= new StructuredSelection(new Object[] {selectedElement, jProject});
+            super.setSelection(structuredSelection);
+        }
+        
+        public IJavaProject getJavaProject() {
+            return fJavaProject;
+        }
+        
+        public Object getSelectedElement() {
+            return fSelectedElement;
+        }
+    }
+    
     /** Java project */
     public static final int JAVA_PROJECT= 0x01;
     /** Package fragment root */
@@ -112,7 +145,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     
     private ClasspathModifierAction[] fActions;
     private int fLastType;
-    private List listeners;
+    private List fListeners;
     
     /**
      * Constructor which creates the operations and based on this 
@@ -127,7 +160,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     public DialogPackageExplorerActionGroup(IClasspathInformationProvider provider, IClasspathModifierListener listener) {
         super();
         fLastType= UNDEFINED;
-        listeners= new ArrayList();
+        fListeners= new ArrayList();
         fActions= new ClasspathModifierAction[9];
         ClasspathModifierOperation op;
         op= new CreateFolderOperation(listener, provider);
@@ -163,11 +196,11 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit")), //$NON-NLS-1$
                 IClasspathInformationProvider.EDIT);
         op= new ResetOperation(listener, provider);
-        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_OBJS_CLEAR, JavaPluginImages.DESC_DLCL_CLEAR, 
+        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_CLEAR, JavaPluginImages.DESC_DLCL_CLEAR, 
                 NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Reset")), //$NON-NLS-1$
                 IClasspathInformationProvider.RESET);
     }
-    
+
     private void addAction(ClasspathModifierAction action, int index) {
         fActions[index]= action;
     }
@@ -228,16 +261,15 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     /**
      * Forces the action group to recompute the available actions 
      * and fire an event to all listeners
+     * @throws JavaModelException 
      * 
      * @see #setContext(ActionContext)
      * @see #informListeners(String[], ClasspathModifierAction[])
      */
-    public void refresh(ActionContext context) {
+    public void refresh(DialogExplorerActionContext context) throws JavaModelException {
         super.setContext(context);
-        IStructuredSelection selection= (IStructuredSelection) context.getSelection();
-        List selectedElements= selection.toList();
-        Object selectedObject= selectedElements.get(0);
-        IJavaProject project= (IJavaProject) selectedElements.get(1);
+        Object selectedObject= context.getSelectedElement();
+        IJavaProject project= context.getJavaProject();
         fLastType= getType(selectedObject, project);
         
         Object[][] result= computeActions(selectedObject, project, fLastType);
@@ -245,22 +277,29 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     }
     
     /**
+     * Set the context of the action group. Note that this method is deprecated. 
+     * <ul><li>Clients should use DialogPackageExplorerActionGroup.setContext(DialogExplorerActionContext) instead</li>
+     * <li>If this method is called, it is expected that the provided context is of type 
+     * <code>DialogExplorerActionContext</code>. If this is not the case, the caller will 
+     * end up with a <code>ClassCastException</code>.
+     * 
+     * @deprecated use instead DialogPackageExplorerActionGroup.setContext(DialogExplorerActionContext)
+     * 
+     * @see #setContext(DialogExplorerActionContext)
+     */
+    public void setContext(ActionContext context) {
+        try {
+            setContext((DialogExplorerActionContext)context);
+        } catch (JavaModelException e) {
+            JavaPlugin.log(e);
+        }
+    }
+    
+    /**
      * Set the context for the action group. This also includes 
      * to update the actions (that is, enable or disable them). 
      * The decision which actions to enable or disable is based 
-     * on the content of the <code>ActionContext</code> as follows:<p>
-     * 
-     * The <code>ActionContext.getSelection()</code> must return an 
-     * element of type <code>IStructuredSelection</code>. The 
-     * <code>IStructuredSelection</code> itself contains two elements: 
-     * <li>1. An object which represents the element on which an action should 
-     * be performed. Based on this object, the set of available actions 
-     * is computed. For example, if the object is of type <code>
-     * IPackageFragmentRoot</code>, then possible actions could be 
-     * removing from classpath, editing inclusion/exclusion filters, ...</li>
-     * <li>2. An <code>IJavaProject</code> to determine the available actions 
-     * which often not only depends on the object, but also on the project 
-     * structure.</li>
+     * on the content of the <code>DialogExplorerActionContext</code>
      * 
      * If the type of the selection changes, then listeners will be notified 
      * about the new set of available actions.
@@ -271,25 +310,28 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * be situations where the type of two objects is the same but the set of 
      * available actions is not. However, if clients decide that upon some action 
      * a recomputation of the available actions has to be forced, then 
-     * <code>PackageExplorerActionGroup.refresh(ActionContext)</code> can be 
+     * <code>PackageExplorerActionGroup.refresh(DialogExplorerActionContext)</code> can be 
      * called.
      * 
      * Clients who want to force recomputation of and notification of the new 
-     * actions can call <code>refresh(ActionContext).
+     * actions can call <code>refresh(DialogExplorerActionContext)</code>.
      * 
-     * @param context the action context containing the list of actions 
-     * to be enabled.
+     * @param context the action context
      * 
      * @see IPackageExplorerActionListener
      * @see PackageExplorerActionEvent
      * @see #addListener(IPackageExplorerActionListener)
+     * @see DialogExplorerActionContext
+     * 
+     * @throws JavaModelException if there is a failure while computing the available 
+     * actions.
      */
-    public void setContext(ActionContext context) {
+    public void setContext(DialogExplorerActionContext context) throws JavaModelException {
         super.setContext(context);
-        IStructuredSelection selection= (IStructuredSelection) context.getSelection();
-        List selectedElements= selection.toList();
-        Object selectedObject= selectedElements.get(0);
-        IJavaProject project= (IJavaProject) selectedElements.get(1);
+        if (context == null) // can happen when disposing
+            return;
+        Object selectedObject= context.getSelectedElement();
+        IJavaProject project= context.getJavaProject();
         int type= getType(selectedObject, project);
         
         if (type == fLastType)
@@ -309,7 +351,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @param actions an array of available actions
      */
     private void informListeners(String[] descriptions, ClasspathModifierAction[] actions) {
-        Iterator iterator= listeners.iterator();
+        Iterator iterator= fListeners.iterator();
         PackageExplorerActionEvent event= new PackageExplorerActionEvent(descriptions, actions);
         while(iterator.hasNext()) {
             IPackageExplorerActionListener listener= (IPackageExplorerActionListener)iterator.next();
@@ -329,8 +371,9 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * If no actions are available, the the array containing the actions has size 
      * zero and the other array containing the descriptions has one string 
      * which describes the reason why there is no action.
+     * @throws JavaModelException 
      */
-    private Object[][] computeActions(Object obj, IJavaProject project, int type) {
+    private Object[][] computeActions(Object obj, IJavaProject project, int type) throws JavaModelException {
         switch (type) {
             case JAVA_PROJECT: return javaProjectSelected(obj, project);
             case PACKAGE_FRAGMENT_ROOT: return fragmentRootSelected(false);
@@ -355,31 +398,29 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * 
      * @param obj the selected object
      * @param project the java project
+     * @throws JavaModelException 
      */
-    private Object[][] javaProjectSelected(Object obj, IJavaProject project) {
+    private Object[][] javaProjectSelected(Object obj, IJavaProject project) throws JavaModelException {
         List descriptionText= new ArrayList();
         List actions= new ArrayList();
         List enableList= new ArrayList();
         addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.create"), IClasspathInformationProvider.CREATE_FOLDER,  //$NON-NLS-1$
                 descriptionText, actions, enableList);
-        try {
-            if (ClasspathModifier.getClasspathEntryFor(project.getPath(), project) == null)
-                addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.ProjectToBuildpath"), IClasspathInformationProvider.ADD_TO_BP,  //$NON-NLS-1$
+
+        if (ClasspathModifier.getClasspathEntryFor(project.getPath(), project) == null)
+            addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.ProjectToBuildpath"), IClasspathInformationProvider.ADD_TO_BP,  //$NON-NLS-1$
+                    descriptionText, actions, enableList);
+        else
+            addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.ProjectFromBuildpath"), IClasspathInformationProvider.REMOVE_FROM_BP,  //$NON-NLS-1$
+                    descriptionText, actions, enableList);
+        if (project.isOnClasspath(project.getUnderlyingResource())) {
+            addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Edit"), IClasspathInformationProvider.EDIT,  //$NON-NLS-1$
+                    descriptionText, actions, enableList);
+            IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(project.getPath(), project);
+            if (entry.getInclusionPatterns().length != 0 || entry.getExclusionPatterns().length != 0) {
+                addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.ResetFilters"), IClasspathInformationProvider.RESET,  //$NON-NLS-1$
                         descriptionText, actions, enableList);
-            else
-                addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.ProjectFromBuildpath"), IClasspathInformationProvider.REMOVE_FROM_BP,  //$NON-NLS-1$
-                        descriptionText, actions, enableList);
-            if (project.isOnClasspath(project.getUnderlyingResource())) {
-                addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Edit"), IClasspathInformationProvider.EDIT,  //$NON-NLS-1$
-                        descriptionText, actions, enableList);
-                IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(project.getPath(), project);
-                if (entry.getInclusionPatterns().length != 0 || entry.getExclusionPatterns().length != 0) {
-                    addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.ResetFilters"), IClasspathInformationProvider.RESET,  //$NON-NLS-1$
-                            descriptionText, actions, enableList);
-                }
             }
-        } catch (JavaModelException e) {
-            JavaPlugin.log(e);
         }
         
         enableActions(enableList);
@@ -479,8 +520,9 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * 
      * @param obj the selected object
      * @param project the java project
+     * @throws JavaModelException 
      */
-    private Object[][] folderSelected(Object obj, IJavaProject project) {
+    private Object[][] folderSelected(Object obj, IJavaProject project) throws JavaModelException {
         List descriptionText= new ArrayList();
         List actions= new ArrayList();
         List enableList= new ArrayList();
@@ -489,19 +531,16 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.toBuildpath"), IClasspathInformationProvider.ADD_TO_BP,  //$NON-NLS-1$
                 descriptionText, actions, enableList);
         IResource resource= (IResource)obj;
-        try {
-            if (project.isOnClasspath(project.getUnderlyingResource()) && resource.getProjectRelativePath().segmentCount() == 1 && 
-                    ClasspathModifier.getFragmentRoot(resource, project, null).equals(ClasspathModifier.getFragmentRoot(project.getCorrespondingResource(), project, null))) { 
-                addToLists(NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Include", "folder"), IClasspathInformationProvider.INCLUDE,  //$NON-NLS-1$ //$NON-NLS-2$
+        if (project.isOnClasspath(project.getUnderlyingResource()) && resource.getProjectRelativePath().segmentCount() == 1 && 
+                ClasspathModifier.getFragmentRoot(resource, project, null).equals(ClasspathModifier.getFragmentRoot(project.getCorrespondingResource(), project, null))) { 
+            addToLists(NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Include", "folder"), IClasspathInformationProvider.INCLUDE,  //$NON-NLS-1$ //$NON-NLS-2$
+                    descriptionText, actions, enableList);
+            if (ClasspathModifier.isExcludedOnProject(resource, project)) {
+                addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.UnexcludeFolder"), IClasspathInformationProvider.UNEXCLUDE,  //$NON-NLS-1$
                         descriptionText, actions, enableList);
-                if (ClasspathModifier.isExcludedOnProject(resource, project)) {
-                    addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.UnexcludeFolder"), IClasspathInformationProvider.UNEXCLUDE,  //$NON-NLS-1$
-                            descriptionText, actions, enableList);
-                }
             }
-        } catch (JavaModelException e) {
-            JavaPlugin.log(e);
         }
+        
         enableActions(enableList);
         
         return new Object[][] {(String[]) descriptionText.toArray(new String[descriptionText.size()]), 
@@ -513,8 +552,9 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * 
      * @param obj the selected object
      * @param project the java project
+     * @throws JavaModelException 
      */
-    private Object[][] excludedFolderSelected(Object obj, IJavaProject project) {
+    private Object[][] excludedFolderSelected(Object obj, IJavaProject project) throws JavaModelException {
         List descriptionText= new ArrayList();
         List actions= new ArrayList();
         List enableList= new ArrayList();
@@ -524,14 +564,10 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
                 descriptionText, actions, enableList);
         addToLists(NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Include", "folder"), IClasspathInformationProvider.INCLUDE,  //$NON-NLS-1$ //$NON-NLS-2$
                 descriptionText, actions, enableList);
-        try {
-            if (ClasspathModifier.includeFiltersEmpty((IResource) obj, project, null)) { 
-                addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.UnexcludeFolder"), IClasspathInformationProvider.UNEXCLUDE,  //$NON-NLS-1$
-                        descriptionText, actions, enableList);
-            }
-        } catch (JavaModelException e) {
-            JavaPlugin.log(e);
-        } 
+        if (ClasspathModifier.isExcludedOnFragmentRoot((IResource)obj, project)) {
+            addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.UnexcludeFolder"), IClasspathInformationProvider.UNEXCLUDE,  //$NON-NLS-1$
+                    descriptionText, actions, enableList);
+        }
         enableActions(enableList);
         
         return new Object[][] {(String[]) descriptionText.toArray(new String[descriptionText.size()]), 
@@ -565,8 +601,9 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * 
      * @param obj the selected object
      * @param project the java project
+     * @throws JavaModelException 
      */
-    private Object[][] excludedFileSelected(Object obj, IJavaProject project) {
+    private Object[][] excludedFileSelected(Object obj, IJavaProject project) throws JavaModelException {
         List descriptionText= new ArrayList();
         List actions= new ArrayList();
         List enableList= new ArrayList();
@@ -574,18 +611,17 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         IPackageFragment fragment= ClasspathModifier.getFragment(file.getParent());
         addToLists(NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.Include", "file"), IClasspathInformationProvider.INCLUDE,  //$NON-NLS-1$ //$NON-NLS-2$
                 descriptionText, actions, enableList);
-        try {
-            if (fragment != null || ClasspathModifier.getFragmentRoot(file, project, null).equals(JavaCore.create(file.getParent())) ||
-                    (file.getParent().getFullPath().equals(project.getPath()) 
-                    && ClasspathModifier.isExcludedOnProject(file, project) 
-                    && ClasspathModifier.includeFiltersEmpty(project.getCorrespondingResource(), project, null))) {
-                if (ClasspathModifier.includeFiltersEmpty(file, project, null))
-                    addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.UnexcludeFile"), IClasspathInformationProvider.UNEXCLUDE,  //$NON-NLS-1$
-                            descriptionText, actions, enableList);
-            }
-        } catch (JavaModelException e) {
-            JavaPlugin.log(e);
+        // TODO includeFiltersEmpty is not correct --> better use isExcludedOnFragmentRoot
+        if (fragment != null || ClasspathModifier.getFragmentRoot(file, project, null).equals(JavaCore.create(file.getParent())) ||
+                (file.getParent().getFullPath().equals(project.getPath()) 
+                && ClasspathModifier.isExcludedOnProject(file, project) 
+                && ClasspathModifier.includeFiltersEmpty(project.getCorrespondingResource(), project, null))) {
+//            if (ClasspathModifier.includeFiltersEmpty(file, project, null))
+            if (ClasspathModifier.isExcludedOnFragmentRoot(file, project))
+                addToLists(NewWizardMessages.getString("PackageExplorerActionGroup.FormText.UnexcludeFile"), IClasspathInformationProvider.UNEXCLUDE,  //$NON-NLS-1$
+                        descriptionText, actions, enableList);
         }
+        
         enableActions(enableList); 
         
         return new Object[][] {(String[]) descriptionText.toArray(new String[descriptionText.size()]), 
@@ -644,9 +680,9 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * PackageExplorerActionGroup.PACKAGE_FRAGMENT<br>
      * PackageExplorerActionGroup.COMPILATION_UNIT<br>
      * PackageExplorerActionGroup.FILE<br>
+     * @throws JavaModelException 
      */
-    private int getType(Object obj, IJavaProject project) {
-        try {
+    private int getType(Object obj, IJavaProject project) throws JavaModelException {
             if (obj instanceof IJavaProject)
                 return JAVA_PROJECT;
             if (obj instanceof IPackageFragmentRoot)
@@ -654,12 +690,12 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
             if (obj instanceof IPackageFragment) {
                 if (ClasspathModifier.isDefaultFragment((IPackageFragment)obj))
                     return DEFAULT_FRAGMENT;
-                if (ClasspathModifier.containsPath((IJavaElement)/*getSelection()*/obj, project, null))
+                if (ClasspathModifier.containsPath((IJavaElement)obj, project, null))
                     return INCLUDED_FOLDER;
                 return PACKAGE_FRAGMENT;
             }
             if (obj instanceof ICompilationUnit)
-                return ClasspathModifier.containsPath((IJavaElement)/*getSelection()*/obj, project, null) ? INCLUDED_FILE : COMPILATION_UNIT;
+                return ClasspathModifier.containsPath((IJavaElement)obj, project, null) ? INCLUDED_FILE : COMPILATION_UNIT;
             if (obj instanceof IFolder) {
                 return getFolderType((IFolder)obj, project);
             }
@@ -667,9 +703,6 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
                 return getFileType((IFile)obj, project);
             if (obj instanceof CPListElementAttribute)
                 return ClasspathModifier.isDefaultOutputFolder((CPListElementAttribute) obj) ? DEFAULT_OUTPUT : OUTPUT;
-        } catch (JavaModelException e) {
-            JavaPlugin.log(e);
-        }
         return UNDEFINED;
     }
     
@@ -680,20 +713,17 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @return the type code for the folder. Possible types are:<br>
      * PackageExplorerActionGroup.FOLDER<br>
      * PackageExplorerActionGroup.EXCLUDED_FOLDER;<br>
+     * @throws JavaModelException 
      */
-    private int getFolderType(IFolder folder, IJavaProject project) {
+    private int getFolderType(IFolder folder, IJavaProject project) throws JavaModelException {
         if (folder.getParent().getFullPath().equals(project.getPath()))
             return FOLDER;
         if (ClasspathModifier.getFragment(folder.getParent()) != null)
             return EXCLUDED_FOLDER;
-        try {
-            if (ClasspathModifier.getFragmentRoot(folder, project, null) == null)
-                return FOLDER;
-            if (ClasspathModifier.getFragmentRoot(folder, project, null).equals(JavaCore.create(folder.getParent())))
-                return EXCLUDED_FOLDER;
-        } catch (JavaModelException e) {
-            JavaPlugin.log(e);
-        }
+        if (ClasspathModifier.getFragmentRoot(folder, project, null) == null)
+            return FOLDER;
+        if (ClasspathModifier.getFragmentRoot(folder, project, null).equals(JavaCore.create(folder.getParent())))
+            return EXCLUDED_FOLDER;
         return FOLDER;              
     }
     
@@ -704,30 +734,26 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @return the type code for the file. Possible types are:<br>
      * PackageExplorerActionGroup.EXCLUDED_FILE<br>
      * PackageExplorerActionGroup.FILE
+     * @throws JavaModelException 
      */
-    private int getFileType(IFile file, IJavaProject project) {
-        try {
-            if (!file.getName().endsWith(".java")) //$NON-NLS-1$
-                return FILE;
-            if (file.getParent().getFullPath().equals(project.getPath())) {
-                if (project.isOnClasspath(project.getUnderlyingResource())) //$NON-NLS-1$
-                    return EXCLUDED_FILE;
-                return FILE;
-            }
-            if (ClasspathModifier.getFragmentRoot(file, project, null) == null)
-                return FILE;
-            if (ClasspathModifier.getFragmentRoot(file, project, null).equals(JavaCore.create(file.getParent())))
+    private int getFileType(IFile file, IJavaProject project) throws JavaModelException {
+        if (!file.getName().endsWith(".java")) //$NON-NLS-1$
+            return FILE;
+        if (file.getParent().getFullPath().equals(project.getPath())) {
+            if (project.isOnClasspath(project.getUnderlyingResource())) //$NON-NLS-1$
                 return EXCLUDED_FILE;
-            if (ClasspathModifier.getFragment(file.getParent()) == null) {
-                if (ClasspathModifier.parentExcluded(file.getParent(), project))
-                    return FILE;
-                return EXCLUDED_FILE;
-            }
-            return EXCLUDED_FILE;
-        } catch (JavaModelException e) {
-            JavaPlugin.log(e);
+            return FILE;
         }
-        return UNDEFINED;
+        if (ClasspathModifier.getFragmentRoot(file, project, null) == null)
+            return FILE;
+        if (ClasspathModifier.getFragmentRoot(file, project, null).equals(JavaCore.create(file.getParent())))
+            return EXCLUDED_FILE;
+        if (ClasspathModifier.getFragment(file.getParent()) == null) {
+            if (ClasspathModifier.parentExcluded(file.getParent(), project))
+                return FILE;
+            return EXCLUDED_FILE;
+        }
+        return EXCLUDED_FILE;
     }
     
     /**
@@ -780,7 +806,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @see IPackageExplorerActionListener
      */
     public void addListener(IPackageExplorerActionListener listener) {
-        listeners.add(listener);
+        fListeners.add(listener);
     }
     
     /**
@@ -789,6 +815,14 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @param listener the listener to be removed
      */
     public void removeListener(IPackageExplorerActionListener listener) {
-        listeners.remove(listener);
+        fListeners.remove(listener);
+    }
+    
+    /* (non-Javadoc)
+     * @see org.eclipse.jdt.internal.ui.actions.CompositeActionGroup#dispose()
+     */
+    public void dispose() {
+        fListeners.clear();
+        super.dispose();
     }
 }

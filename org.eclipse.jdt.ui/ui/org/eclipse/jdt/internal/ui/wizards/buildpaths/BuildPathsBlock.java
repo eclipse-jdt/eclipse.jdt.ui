@@ -340,17 +340,15 @@ public class BuildPathsBlock {
 		fClassPathList.setElements(newClassPath);
 		fClassPathList.setCheckedElements(exportedEntries);
 		
-        if (!newPageEnabled()) {
-    		if (Display.getCurrent() != null) {
-    			updateUI();
-    		} else {
-    			Display.getDefault().asyncExec(new Runnable() {
-    				public void run() {
-    					updateUI();
-    				}
-    			});
-    		}
-        }
+		if (Display.getCurrent() != null) {
+			updateUI();
+		} else {
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					updateUI();
+				}
+			});
+		}
 		initializeTimeStamps();
 	}
 	
@@ -755,17 +753,6 @@ public class BuildPathsBlock {
 		monitor.worked(1);
 				
 		fCurrJProject.setRawClasspath(classpath, outputLocation, new SubProgressMonitor(monitor, 7));
-        if (newPageEnabled() && !fBuildPathDialogField.getLabelControl(null).isDisposed()) {
-            if (Display.getCurrent() != null) {
-                updateUI();
-            } else {
-                Display.getDefault().asyncExec(new Runnable() {
-                    public void run() {
-                        updateUI();
-                    }
-                });
-            }
-        }
 		initializeTimeStamps();
 	}
 	

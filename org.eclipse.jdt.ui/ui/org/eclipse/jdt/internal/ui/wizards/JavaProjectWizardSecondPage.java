@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -36,6 +37,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -45,6 +47,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
 /**
  * As addition to the JavaCapabilityConfigurationPage, the wizard does an
@@ -99,9 +103,9 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				try {
                     if (newPageEnabled()) {
                         monitor.beginTask(NewWizardMessages.getString("JavaProjectWizardSecondPage.operation.create"), 3); //$NON-NLS-1$
-                        JavaCore.create(fFirstPage.getProjectHandle());
-                        updateProject(true, new SubProgressMonitor(monitor, 1));
-                        configureJavaProject(new SubProgressMonitor(monitor, 2));
+//                        JavaCore.create(fFirstPage.getProjectHandle());
+                        updateProject(true, new SubProgressMonitor(monitor, 11));
+//                        configureJavaProject(new SubProgressMonitor(monitor, 2));
                     }
                     else
                         updateProject(initialize, monitor);
@@ -140,7 +144,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			monitor= new NullProgressMonitor();
 		}
 		try {
-			monitor.beginTask(NewWizardMessages.getString("JavaProjectWizardSecondPage.operation.initialize"), 2); //$NON-NLS-1$
+			monitor.beginTask(NewWizardMessages.getString("JavaProjectWizardSecondPage.operation.initialize"), 7); //$NON-NLS-1$
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
@@ -204,7 +208,10 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 					throw new OperationCanceledException();
 				}
 				
-                init(JavaCore.create(fCurrProject), outputLocation, entries, false);
+                IJavaProject jProject= null;
+                if (newPageEnabled())
+                    jProject= internalConfigureJavaProject(entries, outputLocation, monitor);
+                init(jProject == null ? JavaCore.create(fCurrProject) : jProject, outputLocation, entries, false);
                 fRemoveList= new ArrayList();
                 if (removeClasspathFile)
                     fRemoveList.add(fCurrProject.getFile(".classpath")); //$NON-NLS-1$
@@ -307,5 +314,114 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
     
     private boolean newPageEnabled() {
         return PreferenceConstants.getPreferenceStore().getBoolean(WorkInProgressPreferencePage.NEW_SOURCE_PAGE);
+    }
+    
+    /*
+     * Creates the Java project and sets the configured build path and output location.
+     * If the project already exists only build paths are updated.
+     */
+    private IJavaProject internalConfigureJavaProject(IClasspathEntry[] entries, IPath outputLocation, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+        // 10 monitor steps to go
+        fCurrProject= fFirstPage.getProjectHandle();
+        IJavaProject jProject= JavaCore.create(fCurrProject);
+        IWorkspaceRoot workspaceRoot= fCurrProject.getWorkspace().getRoot();
+        
+        // create and set the output path first
+        if (!workspaceRoot.exists(outputLocation)) {
+            IFolder folder= workspaceRoot.getFolder(outputLocation);
+            CoreUtility.createFolder(folder, true, true, null);
+            folder.setDerived(true);        
+        }
+        
+        boolean projectExists= (fCurrProject.exists() && fCurrProject.getFile(".classpath").exists()); //$NON-NLS-1$
+        if  (projectExists) {
+            if (outputLocation == null) {
+                outputLocation=  jProject.readOutputLocation();
+            }
+            if (entries == null) {
+                entries=  jProject.readRawClasspath();
+            }
+        }
+        if (entries == null)
+            entries= getDefaultClassPath(jProject);
+        if (outputLocation == null) {
+            outputLocation= getDefaultBuildPath(jProject);
+        }
+        
+        List sortedEntries= new ArrayList();
+        // create and set the class path
+        for (int i= 0; i < entries.length; i++) {
+            CPListElement entry= CPListElement.createFromExisting(entries[i], jProject);
+            IResource res= entry.getResource();
+            insertSorted(entries[i], sortedEntries, jProject);
+            if ((res instanceof IFolder) && !res.exists()) {
+                CoreUtility.createFolder((IFolder)res, true, true, null);
+            }
+        }   
+        entries= (IClasspathEntry[]) sortedEntries.toArray(new IClasspathEntry[sortedEntries.size()]);
+        BuildPathsBlock.addJavaNature(fCurrProject, new SubProgressMonitor(monitor, 5));
+        jProject.setRawClasspath(entries, outputLocation, new SubProgressMonitor(monitor, 5));
+        return jProject;
+    }
+    
+    private IClasspathEntry[] getDefaultClassPath(IJavaProject jproj) {
+        List list= new ArrayList();
+        IResource srcFolder;
+        IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+        String sourceFolderName= store.getString(PreferenceConstants.SRCBIN_SRCNAME);
+        if (store.getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ) && sourceFolderName.length() > 0) {
+            srcFolder= jproj.getProject().getFolder(sourceFolderName);
+        } else {
+            srcFolder= jproj.getProject();
+        }
+
+        list.add(new CPListElement(jproj, IClasspathEntry.CPE_SOURCE, srcFolder.getFullPath(), srcFolder));
+
+        IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
+        IClasspathEntry[] entries= new IClasspathEntry[jreEntries.length + 1];
+        System.arraycopy(jreEntries, 0, entries, 1, jreEntries.length);
+        entries[0]= JavaCore.newSourceEntry(srcFolder.getFullPath());
+        return entries;
+    }
+    
+    private IPath getDefaultBuildPath(IJavaProject jproj) {
+        IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+        if (store.getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ)) {
+            String outputLocationName= store.getString(PreferenceConstants.SRCBIN_BINNAME);
+            return jproj.getProject().getFullPath().append(outputLocationName);
+        } else {
+            return jproj.getProject().getFullPath();
+        }
+    }
+    
+    /**
+     * Insert the entry into the list of other <code>IClasspathEntries</code> in the following way:
+     * if the new entry is a source entry, then insert it sorted by path into the existing 
+     * src entries, otherwise just append it at the end. 
+     * 
+     * @param entry the entry to be inserted
+     * @param list a sorted list of <code>IClasspathEntries</code>
+     * @param project the java project
+     */
+    private void insertSorted(IClasspathEntry entry, List list, IJavaProject project) {
+        if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+            if (entry.getPath().equals(project.getPath()))
+                list.add(0, entry); // project as root is always the first element
+            else {
+                // insert sorted among all source entries
+                int i;
+                for(i= 0; i < list.size(); i++) {
+                    IClasspathEntry curr= (IClasspathEntry)list.get(i);
+                    if (curr.getEntryKind() != IClasspathEntry.CPE_SOURCE) { // begin of entries which are not src entries --> insert
+                        continue;
+                    } else if (curr.getPath().toString().compareTo(entry.getPath().toString()) > 0) {
+                        break;
+                    }
+                }
+                list.add(i, entry);
+            }
+        } else {
+            list.add(entry);
+        }
     }
 }

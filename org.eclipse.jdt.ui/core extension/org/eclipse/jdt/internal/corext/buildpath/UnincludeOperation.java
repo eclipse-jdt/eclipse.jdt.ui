@@ -42,7 +42,7 @@ public class UnincludeOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public UnincludeOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider);
+        super(listener, informationProvider, IClasspathInformationProvider.UNINCLUDE);
     }
     
     /**
@@ -62,6 +62,6 @@ public class UnincludeOperation extends ClasspathModifierOperation {
             fException= e;
             result= null;
         }
-        super.handleResult(result, oldOutputLocation, IClasspathInformationProvider.UNINCLUDE, monitor);
+        super.handleResult(result, oldOutputLocation, monitor);
     }
 }

@@ -20,6 +20,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
+
 /**
  * Operation to create an output folder
  * 
@@ -39,7 +42,7 @@ public class CreateOutputFolderOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public CreateOutputFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider);
+        super(listener, informationProvider, IClasspathInformationProvider.CREATE_OUTPUT);
     }
     
     
@@ -50,14 +53,14 @@ public class CreateOutputFolderOperation extends ClasspathModifierOperation {
             IPackageFragmentRoot root= (IPackageFragmentRoot)fInformationProvider.getSelection();
             IJavaProject project= fInformationProvider.getJavaProject();
             oldOutputLocation= project.getOutputLocation();
-            IOutputLocationQuery query= fInformationProvider.getOutputLocationQuery();
+            ClasspathModifierQueries.IOutputLocationQuery query= fInformationProvider.getOutputLocationQuery();
             result= createOutputFolder(root, query, project, monitor);
         } catch (CoreException e) {
             fException= e;
             result= null;
         }
         
-        super.handleResult(result, oldOutputLocation, IClasspathInformationProvider.CREATE_OUTPUT, monitor);
+        super.handleResult(result, oldOutputLocation, monitor);
     }
 
 }

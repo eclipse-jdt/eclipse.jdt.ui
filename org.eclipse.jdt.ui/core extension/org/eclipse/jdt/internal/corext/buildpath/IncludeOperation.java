@@ -41,7 +41,7 @@ public class IncludeOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public IncludeOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider);
+        super(listener, informationProvider, IClasspathInformationProvider.INCLUDE);
     }
     
     /**
@@ -61,6 +61,6 @@ public class IncludeOperation extends ClasspathModifierOperation {
             fException= e;
             result= null;
         }
-        super.handleResult(result, oldOutputLocation, IClasspathInformationProvider.INCLUDE, monitor);
+        super.handleResult(result, oldOutputLocation, monitor);
     }
 }

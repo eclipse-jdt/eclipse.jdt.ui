@@ -65,4 +65,11 @@ public class ClasspathModifierAction extends Action {
     public ClasspathModifierOperation getOperation() {
         return fOperation;
     }
+    
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.action.Action#getId()
+     */
+    public String getId() {
+        return fOperation.getId();
+    }
 }

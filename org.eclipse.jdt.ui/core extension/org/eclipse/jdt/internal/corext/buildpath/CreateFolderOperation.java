@@ -19,6 +19,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
+
 
 /**
  * Operation to create a folder.
@@ -37,7 +39,7 @@ public final class CreateFolderOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public CreateFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider);
+        super(listener, informationProvider, IClasspathInformationProvider.CREATE_FOLDER);
     }
     
     /**
@@ -49,8 +51,8 @@ public final class CreateFolderOperation extends ClasspathModifierOperation {
         Object result= null;
         IPath oldOutputLocation= null;
         try {
-            IFolderCreationQuery folderQuery= fInformationProvider.getFolderCreationQuery();
-            IOutputFolderQuery outputQuery= fInformationProvider.getOutputFolderQuery();
+            ClasspathModifierQueries.IFolderCreationQuery folderQuery= fInformationProvider.getFolderCreationQuery();
+            ClasspathModifierQueries.IOutputFolderQuery outputQuery= fInformationProvider.getOutputFolderQuery();
             IJavaProject project= fInformationProvider.getJavaProject();
             oldOutputLocation= project.getOutputLocation();
             result= createFolder(folderQuery, outputQuery, project, monitor);
@@ -58,6 +60,6 @@ public final class CreateFolderOperation extends ClasspathModifierOperation {
             fException= e;
             result= null;
         }
-        super.handleResult(result, oldOutputLocation, IClasspathInformationProvider.CREATE_FOLDER, monitor);
+        super.handleResult(result, oldOutputLocation, monitor);
     }
 }

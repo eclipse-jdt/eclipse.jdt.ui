@@ -42,7 +42,7 @@ public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public RemoveFromClasspathOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider);
+        super(listener, informationProvider, IClasspathInformationProvider.REMOVE_FROM_BP);
     }
     
     /**
@@ -64,6 +64,6 @@ public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
             fException= e;
             result= null;
         }
-        super.handleResult(result, oldOutputLocation, IClasspathInformationProvider.REMOVE_FROM_BP, monitor);
+        super.handleResult(result, oldOutputLocation, monitor);
     }
 }

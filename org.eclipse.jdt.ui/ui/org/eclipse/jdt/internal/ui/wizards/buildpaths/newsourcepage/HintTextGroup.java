@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,15 +27,15 @@ import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.viewers.StructuredSelection;
-
-import org.eclipse.ui.actions.ActionContext;
 
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -48,14 +50,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.IPackageExplorerActionListener;
 import org.eclipse.jdt.internal.corext.buildpath.PackageExplorerActionEvent;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IFolderCreationQuery;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IInclusionExclusionQuery;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IOutputFolderQuery;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IOutputLocationQuery;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.ScrolledPageContent;
@@ -64,6 +61,7 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup.DialogExplorerActionContext;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
@@ -86,12 +84,14 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
     private IJavaProject fCurrJProject;
     private List fNewFolders;
     private String fOldOutputLocation;
+    private HashMap fImageMap;
     
     public HintTextGroup(DialogPackageExplorer packageExplorer, StringDialogField outputLocationField, SelectionButtonDialogField useFolderOutputs, IRunnableContext runnableContext) {
         fPackageExplorer= packageExplorer;
         fRunnableContext= runnableContext;
         fCurrJProject= null;
         fNewFolders= new ArrayList();
+        fImageMap= new HashMap();
         fOutputLocationField= outputLocationField;
     }
     
@@ -106,6 +106,16 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
         fTopComposite.setLayout(gridLayout);
         fTopComposite.setLayoutData(gridData);
         fTopComposite.setData(null);
+        fTopComposite.addDisposeListener(new DisposeListener() {
+            public void widgetDisposed(DisposeEvent e) {
+                Collection collection= fImageMap.values();
+                Iterator iterator= collection.iterator();
+                while(iterator.hasNext()) {
+                    Image image= (Image)iterator.next();
+                    image.dispose();
+                }
+            }
+        });
         return fTopComposite;
     }
     
@@ -174,8 +184,13 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * @param context the runnable context under which the action is executed
      */
     private void createLabel(Composite parent, String text, final ClasspathModifierAction action, final IRunnableContext context) {
-        FormText formText= createFormText(parent, text); //$NON-NLS-1$
-        formText.setImage("defaultImage", JavaPlugin.getImageDescriptorRegistry().get(action.getImageDescriptor())); //$NON-NLS-1$
+        FormText formText= createFormText(parent, text);
+        Image image= (Image)fImageMap.get(action.getId());
+        if (image == null) {
+            image= action.getImageDescriptor().createImage();
+            fImageMap.put(action.getId(), image);
+        }
+        formText.setImage("defaultImage", image); //$NON-NLS-1$
         formText.addHyperlinkListener(new HyperlinkAdapter() {
 
             public void linkActivated(HyperlinkEvent e) {
@@ -259,10 +274,14 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * false</code> otherwise
      */
     private void defaultHandle(Object result, boolean forceRebuild) {
-        if (result != null) {
-            fPackageExplorer.setSelection(result);
-            if (forceRebuild)
-                fActionGroup.refresh(new ActionContext(new StructuredSelection(new Object[] {result, fCurrJProject})));
+        try {
+            if (result != null) {
+                fPackageExplorer.setSelection(result);
+                if (forceRebuild)
+                    fActionGroup.refresh(new DialogExplorerActionContext(result, fCurrJProject));
+            }
+        } catch (JavaModelException e) {
+            ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.JavaModelException.Title"), e.getLocalizedMessage()); //$NON-NLS-1$
         }
     }
     
@@ -331,7 +350,11 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
         if (result != null) {
             if (((IPackageFragmentRoot)result).getPath().equals(fCurrJProject.getPath())) {
                 fPackageExplorer.setSelection(fCurrJProject);
-                fActionGroup.refresh(new ActionContext(new StructuredSelection(new Object[] {fCurrJProject, fCurrJProject})));
+                try {
+                    fActionGroup.refresh(new DialogExplorerActionContext(result, fCurrJProject));
+                } catch (JavaModelException e) {
+                    ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.JavaModelException.Title"), e.getLocalizedMessage()); //$NON-NLS-1$
+                }
             }
             else
                 fPackageExplorer.setSelection(result);
@@ -350,8 +373,12 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      */
     private void handleRemoveFromBP(Object result, boolean forceRebuild) {
         fPackageExplorer.setSelection(result);
-        if (forceRebuild || result instanceof IJavaProject)
-            fActionGroup.refresh(new ActionContext(new StructuredSelection(new Object[] {result, fCurrJProject})));
+        try {
+            if (forceRebuild || result instanceof IJavaProject)
+                fActionGroup.refresh(new DialogExplorerActionContext(result, fCurrJProject));
+        } catch (JavaModelException e) {
+            ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.JavaModelException.Title"), e.getLocalizedMessage()); //$NON-NLS-1$
+        }
     }
     
     /**
@@ -397,11 +424,11 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * Return an <code>IOutputFolderQuery</code>. In this case, 
      * the default query is taken from the <code>ClasspathModifier</code>.
      * 
-     * @see ClasspathModifier#getDefaultFolderQuery(Shell, IPath)
+     * @see ClasspathModifierQueries#getDefaultFolderQuery(Shell, IPath)
      * @see IClasspathInformationProvider#getOutputFolderQuery()
      */
-    public IOutputFolderQuery getOutputFolderQuery() {
-        return ClasspathModifier.getDefaultFolderQuery(getShell(), new Path(fOutputLocationField.getText()));
+    public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery() {
+        return ClasspathModifierQueries.getDefaultFolderQuery(getShell(), new Path(fOutputLocationField.getText()));
 
     }
 
@@ -409,22 +436,22 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * Return an <code>IInclusionExclusionQuery</code>. In this case, 
      * the default query is taken from the <code>ClasspathModifier</code>.
      * 
-     * @see ClasspathModifier#getDefaultInclusionExclusionQuery(Shell)
+     * @see ClasspathModifierQueries#getDefaultInclusionExclusionQuery(Shell)
      * @see IClasspathInformationProvider#getInclusionExclusionQuery()
      */
-    public IInclusionExclusionQuery getInclusionExclusionQuery() {
-        return ClasspathModifier.getDefaultInclusionExclusionQuery(getShell());
+    public ClasspathModifierQueries.IInclusionExclusionQuery getInclusionExclusionQuery() {
+        return ClasspathModifierQueries.getDefaultInclusionExclusionQuery(getShell());
     }
 
     /**
      * Return an <code>IOutputLocationQuery</code>. In this case, 
      * the default query is taken from the <code>ClasspathModifier</code>.
      * 
-     * @see ClasspathModifier#getDefaultOutputLocationQuery(Shell, IPath, List)
+     * @see ClasspathModifierQueries#getDefaultOutputLocationQuery(Shell, IPath, List)
      * @see IClasspathInformationProvider#getOutputLocationQuery()
      */
-    public IOutputLocationQuery getOutputLocationQuery() {
-        return ClasspathModifier.getDefaultOutputLocationQuery(getShell(), new Path(fOutputLocationField.getText()), generateClasspathList());
+    public ClasspathModifierQueries.IOutputLocationQuery getOutputLocationQuery() {
+        return ClasspathModifierQueries.getDefaultOutputLocationQuery(getShell(), new Path(fOutputLocationField.getText()), generateClasspathList());
     }
     
     private List generateClasspathList() {
@@ -446,12 +473,12 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * Return an <code>IFolderCreationQuery</code>. In this case, 
      * the default query is taken from the <code>ClasspathModifier</code>.
      * 
-     * @see ClasspathModifier#getDefaultFolderCreationQuery(Shell, Object, int)
+     * @see ClasspathModifierQueries#getDefaultFolderCreationQuery(Shell, Object, int)
      * @see IClasspathInformationProvider#getFolderCreationQuery()
      */
-    public IFolderCreationQuery getFolderCreationQuery() {
+    public ClasspathModifierQueries.IFolderCreationQuery getFolderCreationQuery() {
         int type= fActionGroup.getType();
-        return ClasspathModifier.getDefaultFolderCreationQuery(getShell(), getSelection(), type);
+        return ClasspathModifierQueries.getDefaultFolderCreationQuery(getShell(), getSelection(), type);
     }
     
     /**

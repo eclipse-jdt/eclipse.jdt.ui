@@ -44,7 +44,7 @@ public class ResetOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public ResetOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider);
+        super(listener, informationProvider, IClasspathInformationProvider.RESET);
     }
     
     /**
@@ -70,6 +70,6 @@ public class ResetOperation extends ClasspathModifierOperation {
             fException= e;
             result= null;
         }
-        super.handleResult(result, oldOutputLocation, IClasspathInformationProvider.RESET, monitor);
+        super.handleResult(result, oldOutputLocation, monitor);
     }
 }

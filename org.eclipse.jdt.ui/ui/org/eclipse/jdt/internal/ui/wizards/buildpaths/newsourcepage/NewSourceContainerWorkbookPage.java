@@ -40,11 +40,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.IDocument;
-
-import org.eclipse.ui.actions.ActionContext;
 
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -67,6 +64,7 @@ import org.eclipse.jdt.internal.ui.util.ViewerPane;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup.DialogExplorerActionContext;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
@@ -179,23 +177,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
      * @param document contains the content to be
      * stored to the given <code>file</code>
      */
-    private void restoreFile(IFile file, IDocument document) {
-        // this is the case if for example ".classpath"
-        // did not exist afterwards (the document is null)
-        // but was created during manipulating the project
-        // (file.exists() == true). In this case, we need to
-        // remove this file.
-        if (document == null && file.exists()) {
-            try {
-                file.delete(true, null);
-            } catch (CoreException e) {
-                ExceptionHandler.handle(e, getShell(), 
-                        NewWizardMessages.getString("NewSourceContainerWorkbookPage.CoreException.Title"),  //$NON-NLS-1$
-                        e.getMessage());
-            }
-            return;
-        }
-            
+    private void restoreFile(IFile file, IDocument document) {            
         if (document == null || file == null || !file.exists())
             return;
 
@@ -291,9 +273,14 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         final DialogPackageExplorerActionGroup actionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, this);
         fUseFolderOutputs.getSelectionButton(null).addSelectionListener(new SelectionListener(){
 
-            public void widgetSelected(SelectionEvent e) {
+            public void widgetSelected(SelectionEvent event) {
                 fPackageExplorer.widgetSelected(fUseFolderOutputs.getSelectionButton(null).getSelection());
-                actionGroup.refresh(new ActionContext(new StructuredSelection(new Object[] {fPackageExplorer.getSelection(), fHintTextGroup.getJavaProject()})));
+                try {
+                    actionGroup.refresh(new DialogExplorerActionContext(fPackageExplorer.getSelection(), fHintTextGroup.getJavaProject()));
+                } catch (JavaModelException e) {
+                    ExceptionHandler.handle(e, getShell(),
+                            NewWizardMessages.getString("NewSourceContainerWorkbookPage.JavaModelException.Title"), e.getMessage()); //$NON-NLS-1$
+                }
             }
 
             public void widgetDefaultSelected(SelectionEvent e) {
@@ -425,6 +412,21 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
             fHintTextGroup.setSelection(root.getJavaProject());
         else
             fHintTextGroup.setSelection(root);
+        
+        // refresh classpath
+        List list= fClassPathList.getElements();
+        IClasspathEntry[] entries= new IClasspathEntry[list.size()];
+        for(int i= 0; i < list.size(); i++) {
+            CPListElement entry= (CPListElement)list.get(i);
+            entries[i]= entry.getClasspathEntry(); 
+        }
+        try {
+            project.setRawClasspath(entries, null);
+            fPackageExplorer.refresh();
+        } catch (JavaModelException e) {
+            JavaPlugin.log(e);
+        }
+        
     }
 
     /* (non-Javadoc)

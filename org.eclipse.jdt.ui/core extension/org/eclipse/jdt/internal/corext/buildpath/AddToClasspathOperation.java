@@ -22,6 +22,9 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputFolderQuery;
+
 
 /**
  * Operation to add an object (of type <code>IFolder</code> or <code>
@@ -45,7 +48,7 @@ public class AddToClasspathOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public AddToClasspathOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider);
+        super(listener, informationProvider, IClasspathInformationProvider.ADD_TO_BP);
     }
     
     public void run(IProgressMonitor monitor) throws InvocationTargetException {
@@ -55,7 +58,7 @@ public class AddToClasspathOperation extends ClasspathModifierOperation {
             Object element= fInformationProvider.getSelection();
             IJavaProject project= fInformationProvider.getJavaProject();
             oldOutputLocation= project.getOutputLocation();
-            IOutputFolderQuery query= fInformationProvider.getOutputFolderQuery();
+            ClasspathModifierQueries.IOutputFolderQuery query= fInformationProvider.getOutputFolderQuery();
             if (element instanceof IFolder)
                 result= addToClasspath((IFolder)element, project, query, monitor);
             else
@@ -65,6 +68,6 @@ public class AddToClasspathOperation extends ClasspathModifierOperation {
             result= null;
         }
         
-        super.handleResult(result, oldOutputLocation, IClasspathInformationProvider.ADD_TO_BP, monitor);
+        super.handleResult(result, oldOutputLocation, monitor);
     }
 }

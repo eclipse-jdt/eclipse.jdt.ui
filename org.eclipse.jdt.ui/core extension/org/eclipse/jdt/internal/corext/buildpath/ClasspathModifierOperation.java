@@ -27,6 +27,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 public abstract class ClasspathModifierOperation extends ClasspathModifier implements IRunnableWithProgress {
     protected IClasspathInformationProvider fInformationProvider;
     protected CoreException fException;
+    private int fType;
     
     /**
      * Constructor
@@ -35,17 +36,20 @@ public abstract class ClasspathModifierOperation extends ClasspathModifier imple
      * changes on classpath entries or <code>null</code> if no such notification is 
      * necessary.
      * @param informationProvider a provider to offer information to the operation
+     * @param type the type of the operation, that is a constant of <code>
+     * IClasspathInformationProvider</code>
      * 
      * @see IClasspathInformationProvider
      * @see ClasspathModifier
      */
-    public ClasspathModifierOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
+    public ClasspathModifierOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider, int type) {
         super(listener);
         fInformationProvider= informationProvider;
         fException= null;
+        fType= type;
     }
     
-    protected void handleResult(Object result, IPath oldOutputLocation, int type, IProgressMonitor monitor) throws InvocationTargetException{
+    protected void handleResult(Object result, IPath oldOutputLocation, IProgressMonitor monitor) throws InvocationTargetException{
         /*
          * if (fMonitor != null && fException != null) then
          * the action was called with the run method of 
@@ -58,7 +62,7 @@ public abstract class ClasspathModifierOperation extends ClasspathModifier imple
          * information provider.
          */
         if (monitor == null || fException == null)
-            fInformationProvider.handleResult(result, oldOutputLocation, fException, type);
+            fInformationProvider.handleResult(result, oldOutputLocation, fException, fType);
         else
             throw new InvocationTargetException(fException);
         fException= null;
@@ -70,4 +74,13 @@ public abstract class ClasspathModifierOperation extends ClasspathModifier imple
      * @param monitor a progress monitor, can be <code>null</code>
      */
     public abstract void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException;
+    
+    /**
+     * Get the type converted into a string.
+     * 
+     * @return the ID (that is the type) of this operation as string.
+     */
+    public String getId() {
+        return Integer.toString(fType);
+    }
 }

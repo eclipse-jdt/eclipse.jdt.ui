@@ -41,7 +41,7 @@ public class ExcludeOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public ExcludeOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider);
+        super(listener, informationProvider, IClasspathInformationProvider.EXCLUDE);
     }
     
     /**
@@ -61,6 +61,6 @@ public class ExcludeOperation extends ClasspathModifierOperation {
             fException= e;
             result= null;
         }
-        super.handleResult(result, oldOutputLocation, IClasspathInformationProvider.EXCLUDE, monitor);
+        super.handleResult(result, oldOutputLocation, monitor);
     }
 }
