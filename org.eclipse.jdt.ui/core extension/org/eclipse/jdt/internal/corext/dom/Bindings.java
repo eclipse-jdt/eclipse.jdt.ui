@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -890,30 +889,6 @@ public class Bindings {
 		return iField;
 	}
 
-	/**
-	 * Finds a field for the given <code>IVariableBinding</code>
-	 * using the class path defined by the given Java project. Returns <code>null</code>
-	 * if the field could not be found.
-	 * @param field the field to search for
-	 * @param in the project defining the scope
-	 * @param owner the workingcopy owner
-	 * @return the corresponding IField
-	 * @throws JavaModelException if an error occurs in the Java model
-	 * @deprecated
-	 */
-	public static IField findField(IVariableBinding field, IJavaProject in, WorkingCopyOwner owner) throws JavaModelException {
-		ITypeBinding declaringClassBinding = field.getDeclaringClass();
-		if (declaringClassBinding == null)
-			return null;
-		IType declaringClass = findType(declaringClassBinding, in, owner);
-		if (declaringClass == null)
-			return null;
-		IField foundField= declaringClass.getField(field.getName());
-		if (! foundField.exists())
-	    	return null;
-		return foundField;
-	}
-
 	private static IField originalFindField(IVariableBinding field, IJavaProject in) throws JavaModelException {
 		ITypeBinding declaringClassBinding = field.getDeclaringClass();
 		if (declaringClassBinding == null)
@@ -925,45 +900,6 @@ public class Bindings {
 		if (! foundField.exists())
 	    	return null;
 		return foundField;
-	}
-
-	/**
-	 * Finds a type for the given <code>ITypeBinding</code>
-	 * using the class path defined by the given Java project. Returns <code>null</code>
-	 * if the type could not be found.
-	 * @param type the type to find
-	 * @param scope the project scope
-	 * @param owner the workingcopy owner
-	 * @return the corresponding IType or <code>null</code>
-	 * @throws JavaModelException if an error occurs in the Java model
-	 * @deprecated
-	 */
-	public static IType findType(ITypeBinding type, IJavaProject scope, WorkingCopyOwner owner) throws JavaModelException {
-		if (type.isPrimitive() || type.isAnonymous() || type.isNullType())
-			return null;
-		if (type.isArray())
-			return findType(type.getElementType(), scope, owner);
-			
-		// TODO: JavaCore should allow to find secondary top level types.
-		
-		String[] typeElements= Bindings.getNameComponents(type);
-		IJavaElement element= scope.findElement(getPathToCompilationUnit(type.getPackage(), typeElements[0]), owner);
-		IType candidate= null;
-		if (element instanceof ICompilationUnit) {
-			candidate= ((ICompilationUnit)element).getType(typeElements[0]);
-		} else if (element instanceof IClassFile) {
-			candidate= ((IClassFile)element).getType();
-		} else if (element == null) {
-			if (type.isMember())
-				candidate= JavaModelUtil.findType(scope, Bindings.getFullyQualifiedName(type.getDeclaringClass()), owner);
-			else
-				candidate= JavaModelUtil.findType(scope, Bindings.getFullyQualifiedName(type), owner);
-		}
-		
-		if (candidate == null || typeElements.length == 1)
-			return candidate;
-			
-		return findTypeInType(typeElements, candidate);
 	}
 
 	/**
@@ -1015,23 +951,6 @@ public class Bindings {
 			return candidate;
 			
 		return findTypeInType(typeElements, candidate);
-	}
-
-	/**
-	 * Finds a method for the given <code>IMethodBinding</code>. Returns <code>null</code> if the method can not be found in the declaring type of the method binding.
-	 * 
-	 * @param method the method to find
-	 * @param scope the project scope
-	 * @param owner the workingcopy owner
-	 * @return the corresponding IMethod or <code>null</code>
-	 * @throws JavaModelException if an error occurs in the Java model
-	 * @deprecated
-	 */
-	public static IMethod findMethod(IMethodBinding method, IJavaProject scope, WorkingCopyOwner owner) throws JavaModelException {
-		IType type= findType(method.getDeclaringClass(), scope, owner);
-		if (type == null)
-			return null;
-		return findMethod(method, type);
 	}
 
 	/**
