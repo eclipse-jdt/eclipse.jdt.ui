@@ -13,11 +13,10 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import java.util.Iterator;
 
-import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -114,7 +113,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		} finally {
 			try {
 				if (path != null) {
-					ITextFileBufferManager manager= FileBuffersPlugin.getDefault().getFileBufferManager();
+					ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 					manager.disconnect(path, null);
 				}
 			} catch (CoreException ex) {
@@ -144,7 +143,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		if (path == null)
 			return null;
 		
-		ITextFileBufferManager manager= FileBuffersPlugin.getDefault().getFileBufferManager();
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		try {
 			manager.connect(path, null);
 		} catch (CoreException ex) {

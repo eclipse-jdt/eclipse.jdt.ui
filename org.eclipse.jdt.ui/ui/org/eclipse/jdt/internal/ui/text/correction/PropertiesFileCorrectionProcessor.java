@@ -15,13 +15,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IMarker;
 
+import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
 import org.eclipse.jface.text.ITextViewer;
@@ -117,7 +116,7 @@ public class PropertiesFileCorrectionProcessor implements IContentAssistProcesso
 		if (!(input instanceof IStorageEditorInput))
 			return null;
 		
-		ITextFileBufferManager manager= FileBuffersPlugin.getDefault().getFileBufferManager();
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		IPath path= null;
 		try {
 			path= ((IStorageEditorInput)input).getStorage().getFullPath();

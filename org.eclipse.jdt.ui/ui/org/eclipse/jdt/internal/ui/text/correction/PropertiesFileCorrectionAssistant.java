@@ -17,11 +17,10 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -191,7 +190,7 @@ public class PropertiesFileCorrectionAssistant extends ContentAssistant {
 		if (!(input instanceof IStorageEditorInput))
 			return -1;
 		
-		ITextFileBufferManager manager= FileBuffersPlugin.getDefault().getFileBufferManager();
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		IPath path= null;
 		try {
 			path= ((IStorageEditorInput)input).getStorage().getFullPath();
