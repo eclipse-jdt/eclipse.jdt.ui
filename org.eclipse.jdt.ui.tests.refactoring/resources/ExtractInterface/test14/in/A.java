@@ -1,6 +1,6 @@
 package p;
 
-class A implements I {
+class A {
 	public void m(){}
 	void f(){
 		A a= new A();

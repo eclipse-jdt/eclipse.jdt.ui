@@ -3,7 +3,7 @@ package p;
 import java.util.ArrayList;
 import java.util.List;
 
-class A implements I{
+class A{
 	public void m(){
 		List list= new ArrayList();
 	}

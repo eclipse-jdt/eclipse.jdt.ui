@@ -1,6 +1,6 @@
 package p;
 
-class A implements Cloneable, I{
+class A implements Cloneable{
 	public void m(){
 	}
 	protected Object clone() throws CloneNotSupportedException {

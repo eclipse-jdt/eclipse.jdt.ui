@@ -1,4 +1,4 @@
 package p;
-abstract class A implements I{
+abstract class A{
 	abstract public void m();
 }

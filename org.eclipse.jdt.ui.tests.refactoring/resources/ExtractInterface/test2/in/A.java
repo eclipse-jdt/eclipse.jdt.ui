@@ -2,6 +2,6 @@ package p;
 
 import java.util.List;
 
-class A implements I{
+class A{
 	public List m(){return null;}
 }
