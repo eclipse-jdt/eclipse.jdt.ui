@@ -99,6 +99,8 @@ public abstract class SuperTypeSet implements ITypeSet {
 					if (rightErasure.equals(leftErasure) || ((HierarchyType) leftErasure).isSubType((HierarchyType) rightErasure))
 						return this;
 				}
+				if (rightErasure.isJavaLangObject())
+					return this;
 				if (leftErasure.canAssignTo(rightErasure))
 					return this;
 				return SuperTypeSet.getEmpty();
@@ -111,6 +113,8 @@ public abstract class SuperTypeSet implements ITypeSet {
 					if (rightErasure.equals(leftErasure) || ((HierarchyType) leftErasure).isSubType((HierarchyType) rightErasure))
 						return this;
 				}
+				if (rightErasure.isJavaLangObject())
+					return this;
 				if (leftErasure.canAssignTo(rightErasure))
 					return this;
 				return SuperTypeSet.createTypeSet(tuple.fSubType);
@@ -178,6 +182,8 @@ public abstract class SuperTypeSet implements ITypeSet {
 					if ((rightErasure.equals(subErasure) || ((HierarchyType) subErasure).isSubType((HierarchyType) rightErasure)) && (rightErasure.equals(superErasure) || ((HierarchyType) superErasure).isSubType((HierarchyType) rightErasure)))
 						return this;
 				}
+				if (rightErasure.isJavaLangObject())
+					return this;
 				if (subErasure.canAssignTo(rightErasure) && superErasure.canAssignTo(rightErasure))
 					return this;
 				return SuperTypeSet.createTypeSet(fSubType);
