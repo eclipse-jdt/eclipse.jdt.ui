@@ -77,6 +77,7 @@ import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.search.ui.ISearchResultView;
 
@@ -680,7 +681,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	protected boolean needsToProcessSelectionChanged(IWorkbenchPart part, ISelection selection) {
-		if (!fProcessSelectionEvents || part == this || isSearchResultView(part) || !(selection instanceof IStructuredSelection)){
+		if (!fProcessSelectionEvents || part == this || isSearchResultView(part)){
 			if (part == this)
 				fPreviousSelectionProvider= part;
 			return false;
@@ -692,6 +693,14 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		if (!needsToProcessSelectionChanged(part, selection))
 			return;
 		
+		if (fToggleLinkingAction.isChecked() && (part instanceof ITextEditor)) {
+			setSelectionFromEditor(part, selection);
+			return;
+		}
+
+		if (!(selection instanceof IStructuredSelection))
+			return;
+	
 		// Set selection
 		Object selectedElement= getSingleElementFromSelection(selection);
 		
