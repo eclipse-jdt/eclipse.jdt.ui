@@ -114,12 +114,13 @@ public class QuickAssistLightBulbUpdater {
 	}
 	
 	private void uninstallSelectionListener() {
-		if (fListener != null) {
+		IAnnotationModel model= getAnnotationModel();
+		if (fListener != null && model != null) {
 			IPostSelectionProvider provider= (IPostSelectionProvider) fViewer.getSelectionProvider();
 			provider.removePostSelectionChangedListener(fListener);
 			fListener= null;
 			if (fIsAnnotationShown) {
-				getAnnotationModel().removeAnnotation(fAnnotation);
+				model.removeAnnotation(fAnnotation);
 				fIsAnnotationShown= false;
 			}
 		}
@@ -187,6 +188,10 @@ public class QuickAssistLightBulbUpdater {
 		int length= point.y;
 		
 		final IAnnotationModel model= getAnnotationModel();
+		if (model == null) {
+			return;
+		}
+		
 		boolean hasQuickFix= hasQuickFixLightBulb(model, offset);
 		ICompilationUnit cu= getCompilationUnit(fEditor.getEditorInput());
 
