@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.core.refactoring.projects;
+package org.eclipse.jdt.internal.core.refactoring.resources;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
@@ -12,6 +12,8 @@ import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
+import org.eclipse.jdt.internal.core.refactoring.resources.*;
+
 
 public class RenameResourceRefactoring extends Refactoring implements IRenameRefactoring {
 

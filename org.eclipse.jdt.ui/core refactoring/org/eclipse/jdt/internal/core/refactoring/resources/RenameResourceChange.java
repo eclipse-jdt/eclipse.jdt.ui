@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.core.refactoring.projects;
+package org.eclipse.jdt.internal.core.refactoring.resources;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
