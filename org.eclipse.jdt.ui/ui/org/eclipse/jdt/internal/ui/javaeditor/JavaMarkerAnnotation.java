@@ -92,7 +92,8 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 			
 			if (fPresentation == null) 
 				fPresentation= DebugUITools.newDebugModelPresentation();
-				
+
+			setImage(null); // see bug 32469
 			setLayer(4);
 			fImageType= BREAKPOINT_IMAGE;					
 			
