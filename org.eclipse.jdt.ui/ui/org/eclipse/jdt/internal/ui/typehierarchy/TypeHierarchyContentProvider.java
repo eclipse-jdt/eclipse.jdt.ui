@@ -8,25 +8,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.IBasicPropertyConstants;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Base class for content providers for type hierarchy viewers.
@@ -35,7 +28,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  */
 public abstract class TypeHierarchyContentProvider implements ITreeContentProvider {
 	protected static final Object[] NO_ELEMENTS= new Object[0];
-
+	
 	protected TypeHierarchyLifeCycle fTypeHierarchy;
 	protected IMember[] fMemberFilter;
 	protected boolean fShowAllTypes;
@@ -93,12 +86,12 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 		return NO_ELEMENTS; 
 	}
-
+	
 	/**
 	 * Hook to overwrite. Filter will be applied on the returned types
 	 */	
 	protected abstract IType[] getTypesInHierarchy(IType type);
-
+	
 	/*
 	 * Called for the tree children.
 	 * @see ITreeContentProvider#getChildren
@@ -131,8 +124,11 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 			if (fMemberFilter != null) {
 				List children= new ArrayList();
 				addFilteredMembers(type, children);
+				if (!children.isEmpty()) {
+					return true;
+				}
 				addFilteredTypes(childrenTypes, children);
-				return children.size() > 0;
+				return !children.isEmpty();
 			} else {
 				return childrenTypes.length > 0;
 			}				
@@ -146,11 +142,13 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 			for (int i= 0; i < fMemberFilter.length; i++) {
 				IMember member= fMemberFilter[i];
 				if (parent.equals(member.getDeclaringType())) {
-					children.add(member);
+					if (!children.contains(member)) {
+						children.add(member);
+					}
 				} else if (member instanceof IMethod) {
 					IMethod curr= (IMethod)member;
 					IMethod meth= JavaModelUtil.findMethod(curr.getElementName(), curr.getParameterTypes(), curr.isConstructor(), methods);
-					if (meth != null) {
+					if (meth != null && !children.contains(meth)) {
 						children.add(meth);
 					}
 				}
@@ -199,7 +197,6 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		return false;
 	}
 	
-		
 	/*
 	 * @see IContentProvider#inputChanged
 	 */
@@ -212,8 +209,8 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 * @see IContentProvider#dispose
 	 */	
 	public void dispose() {
-	}	
-
+	}
+	
 	/*
 	 * @see ITreeContentProvider#getParent
 	 */
