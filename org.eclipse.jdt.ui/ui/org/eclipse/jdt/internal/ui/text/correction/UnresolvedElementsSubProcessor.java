@@ -78,7 +78,7 @@ public class UnresolvedElementsSubProcessor {
 		
 
 		// possible type kind of the node
-		boolean suggestVariablePropasals= true;
+		boolean suggestVariableProposals= true;
 		int typeKind= 0;
 		
 		while (selectedNode instanceof ParenthesizedExpression) {
@@ -94,8 +94,23 @@ public class UnresolvedElementsSubProcessor {
 				if (parent instanceof MethodInvocation && node.equals(((MethodInvocation)parent).getExpression())) {
 					typeKind= SimilarElementsRequestor.CLASSES;
 				} else if (parent instanceof SimpleType) {
-					suggestVariablePropasals= false;
+					suggestVariableProposals= false;
 					typeKind= SimilarElementsRequestor.REF_TYPES;
+				} else if (parent instanceof QualifiedName) {
+					Name qualifier= ((QualifiedName) parent).getQualifier();
+					if (qualifier != node) {
+						binding= qualifier.resolveTypeBinding();
+					} else {
+						typeKind= SimilarElementsRequestor.REF_TYPES;
+					}
+					ASTNode outerParent= parent.getParent();
+					while (outerParent instanceof QualifiedName) {
+						outerParent= outerParent.getParent();
+					}
+					if (outerParent instanceof SimpleType) {
+						typeKind= SimilarElementsRequestor.REF_TYPES;
+						suggestVariableProposals= false;
+					}
 				}
 				break;		
 			case ASTNode.QUALIFIED_NAME:
@@ -107,11 +122,11 @@ public class UnresolvedElementsSubProcessor {
 				} else {
 					node= qualifierName.getQualifier();
 					typeKind= SimilarElementsRequestor.REF_TYPES;
-					suggestVariablePropasals= node.isSimpleName();
+					suggestVariableProposals= node.isSimpleName();
 				}
 				if (selectedNode.getParent() instanceof SimpleType) {
 					typeKind= SimilarElementsRequestor.REF_TYPES;
-					suggestVariablePropasals= false;
+					suggestVariableProposals= false;
 				}
 				break;		
 			case ASTNode.FIELD_ACCESS:
@@ -142,7 +157,7 @@ public class UnresolvedElementsSubProcessor {
 			addNewTypeProposals(cu, node, SimilarElementsRequestor.REF_TYPES, relevance, proposals);
 		}
 		
-		if (!suggestVariablePropasals) {
+		if (!suggestVariableProposals) {
 			return;
 		}
 		
