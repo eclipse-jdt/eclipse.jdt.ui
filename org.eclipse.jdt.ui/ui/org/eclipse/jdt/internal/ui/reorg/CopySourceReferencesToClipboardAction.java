@@ -20,12 +20,11 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 class CopySourceReferencesToClipboardAction extends SourceReferenceAction {
 
 	public CopySourceReferencesToClipboardAction(ISelectionProvider provider) {
-		super(RefactoringMessages.getString("CopySourceReferencesToClipboardAction.copy"), provider); //$NON-NLS-1$
+		super(ReorgMessages.getString("CopySourceReferencesToClipboardAction.copy"), provider); //$NON-NLS-1$
 	}
 	
 	protected void perform() throws JavaModelException {

@@ -21,12 +21,12 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+
 
 class DuplicateSourceReferenceAction extends SourceReferenceAction {
 	
 	public DuplicateSourceReferenceAction(ISelectionProvider provider) {
-		super(RefactoringMessages.getString("DuplicateSourceReferenceAction.duplicate"), provider); //$NON-NLS-1$
+		super(ReorgMessages.getString("DuplicateSourceReferenceAction.duplicate"), provider); //$NON-NLS-1$
 	}
 
 	protected void perform() throws CoreException {

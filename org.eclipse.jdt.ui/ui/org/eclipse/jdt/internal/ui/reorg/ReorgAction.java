@@ -25,7 +25,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -68,7 +67,7 @@ abstract class ReorgAction extends RefactoringAction {
 		try {
 			return ref.checkActivation(new NullProgressMonitor()).isOK();
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("ReorgAction.reorganize"), RefactoringMessages.getString("ReorgAction.exception")); //$NON-NLS-2$ //$NON-NLS-1$
+			ExceptionHandler.handle(e, ReorgMessages.getString("ReorgAction.reorganize"), ReorgMessages.getString("ReorgAction.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 			return false;
 		}	
 	}
