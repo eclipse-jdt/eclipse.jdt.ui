@@ -682,8 +682,12 @@ public class PackageExplorerPart extends ViewPart
 	 * Returns whether the preference to link selection to active editor is enabled.
 	 */
 	boolean isLinkingEnabled() {
-		// linking was removed in 2.1
-		return false;
+		/*
+		 * linking was removed in 2.1
+		 * the key we use now is internal and
+		 * false will normally be returned by this method.
+		 */ 
+		return PreferenceConstants.getPreferenceStore().getBoolean("org.eclipse.jdt.internal.ui.packages.linktoeditor"); //$NON-NLS-1$
 	}
 
 	/**
