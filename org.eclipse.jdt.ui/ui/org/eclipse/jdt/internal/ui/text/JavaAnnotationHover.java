@@ -81,7 +81,7 @@ public class JavaAnnotationHover implements IAnnotationHover {
 			Object o= e.next();
 			if (o instanceof IJavaAnnotation) {
 				IJavaAnnotation a= (IJavaAnnotation)o;
-				if (a.isRelevant()) {
+				if (!a.hasOverlay()) {
 					Position position= model.getPosition((Annotation)a);
 					if (position == null)
 						continue;
