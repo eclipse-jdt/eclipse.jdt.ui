@@ -136,7 +136,7 @@ public class CUOrFileReorgSupport implements ICopySupport, IMoveSupport, INaming
 	}
 
 	public boolean canReplace(Object original, Object container, String newName) {
-		IPackageFragment fragment= (IPackageFragment)container;
+		IPackageFragment fragment= getDestination(container);
 		try {
 			Object res= ReorgSupport.getResource(fragment, newName);
 			if (original.equals(res))
