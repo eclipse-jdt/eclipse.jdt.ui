@@ -1,15 +1,17 @@
 package experiments;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.NullChange;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 
 /*
  * The following should be cofigurable:
@@ -75,10 +77,10 @@ public class AbstractFieldRefactoring extends Refactoring {
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		if (fCreateGetter)
-			result.merge(checkGetterName());
-		if (fCreateSetter)
-			result.merge(checkSetterName());	
+		//if (fCreateGetter)
+		//	result.merge(checkGetterName());
+		//if (fCreateSetter)
+		//	result.merge(checkSetterName());	
 		return result;
 	}
 
