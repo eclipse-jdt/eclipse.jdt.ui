@@ -19,6 +19,7 @@ public class SelectionAnalyzer extends GenericVisitor {
 	
 	private Selection fSelection;
 	private boolean fTraverseSelectedNode;
+	private ASTNode fLastCoveringNode;
 	
 	// Selected nodes
 	private List fSelectedNodes;
@@ -65,6 +66,10 @@ public class SelectionAnalyzer extends GenericVisitor {
 		return TextRange.createFromStartAndExclusiveEnd(firstNode.getStartPosition(), lastNode.getStartPosition() + lastNode.getLength());
 	}
 	
+	public ASTNode getLastCoveringNode() {
+		return fLastCoveringNode;
+	}
+	
 	protected Selection getSelection() {
 		return fSelection;
 	}
@@ -83,6 +88,7 @@ public class SelectionAnalyzer extends GenericVisitor {
 			}
 			return fTraverseSelectedNode;
 		} else if (fSelection.coveredBy(node)) {
+			fLastCoveringNode= node;
 			return true;
 		} else if (fSelection.endsIn(node)) {
 			handleSelectionEndsIn(node);
