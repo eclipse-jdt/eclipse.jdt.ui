@@ -345,24 +345,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					fReusedExpandedItem= null;
 				}
 				
-				/*
-				 * @see TreeViewer#createTreeItem
-				 */
-
-				protected void createTreeItem(Widget parent, Object element, int ix) {
-					Item[] children= getChildren(parent);
-					boolean expand= (parent instanceof Item && (children == null || children.length == 0));
-					
-					Item item= newItem(parent, SWT.NULL, ix);				
-					updateItem(item, element);
-					updatePlus(item, element);
-					
-					if (expand)
-						setExpanded((Item) parent, true);
-						
-					internalExpandToLevel(item, ALL_LEVELS);
-				}
-				
 				protected boolean mustUpdateParent(IJavaElementDelta delta, IJavaElement element) {
 					if (element instanceof IMethod) {
 						if ((delta.getKind() & IJavaElementDelta.ADDED) != 0) {
@@ -757,6 +739,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				handleKeyReleased(e);
 			}
 		});
+		
 		initDragAndDrop();
 	}
 
@@ -929,7 +912,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		if (action != null && action.isEnabled())
 			action.run();
 	}
-	
 	private void initDragAndDrop() {
 		int ops= DND.DROP_COPY | DND.DROP_MOVE;
 		Transfer[] transfers= new Transfer[] {
@@ -950,5 +932,4 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		DragSource source= new DragSource(control, ops);
 		// Note, that the transfer agents are set by the delegating drag adapter itself.
 		source.addDragListener(new DelegatingDragAdapter(dragListeners));
-	}
-}
+	}}
