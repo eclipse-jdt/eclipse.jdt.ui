@@ -36,6 +36,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 import org.eclipse.ui.dialogs.IOverwriteQuery;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
@@ -131,7 +132,7 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 			display.asyncExec(new Runnable() {
 				public void run() {
 					try {
-						activePage.openEditor((IFile)resource);
+						IDE.openEditor(activePage, (IFile)resource, true);
 					} catch (PartInitException e) {
 						ExampleProjectsPlugin.log(e);
 					}
