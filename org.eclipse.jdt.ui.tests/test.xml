@@ -4,7 +4,7 @@
   <!-- The property ${eclipse-home} should be passed into this script -->
   <!-- Set a meaningful default value for when it is not. -->
   <property name="eclipse-home" value="${basedir}\..\.."/>
-  <property name="org.eclipse.jdt.ui.tests" value="org.eclipse.jdt.ui.tests_3.0.0"/>
+  <property name="org.eclipse.jdt.ui.tests" value="org.eclipse.jdt.ui.tests_3.0.1"/>
 
   <!-- sets the properties eclipse-home, and library-file -->
   <property name="plugin-name" value="org.eclipse.jdt.ui.tests"/>
