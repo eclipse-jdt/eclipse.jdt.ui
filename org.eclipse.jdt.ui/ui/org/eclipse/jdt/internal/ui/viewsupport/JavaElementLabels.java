@@ -96,13 +96,13 @@ public class JavaElementLabels {
 	
 	/**
 	 * Field names contain the declared type (appended)
-	 * e.g. <code>int fHello</code>
+	 * e.g. <code>fHello : int</code>
 	 */
 	public final static int F_APP_TYPE_SIGNATURE= 1 << 9;
 	
 	/**
 	 * Field names contain the declared type (prepended)
-	 * e.g. <code>fHello : int</code>
+	 * e.g. <code>int fHello</code>
 	 */
 	public final static int F_PRE_TYPE_SIGNATURE= 1 << 10;	
 
