@@ -29,7 +29,7 @@ class GotoMarkerAction extends Action {
 			return;
 		IWorkbenchPage wbPage= JavaPlugin.getActivePage();
 		IJavaElement javaElement= getJavaElement(marker);
-		if (javaElement == null) {
+		if (javaElement == null || !javaElement.exists()) {
 			beep();
 			return;
 		}
