@@ -35,7 +35,7 @@ public class JdtTextTestPlugin extends AbstractUIPlugin {
 		super(descriptor);
 		plugin = this;
 		try {
-			resourceBundle= ResourceBundle.getBundle("org.eclipse.jdt.text.test.JdtTextTestPluginResources"); //$NON-NLS-1$
+			resourceBundle= ResourceBundle.getBundle("org.eclipse.jdt.text.tests.JdtTextTestPluginResources"); //$NON-NLS-1$
 		} catch (MissingResourceException x) {
 			resourceBundle = null;
 		}
