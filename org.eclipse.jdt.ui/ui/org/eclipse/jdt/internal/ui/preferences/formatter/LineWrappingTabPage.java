@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -38,284 +39,356 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
- 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+
+/**
+ * The line wrapping tab page.
+ */
 public class LineWrappingTabPage extends ModifyDialogTabPage implements ISelectionChangedListener {
 
+    /**
+     * Represents a line wrapping category. All members are final.
+     */
+	private final static class Category {
+		final private String fKey;
+		final private String fName;
+		final private String fPreviewText;
+		final private Collection fChildren;
 
-	private static class Category {
-		final public String key;
-		final public String name;
-		final public String previewText;
-		final public Collection children;
+		public Category(String key, String previewText, String name) {
+			this.fKey= key;
+			this.fName= name;
+			fPreviewText= previewText;
+			fChildren= new ArrayList();
+		}
 		
-		public Category( String key, String previewText, String name, Collection children ) {
-			this.key= key;
-			this.name= name;
-			this.previewText= previewText;
-			this.children= children;
+		public Category(String name) {
+		    this(null, null, name);
 		}
 		
 		public String toString() {
-			return name;
+			return fName;
 		}
+
+        public String getPreviewText() {
+            if (fPreviewText != null)
+                return createPreviewHeader(fName) + fPreviewText;
+            else 
+                return null;
+        }
+
+        public Collection getChildren() {
+            return fChildren;
+        }
+
+        public String getKey() {
+            return fKey;
+        }
+
+        public String getName() {
+            return fName;
+        }
+        
+        public void addChild(Category child) {
+            fChildren.add(child);
+        }
 	}
 	
 
-	private final String COMPACT_IF_PREVIEW= 
-	createPreviewHeader("Compact If") +
-	"class Example {" +
-	"int foo(int argument) {" +
-	"  if (argument==0) return 0;" +
-	"  if (argument==1) return 42; else return 43;" +	
-	"}}";
-	private final Category compactIfCategory= new Category(
-			DefaultCodeFormatterConstants.FORMATTER_COMPACT_IF_ALIGNMENT,
-			COMPACT_IF_PREVIEW,
-			"Compact 'if else'", null);
-	
-	
-
-	private final String TYPE_DECLARATION_SUPERCLASS_PREVIEW= 
-	createPreviewHeader("Superclass Declaration") +
-	"class Example extends OtherClass {}";
-	
-	private final Category typeDeclarationSuperclassCategory= new Category(
-			DefaultCodeFormatterConstants.FORMATTER_TYPE_DECLARATION_SUPERCLASS_ALIGNMENT,
-			TYPE_DECLARATION_SUPERCLASS_PREVIEW, "'extends' clause", null);
-	
-
-	private final String TYPE_DECLARATION_SUPERINTERFACES_PREVIEW=
-	createPreviewHeader("Superinterfaces Declaration") +
-	"class Example implements I1, I2, I3 {}";
-	private final Category typeDeclarationSuperinterfacesCategory= new Category(
-			DefaultCodeFormatterConstants.FORMATTER_TYPE_DECLARATION_SUPERINTERFACES_ALIGNMENT,
-			TYPE_DECLARATION_SUPERINTERFACES_PREVIEW, "'implements' clause", null);
-	
-	
-	private final String METHOD_DECLARATION_ARGUMENTS_PREVIEW= 
-	createPreviewHeader("Method Declaration Parameters") +
-	"class Example {" +
-	"void foo(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) {" +
-	"}" +
-	"}";
-	private final Category methodDeclarationsArgumentsCategory= new Category(
-			DefaultCodeFormatterConstants.FORMATTER_METHOD_DECLARATION_ARGUMENTS_ALIGNMENT,
-			METHOD_DECLARATION_ARGUMENTS_PREVIEW, "Parameters", null);
-			
-	
-	
-
-	private final String MESSAGE_SEND_ARGUMENTS_PREVIEW=
-	createPreviewHeader("Method Call Arguments") +
-	"class Example {" +
-	"void foo() {" +
-	"  Other.bar( 100, 200, 300, 400, 500, 600, 700, 800, 900 );" +
-	"}" +
-	"}";
-	private final Category messageSendArgumentsCategory= new Category(
-			DefaultCodeFormatterConstants.FORMATTER_MESSAGE_SEND_ARGUMENTS_ALIGNMENT,
-			MESSAGE_SEND_ARGUMENTS_PREVIEW, "Arguments", null);
-	
-		
-	private final String MESSAGE_SEND_SELECTOR_PREVIEW=
-	createPreviewHeader("Method Call Selector") +
-	"class Example {" +
-	"int foo(Some a) {" +
-	"  return a.getFirst();" +
-	"}" +
-	"}";
-	private final Category messageSendSelectorCategory= new Category(
-			DefaultCodeFormatterConstants.FORMATTER_MESSAGE_SEND_SELECTOR_ALIGNMENT,
-			MESSAGE_SEND_SELECTOR_PREVIEW, "Qualified invocations", null);
-	
-	
-	private final String METHOD_THROWS_CLAUSE_PREVIEW= 
-	createPreviewHeader("Method Declaration Throws Clause") +
-	"class Example {" +
-	"int foo() throws FirstException, SecondException, ThirdException {" +
-	"  return Other.doSomething();" +
-	"}" +
-	"}";
-	private final Category methodThrowsClauseCategory= new Category(
-			DefaultCodeFormatterConstants.FORMATTER_METHOD_THROWS_CLAUSE_ALIGNMENT, 
-			METHOD_THROWS_CLAUSE_PREVIEW, "'throws' clause", null);
-	
-	
-	private final String ALLOCATION_EXPRESSION_ARGUMENTS_PREVIEW= 
-	createPreviewHeader("Allocation Expressions") +
-	"class Example {" +
-	"SomeClass foo() {" +
-	"  return new SomeClass(100, 200, 300, 400, 500, 600, 700, 800, 900 );" +
-	"}" +
-	"}";
-	private final Category allocationExpressionArgumentsCategory= new Category(
-			DefaultCodeFormatterConstants.FORMATTER_ALLOCATION_EXPRESSION_ARGUMENTS_ALIGNMENT,
-			ALLOCATION_EXPRESSION_ARGUMENTS_PREVIEW, "Object allocation arguments", null);
-	
-	
-	private final String QUALIFIED_ALLOCATION_EXPRESSION_PREVIEW= 
-	createPreviewHeader("Qualified Allocation Expressions") +
-	"class Example {" +
-	"SomeClass foo() {" +
-	"  return SomeOtherClass.new SomeClass(100, 200, 300, 400, 500 );" +
-	"}" +
-	"}";
-	private final Category qualifiedAllocationExpressionCategory= new Category (
-			DefaultCodeFormatterConstants.FORMATTER_QUALIFIED_ALLOCATION_EXPRESSION_ARGUMENTS_ALIGNMENT,
-			QUALIFIED_ALLOCATION_EXPRESSION_PREVIEW, "Qualified object allocation arguments", null);
-	
-	
-	private final String ARRAY_INITIALIZER_EXPRESSIONS_PREVIEW= 
-	createPreviewHeader("Array Initializers") +
-	"class Example {" +
-	"int [] fArray= {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};" +
-	"}";
-	private final Category arrayInitializerExpressionsCategory= new Category(
-			DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_EXPRESSIONS_ALIGNMENT,
-			ARRAY_INITIALIZER_EXPRESSIONS_PREVIEW, "Array initializers", null);
-	
-
-	private final String EXPLICIT_CONSTRUCTOR_ARGUMENTS_PREVIEW=
-	createPreviewHeader("Explicit Constructor Arguments") +
-	"class Example extends AnotherClass {" +
-	"Example() {" +
-	"  super(100, 200, 300, 400, 500, 600, 700);" +
-	"}" +
-	"}";
-	private final Category explicitConstructorArgumentsCategory= new Category(
-			DefaultCodeFormatterConstants.FORMATTER_EXPLICIT_CONSTRUCTOR_ARGUMENTS_ALIGNMENT,
-			EXPLICIT_CONSTRUCTOR_ARGUMENTS_PREVIEW,	"Explicit constructor invocations",	null);
-	
-
-	private final String CONDITIONAL_EXPRESSION_PREVIEW= 
-	createPreviewHeader("Conditional Expressions") +
-	"class Example extends AnotherClass {" +
-	"int Example(boolean Argument) {" +
-	"  return argument ? 100000 : 200000;" +
-	"}" +
-	"}";
-	private final Category conditionalExpressionCategory= new Category(
-			DefaultCodeFormatterConstants.FORMATTER_CONDITIONAL_EXPRESSION_ALIGNMENT,
-			CONDITIONAL_EXPRESSION_PREVIEW, "Conditionals",	null);
-	
-
-	private final String BINARY_EXPRESSION_PREVIEW= 
-	createPreviewHeader("Binary Expressions") +
-	"class Example extends AnotherClass {" +
-	"int foo() {" +
-	"  int sum= 100 + 200 + 300 + 400 + 500 + 600 + 700 + 800;" +
-	"  int product= 1 * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10;" +
-	"  boolean val= true && false && true && false && true;" + //(1 == 2) && ( 2 == 3 ) || (4==5) || false && true;" +
-	"  return product / sum;" +
-	"}" +
-	"}";
-	private final Category binaryExpressionCategory= new Category(
-			DefaultCodeFormatterConstants.FORMATTER_BINARY_EXPRESSION_ALIGNMENT,
-			BINARY_EXPRESSION_PREVIEW, "Binary expressions", null);
-	
+	/* 
+	 * Force splitting 
+	 */
+	protected final static int DO_NOT_FORCE_SPLIT= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_NO_ALIGNMENT);
+	protected final static int FORCE_SPLIT= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FORCE);
 
 	
-	
-	// force splitting
-	private final int ALIGNMENT_FORCE= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FORCE);
-	
-	// indentation style
-	private final int NO_ALIGNMENT= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_NO_ALIGNMENT);
-	private final int INDENT_ON_COLUMN= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_ON_COLUMN);
-	private final int INDENT_BY_ONE= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_BY_ONE);
+	/*
+	 * Indentation styles 
+	 */
+	protected final static int INDENT_DEFAULT= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_NO_ALIGNMENT);
+	protected final static int INDENT_ON_COLUMN= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_ON_COLUMN);
+	protected final static int INDENT_BY_ONE= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_INDENT_BY_ONE);
 
-	private final String [] INDENT_STYLE_NAMES= { "Default indentation", "Indent on column", "Indent by one" };
-	private final int [] INDENT_STYLE_VALUES= { NO_ALIGNMENT, INDENT_ON_COLUMN, INDENT_BY_ONE };
+	protected final static int [] INDENT_VALUES= { 
+	    INDENT_DEFAULT, 
+	    INDENT_ON_COLUMN, 
+	    INDENT_BY_ONE 
+	};
 	
-	private final int fIndentMask;
+	protected final static String[] INDENT_NAMES = {
+	    FormatterMessages.getString("LineWrappingTabPage.indentation.default"), //$NON-NLS-1$ 
+	    FormatterMessages.getString("LineWrappingTabPage.indentation.on_column"), //$NON-NLS-1$ 
+	    FormatterMessages.getString("LineWrappingTabPage.indentation.by_one") //$NON-NLS-1$
+	};
 	
 	
-	// splitting style
-	private final int COMPACT_SPLIT= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_COMPACT_SPLIT);
-	private final int FIRST_BREAK_SPLIT= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_COMPACT_FIRST_BREAK_SPLIT);
-	private final int ONE_PER_LINE_SPLIT= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_ONE_PER_LINE_SPLIT);
-	private final int NEXT_SHIFTED_SPLIT= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_NEXT_SHIFTED_SPLIT);
-	private final int NEXT_PER_LINE_SPLIT= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_NEXT_PER_LINE_SPLIT);
+	/* 
+	 * Splitting styles. 
+	 */
+	protected final static int SPLIT_DO_NOT= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_NO_ALIGNMENT);
+	protected final static int SPLIT_COMPACT= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_COMPACT_SPLIT);
+	protected final static int SPLIT_FIRST_BREAK= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_COMPACT_FIRST_BREAK_SPLIT);
+	protected final static int SPLIT_ONE_PER_LINE= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_ONE_PER_LINE_SPLIT);
+	protected final static int SPLIT_NEXT_SHIFTED= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_NEXT_SHIFTED_SPLIT);
+	protected final static int SPLIT_NEXT_PER_LINE= Integer.parseInt(DefaultCodeFormatterConstants.FORMATTER_NEXT_PER_LINE_SPLIT);
 	
-	private final String[] SPLIT_STYLE_NAMES = { 
-				"Wrap only when necessary", // COMPACT_SPLIT
-				"Always wrap first element, others when necessary", // COMPACT_FIRST_BREAK_SPLIT 
-				"Wrap always", // ONE_PER_LINE_SPLIT 
-				"Wrap always, indent all but the first element", // NEXT_SHIFTED_SPLIT 
-				"Wrap always, except first element only if necessary" }; // NEXT_PER_LINE_SPLIT
-	private final int [] SPLIT_STYLE_VALUES = { COMPACT_SPLIT, FIRST_BREAK_SPLIT, ONE_PER_LINE_SPLIT, NEXT_SHIFTED_SPLIT, NEXT_PER_LINE_SPLIT };  
-				
-	private final int fSplitMask;
+	protected final static int [] SPLIT_VALUES = { 
+	    SPLIT_DO_NOT, 
+	    SPLIT_COMPACT, 
+	    SPLIT_FIRST_BREAK, 
+	    SPLIT_ONE_PER_LINE, 
+	    SPLIT_NEXT_SHIFTED, 
+	    SPLIT_NEXT_PER_LINE 
+	};  
+	
+	protected final static String[] SPLIT_NAMES = { 
+	    FormatterMessages.getString("LineWrappingTabPage.splitting.do_not_split"), //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.splitting.wrap_when_necessary"), // COMPACT_SPLIT //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.splitting.always_wrap_first_others_when_necessary"), // COMPACT_FIRST_BREAK_SPLIT  //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.splitting.wrap_always"), // ONE_PER_LINE_SPLIT  //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.splitting.wrap_always_indent_all_but_first"), // NEXT_SHIFTED_SPLIT  //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.splitting.wrap_always_except_first_only_if_necessary") // NEXT_PER_LINE_SPLIT //$NON-NLS-1$
+	};
 
+	/**
+	 * A wrapper class for the code formatter line wrapping option, which encodes three different options into one.
+	 */
+	private final static class AlignmentValue {
 
+	    private final static int INDENT_MASK= calculateMask(INDENT_VALUES);
+	    private final static int SPLIT_MASK= calculateMask(SPLIT_VALUES);
+
+	    private int fBitField;
+	    
+	    private static int calculateMask(int [] values) {
+	        int mask= 0;
+	        for (int i= 0; i < values.length; i++) {
+	            mask |= values[i];
+	        }
+	        return mask; 
+	    }
+	    
+	    public AlignmentValue(String value) {
+	        setValue(value);
+	    }
+	    
+	    public void setValue(String value) {
+	        try {
+	            fBitField= Integer.parseInt(value);
+	        } catch (NumberFormatException e) {
+	            fBitField= 0;
+	            JavaPlugin.log(e);
+	        }
+	    }
+
+	    public String getValue() {
+	        return Integer.toString(fBitField);
+	    }
+	    
+	    public boolean getForceSplit() {
+	        return (fBitField & FORCE_SPLIT) != 0;
+	    }
+	    
+	    public void setForceSplit(boolean enabled) {
+	        if (enabled) {
+	            fBitField |= FORCE_SPLIT;
+	        } else {
+	            fBitField &= ~FORCE_SPLIT;
+	        }
+	    }
+	    
+	    public int getIndentStyleIndex() {
+	        final int indent= fBitField & INDENT_MASK;
+	        for (int i= 0; i < INDENT_VALUES.length; i++)
+	            if (INDENT_VALUES[i] == indent) return i;
+	        return 0;
+	    }
+	    
+	    public void setIndentStyleIndex(int index) {
+	        fBitField = (fBitField & ~INDENT_MASK) | INDENT_VALUES[index];
+	    }
+	    
+	    public int getSplitStyleIndex() {
+	        final int split= fBitField & SPLIT_MASK;
+	        for (int i= 0; i < SPLIT_VALUES.length; i++)
+	            if (SPLIT_VALUES[i] == split) return i;
+	        return 0;
+	    }
+	    
+	    public void setSplitStyleIndex(int index) {
+	        fBitField = (fBitField & ~SPLIT_MASK) | SPLIT_VALUES[index];
+	    }
+	}
 	
 
-	// other fields
+	private final Category fCompactIfCategory= new Category(
+	    DefaultCodeFormatterConstants.FORMATTER_COMPACT_IF_ALIGNMENT,
+	    "class Example {" + //$NON-NLS-1$
+	    "int foo(int argument) {" + //$NON-NLS-1$
+	    "  if (argument==0) return 0;" + //$NON-NLS-1$
+	    "  if (argument==1) return 42; else return 43;" + //$NON-NLS-1$	
+	    "}}", //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.compact_if_else.title") //$NON-NLS-1$
+	);
 	
+
+	private final Category fTypeDeclarationSuperclassCategory= new Category(
+	    DefaultCodeFormatterConstants.FORMATTER_TYPE_DECLARATION_SUPERCLASS_ALIGNMENT,
+	    "class Example extends OtherClass {}", //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.extends_clause.title") //$NON-NLS-1$
+	);
+	
+
+	private final Category fTypeDeclarationSuperinterfacesCategory= new Category(
+	    DefaultCodeFormatterConstants.FORMATTER_TYPE_DECLARATION_SUPERINTERFACES_ALIGNMENT,
+	    "class Example implements I1, I2, I3 {}", //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.implements_clause.title") //$NON-NLS-1$
+	);	
+
+	private final Category fMethodDeclarationsArgumentsCategory= new Category(
+	    DefaultCodeFormatterConstants.FORMATTER_METHOD_DECLARATION_ARGUMENTS_ALIGNMENT,
+	    "class Example {void foo(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) {}}", //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.parameters.title") //$NON-NLS-1$
+	); 
+	
+	private final Category fMessageSendArgumentsCategory= new Category(
+	    DefaultCodeFormatterConstants.FORMATTER_MESSAGE_SEND_ARGUMENTS_ALIGNMENT,
+	    "class Example {void foo() {Other.bar( 100, 200, 300, 400, 500, 600, 700, 800, 900 );}}", //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.arguments.title") //$NON-NLS-1$
+	); 
+
+	private final Category fMessageSendSelectorCategory= new Category(
+	    DefaultCodeFormatterConstants.FORMATTER_MESSAGE_SEND_SELECTOR_ALIGNMENT,
+	    "class Example {int foo(Some a) {return a.getFirst();}}", //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.qualified_invocations.title") //$NON-NLS-1$
+	);
+	
+	private final Category fMethodThrowsClauseCategory= new Category(
+	    DefaultCodeFormatterConstants.FORMATTER_METHOD_THROWS_CLAUSE_ALIGNMENT, 
+	    "class Example {" + //$NON-NLS-1$
+	    "int foo() throws FirstException, SecondException, ThirdException {" + //$NON-NLS-1$
+	    "  return Other.doSomething();}}", //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.throws_clause.title") //$NON-NLS-1$
+	);
+	
+	private final Category fAllocationExpressionArgumentsCategory= new Category(
+	    DefaultCodeFormatterConstants.FORMATTER_ALLOCATION_EXPRESSION_ARGUMENTS_ALIGNMENT,
+	    "class Example {SomeClass foo() {return new SomeClass(100, 200, 300, 400, 500, 600, 700, 800, 900 );}}", //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.object_allocation.title") //$NON-NLS-1$
+	);
+	
+	private final Category fQualifiedAllocationExpressionCategory= new Category (
+	    DefaultCodeFormatterConstants.FORMATTER_QUALIFIED_ALLOCATION_EXPRESSION_ARGUMENTS_ALIGNMENT,
+	    "class Example {SomeClass foo() {return SomeOtherClass.new SomeClass(100, 200, 300, 400, 500 );}}", //$NON-NLS-1$
+		FormatterMessages.getString("LineWrappingTabPage.qualified_object_allocation.title") //$NON-NLS-1$
+	);
+	
+	private final Category fArrayInitializerExpressionsCategory= new Category(
+	    DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_EXPRESSIONS_ALIGNMENT,
+	    "class Example {int [] fArray= {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};}", //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.array_init.title") //$NON-NLS-1$
+	);
+	
+	private final Category fExplicitConstructorArgumentsCategory= new Category(
+	    DefaultCodeFormatterConstants.FORMATTER_EXPLICIT_CONSTRUCTOR_ARGUMENTS_ALIGNMENT,
+	    "class Example extends AnotherClass {Example() {super(100, 200, 300, 400, 500, 600, 700);}}", //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.explicit_constructor_invocations.title") //$NON-NLS-1$
+	);
+
+	private final Category fConditionalExpressionCategory= new Category(
+	    DefaultCodeFormatterConstants.FORMATTER_CONDITIONAL_EXPRESSION_ALIGNMENT,
+	    "class Example extends AnotherClass {int Example(boolean Argument) {return argument ? 100000 : 200000;}}", //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.conditionals.title") //$NON-NLS-1$
+	);
+
+	private final Category fBinaryExpressionCategory= new Category(
+	    DefaultCodeFormatterConstants.FORMATTER_BINARY_EXPRESSION_ALIGNMENT,
+	    "class Example extends AnotherClass {" + //$NON-NLS-1$
+	    "int foo() {" + //$NON-NLS-1$
+	    "  int sum= 100 + 200 + 300 + 400 + 500 + 600 + 700 + 800;" + //$NON-NLS-1$
+	    "  int product= 1 * 2 * 3 * 4 * 5 * 6 * 7 * 8 * 9 * 10;" + //$NON-NLS-1$
+	    "  boolean val= true && false && true && false && true;" +  //$NON-NLS-1$
+	    "  return product / sum;}}", //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.binary_exprs.title") //$NON-NLS-1$
+	);
+	
+	/**
+	 * The default preview line width.
+	 */
 	private static int DEFAULT_PREVIEW_WINDOW_LINE_WIDTH= 40;
 		
 	private TreeViewer fCategoriesViewer;
 	protected Combo fSplitStyleCombo;
+	protected Label fIndentStyleLabel;
 	protected Combo fIndentStyleCombo;
 	protected Button fForceSplit;
 
 	private Composite fOptionsComposite;
 	private Group fOptionsGroup;
 
-	
+	/**
+	 * A collection containing the categories tree. This is used as model for the tree viewer.
+	 * @see fTreeViewer
+	 */
 	private final Collection fCategories;
 
+	/**
+	 * The key representing the category for which the options are currently shown. 
+	 */
 	private String fCurrentKey;
 	
+	/**
+	 * A special options store wherein the preview line width is kept.
+	 */
 	protected final Map fPreviewPreferences;
+	
+	/**
+	 * The key for the preview line width.
+	 */
 	private final String LINE_SPLIT= DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT;
 	
-	
-	public LineWrappingTabPage(Map workingValues) {
-		super(workingValues);
+	/**
+	 * Create a new line wrapping tab page.
+	 */
+	public LineWrappingTabPage(ModifyDialog modifyDialog, Map workingValues) {
+		super(modifyDialog, workingValues);
 		
 		fPreviewPreferences= new HashMap();
 		fPreviewPreferences.put(LINE_SPLIT, Integer.toString(DEFAULT_PREVIEW_WINDOW_LINE_WIDTH));
 		
 		fCategories= createCategories();
 		
-		fCurrentKey= ((Category)fCategories.iterator().next()).key;
-		
-		// calculate masks
-		fSplitMask= getMask( SPLIT_STYLE_VALUES );
-		fIndentMask= getMask( INDENT_STYLE_VALUES );
+		fCurrentKey= ((Category)fCategories.iterator().next()).getKey();
 	}
 	
+	/**
+	 * Create the categories tree.
+	 */
 	protected Collection createCategories() {
 
-		final List classDeclarationsChildren= new ArrayList(2);
-		classDeclarationsChildren.add(typeDeclarationSuperclassCategory);
-		classDeclarationsChildren.add(typeDeclarationSuperinterfacesCategory);
-		final Category classDeclarations= new Category(null, null, "Class Declarations", classDeclarationsChildren );
+		final Category classDeclarations= new Category(FormatterMessages.getString("LineWrappingTabPage.class_decls.title")); //$NON-NLS-1$
+		classDeclarations.addChild(fTypeDeclarationSuperclassCategory);
+		classDeclarations.addChild(fTypeDeclarationSuperinterfacesCategory);
 		
-		final List methodDeclarationsChildren= new ArrayList(2);
-		methodDeclarationsChildren.add(methodDeclarationsArgumentsCategory);
-		methodDeclarationsChildren.add(methodThrowsClauseCategory);
-		final Category methodDeclarations= new Category(null, null, "Method Declarations", methodDeclarationsChildren );
+		final Category methodDeclarations= new Category(null, null, FormatterMessages.getString("LineWrappingTabPage.method_decls.title")); //$NON-NLS-1$
+		methodDeclarations.addChild(fMethodDeclarationsArgumentsCategory);
+		methodDeclarations.addChild(fMethodThrowsClauseCategory);
 		
-		final List functionCallsChildren= new ArrayList(5);
-		functionCallsChildren.add(messageSendArgumentsCategory);
-		functionCallsChildren.add(messageSendSelectorCategory);
-		functionCallsChildren.add(explicitConstructorArgumentsCategory);
-		functionCallsChildren.add(allocationExpressionArgumentsCategory);
-		functionCallsChildren.add(qualifiedAllocationExpressionCategory);
-		final Category functionCalls= new Category(null, null, "Function Calls", functionCallsChildren);
+		final Category functionCalls= new Category(FormatterMessages.getString("LineWrappingTabPage.function_calls.title")); //$NON-NLS-1$
+		functionCalls.addChild(fMessageSendArgumentsCategory);
+		functionCalls.addChild(fMessageSendSelectorCategory);
+		functionCalls.addChild(fExplicitConstructorArgumentsCategory);
+		functionCalls.addChild(fAllocationExpressionArgumentsCategory);
+		functionCalls.addChild(fQualifiedAllocationExpressionCategory);
 		
-		final List expressionsChildren= new ArrayList(3);
-		expressionsChildren.add(binaryExpressionCategory);
-		expressionsChildren.add(conditionalExpressionCategory);
-		expressionsChildren.add(arrayInitializerExpressionsCategory);
-		final Category expressions= new Category(null, null, "Expressions", expressionsChildren);
+		final Category expressions= new Category(FormatterMessages.getString("LineWrappingTabPage.expressions.title")); //$NON-NLS-1$
+		expressions.addChild(fBinaryExpressionCategory);
+		expressions.addChild(fConditionalExpressionCategory);
+		expressions.addChild(fArrayInitializerExpressionsCategory);
 		
-		final List statementsChildren= new ArrayList();
-		statementsChildren.add(compactIfCategory);
-		final Category statements= new Category(null, null, "Statements", statementsChildren);
+		final Category statements= new Category(FormatterMessages.getString("LineWrappingTabPage.statements.title")); //$NON-NLS-1$
+		statements.addChild(fCompactIfCategory);
 		
 		final List root= new ArrayList();
 		root.add(classDeclarations);
@@ -327,23 +400,6 @@ public class LineWrappingTabPage extends ModifyDialogTabPage implements ISelecti
 		return root;
 	}
 	
-	protected int getMask(int [] values) {
-		int mask= 0;
-		for (int i= 0; i < values.length; i++) {
-			mask |= values[i];
-		}
-		return mask; 
-	}
-	
-	protected int getOffsetOfMask( int mask ) {
-		int offset= 0;
-		if (mask == 0) return offset;
-		while (((mask >> offset) & 0x01) == 0) {
-			offset++;
-		}
-		return offset;
-	}
-
 	protected Composite doCreatePreferences(Composite parent) {
 	
 		final int numColumns= 3;
@@ -351,7 +407,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage implements ISelecti
 		final Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(createGridLayout(numColumns, false));
 		
-		createLabel(numColumns, composite, "&Category:");
+		createLabel(numColumns, composite, FormatterMessages.getString("LineWrappingTabPage.category.label.text")); //$NON-NLS-1$
 		
 		fCategoriesViewer= new TreeViewer(composite, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL );
 		fCategoriesViewer.setContentProvider(new ITreeContentProvider() {
@@ -359,11 +415,11 @@ public class LineWrappingTabPage extends ModifyDialogTabPage implements ISelecti
 				return ((Collection)inputElement).toArray();
 			}
 			public Object[] getChildren(Object parentElement) {
-				return ((Category)parentElement).children.toArray();
+				return ((Category)parentElement).getChildren().toArray();
 			}
 			public Object getParent(Object element) { return null; }
 			public boolean hasChildren(Object element) {
-				return ((Category)element).children != null;
+				return !((Category)element).getChildren().isEmpty();
 			}
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {}
 			public void dispose() {}
@@ -387,32 +443,32 @@ public class LineWrappingTabPage extends ModifyDialogTabPage implements ISelecti
 		fOptionsComposite.setLayout(createGridLayout(numColumns, true));
 		
 		// label "Select split style:"
-		createLabel(numColumns, fOptionsComposite, "Line &wrapping policy:");
+		createLabel(numColumns, fOptionsComposite, FormatterMessages.getString("LineWrappingTabPage.wrapping_policy.label.text")); //$NON-NLS-1$
 	
 		// combo SplitStyleCombo
 		fSplitStyleCombo= new Combo(fOptionsComposite, SWT.SINGLE | SWT.READ_ONLY);
-		fSplitStyleCombo.setItems(SPLIT_STYLE_NAMES);
-		fSplitStyleCombo.setLayoutData(createGridData(numColumns ) /*, GridData.FILL_HORIZONTAL)*/);
+		fSplitStyleCombo.setItems(SPLIT_NAMES);
+		fSplitStyleCombo.setLayoutData(createGridData(numColumns ));
 		
 		// label "Select indentation style:"
-		createLabel(numColumns, fOptionsComposite, "Indent&ation policy:");
+		fIndentStyleLabel= createLabel(numColumns, fOptionsComposite, FormatterMessages.getString("LineWrappingTabPage.indentation_policy.label.text")); //$NON-NLS-1$
 		
 		// combo SplitStyleCombo
 		fIndentStyleCombo= new Combo(fOptionsComposite, SWT.SINGLE | SWT.READ_ONLY);
-		fIndentStyleCombo.setItems(INDENT_STYLE_NAMES);
-		fIndentStyleCombo.setLayoutData(createGridData(numColumns /*GridData.FILL_HORIZONTAL)*/));
+		fIndentStyleCombo.setItems(INDENT_NAMES);
+		fIndentStyleCombo.setLayoutData(createGridData(numColumns));
 		
 		// button "Force split"
 		fForceSplit= new Button(fOptionsComposite, SWT.CHECK);
 		fForceSplit.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL));
-		fForceSplit.setText("&Force split");
+		fForceSplit.setText(FormatterMessages.getString("LineWrappingTabPage.force_split.checkbox.text")); //$NON-NLS-1$
 		
 		return composite;
 	}
 	
 		
 	protected Composite doCreatePreview(Composite parent) {
-		final int numColumns= 4;
+		final int numColumns= 2;
 		
 		final Composite composite= new Composite(parent, SWT.NONE);
 
@@ -421,10 +477,14 @@ public class LineWrappingTabPage extends ModifyDialogTabPage implements ISelecti
 		final Composite preview= super.doCreatePreview(composite);
 		preview.setLayoutData(createGridData(numColumns, GridData.FILL_BOTH));
 		
-		final NumberPreference np= new NumberPreference(composite, numColumns, fPreviewPreferences, LINE_SPLIT,
-				0, Integer.MAX_VALUE, "Set line width for preview window:");
+		final Composite lineWidthComposite= new Composite(composite, SWT.NONE);
+		lineWidthComposite.setLayoutData(createGridData(1, GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_BEGINNING));
+		lineWidthComposite.setLayout(createGridLayout(2, false));
+		
+		final NumberPreference np= new NumberPreference(lineWidthComposite, 2, fPreviewPreferences, LINE_SPLIT,
+		    0, Integer.MAX_VALUE, FormatterMessages.getString("LineWrappingTabPage.line_width_for_preview.label.text")); //$NON-NLS-1$
 		np.addObserver(new Observer() {
-			public void update(Observable o, Object arg) {
+		    public void update(Observable o, Object arg) {
 				updatePreview();
 			}
 		});
@@ -451,7 +511,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage implements ISelecti
 			}
 		});
 		
-		fCategoriesViewer.setSelection(new StructuredSelection(typeDeclarationSuperclassCategory), true);
+		fCategoriesViewer.setSelection(new StructuredSelection(fTypeDeclarationSuperclassCategory), true);
 	}
 	
 	protected void updatePreview() {
@@ -463,61 +523,55 @@ public class LineWrappingTabPage extends ModifyDialogTabPage implements ISelecti
 
 	public void selectionChanged(SelectionChangedEvent event) {
 		final Category c= (Category)((IStructuredSelection)event.getSelection()).getFirstElement();
-		fCurrentKey= c.key;
-		fOptionsGroup.setText("Settings for " + c.name.toLowerCase());
-		fJavaPreview.setPreviewText(c.previewText);
+		fCurrentKey= c.getKey();
+		if (fCurrentKey != null) {
+		    fOptionsGroup.setText(FormatterMessages.getString("LineWrappingTabPage.group.title") + c.getName().toLowerCase()); //$NON-NLS-1$
+		} else {
+		    fOptionsGroup.setText(""); //$NON-NLS-1$
+		}
+		fJavaPreview.setPreviewText(c.getPreviewText());
 		updatePreview();
-		final String key= (String)fWorkingValues.get(c.key);
-
-		final boolean enabled= key != null;
-		fOptionsComposite.setVisible(enabled);
 		
-		if (enabled) {
-			final int value= Integer.parseInt((String)fWorkingValues.get(c.key));		
-			
-			final int forceSplit= value & ALIGNMENT_FORCE;
-			fForceSplit.setSelection(forceSplit == ALIGNMENT_FORCE); 
+		final String valueString= (String)fWorkingValues.get(c.getKey());
 
-			final int indent= value & fIndentMask;
-			for (int i= 0; i < INDENT_STYLE_VALUES.length; i++) {
-				if (INDENT_STYLE_VALUES[i] == indent) {
-					fIndentStyleCombo.setText(INDENT_STYLE_NAMES[i]);
-					break;
-				}
-			}
-			
-			final int split= value & fSplitMask;
-			for (int i= 0; i < SPLIT_STYLE_VALUES.length; i++) {
-				if (SPLIT_STYLE_VALUES[i] == split) {
-					fSplitStyleCombo.setText(SPLIT_STYLE_NAMES[i]);
-					break;
-				}
-			}
+		final boolean enabled= valueString != null;
+		fOptionsComposite.setVisible(enabled);
+		fOptionsGroup.setEnabled(enabled);
+		if (enabled) {
+		    final AlignmentValue value= new AlignmentValue(valueString);
+			fForceSplit.setSelection(value.getForceSplit()); 
+			fIndentStyleCombo.setText(INDENT_NAMES[value.getIndentStyleIndex()]);
+			fSplitStyleCombo.setText(SPLIT_NAMES[value.getSplitStyleIndex()]);
+			updateControls(SPLIT_VALUES[value.getSplitStyleIndex()]);
 		}
 	}
 	
-	protected void forceSplitChanged(boolean state) {
-		int bitField= Integer.parseInt((String)fWorkingValues.get(fCurrentKey));
-		if (state) {
-			bitField |= ALIGNMENT_FORCE;
-		} else {
-			bitField &= ~ALIGNMENT_FORCE;
-		}
-		fWorkingValues.put(fCurrentKey, Integer.toString(bitField));
+	protected void forceSplitChanged(boolean enabled) {
+	    final AlignmentValue value= new AlignmentValue((String)fWorkingValues.get(fCurrentKey));
+	    value.setForceSplit(enabled);
+		fWorkingValues.put(fCurrentKey, value.getValue());
 		updatePreview();
 	}
 	
 	protected void splitStyleChanged(int index) {
-		int bitField= Integer.parseInt((String)fWorkingValues.get(fCurrentKey));
-		bitField = (bitField & ~fSplitMask) | SPLIT_STYLE_VALUES[index];
-		fWorkingValues.put(fCurrentKey, Integer.toString(bitField));
+	    final AlignmentValue value= new AlignmentValue((String)fWorkingValues.get(fCurrentKey));
+		value.setSplitStyleIndex(index);
+		fWorkingValues.put(fCurrentKey, value.getValue());
+		updateControls(SPLIT_VALUES[index]);
 		updatePreview();
 	}
 	
 	protected void indentStyleChanged(int index) {
-		int bitField= Integer.parseInt((String)fWorkingValues.get(fCurrentKey));
-		bitField = (bitField & ~fIndentMask) | INDENT_STYLE_VALUES[index];
-		fWorkingValues.put(fCurrentKey, Integer.toString(bitField));
+	    final AlignmentValue value= new AlignmentValue((String)fWorkingValues.get(fCurrentKey));
+	    value.setIndentStyleIndex(index);
+		fWorkingValues.put(fCurrentKey, value.getValue());
 		updatePreview();
-	}	
+	}
+	
+	protected void updateControls(int splitStyle) {
+	    boolean doSplit= splitStyle != SPLIT_DO_NOT;
+	    fIndentStyleLabel.setEnabled(doSplit);
+	    fIndentStyleCombo.setEnabled(doSplit);
+	    fForceSplit.setEnabled(doSplit);
+	}
 }

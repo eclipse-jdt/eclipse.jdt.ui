@@ -31,8 +31,16 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.formatter.DefaultCodeFormatterOptions;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 
+
+/**
+ * The model for the set of profiles which are available in the workbench.
+ */
 public class ProfileManager extends Observable {
 	
+    /**
+     * A prefix which is prepended to every ID of a user-defined profile, in order
+     * to differentiate it from a built-in profile.
+     */
 	private final static String ID_PREFIX= "_"; //$NON-NLS-1$
 	
 	/**
@@ -58,7 +66,7 @@ public class ProfileManager extends Observable {
 	 * Represents a built-in profile. The state of a built-in profile 
 	 * cannot be changed after instantiation.
 	 */
-	public static class BuiltInProfile extends Profile {
+	public final static class BuiltInProfile extends Profile {
 		private final String fName;
 		private final String fID;
 		private final Map fSettings;
@@ -91,7 +99,7 @@ public class ProfileManager extends Observable {
 	/**
 	 * Represents a user-defined profile. A custom profile can be modified after instantiation.
 	 */
-	public static class CustomProfile extends Profile {
+	public final static class CustomProfile extends Profile {
 		private String fName;
 		private Map fSettings;
 		private ProfileManager fManager;
@@ -206,11 +214,7 @@ public class ProfileManager extends Observable {
 	 */
 	protected final List fUIKeys, fCoreKeys;
 	
-	/**
-	 * The preference stores for Core and UI options.
-	 */
-	
-	
+
 	/**
 	 * Create and initialize a new profile manager.
 	 */
@@ -240,7 +244,13 @@ public class ProfileManager extends Observable {
 	
 
 	/**
-	 * Notify observers with a message.
+	 * Notify observers with a message. The message must be one of the following:
+	 * 
+	 * @see SELECTION_CHANGED_EVENT
+	 * @see PROFILE_DELETED_EVENT
+	 * @see PROFILE_RENAMED_EVENT
+	 * @see PROFILE_CREATED_EVENT
+	 * @see SETTINGS_CHANGED_EVENT
 	 */
 	protected void notifyObservers(int message) {
 		setChanged();
@@ -282,49 +292,67 @@ public class ProfileManager extends Observable {
 	
 	
 	/**
-	 * Add all the built-in profiles to the map
-	 * 
-	 * @param map The map where the profiles are to be added.
+	 * Add all the built-in profiles to the map and to the list.
 	 */
-
 	private void addBuiltinProfiles(Map profiles, List profilesByName) {
-		final Profile defaultProfile= new BuiltInProfile(DEFAULT_PROFILE, "Default [built-in]", getDefaultSettings());
+		final Profile defaultProfile= new BuiltInProfile(DEFAULT_PROFILE, FormatterMessages.getString("ProfileManager.default_profile.name"), getDefaultSettings()); //$NON-NLS-1$
 		profiles.put(defaultProfile.getID(), defaultProfile);
 		profilesByName.add(defaultProfile);
 		
-		final Profile javaProfile= new BuiltInProfile(JAVA_PROFILE, "Java Conventions [built-in]", getJavaSettings());
+		final Profile javaProfile= new BuiltInProfile(JAVA_PROFILE, FormatterMessages.getString("ProfileManager.java_conventions_profile.name"), getJavaSettings()); //$NON-NLS-1$
 		profiles.put(javaProfile.getID(), javaProfile);
 		profilesByName.add(javaProfile);
 	}
 	
 	
-	
+	/**
+	 * Get the settings for the default profile.
+	 */	
 	public static Map getDefaultSettings() {
 		final Map options= DefaultCodeFormatterConstants.getDefaultSettings();
 		new CommentFormattingContext().storeToMap(getUIPreferenceStore(), options, true);
 		return options;
 	}
-	
+
+	/** 
+	 * Get the settings for the Java Conventions profile.
+	 */
 	public static Map getJavaSettings() {
 		final Map options= DefaultCodeFormatterOptions.getJavaConventionsSettings().getMap();
 			// TODO: change to DefaultCodeFormatterConstants.getJavaConventionsSettings();
-
 		new CommentFormattingContext().storeToMap(getUIPreferenceStore(), options, true);
 		return options;
 	}
 	
+	/**
+	 * Get a list of all keys specific to the core preference store.
+	 */
 	private List getCoreKeys() {
 		return new ArrayList(DefaultCodeFormatterConstants.getDefaultSettings().keySet());
 	}
 	
+	/**
+	 * Get a list of all keys which are specific to the UI preference store.
+	 */
 	private List getUIKeys() {
 		return Arrays.asList( new CommentFormattingContext().getPreferenceKeys());
 	}
 	
+	/** 
+	 * Get a list of all profiles, sorted alphabetically. Unless the set of profiles has been modified between
+	 * the two calls, the sequence is guaranteed to correspond to the one returned by <code>getSortedNames</code>. 
+	 * @see getSortedNames
+	 */
 	public List getSortedProfiles() {
 		return new ArrayList(fProfilesByName);
 	}
-	
+
+	/**
+	 * Get the names of all profiles stored in this profile manager, sorted alphabetically. Unless the set of 
+	 * profiles has been modified between the two calls, the sequence is guaranteed to correspond to the one 
+	 * returned by <code>getSortedProfiles</code>.
+	 * @see getSortedProfiles  
+	 */	
 	public String [] getSortedNames() {
 		final String [] sortedNames= new String[fProfilesByName.size()];
 		int i= 0;
@@ -334,10 +362,12 @@ public class ProfileManager extends Observable {
 		return sortedNames;
 	}
 	
+	/**
+	 * Get the profile for this profile id.
+	 */
 	public Profile getProfile(String ID) {
 		return (Profile)fProfiles.get(ID);
 	}
-	
 	
 	/**
 	 * Activate the selected profile, update all necessary options in
@@ -353,11 +383,13 @@ public class ProfileManager extends Observable {
 	 * Get the currently selected profile.
 	 * @return The currently selected profile.
 	 */
-	
 	public Profile getSelected() {
 		return fSelected;
 	}
 
+	/**
+	 * Set the selected profile. The profile must already be contained in this profile manager.
+	 */
 	public void setSelected(Profile profile) {
 		final Profile newSelected= (Profile)fProfiles.get(profile.getID());
 		if (newSelected != null && !newSelected.equals(fSelected)) {
@@ -365,12 +397,18 @@ public class ProfileManager extends Observable {
 			notifyObservers(SELECTION_CHANGED_EVENT);
 		}
 	}
-	
+
+	/**
+	 * Check whether a user-defined profile in this profile manager
+	 * already has this name.
+	 */
 	public boolean containsName(String name) {
 		return fProfiles.containsKey(ID_PREFIX + name);
 	}
 	
-	
+	/**
+	 * Add a new custom profile to this profile manager.
+	 */	
 	public void addProfile(CustomProfile profile) {
 		profile.setManager(this);
 		final CustomProfile oldProfile= (CustomProfile)fProfiles.get(profile.getID());
@@ -384,8 +422,11 @@ public class ProfileManager extends Observable {
 		notifyObservers(PROFILE_CREATED_EVENT);
 	}
 	
-	
-	
+	/**
+	 * Delete the currently selected profile from this profile manager. The next profile
+	 * in the list is selected.
+	 * @return true if the profile has been successfully removed, false otherwise.
+	 */
 	public boolean deleteSelected() {
 		if (!(fSelected instanceof CustomProfile)) 
 			return false;
@@ -400,7 +441,10 @@ public class ProfileManager extends Observable {
 		notifyObservers(PROFILE_DELETED_EVENT);
 		return true;
 	}
-	
+
+	/**
+	 * Get the UI preference store.
+	 */
 	public static IPreferenceStore getUIPreferenceStore() {
 		return PreferenceConstants.getPreferenceStore();
 	}

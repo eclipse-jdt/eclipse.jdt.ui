@@ -21,39 +21,43 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 public class BracesTabPage extends ModifyDialogTabPage {
 	
-	private final String PREVIEW=
-	createPreviewHeader("Braces") +
-	"class Empty {}\n" +
-	"\n" +
-	"class Example {" +
-	"  SomeClass fField= new SomeClass() {" +
-	"  };" +
-	"  int [] myArray= {1,2,3,4,5,6};" +
-	"  void bar(int p) {" +
-	"    for (int i= 0; i<10; i++) {" +
-	"    }" +
-	"    switch(p) {" +
-	"      case 0:" +
-	"        fField.set(0);" +
-	"        break;" +
-	"      default:" +
-	"        fField.reset();" +
-	"    }" +
-	"  }" +
-	"  void foo() {}" +
-	"}";
+	private final String fPreview=
+	createPreviewHeader(FormatterMessages.getString("BracesTabPage.preview.header")) + //$NON-NLS-1$
+	"class Empty {}\n" + //$NON-NLS-1$
+	"\n" + //$NON-NLS-1$
+	"class Example {" + //$NON-NLS-1$
+	"  SomeClass fField= new SomeClass() {" + //$NON-NLS-1$
+	"  };" + //$NON-NLS-1$
+	"  int [] myArray= {1,2,3,4,5,6};" + //$NON-NLS-1$
+	"  void bar(int p) {" + //$NON-NLS-1$
+	"    for (int i= 0; i<10; i++) {" + //$NON-NLS-1$
+	"    }" + //$NON-NLS-1$
+	"    switch(p) {" + //$NON-NLS-1$
+	"      case 0:" + //$NON-NLS-1$
+	"        fField.set(0);" + //$NON-NLS-1$
+	"        break;" + //$NON-NLS-1$
+	"      default:" + //$NON-NLS-1$
+	"        fField.reset();" + //$NON-NLS-1$
+	"    }" + //$NON-NLS-1$
+	"  }" + //$NON-NLS-1$
+	"  void foo() {}" + //$NON-NLS-1$
+	"}"; //$NON-NLS-1$
 	
 	
 	
-	private final String [] BRACE_POSITIONS= {
-				DefaultCodeFormatterConstants.END_OF_LINE,
-						DefaultCodeFormatterConstants.NEXT_LINE,
-				DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED
+	private final String [] fBracePositions= {
+	    DefaultCodeFormatterConstants.END_OF_LINE,
+	    DefaultCodeFormatterConstants.NEXT_LINE,
+	    DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED
 	};
 	
-	private final String [] BRACE_POSITION_NAMES= {"Same line", "Next line", "Next line indented"};
+	private final String [] fBracePositionNames= {
+	    FormatterMessages.getString("BracesTabPage.position.same_line"), //$NON-NLS-1$
+	    FormatterMessages.getString("BracesTabPage.position.next_line"), //$NON-NLS-1$
+	    FormatterMessages.getString("BracesTabPage.position.next_line_indented") //$NON-NLS-1$
+	};
 	
-	private final int numColumns= 4; 
+	private final int NUM_COLUMNS= 4; 
 
 	
 	/**
@@ -61,31 +65,28 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	 * 
 	 * @param workingValues The map wherein the options are stored.
 	 */
-	public BracesTabPage(Map workingValues) {
-		super(workingValues);
-		fJavaPreview.setPreviewText(PREVIEW);
+	public BracesTabPage(ModifyDialog modifyDialog, Map workingValues) {
+		super(modifyDialog, workingValues);
+		fJavaPreview.setPreviewText(fPreview);
 	}
 
 	protected Composite doCreatePreferences(Composite parent) {
 		final Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayout(createGridLayout(numColumns, false));
+		composite.setLayout(createGridLayout(NUM_COLUMNS, false));
 		
-		final Group bracesGroup= createGroup(numColumns, composite, "Brace positions");
-		createBracesCombo(bracesGroup, "&Class declaration:", DefaultCodeFormatterConstants.FORMATTER_TYPE_DECLARATION_BRACE_POSITION);
-		createBracesCombo(bracesGroup, "Anon&ymous class declaration:", DefaultCodeFormatterConstants.FORMATTER_ANONYMOUS_TYPE_DECLARATION_BRACE_POSITION);
-		createBracesCombo(bracesGroup, "Met&hod declaration:", DefaultCodeFormatterConstants.FORMATTER_METHOD_DECLARATION_BRACE_POSITION);
-		createBracesCombo(bracesGroup, "Bloc&ks:", DefaultCodeFormatterConstants.FORMATTER_BLOCK_BRACE_POSITION);
-		createBracesCombo(bracesGroup, "'s&witch...case' statement:", DefaultCodeFormatterConstants.FORMATTER_SWITCH_BRACE_POSITION);
-		
-		/**
-		 * TODO: take it in once defaultcodeformatterconstants is updated.
-		 * createBracesCombo(bracesGroup, "&Array initializer:", DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_BRACE_POSITION);
-		 */
+		final Group bracesGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("BracesTabPage.group.brace_positions.title")); //$NON-NLS-1$
+		createBracesCombo(bracesGroup, FormatterMessages.getString("BracesTabPage.option.class_declaration"), DefaultCodeFormatterConstants.FORMATTER_TYPE_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
+		createBracesCombo(bracesGroup, FormatterMessages.getString("BracesTabPage.option.anonymous_class_declaration"), DefaultCodeFormatterConstants.FORMATTER_ANONYMOUS_TYPE_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
+		createBracesCombo(bracesGroup, FormatterMessages.getString("BracesTabPage.option.method_declaration"), DefaultCodeFormatterConstants.FORMATTER_METHOD_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
+		createBracesCombo(bracesGroup, FormatterMessages.getString("BracesTabPage.option.blocks"), DefaultCodeFormatterConstants.FORMATTER_BLOCK_BRACE_POSITION); //$NON-NLS-1$
+		createBracesCombo(bracesGroup, FormatterMessages.getString("BracesTabPage.option.switch_case"), DefaultCodeFormatterConstants.FORMATTER_SWITCH_BRACE_POSITION); //$NON-NLS-1$
+		createBracesCombo(bracesGroup, FormatterMessages.getString("BracesTabPage.option.array_initializer"), DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_BRACE_POSITION); //$NON-NLS-1$
+
 		
 		return composite;
 	}
 	
 	private void createBracesCombo(Composite composite, String name, String key) {
-		createComboPref(composite, numColumns, name, key, BRACE_POSITIONS, BRACE_POSITION_NAMES);
+		createComboPref(composite, NUM_COLUMNS, name, key, fBracePositions, fBracePositionNames);
 	}
 }

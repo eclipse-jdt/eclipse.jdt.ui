@@ -131,7 +131,7 @@ public class JavaPreview {
 	
 	
 	public void update() {
-		if (fWorkingValues == null)
+		if (fWorkingValues == null || fSourceViewer == null)
 			return;
 
 		final StyledText text = fSourceViewer.getTextWidget();

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/***********vv********************************************************************
  * Copyright (c) 2000, 2003 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
@@ -78,11 +78,11 @@ import org.xml.sax.SAXException;
  */
 
 public class CodingStyleConfigurationBlock {
-	
-	private static final String PREF_LASTLOADPATH= JavaUI.ID_PLUGIN + ".codeformatter.loadpath"; //$NON-NLS-1$
+    
+    private static final String PREF_LASTLOADPATH= JavaUI.ID_PLUGIN + ".codeformatter.loadpath"; //$NON-NLS-1$
 	private static final String PREF_LASTSAVEPATH= JavaUI.ID_PLUGIN + ".codeformatter.savepath"; //$NON-NLS-1$
 	
-
+	
 	private class XMLFileUpdater implements Observer {
 		
 		private final File fFile;
@@ -218,8 +218,8 @@ public class CodingStyleConfigurationBlock {
 		
 		private void saveButtonPressed() {
 			final FileDialog dialog= new FileDialog(fComposite.getShell(), SWT.SAVE);
-			dialog.setText("Save profile to...");
-			dialog.setFilterExtensions(new String [] {"*.xml"});
+			dialog.setText(FormatterMessages.getString("CodingStyleConfigurationBlock.save_profile.dialog.title")); //$NON-NLS-1$
+			dialog.setFilterExtensions(new String [] {"*.xml"}); //$NON-NLS-1$
 			
 			final String lastPath= JavaPlugin.getDefault().getDialogSettings().get(PREF_LASTSAVEPATH);
 			if (lastPath != null) {
@@ -237,16 +237,16 @@ public class CodingStyleConfigurationBlock {
 			try {
 				writeProfilesToFile(profiles, file);
 			} catch (Exception x) {
-				final String title= "Save profile";
-				final String message= "Could not save the profiles.";
+				final String title= FormatterMessages.getString("CodingStyleConfigurationBlock.save_profile.error.title"); //$NON-NLS-1$
+				final String message= FormatterMessages.getString("CodingStyleConfigurationBlock.save_profile.error.message"); //$NON-NLS-1$
 				MessageDialog.openError(fComposite.getShell(), title, message);
 			}
 		}
 		
 		private void loadButtonPressed() {
 			final FileDialog dialog= new FileDialog(fComposite.getShell(), SWT.OPEN);
-			dialog.setText("Load profile from...");
-			dialog.setFilterExtensions(new String [] {"*.xml"});
+			dialog.setText(FormatterMessages.getString("CodingStyleConfigurationBlock.load_profile.dialog.title")); //$NON-NLS-1$
+			dialog.setFilterExtensions(new String [] {"*.xml"}); //$NON-NLS-1$
 			final String lastPath= JavaPlugin.getDefault().getDialogSettings().get(PREF_LASTLOADPATH);
 			if (lastPath != null) {
 				dialog.setFilterPath(lastPath);
@@ -261,8 +261,8 @@ public class CodingStyleConfigurationBlock {
 			try {
 				profiles= readProfilesFromFile(file);
 			} catch (Exception e) {
-				final String title= "Load profile";
-				final String message= "Loading failed. Not a valid profile.";
+				final String title= FormatterMessages.getString("CodingStyleConfigurationBlock.load_profile.error.title"); //$NON-NLS-1$
+				final String message= FormatterMessages.getString("CodingStyleConfigurationBlock.load_profile.error.message"); //$NON-NLS-1$
 				MessageDialog.openError(fComposite.getShell(), title, message);
 			}
 			if (profiles == null || profiles.isEmpty())
@@ -304,14 +304,14 @@ public class CodingStyleConfigurationBlock {
 	/**
 	 * Identifiers for the XML file.
 	 */
-	private final static String XML_NODE_ROOT= "profiles";
-	private final static String XML_NODE_PROFILE= "profile";
-	private final static String XML_NODE_SETTING= "setting";
+	private final static String XML_NODE_ROOT= "profiles"; //$NON-NLS-1$
+	private final static String XML_NODE_PROFILE= "profile"; //$NON-NLS-1$
+	private final static String XML_NODE_SETTING= "setting"; //$NON-NLS-1$
 	
-	private final static String XML_ATTRIBUTE_VERSION= "version";
-	private final static String XML_ATTRIBUTE_ID= "id";
-	private final static String XML_ATTRIBUTE_NAME= "name";
-	private final static String XML_ATTRIBUTE_VALUE= "value";
+	private final static String XML_ATTRIBUTE_VERSION= "version"; //$NON-NLS-1$
+	private final static String XML_ATTRIBUTE_ID= "id"; //$NON-NLS-1$
+	private final static String XML_ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
+	private final static String XML_ATTRIBUTE_VALUE= "value"; //$NON-NLS-1$
 
 	
 	/**
@@ -323,23 +323,23 @@ public class CodingStyleConfigurationBlock {
 	/**
 	 * The name of the store file.
 	 */
-	protected final static String STORE_FILE= "code_formatter_profiles.xml";
+	protected final static String STORE_FILE= "code_formatter_profiles.xml"; //$NON-NLS-1$
 	
 	
 	/**
 	 * Some Java source code used for preview.
 	 */
-	private final static String previewText=
-		"/**\n" +
-		"* A sample source file for the code formatter preview\n" +
-		"*/\n\n" +
-		"package mypackage; import java.util.LinkedList; public class MyIntStack {" +
-		"private final LinkedList fStack;" +
-		"public MyIntStack(){fStack= new LinkedList();}" +
-		"public int pop(){return ((Integer)fStack.removeFirst()).intValue();}" +
-		"public void push(int elem){fStack.addFirst(new Integer(elem));}" +
-		"public boolean isEmpty() {return fStack.isEmpty();}" +
-		"}";
+	private final static String fPreview=
+		"/**\n* " + //$NON-NLS-1$
+		FormatterMessages.getString("CodingStyleConfigurationBlock.preview.title") + //$NON-NLS-1$
+		"\n*/\n\n" + //$NON-NLS-1$
+		"package mypackage; import java.util.LinkedList; public class MyIntStack {" + //$NON-NLS-1$
+		"private final LinkedList fStack;" + //$NON-NLS-1$
+		"public MyIntStack(){fStack= new LinkedList();}" + //$NON-NLS-1$
+		"public int pop(){return ((Integer)fStack.removeFirst()).intValue();}" + //$NON-NLS-1$
+		"public void push(int elem){fStack.addFirst(new Integer(elem));}" + //$NON-NLS-1$
+		"public boolean isEmpty() {return fStack.isEmpty();}" + //$NON-NLS-1$
+		"}"; //$NON-NLS-1$
 
 	/**
 	 * The GUI controls
@@ -380,7 +380,7 @@ public class CodingStyleConfigurationBlock {
 		fProfileManager= new ProfileManager(profiles);
 		Profile selected= fProfileManager.getSelected();
 		fJavaPreview= new JavaPreview(selected.getSettings());
-		fJavaPreview.setPreviewText(previewText);
+		fJavaPreview.setPreviewText(fPreview);
 		new XMLFileUpdater();
 	}
 
@@ -394,23 +394,23 @@ public class CodingStyleConfigurationBlock {
 		fPixConv = new PixelConverter(parent);
 		fComposite = createComposite(parent, numColumns, false);
 
-		createLabel(fComposite, "Sele&ct a profile:", numColumns);
+		createLabel(fComposite, FormatterMessages.getString("CodingStyleConfigurationBlock.select_profile.text"), numColumns); //$NON-NLS-1$
 		fProfileCombo= createProfileCombo(fComposite, numColumns - 3, fPixConv.convertWidthInCharsToPixels(20));
-		fEditButton= createButton(fComposite, "&Edit...", GridData.HORIZONTAL_ALIGN_BEGINNING);
-		fRenameButton= createButton(fComposite, "Re&name...", GridData.HORIZONTAL_ALIGN_BEGINNING);
-		fDeleteButton= createButton(fComposite, "&Remove", GridData.HORIZONTAL_ALIGN_BEGINNING);
+		fEditButton= createButton(fComposite, FormatterMessages.getString("CodingStyleConfigurationBlock.edit_button.desc"), GridData.HORIZONTAL_ALIGN_BEGINNING); //$NON-NLS-1$
+		fRenameButton= createButton(fComposite, FormatterMessages.getString("CodingStyleConfigurationBlock.rename_button.desc"), GridData.HORIZONTAL_ALIGN_BEGINNING); //$NON-NLS-1$
+		fDeleteButton= createButton(fComposite, FormatterMessages.getString("CodingStyleConfigurationBlock.remove_button.desc"), GridData.HORIZONTAL_ALIGN_BEGINNING); //$NON-NLS-1$
 
 		final Composite group= createComposite(fComposite, 4, false);
 		final GridData groupData= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		groupData.horizontalSpan= numColumns;
 		group.setLayoutData(groupData);
 
-		fNewButton= createButton(group, "&New...", GridData.HORIZONTAL_ALIGN_BEGINNING);
-		((GridData)createLabel(group, "", 1).getLayoutData()).grabExcessHorizontalSpace= true;
-		fLoadButton= createButton(group, "Loa&d...", GridData.HORIZONTAL_ALIGN_END);
-		fSaveButton= createButton(group, "Sa&ve...", GridData.HORIZONTAL_ALIGN_END);
+		fNewButton= createButton(group, FormatterMessages.getString("CodingStyleConfigurationBlock.new_button.desc"), GridData.HORIZONTAL_ALIGN_BEGINNING); //$NON-NLS-1$
+		((GridData)createLabel(group, "", 1).getLayoutData()).grabExcessHorizontalSpace= true; //$NON-NLS-1$
+		fLoadButton= createButton(group, FormatterMessages.getString("CodingStyleConfigurationBlock.load_button.desc"), GridData.HORIZONTAL_ALIGN_END); //$NON-NLS-1$
+		fSaveButton= createButton(group, FormatterMessages.getString("CodingStyleConfigurationBlock.save_button.desc"), GridData.HORIZONTAL_ALIGN_END); //$NON-NLS-1$
 
-		createLabel(fComposite, "Prev&iew:", numColumns);
+		createLabel(fComposite, FormatterMessages.getString("CodingStyleConfigurationBlock.preview_label.text"), numColumns); //$NON-NLS-1$
 		configurePreview(fComposite, numColumns);
 		
 		new ButtonController();
@@ -517,19 +517,20 @@ public class CodingStyleConfigurationBlock {
 		
 		Element cpElement;
 		try {
-			final DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		    final DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
+			final DocumentBuilder parser = factory.newDocumentBuilder();
 			cpElement = parser.parse(new InputSource(reader)).getDocumentElement();
+			
 		} catch (SAXException e) {
-			throw createException(e, "Problems reading profiles from XML"); 
+			throw createException(e, FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message"));  //$NON-NLS-1$
 		} catch (ParserConfigurationException e) {
-			throw createException(e, "Problems reading profiles from XML"); 
+			throw createException(e, FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message"));  //$NON-NLS-1$
 		} catch (IOException e) {
-			throw createException(e, "Problems reading profiles from XML"); 
+			throw createException(e, FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message"));  //$NON-NLS-1$
 		}
-		
-		if (cpElement == null) return null;
-		if (!cpElement.getNodeName().equalsIgnoreCase(XML_NODE_ROOT)) {
-			return null;
+
+		if (cpElement == null || !cpElement.getNodeName().equalsIgnoreCase(XML_NODE_ROOT)) {
+		    throw createException(new Exception(), FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message")); //$NON-NLS-1$
 		}
 		
 		final NodeList list= cpElement.getChildNodes();
@@ -538,15 +539,16 @@ public class CodingStyleConfigurationBlock {
 		
 		final Collection profiles= new ArrayList();
 
-		for (int i= 0; i < length; ++i) {
+		for (int i= 0; i < length; i++) {
 			final Node node= list.item(i);
 			final short type= node.getNodeType();
-			if (type == Node.ELEMENT_NODE) {
-				final Element element= (Element) node;
-				if (element.getNodeName().equalsIgnoreCase(XML_NODE_PROFILE)) {
-					profiles.add(createProfileFromElement(element));
-				}
-			}
+			if (type != Node.ELEMENT_NODE)
+			    continue; // white space 
+			final Element element= (Element) node;
+			if (!element.getNodeName().equalsIgnoreCase(XML_NODE_PROFILE)) {
+			    throw createException(null, FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message")); //$NON-NLS-1$
+			}	
+			profiles.add(createProfileFromElement(element));
 		}
 		return profiles;
 	}
@@ -555,23 +557,30 @@ public class CodingStyleConfigurationBlock {
 	/**
 	 * Create a new custom profile from its XML description.
 	 */
-	private CustomProfile createProfileFromElement(final Element element) {
-		final Map settings= ProfileManager.getDefaultSettings();
+	private CustomProfile createProfileFromElement(final Element element) throws CoreException {
+
+	    final Map settings= ProfileManager.getDefaultSettings();
 		final String name= element.getAttribute(XML_ATTRIBUTE_NAME);
-		
 		final NodeList list= element.getChildNodes();
 		
 		for (int i= 0; i < list.getLength(); i++) {
+		    
 			final Node node= list.item(i);
-			if (node.getNodeType() == Node.ELEMENT_NODE) {
-				final Element setting= (Element) node;
-				if (setting.getNodeName().equalsIgnoreCase(XML_NODE_SETTING)) {
-					final String id= setting.getAttribute(XML_ATTRIBUTE_ID);
-					final String value= setting.getAttribute(XML_ATTRIBUTE_VALUE); 
-					if (settings.containsKey(id)) {
-						settings.put(id, value);
-					}
-				}
+			
+			if (node.getNodeType() != Node.ELEMENT_NODE)
+			    continue; // white space
+			
+			final Element setting= (Element) node;
+			
+			if (!setting.getNodeName().equalsIgnoreCase(XML_NODE_SETTING)) {
+			    throw createException(null, FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message")); //$NON-NLS-1$
+			}	
+			
+			final String id= setting.getAttribute(XML_ATTRIBUTE_ID);
+			final String value= setting.getAttribute(XML_ATTRIBUTE_VALUE);
+			
+			if (settings.containsKey(id)) {
+			    settings.put(id, value);
 			}
 		}
 		return new CustomProfile(name, settings);
@@ -624,9 +633,9 @@ public class CodingStyleConfigurationBlock {
 
 			transformer.transform(source, result);
 		} catch (TransformerException e) {
-			throw createException(e, "Problems serializing the profiles to XML"); 
+			throw createException(e, FormatterMessages.getString("CodingStyleConfigurationBlock.error.serializing_xml.message"));  //$NON-NLS-1$
 		} catch (ParserConfigurationException e) {
-			throw createException(e, "Problems serializing the profiles to XML");
+			throw createException(e, FormatterMessages.getString("CodingStyleConfigurationBlock.error.serializing_xml.message")); //$NON-NLS-1$
 		}
 	}
 

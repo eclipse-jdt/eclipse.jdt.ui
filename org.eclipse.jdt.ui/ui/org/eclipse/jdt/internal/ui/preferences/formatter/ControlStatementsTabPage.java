@@ -26,70 +26,70 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 public class ControlStatementsTabPage extends ModifyDialogTabPage {
 	
-	private final String PREVIEW=
-	createPreviewHeader("If...else") +
-	"class Example {" +
-	"  void bar() {" +
-	"    do {} while (true);" +
-	"  }" +
-	"  void foo2() {" +
-	"    if (true) { " +
-	"      return;" +
-	"    }" +
-	"    if (true) {" +
-	"      return;" +
-	"    } else if (false) {" +
-	"      return; " +
-	"    } else {" +
-	"      return;" +
-	"    }" +
-	"  }" +
-	"  void foo(int state) {" +
-	"    if (true) return;" +
-	"    if (true) " +
-	"      return;" +
-	"    else if (false)" +
-	"      return;" +
-	"    else return;" +
-	"  }" +
-	"}";
+	private final String fPreview=
+	createPreviewHeader(FormatterMessages.getString("ControlStatementsTabPage.preview.header")) + //$NON-NLS-1$
+	"class Example {" +	//$NON-NLS-1$	
+	"  void bar() {" +	//$NON-NLS-1$
+	"    do {} while (true);" +	//$NON-NLS-1$
+	"  }" +	//$NON-NLS-1$
+	"  void foo2() {" +	//$NON-NLS-1$
+	"    if (true) { " + //$NON-NLS-1$
+	"      return;" + //$NON-NLS-1$
+	"    }" + //$NON-NLS-1$
+	"    if (true) {" + //$NON-NLS-1$
+	"      return;" + //$NON-NLS-1$
+	"    } else if (false) {" +	//$NON-NLS-1$
+	"      return; " + //$NON-NLS-1$
+	"    } else {" + //$NON-NLS-1$
+	"      return;" + //$NON-NLS-1$
+	"    }" + //$NON-NLS-1$
+	"  }" + //$NON-NLS-1$
+	"  void foo(int state) {" + //$NON-NLS-1$
+	"    if (true) return;" + //$NON-NLS-1$
+	"    if (true) " + //$NON-NLS-1$
+	"      return;" + //$NON-NLS-1$
+	"    else if (false)" + //$NON-NLS-1$
+	"      return;" + //$NON-NLS-1$
+	"    else return;" + //$NON-NLS-1$
+	"  }" + //$NON-NLS-1$
+	"}"; //$NON-NLS-1$
 	
 	
 	
 	private final String [] NOTINSERT_INSERT= {
-				JavaCore.DO_NOT_INSERT,
-						JavaCore.INSERT
+	    JavaCore.DO_NOT_INSERT,
+	    JavaCore.INSERT
 	}; 
 	
 
-	private final int numColumns= 4; 
+	private final int NUM_COLUMNS= 4; 
 	
 	
 	
 	protected CheckboxPreference fThenStatementPref, fSimpleIfPref;
 
 	
-	public ControlStatementsTabPage(Map workingValues) {
-		super(workingValues);
-		fJavaPreview.setPreviewText(PREVIEW);
+	public ControlStatementsTabPage(ModifyDialog modifyDialog, Map workingValues) {
+		super(modifyDialog, workingValues);
+		fJavaPreview.setPreviewText(fPreview);
 	}
 
 	protected Composite doCreatePreferences(Composite parent) {
 		final Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayout(createGridLayout(numColumns, false));
+		composite.setLayout(createGridLayout(NUM_COLUMNS, false));
 		
-		final Group generalGroup= createGroup(numColumns, composite, "General");
-		createOption(generalGroup, numColumns, "Insert new line in &control statements", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_CONTROL_STATEMENTS, NOTINSERT_INSERT);
+		final Group generalGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("ControlStatementsTabPage.general_group.title")); //$NON-NLS-1$
+		createOption(generalGroup, NUM_COLUMNS, FormatterMessages.getString("ControlStatementsTabPage.general_group.insert_new_line_in_control_statements"), DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_CONTROL_STATEMENTS, NOTINSERT_INSERT); //$NON-NLS-1$
 		
-		final Group ifElseGroup= createGroup(numColumns, composite, "I&f...else");
-		fThenStatementPref= createOption(ifElseGroup, numColumns, "Keep 't&hen' statement on same line", DefaultCodeFormatterConstants.FORMATTER_KEEP_THEN_STATEMENT_ON_SAME_LINE, falseTrue);
+		final Group ifElseGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.title")); //$NON-NLS-1$
+		fThenStatementPref= createOption(ifElseGroup, NUM_COLUMNS, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_then_on_same_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_THEN_STATEMENT_ON_SAME_LINE, FALSE_TRUE); //$NON-NLS-1$
 		
 		Label l= new Label(ifElseGroup, SWT.NONE);
 		GridData gd= new GridData();
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(4);
 		l.setLayoutData(gd);
 		
-		fSimpleIfPref= createOption(ifElseGroup, numColumns - 1, "Keep &simple 'if' on one line", DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_IF_ON_ONE_LINE, falseTrue);
+		fSimpleIfPref= createOption(ifElseGroup, NUM_COLUMNS - 1, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_simple_if_on_one_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_IF_ON_ONE_LINE, FALSE_TRUE); //$NON-NLS-1$
 		
 		fThenStatementPref.addObserver( new Observer() {
 			public void update(Observable o, Object arg) {
@@ -98,9 +98,9 @@ public class ControlStatementsTabPage extends ModifyDialogTabPage {
 			
 		});
 		
-		createOption(ifElseGroup, numColumns, "Keep 'else' st&atement on same line", DefaultCodeFormatterConstants.FORMATTER_KEEP_ELSE_STATEMENT_ON_SAME_LINE, falseTrue);
-		createCheckboxPref(ifElseGroup, numColumns, "&Keep 'else if' on one line", DefaultCodeFormatterConstants.FORMATTER_COMPACT_ELSE_IF, falseTrue);
-		createCheckboxPref(ifElseGroup, numColumns, "Keep guardian cla&use on one line", DefaultCodeFormatterConstants.FORMATTER_FORMAT_GUARDIAN_CLAUSE_ON_ONE_LINE, falseTrue);
+		createOption(ifElseGroup, NUM_COLUMNS, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_else_on_same_line"), DefaultCodeFormatterConstants.FORMATTER_KEEP_ELSE_STATEMENT_ON_SAME_LINE, FALSE_TRUE); //$NON-NLS-1$
+		createCheckboxPref(ifElseGroup, NUM_COLUMNS, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_else_if_on_one_line"), DefaultCodeFormatterConstants.FORMATTER_COMPACT_ELSE_IF, FALSE_TRUE); //$NON-NLS-1$
+		createCheckboxPref(ifElseGroup, NUM_COLUMNS, FormatterMessages.getString("ControlStatementsTabPage.if_else_group.keep_guardian_clause_on_one_line"), DefaultCodeFormatterConstants.FORMATTER_FORMAT_GUARDIAN_CLAUSE_ON_ONE_LINE, FALSE_TRUE); //$NON-NLS-1$
 		
 		return composite;
 	}

@@ -18,13 +18,16 @@ import java.util.Observable;
 import java.util.Observer;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
- * 
+ * Tab page for the comment formatter settings.
  */
 public class CommentsTabPage extends ModifyDialogTabPage {
 	
@@ -52,9 +55,9 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 
 			for (final Iterator iter = fSlaves.iterator(); iter.hasNext();) {
 			    Object obj= iter.next();
-			    if (obj instanceof CheckboxPreference) {
-			        ((CheckboxPreference)obj).setEnabled(enabled);
-			    } else if (obj instanceof Group) {
+			    if (obj instanceof Preference) {
+			        ((Preference)obj).setEnabled(enabled);
+			    } else if (obj instanceof Control) {
 			        ((Group)obj).setEnabled(enabled);
 			    }
 			}
@@ -62,66 +65,80 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 	}
 	
 	
-	final int numColumns= 4;
+	final int NUM_COLUMNS= 4;
 	
 
-	final String preview=
-		"/**\n" +
-		" * An example for comment formatting. This example is meant to illustrate the various possiblilities offered by <i>Eclipse</i> in order to format comments.\n" +
-		" */\n" +
-		" interface Example {" +
-		" /**\n" +
-		" *\n" +
-		" * These possibilities include:\n" +
-		" * <ul><li>Formatting of header comments.</li><li>Formatting of Javadoc tags</li></ul>\n" +
-		" */\n" +
-		" int bar();" +
-		" /**\n" +
-		" * The following is some sample code which illustrates source formatting within javadoc comments:\n" +
-		" * <pre>public class Example {final int a= 1;final boolean b= true;}</pre>\n" + 
-		" * @param a The first parameter. For an optimum result, this should be an odd number\n" +
-		" * between 0 and 100.\n" +
-		" * @param b The second parameter.\n" +
-		" * @result The result of the foo operation, usually within 0 and 1000.\n" +
-		" */" +
-		" int foo(int a, int b);" +
-		"}";
-	
-	
-	public CommentsTabPage(Map workingValues) {
-		super(workingValues);
-		fJavaPreview.setPreviewText(preview);
+	final String fPreview=
+		createPreviewHeader("An example for comment formatting. This example is meant to illustrate the various possiblilities offered by <i>Eclipse</i> in order to format comments.") +	//$NON-NLS-1$
+		"package mypackage;\n" + //$NON-NLS-1$
+		"/**\n" + //$NON-NLS-1$
+		" * This is the comment for the example interface.\n" + //$NON-NLS-1$
+		" */\n" + //$NON-NLS-1$
+		" interface Example {" + //$NON-NLS-1$
+		" /**\n" + //$NON-NLS-1$
+		" *\n" + //$NON-NLS-1$
+		" * These possibilities include:\n" + //$NON-NLS-1$
+		" * <ul><li>Formatting of header comments.</li><li>Formatting of Javadoc tags</li></ul>\n" + //$NON-NLS-1$
+		" */\n" + //$NON-NLS-1$
+		" int bar();" + //$NON-NLS-1$
+		" /**\n" + //$NON-NLS-1$
+		" * The following is some sample code which illustrates source formatting within javadoc comments:\n" + //$NON-NLS-1$
+		" * <pre>public class Example {final int a= 1;final boolean b= true;}</pre>\n" + //$NON-NLS-1$ 
+		" * @param a The first parameter. For an optimum result, this should be an odd number\n" + //$NON-NLS-1$
+		" * between 0 and 100.\n" + //$NON-NLS-1$
+		" * @param b The second parameter.\n" + //$NON-NLS-1$
+		" * @result The result of the foo operation, usually within 0 and 1000.\n" + //$NON-NLS-1$
+		" */" + //$NON-NLS-1$
+		" int foo(int a, int b);" + //$NON-NLS-1$
+		"}"; //$NON-NLS-1$
+
+	public CommentsTabPage(ModifyDialog modifyDialog, Map workingValues) {
+		super(modifyDialog, workingValues);
+		fJavaPreview.setPreviewText(fPreview);
 	}
 
+	public void updatePreview() {
+	    super.updatePreview();
+	}
 	
 	protected Composite doCreatePreferences(Composite parent) {
-		
+	    
 		final Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayout(createGridLayout(numColumns, false));
+		composite.setLayout(createGridLayout(NUM_COLUMNS, false));
 		
 		// global group
-		final Group globalGroup= createGroup(numColumns, composite, "Comment Formatting");
-		final CheckboxPreference global= createPref(globalGroup, "Enable &comment formatting", PreferenceConstants.FORMATTER_COMMENT_FORMAT);
-
+		final Group globalGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("CommentsTabPage.global_group.title")); //$NON-NLS-1$
+		final CheckboxPreference global= createPref(globalGroup, FormatterMessages.getString("CommentsTabPage.global_group.enable_comment_formatting"), PreferenceConstants.FORMATTER_COMMENT_FORMAT); //$NON-NLS-1$
+		
 		// format group
-		final Group formatGroup= createGroup(numColumns, composite, "Format");
-		final CheckboxPreference header= createPref(formatGroup, "Format &header comment", PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER);
-		final CheckboxPreference html= createPref(formatGroup, "Format HTML ta&gs", PreferenceConstants.FORMATTER_COMMENT_FORMATHTML);
-		final CheckboxPreference code= createPref(formatGroup, "Format &Java code snippets", PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE);
+		final Group formatGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("CommentsTabPage.format_group.title")); //$NON-NLS-1$
+		final CheckboxPreference header= createPref(formatGroup, FormatterMessages.getString("CommentsTabPage.format_group.format_header"), PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER); //$NON-NLS-1$
+		final CheckboxPreference html= createPref(formatGroup, FormatterMessages.getString("CommentsTabPage.format_group.format_html"), PreferenceConstants.FORMATTER_COMMENT_FORMATHTML); //$NON-NLS-1$
+		final CheckboxPreference code= createPref(formatGroup, FormatterMessages.getString("CommentsTabPage.format_group.format_code_snippets"), PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE); //$NON-NLS-1$
 
 		// blank lines group
-		final Group blankLinesGroup= createGroup(numColumns, composite, "Blank lines");
-		final CheckboxPreference blankComments= createPref(blankLinesGroup, "Clear &blank lines in comments", PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES);
-		final CheckboxPreference blankJavadoc= createPref(blankLinesGroup, "Blan&k line before Javadoc tags", PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS);
+		final Group blankLinesGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("CommentsTabPage.blank_lines_group.title")); //$NON-NLS-1$
+		final CheckboxPreference blankComments= createPref(blankLinesGroup, FormatterMessages.getString("CommentsTabPage.blank_lines_group.clear_blank_lines"), PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES); //$NON-NLS-1$
+		final CheckboxPreference blankJavadoc= createPref(blankLinesGroup, FormatterMessages.getString("CommentsTabPage.blank_lines_group.blank_line_before_javadoc_tags"), PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS); //$NON-NLS-1$
 
 		// indentation group
-		final Group indentationGroup= createGroup(numColumns, composite, "Indentation");
-		final CheckboxPreference indentJavadoc= createPref(indentationGroup, "Indent Javadoc tag&s", PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS);
-		final CheckboxPreference indentDesc= createPref(indentationGroup, "Indent description a&fter @param", PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION);
+		final Group indentationGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("CommentsTabPage.indentation_group.title")); //$NON-NLS-1$
+		final CheckboxPreference indentJavadoc= createPref(indentationGroup, FormatterMessages.getString("CommentsTabPage.indentation_group.indent_javadoc_tags"), PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS); //$NON-NLS-1$
+		
+		Label l= new Label(indentationGroup, SWT.NONE);
+		GridData gd= new GridData();
+		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(4);
+		l.setLayoutData(gd);
+		
+		final CheckboxPreference indentDesc= createCheckboxPref(indentationGroup, NUM_COLUMNS - 1, FormatterMessages.getString("CommentsTabPage.indentation_group.indent_description_after_param"), PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION, FALSE_TRUE); //$NON-NLS-1$
 
 		// new lines group
-		final Group newLinesGroup= createGroup(numColumns, composite, "New lines");
-		final CheckboxPreference nlParam= createPref(newLinesGroup, "New line &after @param tags", PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER);
+		final Group newLinesGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("CommentsTabPage.new_lines_group.title")); //$NON-NLS-1$
+		final CheckboxPreference nlParam= createPref(newLinesGroup, FormatterMessages.getString("CommentsTabPage.new_lines_group.new_line_after_param_tags"), PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER); //$NON-NLS-1$
+		
+		// line width group
+		final Group lineWidthGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("CommentsTabPage.line_width_group.title")); //$NON-NLS-1$
+		final NumberPreference lineWidth= createNumberPref(lineWidthGroup, NUM_COLUMNS, FormatterMessages.getString("CommentsTabPage.line_width_group.line_width"), PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, 0, Integer.MAX_VALUE); //$NON-NLS-1$
 
 		Collection masters, slaves;
 
@@ -133,6 +150,7 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 		slaves.add(blankLinesGroup);
 		slaves.add(indentationGroup);
 		slaves.add(newLinesGroup);
+		slaves.add(lineWidthGroup);
 		slaves.add(header);
 		slaves.add(html);
 		slaves.add(code);
@@ -140,6 +158,7 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 		slaves.add(blankJavadoc);
 		slaves.add(indentJavadoc);
 		slaves.add(nlParam);
+		slaves.add(lineWidth);
 		
 		new Controller(masters, slaves);
 		
@@ -156,6 +175,6 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 	}
 	
 	private CheckboxPreference createPref(Composite composite, String text, String key) {
-	    return createCheckboxPref(composite, numColumns, text, key, falseTrue);
+	    return createCheckboxPref(composite, NUM_COLUMNS, text, key, FALSE_TRUE);
 	}
 }

@@ -14,13 +14,16 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -35,11 +38,11 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 
 public abstract class ModifyDialogTabPage {
-	
 	
 	protected final Observer fUpdater= new Observer() {
 		public void update(Observable o, Object arg) {
@@ -47,48 +50,79 @@ public abstract class ModifyDialogTabPage {
 		}
 	};
 	
+	protected abstract class Preference extends Observable {
+	    private final Map fPreferences;
+	    private boolean fEnabled;
+	    private String fKey;
+	    
+	    public Preference(Map preferences, String key) {
+	        fPreferences= preferences;
+	        fEnabled= true;
+	        fKey= key;
+	    }
+	    
+	    protected final Map getPreferences() {
+	        return fPreferences;
+	    }
+	    
+	    public final void setEnabled(boolean enabled) {
+	        fEnabled= enabled;
+	        updateWidget();
+	    }
+	    
+	    public final boolean getEnabled() {
+	        return fEnabled;
+	    }
+	    
+	    public final void setKey(String key) {
+	        if (key == null || !fKey.equals(key)) {
+	            fKey= key;
+	            updateWidget();
+	        }
+	    }
+	    
+	    public final String getKey() {
+	        return fKey;
+	    }
+	    
+	    protected abstract void updateWidget();
+	}
 	
-	protected static class CheckboxPreference extends Observable {
-		private final Map fPreferences;
-		private String fKey;
-		private boolean fEnabled;
+	
+	protected final class CheckboxPreference extends Preference {
 		private final String[] fValues;
 		private final Button fCheckbox;
 		
 		public CheckboxPreference(Composite composite, int numColumns,
 								  Map preferences, String key, 
 								  String [] values, String text) {
-			fEnabled= true;
-			fPreferences= preferences;
+		    super(preferences, key);
+		    if (values == null || text == null) 
+		        throw new IllegalArgumentException(FormatterMessages.getString("ModifyDialogTabPage.error_msg.values_text_unassigned")); //$NON-NLS-1$
+			fValues= values;
+
 			fCheckbox= new Button(composite, SWT.CHECK);
 			fCheckbox.setText(text);
 			fCheckbox.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL));
-			fValues= values;
-			setKey(key);
+			
+			updateWidget();
 
-			fCheckbox.addSelectionListener(new SelectionListener() {
+			fCheckbox.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					checkboxChecked(((Button)e.widget).getSelection());
 				}
-
-				public void widgetDefaultSelected(SelectionEvent e) {}
 			});
 		}
 		
 		protected void checkboxChecked(boolean state) {
-			fPreferences.put(fKey, state ? fValues[1] : fValues[0]);
+			getPreferences().put(getKey(), state ? fValues[1] : fValues[0]);
 			setChanged();
 			notifyObservers();
 		}
 		
-		public void setKey(String key) {
-			fKey= key;
-			updateWidget();
-		}
-		
 		protected void updateWidget() {
-			if (fKey != null) {
-				fCheckbox.setEnabled(fEnabled);
+			if (getKey() != null) {
+				fCheckbox.setEnabled(getEnabled());
 				fCheckbox.setSelection(getChecked());
 			} else {
 				fCheckbox.setSelection(false);
@@ -97,102 +131,83 @@ public abstract class ModifyDialogTabPage {
 		}
 		
 		public boolean getChecked() {
-			return fValues[1].equals(fPreferences.get(fKey));
-		}
-		public void setEnabled(boolean enabled) {
-			fEnabled= enabled;
-			updateWidget();
-		}
-		public boolean getEnabled() {
-			return fEnabled;
+			return fValues[1].equals(getPreferences().get(getKey()));
 		}
 	}
 	
 	
 	
-	protected static class ComboPreference extends Observable {
-		private final Map fPreferences;
-		private String fKey;
+	protected final class ComboPreference extends Preference {
 		private final String [] fItems;
 		private final String[] fValues;
-		private Combo fCombo;
+		private final Combo fCombo;
 		
 		public ComboPreference(Composite composite, int numColumns,
 								  Map preferences, String key, 
 								  String [] values, String text, String [] items) {
-			fPreferences= preferences;
+		    super(preferences, key);
+		    if (values == null || items == null || text == null) 
+		        throw new IllegalArgumentException(FormatterMessages.getString("ModifyDialogTabPage.error_msg.values_items_text_unassigned")); //$NON-NLS-1$
 			fValues= values;
 			fItems= items;
 			createLabel(numColumns - 1, composite, text);
 			fCombo= new Combo(composite, SWT.SINGLE | SWT.READ_ONLY);
 			fCombo.setItems(items);
 			fCombo.setLayoutData(createGridData(1, GridData.HORIZONTAL_ALIGN_FILL));			
-			setKey(key);
 
-			fCombo.addSelectionListener(new SelectionListener() {
+			updateWidget();
+
+			fCombo.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					comboSelected(((Combo)e.widget).getSelectionIndex());
 				}
-
-				public void widgetDefaultSelected(SelectionEvent e) {}
 			});
 		}
 		
 		protected void comboSelected(int index) {
-			fPreferences.put(fKey, fValues[index]);
+			getPreferences().put(getKey(), fValues[index]);
 			setChanged();
 			notifyObservers(fValues[index]);
 		}
 		
-		public void setKey(String key) {
-			fKey= key;
-			updateWidget();
-		}
-		
 		protected void updateWidget() {
-			if (fKey != null && fPreferences != null && fValues != null) {
-				fCombo.setEnabled(true);
+			if (getKey() != null) {
+				fCombo.setEnabled(getEnabled());
 				fCombo.setText(getSelectedItem());
 			} else {
-				fCombo.setText("");
+				fCombo.setText(""); //$NON-NLS-1$
 				fCombo.setEnabled(false);
 			}
 		}
 		
 		public String getSelectedItem() {
-			final String selected= (String)fPreferences.get(fKey);
+			final String selected= (String)getPreferences().get(getKey());
 			for (int i= 0; i < fValues.length; i++) {
 				if (fValues[i].equals(selected)) {
 					return fItems[i];
 				}
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 	}
 	
 	
-	protected static class NumberPreference extends Observable {
+	protected final class NumberPreference extends Preference {
 		
-		protected final Map fPreferences;
-		protected final int fMinValue, fMaxValue;
-		
+		private final int fMinValue, fMaxValue;
+		private final Label fNumberLabel;
+		private final Text fNumberText;
+
 		protected int fSelected;
-		protected String fKey;
-		
-		protected final Text fNumberText;
-		
+        protected int fOldSelected;
+        
 		public NumberPreference(Composite composite, int numColumns,
 							   Map preferences, String key, 
 							   int minValue, int maxValue, String text) {
-			
-			createLabel(numColumns - 1, composite, text);
-			
+		    super(preferences, key);
+		    
+			fNumberLabel= createLabel(numColumns - 1, composite, text);
 			fNumberText= new Text(composite, SWT.SINGLE | SWT.BORDER | SWT.RIGHT);
-			
-			
-			fPreferences= preferences;
-			
-			setKey(key); 
 
 			final GridData gd= createGridData(1, GridData.HORIZONTAL_ALIGN_END);
 			gd.widthHint= new PixelConverter(composite).convertWidthInCharsToPixels(5);
@@ -201,75 +216,111 @@ public abstract class ModifyDialogTabPage {
 			fMinValue= minValue;
 			fMaxValue= maxValue;
 			
+			updateWidget();
+			
 			fNumberText.addFocusListener(new FocusListener() {
-
 				public void focusGained(FocusEvent e) {
-					fNumberText.setSelection(0, fNumberText.getCharCount());
+				    NumberPreference.this.focusGained();
 				}
-
-				public void focusLost(FocusEvent e) {
-					final String s= (String)fPreferences.get(fKey);
-					fSelected= Integer.parseInt(s);
-					fNumberText.setText(s);
-					
+                public void focusLost(FocusEvent e) {
+				    NumberPreference.this.focusLost();
 				}
-				
 			});
 			
 			fNumberText.addModifyListener(new ModifyListener() {
 				public void modifyText(ModifyEvent e) {
-					int newNumber;
-					try {
-						newNumber= Integer.parseInt(((Text)e.widget).getText());
-					} catch (Exception ex) { return; }
-					numberChanged(newNumber);
+					fieldModified();
 				}
 			});
 		}
 		
-		
-		protected void numberChanged(int number) {
+		private IStatus createErrorStatus() {
+		    return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, FormatterMessages.getFormattedString("ModifyDialogTabPage.NumberPreference.error.invalid_value", new String [] {Integer.toString(fMinValue), Integer.toString(fMaxValue)}), null); //$NON-NLS-1$
+		    
+		}
 
-			if (number < fMinValue) return;
-			if (number > fMaxValue) return;
-			
-			if (number != fSelected) {
-				fSelected= number;
-				updatePreferences();
-				updateNumberText();
-			}
+		protected void focusGained() {
+		    fOldSelected= fSelected;
+		    fNumberText.setSelection(0, fNumberText.getCharCount());
 		}
 		
-		protected void updatePreferences() {
-			fPreferences.put(fKey, Integer.toString(fSelected));
+		protected void focusLost() {
+		    updateStatus(null);
+		    final String input= fNumberText.getText();
+		    if (!validInput(input))
+		        fSelected= fOldSelected;
+		    else
+		        fSelected= Integer.parseInt(input);
+		    saveSelected();
+		    fNumberText.setText(Integer.toString(fSelected));
+		}
+		
+		
+		protected void fieldModified() {
+		    final String trimInput= fNumberText.getText().trim();
+		    final boolean valid= validInput(trimInput);
+		    
+		    updateStatus(valid ? null : createErrorStatus());
+
+		    if (valid) {
+		        final int number= Integer.parseInt(trimInput);
+		        if (fSelected != number) {
+		            fSelected= number;
+		            saveSelected();
+		        }
+		    }
+		}
+		
+		private boolean validInput(String trimInput) {
+		    int number;
+		    
+		    try {
+		        number= Integer.parseInt(trimInput);
+		    } catch (Exception x) {
+		        return false;
+		    }
+		    
+		    if (number < fMinValue) return false;
+		    if (number > fMaxValue) return false;
+		    return true;
+		}
+		
+		private void saveSelected() {
+			getPreferences().put(getKey(), Integer.toString(fSelected));
 			setChanged();
 			notifyObservers();
 		}
 		
-		protected void updateNumberText() {
-			try { 
-				int old= Integer.parseInt(fNumberText.getText());
-				if (fSelected == old) {
-					return;
-				}
-			} catch (Exception e) {}
-			fNumberText.setText(Integer.toString(fSelected));
-		}
+//		private void updateNumberText() {
+//			try { 
+//				int old= Integer.parseInt(fNumberText.getText());
+//				if (fSelected == old) {
+//					return;
+//				}
+//			} catch (Exception e) {}
+//			fNumberText.setText(Integer.toString(fSelected));
+//		}
+//		
 		
+		protected void updateWidget() {
+		    final boolean hasKey= getKey() != null;
 
-		public void setKey(String newKey) {
-			if (newKey == fKey) return;
-			fKey= newKey;
-			
-			if (fKey != null) {
-				final String s= (String)fPreferences.get(fKey);
-				fSelected= Integer.parseInt(s);
-				fNumberText.setText(s);
-				fNumberText.setEnabled(true);
+		    fNumberLabel.setEnabled(hasKey && getEnabled());
+			fNumberText.setEnabled(hasKey && getEnabled());
+
+			if (hasKey) {
+			    String s= (String)getPreferences().get(getKey());
+			    try {
+			        fSelected= Integer.parseInt(s);
+			    } catch (NumberFormatException e) {
+			        final String message= FormatterMessages.getFormattedString("ModifyDialogTabPage.NumberPreference.error.invalid_key", getKey()); //$NON-NLS-1$
+			        JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, message, e));
+			        s= ""; //$NON-NLS-1$
+			    }
+			    fNumberText.setText(s);
 			} else {
-				fNumberText.setEnabled(false);
-				fNumberText.setText("");
-			}			
+			    fNumberText.setText(""); //$NON-NLS-1$
+			}
 		}
 	}
 
@@ -278,7 +329,7 @@ public abstract class ModifyDialogTabPage {
 	 * Constant array for boolean selection 
 	 */
 	
-	protected static String[] falseTrue = {
+	protected static String[] FALSE_TRUE = {
 		DefaultCodeFormatterConstants.FALSE,
 		DefaultCodeFormatterConstants.TRUE
 	};	
@@ -292,13 +343,15 @@ public abstract class ModifyDialogTabPage {
 	protected final JavaPreview fJavaPreview;
 
 	protected final Map fWorkingValues;
+	private final ModifyDialog fModifyDialog;
 	
 	
 	/*
 	 * Create a new <code>ModifyDialogTabPage</code>
 	 */
-	public ModifyDialogTabPage(Map workingValues) {
+	public ModifyDialogTabPage(ModifyDialog modifyDialog, Map workingValues) {
 		fWorkingValues= workingValues;
+		fModifyDialog= modifyDialog;
 		fJavaPreview= new JavaPreview(fWorkingValues);
 	}
 	
@@ -359,7 +412,7 @@ public abstract class ModifyDialogTabPage {
 		
 		final Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(createGridLayout(numColumns, false));
-		createLabel(numColumns, composite, "Pre&view:"); 
+		createLabel(numColumns, composite, FormatterMessages.getString("ModifyDialogTabPage.preview.label.text"));  //$NON-NLS-1$
 		
 		final Control control= fJavaPreview.createContents(composite);
 		final GridData gd= createGridData(numColumns, GridData.FILL_BOTH);
@@ -379,6 +432,9 @@ public abstract class ModifyDialogTabPage {
 	}
 
 
+	protected void updateStatus(IStatus status) {
+	    fModifyDialog.updateStatus(status);
+	}
 	
 	/**
 	 * Factory methods to make GUI construction easier
@@ -487,7 +543,7 @@ public abstract class ModifyDialogTabPage {
 	 * Create the header part for a preview text
 	 */
 	protected static String createPreviewHeader(String title) {
-		return "/**\n* " + title + "\n*/\n\n";
+		return "/**\n* " + title + "\n*/\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	

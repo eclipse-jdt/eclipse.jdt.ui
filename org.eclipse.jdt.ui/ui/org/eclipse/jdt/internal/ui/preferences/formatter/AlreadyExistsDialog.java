@@ -41,7 +41,7 @@ public class AlreadyExistsDialog extends StatusDialog {
 	protected Text fNameText;
 	private Button fRenameRadio, fOverwriteRadio;
 	
-	private final int numColumns= 2;
+	private final int NUM_COLUMNS= 2;
 	
 	private final StatusInfo fOk;
 	private final StatusInfo fEmpty;
@@ -58,26 +58,26 @@ public class AlreadyExistsDialog extends StatusDialog {
 		fProfile= profile;
 		fProfileManager= profileManager;
 		fOk= new StatusInfo();
-		fDuplicate= new StatusInfo(IStatus.ERROR, "A profile with this name already exists");
-		fEmpty= new StatusInfo(IStatus.ERROR, "Profile name is empty");
+		fDuplicate= new StatusInfo(IStatus.ERROR, FormatterMessages.getString("AlreadyExistsDialog.message.profile_already_exists")); //$NON-NLS-1$
+		fEmpty= new StatusInfo(IStatus.ERROR, FormatterMessages.getString("AlreadyExistsDialog.message.profile_name_empty")); //$NON-NLS-1$
 	}
 	
 	
 	public void create() {
 		super.create();
-		setTitle("Profile already exists");
+		setTitle(FormatterMessages.getString("AlreadyExistsDialog.dialog.title")); //$NON-NLS-1$
 	}
 	
 	public Control createDialogArea(Composite parent) {
 				
 		initializeComposite(parent);
 		
-		createLabel("A profile with the name '"	+ fProfile.getName() + "' already exists in this workspace. What would you like to do?");
+		createLabel(FormatterMessages.getFormattedString("AlreadyExistsDialog.dialog.label", fProfile.getName())); //$NON-NLS-1$
 
-		fRenameRadio= createRadioButton("&Rename the imported profile:");
+		fRenameRadio= createRadioButton(FormatterMessages.getString("AlreadyExistsDialog.rename_radio_button.desc")); //$NON-NLS-1$
 		fNameText= createTextField();
 
-		fOverwriteRadio= createRadioButton("&Overwrite the existing profile");
+		fOverwriteRadio= createRadioButton(FormatterMessages.getString("AlreadyExistsDialog.overwrite_radio_button.desc")); //$NON-NLS-1$
 
 		fRenameRadio.setSelection(true);
 		
@@ -126,14 +126,14 @@ public class AlreadyExistsDialog extends StatusDialog {
 		layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
 		layout.verticalSpacing= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
 		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
-		layout.numColumns= numColumns;
+		layout.numColumns= NUM_COLUMNS;
 		
 		fComposite.setLayout(layout);
 	}
 	
 	private Label createLabel(String text) {
 		final GridData gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan= numColumns;
+		gd.horizontalSpan= NUM_COLUMNS;
 		gd.widthHint= convertWidthInCharsToPixels(60);
 		final Label label= new Label(fComposite, SWT.WRAP);
 		label.setText(text);
@@ -143,7 +143,7 @@ public class AlreadyExistsDialog extends StatusDialog {
 	
 	private Button createRadioButton(String text) {
 		final GridData gd = new GridData();
-		gd.horizontalSpan = numColumns;
+		gd.horizontalSpan = NUM_COLUMNS;
 		gd.widthHint= convertWidthInCharsToPixels(60);
 		final Button radio= new Button(fComposite, SWT.RADIO);
 		radio.setLayoutData(gd);
@@ -153,7 +153,7 @@ public class AlreadyExistsDialog extends StatusDialog {
 	
 	private Text createTextField() {
 		final GridData gd = new GridData( GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan= numColumns;
+		gd.horizontalSpan= NUM_COLUMNS;
 		final Text text= new Text(fComposite, SWT.SINGLE | SWT.BORDER);
 		text.setLayoutData(gd);
 		return text;

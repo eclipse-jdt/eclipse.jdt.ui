@@ -90,410 +90,400 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage implements ISelection
 		}
 	}
 	
-	
-	private final Category assignmentCategory= new Category("Assignments", 
-			new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATORS, "before assignment operator" ),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATORS, "after assignment operator" )
+	private final Category fAssignmentCategory= new Category(FormatterMessages.getString("WhiteSpaceTabPage.assignments.title"),  //$NON-NLS-1$
+	    new Option [] {
+	    	new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATORS, FormatterMessages.getString("WhiteSpaceTabPage.assignments.before_assignment_operator") ), //$NON-NLS-1$
+	    	new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATORS, FormatterMessages.getString("WhiteSpaceTabPage.assignemtns.after_assignment_operator") ) //$NON-NLS-1$
 	},
-	"class Example {" +
-	"void foo() {" +
-	"int a= 4;" +
-	"}" +
-	"}"
+	"class Example {" + //$NON-NLS-1$
+	"void foo() {" + //$NON-NLS-1$
+	"int a= 4;" + //$NON-NLS-1$
+	"}" + //$NON-NLS-1$
+	"}" //$NON-NLS-1$
 	);
 	
-	
-	
-	private final Category operatorCategory= new Category( "Operators",
+	private final Category fOperatorCategory= new Category( FormatterMessages.getString("WhiteSpaceTabPage.operators.title"), //$NON-NLS-1$
 		new Option[] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_BINARY_OPERATOR, "before binary operators" ),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_BINARY_OPERATOR, "after binary operators" ),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_UNARY_OPERATOR, "before unary operators" ),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_UNARY_OPERATOR, "after unary operators" ),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_PREFIX_OPERATOR, "before prefix operators" ),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_PREFIX_OPERATOR, "after prefix operators" ),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_POSTFIX_OPERATOR, "before postfix operators" ),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_POSTFIX_OPERATOR,  "after postfix operators" )
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_BINARY_OPERATOR, FormatterMessages.getString("WhiteSpaceTabPage.operators.before_binary_operators") ), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_BINARY_OPERATOR, FormatterMessages.getString("WhiteSpaceTabPage.operators.after_binary_operators") ), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_UNARY_OPERATOR, FormatterMessages.getString("WhiteSpaceTabPage.operators.before_unary_operators") ), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_UNARY_OPERATOR, FormatterMessages.getString("WhiteSpaceTabPage.operators.after_unary_operators") ), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_PREFIX_OPERATOR, FormatterMessages.getString("WhiteSpaceTabPage.operators.before_prefix_operators") ), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_PREFIX_OPERATOR, FormatterMessages.getString("WhiteSpaceTabPage.operators.after_prefix_operators") ), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_POSTFIX_OPERATOR, FormatterMessages.getString("WhiteSpaceTabPage.operators.before_postfix_operators") ), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_POSTFIX_OPERATOR,  FormatterMessages.getString("WhiteSpaceTabPage.operators.after_postfix_operators") ) //$NON-NLS-1$
 		},
-		"class Example {" +
-		"void foo() {" +
-		"int a = 1 + 2 - 3 * -4 / 5;" +
-		"Other.check( a-- );" +
-		"Other.check( ++a );" +
-		"Other.check( -a );" +
-		"boolean d = !Other.isValid();" +
-		"}}"
-		);
-	
-	
-	private final Category classCategory= new Category(
-		"Classes",
-		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_TYPE_OPEN_BRACE, "before opening brace of a class"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ANONYMOUS_TYPE_OPEN_BRACE, "before opening brace of an anonymous class"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_SUPERINTERFACES, "before comma in implements clause "),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_SUPERINTERFACES, "after comma in implements clause")
-		},
-		"class Example extends C2 implements I1, I2, I3 {" +
-		"void run() {" +
-		"  setHandler( new IHandler() {" +
-		"    void handleThis(Event e) {" +
-		"      forward(e);" +
-		"    }" +
-		"  });" +
-		"}" +
-		"}"
-		);
-
-	
-	private final Category memberFunctionCategory= new Category(
-		"Member Functions",
-		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_FIRST_ARGUMENT, "after opening parenthesis"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN, "before closing parenthesis"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_ARGUMENTS, "between empty parenthesis"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_METHOD_OPEN_BRACE, "before opening brace")
-		},
-		"class Example {" +
-		"int fField;" +
-		"Example(int a, int b) throws E1, E2 {" +
-		"fField= a / b;" +
-		"}" +
-		"int foo( int a, int b, int c, int d ) {" +
-		"return a + b + c + d;" +
-		"}" +
-		"int foo() throws E1, E2 {" +
-		"return 0;" +
-		"}}"
+		"class Example {" + //$NON-NLS-1$
+		"void foo() {" + //$NON-NLS-1$
+		"int a = 1 + 2 - 3 * -4 / 5;" + //$NON-NLS-1$
+		"Other.check( a-- );" + //$NON-NLS-1$
+		"Other.check( ++a );" + //$NON-NLS-1$
+		"Other.check( -a );" + //$NON-NLS-1$
+		"boolean d = !Other.isValid();" + //$NON-NLS-1$
+		"}}" //$NON-NLS-1$
 	);
-	
-	
-	private final Category methodCategory= new Category(
-		"Methods",
-		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_ARGUMENTS, "before comma in arguments"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_ARGUMENTS, "after comma in arguments"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_THROWS, "before comma in throws clause"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_THROWS, "after comma in throws clause")
-		},
-		memberFunctionCategory.previewText
-	);
-	
-	
-	private final Category constructorCategory= new Category(
-		"Constructors",
-		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_ARGUMENTS, "before comma in arguments"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_ARGUMENTS, "after comma in arguments"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_THROWS, "before comma in throws clause"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_THROWS, "after comma in throws clause")
-		},
-		memberFunctionCategory.previewText
-	);
-						
-	
-	
-	private final Category fieldCategory= new Category(
-		"Fields",
-		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MULTIPLE_FIELD_DECLARATIONS, "before comma in multiple field declarations"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MULTIPLE_FIELD_DECLARATIONS, "after comma in multiple field declarations")
-		},
-		"class Example { int f1=1,f2=2; }"
-		);
-	
-	
-	private final Category localVariableCategory= new Category(
-		"Local variables",
-		new Option[] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MULTIPLE_LOCAL_DECLARATIONS, "before comma in multiple local declarations"),
-			 new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MULTIPLE_LOCAL_DECLARATIONS, "after comma in multiple local declarations")
-		},
-		"class Example { void foo() { int a=1,b=2; } }"
-	);
-	
-	private final Category arrayInitializerCategory= new Category(
-		"Array initializers",
-		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_FIRST_INITIALIZER, "after opening brace"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_BRACE_IN_ARRAY_INITIALIZER, "before closing brace"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ARRAY_INITIALIZER, "before comma"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ARRAY_INITIALIZER, "after comma"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_ARRAY_INITIALIZER, "between empty braces")
-		},
-		"class Example {" +
-		"  final int [] fArray1= { 1, 2, 3, 4 };" +
-		"  final int [] fArray2= {};" +
-		"}"
-	);
-	
-	private final Category arrayDeclarationCategory= new Category(
-		"Array declarations",
-		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_BRACKET_IN_ARRAY_TYPE_REFERENCE, "before brackets"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_BRACKETS_IN_ARRAY_TYPE_REFERENCE, "between brackets")
-		},
-		"class Example {" +
-		"  int [] fArray1;" +
-		"  int [][] fArray2;" +
-		"}"
-	);
-	
-	private final Category arrayElementAccessCategory= new Category(
-		"Array element access",
-		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_BRACKET_IN_ARRAY_REFERENCE, "before brackets"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_BRACKETS_IN_ARRAY_REFERENCE, "within brackets")
-		},
-		"class Example {" +
-		"  int foo(int [] array) {" +
-		"    return array[0] + array[1];" +
-		"  }" +
-		"}"
-		);
 		
-	
-	private final Category functionCallCategory= new Category(
-		"Method and constructor calls",
+	private final Category fClassCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.classes.title"), //$NON-NLS-1$
 		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_MESSAGE_SEND, "before opening parenthesis"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_WITHIN_MESSAGE_SEND, "after opening and before closing parenthesis"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MESSAGESEND_ARGUMENTS, "before comma in method arguments"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MESSAGESEND_ARGUMENTS, "after comma in method arguments"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ALLOCATION_EXPRESSION, "before comma in object allocation arguments"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ALLOCATION_EXPRESSION, "after comma in object allocation arguments"),				
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_EXPLICITCONSTRUCTORCALL_ARGUMENTS, "before comma in qualified object allocation arguments"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_EXPLICITCONSTRUCTORCALL_ARGUMENTS, "after comma in qualified object allocation arguments")
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_TYPE_OPEN_BRACE, FormatterMessages.getString("WhiteSpaceTabPage.classes.before_opening_brace_of_a_class")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ANONYMOUS_TYPE_OPEN_BRACE, FormatterMessages.getString("WhiteSpaceTabPage.classes.before_opening_brace_of_anon_class")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_SUPERINTERFACES, FormatterMessages.getString("WhiteSpaceTabPage.classes.before_comma_implements")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_SUPERINTERFACES, FormatterMessages.getString("WhiteSpaceTabPage.classes.after_comma_implements")) //$NON-NLS-1$
 		},
-		"class Example extends AnotherExample{" +
-		"  IStore fStore;" +
-		"  IOther fOther;" +
-		"  Example() { this(4, 5, 6); }" +
-		"  Example(int a, int b, int c) { " +
-		"    super(a, b, c);" +
-		"    oneMethod( a, b, c );" +
-		"    anotherMethod();" +
-		"    fStore= new Store( 1, 2, 3 );" +
-		"    fOther= new Other();" +
-		"  }" + 
-		"}"
+		"class Example extends C2 implements I1, I2, I3 {" + //$NON-NLS-1$
+		"void run() {" + //$NON-NLS-1$
+		"  setHandler( new IHandler() {" + //$NON-NLS-1$
+		"    void handleThis(Event e) {" + //$NON-NLS-1$
+		"      forward(e);" + //$NON-NLS-1$
+		"    }" + //$NON-NLS-1$
+		"  });" + //$NON-NLS-1$
+		"}" + //$NON-NLS-1$
+		"}" //$NON-NLS-1$
 	);
 	
-	
-	
-	
-	
-	private final Category statementCategory= new Category(
-		"Control statements",
+	private final Category fMemberFunctionCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.title"), //$NON-NLS-1$
 		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SEMICOLON, "before semicolon")
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_FIRST_ARGUMENT, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.after_opening_paren")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.before_closing_paren")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.between_empty_paren")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_METHOD_OPEN_BRACE, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.before_opening_brace")) //$NON-NLS-1$
+		},
+		"class Example {" + //$NON-NLS-1$
+		"int fField;" + //$NON-NLS-1$
+		"Example(int a, int b) throws E1, E2 {" + //$NON-NLS-1$
+		"fField= a / b;" + //$NON-NLS-1$
+		"}" + //$NON-NLS-1$
+		"int foo( int a, int b, int c, int d ) {" + //$NON-NLS-1$
+		"return a + b + c + d;" + //$NON-NLS-1$
+		"}" + //$NON-NLS-1$
+		"int foo() throws E1, E2 {" + //$NON-NLS-1$
+		"return 0;" + //$NON-NLS-1$
+		"}}" //$NON-NLS-1$
+	);
+	
+	private final Category fMethodCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.methods.title"), //$NON-NLS-1$
+		new Option [] {
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.methods.before_comma_in_args")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.methods.after_comma_in_args")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_THROWS, FormatterMessages.getString("WhiteSpaceTabPage.methods.before_comma_in_throws")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_THROWS, FormatterMessages.getString("WhiteSpaceTabPage.methods.after_comma_in_throws")) //$NON-NLS-1$
+		},
+		fMemberFunctionCategory.previewText
+	);
+	
+	private final Category fConstructorCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.constructors.title"), //$NON-NLS-1$
+		new Option [] {
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.constructors.before_comma_in_args")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.constructors.after_comma_in_args")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_THROWS, FormatterMessages.getString("WhiteSpaceTabPage.constructors.before_comma_in_throws")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_THROWS, FormatterMessages.getString("WhiteSpaceTabPage.constructors.after_comma_in_throws")) //$NON-NLS-1$
+		},
+		fMemberFunctionCategory.previewText
+	);
+
+	private final Category fFieldCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.fields.title"), //$NON-NLS-1$
+		new Option [] {
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MULTIPLE_FIELD_DECLARATIONS, FormatterMessages.getString("WhiteSpaceTabPage.fields.before_comma")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MULTIPLE_FIELD_DECLARATIONS, FormatterMessages.getString("WhiteSpaceTabPage.fields.after_comma")) //$NON-NLS-1$
+		},
+		"class Example { int f1=1,f2=2; }" //$NON-NLS-1$
+		);
+	
+	
+	private final Category fLocalVariableCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.localvars.title"), //$NON-NLS-1$
+		new Option[] {
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MULTIPLE_LOCAL_DECLARATIONS, FormatterMessages.getString("WhiteSpaceTabPage.localvars.before_comma")), //$NON-NLS-1$
+			 new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MULTIPLE_LOCAL_DECLARATIONS, FormatterMessages.getString("WhiteSpaceTabPage.localvars.after_comma")) //$NON-NLS-1$
+		},
+		"class Example { void foo() { int a=1,b=2; } }" //$NON-NLS-1$
+	);
+	
+	private final Category fArrayInitializerCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.arrayinit.title"), //$NON-NLS-1$
+		new Option [] {
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_FIRST_INITIALIZER, FormatterMessages.getString("WhiteSpaceTabPage.arrayinit.after_opening_brace")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_BRACE_IN_ARRAY_INITIALIZER, FormatterMessages.getString("WhiteSpaceTabPage.arrayinit.before_closing_brace")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ARRAY_INITIALIZER, FormatterMessages.getString("WhiteSpaceTabPage.arrayinit.before_comma")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ARRAY_INITIALIZER, FormatterMessages.getString("WhiteSpaceTabPage.arrayinit.after_comma")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_ARRAY_INITIALIZER, FormatterMessages.getString("WhiteSpaceTabPage.arrayinit.between_empty_braces")) //$NON-NLS-1$
+		},
+		"class Example {" + //$NON-NLS-1$
+		"  final int [] fArray1= { 1, 2, 3, 4 };" + //$NON-NLS-1$
+		"  final int [] fArray2= {};" + //$NON-NLS-1$
+		"}" //$NON-NLS-1$
+	);
+	
+	private final Category fArrayDeclarationCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.arraydecls.title"), //$NON-NLS-1$
+		new Option [] {
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_BRACKET_IN_ARRAY_TYPE_REFERENCE, FormatterMessages.getString("WhiteSpaceTabPage.arraydecls.before_brackets")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_BRACKETS_IN_ARRAY_TYPE_REFERENCE, FormatterMessages.getString("WhiteSpaceTabPage.arraydecls.between_brackets")) //$NON-NLS-1$
+		},
+		"class Example {" + //$NON-NLS-1$
+		"  int [] fArray1;" + //$NON-NLS-1$
+		"  int [][] fArray2;" + //$NON-NLS-1$
+		"}" //$NON-NLS-1$
+	);
+	
+	private final Category fArrayElementAccessCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.arrayelem.title"), //$NON-NLS-1$
+		new Option [] {
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_BRACKET_IN_ARRAY_REFERENCE, FormatterMessages.getString("WhiteSpaceTabPage.arrayelem.before_brackets")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_BRACKETS_IN_ARRAY_REFERENCE, FormatterMessages.getString("WhiteSpaceTabPage.arrayelem.within_brackets")) //$NON-NLS-1$
+		},
+		"class Example {" + //$NON-NLS-1$
+		"  int foo(int [] array) {" + //$NON-NLS-1$
+		"    return array[0] + array[1];" + //$NON-NLS-1$
+		"  }" + //$NON-NLS-1$
+		"}" //$NON-NLS-1$
+	);
+	
+	private final Category fFunctionCallCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.calls.title"), //$NON-NLS-1$
+		new Option [] {
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_MESSAGE_SEND, FormatterMessages.getString("WhiteSpaceTabPage.calls.before_opening_paren")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_WITHIN_MESSAGE_SEND, FormatterMessages.getString("WhiteSpaceTabPage.calls.after_opening_before_closing")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MESSAGESEND_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.calls.before_comma_in_method_args")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MESSAGESEND_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.calls.after_comma_in_method_args")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ALLOCATION_EXPRESSION, FormatterMessages.getString("WhiteSpaceTabPage.calls.before_comma_in_alloc")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ALLOCATION_EXPRESSION, FormatterMessages.getString("WhiteSpaceTabPage.calls.after_comma_in_alloc")),				 //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_EXPLICITCONSTRUCTORCALL_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.calls.before_comma_in_qalloc")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_EXPLICITCONSTRUCTORCALL_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.calls.after_comma_in_qalloc")) //$NON-NLS-1$
+		},
+		"class Example extends AnotherExample{" + //$NON-NLS-1$
+		"  IStore fStore;" + //$NON-NLS-1$
+		"  IOther fOther;" + //$NON-NLS-1$
+		"  Example() { this(4, 5, 6); }" + //$NON-NLS-1$
+		"  Example(int a, int b, int c) { " + //$NON-NLS-1$
+		"    super(a, b, c);" + //$NON-NLS-1$
+		"    oneMethod( a, b, c );" + //$NON-NLS-1$
+		"    anotherMethod();" + //$NON-NLS-1$
+		"    fStore= new Store( 1, 2, 3 );" + //$NON-NLS-1$
+		"    fOther= new Other();" + //$NON-NLS-1$
+		"  }" +  //$NON-NLS-1$
+		"}" //$NON-NLS-1$
+	);
+	
+	private final Category fStatementCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.statements.title"), //$NON-NLS-1$
+		new Option [] {
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SEMICOLON, FormatterMessages.getString("WhiteSpaceTabPage.statements.before_semicolon")) //$NON-NLS-1$
 		}, 
-		"class Example {" +
-		"void foo(int a) {" +
-		"Other.initialize();" +
-		"Other.doSomething();" +
-		"Other.doSomethingElse();" +
-		"Other.cleanUp();" +
-		"}}"
+		"class Example {" + //$NON-NLS-1$
+		"void foo(int a) {" + //$NON-NLS-1$
+		"Other.initialize();" + //$NON-NLS-1$
+		"Other.doSomething();" + //$NON-NLS-1$
+		"Other.doSomethingElse();" + //$NON-NLS-1$
+		"Other.cleanUp();" + //$NON-NLS-1$
+		"}}" //$NON-NLS-1$
 	);
 	
 	private final Category blockStatementCategory= new Category(
-		"Blocks",
+		FormatterMessages.getString("WhiteSpaceTabPage.blocks.title"), //$NON-NLS-1$
 		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_BLOCK_OPEN_BRACE, "before opening brace"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_BLOCK_CLOSE_BRACE, "after closing brace")
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_BLOCK_OPEN_BRACE, FormatterMessages.getString("WhiteSpaceTabPage.blocks.before_opening_brace")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_BLOCK_CLOSE_BRACE, FormatterMessages.getString("WhiteSpaceTabPage.blocks.after_closing_brace")) //$NON-NLS-1$
 		},
-		"class Example {" +
-		"void foo() {" +
-		"try {" +
-		"} catch (Exception e) {} finally {" +
-		"}" +
-		"for (int i=0; i < a; i++) {}" +
-		"if (true) {} else {};" +
-		"while( false) {}" +
-		"{" +
-		"}" +
-		"do {" +
-		"} while( false );" +
-		"}}"
-	);
-	
-	
-	private final Category switchStatementCategory= new Category(
-		"'switch case'",
-		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CASE, "before colon in case"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_DEFAULT, "before colon in default"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SWITCH_OPEN_BRACE, "before opening brace"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SWITCH_CONDITION, "before condition"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_IN_SWITCH_CONDITION, "in condition")
-		},
-		"class Example {" +
-		"void foo( int a) {" +
-		"switch (a) {" +
 		"case IConstants.GO: Other.go(); break;" +
 		"case IConstants.STOP: Other.stop(); break;" +
 		"case IConstants.WAIT: Other.wait(); break;" +
-		"default: Other.nothingHappens();" +
-		"}" +
-		"}}"
+		"class Example {" + //$NON-NLS-1$
+		"void foo() {" + //$NON-NLS-1$
+		"try {" + //$NON-NLS-1$
+		"} catch (Exception e) {} finally {" + //$NON-NLS-1$
+		"}" + //$NON-NLS-1$
+		"for (int i=0; i < a; i++) {}" + //$NON-NLS-1$
+		"if (true) {} else {};" + //$NON-NLS-1$
+		"while( false) {}" + //$NON-NLS-1$
+		"{" + //$NON-NLS-1$
+		"}" + //$NON-NLS-1$
+		"do {" + //$NON-NLS-1$
+		"} while( false );" + //$NON-NLS-1$
+		"}}" //$NON-NLS-1$
 	);
 	
-	
-	private final Category doWhileCategory= new Category(
-		"'do while'",
+	private final Category fSwitchStatementCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.switch.title"), //$NON-NLS-1$
 		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_WHILE_CONDITION, "before condition"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_IN_WHILE_CONDITION, "in condition")
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CASE, FormatterMessages.getString("WhiteSpaceTabPage.switch.before_case_colon")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_DEFAULT, FormatterMessages.getString("WhiteSpaceTabPage.switch.before_default_colon")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SWITCH_OPEN_BRACE, FormatterMessages.getString("WhiteSpaceTabPage.switch.before_opening_brace")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SWITCH_CONDITION, FormatterMessages.getString("WhiteSpaceTabPage.switch.before_condition")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_IN_SWITCH_CONDITION, FormatterMessages.getString("WhiteSpaceTabPage.switch.in_condition")) //$NON-NLS-1$
 		},
-		"class Example {" +
-		"void foo() {" +
-		"  int a= 100;" +
-		"  while (a-- > 0 ) { Other.doSomething();};" +
-		" do { Other.doNothing(); } while ( a++ < 1000 );" +
-		"}}"
+		"class Example {" + //$NON-NLS-1$
+		"void foo( int a) {" + //$NON-NLS-1$
+		"switch (a) {" + //$NON-NLS-1$
+		"default: Other.nothingHappens();" + //$NON-NLS-1$
+		"}" + //$NON-NLS-1$
+		"}}" //$NON-NLS-1$
 	);
 	
-	
-	private final Category synchronizedCategory= new Category(
-		"'synchronized'",
+	private final Category fDoWhileCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.do.title"), //$NON-NLS-1$
 		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SYNCHRONIZED_CONDITION, "before condition"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_IN_SYNCHRONIZED_CONDITION, "in condition")
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_WHILE_CONDITION, FormatterMessages.getString("WhiteSpaceTabPage.do.before_condition")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_IN_WHILE_CONDITION, FormatterMessages.getString("WhiteSpaceTabPage.do.in_condition")) //$NON-NLS-1$
 		},
-		"class Example {" +
-		"Mutex fMutex;" +
-		"void run() {" +
-		"  synchronized(fMutex) {" +
-		"    Other.doSomething();" +
-		"  }" +
-		"}" +
-		"} "
+		"class Example {" + //$NON-NLS-1$
+		"void foo() {" + //$NON-NLS-1$
+		"  int a= 100;" + //$NON-NLS-1$
+		"  while (a-- > 0 ) { Other.doSomething();};" + //$NON-NLS-1$
+		" do { Other.doNothing(); } while ( a++ < 1000 );" + //$NON-NLS-1$
+		"}}" //$NON-NLS-1$
 	);
 	
-	
-	private final Category tryStatementCategory= new Category(
-		"'try finally' / 'try catch'",
+	private final Category fSynchronizedCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.synchronized.title"), //$NON-NLS-1$
 		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CATCH_EXPRESSION, "before catch expression"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_IN_CATCH_EXPRESSION, "in catch expression")
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SYNCHRONIZED_CONDITION, FormatterMessages.getString("WhiteSpaceTabPage.synchronized.before_condition")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_IN_SYNCHRONIZED_CONDITION, FormatterMessages.getString("WhiteSpaceTabPage.synchronized.in_condition")) //$NON-NLS-1$
 		},
-		"class Example {" +
-		"  void foo() {" +
-		"    try {" +
-		"      return 8 / 0;" +
-		"    } catch (Exception e) {" +
-		"      System.out.println(\"Something happened\");" +
-		"    }" +
-		"  }" +
-		"}"
+		"class Example {" + //$NON-NLS-1$
+		"Mutex fMutex;" + //$NON-NLS-1$
+		"void run() {" + //$NON-NLS-1$
+		"  synchronized(fMutex) {" + //$NON-NLS-1$
+		"    Other.doSomething();" + //$NON-NLS-1$
+		"  }" + //$NON-NLS-1$
+		"}" + //$NON-NLS-1$
+		"} " //$NON-NLS-1$
 	);
 	
-	
-	private final Category ifStatementCategory= new Category(
-		"'if else'",
+	private final Category fTryStatementCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.try.title"), //$NON-NLS-1$
 		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_IF_CONDITION, "before condition"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_IN_IF_CONDITION, "in condition")
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CATCH_EXPRESSION, FormatterMessages.getString("WhiteSpaceTabPage.try.before_catch_expr")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_IN_CATCH_EXPRESSION, FormatterMessages.getString("WhiteSpaceTabPage.try.in_catch_expr")) //$NON-NLS-1$
 		},
-		"class Example {" +
-		"int fField;" +
-		"int foo(boolean a) {" +
-		"if (a) {" +
-		"return 500;" +
-		"} else {" +
-		"return 400;" +
-		"}}}"
+		"class Example {" + //$NON-NLS-1$
+		"  void foo() {" + //$NON-NLS-1$
+		"    try {" + //$NON-NLS-1$
+		"      return 8 / 0;" + //$NON-NLS-1$
+		"    } catch (Exception e) {" + //$NON-NLS-1$
+		"      System.out.println(\"Something happened\");" + //$NON-NLS-1$
+		"    }" + //$NON-NLS-1$
+		"  }" + //$NON-NLS-1$
+		"}" //$NON-NLS-1$
 	);
 	
-	
-	private final Category forStatementCategory= new Category(
-		"'for'",
+	private final Category fIfStatementCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.if.title"), //$NON-NLS-1$
 		new Option [] {
-		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_FOR_PAREN, "before opening parenthesis"),
-		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_IN_FOR_PARENS, "after opening and before closing parenthesis"),
-		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_FOR_INITS, "before comma in initialization"),
-		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_FOR_INITS, "after comma in initialization"),
-		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_FOR_INCREMENTS, "before comma in increments"),
-		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_FOR_INCREMENTS, "after comma in increments"),
-		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_SEMICOLON_IN_FOR, "after semicolon")
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_IF_CONDITION, FormatterMessages.getString("WhiteSpaceTabPage.if.before_condition")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_IN_IF_CONDITION, FormatterMessages.getString("WhiteSpaceTabPage.if.in_condition")) //$NON-NLS-1$
 		},
-		"class Example {" +
-		"void foo() {" +
-		"for (int i=0, j=100; i < 10; i++, j--) {" +
-		"	Other.enable(i, j );" +
-		"}}}"
+		"class Example {" + //$NON-NLS-1$
+		"int fField;" + //$NON-NLS-1$
+		"int foo(boolean a) {" + //$NON-NLS-1$
+		"if (a) {" + //$NON-NLS-1$
+		"return 500;" + //$NON-NLS-1$
+		"} else {" + //$NON-NLS-1$
+		"return 400;" + //$NON-NLS-1$
+		"}}}" //$NON-NLS-1$
 	);
 	
-	private final Category labelCategory= new Category(
-		"Labels",
+	private final Category fForStatementCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.for.title"), //$NON-NLS-1$
 		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_LABELED_STATEMENT, "before colon"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_LABELED_STATEMENT, "after colon")
+		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_FOR_PAREN, FormatterMessages.getString("WhiteSpaceTabPage.for.before_opening_paren")), //$NON-NLS-1$
+		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_IN_FOR_PARENS, FormatterMessages.getString("WhiteSpaceTabPage.for.after_opening_before_closing_paren")), //$NON-NLS-1$
+		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_FOR_INITS, FormatterMessages.getString("WhiteSpaceTabPage.for.before_comma_init")), //$NON-NLS-1$
+		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_FOR_INITS, FormatterMessages.getString("WhiteSpaceTabPage.for.after_comma_init")), //$NON-NLS-1$
+		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_FOR_INCREMENTS, FormatterMessages.getString("WhiteSpaceTabPage.for.before_comma_inc")), //$NON-NLS-1$
+		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_FOR_INCREMENTS, FormatterMessages.getString("WhiteSpaceTabPage.for.after_comma_inc")), //$NON-NLS-1$
+		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_SEMICOLON_IN_FOR, FormatterMessages.getString("WhiteSpaceTabPage.for.after_semicolon")) //$NON-NLS-1$
 		},
-		"class Example {" +
-		"  void foo() {" +
-		"  outer: " +
-		"    for (int i=0; i < 100; i++) {" +
-		"      for (int j=0; j < 100; j++) {" +
-		"        if (i+j < 100) {" +
-		"			continue outer;" +
-		"        }" +
-		"      }" +
-		"    }" +
-		"  }" +
-		"}"
+		"class Example {" + //$NON-NLS-1$
+		"void foo() {" + //$NON-NLS-1$
+		"for (int i=0, j=100; i < 10; i++, j--) {" + //$NON-NLS-1$
+		"	Other.enable(i, j );" + //$NON-NLS-1$
+		"}}}" //$NON-NLS-1$
 	);
 	
+//TODO: include this category
+//	private final Category fAssertCategory= new Category(
+//		"'assert'",
+//		new Option [] {
+//			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_ASSERT, "before colon"),
+//			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_ASSERT, "after colon")
+//		},
+//		"class Example {" +
+//		"  void foo(int a) {" +
+//		"	 assert a==0 : \"Oops\";" +
+//		"  }" +
+//		"}"
+//	);
 	
-	private final Category conditionalCategory= new Category(
-		"Conditionals",
+	private final Category fLabelCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.labels.title"), //$NON-NLS-1$
 		new Option [] {
-		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_QUESTION_IN_CONDITIONAL, "before question mark"),
-		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_QUESTION_IN_CONDITIONAL, "after question mark"),
-		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CONDITIONAL, "before colon"),
-		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_CONDITIONAL, "after colon")
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_LABELED_STATEMENT, FormatterMessages.getString("WhiteSpaceTabPage.labels.before_colon")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_LABELED_STATEMENT, FormatterMessages.getString("WhiteSpaceTabPage.labels.after_colon")) //$NON-NLS-1$
 		},
-		"class Example {" +
-		"int foo(int a) {" +
-		"return a > 0 ? 1 : 0;" +
-		"}" +
-		"}"
+		"class Example {" + //$NON-NLS-1$
+		"  void foo() {" + //$NON-NLS-1$
+		"  outer: " + //$NON-NLS-1$
+		"    for (int i=0; i < 100; i++) {" + //$NON-NLS-1$
+		"      for (int j=0; j < 100; j++) {" + //$NON-NLS-1$
+		"        if (i+j < 100) {" + //$NON-NLS-1$
+		"			continue outer;" + //$NON-NLS-1$
+		"        }" + //$NON-NLS-1$
+		"      }" + //$NON-NLS-1$
+		"    }" + //$NON-NLS-1$
+		"  }" + //$NON-NLS-1$
+		"}" //$NON-NLS-1$
 	);
 	
-	
-	private final Category typecastCategory= new Category(
-		"Type casts",
+	private final Category fConditionalCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.conditionals.title"), //$NON-NLS-1$
 		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CAST, "after opening parenthesis"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CAST, "before closing parenthesis"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_PAREN_IN_CAST, "after closing parenthesis")
+		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_QUESTION_IN_CONDITIONAL, FormatterMessages.getString("WhiteSpaceTabPage.conditionals.before_question")), //$NON-NLS-1$
+		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_QUESTION_IN_CONDITIONAL, FormatterMessages.getString("WhiteSpaceTabPage.conditionals.after_question")), //$NON-NLS-1$
+		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CONDITIONAL, FormatterMessages.getString("WhiteSpaceTabPage.conditionals.before_colon")), //$NON-NLS-1$
+		   new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_CONDITIONAL, FormatterMessages.getString("WhiteSpaceTabPage.conditionals.after_colon")) //$NON-NLS-1$
 		},
-		"class Example {" +
-		"MyClass foo( Object o) {" +
-		"	return ((SomeClass)o).getMyClass();" +
-		"}}"
+		"class Example {" + //$NON-NLS-1$
+		"int foo(int a) {" + //$NON-NLS-1$
+		"return a > 0 ? 1 : 0;" + //$NON-NLS-1$
+		"}" + //$NON-NLS-1$
+		"}" //$NON-NLS-1$
 	);
-		
 	
-	
-	private final Category parenthesizedExpressionOptions= new Category(
-		"Parenthesized Expressions",
+	private final Category fTypecastCategory= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.typecasts.title"), //$NON-NLS-1$
 		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPEN_PAREN_IN_PARENTHESIZED_EXPRESSION, "before opening parenthesis"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPEN_PAREN_IN_PARENTHESIZED_EXPRESSION, "after opening parenthesis"),
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_PARENTHESIZED_EXPRESSION, "before closing parenthesis")
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CAST, FormatterMessages.getString("WhiteSpaceTabPage.typecasts.after_opening_paren")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CAST, FormatterMessages.getString("WhiteSpaceTabPage.typecasts.before_closing_paren")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_PAREN_IN_CAST, FormatterMessages.getString("WhiteSpaceTabPage.typecasts.after_closing_paren")) //$NON-NLS-1$
 		},
-		"class Example {" +
-		"int foo(int a, int b) {" +
-		"  return  ((a) + (b));" +
-		"}}"
+		"class Example {" + //$NON-NLS-1$
+		"MyClass foo( Object o) {" + //$NON-NLS-1$
+		"	return ((SomeClass)o).getMyClass();" + //$NON-NLS-1$
+		"}}" //$NON-NLS-1$
 	);
 	
-	private final Category declarationsCategory= new Category("Declarations");
-	private final Category expressionsCategory= new Category("Expressions");
-	private final Category arrayCategory= new Category("Arrays");
+	private final Category fParenthesizedExpressionOptions= new Category(
+		FormatterMessages.getString("WhiteSpaceTabPage.parenexpr.title"), //$NON-NLS-1$
+		new Option [] {
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPEN_PAREN_IN_PARENTHESIZED_EXPRESSION, FormatterMessages.getString("WhiteSpaceTabPage.parenexpr.before_opening")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPEN_PAREN_IN_PARENTHESIZED_EXPRESSION, FormatterMessages.getString("WhiteSpaceTabPage.parenexpr.after_opening")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_PARENTHESIZED_EXPRESSION, FormatterMessages.getString("WhiteSpaceTabPage.parenexpr.before_closing")) //$NON-NLS-1$
+		},
+		"class Example {" + //$NON-NLS-1$
+		"int foo(int a, int b) {" + //$NON-NLS-1$
+		"  return  ((a) + (b));" + //$NON-NLS-1$
+		"}}" //$NON-NLS-1$
+	);
+	
+	private final Category fDeclarationsCategory= new Category(FormatterMessages.getString("WhiteSpaceTabPage.decls.title")); //$NON-NLS-1$
+	private final Category fExpressionsCategory= new Category(FormatterMessages.getString("WhiteSpaceTabPage.exprs.title")); //$NON-NLS-1$
+	private final Category fArrayCategory= new Category(FormatterMessages.getString("WhiteSpaceTabPage.arrays.title")); //$NON-NLS-1$
 
 	private final Collection fCategories;
 	
@@ -502,8 +492,8 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage implements ISelection
 
 
 	
-	public WhiteSpaceTabPage(Map workingValues) {
-		super(workingValues);		
+	public WhiteSpaceTabPage(ModifyDialog modifyDialog, Map workingValues) {
+		super(modifyDialog, workingValues);		
 		fCategories= createCategoriesTree();
 	}
 
@@ -512,39 +502,39 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage implements ISelection
 	 */
 	private Collection createCategoriesTree() {
 		
-		memberFunctionCategory.addChild(constructorCategory);
-		memberFunctionCategory.addChild(methodCategory);
+		fMemberFunctionCategory.addChild(fConstructorCategory);
+		fMemberFunctionCategory.addChild(fMethodCategory);
 
-		declarationsCategory.addChild(classCategory);
-		declarationsCategory.addChild(fieldCategory);
-		declarationsCategory.addChild(localVariableCategory);
-		declarationsCategory.addChild(memberFunctionCategory);
-		declarationsCategory.addChild(labelCategory);
+		fDeclarationsCategory.addChild(fClassCategory);
+		fDeclarationsCategory.addChild(fFieldCategory);
+		fDeclarationsCategory.addChild(fLocalVariableCategory);
+		fDeclarationsCategory.addChild(fMemberFunctionCategory);
+		fDeclarationsCategory.addChild(fLabelCategory);
 		
-		arrayCategory.addChild(arrayDeclarationCategory);
-		arrayCategory.addChild(arrayInitializerCategory);
-		arrayCategory.addChild(arrayElementAccessCategory);
+		fArrayCategory.addChild(fArrayDeclarationCategory);
+		fArrayCategory.addChild(fArrayInitializerCategory);
+		fArrayCategory.addChild(fArrayElementAccessCategory);
 		
-		statementCategory.addChild(blockStatementCategory);
-		statementCategory.addChild(ifStatementCategory);
-		statementCategory.addChild(doWhileCategory);
-		statementCategory.addChild(forStatementCategory);
-		statementCategory.addChild(tryStatementCategory);
-		statementCategory.addChild(switchStatementCategory);
-		statementCategory.addChild(synchronizedCategory);
+		fStatementCategory.addChild(blockStatementCategory);
+		fStatementCategory.addChild(fIfStatementCategory);
+		fStatementCategory.addChild(fDoWhileCategory);
+		fStatementCategory.addChild(fForStatementCategory);
+		fStatementCategory.addChild(fTryStatementCategory);
+		fStatementCategory.addChild(fSwitchStatementCategory);
+		fStatementCategory.addChild(fSynchronizedCategory);
 		
-		expressionsCategory.addChild(functionCallCategory);
-		expressionsCategory.addChild(assignmentCategory);
-		expressionsCategory.addChild(operatorCategory);
-		expressionsCategory.addChild(parenthesizedExpressionOptions);
-		expressionsCategory.addChild(typecastCategory);
-		expressionsCategory.addChild(conditionalCategory);
+		fExpressionsCategory.addChild(fFunctionCallCategory);
+		fExpressionsCategory.addChild(fAssignmentCategory);
+		fExpressionsCategory.addChild(fOperatorCategory);
+		fExpressionsCategory.addChild(fParenthesizedExpressionOptions);
+		fExpressionsCategory.addChild(fTypecastCategory);
+		fExpressionsCategory.addChild(fConditionalCategory);
 
 		Collection root= new ArrayList();
-		root.add(declarationsCategory);
-		root.add(statementCategory);
-		root.add(expressionsCategory);
-		root.add(arrayCategory);
+		root.add(fDeclarationsCategory);
+		root.add(fStatementCategory);
+		root.add(fExpressionsCategory);
+		root.add(fArrayCategory);
 		
 		return root;
 	}
@@ -558,7 +548,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage implements ISelection
 		composite.setLayout(createGridLayout(numColumns, false));
 		
 		// label "categories"
-		createLabel(numColumns, composite, "&Category:");
+		createLabel(numColumns, composite, FormatterMessages.getString("WhiteSpaceTabPage.category.label.text")); //$NON-NLS-1$
 		
 		// tree with categories
 		fCategoriesViewer= new TreeViewer(composite, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL);
@@ -586,7 +576,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage implements ISelection
 		fCategoriesViewer.getControl().setLayoutData(gd);
 		
 		// label "Insert white space..."
-		createLabel(numColumns, composite, "Insert &white space:");
+		createLabel(numColumns, composite, FormatterMessages.getString("WhiteSpaceTabPage.checktable.label.text")); //$NON-NLS-1$
 		
 		// table with checkboxes
 		fOptionsViewer= CheckboxTableViewer.newCheckList(composite, SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL);
@@ -601,7 +591,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage implements ISelection
 		fCategoriesViewer.addSelectionChangedListener(this);
 		fOptionsViewer.addCheckStateListener(this);
 		fCategoriesViewer.getTree().setFocus();
-		fCategoriesViewer.setSelection( new StructuredSelection( classCategory ));
+		fCategoriesViewer.setSelection( new StructuredSelection( fClassCategory ));
 	}
 	
 	public void selectionChanged(SelectionChangedEvent event) {

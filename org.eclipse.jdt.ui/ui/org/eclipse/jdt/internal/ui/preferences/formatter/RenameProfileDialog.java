@@ -50,14 +50,14 @@ public class RenameProfileDialog extends StatusDialog {
 		super(parentShell);
 		fProfile= profile;
 		fOk= new StatusInfo();
-		fDuplicate= new StatusInfo(IStatus.ERROR, "A profile with this name already exists");
-		fEmpty= new StatusInfo(IStatus.ERROR, "Profile name is empty");
+		fDuplicate= new StatusInfo(IStatus.ERROR, FormatterMessages.getString("RenameProfileDialog.status.message.profile_with_this_name_already_exists")); //$NON-NLS-1$
+		fEmpty= new StatusInfo(IStatus.ERROR, FormatterMessages.getString("RenameProfileDialog.status.message.profile_name_empty")); //$NON-NLS-1$
 	}
 	
 	
 	public void create() {
 		super.create();
-		setTitle("Rename Profile");
+		setTitle(FormatterMessages.getString("RenameProfileDialog.dialog.title")); //$NON-NLS-1$
 	}
 	
 	public Control createDialogArea(Composite parent) {
@@ -79,7 +79,7 @@ public class RenameProfileDialog extends StatusDialog {
 		gd.horizontalSpan = numColumns;
 		gd.widthHint= convertWidthInCharsToPixels(60);
 		fNameLabel = new Label(composite, SWT.NONE);
-		fNameLabel.setText("Please &enter a new name:");
+		fNameLabel.setText(FormatterMessages.getString("RenameProfileDialog.dialog.label.enter_a_new_name")); //$NON-NLS-1$
 		fNameLabel.setLayoutData(gd);
 		
 		// Create text field to enter name
@@ -104,7 +104,7 @@ public class RenameProfileDialog extends StatusDialog {
 
 
 	/**
-	 * Validate the current settings
+	 * Validate the current settings.
 	 */
 	protected void doValidation() {
 		final String name= fNameText.getText().trim();

@@ -21,41 +21,36 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 public class BlankLinesTabPage extends ModifyDialogTabPage {
 
-	private final String PREVIEW=
-	createPreviewHeader("Blank Lines") +
-	"package foo.bar.baz;" +
-	"import java.util.List;" +
-	"import java.util.Vector;" +
-	"public class Example {" +
-	"" +
-	"public static class Pair {" +
-	"public String first;" +
-	"public String second;" +
-	"};" +
-	"" +
-	"private LinkedList fList;" +
-	"public int counter;" +
-	"" +
-	"public Example(LinkedList list) {" +
-	"  fList= list;" +
-	"  counter= 0;" +
-	"}" +
-	"" +
-	"public void push(Pair p) {" +
-	"  fList.add(p);" +
-	"  ++counter;" +
-	"}" +
-	"" +
-	"public Object pop() {" +
-	"  --counter;" +
-	"  return (Pair)fList.getLast();" +
-	"}" +
-	"}";
+	private final String fPreview=
+	createPreviewHeader(FormatterMessages.getString("BlankLinesTabPage.preview.header")) + //$NON-NLS-1$
+	"package foo.bar.baz;" + //$NON-NLS-1$
+	"import java.util.List;" + //$NON-NLS-1$
+	"import java.util.Vector;" + //$NON-NLS-1$
+	"public class Example {" + //$NON-NLS-1$
+	"public static class Pair {" + //$NON-NLS-1$
+	"public String first;" + //$NON-NLS-1$
+	"public String second;" + //$NON-NLS-1$
+	"};" + //$NON-NLS-1$
+	"private LinkedList fList;" + //$NON-NLS-1$
+	"public int counter;" + //$NON-NLS-1$
+	"public Example(LinkedList list) {" + //$NON-NLS-1$
+	"  fList= list;" + //$NON-NLS-1$
+	"  counter= 0;" + //$NON-NLS-1$
+	"}" + //$NON-NLS-1$
+	"public void push(Pair p) {" + //$NON-NLS-1$
+	"  fList.add(p);" + //$NON-NLS-1$
+	"  ++counter;" + //$NON-NLS-1$
+	"}" + //$NON-NLS-1$
+	"public Object pop() {" + //$NON-NLS-1$
+	"  --counter;" + //$NON-NLS-1$
+	"  return (Pair)fList.getLast();" + //$NON-NLS-1$
+	"}" + //$NON-NLS-1$
+	"}"; //$NON-NLS-1$
 	
-	private final int minimumNumberLines= 0;
-	private final int maximumNumberLines= 99;
+	private final int MIN_NUMBER_LINES= 0;
+	private final int MAX_NUMBER_LINES= 99;
 	
-	private final int numColumns= 4;
+	private final int NUM_COLUMNS= 4;
 	
 	
 	/**
@@ -63,9 +58,9 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 	 * 
 	 * @param workingValues The values wherein the options are stored. 
 	 */
-	public BlankLinesTabPage(Map workingValues) {
-		super(workingValues);
-		fJavaPreview.setPreviewText(PREVIEW);
+	public BlankLinesTabPage(ModifyDialog modifyDialog, Map workingValues) {
+		super(modifyDialog, workingValues);
+		fJavaPreview.setPreviewText(fPreview);
 	}
 
 	/* (non-Javadoc)
@@ -76,30 +71,27 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 		Group group;
 		
 		final Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayout(createGridLayout(numColumns, false));
+		composite.setLayout(createGridLayout(NUM_COLUMNS, false));
 		
-		group= createGroup(numColumns, composite, "Blank lines around import declarations");
-		createBlankLineTextField(group, "Before p&ackage declaration:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_PACKAGE);
-		createBlankLineTextField(group, "After &package declaration:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_PACKAGE);
+		group= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("BlankLinesTabPage.package.group.title")); //$NON-NLS-1$
+		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.package.option.before"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_PACKAGE); //$NON-NLS-1$
+		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.package.option.after"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_PACKAGE); //$NON-NLS-1$
 		
-		group= createGroup(numColumns, composite, "Blank lines around import declarations");
-		createBlankLineTextField(group, "&Before import declaration:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_IMPORTS);
-		createBlankLineTextField(group, "After import de&claration:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_IMPORTS);
+		group= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("BlankLinesTabPage.import.group.title")); //$NON-NLS-1$
+		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.import.option.before"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_IMPORTS); //$NON-NLS-1$
+		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.import.option.after"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_IMPORTS); //$NON-NLS-1$
 		
-		group= createGroup(numColumns, composite, "Blank lines within class declarations");
-		/**
-		 * TODO: take it in once defaultcodeformatterconstants is updated.
-		 *createBlankLineTextField(group, "Before &first declaration:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIRST_CLASS_BODY_DECLARATION);
-		 */
-		createBlankLineTextField(group, "Before declarations of the same &kind:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_NEW_CHUNK);
-		createBlankLineTextField(group, "Before member cla&ss declarations:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_MEMBER_TYPE);
-		createBlankLineTextField(group, "Before& field declarations:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIELD);
-		createBlankLineTextField(group, "Before met&hod declarations:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD);
+		group= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("BlankLinesTabPage.class.group.title")); //$NON-NLS-1$
+		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.class.option.before_first_decl"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIRST_CLASS_BODY_DECLARATION); //$NON-NLS-1$
+		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.class.option.before_decls_of_same_kind"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_NEW_CHUNK); //$NON-NLS-1$
+		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.class.option.before_member_class_decls"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_MEMBER_TYPE); //$NON-NLS-1$
+		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.class.option.before_field_decls"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIELD); //$NON-NLS-1$
+		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.class.option.before_method_decls"), DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD); //$NON-NLS-1$
 
-		createLabel(numColumns, composite,"");
+		createLabel(NUM_COLUMNS, composite,""); //$NON-NLS-1$
 		
-		group= createGroup(numColumns, composite, "Existing blank lines");
-		createBlankLineTextField(group, "Number of empt&y lines to preserve:", DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE);
+		group= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("BlankLinesTabPage.blank_lines.group.title")); //$NON-NLS-1$
+		createBlankLineTextField(group, FormatterMessages.getString("BlankLinesTabPage.blank_lines.option.empty_lines_to_preserve"), DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE); //$NON-NLS-1$
 		return composite;
 	}
 	
@@ -107,8 +99,8 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 	 * A helper method to create a number preference for blank lines.
 	 */
 	protected void createBlankLineTextField(Composite composite, String name, String key) {
-		final NumberPreference numPref= new NumberPreference(composite, numColumns, fWorkingValues, 
-				key, minimumNumberLines, maximumNumberLines, name);
+		final NumberPreference numPref= new NumberPreference(composite, NUM_COLUMNS, fWorkingValues, 
+				key, MIN_NUMBER_LINES, MAX_NUMBER_LINES, name);
 		numPref.addObserver(fUpdater);
 	}
 }

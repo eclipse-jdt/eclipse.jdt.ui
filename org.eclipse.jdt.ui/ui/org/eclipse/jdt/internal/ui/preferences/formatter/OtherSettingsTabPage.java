@@ -22,53 +22,43 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 public class OtherSettingsTabPage extends ModifyDialogTabPage {
 	
-	private final String preview=
-		createPreviewHeader("Other Settings") +
-		"class Example {" +
-		"int theInt= 1;" +
-		"String someString= \"Hello\";" +
-		"double aDouble= 3.0;" +
-		"void foo(int a, int b, int c, int d, int e, int f) {" +
-		"}" +
-		"}";
+	private final String fPreview=
+		createPreviewHeader(FormatterMessages.getString("OtherSettingsTabPage.preview.header")) + //$NON-NLS-1$
+		"class Example {" + //$NON-NLS-1$
+		"int theInt= 1;" + //$NON-NLS-1$
+		"String someString= \"Hello\";" + //$NON-NLS-1$
+		"double aDouble= 3.0;" + //$NON-NLS-1$
+		"void foo(int a, int b, int c, int d, int e, int f) {" + //$NON-NLS-1$
+		"}" + //$NON-NLS-1$
+		"}"; //$NON-NLS-1$
 		
-	
-//	private final String [] lineDelimiterNames= {
-//				"Unix", "Windows", "Mac"
-//	};
-//	
-//	private final String [] lineDelimiters= {
-//				"\n", "\r\n", "\r"
-//	};
-	
-	private final String [] multiAlign= {
-										 DefaultCodeFormatterConstants.FORMATTER_NO_ALIGNMENT,
-										 DefaultCodeFormatterConstants.FORMATTER_MULTICOLUMN
+	private final String [] MULTI_ALIGN_VALUES= {
+	    DefaultCodeFormatterConstants.FORMATTER_NO_ALIGNMENT,
+	    DefaultCodeFormatterConstants.FORMATTER_MULTICOLUMN
 	};
 	
-	private final int numColumns= 4;
+	private final int NUM_COLUMNS= 4;
 	
 	/**
 	 * Create a new GeneralSettingsTabPage.
 	 */
-	public OtherSettingsTabPage(Map workingValues) {
-		super(workingValues);
-		fJavaPreview.setPreviewText(preview);
+	public OtherSettingsTabPage(ModifyDialog modifyDialog, Map workingValues) {
+		super(modifyDialog, workingValues);
+		fJavaPreview.setPreviewText(fPreview);
 	}
 	
 	
 	protected Composite doCreatePreferences(Composite parent) {
 		final Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayout(createGridLayout(numColumns, false));
-		
-		final Group generalGroup= createGroup(numColumns, composite, "General settings");
-		createNumberPref(generalGroup, numColumns, "Maximum line &width:", DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, 0, Integer.MAX_VALUE);
-		createNumberPref(generalGroup, numColumns, "Tab si&ze:", DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 1, 999);
-		createCheckboxPref(generalGroup, numColumns, "U&se tab character", DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, new String [] {JavaCore.SPACE, JavaCore.TAB});
-		
+		composite.setLayout(createGridLayout(NUM_COLUMNS, false));
 
-		final Group typeMemberGroup= createGroup(numColumns, composite, "Alignment of fields in class declarations");
-		createCheckboxPref(typeMemberGroup, numColumns, "Align fields in &columns", DefaultCodeFormatterConstants.FORMATTER_TYPE_MEMBER_ALIGNMENT, multiAlign);
+		final Group generalGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("OtherSettingsTabPage.general_group.title")); //$NON-NLS-1$
+		createNumberPref(generalGroup, NUM_COLUMNS, FormatterMessages.getString("OtherSettingsTabPage.general_group.option.max_line_width"), DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, 0, Integer.MAX_VALUE); //$NON-NLS-1$
+		createNumberPref(generalGroup, NUM_COLUMNS, FormatterMessages.getString("OtherSettingsTabPage.general_group.option.tab_size"), DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 0, 999); //$NON-NLS-1$
+		createCheckboxPref(generalGroup, NUM_COLUMNS, FormatterMessages.getString("OtherSettingsTabPage.general_group.option.use_tab_char"), DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, new String [] {JavaCore.SPACE, JavaCore.TAB}); //$NON-NLS-1$
+		
+		final Group typeMemberGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("OtherSettingsTabPage.field_alignment_group.title")); //$NON-NLS-1$
+		createCheckboxPref(typeMemberGroup, NUM_COLUMNS, FormatterMessages.getString("OtherSettingsTabPage.field_alignment_group.align_fields_in_columns"), DefaultCodeFormatterConstants.FORMATTER_TYPE_MEMBER_ALIGNMENT, MULTI_ALIGN_VALUES); //$NON-NLS-1$
 		
 		return composite;
 	}
