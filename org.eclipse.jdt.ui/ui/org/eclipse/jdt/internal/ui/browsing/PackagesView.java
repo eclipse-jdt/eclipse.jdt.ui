@@ -55,7 +55,6 @@ import org.eclipse.jdt.internal.ui.actions.MultiActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
@@ -229,9 +228,13 @@ public class PackagesView extends JavaBrowsingPart{
 	}
 	
 	private ILabelProvider createTreeLabelProvider() {
-		//add the hiarchy decorator
-		ILabelDecorator[] decorators= concat(AppearanceAwareLabelProvider.getDecorators(true, null), new ILabelDecorator[] { new TreeHierarchyLayoutProblemsDecorator(null)});	
-		return new PackagesViewLabelProvider(PackagesViewLabelProvider.HIERARCHICAL_VIEW_STATE, 0, AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,  decorators);
+		ILabelDecorator[] decorators= concat(AppearanceAwareLabelProvider.getDecorators(true, null), new ILabelDecorator[] { new TreeHierarchyLayoutProblemsDecorator(null)});
+		return new PackagesViewLabelProvider(PackagesViewLabelProvider.HIERARCHICAL_VIEW_STATE, decorators);
+	}
+
+	private ILabelProvider createListLabelProvider() {
+		ILabelDecorator[] decorators= AppearanceAwareLabelProvider.getDecorators(true, null);
+		return new PackagesViewLabelProvider(PackagesViewLabelProvider.FLAT_VIEW_STATE,  decorators);
 	}
 	
 	private ILabelDecorator[] concat(ILabelDecorator[] d1, ILabelDecorator[] d2) {
@@ -241,11 +244,6 @@ public class PackagesView extends JavaBrowsingPart{
 		System.arraycopy(d1, 0, decorators, 0, d1Len);
 		System.arraycopy(d2, 0, decorators, d1Len, d2Len); 
 		return decorators;
-	}
-
-	private ILabelProvider createListLabelProvider() {
-		ILabelDecorator[] decorators= AppearanceAwareLabelProvider.getDecorators(true, null);
-		return new PackagesViewLabelProvider(PackagesViewLabelProvider.FLAT_VIEW_STATE,0, AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,  decorators);
 	}
 
 	/**
@@ -526,7 +524,7 @@ public class PackagesView extends JavaBrowsingPart{
 	
 	/**
 	 * Override the getText and getImage methods for the DecoratingLabelProvider
-	 * to handel the decoration of CompoundElements.
+	 * to handel the decoration of logical packages.
 	 * 
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createDecoratingLabelProvider(org.eclipse.jface.viewers.ILabelDecorator)
 	 */
