@@ -121,9 +121,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 	 */
 	private boolean fIsDisposed= false;
 	/**
-	 * The launched test type
+	 * The launched project
 	 */
-	private IType fTestType;
+	private IJavaProject fTestProject;
 	/**
 	 * The launcher that has started the test
 	 */
@@ -448,8 +448,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 		});	
 	}
 
-	public void startTestRunListening(IType type, int port, ILaunch launch) {
-		fTestType= type;
+	public void startTestRunListening(IJavaElement type, int port, ILaunch launch) {
+		fTestProject= type.getJavaProject();
 		fLaunchMode= launch.getLaunchMode();
 		aboutToLaunch();
 		
@@ -459,9 +459,13 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 		fTestRunnerClient= new RemoteTestRunnerClient();
 		fTestRunnerClient.startListening(this, port);
 		fLastLaunch= launch;
-		String title= JUnitMessages.getFormattedString("TestRunnerViewPart.title", fTestType.getElementName()); //$NON-NLS-1$
+		String title= JUnitMessages.getFormattedString("TestRunnerViewPart.title", type.getElementName()); //$NON-NLS-1$
 		setTitle(title);
-		setTitleToolTip(fTestType.getFullyQualifiedName());
+		if (type instanceof IType)
+			setTitleToolTip(((IType)type).getFullyQualifiedName());
+		else
+			setTitleToolTip(type.getElementName());
+			
 	}
 
 	private void aboutToLaunch() {
@@ -515,7 +519,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 
 	private void postAsyncRunnable(Runnable r) {
 		if (!isDisposed())
-			getDisplay().asyncExec(r);
+			getDisplay().syncExec(r);
 	}
 
 	private void aboutToStart() {
@@ -809,7 +813,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 	}
 
 	public IJavaProject getLaunchedProject() {
-		return fTestType.getJavaProject();
+		return fTestProject;
 	}
 
 	protected static Image createImage(String path) {

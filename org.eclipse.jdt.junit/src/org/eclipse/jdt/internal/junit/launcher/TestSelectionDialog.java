@@ -73,7 +73,7 @@ public class TestSelectionDialog extends TwoPaneElementSelector {
 	 */
 	public int open() {
 		TestSearchEngine engine= new TestSearchEngine();
-		IType[] types;
+		IType[] types= new IType[0];
 		try {
 			types= engine.findTests(fRunnableContext, new Object[] {fProject});
 		} catch (InterruptedException e) {

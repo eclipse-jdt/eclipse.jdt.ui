@@ -76,6 +76,13 @@
    		</launchConfigurationType>
 	</extension>
 	
+	<extension point = "org.eclipse.debug.core.launchConfigurationComparators">
+		<launchConfigurationComparator
+			id = "org.eclipse.jdt.junit.containerComparator"
+			class = "org.eclipse.jdt.internal.junit.launcher.ContainerComparator"
+			attribute = "org.eclipse.jdt.junit.CONTAINER"/>
+	</extension>
+	
 	<extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
 		<launchConfigurationTypeImage
 			id="org.eclipse.jdt.junit.launchimage"

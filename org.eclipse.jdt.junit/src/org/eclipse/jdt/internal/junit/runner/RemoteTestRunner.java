@@ -5,6 +5,8 @@
 package org.eclipse.jdt.internal.junit.runner;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -179,12 +181,23 @@ public class RemoteTestRunner implements TestListener {
 					list.add(args[j]);
 				}
 				fTestClassNames= (String[]) list.toArray(new String[list.size()]);
-			}		
-			else if(args[i].toLowerCase().equals("-port")) { //$NON-NLS-1$
+			}	
+			else if(args[i].toLowerCase().equals("-testnamefile")) {
+				String testNameFile= args[i+1];
+				try {
+					readTestNames(testNameFile);
+				} catch (IOException e) {
+					throw new IllegalArgumentException("Cannot read testname file.");		
+				}
+				i++;
+			
+			} else if(args[i].toLowerCase().equals("-port")) { //$NON-NLS-1$
 				fPort= Integer.parseInt(args[i+1]);
+				i++;
 			}
 			else if(args[i].toLowerCase().equals("-host")) { //$NON-NLS-1$
 				fHost= args[i+1];
+				i++;
 			}
 			else if(args[i].toLowerCase().equals("-keepalive")) { //$NON-NLS-1$
 				fKeepAlive= true;
@@ -201,6 +214,22 @@ public class RemoteTestRunner implements TestListener {
 		if (fDebugMode)
 			System.out.println("keepalive "+fKeepAlive); //$NON-NLS-1$
 	}
+
+	private void readTestNames(String testNameFile) throws IOException {
+		BufferedReader br= new BufferedReader(new FileReader(new File(testNameFile)));
+		try {
+			String line;
+			ArrayList list= new ArrayList();
+			while ((line= br.readLine()) != null) {
+				list.add(line);
+			}
+			fTestClassNames= (String[]) list.toArray(new String[list.size()]);
+		}
+		finally {
+			br.close();
+		}
+	}
+
 	
 	/**
 	 * Connects to the remote ports and runs the tests.
@@ -317,7 +346,10 @@ public class RemoteTestRunner implements TestListener {
 		long startTime= System.currentTimeMillis();
 		if (fDebugMode)
 			System.out.println("start send tree"); //$NON-NLS-1$
-		sendTree(suites[0]);
+		for (int i= 0; i < suites.length; i++) {
+			sendTree(suites[i]);
+		}
+		
 		if (fDebugMode)
 			System.out.println("done send tree"+(System.currentTimeMillis()-startTime)); //$NON-NLS-1$
 

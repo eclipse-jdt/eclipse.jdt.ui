@@ -5,6 +5,9 @@ package org.eclipse.jdt.internal.junit.launcher;
  * All Rights Reserved.
  */
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -12,7 +15,9 @@ import java.util.Vector;
 
 import org.eclipse.core.boot.BootLoader;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
@@ -33,28 +38,57 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 	 * In addition it adds the port for the RemoteTestRunner as an argument
 	 */
 	protected VMRunnerConfiguration createVMRunner(ILaunchConfiguration configuration, IType[] testTypes, int port, String runMode) throws CoreException {
-		String[] classPath= createClassPath(configuration, testTypes[0]);	
+		String[] classPath= createClassPath(configuration);	
 		VMRunnerConfiguration vmConfig= new VMRunnerConfiguration("org.eclipse.jdt.internal.junit.runner.RemoteTestRunner", classPath); //$NON-NLS-1$
 	
 		Vector argv= new Vector(10);
 		argv.add("-port"); //$NON-NLS-1$
 		argv.add(Integer.toString(port));
 		//argv("-debugging");
-		argv.add("-classNames"); //$NON-NLS-1$
 				
 		if (keepAlive(configuration) && runMode.equals(ILaunchManager.DEBUG_MODE))
 			argv.add(0, "-keepalive"); //$NON-NLS-1$
-			
-		for (int i= 0; i < testTypes.length; i++) 
-			argv.add(testTypes[i].getFullyQualifiedName());
-	
+		
+		if (testTypes.length > 1) {
+			String fileName= createTestNamesFile(testTypes);
+			argv.add("-testNameFile"); //$NON-NLS-1$
+			argv.add(fileName);
+		} else {
+			argv.add("-classNames"); //$NON-NLS-1$
+			for (int i= 0; i < testTypes.length; i++) 
+				argv.add(testTypes[i].getFullyQualifiedName());
+		}
 		String[] args= new String[argv.size()];
 		argv.copyInto(args);
 		vmConfig.setProgramArguments(args);
 		return vmConfig;
 	}
+
+	private String createTestNamesFile(IType[] testTypes) throws CoreException {
+		try {
+			File file= File.createTempFile("testNames", ".txt");
+			file.deleteOnExit();
+			BufferedWriter bw= null;
+			try {
+				bw= new BufferedWriter(new FileWriter(file));
+				for (int i= 0; i < testTypes.length; i++) {
+					String testName= testTypes[i].getFullyQualifiedName();
+					bw.write(testName);
+					bw.newLine();
+				}
+			} finally {
+				if (bw != null) {
+					bw.close();
+				}
+			}
+			return file.getAbsolutePath();
+		} catch (IOException e) {
+			throw new CoreException(new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID, IStatus.ERROR, "", e));
+		}
+	}
+
 	
-	private String[] createClassPath(ILaunchConfiguration configuration, IType type) throws CoreException {
+	private String[] createClassPath(ILaunchConfiguration configuration) throws CoreException {
 		URL url= JUnitPlugin.getDefault().getDescriptor().getInstallURL();
 		String[] cp= getClasspath(configuration);
 		boolean inDevelopmentMode= BootLoader.inDevelopmentMode();

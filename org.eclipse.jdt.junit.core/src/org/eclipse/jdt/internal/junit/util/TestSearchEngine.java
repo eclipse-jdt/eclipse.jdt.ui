@@ -104,27 +104,31 @@ public class TestSearchEngine {
 		if (elements.length > 0) {
 			IRunnableWithProgress runnable= new IRunnableWithProgress() {
 				public void run(IProgressMonitor pm) throws InterruptedException {
-					int nElements= elements.length;
-					pm.beginTask(JUnitMessages.getString("TestSearchEngine.message.searching"), nElements);  //$NON-NLS-1$
-					try {
-						for (int i= 0; i < nElements; i++) {
-							try {
-								collectTypes(elements[i], new SubProgressMonitor(pm, 1), result);
-							} catch (JavaModelException e) {
-								JUnitPlugin.log(e.getStatus());
-							}
-							if (pm.isCanceled()) {
-								throw new InterruptedException();
-							}
-						}
-					} finally {
-						pm.done();
-					}
+					doFindTests(elements, result, pm);
 				}
 			};
 			context.run(true, true, runnable);			
 		}
 		return (IType[]) result.toArray(new IType[result.size()]) ;
+	}
+
+	public static void doFindTests(Object[] elements, Set result, IProgressMonitor pm) throws InterruptedException {
+		int nElements= elements.length;
+		pm.beginTask(JUnitMessages.getString("TestSearchEngine.message.searching"), nElements);  //$NON-NLS-1$
+		try {
+			for (int i= 0; i < nElements; i++) {
+				try {
+					collectTypes(elements[i], new SubProgressMonitor(pm, 1), result);
+				} catch (JavaModelException e) {
+					JUnitPlugin.log(e.getStatus());
+				}
+				if (pm.isCanceled()) {
+					throw new InterruptedException();
+				}
+			}
+		} finally {
+			pm.done();
+		}
 	}
 
 	private static void collectTypes(Object element, IProgressMonitor pm, Set result) throws JavaModelException/*, InvocationTargetException*/ {
