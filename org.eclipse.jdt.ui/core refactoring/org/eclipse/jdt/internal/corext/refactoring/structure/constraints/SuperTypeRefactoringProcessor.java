@@ -613,9 +613,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @throws JavaModelException if an error occurs
 	 */
 	protected final void solveSuperTypeConstraints(final ICompilationUnit subUnit, final CompilationUnit subNode, final IType type, final ITypeBinding subType, final ITypeBinding superType, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
-		boolean covariance= true;
+		int level= AST.JLS3;
 		final SuperTypeConstraintsModel model= new SuperTypeConstraintsModel(fEnvironment, fEnvironment.create(subType), fEnvironment.create(superType));
-		model.setUseCovariance(true);
 		final SuperTypeConstraintsCreator creator= new SuperTypeConstraintsCreator(model, fInstanceOf);
 		fSuperType= model.getSuperType();
 		try {
@@ -625,73 +624,73 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			final Map secondPass= new HashMap(firstPass.size());
 			IJavaProject project= null;
 			Collection collection= null;
-			final ASTParser parser= ASTParser.newParser(AST.JLS3);
-			SearchResultGroup group= null;
-			final Map groups= new HashMap();
-			for (final Iterator outer= firstPass.keySet().iterator(); outer.hasNext();) {
-				project= (IJavaProject) outer.next();
-				if (covariance && !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true))) {
-					covariance= false;
-					model.setUseCovariance(false);
-				}
-				collection= (Collection) firstPass.get(project);
-				if (collection != null) {
-					for (final Iterator inner= collection.iterator(); inner.hasNext();) {
-						group= (SearchResultGroup) inner.next();
-						groups.put(group.getCompilationUnit(), group);
+			try {
+				final ASTParser parser= ASTParser.newParser(AST.JLS3);
+				SearchResultGroup group= null;
+				final Map groups= new HashMap();
+				for (final Iterator outer= firstPass.keySet().iterator(); outer.hasNext();) {
+					project= (IJavaProject) outer.next();
+					if (level == AST.JLS3 && !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true)))
+						level= AST.JLS2;
+					collection= (Collection) firstPass.get(project);
+					if (collection != null) {
+						for (final Iterator inner= collection.iterator(); inner.hasNext();) {
+							group= (SearchResultGroup) inner.next();
+							groups.put(group.getCompilationUnit(), group);
+						}
 					}
 				}
-			}
-			for (final Iterator iterator= firstPass.keySet().iterator(); iterator.hasNext();) {
-				project= (IJavaProject) iterator.next();
-				collection= (Collection) firstPass.get(project);
-				if (collection != null && !collection.isEmpty()) {
-					parser.setWorkingCopyOwner(fOwner);
-					parser.setResolveBindings(true);
-					parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-					parser.setProject(project);
-					final Set units= new HashSet(groups.keySet());
-					units.remove(subUnit);
-					parser.createASTs((ICompilationUnit[]) units.toArray(new ICompilationUnit[units.size()]), new String[0], new ASTRequestor() {
+				for (final Iterator iterator= firstPass.keySet().iterator(); iterator.hasNext();) {
+					project= (IJavaProject) iterator.next();
+					collection= (Collection) firstPass.get(project);
+					if (collection != null && !collection.isEmpty()) {
+						parser.setWorkingCopyOwner(fOwner);
+						parser.setResolveBindings(true);
+						parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+						parser.setProject(project);
+						final Set units= new HashSet(groups.keySet());
+						units.remove(subUnit);
+						parser.createASTs((ICompilationUnit[]) units.toArray(new ICompilationUnit[units.size()]), new String[0], new ASTRequestor() {
 
-						public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
-							monitor.subTask(unit.getElementName());
-							performFirstPass(creator, secondPass, groups, unit, node);
-						}
+							public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
+								monitor.subTask(unit.getElementName());
+								performFirstPass(creator, secondPass, groups, unit, node);
+							}
 
-						public final void acceptBinding(final String key, final IBinding binding) {
-							// Do nothing
-						}
-					}, new SubProgressMonitor(monitor, 1));
+							public final void acceptBinding(final String key, final IBinding binding) {
+								// Do nothing
+							}
+						}, new SubProgressMonitor(monitor, 1));
+					}
 				}
-			}
-			performFirstPass(creator, secondPass, groups, subUnit, subNode);
-			for (final Iterator iterator= secondPass.keySet().iterator(); iterator.hasNext();) {
-				project= (IJavaProject) iterator.next();
-				if (covariance && !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true))) {
-					covariance= false;
-					model.setUseCovariance(false);
-				}
-				collection= (Collection) secondPass.get(project);
-				if (collection != null && !collection.isEmpty()) {
-					parser.setWorkingCopyOwner(fOwner);
-					parser.setResolveBindings(true);
-					parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-					parser.setProject(project);
-					final Set units= new HashSet(collection);
-					units.remove(subUnit);
-					parser.createASTs((ICompilationUnit[]) units.toArray(new ICompilationUnit[units.size()]), new String[0], new ASTRequestor() {
+				performFirstPass(creator, secondPass, groups, subUnit, subNode);
+				for (final Iterator iterator= secondPass.keySet().iterator(); iterator.hasNext();) {
+					project= (IJavaProject) iterator.next();
+					if (level == AST.JLS3 && !JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true)))
+						level= AST.JLS2;
+					collection= (Collection) secondPass.get(project);
+					if (collection != null && !collection.isEmpty()) {
+						parser.setWorkingCopyOwner(fOwner);
+						parser.setResolveBindings(true);
+						parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+						parser.setProject(project);
+						final Set units= new HashSet(collection);
+						units.remove(subUnit);
+						parser.createASTs((ICompilationUnit[]) units.toArray(new ICompilationUnit[units.size()]), new String[0], new ASTRequestor() {
 
-						public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
-							monitor.subTask(unit.getElementName());
-							performSecondPass(creator, unit, node);
-						}
+							public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
+								monitor.subTask(unit.getElementName());
+								performSecondPass(creator, unit, node);
+							}
 
-						public final void acceptBinding(final String key, final IBinding binding) {
-							// Do nothing
-						}
-					}, new SubProgressMonitor(monitor, 1));
+							public final void acceptBinding(final String key, final IBinding binding) {
+								// Do nothing
+							}
+						}, new SubProgressMonitor(monitor, 1));
+					}
 				}
+			} finally {
+				model.setCompliance(level);
 			}
 			final SuperTypeConstraintsSolver solver= new SuperTypeConstraintsSolver(model);
 			solver.solveConstraints();

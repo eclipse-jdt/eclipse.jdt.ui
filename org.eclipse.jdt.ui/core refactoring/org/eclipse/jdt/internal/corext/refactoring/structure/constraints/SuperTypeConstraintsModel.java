@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -172,11 +173,11 @@ public final class SuperTypeConstraintsModel {
 	/** The cast variables (element type: <code>CastVariable2</code>) */
 	private final Collection fCastVariables= new ArrayList();
 
+	/** The compliance level */
+	private int fCompliance= AST.JLS3;
+
 	/** The set of constraint variables (element type: <code>ConstraintVariable2</code>) */
 	private final HashedSet fConstraintVariables= new HashedSet();
-
-	/** Should covariance for return types be used? */
-	private boolean fCovariance= true;
 
 	/** The covariant type constraints (element type: <code>CovariantTypeConstraint</code>) */
 	private final Collection fCovariantTypeConstraints= new ArrayList();
@@ -222,6 +223,23 @@ public final class SuperTypeConstraintsModel {
 			return result;
 		}
 		return null;
+	}
+
+	/**
+	 * Creates a conditional type constraint.
+	 * 
+	 * @param expressionVariable the expression type constraint variable
+	 * @param thenVariable the then type constraint variable
+	 * @param elseVariable the else type constraint variable
+	 */
+	public final void createConditionalTypeConstraint(final ConstraintVariable2 expressionVariable, final ConstraintVariable2 thenVariable, final ConstraintVariable2 elseVariable) {
+		final ITypeConstraint2 constraint= new ConditionalTypeConstraint(expressionVariable, thenVariable, elseVariable);
+		if (!fTypeConstraints.contains(constraint)) {
+			fTypeConstraints.add(constraint);
+			setVariableUsage(expressionVariable, constraint);
+			setVariableUsage(thenVariable, constraint);
+			setVariableUsage(elseVariable, constraint);
+		}
 	}
 
 	/**
@@ -464,6 +482,15 @@ public final class SuperTypeConstraintsModel {
 	}
 
 	/**
+	 * Returns the compliance level to use.
+	 * 
+	 * @return the compliance level
+	 */
+	public final int getCompliance() {
+		return fCompliance;
+	}
+
+	/**
 	 * Returns the constraint variables of this model.
 	 * 
 	 * @return the constraint variables (element type: <code>ConstraintVariable2</code>)
@@ -500,22 +527,11 @@ public final class SuperTypeConstraintsModel {
 	}
 
 	/**
-	 * Returns whether covariance is used for return types.
+	 * Sets the compliance level to use.
 	 * 
-	 * @return <code>true</code> if covariance is used, <code>false</code> otherwise
+	 * @param level the compliance level to use. The argument must be one of the <code>AST.JLSx</code> constants.
 	 */
-	public final boolean isUsingCovariance() {
-		return fCovariance;
-	}
-
-	/**
-	 * Determines whether covariance should be used for return types.
-	 * <p>
-	 * This method must be called before solving the constraint model
-	 * 
-	 * @param covariance <code>true</code> to use covariance, <code>false</code> otherwise
-	 */
-	public final void setUseCovariance(final boolean covariance) {
-		fCovariance= covariance;
+	public final void setCompliance(final int level) {
+		fCompliance= level;
 	}
 }
