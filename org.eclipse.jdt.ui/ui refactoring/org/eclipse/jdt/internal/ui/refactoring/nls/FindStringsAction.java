@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -66,6 +67,14 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 	 * @see IActionDelegate#run(IAction)
 	 */
 	public void run(IAction action) {
+		new BusyIndicator().showWhile(JavaPlugin.getActiveWorkbenchShell().getDisplay(), new Runnable() {
+			public void run() {
+				doRun();
+			}
+		});
+	}
+
+	private void doRun() {
 		List elements= getSelectedElementList(getSelection());
 		if (elements == null || elements.isEmpty())
 			return;
@@ -269,7 +278,7 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 				}
 			});
 			getTableViewer().getTable().addSelectionListener(new SelectionAdapter(){
-				public void widgetSelected(SelectionEvent e) {
+				public void widgetDefaultSelected(SelectionEvent e) {
 					ICompilationUnit selectedCu= (ICompilationUnit)(((NonNLSElement)e.item.getData()).cu);
 					ExternalizeAction.openExternalizeStringsWizard(selectedCu);
 				}
