@@ -16,6 +16,7 @@ import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -29,10 +30,14 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Layout;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.util.ListenerList;
 
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlExtension;
@@ -50,6 +55,7 @@ import org.eclipse.jface.text.IInformationControlExtension3;
  * Current problems:
  * - setting a status field text automatically closes the hover
  * - the size computation is too small
+ * - focusLost event is not sent (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=84532)
  * </p>
  * <p>
  * NOTE: This API is work in progress and may change before the final API freeze. (FIXME)
@@ -173,6 +179,8 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	private int fMaxHeight= -1;
 	private Font fStatusTextFont;
 	private boolean fHideScrollBars;
+	private Listener fDeactivateListener;
+	private ListenerList fFocusListeners= new ListenerList();
 
 	/**
 	 * Creates a default information control with the given shell as parent. The given
@@ -484,8 +492,24 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see IInformationControl#addFocusListener(FocusListener)
 	 */
-	public void addFocusListener(FocusListener listener) {
+	public void addFocusListener(final FocusListener listener) {
 		fBrowser.addFocusListener(listener);
+		
+		/*
+		 * FIXME:	This is a workaround for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=84532
+		 * 			(Browser widget does not send focusLost event)
+		 */
+		if (fFocusListeners.isEmpty()) {
+			fDeactivateListener=  new Listener() {
+				public void handleEvent(Event event) {
+					Object[] listeners= fFocusListeners.getListeners();
+					for (int i = 0; i < listeners.length; i++)
+						((FocusListener)listeners[i]).focusLost(new FocusEvent(event));
+				}
+			};
+			fBrowser.getShell().addListener(SWT.Deactivate, fDeactivateListener);
+		}
+		fFocusListeners.add(listener);
 	}
 	
 	/*
@@ -493,6 +517,16 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	 */
 	public void removeFocusListener(FocusListener listener) {
 		fBrowser.removeFocusListener(listener);
+		
+		/*
+		 * FIXME:	This is a workaround for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=84532
+		 * 			(Browser widget does not send focusLost event)
+		 */
+		fFocusListeners.remove(listener);
+		if (fFocusListeners.isEmpty()) {
+			fBrowser.getShell().removeListener(SWT.Deactivate, fDeactivateListener);
+			fDeactivateListener= null;
+		}
 	}
 	
 	/*
