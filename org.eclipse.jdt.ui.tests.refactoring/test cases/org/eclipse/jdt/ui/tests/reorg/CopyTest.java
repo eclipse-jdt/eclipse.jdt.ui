@@ -1031,7 +1031,8 @@ public class CopyTest extends RefactoringTest {
 			verifyValidDestination(ref, destination);						
 		} finally{
 			performDummySearch();
-			folder.delete(true, new NullProgressMonitor());			
+			folder.delete(true, new NullProgressMonitor());	
+			otherFolder.delete(true, new NullProgressMonitor());
 		}
 	}
 
@@ -1951,5 +1952,259 @@ public class CopyTest extends RefactoringTest {
 			performDummySearch();
 			JavaProjectHelper.delete(otherProject);
 		}
+	}
+	
+	public void testCopy_folder_to_other_folder() throws Exception {
+		IProject superFolder= MySetup.getProject().getProject();
+		String folderName= "folder";
+		IFolder folder= superFolder.getFolder(folderName);
+		folder.create(true, true, null);
+
+		IFolder otherFolder= superFolder.getFolder("otherfolder");
+		otherFolder.create(true, true, null);
+		
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {folder};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, new TestCopyQueries());
+
+			Object destination= otherFolder;
+			verifyValidDestination(ref, destination);	
+
+			assertTrue("source does not exist before copying", folder.exists());
+								
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source does not exist after copying", folder.exists());
+			assertTrue("copied folder does not exist after copying", otherFolder.getFolder(folderName).exists());
+			
+		} finally{
+			performDummySearch();
+			folder.delete(true, new NullProgressMonitor());			
+			otherFolder.delete(true, new NullProgressMonitor());			
+		}
+	}
+
+	public void testCopy_folder_Java_project() throws Exception {
+		IProject superFolder= MySetup.getProject().getProject();
+		String folderName= "folder";
+		IFolder folder= superFolder.getFolder(folderName);
+		folder.create(true, true, null);
+
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {folder};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, new TestCopyQueries());
+
+			Object destination= MySetup.getProject();
+			verifyValidDestination(ref, destination);						
+
+			assertTrue("source does not exist before copying", folder.exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source does not exist after copying", folder.exists());
+			
+			assertTrue("copied folder does not exist after copying", MySetup.getProject().getProject().getFolder(folderName).exists());
+		} finally{
+			performDummySearch();
+			folder.delete(true, new NullProgressMonitor());			
+		}
+	}
+
+	public void testCopy_folder_to_source_folder() throws Exception {
+		IProject superFolder= MySetup.getProject().getProject();
+		String folderName= "folder";
+		IFolder folder= superFolder.getFolder(folderName);
+		folder.create(true, true, null);
+
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {folder};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, new TestCopyQueries());
+
+			Object destination= getRoot();
+			verifyValidDestination(ref, destination);						
+
+			assertTrue("source does not exist before copying", folder.exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source does not exist after copying", folder.exists());
+			
+			assertTrue("copied folder does not exist after copying", ((IFolder)getRoot().getResource()).getFolder(folderName).exists());
+		} finally{
+			performDummySearch();
+			folder.delete(true, new NullProgressMonitor());			
+		}
+	}
+
+	public void testCopy_folder_to_package() throws Exception {
+		IProject superFolder= MySetup.getProject().getProject();
+		String folderName= "folder";
+		IFolder folder= superFolder.getFolder(folderName);
+		folder.create(true, true, null);
+
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {folder};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, new TestCopyQueries());
+
+			IPackageFragment destination= getPackageP();
+			verifyValidDestination(ref, destination);						
+			assertTrue("source does not exist before copying", folder.exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source does not exist after copying", folder.exists());			
+			assertTrue("copied folder does not exist after copying", ((IFolder)destination.getResource()).getFolder(folderName).exists());
+		} finally{
+			performDummySearch();
+			folder.delete(true, new NullProgressMonitor());			
+		}
+
+	}
+	public void testCopy_folder_to_file_in_another_folder() throws Exception {
+		IProject superFolder= MySetup.getProject().getProject();
+		String folderName= "folder";
+		IFolder folder= superFolder.getFolder(folderName);
+		folder.create(true, true, null);
+
+		IFolder otherFolder= superFolder.getFolder("otherfolder");
+		otherFolder.create(true, true, null);
+		IFile fileInAnotherFolder= otherFolder.getFile("f.tex");
+		fileInAnotherFolder.create(getStream("123"), true, null);
+
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {folder};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, new TestCopyQueries());
+
+			Object destination= fileInAnotherFolder;
+			verifyValidDestination(ref, destination);						
+			assertTrue("source does not exist before copying", folder.exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source does not exist after copying", folder.exists());			
+			assertTrue("copied folder does not exist after copying", otherFolder.getFolder(folderName).exists());
+		} finally{
+			performDummySearch();
+			folder.delete(true, new NullProgressMonitor());	
+			otherFolder.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testCopy_folder_to_cu() throws Exception {
+		IProject superFolder= MySetup.getProject().getProject();
+		String folderName= "folder";
+		IFolder folder= superFolder.getFolder(folderName);
+		folder.create(true, true, null);
+
+		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {folder};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, new TestCopyQueries());
+
+			Object destination= cu;
+			verifyValidDestination(ref, destination);						
+			assertTrue("source does not exist before copying", folder.exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source does not exist after copying", folder.exists());			
+			assertTrue("copied folder does not exist after copying", ((IFolder)getPackageP().getResource()).getFolder(folderName).exists());
+		} finally{
+			performDummySearch();
+			folder.delete(true, new NullProgressMonitor());			
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testCopy_folder_to_simple_project() throws Exception {
+		IProject superFolder= MySetup.getProject().getProject();
+		String folderName= "folder";
+		IFolder folder= superFolder.getFolder(folderName);
+		folder.create(true, true, null);
+
+		IProject simpleProject= ResourcesPlugin.getWorkspace().getRoot().getProject("mySImpleProject");
+		simpleProject.create(null);
+		simpleProject.open(null);
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {folder};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, new TestCopyQueries());
+
+			Object destination= simpleProject;
+			verifyValidDestination(ref, destination);						
+			assertTrue("source does not exist before copying", folder.exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source does not exist after copying", folder.exists());			
+			assertTrue("copied folder does not exist after copying", simpleProject.getFolder(folderName).exists());
+		} finally{
+			performDummySearch();
+			folder.delete(true, new NullProgressMonitor());			
+			simpleProject.delete(true, true, new NullProgressMonitor());
+		}
+	}
+
+	private static IPackageFragmentRoot getSourceFolder(IJavaProject javaProject, String name) throws JavaModelException{
+		IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
+		for (int i= 0; i < roots.length; i++) {
+			if (! roots[i].isArchive() && roots[i].getElementName().equals(name))
+				return roots[i];
+		}
+		return null;
+	}
+	
+	public void testCopy_root_to_same_Java_project() throws Exception {
+		IPackageFragmentRoot newRoot= null;
+		try {
+			IJavaElement[] javaElements= { getRoot()};
+			IResource[] resources= {			};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, new TestCopyQueries());
+
+			Object destination= getRoot().getJavaProject();
+			verifyValidDestination(ref, destination);
+			assertTrue("source does not exist before copying", getRoot().exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+
+			assertTrue("source does not exist after copying", getRoot().exists());
+			String newName= "Copy of " + getRoot().getElementName();
+			newRoot= getSourceFolder(MySetup.getProject(), newName);
+			assertTrue("copied folder does not exist after copying", newRoot.exists());
+		} finally {
+			performDummySearch();
+			if (newRoot != null && newRoot.exists())
+				newRoot.delete(0, 0, new NullProgressMonitor());
+		}
+	}
+	
+	public void testCopy_root_to_other_Java_project() throws Exception {
+		IJavaProject otherJavaProject= JavaProjectHelper.createJavaProject("other", "bin");
+		try {
+			IJavaElement[] javaElements= { getRoot()};
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, new TestCopyQueries());
+
+			Object destination= otherJavaProject;
+			verifyValidDestination(ref, destination);
+			assertTrue("source does not exist before copying", getRoot().exists());
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+
+			assertTrue("source does not exist after copying", getRoot().exists());
+			String newName= getRoot().getElementName();
+			IPackageFragmentRoot newRoot= getSourceFolder(otherJavaProject, newName);
+			assertTrue("copied folder does not exist after copying", newRoot.exists());
+		} finally {
+			performDummySearch();
+			JavaProjectHelper.delete(otherJavaProject);
+		}						
 	}
 }
