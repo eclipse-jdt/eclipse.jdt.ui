@@ -1154,7 +1154,10 @@ public abstract class TypePage extends ContainerPage {
 			
 			lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
 			String content= createTypeBody(imports, lineDelimiter);
-			createdType= enclosingType.createType(content, null, false, new SubProgressMonitor(monitor, 1));
+			IJavaElement[] elems= enclosingType.getChildren();
+			IJavaElement sibling= elems.length > 0 ? elems[0] : null;
+			
+			createdType= enclosingType.createType(content, sibling, false, new SubProgressMonitor(monitor, 1));
 		
 			indent= StubUtility.getIndentUsed(enclosingType) + 1;
 		}
