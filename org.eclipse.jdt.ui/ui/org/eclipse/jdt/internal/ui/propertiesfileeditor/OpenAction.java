@@ -10,28 +10,32 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringBufferInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceProxy;
-import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.OpenStrategy;
+import org.eclipse.jface.window.Window;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPartitioningException;
 import org.eclipse.jface.text.IDocument;
@@ -39,9 +43,13 @@ import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITypedRegion;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.model.IWorkbenchAdapter;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
 import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
@@ -49,7 +57,6 @@ import org.eclipse.search.internal.core.text.MatchLocator;
 import org.eclipse.search.internal.core.text.TextSearchEngine;
 import org.eclipse.search.internal.core.text.TextSearchScope;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -58,7 +65,7 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
-import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -70,7 +77,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * </p> 
  * <p>
  * FIXME: Work in progress
- * 			- does not yet reveal the key in the opened editor
  * 			- only IFile's are currently supported
  * </p>
  * 
@@ -79,17 +85,65 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class OpenAction extends SelectionDispatchAction {
 	
 	
-	private static class KeyReference {
+	private static class KeyReference extends PlatformObject implements IWorkbenchAdapter {
 		private IFile file;
 		private int offset;
 		private int length;
 
 		private KeyReference(IFile file, int offset, int length) {
+			Assert.isNotNull(file);
 			this.file= file;
 			this.offset= offset;
 			this.length= length;
 		}
+		
+		/*
+		 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
+		 */
+		public Object getAdapter(Class adapter) {
+			if (adapter == IWorkbenchAdapter.class)
+				return this;
+			else
+				return super.getAdapter(adapter);
+		}
+		/*
+		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getChildren(java.lang.Object)
+		 */
+		public Object[] getChildren(Object o) {
+			return null;
+		}
+		/*
+		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getImageDescriptor(java.lang.Object)
+		 */
+		public ImageDescriptor getImageDescriptor(Object object) {
+			IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter)file.getAdapter(IWorkbenchAdapter.class);
+			if (wbAdapter != null)
+				return wbAdapter.getImageDescriptor(file);
+			return null;
+		}
+		/*
+		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getLabel(java.lang.Object)
+		 */
+		public String getLabel(Object o) {
+//			IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter)file.getAdapter(IWorkbenchAdapter.class);
+//			if (wbAdapter != null) {
+//				Object[] args= new Object[] { wbAdapter.getLabel(file), new Integer(offset), new Integer(length) }; 
+//				Object[] args= new Object[] { file.getFullPath(), new Integer(offset), new Integer(length) }; 
+//				return PropertiesFileEditorMessages.getFormattedString("OpenAction.SelectionDialog.elementLabel", args); //$NON-NLS-1$
+//			}
+//			return null;
+			
+			Object[] args= new Object[] { file.getFullPath(), new Integer(offset), new Integer(length) }; 
+			return PropertiesFileEditorMessages.getFormattedString("OpenAction.SelectionDialog.elementLabel", args); //$NON-NLS-1$
+		}
+		/*
+		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getParent(java.lang.Object)
+		 */
+		public Object getParent(Object o) {
+			return null;
+		}
 	}
+	
 	
 	private static class ResultCollector implements ITextSearchResultCollector {
 		
@@ -184,7 +238,8 @@ public class OpenAction extends SelectionDispatchAction {
 			
 			// Check whether the key is valid
 			Properties properties= new Properties();
-			properties.load(new StringBufferInputStream(document.get()));
+//			properties.load(new StringBufferInputStream(document.get()));
+			properties.load(new ByteArrayInputStream(document.get().getBytes()));
 			if (properties.getProperty(key) == null) {
 				showNoKeyErrorInStatusLine();
 				return;
@@ -222,58 +277,72 @@ public class OpenAction extends SelectionDispatchAction {
 		showErrorInStatusLine(PropertiesFileEditorMessages.getString("OpenAction.error.messageBadSelection")); //$NON-NLS-1$
 	}
 
-	private void open(KeyReference[] elements) {
-		if (elements == null)
-			return;
-		for (int i= 0; i < elements.length; i++) {
-			Object element= elements[i].file;
-			try {
-				element= getElementToOpen(element);
-				boolean activateOnOpen= fEditor != null ? true : OpenStrategy.activateOnOpen();
-				OpenActionUtil.open(element, activateOnOpen);
-			} catch (JavaModelException e) {
-				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
-					IJavaStatusConstants.INTERNAL_ERROR, PropertiesFileEditorMessages.getString("OpenAction.error.message"), e)); //$NON-NLS-1$
-				
-				ErrorDialog.openError(getShell(), 
-					getDialogTitle(),
-					PropertiesFileEditorMessages.getString("OpenAction.error.messageProblems"),  //$NON-NLS-1$
-					e.getStatus());
-			
-			} catch (PartInitException x) {
-								
-				String name= null;
-				
-				if (element instanceof IJavaElement) {
-					name= ((IJavaElement) element).getElementName();
-				} else if (element instanceof IStorage) {
-					name= ((IStorage) element).getName();
-				} else if (element instanceof IResource) {
-				}
-				
-				if (name != null) {
-					MessageDialog.openError(getShell(),
-						PropertiesFileEditorMessages.getString("OpenAction.error.messageProblems"),  //$NON-NLS-1$
-						PropertiesFileEditorMessages.getFormattedString("OpenAction.error.messageArgs",  //$NON-NLS-1$
-						new String[] { name, x.getMessage() } ));			
-				}
-			}		
-		}
+	private void open(KeyReference[] keyReferences) {
+		Assert.isLegal(keyReferences != null && keyReferences.length > 0);
+		
+		if (keyReferences.length == 1)
+			open(keyReferences[0]);
+		else
+			open(select(keyReferences));
 	}
 	
-	/**
-	 * Note: this method is for internal use only. Clients should not call this method.
-	 */
-	public Object getElementToOpen(Object object) throws JavaModelException {
-		return object;
-	}	
+	private KeyReference select(KeyReference[] keyReferences) {
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(fEditor.getSite().getShell(), new WorkbenchLabelProvider());
+		dialog.setMultipleSelection(false);
+		dialog.setTitle(PropertiesFileEditorMessages.getString("OpenAction.SelectionDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(PropertiesFileEditorMessages.getString("OpenAction.SelectionDialog.message")); //$NON-NLS-1$
+		dialog.setElements(keyReferences);
+		
+		if (dialog.open() == Window.OK) {
+			Object[] result= dialog.getResult();
+			if (result != null && result.length == 1)
+			 return (KeyReference)result[0];
+		}
+
+		return null;
+	}
+		
+	private void open(KeyReference keyReference) {
+		if (keyReference == null)
+			return;
+		
+		try {	
+			boolean activateOnOpen= fEditor != null ? true : OpenStrategy.activateOnOpen();
+			IEditorPart part= EditorUtility.openInEditor(keyReference.file, activateOnOpen);
+			EditorUtility.revealInEditor(part, keyReference.offset, keyReference.length);
+		} catch (JavaModelException e) {
+			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
+				IJavaStatusConstants.INTERNAL_ERROR, PropertiesFileEditorMessages.getString("OpenAction.error.message"), e)); //$NON-NLS-1$
+			
+			ErrorDialog.openError(getShell(), 
+				getErrorDialogTitle(),
+				PropertiesFileEditorMessages.getString("OpenAction.error.messageProblems"), //$NON-NLS-1$
+				e.getStatus());
+		
+		} catch (PartInitException x) {
+							
+			String message= null;
+			
+			IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter)((IAdaptable)keyReference).getAdapter(IWorkbenchAdapter.class);
+			if (wbAdapter != null)
+				message= PropertiesFileEditorMessages.getFormattedString("OpenAction.error.messageArgs", //$NON-NLS-1$
+						new String[] { wbAdapter.getLabel(keyReference), x.getLocalizedMessage() } );
+
+			if (message == null)
+				message= PropertiesFileEditorMessages.getFormattedString("OpenAction.error.message", x.getLocalizedMessage()); //$NON-NLS-1$
+			
+			MessageDialog.openError(getShell(),
+				PropertiesFileEditorMessages.getString("OpenAction.error.messageProblems"), //$NON-NLS-1$
+				message);			
+		}		
+	}
 	
-	private String getDialogTitle() {
+	private String getErrorDialogTitle() {
 		return PropertiesFileEditorMessages.getString("OpenAction.error.title"); //$NON-NLS-1$
 	}
 	
 	private void showError(CoreException e) {
-		ExceptionHandler.handle(e, getShell(), getDialogTitle(), PropertiesFileEditorMessages.getString("OpenAction.error.message")); //$NON-NLS-1$
+		ExceptionHandler.handle(e, getShell(), getErrorDialogTitle(), PropertiesFileEditorMessages.getString("OpenAction.error.message")); //$NON-NLS-1$
 	}
 	
 	private void showErrorInStatusLine(String message) {
@@ -297,11 +366,14 @@ public class OpenAction extends SelectionDispatchAction {
 		return (KeyReference[])result.toArray(new KeyReference[result.size()]);
 	}
 
-	private static TextSearchScope createScope(IResource resource) {
+	private static TextSearchScope createScope(IResource scope) {
 		TextSearchScope result= new TextSearchScope(""); //$NON-NLS-1$
-		result.add(resource);
+		result.add(scope);
+		
+		// XXX: This should probably be configurable via preference
 		result.addExtension("*.java"); //$NON-NLS-1$
 		result.addExtension("*.xml"); //$NON-NLS-1$
+		
 		return result;
 	}
 }
