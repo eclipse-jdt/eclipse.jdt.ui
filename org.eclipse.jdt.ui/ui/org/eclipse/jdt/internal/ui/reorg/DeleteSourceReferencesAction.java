@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -16,6 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -47,14 +49,16 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 	protected void perform() throws CoreException {
 		if (!confirmDelete())
 			return;
-			
+
 		Map mapping= SourceReferenceUtil.groupByFile(getElementsToProcess()); //IFile -> List of ISourceReference (elements from that file)
-		
+				
 		List emptyCuList= Arrays.asList(getCusLeftEmpty(mapping));
 		
 		for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
 			IFile file= (IFile)iter.next();
 			if (emptyCuList.contains(JavaCore.create(file))) //do not delete in these files
+				continue;
+			if (isReadOnly(file))
 				continue;
 			deleteAll(mapping, file);
 		}
@@ -62,10 +66,43 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 		ICompilationUnit[] notDeleted= deleteEmptyCus(mapping);
 		for (int i= 0; i < notDeleted.length; i++) {
 			IFile file= (IFile)notDeleted[i].getUnderlyingResource();
+			if (isReadOnly(file))
+				continue;
 			deleteAll(mapping, file);
 		}
 	}
 
+	private static boolean isReadOnly(IFile file){
+		if (! file.isReadOnly())
+			return false;
+		if (ResourcesPlugin.getWorkspace().validateEdit(new IFile[]{file}, null).isOK())
+			return false;
+		return true;
+	}
+	
+	private static boolean areAllFilesReadOnly(Map mapping){
+		for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
+			if (! isReadOnly((IFile)iter.next()))
+				return false;
+		}
+		return true;
+	}
+	
+	/*
+	 * @see RefactoringAction#canOperateOn(IStructuredSelection)
+	 */
+	public boolean canOperateOn(IStructuredSelection selection) {
+		if (! super.canOperateOn(selection))
+			return false;
+		try {
+			Map mapping= SourceReferenceUtil.groupByFile(getElementsToProcess()); //IFile -> List of ISourceReference (elements from that file)
+			return ! areAllFilesReadOnly(mapping);
+		} catch(JavaModelException e) {
+			//ignore
+			return false;
+		}
+	}
+	
 	private static void deleteAll(Map mapping, IFile file) throws CoreException {
 		List l= (List)mapping.get(file);
 		ISourceReference[] refs= (ISourceReference[]) l.toArray(new ISourceReference[l.size()]);
@@ -99,7 +136,9 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 	}
 			
 	private static TextEdit createDeleteEdit(ISourceReference ref) throws JavaModelException{
-		return new DeleteSourceReferenceEdit(ref, SourceReferenceUtil.getCompilationUnit(ref));
+		ICompilationUnit cu= SourceReferenceUtil.getCompilationUnit(ref);
+		cu.reconcile();
+		return new DeleteSourceReferenceEdit(ref, cu);
 	}
 	
 	/**
