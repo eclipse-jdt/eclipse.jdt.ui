@@ -58,9 +58,12 @@ public class RefactoringAnalyzeUtil {
 	public static RefactoringStatus reportProblemNodes(ICompilationUnit modifiedWorkingCopy, SimpleName[] problemNodes){
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problemNodes.length; i++) {
-			//FIX ME incorrect - needs backlinking see http://bugs.eclipse.org/bugs/show_bug.cgi?id=11646
-			//see also http://bugs.eclipse.org/bugs/show_bug.cgi?id=12035
-			Context context= JavaSourceContext.create(modifiedWorkingCopy, new SourceRange(0,0));
+			Context context;
+			try {
+				context= new StringContext(modifiedWorkingCopy.getSource(), new SourceRange(problemNodes[i]));
+			} catch (JavaModelException e) {
+				context= null;
+			}
 			result.addError(RefactoringCoreMessages.getString("RefactoringAnalyzeUtil.name_collision") + problemNodes[i].getIdentifier(), context); //$NON-NLS-1$
 		}
 		return result;
