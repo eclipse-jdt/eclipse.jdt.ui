@@ -4,8 +4,6 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import java.util.Map;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
