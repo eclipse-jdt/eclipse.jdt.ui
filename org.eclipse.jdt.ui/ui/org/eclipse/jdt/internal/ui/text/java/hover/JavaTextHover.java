@@ -1,7 +1,7 @@
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 
@@ -11,15 +11,12 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IPluginPrerequisite;
 import org.eclipse.core.runtime.IPluginRegistry;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
@@ -30,7 +27,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
+
+import org.eclipse.jdt.internal.ui.preferences.JavaEditorTextHoverDescriptor;
 
 
 /**
@@ -38,6 +36,10 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
  */
 public class JavaTextHover extends AbstractJavaEditorTextHover {
 		
+	private static String ID= "org.eclipse.jdt.internal.ui.text.java.hover.JavaTextHover"; //$NON-NLS-1$
+	private static String JAVA_PROBLEM_HOVER_ID= "org.eclipse.jdt.internal.ui.text.java.hover.JavaProblemHover"; //$NON-NLS-1$
+
+
 	private static class ConfigurationElementComparator implements Comparator {
 		
 		/*
@@ -47,7 +49,23 @@ public class JavaTextHover extends AbstractJavaEditorTextHover {
 
 			IConfigurationElement element0= (IConfigurationElement)object0;
 			IConfigurationElement element1= (IConfigurationElement)object1;	
+
+			String id0=	element0.getAttribute(JavaEditorTextHoverDescriptor.ID_ATTRIBUTE);
+			String id1= element1.getAttribute(JavaEditorTextHoverDescriptor.ID_ATTRIBUTE);
 			
+			String problemHoverId= JAVA_PROBLEM_HOVER_ID;
+			
+			if (id0 != null && id0.equals(id1))
+				return 0;
+			
+			if (id0 != null && id0.equals(problemHoverId))
+				return -1;
+
+			if (id1 != null && id1.equals(problemHoverId))
+				return +1;
+
+			// now compare non-problem hovers
+
 			if (dependsOn(element0, element1))
 				return -1;
 				
@@ -111,7 +129,7 @@ public class JavaTextHover extends AbstractJavaEditorTextHover {
 			IConfigurationElement[] elements= extensionPoint.getConfigurationElements();			
 			for (int i= 0; i < elements.length; i++)
 				// ensure that we don't add ourselves to the list
-				if (!"org.eclipse.jdt.internal.ui.text.java.hover.JavaTextHover".equals(elements[i].getAttribute("id"))) //$NON-NLS-1$ //$NON-NLS-2$
+				if (!ID.equals(elements[i].getAttribute(JavaEditorTextHoverDescriptor.ID_ATTRIBUTE)))
 					fTextHoverSpecifications.add(elements[i]);
 		}
 		
@@ -146,13 +164,7 @@ public class JavaTextHover extends AbstractJavaEditorTextHover {
 	 * element.
 	 */
 	private IJavaEditorTextHover createTextHover(IConfigurationElement element) {
-		try {
-			return (IJavaEditorTextHover) element.createExecutableExtension("class"); //$NON-NLS-1$
-		} catch (CoreException x) {
-			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, JavaUIMessages.getString("JavaTextHover.createTextHover"), null)); //$NON-NLS-1$
-		}
-		
-		return null;
+		return new JavaEditorTextHoverDescriptor(element).createTextHover();
 	}
 	
 	/*

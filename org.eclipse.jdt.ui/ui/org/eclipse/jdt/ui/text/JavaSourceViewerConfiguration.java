@@ -366,8 +366,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 
 		if (stateMask != ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK) {
 			// Ensure that no additional instance is created for default hover
-			JavaEditorTextHoverDescriptor defaultDescriptor= JavaEditorHoverConfigurationBlock.getTextHoverDescriptor(ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK);
-			if (defaultDescriptor != null && descriptor != null && defaultDescriptor.equals(descriptor))
+			if (JavaEditorHoverConfigurationBlock.isDefaultTextHoverDescriptor(descriptor))
 				return null;	// use default hover instance
 		}
 

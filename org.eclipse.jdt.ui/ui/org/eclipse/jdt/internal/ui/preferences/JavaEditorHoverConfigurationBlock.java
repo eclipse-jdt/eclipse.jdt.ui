@@ -72,7 +72,7 @@ public class JavaEditorHoverConfigurationBlock {
 	final static String ALT_SHIFT_HOVER= JAVA_EDITOR_HOVER + ".altShiftHover"; //$NON-NLS-1$
 
 
-	private class HoverConfig {
+	private static class HoverConfig {
 		
 		private String fModifier;
 		private int fStateMask;
@@ -90,13 +90,13 @@ public class JavaEditorHoverConfigurationBlock {
 			else {
 				// Find index
 				int i= 0;
-				Iterator iter= fContributedHovers.iterator();
+				Iterator iter= fgContributedHovers.iterator();
 				while (iter.hasNext()) {
 					if (hoverId.equals(((JavaEditorTextHoverDescriptor)iter.next()).getId()))
 						break;
 					i++;
 				}
-				if (i < fContributedHovers.size())
+				if (i < fgContributedHovers.size())
 					setHoverIndex(i);
 				else
 					setHoverIndex(NO_HOVER_CONFIGURED_INDEX);
@@ -109,14 +109,14 @@ public class JavaEditorHoverConfigurationBlock {
 				fHoverId= NO_HOVER_CONFIGURED_ID;
 			else if (hoverIndex == DEFAULT_HOVER_CONFIGURED_INDEX)
 				fHoverId= DEFAULT_HOVER_CONFIGURED_ID;
-			else if (hoverIndex >= 0 && hoverIndex < fContributedHovers.size())
-				fHoverId= ((JavaEditorTextHoverDescriptor)fContributedHovers.get(hoverIndex)).getId();
+			else if (hoverIndex >= 0 && hoverIndex < fgContributedHovers.size())
+				fHoverId= ((JavaEditorTextHoverDescriptor)fgContributedHovers.get(hoverIndex)).getId();
 			else
 				Assert.isLegal(false);
 		}
 	}
 
-	private class HoverConfigLabelProvider extends LabelProvider implements ITableLabelProvider {
+	private static class HoverConfigLabelProvider extends LabelProvider implements ITableLabelProvider {
 		/*
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
 		 */
@@ -131,7 +131,7 @@ public class JavaEditorHoverConfigurationBlock {
 					else if (config.fHoverIndex == DEFAULT_HOVER_CONFIGURED_INDEX)
 						return JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.defaultHover"); //$NON-NLS-1$
 					else
-						return ((JavaEditorTextHoverDescriptor)fContributedHovers.get(config.fHoverIndex)).getLabel();
+						return ((JavaEditorTextHoverDescriptor)fgContributedHovers.get(config.fHoverIndex)).getLabel();
 				default :
 					Assert.isLegal(false);
 				return null;
@@ -200,16 +200,17 @@ public class JavaEditorHoverConfigurationBlock {
 		}
 	}
 
-	
+
+	private static List fgContributedHovers= JavaEditorTextHoverDescriptor.getContributedHovers();
+	private static String fgDefaultHoverId;
+
 	private IPreferenceStore fStore;
 	private HoverConfig[] fHoverConfigs;
 	private TableViewer fTableViewer;
-	private List fContributedHovers;
 
 	public JavaEditorHoverConfigurationBlock(IPreferenceStore store) {
 		Assert.isNotNull(store);
 		fStore= store;
-		fContributedHovers= JavaEditorTextHoverDescriptor.getContributedHovers();
 	}
 
 	public static JavaEditorTextHoverDescriptor getTextHoverDescriptor(int stateMask) {
@@ -248,13 +249,25 @@ public class JavaEditorHoverConfigurationBlock {
 		if (id == null)
 			return null;
 
-		Iterator iter= JavaEditorTextHoverDescriptor.getContributedHovers().iterator();
+		Iterator iter= fgContributedHovers.iterator();
 		while (iter.hasNext()) {
 			JavaEditorTextHoverDescriptor hoverDescriptor= (JavaEditorTextHoverDescriptor)iter.next();
 			if (id.equals(hoverDescriptor.getId()))
 				return hoverDescriptor;
 		}
 		return null;
+	}
+
+	public static boolean isDefaultTextHoverDescriptor(JavaEditorTextHoverDescriptor descriptor) {
+		return (descriptor != null && descriptor.getId().equals(getDefaultHoverId()))
+			|| (descriptor == null && getDefaultHoverId().equals(NO_HOVER_CONFIGURED_ID));
+	}
+
+	public static String getDefaultHoverId() {
+		if (fgDefaultHoverId == null)
+			fgDefaultHoverId= JavaPlugin.getDefault().getPreferenceStore().getString(DEFAULT_HOVER);
+			
+		return fgDefaultHoverId;
 	}
 
 	public static boolean isAffectedBy(String property) {
@@ -375,6 +388,7 @@ public class JavaEditorHoverConfigurationBlock {
 
 	void performOk() {
 		fStore.setValue(DEFAULT_HOVER, fHoverConfigs[0].fHoverId);
+		fgDefaultHoverId= fHoverConfigs[0].fHoverId;
 		fStore.setValue(NONE_HOVER, fHoverConfigs[1].fHoverId);
 		fStore.setValue(CTRL_HOVER, fHoverConfigs[2].fHoverId);
 		fStore.setValue(SHIFT_HOVER, fHoverConfigs[3].fHoverId);
@@ -439,7 +453,7 @@ public class JavaEditorHoverConfigurationBlock {
 		if (!isDefaultRowSelected())
 			additionalItemCount++;
 
-		String[] labels= new String[fContributedHovers.size() + additionalItemCount];
+		String[] labels= new String[fgContributedHovers.size() + additionalItemCount];
 		
 		if (!isDefaultRowSelected())
 			labels[0]= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.defaultHover"); //$NON-NLS-1$
@@ -447,7 +461,7 @@ public class JavaEditorHoverConfigurationBlock {
 		labels[additionalItemCount - 1]= JavaUIMessages.getString("JavaEditorHoverConfigurationBlock.noHoverConfigured"); //$NON-NLS-1$
 
 		for (int i= additionalItemCount; i < labels.length; i++)
-			labels[i]= ((JavaEditorTextHoverDescriptor)fContributedHovers.get(i - additionalItemCount)).getLabel();
+			labels[i]= ((JavaEditorTextHoverDescriptor)fgContributedHovers.get(i - additionalItemCount)).getLabel();
 		
 		return labels;
 	}
