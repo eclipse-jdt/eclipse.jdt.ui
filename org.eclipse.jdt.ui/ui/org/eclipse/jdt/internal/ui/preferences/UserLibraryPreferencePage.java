@@ -533,7 +533,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 					Element archiveElement= (Element) archiveNode;
 					
 					String path= archiveElement.getAttribute(TAG_ARCHIVE_PATH);
-					CPListElement newArchive= new CPListElement(null, IClasspathEntry.CPE_LIBRARY, new Path(path), null);
+					CPListElement newArchive= new CPListElement(newLibrary, null, IClasspathEntry.CPE_LIBRARY, new Path(path), null);
 					newLibrary.add(newArchive);
 					
 					if (archiveElement.hasAttribute(TAG_SOURCEATTACHMENT)) {
