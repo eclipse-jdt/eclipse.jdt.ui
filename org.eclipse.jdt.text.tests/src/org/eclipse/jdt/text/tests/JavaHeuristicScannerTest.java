@@ -362,7 +362,7 @@ public class JavaHeuristicScannerTest extends TestCase {
 		fDocument.set("\tvoid proc (int par1, int par2\n");
 		
 		String indent= fScanner.computeIndentation(30).toString();
-		Assert.assertEquals("\t\t\t   ", indent);
+		Assert.assertEquals("\t           ", indent);
 	}
 	
 	public void testIndentation6a() {
@@ -370,7 +370,7 @@ public class JavaHeuristicScannerTest extends TestCase {
 		fDocument.set("\tvoid proc (  int par1, int par2\n");
 		
 		String indent= fScanner.computeIndentation(30).toString();
-		Assert.assertEquals("\t\t\t\t ", indent);
+		Assert.assertEquals("\t             ", indent);
 	}
 	
 	public void testIndentation7() {
@@ -465,7 +465,7 @@ public class JavaHeuristicScannerTest extends TestCase {
 			"");
 		
 		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
-		Assert.assertEquals("									 ", indent);
+		Assert.assertEquals("		                             ", indent);
 	}
 
 	public void testIndentation15() {
@@ -775,7 +775,7 @@ public class JavaHeuristicScannerTest extends TestCase {
 		fDocument.set(	"\tint[]= new int[] { 1, two,\n");
 		
 		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
-		Assert.assertEquals("\t\t\t\t\t   ", indent);
+		Assert.assertEquals("\t                   ", indent);
 		
 	}
 	
