@@ -368,6 +368,11 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	public void test33() throws Exception{
 		helper2();
 	}
+
+	public void test34() throws Exception{
+		printTestDisabledMessage("test for bug#18553");
+//		helper2_0("A", "foo", new String[0], true, true);
+	}
 	
 	//anonymous inner class
 	public void testAnon0() throws Exception{
