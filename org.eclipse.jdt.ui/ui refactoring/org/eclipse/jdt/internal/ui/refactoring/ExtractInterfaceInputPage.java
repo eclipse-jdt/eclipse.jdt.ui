@@ -15,13 +15,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardPage;
-
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
@@ -32,6 +29,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 public class ExtractInterfaceInputPage extends TextInputWizardPage {
@@ -103,12 +101,12 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 	}
 
 	private ILabelProvider createLabelProvider(){
-		ILabelProvider lprovider= new AppearanceAwareLabelProvider(
+		AppearanceAwareLabelProvider lprovider= new AppearanceAwareLabelProvider(
 			AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE,
 			AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS
 		);
 		
-		return new DecoratingLabelProvider(lprovider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
+		return new DecoratingJavaLabelProvider(lprovider);
 	}
 
 	private void createButtonComposite(Composite composite) {

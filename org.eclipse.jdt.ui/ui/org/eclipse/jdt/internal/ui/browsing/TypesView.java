@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -30,6 +29,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 
 public class TypesView extends JavaBrowsingPart {
 
@@ -41,7 +41,7 @@ public class TypesView extends JavaBrowsingPart {
 	 * @return	the label provider
 	 * @see	ILabelProvider
 	 */
-	protected ILabelProvider createLabelProvider() {
+	protected JavaUILabelProvider createLabelProvider() {
 		AppearanceAwareLabelProvider lprovider= new AppearanceAwareLabelProvider(
 						AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS,
 						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);

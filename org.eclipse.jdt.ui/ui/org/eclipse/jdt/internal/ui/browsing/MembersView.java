@@ -12,7 +12,6 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -36,6 +35,7 @@ import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
 public class MembersView extends JavaBrowsingPart implements IPropertyChangeListener {
@@ -55,7 +55,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	 * @return	the label provider
 	 * @see	ILabelProvider
 	 */
-	protected ILabelProvider createLabelProvider() {
+	protected JavaUILabelProvider createLabelProvider() {
 		return new AppearanceAwareLabelProvider(
 						AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS,
 						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS

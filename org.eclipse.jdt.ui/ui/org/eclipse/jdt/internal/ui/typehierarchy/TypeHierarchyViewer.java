@@ -13,16 +13,13 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMember;
@@ -33,6 +30,7 @@ import org.eclipse.jdt.ui.actions.OpenAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
  
 public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
@@ -42,9 +40,9 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	public TypeHierarchyViewer(Composite parent, IContentProvider contentProvider, final TypeHierarchyLifeCycle lifeCycle,  IWorkbenchPart part) {
 		super(new Tree(parent, SWT.SINGLE));
 
-		ILabelProvider labelProvider= new HierarchyLabelProvider(lifeCycle);
+		HierarchyLabelProvider labelProvider= new HierarchyLabelProvider(lifeCycle);
 	
-		setLabelProvider(new DecoratingLabelProvider(labelProvider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
+		setLabelProvider(new DecoratingJavaLabelProvider(labelProvider, true, false));
 			
 		setContentProvider(contentProvider);
 		setSorter(new ViewerSorter() {

@@ -15,19 +15,12 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.ListenerList;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelDecorator;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -40,7 +33,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.TreeHierarchyLayoutProblemsDecora
 /**
  * XXX: not yet reviewed - part of experimental logical packages view
  */
-class PackagesViewLabelProvider implements ILabelProvider, IPropertyChangeListener {
+class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 	
 	private static final int NO_ADORNMENT= 0;
 	
@@ -49,50 +42,26 @@ class PackagesViewLabelProvider implements ILabelProvider, IPropertyChangeListen
 
 	private int fViewState;
 
-	private ListenerList fListeners= new ListenerList(1);
-	private int fTextFlagsMask;
-	private int fTextFlags;
-	private int fImageFlags;
-
 	private ElementImageProvider fElementImageProvider;
 	private ImageDescriptorRegistry fRegistry;
 
-	private ILabelDecorator[] fDecorators;
-	private ILabelDecorator fProblemDecorator;
-
-
-	PackagesViewLabelProvider(int state, ILabelDecorator[] labelDecorators) {
-		this(state, AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED, AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS, labelDecorators);
+	PackagesViewLabelProvider(int state) {
+		this(state, AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED, AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS);
 	}
 
-	PackagesViewLabelProvider(int state, int textFlags, int imageFlags, ILabelDecorator[] labelDecorators) {
+	PackagesViewLabelProvider(int state, int textFlags, int imageFlags) {
+		super(textFlags, imageFlags);
 		
 		Assert.isTrue(isValidState(state));
 		fViewState= state;
-		
-		fRegistry= JavaPlugin.getImageDescriptorRegistry();
-		fDecorators= labelDecorators;
 		fElementImageProvider= new ElementImageProvider();
-		
-		fTextFlags= textFlags;
-		fImageFlags= imageFlags;
-		initTextFlagsMask();
-		
-		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
+		fRegistry= JavaPlugin.getImageDescriptorRegistry();
 	}
 	
 	private boolean isValidState(int state) {
 		return state == FLAT_VIEW_STATE || state == HIERARCHICAL_VIEW_STATE;
 	}
 	
-	private int getTextFlags() {
-		return fTextFlags & fTextFlagsMask;
-	}
-
-	private int getImageFlags() {
-		return fImageFlags;
-	}
-
 	/*
 	 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
 	 */
@@ -100,29 +69,10 @@ class PackagesViewLabelProvider implements ILabelProvider, IPropertyChangeListen
 		if (element instanceof LogicalPackage) {
 			LogicalPackage cp= (LogicalPackage) element;
 			return getLogicalPackageImage(cp);
-		} else if (element instanceof IPackageFragment) {
-			IPackageFragment fragment= (IPackageFragment) element;
-			return getPackageFragmentImage(fragment);
 		}
-		return null;
+		return super.getImage(element);
 	}
-	
-	
-	private Image getPackageFragmentImage(IPackageFragment fragment) {
-		Image image= fRegistry.get(fElementImageProvider.getBaseImageDescriptor(fragment, getImageFlags()));
-		
-		if (fDecorators == null)
-			return image;
 
-		// Decorate
-		Image decoratedImage= image;		
-		for (int i= 0; i < fDecorators.length; i++) {
-			ILabelDecorator decorator= fDecorators[i];
-			decoratedImage= decorator.decorateImage(decoratedImage, fragment);
-		}
-		return decoratedImage;
-	}
-	
 	/**
 	 * Decoration is only concerned with error ticks
 	 */
@@ -140,15 +90,15 @@ class PackagesViewLabelProvider implements ILabelProvider, IPropertyChangeListen
 	
 	
 	private Image decorateCompoundElement(Image image, IPackageFragment[] fragments) {
-		if (fDecorators == null)
+		if (fLabelDecorators == null)
 			return image;
 		
 		int currentAdornment= NO_ADORNMENT;
 		
 		for (int i= 0; i < fragments.length; i++) {
 			IPackageFragment fragment= fragments[i];
-			for (int j= 0; j < fDecorators.length; j++) {
-				ILabelDecorator decorator= fDecorators[j];
+			for (int j= 0; j < fLabelDecorators.size(); j++) {
+				ILabelDecorator decorator= (ILabelDecorator) fLabelDecorators.get(j);
 				if (decorator instanceof TreeHierarchyLayoutProblemsDecorator) {
 					TreeHierarchyLayoutProblemsDecorator dec= (TreeHierarchyLayoutProblemsDecorator) decorator;
 					try {
@@ -189,9 +139,8 @@ class PackagesViewLabelProvider implements ILabelProvider, IPropertyChangeListen
 			return getText((IPackageFragment)element);
 		else if (element instanceof LogicalPackage)
 			return getText((LogicalPackage)element);
-
-		Assert.isLegal(false);
-		return null;
+		else
+			return super.getText(element);
 	}
 	
 	private String getText(IPackageFragment fragment) {
@@ -225,91 +174,17 @@ class PackagesViewLabelProvider implements ILabelProvider, IPropertyChangeListen
 	}
 	
 	private String decorateText(String name, Object element) {
-		if (fDecorators == null)
+		if (fLabelDecorators == null)
 			return name;
 
-		for (int i= 0; i < fDecorators.length; i++) {
-			ILabelDecorator decorator= fDecorators[i];
+		for (int i= 0; i < fLabelDecorators.size(); i++) {
+			ILabelDecorator decorator= (ILabelDecorator) fLabelDecorators.get(i);
 			name= decorator.decorateText(name, element);
 		}
 		return name;	
 	}
 	
-	
-	private void initTextFlagsMask() {
-		fTextFlagsMask= 0xFFFFFFFF;
 
-		if (!compressPackageNames())
-			fTextFlagsMask^= JavaElementLabels.P_COMPRESSED;
-	}
-
-	private static boolean compressPackageNames() {
-		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES);
-	}
-
-	/*
-	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
-	 */
-	public void propertyChange(PropertyChangeEvent event) {
-		String property= event.getProperty();
-		if (property.equals(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW)
-				|| property.equals(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)) {
-			initTextFlagsMask();
-			LabelProviderChangedEvent lpEvent= new LabelProviderChangedEvent(this, null); // refresh all
-			fireLabelProviderChanged(lpEvent);
-		}		
-	}
-	
-	private void fireLabelProviderChanged(LabelProviderChangedEvent event) {
-		Object[] listeners= fListeners.getListeners();
-		for (int i= 0; i < listeners.length; i++)
-			((ILabelProviderListener) listeners[i]).labelProviderChanged(event);
-	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.IBaseLabelProvider#addListener(org.eclipse.jface.viewers.ILabelProviderListener)
-	 */
-	public void addListener(ILabelProviderListener listener) {
-		if (fDecorators != null) {
-			for (int i= 0; i < fDecorators.length; i++) {
-				fDecorators[i].addListener(listener);
-			}
-		}
-		fListeners.add(listener);
-	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
-	 */
-	public void dispose() {
-		if (fDecorators != null) {
-			for (int i= 0; i < fDecorators.length; i++) {
-				ILabelDecorator decorator= fDecorators[i];
-				decorator.dispose();
-			}
-		}
-		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
-	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.IBaseLabelProvider#isLabelProperty(java.lang.Object, java.lang.String)
-	 */
-	public boolean isLabelProperty(Object element, String property) {
-		return true;
-	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.IBaseLabelProvider#removeListener(org.eclipse.jface.viewers.ILabelProviderListener)
-	 */
-	public void removeListener(ILabelProviderListener listener) {
-		if (fDecorators != null) {
-			for (int i= 0; i < fDecorators.length; i++) {
-				fDecorators[i].removeListener(listener);
-			}
-		}
-		fListeners.remove(listener);
-	}
-	
 	private class ElementImageProvider extends JavaElementImageProvider{
 		
 		public ElementImageProvider() {

@@ -40,7 +40,6 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
-import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -118,9 +117,11 @@ import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
@@ -132,7 +133,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private static final String TAG_SELECTED_ELEMENT= "selectedElement"; //$NON-NLS-1$
 	private static final String TAG_SELECTED_ELEMENT_PATH= "selectedElementPath"; //$NON-NLS-1$
 
-	private ILabelProvider fLabelProvider;
+	private JavaUILabelProvider fLabelProvider;
 	private ILabelProvider fTitleProvider;
 	private StructuredViewer fViewer;
 	private IMemento fMemento;
@@ -260,9 +261,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fViewer= createViewer(parent);
 
 		fLabelProvider= createLabelProvider();
-		ILabelDecorator decorationMgr= PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
-		
-		fViewer.setLabelProvider(createDecoratingLabelProvider(fLabelProvider, decorationMgr));
+		fViewer.setLabelProvider(createDecoratingLabelProvider(fLabelProvider));
 		
 		fViewer.setSorter(createJavaElementSorter());
 		fViewer.setUseHashlookup(true);
@@ -308,10 +307,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		setHelp();
 	}
 	
-	protected DecoratingLabelProvider createDecoratingLabelProvider(ILabelProvider provider, ILabelDecorator decorationMgr) {
+	protected DecoratingLabelProvider createDecoratingLabelProvider(JavaUILabelProvider provider) {
 //		XXX: Work in progress for problem decorator being a workbench decorator//
 //		return new ExcludingDecoratingLabelProvider(provider, decorationMgr, "org.eclipse.jdt.ui.problem.decorator"); //$NON-NLS-1$
-		return new DecoratingLabelProvider(provider, decorationMgr);
+		return new DecoratingJavaLabelProvider(provider);
 	}
 	
 	protected JavaElementSorter createJavaElementSorter() {
@@ -728,7 +727,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fViewer= viewer; 
 	}
 
-	protected ILabelProvider createLabelProvider() {
+	protected JavaUILabelProvider createLabelProvider() {
 		return new AppearanceAwareLabelProvider(
 						AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS,
 						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS

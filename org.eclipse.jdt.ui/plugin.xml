@@ -2134,6 +2134,7 @@
 
 </extension>
 
+<!---
 <extension
 	point="org.eclipse.ui.decorators">
 	<decorator
@@ -2174,6 +2175,6 @@
 		</enablement>
 	</decorator>	
 </extension>
-
+-->
 
 </plugin>

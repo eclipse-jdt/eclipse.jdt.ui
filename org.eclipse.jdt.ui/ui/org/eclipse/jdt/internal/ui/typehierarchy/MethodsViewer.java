@@ -18,7 +18,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.OpenEvent;
@@ -27,10 +26,13 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
+import org.eclipse.jdt.ui.actions.OpenAction;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -39,13 +41,10 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
-
-import org.eclipse.jdt.ui.JavaElementSorter;
-import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
-import org.eclipse.jdt.ui.actions.OpenAction;
 
 /**
  * Method viewer shows a list of methods of a input type. 
@@ -71,7 +70,7 @@ public class MethodsViewer extends ProblemTableViewer {
 		
 		fLabelProvider= new HierarchyLabelProvider(lifeCycle);
 			
-		setLabelProvider(new DecoratingLabelProvider(fLabelProvider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
+		setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, true, false));
 		setContentProvider(new MethodsContentProvider(lifeCycle));
 				
 		fOpen= new OpenAction(part.getSite());

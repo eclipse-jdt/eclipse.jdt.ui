@@ -8,11 +8,15 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ILabelDecorator;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -26,34 +30,34 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 
 	
-//	private static class HierarchyOverrideIndicatorLabelDecorator extends OverrideIndicatorLabelDecorator {
-//		
-//		private TypeHierarchyLifeCycle fHierarchy;
-//		
-//		public HierarchyOverrideIndicatorLabelDecorator(TypeHierarchyLifeCycle lifeCycle) {
-//			super(null);
-//			fHierarchy= lifeCycle;
-//		}
-//		
-//		/* (non-Javadoc)
-//		 * @see OverrideIndicatorLabelDecorator#getOverrideIndicators(IMethod)
-//		 */
-//		protected int getOverrideIndicators(IMethod method) throws JavaModelException {
-//			IType type= getOriginalType(method.getDeclaringType());
-//			ITypeHierarchy hierarchy= fHierarchy.getHierarchy();
-//			if (hierarchy != null) {
-//				return findInHierarchy(type, hierarchy, method.getElementName(), method.getParameterTypes());
-//			}
-//			return 0;
-//		}
-//		
-//		private IType getOriginalType(IType type) {
-//			ICompilationUnit cu= type.getCompilationUnit();
-//			if (cu != null && cu.isWorkingCopy())
-//				return (IType) cu.getOriginal(type);
-//			return type;
-//		}
-//	}
+	private static class HierarchyOverrideIndicatorLabelDecorator extends OverrideIndicatorLabelDecorator {
+		
+		private TypeHierarchyLifeCycle fHierarchy;
+		
+		public HierarchyOverrideIndicatorLabelDecorator(TypeHierarchyLifeCycle lifeCycle) {
+			super(null);
+			fHierarchy= lifeCycle;
+		}
+		
+		/* (non-Javadoc)
+		 * @see OverrideIndicatorLabelDecorator#getOverrideIndicators(IMethod)
+		 */
+		protected int getOverrideIndicators(IMethod method) throws JavaModelException {
+			IType type= getOriginalType(method.getDeclaringType());
+			ITypeHierarchy hierarchy= fHierarchy.getHierarchy();
+			if (hierarchy != null) {
+				return findInHierarchy(type, hierarchy, method.getElementName(), method.getParameterTypes());
+			}
+			return 0;
+		}
+		
+		private IType getOriginalType(IType type) {
+			ICompilationUnit cu= type.getCompilationUnit();
+			if (cu != null && cu.isWorkingCopy())
+				return (IType) cu.getOriginal(type);
+			return type;
+		}
+	}
 	
 
 	private static class FocusDescriptor extends CompositeImageDescriptor {
@@ -81,6 +85,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	public HierarchyLabelProvider(TypeHierarchyLifeCycle lifeCycle) {
 		super(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS);
 		fHierarchy= lifeCycle;
+		addLabelDecorator(new HierarchyOverrideIndicatorLabelDecorator(lifeCycle));
 	}
 			
 	private boolean isDifferentScope(IType type) {

@@ -22,7 +22,6 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -35,7 +34,6 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -54,8 +52,9 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.MultiActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter;
-import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
@@ -221,20 +220,20 @@ public class PackagesView extends JavaBrowsingPart{
 		else return new PackagesViewHierarchicalContentProvider(fWrappedViewer.getViewer());
 	}
 
-	protected ILabelProvider createLabelProvider() {	
+	protected JavaUILabelProvider createLabelProvider() {	
 		if(isInListState())
 			return createListLabelProvider();
 		else return createTreeLabelProvider();
 	}
 	
-	private ILabelProvider createTreeLabelProvider() {
-		ILabelDecorator[] decorators= concat(AppearanceAwareLabelProvider.getDecorators(true, null), new ILabelDecorator[] { new TreeHierarchyLayoutProblemsDecorator(null)});
-		return new PackagesViewLabelProvider(PackagesViewLabelProvider.HIERARCHICAL_VIEW_STATE, decorators);
+	private JavaUILabelProvider createTreeLabelProvider() {
+		PackagesViewLabelProvider lprovider= new PackagesViewLabelProvider(PackagesViewLabelProvider.HIERARCHICAL_VIEW_STATE);
+		lprovider.addLabelDecorator(new TreeHierarchyLayoutProblemsDecorator(null));
+		return lprovider;
 	}
 
-	private ILabelProvider createListLabelProvider() {
-		ILabelDecorator[] decorators= AppearanceAwareLabelProvider.getDecorators(true, null);
-		return new PackagesViewLabelProvider(PackagesViewLabelProvider.FLAT_VIEW_STATE,  decorators);
+	private JavaUILabelProvider createListLabelProvider() {
+		return new PackagesViewLabelProvider(PackagesViewLabelProvider.FLAT_VIEW_STATE);
 	}
 	
 	private ILabelDecorator[] concat(ILabelDecorator[] d1, ILabelDecorator[] d2) {
@@ -338,9 +337,8 @@ public class PackagesView extends JavaBrowsingPart{
 	private void setUpViewer(StructuredViewer viewer){
 		Assert.isTrue(viewer != null);
 
-		ILabelProvider labelProvider= createLabelProvider();	
-		ILabelDecorator decorationMgr= PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
-		viewer.setLabelProvider(createDecoratingLabelProvider(labelProvider, decorationMgr));
+		JavaUILabelProvider labelProvider= createLabelProvider();	
+		viewer.setLabelProvider(createDecoratingLabelProvider(labelProvider));
 		
 		viewer.setSorter(createJavaElementSorter());
 		viewer.setUseHashlookup(true);
@@ -528,8 +526,8 @@ public class PackagesView extends JavaBrowsingPart{
 	 * 
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createDecoratingLabelProvider(org.eclipse.jface.viewers.ILabelDecorator)
 	 */
-	protected DecoratingLabelProvider createDecoratingLabelProvider(ILabelProvider provider, final ILabelDecorator decorationMgr) {
-		return new DecoratingLabelProvider(provider, decorationMgr){
+	protected DecoratingLabelProvider createDecoratingLabelProvider(JavaUILabelProvider provider) {
+		return new DecoratingJavaLabelProvider(provider) {
 			
 			public String getText(Object element){
 				if (element instanceof LogicalPackage) {
