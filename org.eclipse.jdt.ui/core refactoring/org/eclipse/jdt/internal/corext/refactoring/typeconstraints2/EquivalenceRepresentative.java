@@ -19,7 +19,7 @@ import java.util.List;
 public class EquivalenceRepresentative {
 	
 	private TypeConstraintVariable2[] fElements;
-	private TypeSet fTypeEstimate;
+	private ITypeSet fTypeEstimate;
 	
 	
 	public EquivalenceRepresentative(TypeConstraintVariable2 leftElement, TypeConstraintVariable2 rightElement) {
@@ -58,11 +58,11 @@ public class EquivalenceRepresentative {
 		fElements= (TypeConstraintVariable2[]) result.toArray(new TypeConstraintVariable2[result.size()]);
 	}
 
-	public void setTypeEstimate(TypeSet typeSet) {
+	public void setTypeEstimate(ITypeSet typeSet) {
 		fTypeEstimate= typeSet;
 	}
 	
-	public TypeSet getTypeEstimate() {
+	public ITypeSet getTypeEstimate() {
 		return fTypeEstimate;
 	}
 	

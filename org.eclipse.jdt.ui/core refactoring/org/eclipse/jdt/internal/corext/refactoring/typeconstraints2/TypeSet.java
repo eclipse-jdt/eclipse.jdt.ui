@@ -15,11 +15,11 @@ import java.util.ArrayList;
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
-public abstract class TypeSet {
+public abstract class TypeSet implements ITypeSet {
 	
 	protected static class Universe extends TypeSet {
 		
-		public TypeSet restrictedTo(TypeSet restrictionSet) {
+		public ITypeSet restrictedTo(ITypeSet restrictionSet) {
 			return restrictionSet;
 		}
 		
@@ -40,7 +40,7 @@ public abstract class TypeSet {
 			fType= type;
 		}
 
-		public TypeSet restrictedTo(TypeSet restrictionSet) {
+		public ITypeSet restrictedTo(ITypeSet restrictionSet) {
 			if (restrictionSet instanceof Universe) {
 				return this;
 			} else if (restrictionSet instanceof SingleTypeSet) {
@@ -72,7 +72,7 @@ public abstract class TypeSet {
 			}
 		}
 		
-		private TypeSet commonLowerBound(SingleTypeSet other) {
+		private ITypeSet commonLowerBound(SingleTypeSet other) {
 			//TODO: see also org.eclipse.jdt.internal.compiler.lookup.Scope.lowerUpperBound(types);
 			//and org.eclipse.jdt.internal.compiler.lookup.Scope.mostSpecificCommonType(types)
 			//TODO: should either not collapse sets here or support multiple lower bounds
@@ -97,7 +97,7 @@ public abstract class TypeSet {
 			fTypes= types;
 		}
 		
-		public TypeSet restrictedTo(TypeSet restrictionSet) {
+		public ITypeSet restrictedTo(ITypeSet restrictionSet) {
 			if (restrictionSet instanceof Universe) {
 				return this;
 			} else if (restrictionSet instanceof SingleTypeSet) {
@@ -179,11 +179,4 @@ public abstract class TypeSet {
 		else
 			return new SingleTypeSet(type);
 	}
-
-	public abstract TypeSet restrictedTo(TypeSet restrictionSet);
-	
-	public abstract TType chooseSingleType();
-	
-	
-	public abstract String toString();
 }

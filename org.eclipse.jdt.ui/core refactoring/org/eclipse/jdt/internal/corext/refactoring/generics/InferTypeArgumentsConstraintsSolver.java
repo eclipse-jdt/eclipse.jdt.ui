@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVa
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.DeclaringTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.EquivalenceRepresentative;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.InferTypeArgumentsTCModel;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SimpleTypeConstraint2;
@@ -87,7 +88,7 @@ public class InferTypeArgumentsConstraintsSolver {
 					representative.setTypeEstimate(TypeSet.create(typeConstraintCv.getType()));
 					typeConstraintCv.setRepresentative(representative);
 				} else {
-					TypeSet typeEstimate= representative.getTypeEstimate();
+					ITypeSet typeEstimate= representative.getTypeEstimate();
 					if (typeEstimate == null) {
 						TypeConstraintVariable2[] cvs= representative.getElements();
 						typeEstimate= TypeSet.getUniverse();
@@ -112,7 +113,7 @@ public class InferTypeArgumentsConstraintsSolver {
 //		}
 //	}
 
-	private static void setTypeEstimate(ConstraintVariable2 cv, TypeSet typeSet) {
+	private static void setTypeEstimate(ConstraintVariable2 cv, ITypeSet typeSet) {
 		if (cv instanceof TypeConstraintVariable2) {
 			TypeConstraintVariable2 typeCv= (TypeConstraintVariable2) cv;
 			EquivalenceRepresentative representative= typeCv.getRepresentative();
@@ -128,8 +129,8 @@ public class InferTypeArgumentsConstraintsSolver {
 		}
 	}
 
-	private static TypeSet getTypeEstimate(ConstraintVariable2 cv) {
-		return (TypeSet) cv.getData(TYPE_ESTIMATE);
+	private static ITypeSet getTypeEstimate(ConstraintVariable2 cv) {
+		return (ITypeSet) cv.getData(TYPE_ESTIMATE);
 	}
 	
 	private void runSolver() {
@@ -177,10 +178,10 @@ public class InferTypeArgumentsConstraintsSolver {
 		
 		if (left instanceof TypeConstraintVariable2 && right instanceof TypeConstraintVariable2) {
 			EquivalenceRepresentative rightRep= ((TypeConstraintVariable2) right).getRepresentative();
-			TypeSet rightEstimate= rightRep.getTypeEstimate();
+			ITypeSet rightEstimate= rightRep.getTypeEstimate();
 			EquivalenceRepresentative leftRep= ((TypeConstraintVariable2) left).getRepresentative();
-			TypeSet leftEstimate= leftRep.getTypeEstimate();
-			TypeSet newRightEstimate= rightEstimate.restrictedTo(leftEstimate);
+			ITypeSet leftEstimate= leftRep.getTypeEstimate();
+			ITypeSet newRightEstimate= rightEstimate.restrictedTo(leftEstimate);
 			if (rightEstimate != newRightEstimate) {
 				rightRep.setTypeEstimate(newRightEstimate);
 				fWorkList.addAll(Arrays.asList(rightRep.getElements()));
@@ -215,7 +216,7 @@ public class InferTypeArgumentsConstraintsSolver {
 				if (cu != null) //TODO: shouldn't be the case
 					addToMultiMap(fDeclarationsToUpdate, cu, cv);
 			} else {
-				TypeSet typeSet= getTypeEstimate(cv);
+				ITypeSet typeSet= getTypeEstimate(cv);
 				if (typeSet != null)
 					setChosenType(cv, typeSet.chooseSingleType());
 			}
