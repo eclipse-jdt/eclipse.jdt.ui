@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.zip.ZipFile;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
@@ -91,12 +92,11 @@ public class SourceAttachmentBlock {
 	private String fFilePathVariable;
 	private String fPrefixVariable;
 	
-	private IProject fCurrProject;
 	private IWorkspaceRoot fRoot;
 	
 	private Control fSWTWidget;
-	private Label fFullPathResolvedLabel;
-	private Label fPrefixResolvedLabel;
+	private CLabel fFullPathResolvedLabel;
+	private CLabel fPrefixResolvedLabel;
 	
 	public SourceAttachmentBlock(IWorkspaceRoot root, IStatusChangeListener context, IClasspathEntry oldEntry) {
 		fContext= context;
@@ -232,8 +232,11 @@ public class SourceAttachmentBlock {
 			DialogField.createEmptySpace(composite, 3);	
 			fInternalButtonField.doFillIntoGrid(composite, 1);
 		} else {
-			String label= NewWizardMessages.getString("SourceAttachmentBlock.filename.resolvedpath"); //$NON-NLS-1$
-			fFullPathResolvedLabel= createHelpText(composite, SWT.LEFT, true, getResolvedLabelString(fFileNameField.getText()));
+			DialogField.createEmptySpace(composite, 1);	
+			fFullPathResolvedLabel= new CLabel(composite, SWT.LEFT);
+			fFullPathResolvedLabel.setText(getResolvedLabelString(fFileNameField.getText()));
+			fFullPathResolvedLabel.setLayoutData(new MGridData(MGridData.HORIZONTAL_ALIGN_FILL));
+			DialogField.createEmptySpace(composite, 2);			
 		}
 		
 		// label
@@ -241,8 +244,11 @@ public class SourceAttachmentBlock {
 	
 		fPrefixField.doFillIntoGrid(composite, 4);
 		if (fIsVariableEntry) {
-			String label= NewWizardMessages.getString("SourceAttachmentBlock.prefix.resolvedpath"); //$NON-NLS-1$
-			fPrefixResolvedLabel= createHelpText(composite, SWT.LEFT, true, getResolvedLabelString(fPrefixField.getText()));
+			DialogField.createEmptySpace(composite, 1);	
+			fPrefixResolvedLabel= new CLabel(composite, SWT.LEFT);
+			fPrefixResolvedLabel.setText(getResolvedLabelString(fPrefixField.getText()));
+			fPrefixResolvedLabel.setLayoutData(new MGridData(MGridData.HORIZONTAL_ALIGN_FILL));
+			DialogField.createEmptySpace(composite, 2);
 		}
 		
 		fFileNameField.postSetFocusOnDialogField(parent.getDisplay());
@@ -340,7 +346,7 @@ public class SourceAttachmentBlock {
 	private String getResolvedLabelString(String path) {
 		IPath resolvedPath= getResolvedPath(new Path(path));
 		if (resolvedPath != null) {
-			return resolvedPath.toString();
+			return resolvedPath.toOSString();
 		}
 		return ""; //$NON-NLS-1$
 	}	
@@ -536,12 +542,11 @@ public class SourceAttachmentBlock {
 		dialog.setTitle(NewWizardMessages.getString("SourceAttachmentBlock.intjardialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.intjardialog.message")); //$NON-NLS-1$
 		
-		IWorkspaceRoot root= fCurrProject.getWorkspace().getRoot();
-		IResource initSel= root.findMember(new Path(initSelection));
+		IResource initSel= fRoot.findMember(new Path(initSelection));
 		if (initSel == null) {
-			initSel= root.findMember(fJARPath);
+			initSel= fRoot.findMember(fJARPath);
 		}
-		if (dialog.open(root, initSel) == dialog.OK) {
+		if (dialog.open(fRoot, initSel) == dialog.OK) {
 			IFile file= (IFile) dialog.getPrimaryResult();
 			return file.getFullPath();
 		}

@@ -96,7 +96,8 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 						return ArrayUtility.getEmptyArray();
 					}
 				} catch (JavaModelException e) {
-					// ignore
+					JavaPlugin.log(e.getStatus());
+					return ArrayUtility.getEmptyArray();
 				}
 			}		 	
 			return new IType[] { input };
