@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.text.template;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
@@ -45,12 +44,9 @@ import org.eclipse.jdt.internal.corext.template.TemplatePosition;
 import org.eclipse.jdt.internal.corext.template.java.GlobalVariables;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.link.ILinkedListener;
 import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionGroup;
 import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl;
-import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl.ExitFlags;
-import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl.IExitPolicy;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
