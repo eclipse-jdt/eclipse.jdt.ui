@@ -39,11 +39,11 @@ public class NLSScanner {
 	/**
 	 * Returns a list of NLSLines found in the string
 	 */	
-	public static NLSLine[] scan(String s) throws JavaModelException, InvalidInputException {
+	public static NLSLine[] scan(String s) throws InvalidInputException {
 		return scan(s.toCharArray()); 
 	}
 	
-	private static NLSLine[] scan(char[] content) throws JavaModelException, InvalidInputException {
+	private static NLSLine[] scan(char[] content) throws InvalidInputException {
 		List lines= new ArrayList();
 		IScanner scanner= ToolFactory.createScanner(true, true, false, true);
 		scanner.setSource(content);
@@ -81,7 +81,7 @@ public class NLSScanner {
 		return result;
 	}
 	
-	private static void parseTags(NLSLine line, IScanner scanner) throws InvalidInputException {
+	private static void parseTags(NLSLine line, IScanner scanner) {
 		String s= new String(scanner.getCurrentTokenSource());
 		int pos= s.indexOf(NLSElement.TAG_PREFIX);
 		while (pos != -1) {
@@ -107,7 +107,7 @@ public class NLSScanner {
 		}
 	}
 	
-	private static void setTagPositions(TextBuffer buffer, NLSLine line) throws JavaModelException {
+	private static void setTagPositions(TextBuffer buffer, NLSLine line) {
 		TextRegion info= buffer.getLineInformation(line.getLineNumber());
 		int defaultValue= info.getOffset() + info.getLength();
 		NLSElement[] elements= line.getElements();
@@ -119,7 +119,7 @@ public class NLSScanner {
 		}
 	}
 	
-	private static int computeInsertOffset(NLSElement[] elements, int index, int defaultValue) throws JavaModelException {
+	private static int computeInsertOffset(NLSElement[] elements, int index, int defaultValue) {
 		NLSElement previousTagged= findPreviousTagged(index, elements);
 		if (previousTagged != null)
 			return previousTagged.getTagPosition().getOffset() + previousTagged.getTagPosition().getLength();
