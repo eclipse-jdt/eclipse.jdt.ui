@@ -100,7 +100,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 		 */
 		public void open() {
 			boolean hasLogEntry= false;
-			CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(fJavaElement, true, null);
+			CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(fJavaElement, ASTProvider.WAIT_ACTIVE_ONLY, null);
 			ASTNode node= null;
 			if (ast != null)
 				node= ast.findDeclaringNode(fAstNodeKey);

@@ -368,7 +368,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	
 		
 	private ClipboardData getClipboardData(IJavaElement inputElement, int offset, int length) {
-		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(inputElement, true, null);
+		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(inputElement, ASTProvider.WAIT_ACTIVE_ONLY, null);
 		if (astRoot == null) {
 			return null;
 		}

@@ -26,7 +26,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -38,8 +37,10 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
 
@@ -147,7 +148,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 * @throws JavaModelException
 	 */
 	protected int getOverrideIndicators(IMethod method) throws JavaModelException {
-		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST((IJavaElement) method.getOpenable(), false, null);
+		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST((IJavaElement) method.getOpenable(), ASTProvider.WAIT_NO, null);
 		if (astRoot != null) {
 			int res= findInHierarchyWithAST(astRoot, method);
 			if (res != -1) {

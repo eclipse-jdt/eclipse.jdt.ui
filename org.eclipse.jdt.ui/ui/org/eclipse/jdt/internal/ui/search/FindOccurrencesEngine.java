@@ -41,6 +41,7 @@ import org.eclipse.search.ui.SearchUI;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -59,7 +60,7 @@ public abstract class FindOccurrencesEngine {
 			fClassFile= file;
 		}
 		protected CompilationUnit createAST() {
-			return JavaPlugin.getDefault().getASTProvider().getAST(fClassFile, true, null);
+			return JavaPlugin.getDefault().getASTProvider().getAST(fClassFile, ASTProvider.WAIT_YES, null);
 		}
 		protected IJavaElement getInput() {
 			return fClassFile;
@@ -85,7 +86,7 @@ public abstract class FindOccurrencesEngine {
 			fCUnit= unit;
 		}
 		protected CompilationUnit createAST() {
-			return JavaPlugin.getDefault().getASTProvider().getAST(fCUnit, true, null);
+			return JavaPlugin.getDefault().getASTProvider().getAST(fCUnit, ASTProvider.WAIT_YES, null);
 		}
 		protected IJavaElement getInput() {
 			return fCUnit;

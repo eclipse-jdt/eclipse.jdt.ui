@@ -41,12 +41,69 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
 
 /**
- * Provides a shared AST for clients.
+ * Provides a shared AST for clients. The shared AST is
+ * the AST of the active Java editor's input element.
  * 
  * @since 3.0
  */
 public final class ASTProvider {
+	
+	/**
+	 * Wait flag.
+	 * 
+	 * @since 3.1
+	 */
+	private static final class WAIT_FLAG {
+		
+		String fName;
+		
+		private WAIT_FLAG(String name) {
+			fName= name;
+		}
+		
+		/*
+		 * @see java.lang.Object#toString()
+		 */
+		public String toString() {
+			return fName;
+		}
+	}
+	
+	/**
+	 * Wait flag indicating that a client requesting an AST
+	 * wants to wait until an AST is ready.
+	 * <p>
+	 * An AST will be created by this AST provider if the shared
+	 * AST is not for the given java element.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final WAIT_FLAG WAIT_YES= new WAIT_FLAG("wait yes"); //$NON-NLS-1$
+	
+	/**
+	 * Wait flag indicating that a client requesting an AST
+	 * only wants to wait for the shared AST of the active editor.
+	 * <p>
+	 * No AST will be created by the AST provider.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final WAIT_FLAG WAIT_ACTIVE_ONLY= new WAIT_FLAG("wait active only"); //$NON-NLS-1$
+	
+	/**
+	 * Wait flag indicating that a client requesting an AST
+	 * only wants the already available shared AST.
+	 * <p>
+	 * No AST will be created by the AST provider.
+	 * </p>
+	 * 
+	 * @since 3.1
+	 */
+	public static final WAIT_FLAG WAIT_NO= new WAIT_FLAG("don't wait"); //$NON-NLS-1$
 
+	
 	/**
 	 * Tells whether this class is in debug mode.
 	 * @since 3.0
@@ -345,13 +402,11 @@ public final class ASTProvider {
 	 * </p>
 	 * 
 	 * @param je				the Java element
-	 * @param wait				<code>true</code> if the client wants to wait for the result,
-	 * 								<code>null</code> will be returned if the AST is not ready and
-	 * 								the client does not want to wait
+	 * @param waitFlag			{@link #WAIT_YES}, {@link #WAIT_NO} or {@link #WAIT_ACTIVE_ONLY}
 	 * @param progressMonitor	the progress monitor
 	 * @return					the AST or <code>null</code> if the AST is not available
 	 */
-	public CompilationUnit getAST(IJavaElement je, boolean wait, IProgressMonitor progressMonitor) {
+	public CompilationUnit getAST(IJavaElement je, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {
 		Assert.isTrue(je != null && (je.getElementType() == IJavaElement.CLASS_FILE || je.getElementType() == IJavaElement.COMPILATION_UNIT));
 		
 		if (progressMonitor != null && progressMonitor.isCanceled())
@@ -359,7 +414,7 @@ public final class ASTProvider {
 		
 		synchronized (this) {
 			if (je.equals(fActiveJavaElement)) {
-				if (fAST != null || !wait)
+				if (fAST != null || waitFlag == WAIT_NO)
 					return fAST;
 			}
 		}
@@ -384,10 +439,10 @@ public final class ASTProvider {
 						return fAST;
 					}
 				}
-				return getAST(je, wait, progressMonitor);
+				return getAST(je, waitFlag, progressMonitor);
 			} catch (InterruptedException e) {
 			}
-		} else if (!wait)
+		} else if (waitFlag == WAIT_NO || (waitFlag == WAIT_ACTIVE_ONLY && !(je.equals(fActiveJavaElement) && fAST == null)))
 			return null;
 		
 		CompilationUnit ast= createAST(je, progressMonitor);
@@ -402,13 +457,36 @@ public final class ASTProvider {
 		
 		return ast;
 	}
+	
+	/**
+	 * Returns a shared compilation unit AST for the given
+	 * Java element.
+	 * <p>
+	 * Clients are not allowed to modify the AST and must
+	 * synchronize all access to its nodes.
+	 * </p>
+	 * 
+	 * @param je				the Java element
+	 * @param wait				<code>true</code> if the client wants to wait for the result,
+	 * 								<code>null</code> will be returned if the AST is not ready and
+	 * 								the client does not want to wait
+	 * @param progressMonitor	the progress monitor
+	 * @return					the AST or <code>null</code> if the AST is not available
+	 * @deprecated As of 3.1, use {@link #getAST(IJavaElement, WAIT_FLAG, IProgressMonitor)}
+	 */
+	public CompilationUnit getAST(IJavaElement je, boolean wait, IProgressMonitor progressMonitor) {
+		if (wait)
+			return getAST(je, WAIT_YES, progressMonitor);
+		else
+			return getAST(je, WAIT_NO, progressMonitor);
+	}
 
 	/**
-	 * Tells whether a reconciler is reconciling the
-	 * given Java element.
+	 * Tells whether the given Java element is the one 
+	 * reported as currently being reconciled.
 	 * 
 	 * @param javaElement the Java element
-	 * @return
+	 * @return <code>true</code> if reported as currently being reconciled
 	 */
 	private boolean isReconciling(IJavaElement javaElement) {
 		synchronized (fReconcileLock) {
@@ -421,8 +499,8 @@ public final class ASTProvider {
 	 * 
 	 * @param je the Java element for which to create the AST
 	 * @param progressMonitor the progress monitor
-	 * @return
-	 * @throws	IllegalStateException if the settings provided are
+	 * @return AST
+	 * @throws IllegalStateException if the settings provided are
 	 * 					insufficient, contradictory, or otherwise unsupported
 	 */
 	private CompilationUnit createAST(IJavaElement je, IProgressMonitor progressMonitor) {

@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * Infrastructure to share an AST for editor post selection listeners.
@@ -161,7 +162,7 @@ public class SelectionListenerWithASTManager {
 			}
 			// create AST
 			try {
-				CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(input, true, monitor);
+				CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(input, ASTProvider.WAIT_ACTIVE_ONLY, monitor);
 			
 				if (astRoot != null && !monitor.isCanceled()) {
 					Object[] listeners;
