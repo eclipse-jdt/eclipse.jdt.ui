@@ -79,7 +79,8 @@ public class ChangeExceptionHandler implements IChangeExceptionHandler {
 			status= ((CoreException)e).getStatus();
 		} else {
 			if (e.getMessage() == null)
-				status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, "", e);
+				status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, 
+					RefactoringMessages.getString("ChangeExceptionHandler.no_details"), e); //$NON-NLS-1$
 			else
 				status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, e.getMessage(), e);
 		}
