@@ -23,6 +23,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
+import org.eclipse.jface.text.rules.DefaultPartitioner;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -48,6 +49,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.JavaIndenter;
@@ -630,6 +632,17 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			
 			scanner= new JavaHeuristicScanner(temp);
 			indenter= new JavaIndenter(temp, scanner);
+			String[] types= new String[] {
+									   IJavaPartitions.JAVA_DOC,
+									   		IJavaPartitions.JAVA_MULTI_LINE_COMMENT,
+									   		IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
+									   		IJavaPartitions.JAVA_STRING,
+									   		IJavaPartitions.JAVA_CHARACTER,
+									   		IDocument.DEFAULT_CONTENT_TYPE
+			};
+			DefaultPartitioner partitioner= new DefaultPartitioner(new FastJavaPartitionScanner(), types);
+			partitioner.connect(temp);
+			temp.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, partitioner);
 			
 			int lines= temp.getNumberOfLines();
 			for (int l= document.computeNumberOfLines(prefix); l < lines; l++) { // we don't change the number of lines while adding indents
@@ -643,15 +656,25 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				if (indent == null) // bail out
 					return;
 				
-				endOfWS= scanner.findNonWhitespaceForward(lineOffset, lineOffset + r.getLength());
+				endOfWS= scanner.findNonWhitespaceForwardInAnyPartition(lineOffset, lineOffset + r.getLength());
 				if (endOfWS == JavaHeuristicScanner.NOT_FOUND)
 					endOfWS= lineOffset;
 				
-				int wsLen= endOfWS - lineOffset;
+				if (lineOffset < temp.getLength() - 1) {
+					// special comment handling
+					String s= temp.get(lineOffset, 2);
+					if ("//".equals(s)) { //$NON-NLS-1$
+						endOfWS= scanner.findNonWhitespaceForwardInAnyPartition(lineOffset + 2, lineOffset + r.getLength());
+						lineOffset += 2;
+					}
+				}
+				
+				int wsLen= Math.max(endOfWS - lineOffset, 0);
 				temp.replace(lineOffset, wsLen, indent);
 			}
 			
-			
+			temp.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, null);
+			partitioner.disconnect();
 
 			command.text= temp.get(prefix.length(), temp.getLength() - prefix.length() - afterContent.length());
 			
