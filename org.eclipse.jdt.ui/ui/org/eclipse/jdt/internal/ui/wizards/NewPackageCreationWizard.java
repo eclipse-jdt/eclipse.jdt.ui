@@ -5,15 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import org.eclipse.jface.dialogs.ErrorDialog;
-
-import org.eclipse.core.resources.IWorkspace;
-
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class NewPackageCreationWizard extends NewElementWizard {
 
@@ -45,9 +37,10 @@ public class NewPackageCreationWizard extends NewElementWizard {
 	public boolean performFinish() {
 		if (finishPage(fPage)) {
 			IPackageFragment pack= fPage.getNewPackageFragment();
-			revealSelection(pack);
 			try {
-				openResource(pack.getUnderlyingResource());
+				IResource resource= pack.getUnderlyingResource();
+				selectAndReveal(resource);
+				openResource(resource);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e.getStatus());
 				ErrorDialog.openError(getShell(), "Error", null, e.getStatus());

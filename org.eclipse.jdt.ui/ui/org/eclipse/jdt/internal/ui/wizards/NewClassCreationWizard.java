@@ -5,15 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import org.eclipse.jface.dialogs.ErrorDialog;
-
-import org.eclipse.core.resources.IWorkspace;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class NewClassCreationWizard extends NewElementWizard {
 
@@ -47,9 +39,10 @@ public class NewClassCreationWizard extends NewElementWizard {
 			if (cu.isWorkingCopy()) {
 				cu= (ICompilationUnit)cu.getOriginalElement();
 			}	
-			revealSelection(cu);
 			try {
-				openResource(cu.getUnderlyingResource());
+				IResource resource= cu.getUnderlyingResource();
+				selectAndReveal(resource);
+				openResource(resource);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e.getStatus());
 				ErrorDialog.openError(getShell(), "Error", null, e.getStatus());

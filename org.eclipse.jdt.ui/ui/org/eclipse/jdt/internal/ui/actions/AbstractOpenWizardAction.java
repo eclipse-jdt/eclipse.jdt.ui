@@ -5,18 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.actions;
 
-import java.util.Iterator;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.jface.wizard.WizardDialog;
-
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchWindow;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import java.util.Iterator;import org.eclipse.jface.action.Action;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.wizard.Wizard;import org.eclipse.jface.wizard.WizardDialog;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.IWorkbenchWizard;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public abstract class AbstractOpenWizardAction extends Action {
 
@@ -84,10 +73,14 @@ public abstract class AbstractOpenWizardAction extends Action {
 	abstract protected Wizard createWizard();
 
 
-	protected ISelection getCurrentSelection() {
+	protected IStructuredSelection getCurrentSelection() {
 		IWorkbenchWindow window= fWorkbench.getActiveWorkbenchWindow();
 		if (window != null) {
-			return window.getSelectionService().getSelection();
+			ISelection selection= window.getSelectionService().getSelection();
+			if (selection instanceof IStructuredSelection) {
+				return (IStructuredSelection) selection;
+			}
+			
 		}
 		return null;
 	}
@@ -96,7 +89,10 @@ public abstract class AbstractOpenWizardAction extends Action {
 	 * The user has invoked this action.
 	 */
 	public void run() {
-		Wizard wizard= createWizard();		
+		Wizard wizard= createWizard();
+		if (wizard instanceof IWorkbenchWizard) {
+			((IWorkbenchWizard)wizard).init(fWorkbench, getCurrentSelection());
+		}
 		WizardDialog dialog= new WizardDialog(fWorkbench.getActiveWorkbenchWindow().getShell(), wizard);
 		dialog.create();
 		dialog.getShell().setText(JavaPlugin.getResourceString(WIZARD_TITLE));
@@ -104,15 +100,12 @@ public abstract class AbstractOpenWizardAction extends Action {
 	}
 	
 	public boolean canActionBeAdded() {
-		ISelection selection= getCurrentSelection();
+		IStructuredSelection selection= getCurrentSelection();
 		if (selection == null || selection.isEmpty()) {
 			return fAcceptEmptySelection;
 		}
 		if (fActivatedOnTypes != null) {
-			if (selection instanceof IStructuredSelection) {
-				return isEnabled(((IStructuredSelection)selection).iterator());
-			}
-			return false;
+			return isEnabled(selection.iterator());
 		}
 		return true;
 	}

@@ -7,8 +7,7 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.IConfigurationElement;import org.eclipse.core.runtime.IExecutableExtension;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.launcher.VMWizardPage;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.ui.IPerspectiveDescriptor;import org.eclipse.ui.IPerspectiveRegistry;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.PlatformUI;import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
-public class NewProjectCreationWizard extends NewElementWizard 
-	implements IExecutableExtension {
+public class NewProjectCreationWizard extends NewElementWizard implements IExecutableExtension {
 
 	public static final String NEW_PROJECT_WIZARD_ID= "org.eclipse.jdt.ui.wizards.NewProjectCreationWizard";
 		
@@ -62,7 +61,7 @@ public class NewProjectCreationWizard extends NewElementWizard
 			return false;
 		}
 		updatePerspective();
-		revealSelection(fJavaPage.getNewJavaProject());
+		selectAndReveal(fJavaPage.getNewJavaProject().getProject());
 		return true;
 	}
 		

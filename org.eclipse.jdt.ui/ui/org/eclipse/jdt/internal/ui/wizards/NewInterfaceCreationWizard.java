@@ -7,7 +7,7 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 
-import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -48,9 +48,11 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 			if (cu.isWorkingCopy()) {
 				cu= (ICompilationUnit)cu.getOriginalElement();
 			}	
-			revealSelection(cu);
+
 			try {
-				openResource(cu.getUnderlyingResource());
+				IResource resource= cu.getUnderlyingResource();
+				selectAndReveal(resource);
+				openResource(resource);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e.getStatus());
 				ErrorDialog.openError(getShell(), "Error", null, e.getStatus());
