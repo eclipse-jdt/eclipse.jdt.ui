@@ -21,7 +21,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
-import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 class SelectWorkingSetAction extends Action {
@@ -49,9 +48,9 @@ class SelectWorkingSetAction extends Action {
 				this.fGroup.setActiveWorkingSets(null);
 			}
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, JavaPlugin.getActiveWorkbenchShell(), CallHierarchyMessages
-					.getString("SelectWorkingSetAction.queryWorkingSets.title"), SearchMessages //$NON-NLS-1$
-					.getString("SelectWorkingSetAction.queryWorkingSets.message")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, JavaPlugin.getActiveWorkbenchShell(), 
+					CallHierarchyMessages.getString("SelectWorkingSetAction.queryWorkingSets.title"), //$NON-NLS-1$
+					CallHierarchyMessages.getString("SelectWorkingSetAction.queryWorkingSets.message")); //$NON-NLS-1$
 		}
 	}
 }
