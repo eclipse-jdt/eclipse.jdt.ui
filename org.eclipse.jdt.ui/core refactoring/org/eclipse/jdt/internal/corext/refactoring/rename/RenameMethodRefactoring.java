@@ -55,6 +55,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	private boolean fUpdateReferences;
 	private IMethod fMethod;
 	private TextChangeManager fChangeManager;
+	private ICompilationUnit[] fNewWorkingCopies;
 	
 	RenameMethodRefactoring(IMethod method) {
 		Assert.isNotNull(method);
@@ -350,14 +351,18 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			TextChangeManager manager= createChangeManager(new SubProgressMonitor(pm, 1));
 			SearchResultGroup[] oldOccurrences= getOldOccurrences(new SubProgressMonitor(pm, 1));
 			SearchResultGroup[] newOccurrences= getNewOccurrences(new SubProgressMonitor(pm, 1), manager);
-			return RenameAnalyzeUtil.analyzeRenameChanges(manager, oldOccurrences, newOccurrences);
+			RefactoringStatus result= RenameAnalyzeUtil.analyzeRenameChanges(manager, oldOccurrences, newOccurrences);
+			return result;
 		} catch(CoreException e) {
 			throw new JavaModelException(e);
 		} finally{
 			pm.done();
+			for (int i= 0; i < fNewWorkingCopies.length; i++) {
+				fNewWorkingCopies[i].destroy();		
+			}
 		}
 	}
-	
+
 	private SearchResultGroup[] getOldOccurrences(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		ISearchPattern oldPattern= createSearchPattern(new SubProgressMonitor(pm, 1));
@@ -368,9 +373,9 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		pm.beginTask("", 3); //$NON-NLS-1$
 		try{
 			ICompilationUnit[] compilationUnitsToModify= manager.getAllCompilationUnits();
-			ICompilationUnit[] newWorkingCopies= RenameAnalyzeUtil.getNewWorkingCopies(compilationUnitsToModify, manager, new SubProgressMonitor(pm, 1));
+			fNewWorkingCopies= RenameAnalyzeUtil.getNewWorkingCopies(compilationUnitsToModify, manager, new SubProgressMonitor(pm, 1));
 			
-			ICompilationUnit declaringCuWorkingCopy= RenameAnalyzeUtil.findWorkingCopyForCu(newWorkingCopies, fMethod.getCompilationUnit());
+			ICompilationUnit declaringCuWorkingCopy= RenameAnalyzeUtil.findWorkingCopyForCu(fNewWorkingCopies, fMethod.getCompilationUnit());
 			if (declaringCuWorkingCopy == null)
 				return new SearchResultGroup[0];
 			
@@ -379,7 +384,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 				return new SearchResultGroup[0];
 			
 			ISearchPattern newPattern= createSearchPattern(new SubProgressMonitor(pm, 1), method);
-			return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), newPattern, newWorkingCopies);
+			return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), newPattern, fNewWorkingCopies);
 		} finally{
 			pm.done();
 		}	

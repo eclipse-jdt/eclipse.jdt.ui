@@ -223,7 +223,9 @@ public class CopyRefactoring extends ReorgRefactoring {
 	private static String getCopiedFileSource(IProgressMonitor pm, ICompilationUnit cu, String newTypeName) throws CoreException {
 		ICompilationUnit wc= WorkingCopyUtil.getNewWorkingCopy(cu);
 		TextChangeManager manager= createChangeManager(pm, wc, newTypeName);
-		return manager.get(wc).getPreviewContent();
+		String result= manager.get(wc).getPreviewContent();
+		wc.destroy();
+		return result;
 	}
 	
 	private static TextChangeManager createChangeManager(IProgressMonitor pm, ICompilationUnit wc, String newName) throws CoreException {

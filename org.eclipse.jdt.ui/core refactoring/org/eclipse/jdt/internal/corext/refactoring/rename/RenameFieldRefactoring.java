@@ -54,6 +54,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	private String fNewName;
 	private SearchResultGroup[] fReferences;
 	private TextChangeManager fChangeManager;
+	private ICompilationUnit[] fNewWorkingCopies;
 	private boolean fUpdateReferences;
 	
 	private boolean fUpdateJavaDoc;
@@ -348,20 +349,24 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			TextChangeManager manager= createTextChangeManager(new SubProgressMonitor(pm, 1));
 			SearchResultGroup[] oldOccurrences= getOldOccurrences(new SubProgressMonitor(pm, 1));
 			SearchResultGroup[] newOccurrences= getNewOccurrences(new SubProgressMonitor(pm, 1), manager);
-			return RenameAnalyzeUtil.analyzeRenameChanges(manager, oldOccurrences, newOccurrences);
+			RefactoringStatus result= RenameAnalyzeUtil.analyzeRenameChanges(manager, oldOccurrences, newOccurrences);
+			return result;
 		} catch(CoreException e) {
 			throw new JavaModelException(e);
 		} finally{
 			pm.done();
+			for (int i= 0; i < fNewWorkingCopies.length; i++) {
+				fNewWorkingCopies[i].destroy();
+			}
 		}
 	}
 
 	private SearchResultGroup[] getNewOccurrences(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		ICompilationUnit[] compilationUnitsToModify= manager.getAllCompilationUnits();
-		ICompilationUnit[] newWorkingCopies= RenameAnalyzeUtil.getNewWorkingCopies(compilationUnitsToModify, manager, new SubProgressMonitor(pm, 1));
+		fNewWorkingCopies= RenameAnalyzeUtil.getNewWorkingCopies(compilationUnitsToModify, manager, new SubProgressMonitor(pm, 1));
 		
-		ICompilationUnit declaringCuWorkingCopy= RenameAnalyzeUtil.findWorkingCopyForCu(newWorkingCopies, fField.getCompilationUnit());
+		ICompilationUnit declaringCuWorkingCopy= RenameAnalyzeUtil.findWorkingCopyForCu(fNewWorkingCopies, fField.getCompilationUnit());
 		if (declaringCuWorkingCopy == null)
 			return new SearchResultGroup[0];
 		
@@ -370,7 +375,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			return new SearchResultGroup[0];
 		
 		ISearchPattern newPattern= SearchEngine.createSearchPattern(field, IJavaSearchConstants.ALL_OCCURRENCES);			
-		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), newPattern, newWorkingCopies);
+		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), newPattern, fNewWorkingCopies);
 	}
 
 	private SearchResultGroup[] getOldOccurrences(IProgressMonitor pm) throws JavaModelException {

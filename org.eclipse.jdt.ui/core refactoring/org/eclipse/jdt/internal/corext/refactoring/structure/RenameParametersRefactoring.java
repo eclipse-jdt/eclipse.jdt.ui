@@ -254,6 +254,7 @@ class RenameParametersRefactoring extends Refactoring implements IMultiRenameRef
 	}
 	
 	private RefactoringStatus analyzeAst() throws JavaModelException{		
+		ICompilationUnit wc= null;
 		try {
 			RefactoringStatus result= new RefactoringStatus();
 						
@@ -264,7 +265,7 @@ class RenameParametersRefactoring extends Refactoring implements IMultiRenameRef
 			TextChange change= new TextBufferChange(RefactoringCoreMessages.getString("RenameParametersRefactoring.rename_Paremeters"), TextBuffer.create(getCu().getSource())); //$NON-NLS-1$
 			change.setTrackPositionChanges(true);
 		
-			ICompilationUnit wc= RefactoringAnalyzeUtil.getWorkingCopyWithNewContent(allEdits, change, getCu());
+			wc= RefactoringAnalyzeUtil.getWorkingCopyWithNewContent(allEdits, change, getCu());
 			CompilationUnit newCUNode= AST.parseCompilationUnit(wc, true);
 			
 			result.merge(RefactoringAnalyzeUtil.analyzeIntroducedCompileErrors(allEdits, change, wc, newCUNode, compliationUnitNode));
@@ -279,10 +280,12 @@ class RenameParametersRefactoring extends Refactoring implements IMultiRenameRef
 				SimpleName[] problemNodes= ProblemNodeFinder.getProblemNodes(methodNode, paramRenameEdits, change, fullKey);
 				result.merge(RefactoringAnalyzeUtil.reportProblemNodes(wc, problemNodes));
 			}
-
 			return result;
 		} catch(CoreException e) {
 			throw new JavaModelException(e);
+		} finally{
+			if (wc != null)
+				wc.destroy();
 		}
 	}
 

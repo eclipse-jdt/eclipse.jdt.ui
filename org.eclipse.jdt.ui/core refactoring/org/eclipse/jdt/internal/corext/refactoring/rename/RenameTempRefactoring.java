@@ -169,6 +169,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	}
 		
 	private RefactoringStatus analyzeAST() throws JavaModelException{
+		ICompilationUnit wc= null;
 		try {
 			RefactoringStatus result= new RefactoringStatus();
 						
@@ -176,7 +177,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 			TextChange change= new TextBufferChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), TextBuffer.create(fCu.getSource())); //$NON-NLS-1$
 			change.setTrackPositionChanges(true);
 		
-			ICompilationUnit wc= RefactoringAnalyzeUtil.getWorkingCopyWithNewContent(edits, change, fCu);
+			wc= RefactoringAnalyzeUtil.getWorkingCopyWithNewContent(edits, change, fCu);
 			CompilationUnit newCUNode= AST.parseCompilationUnit(wc, true);
 			
 			result.merge(RefactoringAnalyzeUtil.analyzeIntroducedCompileErrors(edits, change, wc, newCUNode, fCompilationUnitNode));
@@ -190,6 +191,9 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 			return result;
 		} catch(CoreException e) {
 			throw new JavaModelException(e);
+		} finally{
+			if (wc != null)
+				wc.destroy();
 		}
 	}
 
