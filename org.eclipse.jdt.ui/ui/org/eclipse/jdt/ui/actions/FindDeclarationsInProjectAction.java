@@ -16,12 +16,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
-import org.eclipse.jdt.ui.search.ElementQuerySpecification;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
@@ -58,7 +55,7 @@ public class FindDeclarationsInProjectAction extends FindDeclarationsAction {
 	
 	void init() {
 		setText(SearchMessages.getString("Search.FindDeclarationsInProjectAction.label")); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindDeclarationsInProjectAction.tooltip")); //$NON-NLS-1$
+		setToolTipText(SearchMessages.getString("Search.FindDeclarationsInProjectAction.tooltip1")); //$NON-NLS-1$
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_PROJECT_ACTION);
 	}
@@ -71,7 +68,4 @@ public class FindDeclarationsInProjectAction extends FindDeclarationsAction {
 		return JavaSearchScopeFactory.getInstance().getProjectScopeDescription(element);
 	}
 
-	protected JavaSearchQuery createJob(IJavaElement element) {
-		return new JavaSearchQuery(new ElementQuerySpecification(element, getLimitTo(), getScope(element), getScopeDescription(element)));
-	}
 }

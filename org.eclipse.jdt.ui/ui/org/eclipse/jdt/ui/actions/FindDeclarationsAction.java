@@ -26,13 +26,12 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
-import org.eclipse.jdt.ui.search.PatternQuerySpecification;
+import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
-import org.eclipse.jdt.internal.ui.search.PatternStrings;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
@@ -77,21 +76,11 @@ public class FindDeclarationsAction extends FindAction {
 	}
 	
 	int getLimitTo() {
-		return IJavaSearchConstants.DECLARATIONS;
+		return IJavaSearchConstants.DECLARATIONS | IJavaSearchConstants.IGNORE_DECLARING_TYPE | IJavaSearchConstants.IGNORE_RETURN_TYPE;
 	}
 	
 	protected JavaSearchQuery createJob(IJavaElement element) throws JavaModelException {
-		if (element.getElementType() == IJavaElement.METHOD) { // waiting for bug 80264 to use an ElementQuerySpecification
-			IMethod method= (IMethod)element;
-			int searchFor= IJavaSearchConstants.METHOD;
-			if (method.isConstructor())
-				searchFor= IJavaSearchConstants.CONSTRUCTOR;
-			IType type= getType(element);
-			String pattern= PatternStrings.getUnqualifiedMethodSignature(method);
-			return new JavaSearchQuery(new PatternQuerySpecification(pattern, searchFor, true, getLimitTo(), getScope(type), getScopeDescription(type)));
-		}
-		else
-			return super.createJob(element);
+		return new JavaSearchQuery(new ElementQuerySpecification(element, getLimitTo(), getScope(element), getScopeDescription(element)));
 	}
 	
 }

@@ -15,20 +15,16 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
-import org.eclipse.jdt.ui.search.PatternQuerySpecification;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
-import org.eclipse.jdt.internal.ui.search.PatternStrings;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 
@@ -55,7 +51,7 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 	 * @param site the site providing context information for this action
 	 */
 	public FindDeclarationsInWorkingSetAction(IWorkbenchSite site) {
-		super(site);
+		this(site, null);
 	}
 
 	/**
@@ -67,7 +63,7 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 	 * @param workingSets	the working sets to be used in the search
 	 */
 	public FindDeclarationsInWorkingSetAction(IWorkbenchSite site, IWorkingSet[] workingSets) {
-		this(site);
+		super(site);
 		fWorkingSet= workingSets;
 	}
 
@@ -75,14 +71,14 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindDeclarationsInWorkingSetAction(JavaEditor editor) {
-		super(editor);
+		this(editor, null);
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindDeclarationsInWorkingSetAction(JavaEditor editor, IWorkingSet[] workingSets) {
-		this(editor);
+		super(editor);
 		fWorkingSet= workingSets;
 	}
 
@@ -105,16 +101,7 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 				return null;
 		}
 		SearchUtil.updateLRUWorkingSets(workingSets);
-		if (element.getElementType() == IJavaElement.METHOD) { // waiting for bug 80264 to use an ElementQuerySpecification
-			IMethod method= (IMethod)element;
-			int searchFor= IJavaSearchConstants.METHOD;
-			if (method.isConstructor())
-				searchFor= IJavaSearchConstants.CONSTRUCTOR;
-			String pattern= PatternStrings.getUnqualifiedMethodSignature(method);
-			return new JavaSearchQuery(new PatternQuerySpecification(pattern, searchFor, true, getLimitTo(), getScope(workingSets), getScopeDescription(workingSets)));
-		}
-		else
-			return new JavaSearchQuery(new ElementQuerySpecification(element, getLimitTo(), getScope(workingSets), getScopeDescription(workingSets)));
+		return new JavaSearchQuery(new ElementQuerySpecification(element, getLimitTo(), getScope(workingSets), getScopeDescription(workingSets)));
 	}
 
 	private IJavaSearchScope getScope(IWorkingSet[] workingSets) {
@@ -123,6 +110,5 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 
 	private String getScopeDescription(IWorkingSet[] workingSets) {
 		return SearchMessages.getFormattedString("WorkingSetScope", new String[] {SearchUtil.toString(workingSets)}); //$NON-NLS-1$
-
 	}
 }
