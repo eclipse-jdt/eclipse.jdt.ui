@@ -324,11 +324,16 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
 	protected boolean isClassPathChange(IJavaElementDelta delta) {
+		
+		// need to test the flags only for package fragment roots
+		if (delta.getElement().getElementType() != IJavaElement.PACKAGE_FRAGMENT_ROOT)
+			return false;
+		
 		int flags= delta.getFlags();
 		return (delta.getKind() == IJavaElementDelta.CHANGED && 
 			((flags & IJavaElementDelta.F_ADDED_TO_CLASSPATH) != 0) ||
 			 ((flags & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0) ||
-			 ((flags & IJavaElementDelta.F_CLASSPATH_REORDER) != 0));
+			 ((flags & IJavaElementDelta.F_REORDER) != 0));
 	}
 	
 	/**
