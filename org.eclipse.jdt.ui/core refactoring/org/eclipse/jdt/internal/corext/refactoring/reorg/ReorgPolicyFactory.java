@@ -72,6 +72,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -718,11 +719,15 @@ class ReorgPolicyFactory {
 					listRewrite= targetRewrite.getListRewrite(destinationContainer, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 				else
 					listRewrite= targetRewrite.getListRewrite(destinationContainer, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
-				if (nodeDestination != null)
+				
+				if (nodeDestination != null) {
 					listRewrite.insertAfter(newMember, nodeDestination, null);
-				else
-					listRewrite.insertLast(newMember, null);
-				return; //could insert after destination
+				} else {
+					List bodyDeclarations= listRewrite.getRewrittenList();
+					int insertionIndex= ASTNodes.getInsertionIndex(newMember, bodyDeclarations);
+					listRewrite.insertAt(newMember, insertionIndex, null);
+				}
+				return; //could insert into/after destination
 			}
 			// fallback / default:
 			targetRewrite.markAsInserted(newMember);
