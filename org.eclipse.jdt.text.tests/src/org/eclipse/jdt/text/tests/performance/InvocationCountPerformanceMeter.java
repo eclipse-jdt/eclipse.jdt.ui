@@ -461,11 +461,6 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	private Method getMethod(String className, String name, String signature) {
 		ClassType type= (ClassType) fVM.classesByName(className).get(0);
-		List list= type.allMethods();
-		for (Iterator iter= list.iterator(); iter.hasNext();) {
-			Method element= (Method) iter.next();
-			System.out.println(element + " " + element.signature());
-		}
 		return type.concreteMethodByName(name, signature);
 	}
 	
