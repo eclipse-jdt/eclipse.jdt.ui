@@ -3763,7 +3763,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fOverrideIndicatorManager= new OverrideIndicatorManager(model, inputElement, null);
 		
 		if (provideAST) {
-			Job job= new Job("Override indicator installation job") {
+			Job job= new Job(JavaEditorMessages.getString("OverrideIndicatorManager.intallJob")) { //$NON-NLS-1$
 				/*
 				 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
 				 * @since 3.0
