@@ -29,6 +29,12 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.TextChange;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -42,13 +48,14 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -68,7 +75,6 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -115,13 +121,6 @@ import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.core.refactoring.TextChange;
-
 
 public class ChangeSignatureRefactoring extends Refactoring {
 	
@@ -284,6 +283,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 	
 	public RefactoringStatus checkSignature() {
+		return checkSignature(false);
+	}
+	
+	private RefactoringStatus checkSignature(boolean resolveBindings) {
 		RefactoringStatus result= new RefactoringStatus();
 		checkMethodName(result);
 		if (result.hasFatalError())
@@ -298,7 +301,11 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return result;
 		
 		try {
-			RefactoringStatus[] typeStati= TypeContextChecker.checkAndResolveMethodTypes(fMethod.getDeclaringType(), getStubTypeContext(), getNotDeletedInfos(), fReturnTypeInfo);
+			RefactoringStatus[] typeStati;
+			if (resolveBindings)
+				typeStati= TypeContextChecker.checkAndResolveMethodTypes(fMethod, getStubTypeContext(), getNotDeletedInfos(), fReturnTypeInfo);
+			else
+				typeStati= TypeContextChecker.checkMethodTypesSyntax(fMethod, getStubTypeContext(), getNotDeletedInfos(), fReturnTypeInfo);
 			for (int i= 0; i < typeStati.length; i++)
 				result.merge(typeStati[i]);
 		} catch (CoreException e) {
@@ -570,7 +577,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 			if (isSignatureSameAsInitial())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.unchanged")); //$NON-NLS-1$
-			result.merge(checkSignature());
+			result.merge(checkSignature(true));
 			if (result.hasFatalError())
 				return result;
 
@@ -1796,7 +1803,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 		//TODO: already reported as compilation error -> don't report there?
 		private void checkIfDeletedParametersUsed() {
-			String typeName= getFullTypeName(fMethDecl);
 			for (Iterator iter= getDeletedInfos().iterator(); iter.hasNext();) {
 				ParameterInfo info= (ParameterInfo) iter.next();
 				SingleVariableDeclaration paramDecl= (SingleVariableDeclaration) fMethDecl.parameters().get(info.getOldIndex());
@@ -1806,6 +1812,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 				if (paramRefs.length > 0){
 					RefactoringStatusContext context= JavaStatusContext.create(fCuRewrite.getCu(), paramRefs[0]);
+					String typeName= getFullTypeName(fMethDecl);
 					Object[] keys= new String[]{paramDecl.getName().getIdentifier(),
 												fMethDecl.getName().getIdentifier(),
 												typeName};
@@ -1816,15 +1823,19 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 		
 		private String getFullTypeName(MethodDeclaration decl) {
-			// TODO use AbstractTypeDeclaration
-			
-			TypeDeclaration typeDecl= (TypeDeclaration) ASTNodes.getParent(decl, TypeDeclaration.class);
-			AnonymousClassDeclaration anonymous= (AnonymousClassDeclaration) ASTNodes.getParent(decl, AnonymousClassDeclaration.class);
-			if (anonymous != null && ASTNodes.isParent(typeDecl, anonymous)){
-				ClassInstanceCreation cic= (ClassInstanceCreation) ASTNodes.getParent(decl, ClassInstanceCreation.class);
-				return RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.anonymous_subclass", new String[]{ASTNodes.asString(cic.getType())}); //$NON-NLS-1$
-			} else 
-				return typeDecl.getName().getIdentifier();
+			ASTNode node= decl;
+			while (true) {
+				node= node.getParent();
+				if (node instanceof AbstractTypeDeclaration) {
+					return ((AbstractTypeDeclaration) node).getName().getIdentifier();
+				} else if (node instanceof ClassInstanceCreation) {
+					ClassInstanceCreation cic= (ClassInstanceCreation) node;
+					return RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.anonymous_subclass", new String[]{ASTNodes.asString(cic.getType())}); //$NON-NLS-1$
+				} else if (node instanceof EnumConstantDeclaration) {
+					EnumDeclaration ed= (EnumDeclaration) node.getParent();
+					return RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.anonymous_subclass", new String[]{ASTNodes.asString(ed.getName())}); //$NON-NLS-1$
+				}
+			}
 		}
 		
 		protected ASTNode createNewParamgument(ParameterInfo info) {
