@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionEl
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IndependentTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ImmutableTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
@@ -178,13 +178,13 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 	
 	public void endVisit(StringLiteral node) {
 		ITypeBinding typeBinding= node.resolveTypeBinding();
-		PlainTypeVariable2 cv= fTCModel.makePlainTypeVariable(typeBinding);
+		ImmutableTypeVariable2 cv= fTCModel.makePlainTypeVariable(typeBinding);
 		setConstraintVariable(node, cv);
 	}
 	
 	public void endVisit(TypeLiteral node) {
 //		ITypeBinding typeBinding= node.resolveTypeBinding();
-//		PlainTypeVariable2 cv= fTCModel.makePlainTypeVariable(typeBinding);
+//		ImmutableTypeVariable2 cv= fTCModel.makePlainTypeVariable(typeBinding);
 //		fTCModel.makeElementVariable(cv);
 //		setConstraintVariable(node, cv);
 	}

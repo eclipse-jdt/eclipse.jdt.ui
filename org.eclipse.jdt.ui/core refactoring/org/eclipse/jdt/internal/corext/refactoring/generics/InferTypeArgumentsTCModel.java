@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstra
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IndependentTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterizedTypeVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ImmutableTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SubTypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivalenceSet;
@@ -390,11 +390,11 @@ public class InferTypeArgumentsTCModel {
 		return cv;
 	}
 	
-	public PlainTypeVariable2 makePlainTypeVariable(ITypeBinding typeBinding) {
+	public ImmutableTypeVariable2 makePlainTypeVariable(ITypeBinding typeBinding) {
 		if (filterConstraintVariableType(typeBinding))
 			return null;
-		PlainTypeVariable2 cv= new PlainTypeVariable2(fTypeEnvironment.create(typeBinding));
-		cv= (PlainTypeVariable2) storedCv(cv);
+		ImmutableTypeVariable2 cv= new ImmutableTypeVariable2(fTypeEnvironment.create(typeBinding));
+		cv= (ImmutableTypeVariable2) storedCv(cv);
 		return cv;
 	}
 	

@@ -140,7 +140,7 @@ public class InferTypeArgumentsConstraintsSolver {
 //	}
 //
 //	private static boolean isConstantTypeEntity(ConstraintVariable2 v) {
-//		return v instanceof PlainTypeVariable2 || v instanceof TypeVariable2;
+//		return v instanceof ImmutableTypeVariable2 || v instanceof TypeVariable2;
 //	}
 
 	private void chooseTypes(ConstraintVariable2[] allConstraintVariables) {
