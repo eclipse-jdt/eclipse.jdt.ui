@@ -95,7 +95,7 @@ public class HierarchyViewerSorter extends JavaElementSorter {
 		} else if (isSuperType(hierarchy, def2, def1)) {
 			return -1;
 		}
-		// interfaces before classes
+		// interfaces after classes
 		int flags1= hierarchy.getCachedFlags(def1);
 		int flags2= hierarchy.getCachedFlags(def2);
 		if (Flags.isInterface(flags1)) {
