@@ -1022,6 +1022,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		text= PreferencesMessages.getString("JavaEditorPreferencePage.navigation.browserLikeLinksKeyModifier"); //$NON-NLS-1$
 		fBrowserLikeLinksKeyModifierText= addTextField(composite, text, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, 20, 0, false);
 		
+		fBrowserLikeLinksKeyModifierText.setEnabled(fBrowserLikeLinksCheckBox.getSelection());
+		
 		fBrowserLikeLinksKeyModifierText.addKeyListener(new KeyListener() {
 			private boolean isModifierCandidate;
 			public void keyPressed(KeyEvent e) {
@@ -1054,7 +1056,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		String modifiers= fBrowserLikeLinksKeyModifierText.getText();
 		int stateMask= computeStateMask(modifiers);
 
-		if (fBrowserLikeLinksCheckBox.getSelection() && stateMask == -1) {
+		if (fBrowserLikeLinksCheckBox.getSelection() && stateMask == -1 || (stateMask & SWT.SHIFT) != 0) {
 			fBrowserLikeLinksKeyModifierStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getFormattedString("JavaEditorPreferencePage.navigation.modifierIsNotValid", modifiers)); //$NON-NLS-1$
 			setValid(false);
 			StatusUtil.applyToStatusLine(this, fBrowserLikeLinksKeyModifierStatus);
