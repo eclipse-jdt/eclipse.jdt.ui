@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
@@ -55,6 +56,16 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, ADD_ID, NewWizardMessages.getString("SuperInterfaceSelectionDialog.addButton.label"), true); //$NON-NLS-1$
 		super.createButtonsForButtonBar(parent);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.dialogs.SelectionStatusDialog#updateButtonsEnableState(org.eclipse.core.runtime.IStatus)
+	 */
+	protected void updateButtonsEnableState(IStatus status) {
+	    super.updateButtonsEnableState(status);
+	    Button addButton = getButton(ADD_ID);
+	    if (addButton != null && !addButton.isDisposed())
+	        addButton.setEnabled(!status.matches(IStatus.ERROR));
 	}
 	
 	/*(non-Javadoc)
