@@ -38,6 +38,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelDecorator;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -489,7 +490,10 @@ public class PackageExplorerPart extends ViewPart
 	String getToolTipText(Object element) {
 		String result;
 		if (!(element instanceof IResource)) {
-			result= JavaElementLabels.getTextLabel(element, AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS);		
+			if (element instanceof IJavaModel) 
+				result= PackagesMessages.getString("PackageExplorerPart.workspace"); //$NON-NLS-1$
+			else
+				result= JavaElementLabels.getTextLabel(element, AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS);		
 		} else {
 			IPath path= ((IResource) element).getFullPath();
 			if (path.isRoot()) {
@@ -1117,6 +1121,18 @@ public class PackageExplorerPart extends ViewPart
 			if (editor != null) {
 				editorActivated(editor);
 			}
+		}
+	}
+
+	/**
+	 * Returns the name for the given element.
+	 * Used as the name for the current frame. 
+	 */
+	String getFrameName(Object element) {
+		if (element instanceof IJavaElement) {
+			return ((IJavaElement) element).getElementName();
+		} else {
+			return ((ILabelProvider) getTreeViewer().getLabelProvider()).getText(element);
 		}
 	}
 }

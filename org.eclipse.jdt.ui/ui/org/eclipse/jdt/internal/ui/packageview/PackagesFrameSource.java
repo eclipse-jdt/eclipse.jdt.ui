@@ -18,6 +18,7 @@ class PackagesFrameSource extends TreeViewerFrameSource {
 
 	protected TreeFrame createFrame(Object input) {
 		TreeFrame frame = super.createFrame(input);
+		frame.setName(fPackagesExplorer.getFrameName(input));
 		frame.setToolTipText(fPackagesExplorer.getToolTipText(input));
 		return frame;
 	}
