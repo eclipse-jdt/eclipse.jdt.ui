@@ -65,5 +65,9 @@ class ImportEditManager {
 			if (edit != null && ! edit.isEmpty())
 				manager.get(cu).addTextEdit(RefactoringCoreMessages.getString("ImportEditManager.update_Imports"), edit); //$NON-NLS-1$
 		}
-	}	
+	}
+	
+	public void clear(){
+		fImportEdits.clear();
+	}
 }
