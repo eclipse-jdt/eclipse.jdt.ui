@@ -352,22 +352,6 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		switchFlowInfo.removeLabel(null);
 	}
 
-	//---- Helper to find correct variable binding --------------------------
-
-	private static IVariableBinding getVariableBinding(Expression reference) {
-		if (reference == null)
-			return null;
-		if (!(reference instanceof Name))
-			return null;
-		IBinding binding= ((Name)reference).resolveBinding();
-		if (!(binding instanceof IVariableBinding))
-			return null;
-		IVariableBinding result= (IVariableBinding)binding;
-		if (result.isField())
-			return null;
-		return result;
-	}
-
 	//---- concret endVisit methods ---------------------------------------------------
 	
 	public void endVisit(AnonymousClassDeclaration node) {
@@ -418,11 +402,11 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		FlowInfo lhs= getFlowInfo(node.getLeftHandSide());
 		FlowInfo rhs= getFlowInfo(node.getRightHandSide());
 		if (lhs instanceof LocalFlowInfo) {
-			((LocalFlowInfo)lhs).setWriteAccess(fFlowContext);
+			LocalFlowInfo llhs= (LocalFlowInfo)lhs;
+			llhs.setWriteAccess(fFlowContext);
 			if (node.getOperator() != Assignment.Operator.ASSIGN) {
 				GenericSequentialFlowInfo tmp= createSequential();
-				IVariableBinding binding= getVariableBinding(node.getLeftHandSide());
-				tmp.merge(new LocalFlowInfo(binding, FlowInfo.READ, fFlowContext), fFlowContext);
+				tmp.merge(new LocalFlowInfo(llhs, FlowInfo.READ, fFlowContext), fFlowContext);
 				tmp.merge(rhs, fFlowContext);
 				rhs= tmp;
 			}
@@ -842,7 +826,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			GenericSequentialFlowInfo result= createSequential(node);
 			result.merge(info, fFlowContext);
 			result.merge(
-				new LocalFlowInfo(getVariableBinding(operand), FlowInfo.WRITE, fFlowContext), 
+				new LocalFlowInfo((LocalFlowInfo)info, FlowInfo.WRITE, fFlowContext), 
 				fFlowContext);
 		} else {
 			setFlowInfo(node, info);

@@ -26,6 +26,15 @@ class LocalFlowInfo extends FlowInfo {
 		}
 	}
 	
+	public LocalFlowInfo(LocalFlowInfo info, int localAccessMode, FlowContext context) {
+		super(NO_RETURN);
+		fVariableId= info.fVariableId;
+		if (context.considerAccessMode()) {
+			createAccessModeArray(context);
+			fAccessModes[fVariableId - context.getStartingIndex()]= localAccessMode;
+		}
+	}
+	
 	public void setWriteAccess(FlowContext context) {
 		if (context.considerAccessMode()) {
 			fAccessModes[fVariableId - context.getStartingIndex()]= FlowInfo.WRITE;
