@@ -515,6 +515,7 @@ public class PartialASTTest extends CoreTests {
 		return AST.parsePartialCompilationUnit(cu, offset, true);
 	}
 	
+	/*
 	private static class PartialVisitor extends ASTVisitor {
 		
 		private int fOffset;
@@ -523,9 +524,6 @@ public class PartialASTTest extends CoreTests {
 			fOffset= offset;
 		}
 		
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.Block)
-		 */
 		public boolean visit(Block node) {
 			ASTNode parent= node.getParent();
 			if (parent instanceof MethodDeclaration || parent instanceof Initializer) {
@@ -540,9 +538,7 @@ public class PartialASTTest extends CoreTests {
 			}
 			return true;
 		}
-		
-		
-	}
+	}*/
 	
 	
 }
