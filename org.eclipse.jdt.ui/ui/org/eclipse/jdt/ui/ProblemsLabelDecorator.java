@@ -15,6 +15,7 @@ import java.util.Iterator;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
@@ -198,6 +199,10 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 					return 0;
 				}
 			}
+			if (e.getStatus().getCode() == IResourceStatus.MARKER_NOT_FOUND) {
+				return 0;
+			}
+			
 			JavaPlugin.log(e);
 		}
 		return 0;
