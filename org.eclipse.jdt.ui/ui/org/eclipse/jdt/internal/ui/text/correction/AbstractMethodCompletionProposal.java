@@ -44,6 +44,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionProposal {
@@ -77,7 +78,7 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 			newTypeDecl= typeDecl;
 		} else {
 			isInDifferentCU= true;
-			ASTParser astParser= ASTParser.newParser(AST.JLS2);
+			ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 			astParser.setSource(getCompilationUnit());
 			astParser.setResolveBindings(true);
 			astRoot= (CompilationUnit) astParser.createAST(null);
@@ -114,7 +115,7 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 		SimpleName newNameNode= getNewName(rewrite);
 		
 		decl.setConstructor(isConstructor());
-		decl.setModifiers(evaluateModifiers(targetTypeDecl));
+		ASTNodeFactory.addModifiers(ast, evaluateModifiers(targetTypeDecl), decl.modifiers());
 		decl.setName(newNameNode);
 		
 		ArrayList takenNames= new ArrayList();
@@ -133,9 +134,9 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 		if (!isConstructor()) {
 			Type returnType= getNewMethodType(rewrite);
 			if (returnType == null) {
-				decl.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
+				decl.setReturnType2(ast.newPrimitiveType(PrimitiveType.VOID));
 			} else {
-				decl.setReturnType(returnType);
+				decl.setReturnType2(returnType);
 			}
 			if (!fSenderBinding.isInterface() && returnType != null) {
 				ReturnStatement returnStatement= ast.newReturnStatement();

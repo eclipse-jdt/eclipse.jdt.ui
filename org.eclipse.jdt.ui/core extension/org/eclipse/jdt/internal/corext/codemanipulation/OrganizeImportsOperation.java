@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -56,6 +55,7 @@ import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class OrganizeImportsOperation implements IWorkspaceRunnable {
@@ -261,7 +261,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		fNumberOfImportsAdded= 0;
 		
 		fParsingError= null;
-		ASTParser parser= ASTParser.newParser(AST.JLS2);
+		ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 		parser.setSource(impStructure.getCompilationUnit());
 		parser.setResolveBindings(true);
 		fASTRoot= (CompilationUnit) parser.createAST(null);

@@ -127,9 +127,9 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		}
 
 		if (binding == null) {
-			decl.setModifiers(Modifier.PUBLIC);
+			decl.modifiers().add(Modifier.ModifierKeyword.PUBLIC_KEYWORD);
 		} else {
-			decl.setModifiers(binding.getModifiers());
+			ASTNodeFactory.addModifiers(ast, binding.getModifiers(), decl.modifiers());
 		
 			ITypeBinding[] params= binding.getParameterTypes();
 			for (int i= 0; i < params.length; i++) {

@@ -221,7 +221,7 @@ public class JavadocTagsSubProcessor {
 			}
 		}
 		if (!methodDecl.isConstructor()) {
-			Type type= methodDecl.getReturnType();
+			Type type= methodDecl.getReturnType2();
 			if (!type.isPrimitiveType() || (((PrimitiveType) type).getPrimitiveTypeCode() != PrimitiveType.VOID)) {
 				if (findTag(javadoc, TagElement.TAG_RETURN, null) == null) {
 					TagElement newTag= ast.newTagElement();

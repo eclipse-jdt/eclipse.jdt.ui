@@ -185,7 +185,11 @@ public class ASTResolving {
 		case ASTNode.RETURN_STATEMENT:
 			MethodDeclaration decl= findParentMethodDeclaration(parent);
 			if (decl != null && !decl.isConstructor()) {
-				return decl.getReturnType().resolveBinding();
+				if (decl.getAST().apiLevel() == AST.JLS2) {
+					return decl.getReturnType().resolveBinding();
+				} else {
+					return decl.getReturnType2().resolveBinding();
+				}
 			}
 			break;
 		case ASTNode.CAST_EXPRESSION:

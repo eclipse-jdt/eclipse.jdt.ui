@@ -42,7 +42,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -52,6 +51,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 
@@ -172,7 +172,7 @@ public class QuickAssistLightBulbUpdater {
 				if (cu != null) {
 					installSelectionListener();
 					Point point= fViewer.getSelectedRange();
-					ASTParser parser= ASTParser.newParser(AST.JLS2);
+					ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 					parser.setSource(cu);
 					parser.setResolveBindings(true);
 					CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);

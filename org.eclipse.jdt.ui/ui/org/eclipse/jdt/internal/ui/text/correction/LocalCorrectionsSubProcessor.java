@@ -356,7 +356,7 @@ public class LocalCorrectionsSubProcessor {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (selectedNode == null) {
 			return;
-		}
+		}	
 		ASTNode typeNode= null;
 		if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME && selectedNode.getParent().getNodeType() == ASTNode.TYPE_DECLARATION) {
 			typeNode= selectedNode.getParent();

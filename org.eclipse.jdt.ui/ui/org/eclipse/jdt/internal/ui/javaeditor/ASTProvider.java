@@ -168,7 +168,7 @@ public final class ASTProvider {
 		}
 	}
 	
-	public static final int AST_LEVEL= AST.JLS2;
+	public static final int AST_LEVEL= AST.JLS3;
 	
 	private static final String AST_DISPOSED= "org.eclipse.jdt.internal.ui.astDisposed"; //$NON-NLS-1$
 	private static final String DEBUG_PREFIX= "ASTProvider > "; //$NON-NLS-1$

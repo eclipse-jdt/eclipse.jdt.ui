@@ -11,6 +11,9 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.swt.graphics.Image;
@@ -19,6 +22,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 
@@ -47,7 +54,7 @@ public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 		} else {
 			selectionDescription= new TextEditGroup("selection"); // in different CU, needs selection //$NON-NLS-1$
 			//setSelectionDescription(selectionDescription);
-			ASTParser astParser= ASTParser.newParser(AST.JLS2);
+			ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 			astParser.setSource(getCompilationUnit());
 			astParser.setResolveBindings(true);
 			CompilationUnit newRoot= (CompilationUnit) astParser.createAST(null);
@@ -55,40 +62,45 @@ public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 		}
 		if (declNode != null) {
 			ASTRewrite rewrite= ASTRewrite.create(declNode.getAST());
+			ListRewrite modifierRewrite= null;
 			if (declNode instanceof MethodDeclaration) {
-				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
-				int newModifiers= (methodDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
-				
-				rewrite.set(methodDecl, MethodDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), selectionDescription);
+				modifierRewrite= rewrite.getListRewrite(declNode, MethodDeclaration.MODIFIERS2_PROPERTY);
 			} else if (declNode instanceof VariableDeclarationFragment) {
 				ASTNode parent= declNode.getParent();
 				if (parent instanceof FieldDeclaration) {
-					FieldDeclaration fieldDecl= (FieldDeclaration) parent;
-					int newModifiers= (fieldDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
-				
-					rewrite.set(fieldDecl, FieldDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), selectionDescription);	
+					modifierRewrite= rewrite.getListRewrite(parent, FieldDeclaration.MODIFIERS2_PROPERTY);
 				} else if (parent instanceof VariableDeclarationStatement) {
-					VariableDeclarationStatement varDecl= (VariableDeclarationStatement) parent;
-					int newModifiers= (varDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
-					
-					rewrite.set(varDecl, VariableDeclarationStatement.MODIFIERS_PROPERTY, new Integer(newModifiers), selectionDescription);	
+					modifierRewrite= rewrite.getListRewrite(parent, VariableDeclarationStatement.MODIFIERS2_PROPERTY);
 				} else if (parent instanceof VariableDeclarationExpression) {
-					VariableDeclarationExpression varDecl= (VariableDeclarationExpression) parent;
-					int newModifiers= (varDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
-					
-					rewrite.set(varDecl, VariableDeclarationExpression.MODIFIERS_PROPERTY, new Integer(newModifiers), selectionDescription);
+					modifierRewrite= rewrite.getListRewrite(parent, VariableDeclarationExpression.MODIFIERS2_PROPERTY);
 				}
 			} else if (declNode instanceof SingleVariableDeclaration) {
-				SingleVariableDeclaration variableDeclaration= (SingleVariableDeclaration) declNode;
-				int newModifiers= (variableDeclaration.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
-				
-				rewrite.set(variableDeclaration, SingleVariableDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), selectionDescription);
-				
+				modifierRewrite= rewrite.getListRewrite(declNode, SingleVariableDeclaration.MODIFIERS2_PROPERTY);	
 			} else if (declNode instanceof TypeDeclaration) {
-				TypeDeclaration typeDecl= (TypeDeclaration) declNode;
-				int newModifiers= (typeDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
-				
-				rewrite.set(typeDecl, TypeDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), selectionDescription);
+				modifierRewrite= rewrite.getListRewrite(declNode, TypeDeclaration.MODIFIERS2_PROPERTY);	
+			}
+			if (modifierRewrite != null) {
+				// remove modifiers
+				List originalList= modifierRewrite.getOriginalList();
+				for (int i= 0; i < originalList.size(); i++) {
+					ASTNode curr= (ASTNode) originalList.get(i);
+					if (curr instanceof Modifier && ((fExcludedModifiers & ((Modifier)curr).getKeyword().toFlagValue()) != 0)) {
+						modifierRewrite.remove(curr, selectionDescription);
+					}
+				}
+				// add modifiers
+				List includedNodes= new ArrayList();
+				int visibilityFlags= Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED;	
+				ASTNodeFactory.addModifiers(rewrite.getAST(), fIncludedModifiers, includedNodes);
+				int firstPos= 0;
+				for (int i= 0; i < includedNodes.size(); i++) {
+					Modifier curr= (Modifier) includedNodes.get(i);
+					if ((curr.getKeyword().toFlagValue() & visibilityFlags) != 0) {
+						modifierRewrite.insertAt(curr, firstPos++, selectionDescription);
+					} else {
+						modifierRewrite.insertLast(curr, selectionDescription);
+					}
+				}
 			}
 			return rewrite;
 		}

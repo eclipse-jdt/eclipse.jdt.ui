@@ -134,9 +134,9 @@ public class ReturnTypeSubProcessor {
 				
 				if (methodDeclaration.isConstructor()) {
 					rewrite.set(methodDeclaration, MethodDeclaration.CONSTRUCTOR_PROPERTY, Boolean.FALSE, null);
-					rewrite.set(methodDeclaration, MethodDeclaration.RETURN_TYPE_PROPERTY, newReturnType, null);
+					rewrite.set(methodDeclaration, MethodDeclaration.RETURN_TYPE2_PROPERTY, newReturnType, null);
 				} else {
-					rewrite.replace(methodDeclaration.getReturnType(), newReturnType, null);
+					rewrite.replace(methodDeclaration.getReturnType2(), newReturnType, null);
 				}
 				String key= "return_type"; //$NON-NLS-1$
 				proposal.addLinkedPosition(rewrite.track(newReturnType), true, key);
@@ -196,7 +196,7 @@ public class ReturnTypeSubProcessor {
 				typeName= "void"; //$NON-NLS-1$		
 				type= ast.newPrimitiveType(PrimitiveType.VOID);	
 			}
-			rewrite.set(methodDeclaration, MethodDeclaration.RETURN_TYPE_PROPERTY, type, null);
+			rewrite.set(methodDeclaration, MethodDeclaration.RETURN_TYPE2_PROPERTY, type, null);
 			rewrite.set(methodDeclaration, MethodDeclaration.CONSTRUCTOR_PROPERTY, Boolean.FALSE, null);
 
 			Javadoc javadoc= methodDeclaration.getJavadoc();
@@ -253,8 +253,8 @@ public class ReturnTypeSubProcessor {
 			ReturnStatement existingStatement= (selectedNode instanceof ReturnStatement) ? (ReturnStatement) selectedNode : null;
 			proposals.add( new MissingReturnTypeCorrectionProposal(cu, methodDecl, existingStatement, 6));			
 				
-			Type returnType= methodDecl.getReturnType();
-			if (!"void".equals(ASTNodes.asString(returnType))) { //$NON-NLS-1$
+			Type returnType= methodDecl.getReturnType2();
+			if (returnType != null && !"void".equals(ASTNodes.asString(returnType))) { //$NON-NLS-1$
 				AST ast= methodDecl.getAST();
 				ASTRewrite rewrite= ASTRewrite.create(ast);
 				rewrite.replace(returnType, ast.newPrimitiveType(PrimitiveType.VOID), null);

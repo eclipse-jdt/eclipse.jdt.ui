@@ -50,97 +50,6 @@ public class ASTNodes {
 	private static final int CLEAR_VISIBILITY= ~(Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE);
 	
 	
-	private static class ListFinder extends ASTVisitor {
-		public List result;
-		
-		private ASTNode fNode;
-		public ListFinder(ASTNode node) {
-			fNode= node;
-		}
-		public boolean visit(AnonymousClassDeclaration node) {
-			test(node.bodyDeclarations());
-			return false;
-		}
-		public boolean visit(ArrayCreation node) {
-			test(node.dimensions());
-			return false;
-		}
-		public boolean visit(ArrayInitializer node) {
-			test(node.expressions());
-			return false;
-		}		
-		public boolean visit(Block node) {
-			test(node.statements());
-			return false;
-		}
-		public boolean visit(ClassInstanceCreation node) {
-			test(node.arguments());
-			return false;
-		}
-		public boolean visit(CompilationUnit node) {
-			test(node.imports());
-			test(node.types());
-			return false;
-		}		
-		public boolean visit(ConstructorInvocation node) {
-			test(node.arguments());
-			return false;
-		}
-		public boolean visit(FieldDeclaration node) {
-			test(node.fragments());
-			return false;
-		}
-		public boolean visit(ForStatement node) {
-			test(node.initializers());
-			test(node.updaters());
-			return false;
-		}
-		public boolean visit(MethodDeclaration node) {
-			test(node.parameters());
-			test(node.thrownExceptions());
-			return false;
-		}
-		public boolean visit(MethodInvocation node) {
-			test(node.arguments());
-			return false;
-		}
-		public boolean visit(SuperConstructorInvocation node) {
-			test(node.arguments());
-			return false;
-		}
-		public boolean visit(SuperMethodInvocation node) {
-			test(node.arguments());
-			return false;
-		}
-		public boolean visit(SwitchStatement node) {
-			test(node.statements());
-			return false;
-		}
-		public boolean visit(TryStatement node) {
-			test(node.catchClauses());
-			return false;
-		}		
-		public boolean visit(TypeDeclaration node) {
-			test(node.bodyDeclarations());
-			test(node.superInterfaces());
-			return false;
-		}		
-		public boolean visit(VariableDeclarationExpression node) {
-			test(node.fragments());
-			return false;
-		}
-		public boolean visit(VariableDeclarationStatement node) {
-			test(node.fragments());
-			return false;
-		}
-		private void test(List nodes) {
-			if (nodes.contains(fNode)) {
-				result= nodes;
-			}
-		}
-	}
-	
-
 	private ASTNodes() {
 		// no instance;
 	}
@@ -168,11 +77,11 @@ public class ASTNodes {
      * @return the list that contains the node or <code>null</code>
      */
     public static List getContainingList(ASTNode node) {
-    	if (node.getParent() == null)
-    		return null;
-    	ListFinder finder= new ListFinder(node);
-    	node.getParent().accept(finder);
-    	return finder.result;
+    	StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
+    	if (locationInParent != null && locationInParent.isChildListProperty()) {
+    		return (List) node.getParent().getStructuralProperty(locationInParent);
+    	}
+    	return null;
     }
     
 	/**
@@ -771,4 +680,16 @@ public class ASTNodes {
 			return ((SimpleName) name).getIdentifier();
 		}
 	}
+	
+	public static Modifier findModifierNode(int flag, List modifiers) {
+		for (int i= 0; i < modifiers.size(); i++) {
+			Object curr= modifiers.get(i);
+			if (curr instanceof Modifier && ((Modifier) curr).getKeyword().toFlagValue() == flag) {
+				return (Modifier) curr;
+			}
+		}
+		return null;
+	}
+	
+	
 }

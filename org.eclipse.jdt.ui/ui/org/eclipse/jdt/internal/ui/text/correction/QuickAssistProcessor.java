@@ -75,6 +75,7 @@ import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -277,9 +278,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			newStatement= ast.newExpressionStatement(assignment);
 			insertIndex+= 1; // add after declaration
 			
-			int modifiers= ((VariableDeclarationStatement) statement).getModifiers();
-			if (Modifier.isFinal(modifiers)) {
-				rewrite.set(statement, VariableDeclarationStatement.MODIFIERS_PROPERTY, new Integer(modifiers & ~Modifier.FINAL), null);
+			Modifier modifierNode= ASTNodes.findModifierNode(Modifier.FINAL, ((VariableDeclarationStatement) statement).modifiers());
+			if (modifierNode != null) {
+				rewrite.remove(modifierNode, null);
 			}
 		} else {
 			rewrite.replace(fragment.getParent(), assignment, null);

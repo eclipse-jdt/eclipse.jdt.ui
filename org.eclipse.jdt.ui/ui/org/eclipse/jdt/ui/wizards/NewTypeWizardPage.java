@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -66,6 +67,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -75,6 +77,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaPackageCompletionProcessor;
@@ -1540,17 +1543,26 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}	
 	
 	private void removeUnusedImports(ICompilationUnit cu, Set addedTypes, boolean needsSave) throws CoreException {
-		ASTParser parser= ASTParser.newParser(AST.JLS2);
+		ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 		CompilationUnit root= (CompilationUnit) parser.createAST(null);
+		List importsDecls= root.imports();
+		if (importsDecls.isEmpty()) {
+			return;
+		}
+		
+		int importsEnd= ASTNodes.getExclusiveEnd((ASTNode) importsDecls.get(importsDecls.size() - 1));
 		IProblem[] problems= root.getProblems();
 		ArrayList res= new ArrayList();
 		for (int i= 0; i < problems.length; i++) {
-			int id= problems[i].getID();
-			if (id == IProblem.UnusedImport || id == IProblem.ImportNotVisible) { // not visibles hide unused -> remove both  	 
-				String imp= problems[i].getArguments()[0];
-				res.add(imp);
+			IProblem curr= problems[i];
+			if (curr.getSourceEnd() < importsEnd) {
+				int id= curr.getID();
+				if (id == IProblem.UnusedImport || id == IProblem.NotVisibleType) { // not visibles hide unused -> remove both  	 
+					String imp= problems[i].getArguments()[0];
+					res.add(imp);
+				}
 			}
 		}
 		if (!res.isEmpty()) {

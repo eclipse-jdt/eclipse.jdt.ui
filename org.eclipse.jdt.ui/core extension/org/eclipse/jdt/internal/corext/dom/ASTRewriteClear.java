@@ -207,9 +207,17 @@ public class ASTRewriteClear extends ASTVisitor {
 		if (isInserted(node.getJavadoc())) {
 			node.setJavadoc(null);
 		}
-		if (isInserted(node.getReturnType())) {
-			node.setReturnType(node.getAST().newPrimitiveType(PrimitiveType.VOID));
-		}	
+		if (node.getAST().apiLevel() == AST.JLS2) {
+			ASTNode returnType= node.getReturnType();
+			if (returnType != null && isInserted(returnType)) {
+				node.setReturnType(node.getAST().newPrimitiveType(PrimitiveType.VOID));
+			}	
+		} else {
+			ASTNode returnType= node.getReturnType2();
+			if (returnType != null && isInserted(returnType)) {
+				node.setReturnType2(node.getAST().newPrimitiveType(PrimitiveType.VOID));
+			}	
+		}
 		clearList(node.parameters());
 		clearList(node.thrownExceptions());
 		if (isInserted(node.getBody())) {
@@ -327,10 +335,19 @@ public class ASTRewriteClear extends ASTVisitor {
 		if (isInserted(node.getJavadoc())) {
 			node.setJavadoc(null);
 		}
-		if (isInserted(node.getSuperclass())) {
-			node.setSuperclass(null);
+
+		if (node.getAST().apiLevel() == AST.JLS2) {
+			if (isInserted(node.getSuperclass())) {
+				node.setSuperclass(null);
+			}
+			clearList(node.superInterfaces());
+		} else {
+			if (isInserted(node.getSuperclassType())) {
+				node.setSuperclass(null);
+			}
+			clearList(node.superInterfaceTypes());
 		}
-		clearList(node.superInterfaces());
+		
 		clearList(node.bodyDeclarations());
 		return true;
 	}

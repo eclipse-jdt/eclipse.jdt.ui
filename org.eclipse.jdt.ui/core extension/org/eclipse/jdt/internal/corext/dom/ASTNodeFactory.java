@@ -13,18 +13,7 @@ package org.eclipse.jdt.internal.corext.dom;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.*;
 
 public class ASTNodeFactory {
 
@@ -54,7 +43,7 @@ public class ASTNodeFactory {
 		StringBuffer buffer= new StringBuffer(STATEMENT_HEADER);
 		buffer.append(content);
 		buffer.append(STATEMENT_FOOTER);
-		ASTParser p= ASTParser.newParser(AST.JLS2);
+		ASTParser p= ASTParser.newParser(ast.apiLevel());
 		p.setSource(buffer.toString().toCharArray());
 		CompilationUnit root= (CompilationUnit) p.createAST(null);
 		ASTNode result= ASTNode.copySubtree(ast, NodeFinder.perform(root, STATEMENT_HEADER.length(), content.length()));
@@ -85,7 +74,8 @@ public class ASTNodeFactory {
 		CompilationUnit root= (CompilationUnit) p.createAST(null);
 		List list= root.types();
 		TypeDeclaration typeDecl= (TypeDeclaration) list.get(0);
-		ASTNode type= typeDecl.getMethods()[0].getReturnType();
+		MethodDeclaration methodDecl= typeDecl.getMethods()[0];
+		ASTNode type= ast.apiLevel() == AST.JLS2 ? methodDecl.getReturnType() : methodDecl.getReturnType2();
 		ASTNode result= ASTNode.copySubtree(ast, type);
 		result.accept(new PositionClearer());
 		return (Type)result;
@@ -171,5 +161,28 @@ public class ASTNodeFactory {
 		return ast.newNullLiteral();
 	}
 
+	
+	
+	public static final Modifier.ModifierKeyword[] ALL_KEYWORDS= {
+			Modifier.ModifierKeyword.PUBLIC_KEYWORD,
+			Modifier.ModifierKeyword.PROTECTED_KEYWORD,
+			Modifier.ModifierKeyword.PRIVATE_KEYWORD,
+			Modifier.ModifierKeyword.STATIC_KEYWORD,
+			Modifier.ModifierKeyword.ABSTRACT_KEYWORD,
+			Modifier.ModifierKeyword.FINAL_KEYWORD,
+			Modifier.ModifierKeyword.SYNCHRONIZED_KEYWORD,
+			Modifier.ModifierKeyword.STRICTFP_KEYWORD,
+			Modifier.ModifierKeyword.VOLATILE_KEYWORD,
+			Modifier.ModifierKeyword.NATIVE_KEYWORD,
+			Modifier.ModifierKeyword.TRANSIENT_KEYWORD
+	};
+	
+	public static void addModifiers(AST ast, int modifiers, List res) {
+		for (int i= 0; i < ALL_KEYWORDS.length; i++) {
+			if ((modifiers & ALL_KEYWORDS[i].toFlagValue()) != 0) {
+				res.add(ast.newModifier(ALL_KEYWORDS[i]));
+			}
+		}
+	}
 
 }

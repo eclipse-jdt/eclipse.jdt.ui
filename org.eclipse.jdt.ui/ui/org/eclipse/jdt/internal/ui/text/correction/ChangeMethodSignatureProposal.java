@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	
@@ -95,7 +96,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			newMethodDecl= methodDecl;
 		} else {
 			isInDifferentCU= true;
-			ASTParser astParser= ASTParser.newParser(AST.JLS2);
+			ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 			astParser.setSource(getCompilationUnit());
 			astParser.setResolveBindings(true);
 			astRoot= (CompilationUnit) astParser.createAST(null);
