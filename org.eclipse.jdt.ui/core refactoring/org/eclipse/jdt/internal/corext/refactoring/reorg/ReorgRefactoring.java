@@ -540,18 +540,6 @@ public abstract class ReorgRefactoring extends Refactoring {
 		return null;//XXX should check c.getFullPath().isValidSegment(name) ?
 	}
 	
-	private Object getConflictingElementFromDestination(IJavaProject project, String name) throws JavaModelException{
-		if (project == null)
-			return null;
-		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-		for (int i = 0; i < roots.length; i++) {
-			IPackageFragmentRoot root = roots[i];
-			if (root.getElementName().equals(name))
-				return root;
-		}
-		return null;
-	}
-
 	private Object getConflictingElementFromDestination(IPackageFragmentRoot root, String name) throws JavaModelException{
 		if (root == null)
 			return null;

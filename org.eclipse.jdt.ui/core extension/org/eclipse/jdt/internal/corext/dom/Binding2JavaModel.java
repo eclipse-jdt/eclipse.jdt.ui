@@ -153,18 +153,6 @@ public class Binding2JavaModel {
 		return result == jmType ? null : result;
 	}
 	
-	private static String getQualifiedName(char[][] compoundName, int start, int length, char separator) {
-		StringBuffer buffer= new StringBuffer();
-		int lastSlash= length - 1;
-		int end= Math.min(compoundName.length, start + length);
-		for (int i= start; i < end; i++) {
-			buffer.append(compoundName[i]);
-			if (i < lastSlash)
-				buffer.append(separator);
-		}
-		return buffer.toString();
-	}
-	
 	//---- Helper methods to convert a method ---------------------------------------------
 	
 	private static boolean sameParameters(IMethodBinding method, IMethod candidate) throws JavaModelException {
