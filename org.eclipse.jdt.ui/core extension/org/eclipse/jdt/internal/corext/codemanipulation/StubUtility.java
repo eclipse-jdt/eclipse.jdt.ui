@@ -27,6 +27,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
+import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
 
 import org.eclipse.jdt.core.*;
@@ -465,7 +466,8 @@ public class StubUtility {
 		try {
 			buffer= context.evaluate(template);
 		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
+			throw new CoreException(Status.CANCEL_STATUS);
+		} catch (TemplateException e) {
 			throw new CoreException(Status.CANCEL_STATUS);
 		}
 		if (buffer == null) {
@@ -559,7 +561,8 @@ public class StubUtility {
 		try {
 			buffer= context.evaluate(template);
 		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
+			throw new CoreException(Status.CANCEL_STATUS);
+		} catch (TemplateException e) {
 			throw new CoreException(Status.CANCEL_STATUS);
 		}
 		if (buffer == null)
@@ -630,7 +633,8 @@ public class StubUtility {
 		try {
 			buffer= context.evaluate(template);
 		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
+			throw new CoreException(Status.CANCEL_STATUS);
+		} catch (TemplateException e) {
 			throw new CoreException(Status.CANCEL_STATUS);
 		}
 		if (buffer == null)

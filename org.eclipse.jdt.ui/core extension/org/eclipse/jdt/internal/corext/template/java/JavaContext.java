@@ -35,6 +35,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.templates.ContextType;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
+import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateTranslator;
 import org.eclipse.jface.text.templates.TemplateVariable;
 
@@ -101,10 +102,10 @@ public class JavaContext extends CompilationUnitContext {
 	/*
 	 * @see TemplateContext#evaluate(Template template)
 	 */
-	public TemplateBuffer evaluate(Template template) throws BadLocationException {
+	public TemplateBuffer evaluate(Template template) throws BadLocationException, TemplateException {
 
 		if (!canEvaluate(template))
-			return null;
+			throw new TemplateException(JavaTemplateMessages.getString("Context.error.cannot.evaluate"));
 		
 		TemplateTranslator translator= new TemplateTranslator() {
 			/*
@@ -608,7 +609,7 @@ public class JavaContext extends CompilationUnitContext {
 	/**
 	 * Evaluates a 'java' template in thecontext of a compilation unit
 	 */
-	public static String evaluateTemplate(Template template, ICompilationUnit compilationUnit, int position) throws CoreException, BadLocationException {
+	public static String evaluateTemplate(Template template, ICompilationUnit compilationUnit, int position) throws CoreException, BadLocationException, TemplateException {
 
 		ContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
 		if (contextType == null)

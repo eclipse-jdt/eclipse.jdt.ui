@@ -37,6 +37,8 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateException;
+
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 
@@ -1746,6 +1748,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+		} catch (TemplateException e) {
 			JavaPlugin.log(e);
 		}
 		return null;

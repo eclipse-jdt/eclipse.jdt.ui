@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.dialogs.ErrorDialog;
 
 import org.eclipse.jface.text.templates.Template;
-import org.eclipse.jface.text.templates.persistence.TemplateSet;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -29,7 +28,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 3.0
  * @deprecated use {@link org.eclipse.jdt.internal.ui.JavaPlugin#getCodeTemplateStore()} instead 
  */
-public class CodeTemplates extends TemplateSet {
+public class CodeTemplates extends org.eclipse.jface.text.templates.persistence.TemplateSet {
 
 	private static final String DEFAULT_FILE= "default-codetemplates.xml"; //$NON-NLS-1$
 	private static final String TEMPLATE_FILE= "codetemplates.xml"; //$NON-NLS-1$

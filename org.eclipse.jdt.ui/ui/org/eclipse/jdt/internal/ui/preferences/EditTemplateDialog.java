@@ -18,7 +18,6 @@ import java.util.Map;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
@@ -57,6 +56,8 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.templates.ContextType;
 import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateException;
+
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
@@ -270,10 +271,11 @@ public class EditTemplateDialog extends StatusDialog {
 		fValidationStatus.setOK();
 		ContextType contextType= getContextType(fTemplate.getContextTypeId());
 		if (contextType != null) {
-			String errorMessage= contextType.validate(text);
-			if (errorMessage != null) {
-				fValidationStatus.setError(errorMessage);
-			}			
+			try {
+				contextType.validate(text);
+			} catch (TemplateException e) {
+				fValidationStatus.setError(e.getLocalizedMessage());
+			}
 		}
 
 		updateUndoAction();
@@ -352,22 +354,6 @@ public class EditTemplateDialog extends StatusDialog {
 		return viewer;
 	}
 	
-	private void handleKeyPressed(KeyEvent event) {
-		if (event.stateMask != SWT.MOD1)
-			return;
-			
-		switch (event.character) {
-			case ' ':
-				fPatternEditor.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
-				break;
-
-			// CTRL-Z
-			case 'z' - 'a' + 1:
-				fPatternEditor.doOperation(ITextOperationTarget.UNDO);
-				break;				
-		}
-	}
-
 	private void handleVerifyKeyPressed(VerifyEvent event) {
 		if (!event.doit)
 			return;

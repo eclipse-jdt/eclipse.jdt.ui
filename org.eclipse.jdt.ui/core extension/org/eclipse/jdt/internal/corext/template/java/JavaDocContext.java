@@ -15,6 +15,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.templates.ContextType;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
+import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateTranslator;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -159,12 +160,9 @@ public class JavaDocContext extends CompilationUnitContext {
 	/*
 	 * @see TemplateContext#evaluate(Template)
 	 */
-	public TemplateBuffer evaluate(Template template) throws BadLocationException {
+	public TemplateBuffer evaluate(Template template) throws BadLocationException, TemplateException {
 		TemplateTranslator translator= new TemplateTranslator();
 		TemplateBuffer buffer= translator.translate(template);
-		
-		if (buffer == null)
-			return null;
 
 		getContextType().resolve(buffer, this);
 			

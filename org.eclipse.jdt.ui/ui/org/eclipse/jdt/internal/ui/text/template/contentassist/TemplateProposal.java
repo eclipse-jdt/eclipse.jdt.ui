@@ -45,6 +45,7 @@ import org.eclipse.jface.text.templates.GlobalVariables;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContext;
+import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
 
 import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
@@ -124,8 +125,10 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 		try {
 			
 			fContext.setReadOnly(false);
-			TemplateBuffer templateBuffer= fContext.evaluate(fTemplate);
-			if (templateBuffer == null) {
+			TemplateBuffer templateBuffer;
+			try {
+				templateBuffer= fContext.evaluate(fTemplate);
+			} catch (TemplateException e1) {
 				fSelectedRegion= fRegion;
 				return;
 			}
@@ -300,10 +303,12 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	public String getAdditionalProposalInfo() {
 	    try {
 		    fContext.setReadOnly(true);
-			TemplateBuffer templateBuffer= fContext.evaluate(fTemplate);
-			
-			if (templateBuffer == null)
+			TemplateBuffer templateBuffer;
+			try {
+				templateBuffer= fContext.evaluate(fTemplate);
+			} catch (TemplateException e1) {
 				return null;
+			}
 
 			return templateBuffer.getString();
 
@@ -426,11 +431,10 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 		fContext.setReadOnly(false);
 		try {
 			TemplateBuffer templateBuffer= fContext.evaluate(fTemplate);
-			if (templateBuffer == null)
-				return new String(); // return empty string for replacement text
-			else
-				return templateBuffer.getString();
+			return templateBuffer.getString();
 		} catch (BadLocationException e) {
+			return new String();
+		} catch (TemplateException e) {
 			return new String();
 		}
 	}

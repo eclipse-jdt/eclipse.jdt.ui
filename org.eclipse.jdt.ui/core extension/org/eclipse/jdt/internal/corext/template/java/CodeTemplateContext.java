@@ -19,6 +19,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContext;
+import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateTranslator;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
@@ -43,10 +44,10 @@ public class CodeTemplateContext extends TemplateContext {
 		return fProject;
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jdt.internal.corext.template.TemplateContext#evaluate(org.eclipse.jdt.internal.corext.template.Template)
 	 */
-	public TemplateBuffer evaluate(Template template) throws BadLocationException {
+	public TemplateBuffer evaluate(Template template) throws BadLocationException, TemplateException {
 		// test that all variables are defined
 		Iterator iterator= getContextType().resolvers();
 		while (iterator.hasNext()) {
@@ -63,8 +64,6 @@ public class CodeTemplateContext extends TemplateContext {
 		
 		TemplateTranslator translator= new TemplateTranslator();
 		TemplateBuffer buffer= translator.translate(pattern);
-		if (buffer == null)
-			return null;
 		getContextType().resolve(buffer, this);
 
 		return buffer;

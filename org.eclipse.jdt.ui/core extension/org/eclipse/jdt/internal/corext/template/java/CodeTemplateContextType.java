@@ -16,6 +16,7 @@ import org.eclipse.jface.text.templates.ContextType;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.GlobalVariables;
 import org.eclipse.jface.text.templates.TemplateContext;
+import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
@@ -225,10 +226,10 @@ public class CodeTemplateContextType extends ContextType {
 		addResolver(new CodeTemplateVariableResolver(PROJECTNAME, JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.projectname"))); //$NON-NLS-1$
 	}
 	
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jdt.internal.corext.template.ContextType#validateVariables(org.eclipse.jdt.internal.corext.template.TemplateVariable[])
 	 */
-	protected String validateVariables(TemplateVariable[] variables) {
+	protected void validateVariables(TemplateVariable[] variables) throws TemplateException {
 		ArrayList required=  new ArrayList(5);
 		String contextName= getId();
 		if (NEWTYPE_CONTEXTTYPE.equals(contextName)) {
@@ -238,15 +239,15 @@ public class CodeTemplateContextType extends ContextType {
 		for (int i= 0; i < variables.length; i++) {
 			String type= variables[i].getType();
 			if (getResolver(type) == null) {
-				return JavaTemplateMessages.getFormattedString("CodeTemplateContextType.validate.unknownvariable", type); //$NON-NLS-1$
+				throw new TemplateException(JavaTemplateMessages.getFormattedString("CodeTemplateContextType.validate.unknownvariable", type)); //$NON-NLS-1$
 			}
 			required.remove(type);
 		}
 		if (!required.isEmpty()) {
 			String missing= (String) required.get(0);
-			return JavaTemplateMessages.getFormattedString("CodeTemplateContextType.validate.missingvariable", missing); //$NON-NLS-1$
+			throw new TemplateException(JavaTemplateMessages.getFormattedString("CodeTemplateContextType.validate.missingvariable", missing)); //$NON-NLS-1$
 		}
-		return super.validateVariables(variables);
+		super.validateVariables(variables);
 	}	
 	
 	
@@ -277,20 +278,16 @@ public class CodeTemplateContextType extends ContextType {
 	
 	
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jdt.internal.corext.template.ContextType#validate(java.lang.String)
 	 */
-	public String validate(String pattern) {
-		String message= super.validate(pattern);
-		if (message != null) {
-			return message;
-		}
+	public void validate(String pattern) throws TemplateException {
+		super.validate(pattern);
 		if (fIsComment) {
 			if (!isValidComment(pattern)) {
-				return JavaTemplateMessages.getString("CodeTemplateContextType.validate.invalidcomment"); //$NON-NLS-1$
+				throw new TemplateException(JavaTemplateMessages.getString("CodeTemplateContextType.validate.invalidcomment")); //$NON-NLS-1$
 			}
 		}
-		return null;
 	}
 		
 	

@@ -14,6 +14,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.templates.ContextType;
 import org.eclipse.jface.text.templates.GlobalVariables;
 import org.eclipse.jface.text.templates.TemplateContext;
+import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
@@ -198,17 +199,16 @@ public abstract class CompilationUnitContextType extends ContextType {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.template.ContextType#validateVariables(org.eclipse.jdt.internal.corext.template.TemplateVariable[])
 	 */
-	protected String validateVariables(TemplateVariable[] variables) {
+	protected void validateVariables(TemplateVariable[] variables) throws TemplateException {
 		// check for multiple cursor variables		
 		for (int i= 0; i < variables.length; i++) {
 			TemplateVariable var= variables[i];
 			if (var.getType().equals(GlobalVariables.Cursor.NAME)) {
 				if (var.getOffsets().length > 1) {
-					return JavaTemplateMessages.getString("ContextType.error.multiple.cursor.variables"); //$NON-NLS-1$
+					throw new TemplateException(JavaTemplateMessages.getString("ContextType.error.multiple.cursor.variables")); //$NON-NLS-1$
 				}
 			}
 		}
-		return null;
 	}
 
 }
