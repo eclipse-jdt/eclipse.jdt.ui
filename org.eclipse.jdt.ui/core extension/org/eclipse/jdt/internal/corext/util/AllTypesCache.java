@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * Manages a search cache for types in the workspace. Instead of returning objects of type <code>IType</code>
@@ -43,7 +44,7 @@ public class AllTypesCache {
 	
 	private static final boolean DEBUG= false;
 	
-	private static final int INITIAL_DELAY= 6000;
+	private static final int INITIAL_DELAY= 4000;
 	private static final int TIMEOUT= 3000;
 	private static final int INITIAL_SIZE= 2000;
 
@@ -56,7 +57,7 @@ public class AllTypesCache {
 		private IProgressMonitor fMonitor;
 		
 		TypeCacher(int sizeHint, int delay, IProgressMonitor monitor) {
-			super("AllTypesCacher"); //$NON-NLS-1$
+			super("All Types Caching"); //$NON-NLS-1$
 			fSizeHint= sizeHint;
 			fDelay= delay;
 			fMonitor= monitor;
@@ -74,13 +75,13 @@ public class AllTypesCache {
 		}
 		
 		public void run() {
-			if (DEBUG) System.out.println("thread started"); //$NON-NLS-1$
+			if (DEBUG) System.err.println("thread started"); //$NON-NLS-1$
 			while (true) {
 				if (fDelay > 0) {
 					try {
 						Thread.sleep(fDelay);
 					} catch (InterruptedException e) {
-						if (DEBUG) System.out.println("timer restarted"); //$NON-NLS-1$
+						if (DEBUG) System.err.println("timer restarted"); //$NON-NLS-1$
 						if (fAbort)
 							return;
 						continue;
@@ -89,7 +90,7 @@ public class AllTypesCache {
 								
 				fReset= false;
 				try {
-					if (DEBUG) System.out.println("query started"); //$NON-NLS-1$
+					if (DEBUG) System.err.println("query started"); //$NON-NLS-1$
 					Collection searchResult= doSearchTypes(SearchEngine.createWorkspaceScope(), IJavaSearchConstants.TYPE);
 					if (searchResult != null) {
 						TypeInfo[] result= (TypeInfo[]) searchResult.toArray(new TypeInfo[searchResult.size()]);
@@ -141,7 +142,7 @@ public class AllTypesCache {
 					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 					fMonitor);
 			} catch (RequestorAbort e) {
-				if (DEBUG) System.out.println("  **** query cancelled"); //$NON-NLS-1$
+				if (DEBUG) System.err.println("  **** query cancelled"); //$NON-NLS-1$
 				return null;
 			}
 			return typesFound;
@@ -202,7 +203,7 @@ public class AllTypesCache {
 			fgTypeCacherThread= null;
 			fgLock.notifyAll();
 		}		
-		if (DEBUG) System.out.println("  setCache: " + fgSizeHint); //$NON-NLS-1$
+		if (DEBUG) System.err.println("  setCache: " + fgSizeHint); //$NON-NLS-1$
 	}
 
 	/**
@@ -417,10 +418,20 @@ public class AllTypesCache {
 	}
 
 	public static void initialize() {
-		fgTypeCacherThread= new TypeCacher(fgSizeHint, INITIAL_DELAY, null);
-		fgTypeCacherThread.start();
-		fgDeltaListener= new TypeCacheDeltaListener();
-		JavaCore.addElementChangedListener(fgDeltaListener);
+		if (DEBUG) System.err.println("initialize");
+		Display d= Display.getDefault();
+		if (d != null)
+			d.asyncExec(
+				new Runnable() {
+					public void run() {
+						if (DEBUG) System.err.println("starting thread");
+						fgTypeCacherThread= new TypeCacher(fgSizeHint, INITIAL_DELAY, null);
+						fgTypeCacherThread.start();
+						fgDeltaListener= new TypeCacheDeltaListener();
+						JavaCore.addElementChangedListener(fgDeltaListener);
+					}
+				}
+			);
 	}
 	
 	public static void terminate() {
