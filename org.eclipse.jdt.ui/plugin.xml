@@ -2492,32 +2492,6 @@
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       <command
-            name="%ActionDefinition.correctionAssistProposals.name"
-            description="%ActionDefinition.correctionAssistProposals.description"
-            category="org.eclipse.ui.category.edit"
-            id="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals">
-      </command>
-      <keyBinding
-            string="Ctrl+1"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Ctrl+1"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command=""
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            platform="carbon"
-            string="Command+1"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <command
             name="%ActionDefinition.showJavadoc.name"
             description="%ActionDefinition.showJavadoc.description"
             category="org.eclipse.ui.category.edit"
