@@ -69,7 +69,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	
 	private boolean fIsProjSelected;
 
-	public SourceContainerWorkbookPage(IWorkspaceRoot root, ListDialogField classPathList, StringDialogField outputLocationField, boolean isNewProject) {
+	public SourceContainerWorkbookPage(IWorkspaceRoot root, ListDialogField classPathList, StringDialogField outputLocationField) {
 		fWorkspaceRoot= root;
 		fClassPathList= classPathList;
 		fProjectCPEntry= null;
@@ -89,22 +89,13 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		
 		String[] buttonLabels;
 		int removeIndex;
-		if (isNewProject) {
-			buttonLabels= new String[] { 
-				/* 0 */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.button"), //$NON-NLS-1$
-				/* 1 */ null,
-				/* 2 */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.remove.button") //$NON-NLS-1$
-			};
-			removeIndex= 2;
-		} else {
-			buttonLabels= new String[] { 
-				/* 0 */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.button"), //$NON-NLS-1$
-				/* 1 */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.addexisting.button"), //$NON-NLS-1$
-				/* 2 */ null,
-				/* 3 */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.remove.button") //$NON-NLS-1$
-			};
-			removeIndex= 3;
-		}
+		buttonLabels= new String[] { 
+			/* 0 */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.button"), //$NON-NLS-1$
+			/* 1 */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.addexisting.button"), //$NON-NLS-1$
+			/* 2 */ null,
+			/* 3 */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.remove.button") //$NON-NLS-1$
+		};
+		removeIndex= 3;
 		
 		fFoldersList= new ListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fFoldersList.setDialogFieldListener(adapter);

@@ -286,6 +286,12 @@ public class NewJavaProjectWizardPage extends WizardPage {
 						project.open(new SubProgressMonitor(monitor, 1));
 						workLeft--;
 					}
+
+					if (!project.hasNature(JavaCore.NATURE_ID)) {
+						addNatureToProject(project, JavaCore.NATURE_ID, new SubProgressMonitor(monitor, 1));
+						workLeft--;
+					}
+
 					IRunnableWithProgress jrunnable= fBuildPathsBlock.getRunnable();
 					jrunnable.run(new SubProgressMonitor(monitor, workLeft));
 				} catch (CoreException e) {
@@ -296,6 +302,19 @@ public class NewJavaProjectWizardPage extends WizardPage {
 			}
 		};	
 	}
+	
+	/**
+	 * Adds a nature to a project
+	 */
+	private static void addNatureToProject(IProject proj, String natureId, IProgressMonitor monitor) throws CoreException {
+		IProjectDescription description = proj.getDescription();
+		String[] prevNatures= description.getNatureIds();
+		String[] newNatures= new String[prevNatures.length + 1];
+		System.arraycopy(prevNatures, 0, newNatures, 0, prevNatures.length);
+		newNatures[prevNatures.length]= natureId;
+		description.setNatureIds(newNatures);
+		proj.setDescription(description, monitor);
+	}		
 	
 	/* (non-Javadoc)
 	 * Updates the status line

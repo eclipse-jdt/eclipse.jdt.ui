@@ -85,7 +85,7 @@ public class BuildPathsBlock {
 	private IWorkspaceRoot fWorkspaceRoot;
 
 	private CheckedListDialogField fClassPathList;
-	private StringDialogField fBuildPathDialogField;
+	private StringButtonDialogField fBuildPathDialogField;
 	
 	private StatusInfo fClassPathStatus;
 	private StatusInfo fBuildPathStatus;
@@ -97,7 +97,7 @@ public class BuildPathsBlock {
 	private IStatusChangeListener fContext;
 	private Control fSWTWidget;	
 	
-	private boolean fIsNewProject;
+	private boolean fShowSourceFolderPage;
 	
 	private SourceContainerWorkbookPage fSourceContainerPage;
 	private ProjectsWorkbookPage fProjectsPage;
@@ -105,10 +105,13 @@ public class BuildPathsBlock {
 	
 	private BuildPathBasePage fCurrPage;
 		
-	public BuildPathsBlock(IWorkspaceRoot root, IStatusChangeListener context, boolean isNewProject) {
+	public BuildPathsBlock(IWorkspaceRoot root, IStatusChangeListener context, boolean showSourceFolders) {
 		fWorkspaceRoot= root;
 		fContext= context;
-		fIsNewProject= isNewProject;
+		
+		fShowSourceFolderPage= showSourceFolders;
+		
+		
 		fSourceContainerPage= null;
 		fLibrariesPage= null;
 		fProjectsPage= null;
@@ -133,13 +136,8 @@ public class BuildPathsBlock {
 		fClassPathList.setCheckAllButtonIndex(3);
 		fClassPathList.setUncheckAllButtonIndex(4);		
 			
-		if (isNewProject) {
-			fBuildPathDialogField= new StringDialogField();
-		} else {
-			StringButtonDialogField dialogField= new StringButtonDialogField(adapter);
-			dialogField.setButtonLabel(NewWizardMessages.getString("BuildPathsBlock.buildpath.button")); //$NON-NLS-1$
-			fBuildPathDialogField= dialogField;
-		}
+		fBuildPathDialogField= new StringButtonDialogField(adapter);
+		fBuildPathDialogField.setButtonLabel(NewWizardMessages.getString("BuildPathsBlock.buildpath.button")); //$NON-NLS-1$
 		fBuildPathDialogField.setDialogFieldListener(adapter);
 		fBuildPathDialogField.setLabelText(NewWizardMessages.getString("BuildPathsBlock.buildpath.label")); //$NON-NLS-1$
 
@@ -176,7 +174,7 @@ public class BuildPathsBlock {
 		
 		TabItem item;
 				
-		fSourceContainerPage= new SourceContainerWorkbookPage(fWorkspaceRoot, fClassPathList, fBuildPathDialogField, fIsNewProject);		
+		fSourceContainerPage= new SourceContainerWorkbookPage(fWorkspaceRoot, fClassPathList, fBuildPathDialogField);		
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(NewWizardMessages.getString("BuildPathsBlock.tab.source")); //$NON-NLS-1$
 		item.setImage(imageRegistry.get(JavaPluginImages.IMG_OBJS_PACKFRAG_ROOT));
@@ -228,7 +226,7 @@ public class BuildPathsBlock {
 	
 		editorcomp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		if (fIsNewProject) {
+		if (fShowSourceFolderPage) {
 			folder.setSelection(0);
 			fCurrPage= fSourceContainerPage;
 		} else {
@@ -254,7 +252,7 @@ public class BuildPathsBlock {
 	 * but all existing settings will be cleared and replace by the given or default paths.
 	 * @param project The java project to configure. Does not have to exist.
 	 * @param outputLocation The output location to be set in the page. If <code>null</code>
-	 * is passed, jdt default settings are used, or - if the project is an existing Java project - the
+	 * is passed, jdt default settings are used, or - if the project is an existing Java project- the
 	 * output location of the existing project 
 	 * @param classpathEntries The classpath entries to be set in the page. If <code>null</code>
 	 * is passed, jdt default settings are used, or - if the project is an existing Java project - the
@@ -265,7 +263,7 @@ public class BuildPathsBlock {
 		boolean projExists= false;
 		try {
 			IProject project= fCurrJProject.getProject();
-			projExists= (project.exists() && project.hasNature(JavaCore.NATURE_ID));
+			projExists= (project.exists() && project.getFile(".classpath").exists());
 			if  (projExists) {
 				if (outputLocation == null) {
 					outputLocation=  fCurrJProject.getOutputLocation();
@@ -553,30 +551,12 @@ public class BuildPathsBlock {
 	private void createJavaProject(List classPathEntries, IPath buildPath, IProgressMonitor monitor) throws CoreException {
 		// 10 monitor steps to go
 		
-		IProject project= fCurrJProject.getProject();
-		
-		if (!project.exists()) {
-			project.create(null);
-		}
-		
-		if (!project.isOpen()) {
-			project.open(null);
-		}
-		
-		// create java nature
-		if (!project.hasNature(JavaCore.NATURE_ID)) {
-			addNatureToProject(project, JavaCore.NATURE_ID, null);
-		}
-		monitor.worked(1);
-		
-		String[] prevRequiredProjects= fCurrJProject.getRequiredProjectNames();
-		
 		// create and set the output path first
 		if (!fWorkspaceRoot.exists(buildPath)) {
 			IFolder folder= fWorkspaceRoot.getFolder(buildPath);
 			CoreUtility.createFolder(folder, true, true, null);			
 		}
-		monitor.worked(1);
+		monitor.worked(2);
 				
 		int nEntries= classPathEntries.size();
 		IClasspathEntry[] classpath= new IClasspathEntry[nEntries];
@@ -606,19 +586,6 @@ public class BuildPathsBlock {
 			
 		fCurrJProject.setRawClasspath(classpath, buildPath, new SubProgressMonitor(monitor, 7));		
 	}
-	
-	/**
-	 * Adds a nature to a project
-	 */
-	private static void addNatureToProject(IProject proj, String natureId, IProgressMonitor monitor) throws CoreException {
-		IProjectDescription description = proj.getDescription();
-		String[] prevNatures= description.getNatureIds();
-		String[] newNatures= new String[prevNatures.length + 1];
-		System.arraycopy(prevNatures, 0, newNatures, 0, prevNatures.length);
-		newNatures[prevNatures.length]= natureId;
-		description.setNatureIds(newNatures);
-		proj.setDescription(description, monitor);
-	}	
 	
 	// ---------- util method ------------
 		
