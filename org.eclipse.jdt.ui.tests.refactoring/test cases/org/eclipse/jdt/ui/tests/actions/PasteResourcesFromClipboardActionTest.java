@@ -10,7 +10,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Display;
 
@@ -87,7 +89,14 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 		
 		faTxt= createFile((IFolder)getPackageP().getUnderlyingResource(), "a.txt");
 		
-		clearClipboard();
+		int count= 0;
+		boolean success= false;
+		while (count < 10 && ! success){
+			success= clearClipboard();
+			count++;
+		}
+		if (! success)
+			return;
 		
 		fSimpleProject= createProject("SimpleProject", null);
 		fAnotherProject= createProject("AnotherProject", "src");
@@ -113,8 +122,18 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 		delete(fAnotherProject);
 	}
 	
-	private void clearClipboard() {
-		fClipboard.setContents(new Object[0], new Transfer[0]);
+	/**
+	 * @return true iff successful
+	 */
+	private boolean clearClipboard() {
+		try{
+			fClipboard.setContents(new Object[0], new Transfer[0]);
+			return true;
+		} catch (SWTError e){
+			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
+				throw e;
+			return false;
+		}	
 	}
 
 	private static void delete(ISourceManipulation element) {
