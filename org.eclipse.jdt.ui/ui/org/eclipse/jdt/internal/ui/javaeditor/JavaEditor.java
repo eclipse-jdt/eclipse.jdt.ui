@@ -48,6 +48,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPartService;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
@@ -503,7 +504,8 @@ public abstract class JavaEditor extends StatusTextEditor {
 	protected boolean isActivePart() {
 		IWorkbenchWindow window= getSite().getWorkbenchWindow();
 		IPartService service= window.getPartService();
-		return (this == service.getActivePart());
+		IWorkbenchPart part= service.getActivePart();
+		return part != null && part.equals(this);
 	}
 	
 	/*
