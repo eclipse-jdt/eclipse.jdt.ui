@@ -109,62 +109,66 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
-		assertNumberOf("proposals", proposals.size(), 3);
+		assertNumberOf("proposals", proposals.size(), 4);
 		assertCorrectLabels(proposals);
-		
-		boolean doField= true, doParam= true, doLocal= true;
-		for (int i= 0; i < proposals.size(); i++) {
-			NewVariableCompletionProposal proposal= (NewVariableCompletionProposal) proposals.get(i);
-			String preview= proposal.getCompilationUnitChange().getPreviewContent();
 
-			if (proposal.getVariableKind() == NewVariableCompletionProposal.FIELD) {
-				assertTrue("2 field proposals", doField);
-				doField= false;
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    private Iterator iter;\n");
+		buf.append("\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        iter= vec.iterator();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
 				
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("import java.util.Iterator;\n");
-				buf.append("import java.util.Vector;\n");
-				buf.append("public class E {\n");
-				buf.append("    private Iterator iter;\n");
-				buf.append("\n");
-				buf.append("    void foo(Vector vec) {\n");
-				buf.append("        iter= vec.iterator();\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-			} else if (proposal.getVariableKind() == NewVariableCompletionProposal.LOCAL) {
-				assertTrue("2 local proposals", doLocal);
-				doLocal= false;
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("        Iterator iter = vec.iterator();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= proposal.getCompilationUnitChange().getPreviewContent();
 				
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("import java.util.Iterator;\n");
-				buf.append("import java.util.Vector;\n");
-				buf.append("public class E {\n");
-				buf.append("    void foo(Vector vec) {\n");
-				buf.append("        Iterator iter = vec.iterator();\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-			} else if (proposal.getVariableKind() == NewVariableCompletionProposal.PARAM) {
-				assertTrue("2 param proposals", doParam);
-				doParam= false;
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector vec, Iterator iter) {\n");
+		buf.append("        iter= vec.iterator();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(3);
+		String preview4= proposal.getCompilationUnitChange().getPreviewContent();
 				
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("import java.util.Iterator;\n");
-				buf.append("import java.util.Vector;\n");
-				buf.append("public class E {\n");
-				buf.append("    void foo(Vector vec, Iterator iter) {\n");
-				buf.append("        iter= vec.iterator();\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				assertEqualString(preview, buf.toString());
-			} else {
-				assertTrue("unknown type", false);
-			}
-		}
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Vector vec) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected4= buf.toString();
+	
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });	
 	}
 	
 	public void testVarInForInitializer() throws Exception {
@@ -505,7 +509,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
-		assertNumberOf("proposals", proposals.size(), 5);
+		assertNumberOf("proposals", proposals.size(), 6);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -590,9 +594,24 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("        };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected5= buf.toString();			
+		String expected5= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });		
+		proposal= (CUCorrectionProposal) proposals.get(5);
+		String preview6= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int fcount) {\n");
+		buf.append("        new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected6= buf.toString();			
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5, preview6 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });		
 	}
 	
 	public void testLongVarRef() throws Exception {
