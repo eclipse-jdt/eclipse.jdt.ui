@@ -29,6 +29,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
@@ -45,7 +47,7 @@ public class GenerateConstructorUsingFieldsContentProvider implements ITreeConte
 	public GenerateConstructorUsingFieldsContentProvider(IType type, List fields, List selected) throws JavaModelException {
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
-		AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, unit);
+		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), AbstractTypeDeclaration.class);
 		if (declaration != null) {
 			fType= declaration.resolveBinding();
 			if (fType != null) {
