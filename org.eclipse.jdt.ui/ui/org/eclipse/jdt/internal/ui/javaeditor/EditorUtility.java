@@ -22,6 +22,8 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 
+import org.eclipse.jface.text.IRegion;
+
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -137,6 +139,30 @@ public class EditorUtility {
 		
 		if (element != null && part instanceof JavaEditor)
 			((JavaEditor) part).setSelection(element);
+	}
+	
+	/** 
+	 * Selects and reveals the given region in the given editor part.
+	 */	
+	public static void revealInEditor(IEditorPart part, IRegion region) {
+		if (part != null && region != null)
+			revealInEditor(part, region.getOffset(), region.getLength());
+	}
+	
+	/** 
+	 * Selects and reveals the given offset and length in the given editor part.
+	 */	
+	public static void revealInEditor(IEditorPart part, int offset, int length) {
+		if (part == null)
+			return;
+		
+		// Support for nested text editor
+		IEditorSite site= part.getEditorSite();
+		if (site instanceof MultiPageEditorSite)
+			part= ((MultiPageEditorSite)site).getEditor();
+		
+		if (part instanceof ITextEditor)
+			((ITextEditor)part).selectAndReveal(offset, length);
 	}
 	
 	private static IEditorPart openInEditor(IFile file, boolean activate) throws PartInitException {

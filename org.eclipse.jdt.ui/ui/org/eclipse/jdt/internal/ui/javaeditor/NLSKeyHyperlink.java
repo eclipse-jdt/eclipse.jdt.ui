@@ -125,9 +125,9 @@ public class NLSKeyHyperlink implements IHyperlink {
 				}
 			}
 			if (region != null)
-				((ITextEditor)editor).selectAndReveal(region.getOffset(), region.getLength());
+				EditorUtility.revealInEditor(editor, region);
 			else {
-				((ITextEditor)editor).selectAndReveal(0, 0);
+				EditorUtility.revealInEditor(editor, 0, 0);
 				IEditorStatusLine statusLine= (IEditorStatusLine) editor.getAdapter(IEditorStatusLine.class);
 				if (statusLine != null)
 					statusLine.setMessage(true, JavaEditorMessages.getFormattedString("Editor.OpenPropertiesFile.error.keyNotFound", fKeyStringLiteral.getLiteralValue()), null); //$NON-NLS-1$
