@@ -219,13 +219,13 @@ public class TemplateSet {
 
 	private static void throwReadException(Throwable t) throws CoreException {
 		IStatus status= new JavaUIErrorStatus(JavaStatusConstants.TEMPLATE_IO_EXCEPTION,
-			TemplateMessages.getString("TemplateSet.error.read"), t); //$NON-NLS-1$
+			t.getMessage(), t);
 		throw new JavaUIException(status);
 	}
 	
 	private static void throwWriteException(Throwable t) throws CoreException {
 		IStatus status= new JavaUIErrorStatus(JavaStatusConstants.TEMPLATE_IO_EXCEPTION,
-			TemplateMessages.getString("TemplateSet.error.write"), t); //$NON-NLS-1$
+			t.getMessage(), t); //$NON-NLS-1$
 		throw new JavaUIException(status);
 	}
 

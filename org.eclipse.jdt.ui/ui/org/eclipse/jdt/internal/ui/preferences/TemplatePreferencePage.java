@@ -393,7 +393,6 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 			fTableViewer.setCheckedElements(getEnabledTemplates());
 
 		} catch (CoreException e) {			
-			JavaPlugin.log(e);
 			openReadErrorDialog(e);
 		}
 	}
@@ -533,13 +532,13 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	private void openReadErrorDialog(CoreException e) {
 		ErrorDialog.openError(getShell(),
 			TemplateMessages.getString("TemplatePreferencePage.error.read.title"), //$NON-NLS-1$
-			e.getMessage(), e.getStatus());
+			null, e.getStatus());
 	}
 	
 	private void openWriteErrorDialog(CoreException e) {
 		ErrorDialog.openError(getShell(),
 			TemplateMessages.getString("TemplatePreferencePage.error.write.title"), //$NON-NLS-1$
-			e.getMessage(), e.getStatus());		
+			null, e.getStatus());		
 	}
 		
 }
