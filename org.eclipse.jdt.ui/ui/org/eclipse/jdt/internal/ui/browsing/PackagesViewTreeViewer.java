@@ -17,6 +17,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.jface.viewers.ITreeContentProvider;
+
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -82,6 +84,26 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 			}
 		}
 		return list.toArray();
+	}
+	
+	/*
+	 * @see AbstractTreeViewer#isExpandable(java.lang.Object)
+	 */
+	public boolean isExpandable(Object parent) {
+		Object[] children= ((ITreeContentProvider)getContentProvider()).getChildren(parent);
+		Object[] toBeFiltered= new Object[1];
+		for (int i = 0; i < children.length; i++) {
+			Object object= children[i];
+			
+			if (isEssential(object))
+				return true;
+			
+			toBeFiltered[0]= object;
+			Object[] filtered= filter(toBeFiltered);
+			if (filtered.length > 0)
+				return true;
+		}
+		return false;
 	}
 	
 	private boolean isEssential(Object object) {
