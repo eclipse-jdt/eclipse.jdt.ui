@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.swt.custom.BusyIndicator;
+
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -21,19 +25,42 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-class SourceReferenceAction extends RefactoringAction {
+abstract class SourceReferenceAction extends RefactoringAction {
 
-	protected SourceReferenceAction(String name, StructuredSelectionProvider provider) {
-		super(name, provider);
-	}
-	
+	private ISelectionProvider fSelectionProvider;
 	protected SourceReferenceAction(String name, ISelectionProvider provider) {
 		super(name, provider);
+		fSelectionProvider= provider;
 	}
 
+	protected ISelectionProvider getSelectionProvider(){
+		return fSelectionProvider;
+	}
+	
+	/*
+	 * @see Action#run
+	 */
+	public final void run() {
+		new BusyIndicator().showWhile(JavaPlugin.getActiveWorkbenchShell().getDisplay(), new Runnable() {
+			public void run() {
+				try {
+					perform();
+				} catch (CoreException e) {
+					ExceptionHandler.handle(e, getText(), "Unexpected exception. See log for details.");
+				}
+			}
+		});
+	}
+	
+	protected ISourceReference[] getElementsToProcess() {
+		return SourceReferenceUtil.removeAllWithParentsSelected(getSelectedElements());
+	}	
+	
+	protected abstract void perform() throws CoreException;
+	
 	/*
 	 * @see RefactoringAction#canOperateOn(IStructuredSelection)
 	 */
@@ -52,6 +79,10 @@ class SourceReferenceAction extends RefactoringAction {
 			JavaPlugin.log(e);
 			return false;
 		}	
+	}
+	
+	private ISourceReference[] getSelectedElements(){
+		return getWorkingCopyElements(getStructuredSelection().toList());
 	}
 	
 	private static boolean canWorkOn(Object elem) throws JavaModelException{
@@ -102,10 +133,6 @@ class SourceReferenceAction extends RefactoringAction {
 		return wcElement == null || ! wcElement.exists();
 	}
 			
-	protected ISourceReference[] getSelectedElements(){
-		return getWorkingCopyElements(getStructuredSelection().toList());
-	}
-	
 	private static ISourceReference[] getWorkingCopyElements(List l) {
 		List wcList= new ArrayList(l.size());
 		for (Iterator iter= l.iterator(); iter.hasNext();) {

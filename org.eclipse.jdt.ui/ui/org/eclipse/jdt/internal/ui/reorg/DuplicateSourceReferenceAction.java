@@ -8,8 +8,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.swt.custom.BusyIndicator;
-
 import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -17,45 +15,21 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 class DuplicateSourceReferenceAction extends SourceReferenceAction {
 	
-	private ISelectionProvider fSelectionProvider;
-	
-	protected DuplicateSourceReferenceAction(StructuredSelectionProvider provider, ISelectionProvider selectionProvider) {
+	public DuplicateSourceReferenceAction(ISelectionProvider provider) {
 		super("Dupl&icate", provider);
-		Assert.isNotNull(selectionProvider);
-		fSelectionProvider= selectionProvider;
 	}
 
-	/*
-	 * @see Action#run
-	 */
-	public void run() {
-		new BusyIndicator().showWhile(JavaPlugin.getActiveWorkbenchShell().getDisplay(), new Runnable() {
-			public void run() {
-				try {
-					perform(getSelectedElements());
-				} catch (CoreException e) {
-					ExceptionHandler.handle(e, "Duplicate", "Unexpected exception. See log for details.");
-				}
-			}
-		});
-	}
-
-	static void perform(ISourceReference[] elements) throws CoreException {
-		ISourceReference[] childrenRemoved= SourceReferenceUtil.removeAllWithParentsSelected(elements);
-		Map mapping= SourceReferenceUtil.groupByFile(childrenRemoved); //IFile -> List of ISourceReference (elements from that file)
+	protected void perform() throws CoreException {
+		Map mapping= SourceReferenceUtil.groupByFile(getElementsToProcess()); //IFile -> List of ISourceReference (elements from that file)
 		for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
 			IFile file= (IFile)iter.next();
 			List l= (List)mapping.get(file);
@@ -66,15 +40,19 @@ class DuplicateSourceReferenceAction extends SourceReferenceAction {
 	
 	private static void duplicate(IFile file, ISourceReference[] elems) throws CoreException{
 		TextBuffer tb= TextBuffer.acquire(file);
-		TextBufferEditor tbe= new TextBufferEditor(tb);
-		for (int i= 0; i < elems.length; i++) {
-			tbe.add(createDuplicateEdit(elems[i]));
+		try{
+			TextBufferEditor tbe= new TextBufferEditor(tb);
+			for (int i= 0; i < elems.length; i++) {
+				tbe.add(createDuplicateEdit(elems[i]));
+			}
+			if (! tbe.canPerformEdits())
+				return; ///XXX can i assert here?
+			tbe.performEdits(new NullProgressMonitor());	
+			TextBuffer.commitChanges(tb, false, new NullProgressMonitor());
+		} finally{	
+			if (tb != null)
+				TextBuffer.release(tb);
 		}
-		if (! tbe.canPerformEdits())
-			return; ///XXX can i assert here?
-		tbe.performEdits(new NullProgressMonitor());	
-		TextBuffer.commitChanges(tb, false, new NullProgressMonitor());
-		TextBuffer.release(tb);
 	}
 	
 	private static TextEdit createDuplicateEdit(ISourceReference ref) throws JavaModelException{
