@@ -24,6 +24,7 @@ import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -156,13 +157,14 @@ public class DocumentAdapter2 implements IBuffer, IDocumentListener {
 	
 	private void initialize() {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		IPath location= fFile.getLocation();
 		try {
-			manager.connect(fFile, new NullProgressMonitor());
-			fTextFileBuffer= manager.getTextFileBuffer(fFile);
+			manager.connect(location, new NullProgressMonitor());
+			fTextFileBuffer= manager.getTextFileBuffer(location);
 			fDocument= fTextFileBuffer.getDocument();
 		} catch (CoreException x) {
 			fStatus= x.getStatus();
-			fDocument= manager.createEmptyDocument(fFile);
+			fDocument= manager.createEmptyDocument(location);
 		}
 		fDocument.addPrenotifiedDocumentListener(this);
 	}
@@ -236,7 +238,7 @@ public class DocumentAdapter2 implements IBuffer, IDocumentListener {
 		if (fTextFileBuffer != null) {
 			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 			try {
-				manager.disconnect(fFile, new NullProgressMonitor());
+				manager.disconnect(fFile.getLocation(), new NullProgressMonitor());
 			} catch (CoreException x) {
 				// ignore
 			}
