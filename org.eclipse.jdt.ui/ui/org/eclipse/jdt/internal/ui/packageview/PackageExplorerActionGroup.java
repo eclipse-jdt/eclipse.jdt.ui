@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.packageview;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -249,6 +250,10 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			element= ((IJavaElement)element).getResource();
 			
 		}
+		// fix for 64890 Package explorer out of sync when open/closing projects [package explorer] 64890  
+		if (element instanceof IProject && !((IProject)element).isOpen()) 
+			return;
+		
 		if (!(element instanceof IContainer))
 			return;
 		menu.appendToGroup(
