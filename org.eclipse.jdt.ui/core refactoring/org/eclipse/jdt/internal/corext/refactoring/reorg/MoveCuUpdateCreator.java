@@ -29,6 +29,7 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -148,22 +149,27 @@ public class MoveCuUpdateCreator {
 	private void addReferenceUpdates(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException, CoreException {
 		List cuList= Arrays.asList(fCus);
 		SearchResultGroup[] references= getReferences(movedUnit, pm, status);
-		for (int i= 0; i < references.length; i++){
+		for (int i= 0; i < references.length; i++) {
 			SearchResultGroup searchResultGroup= references[i];
 			ICompilationUnit referencingCu= searchResultGroup.getCompilationUnit();
 			if (referencingCu == null)
 				continue;
-			
+
 			boolean simpleReferencesNeedNewImport= simpleReferencesNeedNewImport(movedUnit, referencingCu, cuList);
 			SearchMatch[] results= searchResultGroup.getSearchResults();
 			for (int j= 0; j < results.length; j++) {
-				//TODO: should update type references with results from addImport
-				TypeReference reference= (TypeReference)results[j];
+				// TODO: should update type references with results from addImport
+				TypeReference reference= (TypeReference) results[j];
 				if (reference.isImportDeclaration()) {
-					ImportRewrite importEdit= getImportRewrite(referencingCu);
-					IImportDeclaration importDecl= (IImportDeclaration)SearchUtils.getEnclosingJavaElement(results[j]);
-					importEdit.removeImport(importDecl.getElementName());
-                    importEdit.addImport(createStringForNewImport(movedUnit, importDecl));
+					ImportRewrite rewrite= getImportRewrite(referencingCu);
+					IImportDeclaration importDecl= (IImportDeclaration) SearchUtils.getEnclosingJavaElement(results[j]);
+					if (Flags.isStatic(importDecl.getFlags())) {
+						rewrite.removeStaticImport(importDecl.getElementName());
+						addStaticImport(movedUnit, importDecl, rewrite);
+					} else {
+						rewrite.removeImport(importDecl.getElementName());
+						rewrite.addImport(createStringForNewImport(movedUnit, importDecl));
+					}
 				} else if (reference.isQualified()) {
 					TextChange textChange= changeManager.get(referencingCu);
 					String changeName= RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_references"); //$NON-NLS-1$
@@ -173,19 +179,35 @@ public class MoveCuUpdateCreator {
 				} else if (simpleReferencesNeedNewImport) {
 					ImportRewrite importEdit= getImportRewrite(referencingCu);
 					String typeName= reference.getSimpleName();
-                    importEdit.addImport(getQualifiedType(fDestination.getElementName(), typeName));
+					importEdit.addImport(getQualifiedType(fDestination.getElementName(), typeName));
 				}
 			}
 		}
 	}
-	
+
+	private void addStaticImport(ICompilationUnit movedUnit, IImportDeclaration importDecl, ImportRewrite rewrite) {
+		String old= importDecl.getElementName();
+		int oldPackLength= movedUnit.getParent().getElementName().length();
+
+		StringBuffer result= new StringBuffer(fDestination.getElementName());
+		if (oldPackLength == 0) // move FROM default package
+			result.append('.').append(old);
+		else if (result.length() == 0) // move TO default package
+			result.append(old.substring(oldPackLength + 1)); // cut "."
+		else
+			result.append(old.substring(oldPackLength));
+		int index= result.lastIndexOf("."); //$NON-NLS-1$
+		if (index > 0 && index < result.length() - 1)
+			rewrite.addStaticImport(result.substring(0, index), result.substring(index + 1, result.length()), true);
+	}
+
 	private String getQualifiedType(String packageName, String typeName) {
 		if (packageName.length() == 0)
 			return typeName;
 		else
 			return packageName + '.' + typeName;
 	}
-	
+
     private String createStringForNewImport(ICompilationUnit movedUnit, IImportDeclaration importDecl) {
     	String old= importDecl.getElementName();
 		int oldPackLength= movedUnit.getParent().getElementName().length();
