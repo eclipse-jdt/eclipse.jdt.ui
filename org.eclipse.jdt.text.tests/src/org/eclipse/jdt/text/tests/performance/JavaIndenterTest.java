@@ -48,7 +48,7 @@ public class JavaIndenterTest extends TestCase {
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
 		runAction(fEditor.getAction(ITextEditorActionConstants.SELECT_ALL));
 		runAction(fEditor.getAction("ToggleComment"));
-		SWTEventHelper.pressKeyCodeCombination(SWTEventHelper.getActiveDisplay(), CTRL_END);
+		SWTEventHelper.pressKeyCodeCombination(EditorTestHelper.getActiveDisplay(), CTRL_END);
 		EditorTestHelper.calmDown(2000, 5000, 100);
 	}
 
@@ -68,7 +68,7 @@ public class JavaIndenterTest extends TestCase {
 
 	private void measureJavaIndenter() {
 		IDocument document= ((JavaEditor) fEditor).getViewer().getDocument();
-		Display display= SWTEventHelper.getActiveDisplay();
+		Display display= EditorTestHelper.getActiveDisplay();
 		IAction undo= fEditor.getAction(ITextEditorActionConstants.UNDO);
 		int originalNumberOfLines= document.getNumberOfLines();
 		for (int i= 0; i < N_OF_RUNS; i++) {

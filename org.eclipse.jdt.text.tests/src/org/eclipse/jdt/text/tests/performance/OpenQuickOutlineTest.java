@@ -85,10 +85,10 @@ public class OpenQuickOutlineTest extends TestCase {
 		performanceMeter.start();
 		runAction(showOutline);
 		performanceMeter.stop();
-		Shell shell= SWTEventHelper.getActiveDisplay().getActiveShell();
+		Shell shell= EditorTestHelper.getActiveDisplay().getActiveShell();
 		assertEquals("", shell.getText());
 		shell.close();
-		shell= SWTEventHelper.getActiveDisplay().getActiveShell();
+		shell= EditorTestHelper.getActiveDisplay().getActiveShell();
 		assertFalse("".equals(shell.getText()));
 	}
 

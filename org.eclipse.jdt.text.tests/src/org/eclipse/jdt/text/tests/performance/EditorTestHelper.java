@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.IDocument;
@@ -91,17 +92,19 @@ public class EditorTestHelper {
 			sleep(1);
 		}
 	}
-
-	public static IWorkbenchPage getActivePage() {
-		IWorkbenchWindow window= getActiveWorkbenchWindow();
-		if (window != null)
-			return window.getActivePage();
-		else
-			return null;
-	}
 	
 	public static IWorkbenchWindow getActiveWorkbenchWindow() {
 		return PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+	}
+
+	public static IWorkbenchPage getActivePage() {
+		IWorkbenchWindow window= getActiveWorkbenchWindow();
+		return window != null ? window.getActivePage() : null;
+	}
+
+	public static Display getActiveDisplay() {
+		IWorkbenchWindow window= getActiveWorkbenchWindow();
+		return window != null ? window.getShell().getDisplay() : null;
 	}
 
 	public static boolean calmDown(long minTime, long maxTime, long intervalTime) {

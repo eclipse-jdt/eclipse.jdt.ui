@@ -85,7 +85,7 @@ public abstract class ScrollEditorTest extends TestCase {
 			
 			setUp(editor);
 			
-			Display display= SWTEventHelper.getActiveDisplay();
+			Display display= EditorTestHelper.getActiveDisplay();
 			
 			StyledText text= (StyledText) editor.getAdapter(Control.class);
 			int numberOfLines= text.getLineCount();

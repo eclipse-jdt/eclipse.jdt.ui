@@ -15,7 +15,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 
-import org.eclipse.ui.PlatformUI;
 
 
 /**
@@ -23,10 +22,6 @@ import org.eclipse.ui.PlatformUI;
  */
 public class SWTEventHelper {
 	
-	public static Display getActiveDisplay() {
-		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().getDisplay();
-	}
-
 	public static void pressKeyCode(Display display, int keyCode) {
 		pressKeyCode(display, keyCode, true);
 	}

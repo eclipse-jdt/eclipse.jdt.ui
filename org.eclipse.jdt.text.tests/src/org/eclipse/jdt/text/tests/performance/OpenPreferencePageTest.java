@@ -40,7 +40,7 @@ public class OpenPreferencePageTest extends TestCase {
 	private PerformanceMeter fMeter;
 
 	public void testOpenPreferencePage() {
-		Display display= SWTEventHelper.getActiveDisplay();
+		Display display= EditorTestHelper.getActiveDisplay();
 		
         PreferenceManager pm = WorkbenchPlugin.getDefault().getPreferenceManager();
         assertNotNull(pm);

@@ -63,7 +63,7 @@ public class NonInitialTypingTest extends TestCase {
 		EditorTestHelper.runEventQueue();
 		sleep(1000);
 		
-		Display display= SWTEventHelper.getActiveDisplay();
+		Display display= EditorTestHelper.getActiveDisplay();
 		fKeyboardProbe.pressChar('{', display);
 		EditorTestHelper.runEventQueue();
 		SWTEventHelper.pressKeyCode(display, SWT.BS);
@@ -77,7 +77,7 @@ public class NonInitialTypingTest extends TestCase {
 	}
 
 	public void testTypeAMethod() {
-		Display display= SWTEventHelper.getActiveDisplay();
+		Display display= EditorTestHelper.getActiveDisplay();
 		
 		fMeter.start();
 		for (int i= 0; i < METHOD.length; i++) {
