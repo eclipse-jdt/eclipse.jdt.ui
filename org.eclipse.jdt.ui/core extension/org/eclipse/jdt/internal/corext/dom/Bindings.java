@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-
 public class Bindings {
 	
 	private Bindings() {
@@ -156,18 +155,6 @@ public class Bindings {
 		}		
 	}	
 	
-	
-	/**
-	 * @deprecated Use ImportEdit.add(ITypeBinding). 
-	 */
-	public static String getFullyQualifiedImportName(ITypeBinding type) {
-		if (type.isArray())
-			return getFullyQualifiedName(type.getElementType());
-		else if (type.isAnonymous())
-			return getFullyQualifiedImportName(type.getSuperclass());
-		else
-			return getFullyQualifiedName(type);
-	}
 	
 	public static String[] getNameComponents(ITypeBinding type) {
 		List result= new ArrayList(5);
