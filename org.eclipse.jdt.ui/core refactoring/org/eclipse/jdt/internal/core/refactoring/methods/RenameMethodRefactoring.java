@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -49,25 +50,15 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 abstract class RenameMethodRefactoring extends MethodRefactoring implements IRenameRefactoring, IPreactivatedRefactoring{
 	
 	private String fNewName;
-	
 	private List fOccurrences;
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
-	
-	public RenameMethodRefactoring(ITextBufferChangeCreator changeCreator, IJavaSearchScope scope, IMethod method, String newName) {
-		super(scope, method);
-		fTextBufferChangeCreator= changeCreator;
-		Assert.isNotNull(fTextBufferChangeCreator, "change creator"); //$NON-NLS-1$
-		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
-		fNewName= newName;
-	}
 	
 	public RenameMethodRefactoring(ITextBufferChangeCreator changeCreator, IMethod method) {
 		super(method);
 		fTextBufferChangeCreator= changeCreator;
 		Assert.isNotNull(fTextBufferChangeCreator, "change creator"); //$NON-NLS-1$
 	}
-
-	/**
+	/**
 	 * @see IRenameRefactoring#setNewName
 	 */
 	public final void setNewName(String newName){
@@ -120,6 +111,13 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 		return result;
 	}
 	
+	private IJavaSearchScope createRefactoringScope() throws JavaModelException{
+		if (Flags.isPrivate(getMethod().getFlags()))
+			return SearchEngine.createJavaSearchScope(new IResource[]{getResource(getMethod())});
+		else
+			return SearchEngine.createWorkspaceScope();	
+	}
+	
 	List getOccurrences(IProgressMonitor pm) throws JavaModelException{
 		if (fOccurrences == null){
 			if (pm == null)
@@ -128,7 +126,7 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 			pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.creating_pattern")); //$NON-NLS-1$
 			ISearchPattern pattern= createSearchPattern(new SubProgressMonitor(pm, 1));
 			pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.searching")); //$NON-NLS-1$
-			fOccurrences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), getScope(), pattern);	
+			fOccurrences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), pattern);	
 			pm.done();
 		}
 		return fOccurrences;

@@ -33,11 +33,7 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
 public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
-
-	public RenameMethodInInterfaceRefactoring(ITextBufferChangeCreator changeCreator, IJavaSearchScope scope, IMethod method, String newName){
-		super(changeCreator, scope, method, newName);
-	}
-	
+
 	public RenameMethodInInterfaceRefactoring(ITextBufferChangeCreator changeCreator, IMethod method){
 		super(changeCreator, method);
 	}

@@ -35,33 +35,9 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
 public class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
-
-	/* non java-doc
-	 * this constructor is only for consistency - should be replaced by:
-	 * RenamePrivateMethodRefactoring(ITextBufferChangeCreator, IMethod, String)
-	 */ 
-	public RenamePrivateMethodRefactoring(ITextBufferChangeCreator changeCreator, IJavaSearchScope scope, IMethod method, String newName){
-		super(changeCreator, scope, method, newName);
-		correctScope();
-	}
 	
 	public RenamePrivateMethodRefactoring(ITextBufferChangeCreator changeCreator, IMethod method) {
 		super(changeCreator, method);
-		correctScope();
-	}
-	
-	/* non java-doc
-	 * narrow down the scope
-	 */ 
-	private void correctScope(){
-		if (getMethod().isBinary())
-			return;
-		try{
-			//only the declaring compilation unit
-			setScope(SearchEngine.createJavaSearchScope(new IResource[]{getResource(getMethod())}));
-		} catch (JavaModelException e){
-			//do nothing
-		}
 	}
 	
 	//----------- Conditions --------------

@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
@@ -184,7 +185,11 @@ public class ReorderParametersRefactoring extends MethodRefactoring {
 	private List getRegionArrays() throws JavaModelException{
 		return new ReorderParameterMoveFinder().findParameterRegions((List)fOccurrences.get(0), getMethod().getCompilationUnit());
 	}
-	private List getOccurrences(IProgressMonitor pm) throws JavaModelException{
+
+	private IJavaSearchScope createRefactoringScope()  throws JavaModelException{
+		return SearchEngine.createWorkspaceScope();
+	}
+		private List getOccurrences(IProgressMonitor pm) throws JavaModelException{
 		if (fOccurrences == null){
 			if (pm == null)
 				pm= new NullProgressMonitor();
@@ -192,7 +197,7 @@ public class ReorderParametersRefactoring extends MethodRefactoring {
 			pm.subTask("creating pattern"); 
 			ISearchPattern pattern= createSearchPattern(new SubProgressMonitor(pm, 1));
 			pm.subTask("searching");
-			fOccurrences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), getScope(), pattern);	
+			fOccurrences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), pattern);	
 			pm.done();
 		}
 		return fOccurrences;

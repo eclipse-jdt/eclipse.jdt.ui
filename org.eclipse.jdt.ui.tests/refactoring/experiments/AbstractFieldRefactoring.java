@@ -51,28 +51,12 @@ public class AbstractFieldRefactoring extends Refactoring {
 		Assert.isNotNull(changeCreator, "change creator"); //$NON-NLS-1$
 		Assert.isTrue(field.exists(), "field must exist");
 		setDefaults();
-		correctScope();
 	}
 		
 	public final IField getField() {
 		return fField;
 	}
-	
-	/* XXX: copied from RenameField
-	 * narrow down the scope
-	 */ 
-	private void correctScope(){
-		if (getField().isBinary())
-			return;
-		try{
-			//only the declaring compilation unit
-			if (Flags.isPrivate(getField().getFlags()))
-				setScope(SearchEngine.createJavaSearchScope(new IResource[]{getResource(getField())}));
-		} catch (JavaModelException e){
-			//do nothing
-		}
-	}
-	
+		
 	// --- framework methods 
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {

@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
@@ -60,19 +61,10 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
 public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRefactoring, IPreactivatedRefactoring{
-
-	private String fNewName;
+	private String fNewName;
 	private List fOccurrences;
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
-	
-	public RenameTypeRefactoring(ITextBufferChangeCreator changeCreator, IJavaSearchScope scope, IType type, String newName){
-		super(scope, type);
-		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
-		Assert.isNotNull(changeCreator, "change creator"); //$NON-NLS-1$
-		fNewName= newName;
-		fTextBufferChangeCreator= changeCreator;
-	}
-	
+
 	public RenameTypeRefactoring(ITextBufferChangeCreator changeCreator, IType type) {
 		super(type);
 		Assert.isNotNull(changeCreator, "change creator"); //$NON-NLS-1$
@@ -81,8 +73,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	
 	public final String getNewName(){
 		return fNewName;
-	}
-
+	}
 	/**
 	 * @see IRenameRefactoring#setNewName
 	 */
@@ -105,7 +96,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		return RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name",  //$NON-NLS-1$
 														new String[]{getType().getFullyQualifiedName(), fNewName});
 	}
-
+
 	//------------- Conditions -----------------
 		
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
@@ -181,9 +172,13 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		return result;
 	}
 	
+	private IJavaSearchScope createRefactoringScope()  throws JavaModelException{
+		return SearchEngine.createWorkspaceScope();
+	}
+	
 	private List getOccurrences(IProgressMonitor pm) throws JavaModelException{
 		pm.subTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.searching"));	 //$NON-NLS-1$
-		fOccurrences= RefactoringSearchEngine.search(pm, getScope(), createSearchPattern());
+		fOccurrences= RefactoringSearchEngine.search(pm, createRefactoringScope(), createSearchPattern());
 		return fOccurrences;
 	}
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
@@ -376,7 +371,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			return null;
 		RefactoringStatus result= new RefactoringStatus();	
 		ISearchPattern pattern= SearchEngine.createSearchPattern(thisPackage, IJavaSearchConstants.REFERENCES);
-		List grouped= RefactoringSearchEngine.search(pm, getScope(), pattern);
+		List grouped= RefactoringSearchEngine.search(pm, createRefactoringScope(), pattern);
 		
 		for (Iterator iter= grouped.iterator(); iter.hasNext();){
 			IImportDeclaration declaration= findImportOnDemand((List)iter.next());

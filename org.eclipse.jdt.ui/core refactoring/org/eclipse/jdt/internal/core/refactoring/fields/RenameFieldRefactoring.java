@@ -53,38 +53,13 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 	
 	private List fOccurrences;
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
-
+
 	public RenameFieldRefactoring(ITextBufferChangeCreator changeCreator, IField field){
 		super(field);
 		Assert.isNotNull(changeCreator, "change creator"); //$NON-NLS-1$
 		fTextBufferChangeCreator= changeCreator;
-		correctScope();
 	}
-	
-	public RenameFieldRefactoring(ITextBufferChangeCreator changeCreator, IJavaSearchScope scope, IField field, String newName){
-		super(scope, field);
-		Assert.isNotNull(changeCreator, "change creator"); //$NON-NLS-1$
-		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
-		fTextBufferChangeCreator= changeCreator;
-		fNewName= newName;
-		correctScope();
-	}
-	
-	/* non java-doc
-	 * narrow down the scope
-	 */ 
-	private void correctScope(){
-		if (getField().isBinary())
-			return;
-		try{
-			//only the declaring compilation unit
-			if (Flags.isPrivate(getField().getFlags()))
-				setScope(SearchEngine.createJavaSearchScope(new IResource[]{getResource(getField())}));
-		} catch (JavaModelException e){
-			//do nothing
-		}
-	}
-	
+		
 	/**
 	 * @see IRenameRefactoring#setNewName
 	 */
@@ -284,12 +259,19 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 		return SearchEngine.createSearchPattern(getField(), IJavaSearchConstants.ALL_OCCURRENCES);
 	}
 	
+	private IJavaSearchScope createRefactoringScope() throws JavaModelException{
+		if (Flags.isPrivate(getField().getFlags()))
+			return SearchEngine.createJavaSearchScope(new IResource[]{getResource(getField())});
+		else
+			return SearchEngine.createWorkspaceScope();	
+	}
+	
 	protected List getOccurrences(IProgressMonitor pm) throws JavaModelException{
 		if (fOccurrences == null){
 			if (pm == null)
 				pm= new NullProgressMonitor();
 			pm.subTask(RefactoringCoreMessages.getString("RenameFieldRefactoring.searching"));	 //$NON-NLS-1$
-			fOccurrences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 6), getScope(), createSearchPattern());
+			fOccurrences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 6), createRefactoringScope(), createSearchPattern());
 		}	
 		return fOccurrences;
 	}

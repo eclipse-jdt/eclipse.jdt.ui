@@ -64,7 +64,9 @@ import junit.framework.Test;import junit.framework.TestSuite;import org.eclip
 		//DebugUtils.dump("cu" + cu.getSource());
 		IType classA= getType(cu, "A");
 		//DebugUtils.dump("classA" + classA);
-		IRefactoring ref= new RenameParametersRefactoring(fgChangeCreator, classA.getMethod("m", signature), newNames);
+		RenameParametersRefactoring ref= new RenameParametersRefactoring(fgChangeCreator, classA.getMethod("m", signature));
+		ref.setNewParameterNames(newNames);
+		
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
 		
@@ -78,7 +80,10 @@ import junit.framework.Test;import junit.framework.TestSuite;import org.eclip
 	private void helper2(String[] newNames, String[] signature) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
 		//DebugUtils.dump("classA" + classA);
-		IRefactoring ref= new RenameParametersRefactoring(fgChangeCreator, classA.getMethod("m", signature), newNames);
+		RenameParametersRefactoring ref= new RenameParametersRefactoring(fgChangeCreator, classA.getMethod("m", signature));
+		if (newNames.length > 0)
+			ref.setNewParameterNames(newNames);
+		
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		
 	}
@@ -218,7 +223,7 @@ import junit.framework.Test;import junit.framework.TestSuite;import org.eclip
 	}
 	
 	public void testFail1() throws Exception{
-		helper2(new String[]{"j"}, new String[0]);
+		helper2(new String[0], new String[0]);
 	}
 	
 	public void testFail2() throws Exception{

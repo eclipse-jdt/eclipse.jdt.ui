@@ -32,9 +32,8 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
 public class RenameParametersRefactoring extends MethodRefactoring implements IPreactivatedRefactoring{
-
-	private String[] fNewParameterNames;
-
+	private String[] fNewParameterNames;
+
 	//helper 
 	private String[] fOldParameterNames;
 	
@@ -44,11 +43,6 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 		super(method);
 		setOldParameterNames();
 		fTextBufferChangeCreator= changeCreator;
-	}
-	
-	public RenameParametersRefactoring(ITextBufferChangeCreator changeCreator, IMethod method, String[] newParameterNames){
-		this(changeCreator, method);
-		fNewParameterNames= newParameterNames;
 	}
 	
 	private void setOldParameterNames(){

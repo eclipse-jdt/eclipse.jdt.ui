@@ -3,22 +3,22 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.core.refactoring.base;
-
+
 import java.util.List;import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-
+
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.UndoManager;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
-
+
 /**
  * Superclass for all refactorings.
  * <p>
@@ -30,29 +30,10 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 public abstract class Refactoring implements IRefactoring {
 	private static IUndoManager fgUndoManager= new UndoManager();
 	
-	//fox for: 1GEYLBZ: ITPJUI:WIN2000 - smoke 120: refactoring doesn't find any reference to TestCase although there are
-	private IJavaSearchScope fScope= SearchEngine.createWorkspaceScope();
 	private List fUnsavedFileList; //list of IFiles
 		
-	public Refactoring(){
-	}
-	
-	public Refactoring(IJavaSearchScope scope){
-		Assert.isNotNull(scope);
-		fScope= scope;
-	}
-	
 	public static IUndoManager getUndoManager() {
 		return fgUndoManager;
-	}
-	
-	public final IJavaSearchScope getScope(){
-		return fScope;
-	}	
-	
-	public final void setScope(IJavaSearchScope scope){
-		Assert.isNotNull(scope);
-		fScope= scope;
 	}
 	
 	public void setUnsavedFileList(List list){
@@ -101,7 +82,6 @@ public abstract class Refactoring implements IRefactoring {
 	 * @see RefactoringStatus#merge
 	 */
 	public final RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
-		Assert.isNotNull(fScope, "scope"); //$NON-NLS-1$
 		pm.beginTask("", 11); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkActivation(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK)));

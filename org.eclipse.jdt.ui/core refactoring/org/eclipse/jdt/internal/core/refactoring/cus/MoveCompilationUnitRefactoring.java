@@ -62,17 +62,9 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 	*/
 	 
 	private IPackageFragment fNewPackage;
-	
 	private List fOccurrences;
-	
 	private boolean fNeedsImportToCurrentPackage;
 	 
-	public MoveCompilationUnitRefactoring(ITextBufferChangeCreator changeCreator, IPackageFragment newPackage, ICompilationUnit compilationUnit){
-		super(changeCreator, compilationUnit);
-		Assert.isNotNull(newPackage, "newPackage"); //$NON-NLS-1$
-		fNewPackage= newPackage;		
-	}
-	
 	public MoveCompilationUnitRefactoring(ITextBufferChangeCreator changeCreator, ICompilationUnit compilationUnit){
 		super(changeCreator, compilationUnit);
 	}
@@ -141,12 +133,16 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		return result;
 	}
 	
+	private IJavaSearchScope createRefactoringScope()  throws JavaModelException{
+		return SearchEngine.createWorkspaceScope();
+	}
+	
 	private List getOccurrences(IProgressMonitor pm) throws JavaModelException{
 		pm.subTask(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.searching"));	 //$NON-NLS-1$
-		fOccurrences= RefactoringSearchEngine.customSearch(pm, getScope(), createSearchPattern());		
+		fOccurrences= RefactoringSearchEngine.customSearch(pm, createRefactoringScope(), createSearchPattern());		
 		return fOccurrences;
 	}
-
+
 	private static RefactoringStatus checkTopLevelTypeNameConflict(IPackageFragment newPack, ICompilationUnit cu) throws JavaModelException{
 		IPackageFragment oldPack= getPackage(cu);
 		RefactoringStatus result= new RefactoringStatus(); 

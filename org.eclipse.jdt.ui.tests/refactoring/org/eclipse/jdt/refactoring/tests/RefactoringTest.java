@@ -41,7 +41,6 @@ public abstract class RefactoringTest extends TestCase {
 
 	private IPackageFragmentRoot fRoot;
 	private IPackageFragment fPackageP;
-	private IJavaSearchScope fScope;
 	
 	public boolean fIsVerbose= false;
 
@@ -64,7 +63,6 @@ public abstract class RefactoringTest extends TestCase {
 		fRoot= testProject.addSourceContainer(CONTAINER);
 		fPackageP= fRoot.createPackageFragment("p", true, null);
 
-		fScope= SearchEngine.createWorkspaceScope();
 		if (fIsVerbose){
 			System.out.println("---------------------------------------------");
 			System.out.println("Test:" + getClass() + "." + name());
@@ -77,16 +75,12 @@ public abstract class RefactoringTest extends TestCase {
 		testProject.removeSourceContainer(CONTAINER);
 	}
 
-	protected	IPackageFragmentRoot getRoot() {
+	protected IPackageFragmentRoot getRoot() {
 		return fRoot;
 	}
 
-	protected	IPackageFragment getPackageP() {
+	protected IPackageFragment getPackageP() {
 		return fPackageP;
-	}
-
-	protected	IJavaSearchScope getScope() {
-		return fScope;
 	}
 
 	protected final RefactoringStatus performRefactoring(IRefactoring ref) throws JavaModelException {

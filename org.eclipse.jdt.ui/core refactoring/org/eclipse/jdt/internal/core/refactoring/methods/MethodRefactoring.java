@@ -3,14 +3,14 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.core.refactoring.methods;
-
+
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-
+
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
-
+
 /**
  * <p>
  * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 
@@ -22,15 +22,9 @@ public abstract class MethodRefactoring extends Refactoring{
 	
 	private IMethod fMethod;
 	
-	public MethodRefactoring(IJavaSearchScope scope, IMethod method) {
-		super(scope);
+	public MethodRefactoring(IMethod method) {
 		Assert.isNotNull(method);
 		Assert.isTrue(method.exists(), RefactoringCoreMessages.getString("MethodRefactoring.assert.must_exist")); //$NON-NLS-1$
-		fMethod= method;
-	}
-
-	public MethodRefactoring(IMethod method) {
-		super();
 		fMethod= method;
 	}
 	

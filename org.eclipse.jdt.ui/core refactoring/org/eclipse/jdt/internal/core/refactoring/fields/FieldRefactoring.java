@@ -16,20 +16,13 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
  * not API
  */
 abstract class FieldRefactoring extends Refactoring {
-
-	private IField fField;
+	private IField fField;
 	
 	public FieldRefactoring(IField field){
-		super();
-		fField= field;
-	}
-	
-	public FieldRefactoring(IJavaSearchScope scope, IField field){
-		super(scope);
-		fField= field;
 		Assert.isTrue(field.exists(), RefactoringCoreMessages.getString("FieldRefactoring.assert.field_must_exist")); //$NON-NLS-1$
+		fField= field;
 	}
-		
+			
 	public final IField getField() {
 		return fField;
 	}

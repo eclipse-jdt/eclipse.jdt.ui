@@ -23,15 +23,9 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
 public class RenameStaticMethodRefactoring extends RenameMethodRefactoring {
-
-	public RenameStaticMethodRefactoring(ITextBufferChangeCreator changeCreator, IJavaSearchScope scope, IMethod method, String newName){
-		super(changeCreator, scope, method, newName);
-	}
-	
-	public RenameStaticMethodRefactoring(ITextBufferChangeCreator changeCreator, IMethod method) {
+	public RenameStaticMethodRefactoring(ITextBufferChangeCreator changeCreator, IMethod method) {
 		super(changeCreator, method);
-	}
-
+	}
 	//---------- Conditions --------------
 		
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{

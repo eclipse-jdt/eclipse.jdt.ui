@@ -36,7 +36,8 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		IRefactoring ref= new RenameVirtualMethodRefactoring(fgChangeCreator, getScope(), classA.getMethod(methodName, signatures), newMethodName);
+		RenameVirtualMethodRefactoring ref= new RenameVirtualMethodRefactoring(fgChangeCreator, classA.getMethod(methodName, signatures));
+		ref.setNewName(newMethodName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
 	}
@@ -48,7 +49,9 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		IRefactoring ref= new RenameVirtualMethodRefactoring(fgChangeCreator, getScope(), classA.getMethod(methodName, signatures), newMethodName);
+		RenameVirtualMethodRefactoring ref= new RenameVirtualMethodRefactoring(fgChangeCreator, classA.getMethod(methodName, signatures));
+		ref.setNewName(newMethodName);
+		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		if (!shouldPass){
 			assert("incorrect renaming because of java model", ! getFileContents(getOutputTestFileName("A")).equals(cu.getSource()));
@@ -277,7 +280,8 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		ICompilationUnit cuC= createCUfromTestFile(getPackageP(), "C");
 		
 		IType classB= getType(cu, "B");
-		IRefactoring ref= new RenameVirtualMethodRefactoring(fgChangeCreator, getScope(), classB.getMethod("m", new String[]{"I"}), "kk");
+		RenameVirtualMethodRefactoring ref= new RenameVirtualMethodRefactoring(fgChangeCreator, classB.getMethod("m", new String[]{"I"}));
+		ref.setNewName("kk");
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		assertEquals("invalid renaming C", getFileContents(getOutputTestFileName("C")), cuC.getSource());

@@ -36,8 +36,10 @@ public class MoveCUTests extends RefactoringTest {
 	}
 	
 	// -------------
-	private MoveCompilationUnitRefactoring createRefactoring(IJavaSearchScope scope, ICompilationUnit cu, IPackageFragment pack){
-		return new MoveCompilationUnitRefactoring(fgChangeCreator, pack, cu);
+	private MoveCompilationUnitRefactoring createRefactoring(ICompilationUnit cu, IPackageFragment pack){
+		MoveCompilationUnitRefactoring ref= new MoveCompilationUnitRefactoring(fgChangeCreator, cu);
+		ref.setNewPackage(pack);
+		return ref;
 	}
 	
 	private void helper1(String thisPackageName, String newPackageName, String[] thisPackageFiles, String[] newPackageFiles) throws Exception{
@@ -49,7 +51,7 @@ public class MoveCUTests extends RefactoringTest {
 			createCUfromTestFile(getPackageP(), thisPackageFiles[i], thisPackageName.replace('.', '/') + "/");
 		}
 		ICompilationUnit cu= getPackageP().getCompilationUnit(thisPackageFiles[0] + ".java");
-		IRefactoring ref= createRefactoring(getScope(), cu, newPackage);
+		IRefactoring ref= createRefactoring(cu, newPackage);
 		assertNotNull("precondition was supposed to fail", performRefactoring(ref));
 	}
 	
@@ -71,7 +73,7 @@ public class MoveCUTests extends RefactoringTest {
 		
 		IPackageFragment pack= (IPackageFragment)thisPackageCUs[0].getParent();
 		IPackageFragment newPack= (IPackageFragment)newPackageCUs[0].getParent();
-		IRefactoring ref= createRefactoring(getScope(), thisPackageCUs[0], newPackage);
+		IRefactoring ref= createRefactoring(thisPackageCUs[0], newPackage);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("preconditions were supposed to pass", null, result);
 		assert("file not moved from", ! pack.getCompilationUnit(thisPackageFiles[0] + ".java").exists());

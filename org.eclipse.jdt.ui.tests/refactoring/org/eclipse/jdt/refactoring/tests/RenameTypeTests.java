@@ -51,13 +51,15 @@ public class RenameTypeTests extends RefactoringTest {
 		
 	/******* shortcuts **********/
 		
-	private RenameTypeRefactoring createRefactoring(IJavaSearchScope scope, IType type, String newName){
-		return new RenameTypeRefactoring(fgChangeCreator, scope, type, newName);
+	private RenameTypeRefactoring createRefactoring(IType type, String newName){
+		RenameTypeRefactoring ref= new RenameTypeRefactoring(fgChangeCreator, type);
+		ref.setNewName(newName);
+		return ref;
 	}
 	
 	private void helper1_0(String className, String newName) throws Exception{
 		IType classA= getClassFromTestFile(getPackageP(), className);
-		IRefactoring ref= createRefactoring(getScope(), classA, newName);
+		IRefactoring ref= createRefactoring(classA, newName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
 		if (fIsVerbose)
@@ -87,7 +89,7 @@ public class RenameTypeTests extends RefactoringTest {
 		
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
-		IRefactoring ref= createRefactoring(getScope(), classA, newName);
+		IRefactoring ref= createRefactoring(classA, newName);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		ICompilationUnit newcu= pack.getCompilationUnit(newCUName + ".java");
 		assert("cu " + newcu.getElementName()+ " does not exist", newcu.exists());
@@ -163,7 +165,7 @@ public class RenameTypeTests extends RefactoringTest {
 	public void testFail4() throws Exception {
 		IType classA= getClassFromTestFile(getPackageP(), "A");
 		getClassFromTestFile(getPackageP(), "B");
-		RefactoringStatus result= performRefactoring(new RenameTypeRefactoring(fgChangeCreator, getScope(), classA, "B"));
+		RefactoringStatus result= performRefactoring(createRefactoring(classA, "B"));
 		assertNotNull("precondition was supposed to fail", result);
 	}
 		
@@ -172,7 +174,7 @@ public class RenameTypeTests extends RefactoringTest {
 		getClassFromTestFile(getPackageP(), "B");
 		getClassFromTestFile(getPackageP(), "C");
 
-		RefactoringStatus result= performRefactoring(new RenameTypeRefactoring(fgChangeCreator, getScope(), classA, "B"));
+		RefactoringStatus result= performRefactoring(createRefactoring(classA, "B"));
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
@@ -181,7 +183,7 @@ public class RenameTypeTests extends RefactoringTest {
 		getClassFromTestFile(getPackageP(), "B");
 		getClassFromTestFile(getPackageP(), "C");
 
-		RefactoringStatus result= performRefactoring(new RenameTypeRefactoring(fgChangeCreator, getScope(), classA, "B"));
+		RefactoringStatus result= performRefactoring(createRefactoring(classA, "B"));
 		assertNotNull("precondition was supposed to fail", result);
 	}
 	
@@ -193,7 +195,7 @@ public class RenameTypeTests extends RefactoringTest {
 		IType classA= getClassFromTestFile(getPackageP(), "A");
 		getClassFromTestFile(getPackageP(), "B");
 
-		RefactoringStatus result= performRefactoring(new RenameTypeRefactoring(fgChangeCreator, getScope(), classA, "B"));
+		RefactoringStatus result= performRefactoring(createRefactoring(classA, "B"));
 		assertNotNull("precondition was supposed to fail", result);
 	}
 	
@@ -236,7 +238,7 @@ public class RenameTypeTests extends RefactoringTest {
 		IType classA= getClassFromTestFile(packageP1, "A");
 		IType classAA= getClassFromTestFile(packageP2, "AA");
 
-		RefactoringStatus result= performRefactoring(new RenameTypeRefactoring(fgChangeCreator, getScope(), classA, "B"));
+		RefactoringStatus result= performRefactoring(createRefactoring(classA, "B"));
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
@@ -244,7 +246,7 @@ public class RenameTypeTests extends RefactoringTest {
 		IType classA= getClassFromTestFile(getPackageP(), "A");
 		getClassFromTestFile(getPackageP(), "B");
 
-		RefactoringStatus result= performRefactoring(new RenameTypeRefactoring(fgChangeCreator, getScope(), classA, "B"));
+		RefactoringStatus result= performRefactoring(createRefactoring(classA, "B"));
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
@@ -257,7 +259,7 @@ public class RenameTypeTests extends RefactoringTest {
 		getClassFromTestFile(packageP3, "B");
 		getClassFromTestFile(packageP2, "Bogus");
 
-		RefactoringStatus result= performRefactoring(new RenameTypeRefactoring(fgChangeCreator, getScope(), classA, "B"));
+		RefactoringStatus result= performRefactoring(createRefactoring(classA, "B"));
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
@@ -268,7 +270,7 @@ public class RenameTypeTests extends RefactoringTest {
 		IType classA= getClassFromTestFile(packageP1, "A");
 		getClassFromTestFile(packageP2, "B");
 
-		RefactoringStatus result= performRefactoring(new RenameTypeRefactoring(fgChangeCreator, getScope(), classA, "B"));
+		RefactoringStatus result= performRefactoring(createRefactoring(classA, "B"));
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
@@ -279,7 +281,7 @@ public class RenameTypeTests extends RefactoringTest {
 		IType classA= getClassFromTestFile(packageP1, "A");
 		getClassFromTestFile(packageP2, "B");
 
-		RefactoringStatus result= performRefactoring(new RenameTypeRefactoring(fgChangeCreator, getScope(), classA, "B"));
+		RefactoringStatus result= performRefactoring(createRefactoring(classA, "B"));
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
@@ -290,7 +292,7 @@ public class RenameTypeTests extends RefactoringTest {
 		IType classA= getClassFromTestFile(packageP1, "A");
 		getClassFromTestFile(packageP2, "B");
 
-		RefactoringStatus result= performRefactoring(new RenameTypeRefactoring(fgChangeCreator, getScope(), classA, "B"));
+		RefactoringStatus result= performRefactoring(createRefactoring(classA, "B"));
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
@@ -301,7 +303,7 @@ public class RenameTypeTests extends RefactoringTest {
 		IType classA= getClassFromTestFile(packageP1, "A");
 		getClassFromTestFile(packageP2, "B");
 
-		RefactoringStatus result= performRefactoring(new RenameTypeRefactoring(fgChangeCreator, getScope(), classA, "B"));
+		RefactoringStatus result= performRefactoring(createRefactoring(classA, "B"));
 		assertNotNull("precondition was supposed to fail", result);
 	}
 	
@@ -326,7 +328,7 @@ public class RenameTypeTests extends RefactoringTest {
 		getClassFromTestFile(packageP2, "B");
 		getClassFromTestFile(packageP3, "C");
 
-		RefactoringStatus result= performRefactoring(new RenameTypeRefactoring(fgChangeCreator, getScope(), classA, "B"));
+		RefactoringStatus result= performRefactoring(createRefactoring(classA, "B"));
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
@@ -335,7 +337,7 @@ public class RenameTypeTests extends RefactoringTest {
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
 		getClassFromTestFile(packageP1, "B");
 		
-		RefactoringStatus result= performRefactoring(new RenameTypeRefactoring(fgChangeCreator, getScope(), classA, "B"));
+		RefactoringStatus result= performRefactoring(createRefactoring(classA, "B"));
 		assertNotNull("precondition was supposed to fail", result);
 	}
 	
@@ -359,7 +361,7 @@ public class RenameTypeTests extends RefactoringTest {
 		IType classA= getClassFromTestFile(getPackageP(), "A");
 		getClassFromTestFile(getPackageP(), "B");
 		
-		RefactoringStatus result= performRefactoring(new RenameTypeRefactoring(fgChangeCreator, getScope(), classA, "B"));
+		RefactoringStatus result= performRefactoring(createRefactoring(classA, "B"));
 		assertNotNull("precondition was supposed to fail", result);
 	}
 	
@@ -619,7 +621,7 @@ public class RenameTypeTests extends RefactoringTest {
 		IPackageFragment myPackage= getRoot().createPackageFragment("", true, new NullProgressMonitor());
 		IType myClass= getClassFromTestFile(myPackage, "Blinky");
 		
-		RefactoringStatus result= performRefactoring(new RenameTypeRefactoring(fgChangeCreator, getScope(), myClass, "B"));
+		RefactoringStatus result= performRefactoring(createRefactoring(myClass, "B"));
 		assertNotNull("precondition was supposed to fail", result);
 	}
 	
@@ -679,7 +681,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(packageA, "A");
 		IType classA= getType(cu, "A");
 		
-		IRefactoring ref= new RenameTypeRefactoring(fgChangeCreator, getScope(), classA, "B");
+		IRefactoring ref= createRefactoring(classA, "B");
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		
@@ -726,7 +728,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 				
-		IRefactoring ref= createRefactoring(getScope(), classA, "B");
+		IRefactoring ref= createRefactoring(classA, "B");
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		
@@ -747,7 +749,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 				
-		IRefactoring ref= createRefactoring(getScope(), classA, "B");
+		IRefactoring ref= createRefactoring(classA, "B");
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		
@@ -762,7 +764,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 				
-		IRefactoring ref= createRefactoring(getScope(), classA, "B");
+		IRefactoring ref= createRefactoring(classA, "B");
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		
@@ -838,7 +840,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 				
-		IRefactoring ref= createRefactoring(getScope(), classA, "B");
+		IRefactoring ref= createRefactoring(classA, "B");
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		
@@ -871,7 +873,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 				
-		IRefactoring ref= createRefactoring(getScope(), classA, "B");
+		IRefactoring ref= createRefactoring(classA, "B");
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		

@@ -50,7 +50,8 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType interfaceI= getType(cu, "I");
-		IRefactoring ref= new RenameMethodInInterfaceRefactoring(fgChangeCreator, getScope(), interfaceI.getMethod(methodName, signatures), newMethodName);
+		RenameMethodInInterfaceRefactoring ref= new RenameMethodInInterfaceRefactoring(fgChangeCreator, interfaceI.getMethod(methodName, signatures));
+		ref.setNewName(newMethodName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
 	}
@@ -62,7 +63,8 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType interfaceI= getType(cu, "I");
-		IRefactoring ref= new RenameMethodInInterfaceRefactoring(fgChangeCreator, getScope(), interfaceI.getMethod(methodName, signatures), newMethodName);
+		RenameMethodInInterfaceRefactoring ref= new RenameMethodInInterfaceRefactoring(fgChangeCreator, interfaceI.getMethod(methodName, signatures));
+		ref.setNewName(newMethodName);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		if (!shouldPass){
 			assert("incorrect renaming because of a java model bug", ! getFileContents(getOutputTestFileName("A")).equals(cu.getSource()));

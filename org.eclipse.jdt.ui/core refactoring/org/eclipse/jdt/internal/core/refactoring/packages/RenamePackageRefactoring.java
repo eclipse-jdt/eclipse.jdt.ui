@@ -54,16 +54,6 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	
 	private List fOccurrences;
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
-
-	public RenamePackageRefactoring(ITextBufferChangeCreator changeCreator, IPackageFragment pack, String newName){
-		super();
-		Assert.isNotNull(pack, "package"); //$NON-NLS-1$
-		Assert.isNotNull(changeCreator, "change creator"); //$NON-NLS-1$
-		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
-		fTextBufferChangeCreator= changeCreator;		
-		fPackage= pack;
-		fNewName= newName;
-	}
 	
 	public RenamePackageRefactoring(ITextBufferChangeCreator changeCreator, IPackageFragment pack){
 		super();
@@ -80,22 +70,13 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		return RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.name",  //$NON-NLS-1$
 						new String[]{fPackage.getElementName(), fNewName});
 	}
-
-	public RenamePackageRefactoring(IJavaSearchScope scope, IPackageFragment pack, String newName){
-		super(scope);
-		fPackage= pack;
-		Assert.isNotNull(fPackage);
-		fNewName= newName;
-		Assert.isNotNull(fNewName);
-	}
 	
 	public final void setJavaElement(IJavaElement javaElement){
 		Assert.isNotNull(javaElement);
 		Assert.isTrue(javaElement.exists(), RefactoringCoreMessages.getString("RenamePackageRefactoring.assert.must_exist"));	 //$NON-NLS-1$
 		fPackage= (IPackageFragment)javaElement;
 	}
-
-	/**
+	/**
 	 * @see IRenameRefactoring#setNewName
 	 */	
 	public final void setNewName(String newName){
@@ -152,9 +133,13 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		return result;
 	}
 	
+	private IJavaSearchScope createRefactoringScope()  throws JavaModelException{
+		return SearchEngine.createWorkspaceScope();
+	}
+	
 	private List getOccurrences(IProgressMonitor pm) throws JavaModelException{
 		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching"));	 //$NON-NLS-1$
-		fOccurrences= RefactoringSearchEngine.search(pm, getScope(), createSearchPattern());
+		fOccurrences= RefactoringSearchEngine.search(pm, createRefactoringScope(), createSearchPattern());
 		return fOccurrences;
 	}
 	

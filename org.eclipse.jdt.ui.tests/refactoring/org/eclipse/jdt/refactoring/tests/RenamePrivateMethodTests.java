@@ -33,7 +33,8 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		IRefactoring ref= new RenamePrivateMethodRefactoring(fgChangeCreator, getScope(), classA.getMethod(methodName, signatures), newMethodName);
+		RenamePrivateMethodRefactoring ref= new RenamePrivateMethodRefactoring(fgChangeCreator, classA.getMethod(methodName, signatures));
+		ref.setNewName(newMethodName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
 	}
@@ -45,7 +46,8 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 	private void helper2_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		IRefactoring ref= new RenamePrivateMethodRefactoring(fgChangeCreator, getScope(), classA.getMethod(methodName, signatures), newMethodName);
+		RenamePrivateMethodRefactoring ref= new RenamePrivateMethodRefactoring(fgChangeCreator, classA.getMethod(methodName, signatures));
+		ref.setNewName(newMethodName);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		
@@ -134,7 +136,9 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 		ICompilationUnit cuC= createCUfromTestFile(getPackageP(), "C");
 		
 		IType classB= getType(cu, "B");
-		IRefactoring ref= new RenamePrivateMethodRefactoring(fgChangeCreator, getScope(), classB.getMethod("m", new String[]{"I"}), "kk");
+		RenamePrivateMethodRefactoring ref= new RenamePrivateMethodRefactoring(fgChangeCreator, classB.getMethod("m", new String[]{"I"}));
+		ref.setNewName("kk");
+		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		assertEquals("invalid renaming C", getFileContents(getOutputTestFileName("C")), cuC.getSource());

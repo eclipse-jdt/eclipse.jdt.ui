@@ -23,18 +23,12 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
  * not API
  */
 abstract class TypeRefactoring extends Refactoring{
-
+
 	private IType fType;
 		
-	public TypeRefactoring(IJavaSearchScope scope, IType type){
-		super(scope);
+	public TypeRefactoring(IType type) {
 		Assert.isNotNull(type);
 		Assert.isTrue(type.exists(), RefactoringCoreMessages.getString("TypeRefactoring.assert.must_exist")); //$NON-NLS-1$
-		fType= type;
-	}
-	
-	public TypeRefactoring(IType type) {
-		super();
 		fType= type;
 	}	
 	
