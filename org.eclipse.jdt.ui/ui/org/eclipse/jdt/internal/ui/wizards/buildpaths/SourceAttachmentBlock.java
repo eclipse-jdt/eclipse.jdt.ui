@@ -104,10 +104,13 @@ public class SourceAttachmentBlock {
 	private CLabel fFullPathResolvedLabel;
 	private CLabel fPrefixResolvedLabel;
 	
+	private IClasspathEntry fOldEntry;
+	
 	public SourceAttachmentBlock(IWorkspaceRoot root, IStatusChangeListener context, IClasspathEntry oldEntry) {
 		fContext= context;
 				
 		fRoot= root;
+		fOldEntry= oldEntry;
 		
 		// fIsVariableEntry specifies if the UI is for a variable entry
 		fIsVariableEntry= (oldEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE);
@@ -157,19 +160,23 @@ public class SourceAttachmentBlock {
 		fJavaDocField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.button"));		 //$NON-NLS-1$
 		
 		// set the old settings
-		if (oldEntry != null && oldEntry.getSourceAttachmentPath() != null) {
-			fFileNameField.setText(oldEntry.getSourceAttachmentPath().toString());
+		setDefaults();
+
+	}
+	
+	public void setDefaults() {
+		if (fOldEntry != null && fOldEntry.getSourceAttachmentPath() != null) {
+			fFileNameField.setText(fOldEntry.getSourceAttachmentPath().toString());
 		} else {
 			fFileNameField.setText(""); //$NON-NLS-1$
 		}	
 				
-		if (oldEntry != null && oldEntry.getSourceAttachmentRootPath() != null) {
-			fPrefixField.setText(oldEntry.getSourceAttachmentRootPath().toString());
+		if (fOldEntry != null && fOldEntry.getSourceAttachmentRootPath() != null) {
+			fPrefixField.setText(fOldEntry.getSourceAttachmentRootPath().toString());
 		} else {
 			fPrefixField.setText(""); //$NON-NLS-1$
 		}
 	}
-	
 	
 	/**
 	 * Gets the source attachment path chosen by the user

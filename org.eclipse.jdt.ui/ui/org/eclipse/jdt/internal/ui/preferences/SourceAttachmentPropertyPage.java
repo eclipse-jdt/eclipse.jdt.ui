@@ -100,6 +100,16 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 		}
 		return true;
 	}
+	
+	/*
+	 * @see PreferencePage#performDefaults()
+	 */
+	protected void performDefaults() {
+		if (fSourceAttachmentBlock != null) {
+			fSourceAttachmentBlock.setDefaults();
+		}
+		super.performDefaults();
+	}	
 				
 	private IPackageFragmentRoot getJARPackageFragmentRoot() {
 		// try to find it as Java element (needed for external jars)
@@ -137,5 +147,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);
 	}	
+
+
 
 }
