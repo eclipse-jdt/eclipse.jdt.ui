@@ -35,7 +35,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.TextEditChangeGroup;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextEditChangeGroup;
 
 public class TextChangePreviewViewer implements IChangePreviewViewer {
 
@@ -150,7 +150,7 @@ public class TextChangePreviewViewer implements IChangePreviewViewer {
 		} else if (input instanceof TextEditChangeInput) {
 			TextEditChangeInput edi= (TextEditChangeInput)input;
 			if (edi.change != null && edi.surroundingLines >= 0) {
-				TextChange.TextEditChangeGroup editChange= edi.change;
+				TextEditChangeGroup editChange= edi.change;
 				TextChange change= editChange.getTextChange();
 				setInput(change.getCurrentContent(editChange.getRegion(), true, 2),
 					change.getPreviewContent(new TextEditChangeGroup[] { editChange }, editChange.getRegion(), true, 2),

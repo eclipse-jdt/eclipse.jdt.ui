@@ -65,66 +65,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
  */
 public abstract class TextChange extends Change {
 
-	public static class TextEditChangeGroup {
-		private boolean fIsActive;
-		private TextChange fTextChange;
-		private TextEditGroup fTextEditGroup;
-		
-		/* package */ TextEditChangeGroup(TextChange change, TextEditGroup group) {
-			fTextChange= change;
-			fIsActive= true;
-			fTextEditGroup= group;
-		}
-		public String getName() {
-			return fTextEditGroup.getName();
-		}
-		public void setActive(boolean active) {
-			fIsActive= active;
-		}
-		public boolean isActive() {
-			return fIsActive;
-		}
-		public TextChange getTextChange() {
-			return fTextChange;
-		}
-		public IRegion getRegion() {
-			return fTextEditGroup.getRegion();
-		}
-		public boolean isEmpty() {
-			return fTextEditGroup.isEmpty();
-		}
-		public TextEdit[] getTextEdits() {
-			return fTextEditGroup.getTextEdits();
-		}
-		/* package */ TextEditGroup getTextEditGroup() {
-			return fTextEditGroup;
-		}
-		public boolean coveredBy(IRegion sourceRegion) {
-			int sLength= sourceRegion.getLength();
-			if (sLength == 0)
-				return false;
-			int sOffset= sourceRegion.getOffset();
-			int sEnd= sOffset + sLength - 1;
-			TextEdit[] edits= fTextEditGroup.getTextEdits();
-			for (int i= 0; i < edits.length; i++) {
-				TextEdit edit= edits[i];
-				if (edit.isDeleted())
-					return false;
-				int rOffset= edit.getOffset();
-				int rLength= edit.getLength();
-				int rEnd= rOffset + rLength - 1;
-			    if (rLength == 0) {
-					if (!(sOffset < rOffset && rOffset <= sEnd))
-						return false;
-				} else {
-					if (!(sOffset <= rOffset && rEnd <= sEnd))
-						return false;
-				}
-			}
-			return true;
-		}
-	}
-	
 	private static class LocalTextEditProcessor extends TextEditProcessor {
 		public static final int EXCLUDE= 1;
 		public static final int INCLUDE= 2;

@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
@@ -31,7 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.TextEditChangeGroup;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextEditChangeGroup;
 
 /**
  * A default content provider to present a hierarchy of <code>IChange</code>
@@ -155,7 +157,7 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 		TextEditChangeGroup[] edits= change.getTextEditChangeGroups();
 		List result= new ArrayList(edits.length);
 		for (int i= 0; i < edits.length; i++) {
-			if (!edits[i].isEmpty())
+			if (!edits[i].getTextEditGroup().isEmpty())
 				result.add(edits[i]);
 		}
 		Comparator comparator= new OffsetComparator();
@@ -193,7 +195,7 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 			while(true) {
 				ISourceReference ref= (ISourceReference)result;
 				IRegion sRange= new Region(ref.getSourceRange().getOffset(), ref.getSourceRange().getLength());
-				if (result.getElementType() == IJavaElement.COMPILATION_UNIT || result.getParent() == null || edit.coveredBy(sRange))
+				if (result.getElementType() == IJavaElement.COMPILATION_UNIT || result.getParent() == null || coveredBy(edit, sRange))
 					break;
 				result= result.getParent();
 			}
@@ -203,6 +205,31 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 			// Do nothing, use old value.
 		}
 		return result;
+	}
+	
+	public boolean coveredBy(TextEditChangeGroup group, IRegion sourceRegion) {
+		int sLength= sourceRegion.getLength();
+		if (sLength == 0)
+			return false;
+		int sOffset= sourceRegion.getOffset();
+		int sEnd= sOffset + sLength - 1;
+		TextEdit[] edits= group.getTextEdits();
+		for (int i= 0; i < edits.length; i++) {
+			TextEdit edit= edits[i];
+			if (edit.isDeleted())
+				return false;
+			int rOffset= edit.getOffset();
+			int rLength= edit.getLength();
+			int rEnd= rOffset + rLength - 1;
+		    if (rLength == 0) {
+				if (!(sOffset < rOffset && rOffset <= sEnd))
+					return false;
+			} else {
+				if (!(sOffset <= rOffset && rEnd <= sEnd))
+					return false;
+			}
+		}
+		return true;
 	}
 }
 
