@@ -26,7 +26,7 @@ public class TypeInfo {
 
 	private final String fName;
 	private final String fPackage;
-	private final String[] fEnclosingNames;
+	private final char[][] fEnclosingNames;
 	private final boolean fIsInterface;
 	private final String fPath;
 
@@ -37,10 +37,7 @@ public class TypeInfo {
 		fPackage= new String(pkg);
 		fName= new String(name);
 		fIsInterface= isInterface;
-		fEnclosingNames= new String[enclosingTypes.length];
-		for (int i= 0; i < fEnclosingNames.length; i++){
-			fEnclosingNames[i]= new String(enclosingTypes[i]);
-		}
+		fEnclosingNames= enclosingTypes;
 	}
 	
 	public String getTypeName() {
