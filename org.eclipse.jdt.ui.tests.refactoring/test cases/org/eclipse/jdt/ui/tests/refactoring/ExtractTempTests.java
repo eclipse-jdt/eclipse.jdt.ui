@@ -258,12 +258,16 @@ public class ExtractTempTests extends RefactoringTest {
 	}	
 
 	public void testFail13() throws Exception{
-		//need to fix this one
+		//need to fix this one - cannot extract assignments
 		failHelper1(5, 16, 5, 20, false, false, "temp");
 	}	
 
 	public void testFail14() throws Exception{
 		failHelper1(4, 16, 4, 22, false, false, "temp");
 	}	
-	
+
+	public void testFail15() throws Exception{
+		//need to fix - cannot extract string literals
+		failHelper1(4, 19, 4, 22, false, false, "temp");
+	}	
 }
