@@ -19,8 +19,8 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -102,18 +102,21 @@ public class BuildActionSelectionContext {
 	 * <code>null</code> if no Java project could be found.
 	 */
 	private IJavaProject getJavaProjectFromSelectedElement(Object element) {
-		if (!(element instanceof IAdaptable))
-			return null;
-		IResource resource= (IResource) ((IAdaptable) element).getAdapter(IResource.class);
-		if (resource == null) {
-			if (element instanceof IPackageFragmentRoot)
-				return ((IPackageFragmentRoot) element).getJavaProject(); // this case is necessary for external archives
-			if (element instanceof ClassPathContainer)
-				return ((ClassPathContainer) element).getJavaProject();
-			return null;
+
+		if (element instanceof IJavaElement)
+			return ((IJavaElement) element).getJavaProject();
+		if (element instanceof ClassPathContainer)
+			return ((ClassPathContainer) element).getJavaProject();
+		if (element instanceof IResource)
+			return JavaCore.create(((IResource) element).getProject());
+		
+		if (element instanceof IAdaptable) {
+			IResource resource= (IResource) ((IAdaptable) element).getAdapter(IResource.class);
+			if (resource != null) {
+				return JavaCore.create(resource.getProject());
+			}
 		}
-		IJavaProject project= JavaCore.create(resource.getProject());
-		return project;
+		return null;
 	}
 
 	public List getElements() {
