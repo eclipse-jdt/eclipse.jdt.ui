@@ -12,25 +12,28 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
-import java.util.List;
 
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
 
 import org.eclipse.swt.dnd.Clipboard;
 
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.internal.corext.refactoring.participants.DeleteExtensionManager;
+import org.eclipse.jdt.internal.corext.refactoring.participants.DeleteRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -39,9 +42,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferences;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 public class CutAction extends SelectionDispatchAction{
 
@@ -72,7 +73,7 @@ public class CutAction extends SelectionDispatchAction{
 			}	
 			fCopyToClipboardAction.selectionChanged(selection);
 			setEnabled(fCopyToClipboardAction.isEnabled() && isDeleteEnabled(selection));
-		} catch (JavaModelException e) {
+		} catch (CoreException e) {
 			//no ui here - this happens on selection changes
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.filterNotPresentException(e))
@@ -81,13 +82,9 @@ public class CutAction extends SelectionDispatchAction{
 		}
 	}
 
-	private boolean isDeleteEnabled(IStructuredSelection selection) throws JavaModelException {
-		List elements= selection.toList();
-		IResource[] resources= ReorgUtils.getResources(elements);
-		IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-		if (elements.size() != resources.length + javaElements.length)
-			return false;
-		return DeleteRefactoring.isAvailable(resources, javaElements);
+	private boolean isDeleteEnabled(IStructuredSelection selection) throws CoreException {
+		Object[] elements= selection.toArray();
+		return DeleteExtensionManager.hasProcessor(elements);
 	}
 
 	private static boolean containsOnlyElementsInsideCompilationUnits(IStructuredSelection selection) {
@@ -118,7 +115,7 @@ public class CutAction extends SelectionDispatchAction{
 				fCopyToClipboardAction.run(selection);
 				runDelete(selection);
 			}
-		} catch (JavaModelException e) {
+		} catch (CoreException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (InterruptedException e) {
 			//OK
@@ -127,19 +124,22 @@ public class CutAction extends SelectionDispatchAction{
 		}	
 	}
 
-	private void runDelete(IStructuredSelection selection) throws JavaModelException, InterruptedException, InvocationTargetException {
-		List elements= selection.toList();
-		IResource[] resources= ReorgUtils.getResources(elements);
-		IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-		DeleteRefactoring refactoring= createRefactoring(resources, javaElements);
+	private void runDelete(IStructuredSelection selection) throws CoreException, InterruptedException, InvocationTargetException {
+		Object[] elements= selection.toArray();
+		DeleteRefactoring refactoring= createRefactoring(elements);
+		Assert.isTrue(refactoring.isAvailable());
 		IRunnableContext context= new ProgressMonitorDialog(getShell());
-		refactoring.setQueries(new ReorgQueries(getShell()));
+		JavaDeleteProcessor processor= (JavaDeleteProcessor)refactoring.getAdapter(JavaDeleteProcessor.class);
+		if (processor != null)
+			processor.setQueries(new ReorgQueries(getShell()));
 		new RefactoringExecutionHelper(refactoring, RefactoringPreferences.getStopSeverity(), false, getShell(), context).perform();
 	}
 
-	private DeleteRefactoring createRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		DeleteRefactoring ref= DeleteRefactoring.create(resources, javaElements);
-		ref.setSuggestGetterSetterDeletion(false);
+	private DeleteRefactoring createRefactoring(Object[] elements) throws CoreException {
+		DeleteRefactoring ref= new DeleteRefactoring(elements);
+		JavaDeleteProcessor processor= (JavaDeleteProcessor)ref.getAdapter(JavaDeleteProcessor.class);
+		if (processor != null)
+			processor.setSuggestGetterSetterDeletion(false);
 		return ref;
 	}
 }

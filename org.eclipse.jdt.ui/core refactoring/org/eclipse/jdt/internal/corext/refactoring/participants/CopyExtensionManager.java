@@ -19,8 +19,8 @@ public class CopyExtensionManager {
 	
 	private static ExtensionManager fInstance= new ExtensionManager("Copy", PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT); //$NON-NLS-1$
 	
-	public static ICopyProcessor getProcessor(Object element) throws CoreException {
-		return (ICopyProcessor)fInstance.getProcessor(element);
+	public static ICopyProcessor getProcessor(Object[] elements) throws CoreException {
+		return (ICopyProcessor)fInstance.getProcessor(elements);
 	}
 	
 	public static ICopyParticipant[] getParticipants(IRefactoringProcessor processor) throws CoreException {
@@ -28,7 +28,7 @@ public class CopyExtensionManager {
 	}		
 
 	public static ICopyParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements) throws CoreException {
-		IRefactoringParticipant[] participants= fInstance.getParticipants(processor, elements);
+		IRefactoringParticipant[] participants= fInstance.getParticipants(processor, elements, new SharableParticipants());
 		ICopyParticipant[] result= new ICopyParticipant[participants.length];
 		System.arraycopy(participants, 0, result, 0, participants.length);
 		return result;

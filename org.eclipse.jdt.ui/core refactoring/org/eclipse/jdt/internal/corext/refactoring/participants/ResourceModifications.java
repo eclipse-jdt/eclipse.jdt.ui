@@ -175,10 +175,10 @@ public class ResourceModifications implements IResourceModifications {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getParticipants(org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor)
 	 */
-	public IRefactoringParticipant[] getParticipants(IRefactoringProcessor processor) throws CoreException {
+	public IRefactoringParticipant[] getParticipants(IRefactoringProcessor processor, SharableParticipants shared) throws CoreException {
 		List result= new ArrayList(5);
 		if (fDelete != null) {
-			IDeleteParticipant[] deletes= DeleteExtensionManager.getParticipants(processor, fDelete.toArray());
+			IDeleteParticipant[] deletes= DeleteExtensionManager.getParticipants(processor, fDelete.toArray(), shared);
 			result.addAll(Arrays.asList(deletes));
 		}
 		if (fCreate != null) {

@@ -89,6 +89,6 @@ public interface IResourceModifications {
 	 * @param processor the main processor of the overall refactoring
 	 * @return an array of participants
 	 */
-	public IRefactoringParticipant[] getParticipants(IRefactoringProcessor processor) throws CoreException;
+	public IRefactoringParticipant[] getParticipants(IRefactoringProcessor processor, SharableParticipants shared) throws CoreException;
 
 }

@@ -50,7 +50,9 @@ public class RenameCompilationUnitProcessor extends RenameProcessor implements I
 	
 	//---- IRefactoringProcessor --------------------------------
 
-	public void initialize(Object element) throws CoreException {
+	public void initialize(Object[] elements) throws CoreException {
+		Assert.isTrue(elements != null && elements.length == 1);
+		Object element= elements[0];
 		if (element instanceof IFile) {
 			IJavaElement jElement= JavaCore.create((IFile)element);
 			if (jElement != null && jElement.exists() && jElement.getElementType() == IJavaElement.COMPILATION_UNIT)
@@ -86,14 +88,14 @@ public class RenameCompilationUnitProcessor extends RenameProcessor implements I
 		return JavaProcessors.computeScope(fCu);
 	}
 
-	public Object getElement() {
-		return fCu;
+	public Object[] getElements() {
+		return new Object[] {fCu};
 	}
 
 	public Object[] getDerivedElements() {
 		if (fRenameTypeProcessor == null)
 			return new Object[0];
-		return new Object[] {fRenameTypeProcessor.getElement()};
+		return new Object[] {fRenameTypeProcessor.getElements()};
 	}
 	
 	public IResourceModifications getResourceModifications() {
@@ -283,7 +285,7 @@ public class RenameCompilationUnitProcessor extends RenameProcessor implements I
 		IType type= getTypeWithTheSameName();
 		if (type != null) {
 			fRenameTypeProcessor= new RenameTypeProcessor();
-			fRenameTypeProcessor.initialize(type);
+			fRenameTypeProcessor.initialize(new Object[] {type});
 		} else {
 			fRenameTypeProcessor= null;
 		}

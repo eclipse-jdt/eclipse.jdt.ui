@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.participants;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
@@ -19,9 +20,9 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 
-public interface IRefactoringProcessor {
+public interface IRefactoringProcessor extends IAdaptable {
 	
-	public void initialize(Object element) throws CoreException;
+	public void initialize(Object[] elements) throws CoreException;
 	
 	public boolean isAvailable() throws CoreException;
 	
@@ -31,7 +32,7 @@ public interface IRefactoringProcessor {
 	
 	public IProject[] getScope() throws CoreException;
 	
-	public Object getElement();
+	public Object[] getElements();
 	
 	public Object[] getDerivedElements() throws CoreException;
 	

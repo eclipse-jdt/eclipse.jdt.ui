@@ -60,4 +60,11 @@ public abstract class RenameProcessor implements IRenameProcessor {
 			participant.setUpdateReferences(((IReferenceUpdating)this).getUpdateReferences());
 		}
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
+	 */
+	public Object getAdapter(Class clazz) {
+		return null;
+	}
 }

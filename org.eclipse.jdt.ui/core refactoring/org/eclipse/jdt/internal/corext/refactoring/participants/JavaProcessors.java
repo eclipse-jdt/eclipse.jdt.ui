@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,7 +37,17 @@ public class JavaProcessors {
 			}
 		}
 		IJavaProject project= element.getJavaProject();
-		Set result= new HashSet(Arrays.asList(Processors.computeScope(project.getProject())));
+		return ResourceProcessors.computeScope(project.getProject());
+	}
+	
+	public static IProject[] computeScope(IJavaElement[] elements) throws CoreException {
+		Set result= new HashSet();
+		for (int i= 0; i < elements.length; i++) {
+			IProject[] scope= computeScope(elements[i]);
+			for (int j= 0; j < scope.length; j++) {
+				result.add(scope[j]);
+			}
+		}
 		return (IProject[])result.toArray(new IProject[result.size()]);
 	}	
 }

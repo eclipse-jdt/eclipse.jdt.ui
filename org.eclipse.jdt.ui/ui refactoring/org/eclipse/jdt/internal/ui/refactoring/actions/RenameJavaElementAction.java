@@ -87,7 +87,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		IJavaElement element= getJavaElement(selection);
 		if (element == null)
 			return false;
-		return RenameExtensionManager.processorExists(element);
+		return RenameExtensionManager.hasProcessor(new Object[] {element});
 	} 
 
 	private static IJavaElement getJavaElement(IStructuredSelection selection) {

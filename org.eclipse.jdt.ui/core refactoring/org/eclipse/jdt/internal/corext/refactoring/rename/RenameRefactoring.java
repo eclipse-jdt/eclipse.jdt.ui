@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipa
 import org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameExtensionManager;
+import org.eclipse.jdt.internal.corext.refactoring.participants.SharableParticipants;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 
 
@@ -42,7 +43,7 @@ public class RenameRefactoring extends Refactoring implements IAdaptable, IRenam
 		Assert.isNotNull(element);
 		
 		fElement= element;
-		fProcessor= RenameExtensionManager.getProcessor(fElement);
+		fProcessor= RenameExtensionManager.getProcessor(new Object[] {fElement});
 	}
 	
 	public boolean isAvailable() {
@@ -50,11 +51,9 @@ public class RenameRefactoring extends Refactoring implements IAdaptable, IRenam
 	}
 		
 	public Object getAdapter(Class clazz) {
-		if (clazz.isInstance(this))
-			return this;
 		if (clazz.isInstance(fProcessor))
 			return fProcessor;
-		return null;
+		return super.getAdapter(clazz);
 	}
 	
 	public IRenameProcessor getProcessor() {
@@ -130,7 +129,7 @@ public class RenameRefactoring extends Refactoring implements IAdaptable, IRenam
 		}
 		try {
 			fElementParticipants= RenameExtensionManager.getParticipants(
-				fProcessor, new Object[] {fProcessor.getElement()});
+				fProcessor, fProcessor.getElements());
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		}		
@@ -219,7 +218,7 @@ public class RenameRefactoring extends Refactoring implements IAdaptable, IRenam
 		fDerivedParticipants= RenameExtensionManager.getParticipants(fProcessor, fProcessor.getDerivedElements());
 		IResourceModifications resourceModifications= fProcessor.getResourceModifications();
 		if (resourceModifications != null)
-			fResourceParticipants= resourceModifications.getParticipants(fProcessor);
+			fResourceParticipants= resourceModifications.getParticipants(fProcessor, new SharableParticipants());
 		else
 			fResourceParticipants= new IRefactoringParticipant[0];
 	}

@@ -40,7 +40,9 @@ public class RenameSourceFolderProcessor extends RenameProcessor {
 	
 	//---- IRefactoringProcessor ---------------------------------------------------
 
-	public void initialize(Object element) {
+	public void initialize(Object[] elements) {
+		Assert.isTrue(elements != null && elements.length == 1);
+		Object element= elements[0];
 		if (!(element instanceof IPackageFragmentRoot))
 			return;
 		fSourceFolder= (IPackageFragmentRoot)element;
@@ -78,8 +80,8 @@ public class RenameSourceFolderProcessor extends RenameProcessor {
 		return JavaProcessors.computeScope(fSourceFolder);
 	}
 	
-	public Object getElement() {
-		return fSourceFolder;
+	public Object[] getElements() {
+		return new Object[] {fSourceFolder};
 	}
 
 	public IResourceModifications getResourceModifications() throws CoreException {

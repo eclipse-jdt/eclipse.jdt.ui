@@ -13,8 +13,13 @@ package org.eclipse.jdt.internal.corext.refactoring.participants;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.*;
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionParser;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IElementHandler;
 import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ITestResult;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.SelectionExpression;
+import org.eclipse.jdt.internal.corext.refactoring.participants.xml.StandardElementHandler;
 
 public class ProcessorDescriptor {
 	
@@ -43,13 +48,21 @@ public class ProcessorDescriptor {
 		return fConfigurationElement.getAttribute(OVERRIDE);
 	}
 
-	public boolean matches(Object element) throws CoreException {
-		IConfigurationElement objectState= fConfigurationElement.getChildren(OBJECT_STATE)[0];
-		if (objectState != null) {
-			Expression exp= PARSER.parse(objectState);
-			return convert(exp.evaluate(element));
+	public boolean matches(Object[] elements) throws CoreException {
+		Assert.isNotNull(elements);
+		IConfigurationElement[] configElements= fConfigurationElement.getChildren(SelectionExpression.NAME);
+		IConfigurationElement selectionState= configElements.length > 0 ? configElements[0] : null; 
+		if (selectionState != null) {
+			Expression exp= PARSER.parse(selectionState);
+			return (convert(exp.evaluate(elements)));
+		} else if (elements.length == 1) {
+			IConfigurationElement objectState= fConfigurationElement.getChildren(OBJECT_STATE)[0];
+			if (objectState != null) {
+				Expression exp= PARSER.parse(objectState);
+				return (convert(exp.evaluate(elements[0])));
+			}
 		}
-		return true;
+		return false;
 	}
 
 	public IRefactoringProcessor createProcessor() throws CoreException {

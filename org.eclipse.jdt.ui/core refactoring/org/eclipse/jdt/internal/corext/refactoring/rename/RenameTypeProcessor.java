@@ -95,7 +95,9 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 
 	//---- IRefactoringProcessor ---------------------------------------------------
 
-	public void initialize(Object element) {
+	public void initialize(Object[] elements) {
+		Assert.isTrue(elements != null && elements.length == 1);
+		Object element= elements[0];
 		if (!(element instanceof IType))
 			return;
 		fType= (IType)element;
@@ -126,8 +128,8 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		return JavaProcessors.computeScope(fType);
 	}
 
-	public Object getElement() {
-		return fType;
+	public Object[] getElements() {
+		return new Object[] {fType};
 	}
 	
 	public Object[] getDerivedElements() throws CoreException {

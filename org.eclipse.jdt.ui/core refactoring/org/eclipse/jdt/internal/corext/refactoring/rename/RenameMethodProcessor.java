@@ -70,7 +70,9 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 	
 	//---- IRefactoringProcessor --------------------------------
 
-	public void initialize(Object method) {
+	public void initialize(Object[] elements) {
+		Assert.isTrue(elements != null && elements.length == 1);
+		Object method= elements[0];
 		if (!(method instanceof IMethod))
 			return;
 		fMethod= (IMethod)method;
@@ -100,8 +102,8 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 		return JavaProcessors.computeScope(fMethod);
 	}
 
-	public Object getElement() {
-		return fMethod;
+	public Object[] getElements() {
+		return new Object[] {fMethod};
 	}
 
 	public Object[] getDerivedElements() throws CoreException {

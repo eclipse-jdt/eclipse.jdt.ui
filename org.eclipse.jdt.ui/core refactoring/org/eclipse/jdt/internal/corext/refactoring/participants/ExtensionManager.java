@@ -13,11 +13,9 @@ package org.eclipse.jdt.internal.corext.refactoring.participants;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -59,14 +57,14 @@ public class ExtensionManager {
 		init();
 	}
 	
-	public boolean processorExists(Object element) throws CoreException {
+	public boolean hasProcessor(Object[] elements) throws CoreException {
 		// check last recently used processors
 		long start= 0;
 		if (EXIST_TRACING)
 			start= System.currentTimeMillis();
 		for (Iterator iter= fLRUProcessors.iterator(); iter.hasNext();) {
 			ProcessorDescriptor descriptor= (ProcessorDescriptor)iter.next();
-			if (descriptor.matches(element)) {
+			if (descriptor.matches(elements)) {
 				if (fLRUProcessors.getFirst() != descriptor) {
 					iter.remove();
 					fLRUProcessors.addFirst(descriptor);
@@ -79,7 +77,7 @@ public class ExtensionManager {
 		// now check normal list of processors
 		for (Iterator iter= fProcessors.iterator(); iter.hasNext();) {
 			ProcessorDescriptor descriptor= (ProcessorDescriptor)iter.next();
-			if (descriptor.matches(element)) {
+			if (descriptor.matches(elements)) {
 				if (fLRUProcessors.size() >= MAX_ENTRIES) {
 					fLRUProcessors.removeLast();
 				}
@@ -100,11 +98,11 @@ public class ExtensionManager {
 			(System.currentTimeMillis() - start) + " ms"); //$NON-NLS-1$
 	}
 	
-	public IRefactoringProcessor getProcessor(Object element) throws CoreException {
+	public IRefactoringProcessor getProcessor(Object[] elements) throws CoreException {
 		List selected= new ArrayList();
 		for (Iterator p= fProcessors.iterator(); p.hasNext();) {
 			ProcessorDescriptor ce= (ProcessorDescriptor)p.next();
-			if (ce.matches(element)) {
+			if (ce.matches(elements)) {
 				selected.add(ce);
 			}
 		}
@@ -112,7 +110,7 @@ public class ExtensionManager {
 			return null;
 			
 		if (selected.size() == 1) {
-			return createProcessor((ProcessorDescriptor)selected.get(0), element);
+			return createProcessor((ProcessorDescriptor)selected.get(0), elements);
 		} else {
 			Comparator sorter= new Comparator() {
 				public int compare(Object o1, Object o2) {
@@ -138,7 +136,7 @@ public class ExtensionManager {
 		
 			Collections.sort(selected, sorter);
 			for (int i= selected.size() - 1; i >= 0; i--) {
-				IRefactoringProcessor result= createProcessor((ProcessorDescriptor)selected.get(i), element);
+				IRefactoringProcessor result= createProcessor((ProcessorDescriptor)selected.get(i), elements);
 				if (result != null)
 					return result;
 			}
@@ -146,8 +144,7 @@ public class ExtensionManager {
 		return null;
 	}
 	
-	public IRefactoringParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements) throws CoreException {
-		Map shared= new HashMap();
+	public IRefactoringParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements, SharableParticipants shared) throws CoreException {
 		List result= new ArrayList();
 		for (int i= 0; i < elements.length; i++) {
 			Object element= elements[i];
@@ -202,9 +199,9 @@ public class ExtensionManager {
 		}
 	}
 	
-	private IRefactoringProcessor createProcessor(ProcessorDescriptor processor, Object element) throws CoreException {
+	private IRefactoringProcessor createProcessor(ProcessorDescriptor processor, Object[] elements) throws CoreException {
 		IRefactoringProcessor result= processor.createProcessor();
-		result.initialize(element);
+		result.initialize(elements);
 		if (result.isAvailable())
 			return result;
 		return null;

@@ -22,6 +22,7 @@ public class ResourcePropertyTester extends PropertyTester {
 
 	private static final String PROPERTY_NAME= "name";	 //$NON-NLS-1$
 	private static final String PROJECT_NATURE = "projectNature";	 //$NON-NLS-1$
+	private static final String CAN_DELETE= "canDelete"; //$NON-NLS-1$
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.properties.IPropertyEvaluator#test(java.lang.Object, java.lang.String, java.lang.String)
@@ -39,7 +40,17 @@ public class ResourcePropertyTester extends PropertyTester {
 			} catch (CoreException e) {
 				return FALSE;		
 			}
+		} else if (CAN_DELETE.equals(propertyName)) {
+			return testBoolean(value, canDelete(resource));
 		}
 		return UNKNOWN;
+	}
+	
+	private boolean canDelete(IResource resource) {
+		if (!resource.exists() || resource.isPhantom())
+			return false;
+		if (resource.getType() == IResource.ROOT || resource.getType() == IResource.PROJECT)
+			return false;
+		return true;
 	}
 }

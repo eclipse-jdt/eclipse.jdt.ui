@@ -19,24 +19,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -45,29 +44,126 @@ import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.participants.DeleteProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringParticipant;
+import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.participants.RefactoringStyles;
+import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
+import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.participants.SharableParticipants;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-public class DeleteRefactoring extends Refactoring{
+public class JavaDeleteProcessor extends DeleteProcessor {
 	
 	private boolean fWasCanceled;
 	private boolean fSuggestGetterSetterDeletion;
+	private Object[] fElements;
 	private IResource[] fResources;
 	private IJavaElement[] fJavaElements;
+	private int fStyle;
 	private IReorgQueries fDeleteQueries;	
 
 	private IChange fDeleteChange;
 	
-	private DeleteRefactoring(IResource[] resources, IJavaElement[] javaElements){
-		fResources= resources;
-		fJavaElements= javaElements;
-		fSuggestGetterSetterDeletion= true;//default
+	public JavaDeleteProcessor() {
+		fSuggestGetterSetterDeletion= true;
 		fWasCanceled= false;
 	}
+	
+	//---- IRefactoringProcessor ---------------------------------------------------
+
+	public void initialize(Object[] elements) {
+		fElements= elements;
+		fResources= getResources(elements);
+		fJavaElements= getJavaElements(elements);
+		fStyle= getStyle(fResources, fJavaElements);
+	}
+	
+	public boolean isAvailable() throws CoreException {
+		if (fElements.length != fResources.length + fJavaElements.length)
+			return false;
+		return true;
+	}
+	
+	public String getProcessorName() {
+		return RefactoringCoreMessages.getString("DeleteRefactoring.7"); //$NON-NLS-1$
+	}
+	
+	public IProject[] getScope() throws CoreException {
+		IProject[] jScope= JavaProcessors.computeScope(fJavaElements);
+		IProject[] rScope= ResourceProcessors.computeScope(fResources);
+		Set result= new HashSet();
+		result.addAll(Arrays.asList(jScope));
+		result.addAll(Arrays.asList(rScope));
+		return (IProject[])result.toArray(new IProject[result.size()]);
+	}
+
+	public Object[] getElements() {
+		return fElements;
+	}
+	
+	public int getStyle() {
+		return fStyle;
+	}
+	
+	public Object[] getDerivedElements() throws CoreException {
+		// TODO Auto-generated method stub
+		return super.getDerivedElements();
+	}
+	
+	protected IRefactoringParticipant[] getMappedParticipants(SharableParticipants shared) throws CoreException {
+		ResourceModifications modifications= new ResourceModifications();
+		for (int i= 0; i < fJavaElements.length; i++) {
+			IJavaElement element= fJavaElements[i];
+			if (element instanceof IPackageFragment) {
+				ICompilationUnit[] children= ((IPackageFragment)fJavaElements[i]).getCompilationUnits();
+				for (int j= 0; j < children.length; j++) {
+					IResource resource= children[i].getResource();
+					if (resource != null) {
+						modifications.addDelete(resource);
+					}
+				}
+			}
+		}
+		return modifications.getParticipants(this, shared);
+	}
+	
+	
+	private static IResource[] getResources(Object[] elements) {
+		List result= new ArrayList();
+		for (int i= 0; i < elements.length; i++) {
+			if (elements[i] instanceof IResource)
+				result.add(elements[i]);
+		}
+		return (IResource[])result.toArray(new IResource[result.size()]);
+	}
+	
+	private static IJavaElement[] getJavaElements(Object[] elements) {
+		List result= new ArrayList();
+		for (int i= 0; i < elements.length; i++) {
+			if (elements[i] instanceof IJavaElement)
+				result.add(elements[i]);
+		}
+		return (IJavaElement[])result.toArray(new IJavaElement[result.size()]);
+	}
+
+	private static int getStyle(IResource[] resources, IJavaElement[] jElements) {	
+		if (resources != null && resources.length > 0)
+			return RefactoringStyles.NEEDS_PROGRESS;
+		if (jElements != null) {
+			for (int i= 0; i < jElements.length; i++) {
+				int type= jElements[i].getElementType();
+				if (type <= IJavaElement.CLASS_FILE)
+					return RefactoringStyles.NEEDS_PROGRESS;
+			}
+		}
+		return RefactoringStyles.NONE;
+	}
+	
 	
 	/* 
 	 * This has to be customizable because when drag and drop is performed on a field,
@@ -94,34 +190,22 @@ public class DeleteRefactoring extends Refactoring{
 		return fResources;
 	}
 	
-	public static boolean isAvailable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
-		return new DeleteEnablementPolicy(resources, javaElements).canEnable();
-	}
-	
-	public static DeleteRefactoring create(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
-		if (! isAvailable(resources, javaElements))
-			return null;
-		return new DeleteRefactoring(resources, javaElements);
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkActivation() throws CoreException {
 		Assert.isNotNull(fDeleteQueries);//must be set before checking activation
-		pm.beginTask("", 1); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(fResources))));
 		IResource[] javaResources= ReorgUtils.getResources(fJavaElements);
 		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(javaResources))));
-		pm.done();
 		return result;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.getString("DeleteRefactoring.1"), 1); //$NON-NLS-1$
 		try{
 			fWasCanceled= false;
@@ -267,22 +351,12 @@ public class DeleteRefactoring extends Refactoring{
 		fJavaElements= parentUtil.getJavaElements();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
-	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		pm.done();
 		return fDeleteChange;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
-	 */
-	public String getName() {
-		return RefactoringCoreMessages.getString("DeleteRefactoring.7"); //$NON-NLS-1$
-	}
-	
 	private void addToSetToDelete(IJavaElement[] newElements){
 		fJavaElements= ReorgUtils.union(fJavaElements, newElements);		
 	}
@@ -436,103 +510,5 @@ public class DeleteRefactoring extends Refactoring{
 				return false;
 		}
 		return true;
-	}
-
-	private static class DeleteEnablementPolicy implements IReorgEnablementPolicy {
-	
-		private final IResource[] fResources;
-		private final IJavaElement[] fJavaElements;
-	
-		public DeleteEnablementPolicy(IResource[] resources, IJavaElement[] javaElements) {
-			Assert.isNotNull(resources);
-			Assert.isNotNull(javaElements);
-			fResources= resources;
-			fJavaElements= javaElements;
-		}
-
-		public final IResource[] getResources() {
-			return fResources;
-		}
-
-		public final IJavaElement[] getJavaElements() {
-			return fJavaElements;
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgEnablementPolicy#canEnable()
-		 */
-		public boolean canEnable() throws JavaModelException {
-			return ! isNothingToDelete() && canDeleteAll();
-		}
-
-		private boolean canDeleteAll() throws JavaModelException {
-			for (int i= 0; i < fResources.length; i++) {
-				if (! canDelete(fResources[i])) return false;
-			}
-			for (int i= 0; i < fJavaElements.length; i++) {
-				if (! canDelete(fJavaElements[i])) return false;
-			}
-			return true;
-		}
-
-		private static boolean canDelete(IResource resource) {
-			if (resource == null || ! resource.exists() || resource.isPhantom())
-				return false;
-			if (resource.getType() == IResource.ROOT || resource.getType() == IResource.PROJECT)
-				return false;
-			return true;
-		}
-
-		private static boolean canDelete(IJavaElement element) throws JavaModelException {
-			if (element == null || ! element.exists())
-				return false;
-		
-			if (element instanceof IJavaModel || element instanceof IJavaProject)
-				return false;
-		
-			if (element.getParent() != null && element.getParent().isReadOnly())
-				return false;
-		
-			if (element instanceof IPackageFragmentRoot){
-				IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-				if (root.isExternal() || Checks.isClasspathDelete(root)) //TODO rename isClasspathDelete
-					return false;
-			}
-			if (element instanceof IPackageFragment && isEmptySuperPackage((IPackageFragment)element))
-				return false;
-		
-			if (isFromExternalArchive(element))
-				return false;
-					
-			if (element instanceof IMember && ((IMember)element).isBinary())
-				return false;
-		
-			if (ReorgUtils.isDeletedFromEditor(element))
-				return false;								
-				
-			return true;
-		}
-	
-		private static boolean isFromExternalArchive(IJavaElement element) {
-			return element.getResource() == null && ! isWorkingCopyElement(element);
-		}
-
-		private static boolean isWorkingCopyElement(IJavaElement element) {
-			if (element instanceof IWorkingCopy) 
-				return ((IWorkingCopy)element).isWorkingCopy();
-			if (ReorgUtils.isInsideCompilationUnit(element))
-				return ReorgUtils.getCompilationUnit(element).isWorkingCopy();
-			return false;
-		}
-
-		private static boolean isEmptySuperPackage(IPackageFragment pack) throws JavaModelException {
-			return  pack.hasSubpackages() &&
-					pack.getNonJavaResources().length == 0 &&
-					pack.getChildren().length == 0;
-		}
-
-		private boolean isNothingToDelete() {
-			return fJavaElements.length + fResources.length == 0;
-		}
 	}
 }

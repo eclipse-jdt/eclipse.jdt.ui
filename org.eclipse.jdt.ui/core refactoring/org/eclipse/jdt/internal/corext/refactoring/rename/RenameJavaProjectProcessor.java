@@ -41,7 +41,9 @@ public class RenameJavaProjectProcessor extends RenameProcessor implements IRefe
 	
 	//---- IRefactoringProcessor ---------------------------------------------------
 
-	public void initialize(Object element) {
+	public void initialize(Object[] elements) {
+		Assert.isTrue(elements != null && elements.length == 1);
+		Object element= elements[0];
 		if (!(element instanceof IJavaProject))
 			return;
 		fProject= (IJavaProject)element;
@@ -69,8 +71,8 @@ public class RenameJavaProjectProcessor extends RenameProcessor implements IRefe
 		return JavaProcessors.computeScope(fProject);
 	}
 	
-	public Object getElement() {
-		return fProject;
+	public Object[] getElements() {
+		return new Object[] {fProject};
 	}
 
 	public IResourceModifications getResourceModifications() throws CoreException {

@@ -84,7 +84,9 @@ public class RenamePackageProcessor extends RenameProcessor implements IReferenc
 	
 	//---- IRefactoringProcessor ---------------------------------------------------
 
-	public void initialize(Object element) {
+	public void initialize(Object[] elements) {
+		Assert.isTrue(elements != null && elements.length == 1);
+		Object element= elements[0];
 		if (!(element instanceof IPackageFragment))
 			return;
 		fPackage= (IPackageFragment)element;
@@ -114,8 +116,8 @@ public class RenamePackageProcessor extends RenameProcessor implements IReferenc
 		return JavaProcessors.computeScope(fPackage);
 	}
 	
-	public Object getElement() {
-		return fPackage;
+	public Object[] getElements() {
+		return new Object[] {fPackage};
 	}
 
 	public IResourceModifications getResourceModifications() throws CoreException {

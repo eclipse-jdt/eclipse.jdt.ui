@@ -73,7 +73,9 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	
 	//---- IRefactoringProcessor --------------------------------
 
-	public void initialize(Object field) {
+	public void initialize(Object[] elements) {
+		Assert.isTrue(elements != null && elements.length == 1);
+		Object field= elements[0];
 		if (!(field instanceof IField))
 			return;
 		fField= (IField)field;
@@ -103,8 +105,8 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 		return JavaProcessors.computeScope(fField);
 	}
 
-	public Object getElement() {
-		return fField;
+	public Object[] getElements() {
+		return new Object[] {fField};
 	}
 
 	public Object[] getDerivedElements() throws CoreException {

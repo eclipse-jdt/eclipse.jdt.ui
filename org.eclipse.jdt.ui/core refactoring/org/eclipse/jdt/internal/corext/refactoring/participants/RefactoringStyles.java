@@ -16,7 +16,9 @@ public final class RefactoringStyles {
 	public static final int NONE= 0;
 	public static final int NEEDS_PREVIEW= 1 << 0;
 	public static final int FORCE_PREVIEW= 1 << 1;
+	public static final int NEEDS_PROGRESS= 1 << 2;
 	
 	private RefactoringStyles() {
+		// no instance
 	}
 }

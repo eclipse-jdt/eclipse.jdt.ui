@@ -3259,13 +3259,13 @@
 
 <extension point="org.eclipse.jdt.ui.propertyTesters">
   <propertyTester
-     id="IResourcePropertyTester"
+     id="org.eclipse.jdt.IResourcePropertyTester"
      type="org.eclipse.core.resources.IResource"
-     properties="name, projectNature"
+     properties="name, projectNature, canDelete"
      class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.ResourcePropertyTester"/>
 </extension>
 
-<extension point="org.eclipse.jdt.ui.propertyTesters">     
+<extension point="org.eclipse.jdt.ui.propertyTesters">          
   <propertyTester
      id="org.eclipse.jdt.IFilePropertyTester"
      type="org.eclipse.core.resources.IFile"
@@ -3281,7 +3281,7 @@
   <propertyTester
      id="IJavaElementPropertyTester"
      type="org.eclipse.jdt.core.IJavaElement"
-     properties="isAvailable"
+     properties="isAvailable, canDelete"
      class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.JavaElementPropertyTester"/>
      
   <propertyTester
@@ -3305,6 +3305,7 @@
 </extension>
 
 <extension-point name="%renameProcessorExtensionPoint" id="renameProcessors"/>
+<extension-point name="%deleteProcessorExtensionPoint" id="deleteProcessors"/>
 <extension-point name="%renameParticipantsExtensionPoint" id="renameParticipants"/>
 <extension-point name="%createParticipantsExtensionPoint" id="createParticipants"/>
 <extension-point name="%deleteParticipantsExtensionPoint" id="deleteParticipants"/>
@@ -3428,6 +3429,27 @@
   </renameProcessor>
 </extension>
 
+<extension point="org.eclipse.jdt.ui.deleteProcessors">
+  <deleteProcessor
+     id="org.eclipse.jdt.deleteProcessor"
+     class="org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor">
+     <selection count="+">
+        <objectState>
+           <or>
+              <and>
+                 <property name="instanceof" value="org.eclipse.jdt.core.IJavaElement"/>
+                 <property name="canDelete" value="true"/>
+              </and>
+              <and>
+                 <property name="instanceof" value="org.eclipse.core.resources.IResource"/>
+                 <property name="canDelete" value="true"/>
+              </and>
+           </or>
+    	</objectState>
+     </selection>
+  </deleteProcessor>
+</extension>
+
 <extension-point name="%statusViewerExtensionPoint" id="statusContextViewers"/>
 <extension-point name="%changeViewerExtensionPoint" id="changePreviewViewers"/>
 <extension-point name="%refactoringWizardExtensionPoint" id="refactoringWizards"/>
@@ -3482,6 +3504,14 @@
 </extension>
 	
 <extension point="org.eclipse.jdt.ui.refactoringWizards">
+	<refactoringWizard
+		id="org.eclipse.jdt.ui.deleteProcessor"
+		class="org.eclipse.jdt.internal.ui.refactoring.reorg.DeleteWizard">
+		<objectState>
+			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor"/>
+		</objectState>
+	</refactoringWizard>
+	
 	<refactoringWizard
 		id="org.eclipse.jdt.renameProcessor.ui.IJavaProject"
 		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameJavaProjectWizard">

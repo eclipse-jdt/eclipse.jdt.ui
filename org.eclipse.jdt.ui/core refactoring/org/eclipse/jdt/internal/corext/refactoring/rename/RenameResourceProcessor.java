@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
-import org.eclipse.jdt.internal.corext.refactoring.participants.Processors;
+import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RefactoringStyles;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
 
@@ -41,7 +41,9 @@ public class RenameResourceProcessor extends RenameProcessor {
 		super(RefactoringStyles.NONE);
 	}
 
-	public void initialize(Object element) throws CoreException {
+	public void initialize(Object[] elements) throws CoreException {
+		Assert.isTrue(elements != null && elements.length == 1);
+		Object element= elements[0];
 		if (!(element instanceof IAdaptable))
 			return;
 		fResource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
@@ -66,8 +68,8 @@ public class RenameResourceProcessor extends RenameProcessor {
 		return message;
 	}
 	
-	public Object getElement() {
-		return fResource;
+	public Object[] getElements() {
+		return new Object[] {fResource};
 	}
 	
 	public String getCurrentElementName() {
@@ -79,7 +81,7 @@ public class RenameResourceProcessor extends RenameProcessor {
 	}
 		
 	public IProject[] getScope() {
-		return Processors.computeScope(fResource);
+		return ResourceProcessors.computeScope(fResource);
 	}
 
 	public Object getNewElement() {

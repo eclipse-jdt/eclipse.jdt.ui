@@ -17,18 +17,18 @@ public class DeleteExtensionManager {
 	private static final String PROCESSOR_EXT_POINT= "deleteProcessors"; //$NON-NLS-1$
 	private static final String PARTICIPANT_EXT_POINT= "deleteParticipants"; //$NON-NLS-1$
 	
-	private static ExtensionManager fInstance= new ExtensionManager("Delete", PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT); //$NON-NLS-1$
+	private static ExtensionManager fgInstance= new ExtensionManager("Delete", PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT); //$NON-NLS-1$
 	
-	public static IDeleteProcessor getProcessor(Object element) throws CoreException {
-		return (IDeleteProcessor)fInstance.getProcessor(element);
+	public static boolean hasProcessor(Object[] elements) throws CoreException {
+		return fgInstance.hasProcessor(elements);
 	}
 	
-	public static IDeleteParticipant[] getParticipants(IRefactoringProcessor processor) throws CoreException {
-		return getParticipants(processor, processor.getDerivedElements());		
-	}		
-
-	public static IDeleteParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements) throws CoreException {
-		IRefactoringParticipant[] participants= fInstance.getParticipants(processor, elements);
+	public static DeleteProcessor getProcessor(Object[] elements) throws CoreException {
+		return (DeleteProcessor)fgInstance.getProcessor(elements);
+	}
+	
+	public static IDeleteParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements, SharableParticipants shared) throws CoreException {
+		IRefactoringParticipant[] participants= fgInstance.getParticipants(processor, elements, shared);
 		IDeleteParticipant[] result= new IDeleteParticipant[participants.length];
 		System.arraycopy(participants, 0, result, 0, participants.length);
 		return result;

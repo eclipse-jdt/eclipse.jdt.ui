@@ -192,7 +192,7 @@ public class RenameRefactoringAction extends SelectionDispatchAction {
 			if (descriptor != null) {
 				RefactoringWizard wizard= descriptor.createWizard();	
 				wizard.initialize(refactoring);	
-				SelectionState state= new SelectionState(processor.getElement());
+				SelectionState state= new SelectionState(processor.getElements());
 				new RefactoringStarter().activate(refactoring, wizard, parent, "Rename", true);
 				state.restore(processor.getNewElement());
 				return;

@@ -18,30 +18,6 @@ import org.eclipse.core.runtime.CoreException;
 
 public abstract class CompositeExpression extends Expression {
 	
-	private static final int[][] AND= new int[][] {
-						// FALSE			//TRUE					//NOT_LOADED			//UNKNOWN
-		/* FALSE   */ { ITestResult.FALSE,	ITestResult.FALSE,		ITestResult.FALSE,		ITestResult.FALSE	},
-		/* TRUE    */ { ITestResult.FALSE,	ITestResult.TRUE,		ITestResult.NOT_LOADED,	ITestResult.UNKNOWN	},
-		/* PNL     */ { ITestResult.FALSE,	ITestResult.NOT_LOADED, ITestResult.NOT_LOADED,	ITestResult.UNKNOWN	},
-		/* UNKNOWN */ { ITestResult.FALSE,	ITestResult.UNKNOWN,	ITestResult.UNKNOWN,	ITestResult.UNKNOWN	}
-	};
-
-	private static final int[][] OR= new int[][] {
-						// FALSE				//TRUE				//NOT_LOADED			//UNKNOWN
-		/* FALSE   */ { ITestResult.FALSE,		ITestResult.TRUE,	ITestResult.NOT_LOADED,	ITestResult.UNKNOWN	},
-		/* TRUE    */ { ITestResult.TRUE,		ITestResult.TRUE,	ITestResult.TRUE,		ITestResult.TRUE	},
-		/* PNL     */ { ITestResult.NOT_LOADED,	ITestResult.TRUE, 	ITestResult.NOT_LOADED,	ITestResult.UNKNOWN	},
-		/* UNKNOWN */ { ITestResult.UNKNOWN,	ITestResult.TRUE,	ITestResult.UNKNOWN,	ITestResult.UNKNOWN	}
-	};
-	
-	private static int and(int left, int right) {
-		return AND[left][right];
-	}
-	
-	private static int or(int left, int right) {
-		return OR[left][right];
-	}
-	
 	protected List fExpressions;
 	
 	public CompositeExpression() {
@@ -81,7 +57,7 @@ public abstract class CompositeExpression extends Expression {
 		int result= ITestResult.TRUE;
 		for (Iterator iter= fExpressions.iterator(); iter.hasNext();) {
 			Expression expression= (Expression)iter.next();
-			result= and(result, expression.evaluate(element));
+			result= TestResult.and(result, expression.evaluate(element));
 			if (result != ITestResult.TRUE)
 				return result;
 		}
@@ -94,7 +70,7 @@ public abstract class CompositeExpression extends Expression {
 		int result= ITestResult.FALSE;
 		for (Iterator iter= fExpressions.iterator(); iter.hasNext();) {
 			Expression expression= (Expression)iter.next();
-			result= or(result, expression.evaluate(element));
+			result= TestResult.or(result, expression.evaluate(element));
 			if (result == ITestResult.TRUE)
 				return result;
 		}

@@ -31,6 +31,10 @@ public class StandardElementHandler implements IElementHandler {
 			ObjectStateExpression result= new ObjectStateExpression(element);
 			creator.processChildren(result, element);
 			return result;
+		} else if (SelectionExpression.NAME.equals(name)) {
+			SelectionExpression result= new SelectionExpression(element);
+			creator.processChildren(result, element);
+			return result;
 		} else if (OrExpression.NAME.equals(name)) {
 			OrExpression result= new OrExpression();
 			creator.processChildren(result, element);

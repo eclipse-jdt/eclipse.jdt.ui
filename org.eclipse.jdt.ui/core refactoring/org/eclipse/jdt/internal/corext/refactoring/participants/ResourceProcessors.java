@@ -16,12 +16,20 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
-public class Processors {
+public class ResourceProcessors {
 
 	public static IProject[] computeScope(IResource resource) {
 		IProject project= resource.getProject();
 		Set result= new HashSet();
 		computeScope(result, project);
+		return (IProject[])result.toArray(new IProject[result.size()]);
+	}
+	
+	public static IProject[] computeScope(IResource[] resources) {
+		Set result= new HashSet();
+		for (int i= 0; i < resources.length; i++) {
+			computeScope(result, resources[i].getProject());
+		}
 		return (IProject[])result.toArray(new IProject[result.size()]);
 	}
 	

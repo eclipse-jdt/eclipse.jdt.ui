@@ -26,12 +26,12 @@ public class InlineTempWizard extends RefactoringWizard {
 		return 0;
 	}
 	
-	private static class InlineTempInputPage extends MessageInputPage {
+	private static class InlineTempInputPage extends MessageWizardPage {
 
 		public static final String PAGE_NAME= "InlineTempInputPage"; //$NON-NLS-1$
 	
 		public InlineTempInputPage() {
-			super(PAGE_NAME, true, MessageInputPage.STYLE_QUESTION);
+			super(PAGE_NAME, true, MessageWizardPage.STYLE_QUESTION);
 		}
 
 		protected String getMessageString() {
