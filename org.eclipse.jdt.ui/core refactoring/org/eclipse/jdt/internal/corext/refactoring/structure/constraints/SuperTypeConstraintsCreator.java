@@ -274,14 +274,19 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 		final Expression elseExpression= node.getElseExpression();
 		if (elseExpression != null)
 			elseVariable= (ConstraintVariable2) elseExpression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-		final ITypeBinding binding= node.resolveTypeBinding();
+		ITypeBinding binding= node.resolveTypeBinding();
 		if (binding != null) {
+			if (binding.isArray())
+				binding= binding.getElementType();
 			final ConstraintVariable2 ancestor= fModel.createIndependentTypeVariable(binding);
-			node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, ancestor);
-			if (thenVariable != null)
-				fModel.createSubtypeConstraint(thenVariable, ancestor);
-			if (elseVariable != null)
-				fModel.createSubtypeConstraint(elseVariable, ancestor);
+			if (ancestor != null) {
+				node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, ancestor);
+				if (thenVariable != null)
+					fModel.createSubtypeConstraint(thenVariable, ancestor);
+				if (elseVariable != null)
+					fModel.createSubtypeConstraint(elseVariable, ancestor);
+				fModel.createConditionalTypeConstraint(ancestor, thenVariable, elseVariable);
+			}
 		}
 	}
 
