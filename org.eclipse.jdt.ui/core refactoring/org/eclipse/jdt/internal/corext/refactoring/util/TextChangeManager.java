@@ -103,7 +103,8 @@ public class TextChangeManager {
 	/**
 	 * Returns if any text changes are managed for the specified compilation unit.
 	 * 
-	 * @return <code>true</code> if any text changes are managed for the specified compilation unit and <code>false</code> otherwise.
+	 * @param cu the compilation unit
+	 * @return <code>true</code> if any text changes are managed for the specified compilation unit and <code>false</code> otherwise
 	 */		
 	public boolean containsChangesIn(ICompilationUnit cu){
 		return fMap.containsKey(cu);
