@@ -12,8 +12,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSupportFactory;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-public class RenameAction extends ReorgAction {
+public class RenameAction extends RefactoringAction {
 	
 	private IRefactoringRenameSupport fRefactoringSupport;
 	

@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.IInputSelectionProvider;
 
@@ -35,7 +36,7 @@ public class CCPActionGroup extends ActionGroup {
 
 	private ReorgGroup fOldReorgGroup;
 	private GroupContext fOldContext;
- 	private IRefactoringAction fDeleteAction;
+ 	private IAction fDeleteAction;
 	
 	/**
 	 * Creates a new <code>CCPActionGroup</code>.
@@ -65,9 +66,9 @@ public class CCPActionGroup extends ActionGroup {
 	
 	private CCPActionGroup(UnifiedSite site, IInputSelectionProvider provider) {
 		fSite= site;
-		fOldReorgGroup= new ReorgGroup();
+		fOldReorgGroup= new ReorgGroup(site);
 		fOldContext= new GroupContext(provider);
-		fDeleteAction= ReorgGroup.createDeleteAction(provider);
+		fDeleteAction= ReorgGroup.createDeleteAction(site, provider);
 	}
 	
 	/**
@@ -77,7 +78,7 @@ public class CCPActionGroup extends ActionGroup {
 	 * @return the delete action. Returns <code>null</code> if the group
 	 * 	doesn't provide any delete action
 	 */
-	public IRefactoringAction getDeleteAction() {
+	public IAction getDeleteAction() {
 		return fDeleteAction;
 	}
 
@@ -87,7 +88,7 @@ public class CCPActionGroup extends ActionGroup {
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
-		ReorgGroup.addGlobalReorgActions(actionBars, fSite.getSelectionProvider());
+		ReorgGroup.addGlobalReorgActions(fSite, actionBars, fSite.getSelectionProvider());
 	}
 	
 	/* (non-Javadoc)

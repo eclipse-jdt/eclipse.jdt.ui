@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 
-import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.part.ResourceTransfer;
 
@@ -17,20 +18,20 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.ui.actions.UnifiedSite;
+
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-class CopySourceReferencesToClipboardAction extends SourceReferenceAction {
+public class CopySourceReferencesToClipboardAction extends SourceReferenceAction{
 
-	public CopySourceReferencesToClipboardAction(ISelectionProvider provider) {
-		super(ReorgMessages.getString("CopySourceReferencesToClipboardAction.copy"), provider); //$NON-NLS-1$
+	protected CopySourceReferencesToClipboardAction(UnifiedSite site) {
+		super(site);
 	}
-	
-	protected void perform() throws JavaModelException {
-		copyToOSClipbard(getElementsToProcess());
+
+	protected void perform(IStructuredSelection selection) throws JavaModelException {
+			copyToOSClipbard(getElementsToProcess(selection));
 	}
 
 	private static Clipboard getSystemClipboard() {
@@ -98,5 +99,5 @@ class CopySourceReferencesToClipboardAction extends SourceReferenceAction {
 			return null;
 		}
 	}
-}
 
+}

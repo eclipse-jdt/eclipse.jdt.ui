@@ -10,7 +10,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jdt.internal.corext.Assert;
 
 public class SimpleSelectionProvider implements ISelectionProvider {
-	private Object[] fElems;
+	private ISelection fSelection;
 
 	public SimpleSelectionProvider(Collection collection) {
 		this(collection.toArray());
@@ -18,14 +18,14 @@ public class SimpleSelectionProvider implements ISelectionProvider {
 	
 	public SimpleSelectionProvider(Object[] elements) {
 		Assert.isNotNull(elements);
-		fElems = elements;
+		fSelection= new StructuredSelection(elements);
 	}
 
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 	}
 
 	public ISelection getSelection() {
-		return new StructuredSelection(fElems);
+		return fSelection;
 	}
 
 	public void removeSelectionChangedListener(ISelectionChangedListener listener) {

@@ -44,6 +44,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionGroup;
@@ -100,6 +101,7 @@ import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
+import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 
 /**
@@ -593,6 +595,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	private GotoErrorAction fNextError;
 	private TextOperationAction fShowJavadoc;
 	
+	private IAction fDeleteAction;
+	
 	private CompositeActionGroup fStandardActionGroups;
 	
 	public JavaOutlinePage(String contextMenuID, JavaEditor editor) {
@@ -612,7 +616,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fTogglePresentation.setEditor(editor);
 		fToggleTextHover.setEditor(editor);
 		fPreviousError.setEditor(editor);
-		fNextError.setEditor(editor);
+		fNextError.setEditor(editor);		
 	}
 	
 	/* (non-Javadoc)
@@ -722,6 +726,9 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
 		
+		fDeleteAction= ReorgGroup.createDeleteAction(UnifiedSite.create(getSite()), this);
+		bars.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
+		
 		fStandardActionGroups.fillActionBars(bars);
 
 		IStatusLineManager statusLineManager= getSite().getActionBars().getStatusLineManager();
@@ -732,9 +739,9 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		
 		registerToolbarActions();
 				
-		fActionGroups= new ContextMenuGroup[] { new GenerateGroup(), new JavaSearchGroup(), new ReorgGroup() };
+		fActionGroups= new ContextMenuGroup[] { new GenerateGroup(), new JavaSearchGroup(), new ReorgGroup(UnifiedSite.create(getSite())) };
 
-		ReorgGroup.addGlobalReorgActions(getSite().getActionBars(), fOutlineViewer);
+		ReorgGroup.addGlobalReorgActions(UnifiedSite.create(getSite()), getSite().getActionBars(), fOutlineViewer);
 		
 		fOutlineViewer.setInput(fInput);	
 		fOutlineViewer.getControl().addKeyListener(new KeyAdapter() {
@@ -903,13 +910,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		
 		IAction action= null;
 		if (event.character == SWT.DEL) {
-			action= getAction("DeleteElement"); //$NON-NLS-1$
-			if (action instanceof IRefactoringAction){
-				//special case - DeleteAction is not a ISelectionChangedListener
-				((IRefactoringAction)action).update();
-				if (! action.isEnabled())
-					return;
-			}	
+			action= fDeleteAction;
 		}
 			
 		if (action != null && action.isEnabled())

@@ -1,8 +1,5 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -10,7 +7,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.dnd.Clipboard;
 
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -24,8 +20,11 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.ui.actions.UnifiedSite;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -33,18 +32,18 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public class PasteSourceReferencesFromClipboardAction extends RefactoringAction {
+public class PasteSourceReferencesFromClipboardAction	extends SelectionDispatchAction {
 
-	public PasteSourceReferencesFromClipboardAction(ISelectionProvider provider) {
-		super(ReorgMessages.getString("PasteSourceReferencesFromClipboardAction.paste"), provider); //$NON-NLS-1$
+	protected PasteSourceReferencesFromClipboardAction(UnifiedSite site) {
+		super(site);
 	}
 
-	/*
-	 * @see RefactoringAction#canOperateOn(IStructuredSelection)
-	 */
+	protected void selectionChanged(IStructuredSelection selection) {
+		setEnabled(canOperateOn(selection));
+	}
+
 	public boolean canOperateOn(IStructuredSelection selection) {
 		try{
 			if (! isAnythingToPaste())
@@ -118,21 +117,18 @@ public class PasteSourceReferencesFromClipboardAction extends RefactoringAction 
 		return (canPasteIn(ref, elements) || canPasteAfter(ref, elements));
 	}
 	
-	private ISourceReference getSelectedElement(){
-		return (ISourceReference)getStructuredSelection().getFirstElement();
+	private ISourceReference getSelectedElement(IStructuredSelection selection){
+		return (ISourceReference)selection.getFirstElement();
 	}
 	
-	/*
-	 * @see Action#run
-	 */
-	public void run() {
-		if (! canOperateOn(getStructuredSelection()))
+	public void run(final IStructuredSelection selection) {
+		if (! canOperateOn(selection))
 			return;
 		
 		new BusyIndicator().showWhile(JavaPlugin.getActiveWorkbenchShell().getDisplay(), new Runnable() {
 			public void run() {
 				try {
-					perform(getSelectedElement());
+					perform(getSelectedElement(selection));
 				} catch (CoreException e) {
 					ExceptionHandler.handle(e, ReorgMessages.getString("PasteSourceReferencesFromClipboardAction.paste1"), ReorgMessages.getString("PasteSourceReferencesFromClipboardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 				}
@@ -320,4 +316,5 @@ public class PasteSourceReferencesFromClipboardAction extends RefactoringAction 
 			return true;
 		return false;		
 	}
-};
+
+}

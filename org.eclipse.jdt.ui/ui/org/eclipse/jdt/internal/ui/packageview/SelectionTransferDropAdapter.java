@@ -31,17 +31,21 @@ import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
-import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
 import org.eclipse.jdt.internal.ui.reorg.JdtCopyAction;
 import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
-import org.eclipse.jdt.internal.ui.reorg.SimpleSelectionProvider;
+import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
+import org.eclipse.jdt.internal.ui.reorg.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
@@ -116,7 +120,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 				
 				if (! canPasteSourceReferences(target, event))
 					return;
-				DeleteSourceReferencesAction delete= new DeleteSourceReferencesAction(new SimpleSelectionProvider(fElements));
+				DeleteSourceReferencesAction delete= ReorgGroup.createDeleteSourceReferencesAction(getDragableSourceReferences());
 				delete.setAskForDeleteConfirmation(false);
 				delete.setCanDeleteGetterSetter(false);
 				delete.update();
@@ -180,8 +184,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}
 
 	private void pasteSourceReferences(final Object target, DropTargetEvent event) {
-		ISourceReference[] elements= getDragableSourceReferences();
-		IRefactoringAction pasteAction= ReorgGroup.createPasteAction(elements, target);
+		SelectionDispatchAction pasteAction= ReorgGroup.createPasteAction(getDragableSourceReferences(), target);
 		pasteAction.update();
 		if (!pasteAction.isEnabled()){
 			event.detail= DND.DROP_NONE;
@@ -209,7 +212,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		ISourceReference[] elements= getDragableSourceReferences();
 		if (elements.length != fElements.size())
 			return false;
-		IRefactoringAction pasteAction= ReorgGroup.createPasteAction(elements, target);
+		SelectionDispatchAction pasteAction= ReorgGroup.createPasteAction(elements, target);
 		pasteAction.update();
 		return pasteAction.isEnabled();
 	}
@@ -250,11 +253,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			return;
 		}
 		
-		JdtCopyAction action= new JdtCopyAction("#COPY", new SimpleSelectionProvider(fElements)){//$NON-NLS-1$
-			protected Object selectDestination(ReorgRefactoring ref) {
-				return target;
-			}
-		};
+		IRefactoringAction action= ReorgGroup.createDnDCopyAction(fElements, ResourceUtil.getResource(target));
 		action.run();
 	}
 	

@@ -8,7 +8,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.custom.BusyIndicator;
 
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -21,38 +20,33 @@ import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.ui.actions.UnifiedSite;
+
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-abstract class SourceReferenceAction extends RefactoringAction {
+public abstract class SourceReferenceAction extends SelectionDispatchAction {
 
-	private ISelectionProvider fSelectionProvider;
-	protected SourceReferenceAction(String name, ISelectionProvider provider) {
-		super(name, provider);
-		fSelectionProvider= provider;
+	protected SourceReferenceAction(UnifiedSite site) {
+		super(site);
 	}
 
-	protected ISelectionProvider getSelectionProvider(){
-		return fSelectionProvider;
-	}
+	protected ISourceReference[] getElementsToProcess(IStructuredSelection selection) {
+		return SourceReferenceUtil.removeAllWithParentsSelected(getSelectedElements(selection));
+	}	
 	
 	/*
-	 * @see Action#run
+	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
-	public final void run() {
-		//safety net - fix for: 9528
-		update();
-		if (!isEnabled())
-			return;
-		
+	public final void run(final IStructuredSelection selection) {
 		new BusyIndicator().showWhile(JavaPlugin.getActiveWorkbenchShell().getDisplay(), new Runnable() {
 			public void run() {
 				try {
-					perform();
+					perform(selection);
 				} catch (CoreException e) {
 					ExceptionHandler.handle(e, getText(), ReorgMessages.getString("SourceReferenceAction.exception")); //$NON-NLS-1$
 				}
@@ -60,16 +54,9 @@ abstract class SourceReferenceAction extends RefactoringAction {
 		});
 	}
 	
-	protected ISourceReference[] getElementsToProcess() {
-		return SourceReferenceUtil.removeAllWithParentsSelected(getSelectedElements());
-	}	
+	protected abstract void perform(IStructuredSelection selection) throws CoreException;
 	
-	protected abstract void perform() throws CoreException;
-	
-	/*
-	 * @see RefactoringAction#canOperateOn(IStructuredSelection)
-	 */
-	public boolean canOperateOn(IStructuredSelection selection) {
+	private boolean canOperateOn(IStructuredSelection selection) {
 		try{
 			if (selection.isEmpty())			
 				return false;
@@ -86,8 +73,8 @@ abstract class SourceReferenceAction extends RefactoringAction {
 		}	
 	}
 	
-	private ISourceReference[] getSelectedElements(){
-		return getWorkingCopyElements(getStructuredSelection().toList());
+	private ISourceReference[] getSelectedElements(IStructuredSelection selection){
+		return getWorkingCopyElements(selection.toList());
 	}
 	
 	private static boolean canWorkOn(Object elem) throws JavaModelException{
@@ -161,5 +148,12 @@ abstract class SourceReferenceAction extends RefactoringAction {
 		}
 		return (ISourceReference[]) wcList.toArray(new ISourceReference[wcList.size()]);
 	}	
-}
 
+	/*
+	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
+	 */
+	protected void selectionChanged(IStructuredSelection selection) {
+		setEnabled(canOperateOn(selection));
+	}
+
+}

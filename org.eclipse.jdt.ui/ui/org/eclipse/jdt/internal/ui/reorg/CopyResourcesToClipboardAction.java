@@ -12,10 +12,9 @@ import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.part.ResourceTransfer;
 
@@ -24,36 +23,27 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 
-class CopyResourcesToClipboardAction extends Action implements IRefactoringAction {
-	
+public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
+
 	private static final String fgLineDelim= System.getProperty("line.separator"); //$NON-NLS-1$
-	private final StructuredSelectionProvider fProvider;
 	
-	public CopyResourcesToClipboardAction(ISelectionProvider selectionProvider) {
-		super(ReorgMessages.getString("CopyResourcesToClipboardAction.copy")); //$NON-NLS-1$
-		fProvider= StructuredSelectionProvider.createFrom(selectionProvider);
+	protected CopyResourcesToClipboardAction(UnifiedSite site) {
+		super(site);
+		setText(ReorgMessages.getString("CopyResourcesToClipboardAction.copy"));//$NON-NLS-1$
 	}
 
-	private IStructuredSelection getStructuredSelection() {
-		return fProvider.getSelection();
+	protected void selectionChanged(IStructuredSelection selection) {
+		setEnabled(canOperateOn(selection));
 	}
 
-	public void update() {
-		setEnabled(canOperateOn(getStructuredSelection()));
-	}
-
-	public void run() {
-		//safety net
-		update();
-		if (! isEnabled())
-			return;
-			
-		IResource[] resources= getSelectedResources();
+	public void run(IStructuredSelection selection) {
+		IResource[] resources= getSelectedResources(selection);
 		getClipboard().setContents(
 			new Object[] { 
 					resources, 
@@ -89,7 +79,7 @@ class CopyResourcesToClipboardAction extends Action implements IRefactoringActio
 		if (! haveCommonParent(selectedResources))
 			return false;
 		
-		IRefactoringAction ca= ClipboardActionUtil.createDnDCopyAction(selection.toList(), ClipboardActionUtil.getFirstResource(selection));
+		IRefactoringAction ca= ReorgGroup.createDnDCopyAction(selection.toList(), ClipboardActionUtil.getFirstResource(selection));
 		ca.update();
 		return ca.isEnabled();
 	}
@@ -155,8 +145,8 @@ class CopyResourcesToClipboardAction extends Action implements IRefactoringActio
 		return true;
 	}
 
-	private IResource[] getSelectedResources() {
-		return StructuredSelectionUtil.getResources(getStructuredSelection());
+	private IResource[] getSelectedResources(IStructuredSelection selection) {
+		return StructuredSelectionUtil.getResources(selection);
 	}
 
 	private static String getFileNamesText(IResource[] resources) {

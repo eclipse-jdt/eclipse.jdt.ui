@@ -59,10 +59,11 @@ import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.PackageFilter;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 
-abstract class ReorgDestinationAction extends ReorgAction {
+abstract class ReorgDestinationAction extends RefactoringAction {
 
 	public ReorgDestinationAction(String name, ISelectionProvider provider) {
 		super(name, provider);
@@ -71,6 +72,10 @@ abstract class ReorgDestinationAction extends ReorgAction {
 	public ReorgDestinationAction(String name, StructuredSelectionProvider provider) {
 		super(name, provider);
 	}
+
+	protected boolean hasOnlyProjects(){
+		return ClipboardActionUtil.hasOnlyProjects(getStructuredSelection());
+	}	
 
 	/*
 	 * @see Action#run()
@@ -143,7 +148,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 	}
 	
  	void doReorg(ReorgRefactoring refactoring) throws JavaModelException{
-		MultiStatus status= perform(refactoring);
+		MultiStatus status= ClipboardActionUtil.perform(refactoring);
 		if (status.isOK()) 
 			return;
 		JavaPlugin.log(status);
@@ -343,7 +348,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 	 * @see IRefactoringAction#canOperateOn(IStructuredSelection)
 	 */
 	public boolean canOperateOn(IStructuredSelection selection) {
-		return canActivate(createRefactoring(selection.toList()));
+		return ClipboardActionUtil.canActivate(createRefactoring(selection.toList()));
 	}
 	
 	//-----

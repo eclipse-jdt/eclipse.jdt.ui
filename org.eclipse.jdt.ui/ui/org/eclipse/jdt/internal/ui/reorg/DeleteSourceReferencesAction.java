@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -26,6 +26,9 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
@@ -39,13 +42,13 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public class DeleteSourceReferencesAction extends SourceReferenceAction{
-	
+public class DeleteSourceReferencesAction extends SourceReferenceAction {
+
 	private boolean fCanDeleteGetterSetter;
 	private boolean fAskForDeleteConfirmation;
 	
-	public DeleteSourceReferencesAction(ISelectionProvider provider) {
-		super(ReorgMessages.getString("DeleteSourceReferencesAction.delete"), provider); //$NON-NLS-1$
+	public DeleteSourceReferencesAction(UnifiedSite site) {
+		super(site);
 		fCanDeleteGetterSetter= true;
 		fAskForDeleteConfirmation= true;
 	}
@@ -58,11 +61,11 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 		fAskForDeleteConfirmation= ask;
 	}
 	
-	protected void perform() throws CoreException {
+	protected void perform(IStructuredSelection selection) throws CoreException {
 		if (fAskForDeleteConfirmation && !confirmDelete())
 			return;
 
-		Map mapping= SourceReferenceUtil.groupByFile(getElementsToProcess()); //IFile -> List of ISourceReference (elements from that file)
+		Map mapping= SourceReferenceUtil.groupByFile(getElementsToProcess(selection)); //IFile -> List of ISourceReference (elements from that file)
 		if (areAllFilesReadOnly(mapping)){
 			String title= ReorgMessages.getString("DeleteSourceReferencesAction.title"); //$NON-NLS-1$
 			String label= ReorgMessages.getString("DeleteSourceReferencesAction.read_only");  //$NON-NLS-1$
@@ -209,8 +212,8 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 	}	
 	
 	//overridden to add getters/setters
-	protected ISourceReference[] getElementsToProcess() {
-		ISourceReference[] elements= super.getElementsToProcess();
+	protected ISourceReference[] getElementsToProcess(IStructuredSelection selection) {
+		ISourceReference[] elements= super.getElementsToProcess(selection);
 		if (! fCanDeleteGetterSetter)
 			return elements;
 		IField[] fields= getFields(elements);
@@ -296,6 +299,4 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		return MessageDialog.openQuestion(parent, title, label);
 	}
-	
 }
-

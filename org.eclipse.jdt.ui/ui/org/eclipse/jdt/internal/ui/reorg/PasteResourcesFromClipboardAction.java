@@ -6,10 +6,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
@@ -18,49 +17,39 @@ import org.eclipse.ui.part.ResourceTransfer;
 
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.ui.actions.UnifiedSite;
+
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
-import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
-class PasteResourcesFromClipboardAction extends Action implements IRefactoringAction {
+public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
+
+	protected PasteResourcesFromClipboardAction(UnifiedSite site) {
+		super(site);
+	}
 	
-	private final StructuredSelectionProvider fProvider;
-
-	public PasteResourcesFromClipboardAction(ISelectionProvider selectionProvider) {
-		super(ReorgMessages.getString("PasteResourcesFromClipboardAction.paste"));		 //$NON-NLS-1$
-		fProvider= StructuredSelectionProvider.createFrom(selectionProvider);
+	protected void selectionChanged(IStructuredSelection selection) {
+		setEnabled(canOperateOn(selection));
 	}
-
-	public void update() {
-		setEnabled(canOperateOn(getStructuredSelection()));
-	}
-
-	private IStructuredSelection getStructuredSelection() {
-		return fProvider.getSelection();
-	}
-
-	public void run() {
-		//safety net
-		update();
-		if (! isEnabled())
-			return;
-		
+	
+	public void run(IStructuredSelection selection) {
 		IResource[] resourceData = getClipboardResources();		
 		if (resourceData == null || resourceData.length == 0)
 			return;
 			 
-		pasteResources(resourceData);
+		pasteResources(selection, resourceData);
 	}
 
-	private void pasteResources(IResource[] resourceData) {
+	private void pasteResources(IStructuredSelection selection, IResource[] resourceData) {
 		if (resourceData[0].getType() == IResource.PROJECT)
 			pasteProject((IProject) resourceData[0]);
 		else
-			ClipboardActionUtil.createDnDCopyAction(resourceData, getFirstSelectedResource()).run();
+			ReorgGroup.createDnDCopyAction(resourceData, getFirstSelectedResource(selection)).run();
 	}
 	
-	private static void pasteProject(IProject project){
+	private void pasteProject(IProject project){
 		CopyProjectAction cpa= new CopyProjectAction(getShell());
 		cpa.selectionChanged(new StructuredSelection(project));
 		if (! cpa.isEnabled())
@@ -69,7 +58,7 @@ class PasteResourcesFromClipboardAction extends Action implements IRefactoringAc
 	}
 
 	//- enablement ---
-	public static boolean canOperateOn(IStructuredSelection selection){
+	private boolean canOperateOn(IStructuredSelection selection){
 		IResource[] resourceData= getClipboardResources();
 		if (resourceData == null || resourceData.length == 0)
 			return false;
@@ -104,20 +93,18 @@ class PasteResourcesFromClipboardAction extends Action implements IRefactoringAc
 	
 	//-- helpers
 	
-	private IResource getFirstSelectedResource(){
-		return ClipboardActionUtil.getFirstResource(getStructuredSelection());
+	private IResource getFirstSelectedResource(IStructuredSelection selection){
+		return ClipboardActionUtil.getFirstResource(selection);
 	}
 	
-	//--- 		
-	private static Shell getShell() {
-		return JavaPlugin.getActiveWorkbenchShell();
+	private Clipboard getClipboard() {
+		if (getShell() != null)
+			return new Clipboard(getShell().getDisplay());
+		else
+			return new Clipboard(SWTUtil.getStandardDisplay());	
 	}
 	
-	private static Clipboard getClipboard() {
-		return new Clipboard(getShell().getDisplay());
-	}
-	
-	private static IResource[] getClipboardResources() {
+	private IResource[] getClipboardResources() {
 		return ((IResource[])getClipboard().getContents(ResourceTransfer.getInstance()));
 	}
 

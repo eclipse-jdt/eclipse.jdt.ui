@@ -1,14 +1,20 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -16,10 +22,18 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
+import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
+import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 class ClipboardActionUtil {
 	
@@ -61,20 +75,6 @@ class ClipboardActionUtil {
 		return (IResource[]) nonJava.toArray(new IResource[nonJava.size()]);
 	}
 
-	public static JdtCopyAction createDnDCopyAction(List elems, final IResource destination){
-		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(new SimpleSelectionProvider(elems.toArray()));
-		JdtCopyAction action= new JdtCopyAction("#PASTE", provider){ //$NON-NLS-1$
-			protected Object selectDestination(ReorgRefactoring ref) {
-				return tryConvertingToJava(destination);			
-			}
-		};
-		return action;
-	}
-	
-	public static JdtCopyAction createDnDCopyAction(IResource[] resourceData, final IResource destination){
-		return createDnDCopyAction(getConvertedResources(resourceData), destination);
-	}
-
 	public static List getConvertedResources(IResource[] resourceData) {
 		List elems= new ArrayList(resourceData.length);
 		elems.addAll(Arrays.asList(ClipboardActionUtil.getJavaElements(resourceData)));
@@ -106,24 +106,60 @@ class ClipboardActionUtil {
 			&& resourceData[0].getType() == IResource.PROJECT
 			&& ((IProject)resourceData[0]).isOpen();
 	}
-	
-	private static class SimpleSelectionProvider implements ISelectionProvider {
-		private Object[] fElems;
-		SimpleSelectionProvider(Object[] elements){
-			fElems= elements;
-		}
-		
-		public void addSelectionChangedListener(ISelectionChangedListener listener) {
-		}
-	
-		public ISelection getSelection() {
-			return new StructuredSelection(fElems);
-		}
-	
-		public void removeSelectionChangedListener(ISelectionChangedListener listener) {
-		}
-	
-		public void setSelection(ISelection selection) {
-		}
+
+	//-------------------------------------------------------
+	static boolean hasOnlyProjects(IStructuredSelection selection){
+		return (! selection.isEmpty() && selection.size() == getSelectedProjects(selection).size());
 	}
+
+
+	static List getSelectedProjects(IStructuredSelection selection) {
+		List result= new ArrayList(selection.size());
+		for(Iterator iter= selection.iterator(); iter.hasNext(); ) {
+			Object element= iter.next();
+			if (element instanceof IJavaProject) {
+				try {
+					result.add(((IJavaProject)element).getUnderlyingResource());
+				} catch (JavaModelException e) {
+					if (!e.isDoesNotExist()) {
+						//do not show error dialogs in a loop
+						JavaPlugin.log(e);
+					}
+				}
+			}
+		}
+		return result;
+	}	
+
+
+	static boolean canActivate(Refactoring ref){
+		try {
+			return ref.checkActivation(new NullProgressMonitor()).isOK();
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, ReorgMessages.getString("ReorgAction.reorganize"), ReorgMessages.getString("ReorgAction.exception")); //$NON-NLS-2$ //$NON-NLS-1$
+			return false;
+		}	
+	}
+
+
+	static MultiStatus perform(Refactoring ref) throws JavaModelException{	
+		PerformChangeOperation op= new PerformChangeOperation(new CreateChangeOperation(ref, CreateChangeOperation.CHECK_NONE));
+		ReorgExceptionHandler handler= new ReorgExceptionHandler();
+		op.setChangeContext(new ChangeContext(handler));		
+		try {
+			//cannot fork - must run in the ui thread
+			new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell()).run(false, true, op);
+		} catch (InvocationTargetException e) {
+			Throwable target= e.getTargetException();
+			if (target instanceof CoreException)
+				handler.getStatus().merge(((CoreException) target).getStatus());
+			JavaPlugin.log(e);	
+			//fall thru
+		} catch (InterruptedException e) {
+			//fall thru
+		}
+		return handler.getStatus();
+	}		
+
+	
 }

@@ -7,6 +7,9 @@ package org.eclipse.jdt.internal.ui.reorg;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
@@ -17,18 +20,27 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
+
 public class ReorgGroup extends ContextMenuGroup {
 	private static final String GROUP_NAME= IContextMenuConstants.GROUP_REORGANIZE;
 	
-	private IRefactoringAction[] fBasicActions; //always added - just grayed out if disabled
-	private IRefactoringAction[] fDynamicActions; //added only if enabled
-		
+	private SelectionDispatchAction[] fBasicActions; //always added - just grayed out if disabled
+	private IAction[] fDynamicActions; //added only if enabled
+	
+	private UnifiedSite fSite;
+	public ReorgGroup(UnifiedSite site){
+		fSite= site;
+	}	
+	
 	public void fill(IMenuManager manager, GroupContext context) {
 		createActions(context.getSelectionProvider());
 		
@@ -38,60 +50,70 @@ public class ReorgGroup extends ContextMenuGroup {
 		}
 		
 		for (int i= 0; i < fDynamicActions.length; i++) {
-			fDynamicActions[i].update();
+			if (fDynamicActions[i] instanceof IRefactoringAction)
+				((IRefactoringAction)fDynamicActions[i]).update();
+			if (fDynamicActions[i] instanceof SelectionDispatchAction)
+				((SelectionDispatchAction)fDynamicActions[i]).update();
+				
 			if (fDynamicActions[i].isEnabled())
 				manager.appendToGroup(GROUP_NAME, fDynamicActions[i]);
 		}
 	}
 	
 	private void createActions(ISelectionProvider p) {
-		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(p);
 		if (fBasicActions != null)
 			return;
 			
-		fBasicActions= new IRefactoringAction[] {	
-			createCutAction(p),
-			createCopyAction(p),
-			createPasteAction(p),
-			createDeleteAction(p),
-			//new DuplicateSourceReferenceAction(provider, p),
+		fBasicActions= new SelectionDispatchAction[] {	
+			createCutAction(fSite, p),
+			createCopyAction(fSite, p),
+			createPasteAction(fSite, p),
+			createDeleteAction(fSite, p)
 		};
 		fDynamicActions= new IRefactoringAction[]{			
-			new JdtMoveAction(provider),
+			new JdtMoveAction(StructuredSelectionProvider.createFrom(p)),
 			new RenameAction(p)
 		};
 	}	
 	
-	public static void addGlobalReorgActions(IActionBars actionBars, ISelectionProvider provider) {
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.COPY, createCopyAction(provider));
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.CUT, createCutAction(provider));
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.PASTE, createPasteAction(provider));
+	public static void addGlobalReorgActions(UnifiedSite site, IActionBars actionBars, ISelectionProvider provider) {
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.COPY, createCopyAction(site, provider));
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.CUT, createCutAction(site, provider));
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.PASTE, createPasteAction(site, provider));
 	}
 
-	private static IRefactoringAction createCutAction(ISelectionProvider p){
-		return new CutSourceReferencesToClipboardAction(p);
+	public static SelectionDispatchAction createCutAction(UnifiedSite site, ISelectionProvider p){
+		SelectionDispatchAction a1= new CutSourceReferencesToClipboardAction(site);
+		p.addSelectionChangedListener(a1);
+		return a1;
 	}
 	
-	public static IRefactoringAction createCopyAction(ISelectionProvider p){
-		IRefactoringAction copyResources= new CopyResourcesToClipboardAction(p);
-		IRefactoringAction copySourceReferences= new CopySourceReferencesToClipboardAction(p);
-		return new DualReorgAction(p, ReorgMessages.getString("ReorgGroup.copy"), ReorgMessages.getString("copyAction.description"), copyResources, copySourceReferences); //$NON-NLS-1$ //$NON-NLS-2$
+	public static SelectionDispatchAction createCopyAction(UnifiedSite site, ISelectionProvider p){
+		SelectionDispatchAction a1= new CopyResourcesToClipboardAction(site);
+		SelectionDispatchAction a2= new CopySourceReferencesToClipboardAction(site);
+		SelectionDispatchAction dual= new DualReorgAction(site, ReorgMessages.getString("ReorgGroup.copy"), ReorgMessages.getString("copyAction.description"), a1, a2);//$NON-NLS-1$ //$NON-NLS-2$
+		p.addSelectionChangedListener(dual);
+		return dual;
 	}
 	
-	public static IRefactoringAction createPasteAction(ISelectionProvider p){
-		IRefactoringAction pasteResources= new PasteResourcesFromClipboardAction(p);
-		IRefactoringAction pasteSourceReferences= new PasteSourceReferencesFromClipboardAction(p);
-		return new DualReorgAction(p, ReorgMessages.getString("ReorgGroup.paste"), ReorgMessages.getString("ReorgGroup.pasteAction.description"), pasteResources, pasteSourceReferences); //$NON-NLS-1$ //$NON-NLS-2$
+	public static SelectionDispatchAction createPasteAction(UnifiedSite site, ISelectionProvider p){
+		SelectionDispatchAction a1= new PasteResourcesFromClipboardAction(site);
+		SelectionDispatchAction a2= new PasteSourceReferencesFromClipboardAction(site);
+		SelectionDispatchAction dual= new DualReorgAction(site, ReorgMessages.getString("ReorgGroup.paste"), ReorgMessages.getString("ReorgGroup.pasteAction.description"), a1, a2);//$NON-NLS-1$ //$NON-NLS-2$
+		p.addSelectionChangedListener(dual);
+		return dual;
 	}
 	
-	public static IRefactoringAction createDeleteAction(ISelectionProvider p){
-		IRefactoringAction deleteResources= new DeleteResourcesAction(p);
-		IRefactoringAction deleteSourceReferences= new DeleteSourceReferencesAction(p);
-		return new DualReorgAction(p, ReorgMessages.getString("ReorgGroup.delete"), ReorgMessages.getString("deleteAction.description"), deleteResources, deleteSourceReferences); //$NON-NLS-1$ //$NON-NLS-2$
+	public static SelectionDispatchAction createDeleteAction(UnifiedSite site, ISelectionProvider p){
+		DeleteResourcesAction a1= new DeleteResourcesAction(site);
+		DeleteSourceReferencesAction a2= new DeleteSourceReferencesAction(site);
+		DualReorgAction dual= new DualReorgAction(site, ReorgMessages.getString("ReorgGroup.delete"), ReorgMessages.getString("deleteAction.description"), a1, a2); //$NON-NLS-1$ //$NON-NLS-2$
+		p.addSelectionChangedListener(dual);
+		return dual;
 	}
 	
-	public static IRefactoringAction createPasteAction(final ISourceReference[] elements, Object target){
-		return new PasteSourceReferencesFromClipboardAction(new SimpleSelectionProvider(new Object[]{target})){
+	public static SelectionDispatchAction createPasteAction(final ISourceReference[] elements, Object target){
+		return new PasteSourceReferencesFromClipboardAction(new MockUnifiedSite(new Object[]{target})){
 			protected TypedSource[] getContentsToPaste(){
 				List result= new ArrayList(elements.length);
 				for(int i= 0; i < elements.length; i++){
@@ -105,4 +127,21 @@ public class ReorgGroup extends ContextMenuGroup {
 			}
 		};
 	}
+	
+	public static DeleteSourceReferencesAction createDeleteSourceReferencesAction(ISourceReference[] elements){
+		return new DeleteSourceReferencesAction(new MockUnifiedSite(elements));
+	}	
+	
+	public static JdtCopyAction createDnDCopyAction(List elems, final IResource destination){
+		JdtCopyAction action= new JdtCopyAction("#PASTE", new SimpleSelectionProvider(elems.toArray())){ //$NON-NLS-1$
+			protected Object selectDestination(ReorgRefactoring ref) {
+				return ClipboardActionUtil.tryConvertingToJava(destination);			
+			}
+		};
+		return action;
+	}
+	
+	public static JdtCopyAction createDnDCopyAction(IResource[] resourceData, final IResource destination){
+		return createDnDCopyAction(ClipboardActionUtil.getConvertedResources(resourceData), destination);
+	}	
 }

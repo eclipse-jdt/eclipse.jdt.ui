@@ -1,55 +1,62 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.ui.actions.UnifiedSite;
 
-class DualReorgAction extends RefactoringAction {
+class DualReorgAction extends SelectionDispatchAction {
+
+	SelectionDispatchAction fResourceAction;
+	SelectionDispatchAction fSourceReferenceAction;
 	
-	private IRefactoringAction fResourceAction;
-	private IRefactoringAction fSourceReferenceAction;
-	
-	public DualReorgAction(ISelectionProvider provider, String text, String description, IRefactoringAction resourceAction, IRefactoringAction sourceReferenceAction) {
-		super(text, provider);
-		Assert.isNotNull(text);
-		Assert.isNotNull(description);
-		Assert.isNotNull(resourceAction);
-		Assert.isNotNull(sourceReferenceAction);
+	protected DualReorgAction(UnifiedSite site, String text, String description, SelectionDispatchAction resourceAction, SelectionDispatchAction sourceReferenceAction) {
+		super(site);
+		setText(text);
 		setDescription(description);
 		fResourceAction= resourceAction;
 		fSourceReferenceAction= sourceReferenceAction;
+		update();
 	}
 
 	/*
-	 * @see RefactoringAction#canOperateOn(IStructuredSelection)
+	 * @see IAction#run()
 	 */
-	public boolean canOperateOn(IStructuredSelection selection) {
-		boolean canReorgResources= fResourceAction.isEnabled();
-		boolean canReorgSourceReferences= fSourceReferenceAction.isEnabled();
-		//FIX ME	
-//		Assert.isTrue(! canReorgResources || ! canReorgSourceReferences);
-		return (canReorgResources || canReorgSourceReferences);
-	}
-	
-	public void update() {
-		fResourceAction.update();
-		fSourceReferenceAction.update();
-		super.update();
-	}
-	
-	public void run(){
-		update();
-		if (! isEnabled())
-			return;
-		//FIX ME	
-//		Assert.isTrue(! fResourceAction.isEnabled() || ! fSourceReferenceAction.isEnabled());
-//		Assert.isTrue(fResourceAction.isEnabled() || fSourceReferenceAction.isEnabled());
+	public void run() {
 		if (fResourceAction.isEnabled())
 			fResourceAction.run();
 		else if (fSourceReferenceAction.isEnabled())
 			fSourceReferenceAction.run();	
+	}
+
+	/* (non-Javadoc)
+	 * Method declared on ISelectionChangedListener.
+	 */
+	public void selectionChanged(SelectionChangedEvent event) {
+		fResourceAction.selectionChanged(event);
+		fSourceReferenceAction.selectionChanged(event);		
+		setEnabled(computeEnabledState());
+	}
+
+	/*
+	 * @see IUpdate#update()
+	 */
+	public void update() {
+		fResourceAction.update();
+		fSourceReferenceAction.update();
+		setEnabled(computeEnabledState());
+	}
+	
+	private boolean computeEnabledState(){
+		if (! (fResourceAction.isEnabled() || fSourceReferenceAction.isEnabled()))
+			return false;
+
+		if (fResourceAction.isEnabled() && fSourceReferenceAction.isEnabled())	
+			return false;
+		
+		return true;	
 	}
 }
