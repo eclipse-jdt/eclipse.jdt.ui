@@ -22,7 +22,9 @@ import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -35,6 +37,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -62,6 +65,8 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 				if ((element instanceof IType) && ((IType)element).isLocal())
 					return false;
 				if ((element instanceof IPackageDeclaration))
+					return false;
+				if (element instanceof IField && JdtFlags.isEnum((IMember) element))
 					return false;
 			}
 		}
