@@ -1,32 +1,22 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Arrays;import java.util.Collection;import java.util.List;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.PixelConverter;import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.wizards.buildpaths;import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Arrays;import java.util.Collection;import java.util.List;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.PixelConverter;import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 
-public class VariableBlock {
-		
+public class VariableBlock {	
 	private ListDialogField fVariablesList;
-	
-	private StatusInfo fSelectionStatus;
-	
-	private IStatusChangeListener fContext;
-	private boolean fUseAsSelectionDialog;
-	
-	private boolean fRemovingSelection= false;
-	private String fSelectedVariable;		private Control fControl;
+	private Control fControl;
 	
 	/**
 	 * Constructor for VariableBlock
 	 */
-	public VariableBlock(IStatusChangeListener context, boolean useAsSelectionDialog, String initSelection) {	
-		fContext= context;
-		fUseAsSelectionDialog= useAsSelectionDialog;
-		fSelectionStatus= new StatusInfo();				
+	public VariableBlock(boolean inPreferencePage, String initSelection) {
+		
 		String[] buttonLabels= new String[] { 
 			/* 0 */ NewWizardMessages.getString("VariableBlock.vars.add.button"), //$NON-NLS-1$			/* 1 */ NewWizardMessages.getString("VariableBlock.vars.edit.button"), //$NON-NLS-1$			/* 2 */ null,			/* 3 */ NewWizardMessages.getString("VariableBlock.vars.remove.button") //$NON-NLS-1$
 		};
 				
 		VariablesAdapter adapter= new VariablesAdapter();
 		
-		CPVariableElementLabelProvider labelProvider= new CPVariableElementLabelProvider(useAsSelectionDialog);
+		CPVariableElementLabelProvider labelProvider= new CPVariableElementLabelProvider(!inPreferencePage);
 		
 		fVariablesList= new ListDialogField(adapter, buttonLabels, labelProvider);
 		fVariablesList.setDialogFieldListener(adapter);
@@ -62,17 +52,12 @@ public class VariableBlock {
 	
 	public void addDoubleClickListener(IDoubleClickListener listener) {
 		fVariablesList.getTableViewer().addDoubleClickListener(listener);
-	}
+	}		public void addSelectionChangedListener(ISelectionChangedListener listener) {		fVariablesList.getTableViewer().addSelectionChangedListener(listener);	}	
 		
 	
 	private Shell getShell() {		if (fControl != null) {			return fControl.getShell();		}
 		return JavaPlugin.getActiveWorkbenchShell();
 	}
-	
-	public String getSelectedVariable() {	
-		return fSelectedVariable;
-	}
-	
 	
 	private class VariablesAdapter implements IDialogFieldListener, IListAdapter {
 		
@@ -102,18 +87,7 @@ public class VariableBlock {
 	}		private boolean containsReserved(List selected) {		for (int i= selected.size()-1; i >= 0; i--) {			if (((CPVariableElement)selected.get(i)).isReserved()) {				return true;			}		}		return false;	}		private static void addAll(Object[] objs, Collection dest) {		for (int i= 0; i < objs.length; i++) {			dest.add(objs[i]);		}	}
 	private void doSelectionChanged(DialogField field) {
 		List selected= fVariablesList.getSelectedElements();
-		boolean isSingleSelected= selected.size() == 1;		boolean containsReserved= containsReserved(selected);				// edit		fVariablesList.enableButton(1, isSingleSelected && !containsReserved);		// remove button		fVariablesList.enableButton(3, !containsReserved);		
-		fSelectedVariable= null;
-		if (fUseAsSelectionDialog) {
-			if (isSingleSelected) {
-				fSelectionStatus.setOK();
-				fSelectedVariable= ((CPVariableElement)selected.get(0)).getName();
-			} else {
-				fSelectionStatus.setError(""); //$NON-NLS-1$
-			}
-			fContext.statusChanged(fSelectionStatus);
-		}	
-	}
+		boolean isSingleSelected= selected.size() == 1;		boolean containsReserved= containsReserved(selected);				// edit		fVariablesList.enableButton(1, isSingleSelected && !containsReserved);		// remove button		fVariablesList.enableButton(3, !containsReserved);	}
 	
 	private void editEntries(CPVariableElement entry) {
 		List existingEntries= fVariablesList.getElements();
@@ -132,7 +106,7 @@ public class VariableBlock {
 			fVariablesList.refresh();
 		}
 		fVariablesList.selectElements(new StructuredSelection(entry));
-	}
+	}		public List getSelectedElements() {		return fVariablesList.getSelectedElements();	}	
 	
 	public void performDefaults() {
 		fVariablesList.removeAllElements();		String[] reservedName= getReservedVariableNames();		for (int i= 0; i < reservedName.length; i++) {			CPVariableElement elem= new CPVariableElement(reservedName[i], null, true);			elem.setReserved(true);			fVariablesList.addElement(elem);		}	}

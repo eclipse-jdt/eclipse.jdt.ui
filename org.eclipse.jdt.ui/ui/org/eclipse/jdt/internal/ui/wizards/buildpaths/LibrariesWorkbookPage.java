@@ -411,20 +411,21 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 	
 	private CPListElement[] chooseVariableEntries() {
-		ArrayList existingPaths= new ArrayList();
-		for (int i= 0; i < fLibrariesList.getSize(); i++) {
-			CPListElement elem= (CPListElement) fLibrariesList.getElement(i);
-			if (elem.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-				existingPaths.add(elem.getPath());
-			}
-		}
-		VariableSelectionDialog dialog= new VariableSelectionDialog(getShell(), existingPaths);
+		NewVariableEntryDialog dialog= new NewVariableEntryDialog(getShell(), null);
 		if (dialog.open() == dialog.OK) {
-			IPath path= dialog.getVariable();
-			CPListElement elem= new CPListElement(IClasspathEntry.CPE_VARIABLE, path, null);
-			IPath resolvedPath= JavaCore.getResolvedVariablePath(path);
-			elem.setIsMissing((resolvedPath == null) || !resolvedPath.toFile().isFile());
-			return new CPListElement[] { elem };
+			List existingElements= fLibrariesList.getElements();
+			
+			IPath[] paths= dialog.getResult();
+			ArrayList result= new ArrayList();
+			for (int i = 0; i < paths.length; i++) {
+				CPListElement elem= new CPListElement(IClasspathEntry.CPE_VARIABLE, paths[i], null);
+				IPath resolvedPath= JavaCore.getResolvedVariablePath(paths[i]);
+				elem.setIsMissing((resolvedPath == null) || !resolvedPath.toFile().exists());
+				if (!existingElements.contains(elem)) {
+					result.add(elem);
+				}
+			}
+			return (CPListElement[]) result.toArray(new CPListElement[result.size()]);
 		}
 		return null;
 	}
@@ -455,62 +456,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			JavaPlugin.log(e.getStatus());
 		}
 	}		
-	
-
-	// a dialog to set the source attachment properties
-	private class VariableSelectionDialog extends StatusDialog implements IStatusChangeListener {	
-		private VariableSelectionBlock fVariableSelectionBlock;
-				
-		public VariableSelectionDialog(Shell parent, List existingPaths) {
-			super(parent);
-			setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.title")); //$NON-NLS-1$
-			String initVar= fDialogSettings.get(IUIConstants.DIALOGSTORE_LASTVARIABLE);
-			fVariableSelectionBlock= new VariableSelectionBlock(this, existingPaths, null, initVar, false);
-		}
-		
-		/*
-		 * @see Windows#configureShell
-		 */
-		protected void configureShell(Shell newShell) {
-			super.configureShell(newShell);
-			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.VARIABLE_SELECTION_DIALOG);
-		}		
-
-		/*
-		 * @see StatusDialog#createDialogArea()
-		 */				
-		protected Control createDialogArea(Composite parent) {
-			Composite composite= (Composite)super.createDialogArea(parent);
 					
-			Label message= new Label(composite, SWT.WRAP);
-			message.setText(NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.message")); //$NON-NLS-1$
-			message.setLayoutData(new GridData());	
-						
-			Control inner= fVariableSelectionBlock.createControl(composite);
-			inner.setLayoutData(new GridData(GridData.FILL_BOTH));
-			return composite;
-		}
-		
-		/*
-		 * @see Dialog#okPressed()
-		 */
-		protected void okPressed() {
-			fDialogSettings.put(IUIConstants.DIALOGSTORE_LASTVARIABLE, getVariable().segment(0));
-			super.okPressed();
-		}	
-
-		/*
-		 * @see IStatusChangeListener#statusChanged()
-		 */			
-		public void statusChanged(IStatus status) {
-			updateStatus(status);
-		}
-		
-		public IPath getVariable() {
-			return fVariableSelectionBlock.getVariablePath();
-		}		
-	}
-				
 	// a dialog to set the source attachment properties
 	private class SourceAttachmentDialog extends StatusDialog implements IStatusChangeListener {
 		

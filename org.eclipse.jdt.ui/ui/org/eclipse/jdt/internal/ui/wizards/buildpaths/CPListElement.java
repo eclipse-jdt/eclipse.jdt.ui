@@ -126,7 +126,7 @@ public class CPListElement {
 	public boolean equals(Object other) {
 		if (other.getClass() == getClass()) {
 			CPListElement elem= (CPListElement)other;
-			return elem.fEntryKind == fEntryKind && elem.fPath == fPath;
+			return elem.fEntryKind == fEntryKind && elem.fPath.equals(fPath);
 		}
 		return false;
 	}

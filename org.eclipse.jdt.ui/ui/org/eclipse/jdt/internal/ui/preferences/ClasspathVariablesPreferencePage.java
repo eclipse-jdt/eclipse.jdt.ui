@@ -14,7 +14,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 				updateStatus(status);
 			}
 		};
-		fVariableBlock= new VariableBlock(listener, false, null);		setDescription(JavaUIMessages.getString("ClasspathVariablesPreferencePage.description")); //$NON-NLS-1$	}
+		fVariableBlock= new VariableBlock(true, null);		setDescription(JavaUIMessages.getString("ClasspathVariablesPreferencePage.description")); //$NON-NLS-1$	}
 
 	/**
 	 * @see PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
