@@ -388,14 +388,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 							String name= Bindings.getFullyQualifiedName(typeBinding);
 							fImpStructure.addImport(name);
 						}
-					} else {
-						System.out.println(fImpStructure.getCompilationUnit().getElementName() + ": Resolved not to type " +  ref.getIdentifier());
 					}	
 					return null;
-				} else {
-					System.out.println(fImpStructure.getCompilationUnit().getElementName() + ": Unresolved " +  ref.getIdentifier());
 				}
-				
+								
 				ArrayList typeRefsFound= fTypeRefsFound; // reuse
 				String typeName= ref.getIdentifier();
 				findTypeRefs(typeName, typeRefsFound, fNamesFound);				
