@@ -1509,9 +1509,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private SemanticHighlightingManager.HighlightedRange[][] createPreviewerRanges() {
 		return new SemanticHighlightingManager.HighlightedRange[][] {
 			{ createHighlightedRange(6, 13, 9, SemanticHighlightings.DEPRECATED_MEMBER) },
-			{ createHighlightedRange(7, 26, 8, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange(7, 26, 8, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 26, 8, SemanticHighlightings.FIELD),createHighlightedRange(7, 26, 8, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION)},
-			{ createHighlightedRange(9, 20, 11, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(9, 20, 11, SemanticHighlightings.FIELD), createHighlightedRange(9, 20, 11, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION)},
-			{ createHighlightedRange(11, 16, 5, SemanticHighlightings.FIELD), createHighlightedRange(11, 16, 5, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION) },
+			{ createHighlightedRange(7, 26, 8, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange(7, 26, 8, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 26, 8, SemanticHighlightings.FIELD) },
+			{ createHighlightedRange(9, 20, 11, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(9, 20, 11, SemanticHighlightings.FIELD) },
+			{ createHighlightedRange(11, 16, 5, SemanticHighlightings.FIELD) },
 			{ createHighlightedRange(13, 12, 3, SemanticHighlightings.METHOD_DECLARATION) },
 			{ createHighlightedRange(13, 20, 9, SemanticHighlightings.PARAMETER_VARIABLE) },
 			{ createHighlightedRange(14, 2, 14, SemanticHighlightings.ABSTRACT_METHOD_INVOCATION) },
