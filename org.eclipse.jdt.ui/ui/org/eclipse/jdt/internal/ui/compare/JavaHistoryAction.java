@@ -81,6 +81,9 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 		else if (input instanceof IMember)
 			cu= ((IMember)input).getCompilationUnit();
 			
+		if (cu == null || !cu.exists())
+			return null;
+			
 		// get to original CU
 		if (cu.isWorkingCopy())
 			cu= (ICompilationUnit) cu.getOriginalElement();
@@ -92,7 +95,10 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 		} catch (JavaModelException ex) {
 			JavaPlugin.log(ex);
 		}
-		return file;
+		
+		if (file.exists())
+			return file;
+		return null;
 	}
 	
 	protected ITypedElement[] buildEditions(ITypedElement target, IFile file) {
@@ -149,7 +155,7 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 				Object o= ss.getFirstElement();
 				if (o instanceof IMember) {
 					IMember m= (IMember) o;
-					if (!m.isBinary() && JavaStructureCreator.hasEdition(m))
+					if (m.exists() && !m.isBinary() && JavaStructureCreator.hasEdition(m))
 						return m;
 				}
 			}
@@ -162,7 +168,7 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 		if (m == null)
 			return false;
 		IFile file= getFile(m);
-		if (beingEdited(file))
+		if (file != null && beingEdited(file))
 			return getWorkingCopy(m) != null;
 		return true;
 	}
