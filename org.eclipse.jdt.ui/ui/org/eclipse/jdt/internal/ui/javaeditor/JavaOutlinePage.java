@@ -40,10 +40,13 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.Page;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
+import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
@@ -68,6 +71,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
+import org.eclipse.jdt.internal.ui.actions.OpenExternalJavadocAction;
 import org.eclipse.jdt.internal.ui.actions.OpenHierarchyAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
@@ -88,7 +92,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
  * Pulishes its context menu under <code>JavaPlugin.getDefault().getPluginId() + ".outliner"</code>.
  */
 class JavaOutlinePage extends Page implements IContentOutlinePage {
-	
+
 			/**
 			 * The element change listener of the java outline viewer.
 			 * @see IElementChangedListener
@@ -583,6 +587,15 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	private Hashtable fActions= new Hashtable();
 	private ContextMenuGroup[] fActionGroups;
 	
+	private OpenOnSelectionAction fOpenOnSelection;
+	private OpenOnSelectionAction fOpenOnTypeSelection;
+	private TogglePresentationAction fTogglePresentation;
+	private ToggleTextHoverAction fToggleTextHover;
+	private GotoErrorAction fPreviousError;
+	private GotoErrorAction fNextError;
+	private OpenExternalJavadocAction fOpenExternalJavadoc;
+	private TextOperationAction fShowJavadoc;
+	
 	public JavaOutlinePage(String contextMenuID, JavaEditor editor) {
 		super();
 		
@@ -590,6 +603,23 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		
 		fContextMenuID= contextMenuID;
 		fEditor= editor;
+		
+		fOpenOnSelection= new OpenOnSelectionAction();
+		fOpenOnTypeSelection= new OpenHierarchyOnSelectionAction();		
+		fTogglePresentation= new TogglePresentationAction();
+		fToggleTextHover= new ToggleTextHoverAction();
+		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$		
+		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
+		fOpenExternalJavadoc= new OpenExternalJavadocAction();
+		fShowJavadoc= (TextOperationAction) fEditor.getAction("ShowJavaDoc");
+		
+		fOpenOnSelection.setContentEditor(editor);
+		fOpenOnTypeSelection.setContentEditor(editor);		
+		fTogglePresentation.setEditor(editor);
+		fToggleTextHover.setEditor(editor);
+		fPreviousError.setEditor(editor);
+		fNextError.setEditor(editor);
+		fOpenExternalJavadoc.setActivePart(null, editor);
 	}
 	
 	/*
@@ -678,7 +708,18 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		
 		getSite().registerContextMenu(JavaPlugin.getDefault().getPluginId() + ".outline", manager, fOutlineViewer);
 		getSite().setSelectionProvider(fOutlineViewer);
-		
+
+		// register global actions
+		IActionBars bars= getSite().getActionBars();
+		bars.setGlobalActionHandler(IJavaEditorActionConstants.OPEN_SELECTION, fOpenOnSelection);
+		bars.setGlobalActionHandler(IJavaEditorActionConstants.OPEN_TYPE_HIERARCHY, fOpenOnTypeSelection);
+		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
+		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
+		bars.setGlobalActionHandler(IJavaEditorActionConstants.NEXT_ERROR, fPreviousError);
+		bars.setGlobalActionHandler(IJavaEditorActionConstants.PREVIOUS_ERROR, fNextError);
+		bars.setGlobalActionHandler(IJavaEditorActionConstants.OPEN_JAVADOC, fOpenExternalJavadoc);
+		bars.setGlobalActionHandler(IJavaEditorActionConstants.SHOW_JAVADOC, fShowJavadoc);
+
 		IStatusLineManager statusLineManager= getSite().getActionBars().getStatusLineManager();
 		if (statusLineManager != null) {
 			StatusBarUpdater updater= new StatusBarUpdater(statusLineManager);

@@ -6,7 +6,9 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
-import java.util.ResourceBundle;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.text.IRegion;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.TextEditorAction;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import java.util.ResourceBundle;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.text.IRegion;import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.TextEditorAction;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 /**
@@ -14,8 +16,10 @@ import java.util.ResourceBundle;import org.eclipse.jface.preference.IPreferenc
  * connected text editor. The editor shows either the highlight range
  * only or always the whole document.
  */
-public class TogglePresentationAction extends TextEditorAction {
+public class TogglePresentationAction extends TextEditorAction implements IPropertyChangeListener {
 		
+	private IPreferenceStore fStore;
+
 	private String fToolTipChecked;
 	private String fToolTipUnchecked;
 	
@@ -32,7 +36,15 @@ public class TogglePresentationAction extends TextEditorAction {
 		fToolTipUnchecked= JavaEditorMessages.getString("TogglePresentation.tooltip.unchecked"); //$NON-NLS-1$
 		
 		update();
-		WorkbenchHelp.setHelp(this,	IJavaHelpContextIds.TOGGLE_PRESENTATION_ACTION);					
+		WorkbenchHelp.setHelp(this,	IJavaHelpContextIds.TOGGLE_PRESENTATION_ACTION);
+		
+		getStore().addPropertyChangeListener(this);
+	}
+
+	private IPreferenceStore getStore() {
+		if (fStore == null)
+			fStore= JavaPlugin.getDefault().getPreferenceStore();
+		return fStore;
 	}
 	
 	/**
@@ -55,8 +67,7 @@ public class TogglePresentationAction extends TextEditorAction {
 		if (remembered != null)
 			editor.setHighlightRange(remembered.getOffset(), remembered.getLength(), true);
 		
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(IPreferencesConstants.EDITOR_SHOW_SEGMENTS, showAll);
+		getStore().setValue(IPreferencesConstants.EDITOR_SHOW_SEGMENTS, showAll);
 	}
 	
 	private String getToolTipText(boolean checked) {
@@ -83,12 +94,9 @@ public class TogglePresentationAction extends TextEditorAction {
 		
 		if (editor != null) {
 			
-			boolean showSegments= JavaPlugin.getDefault().getPreferenceStore().getBoolean(IPreferencesConstants.EDITOR_SHOW_SEGMENTS);
-			
-			if (isChecked() != showSegments) {
-				setChecked(showSegments);
-				setToolTipText(getToolTipText(showSegments));
-			}
+			boolean showSegments= getStore().getBoolean(IPreferencesConstants.EDITOR_SHOW_SEGMENTS);			
+			setChecked(showSegments);
+			setToolTipText(getToolTipText(showSegments));
 			
 			if (editor.showsHighlightRangeOnly() != showSegments) {
 				IRegion remembered= editor.getHighlightRange();
@@ -99,4 +107,13 @@ public class TogglePresentationAction extends TextEditorAction {
 			}
 		}
 	}
+
+	/**
+	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
+	 */
+	public void propertyChange(PropertyChangeEvent event) {
+		if (event.getProperty().equals(IPreferencesConstants.EDITOR_SHOW_SEGMENTS))
+			update();
+	}
+
 }

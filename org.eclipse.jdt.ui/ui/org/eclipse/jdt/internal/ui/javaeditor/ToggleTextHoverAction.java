@@ -6,18 +6,19 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
-import java.util.ResourceBundle;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.TextEditorAction;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import java.util.ResourceBundle;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.TextEditorAction;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 /**
  * A toolbar action which toggles the enabling state of the 
  * editor's text hover.
  */
-public class ToggleTextHoverAction extends TextEditorAction {
+public class ToggleTextHoverAction extends TextEditorAction implements IPropertyChangeListener {
 	
 	
 	private IPreferenceStore fStore;
-	private boolean fIsEnabled;
 	
 	private String fToolTipChecked;
 	private String fToolTipUnchecked;
@@ -34,6 +35,11 @@ public class ToggleTextHoverAction extends TextEditorAction {
 		fToolTipUnchecked= JavaEditorMessages.getString("ToggleTextHover.tooltip.unchecked"); //$NON-NLS-1$
 	
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.TOGGLE_TEXTHOVER_ACTION);	
+
+		boolean showHover= getStore().getBoolean(IPreferencesConstants.EDITOR_SHOW_HOVER);
+		setChecked(showHover);
+		
+		getStore().addPropertyChangeListener(this);
 	}
 	
 	private IPreferenceStore getStore() {
@@ -50,19 +56,19 @@ public class ToggleTextHoverAction extends TextEditorAction {
 	 * @see IAction#actionPerformed
 	 */
 	public void run() {
-		fIsEnabled= !fIsEnabled;
-		getStore().setValue(IPreferencesConstants.EDITOR_SHOW_HOVER, fIsEnabled);
-		setChecked(fIsEnabled);
-		setToolTipText(getToolTipText(fIsEnabled));
+		boolean showHover= !getStore().getBoolean(IPreferencesConstants.EDITOR_SHOW_HOVER);
+		getStore().setValue(IPreferencesConstants.EDITOR_SHOW_HOVER, showHover);
+		setChecked(showHover);
+		setToolTipText(getToolTipText(showHover));
 	}
 	
 	/**
 	 * @see TextEditorAction#update
 	 */
 	public void update() {
-		fIsEnabled= getStore().getBoolean(IPreferencesConstants.EDITOR_SHOW_HOVER);
-		setChecked(fIsEnabled);
-		setToolTipText(getToolTipText(fIsEnabled));
+		boolean showHover= getStore().getBoolean(IPreferencesConstants.EDITOR_SHOW_HOVER);
+		setChecked(showHover);
+		setToolTipText(getToolTipText(showHover));
 		setEnabled(true);
 	}
 	
@@ -73,4 +79,13 @@ public class ToggleTextHoverAction extends TextEditorAction {
 		super.setEditor(editor);
 		update();
 	}
+
+	/**
+	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
+	 */
+	public void propertyChange(PropertyChangeEvent event) {
+		if (event.getProperty().equals(IPreferencesConstants.EDITOR_SHOW_HOVER))
+			update();
+	}
+
 }
