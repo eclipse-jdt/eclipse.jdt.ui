@@ -61,6 +61,7 @@ public class GenerateActionGroup extends ActionGroup {
 	private AddImportOnSelectionAction fAddImport;
 	private OverrideMethodsAction fOverrideMethods;
 	private AddGetterSetterAction fAddGetterSetter;
+	private AddDelegateMethodsAction fAddDelegateMethods;
 	private AddUnimplementedConstructorsAction fAddUnimplementedConstructors;
 	private AddJavaDocStubAction fAddJavaDocStub;
 	private AddBookmarkAction fAddBookmark;
@@ -109,6 +110,10 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddGetterSetter= new AddGetterSetterAction(editor);
 		fAddGetterSetter.setActionDefinitionId(IJavaEditorActionDefinitionIds.CREATE_GETTER_SETTER);
 		editor.setAction("AddGetterSetter", fAddGetterSetter); //$NON-NLS-1$
+
+		fAddDelegateMethods= new AddDelegateMethodsAction(editor);
+		fAddDelegateMethods.setActionDefinitionId(IJavaEditorActionDefinitionIds.CREATE_DELEGATE_METHODS);
+		editor.setAction("AddDelegateMethods", fAddDelegateMethods); //$NON-NLS-1$
 		
 		fAddUnimplementedConstructors= new AddUnimplementedConstructorsAction(editor);
 		fAddUnimplementedConstructors.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_UNIMPLEMENTED_CONTRUCTORS);
@@ -168,6 +173,7 @@ public class GenerateActionGroup extends ActionGroup {
 		
 		fOverrideMethods= new OverrideMethodsAction(site);
 		fAddGetterSetter= new AddGetterSetterAction(site);
+		fAddDelegateMethods= new AddDelegateMethodsAction(site);
 		fAddUnimplementedConstructors= new AddUnimplementedConstructorsAction(site);
 		fAddJavaDocStub= new AddJavaDocStubAction(site);
 		fAddBookmark= new AddBookmarkAction(site.getShell());
@@ -181,6 +187,7 @@ public class GenerateActionGroup extends ActionGroup {
 		
 		fOverrideMethods.update(selection);
 		fAddGetterSetter.update(selection);
+		fAddDelegateMethods.update(selection);
 		fAddUnimplementedConstructors.update(selection);	
 		fAddJavaDocStub.update(selection);
 		fExternalizeStrings.update(selection);
@@ -197,6 +204,7 @@ public class GenerateActionGroup extends ActionGroup {
 		
 		registerSelectionListener(provider, fOverrideMethods);
 		registerSelectionListener(provider, fAddGetterSetter);
+		registerSelectionListener(provider, fAddDelegateMethods);
 		registerSelectionListener(provider, fAddUnimplementedConstructors);
 		registerSelectionListener(provider, fAddJavaDocStub);
 		registerSelectionListener(provider, fAddBookmark);
@@ -254,6 +262,7 @@ public class GenerateActionGroup extends ActionGroup {
 			appendToGroup(menu, fOrganizeImports);
 			appendToGroup(menu, fOverrideMethods);
 			appendToGroup(menu, fAddGetterSetter);
+			appendToGroup(menu, fAddDelegateMethods);
 			appendToGroup(menu, fAddUnimplementedConstructors);
 			appendToGroup(menu, fAddJavaDocStub);
 			appendToGroup(menu, fSortMembers);
@@ -274,6 +283,7 @@ public class GenerateActionGroup extends ActionGroup {
 		result.add(new Separator());
 		added+= addAction(result, fOverrideMethods);
 		added+= addAction(result, fAddGetterSetter);
+		added+= addAction(result, fAddDelegateMethods);
 		added+= addAction(result, fAddUnimplementedConstructors);
 		added+= addAction(result, fAddJavaDocStub);
 		added+= addAction(result, fSortMembers);
@@ -306,6 +316,7 @@ public class GenerateActionGroup extends ActionGroup {
 		actionBar.setGlobalActionHandler(JdtActionConstants.SURROUND_WITH_TRY_CATCH, fSurroundWithTryCatch);
 		actionBar.setGlobalActionHandler(JdtActionConstants.OVERRIDE_METHODS, fOverrideMethods);
 		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_GETTER_SETTER, fAddGetterSetter);
+		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_DELEGATE_METHODS, fAddDelegateMethods);
 		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_CONSTRUCTOR_FROM_SUPERCLASS, fAddUnimplementedConstructors);
 		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_JAVA_DOC_COMMENT, fAddJavaDocStub);
 		actionBar.setGlobalActionHandler(JdtActionConstants.EXTERNALIZE_STRINGS, fExternalizeStrings);

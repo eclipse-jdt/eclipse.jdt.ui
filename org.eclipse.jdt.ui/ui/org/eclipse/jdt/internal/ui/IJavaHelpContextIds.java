@@ -61,6 +61,8 @@ public interface IJavaHelpContextIds {
 	public static final String LEXICAL_SORTING_OUTLINE_ACTION= 							PREFIX + "lexical_sorting_outline_action"; //$NON-NLS-1$
 	public static final String LEXICAL_SORTING_BROWSING_ACTION= 						PREFIX + "lexical_sorting_browsing_action"; //$NON-NLS-1$
 	public static final String OPEN_JAVA_PERSPECTIVE_ACTION= 							PREFIX + "open_java_perspective_action"; //$NON-NLS-1$
+	public static final String ADD_DELEGATE_METHODS_ACTION= 										PREFIX + "add_delegate_methods_action"; //$NON-NLS-1$
+
 	public static final String OPEN_JAVA_BROWSING_PERSPECTIVE_ACTION= 			PREFIX + "open_java_browsing_perspective_action"; //$NON-NLS-1$
 	public static final String OPEN_PROJECT_ACTION= 											PREFIX + "open_project_action"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_ACTION= 												PREFIX + "open_type_action"; //$NON-NLS-1$

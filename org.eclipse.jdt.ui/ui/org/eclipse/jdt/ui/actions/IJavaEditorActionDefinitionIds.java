@@ -163,10 +163,18 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String ADD_UNIMPLEMENTED_CONTRUCTORS= "org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors"; //$NON-NLS-1$
 	
 	/**
-	 * Action definition ID of the source -> create setter/getter action
+	 * Action definition ID of the source -> generate setter/getter action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.create.getter.setter"</code>).
 	 */
 	public static final String CREATE_GETTER_SETTER= "org.eclipse.jdt.ui.edit.text.java.create.getter.setter"; //$NON-NLS-1$
+	
+	/**
+	 * Action definition ID of the source -> generate delegates action (value
+	 * <code>"org.eclipse.jdt.ui.edit.text.java.create.delegate.methods"</code>).
+	 * @since 2.1
+	 */
+	public static final String CREATE_DELEGATE_METHODS= "org.eclipse.jdt.ui.edit.text.java.create.delegate.methods"; //$NON-NLS-1$
+	
 	
 	/**
 	 * Action definition ID of the source -> externalize strings action

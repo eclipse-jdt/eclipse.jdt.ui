@@ -154,7 +154,14 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.GenerateGetterSetter"</code>).
 	 */
 	public static final String GENERATE_GETTER_SETTER= "org.eclipse.jdt.ui.actions.GenerateGetterSetter"; //$NON-NLS-1$
-	
+
+	/**
+	 * Source menu: name of standard delegate methdos global action (value
+	 * <code>"org.eclipse.jdt.ui.actions.GenerateDelegateMethods"</code>).
+	 * @since 2.1
+	 */
+	public static final String GENERATE_DELEGATE_METHODS= "org.eclipse.jdt.ui.actions.GenerateDelegateMethods"; //$NON-NLS-1$
+
 	/**
 	 * Source menu: name of standard Add Constructor From Superclass global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.AddConstructorFromSuperclass"</code>).

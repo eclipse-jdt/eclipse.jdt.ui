@@ -1182,6 +1182,11 @@
       		label="%AddConstructorFromSuperclassAction.label"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors"
 			retarget="true" />
+
+		<action id="org.eclipse.jdt.ui.actions.GenerateDelegateMethods"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
+      		label="%GenerateDelegateMethodsAction.label"
+			retarget="true" />		
 			
 		<action id="org.eclipse.jdt.ui.actions.GenerateGetterSetter"
       		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
