@@ -297,7 +297,7 @@ public class JavaElementLabels {
 		getElementLabel(element, flags, buf);
 		return buf.toString();
 	}
-
+	
 	/**
 	 * Returns the label for a Java element. Flags as defined above.
 	 */
@@ -379,9 +379,10 @@ public class JavaElementLabels {
 			buf.append(method.getElementName());
 			
 			// parameters
+			buf.append('(');
 			if (getFlag(flags, M_PARAMETER_TYPES | M_PARAMETER_NAMES)) {
-				buf.append('(');
-				
+			
+			
 				String[] types= getFlag(flags, M_PARAMETER_TYPES) ? method.getParameterTypes() : null;
 				String[] names= (getFlag(flags, M_PARAMETER_NAMES) && method.exists()) ? method.getParameterNames() : null;
 				int nParams= types != null ? types.length : names.length;
@@ -400,8 +401,12 @@ public class JavaElementLabels {
 						buf.append(names[i]);
 					}
 				}
-				buf.append(')');
+			} else {
+				if (method.getParameterTypes().length > 0) {
+					buf.append(".."); //$NON-NLS-1$
+				}
 			}
+			buf.append(')');
 					
 			if (getFlag(flags, M_EXCEPTIONS) && method.exists()) {
 				String[] types= method.getExceptionTypes();
@@ -508,15 +513,16 @@ public class JavaElementLabels {
 				getPackageFragmentLabel(pack, (flags & P_COMPRESSED), buf);
 				buf.append('.');
 			}
+		}
+		if (getFlag(flags, T_FULLY_QUALIFIED | T_CONTAINER_QUALIFIED)) {
 			IType declaringType= type.getDeclaringType();
 			if (declaringType != null) {
-				buf.append(JavaModelUtil.getTypeQualifiedName(declaringType));
+				getTypeLabel(declaringType, T_CONTAINER_QUALIFIED, buf);
 				buf.append('.');
 			}
-		} else if (getFlag(flags, T_CONTAINER_QUALIFIED)) {
-			IType declaringType= type.getDeclaringType();
-			if (declaringType != null) {
-				buf.append(JavaModelUtil.getTypeQualifiedName(declaringType));
+			IJavaElement parent= type.getParent();
+			if (parent instanceof IMethod) {
+				getMethodLabel((IMethod) parent, 0, buf);
 				buf.append('.');
 			}
 		}
@@ -539,6 +545,11 @@ public class JavaElementLabels {
 			IType declaringType= type.getDeclaringType();
 			if (declaringType != null) {
 				getTypeLabel(declaringType, T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
+				IJavaElement parent= type.getParent();
+				if (parent instanceof IMethod) {
+					buf.append('.');
+					getMethodLabel((IMethod) parent, 0, buf);
+				}
 			} else {
 				getPackageFragmentLabel(type.getPackageFragment(), (flags & P_COMPRESSED), buf);
 			}

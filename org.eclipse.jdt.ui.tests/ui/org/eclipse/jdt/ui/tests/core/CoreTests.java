@@ -46,6 +46,7 @@ public class CoreTests extends TestCase {
 		suite.addTest(PartialASTTest.allTests());
 		suite.addTest(CodeCompletionTest.allTests());
 		suite.addTest(TypeRulesTest.allTests());
+		suite.addTest(JavaElementLabelsTest.allTests());
 		
 		
 		return new ProjectTestSetup(suite);
