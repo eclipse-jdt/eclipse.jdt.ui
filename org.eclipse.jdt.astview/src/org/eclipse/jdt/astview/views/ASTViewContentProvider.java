@@ -156,6 +156,8 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 		} else if (node instanceof EnumConstantDeclaration) {
 			IBinding binding= ((EnumConstantDeclaration) node).resolveVariable();
 			res.add(createBinding(node, binding));
+			IBinding binding2= ((EnumConstantDeclaration) node).resolveConstructorBinding();
+			res.add(createBinding(node, binding2));
 		} else if (node instanceof MethodDeclaration) {
 			IBinding binding= ((MethodDeclaration) node).resolveBinding();
 			res.add(createBinding(node, binding));
