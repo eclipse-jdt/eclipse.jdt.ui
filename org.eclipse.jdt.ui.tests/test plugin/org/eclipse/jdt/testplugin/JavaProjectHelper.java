@@ -111,7 +111,7 @@ public class JavaProjectHelper {
 	
 	/**
 	 * Creates a Java project with JUnit source and rt.jar from
-	 * {@link #addVariableRTJar(IJavaProject, String, String, String)}.
+	 * {@link #addVariableRTJar(IJavaProject, IPath, String, String, String)}.
 	 * 
 	 * @param projectName the project name
 	 * @param srcContainerName the source container name
@@ -124,8 +124,9 @@ public class JavaProjectHelper {
 	 */	
 	public static IJavaProject createJavaProjectWithJUnitSource(String projectName, String srcContainerName, String outputFolderName) throws CoreException, IOException, InvocationTargetException {
 		IJavaProject project= createJavaProject(projectName, outputFolderName); //$NON-NLS-2$
+		set15CompilerOptions(project);
 		
-		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(project, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
+		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(project, RT_STUBS_13, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
 		Assert.assertNotNull(jdk);
 		
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
@@ -135,7 +136,16 @@ public class JavaProjectHelper {
 		
 		return project;
 	}
-
+	
+	/**
+	 * Sets the compiler options to 1.5 for the given project.
+	 * @param project the java project
+	 */	
+	public static void set15CompilerOptions(IJavaProject project) {
+		Map options= project.getOptions(false);
+		JavaProjectHelper.set15CompilerOptions(options);
+		project.setOptions(options);
+	}
 	
 	/**
 	 * Sets the compiler options to 1.5
@@ -369,29 +379,19 @@ public class JavaProjectHelper {
 	}	
 
 	/**
-	 * Adds a library entry pointing to a current JRE (stubs only).
+	 * Adds a 1.5 library entry pointing to a current JRE (stubs only).
+	 * 
 	 * @param jproject target
 	 * @return the new package fragment root
 	 * @throws CoreException
 	 */	
 	public static IPackageFragmentRoot addRTJar(IJavaProject jproject) throws CoreException {
-		IPath[] rtJarPath= find15RtJar();
+		IPath[] rtJarPath= findRtJar(RT_STUBS_15);
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 	}
 	
 	/**
-	 * Adds a library entry pointing to a 1.3 JRE (stubs only).
-	 * @param jproject target
-	 * @return the new package fragment root
-	 * @throws CoreException
-	 */	
-	public static IPackageFragmentRoot add13RTJar(IJavaProject jproject) throws CoreException {
-		IPath[] rtJarPath= find13RtJar();
-		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
-	}
-	
-	/**
-	 * Adds a variable entry with source attchment to a IJavaProject.
+	 * Adds a variable entry with source attachment to a IJavaProject.
 	 * Can return null if variable can not be resolved.
 	 */			
 	public static IPackageFragmentRoot addVariableEntry(IJavaProject jproject, IPath path, IPath sourceAttachPath, IPath sourceAttachRoot) throws JavaModelException {
@@ -407,13 +407,16 @@ public class JavaProjectHelper {
 	/**
 	 * Adds a variable entry pointing to a current JRE (stubs only).
 	 * The arguments specify the names of the variable to be used.
+	 * 
+	 * @param jproject the project to add the variable RT JAR
+	 * @param rtSubsPath XXX
 	 * @param libVarName Name of the variable for the library
-	 * @param srcVarName Name of the variable for the source attchment. Can be <code>null</code>.
-	 * @param srcrootVarName Name of the variable for the source attchment root. Can be <code>null</code>.
+	 * @param srcVarName Name of the variable for the source attachment. Can be <code>null</code>.
+	 * @param srcrootVarName Name of the variable for the source attachment root. Can be <code>null</code>.
 	 * @return the new package fragment root
 	 */	
-	public static IPackageFragmentRoot addVariableRTJar(IJavaProject jproject, String libVarName, String srcVarName, String srcrootVarName) throws CoreException {
-		IPath[] rtJarPaths= find15RtJar();
+	public static IPackageFragmentRoot addVariableRTJar(IJavaProject jproject, IPath rtSubsPath, String libVarName, String srcVarName, String srcrootVarName) throws CoreException {
+		IPath[] rtJarPaths= findRtJar(rtSubsPath);
 		IPath libVarPath= new Path(libVarName);
 		IPath srcVarPath= null;
 		IPath srcrootVarPath= null;
@@ -481,24 +484,11 @@ public class JavaProjectHelper {
 	}
 	
 	/**
-	 * @return a 1.5 rt.jar (stubs only)
+	 * @param rtStubsPath the path to the rt stubs
+	 * @return a rt.jar (stubs only)
 	 */
-	public static IPath[] find15RtJar() {
-		File rtStubs= JavaTestPlugin.getDefault().getFileInPlugin(RT_STUBS_15);
-		Assert.assertNotNull(rtStubs);
-		Assert.assertTrue(rtStubs.exists());
-		return new IPath[] {
-			new Path(rtStubs.getPath()),
-			null,
-			null
-		};
-	}
-	
-	/**
-	 * @return a 1.3 rt.jar (stubs only)
-	 */
-	public static IPath[] find13RtJar() {
-		File rtStubs= JavaTestPlugin.getDefault().getFileInPlugin(RT_STUBS_13);
+	public static IPath[] findRtJar(IPath rtStubsPath) {
+		File rtStubs= JavaTestPlugin.getDefault().getFileInPlugin(rtStubsPath);
 		Assert.assertNotNull(rtStubs);
 		Assert.assertTrue(rtStubs.exists());
 		return new IPath[] {

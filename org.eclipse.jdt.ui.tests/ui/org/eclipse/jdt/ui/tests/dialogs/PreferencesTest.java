@@ -244,7 +244,7 @@ public class PreferencesTest extends TestCase {
 	
 	public void testVariableSourceAttachmentPropPage() throws Exception {
 		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
-		IPackageFragmentRoot root= JavaProjectHelper.addVariableRTJar(jproject, "VAR_LIB", "VAR_SRC", "VAR_SRCROOT");
+		IPackageFragmentRoot root= JavaProjectHelper.addVariableRTJar(jproject, JavaProjectHelper.RT_STUBS_15, "VAR_LIB", "VAR_SRC", "VAR_SRCROOT");
 		assertTrue(root != null);
 		
 		Dialog dialog = getPropertyDialog("org.eclipse.jdt.ui.propertyPages.SourceAttachmentPage1", root);

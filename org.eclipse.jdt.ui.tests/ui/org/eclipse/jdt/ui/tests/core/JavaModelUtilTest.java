@@ -85,7 +85,7 @@ public class JavaModelUtilTest extends TestCase {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
 
-		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(fJProject1, "JRE_LIB_TEST", null, null);
+		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(fJProject1, JavaProjectHelper.RT_STUBS_15, "JRE_LIB_TEST", null, null);
 		assertTrue("jdk not found", jdk != null);
 
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);

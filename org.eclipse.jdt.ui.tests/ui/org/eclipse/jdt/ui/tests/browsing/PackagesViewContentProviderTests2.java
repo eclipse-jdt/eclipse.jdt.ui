@@ -343,7 +343,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		
 		//------------set up project #1 : External Jar and zip file-------
 		
-		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(fJProject1, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
+		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(fJProject1, JavaProjectHelper.RT_STUBS_15, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
 		assertTrue("jdk not found", jdk != null);//$NON-NLS-1$
 
 		
