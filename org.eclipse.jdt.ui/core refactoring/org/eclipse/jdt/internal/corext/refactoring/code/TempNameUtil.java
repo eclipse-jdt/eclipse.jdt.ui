@@ -25,11 +25,6 @@ public class TempNameUtil {
 	private TempNameUtil(){
 	}
 	
-	public static String[] getLocalNames(MethodDeclaration methodNode){
-		Set set= getLocalNameMap(methodNode).keySet();
-		return (String[]) set.toArray(new String[set.size()]);
-	}
-	
 	//String -> ISourceRange
 	public static Map getLocalNameMap(MethodDeclaration methodNode){
 		if (methodNode == null)
