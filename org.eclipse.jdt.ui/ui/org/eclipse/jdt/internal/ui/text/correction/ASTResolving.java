@@ -202,6 +202,12 @@ public class ASTResolving {
 				return getPossibleReferenceBinding(parent);
 			}
 			break;
+		case ASTNode.SWITCH_CASE:
+			if (node.equals(((SwitchCase) parent).getExpression()) && parent.getParent() instanceof SwitchStatement) {
+				return ((SwitchStatement) parent.getParent()).getExpression().resolveTypeBinding();
+			}
+			break;
+			
 		default:
 			// do nothing
 		}
