@@ -108,6 +108,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.MATCHING_BRACKETS_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.MATCHING_BRACKETS),
 		
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.CURRENT_LINE_COLOR),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.CURRENT_LINE),
+		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.AUTOACTIVATION),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, ContentAssistPreference.AUTOACTIVATION_DELAY),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.AUTOINSERT),
@@ -187,13 +190,16 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		Color color;
 		Display display= Display.getDefault();
-				
+		
 		store.setDefault(CompilationUnitEditor.MATCHING_BRACKETS, true);
 		color= display.getSystemColor(SWT.COLOR_GRAY);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.MATCHING_BRACKETS_COLOR,  color.getRGB());
 		
+		store.setDefault(CompilationUnitEditor.CURRENT_LINE, true);
+		PreferenceConverter.setDefault(store, CompilationUnitEditor.CURRENT_LINE_COLOR, new RGB(225, 235, 224));
+		
 		WorkbenchChainedTextFontFieldEditor.startPropagate(store, JFaceResources.TEXT_FONT);
-
+		
 		color= display.getSystemColor(SWT.COLOR_LIST_FOREGROUND);
 		PreferenceConverter.setDefault(store,  AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND, color.getRGB());
 		store.setDefault(AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND_SYSTEM_DEFAULT, true);
@@ -513,6 +519,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	
 	private Button fBracketHighlightButton;
 	private Control fBracketHighlightColor;
+	private Button fLineHighlightButton;
+	private Control fLineHighlightColor;
 	
 	private Control createBehaviorPage(Composite parent) {
 
@@ -527,15 +535,26 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fBracketHighlightColor= addColorButton(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS_COLOR, 0);
 
 		fBracketHighlightButton.addSelectionListener(new SelectionListener() {
-			Button button= fBracketHighlightButton;
-			Control control= fBracketHighlightColor;
-			
 			public void widgetSelected(SelectionEvent e) {
-				setEnabled(control, button.getSelection());
+				setEnabled(fBracketHighlightColor, fBracketHighlightButton.getSelection());
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
+		
+		label= "Highlight &current line";
+		fLineHighlightButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.CURRENT_LINE, 0);
+		
+		label= "Current &line highlight color:";
+		fLineHighlightColor= addColorButton(behaviorComposite, label, CompilationUnitEditor.CURRENT_LINE_COLOR, 0);
+
+		fLineHighlightButton.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				setEnabled(fLineHighlightColor, fLineHighlightButton.getSelection());
+			}
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});		
 		
 		label= "Text font:";
 		addTextFontEditor(behaviorComposite, label, AbstractTextEditor.PREFERENCE_FONT);
@@ -678,6 +697,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fBackgroundColorButton.setEnabled(!default_);
 		
 		setEnabled(fBracketHighlightColor, fBracketHighlightButton.getSelection());
+		setEnabled(fLineHighlightColor, fLineHighlightButton.getSelection());
 	}
 	
 	/*

@@ -9,7 +9,10 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
+import org.eclipse.swt.custom.LineBackgroundEvent;
+import org.eclipse.swt.custom.LineBackgroundListener;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.custom.StyledTextContent;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
@@ -53,6 +56,7 @@ import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
@@ -107,334 +111,6 @@ import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 public class CompilationUnitEditor extends JavaEditor {
 	
 	
-	/**
-	 * Responsible for highlighting matching pairs of brackets.
-	 */
-	class BracketHighlighter implements KeyListener, MouseListener, ISelectionChangedListener, ITextListener, ITextInputListener {		
-		
-		/**
-		 * Highlights the brackets.
-		 */
-		class HighlightBrackets implements PaintListener {
-			
-			private JavaPairMatcher fMatcher= new JavaPairMatcher(new char[] { '{', '}', '(', ')', '[', ']' });
-			private Position fBracketPosition= new Position(0, 0);
-			private int fAnchor;
-			
-			private boolean fIsActive= false;
-			private StyledText fTextWidget;
-			private Color fColor;
-			
-			
-			public HighlightBrackets() {
-				fTextWidget= fSourceViewer.getTextWidget();
-			}
-			
-			public void setHighlightColor(Color color) {
-				fColor= color;
-			}
-						
-			public void dispose() {
-				if (fMatcher != null) {
-					fMatcher.dispose();
-					fMatcher= null;
-				}
-				
-				fColor= null;
-				fTextWidget= null;
-			}
-						
-			public void deactivate(boolean redraw) {
-				if (fIsActive) {
-					fIsActive= false;
-					fTextWidget.removePaintListener(this);
-					fManager.unmanage(fBracketPosition);
-					if (redraw)
-						handleDrawRequest(null);
-				}
-			}
-			
-			public void run() {
-								
-				Point selection= fSourceViewer.getSelectedRange();
-				if (selection.y > 0) {
-					deactivate(true);
-					return;
-				}
-					
-				IRegion pair= fMatcher.match(fSourceViewer.getDocument(), selection.x);
-				if (pair == null) {
-					deactivate(true);
-					return;
-				}
-				
-				if (fIsActive) {
-					// only if different
-					if (pair.getOffset() != fBracketPosition.getOffset() || 
-							pair.getLength() != fBracketPosition.getLength() || 
-							fMatcher.getAnchor() != fAnchor) {
-						
-						// remove old highlighting
-						handleDrawRequest(null);
-						// update position
-						fBracketPosition.isDeleted= false;
-						fBracketPosition.offset= pair.getOffset();
-						fBracketPosition.length= pair.getLength();
-						fAnchor= fMatcher.getAnchor();
-						// apply new highlighting
-						handleDrawRequest(null);
-					
-					}
-				} else {
-					
-					fIsActive= true;
-					
-					fBracketPosition.isDeleted= false;
-					fBracketPosition.offset= pair.getOffset();
-					fBracketPosition.length= pair.getLength();
-					fAnchor= fMatcher.getAnchor();
-					
-					fTextWidget.addPaintListener(this);
-					fManager.manage(fBracketPosition);
-					handleDrawRequest(null);
-				}
-			}
-			
-			public void paintControl(PaintEvent event) {
-				if (fTextWidget != null)
-					handleDrawRequest(event.gc);
-			}
-			
-			private void handleDrawRequest(GC gc) {
-				
-				if (fBracketPosition.isDeleted)
-					return;
-					
-				int length= fBracketPosition.getLength();
-				if (length < 1)
-					return;
-					
-				int offset= fBracketPosition.getOffset();
-				IRegion region= fSourceViewer.getVisibleRegion();
-				
-				if (region.getOffset() <= offset && region.getOffset() + region.getLength() >= offset + length) {
-					offset -= region.getOffset();
-					if (fMatcher.RIGHT == fAnchor)
-						draw(gc, offset, 1);
-					else 
-						draw(gc, offset + length -1, 1);					
-				}
-			}
-			
-			private void draw(GC gc, int offset, int length) {
-				if (gc != null) {
-					Point left= fTextWidget.getLocationAtOffset(offset);
-					Point right= fTextWidget.getLocationAtOffset(offset + length);
-					
-					gc.setForeground(fColor);
-					gc.drawRectangle(left.x, left.y, right.x - left.x - 1, gc.getFontMetrics().getHeight() - 1);
-										
-				} else {
-					fTextWidget.redrawRange(offset, length, true);
-				}
-			}
-		};
-		
-		/**
-		 * Manages the registration and updating of the bracket position.
-		 */
-		class BracketPositionManager {
-			
-			private IDocument fDocument;
-			private IPositionUpdater fPositionUpdater;
-			private String fCategory;
-			
-			public BracketPositionManager() {
-				fCategory= getClass().getName() + hashCode();
-				fPositionUpdater= new DefaultPositionUpdater(fCategory);
-			}
-			
-			public void install(IDocument document) {
-				fDocument= document;
-				fDocument.addPositionCategory(fCategory);
-				fDocument.addPositionUpdater(fPositionUpdater);
-			}
-			
-			public void dispose() {
-				uninstall(fDocument);
-			}
-			
-			public void uninstall(IDocument document) {
-				if (document == fDocument && document != null) {
-					try {
-						fDocument.removePositionUpdater(fPositionUpdater);
-						fDocument.removePositionCategory(fCategory);			
-					} catch (BadPositionCategoryException x) {
-						// should not happen
-					}
-					fDocument= null;
-				}
-			}
-			
-			public void manage(Position position) {
-				try {
-					fDocument.addPosition(fCategory, position);
-				} catch (BadPositionCategoryException x) {
-					// should not happen
-				} catch (BadLocationException x) {
-					// should not happen
-				}
-			}
-			
-			public void unmanage(Position position) {
-				try {
-					fDocument.removePosition(fCategory, position);
-				} catch (BadPositionCategoryException x) {
-					// should not happen
-				}
-			}
-		};
-		
-		
-		private BracketPositionManager fManager= new BracketPositionManager();
-		private HighlightBrackets fHighlightBrackets;
-		private ISourceViewer fSourceViewer;
-		private boolean fTextChanged= false;
-
-		
-		public BracketHighlighter(ISourceViewer sourceViewer) {
-			fSourceViewer= sourceViewer;
-			fHighlightBrackets= new HighlightBrackets();
-		}
-		
-		public void setHighlightColor(Color color) {
-			fHighlightBrackets.setHighlightColor(color);
-		}
-		
-		public void install() {
-			
-			fManager.install(fSourceViewer.getDocument());
-			
-			fSourceViewer.addTextInputListener(this);
-			
-			ISelectionProvider provider= fSourceViewer.getSelectionProvider();
-			provider.addSelectionChangedListener(this);
-			
-			fSourceViewer.addTextListener(this);
-			
-			StyledText text= fSourceViewer.getTextWidget();
-			text.addKeyListener(this);
-			text.addMouseListener(this);
-		}
-		
-		public void dispose() {
-			
-			if (fManager != null) {
-				fManager.dispose();
-				fManager= null;
-			}
-			
-			if (fHighlightBrackets != null) {
-				fHighlightBrackets.dispose();
-				fHighlightBrackets= null;
-			}
-			
-			if (fSourceViewer != null && fBracketHighlighter != null) {
-				
-				fSourceViewer.removeTextInputListener(this);
-				
-				ISelectionProvider provider= fSourceViewer.getSelectionProvider();
-				provider.removeSelectionChangedListener(this);
-				
-				fSourceViewer.removeTextListener(this);
-				
-				StyledText text= fSourceViewer.getTextWidget();
-				if (text != null && !text.isDisposed()) {
-					text.removeKeyListener(fBracketHighlighter);
-					text.removeMouseListener(fBracketHighlighter);
-				}
-				
-				fSourceViewer= null;
-			}
-		}
-		
-		/**
-		 * @see KeyListener#keyPressed(KeyEvent)
-		 */
-		public void keyPressed(KeyEvent e) {
-			fTextChanged= false;
-		}
-
-		/**
-		 * @see KeyListener#keyReleased(KeyEvent)
-		 */
-		public void keyReleased(KeyEvent e) {
-			if (!fTextChanged)
-				fHighlightBrackets.run();
-		}
-
-		/**
-		 * @see MouseListener#mouseDoubleClick(MouseEvent)
-		 */
-		public void mouseDoubleClick(MouseEvent e) {
-		}
-		
-		/**
-		 * @see MouseListener#mouseDown(MouseEvent)
-		 */
-		public void mouseDown(MouseEvent e) {
-		}
-		
-		/**
-		 * @see MouseListener#mouseUp(MouseEvent)
-		 */
-		public void mouseUp(MouseEvent e) {
-			fHighlightBrackets.run();
-		}
-		
-		/**
-		 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
-		 */
-		public void selectionChanged(SelectionChangedEvent event) {
-			fHighlightBrackets.run();
-		}
-		
-		/**
-		 * @see ITextListener#textChanged(TextEvent)
-		 */
-		public void textChanged(TextEvent event) {
-			fTextChanged= true;
-			Control control= fSourceViewer.getTextWidget();
-			if (control != null) {
-				control.getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						if (fTextChanged && fHighlightBrackets != null) 
-							fHighlightBrackets.run();
-					}
-				});
-			}
-		}
-		
-		/**
-		 * @see ITextInputListener#inputDocumentAboutToBeChanged(IDocument, IDocument)
-		 */
-		public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
-			if (oldInput != null) {
-				fHighlightBrackets.deactivate(false);
-				fManager.uninstall(oldInput);
-			}
-		}
-		
-		/**
-		 * @see ITextInputListener#inputDocumentChanged(IDocument, IDocument)
-		 */
-		public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
-			if (newInput != null)
-				fManager.install(newInput);
-		}
-	};
-	
-	
 	class InternalSourceViewer extends SourceViewer {
 		
 		public InternalSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
@@ -464,6 +140,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		}
 	};
 	
+	
 	/* Preference key for code formatter tab size */
 	private final static String CODE_FORMATTER_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size";	
 	/* Preference key for code formatter tab character */
@@ -473,6 +150,10 @@ public class CompilationUnitEditor extends JavaEditor {
 	public final static String MATCHING_BRACKETS=  "matchingBrackets";
 	/** Preference key for matching brackets color */
 	public final static String MATCHING_BRACKETS_COLOR=  "matchingBracketsColor";
+	/** Preference key for highlighting current line */
+	public final static String CURRENT_LINE= "currentLine";
+	/** Preference key for highlight color of current line */
+	public final static String CURRENT_LINE_COLOR= "currentLineColor";
 	
 	
 	
@@ -482,8 +163,12 @@ public class CompilationUnitEditor extends JavaEditor {
 	protected ISavePolicy fSavePolicy;
 	/** Listener to annotation model changes that updates the error tick in the tab image */
 	private JavaEditorErrorTickUpdater fJavaEditorErrorTickUpdater;
-	/** The editor's bracket highlighter */
-	private BracketHighlighter fBracketHighlighter;
+	/** The editor's paint manager */
+	private PaintManager fPaintManager;
+	/** The editor's bracket painter */
+	private BracketPainter fBracketPainter;
+	/** The editor's line painter */
+	private LinePainter fLinePainter;
 	
 	
 	/**
@@ -979,18 +664,20 @@ public class CompilationUnitEditor extends JavaEditor {
 	}
 	
 	private void startBracketHighlighting() {
-		if (fBracketHighlighter == null) {
+		if (fBracketPainter == null) {
 			ISourceViewer sourceViewer= getSourceViewer();
-			fBracketHighlighter= new BracketHighlighter(sourceViewer);
-			fBracketHighlighter.setHighlightColor(getColor(MATCHING_BRACKETS_COLOR));
-			fBracketHighlighter.install();
+			fBracketPainter= new BracketPainter(sourceViewer);
+			fBracketPainter.setHighlightColor(getColor(MATCHING_BRACKETS_COLOR));
+			fPaintManager.addPainter(fBracketPainter);
 		}
 	}
 	
 	private void stopBracketHighlighting() {
-		if (fBracketHighlighter != null) {
-			fBracketHighlighter.dispose();
-			fBracketHighlighter= null;
+		if (fBracketPainter != null) {
+			fPaintManager.removePainter(fBracketPainter);
+			fBracketPainter.deactivate(true);
+			fBracketPainter.dispose();
+			fBracketPainter= null;
 		}
 	}
 	
@@ -999,8 +686,35 @@ public class CompilationUnitEditor extends JavaEditor {
 		return store.getBoolean(MATCHING_BRACKETS);
 	}
 	
+	private void startLineHighlighting() {
+		if (fLinePainter == null) {
+			ISourceViewer sourceViewer= getSourceViewer();
+			fLinePainter= new LinePainter(sourceViewer);
+			fLinePainter.setHighlightColor(getColor(CURRENT_LINE_COLOR));
+			fPaintManager.addPainter(fLinePainter);
+		}
+	}
+	
+	private void stopLineHighlighting() {
+		if (fLinePainter != null) {
+			fPaintManager.removePainter(fLinePainter);
+			fLinePainter.deactivate(true);
+			fLinePainter.dispose();
+			fLinePainter= null;
+		}
+	}
+	
+	private boolean isLineHighlightingEnabled() {
+		IPreferenceStore store= getPreferenceStore();
+		return store.getBoolean(CURRENT_LINE);
+	}
+	
 	private Color getColor(String key) {
 		RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), key);
+		return getColor(rgb);
+	}
+	
+	private Color getColor(RGB rgb) {
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		return textTools.getColorManager().getColor(rgb);
 	}
@@ -1015,6 +729,12 @@ public class CompilationUnitEditor extends JavaEditor {
 		}
 		
 		stopBracketHighlighting();
+		stopLineHighlighting();
+		
+		if (fPaintManager != null) {
+			fPaintManager.dispose();
+			fPaintManager= null;
+		}
 		
 		super.dispose();
 	}
@@ -1024,8 +744,11 @@ public class CompilationUnitEditor extends JavaEditor {
 	 */
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
+		fPaintManager= new PaintManager(getSourceViewer());
 		if (isBracketHighlightingEnabled())
 			startBracketHighlighting();
+		if (isLineHighlightingEnabled())
+			startLineHighlighting();
 	}
 	
 	/**
@@ -1057,10 +780,24 @@ public class CompilationUnitEditor extends JavaEditor {
 				}
 				
 				if (MATCHING_BRACKETS_COLOR.equals(p)) {
-					if (fBracketHighlighter != null)
-						fBracketHighlighter.setHighlightColor(getColor(MATCHING_BRACKETS_COLOR));
+					if (fBracketPainter != null)
+						fBracketPainter.setHighlightColor(getColor(MATCHING_BRACKETS_COLOR));
 					return;
-				} 
+				}
+				
+				if (CURRENT_LINE.equals(p)) {
+					if (isLineHighlightingEnabled())
+						startLineHighlighting();
+					else
+						stopLineHighlighting();
+					return;
+				}
+				
+				if (CURRENT_LINE_COLOR.equals(p)) {
+					if (fLinePainter != null)
+						fLinePainter.setHighlightColor(getColor(CURRENT_LINE_COLOR));
+					return;
+				}
 				
 				IContentAssistant c= isv.getContentAssistant();
 				if (c instanceof ContentAssistant)
@@ -1077,7 +814,7 @@ public class CompilationUnitEditor extends JavaEditor {
 	 */
 	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
 		String p= event.getProperty();
-		boolean affects=MATCHING_BRACKETS_COLOR.equals(p);
+		boolean affects=MATCHING_BRACKETS_COLOR.equals(p) || CURRENT_LINE_COLOR.equals(p);
 		return affects ? affects : super.affectsTextPresentation(event);
 	}
 	
