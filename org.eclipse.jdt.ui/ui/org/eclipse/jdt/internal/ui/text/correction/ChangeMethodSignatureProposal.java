@@ -162,7 +162,7 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 		if (!createdVariables.isEmpty()) {
 			// avoid take a name of a local variable inside
 			CompilationUnit root= (CompilationUnit) methodDecl.getRoot();
-			IBinding[] bindings= (new ScopeAnalyzer()).getDeclarationsAfter(root, methodDecl.getBody().getStartPosition(), ScopeAnalyzer.VARIABLES);
+			IBinding[] bindings= (new ScopeAnalyzer(root)).getDeclarationsAfter(methodDecl.getBody().getStartPosition(), ScopeAnalyzer.VARIABLES);
 			for (int i= 0; i < bindings.length; i++) {
 				usedNames.add(bindings[i].getName());
 			}

@@ -51,7 +51,7 @@ public class ImportOrganizeTest extends CoreTests {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ImportOrganizeTest("testBaseGroups1"));
+			suite.addTest(new ImportOrganizeTest("testInnerClassVisibility"));
 			return suite;
 		}	
 	}
@@ -1245,6 +1245,91 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
+	
+	public void testVisibility_bug37299a() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("public class ClusterSingletonStepped {\n");
+		buf.append("	public interface SingletonStep {\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("ClusterSingletonStepped.java", buf.toString(), false, null);
+
+		IPackageFragment pack2= sourceFolder.createPackageFragment("pack0", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("\n");
+		buf.append("import pack1.ClusterSingletonStepped;\n");
+		buf.append("import pack1.ClusterSingletonStepped.SingletonStep;\n");
+		buf.append("\n");
+		buf.append("public class TestFile extends ClusterSingletonStepped implements SingletonStep {\n");
+		buf.append("    SingletonStep step;\n");		
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("TestFile.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("TestFile", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("\n");
+		buf.append("import pack1.ClusterSingletonStepped;\n");
+		buf.append("import pack1.ClusterSingletonStepped.SingletonStep;\n");
+		buf.append("\n");
+		buf.append("public class TestFile extends ClusterSingletonStepped implements SingletonStep {\n");
+		buf.append("    SingletonStep step;\n");	
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testVisibility_bug37299b() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("public class ClusterSingletonStepped {\n");
+		buf.append("	public interface SingletonStep {\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("ClusterSingletonStepped.java", buf.toString(), false, null);
+
+		IPackageFragment pack2= sourceFolder.createPackageFragment("pack0", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("\n");
+		buf.append("import pack1.ClusterSingletonStepped;\n");
+		buf.append("import pack1.ClusterSingletonStepped.SingletonStep;\n");
+		buf.append("\n");
+		buf.append("public class TestFile extends ClusterSingletonStepped {\n");
+		buf.append("    SingletonStep step;\n");		
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("TestFile.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("TestFile", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("\n");
+		buf.append("import pack1.ClusterSingletonStepped;\n");
+		buf.append("\n");
+		buf.append("public class TestFile extends ClusterSingletonStepped {\n");
+		buf.append("    SingletonStep step;\n");	
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}		
 	
 	
 	public void test5() throws Exception {

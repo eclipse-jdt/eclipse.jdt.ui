@@ -45,10 +45,11 @@ public class ScopeAnalyzer {
 	
 	private CompilationUnit fRoot;
 	
-	public ScopeAnalyzer() {
+	public ScopeAnalyzer(CompilationUnit root) {
 		fRequestor= new ArrayList();
 		fNamesAdded= new HashSet();
 		fTypesVisited= new HashSet();
+		fRoot= root;
 	}
 	
 	protected void addResult(IBinding binding) {
@@ -62,8 +63,6 @@ public class ScopeAnalyzer {
 		fRequestor.clear();
 		fNamesAdded.clear();
 		fTypesVisited.clear();
-		
-		fRoot= null;
 	}
 	
 	private static String getSignature(IBinding binding) {
@@ -207,29 +206,37 @@ public class ScopeAnalyzer {
 		}
 	}
 	
-	public IBinding[] getDeclarationsInScope(CompilationUnit root, int offset, int flags) {
-		fRoot= root;
+	public IBinding[] getDeclarationsInScope(SimpleName selector, int flags) {
 		try {
-			NodeFinder finder= new NodeFinder(offset, 0);
-			root.accept(finder);
-			ASTNode node= finder.getCoveringNode();
-			if (node == null) {
-				return null;
+			ITypeBinding binding= getQualifier(selector);
+			if (binding == null) {
+				addLocalDeclarations(selector, flags);
+				binding= ASTResolving.getBindingOfParentType(selector);
 			}
-			ITypeBinding binding= null;
-			if (node instanceof SimpleName) {
-				SimpleName selector= (SimpleName) node;
-				
-				binding= getQualifier(selector);
-				if (binding == null) {
-					addLocalDeclarations(selector, flags);
-					binding= ASTResolving.getBindingOfParentType(selector);
-				}	
-			} else {
-				addLocalDeclarations(node, offset, flags);
-				binding= ASTResolving.getBindingOfParentType(node);				
+			if (binding != null) {
+				addTypeDeclarations(binding, flags);
 			}
+			return (IBinding[]) fRequestor.toArray(new IBinding[fRequestor.size()]);
+		} finally {
+			clearLists();			
+		}
+	}		
+	
+	public IBinding[] getDeclarationsInScope(int offset, int flags) {
+		NodeFinder finder= new NodeFinder(offset, 0);
+		fRoot.accept(finder);
+		ASTNode node= finder.getCoveringNode();
+		if (node == null) {
+			return null;
+		}
 
+		if (node instanceof SimpleName) {
+			return getDeclarationsInScope((SimpleName) node, flags);
+		}
+		
+		try {
+			addLocalDeclarations(node, offset, flags);
+			ITypeBinding binding= ASTResolving.getBindingOfParentType(node);				
 			if (binding != null) {
 				addTypeDeclarations(binding, flags);
 			}
@@ -240,11 +247,10 @@ public class ScopeAnalyzer {
 		}
 	}
 	
-	public IBinding[] getDeclarationsAfter(CompilationUnit root, int offset, int flags) {
-		fRoot= root;
+	public IBinding[] getDeclarationsAfter(int offset, int flags) {
 		try {		
 			NodeFinder finder= new NodeFinder(offset, 0);
-			root.accept(finder);
+			fRoot.accept(finder);
 			ASTNode node= finder.getCoveringNode();
 			if (node == null) {
 				return null;

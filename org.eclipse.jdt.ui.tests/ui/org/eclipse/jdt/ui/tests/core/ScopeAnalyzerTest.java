@@ -100,7 +100,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 
 			assertVariables(res, new String[] { "param1", "param2", "count", "count2", "fGlobal" });
 		}
@@ -110,7 +110,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 			
 			int flags= ScopeAnalyzer.VARIABLES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertVariables(res, new String[] { "param1", "param2", "count", "fGlobal" });
 		}
@@ -120,7 +120,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 			
 			int flags= ScopeAnalyzer.VARIABLES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 
 			assertVariables(res, new String[] { "param1", "param2", "count", "i", "insideFor", "fGlobal" });
 		}		
@@ -160,7 +160,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.VARIABLES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertVariables(res, new String[] { "param1", "count", "count2", "i", "j"});
 		}
@@ -170,7 +170,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.VARIABLES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertVariables(res, new String[] { "param1", "count", "count2"});
 		}		
@@ -180,7 +180,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 			
 			int flags= ScopeAnalyzer.VARIABLES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 
 			assertVariables(res, new String[] { "param1", "count", "count2", "e", "k" });
 		}
@@ -190,7 +190,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 			
 			int flags= ScopeAnalyzer.VARIABLES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertVariables(res, new String[] { "param1", "count", "count2", "x" });
 		}		
@@ -200,7 +200,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 			
 			int flags= ScopeAnalyzer.VARIABLES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertVariables(res, new String[] { "param1", "count", "count2" });
 		}		
@@ -236,7 +236,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.VARIABLES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertVariables(res, new String[] { "k", "fInner",  "param1", "run", "fVar1", "fVar2"});
 		}
@@ -246,7 +246,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.VARIABLES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertVariables(res, new String[] { "k", "param1", "run", "fVar1", "fVar2"});
 		}
@@ -285,7 +285,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str) + "return r.".length();
 	
 			int flags= ScopeAnalyzer.VARIABLES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertVariables(res, new String[] { "x", "y"});
 		}			
@@ -335,7 +335,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.VARIABLES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertVariables(res, new String[] { "param1", "fCount", "fVar1", "fVar2"});
 		}
@@ -345,7 +345,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.VARIABLES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertVariables(res, new String[] { "param1", "fCount2", "fCount", "k", "param0", "fVar1", "fVar2", "CONST"});
 		}				
@@ -392,7 +392,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.VARIABLES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsAfter(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsAfter(offset, flags);
 			
 			assertVariables(res, new String[] { "k", "i", "x", "run"});
 		}
@@ -402,7 +402,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.VARIABLES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsAfter(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsAfter(offset, flags);
 			
 			assertVariables(res, new String[] { });
 		}
@@ -412,7 +412,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.VARIABLES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsAfter(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsAfter(offset, flags);
 			
 			assertVariables(res, new String[] { "i", "j", "x2" });
 		}				
@@ -458,7 +458,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.TYPES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertVariables(res, new String[] { "A1", "A", "E", "A2", "F"});
 		}
@@ -468,7 +468,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.TYPES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertVariables(res, new String[] { "A1", "A", "E", "A2", "F"});
 		}
@@ -478,7 +478,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.TYPES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertVariables(res, new String[] { "C", "F", "A1", "A2", "E"});
 		}
@@ -488,7 +488,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.TYPES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertVariables(res, new String[] { "C", "F", "E"});
 		}					
@@ -526,7 +526,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.TYPES;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertVariables(res, new String[] { "F", "EE1", "EE2", "G1", "G", "E"});
 		}
@@ -561,7 +561,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.METHODS;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertMethods(res, new String[] { "goo", "foo" }, true);
 		}			
@@ -604,7 +604,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.METHODS;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertMethods(res, new String[] { "run", "goo"}, true);
 		}
@@ -614,7 +614,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.METHODS;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertMethods(res, new String[] { "goo"}, true);
 		}
@@ -624,7 +624,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 	
 			int flags= ScopeAnalyzer.METHODS;
-			IBinding[] res= new ScopeAnalyzer().getDeclarationsInScope(astRoot, offset, flags);
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
 			assertMethods(res, new String[] { "foo", "goo"}, true);
 		}		

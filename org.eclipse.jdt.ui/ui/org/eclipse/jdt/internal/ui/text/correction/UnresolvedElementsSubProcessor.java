@@ -173,7 +173,7 @@ public class UnresolvedElementsSubProcessor {
 	}
 	
 	private static void addSimilarVariableProposals(ICompilationUnit cu, CompilationUnit astRoot, SimpleName node, List proposals) {
-		IBinding[] varsInScope= (new ScopeAnalyzer()).getDeclarationsInScope(astRoot, node.getStartPosition(), ScopeAnalyzer.VARIABLES);
+		IBinding[] varsInScope= (new ScopeAnalyzer(astRoot)).getDeclarationsInScope(node, ScopeAnalyzer.VARIABLES);
 		if (varsInScope.length > 0) {
 			// avoid corrections like int i= i;
 			String assignedName= null;
@@ -415,7 +415,7 @@ public class UnresolvedElementsSubProcessor {
 		int nArguments= arguments.size();
 			
 		// corrections
-		IBinding[] bindings= (new ScopeAnalyzer()).getDeclarationsInScope(astRoot, nameNode.getStartPosition(), ScopeAnalyzer.METHODS);
+		IBinding[] bindings= (new ScopeAnalyzer(astRoot)).getDeclarationsInScope(nameNode, ScopeAnalyzer.METHODS);
 		
 		ArrayList parameterMismatchs= new ArrayList();
 		for (int i= 0; i < bindings.length; i++) {

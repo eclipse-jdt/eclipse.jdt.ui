@@ -83,8 +83,8 @@ public class MissingReturnTypeCorrectionProposal extends ASTRewriteCorrectionPro
 		if (methodBinding != null && methodBinding.getReturnType() != null) {
 			ITypeBinding returnBinding= methodBinding.getReturnType();
 			
-			ScopeAnalyzer analyzer= new ScopeAnalyzer();
-			IBinding[] bindings= analyzer.getDeclarationsInScope(root, returnOffset, ScopeAnalyzer.VARIABLES);
+			ScopeAnalyzer analyzer= new ScopeAnalyzer(root);
+			IBinding[] bindings= analyzer.getDeclarationsInScope(returnOffset, ScopeAnalyzer.VARIABLES);
 			for (int i= 0; i < bindings.length; i++) {
 				IVariableBinding curr= (IVariableBinding) bindings[i];
 				ITypeBinding type= curr.getType();

@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -59,22 +60,17 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	private static class TypeRefASTVisitor extends ASTVisitor {
 
 		private Collection fResult;
-		private HashSet fNamesFound;
 		private ArrayList fOldSingleImports;
 		private ArrayList fOldDemandImports;
 
 		public TypeRefASTVisitor(Collection result, ArrayList oldSingleImports, ArrayList oldDemandImports) {
 			fResult= result;
-			fNamesFound= new HashSet();
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
 		}
 		
 		private void addReference(SimpleName name) {
-			String identifier= name.getIdentifier();
-			if (fNamesFound.add(identifier)) {
-				fResult.add(name);
-			}
+			fResult.add(name);
 		}			
 		
 		private void typeRefFound(Name node) {
@@ -253,58 +249,33 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private ArrayList fOldSingleImports;
 		private ArrayList fOldDemandImports;
 		
+		private HashSet fImportsAdded;
+		
 		private ImportsStructure fImpStructure;
 				
 		private ArrayList fTypeRefsFound; // cached array list for reuse
-		private ArrayList fNamesFound; // cached array list for reuse
 		
 		private boolean fIgnoreLowerCaseNames;
 		
 		private IJavaSearchScope fSearchScope;
 		private IPackageFragment fCurrPackage;
 		
+		private ScopeAnalyzer fAnalyzer;
 		
-		public TypeReferenceProcessor(ArrayList oldSingleImports, ArrayList oldDemandImports, ImportsStructure impStructure, boolean ignoreLowerCaseNames) throws JavaModelException {
+		public TypeReferenceProcessor(ArrayList oldSingleImports, ArrayList oldDemandImports, CompilationUnit root, ImportsStructure impStructure, boolean ignoreLowerCaseNames) throws JavaModelException {
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
 			fImpStructure= impStructure;
 			fIgnoreLowerCaseNames= ignoreLowerCaseNames;
+			fAnalyzer= new ScopeAnalyzer(root);
 
 			ICompilationUnit cu= fImpStructure.getCompilationUnit();
 			fSearchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { cu.getJavaProject() });
 			fCurrPackage= (IPackageFragment) cu.getParent();
 					
 			fTypeRefsFound= new ArrayList();  	// cached array list for reuse
-			fNamesFound= new ArrayList();  	// cached array list for reuse		
+			fImportsAdded= new HashSet();		
 		}
-		
-		private boolean isContained(ITypeBinding curr, ITypeBinding[] list) {
-			for (int i = 0; i < list.length; i++) {
-				if (curr == list[i]) {
-					return true;
-				}
-			}
-			return false;
-		}
-		
-		private boolean isInSuperTypes(ITypeBinding typeBinding, ITypeBinding declaring) {
-			ITypeBinding superClass= declaring.getSuperclass();
-			while (superClass != null && superClass != typeBinding) {
-				if (isContained(typeBinding, superClass.getDeclaredTypes())) {
-					return true; // inner type of super type
-				}
-				ITypeBinding[] bindings= declaring.getInterfaces();
-				for (int i= 0; i < bindings.length; i++) {
-					ITypeBinding curr= bindings[i];
-					if (isContained(typeBinding, curr.getDeclaredTypes())) {
-						return true; // inner type of super interface
-					}
-					isInSuperTypes(typeBinding, curr);
-				}
-				superClass= superClass.getSuperclass();
-			}
-			return false;
-		}		
 		
 		private boolean needsImport(ITypeBinding typeBinding, SimpleName ref) {
 			if (!typeBinding.isTopLevel() && !typeBinding.isMember()) {
@@ -324,26 +295,33 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 			}
 			
+			if (ref.getParent() instanceof TypeDeclaration) {
+				return true;
+			}
+			
 			if (typeBinding.isMember()) {
-				ITypeBinding declaring= currTypeBinding;
-				while (declaring != null) {
-					if (isContained(typeBinding, declaring.getDeclaredTypes())) {
-						return false; // inner type of the declaring type
-					}
-					if (isInSuperTypes(typeBinding, declaring)) {
+				IBinding[] visibleTypes= fAnalyzer.getDeclarationsInScope(ref, ScopeAnalyzer.TYPES);
+				for (int i= 0; i < visibleTypes.length; i++) {
+					if (visibleTypes[i] == typeBinding) {
 						return false;
-					}		
-					declaring= declaring.getDeclaringClass();
+					}
 				}
 			}
 			return true;				
 		}
+			
 		
 		/**
 		 * Tries to find the given type name and add it to the import structure.
 		 * Returns array of coices if user needs to select a type.
 		 */
 		public TypeInfo[] process(SimpleName ref) throws CoreException {
+			String typeName= ref.getIdentifier();
+			
+			if (fImportsAdded.contains(typeName)) {
+				return null;
+			}
+			
 			try {
 				IBinding binding= ref.resolveBinding();
 				if (binding != null) {
@@ -354,13 +332,16 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						}
 						if (needsImport(typeBinding, ref)) {
 							fImpStructure.addImport(typeBinding);
+							fImportsAdded.add(typeName);
 						}
 					}	
 					return null;
 				}
-								
+				
+				fImportsAdded.add(typeName);
+						
 				ArrayList typeRefsFound= fTypeRefsFound; // reuse
-				String typeName= ref.getIdentifier();
+				
 				findTypeRefs(typeName, typeRefsFound);				
 				int nFound= typeRefsFound.size();
 				if (nFound == 0) {
@@ -401,7 +382,6 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 			} finally {
 				fTypeRefsFound.clear();
-				fNamesFound.clear();
 			}
 			return null;
 		}
@@ -421,6 +401,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 	}	
 
+
 	private ICompilationUnit fCompilationUnit;	
 	private boolean fDoSave;
 	
@@ -433,14 +414,12 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	private int fNumberOfImportsAdded;
 
 	private IProblem fParsingError;
-
-	private boolean fDoResolve;
-		
+	private CompilationUnit fASTRoot;
+	
 	public OrganizeImportsOperation(ICompilationUnit cu, String[] importOrder, int importThreshold, boolean ignoreLowerCaseNames, boolean save, boolean doResolve, IChooseImportQuery chooseImportQuery) {
 		super();
 		fCompilationUnit= cu;
 		fDoSave= save;
-		fDoResolve= doResolve;
 		
 		fImportThreshold= importThreshold;
 		fOrderPreference= importOrder;
@@ -450,6 +429,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		fNumberOfImportsAdded= 0;
 		
 		fParsingError= null;
+	
+		fASTRoot= AST.parseCompilationUnit(fCompilationUnit, doResolve);
 	}
 
 	/**
@@ -483,7 +464,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit, fOrderPreference, fImportThreshold, false);
 			
-			TypeReferenceProcessor processor= new TypeReferenceProcessor(oldSingleImports, oldDemandImports, impStructure, fIgnoreLowerCaseNames);
+			TypeReferenceProcessor processor= new TypeReferenceProcessor(oldSingleImports, oldDemandImports, fASTRoot, impStructure, fIgnoreLowerCaseNames);
 			ArrayList openChoices= new ArrayList();
 			ArrayList sourceRanges= new ArrayList();
 			while (references.hasNext()) {
@@ -520,8 +501,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	
 	// find type references in a compilation unit
 	private Iterator findTypeReferences(ArrayList oldSingleImports, ArrayList oldDemandImports) throws JavaModelException {
-		CompilationUnit astRoot= AST.parseCompilationUnit(fCompilationUnit, fDoResolve);
-		IProblem[] problems= astRoot.getProblems();
+		IProblem[] problems= fASTRoot.getProblems();
 		for (int i= 0; i < problems.length; i++) {
 			IProblem curr= problems[i];
 			if (curr.isError() && (curr.getID() & IProblem.Syntax) != 0) {
@@ -531,7 +511,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 		ArrayList result= new ArrayList();
 		TypeRefASTVisitor visitor = new TypeRefASTVisitor(result, oldSingleImports, oldDemandImports);
-		astRoot.accept(visitor);
+		fASTRoot.accept(visitor);
 
 		return result.iterator();
 	}	
