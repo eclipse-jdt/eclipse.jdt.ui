@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -425,9 +426,16 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 			}
 			if (isExpressionSelected()) {
 				ASTNode expression= getFirstSelectedNode();
-				if (expression instanceof Name && ((Name)expression).resolveBinding() instanceof ITypeBinding) {
-					status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_type_reference")); //$NON-NLS-1$
-					break superCall;
+				if (expression instanceof Name) {
+					Name name= (Name)expression;
+					if (name.resolveBinding() instanceof ITypeBinding) {
+						status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_type_reference")); //$NON-NLS-1$
+						break superCall;
+					}
+					if (name.isSimpleName() && ((SimpleName)name).isDeclaration()) {
+						status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_name_in_declaration")); //$NON-NLS-1$
+						break superCall;
+					}
 				}
 			}
 			status.merge(LocalTypeAnalyzer.perform(fEnclosingMethod, getSelection()));
