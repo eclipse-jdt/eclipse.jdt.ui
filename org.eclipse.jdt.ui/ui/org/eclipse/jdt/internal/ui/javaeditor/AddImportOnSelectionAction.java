@@ -15,12 +15,13 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.text.BadLocationException;
@@ -29,8 +30,10 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -74,10 +77,6 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		setEnabled(getCompilationUnit() != null);	
 	}
 	
-	public AddImportOnSelectionAction() {
-		this(null);
-	}
-	
 	public void update() {
 		setEnabled(fEditor != null && getCompilationUnit() != null);
 	}	
@@ -117,6 +116,13 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					if (existingImport != null) {
 						if (!existingImport.getElementName().equals(name)) {
 							getShell().getDisplay().beep();
+							IStatusLineManager manager= getStatusLineManager();
+							if (manager != null) {
+								String message= JavaEditorMessages.getFormattedString("AddImportOnSelection.error.importclash", existingImport.getElementName()); //$NON-NLS-1$
+								manager.setErrorMessage(message);
+							}
+						} else {
+							removeQualification(doc, nameStart, containerName);
 						}
 						return;
 					}			
@@ -139,7 +145,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 						MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), JavaEditorMessages.getString("AddImportOnSelection.error.notresolved.message")); //$NON-NLS-1$ //$NON-NLS-2$
 						return;
 					}
-					removeQualification(doc, nameStart, chosen);
+					removeQualification(doc, nameStart, chosen.getTypeContainerName());
 					
 					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 					AddImportsOperation op= new AddImportsOperation(cu, new IJavaElement[] { type }, settings, false);
@@ -162,6 +168,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		}		
 	}
 	
+
 	private int getNameStart(IDocument doc, int pos) throws BadLocationException {
 		while (pos > 0) {
 			char ch= doc.getChar(pos - 1);
@@ -190,8 +197,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		return pos;
 	}		
 	
-	private void removeQualification(IDocument doc, int nameStart, TypeInfo typeInfo) throws BadLocationException {
-		String containerName= typeInfo.getTypeContainerName();
+	private void removeQualification(IDocument doc, int nameStart, String containerName) throws BadLocationException {
 		int containerLen= containerName.length();
 		int docLen= doc.getLength();
 		if ((containerLen > 0) && (nameStart + containerLen + 1 < docLen)) {
@@ -261,4 +267,12 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		}
 		return null;
 	}
+	
+	private IStatusLineManager getStatusLineManager() {
+		IEditorActionBarContributor contributor= fEditor.getEditorSite().getActionBarContributor();
+		if (contributor instanceof EditorActionBarContributor) {
+			return ((EditorActionBarContributor) contributor).getActionBars().getStatusLineManager();
+		}
+		return null;
+	}	
 }
