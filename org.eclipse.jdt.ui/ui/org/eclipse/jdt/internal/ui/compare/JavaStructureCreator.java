@@ -24,8 +24,6 @@ import org.eclipse.jdt.core.compiler.*;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.internal.core.JavaModel;
-import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.compare.*;
@@ -136,11 +134,12 @@ public class JavaStructureCreator implements IStructureCreator {
 		if (input instanceof IResourceProvider) {
 			IResource resource= ((IResourceProvider) input).getResource();
 			if (resource != null) {
-				JavaModelManager javaModelManager= JavaModelManager.getJavaModelManager();
-				JavaModel javaModel= javaModelManager.getJavaModel();
-				IJavaProject javaProject= javaModel.getJavaProject(resource);
-				if (javaProject != null)
-					compilerOptions= javaProject.getOptions(true);
+				IJavaElement element= JavaCore.create(resource);
+				if (element != null) {
+					IJavaProject javaProject= element.getJavaProject();
+					if (javaProject != null)
+						compilerOptions= javaProject.getOptions(true);
+				}
 			}
 		}
 		

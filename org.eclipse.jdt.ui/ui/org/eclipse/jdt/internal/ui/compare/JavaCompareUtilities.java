@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -47,6 +46,15 @@ import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFilePartitionS
 
 
 class JavaCompareUtilities {
+	
+	private static final char PACKAGEDECLARATION= '%';
+	private static final char IMPORTDECLARATION= '#';
+	private static final char IMPORT_CONTAINER= '<';
+	private static final char FIELD= '^';
+	private static final char METHOD= '~';
+	private static final char INITIALIZER= '|';
+	private static final char COMPILATIONUNIT= '{';
+	private static final char TYPE= '[';
 	
 	static int getTabSize() {
 		return CodeFormatterUtil.getTabWidth();
@@ -144,34 +152,34 @@ class JavaCompareUtilities {
 		
 		switch (je.getElementType()) {
 		case IJavaElement.COMPILATION_UNIT:
-			sb.append(JavaElement.JEM_COMPILATIONUNIT);
+			sb.append(COMPILATIONUNIT);
 			break;
 		case IJavaElement.TYPE:
-			sb.append(JavaElement.JEM_TYPE);
+			sb.append(TYPE);
 			sb.append(je.getElementName());
 			break;
 		case IJavaElement.FIELD:
-			sb.append(JavaElement.JEM_FIELD);
+			sb.append(FIELD);
 			sb.append(je.getElementName());
 			break;
 		case IJavaElement.METHOD:
-			sb.append(JavaElement.JEM_METHOD);
+			sb.append(METHOD);
 			sb.append(JavaElementLabels.getElementLabel(je, JavaElementLabels.M_PARAMETER_TYPES));
 			break;
 		case IJavaElement.INITIALIZER:
 			String id= je.getHandleIdentifier();
-			int pos= id.lastIndexOf(JavaElement.JEM_INITIALIZER);
+			int pos= id.lastIndexOf(INITIALIZER);
 			if (pos >= 0)
 				sb.append(id.substring(pos));
 			break;
 		case IJavaElement.PACKAGE_DECLARATION:
-			sb.append(JavaElement.JEM_PACKAGEDECLARATION);
+			sb.append(PACKAGEDECLARATION);
 			break;
 		case IJavaElement.IMPORT_CONTAINER:
-			sb.append('<');
+			sb.append(IMPORT_CONTAINER);
 			break;
 		case IJavaElement.IMPORT_DECLARATION:
-			sb.append(JavaElement.JEM_IMPORTDECLARATION);
+			sb.append(IMPORTDECLARATION);
 			sb.append(je.getElementName());			
 			break;
 		default:
@@ -188,37 +196,37 @@ class JavaCompareUtilities {
 		StringBuffer sb= new StringBuffer();
 		switch (type) {
 		case JavaNode.CU:
-			sb.append(JavaElement.JEM_COMPILATIONUNIT);
+			sb.append(COMPILATIONUNIT);
 			break;
 		case JavaNode.CLASS:
 		case JavaNode.INTERFACE:
 		case JavaNode.ENUM:
 		case JavaNode.ANNOTATION:
-			sb.append(JavaElement.JEM_TYPE);
+			sb.append(TYPE);
 			sb.append(name);
 			break;
 		case JavaNode.FIELD:
-			sb.append(JavaElement.JEM_FIELD);
+			sb.append(FIELD);
 			sb.append(name);
 			break;
 		case JavaNode.CONSTRUCTOR:
 		case JavaNode.METHOD:
-			sb.append(JavaElement.JEM_METHOD);
+			sb.append(METHOD);
 			sb.append(name);
 			break;
 		case JavaNode.INIT:
-			sb.append(JavaElement.JEM_INITIALIZER);
+			sb.append(INITIALIZER);
 			sb.append(name);
 			break;
 		case JavaNode.PACKAGE:
-			sb.append(JavaElement.JEM_PACKAGEDECLARATION);
+			sb.append(PACKAGEDECLARATION);
 			break;
 		case JavaNode.IMPORT:
-			sb.append(JavaElement.JEM_IMPORTDECLARATION);
+			sb.append(IMPORTDECLARATION);
 			sb.append(name);
 			break;
 		case JavaNode.IMPORT_CONTAINER:
-			sb.append('<');
+			sb.append(IMPORT_CONTAINER);
 			break;
 		default:
 			Assert.isTrue(false);
