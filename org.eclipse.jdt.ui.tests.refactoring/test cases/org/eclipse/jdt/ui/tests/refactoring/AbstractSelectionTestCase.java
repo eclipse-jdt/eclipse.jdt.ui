@@ -7,10 +7,7 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IPackageFragment;
-
-import org.eclipse.jdt.testplugin.AbstractCUTestCase;
+import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 
 public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {

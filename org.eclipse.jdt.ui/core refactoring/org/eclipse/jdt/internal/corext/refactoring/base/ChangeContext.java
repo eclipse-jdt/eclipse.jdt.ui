@@ -10,7 +10,6 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.text.AbstractTextBufferChange;
 
 /**
  * A change context is used to give an <code>IChange</code> object access to several workspace
@@ -137,7 +136,7 @@ public class ChangeContext {
 	 * @param the change executed successfully.
 	 */
 	public void addPerformedChange(IChange change) {
-		if (change instanceof ICompositeChange && !(change instanceof AbstractTextBufferChange))
+		if (change instanceof ICompositeChange)
 			return;
 			
 		fPerformedChanges.add(change);

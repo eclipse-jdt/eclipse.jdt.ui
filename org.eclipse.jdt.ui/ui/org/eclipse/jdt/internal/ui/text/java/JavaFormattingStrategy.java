@@ -1,10 +1,8 @@
-package org.eclipse.jdt.internal.ui.text.java;
-
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
- 
+package org.eclipse.jdt.internal.ui.text.java;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.formatter.IFormattingStrategy;
@@ -12,12 +10,10 @@ import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.corext.refactoring.TextUtilities;
-import org.eclipse.jdt.internal.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
+import org.eclipse.jdt.internal.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage; 
-
-
 
 public class JavaFormattingStrategy implements IFormattingStrategy {
 	
@@ -54,7 +50,7 @@ public class JavaFormattingStrategy implements IFormattingStrategy {
 		formatter.setPositionsToMap(positions);
 		int indent= 0;
 		if (fInitialIndentation != null) {
-			indent= TextUtilities.getIndent(fInitialIndentation, CodeFormatterPreferencePage.getTabSize());
+			indent= TextUtil.getIndent(fInitialIndentation, CodeFormatterPreferencePage.getTabSize());
 		}
 		formatter.setInitialIndentationLevel(indent);
 		String string= formatter.formatSourceString(content);

@@ -11,7 +11,7 @@ import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextStore;
 
-import org.eclipse.jdt.internal.corext.refactoring.TextUtilities;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
 
 /**
  * The code indentator indentates a text block by a given indentation level.
@@ -49,7 +49,7 @@ public class CodeIndentator {
 	public String indentate(String string) {		
 		StringBuffer buffer = new StringBuffer(string.length());
 		
-		String indentation= TextUtilities.createIndentString(fIndentationLevel);
+		String indentation= TextUtil.createIndentString(fIndentationLevel);
 		String[] lines= splitIntoLines(string);
 
 		int[] positionDelta= new int[fPositions.length];

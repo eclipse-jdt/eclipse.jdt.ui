@@ -23,12 +23,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.TextUtilities;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage;
-import org.eclipse.jdt.internal.ui.refactoring.changes.TextBuffer;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
 
@@ -246,10 +245,10 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ex
 		int start= fContext.getStart();
 		int end= fContext.getEnd();
 		
-		int indentationLevel= guessIndentationLevel(document, start);
-		IDocument template= getDocument(indentationLevel);
-
 		try {
+			int indentationLevel= guessIndentationLevel(document, start);
+			IDocument template= getDocument(indentationLevel);
+
 			// backup and replace with template
 			fOldText= document.get(start, end - start);			
 			document.replace(start, end - start, template.get());	
@@ -319,10 +318,10 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ex
 		}
 	}
 	
-	private static int guessIndentationLevel(IDocument document, int offset) {
-		TextBuffer buffer= new TextBuffer(document);
-		String line= buffer.getLineContentOfOffset(offset);
-		return TextUtilities.getIndent(line, CodeFormatterPreferencePage.getTabSize());
+	private static int guessIndentationLevel(IDocument document, int offset) throws BadLocationException {
+		IRegion region= document.getLineInformationOfOffset(offset);
+		String line= document.get(region.getOffset(), region.getLength());
+		return TextUtil.getIndent(line, CodeFormatterPreferencePage.getTabSize());
 	}
 
 	private void guessVariableNames() {

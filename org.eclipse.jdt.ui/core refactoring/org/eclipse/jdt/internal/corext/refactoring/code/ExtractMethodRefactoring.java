@@ -20,23 +20,23 @@ import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.core.CompilationUnit;
-import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ExtendedBuffer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.TextUtilities;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ASTParentTrackingAdapter;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
 
 /**
  * Extracts a method in a compilation unit based on a text selection range.
@@ -84,8 +84,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 			int startLine= buffer.getLineOfOffset(fMethodStart);
 			int endLine= buffer.getLineOfOffset(fMethodEnd);
 			String delimiter= buffer.getLineDelimiter(startLine);
-			int indent= TextUtilities.getIndent(buffer.getLineContentOfOffset(fMethodStart), fTabWidth);	
-			setText(computeNewMethod(buffer, endLine, TextUtilities.createIndentString(indent), delimiter));
+			int indent= TextUtil.getIndent(buffer.getLineContentOfOffset(fMethodStart), fTabWidth);	
+			setText(computeNewMethod(buffer, endLine, TextUtil.createIndentString(indent), delimiter));
 		}
 		public TextEdit copy() {
 			return new InsertNewMethod(getTextRange().getOffset(), fMethodStart, fMethodEnd);
@@ -342,7 +342,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private boolean insertNewLineAfterMethodBody(TextBuffer buffer, int lineNumber) {
 		String line= buffer.getLineContent(lineNumber + 1);
 		if (line != null) {
-			return TextUtilities.containsOnlyWhiteSpaces(line);
+			return TextUtil.containsOnlyWhiteSpaces(line);
 		}
 		return true;
 	}
@@ -354,9 +354,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 		
 		// Format the first line with the right indent.
 		String firstLine= buffer.getLineContentOfOffset(fSelectionStart);
-		int firstLineIndent= TextUtilities.getIndent(firstLine, fTabWidth);
+		int firstLineIndent= TextUtil.getIndent(firstLine, fTabWidth);
 		if (lines.length > 0)
-			lines[0]= TextUtilities.createIndentString(firstLineIndent) + TextUtilities.removeLeadingIndents(lines[0], fTabWidth);
+			lines[0]= TextUtil.createIndentString(firstLineIndent) + TextUtil.removeLeadingIndents(lines[0], fTabWidth);
 		
 		// Compute the minimal indent.	
 		int minIndent= Integer.MAX_VALUE;
@@ -364,8 +364,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 			String line= lines[i];
 			if (line.length() == 0 && i + 1 == lines.length) {
 				lines[i]= null;
-			} else if (!TextUtilities.containsOnlyWhiteSpaces(lines[i])) {
-				minIndent= Math.min(TextUtilities.getIndent(lines[i], fTabWidth), minIndent);
+			} else if (!TextUtil.containsOnlyWhiteSpaces(lines[i])) {
+				minIndent= Math.min(TextUtil.getIndent(lines[i], fTabWidth), minIndent);
 			} else {
 				lines[i]= EMPTY_LINE;
 			}	
@@ -377,7 +377,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			for (int i= 0; i < lines.length; i++) {
 				String line= lines[i];
 				if (line != null && line != EMPTY_LINE)
-					lines[i]= TextUtilities.removeIndent(minIndent, line, fTabWidth);
+					lines[i]= TextUtil.removeIndent(minIndent, line, fTabWidth);
 			}
 		}
 		
@@ -432,9 +432,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 	
 	private String computeCall(TextBuffer buffer, String delimiter) {
 		String[] lines= buffer.convertIntoLines(fSelectionStart, fSelectionLength);
-		String firstLineIndent= TextUtilities.createIndentString(
-			TextUtilities.getIndent(buffer.getLineContentOfOffset(fSelectionStart), fTabWidth));
-		StringBuffer result= new StringBuffer(TextUtilities.createIndentString(TextUtilities.getIndent(lines[0], fTabWidth)));
+		String firstLineIndent= TextUtil.createIndentString(
+			TextUtil.getIndent(buffer.getLineContentOfOffset(fSelectionStart), fTabWidth));
+		StringBuffer result= new StringBuffer(TextUtil.createIndentString(TextUtil.getIndent(lines[0], fTabWidth)));
 		
 		
 		LocalVariableBinding[] locals= fAnalyzer.getCallerLocals();

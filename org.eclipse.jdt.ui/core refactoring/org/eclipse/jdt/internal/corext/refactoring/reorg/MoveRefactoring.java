@@ -34,7 +34,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveResourceChange;
-import org.eclipse.jdt.internal.corext.refactoring.text.ITextBufferChangeCreator;
 
 public class MoveRefactoring extends ReorgRefactoring {
 	

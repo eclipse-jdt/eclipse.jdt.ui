@@ -2,12 +2,13 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.corext.refactoring;
+package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.internal.core.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
-public class TextUtilities {
+public class TextUtil {
 
 	/**
 	 * Returns the length of the string desribed by <code>start</code> and 
@@ -80,7 +81,7 @@ public class TextUtilities {
 					}
 					break;
 				default:
-					Assert.isTrue(false, RefactoringCoreMessages.getString("TextUtilities.assert.indents")); //$NON-NLS-1$
+					Assert.isTrue(false, "Line does not have requested number of indents"); //$NON-NLS-1$
 			}
 			if (indents == numberOfIndents) {
 				start= i + 1;
