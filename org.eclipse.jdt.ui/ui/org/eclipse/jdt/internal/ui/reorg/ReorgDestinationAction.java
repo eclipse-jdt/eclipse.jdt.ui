@@ -29,6 +29,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -192,7 +193,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 			return true;
 			
 		ListSelectionDialog dialog = createUnsavedEditorDialog(unsavedElements);
-		if (dialog.open() != dialog.OK)
+		if (dialog.open() != Window.OK)
 			return false;
 		
 		IEditorPart[] unsavedEditorArray= (IEditorPart[]) unsavedEditors.toArray(new IEditorPart[unsavedEditors.size()]);
@@ -303,7 +304,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		dialog.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
 		dialog.setInitialSelection(computeCommonParent(refactoring.getElementsToReorg()));
 		
-		if (dialog.open() != dialog.CANCEL)
+		if (dialog.open() != Window.CANCEL)
 			return dialog.getFirstResult();
 		return null;
 	}

@@ -49,7 +49,7 @@ public abstract class SourceReferenceAction extends SelectionDispatchAction {
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
 	public final void run(final IStructuredSelection selection) {
-		new BusyIndicator().showWhile(JavaPlugin.getActiveWorkbenchShell().getDisplay(), new Runnable() {
+		BusyIndicator.showWhile(JavaPlugin.getActiveWorkbenchShell().getDisplay(), new Runnable() {
 			public void run() {
 				try {
 					perform(selection);

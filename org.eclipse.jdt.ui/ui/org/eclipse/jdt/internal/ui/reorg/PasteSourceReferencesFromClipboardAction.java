@@ -134,7 +134,7 @@ public class PasteSourceReferencesFromClipboardAction extends SelectionDispatchA
 		if (! canOperateOn(selection))
 			return;
 		
-		new BusyIndicator().showWhile(JavaPlugin.getActiveWorkbenchShell().getDisplay(), new Runnable() {
+		BusyIndicator.showWhile(JavaPlugin.getActiveWorkbenchShell().getDisplay(), new Runnable() {
 			public void run() {
 				try {
 					perform(getSelectedElement(selection));
