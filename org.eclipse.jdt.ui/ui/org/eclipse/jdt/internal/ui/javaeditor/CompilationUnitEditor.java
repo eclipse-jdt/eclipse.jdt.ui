@@ -101,6 +101,7 @@ import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
 import org.eclipse.jdt.internal.ui.text.java.IProblemAcceptor;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
+import org.eclipse.jdt.internal.ui.text.java.ReconcilingProblemRequestor;
 
 
 /**
@@ -143,12 +144,16 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				
 				IVerticalRuler vr= fAdaptedSourceViewer.getVerticalRuler();
 				int vrWidth=vr.getWidth();
-				OverviewRuler or= fAdaptedSourceViewer.getOverviewRuler();
-				int orWidth= or.getWidth();
 				
-				vr.getControl().setBounds(0, 0, vrWidth, clArea.height - scrollbarHeight);
+				int orWidth= 0;
+				if (fAdaptedSourceViewer.isOverviewRulerVisible()) {
+					OverviewRuler or= fAdaptedSourceViewer.getOverviewRuler();
+					orWidth= or.getWidth();
+					or.getControl().setBounds(clArea.width - orWidth, scrollbarHeight, orWidth, clArea.height - 3*scrollbarHeight);
+				}
+				
 				textWidget.setBounds(vrWidth + fGap, 0, clArea.width - vrWidth - orWidth - 2*fGap, clArea.height);
-				or.getControl().setBounds(clArea.width - orWidth, scrollbarHeight, orWidth, clArea.height - 3*scrollbarHeight);
+				vr.getControl().setBounds(0, 0, vrWidth, clArea.height - scrollbarHeight);
 				
 			} else {
 				StyledText textWidget= fAdaptedSourceViewer.getTextWidget();
@@ -162,6 +167,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		
 		private List fTextConverters;
 		private OverviewRuler fOverviewRuler;
+		private boolean fIsOverviewRulerVisible;
 		
 		private IVerticalRuler fCachedVerticalRuler;
 		private boolean fCachedIsVerticalRulerVisible;
@@ -284,7 +290,29 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				composite.setLayout(new AdaptedRulerLayout(GAP_SIZE, this));
 				fOverviewRuler.createControl(composite, this);
 			}
-		}	
+		}
+		
+		public void hideOverviewRuler() {
+			fIsOverviewRulerVisible= false;
+			Control control= getControl();
+			if (control instanceof Composite) {
+				Composite composite= (Composite) control;
+				composite.layout();
+			}
+		}
+		
+		public void showOverviewRuler() {
+			fIsOverviewRulerVisible= true;
+			Control control= getControl();
+			if (control instanceof Composite) {
+				Composite composite= (Composite) control;
+				composite.layout();
+			}
+		}
+		
+		public boolean isOverviewRulerVisible() {
+			return fIsOverviewRulerVisible;
+		}
 	};
 	
 	static class TabConverter implements ITextConverter {
@@ -344,6 +372,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public final static String PROBLEM_INDICATION= "problemIndication";
 	/** Preference key for problem highlight color */
 	public final static String PROBLEM_INDICATION_COLOR= "problemIndicationColor";
+	/** Preference key for shwoing the overview ruler */
+	public final static String OVERVIEW_RULER= "overviewRuler";
 	
 	
 	
@@ -367,8 +397,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private TabConverter fTabConverter;
 	/** History for structure select action */
 	private SelectionHistory fSelectionHistory;
-	/** The editor's overview ruler */
-	private OverviewRuler fOverviewRuler;
+	
 	
 	/**
 	 * Creates a new compilation unit editor.
@@ -431,11 +460,12 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			synchronized (unit) {
 				try {
 					
-//					ReconcilingProblemRequestor rpr= new ReconcilingProblemRequestor(this);
-//					rpr.init();
-//					unit.reconcile(rpr);
-					unit.reconcile();
-//					setProblems(rpr.getProblems());
+					if (!unit.isConsistent()) {
+						ReconcilingProblemRequestor rpr= new ReconcilingProblemRequestor(this); 
+						rpr.init();
+						unit.reconcile(rpr);
+						setProblems(rpr.getProblems());
+					}
 					
 					return unit.getElementAt(offset);
 				
@@ -992,6 +1022,21 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return store.getBoolean(SPACES_FOR_TABS);
 	}
 	
+	private void startShowingOverviewRuler() {
+		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
+		asv.showOverviewRuler();
+	}
+	
+	private void stopShowingOverviewRuler() {
+		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
+		asv.hideOverviewRuler();
+	}
+	
+	private boolean isShowingOverviewRuler() {
+		IPreferenceStore store= getPreferenceStore();
+		return store.getBoolean(OVERVIEW_RULER);
+	}
+	
 	private Color getColor(String key) {
 		RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), key);
 		return getColor(rgb);
@@ -1028,7 +1073,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	/**
 	 * @see AbstractTextEditor#createPartControl(Composite)
 	 */
-	public void createPartControl(Composite parent) {
+	public void createPartControl(Composite parent) {			
 		super.createPartControl(parent);
 		fPaintManager= new PaintManager(getSourceViewer());
 		if (isBracketHighlightingEnabled())
@@ -1041,6 +1086,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			startProblemIndication();
 		if (isTabConversionEnabled())
 			startTabConversion();
+		if (isShowingOverviewRuler())
+			startShowingOverviewRuler();
 	}
 	
 	/**
@@ -1134,6 +1181,14 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					return;
 				}
 				
+				if (OVERVIEW_RULER.equals(p))  {
+					if (isShowingOverviewRuler())
+						startShowingOverviewRuler();
+					else
+						stopShowingOverviewRuler();
+					return;
+				}
+				
 				IContentAssistant c= asv.getContentAssistant();
 				if (c instanceof ContentAssistant)
 					ContentAssistPreference.changeConfiguration((ContentAssistant) c, getPreferenceStore(), event);
@@ -1187,7 +1242,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					if (fProblemPainter != null)
 						fProblemPainter.updateProblems(problems);
 					AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
-					asv.getOverviewRuler().setProblemPositions(getProblemPositions());
+					if (asv != null)
+						asv.getOverviewRuler().setProblemPositions(getProblemPositions());
 				}
 			});
 		}

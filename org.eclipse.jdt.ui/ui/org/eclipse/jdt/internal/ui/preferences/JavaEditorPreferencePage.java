@@ -120,6 +120,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.PROBLEM_INDICATION_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.PROBLEM_INDICATION),
 		
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.OVERVIEW_RULER),
+		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.SPACES_FOR_TABS),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.AUTOACTIVATION),
@@ -217,6 +219,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		store.setDefault(CompilationUnitEditor.PROBLEM_INDICATION, false);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.PROBLEM_INDICATION_COLOR, new RGB(255, 0 , 128));
+		
+		store.setDefault(CompilationUnitEditor.OVERVIEW_RULER, false);
 		
 		WorkbenchChainedTextFontFieldEditor.startPropagate(store, JFaceResources.TEXT_FONT);
 		
@@ -569,6 +573,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= "Insert &space for tabs (see Formatting preferences)";
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.SPACES_FOR_TABS, 0);
 		
+		label= "Show overview &ruler";
+		addCheckBox(behaviorComposite, label, CompilationUnitEditor.OVERVIEW_RULER, 0);
+		
 		label= "Highlight &matching brackets";
 		fBracketHighlightButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS, 0);
 
@@ -599,7 +606,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		});
 		
 		
-		label= "Show &temporary problems";
+		label= "Highlight &problems";
 		fProblemIndicationButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.PROBLEM_INDICATION, 0);
 		
 		label= "Prob&lem highlight color:";
@@ -613,7 +620,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			}
 		});
 		
-				
+		
 		label= "Show print &margin";
 		fPrintMarginButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN, 0);
 		
@@ -632,7 +639,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
-
+		
+		
 		label= "F&ind Scope:";
 		fFindScopeColor= addColorButton(behaviorComposite, label, AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE, 0);
 		

@@ -409,13 +409,14 @@ public class OverviewRuler {
 			line= d.getLineInformation(lineNumbers[lineNumbers.length - 1]);
 			int end= line.getOffset() + line.getLength();
 			
-			
-			Iterator e= fProblemPositions.iterator();
-			while (e.hasNext()) {
-				ProblemPosition p= (ProblemPosition) e.next();
-				if (start <= p.getOffset() && p.getOffset() < end) {
-					if (found == null || p.getOffset() < found.getOffset())
-						found= p;
+			if (fProblemPositions != null) {
+				Iterator e= fProblemPositions.iterator();
+				while (e.hasNext()) {
+					ProblemPosition p= (ProblemPosition) e.next();
+					if (start <= p.getOffset() && p.getOffset() < end) {
+						if (found == null || p.getOffset() < found.getOffset())
+							found= p;
+					}
 				}
 			}
 		} catch (BadLocationException x) {
