@@ -47,6 +47,8 @@ import org.eclipse.jdt.internal.ui.text.correction.SerialVersionHashProposal;
  */
 public class SerialVersionQuickFixTest extends QuickFixTest {
 
+	private static final String FIELD_COMMENT= "/* Test */";
+
 	private static final Class THIS= SerialVersionQuickFixTest.class;
 
 	/**
@@ -92,6 +94,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 
 		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.NEWTYPE).setPattern(""); //$NON-NLS-1$
 		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.TYPECOMMENT).setPattern(""); //$NON-NLS-1$
+		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.FIELDCOMMENT).setPattern(FIELD_COMMENT); //$NON-NLS-1$
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fProject, "src"); //$NON-NLS-1$
 	}
@@ -146,6 +149,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 				buffer.append("    protected int var2;\n"); //$NON-NLS-1$
 				buffer.append("    public void test() {\n"); //$NON-NLS-1$
 				buffer.append("        Serializable var3= new Serializable() {\n"); //$NON-NLS-1$
+				buffer.append("            " + FIELD_COMMENT + "\n");
 				buffer.append("            private static final long serialVersionUID = -70923185657280836L;\n"); //$NON-NLS-1$
 				buffer.append("            int var4;\n"); //$NON-NLS-1$
 				buffer.append("        };\n"); //$NON-NLS-1$
@@ -166,6 +170,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 				buffer.append("    protected int var2;\n"); //$NON-NLS-1$
 				buffer.append("    public void test() {\n"); //$NON-NLS-1$
 				buffer.append("        Serializable var3= new Serializable() {\n"); //$NON-NLS-1$
+				buffer.append("            " + FIELD_COMMENT + "\n");
 				buffer.append("            private static final long serialVersionUID = 1L;\n"); //$NON-NLS-1$
 				buffer.append("            int var4;\n"); //$NON-NLS-1$
 				buffer.append("        };\n"); //$NON-NLS-1$
@@ -219,6 +224,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 				buffer.append("    protected int var1;\n"); //$NON-NLS-1$
 				buffer.append("    protected int var2;\n"); //$NON-NLS-1$
 				buffer.append("    protected class Test1 implements Serializable {\n"); //$NON-NLS-1$
+				buffer.append("        " + FIELD_COMMENT + "\n");
 				buffer.append("        private static final long serialVersionUID = -4023230086280104302L;\n"); //$NON-NLS-1$
 				buffer.append("        public long var3;\n"); //$NON-NLS-1$
 				buffer.append("    }\n"); //$NON-NLS-1$
@@ -237,6 +243,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 				buffer.append("    protected int var1;\n"); //$NON-NLS-1$
 				buffer.append("    protected int var2;\n"); //$NON-NLS-1$
 				buffer.append("    protected class Test1 implements Serializable {\n"); //$NON-NLS-1$
+				buffer.append("        " + FIELD_COMMENT + "\n");
 				buffer.append("        private static final long serialVersionUID = 1L;\n"); //$NON-NLS-1$
 				buffer.append("        public long var3;\n"); //$NON-NLS-1$
 				buffer.append("    }\n"); //$NON-NLS-1$
@@ -280,6 +287,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 				buffer.append("package test1;\n"); //$NON-NLS-1$
 				buffer.append("import java.io.Serializable;\n"); //$NON-NLS-1$
 				buffer.append("public class Test1 implements Serializable {\n"); //$NON-NLS-1$
+				buffer.append("    " + FIELD_COMMENT + "\n");
 				buffer.append("    private static final long serialVersionUID = -2242798150684569765L;\n"); //$NON-NLS-1$
 				buffer.append("    protected int var1;\n"); //$NON-NLS-1$
 				buffer.append("    protected int var2;\n"); //$NON-NLS-1$
@@ -295,6 +303,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 				buffer.append("package test1;\n"); //$NON-NLS-1$
 				buffer.append("import java.io.Serializable;\n"); //$NON-NLS-1$
 				buffer.append("public class Test1 implements Serializable {\n"); //$NON-NLS-1$
+				buffer.append("    " + FIELD_COMMENT + "\n");
 				buffer.append("    private static final long serialVersionUID = 1L;\n"); //$NON-NLS-1$
 				buffer.append("    protected int var1;\n"); //$NON-NLS-1$
 				buffer.append("    protected int var2;\n"); //$NON-NLS-1$

@@ -21,11 +21,14 @@ import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
+import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -158,6 +161,12 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 			rewrite.getListRewrite(declarations, descriptor).insertAt(declaration, 0, null);
 
 			addLinkedPositions(rewrite, fragment);
+		}
+
+		final String comment= CodeGeneration.getFieldComment(getCompilationUnit(), declaration.getType().toString(), NAME_FIELD, String.valueOf('\n'));
+		if (comment != null && comment.length() > 0) {
+			final Javadoc doc= (Javadoc) rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC);
+			declaration.setJavadoc(doc);
 		}
 		return rewrite;
 	}
