@@ -1,7 +1,5 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
-import java.io.File;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -27,9 +25,10 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 
@@ -140,18 +139,9 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
         return true;
     }
     
-    private static boolean allFilesExist(String[] clipboardFiles) {
-    	for (int i= 0; i < clipboardFiles.length; i++) {
-            if (! new File(clipboardFiles[i]).exists())
-       	        return false;
-        }
-        return true;
-    }
-
     private boolean canPasteFiles(IStructuredSelection selection) {
 		String[] clipboardFiles= getClipboardFiles();
         return clipboardFiles != null
-        		&& allFilesExist(clipboardFiles)
         		&& canPasteFilesOn(selection.getFirstElement());
     }
 
