@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * Copyright (c) 2000, 2003 International Business Machines Corp. and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0 
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.viewers.ContentViewer;
@@ -23,6 +24,8 @@ import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
+
+import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
@@ -35,6 +38,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 
@@ -51,7 +55,7 @@ import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
  */
 public class JavaElementSorter extends ViewerSorter {
 	
-	private static final int JAVAPROJECTS= 1;
+	private static final int PROJECTS= 1;
 	private static final int PACKAGEFRAGMENTROOTS= 2;
 	private static final int PACKAGEFRAGMENT= 3;
 
@@ -139,7 +143,7 @@ public class JavaElementSorter extends ViewerSorter {
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT :
 						return PACKAGEFRAGMENTROOTS;
 					case IJavaElement.JAVA_PROJECT :
-						return JAVAPROJECTS;
+						return PROJECTS;
 					case IJavaElement.CLASS_FILE :
 						return CLASSFILES;
 					case IJavaElement.COMPILATION_UNIT :
@@ -152,6 +156,8 @@ public class JavaElementSorter extends ViewerSorter {
 			return JAVAELEMENTS;
 		} else if (element instanceof IFile) {
 			return RESOURCES;
+		} else if (element instanceof IProject) {
+			return PROJECTS;
 		} else if (element instanceof IContainer) {
 			return RESOURCEFOLDERS;
 		} else if (element instanceof IStorage) {
@@ -173,8 +179,14 @@ public class JavaElementSorter extends ViewerSorter {
 		int cat2= category(e2);
 
 		if (cat1 != cat2)
-			return cat1 - cat2;	
+			return cat1 - cat2;
 		
+		if (cat1 == PROJECTS) {
+			IWorkbenchAdapter a1= (IWorkbenchAdapter)((IAdaptable)e1).getAdapter(IWorkbenchAdapter.class);
+			IWorkbenchAdapter a2= (IWorkbenchAdapter)((IAdaptable)e2).getAdapter(IWorkbenchAdapter.class);
+				return getCollator().compare(a1.getLabel(e1), a2.getLabel(e2));
+		}
+			
 		if (cat1 == PACKAGEFRAGMENTROOTS) {
 			IPackageFragmentRoot root1= JavaModelUtil.getPackageFragmentRoot((IJavaElement)e1);
 			IPackageFragmentRoot root2= JavaModelUtil.getPackageFragmentRoot((IJavaElement)e2);
@@ -187,7 +199,7 @@ public class JavaElementSorter extends ViewerSorter {
 			}
 		}
 		// non - java resources are sorted using the label from the viewers label provider
-		if (cat1 == RESOURCES || cat1 == RESOURCEFOLDERS || cat1 == STORAGE || cat1 == OTHERS) {
+		if (cat1 == PROJECTS || cat1 == RESOURCES || cat1 == RESOURCEFOLDERS || cat1 == STORAGE || cat1 == OTHERS) {
 			return compareWithLabelProvider(viewer, e1, e2);
 		}
 		
