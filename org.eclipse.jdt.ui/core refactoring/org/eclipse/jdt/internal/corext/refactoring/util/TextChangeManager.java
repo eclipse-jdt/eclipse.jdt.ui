@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.corext.refactoring.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -59,7 +57,7 @@ public class TextChangeManager {
 	 * @param cu the compilation unit for which the text buffer change is requested
 	 * @return the text change associated with the given compilation unit. 
 	 */
-	public TextChange get(ICompilationUnit cu) throws CoreException {
+	public TextChange get(ICompilationUnit cu) {
 		TextChange result= (TextChange)fMap.get(cu);
 		if (result == null) {
 			result= new CompilationUnitChange(cu.getElementName(), cu);
