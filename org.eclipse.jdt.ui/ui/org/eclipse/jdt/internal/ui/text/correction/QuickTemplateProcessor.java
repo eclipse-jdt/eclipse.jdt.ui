@@ -94,6 +94,12 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 			int startLine= document.getLineOfOffset(offset);
 			int endLine= document.getLineOfOffset(offset + length);
 			IRegion endLineRegion= document.getLineInformation(endLine);
+			//if end position is at start of line, set it back to the previous line's end
+			if (endLine > startLine && endLineRegion.getOffset() == offset + length) {
+				endLine--;
+				endLineRegion= document.getLineInformation(endLine);
+				length= endLineRegion.getOffset() + endLineRegion.getLength() - offset;
+			}
 			if (startLine  == endLine) {
 				if (length == 0 || offset != endLineRegion.getOffset() || length != endLineRegion.getLength()) {
 					return null;
