@@ -55,4 +55,12 @@ public class ParameterTypeVariable extends ConstraintVariable {
 		return super.hashCode() ^ fMethodBinding.hashCode() ^ fParameterIndex;
 	}
 
+	public IMethodBinding getMethodBinding() {
+		return fMethodBinding;
+	}
+
+	public int getParameterIndex() {
+		return fParameterIndex;
+	}
+
 }
