@@ -54,7 +54,7 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
 		fDialogSettings= settings.getSection(DIALOGSTORE_SECTION);
 		if (fDialogSettings == null) {
-			fDialogSettings= fDialogSettings.addNewSection(DIALOGSTORE_SECTION);
+			fDialogSettings= settings.addNewSection(DIALOGSTORE_SECTION);
 			fDialogSettings.put(DIALOGSTORE_CONTAINER_IDX, 0);
 		}
 		validatePage();
