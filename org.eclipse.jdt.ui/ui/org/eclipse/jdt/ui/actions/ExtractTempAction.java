@@ -17,10 +17,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
-
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -31,6 +27,8 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 
 /**
  * Extracts an expression into a new local variable and replaces all occurrences of
@@ -44,8 +42,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class ExtractTempAction extends SelectionDispatchAction {
 
-	private CompilationUnitEditor fEditor;
 	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("ExtractTempAction.extract_temp"); //$NON-NLS-1$
+	private final CompilationUnitEditor fEditor;
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
@@ -58,15 +56,15 @@ public class ExtractTempAction extends SelectionDispatchAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.EXTRACT_TEMP_ACTION);
 	}
 
-	private Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
+	private static ExtractTempRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return ExtractTempRefactoring.create(cunit, selection.getOffset(), selection.getLength(), 
 																 JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
-	private RefactoringWizard createWizard(Refactoring refactoring) {
+	private static RefactoringWizard createWizard(ExtractTempRefactoring refactoring) {
 		String helpId= IJavaHelpContextIds.EXTRACT_TEMP_ERROR_WIZARD_PAGE;
 		String pageTitle= RefactoringMessages.getString("ExtractTempAction.extract_temp"); //$NON-NLS-1$
-		return new ExtractTempWizard((ExtractTempRefactoring)refactoring, pageTitle, helpId);
+		return new ExtractTempWizard(refactoring, pageTitle, helpId);
 	}
 	
 	/* (non-Javadoc)
@@ -76,7 +74,7 @@ public class ExtractTempAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		try{
-			Refactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
+			ExtractTempRefactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
 			if (refactoring == null)
 				return;
 			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);

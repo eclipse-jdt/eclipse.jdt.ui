@@ -41,8 +41,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 
-	private CompilationUnitEditor fEditor;
 	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("ConvertAnonymousToNestedAction.dialog_title"); //$NON-NLS-1$
+	private final CompilationUnitEditor fEditor;
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
@@ -55,14 +55,14 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_ACTION);
 	}
 
-	private Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
+	private static ConvertAnonymousToNestedRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return ConvertAnonymousToNestedRefactoring.create(cunit, selection.getOffset(), selection.getLength());
 	}
 
-	private RefactoringWizard createWizard(Refactoring refactoring) {
+	private static RefactoringWizard createWizard(ConvertAnonymousToNestedRefactoring refactoring) {
 		String helpId= IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_ERROR_WIZARD_PAGE;
 		String pageTitle= RefactoringMessages.getString("ConvertAnonymousToNestedAction.wizard_title"); //$NON-NLS-1$
-		return new ConvertAnonymousToNestedWizard((ConvertAnonymousToNestedRefactoring)refactoring, pageTitle, helpId);
+		return new ConvertAnonymousToNestedWizard(refactoring, pageTitle, helpId);
 	}
 	
 	/* (non-Javadoc)
@@ -72,7 +72,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		try{
-			Refactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
+			ConvertAnonymousToNestedRefactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
 			if (refactoring == null)
 				return;
 			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);

@@ -17,8 +17,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -29,6 +27,8 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
 
 /**
  * Extracts an expression into a new local variable and replaces all occurrences of
@@ -42,8 +42,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class ExtractConstantAction extends SelectionDispatchAction {
 
-	private CompilationUnitEditor fEditor;
-	private String fDialogMessageTitle;
+	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("ExtractConstantAction.extract_constant"); //$NON-NLS-1$
+	private final CompilationUnitEditor fEditor;
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
@@ -52,20 +52,19 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 		super(editor.getEditorSite());
 		setText(RefactoringMessages.getString("ExtractConstantAction.label")); //$NON-NLS-1$
 		fEditor= editor;
-		fDialogMessageTitle= RefactoringMessages.getString("ExtractConstantAction.extract_constant"); //$NON-NLS-1$
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.EXTRACT_CONSTANT_ACTION);
 	}
 
-	private Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
+	private static ExtractConstantRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return ExtractConstantRefactoring.create(cunit, selection.getOffset(), selection.getLength(), 
 																 JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
-	private RefactoringWizard createWizard(Refactoring refactoring) {
+	private static RefactoringWizard createWizard(ExtractConstantRefactoring refactoring) {
 		String helpId= IJavaHelpContextIds.EXTRACT_CONSTANT_ERROR_WIZARD_PAGE;
 		String pageTitle= RefactoringMessages.getString("ExtractConstantAction.extract_constant"); //$NON-NLS-1$
-		return new ExtractConstantWizard((ExtractConstantRefactoring)refactoring, pageTitle, helpId);
+		return new ExtractConstantWizard(refactoring, pageTitle, helpId);
 	}
 	
 	/* (non-Javadoc)
@@ -75,12 +74,12 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		try{
-			Refactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
+			ExtractConstantRefactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
 			if (refactoring == null)
 				return;
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), fDialogMessageTitle, false);
+			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, fDialogMessageTitle, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
 		}	
 	}
 
