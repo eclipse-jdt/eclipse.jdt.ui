@@ -12,7 +12,7 @@ public class SourceCompareUtil extends Assert{
 		String[] actualCode= Strings.convertIntoLines(actual);
 		String[] expectedCode= Strings.convertIntoLines(expected);
 		if(expectedCode.length != actualCode.length){
-			assertEquals("Different number of lines", expected, actual);
+			assertEquals("Different number of lines (" + actualCode.length + " not " + expectedCode.length+")" , expected, actual);
 			return;
 		}
 		for (int i= 0; i < expectedCode.length; i++) {
