@@ -219,9 +219,9 @@ public class EditorUtility {
 	
 	/** 
 	 * Gets the working copy of an member opened in an editor
-	 * @param part the editor part
-	 * @param type the original member (or another working copy)
-	 * @return the working copy of the member, or null if not found
+	 *
+	 * @param member the original member or a member in a working copy
+	 * @return the corresponding member in the shared working copy or <code>null</code> if not found
 	 */	
 	public static IMember getWorkingCopy(IMember member) throws JavaModelException {
 		ICompilationUnit cu= member.getCompilationUnit();
