@@ -44,7 +44,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 
 		ILabelProvider labelProvider= new HierarchyLabelProvider(lifeCycle);
 	
-		setLabelProvider(new DecoratingLabelProvider(labelProvider, PlatformUI.getWorkbench().getDecoratorManager()));
+		setLabelProvider(new DecoratingLabelProvider(labelProvider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 			
 		setContentProvider(contentProvider);
 		setSorter(new ViewerSorter() {

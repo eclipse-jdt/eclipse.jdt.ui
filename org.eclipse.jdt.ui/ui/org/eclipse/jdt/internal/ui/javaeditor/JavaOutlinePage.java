@@ -681,7 +681,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 
 		fOutlineViewer= new JavaOutlineViewer(tree);		
 		fOutlineViewer.setContentProvider(new ChildrenProvider());
-		fOutlineViewer.setLabelProvider(new DecoratingLabelProvider(lprovider, PlatformUI.getWorkbench().getDecoratorManager()));
+		fOutlineViewer.setLabelProvider(new DecoratingLabelProvider(lprovider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 		
 		Object[] listeners= fSelectionChangedListeners.getListeners();
 		for (int i= 0; i < listeners.length; i++) {

@@ -40,7 +40,7 @@ public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS,
 				null)
 			, null);
-		setLabelDecorator(PlatformUI.getWorkbench().getDecoratorManager());
+		setLabelDecorator(PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
 	}	
 
 

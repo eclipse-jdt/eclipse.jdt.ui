@@ -72,7 +72,7 @@ public class MethodsViewer extends ProblemTableViewer {
 		
 		fLabelProvider= new HierarchyLabelProvider(lifeCycle);
 			
-		setLabelProvider(new DecoratingLabelProvider(fLabelProvider, PlatformUI.getWorkbench().getDecoratorManager()));
+		setLabelProvider(new DecoratingLabelProvider(fLabelProvider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 		setContentProvider(new MethodsContentProvider(lifeCycle));
 				
 		fOpen= new OpenAction(part.getSite());		

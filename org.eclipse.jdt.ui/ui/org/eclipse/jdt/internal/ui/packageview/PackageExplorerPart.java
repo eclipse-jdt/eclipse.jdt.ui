@@ -250,7 +250,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			);
 		
 		fViewer.setLabelProvider(new DecoratingLabelProvider(
-			labelProvider, PlatformUI.getWorkbench().getDecoratorManager())
+			labelProvider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator())
 		);
 		fViewer.setSorter(new JavaElementSorter());
 		fViewer.addFilter(new EmptyInnerPackageFilter());
