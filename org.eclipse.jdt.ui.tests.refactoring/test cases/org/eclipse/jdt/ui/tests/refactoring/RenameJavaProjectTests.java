@@ -103,11 +103,12 @@ public class RenameJavaProjectTests extends RefactoringTest {
 			if (referencing2 != null && referencing2.exists())
 				JavaProjectHelper.removeSourceContainer(referencing2, "src");
 
-			if (p1 != null && p1.exists()) {
+			if (p1 != null && p1.exists())
 				JavaProjectHelper.delete(p1);
+			if (referencing1 != null && referencing1.exists())
 				JavaProjectHelper.delete(referencing1);
+			if (referencing2 != null && referencing2.exists())
 				JavaProjectHelper.delete(referencing2);
-			}
 		}
 	}
 }
