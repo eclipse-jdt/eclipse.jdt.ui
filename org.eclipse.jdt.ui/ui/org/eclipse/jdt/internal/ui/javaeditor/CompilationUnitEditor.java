@@ -170,7 +170,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		 */
 		public boolean canDoOperation(int operation) {
 			if (operation == CORRECTIONASSIST_PROPOSALS)
-				return true;
+				return isEditable();
 			return super.canDoOperation(operation);
 		}
 		
