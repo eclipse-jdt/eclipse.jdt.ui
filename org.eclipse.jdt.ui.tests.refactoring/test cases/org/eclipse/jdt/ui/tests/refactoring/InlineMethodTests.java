@@ -7,6 +7,11 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fixes for:
+ *       o bug "inline method - doesn't handle implicit cast" (see
+ *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
+ *       o bug inline method: compile error (array related) [refactoring] 
+ *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38471)
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -213,6 +218,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void testWrite() throws Exception {
+		performArgumentTest();
+	}
+	
+	public void testArray() throws Exception {
 		performArgumentTest();
 	}
 	

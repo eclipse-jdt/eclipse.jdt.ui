@@ -7,9 +7,11 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
- *       bug "inline method - doesn't handle implicit cast" (see
- *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
+ *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fixes for:
+ *       o bug "inline method - doesn't handle implicit cast" (see
+ *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
+ *       o bug inline method: compile error (array related) [refactoring] 
+ *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38471)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -24,6 +26,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
@@ -293,8 +296,8 @@ public class CallInliner {
 			ParameterData parameter= fSourceProvider.getParameterData(i);
 			if (canInline(expression, parameter)) {
 				realArguments[i] = getContent(expression);
-				// fixes bug #35905
-				if(expression instanceof CastExpression) {
+				// fixes bugs #35905, #38471
+				if(expression instanceof CastExpression || expression instanceof ArrayCreation) {
 					realArguments[i] = "(" + realArguments[i] + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			} else {
