@@ -450,7 +450,11 @@ public class DeleteRefactoring2 extends Refactoring{
 	//----static classes
 	private static class DeleteChangeCreator{
 		static IChange createDeleteChange(TextChangeManager manager, IResource[] resources, IJavaElement[] javaElements) throws CoreException{
-			CompositeChange composite= new CompositeChange();
+			CompositeChange composite= new CompositeChange(){
+				public boolean isUndoable() {
+					return false;
+				}	
+			};
 			for (int i= 0; i < javaElements.length; i++) {
 				IJavaElement element= javaElements[i];
 				if (! ReorgUtils2.isInsideCompilationUnit(element))
@@ -466,7 +470,6 @@ public class DeleteRefactoring2 extends Refactoring{
 			for (int i= 0; i < resources.length; i++) {
 				composite.add(createDeleteChange(resources[i]));
 			}
-			composite.makeNotUndoable();
 			return composite;
 		}
 		
