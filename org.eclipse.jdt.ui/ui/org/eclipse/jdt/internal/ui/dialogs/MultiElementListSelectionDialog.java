@@ -6,7 +6,6 @@ package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -158,7 +157,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 * @see SelectionStatusDialog#computeResult()
 	 */
 	protected void computeResult() {
-		setResult(fCurrentPage, Arrays.asList(getSelectedElements()));
+		setResult(fCurrentPage, getSelectedElements());
 	}
 		
 	/**
@@ -219,7 +218,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		list.set(fCurrentPage, selectedElements);
 
 		// store result
-		setResult(fCurrentPage, Arrays.asList(getSelectedElements()));
+		setResult(fCurrentPage, getSelectedElements());
 
 		if (toNextPage) {
 			if (fCurrentPage + 1 >= fNumberOfPages)
@@ -282,6 +281,5 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	public int getCurrentPage() {
 		return fCurrentPage;
 	}
-
 
 }

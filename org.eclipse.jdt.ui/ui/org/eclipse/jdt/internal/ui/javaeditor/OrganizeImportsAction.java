@@ -121,15 +121,13 @@ public class OrganizeImportsAction extends Action {
 		dialog.setMessage(JavaEditorMessages.getString("OrganizeImportsAction.selectiondialog.message")); //$NON-NLS-1$
 		dialog.setElements(openChoices);
 		if (dialog.open() == dialog.OK) {
-			Object[] res= dialog.getResult();
-			ArrayList refs= new ArrayList(res.length);
+			Object[] res= dialog.getResult();			
+			result= new TypeInfo[res.length];
 			for (int i= 0; i < res.length; i++) {
-				List types= (List) res[i];
-				if (types.size() > 0) {
-					refs.add(types.get(0));
-				}
-			}				
-			result= (TypeInfo[]) refs.toArray(new TypeInfo[refs.size()]);
+				Object[] array= (Object[]) res[i];
+				if (array.length > 0)
+					result[i]= (TypeInfo) array[0];
+			}
 		}
 		// restore selection
 		if (sel instanceof ITextSelection) {
