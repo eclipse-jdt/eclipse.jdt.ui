@@ -17,7 +17,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUn
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 
-public class CastVariable2 extends TypeConstraintVariable2 {
+public class CastVariable2 extends TypeConstraintVariable2 implements IDeclaredConstraintVariable {
 
 	private final CompilationUnitRange fRange;
 	private TypeConstraintVariable2 fExpressionVariable;
@@ -34,6 +34,10 @@ public class CastVariable2 extends TypeConstraintVariable2 {
 	
 	public ICompilationUnit getCompilationUnit() {
 		return fRange.getCompilationUnit();
+	}
+	
+	public void setCompilationUnit(ICompilationUnit unit) {
+		throw new UnsupportedOperationException();
 	}
 	
 	public TypeConstraintVariable2 getExpressionVariable() {
