@@ -274,6 +274,9 @@ public class JavadocOptionsManager {
 		//Since the selected packages are stored we must locate the project
 		fDestination= element.getAttribute(DESTINATION);
 		fFromStandard= true;
+		fDocletname= "";
+		fDocletpath= "";
+		
 		if (fDestination.equals("")) {
 			NodeList list= element.getChildNodes();
 			for (int i= 0; i < list.getLength(); i++) {
@@ -281,12 +284,15 @@ public class JavadocOptionsManager {
 				if (child.getNodeName().equals("doclet")) {
 					fDocletpath= ((Element) child).getAttribute(PATH);
 					fDocletname= ((Element) child).getAttribute(NAME);
-					if (!(fDocletpath.equals("") && !fDocletname.equals("")))
+					if (!(fDocletpath.equals("") && !fDocletname.equals(""))) {
 						fFromStandard= false;
-					else fDocletname= fDocletpath ="";
+					} else {
+						fDocletname= "";
+						fDocletpath= "";
+					}
 					break;
 				}
-			}
+			} 
 		}
 
 		//get all the package or type names
