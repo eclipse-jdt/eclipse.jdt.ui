@@ -374,11 +374,17 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			 * should not be removed).
 			 */ 
 			private boolean isEssential(Object object) {
-				if (!isFlatLayout() && object instanceof IPackageFragment)
-					return fContentProvider.hasChildren(object);
-				else
-					return false;
+				try {
+					if (!isFlatLayout() && object instanceof IPackageFragment) {
+						IPackageFragment fragment = (IPackageFragment) object;
+						return !fragment.isDefaultPackage() && fragment.hasSubpackages();
+					}
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+				}
+				return false;
 			}
+			
 		};
 	}
 
