@@ -640,6 +640,9 @@ public class ASTNodes {
 		}
 	}		
 	
+	/*
+	 * @param List<BodyDeclaration> container
+	 */
 	public static int getInsertionIndex(BodyDeclaration member, List container) {
 		int memberType= member.getNodeType();
 		if (memberType == ASTNode.TYPE_DECLARATION || memberType == ASTNode.INITIALIZER)
