@@ -393,6 +393,7 @@ public class ImportsStructure implements IImportsStructure {
 	 * to a conflict. 
 	 */
 	public String addImport(ITypeBinding binding) {
+		// TODO review: I think this should not be here
 		if (binding.isAnonymous()) {
 			ITypeBinding[] interfaces= binding.getInterfaces();
 			if (interfaces.length >= 1)
@@ -497,19 +498,36 @@ public class ImportsStructure implements IImportsStructure {
 	/**
 	 * Removes an import from the structure.
 	 */
-	public void removeImport(String qualifiedTypeName) {
+	public boolean removeImport(String qualifiedTypeName) {
 		String typeContainerName= Signature.getQualifier(qualifiedTypeName);
+		int bracketOffset= qualifiedTypeName.indexOf('[');
+		if (bracketOffset != -1) {
+			qualifiedTypeName= qualifiedTypeName.substring(0, bracketOffset);
+		}		
+		
 		int nPackages= fPackageEntries.size();
 		for (int i= 0; i < nPackages; i++) {
 			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
 			if (entry.getName().equals(typeContainerName)) {
 				if (entry.remove(qualifiedTypeName)) {
 					fHasChanges= true;
-					return;
+					return true;
 				}
 			}
 		}
+		return false;
 	}
+	
+	/**
+	 * Removes an import from the structure.
+	 */
+	public boolean removeImport(ITypeBinding binding) {
+		String qualifiedName= binding.getQualifiedName();
+		if (qualifiedName.length() > 0) {
+			return removeImport(qualifiedName);
+		}
+		return false;
+	}	
 
 	/**
 	 * Looks if there already is single import for the given type name.
