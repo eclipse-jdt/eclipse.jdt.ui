@@ -10,17 +10,22 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
@@ -30,24 +35,26 @@ import org.eclipse.jdt.internal.corext.Assert;
 public class TypeEnvironment {
 	
 	/** Type code for the primitive type "int". */
-	public final PrimitiveType INT= new PrimitiveType(this, PrimitiveType.INT);
+	public final PrimitiveType INT= new PrimitiveType(this, PrimitiveType.INT, Signature.createTypeSignature("int", true)); //$NON-NLS-1$
 	/** Type code for the primitive type "char". */
-	public final PrimitiveType CHAR = new PrimitiveType(this, PrimitiveType.CHAR);
+	public final PrimitiveType CHAR = new PrimitiveType(this, PrimitiveType.CHAR, Signature.createTypeSignature("char", true)); //$NON-NLS-1$
 	/** Type code for the primitive type "boolean". */
-	public final PrimitiveType BOOLEAN = new PrimitiveType(this, PrimitiveType.BOOLEAN);
+	public final PrimitiveType BOOLEAN = new PrimitiveType(this, PrimitiveType.BOOLEAN, Signature.createTypeSignature("boolean", true)); //$NON-NLS-1$
 	/** Type code for the primitive type "short". */
-	public final PrimitiveType SHORT = new PrimitiveType(this, PrimitiveType.SHORT);
+	public final PrimitiveType SHORT = new PrimitiveType(this, PrimitiveType.SHORT, Signature.createTypeSignature("short", true)); //$NON-NLS-1$
 	/** Type code for the primitive type "long". */
-	public final PrimitiveType LONG = new PrimitiveType(this, PrimitiveType.LONG);
+	public final PrimitiveType LONG = new PrimitiveType(this, PrimitiveType.LONG, Signature.createTypeSignature("long", true)); //$NON-NLS-1$
 	/** Type code for the primitive type "float". */
-	public final PrimitiveType FLOAT = new PrimitiveType(this, PrimitiveType.FLOAT);
+	public final PrimitiveType FLOAT = new PrimitiveType(this, PrimitiveType.FLOAT, Signature.createTypeSignature("float", true)); //$NON-NLS-1$
 	/** Type code for the primitive type "double". */
-	public final PrimitiveType DOUBLE = new PrimitiveType(this, PrimitiveType.DOUBLE);
+	public final PrimitiveType DOUBLE = new PrimitiveType(this, PrimitiveType.DOUBLE, Signature.createTypeSignature("double", true)); //$NON-NLS-1$
 	/** Type code for the primitive type "byte". */
-	public final PrimitiveType BYTE = new PrimitiveType(this, PrimitiveType.BYTE);
+	public final PrimitiveType BYTE = new PrimitiveType(this, PrimitiveType.BYTE, Signature.createTypeSignature("byte", true)); //$NON-NLS-1$
 	
 	/** Type code for the primitive type "null". */
-	public final NullType NULL = new NullType(this);
+	public final NullType NULL= new NullType(this);
+	
+	public final VoidType VOID= new VoidType(this); 
 	
 	final PrimitiveType[] PRIMITIVE_TYPES= {INT, CHAR, BOOLEAN, SHORT, LONG, FLOAT, DOUBLE, BYTE};
 	
@@ -61,7 +68,8 @@ public class TypeEnvironment {
 		"java.lang.Double",  //$NON-NLS-1$
 		"java.lang.Byte"};  //$NON-NLS-1$
 	
-
+	private static TType OBJECT_TYPE= null;
+	
 	private Map[] fArrayTypes= new Map[] { new HashMap() };
 	private Map fStandardTypes= new HashMap();
 	private Map fGenericTypes= new HashMap();
@@ -80,6 +88,44 @@ public class TypeEnvironment {
 		}
 	};
 	
+	public static ITypeBinding[] createTypeBindings(TType[] types, IJavaProject project) {
+		final Map mapping= new HashMap();
+		List keys= new ArrayList();
+		for (int i= 0; i < types.length; i++) {
+			TType type= types[i];
+			String bindingKey= type.getBindingKey();
+			mapping.put(bindingKey, type);
+			if (bindingKey != null)
+				keys.add(bindingKey);
+		}
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		parser.setProject(project);
+		parser.setResolveBindings(true);
+		parser.createASTs(new ICompilationUnit[0], (String[])keys.toArray(new String[keys.size()]), 
+			new ASTRequestor() {
+				public void acceptBinding(String bindingKey, IBinding binding) {
+					mapping.put(bindingKey, binding);
+				}
+			}, null);
+		List result= new ArrayList();
+		for (int i= 0; i < types.length; i++) {
+			TType type= types[i];
+			String bindingKey= type.getBindingKey();
+			if (bindingKey == null) {
+				result.add(null);
+			} else {
+				Object value= mapping.get(bindingKey);
+				if (value instanceof ITypeBinding) {
+					result.add(value);
+				} else {
+					result.add(null);
+				}
+			}
+			
+		}
+		return (ITypeBinding[])result.toArray(new ITypeBinding[result.size()]);
+	}
+	
 	private boolean fIdentityTest;
 	
 	public TypeEnvironment() {
@@ -93,7 +139,7 @@ public class TypeEnvironment {
 		return fSubTypeCache;
 	}
 	
-	public Type create(ITypeBinding binding) {
+	public TType create(ITypeBinding binding) {
 		if (binding.isPrimitive()) {
 			return createPrimitiveType(binding);
 		} else if (binding.isArray()) {
@@ -118,6 +164,10 @@ public class TypeEnvironment {
 		if ("null".equals(binding.getName())) //$NON-NLS-1$
 			return NULL;
 		return createStandardType(binding);
+	}
+	
+	/* package */ TType getJavaLangObject() {
+		return OBJECT_TYPE;
 	}
 	
 	PrimitiveType createUnBoxed(StandardType type) {
@@ -146,7 +196,7 @@ public class TypeEnvironment {
 		return null;
 	}
 	
-	private Type createPrimitiveType(ITypeBinding binding) {
+	private TType createPrimitiveType(ITypeBinding binding) {
 		String name= binding.getName();
 		String[] names= PrimitiveType.NAMES;
 		for (int i= 0; i < names.length; i++) {
@@ -158,12 +208,9 @@ public class TypeEnvironment {
 		return null;
 	}
 
-	public Type getJavaLangObject() {
-		return null;
-	}
-	
 	private ArrayType createArrayType(ITypeBinding binding) {
 		int index= binding.getDimensions() - 1;
+		TType elementType= create(binding.getElementType());
 		if (index >= fArrayTypes.length) {
 			Map[] newArray= new Map[index + 1];
 			System.arraycopy(fArrayTypes, 0, newArray, 0, fArrayTypes.length);
@@ -171,7 +218,6 @@ public class TypeEnvironment {
 			fArrayTypes[index]= new HashMap();
 		}
 		Map arrayTypes= fArrayTypes[index];
-		Type elementType= create(binding.getElementType());
 		ArrayType result= (ArrayType)arrayTypes.get(elementType);
 		if (result != null)
 			return result;
@@ -189,6 +235,8 @@ public class TypeEnvironment {
 		result= new StandardType(this);
 		fStandardTypes.put(javaElement, result);
 		result.initialize(binding, (IType)javaElement);
+		if (OBJECT_TYPE == null && result.isJavaLangObject())
+			OBJECT_TYPE= result;
 		return result;
 	}
 	
@@ -231,7 +279,7 @@ public class TypeEnvironment {
 		return result;
 	}
 	
-	private Type createUnboundWildcardType(ITypeBinding binding) {
+	private TType createUnboundWildcardType(ITypeBinding binding) {
 		if (fUnboundWildcardType == null) {
 			fUnboundWildcardType= new UnboundWildcardType(this);
 			fUnboundWildcardType.initialize(binding);
@@ -239,8 +287,8 @@ public class TypeEnvironment {
 		return fUnboundWildcardType;
 	}
 	
-	private Type createExtendsWildCardType(ITypeBinding binding) {
-		Type bound= create(binding.getBound());
+	private TType createExtendsWildCardType(ITypeBinding binding) {
+		TType bound= create(binding.getBound());
 		ExtendsWildcardType result= (ExtendsWildcardType)fExtendsWildcardTypes.get(bound);
 		if (result != null)
 			return result;
@@ -250,8 +298,8 @@ public class TypeEnvironment {
 		return result;
 	}	
 	
-	private Type createSuperWildCardType(ITypeBinding binding) {
-		Type bound= create(binding.getBound());
+	private TType createSuperWildCardType(ITypeBinding binding) {
+		TType bound= create(binding.getBound());
 		SuperWildcardType result= (SuperWildcardType)fSuperWildcardTypes.get(bound);
 		if (result != null)
 			return result;

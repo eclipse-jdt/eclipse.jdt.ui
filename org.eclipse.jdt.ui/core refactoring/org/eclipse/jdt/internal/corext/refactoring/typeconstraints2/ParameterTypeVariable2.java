@@ -12,9 +12,9 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 /**
  * A ParameterTypeVariable is a ConstraintVariable which stands for
@@ -26,8 +26,8 @@ public class ParameterTypeVariable2 extends TypeConstraintVariable2 implements I
 	private final String fMethodBindingKey;
 	private ICompilationUnit fCompilationUnit;
 	
-	public ParameterTypeVariable2(ITypeBinding parameterTypeBinding, int parameterIndex, IMethodBinding methodBinding) {
-		super(parameterTypeBinding);
+	public ParameterTypeVariable2(TType parameterType, int parameterIndex, IMethodBinding methodBinding) {
+		super(parameterType);
 		Assert.isNotNull(methodBinding);
 		Assert.isTrue(0 <= parameterIndex);
 		Assert.isTrue(parameterIndex < methodBinding.getParameterTypes().length);

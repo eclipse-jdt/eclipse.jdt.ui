@@ -11,7 +11,7 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
-import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 /**
  * A PlainTypeVariable is a ConstraintVariable which stands for a
@@ -20,12 +20,12 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 public class PlainTypeVariable2 extends TypeConstraintVariable2 {
 
-	protected PlainTypeVariable2(ITypeBinding typeBinding) {
-		super(typeBinding);
+	protected PlainTypeVariable2(TType type) {
+		super(type);
 	}
 
 	protected int getHash() {
-		return getTypeBinding().hashCode();
+		return getType().hashCode();
 	}
 
 	protected boolean isSameAs(ConstraintVariable2 other) {
@@ -34,11 +34,11 @@ public class PlainTypeVariable2 extends TypeConstraintVariable2 {
 		if (other.getClass() != PlainTypeVariable2.class)
 			return false;
 		
-		return getTypeBinding() == ((PlainTypeVariable2) other).getTypeBinding();
+		return getType() == ((PlainTypeVariable2) other).getType();
 	}
 	
 	public String toString() {
-		return getTypeBinding().getName();
+		return getType().getPrettySignature();
 	}
 
 }

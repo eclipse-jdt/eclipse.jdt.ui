@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.tests.typeconstraints;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.Test;
@@ -25,6 +26,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -32,7 +34,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.Type;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
@@ -75,8 +77,9 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 		private void checkTypeBinding(IBinding binding) {
 			ITypeBinding type= (ITypeBinding)binding;
 			if (!(type.isPrimitive())) {
-				Type refType= fTypeEnvironment.create(type);
+				TType refType= fTypeEnvironment.create(type);
 				assertNotNull("Refactoring type is null", refType);
+				assertEquals("Not same name", type.getName(), refType.getName());
 				assertEquals("Not same signature", PrettySignatures.get(type), refType.getPrettySignature());
 				assertTrue("Not same type", refType == fTypeEnvironment.create(type));
 			}
@@ -89,6 +92,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 	
 	private static class TypeBindingCollector extends ASTVisitor {
 		private List fResult= new ArrayList();
+		private List fWildcards= new ArrayList();
 		public boolean visit(FieldDeclaration node) {
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment)node.fragments().get(0);
 			if (fragment.getName().getIdentifier().equals("NullType")) {
@@ -98,8 +102,24 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 			}
 			return false;
 		}
+		public void endVisit(CompilationUnit node) {
+			for (Iterator iter= fResult.iterator(); iter.hasNext();) {
+				ITypeBinding binding= (ITypeBinding)iter.next();
+				if (binding.isParameterizedType()) {
+					ITypeBinding[] args= binding.getTypeArguments();
+					for (int i= 0; i < args.length; i++) {
+						if (args[i].isWildcardType()) {
+							fWildcards.add(args[i]);
+						}
+					}
+				}
+			}
+		}
 		public ITypeBinding[] getResult() {
 			return (ITypeBinding[])fResult.toArray(new ITypeBinding[fResult.size()]);
+		}
+		public ITypeBinding[] getWildcards() {
+			return (ITypeBinding[])fWildcards.toArray(new ITypeBinding[fWildcards.size()]);
 		}
 	}
 	
@@ -173,12 +193,21 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 		ASTNode node= createAST(MyTestSetup.getGenericPackage());
 		TypeBindingCollector collector= new TypeBindingCollector();
 		node.accept(collector);
-		ITypeBinding[] bindings= collector.getResult();
-		Type[] types= new Type[bindings.length];
+		testBindings(collector.getResult());
+		// testAssignment(collector.getWildcards());
+	}
+
+	private void testBindings(ITypeBinding[] bindings) throws Exception {
+		TType[] types= new TType[bindings.length];
 		TypeEnvironment environment= new TypeEnvironment();
 		for (int i= 0; i < bindings.length; i++) {
 			types[i]= environment.create(bindings[i]);
+			assertEquals("Not same name", bindings[i].getName(), types[i].getName());
 			assertEquals("Not same signature", PrettySignatures.get(bindings[i]), types[i].getPrettySignature());
+			assertEquals("Not same modifiers", bindings[i].getModifiers(), types[i].getModifiers());
+			testFlags(bindings[i], types[i]);
+			assertTrue("Not same erasure", types[i].getErasure().isEqualTo(bindings[i].getErasure()));
+			// assertTrue("Not same type declaration", types[i].getTypeDeclaration().isEqualTo(bindings[i].getTypeDeclaration()));
 			assertTrue("Not same type", types[i] == environment.create(bindings[i]));
 			
 		}
@@ -191,6 +220,50 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 				
 			}
 		}
+		TypeEnvironment secondEnvironment= new TypeEnvironment();
+		for (int i= 0; i < bindings.length; i++) {
+			assertTrue("Equal to second environment", types[i].equals(secondEnvironment.create(bindings[i])));
+		}
+		/*
+		ITypeBinding[] restoredBindings= TypeEnvironment.createTypeBindings(types, RefactoringTestSetup.getProject());
+		assertEquals("Not same length", restoredBindings.length, bindings.length);
+		for (int i= 0; i < restoredBindings.length; i++) {
+			assertTrue("Not same binding", bindings[i].isEqualTo(restoredBindings[i]));
+		}
+		*/
+	}
+	
+	private void testAssignment(ITypeBinding[] bindings) {
+		TType[] types= new TType[bindings.length];
+		TypeEnvironment environment= new TypeEnvironment();
+		for (int i= 0; i < bindings.length; i++) {
+			types[i]= environment.create(bindings[i]);
+		}
+		for (int o= 0; o < bindings.length; o++) {
+			for (int i= 0; i < bindings.length; i++) {
+				boolean coreResult= bindings[o].isAssignmentCompatible(bindings[i]);
+				boolean uiResult= types[o].canAssignTo(types[i]);
+				if (coreResult != uiResult && !types[o].isUnboundWildcardType()) {
+					System.out.println("Different assignment rule(" +
+						PrettySignatures.get(bindings[i]) + "= " + PrettySignatures.get(bindings[o]) + 
+						"): core<" + coreResult +
+						"> ui<" + uiResult + ">");
+				}
+			}
+		}
+	}
+	
+	private void testFlags(ITypeBinding binding, TType type) {
+		assertEquals("Different class flag", binding.isClass(), type.isClass());
+		assertEquals("Different enum flag", binding.isEnum(), type.isEnum());
+		assertEquals("Different interface  flag", binding.isInterface(), type.isInterface());
+		assertEquals("Different annotation flag", binding.isAnnotation(), type.isAnnotation());
+		
+		assertEquals("Different top level flag", binding.isTopLevel(), type.isTopLevel());
+		assertEquals("Different nested flag", binding.isNested(), type.isNested());
+		assertEquals("Different local flag", binding.isLocal(), type.isLocal());
+		assertEquals("Different member flag", binding.isMember(), type.isMember());
+		assertEquals("Different anonymous flag", binding.isAnonymous(), type.isAnonymous());
 	}
 	
 	public void testStandardAssignments() throws Exception {
@@ -210,7 +283,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 		TypeBindingCollector collector= new TypeBindingCollector();
 		node.accept(collector);
 		ITypeBinding[] bindings= collector.getResult();
-		Type[] types= new Type[bindings.length];
+		TType[] types= new TType[bindings.length];
 		TypeEnvironment environment= new TypeEnvironment();
 		for (int i= 0; i < bindings.length; i++) {
 			types[i]= environment.create(bindings[i]);
@@ -225,12 +298,12 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 		TypeBindingCollector collector= new TypeBindingCollector();
 		node.accept(collector);
 		ITypeBinding[] bindings= collector.getResult();
-		bindings[0]= bindings[0].getGenericType();
+		bindings[0]= bindings[0].getTypeDeclaration();
 		System.out.println(PrettySignatures.get(bindings[0]) + "= " + PrettySignatures.get(bindings[1]) +
 			": " + bindings[1].isAssignmentCompatible(bindings[0]));
 		System.out.println(PrettySignatures.get(bindings[0]) + "= " + PrettySignatures.get(bindings[0]) +
 			": " + bindings[0].isAssignmentCompatible(bindings[0]));
-		bindings[1]= bindings[1].getGenericType();
+		bindings[1]= bindings[1].getTypeDeclaration();
 		System.out.println(PrettySignatures.get(bindings[0]) + "= " + PrettySignatures.get(bindings[1]) +
 			": " + bindings[1].isAssignmentCompatible(bindings[0]));
 	}

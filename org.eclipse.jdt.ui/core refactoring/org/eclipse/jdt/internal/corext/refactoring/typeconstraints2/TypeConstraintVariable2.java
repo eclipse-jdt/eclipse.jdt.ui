@@ -11,9 +11,8 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
-import org.eclipse.jdt.core.dom.ITypeBinding;
-
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 /**
  * A {@link TypeConstraintVariable2} stands for an AST entity which has a type.
@@ -21,14 +20,14 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 public abstract class TypeConstraintVariable2 extends ConstraintVariable2 {
 
-	private ITypeBinding fTypeBinding;
+	private TType fType;
 
 	/**
 	 * @param typeBindings the type binding
 	 */
-	protected TypeConstraintVariable2(ITypeBinding typeBindings) {
+	protected TypeConstraintVariable2(TType typeBindings) {
 		Assert.isNotNull(typeBindings);
-		fTypeBinding= typeBindings;
+		fType= typeBindings;
 	}
 	
 	/**
@@ -44,8 +43,8 @@ public abstract class TypeConstraintVariable2 extends ConstraintVariable2 {
 	 *         variable has no type in the original source (e.g.
 	 *         {@link CollectionElementVariable2})
 	 */
-	public ITypeBinding getTypeBinding() {
-		return fTypeBinding;
+	public final TType getType() {
+		return fType;
 	}
 	
 	public String toString() {
@@ -55,7 +54,7 @@ public abstract class TypeConstraintVariable2 extends ConstraintVariable2 {
 			
 		String name= getClass().getName();
 		int dot= name.lastIndexOf('.');
-		return name.substring(dot + 1) + ": " + fTypeBinding.getName(); //$NON-NLS-1$
+		return name.substring(dot + 1) + ": " + fType.getPrettySignature(); //$NON-NLS-1$
 	}
 
 }

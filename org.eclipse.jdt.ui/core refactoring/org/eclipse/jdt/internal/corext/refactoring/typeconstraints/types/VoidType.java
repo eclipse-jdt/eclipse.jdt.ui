@@ -10,27 +10,32 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 
+import org.eclipse.jdt.core.Signature;
 
-public class TypeTuple {
-	private TType fFirst;
-	private TType fSecond;
 
-	public TypeTuple(TType first, TType second) {
-		super();
-		fFirst= first;
-		fSecond= second;
+public class VoidType extends TType {
+
+	protected VoidType(TypeEnvironment environment) {
+		super(environment, Signature.createTypeSignature("void", true)); //$NON-NLS-1$
 	}
-	
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!(obj instanceof TypeTuple))
-			return false;
-		TypeTuple other= (TypeTuple)obj;
-		return fFirst.equals(other.fFirst) && fSecond.equals(other.fSecond);
+
+	public int getElementType() {
+		return VOID_TYPE;
 	}
-	
-	public int hashCode() {
-		return fFirst.hashCode() << 16 + fSecond.hashCode();
+
+	protected boolean doEquals(TType type) {
+		return true;
+	}
+
+	protected boolean doCanAssignTo(TType lhs) {
+		return false;
+	}
+
+	public String getName() {
+		return "void"; //$NON-NLS-1$
+	}
+
+	public String getPrettySignature() {
+		return getName();
 	}
 }

@@ -10,7 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 
+
 public final class StandardType extends HierarchyType {
+	
+	private static final String OBJECT_BINDING_KEY= "Ljava/lang/Object;"; //$NON-NLS-1$
+	private static final String CLONEABLE_BINDING_KEY= "Ljava/lang/Cloneable;"; //$NON-NLS-1$
+	private static final String SERIALIZABLE_BINDING_KEY= "Ljava/io/Serializable;"; //$NON-NLS-1$
 
 	protected StandardType(TypeEnvironment environment) {
 		super(environment);
@@ -21,42 +26,42 @@ public final class StandardType extends HierarchyType {
 	}
 	
 	public boolean isJavaLangObject() {
-		return "java.lang.Object".equals(getJavaElementType().getFullyQualifiedName()); //$NON-NLS-1$
+		return OBJECT_BINDING_KEY.equals(getBindingKey());
 	}
 	
 	public boolean isJavaLangCloneable() {
-		return "java.lang.Cloneable".equals(getJavaElementType().getFullyQualifiedName()); //$NON-NLS-1$
+		return CLONEABLE_BINDING_KEY.equals(getBindingKey());
 	}
 	
 	public boolean isJavaIoSerializable() {
-		return "java.io.Serializable".equals(getJavaElementType().getFullyQualifiedName()); //$NON-NLS-1$
+		return SERIALIZABLE_BINDING_KEY.equals(getBindingKey());
 	}
 	
-	public boolean doEquals(Type type) {
-		return getJavaElementType().equals(((GenericType)type).getJavaElementType());
+	public boolean doEquals(TType type) {
+		return getJavaElementType().equals(((StandardType)type).getJavaElementType());
 	}
 	
 	public int hashCode() {
 		return getJavaElementType().hashCode();
 	}
 	
-	protected boolean doCanAssignTo(Type target) {
-		int targetType= target.getElementType();
-		switch (targetType) {
+	protected boolean doCanAssignTo(TType lhs) {
+		switch (lhs.getElementType()) {
 			case NULL_TYPE: return false;
-			case PRIMITIVE_TYPE: return canAssignToPrimitive((PrimitiveType)target);
+			case VOID_TYPE: return false;
+			case PRIMITIVE_TYPE: return canAssignToPrimitive((PrimitiveType)lhs);
 			
 			case ARRAY_TYPE: return false;
 			
-			case STANDARD_TYPE: return canAssignToStandardType((StandardType)target); 
+			case STANDARD_TYPE: return canAssignToStandardType((StandardType)lhs); 
 			case GENERIC_TYPE: return false;
-			case PARAMETERIZED_TYPE: return isSubType((HierarchyType)target);
-			case RAW_TYPE: return isSubType((HierarchyType)target);
+			case PARAMETERIZED_TYPE: return isSubType((HierarchyType)lhs);
+			case RAW_TYPE: return isSubType((HierarchyType)lhs);
 			
 			case UNBOUND_WILDCARD_TYPE:
 			case SUPER_WILDCARD_TYPE: 
 			case EXTENDS_WILDCARD_TYPE: 
-				return ((WildcardType)target).checkBound(this);
+				return ((WildcardType)lhs).checkAssignmentBound(this);
 			
 			case TYPE_VARIABLE: return false;
 		}
@@ -68,6 +73,10 @@ public final class StandardType extends HierarchyType {
 		return source != null && source.canAssignTo(type);
 	}
 
+	public String getName() {
+		return getJavaElementType().getElementName();
+	}
+	
 	public String getPrettySignature() {
 		return getJavaElementType().getFullyQualifiedName('.');
 	}

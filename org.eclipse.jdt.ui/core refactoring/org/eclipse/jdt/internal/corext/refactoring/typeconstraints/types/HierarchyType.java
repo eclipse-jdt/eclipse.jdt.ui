@@ -17,8 +17,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-public abstract class HierarchyType extends Type {
-	private HierarchyType fSuperClass;
+public abstract class HierarchyType extends TType {
+	private HierarchyType fSuperclass;
 	private HierarchyType[] fInterfaces;
 	private IType fJavaElementType;
 	
@@ -33,7 +33,7 @@ public abstract class HierarchyType extends Type {
 		TypeEnvironment environment= getEnvironment();
 		ITypeBinding superclass= binding.getSuperclass();
 		if (superclass != null) {
-			fSuperClass= (HierarchyType)environment.create(superclass);
+			fSuperclass= (HierarchyType)environment.create(superclass);
 		}
 		ITypeBinding[] interfaces= binding.getInterfaces();
 		fInterfaces= new HierarchyType[interfaces.length];
@@ -42,11 +42,11 @@ public abstract class HierarchyType extends Type {
 		}
 	}
 	
-	public Type getSuperClass() {
-		return fSuperClass;
+	public TType getSuperclass() {
+		return fSuperclass;
 	}
 	
-	public Type[] getInterfaces() {
+	public TType[] getInterfaces() {
 		return fInterfaces;
 	}
 	
@@ -70,7 +70,7 @@ public abstract class HierarchyType extends Type {
 	}
 
 	private boolean doIsSubType(HierarchyType other) {
-		if (fSuperClass != null && (other.isTypeEquivalentTo(fSuperClass) || fSuperClass.doIsSubType(other)))
+		if (fSuperclass != null && (other.isTypeEquivalentTo(fSuperclass) || fSuperclass.doIsSubType(other)))
 			return true;
 		for (int i= 0; i < fInterfaces.length; i++) {
 			if (other.isTypeEquivalentTo(fInterfaces[i]) || fInterfaces[i].doIsSubType(other))

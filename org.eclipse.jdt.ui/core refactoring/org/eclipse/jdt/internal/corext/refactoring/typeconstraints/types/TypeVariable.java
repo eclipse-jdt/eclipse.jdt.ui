@@ -16,9 +16,9 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.internal.corext.Assert;
 
 
-public final class TypeVariable extends Type {
+public final class TypeVariable extends TType {
 	
-	private Type[] fBounds;
+	private TType[] fBounds;
 	private ITypeParameter fJavaTypeParameter;
 	
 	protected TypeVariable(TypeEnvironment environment) {
@@ -31,7 +31,7 @@ public final class TypeVariable extends Type {
 		Assert.isNotNull(javaTypeParameter);
 		fJavaTypeParameter= javaTypeParameter;
 		ITypeBinding[] bounds= binding.getTypeBounds();
-		fBounds= new Type[bounds.length];
+		fBounds= new TType[bounds.length];
 		for (int i= 0; i < bounds.length; i++) {
 			fBounds[i]= getEnvironment().create(bounds[i]);
 		}
@@ -41,7 +41,15 @@ public final class TypeVariable extends Type {
 		return TYPE_VARIABLE;
 	}
 	
-	public boolean doEquals(Type type) {
+	public TType getErasure() {
+		return fBounds[0].getErasure();
+	}
+	
+	/* package */ TType getLeftMostBound() {
+		return fBounds[0];
+	}
+	
+	public boolean doEquals(TType type) {
 		return fJavaTypeParameter.equals(((TypeVariable)type).fJavaTypeParameter);
 	}
 	
@@ -49,9 +57,10 @@ public final class TypeVariable extends Type {
 		return fJavaTypeParameter.hashCode();
 	}
 	
-	protected boolean doCanAssignTo(Type lhs) {
+	protected boolean doCanAssignTo(TType lhs) {
 		switch (lhs.getElementType()) {
 			case NULL_TYPE: 
+			case VOID_TYPE: return false;
 			case PRIMITIVE_TYPE:
 				
 			case ARRAY_TYPE: return false;
@@ -65,7 +74,7 @@ public final class TypeVariable extends Type {
 			case UNBOUND_WILDCARD_TYPE:
 			case EXTENDS_WILDCARD_TYPE:
 			case SUPER_WILDCARD_TYPE:
-				return ((WildcardType)lhs).checkBound(this);
+				return ((WildcardType)lhs).checkAssignmentBound(this);
 				
 			case TYPE_VARIABLE: 
 				return doExtends((TypeVariable)lhs);
@@ -73,7 +82,15 @@ public final class TypeVariable extends Type {
 		return false;
 	}
 	
-	private boolean canAssignOneBoundTo(Type lhs) {
+	protected boolean checkAssignmentBound(TType rhs) {
+		for (int i= 0; i < fBounds.length; i++) {
+			if (rhs.canAssignTo(fBounds[i]))
+				return true;
+		}
+		return false;
+	}
+	
+	private boolean canAssignOneBoundTo(TType lhs) {
 		for (int i= 0; i < fBounds.length; i++) {
 			if (fBounds[i].canAssignTo(lhs))
 				return true;
@@ -83,11 +100,15 @@ public final class TypeVariable extends Type {
 	
 	private boolean doExtends(TypeVariable other) {
 		for (int i= 0; i < fBounds.length; i++) {
-			Type bound= fBounds[i];
+			TType bound= fBounds[i];
 			if (other.equals(bound) || (bound.getElementType() == TYPE_VARIABLE && ((TypeVariable)bound).doExtends(other)))
 				return true;
 		}
 		return false;
+	}
+	
+	public String getName() {
+		return fJavaTypeParameter.getElementName();
 	}
 	
 	public String getPrettySignature() {

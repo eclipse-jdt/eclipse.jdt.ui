@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import java.util.ArrayList;
 
-import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 public abstract class TypeSet {
 	
@@ -23,7 +23,7 @@ public abstract class TypeSet {
 			return restrictionSet;
 		}
 		
-		public ITypeBinding chooseSingleType() {
+		public TType chooseSingleType() {
 			return null;
 		}
 
@@ -34,41 +34,41 @@ public abstract class TypeSet {
 	
 	private static class SingleTypeSet extends TypeSet {
 
-		private final ITypeBinding fTypeBinding;
+		private final TType fType;
 
-		public SingleTypeSet(ITypeBinding typeHandle) {
-			fTypeBinding= typeHandle;
+		public SingleTypeSet(TType type) {
+			fType= type;
 		}
 
 		public TypeSet restrictedTo(TypeSet restrictionSet) {
 			if (restrictionSet instanceof Universe) {
 				return this;
 			} else if (restrictionSet instanceof SingleTypeSet) {
-				ITypeBinding restrictionTypeBinding= ((SingleTypeSet) restrictionSet).fTypeBinding;
-				if (fTypeBinding == restrictionTypeBinding)
+				TType restrictionType= ((SingleTypeSet)restrictionSet).fType;
+				if (fType == restrictionType)
 					return this;
-				else if (TypeBindings.canAssign(fTypeBinding, restrictionTypeBinding))
+				else if (fType.canAssignTo(restrictionType))
 					return restrictionSet; //e.g. fTypeBinding==Integer, restrictionTypeBinding==Number
-				else if (TypeBindings.canAssign(restrictionTypeBinding, fTypeBinding))
+				else if (restrictionType.canAssignTo(fType))
 					return this; //e.g. fTypeBinding==Number, restrictionTypeBinding==Integer
 				else
-					return new MultiTypeSet(new ITypeBinding[] {fTypeBinding, restrictionTypeBinding});
+					return new MultiTypeSet(new TType[] {fType, restrictionType});
 //					return commonLowerBound(restrictionSingleTypeSet);
 			} else if (restrictionSet instanceof MultiTypeSet) {
-				ITypeBinding[] restrictionTypeBindings= ((MultiTypeSet) restrictionSet).fTypeBindings;
-				int count= restrictionTypeBindings.length;
+				TType[] restrictionTypes= ((MultiTypeSet) restrictionSet).fTypes;
+				int count= restrictionTypes.length;
 				for (int i= 0; i < count; i++) {
-					if (! TypeBindings.canAssign(fTypeBinding, restrictionTypeBindings[i])) {
+					if (! fType.canAssignTo(restrictionTypes[i])) {
 						//e.g. fTypeBinding==ArrayList, restrictionTypeBindings=={List, LinkedList}
-						ITypeBinding[] newTypeBindings= new ITypeBinding[count + 1];
-						System.arraycopy(restrictionTypeBindings, 0, newTypeBindings, 0, count);
-						newTypeBindings[count]= fTypeBinding;
-						return new MultiTypeSet(newTypeBindings);
+						TType[] newTypes= new TType[count + 1];
+						System.arraycopy(restrictionTypes, 0, newTypes, 0, count);
+						newTypes[count]= fType;
+						return new MultiTypeSet(newTypes);
 					}
 				}
 				return restrictionSet; //e.g. fTypeBinding==ArrayList, restrictionTypeBindings=={List, RandomAccess}
 			} else 	{ //TODO
-				throw new IllegalStateException(fTypeBinding.getQualifiedName() + " ^ " + restrictionSet); //$NON-NLS-1$
+				throw new IllegalStateException(fType.getPrettySignature() + " ^ " + restrictionSet); //$NON-NLS-1$
 			}
 		}
 		
@@ -76,36 +76,36 @@ public abstract class TypeSet {
 			//TODO: see also org.eclipse.jdt.internal.compiler.lookup.Scope.lowerUpperBound(types);
 			//and org.eclipse.jdt.internal.compiler.lookup.Scope.mostSpecificCommonType(types)
 			//TODO: should either not collapse sets here or support multiple lower bounds
-			ITypeBinding msct= TypeBindings.mostSpecificCommonType(new ITypeBinding[] {fTypeBinding, other.fTypeBinding});
+			TType msct= TTypes.mostSpecificCommonType(new TType[] {fType, other.fType});
 			return new SingleTypeSet(msct);
 //			throw new IllegalStateException(this + " != " + other); //$NON-NLS-1$
 		}
 
-		public ITypeBinding chooseSingleType() {
-			return fTypeBinding;
+		public TType chooseSingleType() {
+			return fType;
 		}
 
 		public String toString() {
-			return fTypeBinding.getQualifiedName();
+			return fType.getPrettySignature();
 		}
 	}
 	
 	private static class MultiTypeSet extends TypeSet {
-		private final ITypeBinding[] fTypeBindings;
+		private final TType[] fTypes;
 		
-		public MultiTypeSet(ITypeBinding[] typeBindings) {
-			fTypeBindings= typeBindings;
+		public MultiTypeSet(TType[] types) {
+			fTypes= types;
 		}
 		
 		public TypeSet restrictedTo(TypeSet restrictionSet) {
 			if (restrictionSet instanceof Universe) {
 				return this;
 			} else if (restrictionSet instanceof SingleTypeSet) {
-				ITypeBinding restrictionTypeBinding= ((SingleTypeSet) restrictionSet).fTypeBinding;
+				TType restrictionType= ((SingleTypeSet) restrictionSet).fType;
 				boolean foundTarget= false;
-				int count= fTypeBindings.length;
+				int count= fTypes.length;
 				for (int i= 0; i < count; i++) {
-					if (TypeBindings.canAssign(restrictionTypeBinding, fTypeBindings[i])) {
+					if (restrictionType.canAssignTo(fTypes[i])) {
 						//e.g. fTypeBindings=={Number, Something}, restrictionTypeBinding==Integer
 						foundTarget= true;
 						break;
@@ -115,22 +115,22 @@ public abstract class TypeSet {
 					return this; 
 				
 				//e.g. fTypeBindings=={Integer, Runnable}, restrictionTypeBinding==Number
-				ITypeBinding[] newTypeBindings= new ITypeBinding[count + 1];
-				System.arraycopy(fTypeBindings, 0, newTypeBindings, 0, count);
-				newTypeBindings[count]= restrictionTypeBinding;
-				return new MultiTypeSet(newTypeBindings);
+				TType[] newTypes= new TType[count + 1];
+				System.arraycopy(fTypes, 0, newTypes, 0, count);
+				newTypes[count]= restrictionType;
+				return new MultiTypeSet(newTypes);
 				
 			} else if (restrictionSet instanceof MultiTypeSet) {
 				if (this == restrictionSet)
 					return this;
-				ITypeBinding[] restrictionTypeBindings= ((MultiTypeSet) restrictionSet).fTypeBindings;
+				TType[] restrictionTypes= ((MultiTypeSet) restrictionSet).fTypes;
 				ArrayList toAdd= new ArrayList();
-				for (int i= 0; i < restrictionTypeBindings.length; i++) {
-					ITypeBinding restrictionType= restrictionTypeBindings[i];
+				for (int i= 0; i < restrictionTypes.length; i++) {
+					TType restrictionType= restrictionTypes[i];
 					boolean foundTarget= false;
-					for (int j= 0; j < fTypeBindings.length; j++) {
-						ITypeBinding type= fTypeBindings[j];
-						if (TypeBindings.canAssign(restrictionType, type)) {
+					for (int j= 0; j < fTypes.length; j++) {
+						TType type= fTypes[j];
+						if (restrictionType.canAssignTo(type)) {
 							//e.g. fTypeBindings=={Number, Something}, restrictionType==Integer
 							foundTarget= true;
 							break;
@@ -142,26 +142,26 @@ public abstract class TypeSet {
 				if (toAdd.size() == 0)
 					return this;
 				
-				ITypeBinding[] newTypeBindings= new ITypeBinding[fTypeBindings.length + toAdd.size()];
-				System.arraycopy(fTypeBindings, 0, newTypeBindings, 0, fTypeBindings.length);
+				TType[] newTypes= new TType[fTypes.length + toAdd.size()];
+				System.arraycopy(fTypes, 0, newTypes, 0, fTypes.length);
 				for (int i= 0; i < toAdd.size(); i++)
-					newTypeBindings[i + fTypeBindings.length]= (ITypeBinding) toAdd.get(i);
+					newTypes[i + fTypes.length]= (TType) toAdd.get(i);
 				
-				return new MultiTypeSet(newTypeBindings);
+				return new MultiTypeSet(newTypes);
 			} else 	{ //TODO
 				throw new IllegalStateException(toString() + " ^ " + restrictionSet); //$NON-NLS-1$
 			}
 		}
 
-		public ITypeBinding chooseSingleType() {
+		public TType chooseSingleType() {
 			//TODO: Need to count possible removable casts for each choice to decide for best choice.
-			return TypeBindings.mostSpecificCommonType(fTypeBindings);
+			return TTypes.mostSpecificCommonType(fTypes);
 		}
 
 		public String toString() {
-			ArrayList names= new ArrayList(fTypeBindings.length);
-			for (int i= 0; i < fTypeBindings.length; i++) {
-				names.add(fTypeBindings[i].getQualifiedName());
+			ArrayList names= new ArrayList(fTypes.length);
+			for (int i= 0; i < fTypes.length; i++) {
+				names.add(fTypes[i].getPrettySignature());
 			}
 			return names.toString();
 		}
@@ -173,16 +173,16 @@ public abstract class TypeSet {
 		return fgUniverse;
 	}
 
-	public static TypeSet create(ITypeBinding typeHandle) {
-		if (typeHandle == null)
+	public static TypeSet create(TType type) {
+		if (type == null)
 			return new Universe();
 		else
-			return new SingleTypeSet(typeHandle);
+			return new SingleTypeSet(type);
 	}
 
 	public abstract TypeSet restrictedTo(TypeSet restrictionSet);
 	
-	public abstract ITypeBinding chooseSingleType();
+	public abstract TType chooseSingleType();
 	
 	
 	public abstract String toString();

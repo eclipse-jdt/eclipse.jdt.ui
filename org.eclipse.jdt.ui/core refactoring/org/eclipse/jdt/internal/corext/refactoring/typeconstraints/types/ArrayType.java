@@ -14,26 +14,37 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-public final class ArrayType extends Type {
-	private Type fItemType;
+public final class ArrayType extends TType {
+	private TType fItemType;
 	private int fDimensions;
+	
+	private TType fErasure;
 
 	protected ArrayType(TypeEnvironment environment) {
 		super(environment);
 	}
 
-	protected void initialize(ITypeBinding binding, Type itemType) {
+	protected void initialize(ITypeBinding binding, TType itemType) {
 		Assert.isTrue(binding.isArray());
 		super.initialize(binding);
 		fItemType= itemType;
 		fDimensions= binding.getDimensions();
+		if (fItemType.isParameterizedType() || fItemType.isRawType()) {
+			fErasure= getEnvironment().create(binding.getErasure());
+		} else {
+			fErasure= this;
+		}
 	}
 
 	public int getElementType() {
 		return ARRAY_TYPE;
 	}
 	
-	public boolean doEquals(Type other) {
+	public TType getErasure() {
+		return fErasure;
+	}
+	
+	public boolean doEquals(TType other) {
 		ArrayType arrayType= (ArrayType)other;
 		return fItemType.equals(arrayType.fItemType) && fDimensions == arrayType.fDimensions;
 	}
@@ -42,9 +53,10 @@ public final class ArrayType extends Type {
 		return fItemType.hashCode() << ARRAY_TYPE_SHIFT;
 	}
 	
-	protected boolean doCanAssignTo(Type lhs) {
+	protected boolean doCanAssignTo(TType lhs) {
 		switch (lhs.getElementType()) {
 			case NULL_TYPE: return false;
+			case VOID_TYPE: return false;
 			case PRIMITIVE_TYPE: return false;
 			
 			case ARRAY_TYPE: return canAssignToArrayType((ArrayType)lhs);
@@ -57,7 +69,7 @@ public final class ArrayType extends Type {
 			case UNBOUND_WILDCARD_TYPE:
 			case EXTENDS_WILDCARD_TYPE: 
 			case SUPER_WILDCARD_TYPE: 
-				return ((WildcardType)lhs).checkBound(this);
+				return ((WildcardType)lhs).checkAssignmentBound(this);
 				
 			case TYPE_VARIABLE: return false;
 		}
@@ -76,12 +88,20 @@ public final class ArrayType extends Type {
 		return isArrayLhsCompatible(lhs.fItemType);
 	}
 
-	private boolean isArrayLhsCompatible(Type lhsElementType) {
+	private boolean isArrayLhsCompatible(TType lhsElementType) {
 		return lhsElementType.isJavaLangObject() || lhsElementType.isJavaLangCloneable() || lhsElementType.isJavaIoSerializable();
 	}
 	
 	public String getPrettySignature() {
 		StringBuffer result= new StringBuffer(fItemType.getPrettySignature());
+		for (int i= 0; i < fDimensions; i++) {
+			result.append("[]"); //$NON-NLS-1$
+		}
+		return result.toString();
+	}
+	
+	public String getName() {
+		StringBuffer result= new StringBuffer(fItemType.getName());
 		for (int i= 0; i < fDimensions; i++) {
 			result.append("[]"); //$NON-NLS-1$
 		}

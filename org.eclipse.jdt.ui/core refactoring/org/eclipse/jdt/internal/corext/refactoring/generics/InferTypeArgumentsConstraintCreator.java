@@ -97,7 +97,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			return;
 		
 		setConstraintVariable(node, typeVariable);
-		if (fTCModel.isAGenericType(typeVariable.getTypeBinding()))
+		if (fTCModel.isAGenericType(typeVariable.getType()))
 			fTCModel.makeElementVariable(typeVariable);
 	}
 	

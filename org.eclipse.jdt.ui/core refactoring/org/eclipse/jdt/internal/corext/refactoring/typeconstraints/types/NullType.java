@@ -11,25 +11,30 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 
 
-public class NullType extends Type {
+public class NullType extends TType {
 
 	protected NullType(TypeEnvironment environment) {
-		super(environment);
+		super(environment, "N"); //$NON-NLS-1$
 	}
 
 	public int getElementType() {
 		return NULL_TYPE;
 	}
 
-	protected boolean doEquals(Type type) {
+	protected boolean doEquals(TType type) {
 		return true;
 	}
 
-	public String getPrettySignature() {
+	public String getName() {
 		return "null";  //$NON-NLS-1$
 	}
 	
-	protected boolean doCanAssignTo(Type target) {
-		return target.getElementType() != PRIMITIVE_TYPE;
+	public String getPrettySignature() {
+		return getName();
+	}
+	
+	protected boolean doCanAssignTo(TType target) {
+		int elementType= target.getElementType();
+		return elementType != PRIMITIVE_TYPE && elementType != VOID_TYPE;
 	}
 }

@@ -33,6 +33,8 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 
@@ -86,6 +88,8 @@ public class InferTypeArgumentsTCModel {
 	private Collection fNewTypeConstraints;
 	private Collection fNewConstraintVariables; //TODO: remove?
 	
+	private TypeEnvironment fTypeEnvironment;
+	
 	public InferTypeArgumentsTCModel() {
 		fTypeConstraints= new CustomHashtable(new TypeConstraintComparer());
 		fConstraintVariables= new CustomHashtable(new ConstraintVariableComparer());
@@ -95,6 +99,8 @@ public class InferTypeArgumentsTCModel {
 		fCuScopedConstraintVariables= new HashSet();
 		fNewTypeConstraints= new ArrayList();
 		fNewConstraintVariables= new ArrayList();
+		
+		fTypeEnvironment= new TypeEnvironment();
 	}
 	
 	/**
@@ -135,11 +141,11 @@ public class InferTypeArgumentsTCModel {
 		
 		//TODO: who needs these?
 		if (cv1 instanceof TypeConstraintVariable2)
-			if (isAGenericType(((TypeConstraintVariable2) cv1).getTypeBinding()))
+			if (isAGenericType(((TypeConstraintVariable2) cv1).getType()))
 				return true;
 				
 		if (cv2 instanceof TypeConstraintVariable2)
-			if (isAGenericType(((TypeConstraintVariable2) cv2).getTypeBinding()))
+			if (isAGenericType(((TypeConstraintVariable2) cv2).getType()))
 				return true;
 		
 		return false;
@@ -311,7 +317,7 @@ public class InferTypeArgumentsTCModel {
 		ITypeBinding typeBinding= variableBinding.getType();
 		if (filterConstraintVariableType(typeBinding))
 			return null;
-		VariableVariable2 cv= new VariableVariable2(typeBinding, variableBinding);
+		VariableVariable2 cv= new VariableVariable2(fTypeEnvironment.create(typeBinding), variableBinding);
 		cv= (VariableVariable2) storedCv(cv);
 		CollectionElementVariable2 elementVariable= makeElementVariable(cv);
 		if (fStoreToString)
@@ -335,7 +341,7 @@ public class InferTypeArgumentsTCModel {
 			return null;
 		ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(type);
 		CompilationUnitRange range= new CompilationUnitRange(cu, type);
-		TypeVariable2 typeVariable= new TypeVariable2(typeBinding, range);
+		TypeVariable2 typeVariable= new TypeVariable2(fTypeEnvironment.create(typeBinding), range);
 		typeVariable= (TypeVariable2) storedCv(typeVariable); //TODO: Should not use storedCv(..) here!
 		fCuScopedConstraintVariables.add(typeVariable);
 		if (fStoreToString)
@@ -355,7 +361,7 @@ public class InferTypeArgumentsTCModel {
 			return null;
 		ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(expression);
 		CompilationUnitRange range= new CompilationUnitRange(cu, expression);
-		TypeVariable2 typeVariable= new TypeVariable2(typeBinding, range);
+		TypeVariable2 typeVariable= new TypeVariable2(fTypeEnvironment.create(typeBinding), range);
 		fCuScopedConstraintVariables.add(typeVariable);
 		if (fStoreToString)
 			typeVariable.setData(ConstraintVariable2.TO_STRING, expression.toString());
@@ -366,7 +372,8 @@ public class InferTypeArgumentsTCModel {
 		ITypeBinding typeBinding= methodBinding.getParameterTypes() [parameterIndex];
 		if (filterConstraintVariableType(typeBinding))
 			return null;
-		ParameterTypeVariable2 cv= new ParameterTypeVariable2(typeBinding, parameterIndex, methodBinding);
+		ParameterTypeVariable2 cv= new ParameterTypeVariable2(
+			fTypeEnvironment.create(typeBinding), parameterIndex, methodBinding);
 		cv= (ParameterTypeVariable2) storedCv(cv); //TODO: Should not use storedCv(..) here!
 		if (fStoreToString)
 			cv.setData(ConstraintVariable2.TO_STRING, "[Parameter(" + parameterIndex + "," + Bindings.asString(methodBinding) + ")]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -410,7 +417,7 @@ public class InferTypeArgumentsTCModel {
 		ITypeBinding returnTypeBinding= methodBinding.getReturnType();
 		if (filterConstraintVariableType(returnTypeBinding))
 			return null;
-		ReturnTypeVariable2 cv= new ReturnTypeVariable2(returnTypeBinding, methodBinding);
+		ReturnTypeVariable2 cv= new ReturnTypeVariable2(fTypeEnvironment.create(returnTypeBinding), methodBinding);
 		cv= (ReturnTypeVariable2) storedCv(cv); //TODO: Should not use storedCv(..) here!
 		if (fStoreToString)
 			cv.setData(ConstraintVariable2.TO_STRING, "[ReturnType(" + Bindings.asString(methodBinding) + ")]"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -430,7 +437,7 @@ public class InferTypeArgumentsTCModel {
 	public PlainTypeVariable2 makePlainTypeVariable(ITypeBinding typeBinding) {
 		if (filterConstraintVariableType(typeBinding))
 			return null;
-		PlainTypeVariable2 cv= new PlainTypeVariable2(typeBinding);
+		PlainTypeVariable2 cv= new PlainTypeVariable2(fTypeEnvironment.create(typeBinding));
 		cv= (PlainTypeVariable2) storedCv(cv);
 		return cv;
 	}
@@ -444,7 +451,7 @@ public class InferTypeArgumentsTCModel {
 		if (storedElementVariable != null)
 			return storedElementVariable;
 		
-		if (isAGenericType(expressionCv.getTypeBinding())) {
+		if (isAGenericType(expressionCv.getType())) {
 			CollectionElementVariable2 cv= new CollectionElementVariable2(expressionCv);
 			cv= (CollectionElementVariable2) storedCv(cv); //TODO: Should not use storedCv(..) here!
 			setElementVariable(expressionCv, cv);
@@ -456,17 +463,23 @@ public class InferTypeArgumentsTCModel {
 		}
 	}
 	
-	public boolean isAGenericType(ITypeBinding typeBinding) {
-		return typeBinding.isParameterizedType()
-				|| typeBinding.isRawType()
-				|| typeBinding.isGenericType();
+	public boolean isAGenericType(TType type) {
+		return type.isParameterizedType()
+				|| type.isRawType()
+				|| type.isGenericType();
+	}
+
+	public boolean isAGenericType(ITypeBinding type) {
+		return type.isParameterizedType()
+				|| type.isRawType()
+				|| type.isGenericType();
 	}
 
 	public void makeCastVariable(CastExpression castExpression, TypeConstraintVariable2 expressionCv) {
 		ITypeBinding typeBinding= castExpression.resolveTypeBinding();
 		ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(castExpression);
 		CompilationUnitRange range= new CompilationUnitRange(cu, castExpression);
-		CastVariable2 castCv= new CastVariable2(typeBinding, range, expressionCv);
+		CastVariable2 castCv= new CastVariable2(fTypeEnvironment.create(typeBinding), range, expressionCv);
 		fCastVariables.add(castCv);
 	}
 	

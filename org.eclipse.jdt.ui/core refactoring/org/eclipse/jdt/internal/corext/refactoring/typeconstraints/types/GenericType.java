@@ -17,7 +17,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 public final class GenericType extends HierarchyType {
 	
-	private Type[] fTypeParameters;
+	private TType[] fTypeParameters;
 	
 	protected GenericType(TypeEnvironment environment) {
 		super(environment);
@@ -28,7 +28,7 @@ public final class GenericType extends HierarchyType {
 		super.initialize(binding, javaElementType);
 		TypeEnvironment environment= getEnvironment();
 		ITypeBinding[] typeParameters= binding.getTypeParameters();
-		fTypeParameters= new Type[typeParameters.length];
+		fTypeParameters= new TType[typeParameters.length];
 		for (int i= 0; i < typeParameters.length; i++) {
 			fTypeParameters[i]= environment.create(typeParameters[i]);
 		}
@@ -38,7 +38,7 @@ public final class GenericType extends HierarchyType {
 		return GENERIC_TYPE;
 	}
 	
-	public boolean doEquals(Type type) {
+	public boolean doEquals(TType type) {
 		return getJavaElementType().equals(((GenericType)type).getJavaElementType());
 	}
 	
@@ -46,15 +46,19 @@ public final class GenericType extends HierarchyType {
 		return getJavaElementType().hashCode();
 	}
 	
-	protected boolean doCanAssignTo(Type type) {
+	protected boolean doCanAssignTo(TType type) {
 		return false;
 	}
 	
-	protected boolean isTypeEquivalentTo(Type other) {
+	protected boolean isTypeEquivalentTo(TType other) {
 		int otherElementType= other.getElementType();
 		if (otherElementType == RAW_TYPE || otherElementType == PARAMETERIZED_TYPE)
 			return getErasure().isTypeEquivalentTo(other.getErasure());
 		return super.isTypeEquivalentTo(other);
+	}
+	
+	public String getName() {
+		return getJavaElementType().getElementName();
 	}
 	
 	public String getPrettySignature() {

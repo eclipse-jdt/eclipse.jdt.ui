@@ -20,19 +20,18 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.InferTypeArgumentsTCModel;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.DeclaringTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.EquivalenceRepresentative;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.InferTypeArgumentsTCModel;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SimpleTypeConstraint2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeBindings;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
@@ -82,7 +81,7 @@ public class InferTypeArgumentsConstraintsSolver {
 			if (cv instanceof TypeConstraintVariable2) {
 				TypeConstraintVariable2 typeConstraintCv= (TypeConstraintVariable2) cv;
 				//TODO: not necessary for types that are not used in a TypeConstraint but only as type in CollectionElementVariable
-				setTypeEstimate(cv, TypeSet.create(typeConstraintCv.getTypeBinding()));
+				setTypeEstimate(cv, TypeSet.create(typeConstraintCv.getType()));
 			} else if (cv instanceof CollectionElementVariable2) {
 //				setTypeEstimate(cv, TypeSet.getUniverse());
 			}
@@ -182,8 +181,8 @@ public class InferTypeArgumentsConstraintsSolver {
 				if (representative == null)
 					continue; //TODO: should not happen iff all unused constraint variables got pruned
 				//TODO: should calculate only once per EquivalenceRepresentative; can throw away estimate TypeSet afterwards
-				ITypeBinding typeBinding= representative.getTypeEstimate().chooseSingleType(); //TODO: is null for Universe TypeSet
-				setChosenType(elementCv, typeBinding);
+				TType type= representative.getTypeEstimate().chooseSingleType(); //TODO: is null for Universe TypeSet
+				setChosenType(elementCv, type);
 				ICompilationUnit cu= elementCv.getCompilationUnit();
 				if (cu != null) //TODO: shouldn't be the case
 					addToMultiMap(fDeclarationsToUpdate, cu, cv);
@@ -200,8 +199,8 @@ public class InferTypeArgumentsConstraintsSolver {
 		for (int i= 0; i < castVariables.length; i++) {
 			CastVariable2 castCv= castVariables[i];
 			TypeConstraintVariable2 expressionVariable= castCv.getExpressionVariable();
-			ITypeBinding chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(expressionVariable);
-			if (chosenType != null && TypeBindings.canAssign(chosenType, castCv.getTypeBinding())) {
+			TType chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(expressionVariable);
+			if (chosenType != null && chosenType.canAssignTo(castCv.getType())) {
 				ICompilationUnit cu= castCv.getCompilationUnit();
 				addToMultiMap(fCastsToRemove, cu, castCv);
 			}
@@ -227,13 +226,13 @@ public class InferTypeArgumentsConstraintsSolver {
 		return fCastsToRemove;
 	}
 	
-	public static ITypeBinding getChosenType(ConstraintVariable2 cv) {
+	public static TType getChosenType(ConstraintVariable2 cv) {
 		if (cv instanceof CollectionElementVariable2)
 			return ((CollectionElementVariable2) cv).getRepresentative().getTypeEstimate().chooseSingleType();
-		return (ITypeBinding) cv.getData(TYPE_ESTIMATE);
+		return (TType) cv.getData(TYPE_ESTIMATE);
 	}
 
-	private static void setChosenType(ConstraintVariable2 cv, ITypeBinding type) {
+	private static void setChosenType(ConstraintVariable2 cv, TType type) {
 		cv.setData(TYPE_ESTIMATE, type);
 	}
 }

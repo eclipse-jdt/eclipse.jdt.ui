@@ -12,9 +12,9 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 /**
  * A TypeVariable is a ConstraintVariable which stands for a
@@ -24,8 +24,8 @@ public class TypeVariable2 extends TypeConstraintVariable2 implements IDeclaredC
 
 	private final CompilationUnitRange fRange;
 
-	protected TypeVariable2(ITypeBinding typeBinding, CompilationUnitRange range) {
-		super(typeBinding);
+	protected TypeVariable2(TType type, CompilationUnitRange range) {
+		super(type);
 		fRange= range;
 	}
 	
@@ -37,7 +37,7 @@ public class TypeVariable2 extends TypeConstraintVariable2 implements IDeclaredC
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2#getHash()
 	 */
 	protected int getHash() {
-		return getRange().hashCode() ^ getTypeBinding().hashCode();
+		return getRange().hashCode() ^ getType().hashCode();
 	}
 	
 	/*
@@ -52,7 +52,7 @@ public class TypeVariable2 extends TypeConstraintVariable2 implements IDeclaredC
 		
 		TypeVariable2 otherTypeVariable= (TypeVariable2) other;
 		return getRange().equals(otherTypeVariable.getRange())
-				&& getTypeBinding() == otherTypeVariable.getTypeBinding();
+				&& getType() == otherTypeVariable.getType();
 	}
 
 	public void setCompilationUnit(ICompilationUnit cu) {

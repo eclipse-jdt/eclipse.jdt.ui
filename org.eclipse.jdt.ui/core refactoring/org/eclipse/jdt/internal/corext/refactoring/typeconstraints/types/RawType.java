@@ -17,7 +17,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 public final class RawType extends HierarchyType {
 	
-	private GenericType fGenericType;
+	private GenericType fTypeDeclaration;
 	
 	protected RawType(TypeEnvironment environment) {
 		super(environment);
@@ -27,33 +27,38 @@ public final class RawType extends HierarchyType {
 		Assert.isTrue(binding.isRawType());
 		super.initialize(binding, javaElementType);
 		TypeEnvironment environment= getEnvironment();
-		fGenericType= (GenericType)environment.create(binding.getGenericType());
+		fTypeDeclaration= (GenericType)environment.create(binding.getGenericType());
 	}
 	
 	public int getElementType() {
 		return RAW_TYPE;
 	}
 	
-	public boolean doEquals(Type type) {
-		return getJavaElementType().equals(((GenericType)type).getJavaElementType());
+	public boolean doEquals(TType type) {
+		return getJavaElementType().equals(((RawType)type).getJavaElementType());
 	}
 	
 	public int hashCode() {
 		return getJavaElementType().hashCode();
 	}
 	
-	protected GenericType getGenericType() {
-		return fGenericType;
+	public TType getTypeDeclaration() {
+		return fTypeDeclaration;
 	}
 	
-	public Type getErasure() {
-		return fGenericType;
+	public TType getErasure() {
+		return fTypeDeclaration;
 	}
 	
-	protected boolean doCanAssignTo(Type target) {
+	/* package */ GenericType getGenericType() {
+		return fTypeDeclaration;
+	}
+	
+	protected boolean doCanAssignTo(TType target) {
 		int targetType= target.getElementType();
 		switch (targetType) {
 			case NULL_TYPE: return false;
+			case VOID_TYPE: return false;
 			case PRIMITIVE_TYPE: return false;
 			
 			case ARRAY_TYPE: return false;
@@ -66,20 +71,24 @@ public final class RawType extends HierarchyType {
 			case UNBOUND_WILDCARD_TYPE:
 			case SUPER_WILDCARD_TYPE:
 			case EXTENDS_WILDCARD_TYPE: 
-				return ((WildcardType)target).checkBound(this);
+				return ((WildcardType)target).checkAssignmentBound(this);
 			
 			case TYPE_VARIABLE: return false;
 		}
 		return false;
 	}
 
-	protected boolean isTypeEquivalentTo(Type other) {
+	protected boolean isTypeEquivalentTo(TType other) {
 		int otherElementType= other.getElementType();
 		if (otherElementType == PARAMETERIZED_TYPE || otherElementType == GENERIC_TYPE)
 			return getErasure().isTypeEquivalentTo(other.getErasure());
 		return super.isTypeEquivalentTo(other);
 	}
 
+	public String getName() {
+		return getJavaElementType().getElementName();
+	}
+	
 	public String getPrettySignature() {
 		return getJavaElementType().getFullyQualifiedName('.');
 	}

@@ -48,6 +48,8 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.InferTypeArgumentsTCModel;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
@@ -261,13 +263,16 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			} else if (element instanceof TypeVariable2) {
 				ASTNode node= ((TypeVariable2) element).getRange().getNode(rewrite.getRoot());
 				if (node instanceof SimpleName) {
-					ITypeBinding chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(elementCv);
+					TType chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(elementCv);
 					if (chosenType == null)
 						return; // couldn't infer an element type
 					Type originalType= (Type) ((SimpleName) node).getParent();
 					Type movingType= (Type) rewrite.getASTRewrite().createMoveTarget(originalType);
 					ParameterizedType newType= rewrite.getAST().newParameterizedType(movingType);
-					newType.typeArguments().add(rewrite.getImportRewrite().addImport(chosenType, rewrite.getAST()));
+					
+					ITypeBinding[] binding= TypeEnvironment.createTypeBindings(new TType[] {chosenType}, rewrite.getCu().getJavaProject());
+					
+					newType.typeArguments().add(rewrite.getImportRewrite().addImport(binding[0], rewrite.getAST()));
 					rewrite.getASTRewrite().replace(originalType, newType, null);
 				} //TODO: other node types?
 			}

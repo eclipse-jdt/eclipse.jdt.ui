@@ -14,8 +14,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-public abstract class WildcardType extends Type {
-	protected Type fBound;
+public abstract class WildcardType extends TType {
+	protected TType fBound;
 	
 	protected WildcardType(TypeEnvironment environment) {
 		super(environment);
@@ -30,15 +30,11 @@ public abstract class WildcardType extends Type {
 		}
 	}
 	
-	protected boolean isWildcardType() {
-		return true;
-	}
-	
-	public Type getBound() {
+	public TType getBound() {
 		return fBound;
 	}
 	
-	public boolean doEquals(Type type) {
+	public boolean doEquals(TType type) {
 		WildcardType other= (WildcardType)type;
 		if (fBound == null)
 			return other.fBound == null;
@@ -51,5 +47,31 @@ public abstract class WildcardType extends Type {
 		return fBound.hashCode() << WILDCARD_TYPE_SHIFT;
 	}
 	
-	protected abstract boolean checkBound(Type rhs);
+	protected abstract boolean checkAssignmentBound(TType rhs);
+	
+	// protected abstract boolean checkTypeArgumentBound(TType rhs);
+	
+	protected String internalGetName(String keyword) {
+		StringBuffer result= new StringBuffer("?"); //$NON-NLS-1$
+		TType bound= getBound();
+		if (bound != null) {
+			result.append(" "); //$NON-NLS-1$
+			result.append(keyword);
+			result.append(" "); //$NON-NLS-1$
+			result.append(bound.getName());
+		}
+		return result.toString();
+	}
+	
+	protected String internalGetPrettySignature(String keyword) {
+		StringBuffer result= new StringBuffer("?"); //$NON-NLS-1$
+		TType bound= getBound();
+		if (bound != null) {
+			result.append(" "); //$NON-NLS-1$
+			result.append(keyword);
+			result.append(" "); //$NON-NLS-1$
+			result.append(bound.getPrettySignature());
+		}
+		return result.toString();
+	}	
 }

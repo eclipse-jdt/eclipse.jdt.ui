@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
 import org.eclipse.jdt.core.IJavaProject;
 
 
-public class PrimitiveType extends Type {
+public class PrimitiveType extends TType {
 
 	/** Type code for the primitive type "int". */
 	public static final int INT = 0;
@@ -44,8 +44,8 @@ public class PrimitiveType extends Type {
 	
 	private int fId;
 	
-	protected PrimitiveType(TypeEnvironment environment, int id) {
-		super(environment);
+	protected PrimitiveType(TypeEnvironment environment, int id, String signature) {
+		super(environment, signature);
 		fId= id;
 	}
 	
@@ -57,11 +57,11 @@ public class PrimitiveType extends Type {
 		return PRIMITIVE_TYPE;
 	}
 	
-	protected boolean doEquals(Type type) {
+	protected boolean doEquals(TType type) {
 		return fId == ((PrimitiveType)type).fId;
 	}
 
-	protected boolean doCanAssignTo(Type target) {
+	protected boolean doCanAssignTo(TType target) {
 		if (target.getElementType() != PRIMITIVE_TYPE) {
 			if (target.getElementType() == STANDARD_TYPE) {
 				IJavaProject javaProject= ((StandardType)target).getJavaElementType().getJavaProject();
@@ -121,6 +121,10 @@ public class PrimitiveType extends Type {
 				return (fId == BYTE);
 		}
 		return false;
+	}
+	
+	public String getName() {
+		return NAMES[fId];
 	}
 	
 	public String getPrettySignature() {

@@ -20,28 +20,67 @@ public final class ExtendsWildcardType extends WildcardType {
 		return EXTENDS_WILDCARD_TYPE;
 	}
 	
-	protected boolean doCanAssignTo(Type lhs) {
+	public TType getErasure() {
+		return fBound.getErasure();
+	}
+	
+	protected boolean doCanAssignTo(TType lhs) {
 		switch (lhs.getElementType()) {
-			case UNBOUND_WILDCARD_TYPE:
+			case ARRAY_TYPE: 
+			case STANDARD_TYPE:  
+			case PARAMETERIZED_TYPE:
+			case RAW_TYPE: 
+				return getBound().canAssignTo(lhs);
+			
+			case UNBOUND_WILDCARD_TYPE: 
 				return true;
-			case EXTENDS_WILDCARD_TYPE:
-				return getBound().canAssignTo(((ExtendsWildcardType)lhs).getBound());
+			case SUPER_WILDCARD_TYPE: 
+			case EXTENDS_WILDCARD_TYPE: 
+				return ((WildcardType)lhs).checkAssignmentBound(getBound());
+			
+			case TYPE_VARIABLE: 
+				return ((TypeVariable)lhs).checkAssignmentBound(getBound());
+				
 			default:
 				return false;
 		}
 	}
 	
-	protected boolean checkBound(Type rhs) {
-		return rhs.canAssignTo(getBound());
+	protected boolean checkTypeArgument(TType rhs) {
+		switch(rhs.getElementType()) {
+			case ARRAY_TYPE:
+			case STANDARD_TYPE:
+			case PARAMETERIZED_TYPE:
+			case RAW_TYPE:
+				return rhs.canAssignTo(getBound());
+				
+			case UNBOUND_WILDCARD_TYPE:
+				return getBound().isJavaLangObject();
+			case EXTENDS_WILDCARD_TYPE: 
+				return ((ExtendsWildcardType)rhs).getBound().canAssignTo(getBound());
+			case SUPER_WILDCARD_TYPE:
+				return getBound().isJavaLangObject();
+				
+			case TYPE_VARIABLE:
+				return rhs.canAssignTo(getBound());
+				
+			default:
+				return false;
+		}
+	}
+	
+	protected boolean checkAssignmentBound(TType rhs) {
+		// ? extends Number is a set of all subtyes of number and number.
+		// so the only thing that can be assigned is null since null is
+		// a sub type of everything
+		return rhs.isNullType();
+	}
+	
+	public String getName() {
+		return internalGetName("extends"); //$NON-NLS-1$
 	}
 	
 	public String getPrettySignature() {
-		StringBuffer result= new StringBuffer("?"); //$NON-NLS-1$
-		Type bound= getBound();
-		if (bound != null) {
-			result.append(" extends "); //$NON-NLS-1$
-			result.append(bound.getPrettySignature());
-		}
-		return result.toString();
+		return internalGetPrettySignature("extends"); //$NON-NLS-1$
 	}
 }

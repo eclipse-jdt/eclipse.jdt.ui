@@ -12,9 +12,9 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 
 public class CastVariable2 extends TypeConstraintVariable2 {
@@ -22,8 +22,8 @@ public class CastVariable2 extends TypeConstraintVariable2 {
 	private final CompilationUnitRange fRange;
 	private TypeConstraintVariable2 fExpressionVariable;
 
-	protected CastVariable2(ITypeBinding typeBinding, CompilationUnitRange range, TypeConstraintVariable2 expressionVariable) {
-		super(typeBinding);
+	protected CastVariable2(TType type, CompilationUnitRange range, TypeConstraintVariable2 expressionVariable) {
+		super(type);
 		fRange= range;
 		fExpressionVariable= expressionVariable;
 	}
@@ -44,7 +44,7 @@ public class CastVariable2 extends TypeConstraintVariable2 {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2#getHash()
 	 */
 	protected int getHash() {
-		return getRange().hashCode() ^ getTypeBinding().hashCode();
+		return getRange().hashCode() ^ getType().hashCode();
 	}
 	
 	/*
