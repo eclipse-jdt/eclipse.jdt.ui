@@ -11,7 +11,9 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IFile;
 
@@ -24,9 +26,15 @@ import org.eclipse.ui.ide.IDE;
 
 public class OpenJavaEditorStressTest extends TestCase {
 
+	private static final Class THIS= OpenJavaEditorStressTest.class;
+	
 	private static final String FILE= PerformanceTestSetup.PROJECT + "/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
 	
 	private static final int NUMBER_OF_RUNS= 100;
+
+	public static Test suite() {
+		return new PerformanceTestSetup(new TestSuite(THIS));
+	}
 
 	public void testOpenJavaEditor1() throws PartInitException {
 		IFile file= ResourceTestHelper.findFile(FILE);
