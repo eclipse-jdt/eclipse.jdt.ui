@@ -322,8 +322,14 @@ public class Checks {
 	
 	public static RefactoringStatus checkIfCuBroken(IMember member) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		if (! member.getCompilationUnit().isStructureKnown())
-			result.addFatalError("This compilation unit cannot be parsed correctly.");
+		//1GF25DZ: ITPJUI:WINNT - SEVERE: Assertion failed in rename paramter refactoring
+		ICompilationUnit cu= (ICompilationUnit)JavaCore.create(Refactoring.getResource(member));
+		if (cu == null){
+			result.addFatalError("Compilation unit could not be created for this element.");	
+		}	else {
+			if (! cu.isStructureKnown())
+				result.addFatalError("This compilation unit cannot be parsed correctly.");	
+		}	
 		return result;
 	}
 	

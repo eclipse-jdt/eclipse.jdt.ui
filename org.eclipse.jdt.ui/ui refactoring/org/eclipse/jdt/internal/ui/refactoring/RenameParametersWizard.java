@@ -41,4 +41,7 @@ public class RenameParametersWizard extends RefactoringWizard {
 		return RefactoringResources.getResourceString(RESOURCE_KEY_PREFIX + INPUTPAGE_MESSAGE_SUFFIX);
 	}
 	
+	protected boolean checkActivationOnOpen() {
+		return true;
+	}
 }
