@@ -1371,6 +1371,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	
 	//---- Test for CUs with compiler errors
 	
+	public void test800() throws Exception {
+		errorTest();
+	}
+	
 	public void test801() throws Exception {
 		errorTest();
 	}
