@@ -100,6 +100,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -1528,7 +1529,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			final boolean target= createMethodCopy(document, declaration, sourceRewrite, rewrites, adjustor.getAdjustments(), status, new SubProgressMonitor(monitor, 1));
 			createMethodJavadocReferences(rewrites, declaration, references, target, status, new SubProgressMonitor(monitor, 1));
 			if (!fSourceRewrite.getCu().equals(targetRewrite.getCu()))
-				createMethodImports(targetRewrite, new SubProgressMonitor(monitor, 1));
+				createMethodImports(targetRewrite, declaration, new SubProgressMonitor(monitor, 1), status);
 			boolean removable= false;
 			if (fInline) {
 				removable= createMethodDelegator(rewrites, declaration, references, adjustor.getAdjustments(), target, status, new SubProgressMonitor(monitor, 1));
@@ -2086,23 +2087,54 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	 * Creates the necessary imports for the copied method in the target compilation unit.
 	 * 
 	 * @param rewriter the target compilation unit rewrite
+	 * @param declaration the source method declaration
 	 * @param monitor the progress monitor to use
-	 * @throws JavaModelException if the types referenced in the method could not be determined
+	 * @param status the refactoring status to use
+	 * @throws CoreException if an error occurs
 	 */
-	protected void createMethodImports(final CompilationUnitRewrite rewriter, final IProgressMonitor monitor) throws JavaModelException {
+	protected void createMethodImports(final CompilationUnitRewrite rewriter, final MethodDeclaration declaration, final IProgressMonitor monitor, final RefactoringStatus status) throws CoreException {
 		Assert.isNotNull(rewriter);
+		Assert.isNotNull(declaration);
 		Assert.isNotNull(monitor);
+		Assert.isNotNull(status);
 		monitor.beginTask("", 1); //$NON-NLS-1$
 		monitor.setTaskName(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.creating")); //$NON-NLS-1$
 		try {
-			final IType[] references= ReferenceFinderUtil.getTypesReferencedIn(new IJavaElement[] { fMethod}, monitor);
+			final Set typeImports= new HashSet();
+			final Set staticImports= new HashSet();
+			final ImportReferencesCollector collector= new ImportReferencesCollector(fTargetType.getJavaProject(), null, typeImports, staticImports);
+			declaration.accept(collector);
 			final ImportRewrite rewrite= rewriter.getImportRewrite();
 			final ImportRemover remover= rewriter.getImportRemover();
-			String name= null;
-			for (int index= 0; index < references.length; index++) {
-				name= JavaModelUtil.getFullyQualifiedName(references[index]);
-				rewrite.addImport(name);
-				remover.registerAddedImport(name);
+			Name name= null;
+			IBinding binding= null;
+			for (final Iterator iterator= typeImports.iterator(); iterator.hasNext();) {
+				name= (Name) iterator.next();
+				binding= name.resolveBinding();
+				if (binding instanceof ITypeBinding) {
+					final ITypeBinding type= (ITypeBinding) binding;
+					rewrite.addImport(type);
+					remover.registerAddedImport(type.getQualifiedName());
+				}
+			}
+			for (final Iterator iterator= staticImports.iterator(); iterator.hasNext();) {
+				name= (Name) iterator.next();
+				binding= name.resolveBinding();
+				if (binding instanceof IVariableBinding) {
+					final IVariableBinding variable= (IVariableBinding) binding;
+					final ITypeBinding declaring= variable.getDeclaringClass();
+					if (declaring != null) {
+						rewrite.addStaticImport(variable);
+						remover.registerAddedStaticImport(declaring.getQualifiedName(), variable.getName(), true);
+					}
+				} else if (binding instanceof IMethodBinding) {
+					final IMethodBinding method= (IMethodBinding) binding;
+					final ITypeBinding declaring= method.getDeclaringClass();
+					if (declaring != null) {
+						rewrite.addStaticImport(method);
+						remover.registerAddedStaticImport(declaring.getQualifiedName(), method.getName(), false);
+					}
+				}
 			}
 		} finally {
 			monitor.done();

@@ -19,12 +19,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.core.IJavaProject;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -33,21 +33,128 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
 
 public class ImportRemover {
-	/*
-	 * Potential optimization in getImportsToRemove():
-	 * Run ImportReferencesCollector on fRemovedNodes first.
-	 * Only visit rest of AST when removed type refs found.
-	 */
-	private Set/*<String>*/ fAddedImports;
-	private List/*<ASTNode>*/ fRemovedNodes;
-	private final CompilationUnit fRoot;
+
+	private static class StaticImportData {
+
+		private boolean fField;
+
+		private String fMember;
+
+		private String fQualifier;
+
+		private StaticImportData(String qualifier, String member, boolean field) {
+			fQualifier= qualifier;
+			fMember= member;
+			fField= field;
+		}
+	}
+
+	private Set/* <String> */fAddedImports= new HashSet();
+
+	private Set/* <StaticImportData> */fAddedStaticImports= new HashSet();
+
 	private final IJavaProject fProject;
+
+	private List/* <ASTNode> */fRemovedNodes= new ArrayList();
+
+	private final CompilationUnit fRoot;
 
 	public ImportRemover(IJavaProject project, CompilationUnit root) {
 		fProject= project;
 		fRoot= root;
-		fAddedImports= new HashSet();
-		fRemovedNodes= new ArrayList();
+	}
+
+	private void divideTypeRefs(List/* <SimpleName> */importNames, List/* <SimpleName> */staticNames, List/* <SimpleName> */removedRefs, List/* <SimpleName> */unremovedRefs) {
+		int[] removedStartsEnds= new int[2 * fRemovedNodes.size()];
+		for (int index= 0; index < fRemovedNodes.size(); index++) {
+			ASTNode node= (ASTNode) fRemovedNodes.get(index);
+			int start= node.getStartPosition();
+			removedStartsEnds[2 * index]= start;
+			removedStartsEnds[2 * index + 1]= start + node.getLength();
+		}
+		for (Iterator iterator= importNames.iterator(); iterator.hasNext();) {
+			SimpleName name= (SimpleName) iterator.next();
+			if (isInRemoved(name, removedStartsEnds))
+				removedRefs.add(name);
+			else
+				unremovedRefs.add(name);
+		}
+		for (Iterator iterator= staticNames.iterator(); iterator.hasNext();) {
+			SimpleName name= (SimpleName) iterator.next();
+			if (isInRemoved(name, removedStartsEnds))
+				removedRefs.add(name);
+			else
+				unremovedRefs.add(name);
+		}
+	}
+
+	public IBinding[] getImportsToRemove() {
+		ArrayList/* <SimpleName> */importNames= new ArrayList();
+		ArrayList/* <SimpleName> */staticNames= new ArrayList();
+		fRoot.accept(new ImportReferencesCollector(fProject, null, importNames, staticNames));
+		List/* <SimpleName> */removedRefs= new ArrayList();
+		List/* <SimpleName> */unremovedRefs= new ArrayList();
+		divideTypeRefs(importNames, staticNames, removedRefs, unremovedRefs);
+		if (removedRefs.size() == 0)
+			return new IBinding[0];
+
+		HashMap/* <String, IBinding> */potentialRemoves= getPotentialRemoves(removedRefs);
+		for (Iterator iterator= unremovedRefs.iterator(); iterator.hasNext();) {
+			SimpleName name= (SimpleName) iterator.next();
+			potentialRemoves.remove(name.getIdentifier());
+		}
+
+		Collection importsToRemove= potentialRemoves.values();
+		return (IBinding[]) importsToRemove.toArray(new IBinding[importsToRemove.size()]);
+	}
+
+	private HashMap getPotentialRemoves(List removedRefs) {
+		HashMap/* <String, IBinding> */potentialRemoves= new HashMap();
+		for (Iterator iterator= removedRefs.iterator(); iterator.hasNext();) {
+			SimpleName name= (SimpleName) iterator.next();
+			if (fAddedImports.contains(name.getIdentifier()) || hasAddedStaticImport(name))
+				continue;
+			IBinding binding= name.resolveBinding();
+			if (binding != null)
+				potentialRemoves.put(name.getIdentifier(), binding);
+		}
+		return potentialRemoves;
+	}
+
+	private boolean hasAddedStaticImport(SimpleName name) {
+		IBinding binding= name.resolveBinding();
+		if (binding instanceof IVariableBinding) {
+			IVariableBinding variable= (IVariableBinding) binding;
+			return hasAddedStaticImport(variable.getDeclaringClass().getQualifiedName(), variable.getName(), true);
+		} else if (binding instanceof IMethodBinding) {
+			IMethodBinding method= (IMethodBinding) binding;
+			return hasAddedStaticImport(method.getDeclaringClass().getQualifiedName(), method.getName(), false);
+		}
+		return false;
+	}
+
+	private boolean hasAddedStaticImport(String qualifier, String member, boolean field) {
+		StaticImportData data= null;
+		for (final Iterator iterator= fAddedStaticImports.iterator(); iterator.hasNext();) {
+			data= (StaticImportData) iterator.next();
+			if (data.fQualifier.equals(qualifier) && data.fMember.equals(member) && data.fField == field)
+				return true;
+		}
+		return false;
+	}
+
+	public boolean hasRemovedNodes() {
+		return fRemovedNodes.size() != 0;
+	}
+
+	private boolean isInRemoved(SimpleName ref, int[] removedStartsEnds) {
+		int start= ref.getStartPosition();
+		int end= start + ref.getLength();
+		for (int index= 0; index < removedStartsEnds.length; index+= 2) {
+			if (start >= removedStartsEnds[index] && end <= removedStartsEnds[index + 1])
+				return true;
+		}
+		return false;
 	}
 
 	public void registerAddedImport(String typeName) {
@@ -57,92 +164,36 @@ public class ImportRemover {
 		else
 			fAddedImports.add(typeName.substring(dot + 1));
 	}
-	
+
 	public void registerAddedImports(Type newTypeNode) {
 		newTypeNode.accept(new ASTVisitor(true) {
+
+			private void addName(SimpleName name) {
+				fAddedImports.add(name.getIdentifier());
+			}
+
 			public boolean visit(QualifiedName node) {
 				addName(node.getName());
 				return false;
 			}
+
 			public boolean visit(QualifiedType node) {
 				addName(node.getName());
 				return false;
 			}
+
 			public boolean visit(SimpleName node) {
 				addName(node);
 				return false;
 			}
-			private void addName(SimpleName name) {
-				fAddedImports.add(name.getIdentifier());
-			}
 		});
 	}
-	
+
+	public void registerAddedStaticImport(String qualifier, String member, boolean field) {
+		fAddedStaticImports.add(new StaticImportData(qualifier, member, field));
+	}
+
 	public void registerRemovedNode(ASTNode removed) {
 		fRemovedNodes.add(removed);
 	}
-
-	public boolean hasRemovedNodes() {
-		return fRemovedNodes.size() != 0;
-	}
-	
-	public ITypeBinding[] getImportsToRemove() {
-		ArrayList/*<SimpleName>*/ simpleNames= new ArrayList();
-		fRoot.accept(new ImportReferencesCollector(fProject, null, simpleNames, null));
-		List/*<SimpleName>*/ removedTypeRefs= new ArrayList();
-		List/*<SimpleName>*/ notRemovedTypeRefs= new ArrayList();
-		divideTypeRefs(simpleNames, removedTypeRefs, notRemovedTypeRefs);
-		if (removedTypeRefs.size() == 0)
-			return new ITypeBinding[0];
-		
-		HashMap/*<String, ITypeBinding>*/ potentialRemoves= getPotentialRemoves(removedTypeRefs);
-		for (Iterator iter= notRemovedTypeRefs.iterator(); iter.hasNext();) {
-			SimpleName name= (SimpleName) iter.next();
-			potentialRemoves.remove(name.getIdentifier());
-		}
-		
-		Collection importsToRemove= potentialRemoves.values();
-		return (ITypeBinding[]) importsToRemove.toArray(new ITypeBinding[importsToRemove.size()]);
-	}
-
-	private HashMap getPotentialRemoves(List removedTypeRefs) {
-		HashMap/*<String, ITypeBinding>*/ potentialRemoves= new HashMap();
-		for (Iterator iter= removedTypeRefs.iterator(); iter.hasNext();) {
-			SimpleName name= (SimpleName) iter.next();
-			if (fAddedImports.contains(name.getIdentifier()))
-				continue; // don't remove added imports
-			IBinding binding= name.resolveBinding();
-			if (binding != null && binding instanceof ITypeBinding)
-				potentialRemoves.put(name.getIdentifier(), binding); // only remove refs with type bindings
-		}
-		return potentialRemoves;
-	}
-
-	private void divideTypeRefs(List/*<SimpleName>*/ simpleNames, List/*<SimpleName>*/ removedTypeRefs, List/*<SimpleName>*/ notRemovedTypeRefs) {
-		int[] removedStartsEnds= new int[2 * fRemovedNodes.size()];
-		for (int i= 0; i < fRemovedNodes.size(); i++) {
-			ASTNode node= (ASTNode) fRemovedNodes.get(i);
-			int start= node.getStartPosition();
-			removedStartsEnds[2 * i]= start;
-			removedStartsEnds[2 * i + 1]= start + node.getLength();
-		}
-		for (Iterator iter= simpleNames.iterator(); iter.hasNext();) {
-			SimpleName ref= (SimpleName) iter.next();
-			if (isInRemoved(ref, removedStartsEnds))
-				removedTypeRefs.add(ref);
-			else
-				notRemovedTypeRefs.add(ref);
-		}
-	}
-
-	private boolean isInRemoved(SimpleName ref, int[] removedStartsEnds) {
-		int start= ref.getStartPosition();
-		int end= start + ref.getLength();
-		for (int i= 0; i < removedStartsEnds.length; i+= 2) {
-			if (start >= removedStartsEnds[i] && end <= removedStartsEnds[i+1])
-				return true;
-		}
-		return false;
-	}
-	
 }

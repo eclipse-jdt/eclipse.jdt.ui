@@ -27,7 +27,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
@@ -138,9 +141,18 @@ public class CompilationUnitRewrite {
 				}
 			}
 			if (needsImportRemoval) {
-				ITypeBinding[] bindings= fImportRemover.getImportsToRemove();
-				for (int i= 0; i < bindings.length; i++)
-					getImportRewrite().removeImport(bindings[i]);
+				IBinding[] bindings= fImportRemover.getImportsToRemove();
+				for (int i= 0; i < bindings.length; i++) {
+					if (bindings[i] instanceof ITypeBinding)
+						getImportRewrite().removeImport((ITypeBinding) bindings[i]);
+					else if (bindings[i] instanceof IMethodBinding) {
+						IMethodBinding binding= (IMethodBinding) bindings[i];
+						getImportRewrite().removeStaticImport(binding.getDeclaringClass().getQualifiedName() + "." + binding.getName()); //$NON-NLS-1$
+					} else if (bindings[i] instanceof IVariableBinding) {
+						IVariableBinding binding= (IVariableBinding) bindings[i];
+						getImportRewrite().removeStaticImport(binding.getDeclaringClass().getQualifiedName() + "." + binding.getName()); //$NON-NLS-1$
+					}
+				}
 			}
 			if (fImportRewrite != null && !fImportRewrite.isEmpty()) {
 				TextEdit importsEdit= fImportRewrite.createEdit(document);
