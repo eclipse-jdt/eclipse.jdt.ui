@@ -598,6 +598,10 @@ public final class JavaModelUtil {
 		if (PRIMARY_ONLY) {
 			testCompilationUnitOwner("toOriginal", cu); //$NON-NLS-1$
 		}
+		// To stay compatible with old version returned null
+		// if cu is null
+		if (cu == null)
+			return cu;
 		return cu.getPrimary();
 	}
 	
