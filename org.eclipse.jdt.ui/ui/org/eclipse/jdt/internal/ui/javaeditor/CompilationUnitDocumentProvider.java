@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
@@ -127,7 +128,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 						if (resource instanceof IFile) {
 							IFileEditorInput providerKey= new FileEditorInput((IFile) resource);
 							IDocument document= internalGetDocument(providerKey);
-							return new DocumentAdapter(unit, document, CompilationUnitDocumentProvider.this, providerKey);
+							return new DocumentAdapter(unit, document, new DefaultLineTracker(), CompilationUnitDocumentProvider.this, providerKey);
 						}
 						
 					} catch (CoreException x) {

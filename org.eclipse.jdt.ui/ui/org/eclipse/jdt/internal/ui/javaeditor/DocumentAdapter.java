@@ -17,6 +17,8 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
+import org.eclipse.jface.text.ILineTracker;
+import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jface.util.Assert;
 
@@ -33,7 +35,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
- * Adapts IDocument to IBuffer.
+ * Adapts <code>IDocument</code> to <code>IBuffer</code>. Uses the
+ * same algorithm as the text widget to determine the buffer's line delimiter. 
+ * All text inserted into the buffer is converted to this line delimiter.
  */
 class DocumentAdapter implements IBuffer, IDocumentListener {
 	
@@ -41,17 +45,21 @@ class DocumentAdapter implements IBuffer, IDocumentListener {
 	private IDocument fDocument;
 	private Object fProviderKey;
 	private CompilationUnitDocumentProvider fProvider;
+	private String fLineDelimiter;
+	private ILineTracker fLineTracker;
 	
 	private List fBufferListeners= new ArrayList(3);
 	
 	
-	DocumentAdapter(IOpenable owner, IDocument document, CompilationUnitDocumentProvider provider, Object providerKey) {
+	DocumentAdapter(IOpenable owner, IDocument document, ILineTracker lineTracker, CompilationUnitDocumentProvider provider, Object providerKey) {
 		
 		Assert.isNotNull(owner);
 		Assert.isNotNull(document);
+		Assert.isNotNull(lineTracker);
 		
 		fOwner= owner;
 		fDocument= document;
+		fLineTracker= lineTracker;
 		fProvider= provider;
 		fProviderKey= providerKey;
 		
@@ -65,6 +73,76 @@ class DocumentAdapter implements IBuffer, IDocumentListener {
 	 */
 	public IDocument getDocument() {
 		return fDocument;
+	}
+	
+	/**
+	 * Returns the line delimiter of this buffer. As a document has a set of
+	 * valid line delimiters, this set must be reduced to size 1.
+	 */
+	protected String getLineDelimiter() {
+		
+		if (fLineDelimiter == null) {
+			
+			try {
+				fLineDelimiter= fDocument.getLineDelimiter(0);
+			} catch (BadLocationException x) {
+			}
+			
+			if (fLineDelimiter == null) {
+				/*
+				 * Follow up fix for: 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
+				 * The line delimiter must always be a legal document line delimiter.
+				 */
+				String sysLineDelimiter= System.getProperty("line.separator"); //$NON-NLS-1$
+				String[] delimiters= fDocument.getLegalLineDelimiters();
+				Assert.isTrue(delimiters.length > 0);
+				for (int i= 0; i < delimiters.length; i++) {
+					if (delimiters[i].equals(sysLineDelimiter)) {
+						fLineDelimiter= sysLineDelimiter;
+						break;
+					}
+				}
+				
+				if (fLineDelimiter == null) {
+					// system line delimiter is not a legal document line delimiter
+					fLineDelimiter= delimiters[0];
+				}
+			}
+		}
+		
+		return fLineDelimiter;
+	}	
+	
+	/**
+	 * Converts the given string to the line delimiter of this buffer.
+	 */
+	protected String normalize(String text) {
+		fLineTracker.set(text);
+		
+		int lines= fLineTracker.getNumberOfLines();
+		if (lines <= 1)
+			return text;
+			
+		StringBuffer buffer= new StringBuffer(text);
+		
+		try {
+			IRegion previous= fLineTracker.getLineInformation(0);
+			for (int i= 1; i < lines; i++) {
+				IRegion current= fLineTracker.getLineInformation(i);
+				buffer.replace(previous.getOffset() + previous.getLength(), current.getOffset(), getLineDelimiter());
+				previous= current;
+			}
+			
+			// last line
+			String delimiter= fLineTracker.getLineDelimiter(lines -1);
+			if (delimiter != null && delimiter.length() > 0)
+				buffer.replace(previous.getOffset() + previous.getLength(), buffer.length(), getLineDelimiter());
+				
+			return buffer.toString();
+		} catch (BadLocationException x) {
+		}
+		
+		return text;
 	}
 	
 	/*
@@ -96,7 +174,7 @@ class DocumentAdapter implements IBuffer, IDocumentListener {
 	 */
 	public void append(String text) {
 		try {
-			fDocument.replace(fDocument.getLength(), 0, text);
+			fDocument.replace(fDocument.getLength(), 0, normalize(text));
 		} catch (BadLocationException x) {
 			// cannot happen
 		}
@@ -212,7 +290,7 @@ class DocumentAdapter implements IBuffer, IDocumentListener {
 	 */
 	public void replace(int position, int length, String text) {
 		try {
-			fDocument.replace(position, length, text);
+			fDocument.replace(position, length, normalize(text));
 		} catch (BadLocationException x) {
 			throw new ArrayIndexOutOfBoundsException();
 		}
@@ -242,7 +320,7 @@ class DocumentAdapter implements IBuffer, IDocumentListener {
 	 * @see IBuffer#setContents(String)
 	 */
 	public void setContents(String contents) {
-		fDocument.set(contents);
+		fDocument.set(normalize(contents));
 	}
 	
 	/*

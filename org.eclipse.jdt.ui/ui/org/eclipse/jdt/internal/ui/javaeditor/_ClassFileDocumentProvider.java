@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.IAnnotationModel;
@@ -180,7 +181,7 @@ public class _ClassFileDocumentProvider extends FileDocumentProvider {
 							input= new InternalClassFileEditorInput(classFile);
 							
 						IDocument document= internalGetDocument(input);
-						return new DocumentAdapter(classFile, document, null, null);
+						return new DocumentAdapter(classFile, document, new DefaultLineTracker(), null, null);
 						
 					} catch (CoreException x) {
 						handleCoreException(x, "Problems creating buffer");
