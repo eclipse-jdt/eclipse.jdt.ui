@@ -126,8 +126,8 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 			} else if (parentElement instanceof LogicalPackage) {
 
 				List children= new ArrayList();
-				LogicalPackage compoundEl= (LogicalPackage) parentElement;
-				IPackageFragment[] elements= compoundEl.getFragments();
+				LogicalPackage logicalPackage= (LogicalPackage) parentElement;
+				IPackageFragment[] elements= logicalPackage.getFragments();
 				for (int i= 0; i < elements.length; i++) {
 					IPackageFragment fragment= elements[i];
 					IPackageFragment[] objects= findNextLevelChildrenByElementName((IPackageFragmentRoot) fragment.getParent(), fragment);
@@ -305,7 +305,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		if (element instanceof IPackageFragment) {
 			final IPackageFragment frag = (IPackageFragment) element;
 
-			//if fragment was in compound element refresh,
+			//if fragment was in LogicalPackage refresh,
 			//otherwise just remove
 			if (kind == IJavaElementDelta.REMOVED) {
 				removeElement(frag);
@@ -408,13 +408,13 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		String key= getKey(frag);
 		LogicalPackage lp= (LogicalPackage)fMapToLogicalPackage.get(key);
 
-		//if fragment must be added to an existing CompoundElement
+		//if fragment must be added to an existing LogicalPackage
 		if (lp != null && lp.belongs(frag)){
 			lp.add(frag);
 			return;
 		}
 
-		//if a new CompoundElement must be created
+		//if a new LogicalPackage must be created
 		IPackageFragment iPackageFragment= (IPackageFragment)fMapToPackageFragments.get(key);
 		if (iPackageFragment!= null && !iPackageFragment.equals(frag)){
 			lp= new LogicalPackage(iPackageFragment);

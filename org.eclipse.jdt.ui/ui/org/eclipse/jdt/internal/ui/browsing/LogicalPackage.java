@@ -69,7 +69,7 @@ public class LogicalPackage {
 	/**
 	 * Returns true if the given fragment has the same name and
 	 * resides inside the same project as the other fragments in
-	 * the CompoundElement.
+	 * the LogicalPackage.
 	 * 
 	 * @param fragment
 	 * @return boolean
