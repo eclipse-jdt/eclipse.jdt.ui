@@ -147,12 +147,12 @@ public class TypeConstraintTests extends RefactoringTest {
 	}	
 
 	public void testConstraints6() throws Exception{
-		String[] strings= {"Decl(A:f()) =^= p.A", "Decl(A:A(A)) =^= p.A", "[new A(a0)] =^= p.A", "[a0] <= [Parameter(0,A:A(A))]", "[a1] =^= A", "[a0] =^= A", "[null] <= [a0]", "[new A(a0)] <= [a1]", "[Parameter(0,A:A(A))] =^= [a]"};
+		String[] strings= {"Decl(A:f()) =^= p.A", "Decl(A:A(A)) =^= p.A", "[new A(a0)] =^= p.A", "[a0] <= [Parameter(0,A:A(A))]", "[a1] =^= A", "[a] =^= A", "[a0] =^= A", "[null] <= [a0]", "[new A(a0)] <= [a1]", "[Parameter(0,A:A(A))] =^= [a]"};
 		testConstraints(strings);
 	}	
 
 	public void testConstraints7() throws Exception{
-		String[] strings= {"Decl(A:A()) =^= p.A", "Decl(A:A(A)) =^= p.A", "[null] <= [Parameter(0,A:A(A))]", "[Parameter(0,A:A(A))] =^= [a]"};
+		String[] strings= {"Decl(A:A()) =^= p.A", "Decl(A:A(A)) =^= p.A", "[null] <= [Parameter(0,A:A(A))]", "[Parameter(0,A:A(A))] =^= [a]", "[a] =^= A"};
 		testConstraints(strings);
 	}	
 
@@ -172,27 +172,36 @@ public class TypeConstraintTests extends RefactoringTest {
 	}	
 
 	public void testConstraints11() throws Exception{
-		String[] strings= {"[null] <= [A:f(A, Object)]_returnType", "[Parameter(1,B:f(A, Object))] =^= [a4]", "[B:f(A, Object)]_returnType =^= A", "Decl(B:f(A, Object)) < Decl(A:f(A, Object))", "[Parameter(1,A:f(A, Object))] == [Parameter(1,B:f(A, Object))]", "[Parameter(0,A:f(A, Object))] == [Parameter(0,B:f(A, Object))]", "[A:f(A, Object)]_returnType == [B:f(A, Object)]_returnType", "[Parameter(0,B:f(A, Object))] =^= [a3]", "[Parameter(0,A:f(A, Object))] =^= [a0]", "Decl(A:f(A, Object)) =^= p.A", "[null] <= [B:f(A, Object)]_returnType", "[Parameter(1,A:f(A, Object))] =^= [a1]", "[A:f(A, Object)]_returnType =^= A", "Decl(B:f(A, Object)) =^= p.B"};
+		String[] strings= {"[null] <= [A:f(A, Object)]_returnType", "[Parameter(1,B:f(A, Object))] =^= [a4]", 
+							"[B:f(A, Object)]_returnType =^= A", "Decl(B:f(A, Object)) < Decl(A:f(A, Object))",
+							"[Parameter(1,A:f(A, Object))] == [Parameter(1,B:f(A, Object))]", 
+							"[Parameter(0,A:f(A, Object))] == [Parameter(0,B:f(A, Object))]", 
+							"[A:f(A, Object)]_returnType == [B:f(A, Object)]_returnType", 
+							"[Parameter(0,B:f(A, Object))] =^= [a3]", 
+							"[Parameter(0,A:f(A, Object))] =^= [a0]", "Decl(A:f(A, Object)) =^= p.A", 
+							"[null] <= [B:f(A, Object)]_returnType", "[Parameter(1,A:f(A, Object))] =^= [a1]", 
+							"[A:f(A, Object)]_returnType =^= A", "Decl(B:f(A, Object)) =^= p.B",
+							"[a3] =^= A", "[a0] =^= A", "[a1] =^= Object", "[a4] =^= Object"};
 		testConstraints(strings);
 	}	
 
 	public void testConstraints12() throws Exception{
-		String[] strings= {"Decl(B:f(A, Object)) =^= p.B", "[Parameter(1,B:f(A, Object))] =^= [a4]", "[B:f(A, Object)]_returnType =^= A", "[null] <= [B:f(A, Object)]_returnType", "[A:f(A, Object)]_returnType =^= A", "[Parameter(1,A:f(A, Object))] =^= [a1]", "Decl(A:f(A, Object)) =^= p.A", "[Parameter(0,B:f(A, Object))] =^= [a3]", "[null] <= [A:f(A, Object)]_returnType", "[Parameter(0,A:f(A, Object))] =^= [a0]"};
+		String[] strings= { "Decl(B:f(A, Object)) =^= p.B", "[Parameter(1,B:f(A, Object))] =^= [a4]", "[B:f(A, Object)]_returnType =^= A", "[null] <= [B:f(A, Object)]_returnType", "[A:f(A, Object)]_returnType =^= A", "[Parameter(1,A:f(A, Object))] =^= [a1]", "Decl(A:f(A, Object)) =^= p.A", "[Parameter(0,B:f(A, Object))] =^= [a3]", "[null] <= [A:f(A, Object)]_returnType", "[Parameter(0,A:f(A, Object))] =^= [a0]", "[a3] =^= A", "[a0] =^= A", "[a1] =^= Object", "[a4] =^= Object" };
 		testConstraints(strings);
 	}	
 
 	public void testConstraints13() throws Exception{
-		String[] strings= {"Decl(B:f(A, Object)) =^= p.B", "[Parameter(1,B:f(A, Object))] =^= [a4]", "[B:f(A, Object)]_returnType =^= A", "[null] <= [B:f(A, Object)]_returnType", "[A:f(A, Object)]_returnType =^= A", "[Parameter(1,A:f(A, Object))] =^= [a1]", "Decl(A:f(A, Object)) =^= p.A", "[Parameter(0,B:f(A, Object))] =^= [a3]", "[null] <= [A:f(A, Object)]_returnType", "[Parameter(0,A:f(A, Object))] =^= [a0]"};
+		String[] strings= {"Decl(B:f(A, Object)) =^= p.B", "[Parameter(1,B:f(A, Object))] =^= [a4]", "[B:f(A, Object)]_returnType =^= A", "[null] <= [B:f(A, Object)]_returnType", "[A:f(A, Object)]_returnType =^= A", "[Parameter(1,A:f(A, Object))] =^= [a1]", "Decl(A:f(A, Object)) =^= p.A", "[Parameter(0,B:f(A, Object))] =^= [a3]", "[null] <= [A:f(A, Object)]_returnType", "[Parameter(0,A:f(A, Object))] =^= [a0]", "[a3] =^= A", "[a0] =^= A", "[a1] =^= Object", "[a4] =^= Object"};
 		testConstraints(strings);
 	}	
 
 	public void testConstraints14() throws Exception{
-		String[] strings= {"[A:f(A)]_returnType == [B:f(A)]_returnType", "[Parameter(0,A:f(A))] == [Parameter(0,B:f(A))]", "[B:f(A)]_returnType =^= A", "Decl(B:f(A)) < Decl(A:f(A))", "[A:f(A)]_returnType =^= A", "Decl(B:f(A)) < Decl(I:f(A))", "[null] <= [A:f(A)]_returnType", "[Parameter(0,A:f(A))] =^= [a0]", "[I:f(A)]_returnType =^= A", "Decl(A:f(A)) =^= p.A", "[ax] =^= B", "[Parameter(0,B:f(A))] =^= [a3]", "[null] <= [B:f(A)]_returnType", "[a3] <= [Parameter(0,B:f(A))]", "[ax.f(a3)] =^= [B:f(A)]_returnType", "[ax] <= Decl(I:f(A)) or [ax] <= Decl(A:f(A))", "Decl(B:f(A)) =^= p.B", "[I:f(A)]_returnType == [B:f(A)]_returnType", "[Parameter(0,I:f(A))] == [Parameter(0,B:f(A))]", "[null] <= [ax]", "[Parameter(0,I:f(A))] =^= [ai]", "Decl(I:f(A)) =^= p.I"};
+		String[] strings= {"[A:f(A)]_returnType == [B:f(A)]_returnType", "[Parameter(0,A:f(A))] == [Parameter(0,B:f(A))]", "[B:f(A)]_returnType =^= A", "Decl(B:f(A)) < Decl(A:f(A))", "[A:f(A)]_returnType =^= A", "Decl(B:f(A)) < Decl(I:f(A))", "[null] <= [A:f(A)]_returnType", "[Parameter(0,A:f(A))] =^= [a0]", "[I:f(A)]_returnType =^= A", "Decl(A:f(A)) =^= p.A", "[ax] =^= B", "[Parameter(0,B:f(A))] =^= [a3]", "[null] <= [B:f(A)]_returnType", "[a3] <= [Parameter(0,B:f(A))]", "[ax.f(a3)] =^= [B:f(A)]_returnType", "[ax] <= Decl(I:f(A)) or [ax] <= Decl(A:f(A))", "Decl(B:f(A)) =^= p.B", "[I:f(A)]_returnType == [B:f(A)]_returnType", "[Parameter(0,I:f(A))] == [Parameter(0,B:f(A))]", "[null] <= [ax]", "[Parameter(0,I:f(A))] =^= [ai]", "Decl(I:f(A)) =^= p.I", "[a3] =^= A", "[a0] =^= A", "[ai] =^= A"};
 		testConstraints(strings);
 	}	
 
 	public void testConstraints15() throws Exception{
-		String[] strings= {"[Parameter(0,A:f(A))] =^= [a0]", "[I:f(A)]_returnType == [B:f(A)]_returnType", "[Parameter(0,I:f(A))] == [Parameter(0,B:f(A))]", "[null] <= [A:f(A)]_returnType", "[A:f(A)]_returnType == [B:f(A)]_returnType", "[Parameter(0,A:f(A))] == [Parameter(0,B:f(A))]", "Decl(B:f(A)) < Decl(A:f(A))", "[super.f(a3)] =^= [A:f(A)]_returnType", "Decl(A:f(A)) =^= p.A", "[null] <= [B:f(A)]_returnType", "[Parameter(0,I:f(A))] =^= [ai]", "[Parameter(0,B:f(A))] =^= [a3]", "[A:f(A)]_returnType =^= A", "Decl(B:f(A)) =^= p.B", "Decl(I:f(A)) =^= p.I", "Decl(B:f(A)) < Decl(I:f(A))", "[a3] <= [Parameter(0,A:f(A))]", "[I:f(A)]_returnType =^= A", "[B:f(A)]_returnType =^= A"};
+		String[] strings= {"[Parameter(0,A:f(A))] =^= [a0]", "[I:f(A)]_returnType == [B:f(A)]_returnType", "[Parameter(0,I:f(A))] == [Parameter(0,B:f(A))]", "[null] <= [A:f(A)]_returnType", "[A:f(A)]_returnType == [B:f(A)]_returnType", "[Parameter(0,A:f(A))] == [Parameter(0,B:f(A))]", "Decl(B:f(A)) < Decl(A:f(A))", "[super.f(a3)] =^= [A:f(A)]_returnType", "Decl(A:f(A)) =^= p.A", "[null] <= [B:f(A)]_returnType", "[Parameter(0,I:f(A))] =^= [ai]", "[Parameter(0,B:f(A))] =^= [a3]", "[A:f(A)]_returnType =^= A", "Decl(B:f(A)) =^= p.B", "Decl(I:f(A)) =^= p.I", "Decl(B:f(A)) < Decl(I:f(A))", "[a3] <= [Parameter(0,A:f(A))]", "[I:f(A)]_returnType =^= A", "[B:f(A)]_returnType =^= A", "[a3] =^= A", "[a0] =^= A", "[ai] =^= A"};
 		testConstraints(strings);
 	}	
 
@@ -207,7 +216,7 @@ public class TypeConstraintTests extends RefactoringTest {
 	}	
 
 	public void testConstraints18() throws Exception{
-		String[] strings= {"[Parameter(0,B:B(A))] =^= [a1]", "Decl(B:B(A)) =^= p.B", "[Parameter(0,A:A(A))] =^= [a0]", "Decl(A:A(A)) =^= p.A", "[a1] <= [Parameter(0,A:A(A))]"};
+		String[] strings= {"[Parameter(0,B:B(A))] =^= [a1]", "Decl(B:B(A)) =^= p.B", "[Parameter(0,A:A(A))] =^= [a0]", "Decl(A:A(A)) =^= p.A", "[a1] <= [Parameter(0,A:A(A))]", "[a1] =^= A", "[a0] =^= A"};
 		testConstraints(strings);
 	}	
 
@@ -222,12 +231,12 @@ public class TypeConstraintTests extends RefactoringTest {
 	}	
 
 	public void testConstraints21() throws Exception{
-		String[] strings= {"Decl(A:f2(A[])) =^= p.A", "[Parameter(0,A:f2(A[]))] =^= [as]"};
+		String[] strings= {"Decl(A:f2(A[])) =^= p.A", "[Parameter(0,A:f2(A[]))] =^= [as]", "[as] =^= A[]"};
 		testConstraints(strings);
 	}	
 
 	public void testConstraints22() throws Exception{
-		String[] strings= {"[null] <= [A:f(A, Object)]_returnType", "[Parameter(0,A:f(A, Object))] =^= [a0]", "[Parameter(1,A:f(A, Object))] =^= [a1]", "[A:f(A, Object)]_returnType =^= A", "Decl(A:f(A, Object)) =^= p.A"};
+		String[] strings= {"[null] <= [A:f(A, Object)]_returnType", "[Parameter(0,A:f(A, Object))] =^= [a0]", "[Parameter(1,A:f(A, Object))] =^= [a1]", "[A:f(A, Object)]_returnType =^= A", "Decl(A:f(A, Object)) =^= p.A", "[a1] =^= Object", "[a0] =^= A"};
 		testConstraints(strings);
 	}	
 	
