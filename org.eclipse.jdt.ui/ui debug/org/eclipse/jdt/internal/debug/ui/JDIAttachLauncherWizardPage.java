@@ -132,6 +132,9 @@ public class JDIAttachLauncherWizardPage extends WizardPage implements Listener 
 	protected void initializeSettings() {
 		Runnable runnable= new Runnable() {
 			public void run() {
+				if (getControl().isDisposed()) {
+					return;
+				}
 				fHostField.setFocus();
 				setTitle(DebugUIUtils.getResourceString(PREFIX + "title"));
 				setPageComplete(true);

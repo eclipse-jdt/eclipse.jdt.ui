@@ -22,7 +22,11 @@ public class DisplayAction extends EvaluateAction {
 		final IJavaValue value= result.getValue();
 		
 		if (result.hasProblems() || value != null) {
-			Display.getDefault().asyncExec(new Runnable() {
+			Display display= Display.getDefault();
+			if (display.isDisposed()) {
+				return;
+			}
+			display.asyncExec(new Runnable() {
 				public void run() {
 					if (result.hasProblems())
 						reportProblems(result);

@@ -263,6 +263,9 @@ public class JavaApplicationWizardPage extends WizardPage {
 	protected void initializeSettings() {
 		Runnable runnable= new Runnable() {
 			public void run() {
+				if (getControl().isDisposed()) {
+					return;
+				}
 				if (fElements.length == 1) {
 					fElementsList.setSelection(new StructuredSelection(fElements[0]), true);
 					setMessage(DebugUIUtils.getResourceString(SELECT_ELEMENTS));

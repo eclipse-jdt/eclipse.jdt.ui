@@ -43,6 +43,9 @@ public abstract class ToggleFilterAction extends Action implements IViewActionDe
 	 * on the value of the parameter.
 	 */
 	protected void valueChanged(final boolean on) {
+		if (fViewer.getControl().isDisposed()) {
+			return;
+		}
 		BusyIndicator.showWhile(fViewer.getControl().getDisplay(), new Runnable() {
 			public void run() {
 				if (on) {

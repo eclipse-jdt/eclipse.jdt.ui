@@ -19,7 +19,11 @@ public class InspectAction extends EvaluateAction {
 	public void evaluationComplete(final IJavaEvaluationResult res) {
 		final IValue value= res.getValue();
 		if (res.hasProblems() || value != null) {
-			Display.getDefault().asyncExec(new Runnable() {
+			Display display= Display.getDefault();
+			if (display.isDisposed()) {
+				return;
+			}
+			display.asyncExec(new Runnable() {
 				public void run() {
 					if (res.hasProblems()) {
 						reportProblems(res);

@@ -41,6 +41,9 @@ public class HexValuesAction extends Action implements IViewActionDelegate {
 	}
 
 	private void valueChanged(boolean on) {
+		if (fAdapter.getViewer().getControl().isDisposed()) {
+			return;
+		}		
 		IDebugModelPresentation presentation= fAdapter.getPresentation(JDIDebugModel.getPluginIdentifier());
 		presentation.setAttribute(JDIModelPresentation.DISPLAY_HEX_VALUES, new Boolean(on));
 		BusyIndicator.showWhile(fAdapter.getViewer().getControl().getDisplay(), new Runnable() {
