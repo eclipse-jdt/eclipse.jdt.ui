@@ -57,9 +57,12 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.Type;
@@ -123,13 +126,15 @@ public class UnresolvedElementsSubProcessor {
 		
 		
 		Name node= null;
+
 		switch (selectedNode.getNodeType()) {
 			case ASTNode.SIMPLE_NAME:
 				node= (SimpleName) selectedNode;
 				ASTNode parent= node.getParent();
-				if (node.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY) {
+				StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
+				if (locationInParent == MethodInvocation.EXPRESSION_PROPERTY) {
 					typeKind= SimilarElementsRequestor.CLASSES;
-				} else if (node.getLocationInParent() == FieldAccess.NAME_PROPERTY) {
+				} else if (locationInParent == FieldAccess.NAME_PROPERTY) {
 					Expression expression= ((FieldAccess) parent).getExpression();
 					if (expression != null) {
 						binding= expression.resolveTypeBinding();
@@ -155,7 +160,12 @@ public class UnresolvedElementsSubProcessor {
 						typeKind= SimilarElementsRequestor.REF_TYPES;
 						suggestVariableProposals= false;
 					}
-				} 
+				} else if (locationInParent == SwitchCase.EXPRESSION_PROPERTY) {
+					ITypeBinding switchExp= ((SwitchStatement) node.getParent().getParent()).getExpression().resolveTypeBinding();
+					if (switchExp != null && switchExp.isEnum()) {
+						binding= switchExp;
+					}
+				}
 				break;		
 			case ASTNode.QUALIFIED_NAME:
 				QualifiedName qualifierName= (QualifiedName) selectedNode;
@@ -262,7 +272,7 @@ public class UnresolvedElementsSubProcessor {
 		ITypeBinding senderDeclBinding;
 		if (binding != null) {
 			senderDeclBinding= binding.getTypeDeclaration();
-			targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, binding);
+			targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, senderDeclBinding);
 		} else { // binding is null for accesses without qualifier
 			senderDeclBinding= declaringTypeBinding;
 			targetCU= cu;
@@ -271,53 +281,50 @@ public class UnresolvedElementsSubProcessor {
 		if (!senderDeclBinding.isFromSource() || targetCU == null || !JavaModelUtil.isEditable(targetCU)) {
 			return;
 		}
+		
+		addNewFieldForType(targetCU, binding, senderDeclBinding, simpleName, isWriteAccess, proposals);
 			
-		ITypeBinding outsideAnonymous= null;
-		if (binding == null && senderDeclBinding.isAnonymous()) {
+		if (binding == null && senderDeclBinding.isNested()) {
 			ASTNode anonymDecl= astRoot.findDeclaringNode(senderDeclBinding);
 			if (anonymDecl != null) {
 				ITypeBinding bind= Bindings.getBindingOfParentType(anonymDecl.getParent());
 				if (!bind.isAnonymous()) {
-					outsideAnonymous= bind;
+					addNewFieldForType(targetCU, binding, bind, simpleName, isWriteAccess, proposals);
 				}
 			}
 		}
-		
-		String name= simpleName.getIdentifier();
-		int relevance= StubUtility.hasFieldName(cu.getJavaProject(), name) ? 9 : 6;
+	}
 
+	private static void addNewFieldForType(ICompilationUnit targetCU, ITypeBinding binding, ITypeBinding senderDeclBinding, SimpleName simpleName, boolean isWriteAccess, Collection proposals) {
+		String name= simpleName.getIdentifier();
 		String label;
 		Image image;
-		if (binding == null) {
-			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", name); //$NON-NLS-1$
-			image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE);
+		if (senderDeclBinding.isEnum() && !isWriteAccess) {
+			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createenum.description", new Object[] { name, ASTResolving.getTypeSignature(senderDeclBinding) }); //$NON-NLS-1$
+			image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
+			proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.ENUM_CONST, simpleName, senderDeclBinding, 10, image));
 		} else {
-			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { name, ASTResolving.getTypeSignature(senderDeclBinding) } ); //$NON-NLS-1$
-			image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
-		}
-		
-		proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, senderDeclBinding, relevance, image));
-
-		// create field in outer class (if inside anonymous)
-		if (outsideAnonymous != null) {
-			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { name, ASTResolving.getTypeSignature(outsideAnonymous) } ); //$NON-NLS-1$
-			image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
-			proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, outsideAnonymous, relevance + 1, image));
-		}
-		
-		// create constant
-		
-		if (!isWriteAccess) {
-			relevance= StubUtility.hasConstantName(name) ? 9 : 4;
-			ITypeBinding target= (outsideAnonymous != null) ? outsideAnonymous : senderDeclBinding;
 			if (binding == null) {
-				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconst.description", name); //$NON-NLS-1$
+				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", name); //$NON-NLS-1$
 				image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE);
 			} else {
-				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconst.other.description", new Object[] { name, ASTResolving.getTypeSignature(senderDeclBinding) } ); //$NON-NLS-1$
+				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { name, ASTResolving.getTypeSignature(senderDeclBinding) } ); //$NON-NLS-1$
 				image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
 			}
-			proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.CONST_FIELD, simpleName, target, relevance, image));
+			int fieldRelevance= StubUtility.hasFieldName(targetCU.getJavaProject(), name) ? 9 : 6;
+			proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, senderDeclBinding, fieldRelevance, image));
+
+			if (!isWriteAccess && !senderDeclBinding.isAnonymous()) {
+				if (binding == null) {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconst.description", name); //$NON-NLS-1$
+					image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE);
+				} else {
+					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconst.other.description", new Object[] { name, ASTResolving.getTypeSignature(senderDeclBinding) } ); //$NON-NLS-1$
+					image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
+				}
+				int constRelevance= StubUtility.hasConstantName(name) ? 9 : 4;
+				proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.CONST_FIELD, simpleName, senderDeclBinding, constRelevance, image));
+			}	
 		}
 	}
 	
@@ -819,6 +826,23 @@ public class UnresolvedElementsSubProcessor {
 		}
 		
 		// new method
+		addNewMethodProposals(cu, astRoot, sender, arguments, isSuperInvocation, invocationNode, methodName, proposals);
+		
+		if (!isOnlyParameterMismatch && !isSuperInvocation && sender != null) {
+			addMissingCastParentsProposal(cu, (MethodInvocation) invocationNode, proposals);
+		}
+		
+		if (!isSuperInvocation && sender == null && invocationNode.getParent() instanceof ThrowStatement) {
+			String str= "new ";   //$NON-NLS-1$ // do it the manual way, copting all the arguments is nasty
+			String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.addnewkeyword.description"); //$NON-NLS-1$
+			int relevance= Character.isUpperCase(methodName.charAt(0)) ? 7 : 4;
+			ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, cu, invocationNode.getStartPosition(), 0, str, relevance);
+			proposals.add(proposal);
+		}
+
+	}
+
+	private static void addNewMethodProposals(ICompilationUnit cu, CompilationUnit astRoot, Expression sender, List arguments, boolean isSuperInvocation, ASTNode invocationNode, String methodName, Collection proposals) throws JavaModelException {
 		ITypeBinding binding= null;
 		if (sender != null) {
 			binding= sender.resolveTypeBinding();
@@ -848,7 +872,7 @@ public class UnresolvedElementsSubProcessor {
 					}
 					proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, 5, image));
 				}
-				if (senderDeclBinding.isAnonymous() && cu.equals(targetCU) && sender == null && Bindings.findMethodInHierarchy(senderDeclBinding, methodName, (ITypeBinding[]) null) == null) { // no covering method
+				if (senderDeclBinding.isNested() && cu.equals(targetCU) && sender == null && Bindings.findMethodInHierarchy(senderDeclBinding, methodName, (ITypeBinding[]) null) == null) { // no covering method
 					ASTNode anonymDecl= astRoot.findDeclaringNode(senderDeclBinding);
 					if (anonymDecl != null) {
 						senderDeclBinding= Bindings.getBindingOfParentType(anonymDecl.getParent());
@@ -862,19 +886,6 @@ public class UnresolvedElementsSubProcessor {
 				}
 			}
 		}
-		
-		if (!isOnlyParameterMismatch && !isSuperInvocation && sender != null) {
-			addMissingCastParentsProposal(cu, (MethodInvocation) invocationNode, proposals);
-		}
-		
-		if (!isSuperInvocation && sender == null && invocationNode.getParent() instanceof ThrowStatement) {
-			String str= "new ";   //$NON-NLS-1$ // do it the manual way, copting all the arguments is nasty
-			String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.addnewkeyword.description"); //$NON-NLS-1$
-			int relevance= Character.isUpperCase(methodName.charAt(0)) ? 7 : 4;
-			ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, cu, invocationNode.getStartPosition(), 0, str, relevance);
-			proposals.add(proposal);
-		}
-
 	}
 
 	private static void addMissingCastParentsProposal(ICompilationUnit cu, MethodInvocation invocationNode, Collection proposals) {

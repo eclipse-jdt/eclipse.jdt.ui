@@ -268,6 +268,14 @@ public class ScopeAnalyzer {
 	
 	public IBinding[] getDeclarationsInScope(SimpleName selector, int flags) {
 		try {
+			// special case for switch on enum
+			if (selector.getLocationInParent() == SwitchCase.EXPRESSION_PROPERTY) {
+				ITypeBinding binding= ((SwitchStatement) selector.getParent().getParent()).getExpression().resolveTypeBinding();
+				if (binding != null && binding.isEnum()) {
+					return getEnumContants(binding);
+				}
+			}
+			
 			ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(selector);
 			
 			ITypeBinding binding= getQualifier(selector);
@@ -287,6 +295,18 @@ public class ScopeAnalyzer {
 		}
 	}		
 	
+	private IVariableBinding[] getEnumContants(ITypeBinding binding) {
+		IVariableBinding[] declaredFields= binding.getDeclaredFields();
+		ArrayList res= new ArrayList(declaredFields.length);
+		for (int i= 0; i < declaredFields.length; i++) {
+			IVariableBinding curr= declaredFields[i];
+			if (curr.isEnumConstant()) {
+				res.add(curr);
+			}
+		}
+		return (IVariableBinding[]) res.toArray(new IVariableBinding[res.size()]);
+	}
+
 	public IBinding[] getDeclarationsInScope(int offset, int flags) {
 		NodeFinder finder= new NodeFinder(offset, 0);
 		fRoot.accept(finder);
@@ -470,8 +490,7 @@ public class ScopeAnalyzer {
 					IVariableBinding[] declaredFields= binding.getDeclaredFields();
 					for (int i= 0; i < declaredFields.length; i++) {
 						IVariableBinding curr= declaredFields[i];
-						// TODO: Change when bug 82216 is fixed
-						if (curr.getType().isAssignmentCompatible(binding)) {
+						if (curr.isEnumConstant()) {
 							addResult(curr);
 						}
 					}

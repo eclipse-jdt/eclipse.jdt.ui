@@ -27,8 +27,10 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
@@ -39,17 +41,23 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 	public static final int PARAM= 3;
 	
 	public static final int CONST_FIELD= 4;
+	public static final int ENUM_CONST= 5;
 
 	private static final String KEY_NAME= "name"; //$NON-NLS-1$
 	private static final String KEY_TYPE= "type"; //$NON-NLS-1$
 	private static final String KEY_INITIALIZER= "initializer"; //$NON-NLS-1$
 
-	private int  fVariableKind;
-	private SimpleName fOriginalNode;
-	private ITypeBinding fSenderBinding;
+	final private int  fVariableKind;
+	final private SimpleName fOriginalNode;
+	final private ITypeBinding fSenderBinding;
 	
 	public NewVariableCompletionProposal(String label, ICompilationUnit cu, int variableKind, SimpleName node, ITypeBinding senderBinding, int relevance, Image image) {
 		super(label, cu, null, relevance, image);
+		if (senderBinding == null) {
+			Assert.isTrue(variableKind == PARAM || variableKind == LOCAL);
+		} else {
+			Assert.isTrue(Bindings.isDeclarationBinding(senderBinding));
+		}
 	
 		fVariableKind= variableKind;
 		fOriginalNode= node;
@@ -57,14 +65,19 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 	}
 		
 	protected ASTRewrite getRewrite() throws CoreException {
-
 		CompilationUnit cu= ASTResolving.findParentCompilationUnit(fOriginalNode);
-		if (fVariableKind == PARAM) {
-			return doAddParam(cu);
-		} else if (fVariableKind == FIELD || fVariableKind ==CONST_FIELD) {
-			return doAddField(cu);
-		} else { // LOCAL
-			return doAddLocal(cu);
+		switch (fVariableKind) {
+			case PARAM:
+				return doAddParam(cu);
+			case FIELD:
+			case CONST_FIELD:
+				return doAddField(cu);
+			case LOCAL:
+				return doAddLocal(cu);
+			case ENUM_CONST:
+				return doAddEnumConst(cu);
+			default:
+				throw new IllegalArgumentException("Unsupported variable kind: " + fVariableKind); //$NON-NLS-1$
 		}
 	}
 
@@ -434,6 +447,37 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		
 		return modifiers;
 	}	
+	
+	private ASTRewrite doAddEnumConst(CompilationUnit astRoot) throws CoreException {
+		SimpleName node= fOriginalNode;
+
+		ASTNode newTypeDecl= astRoot.findDeclaringNode(fSenderBinding);
+		if (newTypeDecl == null) {
+			ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
+			astParser.setSource(getCompilationUnit());
+			astParser.setResolveBindings(true);
+			astRoot= (CompilationUnit) astParser.createAST(null);
+			newTypeDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
+		}
+		
+		if (newTypeDecl != null) {
+			AST ast= newTypeDecl.getAST();
+			
+			ASTRewrite rewrite= ASTRewrite.create(ast);
+
+			EnumConstantDeclaration constDecl= ast.newEnumConstantDeclaration();
+			constDecl.setName(ast.newSimpleName(node.getIdentifier()));
+										
+			ListRewrite listRewriter= rewrite.getListRewrite(newTypeDecl, EnumDeclaration.ENUM_CONSTANTS_PROPERTY);
+			listRewriter.insertLast(constDecl, null);
+			
+			addLinkedPosition(rewrite.track(constDecl.getName()), false, KEY_NAME);
+
+			return rewrite;
+		}
+		return null;
+	}
+
 
 
 	/**
