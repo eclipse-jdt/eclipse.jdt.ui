@@ -68,7 +68,8 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		setDescription(JavaEditorMessages.getString("AddImportOnSelection.description")); //$NON-NLS-1$
 		
 		fEditor= editor;
-		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_IMPORT_ON_SELECTION_ACTION);	
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_IMPORT_ON_SELECTION_ACTION);
+		setEnabled(getCompilationUnit() != null);	
 	}
 	
 	public AddImportOnSelectionAction() {
@@ -76,7 +77,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	}
 	
 	public void update() {
-		setEnabled(fEditor != null);
+		setEnabled(fEditor != null && getCompilationUnit() != null);
 	}	
 			
 	private ICompilationUnit getCompilationUnit () {

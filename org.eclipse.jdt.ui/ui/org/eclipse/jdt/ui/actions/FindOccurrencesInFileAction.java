@@ -87,6 +87,7 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	public FindOccurrencesInFileAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
+		setEnabled(getEditorInput(editor) != null);
 	}
 	
 	private FindOccurrencesInFileAction(IWorkbenchSite site) {

@@ -133,6 +133,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	public OrganizeImportsAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
+		setEnabled(getCompilationUnit(fEditor) != null);
 	}
 	
 	/* (non-Javadoc)
@@ -243,9 +244,13 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void run(ITextSelection selection) {
+		run(getCompilationUnit(fEditor));
+	}
+
+	private static ICompilationUnit getCompilationUnit(JavaEditor editor) {
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-		ICompilationUnit cu= manager.getWorkingCopy(fEditor.getEditorInput());
-		run(cu);
+		ICompilationUnit cu= manager.getWorkingCopy(editor.getEditorInput());
+		return cu;
 	}
 	
 	/* (non-Javadoc)

@@ -119,6 +119,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	public AddDelegateMethodsAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
 		fEditor = editor;
+		setEnabled(SelectionConverter.getInputAsCompilationUnit(editor) != null);
 	}
 
 	//---- Structured Viewer -----------------------------------------------------------

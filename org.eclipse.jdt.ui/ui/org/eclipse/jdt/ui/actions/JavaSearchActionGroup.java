@@ -157,7 +157,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 		}
 		
 		// no other way to find out if we have added items.
-		if (searchSubMenu != null && searchSubMenu.getItems().length > 1) {		
+		if (searchSubMenu != null && searchSubMenu.getItems().length > 2) {		
 			menu.appendToGroup(ITextEditorActionConstants.GROUP_FIND, searchSubMenu);
 		}
 	}	

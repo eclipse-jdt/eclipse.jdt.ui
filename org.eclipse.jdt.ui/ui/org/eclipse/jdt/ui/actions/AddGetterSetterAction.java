@@ -118,6 +118,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	public AddGetterSetterAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
+		setEnabled(SelectionConverter.getInputAsCompilationUnit(editor) != null);
 	}
 	
 	//---- Structured Viewer -----------------------------------------------------------
