@@ -16,8 +16,7 @@
  * %CodeTemplates.typecomment.content2
  */</codetemplate>
  
- <codetemplate name="fieldcomment" description="%CodeTemplates.fieldcomment" context="fieldcomment_context" enabled="true">
- /**
+ <codetemplate name="fieldcomment" description="%CodeTemplates.fieldcomment" context="fieldcomment_context" enabled="true">/**
  * %CodeTemplates.fieldcomment.content
  */</codetemplate>
  
@@ -38,7 +37,8 @@ ${package_declaration}
 ${typecomment}
 ${type_declaration}</codetemplate>
 <codetemplate name="catchblock" description="%CodeTemplates.catchblock" context="catchblock_context" enabled="true">// ${todo} %CodeTemplates.catchblock.tododesc
-${exception_var}.printStackTrace();</codetemplate><codetemplate name="methodbody" description="%CodeTemplates.methodstub" context="methodbody_context" enabled="true">// ${todo} %CodeTemplates.methodstub.tododesc
+${exception_var}.printStackTrace();</codetemplate>
+<codetemplate name="methodbody" description="%CodeTemplates.methodstub" context="methodbody_context" enabled="true">// ${todo} %CodeTemplates.methodstub.tododesc
 ${body_statement}</codetemplate>
 <codetemplate name="constructorbody" description="%CodeTemplates.constructorstub" context="constructorbody_context" enabled="true">${body_statement}
 // ${todo} %CodeTemplates.constructorstub.tododesc</codetemplate>

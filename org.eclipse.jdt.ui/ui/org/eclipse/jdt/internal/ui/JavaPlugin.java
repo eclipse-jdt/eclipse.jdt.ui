@@ -616,11 +616,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns the template context type registry for the special code templates
-	 * used by code generation.
+	 * Returns the template context type registry for the code generation
+	 * templates.
 	 * 
-	 * @return the template context type registry for the special code templates
-	 *         used by code generation
+	 * @return the template context type registry for the code generation
+	 *         templates
 	 * @since 3.0
 	 */
 	public ContextTypeRegistry getCodeTemplateContextRegistry() {
@@ -634,9 +634,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	/**
-	 * Returns the template store for the java editor templates.
+	 * Returns the template store for the code generation templates.
 	 * 
-	 * @return the template store for the java editor templates
+	 * @return the template store for the code generation templates
 	 * @since 3.0
 	 */
 	public TemplateStore getCodeTemplateStore() {

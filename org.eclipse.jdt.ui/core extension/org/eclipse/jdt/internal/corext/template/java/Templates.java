@@ -62,7 +62,7 @@ public class Templates extends TemplateSet {
 			}
 
 		} catch (CoreException e) {
-//			JavaPlugin.log(e);
+			JavaPlugin.log(e);
 			ErrorDialog.openError(null,
 				TemplateMessages.getString("Templates.error.title"), //$NON-NLS-1$
 				e.getMessage(), e.getStatus());

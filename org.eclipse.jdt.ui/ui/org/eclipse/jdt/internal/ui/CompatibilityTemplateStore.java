@@ -24,8 +24,12 @@ import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
 import org.eclipse.jface.text.templates.persistence.TemplateSet;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
 
 
+/**
+ * @deprecated don't use
+ */
 public final class CompatibilityTemplateStore extends TemplateStore {
 
 
@@ -41,35 +45,45 @@ public final class CompatibilityTemplateStore extends TemplateStore {
 		
 		if (fLegacySet != null) {
 			
-			List templates= new ArrayList(Arrays.asList(fLegacySet.getTemplates()));
+			List legacyTemplates= new ArrayList(Arrays.asList(fLegacySet.getTemplates()));
 			fLegacySet.clear();
 			
 			TemplatePersistenceData[] datas= getTemplateData(true);
-			outer: for (int j= 0; j < datas.length; j++) {
-				TemplatePersistenceData data= datas[j];
-				Template orig= data.getTemplate();
-				
-				for (Iterator it= templates.listIterator(); it.hasNext();) {
-					Template t= (Template) it.next();
-					if (isSimilar(t, orig)) {
-						if (!orig.getPattern().equals(t.getPattern()))
-							add(new TemplatePersistenceData(t, true, data.getId()));
-						it.remove(); // this one covered
-						continue outer;
-					}
+			for (Iterator it= legacyTemplates.listIterator(); it.hasNext();) {
+				Template t= (Template) it.next();
+				TemplatePersistenceData orig= findSimilarTemplate(datas, t);
+				if (orig == null) { // no contributed match for the old template found
+					if (!isCodeTemplates())
+						add(new TemplatePersistenceData(t, true));
+				} else { // a contributed template seems to be the descendant of the non-id template t
+					if (!orig.getTemplate().getPattern().equals(t.getPattern()))
+						// add as modified contributed template if changed compared to the original
+						orig.setTemplate(t);
 				}
-			}
-			
-			for (Iterator it= templates.iterator(); it.hasNext();) {
-				add(new TemplatePersistenceData((Template) it.next(), true));
 			}
 			
 			save();
 //			fLegacySet= null;
 		}
 	}
+	
+	private TemplatePersistenceData findSimilarTemplate(TemplatePersistenceData[] datas, Template template) {
+		 for (int i= 0; i < datas.length; i++) {
+			TemplatePersistenceData data= datas[i];
+			Template orig= data.getTemplate();
+			if (isSimilar(template, orig))
+				return data;
+		 }
+		 
+		 return null;
+	}
 
 	private boolean isSimilar(Template t, Template orig) {
-		return orig.getName().equals(t.getName()) && orig.getContextTypeId().equals(t.getContextTypeId());
+		return orig.getName().equals(t.getName()) && orig.getContextTypeId().equals(t.getContextTypeId())
+				&& (isCodeTemplates() || orig.getDescription().equals(t.getDescription())); // only use description for templates (for, while...)
+	}
+	
+	private boolean isCodeTemplates() {
+		return fLegacySet instanceof CodeTemplates;
 	}
 }
