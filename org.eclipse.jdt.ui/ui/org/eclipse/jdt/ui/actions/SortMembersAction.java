@@ -151,10 +151,13 @@ public class SortMembersAction extends SelectionDispatchAction {
 	protected void run(ITextSelection selection) {
 		Shell shell= getShell();
 		IJavaElement input= SelectionConverter.getInput(fEditor);
-		if (input instanceof ICompilationUnit && ElementValidator.check(input, getShell(), getDialogTitle(), true))
-			run(shell, (ICompilationUnit) input, fEditor);
-		else
+		if (input instanceof ICompilationUnit) {
+			if (ElementValidator.check(input, getShell(), getDialogTitle(), true)) {
+				run(shell, (ICompilationUnit) input, fEditor);
+			}
+		} else {
 			MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("SortMembersAction.not_applicable")); //$NON-NLS-1$
+		}
 	}
 
 	//---- Helpers -------------------------------------------------------------------
