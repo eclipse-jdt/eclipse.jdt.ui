@@ -1,30 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<!--
-(c) Copyright IBM Corp. 2000, 2001.
-All Rights Reserved.
--->
-
 <templates>
 
-  <!-- java -->
+<codetemplate name="newtype" description="New classes and interfaces" 
+context="codetemplate" enabled="true">/**
+ * Date ${date}
+ */</codetemplate>
 
-  <codetemplate description="New classes and interfaces" name="newtype" context="codetemplate"
->for (int ${index} = 0; ${index} &lt; ${array}.length; ${index}++) {
-	${cursor}
-}</codetemplate>
+<codetemplate name="catchblock" description="Code in new catch blocks" 
+context="codetemplate" enabled="true">//TODO</codetemplate>
 
-  <codetemplate description="Code in new catch blocks" name="catchblock" context="codetemplate"
->for (int ${index} = 0; ${index} &lt; ${array}.length; ${index}++) {
-	${array_type} ${array_element} = ${array}[${index}];
-	${cursor}
-}</codetemplate>
-
-  <codetemplate description="Code in new method bodies" name="methodbody" context="codetemplate"
->for (Iterator ${iterator} = ${collection}.iterator(); ${iterator}.hasNext(); ) {
-	${type} ${element} = (${type}) ${iterator}.next();
-	${cursor}
-}</codetemplate>
-
-
+<codetemplate name="methodbody" description="Code in new method bodies" 
+context="codetemplate" enabled="true">// TODO</codetemplate>
 </templates>
