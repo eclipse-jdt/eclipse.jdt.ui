@@ -62,6 +62,8 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		}
 	
 	}
+	
+	private static final IMarkerResolution[] NO_RESOLUTIONS= new IMarkerResolution[0];
 
 
 	/**
@@ -77,7 +79,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 	public IMarkerResolution[] getResolutions(IMarker marker) {
 		int id= marker.getAttribute(IJavaModelMarker.ID, -1);
 		if (!JavaCorrectionProcessor.hasCorrections(id)) {
-			return new IMarkerResolution[0]; 
+			return NO_RESOLUTIONS; 
 		}
 		
 		try {
