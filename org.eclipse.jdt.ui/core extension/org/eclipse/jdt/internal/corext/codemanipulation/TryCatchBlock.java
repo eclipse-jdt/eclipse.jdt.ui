@@ -17,18 +17,10 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.template.CodeTemplates;
-import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateTemplateContext;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 public class TryCatchBlock extends AbstractCodeBlock {
-
-	private static final String TRY_PLACE_HOLDER= "f();";
-	private static final String CATCH_PLACE_HOLDER= "h();";
 
 	private AbstractCodeBlock fTryBody;
 	private ITypeBinding[] fExceptions;
@@ -44,11 +36,13 @@ public class TryCatchBlock extends AbstractCodeBlock {
 
 	public void fill(StringBuffer buffer, String firstLineIndent, String indent, String lineSeparator) throws CoreException {
 		final String dummy= createStatement();
+		final String placeHolder= "x();"; //$NON-NLS-1$
 		ICodeFormatter formatter= ToolFactory.createCodeFormatter();
-		int[] positions= computePositions(dummy);
+		int placeHolderStart= dummy.indexOf(placeHolder);
+		int[] positions= new int[] {placeHolderStart, placeHolderStart + placeHolder.length() - 1};
 		String formattedCode= formatter.format(dummy, 0, positions, lineSeparator);
 		// begin workaround for http://dev.eclipse.org/bugs/show_bug.cgi?id=19335
-		if (!adjustPositions(formattedCode, positions)) {
+		if (!adjustPositions(formattedCode, placeHolder, positions)) {
 			// nothing we can do here.
 			Assert.isTrue(false, "This should never happend");	//$NON-NLS-1$
 		}
@@ -59,43 +53,16 @@ public class TryCatchBlock extends AbstractCodeBlock {
 		
 		fill(buffer, formattedCode.substring(0, positions[0]), firstLineIndent, indent, lineSeparator);
 		fTryBody.fill(buffer, "", bodyIndent, lineSeparator); //$NON-NLS-1$
-		for (int i= 0; i < fExceptions.length; i++) {
-			fill(buffer, formattedCode.substring(positions[i * 2 + 1] + 1, positions[i * 2 + 2]), "", indent, lineSeparator); //$NON-NLS-1$
-			fill(buffer, getCatchBody(fExceptions[i], lineSeparator), "", indent, lineSeparator); //$NON-NLS-1$
-		}
-		fill(buffer, formattedCode.substring(positions[positions.length - 1] + 1), "", indent, lineSeparator); //$NON-NLS-1$
-	}
-
-	private String getCatchBody(ITypeBinding binding, String lineSeparator) throws CoreException {
-//		CodeTemplates templates= CodeTemplates.getInstance();
-//		Template template= templates.getTemplates("catchblock")[0];
-//		CodeTemplateTemplateContext context= new CodeTemplateTemplateContext(new CodeTemplateContextType(), lineSeparator);
-//		TemplateBuffer buffer= context.evaluate(template);
-//		return buffer.getString();
-		return "//TODO";
-	}
-
-	private int[] computePositions(final String dummy) {
-		int[] result= new int[2 + fExceptions.length * 2];
-		int tryPlaceHolderStart= dummy.indexOf(TRY_PLACE_HOLDER);
-		result[0]= tryPlaceHolderStart; 
-		result[1]= tryPlaceHolderStart + TRY_PLACE_HOLDER.length() - 1;
-		int catchPlaceHolderStart= tryPlaceHolderStart;
-		for (int i= 0; i < fExceptions.length; i++) {
-			catchPlaceHolderStart= dummy.indexOf(CATCH_PLACE_HOLDER, catchPlaceHolderStart + 1);
-			result[i * 2 + 2]= catchPlaceHolderStart;
-			result[i * 2 + 3]= catchPlaceHolderStart + CATCH_PLACE_HOLDER.length() - 1;
-		}
-		return result;
+		fill(buffer, formattedCode.substring(positions[1] + 1), "", indent, lineSeparator); //$NON-NLS-1$
 	}
 
 	private String createStatement() {
 		StringBuffer buffer= new StringBuffer();
-		buffer.append("try {f();} "); //$NON-NLS-1$
+		buffer.append("try {x();} "); //$NON-NLS-1$
 		for (int i= 0; i < fExceptions.length; i++) {
 			buffer.append("catch("); //$NON-NLS-1$
 			buffer.append(fExceptions[i].getName());
-			buffer.append(" e){h();}"); //$NON-NLS-1$
+			buffer.append(" e){}"); //$NON-NLS-1$
 		}
 		return buffer.toString();	
 	}
@@ -103,19 +70,14 @@ public class TryCatchBlock extends AbstractCodeBlock {
 	/*
 	 * Workaround for http://dev.eclipse.org/bugs/show_bug.cgi?id=19335
 	 */
-	private  boolean adjustPositions(String code, int[] positions) {
-		int candidate= code.indexOf(TRY_PLACE_HOLDER);
-		if (candidate == -1)
-			return false;
-		positions[0]= candidate;
-		positions[1]= candidate + TRY_PLACE_HOLDER.length() - 1;
-		
-		for (int i= 0; i < fExceptions.length; i++) {
-			candidate= code.indexOf(CATCH_PLACE_HOLDER, candidate + 1);
+	private static boolean adjustPositions(String code, String placeHolder, int[] positions) {
+		int length= code.length();
+		if (positions[0] < 0 || positions[1] < 0 || positions[0] >= length || positions[1] >= length) {
+			int candidate= code.indexOf(placeHolder);
 			if (candidate == -1)
 				return false;
-			positions[i * 2 + 2]= candidate;
-			positions[i * 2 + 3]= candidate + CATCH_PLACE_HOLDER.length() - 1;
+			positions[0]= candidate;
+			positions[1]= candidate + placeHolder.length() - 1;
 		}
 		return true;
 	}
