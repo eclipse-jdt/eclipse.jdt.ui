@@ -343,7 +343,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
                 });
 
         IStatusLineManager slManager = getViewSite().getActionBars().getStatusLineManager();
-        fSelectionProviderMediator.addSelectionChangedListener(new StatusBarUpdater(
+        new SelectionProviderAdapter(fSelectionProviderMediator).addSelectionChangedListener(new StatusBarUpdater(
                 slManager));
         getSite().setSelectionProvider(fSelectionProviderMediator);
 

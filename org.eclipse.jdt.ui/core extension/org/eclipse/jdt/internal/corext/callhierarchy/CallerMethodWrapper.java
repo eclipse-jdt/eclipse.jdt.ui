@@ -58,11 +58,12 @@ class CallerMethodWrapper extends MethodWrapper {
             MethodReferencesSearchCollector searchCollector = new MethodReferencesSearchCollector();
             SearchEngine searchEngine = new SearchEngine();
 
-            for (Iterator iter = getMembers().iterator();
-                        iter.hasNext() && !progressMonitor.isCanceled();) {
+            IProgressMonitor monitor= new SubProgressMonitor(progressMonitor, 95, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
+            for (Iterator iter = getMembers().iterator(); iter.hasNext();) {
+                checkCanceled(progressMonitor);
+
                 IMember member = (IMember) iter.next();
-                searchCollector.setProgressMonitor(new SubProgressMonitor(
-                        progressMonitor, 10, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+                searchCollector.setProgressMonitor(monitor);
                 searchEngine.search(ResourcesPlugin.getWorkspace(), member,
                     IJavaSearchConstants.REFERENCES, getSearchScope(), searchCollector);
             }

@@ -11,19 +11,41 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CallHierarchyContentProvider implements ITreeContentProvider {
     private final static Object[] EMPTY_ARRAY = new Object[0];
-    private TreeViewer fViewer;
 
-    public CallHierarchyContentProvider() {
+    private class MethodWrapperRunnable implements IRunnableWithProgress {
+        private MethodWrapper fMethodWrapper;
+        private MethodWrapper[] fCalls= null;
+
+        MethodWrapperRunnable(MethodWrapper methodWrapper) {
+            fMethodWrapper= methodWrapper;
+        }
+                
+        public void run(IProgressMonitor pm) throws InvocationTargetException {
+            fCalls= fMethodWrapper.getCalls(pm);
+        }
+        
+        MethodWrapper[] getCalls() {
+            return fCalls;
+        }
+    };
+
+
+    public CallHierarchyContentProvider(CallHierarchyViewPart part) {
         super();
     }
 
@@ -41,7 +63,17 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
             if (shouldStopTraversion(methodWrapper)) {
                 return EMPTY_ARRAY;
             } else {
-                return methodWrapper.getCalls();
+                IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
+                MethodWrapperRunnable runnable= new MethodWrapperRunnable(methodWrapper);
+                try {
+                    context.run(true, true, runnable);
+                } catch (InvocationTargetException e) {
+                    JavaPlugin.log(e);
+                } catch (InterruptedException e) {
+                    return EMPTY_ARRAY;
+                }
+
+                return runnable.getCalls();
             }
         }
 
@@ -100,6 +132,5 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
      * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
      */
     public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-        this.fViewer = (TreeViewer) viewer;
     }
 }

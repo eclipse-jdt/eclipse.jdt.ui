@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -73,6 +73,7 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ClassInstanceCreation)
      */
     public boolean visit(ClassInstanceCreation node) {
+        progressMonitorWorked(1);
         if (!isNodeWithinMethod(node)) {
             return false;
         }
@@ -90,6 +91,7 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ConstructorInvocation)
      */
     public boolean visit(ConstructorInvocation node) {
+        progressMonitorWorked(1);
         if (!isNodeWithinMethod(node)) {
             return false;
         }
@@ -103,6 +105,7 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodDeclaration)
      */
     public boolean visit(MethodDeclaration node) {
+        progressMonitorWorked(1);
         return isNodeWithinMethod(node);
     }
 
@@ -114,6 +117,7 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodInvocation)
      */
     public boolean visit(MethodInvocation node) {
+        progressMonitorWorked(1);
         if (!isNodeWithinMethod(node)) {
             return false;
         }
@@ -132,6 +136,7 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SuperConstructorInvocation)
      */
     public boolean visit(SuperConstructorInvocation node) {
+        progressMonitorWorked(1);
         if (!isNodeWithinMethod(node)) {
             return false;
         }
@@ -149,6 +154,7 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodInvocation)
      */
     public boolean visit(SuperMethodInvocation node) {
+        progressMonitorWorked(1);
         if (!isNodeWithinMethod(node)) {
             return false;
         }
@@ -181,9 +187,7 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
                 }
 
                 IMethod calledMethod = findIncludingSupertypes(calledMethodBinding,
-                        calledType,
-                        new SubProgressMonitor(fProgressMonitor, 100,
-                            SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+                        calledType, fProgressMonitor);
 
                 IMember referencedMember= null;
                 if (calledMethod == null) {
@@ -265,6 +269,15 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
             return calledMethod;
         } else {
             return (IMethod) implementingMethods.iterator().next();
+        }
+    }
+    
+    private void progressMonitorWorked(int work) {
+        if (fProgressMonitor != null) {
+            fProgressMonitor.worked(work);
+            if (fProgressMonitor.isCanceled()) {
+                throw new OperationCanceledException();
+            }
         }
     }
 }

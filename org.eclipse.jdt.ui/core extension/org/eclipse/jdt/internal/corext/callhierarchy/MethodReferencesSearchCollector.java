@@ -16,7 +16,6 @@ import java.util.Map;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -77,7 +76,7 @@ class MethodReferencesSearchCollector implements IJavaSearchResultCollector {
     /**
      * @param monitor
      */
-    void setProgressMonitor(SubProgressMonitor monitor) {
+    void setProgressMonitor(IProgressMonitor monitor) {
         this.fProgressMonitor = monitor;
     }
 }

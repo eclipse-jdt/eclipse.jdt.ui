@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -65,8 +64,8 @@ class CalleeMethodWrapper extends MethodWrapper {
 	/* Returns the calls sorted after the call location
 	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#getCalls()
      */
-    public MethodWrapper[] getCalls() {
-        MethodWrapper[] result = super.getCalls();
+    public MethodWrapper[] getCalls(IProgressMonitor progressMonitor) {
+        MethodWrapper[] result = super.getCalls(progressMonitor);
         Arrays.sort(result, fMethodWrapperComparator);
 
         return result;
@@ -91,22 +90,21 @@ class CalleeMethodWrapper extends MethodWrapper {
 	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#findChildren(org.eclipse.core.runtime.IProgressMonitor)
      */
     protected Map findChildren(IProgressMonitor progressMonitor) {
-    	progressMonitor.beginTask("", 1); //$NON-NLS-1$
-    	try{
-			if (getMember().exists() && getMember().getElementType() == IJavaElement.METHOD) {
-				CompilationUnit cu= createCompilationUnitNode(getMember());
-				if (cu != null) {
-					CalleeAnalyzerVisitor visitor = new CalleeAnalyzerVisitor((IMethod) getMember(),
-							new SubProgressMonitor(progressMonitor, 1));
-            
-					cu.accept(visitor);
-					return visitor.getCallees();
-				}
-			}
-			return new HashMap(0);
-    	} finally{
-    		progressMonitor.done();
-    	}
+    	if (getMember().exists() && getMember().getElementType() == IJavaElement.METHOD) {
+        	CompilationUnit cu= createCompilationUnitNode(getMember());
+            if (progressMonitor != null) {
+                progressMonitor.worked(5);
+            }
+
+        	if (cu != null) {
+        		CalleeAnalyzerVisitor visitor = new CalleeAnalyzerVisitor((IMethod) getMember(),
+        				progressMonitor);
+        
+        		cu.accept(visitor);
+        		return visitor.getCallees();
+        	}
+        }
+        return new HashMap(0);
     }
     
 	private static CompilationUnit createCompilationUnitNode(IMember member) {

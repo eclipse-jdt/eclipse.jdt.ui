@@ -17,7 +17,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -75,9 +75,9 @@ public abstract class MethodWrapper implements IAdaptable {
      * Method getCallerElements.
      * @return The child caller elements of this element
      */
-    public MethodWrapper[] getCalls() {
+    public MethodWrapper[] getCalls(IProgressMonitor progressMonitor) {
         if (fElements == null) {
-            doFindChildren();
+            doFindChildren(progressMonitor);
         }
 
         MethodWrapper[] result = new MethodWrapper[fElements.size()];
@@ -203,7 +203,7 @@ public abstract class MethodWrapper implements IAdaptable {
      */
     protected abstract MethodWrapper createMethodWrapper(MethodCall methodCall);
 
-    private void doFindChildren() {
+    private void doFindChildren(IProgressMonitor progressMonitor) {
         Map existingResults = lookupMethod(getMethodCall());
 
         if (existingResults != null) {
@@ -212,10 +212,8 @@ public abstract class MethodWrapper implements IAdaptable {
         } else {
             initCalls();
 
-            IProgressMonitor progressMonitor = getProgressMonitor();
-
             if (progressMonitor != null) {
-                progressMonitor.beginTask(getTaskName(), IProgressMonitor.UNKNOWN);
+                progressMonitor.beginTask(getTaskName(), 100);
             }
 
             try {
@@ -284,6 +282,8 @@ public abstract class MethodWrapper implements IAdaptable {
         fElements = findChildren(progressMonitor);
 
         for (Iterator iter = fElements.keySet().iterator(); iter.hasNext();) {
+            checkCanceled(progressMonitor);
+
             MethodCall methodCall = getMethodCallFromMap(fElements, iter.next());
             addCallToCache(methodCall);
         }
@@ -293,14 +293,23 @@ public abstract class MethodWrapper implements IAdaptable {
         return (MethodCall) elements.get(key);
     }
 
-    private IProgressMonitor getProgressMonitor() {
-        // TODO: Figure out what to do with progress monitors
-        return new NullProgressMonitor();
-    }
-
     private void initCacheForMethod() {
         Map cachedCalls = new HashMap();
         getMethodCache().put(this.getMethodCall().getKey(), cachedCalls);
+    }
+
+    /**
+     * Checks with the progress monitor to see whether the creation of the type hierarchy
+     * should be canceled. Should be regularly called
+     * so that the user can cancel.
+     *
+     * @exception OperationCanceledException if cancelling the operation has been requested
+     * @see IProgressMonitor#isCanceled
+     */
+    protected void checkCanceled(IProgressMonitor progressMonitor) {
+        if (progressMonitor != null && progressMonitor.isCanceled()) {
+            throw new OperationCanceledException();
+        }
     }
     
     /**
@@ -309,17 +318,23 @@ public abstract class MethodWrapper implements IAdaptable {
      *  
      * @param visitor
      */
-    public void accept(CallHierarchyVisitor visitor) {
+    public void accept(CallHierarchyVisitor visitor, IProgressMonitor progressMonitor) {
         if (getParent() != null && getParent().isRecursive()) {
             return;
         }
+        checkCanceled(progressMonitor);
+        
         visitor.preVisit(this);
         if (visitor.visit(this)) {
-            MethodWrapper[] methodWrappers= getCalls();
+            MethodWrapper[] methodWrappers= getCalls(progressMonitor);
             for (int i= 0; i < methodWrappers.length; i++) {
-                methodWrappers[i].accept(visitor);
+                methodWrappers[i].accept(visitor, progressMonitor);
             }
         }
         visitor.postVisit(this);
+
+        if (progressMonitor != null) {        
+            progressMonitor.worked(1);
+        }
     }
 }
