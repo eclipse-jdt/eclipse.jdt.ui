@@ -2,6 +2,7 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -14,6 +15,10 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
@@ -97,7 +102,37 @@ public class ReferenceFinderUtil {
 		return collector.getResults();
 	}
 	
-
+	//only in declarations - not in bodies!
+	public static ITypeBinding[] getTypesReferencedInDeclarations(IMethod[] methods, ASTNodeMappingManager astManager) throws JavaModelException{
+		Set typesUsed= new HashSet();
+		for (int i= 0; i < methods.length; i++) {
+			typesUsed.addAll(getTypesUsedInDeclaration(methods[i], astManager));
+		}
+		return (ITypeBinding[]) typesUsed.toArray(new ITypeBinding[typesUsed.size()]);
+	}
+		
+	//set of ITypeBindings
+	private static Set getTypesUsedInDeclaration(IMethod iMethod, ASTNodeMappingManager astManager) throws JavaModelException {
+		MethodDeclaration methodDeclaration= getMethodDeclarationNode(iMethod, astManager);
+		if (methodDeclaration == null)
+			return new HashSet(0);
+		Set result= new HashSet();	
+		result.add(methodDeclaration.getReturnType().resolveBinding());
+				
+		for (Iterator iter= methodDeclaration.parameters().iterator(); iter.hasNext();) {
+			result.add(((SingleVariableDeclaration) iter.next()).getType().resolveBinding()); 
+		}
+			
+		for (Iterator iter= methodDeclaration.thrownExceptions().iterator(); iter.hasNext();) {
+			result.add(((Name) iter.next()).resolveTypeBinding());
+		}
+		return result;
+	}
+	
+	private static MethodDeclaration getMethodDeclarationNode(IMethod iMethod, ASTNodeMappingManager astManager) throws JavaModelException{
+		return ASTNodeSearchUtil.getMethodDeclarationNode(iMethod, astManager);
+	}
+	
 	/// private helpers 	
 	private static Set extractElements(SearchResult[] searchResults, int elementType){
 		Set elements= new HashSet();
