@@ -86,7 +86,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	private final List fKeywords= new ArrayList();
 	private final Set fSuggestedMethodNames= new HashSet();
 	
-	private ICompilationUnit fCompilationUnit;
+	private final ICompilationUnit fCompilationUnit;
 	private final IJavaProject fJavaProject;
 	private int fUserReplacementLength;
 	
@@ -108,8 +108,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * @param cu the compilation unit that the result collector will operate on
 	 */
 	public CompletionProposalCollector(ICompilationUnit cu) {
-		this(cu.getJavaProject());
-		fCompilationUnit= cu;
+		this(cu.getJavaProject(), cu);
 	}
 	
 	/**
@@ -129,8 +128,12 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 *        <code>null</code>
 	 */
 	public CompletionProposalCollector(IJavaProject project) {
+		this(project, null);
+	}
+	
+	private CompletionProposalCollector(IJavaProject project, ICompilationUnit cu) {
 		fJavaProject= project;
-		fCompilationUnit= null;
+		fCompilationUnit= cu;
 
 		fUserReplacementLength= -1;
 		fLastProblem= null;
@@ -138,7 +141,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		fJavaProposals.clear();
 		fKeywords.clear();
 		fSuggestedMethodNames.clear();
-	}	
+	}
 
 	/**
 	 * @inheritDoc
