@@ -331,6 +331,14 @@ public class CodeFormatterUtil {
 		return null;
 	}
 	
+	private static int getCommentStart(String comment, int offset) {
+		while (offset < comment.length() && Strings.isIndentChar(comment.charAt(offset))) {
+			offset++;
+		}
+		return offset;
+	}
+	
+	
 	private static void commentDifferent(String origComment, String newComment, int offset, TextEdit result) {
 		DefaultLineTracker tracker1= new DefaultLineTracker();
 		tracker1.set(origComment);
@@ -348,16 +356,14 @@ public class CodeFormatterUtil {
 					IRegion region2= tracker2.getLineInformation(i);
 					int lineEnd1= region1.getOffset() + region1.getLength();
 					int lineEnd2= region2.getOffset() + region2.getLength();
-					int sameStart1= region1.getOffset();
-					int sameStart2= lineEnd2 - region1.getLength();
+					int sameStart1= getCommentStart(origComment, region1.getOffset());
+					int sameStart2= getCommentStart(newComment, region2.getOffset());
 					if (isDifferent(origComment, sameStart1, lineEnd1, newComment, sameStart2, lineEnd2)) {
-						// should not happen: replace full line
-						if (DEBUG) {
-							System.out.println("Comment line changed: is: " + origComment.substring(sameStart1, lineEnd1) + ", was: " + newComment.substring(sameStart2, lineEnd2));  //$NON-NLS-1$//$NON-NLS-2$
-						}
+						// comment string changed: replace full line
 						res.add(new ReplaceEdit(start1 + offset, lineEnd1 - start1, newComment.substring(start2, lineEnd2)));
 					} else {
 						if (isDifferent(origComment, start1, sameStart1, newComment, start2, sameStart2)) {
+							// only indent changed
 							res.add(new ReplaceEdit(start1 + offset, sameStart1 - start1, newComment.substring(start2, sameStart2)));
 						}
 					}
