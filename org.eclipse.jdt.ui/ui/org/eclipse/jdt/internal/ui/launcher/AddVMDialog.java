@@ -213,7 +213,10 @@ public class AddVMDialog extends StatusDialog {
 	}
 	
 	private void updateVMType() {
-		fSelectedVMType= fVMTypes[fVMTypeCombo.getSelectionIndex()];
+		int selIndex= fVMTypeCombo.getSelectionIndex();
+		if (selIndex >= 0 && selIndex < fVMTypes.length) {
+			fSelectedVMType= fVMTypes[selIndex];
+		}
 		fStati[1]= validateJDKLocation();
 		useDefaultSystemLibrary();
 		updateStatusLine();
