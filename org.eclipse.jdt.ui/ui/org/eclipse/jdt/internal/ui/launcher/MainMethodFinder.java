@@ -6,14 +6,14 @@
 package org.eclipse.jdt.internal.ui.launcher;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
@@ -29,8 +29,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -39,22 +39,27 @@ import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 public class MainMethodFinder {
+	
+	private MainMethodFinder() {
+	}
 
-	public List findTargets(IRunnableContext context, IStructuredSelection selection) {
-		final ArrayList result= new ArrayList();
-		
-		final List elements= SelectionUtil.toList(selection);
-		if (elements != null && !elements.isEmpty()) {
+	public static IType[] findTargets(IRunnableContext context, final Object[] elements) throws InvocationTargetException, InterruptedException{
+		final Set result= new HashSet();
+	
+		if (elements.length > 0) {
 			IRunnableWithProgress runnable= new IRunnableWithProgress() {
-				public void run(IProgressMonitor pm) {
-					int nElements= elements.size();
+				public void run(IProgressMonitor pm) throws InterruptedException {
+					int nElements= elements.length;
 					pm.beginTask(LauncherMessages.getString("MainMethodFinder.description"), nElements);
 					try {
 						for (int i= 0; i < nElements; i++) {
 							try {
-								collectTypes(elements.get(i), new SubProgressMonitor(pm, 1), result);
+								collectTypes(elements[i], new SubProgressMonitor(pm, 1), result);
 							} catch (JavaModelException e) {
 								JavaPlugin.log(e.getStatus());
+							}
+							if (pm.isCanceled()) {
+								throw new InterruptedException();
 							}
 						}
 					} finally {
@@ -62,19 +67,12 @@ public class MainMethodFinder {
 					}
 				}
 			};
-			try {
-				context.run(true, true, runnable);
-			} catch (InvocationTargetException e) {
-				JavaPlugin.log(e);
-			} catch (InterruptedException e) {
-				// user pressed cancel
-			}
-				
+			context.run(true, true, runnable);			
 		}
-		return result;
+		return (IType[]) result.toArray(new IType[result.size()]) ;
 	}
 			
-	private void collectTypes(Object element, IProgressMonitor monitor, List result) throws JavaModelException {
+	private static void collectTypes(Object element, IProgressMonitor monitor, Set result) throws JavaModelException {
 		if (element instanceof IProcess) {
 			element= ((IProcess)element).getLaunch();
 		} else if (element instanceof IDebugTarget) {
@@ -91,6 +89,7 @@ public class MainMethodFinder {
 				IType parentType= (IType) JavaModelUtil.findElementOfKind(jelem, IJavaElement.TYPE);
 				if (parentType != null && JavaModelUtil.hasMainMethod((IType) parentType)) {
 					result.add(parentType);
+					monitor.done();
 					return;
 				}
 				IJavaElement openable= (IJavaElement) JavaModelUtil.getOpenable(jelem);
@@ -101,12 +100,14 @@ public class MainMethodFinder {
 						if (mainType.exists() && JavaModelUtil.hasMainMethod(mainType)) {
 							result.add(mainType);
 						}
+						monitor.done();
 						return;
 					} else if (openable.getElementType() == IJavaElement.CLASS_FILE) {
 						IType mainType= ((IClassFile)openable).getType();
-						if ( JavaModelUtil.hasMainMethod(mainType)) {
+						if (JavaModelUtil.hasMainMethod(mainType)) {
 							result.add(parentType);
 						}
+						monitor.done();
 						return;	
 					}
 					resource= openable.getUnderlyingResource();
@@ -120,12 +121,15 @@ public class MainMethodFinder {
 				for (int i= 0; i < types.length; i++) {
 					result.add(types[i]);
 				}
+			} else {
+				monitor.done();
 			}
 		}
 	}
 	
-	private IType[] searchMainMethods(IResource res, IProgressMonitor monitor) throws JavaModelException {
+	private static IType[] searchMainMethods(IResource res, IProgressMonitor monitor) throws JavaModelException {
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IResource[] { res });
+		scope.setIncludesBinaries(false); // can be removed when fixed 1GKB475: ITPJCORE:WINNT - StringIndexOutOfBoundsException on searchfor methods
 		MainMethodSearchEngine searchEngine= new MainMethodSearchEngine();
 		return searchEngine.searchMainMethods(monitor, scope, IJavaElementSearchConstants.CONSIDER_BINARIES);
 	}

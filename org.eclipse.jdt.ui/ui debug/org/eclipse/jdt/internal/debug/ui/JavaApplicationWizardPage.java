@@ -9,7 +9,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncher;
+import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncherDelegate;
 import org.eclipse.jdt.internal.ui.launcher.LauncherLabelProvider;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jface.viewers.*;
@@ -59,7 +59,7 @@ public class JavaApplicationWizardPage extends WizardPage {
 
 	protected String fMode;
 
-	protected JavaApplicationLauncher fLauncher;
+	protected JavaApplicationLauncherDelegate fLauncher;
 
 	/**
 	 * A content provider for the elements list
@@ -122,10 +122,10 @@ public class JavaApplicationWizardPage extends WizardPage {
 	/**
 	 * Constructs a <code>JavaApplicationWizardPage</code> with the given launcher and pre-computed children
 	 */
-	public JavaApplicationWizardPage(List elements, JavaApplicationLauncher launcher, String mode) {
+	public JavaApplicationWizardPage(Object[] elements, JavaApplicationLauncherDelegate launcher, String mode) {
 		super(DebugUIUtils.getResourceString(PREFIX + "title"));
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAVA_LAUNCH);
-		fElements= elements.toArray();
+		fElements= elements;
 		fMode= mode;
 		fLauncher= launcher;
 	}

@@ -42,9 +42,9 @@ import org.eclipse.jdt.debug.core.IJavaEvaluationResult;
 import org.eclipse.jdt.debug.core.IJavaStackFrame;
 import org.eclipse.jdt.debug.core.IJavaThread;
 import org.eclipse.jdt.debug.core.IJavaValue;
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -244,7 +244,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	
 		if (launch) {
 			launchVM();
-			fVM= ScrapbookLauncher.getDefault().getDebugTarget(getPage());
+			fVM= ScrapbookLauncherDelegate.getDefault().getDebugTarget(getPage());
 		}
 	}
 	
@@ -293,7 +293,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		IDebugTarget target= fVM;
 		if (fVM != null) {
 			try {
-				IBreakpoint bp = ScrapbookLauncher.getDefault().getMagicBreakpoint(fVM);
+				IBreakpoint bp = ScrapbookLauncherDelegate.getDefault().getMagicBreakpoint(fVM);
 				if (bp != null) {
 					fVM.breakpointRemoved(bp, null);
 				}
@@ -306,7 +306,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 				return;
 			}
 			vmTerminated();
-			ScrapbookLauncher.getDefault().cleanup(target);
+			ScrapbookLauncherDelegate.getDefault().cleanup(target);
 		}
 	}
 	
@@ -665,7 +665,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 						if (f != null) {
 							if (e.getDetail() == DebugEvent.STEP_END && f.getLineNumber() == 9 && f.getDeclaringTypeName().equals("org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookMain1")) { //$NON-NLS-1$
 								fThread = jt;
-							} else if (e.getDetail() == DebugEvent.BREAKPOINT && jt.getBreakpoint().equals(ScrapbookLauncher.getDefault().getMagicBreakpoint(jt.getDebugTarget()))) {
+							} else if (e.getDetail() == DebugEvent.BREAKPOINT && jt.getBreakpoint().equals(ScrapbookLauncherDelegate.getDefault().getMagicBreakpoint(jt.getDebugTarget()))) {
 								jt.stepOver();
 							}
 						}
@@ -684,7 +684,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	protected void launchVM() {
 		DebugPlugin.getDefault().addDebugEventListener(JavaSnippetEditor.this);
 		fLaunchedClassPath = getClassPath(getJavaProject());
-		final ILauncher launcher = ScrapbookLauncher.getLauncher();
+		final ILauncher launcher = ScrapbookLauncherDelegate.getLauncher();
 		Runnable r = new Runnable() {
 			public void run() {
 				launcher.launch(new Object[] {getPage()}, ILaunchManager.DEBUG_MODE);

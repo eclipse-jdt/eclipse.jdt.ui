@@ -7,7 +7,7 @@ package org.eclipse.jdt.internal.debug.ui;
 import org.eclipse.debug.core.ILauncher;
 import org.eclipse.debug.ui.ILaunchWizard;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncher;
+import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncherDelegate;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -22,13 +22,13 @@ import java.util.List;
 public class JavaApplicationWizard extends Wizard implements ILaunchWizard {
 	protected String fMode;
 	protected ILauncher fLauncher;
-	protected List fLauncheables;
+	protected Object[] fLauncheables;
 	protected boolean fLastLaunchSuccessful;
 
 	public JavaApplicationWizard() {
 	}
 
-	public JavaApplicationWizard(List launcheables) {
+	public JavaApplicationWizard(Object[] launcheables) {
 		fLauncheables= launcheables;
 	}
 
@@ -62,8 +62,8 @@ public class JavaApplicationWizard extends Wizard implements ILaunchWizard {
 	/**
 	 * @see ILauncher#getDelegate()
 	 */
-	protected JavaApplicationLauncher getLauncher() {
-		return (JavaApplicationLauncher) fLauncher.getDelegate();
+	protected JavaApplicationLauncherDelegate getLauncher() {
+		return (JavaApplicationLauncherDelegate) fLauncher.getDelegate();
 	}
 
 	/**
@@ -76,7 +76,7 @@ public class JavaApplicationWizard extends Wizard implements ILaunchWizard {
 			fLauncheables= getLauncher().getLaunchableElements(selection, fMode);
 		}
 		if (fLauncheables == null) {
-			fLauncheables= Collections.EMPTY_LIST;
+			fLauncheables= new Object[0];
 		}
 		setNeedsProgressMonitor(true);
 		setWindowTitle(DebugUIUtils.getResourceString("java_application_wizard.title"));

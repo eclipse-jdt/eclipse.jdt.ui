@@ -523,13 +523,13 @@
 
 <extension point = "org.eclipse.debug.core.launchers">
 	<launcher
-	    id="org.eclipse.jdt.ui.launcher.JavaApplicationLauncher"
-	   	class="org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncher"
-	  	modes="run, debug"
+	    id="org.eclipse.jdt.ui.launcher.JavaApplicationLauncherDelegate"
+	   	class="org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncherDelegate"
 	  	labelProvider="org.eclipse.jdt.internal.ui.launcher.LauncherLabelProvider"
 		description="%launcher.description"
 	  	wizard="org.eclipse.jdt.internal.debug.ui.JavaApplicationWizard"
 	  	icon = "icons/full/ctool16/java_app.gif"
+	  	modes="run, debug"
  	  	label= "%launcher.label"/>
    <launcher
 		id="org.eclipse.jdt.ui.launcher.JDIAttachLauncher"
@@ -540,8 +540,8 @@
 		icon = "icons/full/ctool16/java_attach.gif"
    		modes="debug" />
    	<launcher
-		id="org.eclipse.jdt.ui.launcher.ScrapbookLauncher"
-		class="org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookLauncher"
+		id="org.eclipse.jdt.ui.launcher.ScrapbookLauncherDelegate"
+		class="org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookLauncherDelegate"
 		label="%scrapbookLauncher.label"
 		public="false"
    		modes="debug" />

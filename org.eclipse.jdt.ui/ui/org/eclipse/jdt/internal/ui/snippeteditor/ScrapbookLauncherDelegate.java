@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncher;
+import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncherDelegate;
 import org.eclipse.jdt.internal.ui.launcher.JavaLaunchUtils;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.ProjectSourceLocator;
@@ -45,7 +45,7 @@ import org.eclipse.jdt.launching.VMRunnerResult;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebugEventListener {
+public class ScrapbookLauncherDelegate extends JavaApplicationLauncherDelegate implements IDebugEventListener {
 	
 	IBreakpoint fMagicBreakpoint;
 	DebugException fDebugException;
@@ -55,7 +55,7 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 	HashMap fVMsToScrapbooks = new HashMap(10);
 	HashMap fVMsToFilters = new HashMap(10);
 	
-	public ScrapbookLauncher() {
+	public ScrapbookLauncherDelegate() {
 		DebugPlugin.getDefault().addDebugEventListener(this);
 	}
 	
@@ -71,14 +71,14 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 		return me;
 	}
 	
-	public static ScrapbookLauncher getDefault() {
-		return (ScrapbookLauncher)getLauncher().getDelegate();
+	public static ScrapbookLauncherDelegate getDefault() {
+		return (ScrapbookLauncherDelegate)getLauncher().getDelegate();
 	}
 	
 	/**
-	 *	@see ILauncher#launch
+	 *	@see JavaApplicationLauncher#launchElement
 	 */
-	public boolean launch(Object runnable, String mode, ILauncher launcher) {
+	protected boolean launchElement(Object runnable, String mode, ILauncher launcher) {
 		
 		if (!(runnable instanceof IFile)) {
 			showNoPageDialog();
@@ -117,11 +117,10 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 		return doLaunch(javaProject, mode, page, classPath, launcher);
 	}
 
-	protected boolean doLaunch(IJavaProject p, String mode, IFile page, String[] classPath, ILauncher launcherProxy) {
+	private boolean doLaunch(IJavaProject p, String mode, IFile page, String[] classPath, ILauncher launcherProxy) {
 		try {
-			IVMRunner launcher= getJavaLauncher(p, mode);
-			if (launcher == null) {
-				showNoLauncherDialog();
+			IVMRunner runner= getVMRunner(p, mode);
+			if (runner == null) {
 				return false;
 			}
 			
@@ -147,7 +146,7 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 				return false;
 			}
 			
-			VMRunnerResult result= launcher.run(config);
+			VMRunnerResult result= runner.run(config);
 			if (result != null) {
 				IDebugTarget dt = result.getDebugTarget();
 				IBreakpoint magicBreakpoint = createMagicBreakpoint(getMainType(p));
@@ -189,13 +188,10 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 		return null;
 	}
 		
-	/**
-	 * Returns a collection of elements this launcher is capable of launching
-	 * in the specified mode based on the given selection. If this launcher cannot launch any
-	 * elements in the current selection, an empty collection or <code>null</code>
-	 * is returned.
+	/*
+	 * @see JavaApplictionLauncher#getLaunchableElements
 	 */
-	public List getLaunchableElements(IStructuredSelection selection, String mode) {
+	public Object[] getLaunchableElements(IStructuredSelection selection, String mode) {
 		if (mode.equals(ILaunchManager.DEBUG_MODE)) {
 			if (!selection.isEmpty()) {
 				ArrayList list = new ArrayList(1);
@@ -206,10 +202,10 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 						list.add(o);
 					}
 				}
-				return list;
+				return list.toArray();
 			}
 		} 
-		return new ArrayList(0);
+		return new Object[0];
 	}
 
 	public void handleDebugEvent(DebugEvent event) {
