@@ -18,11 +18,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.operation.IThreadListener;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -33,8 +35,9 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
  * so that is can be executed inside <code>IRunnableContext</code>. <code>OperationCanceledException</code> 
  * thrown by the adapted runnable are caught and re-thrown as a <code>InterruptedException</code>.
  */
-public class WorkbenchRunnableAdapter implements IRunnableWithProgress {
+public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadListener {
 	
+	private boolean fTransfer= false;
 	private IWorkspaceRunnable fWorkspaceRunnable;
 	private ISchedulingRule fRule;
 	
@@ -53,8 +56,27 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress {
 		fRule= rule;
 	}
 	
+	/**
+	 * Runs a workspace runnable with the given lock or <code>null</code> to run with no lock at all.
+	 * @param transfer <code>true</code> if the rule is to be transfered 
+	 *  to the model context thread. Otherwise <code>false</code>
+	 */
+	public WorkbenchRunnableAdapter(IWorkspaceRunnable runnable, ISchedulingRule rule, boolean transfer) {
+		fWorkspaceRunnable= runnable;
+		fRule= rule;
+		fTransfer= transfer;
+	}
+	
 	public ISchedulingRule getSchedulingRule() {
 		return fRule;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void threadChange(Thread thread) {
+		if (fTransfer)
+			Platform.getJobManager().transferRule(fRule, thread);
 	}
 
 	/*
@@ -103,4 +125,3 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress {
 		// TODO: should block until user pressed 'to background'
 	}
 }
-
