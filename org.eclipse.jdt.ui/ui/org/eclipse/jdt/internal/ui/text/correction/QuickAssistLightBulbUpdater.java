@@ -33,7 +33,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.texteditor.DefaultAnnotation;
+import org.eclipse.ui.texteditor.AnnotationLayerLookup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -61,7 +61,7 @@ public class QuickAssistLightBulbUpdater {
 		private Image fImage;
 		
 		public AssistAnnotation() {
-			setLayer(DefaultAnnotation.ERROR_LAYER + 1);
+			setLayer(AnnotationLayerLookup.ERROR_LAYER + 1);
 		}
 		
 		private Image getImage() {

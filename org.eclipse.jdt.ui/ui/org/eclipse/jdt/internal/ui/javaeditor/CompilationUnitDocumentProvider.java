@@ -58,7 +58,7 @@ import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
-import org.eclipse.ui.texteditor.DefaultAnnotation;
+import org.eclipse.ui.texteditor.AnnotationLayerLookup;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
@@ -134,16 +134,16 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				
 				if (IProblem.Task == fProblem.getID()) {
 					setType(JavaMarkerAnnotation.TASK_ANNOTATION_TYPE);
-					setLayer(DefaultAnnotation.TASK_LAYER + 1);
+					setLayer(AnnotationLayerLookup.TASK_LAYER + 1);
 				} else if (fProblem.isWarning()) {
 					setType(JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE);
-					setLayer(DefaultAnnotation.WARNING_LAYER + 1);
+					setLayer(AnnotationLayerLookup.WARNING_LAYER + 1);
 				} else if (fProblem.isError()) {
 					setType(JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE);
-					setLayer(DefaultAnnotation.ERROR_LAYER + 1);
+					setLayer(AnnotationLayerLookup.ERROR_LAYER + 1);
 				} else {
 					setType(JavaMarkerAnnotation.INFO_ANNOTATION_TYPE);
-					setLayer(DefaultAnnotation.INFO_LAYER + 1);
+					setLayer(AnnotationLayerLookup.INFO_LAYER + 1);
 				}
 			}
 			
