@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
@@ -25,6 +26,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -383,7 +385,31 @@ public class ASTRewriteClear extends ASTVisitor {
 			}
 			clearList(node.superInterfaceTypes());
 		}
-		
+
+		clearList(node.bodyDeclarations());
+		return true;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(EnumDeclaration)
+	 */
+	public boolean visit(EnumDeclaration node) {
+		if (isInserted(node.getJavadoc())) {
+			node.setJavadoc(null);
+		}
+		clearList(node.superInterfaceTypes());
+		clearList(node.bodyDeclarations());
+		clearList(node.enumConstants());
+		return true;
+	}
+
+	/*
+	 * @see ASTVisitor#visit(AnnotationTypeDeclaration)
+	 */
+	public boolean visit(AnnotationTypeDeclaration node) {
+		if (isInserted(node.getJavadoc())) {
+			node.setJavadoc(null);
+		}
 		clearList(node.bodyDeclarations());
 		return true;
 	}
