@@ -248,6 +248,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			ISourceReference element= computeHighlightRangeSourceReference();
 			synchronizeOutlinePage(element);
 			setSelection(element, false);
+			updateStatusLine();
 		}
 	}
 		
@@ -2503,57 +2504,85 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		super.configureSourceViewerDecorationSupport(support);
 	}
 	
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#gotoMarker(org.eclipse.core.resources.IMarker)
+	 */
+	public void gotoMarker(IMarker marker) {
+		if (!isActivePart())
+			super.gotoMarker(marker);
+	}
+	
 	/**
 	 * Jumps to the next enabled annotation according to the given direction.
 	 * An annotation type is enabled if it is configured to be in the
 	 * Next/Previous tool bar drop down menu and if it is checked.
+	 * 
+	 * @param forward <code>true</code> if search direction is forward, <code>false</code> if backward
 	 */
 	public void gotoAnnotation(boolean forward) {
-		
-		ISelectionProvider provider= getSelectionProvider();
-		
-		ITextSelection s= (ITextSelection) provider.getSelection();
-		Position annotationPosition= new Position(0, 0);
-		Annotation nextAnnotation= getNextAnnotation(s.getOffset(), s.getLength(),forward, annotationPosition);
-		
-		setStatusLineErrorMessage(null);
-
-		if (nextAnnotation != null) {
-			
-			IMarker marker= null;
-			if (nextAnnotation instanceof MarkerAnnotation)
-				marker= ((MarkerAnnotation) nextAnnotation).getMarker();
-			else if (nextAnnotation instanceof IJavaAnnotation) {
-				Iterator e= ((IJavaAnnotation)nextAnnotation).getOverlaidIterator();
-				if (e != null) {
-					while (e.hasNext()) {
-						Object o= e.next();
-						if (o instanceof MarkerAnnotation) {
-							marker= ((MarkerAnnotation) o).getMarker();
-							break;
-						}
+		ITextSelection selection= (ITextSelection) getSelectionProvider().getSelection();
+		Position position= new Position(0, 0);
+		if (true /* delayed */) {
+			getNextAnnotation(selection.getOffset(), selection.getLength(), forward, position);
+			selectAndReveal(position.getOffset(), position.getLength());
+		} else /* no delay */ {
+			Annotation annotation= getNextAnnotation(selection.getOffset(), selection.getLength(), forward, position);
+			setStatusLineErrorMessage(null);
+			if (annotation != null) {
+				updateAnnotationViews(annotation);
+				selectAndReveal(position.getOffset(), position.getLength());
+				if (annotation instanceof IJavaAnnotation && ((IJavaAnnotation)annotation).isProblem())
+					setStatusLineErrorMessage(((IJavaAnnotation)annotation).getMessage());
+			}
+		}
+	}
+	
+	/**
+	 * Updates the annotation views that show the given annotation.
+	 * 
+	 * @param annotation the annotation
+	 */
+	private void updateAnnotationViews(Annotation annotation) {
+		IMarker marker= null;
+		if (annotation instanceof MarkerAnnotation)
+			marker= ((MarkerAnnotation) annotation).getMarker();
+		else if (annotation instanceof IJavaAnnotation) {
+			Iterator e= ((IJavaAnnotation) annotation).getOverlaidIterator();
+			if (e != null) {
+				while (e.hasNext()) {
+					Object o= e.next();
+					if (o instanceof MarkerAnnotation) {
+						marker= ((MarkerAnnotation) o).getMarker();
+						break;
 					}
 				}
 			}
+		}
 			
-			if (marker != null) {
-				try {
-					boolean isProblem= marker.isSubtypeOf(IMarker.PROBLEM);
-					IWorkbenchPage page= getSite().getPage();
-					IViewPart view= view= page.findView(isProblem ? IPageLayout.ID_PROBLEM_VIEW: IPageLayout.ID_TASK_LIST); //$NON-NLS-1$  //$NON-NLS-2$
-					Method method= view.getClass().getMethod("setSelection", new Class[] { IStructuredSelection.class, boolean.class}); //$NON-NLS-1$
-					method.invoke(view, new Object[] {new StructuredSelection(marker), Boolean.TRUE });
-				} catch (CoreException x) {
-				} catch (NoSuchMethodException x) {
-				} catch (IllegalAccessException x) {
-				} catch (InvocationTargetException x) {
-				}
-				// ignore, don't update any of the lists, just set statusline
+		if (marker != null) {
+			try {
+				boolean isProblem= marker.isSubtypeOf(IMarker.PROBLEM);
+				IWorkbenchPage page= getSite().getPage();
+				IViewPart view= view= page.findView(isProblem ? IPageLayout.ID_PROBLEM_VIEW: IPageLayout.ID_TASK_LIST); //$NON-NLS-1$  //$NON-NLS-2$
+				Method method= view.getClass().getMethod("setSelection", new Class[] { IStructuredSelection.class, boolean.class}); //$NON-NLS-1$
+				method.invoke(view, new Object[] {new StructuredSelection(marker), Boolean.TRUE });
+			} catch (CoreException x) {
+			} catch (NoSuchMethodException x) {
+			} catch (IllegalAccessException x) {
+			} catch (InvocationTargetException x) {
 			}
-			
-			selectAndReveal(annotationPosition.getOffset(), annotationPosition.getLength());
-			if (nextAnnotation instanceof IJavaAnnotation && ((IJavaAnnotation)nextAnnotation).isProblem())
-				setStatusLineErrorMessage(((IJavaAnnotation)nextAnnotation).getMessage());
+			// ignore exceptions, don't update any of the lists, just set statusline
+		}			
+	}
+	
+	protected void updateStatusLine() {
+		ITextSelection selection= (ITextSelection) getSelectionProvider().getSelection();
+		Annotation annotation= getAnnotation(selection.getOffset(), selection.getLength());
+		setStatusLineErrorMessage(null);
+		if (annotation != null) {
+			updateAnnotationViews(annotation);
+			if (annotation instanceof IJavaAnnotation && ((IJavaAnnotation)annotation).isProblem())
+				setStatusLineErrorMessage(((IJavaAnnotation)annotation).getMessage());
 		}
 	}
 	
@@ -2672,10 +2701,20 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			return false;	
 		}
 	}
-
-
-
+		
+	/**
+	 * Returns the annotation closest to the given range respecting the given
+	 * direction. If an annotation is found, the annotations current position
+	 * is copied into the provided annotation position.
+	 * 
+	 * @param offset the region offset
+	 * @param length the region length
+	 * @param forward <code>true</code> for forwards, <code>false</code> for backward
+	 * @param annotationPosition the position of the found annotation
+	 * @return the found annotation
+	 */
 	private Annotation getNextAnnotation(int offset, int length, boolean forward, Position annotationPosition) {
+		
 		Annotation nextAnnotation= null;
 		Position nextAnnotationPosition= null;
 		Annotation containingAnnotation= null;
@@ -2694,34 +2733,10 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			Annotation a= (Annotation) e.next();
 			Object type;
 			if (a instanceof IJavaAnnotation)
-				type= ((IJavaAnnotation)a).getAnnotationType();
+				type= ((IJavaAnnotation) a).getAnnotationType();
 			else
 				type= access.getType(a);
-			
-			Preferences workbenchTextEditorPrefStore= Platform.getPlugin("org.eclipse.ui.workbench.texteditor").getPluginPreferences(); //$NON-NLS-1$
-			Iterator iter= getAnnotationPreferences().getAnnotationPreferences().iterator();
-			boolean isNavigationTarget= false;
-			while (iter.hasNext()) {
-				AnnotationPreference annotationPref= (AnnotationPreference)iter.next();
-				if (annotationPref.getAnnotationType().equals(type)) {
-					String key;
-					/*
-					 * Fixes bug 41689
-					 * This code can be simplified if we decide that
-					 * we don't allow to use different settings for go to
-					 * previous and go to next annotation.
-					 */
-					key= annotationPref.getIsGoToNextNavigationTargetKey();
-//					if (forward)
-//						key= annotationPref.getIsGoToNextNavigationTargetKey();
-//					else
-//						key= annotationPref.getIsGoToPreviousNavigationTargetKey();
-					if (key != null)
-						isNavigationTarget= workbenchTextEditorPrefStore.getBoolean(key);
-					break;
-				}
-				annotationPref= null;
-			}
+			boolean isNavigationTarget= isNavigationTargetType(type);
 			
 			if ((a instanceof IJavaAnnotation) && ((IJavaAnnotation)a).hasOverlay() || !isNavigationTarget)
 				continue;
@@ -2755,8 +2770,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					containingAnnotationPosition= p;
 					if (length == p.length)
 						currentAnnotation= true;
+				}
 			}
-		}
 		}
 		if (containingAnnotationPosition != null && (!currentAnnotation || nextAnnotation == null)) {
 			annotationPosition.setOffset(containingAnnotationPosition.getOffset());
@@ -2771,6 +2786,60 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		return nextAnnotation;
 	}
 	
+	/**
+	 * Returns the annotation overlapping with the given range or <code>null</code>.
+	 * 
+	 * @param offset the region offset
+	 * @param length the region length
+	 * @return the found annotation or <code>null</code>
+	 * @since 3.0
+	 */
+	private Annotation getAnnotation(int offset, int length) {
+		IAnnotationAccess access= getAnnotationAccess();
+		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
+		Iterator e= new JavaAnnotationIterator(model, true, true);
+		while (e.hasNext()) {
+			Annotation a= (Annotation) e.next();
+			if (a instanceof IJavaAnnotation) {
+				IJavaAnnotation annotation= (IJavaAnnotation) a;
+				if (annotation.hasOverlay() || !isNavigationTargetType(annotation.getAnnotationType()))
+					continue;
+			} else if (!isNavigationTargetType(access.getType(a)))
+				continue;
+				
+			Position p= model.getPosition(a);
+			if (p != null && p.overlapsWith(offset, length))
+				return a;
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Returns whether the given annotation type is configured as a target type
+	 * for the "Go to Next/Previous Annotation" actions
+	 * 
+	 * @param type the annotation type
+	 * @return <code>true</code> if this is a target type, <code>false</code>
+	 *            otherwise
+	 * @since 3.0
+	 */
+	private boolean isNavigationTargetType(Object type) {
+		Preferences preferences= Platform.getPlugin("org.eclipse.ui.workbench.texteditor").getPluginPreferences(); //$NON-NLS-1$
+		Iterator i= getAnnotationPreferences().getAnnotationPreferences().iterator();
+		while (i.hasNext()) {
+			AnnotationPreference annotationPref= (AnnotationPreference) i.next();
+			if (annotationPref.getAnnotationType().equals(type)) {
+//				See bug 41689
+//				String key= forward ? annotationPref.getIsGoToNextNavigationTargetKey() : annotationPref.getIsGoToPreviousNavigationTargetKey();
+				String key= annotationPref.getIsGoToNextNavigationTargetKey();
+				if (key != null && preferences.getBoolean(key))
+					return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Computes and returns the source reference that includes the caret and
 	 * serves as provider for the outline page selection and the editor range
