@@ -10,16 +10,12 @@ import java.util.Comparator;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.dom.ASTNode;
 
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
-
 public class SourceRange implements ISourceRange{
 	
 	private int fOffset;
 	private int fLength;
 
 	public SourceRange(int offset, int length){
-		Assert.isTrue(offset >= 0);
-		Assert.isTrue(length >= 0);
 		fLength= length;
 		fOffset= offset;
 	}
@@ -62,5 +58,21 @@ public class SourceRange implements ISourceRange{
 		Arrays.sort(ranges, comparator);
 		return ranges;
 	}
+
+    /*
+     * @see Object#equals(Object)
+     */
+    public boolean equals(Object obj) {
+    	if (! (obj instanceof ISourceRange))
+	        return false;
+	    return ((ISourceRange)obj).getOffset() == fOffset && ((ISourceRange)obj).getLength() == fLength;
+    }
+
+    /*
+     * @see Object#hashCode()
+     */
+    public int hashCode() {
+        return fLength ^ fOffset;
+    }
 }
 
