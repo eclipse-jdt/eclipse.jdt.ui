@@ -1,0 +1,273 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.jdt.internal.corext.refactoring.structure.constraints;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Type;
+
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariableComparer;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CustomHashtable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IElementComparer;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintComparer;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+
+/**
+ * Type constraints model to hold all type constraints to replace type occurrences by a given supertype.
+ * 
+ * @since 3.1
+ */
+public final class SuperTypeConstraintsModel {
+
+	/** Custom hashed set implementation */
+	private static class HashedSet implements Set {
+
+		/** The implementation */
+		private final CustomHashtable fImplementation;
+
+		/**
+		 * Creates a new hashed set.
+		 * 
+		 * @param comparer the element comparer to use
+		 */
+		public HashedSet(final IElementComparer comparer) {
+			Assert.isNotNull(comparer);
+			fImplementation= new CustomHashtable(comparer);
+		}
+
+		/*
+		 * @see java.util.Set#add(java.lang.Object)
+		 */
+		public final boolean add(final Object object) {
+			return fImplementation.put(object, object) == null;
+		}
+
+		/*
+		 * @see java.util.Set#addAll(java.util.Collection)
+		 */
+		public final boolean addAll(final Collection collection) {
+			throw new UnsupportedOperationException();
+		}
+
+		/*
+		 * @see java.util.Set#clear()
+		 */
+		public final void clear() {
+			for (Enumeration enumeration= fImplementation.keys(); enumeration.hasMoreElements();)
+				fImplementation.remove(enumeration.nextElement());
+		}
+
+		/*
+		 * @see java.util.Set#contains(java.lang.Object)
+		 */
+		public final boolean contains(final Object object) {
+			return fImplementation.containsKey(object);
+		}
+
+		/*
+		 * @see java.util.Set#containsAll(java.util.Collection)
+		 */
+		public final boolean containsAll(final Collection collection) {
+			for (final Iterator iterator= collection.iterator(); iterator.hasNext();)
+				if (!fImplementation.containsKey(iterator.next()))
+					return false;
+			return true;
+		}
+
+		/*
+		 * @see java.util.Set#isEmpty()
+		 */
+		public boolean isEmpty() {
+			return fImplementation.size() == 0;
+		}
+
+		/*
+		 * @see java.util.Set#iterator()
+		 */
+		public final Iterator iterator() {
+			final Enumeration enumeration= fImplementation.keys();
+			return new Iterator() {
+
+				public final boolean hasNext() {
+					return enumeration.hasMoreElements();
+				}
+
+				public final Object next() {
+					return enumeration.nextElement();
+				}
+
+				public final void remove() {
+					throw new UnsupportedOperationException();
+				}
+			};
+		}
+
+		/*
+		 * @see java.util.Set#remove(java.lang.Object)
+		 */
+		public final boolean remove(final Object object) {
+			return fImplementation.remove(object) != null;
+		}
+
+		/*
+		 * @see java.util.Set#removeAll(java.util.Collection)
+		 */
+		public final boolean removeAll(final Collection collection) {
+			throw new UnsupportedOperationException();
+		}
+
+		/*
+		 * @see java.util.Set#retainAll(java.util.Collection)
+		 */
+		public final boolean retainAll(final Collection collection) {
+			throw new UnsupportedOperationException();
+		}
+
+		/*
+		 * @see java.util.Set#size()
+		 */
+		public final int size() {
+			return fImplementation.size();
+		}
+
+		/*
+		 * @see java.util.Set#toArray()
+		 */
+		public final Object[] toArray() {
+			throw new UnsupportedOperationException();
+		}
+
+		/*
+		 * @see java.util.Set#toArray(java.lang.Object[])
+		 */
+		public final Object[] toArray(final Object[] array) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	/** The usage data */
+	private static final String DATA_USAGE= "us"; //$NON-NLS-1$
+
+	/** The type environment to use */
+	private static TypeEnvironment fEnvironment= new TypeEnvironment();
+
+	/**
+	 * Returns the usage of the specified constraint variable.
+	 * 
+	 * @param variable the constraint variable
+	 * @return the usage of the constraint variable (element type: <code>ITypeConstraint2</code>)
+	 */
+	public static Collection getUsage(final ConstraintVariable2 variable) {
+		Assert.isNotNull(variable);
+		final Object data= variable.getData(DATA_USAGE);
+		if (data == null)
+			return Collections.EMPTY_LIST;
+		else if (data instanceof List)
+			return Collections.unmodifiableList((List) data);
+		else
+			return Collections.singletonList(data);
+	}
+
+	/**
+	 * Is the type represented by the specified binding a constrained type?
+	 * 
+	 * @param binding the binding to check
+	 * @return <code>true</code> if it is constrained, <code>false</code> otherwise
+	 */
+	private static boolean isConstrainedType(final ITypeBinding binding) {
+		Assert.isNotNull(binding);
+		return !binding.isPrimitive();
+	}
+
+	/**
+	 * Is the type represented by the specified binding a generic type?
+	 * 
+	 * @param binding the binding to check
+	 * @return <code>true</code> if it is generic, <code>false</code> otherwise
+	 */
+	private static boolean isGenericType(final ITypeBinding binding) {
+		Assert.isNotNull(binding);
+		return binding.isGenericType() || binding.isParameterizedType() || binding.isRawType();
+	}
+
+	/** The cast variables (element type: <code>CastVariable2</code>) */
+	private final Collection fCastVariables= new ArrayList();
+
+	/** The set of constraint variables (element type: <code>ConstraintVariable2</code>) */
+	private final Set fConstraintVariables= new HashedSet(new ConstraintVariableComparer());
+
+	/** The set of type constraints (element type: <code>ITypeConstraint2</code>) */
+	private final Set fTypeConstraints= new HashedSet(new TypeConstraintComparer());
+
+	/**
+	 * Returns the cast variables of this model.
+	 * 
+	 * @return the cast variables (element type: <code>CastVariable2</code>)
+	 */
+	public final Collection getCastVariables() {
+		return Collections.unmodifiableCollection(fCastVariables);
+	}
+
+	/**
+	 * Returns the constraint variables of this model.
+	 * 
+	 * @return the constraint variables (element type: <code>ConstraintVariable2</code>)
+	 */
+	public final Collection getConstraintVariables() {
+		return Collections.unmodifiableCollection(fConstraintVariables);
+	}
+
+	/**
+	 * Creates a cast variable.
+	 * 
+	 * @param expression the cast expression
+	 * @param variable the associated constraint variable
+	 */
+	public final void makeCastVariable(final CastExpression expression, final TypeConstraintVariable2 variable) {
+		Assert.isNotNull(expression);
+		Assert.isNotNull(variable);
+		fCastVariables.add(new CastVariable2(fEnvironment.create(expression.resolveTypeBinding()), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(expression), expression), variable));
+	}
+
+	public TypeVariable2 makeTypeVariable(final Type type) {
+		Assert.isNotNull(type);
+		final ITypeBinding binding= type.resolveBinding();
+		if (isConstrainedType(binding)) {
+//
+//			ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(type);
+//			CompilationUnitRange range= new CompilationUnitRange(cu, type);
+//			TypeVariable2 typeVariable= new TypeVariable2(fEnvironment.create(binding), range);
+//			TypeVariable2 storedCv= (TypeVariable2) storedCv(typeVariable);
+//			if (storedCv == typeVariable) {
+//				fCuScopedConstraintVariables.add(storedCv);
+//				if (isGenericType(binding))
+//					makeElementVariables(storedCv, binding);
+//			}
+//			return storedCv;
+		}
+		return null;
+	}
+}
