@@ -2673,7 +2673,7 @@ public class PreferenceConstants {
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, new RGB(192, 192,192));
 
 		store.setDefault(PreferenceConstants.EDITOR_CURRENT_LINE, true);
-		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_CURRENT_LINE_COLOR, new RGB(225, 235, 224));
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_CURRENT_LINE_COLOR, new RGB(232, 242, 254));
 
 		store.setDefault(PreferenceConstants.EDITOR_PRINT_MARGIN, false);
 		store.setDefault(PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN, 80);

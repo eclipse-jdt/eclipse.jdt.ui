@@ -593,7 +593,7 @@
             verticalRulerPreferenceKey="occurrenceIndicationInVerticalRuler"
             verticalRulerPreferenceValue="false"
             colorPreferenceKey="occurrenceIndicationColor"
-            colorPreferenceValue="180,207,205"
+            colorPreferenceValue="255,248,147"
             presentationLayer="3"
             showInNextPrevDropdownToolbarActionKey="showOccurrenceInNextPrevDropdownToolbarAction"
             showInNextPrevDropdownToolbarAction="true"
