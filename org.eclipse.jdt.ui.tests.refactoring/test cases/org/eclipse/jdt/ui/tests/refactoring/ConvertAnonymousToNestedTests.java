@@ -48,7 +48,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	}
 	
 	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
+		return new Java15Setup(new TestSuite(clazz));
 	}
 	
 	public static Test setUpTest(Test someTest) {
@@ -119,7 +119,39 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		assertEqualLines(getFileContents(getTestFileName(true, false)), newcu.getSource());
 	}
-	
+
+	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean makeFinal, boolean makeStatic, String className, int visibility) throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
+		ConvertAnonymousToNestedRefactoring ref= ConvertAnonymousToNestedRefactoring.create(cu, selection.getOffset(), selection.getLength());
+
+		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());	
+		if (preconditionResult.isOK())
+			preconditionResult= null;
+		assertEquals("activation was supposed to be successful", null, preconditionResult);
+
+		ref.setClassName(className);
+		ref.setDeclareFinal(makeFinal);
+		ref.setDeclareStatic(makeStatic);
+		ref.setVisibility(visibility);
+		
+		if (preconditionResult == null)
+			preconditionResult= ref.checkFinalConditions(new NullProgressMonitor());
+		else	
+			preconditionResult.merge(ref.checkFinalConditions(new NullProgressMonitor()));
+		if (preconditionResult.isOK())
+			preconditionResult= null;
+		assertEquals("precondition was supposed to pass", null, preconditionResult);
+		
+		performChange(ref, false);
+		
+		IPackageFragment pack= (IPackageFragment)cu.getParent();
+		String newCuName= getSimpleTestFileName(true, true);
+		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
+		assertTrue(newCuName + " does not exist", newcu.exists());
+		assertEqualLines(getFileContents(getTestFileName(true, false)), newcu.getSource());
+	}
+
 	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean makeFinal, String className, int visibility, int expectedSeverity) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
@@ -293,4 +325,32 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 //        printTestDisabledMessage("disabled: bug 43360");
     	helper1(10, 27, 10, 27, true, "Inner", Modifier.PRIVATE);   
     }
+
+	public void testGenerics0() throws Exception{
+		helper1(5, 20, 5, 20, true, "Inner", Modifier.PRIVATE);
+	}
+
+	public void testGenerics1() throws Exception{
+		helper1(5, 20, 5, 20, true, "Inner", Modifier.PUBLIC);
+	}
+
+	public void testGenerics2() throws Exception{
+		helper1(5, 20, 5, 20, true, "Inner", Modifier.PUBLIC);
+	}
+
+	public void testGenerics3() throws Exception{
+		helper1(5, 20, 5, 20, false, "Inner", Modifier.PUBLIC);
+	}
+
+	public void testGenerics4() throws Exception{
+		helper1(7, 20, 7, 20, true, "Inner", Modifier.PRIVATE);
+	}
+
+	public void testGenerics5() throws Exception{
+		helper1(7, 20, 7, 20, true, "Inner", Modifier.PRIVATE);
+	}
+
+	public void testGenerics6() throws Exception{
+		helper1(7, 20, 7, 20, true, true, "Inner", Modifier.PRIVATE);
+	}
 }
