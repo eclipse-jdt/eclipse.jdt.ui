@@ -157,20 +157,44 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 
 			} else if (kind == IJavaElementDelta.CHANGED) {
 				//just refresh 
+				Object toBeRefreshed= element;
 				if (element instanceof IPackageFragment) {
 					IPackageFragment pkgFragment= (IPackageFragment)element;
 					LogicalPackage logicalPkg= findLogicalPackage(pkgFragment);
+					//deal with packages that have been filtered and are now visible
 					if (logicalPkg != null)
-						postRefresh(logicalPkg);
+						toBeRefreshed= findElementToRefresh(logicalPkg);
 					else
-						postRefresh(pkgFragment);
-				} else
-					postRefresh(element);
+						toBeRefreshed= findElementToRefresh(pkgFragment);
+					
+				}
+				postRefresh(toBeRefreshed);
 			}
 			//in this view there will be no children of PackageFragment to refresh
 			return;
 		}
 		processAffectedChildren(delta);
+	}
+	
+	//test to see if element to be refreshed is being filtered out
+	//and if so refresh the viewers input element (JavaProject or PackageFragmentRoot)
+	private Object findElementToRefresh(IPackageFragment fragment) {
+		if (fViewer.testFindItem(fragment) == null) {
+			if(fProjectViewState)
+				return fragment.getJavaProject();
+			else return fragment.getParent();
+		} 
+		return fragment;
+	}
+	
+	//test to see if element to be refreshed is being filtered out
+	//and if so refresh the viewers input element (JavaProject or PackageFragmentRoot)
+	private Object findElementToRefresh(LogicalPackage logicalPackage) {
+		if (fViewer.testFindItem(logicalPackage) == null) {
+			IPackageFragment fragment= logicalPackage.getFragments()[0];
+			return fragment.getJavaProject();
+		}
+		return logicalPackage;
 	}
 
 
@@ -181,7 +205,6 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 			processDelta(elementDelta);
 		}
 	}
-
 
 	private void postAdd(final Object child) {
 		postRunnable(new Runnable() {
