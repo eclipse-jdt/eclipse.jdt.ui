@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.Resources;
 
 public class DeleteRefactoring2 extends Refactoring{
 	
@@ -109,8 +110,12 @@ public class DeleteRefactoring2 extends Refactoring{
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		Assert.isNotNull(fDeleteQueries);//must be set before checking activation
 		pm.beginTask("", 1); //$NON-NLS-1$
+		RefactoringStatus result= new RefactoringStatus();
+		result.merge(RefactoringStatus.create(Resources.checkInSync(fResources)));
+		IResource[] javaResources= ReorgUtils2.getResources(fJavaElements);
+		result.merge(RefactoringStatus.create(Resources.checkInSync(javaResources)));
 		pm.done();
-		return new RefactoringStatus();
+		return result;
 	}
 
 	/* (non-Javadoc)
