@@ -130,7 +130,7 @@ public class CallInliner {
 		TextBuffer.release(fBuffer);
 	}
 	
-	public ImportEdit getImprtEdit() {
+	public ImportEdit getImportEdit() {
 		return fImportEdit;
 	}
 	
@@ -193,6 +193,7 @@ public class CallInliner {
 		
 		MultiTextEdit result= new MultiTextEdit();
 		fRewriter.rewriteNode(fBuffer, result, null);
+		fRewriter.removeModifications();
 		return result;
 	}
 
@@ -318,10 +319,6 @@ public class CallInliner {
 		ASTNode parent= fTargetNode.getParent();
 		int type= parent.getNodeType();
 		return type == ASTNode.METHOD_INVOCATION || (parent instanceof Expression && type != ASTNode.ASSIGNMENT);
-	}
-	
-	public void performed() {
-		fRewriter.removeModifications();
 	}
 	
 	private VariableDeclarationStatement createLocalDeclaration(ITypeBinding type, String name, Expression initializer) {

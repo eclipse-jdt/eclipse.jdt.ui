@@ -220,6 +220,9 @@ public interface IJavaHelpContextIds {
 	public static final String SEF_ERROR_WIZARD_PAGE= 								PREFIX + "self_encapsulate_field_error_wizard_page_context"; //$NON-NLS-1$
 	public static final String USE_SUPERTYPE_WIZARD_PAGE= 						PREFIX + "use_supertype_wizard_page_context"; //$NON-NLS-1$
 	public static final String USE_SUPERTYPE_ERROR_WIZARD_PAGE= 				PREFIX + "use_supertype_error_wizard_page_context"; //$NON-NLS-1$
+	public static final String INLINE_METHOD_WIZARD_PAGE=				PREFIX + "inline_method_wizard_page_context"; //$NON-NLS-1$
+	public static final String INLINE_METHOD_ERROR_WIZARD_PAGE=				PREFIX + "inline_method_error_wizard_page_context"; //$NON-NLS-1$
+	
 	// reused ui-blocks
 	public static final String BUILD_PATH_BLOCK= PREFIX + "build_paths_context"; //$NON-NLS-1$
 	public static final String SOURCE_ATTACHMENT_BLOCK= PREFIX + "source_attachment_context"; //$NON-NLS-1$

@@ -101,7 +101,7 @@ public abstract class TextChange extends AbstractTextChange {
 			fEdit= new AutoOrganizingTextEdit();
 			fAutoMode= true;
 		} else {
-			Assert.isTrue(fAutoMode);
+			Assert.isTrue(fAutoMode, "Can only add edits when in auot organizing mode"); //$NON-NLS-1$
 		}
 		for (int i= 0; i < edits.length; i++) {
 			fEdit.add(edits[i]);
@@ -114,7 +114,8 @@ public abstract class TextChange extends AbstractTextChange {
 	 * @param edit the root text edit
 	 */
 	public void setEdit(TextEdit edit) {
-		Assert.isTrue(edit != null && !fAutoMode);
+		Assert.isTrue(fEdit == null, "Root edit can only be set once"); //$NON-NLS-1$
+		Assert.isTrue(edit != null);
 		fEdit= edit;
 		fTextEditChanges=  new ArrayList(5);
 		fAutoMode= false;
@@ -135,7 +136,9 @@ public abstract class TextChange extends AbstractTextChange {
 	 * @param description the group description to be added
 	 */
 	public void addGroupDescription(GroupDescription description) {
-		Assert.isTrue(description != null && !fAutoMode);
+		Assert.isTrue(fEdit != null, "Can only add a description if a root edit exists"); //$NON-NLS-1$
+		Assert.isTrue(!fAutoMode, "Group descriptions are only supported if root edit has been set by setEdit"); //$NON-NLS-1$
+		Assert.isTrue(description != null);
 		fTextEditChanges.add(new EditChange(description, this));
 	}
 	

@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
+import org.eclipse.jdt.internal.corext.textmanipulation.UndoMemento;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -148,9 +149,16 @@ public class SourceProvider {
 		return fAnalyzer.getImplicitReceivers().size();
 	}
 	
+	public TextEdit getDeleteEdit() {
+		ASTRewrite rewriter= new ASTRewrite(fDeclaration.getParent());
+		rewriter.markAsRemoved(fDeclaration);
+		MultiTextEdit result= new MultiTextEdit();
+		rewriter.rewriteNode(fBuffer, result, null);
+		rewriter.removeModifications();
+		return result;
+	}
+	
 	public String[] getCodeBlocks(CallContext context) throws CoreException {
-		List result= new ArrayList(1);
-		
 		replaceParameterWithExpression(context.arguments);
 		updateImplicitReceivers(context);
 		makeNamesUnique(context.usedCallerNames);
@@ -190,13 +198,17 @@ public class SourceProvider {
 		root.addAll(markers);
 		TextBufferEditor editor= new TextBufferEditor(fBuffer);
 		editor.add(root);
-		editor.performEdits(null);
+		UndoMemento undo= editor.performEdits(null);
+		String[] result= getBlocks(ranges);
+		// It is faster to undo the changes than coping the buffer over and over again.
+		TextBufferEditor undoEditor= new TextBufferEditor(fBuffer);
+		undoEditor.add(undo);
+		undoEditor.performEdits(null);
 		fRewriter.removeModifications();
-		
-		return getBlocks(ranges);
+		return result;
 	}
 
-	public void replaceParameterWithExpression(String[] expressions) {
+	private void replaceParameterWithExpression(String[] expressions) {
 		for (int i= 0; i < expressions.length; i++) {
 			String expression= expressions[i];
 			ParameterData parameter= getParameterData(i);

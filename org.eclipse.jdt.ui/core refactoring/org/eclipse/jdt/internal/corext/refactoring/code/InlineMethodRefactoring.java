@@ -12,9 +12,12 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -35,8 +38,13 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * Open items:
@@ -49,6 +57,9 @@ import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
  */
 public class InlineMethodRefactoring extends Refactoring {
 
+	public static final int INLINE_ALL= ASTNode.METHOD_DECLARATION;
+	public static final int INLINE_SINGLE= ASTNode.METHOD_INVOCATION;
+
 	private ICompilationUnit fInitialCUnit;
 	private ASTNode fInitialNode;
 	private CodeGenerationSettings fCodeGenerationSettings;
@@ -56,6 +67,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	private SourceProvider fSourceProvider;
 	private TargetProvider fTargetProvider;
 	private boolean fSaveChanges;
+	private boolean fRemoveSource;
 	
 	private static final String SOURCE= "source";
 
@@ -66,13 +78,13 @@ public class InlineMethodRefactoring extends Refactoring {
 		fInitialCUnit= unit;
 		fInitialNode= node;
 		fCodeGenerationSettings= settings;
-		fChangeManager= new TextChangeManager();
 	}
 
 	public InlineMethodRefactoring(ICompilationUnit unit, MethodInvocation node, CodeGenerationSettings settings) {
 		this(unit, (ASTNode)node, settings);
 		fTargetProvider= TargetProvider.create(unit, node);
 		fSaveChanges= false;
+		fRemoveSource= false;
 	}
 
 	public InlineMethodRefactoring(ICompilationUnit unit, MethodDeclaration node, CodeGenerationSettings settings) {
@@ -80,6 +92,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		fSourceProvider= new SourceProvider(unit, node);
 		fTargetProvider= TargetProvider.create(unit, node);
 		fSaveChanges= true;
+		fRemoveSource= true;
 	}
 	
 	public static InlineMethodRefactoring create(ICompilationUnit unit, int offset, int length, CodeGenerationSettings settings) {
@@ -89,8 +102,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		if (node.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			return new InlineMethodRefactoring(unit, (MethodInvocation)node, settings);
 		} else if (node.getNodeType() == ASTNode.METHOD_DECLARATION) {
-			return null;
-			// return new InlineMethodRefactoring(unit, (MethodDeclaration)node, settings);
+			return new InlineMethodRefactoring(unit, (MethodDeclaration)node, settings);
 		}
 		return null;
 	}
@@ -102,7 +114,30 @@ public class InlineMethodRefactoring extends Refactoring {
 	public void setSaveChanges(boolean save) {
 		fSaveChanges= save;
 	}
+	
+	public boolean getRemoveSource() {
+		return fRemoveSource;
+	}
 
+	public void setDeleteSource(boolean remove) {
+		fRemoveSource= remove;
+	}
+	
+	public int getInitialMode() {
+		return fInitialNode.getNodeType();
+	}
+	
+	public RefactoringStatus setCurrentMode(int mode) throws JavaModelException {
+		Assert.isTrue(getInitialMode() == INLINE_SINGLE);
+		if (mode == INLINE_SINGLE) {
+			fTargetProvider= TargetProvider.create(fInitialCUnit, (MethodInvocation)fInitialNode);
+		} else {
+			fTargetProvider= TargetProvider.create(
+				fSourceProvider.getCompilationUnit(), fSourceProvider.getDeclaration());
+		}
+		return fTargetProvider.checkActivation(new NullProgressMonitor());
+	}
+	
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		if (fSourceProvider == null && fInitialNode.getNodeType() == ASTNode.METHOD_INVOCATION) {
@@ -116,18 +151,26 @@ public class InlineMethodRefactoring extends Refactoring {
 	}
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 2);
+		fChangeManager= new TextChangeManager();
 		RefactoringStatus result= new RefactoringStatus();
 		fSourceProvider.initialize();
-		ICompilationUnit[] units= fTargetProvider.getAffectedCompilationUnits(pm);
+		ICompilationUnit[] units= fTargetProvider.getAffectedCompilationUnits(new SubProgressMonitor(pm, 1));
+		IProgressMonitor sub= new SubProgressMonitor(pm, 1);
+		sub.beginTask("", units.length * 3);
 		for (int c= 0; c < units.length; c++) {
 			ICompilationUnit unit= units[c];
+			sub.subTask("Processing" + unit.getElementName());
 			CallInliner inliner= null;
 			try {
 				MultiTextEdit root= new MultiTextEdit();
+				CompilationUnitChange change= (CompilationUnitChange)fChangeManager.get(unit);
+				change.setSave(fSaveChanges);
+				change.setEdit(root);
 				inliner= new CallInliner(unit, fSourceProvider, fCodeGenerationSettings);
-				BodyDeclaration[] bodies= fTargetProvider.getAffectedBodyDeclarations(unit, pm);
+				BodyDeclaration[] bodies= fTargetProvider.getAffectedBodyDeclarations(unit, new SubProgressMonitor(pm, 1));
 				for (int b= 0; b < bodies.length; b++) {
-					MethodInvocation[] invocations= fTargetProvider.getInvocations(bodies[b], pm);
+					MethodInvocation[] invocations= fTargetProvider.getInvocations(bodies[b], new SubProgressMonitor(pm, 1));
 					for (int i= 0; i < invocations.length; i++) {
 						MethodInvocation invocation= invocations[i];
 						result.merge(fTargetProvider.checkInvocation(invocation, pm));
@@ -135,28 +178,44 @@ public class InlineMethodRefactoring extends Refactoring {
 							break;
 						result.merge(inliner.initialize(invocation));
 						if (!result.hasFatalError()) {
-							try {
-								root.add(inliner.perform());
-							} finally {
-								inliner.performed();
-							}
+							TextEdit edit= inliner.perform();
+							change.addGroupDescription( 
+								new GroupDescription("Inline invocation", new TextEdit[] { edit }));
+							root.add(edit);
 						}
 					}
 				}
-				CompilationUnitChange change= (CompilationUnitChange)fChangeManager.get(unit);
-				change.setSave(fSaveChanges);
-				change.setEdit(root);
 			} catch (CoreException e) {
 				throw new JavaModelException(e);
 			} finally {
 				if (inliner != null)
 					inliner.dispose();
 			}
+			sub.worked(1);
 		}
+		sub.done();
+		pm.done();
 		return result;
 	}
 		
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+		if (fRemoveSource) {
+			try {
+				TextChange change= fChangeManager.get(fSourceProvider.getCompilationUnit());
+				TextEdit delete= fSourceProvider.getDeleteEdit();
+				GroupDescription description= new GroupDescription(
+					"Delete method declaration", new TextEdit[] { delete });
+				TextEdit root= change.getEdit();
+				if (root != null) {
+					root.add(delete);
+				} else {
+					change.setEdit(delete);
+				}
+				change.addGroupDescription(description);
+			} catch (CoreException e) {
+				throw new JavaModelException(e);
+			}
+		}
 		return new CompositeChange("Inline Call", fChangeManager.getAllChanges());
 	}
 	
@@ -173,6 +232,18 @@ public class InlineMethodRefactoring extends Refactoring {
 			if (source == null) {
 				status.addFatalError("Can't inline method since it is declared in a class file");
 				return null;
+			}
+			if (!source.isWorkingCopy()) {
+				// try to find a working copy if exists.
+				// XXX: This is a layer breaker - should not access jdt.ui
+				IWorkingCopy[] workingCopies= JavaUI.getSharedWorkingCopies();
+				for (int i= 0; i < workingCopies.length; i++) {
+					IWorkingCopy wcopy= workingCopies[i];
+					if (source.equals(wcopy.getOriginalElement())) {
+						source= (ICompilationUnit)wcopy;
+						break;
+					}
+				}
 			}
 			declaration= (MethodDeclaration)JavaElementMapper.perform(method, MethodDeclaration.class);
 			if (declaration != null) {
