@@ -602,9 +602,14 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			public void keyReleased(KeyEvent event) {
 				if (event.stateMask == 0) {
 					if (event.keyCode == SWT.F5) {
+						ITypeHierarchy hierarchy= fHierarchyLifeCycle.getHierarchy();
+						if (hierarchy != null) {
+							fHierarchyLifeCycle.typeHierarchyChanged(hierarchy);
+							doTypeHierarchyChangedOnViewers(null);
+						}
 						updateHierarchyViewer(false);
 						return;
-					} else if (event.character == SWT.DEL){
+					} else if (event.character == SWT.DEL) {
 						if (fCCPActionGroup.getDeleteAction().isEnabled())
 							fCCPActionGroup.getDeleteAction().run();
 						return;	
