@@ -13,6 +13,7 @@ import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.search.ui.ISearchResultViewEntry;
+import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -43,26 +44,23 @@ public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 		setLabelDecorator(PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
 	}	
 
-
 	public String getText(Object o) {
 		fLastMarker= null;
 		IJavaElement javaElement= getJavaElement(o); // sets fLastMarker as side effect
-		boolean isAccurate= true;
-		if (fLastMarker != null && (fLastMarker.getAttribute(IJavaSearchUIConstants.ATT_ACCURACY, -1) == IJavaSearchResultCollector.POTENTIAL_MATCH))
-			isAccurate= false;
+		boolean isPotentialMatch= fLastMarker != null && fLastMarker.getAttribute(SearchUI.POTENTIAL_MATCH, false);
 		if (javaElement == null) {
 			if (fLastMarker != null) {
-				if (isAccurate) 
-					return super.getText(fLastMarker.getResource());
-				else
+				if (isPotentialMatch) 
 					return super.getText(fLastMarker.getResource()) + POTENTIAL_MATCH;
+				else
+					return super.getText(fLastMarker.getResource());
 			}
 			else
 				return ""; //$NON-NLS-1$
 		}
 		if (javaElement instanceof IImportDeclaration)
 			javaElement= ((IImportDeclaration)javaElement).getParent().getParent();
-		if (!isAccurate) 
+		if (isPotentialMatch) 
 			return super.getText(javaElement) + POTENTIAL_MATCH;
 		else
 			return super.getText(javaElement);

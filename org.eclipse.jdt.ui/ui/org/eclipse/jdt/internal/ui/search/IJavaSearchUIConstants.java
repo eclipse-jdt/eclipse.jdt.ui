@@ -11,9 +11,6 @@ public interface IJavaSearchUIConstants {
 	/** Attribute name of the Java Element handle ID in a marker */
 	static final String ATT_JE_HANDLE_ID= "org.eclipse.jdt.internal.ui.search.handleID"; //$NON-NLS-1$
 
-	/** Attribute name of a Java search result accuracy */
-	static final String ATT_ACCURACY= "org.eclipse.jdt.internal.ui.search.accuracy"; //$NON-NLS-1$
-
 	/** Attribute name for isWorkingCopy property */
 	static final String ATT_IS_WORKING_COPY= "org.eclipse.jdt.internal.ui.search.isWorkingCopy"; //$NON-NLS-1$
 }

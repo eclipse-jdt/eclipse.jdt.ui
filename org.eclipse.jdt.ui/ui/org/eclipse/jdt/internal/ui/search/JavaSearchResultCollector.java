@@ -49,7 +49,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	private static final String MATCHES= SearchMessages.getString("SearchResultCollector.matches"); //$NON-NLS-1$
 	private static final String DONE= SearchMessages.getString("SearchResultCollector.done"); //$NON-NLS-1$
 	private static final String SEARCHING= SearchMessages.getString("SearchResultCollector.searching"); //$NON-NLS-1$
-	private static final Integer POTENTIAL_MATCH_VALUE= new Integer(POTENTIAL_MATCH);
+	private static final Boolean POTENTIAL_MATCH_VALUE= new Boolean(true);
 	
 	private IProgressMonitor fMonitor;
 	private IContextMenuContributor fContextMenu;
@@ -124,7 +124,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 		attributes= new HashMap(7);
 		if (accuracy == POTENTIAL_MATCH) {
 			fPotentialMatchCount++;
-			attributes.put(IJavaSearchUIConstants.ATT_ACCURACY, POTENTIAL_MATCH_VALUE);
+			attributes.put(SearchUI.POTENTIAL_MATCH, POTENTIAL_MATCH_VALUE);
 			if (groupKey == null)
 				groupKey= "?:null"; //$NON-NLS-1$
 			else
