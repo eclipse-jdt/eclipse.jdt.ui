@@ -195,6 +195,8 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 	}
 
 	public synchronized void elementsChanged(Object[] updatedElements) {
+		if (fResult == null)
+			return;
 		for (int i= 0; i < updatedElements.length; i++) {
 			if (fResult.getMatchCount(updatedElements[i]) > 0)
 				insert(updatedElements[i], true);
