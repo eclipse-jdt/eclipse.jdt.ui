@@ -12,6 +12,10 @@ package org.eclipse.jdt.ui.leaktest;
 
 import junit.framework.TestCase;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.jdt.testplugin.util.DisplayHelper;
+
 
 
 /**
@@ -23,7 +27,60 @@ public class LeakTestCase extends TestCase {
 	public LeakTestCase(String name) {
 		super(name);
 	}
-
+	
+  	/**
+   	 * Asserts that the instance count of the given class is as expected.
+   	 * 
+	 * @param clazz the class of the instances to count
+  	 * @param expected the expected instance count
+	 */
+  	public static void assertInstanceCount(final Class clazz, final int expected) {
+		
+		DisplayHelper helper= new DisplayHelper() {
+			protected boolean condition() {
+				System.gc();
+				int count= 0;
+				try {
+					count= getInstanceCount(clazz);
+				} catch (ProfileException e) {
+					fail();
+				}
+				return count == expected;
+			}
+		};
+		assertTrue(helper.waitForCondition(JavaPlugin.getActiveWorkbenchShell().getDisplay(), 60000));
+	}
+	
+	/**
+	 * Returns the number of instances of a given class that are live (not garbage).
+	 * @param cl The class of the instances to count
+	 * @return Returns the current number of instances of the given class or <code>-1</code> if
+	 * no connection is established.
+	 * @throws ProfileException ProfileException is thrown if the request failed unexpectedly.
+	 */
+	protected static int getInstanceCount(Class cl) throws ProfileException {
+		ProfilerConnector connection= LeakTestSetup.getProfilerConnector();
+		if (connection != null)
+			return connection.getInstanceCount(cl);
+		return -1;
+	}
+	
+	/**
+	 * Returns the number of instances of a given class that are live (not garbage).
+	 * 
+	 * @param cl The class of the instances to count
+	 * @param excludedClasses the classes to exclude
+	 * @return the current number of instances of the given class or <code>-1</code> if
+	 * no connection is established.
+	 * @throws ProfileException ProfileException is thrown if the request failed unexpectedly.
+	 */
+	protected static int getInstanceCount(Class cl, Class[] excludedClasses) throws ProfileException {
+		ProfilerConnector connection= LeakTestSetup.getProfilerConnector();
+		if (connection != null)
+			return connection.getInstanceCount(cl, excludedClasses);
+		
+		return -1;
+	}
 	
 	/**
 	 * Assert that two counts are different. The method does not fail if the profile connection
@@ -75,35 +132,4 @@ public class LeakTestCase extends TestCase {
 			assertTrue(str + "instance count is not the same: (" + startCount + " / " + endCount + " )", false);
 		}
 	}
-	
-	/**
-	 * Returns the number of instances of a given class that are live (not garbage).
-	 * @param cl The class of the instances to count
-	 * @return Returns the current number of instances of the given class or <code>-1</code> if
-	 * no connection is established.
-	 * @throws ProfileException ProfileException is thrown if the request failed unexpectedly.
-	 */
-	protected int getInstanceCount(Class cl) throws ProfileException {
-		ProfilerConnector connection= LeakTestSetup.getProfilerConnector();
-		if (connection != null) {
-			return connection.getInstanceCount(cl);
-		}
-		return -1;
-	}
-	
-	/**
-	 * Returns the number of instances of a given class that are live (not garbage).
-	 * @param cl The class of the instances to count
-	 * @return Returns the current number of instances of the given class or <code>-1</code> if
-	 * no connection is established.
-	 * @throws ProfileException ProfileException is thrown if the request failed unexpectedly.
-	 */
-	protected int getInstanceCount(Class cl, Class[] excludedClasses) throws ProfileException {
-		ProfilerConnector connection= LeakTestSetup.getProfilerConnector();
-		if (connection != null) {
-			return connection.getInstanceCount(cl, excludedClasses);
-		}
-		return -1;
-	}
-	
 }

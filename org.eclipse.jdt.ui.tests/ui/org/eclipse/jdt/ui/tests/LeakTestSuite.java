@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.tests;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.ui.tests.leaks.JavaLeakTest;
+
 
 /**
  * Test for leaks
@@ -20,8 +22,10 @@ import junit.framework.TestSuite;
 public class LeakTestSuite extends TestSuite {
 
 	/**
-	 * @return Returns the suite.  This is required to
+	 * Returns the suite.  This is required to
 	 * use the JUnit Launcher.
+	 * 
+	 * @return the test suite.
 	 */
 	public static Test suite() {
 		return new LeakTestSuite();
@@ -31,7 +35,7 @@ public class LeakTestSuite extends TestSuite {
 	 * Construct the test suite.
 	 */
 	public LeakTestSuite() {
-		//addTest(JavaLeakTest.suite());
+		addTest(JavaLeakTest.suite());
 	}
 	
 }

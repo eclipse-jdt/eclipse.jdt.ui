@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.leaks;
 
+import java.io.StringBufferInputStream;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.core.resources.IFile;
 
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -24,25 +25,28 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.INewWizard;
 
+import org.eclipse.ui.editors.text.TextEditor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.ui.leaktest.LeakTestCase;
-import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.ui.leaktest.LeakTestCase;
+import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
+
 public class JavaLeakTest extends LeakTestCase {
 	
-	private IJavaProject fJProject1;
+	private IJavaProject fJProject;
 
 	private static final Class THIS= JavaLeakTest.class;
 	
@@ -59,19 +63,39 @@ public class JavaLeakTest extends LeakTestCase {
 			return new LeakTestSetup(suite);
 		}	
 	}
+	
+	public void testTextEditorClose() throws Exception {
+		IFile file= createTestFile("Test.txt");
+		internalTestEditorClose(file, TextEditor.class, false);
+	}
+	
+	public void testTextEditorCloseAll() throws Exception {
+		IFile file= createTestFile("Test.txt");
+		internalTestEditorClose(file, TextEditor.class, true);
+	}
 
+	public void testJavaEditorClose() throws Exception {
+		ICompilationUnit cu= createTestCU("Test");
+		internalTestEditorClose(cu, CompilationUnitEditor.class, false);
+	}
+	
+	public void testJavaEditorCloseAll() throws Exception {
+		ICompilationUnit cu= createTestCU("Test");
+		internalTestEditorClose(cu, CompilationUnitEditor.class, true);
+		
+	}
 
 	protected void setUp() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
+		fJProject= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		assertTrue("RT not found", JavaProjectHelper.addRTJar(fJProject) != null);
 	}
 
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fJProject1);
+		JavaProjectHelper.delete(fJProject);
 	}
 
 	private ICompilationUnit createTestCU(String typeName) throws Exception {
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack0", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -80,104 +104,57 @@ public class JavaLeakTest extends LeakTestCase {
 		return pack2.createCompilationUnit(typeName+".java", buf.toString(), false, null);
 	}
 	
-
-	public void testJavaEditorClose() throws Exception {
-		final Class cl= CompilationUnitEditor.class;
-		
-		// known reference via a ThreadLocal ref to JavaReconciler.BackgroundThread
-		final Class[] excludedClasses= new Class[] { JavaReconciler.class };
-
-		// count before opening the editor
-		final int count1= getInstanceCount(cl, excludedClasses);
-		
-		// open an editor on a CU
-		ICompilationUnit unit= createTestCU("List1");
-		IEditorPart part= EditorUtility.openInEditor(unit);
-		// make sure the received instance has the type we're expecting
-		assertEquals(part.getClass(), cl);
-
-		int count2= getInstanceCount(cl, excludedClasses);
-		assertDifferentCount("JavaEditor", count1, count2);
-		
-		// close the editor
-		boolean res= JavaPlugin.getActivePage().closeEditor(part, false);
-		part= null;
-		assertTrue("Could not close editor", res);
-		
-		final boolean[] runnableFinished= new boolean[] { false };
-		
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				runnableFinished[0]= true;
-			}
-		});
-		// closing editors is posted via the event queue.
-		while (!runnableFinished[0])
-			Display.getDefault().readAndDispatch();
-		int count3 = getInstanceCount(cl, excludedClasses);
-		assertEqualCount("JavaEditor", count1, count3);
+	private IFile createTestFile(String fileName) throws Exception {
+		IFile file= fJProject.getProject().getFile(fileName);
+		file.create(new StringBufferInputStream("test\n"), false, null);
+		assertTrue(file.exists());
+		return file;
 	}
-
-	public void testJavaEditorCloseAll() throws Exception {
-		final Class cl= CompilationUnitEditor.class;
+	
+	private void internalTestEditorClose(Object objectToOpen, final Class clazz, boolean closeAll) throws Exception {
 		
-		// known reference via a ThreadLocal ref to JavaReconciler.BackgroundThread
-		final Class[] excludedClasses= new Class[] { JavaReconciler.class };
+		// open an editor on given object
+		IEditorPart part= EditorUtility.openInEditor(objectToOpen);
 
-		// count before opening the editor
-		final int count1= getInstanceCount(cl, excludedClasses);
-		
-		// open an editor on a CU
-		ICompilationUnit unit= createTestCU("List2");
-		IEditorPart part= EditorUtility.openInEditor(unit);
 		// make sure the received instance has the type we're expecting
-		assertEquals(part.getClass(), cl);
+		assertEquals(part.getClass(), clazz);
 
-		int count2= getInstanceCount(cl, excludedClasses);
-		assertDifferentCount("JavaEditor", count1, count2);
+		// verify that the editor instance is there
+		assertInstanceCount(clazz, 1);
 		
 		// close the editor
-		boolean res= JavaPlugin.getActivePage().closeAllEditors(false);
+		boolean res;
+		if (closeAll)
+			res= JavaPlugin.getActivePage().closeAllEditors(false);
+		else
+			res= JavaPlugin.getActivePage().closeEditor(part, false);
 		part= null;
 		assertTrue("Could not close editor", res);
 		
-		final boolean[] runnableFinished= new boolean[] { false };
-		
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				runnableFinished[0]= true;
-			}
-		});
-		// closing editors is posted via the event queue.
-		while (!runnableFinished[0])
-			Display.getDefault().readAndDispatch();
-		int count3 = getInstanceCount(cl, excludedClasses);
-		assertEqualCount("JavaEditor", count1, count3);
+		// verify that the editor instance is gone
+		assertInstanceCount(clazz, 0);
 	}
 	
 	public void testNewClassWizard() throws Exception {
-		int count1= getInstanceCount(NewClassCreationWizard.class);
+		assertInstanceCount(NewClassCreationWizard.class, 0);
 		doWizardLeakTest(new NewClassCreationWizard());
-		int count2= getInstanceCount(NewClassCreationWizard.class);
-		assertEqualCount("NewClassCreationWizard", count1, count2);
+		assertInstanceCount(NewClassCreationWizard.class, 0);
 	}
 	
 	public void testNewInterfaceWizard() throws Exception {
-		int count1= getInstanceCount(NewInterfaceCreationWizard.class);
+		assertInstanceCount(NewInterfaceCreationWizard.class, 0);
 		doWizardLeakTest(new NewInterfaceCreationWizard());
-		int count2= getInstanceCount(NewInterfaceCreationWizard.class);
-		assertEqualCount("NewInterfaceCreationWizard", count1, count2);
+		assertInstanceCount(NewInterfaceCreationWizard.class, 0);
 	}
 	
 	public void testNewJavaProjectWizard() throws Exception {
-		int count1= getInstanceCount(JavaProjectWizard.class);
+		assertInstanceCount(JavaProjectWizard.class, 0);
 		doWizardLeakTest(new JavaProjectWizard());
-		int count2= getInstanceCount(JavaProjectWizard.class);
-		assertEqualCount("NewProjectCreationWizard", count1, count2);
+		assertInstanceCount(JavaProjectWizard.class, 0);
 	}		
 	
 	private void doWizardLeakTest(INewWizard wizard) throws Exception {
-		wizard.init(JavaPlugin.getDefault().getWorkbench(), new StructuredSelection(fJProject1));
+		wizard.init(JavaPlugin.getDefault().getWorkbench(), new StructuredSelection(fJProject));
 		
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		WizardDialog dialog= new WizardDialog(shell, wizard);
@@ -189,6 +166,4 @@ public class JavaLeakTest extends LeakTestCase {
 		wizard= null;
 		dialog= null;
 	}	
-	
-
 }
