@@ -206,9 +206,18 @@ public class DeleteTest extends RefactoringTest{
 
 	public void testEnabled_defaultPackage() throws Exception{
 //		printTestDisabledMessage("enable this case once 38450 is fixed");
-		IJavaElement[] javaElements= {getRoot().getPackageFragment("")};
-		IResource[] resources= {};
-		verifyEnabled(resources, javaElements);		
+		
+		IPackageFragment defaultPackage= getRoot().getPackageFragment("");
+		ICompilationUnit cu= defaultPackage.createCompilationUnit("A.java", "", false, new NullProgressMonitor());
+		
+		try{
+			IJavaElement[] javaElements= {defaultPackage};
+			IResource[] resources= {};
+			verifyEnabled(resources, javaElements);		
+		} finally{
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
 	}
 	
 	public void testDisabled_simpleProject() throws Exception{
