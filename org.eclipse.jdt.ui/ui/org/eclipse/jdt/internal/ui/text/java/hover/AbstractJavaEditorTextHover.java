@@ -141,10 +141,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	public IInformationControlCreator getInformationControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				String affordanceString= null;
-				if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE))
-					affordanceString= getTooltipAffordanceString(); //$NON-NLS-1$
-				return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true), affordanceString);
+				return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true), getTooltipAffordanceString());
 			}
 		};
 	}
@@ -152,10 +149,13 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	/**
 	 * Returns the tool tip affordance string.
 	 * 
-	 * @return the affordance string or <code>null</code> if no key binding is defined
+	 * @return the affordance string or <code>null</code> if disabled or no key binding is defined
 	 * @since 3.0
 	 */
-	private String getTooltipAffordanceString() {
+	protected String getTooltipAffordanceString() {
+		if (!JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE))
+			return null;
+		
 		KeySequence[] sequences= getKeySequences();
 		if (sequences == null)
 			return null;

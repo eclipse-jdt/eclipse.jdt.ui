@@ -29,8 +29,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -123,10 +121,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 	public IInformationControlCreator getInformationControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				String affordanceString= null;
-				if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE))
-					affordanceString= JavaHoverMessages.getString("JavaTextHover.makeStickyHint"); //$NON-NLS-1$
-				return new SourceViewerInformationControl(parent, affordanceString);
+				return new SourceViewerInformationControl(parent, getTooltipAffordanceString());
 			}
 		};
 	}
