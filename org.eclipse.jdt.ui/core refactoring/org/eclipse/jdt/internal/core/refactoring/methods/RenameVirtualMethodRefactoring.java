@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
@@ -100,6 +101,9 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 			
 		RenameMethodASTAnalyzer analyzer= new RenameMethodASTAnalyzer(getNewName(), getMethod());
 		for (Iterator iter= grouped.iterator(); iter.hasNext(); ){	
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
+			
 			List searchResults= (List)iter.next();
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(((SearchResult)searchResults.get(0)).getResource());
 			pm.subTask(RefactoringCoreMessages.getFormattedString("RenameVirtualMethodRefactoring.analyzing", cu.getElementName())); //$NON-NLS-1$

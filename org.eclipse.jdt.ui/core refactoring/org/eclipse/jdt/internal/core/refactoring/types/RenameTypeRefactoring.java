@@ -11,6 +11,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
@@ -155,7 +156,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			// before doing any expensive analysis
 			if (result.hasFatalError())
 				return result;
-				
+							
 			result.merge(analyseEnclosedLocalTypes(getType(), fNewName));
 			pm.worked(1);
 
@@ -168,7 +169,12 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 				
 			pm.worked(1);
 			result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 35))));
+
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
+
 			result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 25)));
+
 		} finally {
 			pm.done();
 		}	
@@ -403,6 +409,9 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		while (iter.hasNext()){
 			analyzeCompilationUnit(pm, analyzer, (List)iter.next(), result);
 			pm.worked(1);
+			
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 		}
 		return result;
 	}

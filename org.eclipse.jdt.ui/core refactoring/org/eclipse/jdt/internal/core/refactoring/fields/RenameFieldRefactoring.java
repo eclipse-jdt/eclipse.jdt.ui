@@ -9,6 +9,7 @@ import java.util.List;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
@@ -219,6 +220,9 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 		Iterator iter= fOccurrences.iterator();
 		RenameFieldASTAnalyzer analyzer= new RenameFieldASTAnalyzer(fNewName, getField());
 		while (iter.hasNext()){
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
+			
 			analyzeCompilationUnit(pm, analyzer, (List)iter.next(), result);
 		}
 		return result;

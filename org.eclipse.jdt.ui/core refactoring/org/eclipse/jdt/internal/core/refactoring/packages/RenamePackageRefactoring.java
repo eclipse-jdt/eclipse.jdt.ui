@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -245,6 +246,9 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		Iterator iter= fOccurrences.iterator();
 		RenamePackageASTAnalyzer analyzer= new RenamePackageASTAnalyzer(fNewName);
 		while (iter.hasNext()){
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
+			
 			analyzeCompilationUnit(pm, analyzer, (List)iter.next(), result);
 			pm.worked(1);
 		}

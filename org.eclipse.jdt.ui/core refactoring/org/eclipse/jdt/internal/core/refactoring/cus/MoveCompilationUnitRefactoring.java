@@ -13,6 +13,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
@@ -124,12 +125,19 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		fNeedsImportToCurrentPackage= needsImportToCurrentPackage(new SubProgressMonitor(pm, 3), getCu());
 		if (fNeedsImportToCurrentPackage)
 			result.merge(checkTopLevelTypeNameConflict(fNewPackage, getCu()));
+		
+		if (pm.isCanceled())
+			throw new OperationCanceledException();
 							
 		result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 11))));
 		pm.worked(5);
 		result.merge(checkReferencesInOurCompilationUnit(new SubProgressMonitor(pm, 11)));
 		result.merge(checkReferencesInOtherCompilationUnits(new SubProgressMonitor(pm, 11)));
 		pm.done();
+		
+		if (pm.isCanceled())
+			throw new OperationCanceledException();
+		
 		return result;
 	}
 	
@@ -280,6 +288,9 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		List grouped= RefactoringSearchEngine.customSearch(pm, createPackageScope(getPackage(getCu())), pattern);
 		IResource ourResource= getResource(getCu());
 		for (Iterator iter= grouped.iterator(); iter.hasNext(); ){
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
+			
 			List searchResults= (List)iter.next();
 			IResource resource= ((SearchResult)searchResults.get(0)).getResource();
 			if (! resource.equals(ourResource))
