@@ -626,7 +626,8 @@ public class BuildPathsBlock {
 		// create and set the output path first
 		if (!fWorkspaceRoot.exists(outputLocation)) {
 			IFolder folder= fWorkspaceRoot.getFolder(outputLocation);
-			CoreUtility.createFolder(folder, true, true, null);			
+			CoreUtility.createFolder(folder, true, true, null);
+			folder.setDerived(true);		
 		}
 		
 		monitor.worked(2);
