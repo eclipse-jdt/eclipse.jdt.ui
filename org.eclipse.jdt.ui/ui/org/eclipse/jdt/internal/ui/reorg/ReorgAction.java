@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Base class for actions related to reorganizing resources
  */
-public abstract class ReorgAction extends RefactoringAction {
+abstract class ReorgAction extends RefactoringAction {
 	
 	public ReorgAction(String name, StructuredSelectionProvider p) {
 		super(name, p);
