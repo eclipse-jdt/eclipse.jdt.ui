@@ -18,6 +18,7 @@ public interface IJUnitHelpContextIds {
 
 	// Actions
 	public static final String COPYTRACE_ACTION= PREFIX + "copy_trace_action_context"; //$NON-NLS-1$
+	public static final String COPYFAILURELIST_ACTION= PREFIX + "copy_failure_list_action_context"; //$NON-NLS-1$
 	public static final String ENABLEFILTER_ACTION= PREFIX + "enable_filter_action_context"; //$NON-NLS-1$
 	public static final String OPENEDITORATLINE_ACTION= PREFIX + "open_editor_atline_action_context"; //$NON-NLS-1$
 	public static final String OPENTEST_ACTION= PREFIX + "open_test_action_context"; //$NON-NLS-1$

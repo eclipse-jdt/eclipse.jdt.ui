@@ -691,8 +691,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		CTabFolder tabFolder= new CTabFolder(parent, SWT.TOP);
 		tabFolder.setLayoutData(new GridData(GridData.FILL_BOTH | GridData.GRAB_VERTICAL));
 
-		ITestRunView failureRunView= new FailureRunView(tabFolder, this); 
-		ITestRunView testHierarchyRunView= new HierarchyRunView(tabFolder, this);
+		ITestRunView failureRunView= new FailureRunView(tabFolder, fClipboard, this);		
+		ITestRunView testHierarchyRunView= new HierarchyRunView(tabFolder, fClipboard, this);
 		
 		fTestRunViews.addElement(failureRunView);
 		fTestRunViews.addElement(testHierarchyRunView);
@@ -730,7 +730,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		ToolBar failureToolBar= new ToolBar(bottom, SWT.FLAT | SWT.WRAP);
 		bottom.setTopCenter(failureToolBar);
 		
-		fFailureView= new FailureTraceView(bottom, this, fClipboard);
+		fFailureView= new FailureTraceView(bottom, fClipboard, this);
 		bottom.setContent(fFailureView.getComposite()); 
 		CLabel label= new CLabel(bottom, SWT.NONE);
 		label.setText(JUnitMessages.getString("TestRunnerViewPart.label.failure")); //$NON-NLS-1$

@@ -21,6 +21,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
@@ -40,6 +41,8 @@ import org.eclipse.swt.widgets.TreeItem;
  * as a tree.
  */
 class HierarchyRunView implements ITestRunView, IMenuListener {
+	private final Clipboard fClipboard;	
+	
 	/**
 	 * The tree widget
 	 */
@@ -78,8 +81,9 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	private final Image fTestIcon= TestRunnerViewPart.createImage("obj16/test.gif"); //$NON-NLS-1$
 	private final Image fTestRunningIcon= TestRunnerViewPart.createImage("obj16/testrun.gif"); //$NON-NLS-1$
 		
-	public HierarchyRunView(CTabFolder tabFolder, TestRunnerViewPart runner) {
+	public HierarchyRunView(CTabFolder tabFolder, Clipboard clipboard, TestRunnerViewPart runner) {
 		fTestRunnerPart= runner;
+		fClipboard = clipboard;
 		
 		CTabItem hierarchyTab= new CTabItem(tabFolder, SWT.NONE);
 		hierarchyTab.setText(getName());

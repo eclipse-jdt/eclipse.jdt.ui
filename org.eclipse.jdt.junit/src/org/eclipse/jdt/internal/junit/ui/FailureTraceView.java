@@ -47,7 +47,7 @@ class FailureTraceView implements IMenuListener {
 	private final Image fStackIcon= TestRunnerViewPart.createImage("obj16/stkfrm_obj.gif"); //$NON-NLS-1$
 	private final Image fExceptionIcon= TestRunnerViewPart.createImage("obj16/exc_catch.gif"); //$NON-NLS-1$
 
-	public FailureTraceView(Composite parent, TestRunnerViewPart testRunner, Clipboard clipboard) {
+	public FailureTraceView(Composite parent, Clipboard clipboard, TestRunnerViewPart testRunner) {
 		Assert.isNotNull(clipboard);
 		fTable= new Table(parent, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 		fTestRunner= testRunner;
@@ -88,9 +88,9 @@ class FailureTraceView implements IMenuListener {
 		if (fTable.getSelectionCount() > 0) {
 			Action a= createOpenEditorAction(getSelectedText());
 			if (a != null)
-				manager.add(a);
+				manager.add(a);		
+			manager.add(new CopyTraceAction(FailureTraceView.this, fClipboard));
 		}
-		manager.add(new CopyTraceAction(FailureTraceView.this, fClipboard));
 	}
 
 	public String getTrace() {

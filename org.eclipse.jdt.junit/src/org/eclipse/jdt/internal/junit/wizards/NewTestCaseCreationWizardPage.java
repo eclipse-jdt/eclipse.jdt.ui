@@ -87,7 +87,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	protected final static String STORE_GENERATE_MAIN= PAGE_NAME + ".GENERATE_MAIN"; //$NON-NLS-1$
 	protected final static String STORE_USE_TESTRUNNER= PAGE_NAME + ".USE_TESTRUNNER";	//$NON-NLS-1$
 	protected final static String STORE_TESTRUNNER_TYPE= PAGE_NAME + ".TESTRUNNER_TYPE"; //$NON-NLS-1$
-
 	
 	private String fDefaultClassToTest;
 	private NewTestCaseCreationWizardPage2 fPage2;
@@ -122,7 +121,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			/* Add testrunner statement to main Method */
 			WizardMessages.getString("NewTestClassWizPage.methodStub.testRunner"), //$NON-NLS-1$
 			WizardMessages.getString("NewTestClassWizPage.methodStub.setUp"), //$NON-NLS-1$
-			WizardMessages.getString("NewTestClassWizPage.methodStub.tearDown") //$NON-NLS-1$
+			WizardMessages.getString("NewTestClassWizPage.methodStub.tearDown"), //$NON-NLS-1$
+			WizardMessages.getString("NewTestClassWizPage.methodStub.constructor") //$NON-NLS-1$
 		};
 		
 		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 1);
@@ -186,6 +186,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		fMethodStubsButtons.setEnabled(1, false); //add text
 		fMethodStubsButtons.setSelection(2, false); //setUp
 		fMethodStubsButtons.setSelection(3, false); //tearDown
+		fMethodStubsButtons.setSelection(4, false); //constructor
 	}
 	
 	/**
@@ -387,9 +388,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		fIndexOfFirstTestMethod= 0;
 
-		if (fPage2.getCreateConstructorButtonSelection())
-			createConstructor(type, imports); 
-
 		if (fMethodStubsButtons.isSelected(0)) 
 			createMain(type);
 		
@@ -400,7 +398,10 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		if (fMethodStubsButtons.isSelected(3)) {
 			createTearDown(type, imports);
 		}
-		
+
+		if (fMethodStubsButtons.isSelected(4))
+			createConstructor(type, imports); 		
+
 		if (isNextPageValid()) {
 			createTestMethodStubs(type);
 		}
@@ -572,7 +573,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			type.createMethod(newMethod.toString(), null, false, null);	
 		}
 	}
-
+	
 	private String getLineDelimiter(){
 		IType classToTest= getClassToTest();
 		
@@ -676,8 +677,9 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				return;
 		} catch (JavaModelException e) {
 		}
-		JUnitStatus status= new JUnitStatus();				
-		status.setError(WizardMessages.getString("NewTestClassWizPage.error.junitNotOnbuildpath")); //$NON-NLS-1$
+		JUnitStatus status= new JUnitStatus();
+		/* TODO: is this a warning or error? */				
+		status.setWarning(WizardMessages.getString("NewTestClassWizPage.error.junitNotOnbuildpath")); //$NON-NLS-1$		
 		fContainerStatus= status;
 	}
 	
@@ -708,7 +710,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				IType type= resolveClassNameToType(getPackageFragmentRoot().getJavaProject(), getPackageFragment(), superClassName);
 				JUnitStatus status = new JUnitStatus();				
 				if (type == null) {
-					status.setError(WizardMessages.getString("NewTestClassWizPage.error.superclass.not_exist")); //$NON-NLS-1$
+					/* TODO: is this a warning or error? */
+					status.setWarning(WizardMessages.getString("NewTestClassWizPage.error.superclass.not_exist")); //$NON-NLS-1$
 					fSuperClassStatus= status;
 				} else {
 					if (type.isInterface()) {

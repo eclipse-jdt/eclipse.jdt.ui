@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.junit.ui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
@@ -40,13 +41,15 @@ import org.eclipse.jdt.junit.ITestRunListener;
 class FailureRunView implements ITestRunView, IMenuListener {
 	private Table fTable;
 	private TestRunnerViewPart fRunnerViewPart;
+	private final Clipboard fClipboard;	
 	
 	private final Image fErrorIcon= TestRunnerViewPart.createImage("obj16/testerr.gif"); //$NON-NLS-1$
 	private final Image fFailureIcon= TestRunnerViewPart.createImage("obj16/testfail.gif"); //$NON-NLS-1$
 	private final Image fFailureTabIcon= TestRunnerViewPart.createImage("obj16/failures.gif"); //$NON-NLS-1$
-	
-	public FailureRunView(CTabFolder tabFolder, TestRunnerViewPart runner) {
+
+	public FailureRunView(CTabFolder tabFolder, Clipboard clipboard, TestRunnerViewPart runner) {
 		fRunnerViewPart= runner;
+		fClipboard= clipboard;
 		
 		CTabItem failureTab= new CTabItem(tabFolder, SWT.NONE);
 		failureTab.setText(getName());
@@ -102,6 +105,15 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		return getTestInfo(fTable.getItem(index)).getTestId();
 	}
 	
+	public String getAllFailedTestNames() {
+		StringBuffer trace = new StringBuffer();
+		String lineDelim= System.getProperty("line.separator", "\n");  //$NON-NLS-1$//$NON-NLS-2$
+		for (int i=0; i<fTable.getItemCount(); i++) {
+			trace.append(getTestInfo(fTable.getItem(i)).getTestName()).append(lineDelim);
+		}
+		return trace.toString();
+	}
+	
 	private String getClassName() {
 		return cutFromTo(getSelectedText(), '(', ')');
 	}
@@ -131,6 +143,7 @@ class FailureRunView implements ITestRunView, IMenuListener {
 			if (className != null) {
 				manager.add(new OpenTestAction(fRunnerViewPart, className, methodName));
 				manager.add(new RerunAction(fRunnerViewPart, getSelectedTestId(), className, methodName));
+				manager.add(new CopyFailureListAction(fRunnerViewPart, FailureRunView.this, fClipboard));
 			}
 		}
 	}		
