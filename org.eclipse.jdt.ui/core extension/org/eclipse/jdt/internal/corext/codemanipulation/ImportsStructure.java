@@ -241,34 +241,34 @@ public class ImportsStructure implements IImportsStructure {
 	 * @param qualifiedTypeName The fully qualified name of the type to import
 	 */			
 	public void addImport(String qualifiedTypeName) {
-		String packName= Signature.getQualifier(qualifiedTypeName);
+		String typeContainerName= Signature.getQualifier(qualifiedTypeName);
 		String typeName= Signature.getSimpleName(qualifiedTypeName);
-		addImport(packName, typeName);
+		addImport(typeContainerName, typeName);
 	}
 	
 	/**
 	 * Adds a new import declaration that is sorted in the structure using
 	 * a best match algorithm. If an import already exists, the import is
 	 * not added.
-	 * @param packageName The package name of the type to import
+	 * @param typeContainerName The type container name (package name / outer type name) of the type to import
 	 * @param typeName The type name of the type to import (can be '*' for imports-on-demand)
 	 */			
-	public void addImport(String packageName, String typeName) {
-		String fullTypeName= JavaModelUtil.concatenateName(packageName, typeName);
+	public void addImport(String typeContainerName, String typeName) {
+		String fullTypeName= JavaModelUtil.concatenateName(typeContainerName, typeName);
 		ImportDeclEntry decl= new ImportDeclEntry(fullTypeName, -1, false);
 			
-		PackageEntry bestMatch= findBestMatch(packageName);
+		PackageEntry bestMatch= findBestMatch(typeContainerName);
 		if (bestMatch == null) {
-			PackageEntry packEntry= new PackageEntry(packageName, -1, false);
+			PackageEntry packEntry= new PackageEntry(typeContainerName, -1, false);
 			packEntry.add(decl);
 			fPackageEntries.add(packEntry);
 		} else {
-			int cmp= packageName.compareTo(bestMatch.getName());
+			int cmp= typeContainerName.compareTo(bestMatch.getName());
 			if (cmp == 0) {
 				bestMatch.sortIn(decl);
 			} else {
 				// create a new packageentry
-				PackageEntry packEntry= new PackageEntry(packageName, bestMatch.getGroupID(), false);
+				PackageEntry packEntry= new PackageEntry(typeContainerName, bestMatch.getGroupID(), false);
 				packEntry.add(decl);
 				int index= fPackageEntries.indexOf(bestMatch);
 				if (cmp < 0) { 	// insert ahead of best match
