@@ -29,6 +29,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -46,7 +47,7 @@ public class TypeMismatchSubProcessor {
 		}
 			
 		ICompilationUnit cu= context.getCompilationUnit();
-		String castType= args[1];
+		String castTypeName= args[1];
 
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveredNode(astRoot);
@@ -78,11 +79,17 @@ public class TypeMismatchSubProcessor {
 				}
 				receiverNode= frag.getName();
 			}
+		} else {
+			// try to find the binding corresponding to 'castTypeName'
+			ITypeBinding guessedCastTypeBinding= ASTResolving.guessBindingForReference(nodeToCast);
+			if (guessedCastTypeBinding != null && castTypeName.equals(guessedCastTypeBinding.getQualifiedName())) {
+				castTypeBinding= guessedCastTypeBinding;
+			}
 		}
 
 		ITypeBinding binding= nodeToCast.resolveTypeBinding();
-		if (binding == null || canCast(castType, binding)) {
-			proposals.add(createCastProposal(context, castType, nodeToCast, 5));
+		if (binding == null || canCast(castTypeName, castTypeBinding, binding)) {
+			proposals.add(createCastProposal(context, castTypeName, nodeToCast, 5));
 		}
 		
 		ITypeBinding currBinding= nodeToCast.resolveTypeBinding();
@@ -132,7 +139,6 @@ public class TypeMismatchSubProcessor {
 			}
 			addChangeSenderTypeProposals(context, receiverNode, currBinding, true, 4, proposals);
 		}
-		
 		
 		if (castTypeBinding != null) {
 			addChangeSenderTypeProposals(context, nodeToCast, castTypeBinding, false, 5, proposals);
@@ -197,7 +203,11 @@ public class TypeMismatchSubProcessor {
 		}
 	}
 	
-	private static boolean canCast(String castTarget, ITypeBinding bindingToCast) {
+	private static boolean canCast(String castTarget, ITypeBinding castTypeBinding, ITypeBinding bindingToCast) {
+		if (castTypeBinding != null) {
+			return TypeRules.canCast(castTypeBinding, bindingToCast);
+		}
+		
 		bindingToCast= Bindings.normalizeTypeBinding(bindingToCast);
 		if (bindingToCast == null) {
 			return false;
