@@ -6,7 +6,6 @@
 package org.eclipse.jdt.internal.ui.refactoring.sef;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -33,7 +32,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 
@@ -61,7 +59,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		layouter.setDefaultGridData(data, 1);
 		
 		Label label= new Label(result, SWT.LEFT);
-		label.setText("&Getting method name");
+		label.setText("&Getter name:");
 		Text text= new Text(result, SWT.BORDER);
 		text.setText(fRefactoring.getGetterName());
 		layouter.perform(label, text, 1);
@@ -74,13 +72,13 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		
 		if (needsModifiers()) {
 			label= new Label(result, SWT.LEFT);
-			label.setText("&Setting method name");
+			label.setText("&Setter name:");
 			text= new Text(result, SWT.BORDER);
 			text.setText(fRefactoring.getSetterName());
 			layouter.perform(label, text, 1);
 			text.addModifyListener(new ModifyListener() {
 				public void modifyText(ModifyEvent e) {
-					fRefactoring.setSetterName(((StyledText)e.widget).getText());
+					fRefactoring.setSetterName(((Text)e.widget).getText());
 					processValidation();
 				}
 			});
@@ -89,7 +87,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		// createSeparator(result, layouter);
 		
 		label= new Label(result, SWT.LEFT);
-		label.setText("Insert new methods after");
+		label.setText("&Insert new methods after:");
 		final Combo combo= new Combo(result, SWT.READ_ONLY);
 		fillWithPossibleInsertPositions(combo, fRefactoring.getField());
 		combo.addSelectionListener(new SelectionAdapter() {
