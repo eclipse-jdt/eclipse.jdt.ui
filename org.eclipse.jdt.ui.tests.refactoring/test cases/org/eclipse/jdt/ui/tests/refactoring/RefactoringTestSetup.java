@@ -81,16 +81,8 @@ public class RefactoringTestSetup extends AbstractRefactoringTestSetup {
 	}
 	
 	protected void tearDown() throws Exception {
-		if (fgPackageP.exists())
-			fgPackageP.delete(true, null);
-		JavaProjectHelper.removeSourceContainer(fgJavaTestProject, CONTAINER);
 		JavaProjectHelper.delete(fgJavaTestProject);
-//TODO: enable
-//		fgPackageP= null;
-//		fgRoot= null;
-//		fgJavaTestProject= null;
 		super.tearDown();
 	}
-	
 }
 
