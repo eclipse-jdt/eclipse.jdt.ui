@@ -75,6 +75,10 @@ import java.util.zip.ZipFile;
 	 * whose name corresponds to the parameter
 	 */
 	/*package*/ ZipTreeNode findNode(String name){
+		//FIXME: workaround for 1GF5VTI: ITPJUI:ALL - NPE when browsing for non-existing source root
+		if (name == null)
+			return null;
+			
 		if (isRoot()){
 			return ((ZipTreeNode)fChildren.get(0)).findNode(name);
 		}
