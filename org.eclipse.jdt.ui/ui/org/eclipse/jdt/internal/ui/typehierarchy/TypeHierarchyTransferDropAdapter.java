@@ -17,7 +17,6 @@ import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
 
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
@@ -51,8 +50,6 @@ public class TypeHierarchyTransferDropAdapter extends SelectionTransferDropAdapt
 		}	
 		IJavaElement input= getInputElement(getSelection());
 		fTypeHierarchyViewPart.setInputElement(input);
-		if (input instanceof IMember) 
-			fTypeHierarchyViewPart.selectMember((IMember) input);
 	}
 	
 	private static IJavaElement getInputElement(ISelection selection) {

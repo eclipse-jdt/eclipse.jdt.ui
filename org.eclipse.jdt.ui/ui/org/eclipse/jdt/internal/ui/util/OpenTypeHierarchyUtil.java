@@ -96,10 +96,6 @@ public class OpenTypeHierarchyUtil {
 			}
 			result= (TypeHierarchyViewPart) page.showView(JavaUI.ID_TYPE_HIERARCHY);
 			result.setInputElement(input);
-			
-			if (input instanceof IMember) {
-				result.selectMember((IMember) input);
-			}	
 			return result;
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, window.getShell(), 
@@ -128,10 +124,8 @@ public class OpenTypeHierarchyUtil {
 			part.clearNeededRefresh(); // avoid refresh of old hierarchy on 'becomes visible'
 		}		
 		part= (TypeHierarchyViewPart) page.showView(JavaUI.ID_TYPE_HIERARCHY);
-		part.setInputElement(perspectiveInput);
+		part.setInputElement(input);
 		if (input instanceof IMember) {
-			part.selectMember((IMember) input);
-			
 			if (page.getEditorReferences().length == 0) {
 				openEditor(input, false); // only open when the perspecive has been created
 			}

@@ -451,10 +451,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * @param element the input element
 	 */	
 	public void setInputElement(IJavaElement element) {
+		IMember memberToSelect= null;
 		if (element != null) {
 			if (element instanceof IMember) {
 				if (element.getElementType() != IJavaElement.TYPE) {
-					element= ((IMember) element).getDeclaringType();
+					memberToSelect= (IMember) element;
+					element= memberToSelect.getDeclaringType();
+					
 				}
 				if (!element.exists()) {
 					MessageDialog.openError(getSite().getShell(), TypeHierarchyMessages.getString("TypeHierarchyViewPart.error.title"), TypeHierarchyMessages.getString("TypeHierarchyViewPart.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -473,6 +476,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 			
 		updateInput(element);
+		if (memberToSelect != null) {
+			selectMember(memberToSelect);
+		}
 	}
 	
 	/*
