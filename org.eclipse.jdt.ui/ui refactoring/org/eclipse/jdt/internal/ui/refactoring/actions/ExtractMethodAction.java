@@ -28,7 +28,7 @@ public class ExtractMethodAction extends TextSelectionBasedRefactoringAction {
 	 * Creates a new extract method action when used as an action delegate.
 	 */
 	public ExtractMethodAction() {
-		super(RefactoringMessages.getString("ExtractMethodAction.extract_method"));  //$NON-NLS-1$
+		super(RefactoringMessages.getString("ExtractMethodAction.label"));  //$NON-NLS-1$
 	}
 	
 	/* (non-Javadoc)
@@ -54,6 +54,6 @@ public class ExtractMethodAction extends TextSelectionBasedRefactoringAction {
 	 * Method declated in TextSelectionBasedRefactoringAction
 	 */	
 	protected String getMessageDialogTitle() {
-		return RefactoringMessages.getString("ExtractMethodAction.extract_Method"); //$NON-NLS-1$
+		return RefactoringMessages.getString("ExtractMethodAction.dialog.title"); //$NON-NLS-1$
 	}
 }

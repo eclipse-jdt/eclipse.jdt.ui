@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
 import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferences;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
@@ -104,7 +105,7 @@ public class RefactoringStarter {
 						return check.getFirstMessage(RefactoringStatus.INFO);	
 					}	catch (JavaModelException e){
 						JavaPlugin.log(e);
-						return "Unexpected exception. See log for details."; //don't want to show the error dialog
+						return RefactoringMessages.getString("RefactoringStarter.unexpected_exception"); //$NON-NLS-1$
 					}
 				}
 			};
@@ -125,8 +126,8 @@ public class RefactoringStarter {
 		if (isReadOnly(element))
 			return MessageDialog.openQuestion(
 				JavaPlugin.getActiveWorkbenchShell(),
-				"Rename",
-				MessageFormat.format("{0} is read only. Do you still wish to rename it?", new Object[] {ReorgUtils.getName(element)}));
+				RefactoringMessages.getString("RefactoringStarter.rename"), //$NON-NLS-1$
+				RefactoringMessages.getFormattedString("RefactoringStarter.is_read_only", ReorgUtils.getName(element))); //$NON-NLS-1$
 		else
 			return true;
 	}
@@ -174,10 +175,12 @@ public class RefactoringStarter {
 			}
 			return true;
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, shell, "Saving Resources", "Unexpected exception. See log for details."); 
+			ExceptionHandler.handle(e, shell, 
+				RefactoringMessages.getString("RefactoringStarter.saving"), RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));  //$NON-NLS-1$ //$NON-NLS-2$
 			return false;
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, shell, "Saving Resources", "Unexpected exception. See log for details."); 
+			ExceptionHandler.handle(e, shell, 
+				RefactoringMessages.getString("RefactoringStarter.saving"), RefactoringMessages.getString("RefactoringStarter.unexpected_exception"));  //$NON-NLS-1$ //$NON-NLS-2$
 			return false;			
 		} catch (InterruptedException e) {
 			Assert.isTrue(false); // Can't happen. Operation isn't cancelable.
@@ -189,7 +192,7 @@ public class RefactoringStarter {
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor pm) {
 				IEditorPart[] editorsToSave= JavaPlugin.getDirtyEditors();
-				pm.beginTask("Saving dirty editors", editorsToSave.length);
+				pm.beginTask(RefactoringMessages.getString("RefactoringStarter.saving_dirty_editors"), editorsToSave.length); //$NON-NLS-1$
 				for (int i= 0; i < editorsToSave.length; i++) {
 					editorsToSave[i].doSave(new SubProgressMonitor(pm, 1));
 					pm.worked(1);
@@ -206,7 +209,7 @@ public class RefactoringStarter {
 			protected Control createDialogArea(Composite parent) {
 				Composite result= (Composite) super.createDialogArea(parent);
 				final Button check= new Button(result, SWT.CHECK);
-				check.setText("&Always save all modified resources automatically prior to refactoring");
+				check.setText(RefactoringMessages.getString("RefactoringStarter.always_save")); //$NON-NLS-1$
 				check.setSelection(RefactoringPreferences.getSaveAllEditors());
 				check.addSelectionListener(new SelectionAdapter() {
 					public void widgetSelected(SelectionEvent e) {
@@ -216,10 +219,10 @@ public class RefactoringStarter {
 				return result;
 			}
 		};
-		dialog.setTitle("Save all modified resources");
+		dialog.setTitle(RefactoringMessages.getString("RefactoringStarter.save_all_resources")); //$NON-NLS-1$
 		dialog.setAddCancelButton(true);
 		dialog.setLabelProvider(createDialogLabelProvider());
-		dialog.setMessage("All modified resources must be saved before this operation.\nPress OK to confirm or Cancel otherwise.");
+		dialog.setMessage(RefactoringMessages.getString("RefactoringStarter.must_save")); //$NON-NLS-1$
 		dialog.setContentProvider(new ListContentProvider());
 		dialog.setInput(Arrays.asList(JavaPlugin.getDirtyEditors()));
 		return dialog.open() == Dialog.OK;

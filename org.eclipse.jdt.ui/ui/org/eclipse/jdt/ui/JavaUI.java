@@ -289,7 +289,7 @@ public final class JavaUI {
 		} else if (style == IJavaElementSearchConstants.CONSIDER_CLASSES) {
 			elementKinds= IJavaSearchConstants.CLASS;
 		} else {
-			Assert.isTrue(false, "illegal style");
+			Assert.isTrue(false, "illegal style"); //$NON-NLS-1$
 		}
 		if (multipleSelection) {
 			MultiTypeSelectionDialog dialog= new MultiTypeSelectionDialog(parent, context, elementKinds, scope);

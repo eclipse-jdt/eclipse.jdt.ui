@@ -20,7 +20,9 @@ public class RefactoringErrorDialogUtil {
 	
 	public static void open(String dialogTitle, RefactoringStatus status) {
 		if (status.getEntries().size() == 1) {
-			String message= "This operation cannot be performed:\n\n" + status.getFirstMessage(RefactoringStatus.FATAL);
+			String message= RefactoringMessages.getFormattedString(
+				"RefactoringErrorDialogUtil.cannot_perform_long", //$NON-NLS-1$
+				status.getFirstMessage(RefactoringStatus.FATAL)); 
 			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), dialogTitle, message);
 		} else {
 			openListDialog(dialogTitle, status);	
