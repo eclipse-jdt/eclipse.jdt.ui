@@ -151,11 +151,11 @@ public class InlineMethodRefactoring extends Refactoring {
 		CompilationUnit root= (CompilationUnit)fInvocation.getRoot();
 		IMethodBinding methodBinding= (IMethodBinding)fInvocation.getName().resolveBinding();
 		MethodDeclaration declaration= (MethodDeclaration)root.findDeclaringNode(methodBinding);
-		if (declaration != null) {
-			fSourceProvider= new SourceProvider(cunit, declaration);
-			return;
+		if (declaration == null || ASTNodes.getParent(fInvocation, ASTNode.TYPE_DECLARATION) != ASTNodes.getParent(declaration, ASTNode.TYPE_DECLARATION)) {
+			status.addFatalError("Current limitation: can only inline call if method declaration and call reside in the same type.");
+			return;		    	
 		}
-		status.addFatalError("Current limitation: can only inline call if method declaration and call reside in the same compilation unit.");
+		fSourceProvider= new SourceProvider(cunit, declaration);
 		/*
 		IMethod method= Binding2JavaModel.find(methodBinding, cunit.getJavaProject());
 		if (method != null) {
