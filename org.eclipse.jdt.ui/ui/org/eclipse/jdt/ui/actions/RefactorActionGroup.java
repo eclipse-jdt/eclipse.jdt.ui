@@ -66,8 +66,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  */
 public class RefactorActionGroup extends ActionGroup {
 	
-	private static final String INFER_TYPE_ARGUMENTS_ACTION= "org.eclipse.jdt.ui.edit.text.java.infer.type.arguments"; //TODO: publish in IJavaEditorActionDefinitionIds
-	
 	/**
 	 * Pop-up menu: id of the refactor sub menu (value <code>org.eclipse.jdt.ui.refactoring.menu</code>).
 	 * 
