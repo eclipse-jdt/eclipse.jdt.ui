@@ -57,12 +57,6 @@ public class PropertiesFileSourceViewerConfiguration extends SourceViewerConfigu
 		}
 	}
 	
-	/** 
-	 * Preference key for inserting spaces rather than tabs.
-	 */
-	public final static String SPACES_FOR_TABS= PreferenceConstants.EDITOR_SPACES_FOR_TABS;
-
-	
 	private ITextEditor fTextEditor;
 	/**
 	 * The document partitioning.
