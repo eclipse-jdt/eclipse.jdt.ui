@@ -54,7 +54,7 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	}
 	
 	public static boolean isAvailable(IType type) throws JavaModelException{
-		return Checks.isAvailable(type);
+		return Checks.isAvailable(type) && !type.isAnonymous();
 	}
 	
 	public IType getInputType(){
