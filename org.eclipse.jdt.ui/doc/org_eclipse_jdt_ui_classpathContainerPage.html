@@ -1,0 +1,46 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+   <meta name="Author" content="Build">
+   <title>Eclipse Java UI Extensions: Classpath Container Entry Page</title>
+</head>
+<body link="#0000FF" vlink="#800080">
+
+<center>
+<h1>Classpath Container Entry Page</h1></center>
+<b><i>Identifier: </i></b>org.eclipse.jdt.ui.classpathContainerPage
+<p><b><i>Description: </i></b>This extension point allows to add a wizard page to create or edit a Classpath Container Entry. 
+<p><b><i>Configuration Markup:</i></b>
+<p><tt>&nbsp;&nbsp; &lt;!ELEMENT classpathContainerPage EMPTY&gt;</tt>
+<br><tt>&nbsp;&nbsp; &lt;!ATTLIST classpathContainerPage</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; name&nbsp;&nbsp;&nbsp;CDATA #IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class&nbsp;&nbsp;CDATA #IMPLIED</tt>
+<br><tt>&nbsp;&nbsp; &gt;</tt>
+</p>
+<ul>
+<li><b>id</b> - identifies the classpath container as defined by <tt>org.eclipse.jdt.core.classpathVariableInitializer</tt>
+</li>
+<li><b>name</b> - a unique name that allows to identify this filter in the UI. This attribute should be a translated string.
+</li>
+<li><b>class</b> - the name of the class that implements this container page.
+The class must be public and implement <tt>org.eclipse.jdt.ui.wizards.IClasspathContainerPage</tt> with a public 0-argument constructor. 
+</li>
+
+</ul>
+
+<b><i>Examples:</i></b>
+<p>The following is an example of a Java element filter definition. It filters out
+inner classes and is initially selected:
+<p><tt>&nbsp;&nbsp; &lt;extension point=&quot;org.eclipse.jdt.ui.javaElementFilters&quot;&gt;</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;filter</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id=&quot;JRE&quot;</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; name=&quot;JRE System Libraries&quot;</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class=&quot;com.example.NewJDKEntryPage&quot;</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/filter&gt;</tt><br>
+<tt>&nbsp;&nbsp; &lt;/extension&gt;</tt>
+<p><a href="hglegal.htm"><img SRC="ngibmcpy.gif" ALT="Copyright IBM Corp. 2000, 2002.  All Rights Reserved." BORDER=0 height=12 width=195></a>
+</body>
+</html>

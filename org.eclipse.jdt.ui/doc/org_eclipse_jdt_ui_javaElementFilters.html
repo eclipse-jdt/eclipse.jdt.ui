@@ -4,36 +4,65 @@
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
    <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
    <meta name="Author" content="Build">
-   <title>Eclipse Workbench Extension Point: View Actions</title>
+   <title>Eclipse Java UI Extension Point: Java Element Filters</title>
 </head>
 <body link="#0000FF" vlink="#800080">
 
 <center>
-<h1>
-Java Element Filter Extensions</h1></center>
+<h1>Java Element Filters</h1></center>
 <b><i>Identifier: </i></b>org.eclipse.jdt.ui.javaElementFilters
-<p><b><i>Description: </i></b>This extension point is used to extend the set of
-available filters provided by the Packages view. 
+<p><b><i>Description: </i></b>This extension point is used to extend  Java UI views with filters. 
 <p><b><i>Configuration Markup:</i></b>
-<p><tt>&nbsp;&nbsp; &lt;!ELEMENT filter EMPTY&gt;</tt><br>
-<tt>&nbsp;&nbsp; &lt;!ATTLIST filter</tt><br>
-<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pattern CDATA #REQUIRED</tt><br>
-<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; selected CDATA <font color="#000000">#IMPLIED</font></tt><br>
-<tt>&nbsp;&nbsp; &gt;</tt>
+<p><tt>&nbsp;&nbsp; &lt;!ELEMENT filter EMPTY&gt;</tt>
+<br><tt>&nbsp;&nbsp; &lt;!ATTLIST filter</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; viewId&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; enabled&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(true | false) #IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pattern*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#IMPLIED</tt>
+<br><tt>&nbsp;&nbsp; &gt;</tt>
+</p>
+*) exactly one of them must be present
 <ul>
-  <li><b>pattern</b> - the filter pattern (? = any character, * = any string)
-  <li><b>selected</b> - an optional attribute that defines whether the filter is
-    initially selected and active (&quot;true&quot; or &quot;false&quot;).
+<li><b>id</b> - a unique id that will be used to identify this filter
+</li>
+<li><b>name</b> - a unique name that allows to identify this filter in the UI. This attribute should be a translated string.
+Though this attribute is not required for pattern filters (i.e. those using the <tt>pattern</tt> attribute) we suggest to provide a name anyway,
+otherwise the pattern string itself would used to represent the filter in the UI.
+</li>
+<li><b>description</b> - a short description for this filter. This attribute should be a translated string
+</li>
+<li><b>viewId</b> - the id of the view where this filter is contributed.
+If this attribute is missing then the filter will be contributed to all views which use the <tt>org.eclipse.jdt.ui.actions.CustomFiltersActionGroup</tt>.
+</li>
+<li><b>class</b> - the name of the class used to filter the view. 
+The class must extend <tt>org.eclipse.jface.viewers.ViewerFilter</tt>
+</li>
+<li><b>enabled</b> - the filter will be enabled if this attribute is present and its value is <tt>true</tt>.
+Most likely the user will be able to override this setting in the UI.
+</li>
+<li><b>pattern</b> - elements whose name matches this pattern will be hidden.
+This attribute is here for backward compatibility and should no longer be used. All views that allow to plug-in a filter also
+allow to add pattern filters directly via UI.
+</li>
+
 </ul>
+
 <b><i>Examples:</i></b>
-<p>The following is an example of a pattern filter definition. It filters out
+<p>The following is an example of a Java element filter definition. It filters out
 inner classes and is initially selected:
 <p><tt>&nbsp;&nbsp; &lt;extension point=&quot;org.eclipse.jdt.ui.javaElementFilters&quot;&gt;</tt><br>
 <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;filter</tt><br>
-<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pattern=&quot;*$*.class&quot;</tt><br>
-<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; selected=&quot;true&quot;&gt;</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id=&quot;org.eclipse.jdt.ui.PackageExplorer.LibraryFilter&quot;</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; name=&quot;%HideReferencedLibraries.label&quot;</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; description=&quot;%HideReferencedLibraries.description&quot;</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; viewId=&quot;org.eclipse.jdt.ui.PackageExplorer&quot;</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class=&quot;org.eclipse.jdt.internal.ui.filters.LibraryFilter&quot;</tt><br>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; enabled=&quot;false&quot;&gt;</tt><br>
 <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/filter&gt;</tt><br>
 <tt>&nbsp;&nbsp; &lt;/extension&gt;</tt>
-<p><a href="hglegal.htm"><img SRC="ngibmcpy.gif" ALT="Copyright IBM Corp. 2000, 2001.  All Rights Reserved." BORDER=0 height=12 width=195></a>
+<p><a href="hglegal.htm"><img SRC="ngibmcpy.gif" ALT="Copyright IBM Corp. 2000, 2002.  All Rights Reserved." BORDER=0 height=12 width=195></a>
 </body>
 </html>
