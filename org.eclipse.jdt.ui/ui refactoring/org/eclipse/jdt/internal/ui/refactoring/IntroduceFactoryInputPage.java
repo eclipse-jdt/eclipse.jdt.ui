@@ -50,6 +50,9 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 	 * The name of the factory method to be created.
 	 */
 	private Text fMethodName;
+	
+	private RefactoringStatus fMethodNameStatus;
+	private RefactoringStatus fDestinationStatus;
 
 	/**
 	 * Constructor for IntroduceFactoryInputPage.
@@ -113,38 +116,43 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 		gd.horizontalSpan= 2;
 		protectCtorCB.setLayoutData(gd);
 
-		fMethodName.addModifyListener(new ModifyListener()
-			{
-				public void modifyText(ModifyEvent e) {
-					RefactoringStatus	status= getUseFactoryRefactoring().setNewMethodName(fMethodName.getText());
-					boolean				nameOk= status.isOK();
+		fMethodName.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				fMethodNameStatus = getUseFactoryRefactoring().setNewMethodName(fMethodName.getText());
+				validateInput(true);
+				/*
+				boolean				nameOk= status.isOK();
 
-					IntroduceFactoryInputPage.this.setPageComplete(nameOk);
-					IntroduceFactoryInputPage.this.setErrorMessage(nameOk ?
-						"" : //$NON-NLS-1$
-						status.getMessageMatchingSeverity(RefactoringStatus.ERROR));
+				if (status.hasFatalError()) {
+					IntroduceFactoryInputPage.this.setPageComplete(false);
+					
 				}
-			});
-		protectCtorCB.addSelectionListener(new SelectionAdapter()
-			{
-				public void widgetSelected(SelectionEvent e) {
-					boolean	isChecked = protectCtorCB.getSelection();
+				IntroduceFactoryInputPage.this.setPageComplete(!status.hasFatalError());
+				IntroduceFactoryInputPage.this.setErrorMessage(nameOk ?
+					"" : //$NON-NLS-1$
+					status.getMessageMatchingSeverity(RefactoringStatus.ERROR));
+					*/
+			}
+		});
+		protectCtorCB.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				boolean	isChecked = protectCtorCB.getSelection();
 
-					getUseFactoryRefactoring().setProtectConstructor(isChecked);
-				}
-			});
+				getUseFactoryRefactoring().setProtectConstructor(isChecked);
+			}
+		});
 
 		factoryTypeName.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				RefactoringStatus	status;
-
-				status= getUseFactoryRefactoring().setFactoryClass(factoryTypeName.getText());
-
+				fDestinationStatus= getUseFactoryRefactoring().setFactoryClass(factoryTypeName.getText());
+				validateInput(false);
+				/*
 				boolean	nameOk= status.isOK();
 
 				IntroduceFactoryInputPage.this.setPageComplete(nameOk);
 				IntroduceFactoryInputPage.this.setErrorMessage(nameOk ? "" : //$NON-NLS-1$
 															   status.getMessageMatchingSeverity(RefactoringStatus.ERROR));
+															   */
 			}
 		});
 		browseTypes.addSelectionListener(new SelectionAdapter() {
@@ -200,4 +208,21 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 	private IntroduceFactoryRefactoring getUseFactoryRefactoring() {
 		return (IntroduceFactoryRefactoring) getRefactoring();
 	}
-}
+	
+	private void validateInput(boolean methodName) {
+		RefactoringStatus merged= new RefactoringStatus();
+		if (fMethodNameStatus != null && (methodName || fMethodNameStatus.hasError()))
+			merged.merge(fMethodNameStatus);
+		if (fDestinationStatus != null && (!methodName || fDestinationStatus.hasError()))
+			merged.merge(fDestinationStatus);
+		
+		setPageComplete(!merged.hasError());
+		int severity= merged.getSeverity();
+		String message= merged.getMessageMatchingSeverity(severity);
+		if (severity >= RefactoringStatus.INFO) {
+			setMessage(message, severity);
+		} else {
+			setMessage("", NONE); //$NON-NLS-1$
+		}
+	}
+ }
