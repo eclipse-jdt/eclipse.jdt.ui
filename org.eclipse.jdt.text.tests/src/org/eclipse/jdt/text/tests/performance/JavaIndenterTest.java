@@ -58,32 +58,33 @@ public class JavaIndenterTest extends TestCase {
 		fPerformanceMeter.dispose();
 	}
 	
-	public void testJavaIndenter1() {
-		// cold run
-		measureJavaIndenter();
-	}
-
 	public void testJavaIndenter2() {
+		// cold run
+		measureJavaIndenter(false);
 		// warm run
-		measureJavaIndenter();
+		measureJavaIndenter(true);
 	}
 
-	private void measureJavaIndenter() {
+	private void measureJavaIndenter(boolean measure) {
 		IDocument document= ((JavaEditor) fEditor).getViewer().getDocument();
 		Display display= EditorTestHelper.getActiveDisplay();
 		IAction undo= fEditor.getAction(ITextEditorActionConstants.UNDO);
 		int originalNumberOfLines= document.getNumberOfLines();
 		for (int i= 0; i < N_OF_RUNS; i++) {
-			fPerformanceMeter.start();
+			if (measure)
+				fPerformanceMeter.start();
 			SWTEventHelper.pressKeyCode(display, SWT.CR);
-			fPerformanceMeter.stop();
+			if (measure)
+				fPerformanceMeter.stop();
 			assertEquals(originalNumberOfLines + 1, document.getNumberOfLines());
 			runAction(undo);
 			assertEquals(originalNumberOfLines, document.getNumberOfLines());
 			sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
 		}
-		fPerformanceMeter.commit();
-		Performance.getDefault().assertPerformance(fPerformanceMeter);
+		if (measure) {
+			fPerformanceMeter.commit();
+			Performance.getDefault().assertPerformance(fPerformanceMeter);
+		}
 	}
 
 	private void runAction(IAction action) {
