@@ -550,18 +550,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		}
 	}
 
-	/**
-	 * Returns the package fragment root corresponding to the class file.
-	 */
-	private static IPackageFragmentRoot getPackageFragmentRoot(IClassFile file) {
-
-		IJavaElement element= file.getParent();
-		while (element != null && element.getElementType() != IJavaElement.PACKAGE_FRAGMENT_ROOT)
-			element= element.getParent();
-
-		return (IPackageFragmentRoot) element;		
-	}
-
 	private JavaModelException probeInputForSource(IEditorInput input) {
 		if (input == null)
 			return null;

@@ -625,21 +625,6 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return buffer.toString();
 	}
 
-	/**
-	 * Returns whether the text ends with one of the given search strings.
-	 */
-	private boolean endsWithDelimiter(IDocument d, String txt) {
-
-		String[] delimiters= d.getLegalLineDelimiters();
-
-		for (int i= 0; i < delimiters.length; i++) {
-			if (txt.endsWith(delimiters[i]))
-				return true;
-		}
-
-		return false;
-	}
-
 	private boolean equalsDelimiter(IDocument d, String txt) {
 
 		String[] delimiters= d.getLegalLineDelimiters();

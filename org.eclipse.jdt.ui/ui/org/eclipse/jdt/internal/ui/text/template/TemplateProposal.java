@@ -49,7 +49,6 @@ public class TemplateProposal implements IJavaCompletionProposal {
 	private int fRelevance;
 
 	private TemplateBuffer fTemplateBuffer;
-	private String fOldText;
 	private IRegion fSelectedRegion; // initialized by apply()
 		
 	/**

@@ -22,9 +22,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 
 
 public class ProposalInfo {
-	
-	private static final int NUMBER_OF_JAVADOC_LINES= 12;
-	
+		
 	private IJavaProject fJavaProject;
 	private char[] fPackageName;
 	private char[] fTypeName;

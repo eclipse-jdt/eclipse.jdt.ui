@@ -95,16 +95,6 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		command.text= getModifiedText(command.text, lineDelimiter, indentation);		
 	}
 
-	private void javaStringSkipQuote(IDocument document, DocumentCommand command) throws BadLocationException {
-
-		ITypedRegion partition= document.getPartition(command.offset);
-		int offset= partition.getOffset();
-		int length= partition.getLength();
-
-		if (command.offset == offset + length - 1 && document.getChar(offset + length - 1) == '\"')
-			command.length++;
-	}
-
 	/*
 	 * @see org.eclipse.jface.text.IAutoIndentStrategy#customizeDocumentCommand(IDocument, DocumentCommand)
 	 */

@@ -37,10 +37,6 @@ public class ContentAssistPreference {
 	private final static String PARAMETERS_FOREGROUND=  PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND;
 	/** Preference key for content assist parameters color */
 	private final static String PARAMETERS_BACKGROUND=  PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND;
-	/** Preference key for content assist completion replacement color */
-	private final static String COMPLETION_REPLACEMENT_FOREGROUND=  PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND;
-	/** Preference key for content assist completion replacement color */
-	private final static String COMPLETION_REPLACEMENT_BACKGROUND=  PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND;
 	/** Preference key for content assist auto insert */
 	private final static String AUTOINSERT= PreferenceConstants.CODEASSIST_AUTOINSERT;
 	
@@ -57,12 +53,8 @@ public class ContentAssistPreference {
 	private final static String CASE_SENSITIVITY= PreferenceConstants.CODEASSIST_CASE_SENSITIVITY;
 	/** Preference key for adding imports on code assist */
 	private final static String ADD_IMPORT= PreferenceConstants.CODEASSIST_ADDIMPORT;
-	/** Preference key for inserting content assist */
-	private static final String INSERT_COMPLETION= PreferenceConstants.CODEASSIST_INSERT_COMPLETION;
 	/** Preference key for filling argument names on method completion */
 	private static final String FILL_METHOD_ARGUMENTS= PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES;
-	/** Preference key for guessing argument names on method completion */
-	private static final String GUESS_METHOD_ARGUMENTS= PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS;
 
 	
 	private static Color getColor(IPreferenceStore store, String key, IColorManager manager) {

@@ -25,12 +25,6 @@ import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
-
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -48,7 +42,6 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -182,32 +175,6 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);	
 		}
-	}
-
-	/**
-	 * Returns the compilation unit of the CompilationUnitEditor invoking the AutoIndentStrategy,
-	 * might return <code>null</code> on error.
-	 */
-	private static ICompilationUnit getCompilationUnit() {
-
-		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		if (window == null)
-			return null;
-
-		IWorkbenchPage page= window.getActivePage();
-		if (page == null)
-			return null;
-
-		IEditorPart editor= page.getActiveEditor();
-		if (editor == null)
-			return null;
-
-		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-		ICompilationUnit unit= manager.getWorkingCopy(editor.getEditorInput());
-		if (unit == null)
-			return null;
-
-		return unit;
 	}
 
 	private static String getLineDelimiter(IDocument document) {

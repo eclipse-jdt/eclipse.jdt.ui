@@ -159,7 +159,6 @@ import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
@@ -425,17 +424,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			
 			fActiveRegion= null;
 		}
-
-		private IJavaElement getInput(JavaEditor editor) {
-			if (editor == null)
-				return null;
-			IEditorInput input= editor.getEditorInput();
-			if (input instanceof IClassFileEditorInput)
-				return ((IClassFileEditorInput)input).getClassFile();
-			IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();				
-			return manager.getWorkingCopy(input);			
-		}
-
 
 		// will eventually be replaced by a method provided by jdt.core		
 		private IRegion selectWord(IDocument document, int anchor) {
@@ -1657,13 +1645,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		
 		if (isBrowserLikeLinks())
 			enableBrowserLikeLinks();
-	}
-	
-	private boolean isTextSelectionEmpty() {
-		ISelection selection= getSelectionProvider().getSelection();
-		if (!(selection instanceof ITextSelection))
-			return true;
-		return ((ITextSelection)selection).getLength() == 0;	
 	}
 	
 	public void updatedTitleImage(Image image) {

@@ -40,7 +40,6 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	
 	private IWorkingCopyManager fManager;
 	private IDocumentProvider fDocumentProvider;
-	private ICompilationUnit fUnit;
 	private IProgressMonitor fProgressMonitor;
 	private boolean fNotify= true;
 	
