@@ -22,7 +22,10 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -130,7 +133,13 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 		Object element= selection.getFirstElement();
 		if (!(element instanceof IField))
 			return false;
-		return !((IField)element).isBinary();
+		final IField field= (IField) element;
+		try {
+			return !field.isBinary() && !JdtFlags.isEnum(field);
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
+			return false;
+		}
 	}
 	
 	/* (non-Javadoc)

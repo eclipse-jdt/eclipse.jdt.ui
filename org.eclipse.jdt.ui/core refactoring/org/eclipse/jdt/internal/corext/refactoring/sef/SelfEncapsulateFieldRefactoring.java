@@ -131,7 +131,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	}
 	
 	public static boolean isAvailable(IField field) throws JavaModelException {
-		return Checks.isAvailable(field);
+		return Checks.isAvailable(field) && !JdtFlags.isEnum(field);
 	}
 	
 	public static SelfEncapsulateFieldRefactoring create(IField field) throws JavaModelException {
