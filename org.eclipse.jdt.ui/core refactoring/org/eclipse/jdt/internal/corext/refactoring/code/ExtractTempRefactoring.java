@@ -138,11 +138,19 @@ public class ExtractTempRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 8); //$NON-NLS-1$
+			pm.beginTask("", 10); //$NON-NLS-1$
 	
-			if (getSelectedExpression() == null)
+			Expression selectedExpression= getSelectedExpression();
+			
+			if (selectedExpression == null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression")); //$NON-NLS-1$
-
+			pm.worked(1);
+			
+			if (selectedExpression.getStartPosition() != fSelectionStart){ 
+				int length= selectedExpression.getStartPosition() - fSelectionStart;
+				if (length >= 0 && ! "".equals(fCu.getBuffer().getText(fSelectionStart, length).trim())) //$NON-NLS-1$
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.begining")); //$NON-NLS-1$
+			}
 			pm.worked(1);
 			
 			if (isUsedInExplicitConstructorCall())
@@ -153,10 +161,14 @@ public class ExtractTempRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.expression_in_method"));			 //$NON-NLS-1$
 			pm.worked(1);				
 			
-			if (getSelectedExpression().getParent() instanceof ExpressionStatement)
+			if (selectedExpression.getParent() instanceof ExpressionStatement)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.statements")); //$NON-NLS-1$
 			pm.worked(1);				
-
+			
+			if (selectedExpression instanceof Name && selectedExpression.getParent() instanceof ClassInstanceCreation)
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.name_in_new")); //$NON-NLS-1$
+			pm.worked(1);				
+			
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkExpression());
 			if (result.hasFatalError())
@@ -199,6 +211,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private RefactoringStatus checkExpression() throws JavaModelException {
 		Expression selectedExpression= getSelectedExpression();
+			
 		if (selectedExpression instanceof NullLiteral) {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.null_literals")); //$NON-NLS-1$
 		} else if (selectedExpression instanceof ArrayInitializer) {
@@ -213,7 +226,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		} else
 			return null;
 	}
-
+	
 	public RefactoringStatus checkTempName(String newName) {
 		RefactoringStatus result= Checks.checkFieldName(newName);
 		if (! Checks.startsWithLowerCase(newName))
