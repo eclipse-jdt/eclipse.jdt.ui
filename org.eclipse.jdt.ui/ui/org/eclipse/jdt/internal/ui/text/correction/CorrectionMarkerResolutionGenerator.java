@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
@@ -80,7 +81,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		
 		try {
 			ICompilationUnit cu= getCompilationUnit(marker);
-			if (cu != null) {
+			if (cu != null && JavaModelUtil.isEditable(cu)) {
 				IEditorInput input= EditorUtility.getEditorInput(cu);
 				if (input != null) { // only works with element open in editor
 					ProblemPosition pos= findProblemPosition(input, marker);
