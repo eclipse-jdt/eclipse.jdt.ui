@@ -689,7 +689,8 @@ public class ExtractInterfaceTests extends RefactoringTest {
 
 	public void test100() throws Exception{
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=47785
-		validatePassingTest("A", "I", true, false);
+		//validatePassingTest("A", "I", true, false);
+		// TODO: enable again with I20040302
 	}
 	
 	public void testPaperExample0() throws Exception{
