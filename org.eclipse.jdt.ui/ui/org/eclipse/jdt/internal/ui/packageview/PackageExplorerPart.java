@@ -450,7 +450,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	String getToolTipText(Object element) {
 		String result;
 		if (!(element instanceof IResource)) {
+			fJavaElementLabelProvider.setCompressingPkgNameInPackagesView(false);
 			result= ((ILabelProvider) getViewer().getLabelProvider()).getText(element);
+			fJavaElementLabelProvider.setCompressingPkgNameInPackagesView(WorkInProgressPreferencePage.isCompressingPkgNameInPackagesView());
+
 		} else {
 			IPath path= ((IResource) element).getFullPath();
 			if (path.isRoot()) {
@@ -1261,7 +1264,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			setTitleToolTip(""); //$NON-NLS-1$
 		} else {
 			ILabelProvider labelProvider = (ILabelProvider) getViewer().getLabelProvider();
+			fJavaElementLabelProvider.setCompressingPkgNameInPackagesView(false);
 			String inputText= labelProvider.getText(input);
+			fJavaElementLabelProvider.setCompressingPkgNameInPackagesView(WorkInProgressPreferencePage.isCompressingPkgNameInPackagesView());
 			String title= PackagesMessages.getFormattedString("PackageExplorer.argTitle", new String[] { viewName, inputText }); //$NON-NLS-1$
 			setTitle(title);
 			setTitleToolTip(getToolTipText(input));
