@@ -16,7 +16,6 @@
       <import plugin="org.eclipse.jdt.ui"/>
 	  <import plugin="org.eclipse.jdt.launching"/>
 	  <import plugin="org.eclipse.jdt.junit.eclipse"/>
-	  <import plugin="Refactoring Tests Resources"/>
    </requires>
 
 <runtime>
