@@ -540,6 +540,9 @@
          markerType="org.eclipse.jdt.core.problem"
          markerSeverity="0">
       </type>
+      <type
+         name="org.eclipse.jdt.ui.occurrences">
+      </type>
    </extension>
    <extension
          point="org.eclipse.ui.editors.markerAnnotationSpecification">
@@ -560,9 +563,31 @@
             icon="icons/full/obj16/brkp_obj.gif"
             annotationImageProvider="org.eclipse.jdt.internal.ui.javaeditor.BreakpointImageProvider">
       </specification>
+	  <specification
+            annotationType="org.eclipse.jdt.ui.occurrences"
+            label="%OccurrenceAnnotation.label"
+            icon="icons/full/obj16/searchm_obj.gif"
+            textPreferenceKey="occurrenceIndication"
+            textPreferenceValue="false"
+            highlightPreferenceKey="occurrenceHighlighting"
+            highlightPreferenceValue="true"
+            overviewRulerPreferenceKey="occurrenceIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            verticalRulerPreferenceKey="occurrenceIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="false"
+            colorPreferenceKey="occurrenceIndicationColor"
+            colorPreferenceValue="180,207,205"
+            presentationLayer="3"
+            showInNextPrevDropdownToolbarActionKey="showOccurrenceInNextPrevDropdownToolbarAction"
+            showInNextPrevDropdownToolbarAction="true"
+            isGoToNextNavigationTargetKey="isOccurrenceGoToNextNavigationTarget"
+	        isGoToNextNavigationTarget="false"
+            isGoToPreviousNavigationTargetKey="isOccurrenceGoToPreviousNavigationTarget"
+	        isGoToPreviousNavigationTarget="false">
+	  </specification>
 
       <!-- linked annotations -->
-      <specification
+	  <specification
             annotationType="org.eclipse.jdt.ui.link.master"
             colorPreferenceValue="180,215,255"
             colorPreferenceKey="linked.focus.color"
@@ -622,7 +647,8 @@
             highlightPreferenceValue="false"
             overviewRulerPreferenceKey="linked.target.overviewruler">
       </specification>
-   </extension>
+	</extension>
+
    <extension
          id="org.eclipse.jdt.ui.JavaDocumentSetupParticipant"
          name="%javaDocumentSetupParticipant"
