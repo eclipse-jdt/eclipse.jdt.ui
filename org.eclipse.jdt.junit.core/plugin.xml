@@ -62,5 +62,48 @@
 		</page>
 	</extension>
 	
+	<extension point = "org.eclipse.debug.core.launchConfigurationTypes">
+   		<launchConfigurationType
+   	   		id="org.eclipse.jdt.junit.launchconfig"
+	   		name="JUnit"
+	   		delegate="org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfiguration"
+	   		modes= "run, debug">
+	   <fileExtension
+	   		extension="java"
+	   		default="false"/>
+	   <fileExtension
+	   		extension="class"
+	   		default="false"/>
+   		</launchConfigurationType>
+	</extension>
+	
+	<extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+		<launchConfigurationTypeImage
+			id="org.eclipse.jdt.junit.launchimage"
+			configTypeID="org.eclipse.jdt.junit.launchconfig"
+			icon="icons/smalllogo.gif">
+		</launchConfigurationTypeImage>	
+	</extension>
+	
+	<extension point = "org.eclipse.debug.ui.launchConfigurationTabs">
+		<launchConfigurationTab
+			id="org.eclipse.jdt.junit.launchConfigurationTab.JUnitMain"
+			type ="org.eclipse.jdt.junit.launchconfig"
+			class="org.eclipse.jdt.internal.junit.launcher.JUnitMainTab"
+			name="Main">
+		</launchConfigurationTab>
+		<launchConfigurationTab
+			id="org.eclipse.jdt.junit.launchConfigurationTab.JUnitArguments"
+			type ="org.eclipse.jdt.junit.launchconfig"
+			class="org.eclipse.jdt.internal.junit.launcher.JUnitArgumentsTab"
+			name="Arguments">
+		</launchConfigurationTab>
+		<launchConfigurationTab
+			id="org.eclipse.jdt.junit.launchConfigurationTab.JavaEnvironment"
+			type ="org.eclipse.jdt.junit.launchconfig"
+			class="org.eclipse.jdt.internal.debug.ui.launcher.JavaEnvironmentTab"
+			name="Environment">
+		</launchConfigurationTab>
+	</extension>
 
 </plugin>

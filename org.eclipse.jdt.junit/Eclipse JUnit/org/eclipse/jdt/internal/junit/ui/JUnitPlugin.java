@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.junit.ui;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
 import org.eclipse.jdt.internal.junit.oldlauncher.*;
 
 import org.eclipse.core.runtime.CoreException;
@@ -137,19 +138,18 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 			port= launcherDelegate.getPort();
 		} else {
 			// new launch configs
-			// disable new launch config support
-//			ILaunchConfiguration config= launch.getLaunchConfiguration();
-//			if (config != null) {
-//				// test whether the launch defines the JUnit attributes
-//				String portStr= launch.getAttribute(JUnitBaseLaunchConfiguration.PORT_ATTR);
-//				String typeStr= launch.getAttribute(JUnitBaseLaunchConfiguration.TESTTYPE_ATTR);
-//				if (portStr != null && typeStr != null) {
-//					port= Integer.parseInt(portStr);
-//					IJavaElement element= JavaCore.create(typeStr);
-//					if (element instanceof IType) 
-//						launchedType= (IType)element;
-//				}
-//			}	
+			ILaunchConfiguration config= launch.getLaunchConfiguration();
+			if (config != null) {
+				// test whether the launch defines the JUnit attributes
+				String portStr= launch.getAttribute(JUnitBaseLaunchConfiguration.PORT_ATTR);
+				String typeStr= launch.getAttribute(JUnitBaseLaunchConfiguration.TESTTYPE_ATTR);
+				if (portStr != null && typeStr != null) {
+					port= Integer.parseInt(portStr);
+					IJavaElement element= JavaCore.create(typeStr);
+					if (element instanceof IType) 
+						launchedType= (IType)element;
+				}
+			}	
 		}
 		if (launchedType != null) 
 			connectTestRunner(launch, launchedType, port);
