@@ -101,12 +101,39 @@
             <adapter type="org.eclipse.ui.IContributorResourceAdapter"/>
             <adapter type="org.eclipse.ui.IContainmentAdapter"/>
             
+            <adapter type="org.eclipse.search.ui.ISearchPageScoreComputer"/>
+            
             <adapter type="org.eclipse.ui.model.IWorkbenchAdapter"/>
             <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
             <adapter type="org.eclipse.ui.views.tasklist.ITaskListResourceAdapter"/>
             
             <adapter type="org.eclipse.jdt.internal.ui.IResourceLocator"/>
 		</factory>
+		
+		<factory 
+            class="org.eclipse.jdt.internal.ui.ResourceAdapterFactory" 
+            adaptableType="org.eclipse.core.resources.IResource">
+            <adapter type="org.eclipse.jdt.core.IJavaElement"/>
+		</factory>
+		
+		<factory 
+            class="org.eclipse.jdt.internal.ui.MarkerAdapterFactory" 
+            adaptableType="org.eclipse.core.resources.IMarker">
+            <adapter type="org.eclipse.search.ui.ISearchPageScoreComputer"/>
+		</factory>
+		
+		<factory 
+            class="org.eclipse.jdt.internal.ui.EditorInputAdapterFactory" 
+            adaptableType="org.eclipse.ui.IEditorInput">
+            <adapter type="org.eclipse.search.ui.ISearchPageScoreComputer"/>
+		</factory>
+		
+		<factory 
+            class="org.eclipse.jdt.internal.ui.LogicalPackageAdapterFactory" 
+            adaptableType="org.eclipse.jdt.internal.ui.browsing.LogicalPackage">
+            <adapter type="org.eclipse.search.ui.ISearchPageScoreComputer"/>
+		</factory>
+		
    </extension>     	
 
 

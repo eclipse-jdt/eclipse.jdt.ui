@@ -21,16 +21,13 @@ import org.osgi.framework.BundleContext;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -69,7 +66,6 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IBufferFactory;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 
@@ -87,7 +83,6 @@ import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 import org.eclipse.jdt.internal.corext.template.java.Templates;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 
-import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
@@ -168,12 +163,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private JavaTextTools fJavaTextTools;
 	private ProblemMarkerManager fProblemMarkerManager;
 	private ImageDescriptorRegistry fImageDescriptorRegistry;
-	
-	private JavaElementAdapterFactory fJavaElementAdapterFactory;
-	private MarkerAdapterFactory fMarkerAdapterFactory;
-	private EditorInputAdapterFactory fEditorInputAdapterFactory;
-	private ResourceAdapterFactory fResourceAdapterFactory; 
-	private LogicalPackageAdapterFactory fLogicalPackageAdapterFactory;
 	
 	private MembersOrderPreferenceCache fMembersOrderPreferenceCache;
 	private IPropertyChangeListener fFontPropertyChangeListener;
@@ -352,7 +341,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		registerAdapters();
 		
 		if (USE_WORKING_COPY_OWNERS) {
 			WorkingCopyOwner.setPrimaryBufferProvider(new WorkingCopyOwner() {
@@ -469,8 +457,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 			if (fImageDescriptorRegistry != null)
 				fImageDescriptorRegistry.dispose();
 			
-			unregisterAdapters();
-	
 			if (fASTProvider != null) {
 				fASTProvider.dispose();
 				fASTProvider= null;
@@ -813,30 +799,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 		return fImageDescriptorRegistry;
 	}
 
-	private void registerAdapters() {
-		fJavaElementAdapterFactory= new JavaElementAdapterFactory();
-		fMarkerAdapterFactory= new MarkerAdapterFactory();
-		fEditorInputAdapterFactory= new EditorInputAdapterFactory();
-		fResourceAdapterFactory= new ResourceAdapterFactory();
-		fLogicalPackageAdapterFactory= new LogicalPackageAdapterFactory();
-
-		IAdapterManager manager= Platform.getAdapterManager();		
-		manager.registerAdapters(fJavaElementAdapterFactory, IJavaElement.class);
-		manager.registerAdapters(fMarkerAdapterFactory, IMarker.class);
-		manager.registerAdapters(fEditorInputAdapterFactory, IEditorInput.class);
-		manager.registerAdapters(fResourceAdapterFactory, IResource.class);
-		manager.registerAdapters(fLogicalPackageAdapterFactory, LogicalPackage.class);
-	}
-	
-	private void unregisterAdapters() {
-		IAdapterManager manager= Platform.getAdapterManager();
-		manager.unregisterAdapters(fJavaElementAdapterFactory);
-		manager.unregisterAdapters(fMarkerAdapterFactory);
-		manager.unregisterAdapters(fEditorInputAdapterFactory);
-		manager.unregisterAdapters(fResourceAdapterFactory);
-		manager.unregisterAdapters(fLogicalPackageAdapterFactory);
-	}
-	
 	/**
 	 * Returns a combined preference store, this store is read-only.
 	 * 
