@@ -20,9 +20,7 @@ import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.NullChange;
 import org.eclipse.jdt.internal.core.refactoring.RenameResourceChange;
-import org.eclipse.jdt.internal.core.refactoring.cus.*;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
-
 
 public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring implements IRenameRefactoring, IPreactivatedRefactoring{
 
