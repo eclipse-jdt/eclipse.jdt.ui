@@ -33,7 +33,9 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstructorsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 
@@ -87,8 +89,8 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		comment.append(" * ${tags}\n");
 		comment.append(" */");
 		
-		CodeTemplates.getCodeTemplate(CodeTemplates.CONSTRUCTORCOMMENT).setPattern(comment.toString());
-		CodeTemplates.getCodeTemplate(CodeTemplates.CONSTRUCTORSTUB).setPattern("${body_statement}\n// TODO");	
+		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT).setPattern(comment.toString());
+		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.CONSTRUCTORSTUB).setPattern("${body_statement}\n// TODO");	
 		fSettings= JavaPreferencesSettings.getCodeGenerationSettings();
 		fSettings.createComments= true;
 	}

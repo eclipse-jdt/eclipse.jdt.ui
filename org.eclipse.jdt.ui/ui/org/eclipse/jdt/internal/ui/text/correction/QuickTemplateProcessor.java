@@ -39,7 +39,6 @@ import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
-import org.eclipse.jdt.internal.corext.template.java.Templates;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
@@ -128,7 +127,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 	}
 	
 	private void collectSurroundTemplates(IDocument document, ICompilationUnit cu, int offset, int length, Collection result) throws BadLocationException {
-		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getTemplateContextRegistry().getContextType(JavaContextType.NAME);
+		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.NAME);
 		CompilationUnitContext context= contextType.createContext(document, offset, length, cu);
 		context.setVariable("selection", document.get(offset, length)); //$NON-NLS-1$
 		context.setForceEvaluation(true);
@@ -137,7 +136,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 		int end= context.getEnd();
 		IRegion region= new Region(start, end - start);
 
-		Template[] templates= Templates.getInstance().getTemplates();
+		Template[] templates= JavaPlugin.getDefault().getTemplateStore().getTemplates();
 		for (int i= 0; i != templates.length; i++) {
 			Template curr= templates[i];
 			if (context.canEvaluate(curr) && curr.getContextTypeId().equals(JavaContextType.NAME) && curr.getPattern().indexOf($_LINE_SELECTION) != -1) {

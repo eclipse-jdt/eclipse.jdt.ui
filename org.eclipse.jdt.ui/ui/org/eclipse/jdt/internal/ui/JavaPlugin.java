@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +45,8 @@ import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
+import org.eclipse.jface.text.templates.persistence.TemplateStore;
+
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
@@ -62,8 +65,10 @@ import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
+import org.eclipse.jdt.internal.corext.template.java.Templates;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
@@ -92,14 +97,52 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
  * of the plug-in such as document providers and find-replace-dialogs.
  */
 public class JavaPlugin extends AbstractUIPlugin {
-	
 	/** temporarily */
 	public static final boolean USE_WORKING_COPY_OWNERS= true;
+	/**
+	 * The key to store customized templates. 
+	 * @since 3.0
+	 */
+	private static final String TEMPLATES_KEY= "org.eclipse.jdt.ui.text.custom_templates"; //$NON-NLS-1$
+	/**
+	 * The key to store customized code templates. 
+	 * @since 3.0
+	 */
+	private static final String CODE_TEMPLATES_KEY= "org.eclipse.jdt.ui.text.custom_code_templates"; //$NON-NLS-1$
+	/**
+	 * The key to store whether the legacy templates have been migrated 
+	 * @since 3.0
+	 */
+	private static final String TEMPLATES_MIGRATION_KEY= "org.eclipse.jdt.ui.text.templates_migrated"; //$NON-NLS-1$
+	/**
+	 * The key to store whether the legacy code templates have been migrated 
+	 * @since 3.0
+	 */
+	private static final String CODE_TEMPLATES_MIGRATION_KEY= "org.eclipse.jdt.ui.text.code_templates_migrated"; //$NON-NLS-1$
 	
 	private static JavaPlugin fgJavaPlugin;
 	
-	/** The template context type registry. */
-	private static ContextTypeRegistry fgContextTypeRegistry;
+	/** 
+	 * The template context type registry for the java editor. 
+	 * @since 3.0
+	 */
+	private ContextTypeRegistry fContextTypeRegistry;
+	/** 
+	 * The code template context type registry for the java editor. 
+	 * @since 3.0
+	 */
+	private ContextTypeRegistry fCodeTemplateContextTypeRegistry;
+	
+	/**
+	 * The template store for the java editor. 
+	 * @since 3.0
+	 */
+	private TemplateStore fTemplateStore;
+	/**
+	 * The coded template store for the java editor. 
+	 * @since 3.0
+	 */
+	private TemplateStore fCodeTemplateStore;
 
 
 	private IWorkingCopyManager fWorkingCopyManager;
@@ -141,6 +184,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @since 3.0
 	 */
 	private ASTProvider fASTProvider;
+
 
 	
 	public static JavaPlugin getDefault() {
@@ -495,7 +539,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * a client asks for them.
 	 * </p>
 	 * 
-	 * @return an array of JavaEditorTextHoverDescriptor
 	 * @since 2.1
 	 */
 	public void resetJavaEditorTextHoverDescriptors() {
@@ -526,21 +569,91 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * Returns the template context type registry for the java plugin.
 	 * 
 	 * @return the template context type registry for the java plugin
+	 * @since 3.0
 	 */
-	public static ContextTypeRegistry getTemplateContextRegistry() {
-		if (fgContextTypeRegistry == null) {
-			fgContextTypeRegistry= new ContextTypeRegistry();
+	public ContextTypeRegistry getTemplateContextRegistry() {
+		if (fContextTypeRegistry == null) {
+			fContextTypeRegistry= new ContextTypeRegistry();
 			
-			fgContextTypeRegistry.addContextType(new JavaContextType());
-			fgContextTypeRegistry.addContextType(new JavaDocContextType());
-			CodeTemplateContextType.registerContextTypes(fgContextTypeRegistry);
+			fContextTypeRegistry.addContextType(new JavaContextType());
+			fContextTypeRegistry.addContextType(new JavaDocContextType());
 		}
 
-		return fgContextTypeRegistry;
+		return fContextTypeRegistry;
+	}
+	
+	/**
+	 * Returns the template store for the java editor templates.
+	 * 
+	 * @return the template store for the java editor templates
+	 * @since 3.0
+	 */
+	public TemplateStore getTemplateStore() {
+		if (fTemplateStore == null) {
+			boolean alreadyMigrated= getPreferenceStore().getBoolean(TEMPLATES_MIGRATION_KEY);
+			if (alreadyMigrated)
+				fTemplateStore= new TemplateStore(getTemplateContextRegistry(), getPreferenceStore(), TEMPLATES_KEY);
+			else {
+				fTemplateStore= new CompatibilityTemplateStore(getTemplateContextRegistry(), getPreferenceStore(), TEMPLATES_KEY, Templates.getInstance());
+				getPreferenceStore().setValue(TEMPLATES_MIGRATION_KEY, true);
+			}
+
+			try {
+				fTemplateStore.load();
+			} catch (IOException e) {
+				log(e);
+			}
+		}
+		
+		return fTemplateStore;
 	}
 
 	/**
-	 * @see AbstractUIPlugin#initializeDefaultPreferences
+	 * Returns the template context type registry for the special code templates
+	 * used by code generation.
+	 * 
+	 * @return the template context type registry for the special code templates
+	 *         used by code generation
+	 * @since 3.0
+	 */
+	public ContextTypeRegistry getCodeTemplateContextRegistry() {
+		if (fCodeTemplateContextTypeRegistry == null) {
+			fCodeTemplateContextTypeRegistry= new ContextTypeRegistry();
+			
+			CodeTemplateContextType.registerContextTypes(fCodeTemplateContextTypeRegistry);
+		}
+
+		return fCodeTemplateContextTypeRegistry;
+	}
+	
+	/**
+	 * Returns the template store for the java editor templates.
+	 * 
+	 * @return the template store for the java editor templates
+	 * @since 3.0
+	 */
+	public TemplateStore getCodeTemplateStore() {
+		if (fCodeTemplateStore == null) {
+			boolean alreadyMigrated= getPreferenceStore().getBoolean(CODE_TEMPLATES_MIGRATION_KEY);
+			if (alreadyMigrated)
+				fCodeTemplateStore= new TemplateStore(getCodeTemplateContextRegistry(), getPreferenceStore(), CODE_TEMPLATES_KEY);
+			else {
+				fCodeTemplateStore= new CompatibilityTemplateStore(getCodeTemplateContextRegistry(), getPreferenceStore(), CODE_TEMPLATES_KEY, CodeTemplates.getInstance());
+				getPreferenceStore().setValue(CODE_TEMPLATES_MIGRATION_KEY, true);
+			}
+
+			try {
+				fCodeTemplateStore.load();
+			} catch (IOException e) {
+				log(e);
+			}
+		}
+		
+		return fCodeTemplateStore;
+	}
+	
+	/**
+	 * @see AbstractUIPlugin#initializeDefaultPreferences(org.eclipse.jface.preference.IPreferenceStore)
 	 */
 	protected void initializeDefaultPreferences(IPreferenceStore store) {
 		super.initializeDefaultPreferences(store);

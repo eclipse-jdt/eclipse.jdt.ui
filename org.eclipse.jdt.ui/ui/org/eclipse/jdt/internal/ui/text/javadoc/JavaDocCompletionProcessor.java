@@ -31,7 +31,6 @@ import org.eclipse.jface.text.templates.ContextType;
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -61,10 +60,10 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	
 	public JavaDocCompletionProcessor(IEditorPart editor) {
 		fEditor= editor;
-		ContextType contextType= JavaPlugin.getTemplateContextRegistry().getContextType("javadoc"); //$NON-NLS-1$
+		ContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("javadoc"); //$NON-NLS-1$
 		if (contextType == null) {
 			contextType= new JavaDocContextType();
-			JavaPlugin.getTemplateContextRegistry().addContextType(contextType);
+			JavaPlugin.getDefault().getTemplateContextRegistry().addContextType(contextType);
 		}
 		if (contextType != null)
 			fTemplateEngine= new TemplateEngine(contextType);
@@ -208,12 +207,8 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 			}
 		}
 		if (fTemplateEngine != null) {
-			try {
-				fTemplateEngine.reset(); 
-				fTemplateEngine.complete(viewer, offset, cu);
-			} catch (JavaModelException x) {
-				errorMessage= x.getLocalizedMessage();
-			}				
+			fTemplateEngine.reset(); 
+			fTemplateEngine.complete(viewer, offset, cu);				
 			
 			ICompletionProposal[] templateResults= fTemplateEngine.getResults();
 			for (int k= 0; k < templateResults.length; k++) {

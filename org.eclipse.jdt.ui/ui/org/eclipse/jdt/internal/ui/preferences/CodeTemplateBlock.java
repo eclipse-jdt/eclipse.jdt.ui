@@ -12,10 +12,16 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
+import org.xml.sax.SAXException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -41,7 +47,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.templates.ContextType;
 import org.eclipse.jface.text.templates.Template;
-import org.eclipse.jface.text.templates.persistence.TemplateSet;
+import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
+import org.eclipse.jface.text.templates.persistence.TemplateReaderWriter;
+import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.PreferencesAdapter;
@@ -49,14 +57,11 @@ import org.eclipse.ui.texteditor.PreferencesAdapter;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
-
-import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -72,8 +77,6 @@ public class CodeTemplateBlock {
 	private class CodeTemplateAdapter implements ITreeListAdapter, IDialogFieldListener {
 
 		private final Object[] NO_CHILDREN= new Object[0];
-		public CodeTemplateAdapter(CodeTemplates templates) {
-		}		
 
 		public void customButtonPressed(TreeListDialogField field, int index) {
 			doButtonPressed(index, field.getSelectedElements());
@@ -102,9 +105,9 @@ public class CodeTemplateBlock {
 		}
 
 		public Object getParent(TreeListDialogField field, Object element) {
-			if (element instanceof Template) {
-				Template template= (Template) element;
-				if (template.getName().endsWith(CodeTemplates.COMMENT_SUFFIX)) {
+			if (element instanceof TemplatePersistenceData) {
+				TemplatePersistenceData data= (TemplatePersistenceData) element;
+				if (data.getTemplate().getName().endsWith(CodeTemplateContextType.COMMENT_SUFFIX)) {
 					return COMMENT_NODE;
 				}
 				return CODE_NODE;
@@ -141,33 +144,34 @@ public class CodeTemplateBlock {
 			if (element == COMMENT_NODE || element == CODE_NODE) {
 				return (String) element;
 			}
-			Template template = (Template) element;
+			TemplatePersistenceData data= (TemplatePersistenceData) element;
+			Template template= data.getTemplate();
 			String name= template.getName();
-			if (CodeTemplates.CATCHBLOCK.equals(name)) {
+			if (CodeTemplateContextType.CATCHBLOCK.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.catchblock.label"); //$NON-NLS-1$
-			} else if (CodeTemplates.METHODSTUB.equals(name)) {
+			} else if (CodeTemplateContextType.METHODSTUB.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.methodstub.label"); //$NON-NLS-1$
-			} else if (CodeTemplates.CONSTRUCTORSTUB.equals(name)) {
+			} else if (CodeTemplateContextType.CONSTRUCTORSTUB.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.constructorstub.label"); //$NON-NLS-1$
-			} else if (CodeTemplates.GETTERSTUB.equals(name)) {
+			} else if (CodeTemplateContextType.GETTERSTUB.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.getterstub.label"); //$NON-NLS-1$
-			} else if (CodeTemplates.SETTERSTUB.equals(name)) {
+			} else if (CodeTemplateContextType.SETTERSTUB.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.setterstub.label"); //$NON-NLS-1$
-			} else if (CodeTemplates.NEWTYPE.equals(name)) {
+			} else if (CodeTemplateContextType.NEWTYPE.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.newtype.label"); //$NON-NLS-1$
-			} else if (CodeTemplates.TYPECOMMENT.equals(name)) {
+			} else if (CodeTemplateContextType.TYPECOMMENT.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.typecomment.label"); //$NON-NLS-1$
-			} else if (CodeTemplates.FIELDCOMMENT.equals(name)) {
+			} else if (CodeTemplateContextType.FIELDCOMMENT.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.fieldcomment.label"); //$NON-NLS-1$
-			} else if (CodeTemplates.METHODCOMMENT.equals(name)) {
+			} else if (CodeTemplateContextType.METHODCOMMENT.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.methodcomment.label"); //$NON-NLS-1$
-			} else if (CodeTemplates.OVERRIDECOMMENT.equals(name)) {
+			} else if (CodeTemplateContextType.OVERRIDECOMMENT.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.overridecomment.label"); //$NON-NLS-1$
-			} else if (CodeTemplates.CONSTRUCTORCOMMENT.equals(name)) {
+			} else if (CodeTemplateContextType.CONSTRUCTORCOMMENT.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.constructorcomment.label"); //$NON-NLS-1$
-			} else if (CodeTemplates.GETTERCOMMENT.equals(name)) {
+			} else if (CodeTemplateContextType.GETTERCOMMENT.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.gettercomment.label"); //$NON-NLS-1$
-			} else if (CodeTemplates.SETTERCOMMENT.equals(name)) {
+			} else if (CodeTemplateContextType.SETTERCOMMENT.equals(name)) {
 				return PreferencesMessages.getString("CodeTemplateBlock.settercomment.label"); //$NON-NLS-1$
 			}
 			return template.getDescription();
@@ -189,7 +193,7 @@ public class CodeTemplateBlock {
 	
 	private SelectionButtonDialogField fCreateJavaDocComments;
 	
-	protected CodeTemplates fTemplates;
+	protected TemplateStore fTemplates;
 	
 	private PixelConverter fPixelConverter;
 	private SourceViewer fPatternViewer;
@@ -198,10 +202,10 @@ public class CodeTemplateBlock {
 
 	public CodeTemplateBlock() {
 		
-		fTemplates= CodeTemplates.getInstance();
+		fTemplates= JavaPlugin.getDefault().getCodeTemplateStore();
 		fTemplateProcessor= new TemplateVariableProcessor();
 		
-		CodeTemplateAdapter adapter= new CodeTemplateAdapter(fTemplates);
+		CodeTemplateAdapter adapter= new CodeTemplateAdapter();
 
 		String[] buttonLabels= new String[] { 
 			/* IDX_EDIT*/ PreferencesMessages.getString("CodeTemplateBlock.templates.edit.button"),	//$NON-NLS-1$
@@ -292,29 +296,30 @@ public class CodeTemplateBlock {
 		return viewer;
 	}
 	
-	protected Template[] getTemplateOfCategory(boolean isComment) {
+	protected TemplatePersistenceData[] getTemplateOfCategory(boolean isComment) {
 		ArrayList res=  new ArrayList();
-		Template[] templates= fTemplates.getTemplates();
+		TemplatePersistenceData[] templates= fTemplates.getTemplateData(false);
 		for (int i= 0; i < templates.length; i++) {
-			Template curr= templates[i];
-			if (isComment == curr.getName().endsWith(CodeTemplates.COMMENT_SUFFIX)) {
+			TemplatePersistenceData curr= templates[i];
+			if (isComment == curr.getTemplate().getName().endsWith(CodeTemplateContextType.COMMENT_SUFFIX)) {
 				res.add(curr);
 			}
 		}
-		return (Template[]) res.toArray(new Template[res.size()]);
+		return (TemplatePersistenceData[]) res.toArray(new TemplatePersistenceData[res.size()]);
 	}
 	
 	protected static boolean canEdit(List selected) {
-		return selected.size() == 1 && (selected.get(0) instanceof Template);
+		return selected.size() == 1 && (selected.get(0) instanceof TemplatePersistenceData);
 	}	
 	
 	protected void updateSourceViewerInput(List selection) {
 		if (fPatternViewer == null || fPatternViewer.getTextWidget().isDisposed()) {
 			return;
 		}
-		if (selection.size() == 1 && selection.get(0) instanceof Template) {
-			Template template= (Template) selection.get(0);
-			ContextType type= JavaPlugin.getTemplateContextRegistry().getContextType(template.getContextTypeId());
+		if (selection.size() == 1 && selection.get(0) instanceof TemplatePersistenceData) {
+			TemplatePersistenceData data= (TemplatePersistenceData) selection.get(0);
+			Template template= data.getTemplate();
+			ContextType type= JavaPlugin.getDefault().getCodeTemplateContextRegistry().getContextType(template.getContextTypeId());
 			fTemplateProcessor.setContextType(type);
 			fPatternViewer.getDocument().set(template.getPattern());
 		} else {
@@ -324,7 +329,7 @@ public class CodeTemplateBlock {
 		
 	protected void doButtonPressed(int buttonIndex, List selected) {
 		if (buttonIndex == IDX_EDIT) {
-			edit((Template) selected.get(0));
+			edit((TemplatePersistenceData) selected.get(0));
 		} else if (buttonIndex == IDX_EXPORT) {
 			export(selected);
 		} else if (buttonIndex == IDX_EXPORTALL) {
@@ -334,15 +339,14 @@ public class CodeTemplateBlock {
 		}
 	}
 	
-	private void edit(Template template) {
-		Template newTemplate= new Template(template);
+	private void edit(TemplatePersistenceData data) {
+		Template newTemplate= new Template(data.getTemplate());
 		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), newTemplate, true, false, new String[0]);
 		if (dialog.open() == Window.OK) {
 			// changed
-			template.setDescription(newTemplate.getDescription());
-			template.setPattern(newTemplate.getPattern());
-			fCodeTemplateTree.refresh(template);
-			fCodeTemplateTree.selectElements(new StructuredSelection(template));
+			data.setTemplate(newTemplate);
+			fCodeTemplateTree.refresh(data);
+			fCodeTemplateTree.selectElements(new StructuredSelection(data));
 		}
 	}
 		
@@ -351,49 +355,59 @@ public class CodeTemplateBlock {
 		dialog.setText(PreferencesMessages.getString("CodeTemplateBlock.import.title")); //$NON-NLS-1$
 		dialog.setFilterExtensions(new String[] {PreferencesMessages.getString("CodeTemplateBlock.import.extension")}); //$NON-NLS-1$
 		String path= dialog.open();
-		if (path != null) {
-			try {
-				fTemplates.addFromFile(new File(path), false, null);
-			} catch (CoreException e) {
-				openReadErrorDialog(e);
+		
+		if (path == null)
+			return;
+		
+		try {
+			TemplateReaderWriter reader= new TemplateReaderWriter();
+			File file= new File(path);
+			if (file.exists()) {
+				Reader input= new FileReader(file);
+				TemplatePersistenceData[] datas= reader.read(input);
+				for (int i= 0; i < datas.length; i++) {
+					TemplatePersistenceData data= datas[i];
+					fTemplates.add(data);
+				}
 			}
+
 			fCodeTemplateTree.refresh();
+
+		} catch (FileNotFoundException e) {
+			openReadErrorDialog(e);
+		} catch (SAXException e) {
+			openReadErrorDialog(e);
+		} catch (IOException e) {
+			openReadErrorDialog(e);
 		}
+
 	}
 	
 	private void exportAll() {
-		export(fTemplates);	
+		export(fTemplates.getTemplateData(false));	
 	}
-
+	
 	private void export(List selected) {
-		TemplateSet templateSet= new TemplateSet(fTemplates.getTemplateTag(), JavaPlugin.getTemplateContextRegistry());
+		List datas= new ArrayList();
 		for (int i= 0; i < selected.size(); i++) {
 			Object curr= selected.get(i);
-			if (curr instanceof Template) {
-				addToTemplateSet(templateSet, (Template) curr);
+			if (curr instanceof TemplatePersistenceData) {
+				datas.add(curr);
 			} else {
-				Template[] templates= getTemplateOfCategory(curr == COMMENT_NODE);
-				for (int k= 0; k < templates.length; k++) {
-					addToTemplateSet(templateSet, templates[k]);
-				}
+				TemplatePersistenceData[] cat= getTemplateOfCategory(curr == COMMENT_NODE);
+				datas.addAll(Arrays.asList(cat));
 			}
 		}
-		export(templateSet);
+		export((TemplatePersistenceData[]) datas.toArray(new TemplatePersistenceData[datas.size()]));
 	}
 	
-	private void addToTemplateSet(TemplateSet set, Template template) {
-		if (set.getFirstTemplate(template.getName()) == null) {
-			set.add(template);
-		}
-	}
-	
-	private void export(TemplateSet templateSet) {
+	private void export(TemplatePersistenceData[] templates) {
 		FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
-		dialog.setText(PreferencesMessages.getFormattedString("CodeTemplateBlock.export.title", String.valueOf(templateSet.getTemplates().length))); //$NON-NLS-1$
+		dialog.setText(PreferencesMessages.getFormattedString("CodeTemplateBlock.export.title", String.valueOf(templates.length))); //$NON-NLS-1$
 		dialog.setFilterExtensions(new String[] {PreferencesMessages.getString("CodeTemplateBlock.export.extension")}); //$NON-NLS-1$
 		dialog.setFileName(PreferencesMessages.getString("CodeTemplateBlock.export.filename")); //$NON-NLS-1$
 		String path= dialog.open();
-		
+
 		if (path == null)
 			return;
 		
@@ -415,18 +429,14 @@ public class CodeTemplateBlock {
 
 		if (!file.exists() || confirmOverwrite(file)) {
 			try {
-				templateSet.saveToFile(file);			
-			} catch (CoreException e) {			
-				if (e.getStatus().getException() instanceof FileNotFoundException) {
-					String title= PreferencesMessages.getString("CodeTemplateBlock.export.error.title"); //$NON-NLS-1$
-					String message= PreferencesMessages.getFormattedString("CodeTemplateBlock.export.error.fileNotFound", e.getStatus().getException().getLocalizedMessage()); //$NON-NLS-1$
-					MessageDialog.openError(getShell(), title, message);
-					return;
-				}
-				JavaPlugin.log(e);
+				Writer output= new FileWriter(file);
+				TemplateReaderWriter writer= new TemplateReaderWriter();
+				writer.save(templates, output);
+			} catch (Exception e) {
 				openWriteErrorDialog(e);
 			}		
 		}
+		
 	}
 
 	private boolean confirmOverwrite(File file) {
@@ -441,12 +451,7 @@ public class CodeTemplateBlock {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		fCreateJavaDocComments.setSelection(prefs.getDefaultBoolean(PREF_JAVADOC_STUBS));
 
-		try {
-			fTemplates.restoreDefaults();
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-			openReadErrorDialog(e);
-		}
+		fTemplates.restoreDefaults();
 		
 		// refresh
 		fCodeTemplateTree.refresh();		
@@ -459,7 +464,7 @@ public class CodeTemplateBlock {
 		
 		try {
 			fTemplates.save();
-		} catch (CoreException e) {
+		} catch (IOException e) {
 			JavaPlugin.log(e);
 			openWriteErrorDialog(e);
 		}		
@@ -468,33 +473,27 @@ public class CodeTemplateBlock {
 	
 	public void performCancel() {
 		try {
-			fTemplates.reset();			
-		} catch (CoreException e) {
+			fTemplates.load();			
+		} catch (IOException e) {
 			openReadErrorDialog(e);
 		}
 	}
 	
-	private void openReadErrorDialog(CoreException e) {
+	private void openReadErrorDialog(Exception e) {
 		String title= PreferencesMessages.getString("CodeTemplateBlock.error.read.title"); //$NON-NLS-1$
 		
-		// Show parse error in a user dialog without logging
-		if (e.getStatus().getCode() == IJavaStatusConstants.TEMPLATE_PARSE_EXCEPTION) {
-			String message= e.getStatus().getException().getLocalizedMessage();
-			if (message != null)
-				message= PreferencesMessages.getFormattedString("CodeTemplateBlock.error.parse.message", message); //$NON-NLS-1$
-			else
-				message= PreferencesMessages.getString("CodeTemplateBlock.error.read.message"); //$NON-NLS-1$
-			MessageDialog.openError(getShell(), title, message);
-		} else {
-			String message= PreferencesMessages.getString("CodeTemplateBlock.error.read.message"); //$NON-NLS-1$
-			ExceptionHandler.handle(e, getShell(), title, message);		
-		}
+		String message= e.getLocalizedMessage();
+		if (message != null)
+			message= PreferencesMessages.getFormattedString("CodeTemplateBlock.error.parse.message", message); //$NON-NLS-1$
+		else
+			message= PreferencesMessages.getString("CodeTemplateBlock.error.read.message"); //$NON-NLS-1$
+		MessageDialog.openError(getShell(), title, message);
 	}
 	
-	private void openWriteErrorDialog(CoreException e) {
+	private void openWriteErrorDialog(Exception e) {
 		String title= PreferencesMessages.getString("CodeTemplateBlock.error.write.title"); //$NON-NLS-1$
 		String message= PreferencesMessages.getString("CodeTemplateBlock.error.write.message"); //$NON-NLS-1$
-		ExceptionHandler.handle(e, getShell(), title, message);	
+		MessageDialog.openError(getShell(), title, message);
 	}	
 
 }

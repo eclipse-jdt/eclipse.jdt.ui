@@ -42,7 +42,6 @@ import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
-import org.eclipse.jdt.internal.corext.template.java.Templates;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -120,17 +119,17 @@ public class ParameterGuesser {
 		/** The enclosing type name */
 		private String fEnclosingTypeName;
 		/** The local and member variables */
-		private List fVariables;
+		private List fVars;
 
 		public List collect(int codeAssistOffset, ICompilationUnit compilationUnit) throws JavaModelException {	
 			Assert.isTrue(codeAssistOffset >= 0);
 			Assert.isNotNull(compilationUnit);
 	
-			fVariables= new ArrayList();			
+			fVars= new ArrayList();			
 					
 			String source= compilationUnit.getSource();
 			if (source == null)
-				return fVariables;
+				return fVars;
 					
 			fEnclosingTypeName= getEnclosingTypeName(codeAssistOffset, compilationUnit);
 	
@@ -155,7 +154,7 @@ public class ParameterGuesser {
 			addVariable(Variable.FIELD, new char[0], "boolean".toCharArray(), "true".toCharArray(), new char[0], null);  //$NON-NLS-1$//$NON-NLS-2$
 			addVariable(Variable.FIELD, new char[0], "boolean".toCharArray(), "false".toCharArray(), new char[0], null);  //$NON-NLS-1$//$NON-NLS-2$
 			
-			return fVariables;
+			return fVars;
 		}
 		
 		private static String getEnclosingTypeName(int codeAssistOffset, ICompilationUnit compilationUnit) throws JavaModelException {
@@ -187,7 +186,7 @@ public class ParameterGuesser {
 		}
 
 		private void addVariable(int varType, char[] typePackageName, char[] typeName, char[] name, char[] triggers, ImageDescriptor descriptor) {
-			fVariables.add(new Variable(new String(typePackageName), new String(typeName), new String(name), varType, fVariables.size(), triggers, descriptor));
+			fVars.add(new Variable(new String(typePackageName), new String(typeName), new String(name), varType, fVars.size(), triggers, descriptor));
 		}
 
 		/*
@@ -276,7 +275,6 @@ public class ParameterGuesser {
 	 * 
 	 * @param codeAssistOffset the offset at which to perform code assist
 	 * @param compilationUnit the compilation unit in which code assist is performed
-	 * @param offset the replacement offset at which the returned proposals start
 	 */
 	public ParameterGuesser(int codeAssistOffset, ICompilationUnit compilationUnit) {
 		Assert.isTrue(codeAssistOffset >= 0);
@@ -404,7 +402,7 @@ public class ParameterGuesser {
 	 * @return
 	 */
 	private TemplateProposal createTemplateProposal(int offset, IDocument document, int replacementLength) {
-		ContextType contextType= JavaPlugin.getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
+		ContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
 		CompilationUnitContext context= ((CompilationUnitContextType) contextType).createContext(document, offset, replacementLength, fCompilationUnit);
 		context.setForceEvaluation(true);
 		context.setVariable("type", fTemplateType); //$NON-NLS-1$
@@ -532,8 +530,6 @@ public class ParameterGuesser {
 	 * 
 	 * 	4) A better source position score will prevail (the declaration point of the variable, or
 	 * 		"how close to the point of completion?"
-	 * 
-	 * @return returns <code>null</code> if no match is found
 	 */
 	private static void orderMatches(List typeMatches, String paramName) {
 		if (typeMatches != null) Collections.sort(typeMatches, new MatchComparator(paramName));
@@ -560,7 +556,7 @@ public class ParameterGuesser {
 			if (isTypeMatch(variable, typePackage, typeName))
 				matches.add(variable);
 			if (isArrayType && isAssignable(variable, "java.util", "Collection")) { //$NON-NLS-1$//$NON-NLS-2$
-				fTemplateMatch= Templates.getInstance().getFirstTemplate("toarray"); //$NON-NLS-1$
+				fTemplateMatch= JavaPlugin.getDefault().getTemplateStore().findTemplate("toarray"); //$NON-NLS-1$
 				isArrayType= false;
 				fTemplateType= typeName.substring(0, typeName.length() - 2);
 				fTemplateCollection= variable.name;
@@ -574,7 +570,7 @@ public class ParameterGuesser {
 		return matches.isEmpty() ? null : matches;
 	}
 
-	private boolean isArrayType(String typeName) throws JavaModelException {
+	private boolean isArrayType(String typeName) {
 		// check for an exact match (fast)
 		return typeName.endsWith("[]"); //$NON-NLS-1$
 	}

@@ -32,7 +32,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
@@ -78,8 +78,8 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		fJProject1= ProjectTestSetup.getProject();
 		
-		CodeTemplates.getCodeTemplate(CodeTemplates.NEWTYPE).setPattern("");
-		CodeTemplates.getCodeTemplate(CodeTemplates.TYPECOMMENT).setPattern("");
+		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.NEWTYPE).setPattern("");
+		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.TYPECOMMENT).setPattern("");
 		
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}

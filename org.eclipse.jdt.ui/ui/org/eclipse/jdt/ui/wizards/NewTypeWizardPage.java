@@ -1731,9 +1731,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	protected String getTemplate(String name, ICompilationUnit parentCU, int pos) {
 		try {
-			Template[] templates= Templates.getInstance().getTemplates(name);
-			if (templates.length > 0) {
-				return JavaContext.evaluateTemplate(templates[0], parentCU, pos);
+			Template template= JavaPlugin.getDefault().getTemplateStore().findTemplate(name);
+			if (template != null) {
+				return JavaContext.evaluateTemplate(template, parentCU, pos);
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);

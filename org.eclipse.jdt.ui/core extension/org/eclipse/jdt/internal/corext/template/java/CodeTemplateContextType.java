@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
   */
 public class CodeTemplateContextType extends ContextType {
 	
+	/* context types */
 	public static final String CATCHBLOCK_CONTEXTTYPE= "catchblock_context"; //$NON-NLS-1$
 	public static final String METHODBODY_CONTEXTTYPE= "methodbody_context"; //$NON-NLS-1$
 	public static final String CONSTRUCTORBODY_CONTEXTTYPE= "constructorbody_context"; //$NON-NLS-1$
@@ -44,6 +45,23 @@ public class CodeTemplateContextType extends ContextType {
 	public static final String GETTERCOMMENT_CONTEXTTYPE= "gettercomment_context"; //$NON-NLS-1$
 	public static final String SETTERCOMMENT_CONTEXTTYPE= "settercomment_context"; //$NON-NLS-1$
 
+	/* templates */
+	public static final String COMMENT_SUFFIX= "comment"; //$NON-NLS-1$
+	public static final String CATCHBLOCK= "catchblock"; //$NON-NLS-1$
+	public static final String METHODSTUB= "methodbody"; //$NON-NLS-1$	
+	public static final String NEWTYPE= "newtype"; //$NON-NLS-1$	
+	public static final String CONSTRUCTORSTUB= "constructorbody"; //$NON-NLS-1$
+	public static final String GETTERSTUB= "getterbody"; //$NON-NLS-1$
+	public static final String SETTERSTUB= "setterbody"; //$NON-NLS-1$
+	public static final String TYPECOMMENT= "type" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String FIELDCOMMENT= "field" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String METHODCOMMENT= "method" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String CONSTRUCTORCOMMENT= "constructor" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String OVERRIDECOMMENT= "override" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String GETTERCOMMENT= "getter" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String SETTERCOMMENT= "setter" + COMMENT_SUFFIX; //$NON-NLS-1$
+	
+	/* resolver types */
 	public static final String EXCEPTION_TYPE= "exception_type"; //$NON-NLS-1$
 	public static final String EXCEPTION_VAR= "exception_var"; //$NON-NLS-1$
 	public static final String ENCLOSING_METHOD= "enclosing_method"; //$NON-NLS-1$
@@ -52,7 +70,6 @@ public class CodeTemplateContextType extends ContextType {
 	public static final String FIELD= "field"; //$NON-NLS-1$
 	public static final String FIELD_TYPE= "field_type"; //$NON-NLS-1$
 	public static final String BARE_FIELD_NAME= "bare_field_name"; //$NON-NLS-1$
-	
 	
 	public static final String PARAM= "param"; //$NON-NLS-1$
 	public static final String RETURN_TYPE= "return_type"; //$NON-NLS-1$
@@ -69,6 +86,10 @@ public class CodeTemplateContextType extends ContextType {
 	public static final String TYPE_DECLARATION= "type_declaration"; //$NON-NLS-1$
 	public static final String TYPE_COMMENT= "typecomment"; //$NON-NLS-1$
 	
+	
+	/**
+	 * Resolver that resolves to the variable defined in the context.
+	 */
 	public static class CodeTemplateVariableResolver extends TemplateVariableResolver {
 		public CodeTemplateVariableResolver(String type, String description) {
 			super(type, description);
@@ -79,6 +100,9 @@ public class CodeTemplateContextType extends ContextType {
 		}
 	}
 	
+	/**
+	 * Resolver for javadoc tags.
+	 */
 	public static class TagsVariableResolver extends TemplateVariableResolver {
 		public TagsVariableResolver() {
 			super(TAGS,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.tags")); //$NON-NLS-1$
@@ -89,6 +113,9 @@ public class CodeTemplateContextType extends ContextType {
 		}
 	}	
 		
+	/**
+	 * Resolver for todo tags.
+	 */
 	protected static class Todo extends TemplateVariableResolver {
 
 		public Todo() {

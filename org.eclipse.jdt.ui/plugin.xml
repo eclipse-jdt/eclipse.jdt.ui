@@ -816,8 +816,8 @@
       <page
             name="%templatePageName"
             category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage"
-            id="org.eclipse.jdt.ui.preferences.TemplatePreferencePage">
+            class="org.eclipse.jdt.internal.ui.preferences.JavaTemplatePreferencePage"
+            id="org.eclipse.jdt.ui.preferences.JavaTemplatePreferencePage">
       </page>
 
       <page
@@ -3938,6 +3938,32 @@
             id="org.eclipse.jdt.callhierarchy.view">
       </view>
    </extension>
+   
+<!-- =========================================================================== -->
+<!-- Templates                                                                   -->
+<!-- =========================================================================== -->
+   <extension
+         point="org.eclipse.ui.editors.templates">
+      <contextType
+            name="%templates.java.contextType.name"
+            class="org.eclipse.jdt.internal.corext.template.java.JavaContextType"
+            id="java">
+      </contextType>
+      <contextType
+            name="%templates.javadoc.contextType.name"
+            class="org.eclipse.jdt.internal.corext.template.java.JavaDocContextType"
+            id="javadoc">
+      </contextType>
+      <include
+      		file="templates/default-templates.xml"
+      		translations="templates/default-templates.properties">
+      </include>
+      <include
+      		file="templates/default-codetemplates.xml"
+      		translations="templates/default-templates.properties">
+      </include>
+   </extension>
+
 <!-- =========================================================================== -->
 <!-- Work in Progress                                                            -->
 <!-- =========================================================================== -->

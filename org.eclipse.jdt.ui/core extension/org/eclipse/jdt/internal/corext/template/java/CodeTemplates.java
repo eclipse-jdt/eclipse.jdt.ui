@@ -34,22 +34,6 @@ public class CodeTemplates extends TemplateSet {
 	private static final String TEMPLATE_FILE= "codetemplates.xml"; //$NON-NLS-1$
 	private static final ResourceBundle fgResourceBundle= ResourceBundle.getBundle(JavaTemplateMessages.class.getName());
 
-	public static final String COMMENT_SUFFIX= "comment"; //$NON-NLS-1$
-
-	public static final String CATCHBLOCK= "catchblock"; //$NON-NLS-1$
-	public static final String METHODSTUB= "methodbody"; //$NON-NLS-1$	
-	public static final String NEWTYPE= "newtype"; //$NON-NLS-1$	
-	public static final String CONSTRUCTORSTUB= "constructorbody"; //$NON-NLS-1$
-	public static final String GETTERSTUB= "getterbody"; //$NON-NLS-1$
-	public static final String SETTERSTUB= "setterbody"; //$NON-NLS-1$
-	public static final String TYPECOMMENT= "type" + COMMENT_SUFFIX; //$NON-NLS-1$
-	public static final String FIELDCOMMENT= "field" + COMMENT_SUFFIX; //$NON-NLS-1$
-	public static final String METHODCOMMENT= "method" + COMMENT_SUFFIX; //$NON-NLS-1$
-	public static final String CONSTRUCTORCOMMENT= "constructor" + COMMENT_SUFFIX; //$NON-NLS-1$
-	public static final String OVERRIDECOMMENT= "override" + COMMENT_SUFFIX; //$NON-NLS-1$
-	public static final String GETTERCOMMENT= "getter" + COMMENT_SUFFIX; //$NON-NLS-1$
-	public static final String SETTERCOMMENT= "setter" + COMMENT_SUFFIX; //$NON-NLS-1$
-	
 	/** Singleton. */
 	private static CodeTemplates fgTemplates;
 
@@ -68,7 +52,7 @@ public class CodeTemplates extends TemplateSet {
 	}
 	
 	private CodeTemplates() {
-		super("codetemplate", JavaPlugin.getTemplateContextRegistry()); //$NON-NLS-1$
+		super("codetemplate", JavaPlugin.getDefault().getCodeTemplateContextRegistry()); //$NON-NLS-1$
 		create();
 	}
 	

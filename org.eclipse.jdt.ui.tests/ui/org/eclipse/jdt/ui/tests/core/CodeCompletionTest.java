@@ -32,7 +32,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
@@ -76,8 +76,8 @@ public class CodeCompletionTest extends CoreTests {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, true);
 
-		CodeTemplates.getCodeTemplate(CodeTemplates.OVERRIDECOMMENT).setPattern("/* (non-Javadoc)\n * ${see_to_overridden}\n */");	
-		CodeTemplates.getCodeTemplate(CodeTemplates.METHODSTUB).setPattern("//TODO\n${body_statement}");
+		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.OVERRIDECOMMENT).setPattern("/* (non-Javadoc)\n * ${see_to_overridden}\n */");	
+		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.METHODSTUB).setPattern("//TODO\n${body_statement}");
 	}
 
 

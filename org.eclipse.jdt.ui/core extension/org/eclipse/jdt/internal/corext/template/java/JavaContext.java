@@ -72,7 +72,7 @@ public class JavaContext extends CompilationUnitContext {
 	 * @param document the document.
 	 * @param completionOffset the completion offset within the document.
 	 * @param completionLength the completion length.
-	 * @param unit the compilation unit (may be <code>null</code>).
+	 * @param compilationUnit the compilation unit (may be <code>null</code>).
 	 */
 	public JavaContext(ContextType type, IDocument document, int completionOffset, int completionLength,
 		ICompilationUnit compilationUnit)
@@ -484,7 +484,7 @@ public class JavaContext extends CompilationUnitContext {
 	 */
 	public static String evaluateTemplate(Template template, ICompilationUnit compilationUnit, int position) throws CoreException, BadLocationException {
 
-		ContextType contextType= JavaPlugin.getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
+		ContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
 		if (contextType == null)
 			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.getString("JavaContext.error.message"), null)); //$NON-NLS-1$
 

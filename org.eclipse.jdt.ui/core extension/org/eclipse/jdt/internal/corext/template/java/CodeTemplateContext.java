@@ -34,7 +34,7 @@ public class CodeTemplateContext extends TemplateContext {
 	private IJavaProject fProject;
 
 	public CodeTemplateContext(String contextTypeName, IJavaProject project, String lineDelim) {
-		super(JavaPlugin.getTemplateContextRegistry().getContextType(contextTypeName));
+		super(JavaPlugin.getDefault().getCodeTemplateContextRegistry().getContextType(contextTypeName));
 		fLineDelimiter= lineDelim;
 		fProject= project;
 	}

@@ -134,10 +134,10 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		fEditor= editor;
 		fCollector= new ResultCollector();
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
-		ContextType contextType= JavaPlugin.getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
+		ContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
 		if (contextType == null) {
 			contextType= new JavaContextType();
-			JavaPlugin.getTemplateContextRegistry().addContextType(contextType);
+			JavaPlugin.getDefault().getTemplateContextRegistry().addContextType(contextType);
 		}
 		if (contextType != null)
 			fTemplateEngine= new TemplateEngine(contextType);
@@ -198,7 +198,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	 * Tells this processor to add import statement for proposals that have
 	 * a fully qualified type name
 	 * 
-	 * @param restrict <code>true</code> if import can be added
+	 * @param allowAddingImports <code>true</code> if import can be added
 	 */
 	public void allowAddingImports(boolean allowAddingImports) {
 		fAllowAddImports= allowAddingImports;
@@ -368,13 +368,8 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		results= collector.getResults();
 
 		if (fTemplateEngine != null) {
-			try {
-				fTemplateEngine.reset();
-				fTemplateEngine.complete(viewer, offset, unit);
-			} catch (JavaModelException x) {
-				Shell shell= viewer.getTextWidget().getShell();
-				ErrorDialog.openError(shell, JavaTextMessages.getString("CompletionProcessor.error.accessing.title"), JavaTextMessages.getString("CompletionProcessor.error.accessing.message"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
-			}				
+			fTemplateEngine.reset();
+			fTemplateEngine.complete(viewer, offset, unit);				
 			
 			TemplateProposal[] templateResults= fTemplateEngine.getResults();
 			

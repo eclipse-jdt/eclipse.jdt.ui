@@ -28,6 +28,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 
+import org.eclipse.jface.text.templates.persistence.TemplateStore;
+
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -35,7 +37,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
-import org.eclipse.jdt.internal.corext.template.java.Templates;
 import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
@@ -117,8 +118,8 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 	protected void warnAboutTypeCommentDeprecation() {
 		String key= IUIConstants.DIALOGSTORE_TYPECOMMENT_DEPRECATED;
 		if (OptionalMessageDialog.isDialogEnabled(key)) {
-			Templates templates= Templates.getInstance();
-			boolean isOldWorkspace= templates.getTemplates("filecomment").length > 0 && templates.getTemplates("typecomment").length > 0; //$NON-NLS-1$ //$NON-NLS-2$
+			TemplateStore templates= JavaPlugin.getDefault().getTemplateStore();
+			boolean isOldWorkspace= templates.findTemplate("filecomment") != null && templates.findTemplate("typecomment") != null; //$NON-NLS-1$ //$NON-NLS-2$
 			if (!isOldWorkspace) {
 				OptionalMessageDialog.setDialogEnabled(key, false);
 			}

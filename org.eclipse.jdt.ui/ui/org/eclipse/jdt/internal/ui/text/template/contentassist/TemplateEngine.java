@@ -24,12 +24,11 @@ import org.eclipse.jface.text.templates.GlobalVariables;
 import org.eclipse.jface.text.templates.Template;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
-import org.eclipse.jdt.internal.corext.template.java.Templates;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class TemplateEngine {
@@ -53,8 +52,6 @@ public class TemplateEngine {
 
 	/**
 	 * Empties the collector.
-	 * 
-	 * @param unit   the compilation unit (may be <code>null</code>)
 	 */
 	public void reset() {
 		fProposals.clear();
@@ -74,9 +71,7 @@ public class TemplateEngine {
 	 * @param completionPosition the context position in the document of the text viewer
 	 * @param compilationUnit the compilation unit (may be <code>null</code>)
 	 */
-	public void complete(ITextViewer viewer, int completionPosition, ICompilationUnit compilationUnit)
-		throws JavaModelException
-	{
+	public void complete(ITextViewer viewer, int completionPosition, ICompilationUnit compilationUnit) {
 	    IDocument document= viewer.getDocument();
 	    
 		if (!(fContextType instanceof CompilationUnitContextType))
@@ -99,7 +94,7 @@ public class TemplateEngine {
 		int end= context.getEnd();
 		IRegion region= new Region(start, end - start);
 
-		Template[] templates= Templates.getInstance().getTemplates();
+		Template[] templates= JavaPlugin.getDefault().getTemplateStore().getTemplates(); 
 
 		if (selection.y == 0) {
 			for (int i= 0; i != templates.length; i++)

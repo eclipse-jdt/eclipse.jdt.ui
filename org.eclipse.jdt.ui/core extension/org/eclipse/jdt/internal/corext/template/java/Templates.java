@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 
+import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateMessages;
 import org.eclipse.jface.text.templates.persistence.TemplateSet;
 
@@ -47,9 +48,10 @@ public class Templates extends TemplateSet {
 	}
 	
 	public Templates() {
-		super("template", JavaPlugin.getTemplateContextRegistry()); //$NON-NLS-1$
+		super("template", JavaPlugin.getDefault().getTemplateContextRegistry()); //$NON-NLS-1$
 		create();
-	}		
+	}
+	
 
 	private void create() {
 
@@ -57,9 +59,6 @@ public class Templates extends TemplateSet {
 			File templateFile= getTemplateFile();
 			if (templateFile.exists()) {
 				addFromFile(templateFile, true, fgResourceBundle);
-			} else {
-				addFromStream(getDefaultsAsStream(), true, true, fgResourceBundle);
-				saveToFile(templateFile);
 			}
 
 		} catch (CoreException e) {

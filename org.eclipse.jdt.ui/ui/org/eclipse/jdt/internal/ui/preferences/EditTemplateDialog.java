@@ -61,7 +61,6 @@ import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.templates.ContextType;
-import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.Template;
 
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -161,7 +160,7 @@ public class EditTemplateDialog extends StatusDialog {
 		fContextTypes= contextTypes;
 		fValidationStatus= new StatusInfo();
 		
-		ContextType type= JavaPlugin.getTemplateContextRegistry().getContextType(template.getContextTypeId());
+		ContextType type= getContextType(template.getContextTypeId());
 		fTemplateProcessor.setContextType(type);
 	}
 	
@@ -263,18 +262,22 @@ public class EditTemplateDialog extends StatusDialog {
 		} else if (w == fContextCombo) {
 			String name= fContextCombo.getText();
 			fTemplate.setContextTypeId(name);
-			fTemplateProcessor.setContextType(JavaPlugin.getTemplateContextRegistry().getContextType(name));
+			fTemplateProcessor.setContextType(getContextType(name));
 		} else if (w == fDescriptionText) {
 			String desc= fDescriptionText.getText();
 			fTemplate.setDescription(desc);
 		}	
 	}
 	
+	private ContextType getContextType(String contextTypeId) {
+		return JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(contextTypeId);
+	}
+
 	protected void doSourceChanged(IDocument document) {
 		String text= document.get();
 		fTemplate.setPattern(text);
 		fValidationStatus.setOK();
-		ContextType contextType= JavaPlugin.getTemplateContextRegistry().getContextType(fTemplate.getContextTypeId());
+		ContextType contextType= getContextType(fTemplate.getContextTypeId());
 		if (contextType != null) {
 			String errorMessage= contextType.validate(text);
 			if (errorMessage != null) {
@@ -481,8 +484,7 @@ public class EditTemplateDialog extends StatusDialog {
 	}
 
 	private int getIndex(String context) {
-		ContextTypeRegistry registry= JavaPlugin.getTemplateContextRegistry();
-		registry.getContextType(context);
+		getContextType(context);
 		
 		if (context == null)
 			return -1;
