@@ -1,7 +1,7 @@
 package p;
 //initialize in constructor
 class A{
-	private int i= 0;
+	private int i;
 	A(){
 		i= 0;
 	}
