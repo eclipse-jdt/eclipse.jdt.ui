@@ -90,10 +90,10 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 * @see Window#open()
 	 */
 	public int open() {
-		List selection= getInitialSelections();
+		List selection= getInitialElementSelections();
 		if (selection == null || selection.size() != fNumberOfPages) {
 			setInitialSelections(new Object[fNumberOfPages]);
-			selection= getInitialSelections();
+			selection= getInitialElementSelections();
 		}
 			
 		Assert.isTrue(selection.size() == fNumberOfPages);
@@ -224,7 +224,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 
 		// store selection
 		Object[] selectedElements= getSelectedElements();
-		List list= getInitialSelections();
+		List list= getInitialElementSelections();
 		list.set(fCurrentPage, selectedElements);
 
 		// store result
@@ -263,7 +263,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		setFilter(filter);
 		
 		// 3. select elements
-		Object[] selectedElements= (Object[]) getInitialSelections().get(fCurrentPage);
+		Object[] selectedElements= (Object[]) getInitialElementSelections().get(fCurrentPage);
 		setSelection(selectedElements);
 		fFilteredList.setFocus();
 	}

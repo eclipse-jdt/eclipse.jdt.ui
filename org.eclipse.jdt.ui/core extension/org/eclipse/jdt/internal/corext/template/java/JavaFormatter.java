@@ -12,6 +12,7 @@ import java.util.Vector;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -20,6 +21,12 @@ import org.eclipse.jface.text.ITypedRegion;
 
 import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.ToolFactory;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
+
 import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
 import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
@@ -32,10 +39,6 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage;
-import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
-
 /**
  * A template editor using the Java formatter to format a template buffer.
  */
@@ -46,7 +49,6 @@ public class JavaFormatter implements ITemplateEditor {
 	/** The java partitioner */
 	private final IDocumentPartitioner fPartitioner= JavaPlugin.getDefault().getJavaTextTools().createDocumentPartitioner(); 
 	
-
 	/**
 	 * Creates a JavaFormatter with the target line delimiter.
 	 */
@@ -60,12 +62,17 @@ public class JavaFormatter implements ITemplateEditor {
 	public void edit(TemplateBuffer buffer, TemplateContext context) throws CoreException {
 		int indentationLevel= ((JavaContext) context).getIndentationLevel();
 		
-		if (TemplatePreferencePage.useCodeFormatter())
+		if (useCodeFormatter())
 			format(buffer, indentationLevel);
 		else
 			indentate(buffer, indentationLevel);
 			
 		trimBegin(buffer);
+	}
+	
+	private boolean useCodeFormatter() {
+		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		return prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);
 	}
 
 	private static int getCaretOffset(TemplatePosition[] variables) {

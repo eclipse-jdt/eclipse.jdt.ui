@@ -6,11 +6,11 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
@@ -21,6 +21,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -34,11 +38,8 @@ import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
 import org.eclipse.jdt.internal.corext.template.TemplateTranslator;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.LocalVariable;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * A context for java source.
@@ -220,7 +221,7 @@ public class JavaContext extends CompilationUnitContext {
 		TextBuffer textBuffer= TextBuffer.create(getDocument().get());
 	    String lineContent= textBuffer.getLineContentOfOffset(start);
 
-		return Strings.computeIndent(lineContent, CodeFormatterPreferencePage.getTabSize());
+		return Strings.computeIndent(lineContent, CodeFormatterUtil.getTabWidth());
 	}
 
 	private CompilationUnitCompletion guessVariableNames() {
