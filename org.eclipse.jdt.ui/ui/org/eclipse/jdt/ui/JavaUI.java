@@ -16,19 +16,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.util.Assert;
-
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.ui.dialogs.SelectionDialog;
-import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jdt.core.IBufferFactory;
 import org.eclipse.jdt.core.IJavaElement;
@@ -42,7 +32,21 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.util.Assert;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.dialogs.SelectionDialog;
+import org.eclipse.ui.texteditor.IDocumentProvider;
+
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.SharedImages;
@@ -765,5 +769,33 @@ public final class JavaUI {
 	 */		
 	public static URL getJavadocLocation(IJavaElement element, boolean includeAnchor) throws JavaModelException {
 		return JavaDocLocations.getJavadocLocation(element, includeAnchor);
+	}
+	
+	/**
+	 * Returns the transfer instance used to copy/paste Java elements to
+	 * and from the clipboard. Objects managed by this transfer instance
+	 * are of type <code>IJavaElement[]</code>. So to access data from the
+	 * clipboard clients should use the following code snippet:
+	 * <pre>
+	 *   IJavaElement[] elements=
+	 *     (IJavaElement[])clipboard.getContents(JavaUI.getJavaElementClipboardTransfer());
+	 * </pre>  
+	 * 
+	 * To put elements into the clipboard use the following snippet:
+	 * 
+	 * <pre>
+	 *    IJavaElement[] javaElements= ...;
+	 *    clipboard.setContents(
+	 *     new Object[] { javaElements },
+	 *     new Transfer[] { JavaUI.getJavaElementClipboardTransfer() } );
+	 * </pre>
+	 * 
+	 * @return returns the transfer object used to copy/paste Java elements
+	 *  to and from the clipboard
+	 * 
+	 * @since 3.0
+	 */
+	public static Transfer getJavaElementClipboardTransfer() {
+		return JavaElementTransfer.getInstance();
 	}
 }
