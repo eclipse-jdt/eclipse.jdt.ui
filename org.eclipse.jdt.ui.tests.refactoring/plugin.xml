@@ -1,53 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <plugin
-   name="%Plugin.name"
    id="org.eclipse.jdt.ui.tests.refactoring"
+   name="%Plugin.name"
    version="3.0.0"
-   provider-name = "%Plugin.providerName"
+   provider-name="%Plugin.providerName"
    class="org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin">
-   
+
+   <runtime>
+      <library name="refactoringtests.jar">
+         <export name="*"/>
+      </library>
+   </runtime>
    <requires>
-	  <import plugin="org.junit"/>   
-      <import plugin="org.apache.xerces"/>
+      <import plugin="org.junit"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.ui"/>
-	  <import plugin="org.eclipse.jdt.ui.tests"/>
+      <import plugin="org.eclipse.jdt.ui.tests"/>
    </requires>
 
-  <runtime>
-    <library name="refactoringtests.jar" >
-       <export name = "*"/>
-    </library> 
-  </runtime>
 
-<extension point="org.eclipse.jdt.ui.typeExtenders">     
-  <typeExtender
-     id="org.eclipse.jdt.ui.tests.A_TypeExtender"
-     type="org.eclipse.jdt.ui.tests.xml.A"
-     methods="simple, overridden, ordering, chainOrdering"
-     class="org.eclipse.jdt.ui.tests.xml.A_TypeExtender"/>
-
-  <typeExtender
-     id="org.eclipse.jdt.ui.tests.A_TypeExtender2"
-     type="org.eclipse.jdt.ui.tests.xml.A"
-     methods="chaining, chainOrdering"
-     class="org.eclipse.jdt.ui.tests.xml.A_TypeExtender2"/>
-
-  <typeExtender
-     id="org.eclipse.jdt.ui.tests.B_TypeExtender"
-     type="org.eclipse.jdt.ui.tests.xml.B"
-     methods="overridden"
-     class="org.eclipse.jdt.ui.tests.xml.B_TypeExtender"/>
-
-  <typeExtender
-     id="org.eclipse.jdt.ui.tests.I_TypeExtender"
-     type="org.eclipse.jdt.ui.tests.xml.I"
-     methods="ordering"
-     class="org.eclipse.jdt.ui.tests.xml.I_TypeExtender"/>
-</extension>     
-	
+   <extension
+         point="org.eclipse.jdt.ui.typeExtenders">
+      <typeExtender
+            methods="simple, overridden, ordering, chainOrdering"
+            type="org.eclipse.jdt.ui.tests.xml.A"
+            class="org.eclipse.jdt.ui.tests.xml.A_TypeExtender"
+            id="org.eclipse.jdt.ui.tests.A_TypeExtender">
+      </typeExtender>
+      <typeExtender
+            methods="chaining, chainOrdering"
+            type="org.eclipse.jdt.ui.tests.xml.A"
+            class="org.eclipse.jdt.ui.tests.xml.A_TypeExtender2"
+            id="org.eclipse.jdt.ui.tests.A_TypeExtender2">
+      </typeExtender>
+      <typeExtender
+            methods="overridden"
+            type="org.eclipse.jdt.ui.tests.xml.B"
+            class="org.eclipse.jdt.ui.tests.xml.B_TypeExtender"
+            id="org.eclipse.jdt.ui.tests.B_TypeExtender">
+      </typeExtender>
+      <typeExtender
+            methods="ordering"
+            type="org.eclipse.jdt.ui.tests.xml.I"
+            class="org.eclipse.jdt.ui.tests.xml.I_TypeExtender"
+            id="org.eclipse.jdt.ui.tests.I_TypeExtender">
+      </typeExtender>
+   </extension>
 
 </plugin>
