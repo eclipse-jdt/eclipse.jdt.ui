@@ -15,15 +15,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
@@ -31,6 +34,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -125,20 +129,31 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 						outputLocation= detector.getOutputLocation();
 					}
 				} else if (fFirstPage.isSrcBin()) {
-					String srcName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_SRCNAME);
-					String binName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
+					IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+					IPath srcPath= new Path(store.getString(PreferenceConstants.SRCBIN_SRCNAME));
+					IPath binPath= new Path(store.getString(PreferenceConstants.SRCBIN_BINNAME));
+					
+					if (srcPath.segmentCount() > 0) {
+						IFolder folder= fCurrProject.getFolder(srcPath);
+						CoreUtility.createFolder(folder, true, true, null);
+					}
+					
+					if (binPath.segmentCount() > 0 && !binPath.equals(srcPath)) {
+						IFolder folder= fCurrProject.getFolder(binPath);
+						CoreUtility.createFolder(folder, true, true, null);
+					}
 					
 					final IPath projectPath= fCurrProject.getFullPath();
 
 					// configure the classpath entries, including the default jre library.
 					final List cpEntries= new ArrayList();
-					cpEntries.add(JavaCore.newSourceEntry(projectPath.append(srcName)));
+					cpEntries.add(JavaCore.newSourceEntry(projectPath.append(srcPath)));
 					cpEntries.addAll(Arrays.asList(PreferenceConstants.getDefaultJRELibrary()));
 					entries= new IClasspathEntry[cpEntries.size()];
 					cpEntries.toArray(entries);
 					
 					// configure the output location
-					outputLocation= projectPath.append(binName);
+					outputLocation= projectPath.append(binPath);
 				}
 				init(JavaCore.create(fCurrProject), outputLocation, entries, false);
 			}
