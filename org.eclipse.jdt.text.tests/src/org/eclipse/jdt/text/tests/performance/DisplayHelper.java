@@ -16,9 +16,9 @@ import org.eclipse.swt.widgets.Display;
 
 /**
  * Runs the event loop of the given display until {@link #condition()} becomes
- * <code>true</code> or no events have occurred for the supplied timeout. Between
- * running the event loop, {@link Display#sleep()} is called.
- *  
+ * <code>true</code> or no events have occurred for the supplied timeout.
+ * Between running the event loop, {@link Display#sleep()} is called.
+ * 
  * @since 3.1
  */
 public abstract class DisplayHelper {
@@ -65,13 +65,15 @@ public abstract class DisplayHelper {
 		DisplayWaiter waiter= new DisplayWaiter(display);
 		DisplayWaiter.Timeout timeoutState= waiter.start(timeout);
 		boolean condition;
-		do {
-			if (display.sleep())
-				runEventQueue(display);
-			condition= condition();
-		} while (!condition && !timeoutState.hasTimedOut());
-		
-		waiter.stop();
+		try {
+			do {
+				if (display.sleep())
+					runEventQueue(display);
+				condition= condition();
+			} while (!condition && !timeoutState.hasTimedOut());
+		} finally {
+			waiter.stop();
+		}
 		return condition;
 	}
 	
