@@ -19,8 +19,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
 
-import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
-import org.eclipse.jdt.internal.ui.reorg.CutSourceReferencesToClipboardAction.DeleteSourceReferencesAction;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgActionFactory;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.CutSourceReferencesToClipboardAction.DeleteSourceReferencesAction;
 
 class SourceReferenceTestUtil {
 	

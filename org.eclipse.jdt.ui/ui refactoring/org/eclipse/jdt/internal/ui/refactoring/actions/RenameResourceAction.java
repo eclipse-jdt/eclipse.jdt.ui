@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSupport;
-import org.eclipse.jdt.internal.ui.reorg.IRefactoringRenameSupport;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.IRefactoringRenameSupport;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;

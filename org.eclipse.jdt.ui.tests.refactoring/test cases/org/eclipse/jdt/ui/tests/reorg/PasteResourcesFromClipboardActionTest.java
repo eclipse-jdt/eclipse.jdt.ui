@@ -38,7 +38,7 @@ import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
 
-import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgActionFactory;
 
 public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.reorg;
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jdt.core.JavaModelException;

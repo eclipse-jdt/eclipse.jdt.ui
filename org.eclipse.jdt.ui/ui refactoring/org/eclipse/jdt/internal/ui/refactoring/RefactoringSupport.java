@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
-import org.eclipse.jdt.internal.ui.reorg.IRefactoringRenameSupport;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.IRefactoringRenameSupport;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;

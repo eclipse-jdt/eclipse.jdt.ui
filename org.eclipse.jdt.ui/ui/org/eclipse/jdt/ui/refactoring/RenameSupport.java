@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferences;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSupport;
-import org.eclipse.jdt.internal.ui.reorg.IRefactoringRenameSupport;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.IRefactoringRenameSupport;
 
 /**
  * Central access point to execute rename refactorings.

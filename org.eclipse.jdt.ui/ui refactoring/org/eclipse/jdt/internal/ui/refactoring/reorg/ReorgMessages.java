@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.reorg;
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
