@@ -314,7 +314,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer.addFilter(fPatternFilter);
 		fViewer.addFilter(fLibraryFilter);
 		
-		fMemberFilterActionGroup= new MemberFilterActionGroup(fViewer, "PackageView"); // adds filter
+		fMemberFilterActionGroup= new MemberFilterActionGroup(fViewer, "PackageView");  //$NON-NLS-1$
 	
 		fViewer.addFilter(fWorkingSetFilter);
 		if(fMemento != null) 
@@ -461,10 +461,11 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		IWorkingSet ws= fWorkingSetFilter.getWorkingSet();
 		if (ws == null)
 			return result;
-		String wsstr= "Working Set: "+ws.getName();
+		
+		String wsstr= PackagesMessages.getFormattedString("PackageExplorer.toolTip", new String[] { ws.getName() }); //$NON-NLS-1$
 		if (result.length() == 0)
 			return wsstr;
-		return result + " - " + wsstr;
+		return PackagesMessages.getFormattedString("PackageExplorer.toolTip2", new String[] { result, ws.getName() }); //$NON-NLS-1$
 	}
 	
 	public String getTitleToolTip() {

@@ -95,7 +95,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 				success= handleValidateMove(target, event);
 			}
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, "Drag'n'drop", "Unexpected exception. See log for details.");
+			ExceptionHandler.handle(e, PackagesMessages.getString("SelectionTransferDropAdapter.error.title"), PackagesMessages.getString("SelectionTransferDropAdapter.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
 			success= false;
 		}	
 		
@@ -116,7 +116,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			// if we moved something.
 			event.detail= DND.DROP_NONE;
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, "Drag'n'drop", "Unexpected exception. See log for details.");
+			ExceptionHandler.handle(e, PackagesMessages.getString("SelectionTransferDropAdapter.error.title"), PackagesMessages.getString("SelectionTransferDropAdapter.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
 		}	
 	}
 	
@@ -144,7 +144,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		try{
 			return ref.checkActivation(new NullProgressMonitor()).isOK();
 		} catch(JavaModelException e){
-			ExceptionHandler.handle(e, "Drag'n'drop", "Unexpected exception. See log for details.");
+			ExceptionHandler.handle(e, PackagesMessages.getString("SelectionTransferDropAdapter.error.title"), PackagesMessages.getString("SelectionTransferDropAdapter.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
 			return false;
 		}
 	}
@@ -173,7 +173,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}		
 	
 	private void handleDropCopy(final Object target, DropTargetEvent event) throws JavaModelException{
-		JdtCopyAction action= new JdtCopyAction("#COPY", StructuredSelectionProvider.createFrom(getViewer())){
+		JdtCopyAction action= new JdtCopyAction("#COPY", StructuredSelectionProvider.createFrom(getViewer())){ //$NON-NLS-1$
 			protected Object selectDestination(ReorgRefactoring ref) {
 				return target;
 			}
@@ -187,7 +187,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		private static final int PREVIEW_ID= IDialogConstants.CLIENT_ID + 1;
 		
 		public DragNDropMoveAction(StructuredSelectionProvider provider, Object target){
-			super("#MOVE", provider);
+			super("#MOVE", provider); //$NON-NLS-1$
 			Assert.isNotNull(target);
 			fTarget= target;
 		}
@@ -232,9 +232,9 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		
 		private static int askIfUpdateReferences(){
 			Shell shell= JavaPlugin.getActiveWorkbenchShell().getShell();
-			String title= "Move";
-			String preview= "Pre&view";
-			String question= "Do you want to update references to the moved element(s)? Press '" + preview + "' to see the preview of the reference updates.";
+			String title= PackagesMessages.getString("SelectionTransferDropAdapter.dialog.title"); //$NON-NLS-1$
+			String preview= PackagesMessages.getString("SelectionTransferDropAdapter.dialog.preview.label"); //$NON-NLS-1$
+			String question= PackagesMessages.getString("SelectionTransferDropAdapter.dialog.question"); //$NON-NLS-1$
 			
 			String[] labels= new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL,
 																 preview,  IDialogConstants.CANCEL_LABEL };
