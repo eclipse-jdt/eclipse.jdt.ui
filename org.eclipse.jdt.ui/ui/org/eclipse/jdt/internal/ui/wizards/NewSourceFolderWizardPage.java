@@ -330,6 +330,12 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 						fRootStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.NotAFolder")); //$NON-NLS-1$
 						return;
 					}
+				} else {
+					IPath projLocation= fCurrJProject.getProject().getLocation();
+					if (projLocation != null && projLocation.append(str).toFile().exists()) {
+						fRootStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.AlreadyExistingDifferentCase")); //$NON-NLS-1$
+						return;
+					}
 				}
 				ArrayList newEntries= new ArrayList(fEntries.length + 1);
 				int projectEntryIndex= -1;
