@@ -269,7 +269,17 @@ public class StubUtility {
 	public static void genJavaDocSeeTag(IType declaringType, String methodName, String[] paramTypes, boolean nonJavaDocComment, boolean isDeprecated, StringBuffer buf) throws JavaModelException {
 		String[] fullParamNames= new String[paramTypes.length];
 		for (int i= 0; i < paramTypes.length; i++) {
-			fullParamNames[i]= JavaModelUtil.getResolvedTypeName(paramTypes[i], declaringType);
+			String name= JavaModelUtil.getResolvedTypeName(paramTypes[i], declaringType);
+			int arrayCount= Signature.getArrayCount(paramTypes[i]);
+			if (arrayCount > 0) {
+				StringBuffer buf1= new StringBuffer(name);
+				while (arrayCount > 0) {
+					buf1.append("[]");
+					arrayCount--;
+				}
+				name= buf1.toString();
+			}
+			fullParamNames[i]= name;
 		}
 		String fullTypeName= JavaModelUtil.getFullyQualifiedName(declaringType);
 		
