@@ -135,13 +135,12 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	/*
 	 * @see IRenameRefactoring#checkNewName()
 	 */
-	public RefactoringStatus checkNewName() throws JavaModelException {
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(Checks.checkFieldName(fNewName));
-		if (! Checks.startsWithLowerCase(fNewName))
+	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
+		RefactoringStatus result= Checks.checkFieldName(newName);
+		if (! Checks.startsWithLowerCase(newName))
 			result.addWarning("By convention, all names of  local variables start with lowercase letters.");
-		if (fAlreadyUsedNames.containsKey(fNewName))
-			result.addError("Name '" + fNewName + "' is already used.", JavaSourceContext.create(fCu, (ISourceRange)fAlreadyUsedNames.get(fNewName)));
+		if (fAlreadyUsedNames.containsKey(newName))
+			result.addError("Name '" + newName + "' is already used.", JavaSourceContext.create(fCu, (ISourceRange)fAlreadyUsedNames.get(newName)));
 		return result;		
 	}
 	
@@ -200,7 +199,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		try{
 			pm.beginTask("", 1);	
 			RefactoringStatus result= new RefactoringStatus();
-			result.merge(checkNewName());
+			result.merge(checkNewName(fNewName));
 			result.merge(analyzeAST());
 			return result;
 		} finally{

@@ -37,7 +37,6 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.JavaModelUtility;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
@@ -50,6 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public abstract class RenameMethodRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring{
 	
@@ -181,12 +181,12 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	/* non java-doc
 	 * @see IRenameRefactoring#checkNewName
 	 */
-	public final RefactoringStatus checkNewName() {
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(Checks.checkMethodName(fNewName));
-		result.merge(checkIfConstructorName(fMethod));
+	public final RefactoringStatus checkNewName(String newName) {
+		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
+		RefactoringStatus result= Checks.checkMethodName(newName);
+		result.merge(checkIfConstructorName(fMethod, newName));
 					
-		if (Checks.isAlreadyNamed(fMethod, getNewName()))
+		if (Checks.isAlreadyNamed(fMethod, newName))
 			result.addFatalError(RefactoringCoreMessages.getString("RenameMethodRefactoring.same_name")); //$NON-NLS-1$
 		return result;
 	}
@@ -203,7 +203,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			if (result.hasFatalError())
 				return result;
 			pm.subTask(RefactoringCoreMessages.getString("RenameMethodRefactoring.checking_name")); //$NON-NLS-1$	
-			result.merge(checkNewName());
+			result.merge(checkNewName(fNewName));
 			pm.worked(1);
 			
 			if (!fUpdateReferences)
@@ -274,11 +274,11 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 				|| method.getReturnType().equals("QString;") //$NON-NLS-1$
 				|| method.getReturnType().equals("Qjava.lang.String;"))) //$NON-NLS-1$
 			return true;		
-		else return (JavaModelUtility.isMainMethod(method));
+		else return (JavaModelUtil.isMainMethod(method));
 	}
 	
-	private RefactoringStatus checkIfConstructorName(IMethod method){
-		return Checks.checkIfConstructorName(method, fNewName, method.getDeclaringType().getElementName());
+	private static RefactoringStatus checkIfConstructorName(IMethod method, String newName){
+		return Checks.checkIfConstructorName(method, newName, method.getDeclaringType().getElementName());
 	}
 	
 	private RefactoringStatus checkRelatedMethods(IProgressMonitor pm) throws JavaModelException{
@@ -286,7 +286,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		for (Iterator iter= getMethodsToRename(fMethod, pm).iterator(); iter.hasNext(); ){
 			IMethod method= (IMethod)iter.next();
 			
-			result.merge(checkIfConstructorName(method));
+			result.merge(checkIfConstructorName(method, fNewName));
 			
 			String[] msgData= new String[]{method.getElementName(), method.getDeclaringType().getFullyQualifiedName()};
 			if (! method.exists()){

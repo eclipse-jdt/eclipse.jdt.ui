@@ -177,12 +177,12 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		return result;
 	}
 	
-	public RefactoringStatus checkNewName() throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(Checks.checkPackageName(fNewName));
-		if (Checks.isAlreadyNamed(fPackage, fNewName))
+	public RefactoringStatus checkNewName(String newName) throws JavaModelException{
+		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
+		RefactoringStatus result= Checks.checkPackageName(newName);
+		if (Checks.isAlreadyNamed(fPackage, newName))
 			result.addFatalError(RefactoringCoreMessages.getString("RenamePackageRefactoring.another_name")); //$NON-NLS-1$
-		result.merge(checkPackageInCurrentRoot());
+		result.merge(checkPackageInCurrentRoot(newName));
 		return result;
 	}
 	
@@ -191,7 +191,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 			pm.beginTask("", 14); //$NON-NLS-1$
 			pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking")); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
-			result.merge(checkNewName());
+			result.merge(checkNewName(fNewName));
 			pm.worked(1);
 			result.merge(checkForNativeMethods());
 			pm.worked(1);
@@ -204,7 +204,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 			result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 6))));
 			pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.analyzing")); //$NON-NLS-1$
 			result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 3)));
-			result.merge(checkPackageName());
+			result.merge(checkPackageName(fNewName));
 			pm.worked(1);
 			return result;
 		} finally{
@@ -247,8 +247,8 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	 * if a package fragment with this name exists and has java resources,
 	 * then the name is not ok.
 	 */
-	private boolean isPackageNameOkInRoot(IPackageFragmentRoot root) throws JavaModelException{
-		IPackageFragment pack= root.getPackageFragment(fNewName);
+	private boolean isPackageNameOkInRoot(String newName, IPackageFragmentRoot root) throws JavaModelException{
+		IPackageFragment pack= root.getPackageFragment(newName);
 		if (! pack.exists())
 			return true;
 		else if (! pack.hasSubpackages()) //leaves are no good
@@ -261,17 +261,21 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 			return true;	
 	}
 	
-	private RefactoringStatus checkPackageInCurrentRoot() throws JavaModelException{
-		if (isPackageNameOkInRoot(((IPackageFragmentRoot)fPackage.getParent())))
+	private RefactoringStatus checkPackageInCurrentRoot(String newName) throws JavaModelException{
+		if (isPackageNameOkInRoot(newName, getPackageFragmentRoot()))
 			return null;
 		else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenamePackageRefactoring.package_exists"));//$NON-NLS-1$
 	}
+
+	private IPackageFragmentRoot getPackageFragmentRoot() {
+		return ((IPackageFragmentRoot)fPackage.getParent());
+	}
 	
-	private RefactoringStatus checkPackageName() throws JavaModelException{		
+	private RefactoringStatus checkPackageName(String newName) throws JavaModelException{		
 		IPackageFragmentRoot[] roots= fPackage.getJavaProject().getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
-			if (! isPackageNameOkInRoot(roots[i]))
+			if (! isPackageNameOkInRoot(newName, roots[i]))
 				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.aleady_exists", fNewName));//$NON-NLS-1$
 		}
 		return new RefactoringStatus();

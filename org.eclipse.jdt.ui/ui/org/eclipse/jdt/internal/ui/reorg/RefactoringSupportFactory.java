@@ -53,7 +53,8 @@ public class RefactoringSupportFactory {
 		
 		public void rename(Object element) throws JavaModelException{
 			Assert.isNotNull(fRefactoring);
-			RefactoringAction.activateRefactoringWizard((Refactoring)fRefactoring, createWizard(fRefactoring), "Rename", true);
+			RefactoringWizard wizard= createWizard(fRefactoring);
+			RefactoringAction.activateRefactoringWizard((Refactoring)fRefactoring, wizard, "Rename", true);
 			fRefactoring= null;
 		}
 		
@@ -62,6 +63,7 @@ public class RefactoringSupportFactory {
 		abstract RefactoringWizard createWizard(IRenameRefactoring ref);
 		
 		abstract boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException;
+		
 	}
 	
 	private static RefactoringWizard createRenameWizard(IRenameRefactoring ref, String title, String message, String wizardPageHelp, String errorPageHelp, ImageDescriptor image){
@@ -70,6 +72,66 @@ public class RefactoringSupportFactory {
 		return w;
 	}
 	
+	private static RenameSupport createJavaProjectRename(){
+		return new RenameSupport(){
+			IRenameRefactoring createRefactoring(Object element) {
+				return new RenameJavaProjectRefactoring((IJavaProject)element);
+			}
+			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
+				return ((RenameJavaProjectRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
+			}
+			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
+				String title= "Rename Java Project";
+				String message= "Enter the new name for this Java project.";
+				//FIX ME: wrong icon
+				String wizardPageHelp= IJavaHelpContextIds.RENAME_JPRJ_WIZARD_PAGE; 
+				String errorPageHelp= IJavaHelpContextIds.RENAME_JPRJ_ERROR_WIZARD_PAGE;
+				ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_NEWJPRJ;
+				return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
+			}
+		};
+	}
+	
+	private static RenameSupport createSourceFolderRename(){
+		return new RenameSupport(){
+			IRenameRefactoring createRefactoring(Object element) {
+				return new RenameSourceFolderRefactoring((IPackageFragmentRoot)element);
+			}
+			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
+				return ((RenameSourceFolderRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
+			}
+			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
+				String title= "Rename Source Folder";
+				String message= "Enter the new name for this source folder.";
+				//FIX ME: wrong icon
+				String wizardPageHelp= IJavaHelpContextIds.RENAME_SRCFLDR_WIZARD_PAGE; 
+				String errorPageHelp= IJavaHelpContextIds.RENAME_SRCFLDR_ERROR_WIZARD_PAGE;
+				ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR;
+				return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
+			}
+		};
+	}
+	
+	private static RenameSupport createResourceRename(){
+		return new RenameSupport(){
+			IRenameRefactoring createRefactoring(Object element) {
+				return new RenameResourceRefactoring((IResource)element);
+			}
+			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
+				return ((RenameResourceRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
+			}
+			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
+					String title= "Rename Resource";
+					String message= "Enter the new name for this resource.";
+					//FIX ME: wrong icon
+					String wizardPageHelp= IJavaHelpContextIds.RENAME_RESOURCE_WIZARD_PAGE; 
+					String errorPageHelp= IJavaHelpContextIds.RENAME_RESOURCE_ERROR_WIZARD_PAGE;
+					ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR_CU;
+					return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
+			}
+		};
+	}
+
 	private static RenameSupport createPackageRename(){
 		return new RenameSupport(){
 			IRenameRefactoring createRefactoring(Object element) {
@@ -110,67 +172,7 @@ public class RefactoringSupportFactory {
 			}
 		};
 	}
-	
-	private static RenameSupport createSourceFolderRename(){
-		return new RenameSupport(){
-			IRenameRefactoring createRefactoring(Object element) {
-				return new RenameSourceFolderRefactoring((IPackageFragmentRoot)element);
-			}
-			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
-				return ((RenameSourceFolderRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
-			}
-			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
-				String title= "Rename Source Folder";
-				String message= "Enter the new name for this source folder.";
-				//FIX ME: wrong icon
-				String wizardPageHelp= IJavaHelpContextIds.RENAME_SRCFLDR_WIZARD_PAGE; 
-				String errorPageHelp= IJavaHelpContextIds.RENAME_SRCFLDR_ERROR_WIZARD_PAGE;
-				ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR;
-				return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
-			}
-		};
-	}
-	
-	private static RenameSupport createJavaProjectRename(){
-		return new RenameSupport(){
-			IRenameRefactoring createRefactoring(Object element) {
-				return new RenameJavaProjectRefactoring((IJavaProject)element);
-			}
-			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
-				return ((RenameJavaProjectRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
-			}
-			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
-				String title= "Rename Java Project";
-				String message= "Enter the new name for this Java project.";
-				//FIX ME: wrong icon
-				String wizardPageHelp= IJavaHelpContextIds.RENAME_JPRJ_WIZARD_PAGE; 
-				String errorPageHelp= IJavaHelpContextIds.RENAME_JPRJ_ERROR_WIZARD_PAGE;
-				ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_NEWJPRJ;
-				return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
-			}
-		};
-	}
-	
-	private static RenameSupport createResourceRename(){
-		return new RenameSupport(){
-			IRenameRefactoring createRefactoring(Object element) {
-				return new RenameResourceRefactoring((IResource)element);
-			}
-			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
-				return ((RenameResourceRefactoring)refactoring).checkActivation(new NullProgressMonitor()).isOK();
-			}
-			RefactoringWizard createWizard(IRenameRefactoring refactoring) {
-					String title= "Rename Resource";
-					String message= "Enter the new name for this resource.";
-					//FIX ME: wrong icon
-					String wizardPageHelp= IJavaHelpContextIds.RENAME_RESOURCE_WIZARD_PAGE; 
-					String errorPageHelp= IJavaHelpContextIds.RENAME_RESOURCE_ERROR_WIZARD_PAGE;
-					ImageDescriptor imageDesc= JavaPluginImages.DESC_WIZBAN_REFACTOR_CU;
-					return createRenameWizard(refactoring, title, message, wizardPageHelp, errorPageHelp, imageDesc);
-			}
-		};
-	}
-	
+		
 	private static RenameSupport createTypeRename(){
 		return new RenameSupport(){
 			IRenameRefactoring createRefactoring(Object element) {
@@ -230,31 +232,37 @@ public class RefactoringSupportFactory {
 	}
 
 	public static IRefactoringRenameSupport createRenameSupport(Object element) {
-			
-		if (element instanceof IPackageFragment)
-			return createPackageRename();
-			
-		if (element instanceof ICompilationUnit)
-			return createCompilationUnitRename();
-		
-		if (element instanceof IPackageFragmentRoot)
-			return createSourceFolderRename();
-			
-		if (element instanceof IJavaProject)
-			return createJavaProjectRename();
-		
 		if (element instanceof IResource)
 			return createResourceRename();
 		
-		if (element instanceof IType)
-			return createTypeRename();
+		if (!(element instanceof IJavaElement))
+			return null;
 			
-		if (element instanceof IMethod)
-			return createMethodRename();
-
-		if (element instanceof IField)
-			return createFieldRename();
+		switch (((IJavaElement)element).getElementType()){
 			
-		return null;	
+			case IJavaElement.PACKAGE_FRAGMENT:
+					return createPackageRename();
+					
+			case IJavaElement.COMPILATION_UNIT: 
+				return createCompilationUnitRename();
+				
+			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				 return createSourceFolderRename();
+				
+			case IJavaElement.JAVA_PROJECT:	 
+				return createJavaProjectRename();
+				 
+			case IJavaElement.TYPE:
+				return createTypeRename();
+			
+			case IJavaElement.METHOD:
+				return createMethodRename();
+				
+			case IJavaElement.FIELD:
+				return createFieldRename();
+				
+			default: 	
+				return null;	
+		}	
 	}
 }

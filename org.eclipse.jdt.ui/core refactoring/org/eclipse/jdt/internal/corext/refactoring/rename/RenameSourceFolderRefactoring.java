@@ -1,22 +1,20 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFromClasspathChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameSourceFolderChange;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 
@@ -91,14 +89,34 @@ public class RenameSourceFolderRefactoring	extends Refactoring implements IRenam
 	/* non java-doc
 	 * @see IRenameRefactoring#checkNewName()
 	 */
-	public RefactoringStatus checkNewName() throws JavaModelException {
+	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
+		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
+		if (! newName.trim().equals(newName))
+			return RefactoringStatus.createFatalErrorStatus("Name must not start or end with a blank.");
+		
+		IContainer c= 	fSourceFolder.getCorrespondingResource().getParent();
+		if (! c.getFullPath().isValidSegment(newName))
+			return RefactoringStatus.createFatalErrorStatus("This is an invalid name for a file or folder.");
+		
+		RefactoringStatus result= RefactoringStatus.create(c.getWorkspace().validateName(newName, IResource.FOLDER));
+		if (result.hasFatalError())
+			return result;		
+				
+		result.merge(RefactoringStatus.create(c.getWorkspace().validatePath(createNewPath(newName), IResource.FOLDER)));		
+		if (result.hasFatalError())
+			return result;
+			
 		IJavaProject project= fSourceFolder.getJavaProject();
-		IPath p= project.getProject().getFullPath().append(fNewName);
+		IPath p= project.getProject().getFullPath().append(newName);
 		if (project.findPackageFragmentRoot(p) != null)
 			return RefactoringStatus.createFatalErrorStatus("The package or folder already exists");
-		return new RefactoringStatus();	
+					
+		return result;		
 	}
-
+	
+	private String createNewPath(String newName) throws JavaModelException {
+		return fSourceFolder.getCorrespondingResource().getFullPath().removeLastSegments(1).append(newName).toString();
+	}
 	
 	/* non java-doc
 	 * @see Refactoring#checkInput(IProgressMonitor)

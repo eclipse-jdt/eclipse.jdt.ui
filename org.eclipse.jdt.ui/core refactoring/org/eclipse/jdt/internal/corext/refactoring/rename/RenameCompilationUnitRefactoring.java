@@ -69,12 +69,12 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 	/* non java-doc
 	 * @see IRenameRefactoring#checkNewName()
 	 */
-	public RefactoringStatus checkNewName() throws JavaModelException {
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(Checks.checkCompilationUnitName(fNewName));
+	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
+		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
+		RefactoringStatus result= Checks.checkCompilationUnitName(newName);
 		if (fWillRenameType)
-			result.merge(fRenameTypeRefactoring.checkNewName());
-		if (Checks.isAlreadyNamed(fCu, fNewName))
+			result.merge(fRenameTypeRefactoring.checkNewName(removeFileNameExtension(newName)));
+		if (Checks.isAlreadyNamed(fCu, newName))
 			result.addFatalError(RefactoringCoreMessages.getString("RenameCompilationUnitRefactoring.same_name"));	 //$NON-NLS-1$
 		return result;
 	}

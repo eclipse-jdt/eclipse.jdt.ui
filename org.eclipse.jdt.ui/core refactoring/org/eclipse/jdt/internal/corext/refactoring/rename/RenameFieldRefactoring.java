@@ -198,18 +198,17 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	/* non java-doc
 	 * @see IRenameRefactoring#checkNewName
 	 */
-	public RefactoringStatus checkNewName() throws JavaModelException {
-		RefactoringStatus result= new RefactoringStatus();
+	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
+		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
+		RefactoringStatus result= Checks.checkFieldName(newName);
 		
-		result.merge(Checks.checkFieldName(getNewName()));
-		
-		if (isInstaceField(fField) && (! Checks.startsWithLowerCase(getNewName())))
+		if (isInstaceField(fField) && (! Checks.startsWithLowerCase(newName)))
 			result.addWarning(RefactoringCoreMessages.getString("RenameFieldRefactoring.should_start_lowercase")); //$NON-NLS-1$
 			
-		if (Checks.isAlreadyNamed(fField, getNewName()))
+		if (Checks.isAlreadyNamed(fField, newName))
 			result.addFatalError(RefactoringCoreMessages.getString("RenameFieldRefactoring.another_name")); //$NON-NLS-1$
-		if (fField.getDeclaringType().getField(getNewName()).exists())
-			result.addError(RefactoringCoreMessages.getString("RenameFieldRefactoring.field_already_defined")); //$NON-NLS-1$
+		if (fField.getDeclaringType().getField(newName).exists())
+			result.addFatalError(RefactoringCoreMessages.getString("RenameFieldRefactoring.field_already_defined")); //$NON-NLS-1$
 		return result;
 	}
 	
@@ -224,7 +223,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			result.merge(Checks.checkIfCuBroken(fField));
 			if (result.hasFatalError())
 				return result;
-			result.merge(checkNewName());
+			result.merge(checkNewName(fNewName));
 			pm.worked(1);
 			result.merge(checkEnclosingHierarchy());
 			pm.worked(1);

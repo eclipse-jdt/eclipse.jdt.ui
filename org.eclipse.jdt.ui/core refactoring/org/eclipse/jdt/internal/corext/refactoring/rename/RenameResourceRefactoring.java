@@ -76,21 +76,21 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 	/* non java-doc
 	 * @see IRenameRefactoring#checkNewName()
 	 */
-	public RefactoringStatus checkNewName() throws JavaModelException {
+	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
+		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		IContainer c= fResource.getParent();
 		if (c == null)
 			return RefactoringStatus.createFatalErrorStatus("Internal Error");
 						
-		if (c.findMember(fNewName) != null)
+		if (c.findMember(newName) != null)
 			return RefactoringStatus.createFatalErrorStatus("A file or folder with this name already exists.");
 			
-		if (!c.getFullPath().isValidSegment(fNewName))
+		if (!c.getFullPath().isValidSegment(newName))
 			return RefactoringStatus.createFatalErrorStatus("This is an invalid name for a file or folder.");
 	
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(validateStatus(c.getWorkspace().validateName(fNewName, IResource.FOLDER)));
+		RefactoringStatus result= RefactoringStatus.create(c.getWorkspace().validateName(newName, fResource.getType()));
 		if (! result.hasFatalError())
-			result.merge(validateStatus(c.getWorkspace().validatePath(createNewPath(), IResource.FOLDER)));		
+			result.merge(RefactoringStatus.create(c.getWorkspace().validatePath(createNewPath(newName), fResource.getType())));		
 		return result;		
 	}
 	
@@ -108,26 +108,10 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 		}	
 	}
 
-	private String createNewPath(){
-		return fResource.getFullPath().removeLastSegments(1).append(fNewName).toString();
+	private String createNewPath(String newName){
+		return fResource.getFullPath().removeLastSegments(1).append(newName).toString();
 	}
-	
-	private static RefactoringStatus validateStatus(IStatus status){
-		if (status.isOK())
-			return null;
 		
-		switch (status.getSeverity()){
-			case IStatus.INFO:
-				return RefactoringStatus.createWarningStatus(status.getMessage());
-			case IStatus.WARNING:
-				return RefactoringStatus.createErrorStatus(status.getMessage());
-			case IStatus.ERROR:
-				return RefactoringStatus.createFatalErrorStatus(status.getMessage());
-			default:	
-				return null;
-		}
-	}
-	
 	//--- changes 
 	
 	/* non java-doc 

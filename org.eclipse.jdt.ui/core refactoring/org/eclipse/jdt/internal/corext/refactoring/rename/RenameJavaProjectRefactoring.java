@@ -109,15 +109,13 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 	/* non java-doc
 	 * @see IRenameRefactoring#checkNewName()
 	 */
-	public RefactoringStatus checkNewName() throws JavaModelException {
-		IStatus status= JavaPlugin.getWorkspace().validateName(fNewName, IResource.PROJECT);
-		if (!status.isOK()){
-			if (status.isMultiStatus())
-				return RefactoringStatus.createFatalErrorStatus("It is an invalid name for a project.");
-			return RefactoringStatus.createFatalErrorStatus(status.getMessage());
-		}
+	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
+		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
+		RefactoringStatus result= RefactoringStatus.create(JavaPlugin.getWorkspace().validateName(newName, IResource.PROJECT));
+		if (result.hasFatalError())
+			return result;
 		
-		if (projectNameAlreadyExists())
+		if (projectNameAlreadyExists(newName))
 			return RefactoringStatus.createFatalErrorStatus("A project with that name already exists.");
 		
 		return new RefactoringStatus();
@@ -142,8 +140,8 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 		return fProject.getCorrespondingResource().isReadOnly();
 	}
 	
-	private boolean projectNameAlreadyExists(){
-		return fProject.getJavaModel().getJavaProject(fNewName).exists();
+	private boolean projectNameAlreadyExists(String newName){
+		return fProject.getJavaModel().getJavaProject(newName).exists();
 	}
 
 	//--- changes 

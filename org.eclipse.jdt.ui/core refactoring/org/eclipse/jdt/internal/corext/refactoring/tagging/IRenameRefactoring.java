@@ -15,7 +15,6 @@ public interface IRenameRefactoring extends IRefactoring{
 	
 	/**
 	 * Sets new name for the entity that this refactoring is working on.
-	 * This name is then validated in <code>checkNewName</code>.
 	 */
 	public void setNewName(String newName);
 	
@@ -30,8 +29,7 @@ public interface IRenameRefactoring extends IRefactoring{
 	public String getCurrentName();
 	
 	/**
-	 * Checks if the new name (set in <code>setNewName</code>) is valid for
-	 * the entity that this refactoring renames.
+	 * Checks if the new name is valid for the entity that this refactoring renames.
 	 */
-	public RefactoringStatus checkNewName() throws JavaModelException;
+	public RefactoringStatus checkNewName(String newName) throws JavaModelException;
 }
