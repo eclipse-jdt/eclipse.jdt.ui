@@ -5,20 +5,15 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-import java.util.ResourceBundle;
-
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 
 public class GotoErrorAction extends TextEditorAction {
-	
-	
+		
 	private boolean fForward;
-	
 	
 	public GotoErrorAction(String prefix, boolean forward) {
 		super(JavaEditorMessages.getResourceBundle(), prefix, null);
