@@ -65,13 +65,6 @@ public class JavaDocLocations {
 	
 	private static Map fgJavadocLocations= new HashMap(5);
 	
-	
-	/**
-	 * Gets the Javadoc location for an archive with the given path.
-	 */
-	public static URL getJavadocLocation(IPath path) {
-		return (URL) fgJavadocLocations.get(path);
-	}
 
 	/**
 	 * Sets the Javadoc location for an archive with the given path.
@@ -82,7 +75,32 @@ public class JavaDocLocations {
 		} else {
 			fgJavadocLocations.put(path, url);
 		}
-	}	
+	}
+
+	/**
+	 * Gets the Javadoc location for an archive with the given path.
+	 */
+	public static URL getJavadocLocation(IPath path) {
+		return (URL) fgJavadocLocations.get(path);
+	}
+
+		
+	public static IPath getAnnotatedPath(IJavaElement element) throws JavaModelException {	
+		if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
+			return element.getCorrespondingResource().getFullPath();
+		}
+		
+		IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
+		if (root == null) {
+			return null;
+		}
+
+		if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
+			return root.getPath();
+		} else {
+			return root.getJavaProject().getProject().getFullPath();
+		}	
+	}
 		
 	private static String getLocationsAsXMLString() throws CoreException {
 		Document document = new DocumentImpl();
@@ -168,112 +186,108 @@ public class JavaDocLocations {
 		}
 	}
 	
-	public static URL getJavaDocLocation(IJavaElement element) throws CoreException {
-		IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
-		if (root == null) {
+	public static URL getJavaDocLocation(IJavaElement element, boolean includeMemberReference) throws CoreException {
+		IPath annotated= getAnnotatedPath(element);
+		if (annotated == null) {
 			return null;
 		}
-		IPath path;
-		if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
-			path= root.getPath();
-		} else {
-			path= root.getJavaProject().getProject().getFullPath();
-		}
-		
-		URL baseLocation= getJavadocLocation(path);
+
+		URL baseLocation= getJavadocLocation(annotated);
 		if (baseLocation == null) {
 			return null;
 		}
-		try {
-			String urlString= baseLocation.toExternalForm();
-			
-			StringBuffer pathBuffer= new StringBuffer(urlString);
-			if (!urlString.endsWith("/")) {
-				pathBuffer.append('/');
-			}
-			
-			switch (element.getElementType()) {
-				case IJavaElement.PACKAGE_FRAGMENT:
-					return getPackageLocation((IPackageFragment) element, pathBuffer);
-				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-					return getOverviewLocation(pathBuffer);
-				case IJavaElement.IMPORT_CONTAINER:
-					element= element.getParent();
-					// fall through
-				case IJavaElement.COMPILATION_UNIT:
-					IType mainType= JavaModelUtil.findPrimaryType((ICompilationUnit) element);
-					if (mainType == null) {
-						return null;
-					}
-					return getTypeLocation(mainType, pathBuffer);
-				case IJavaElement.CLASS_FILE:
-					return getTypeLocation(((IClassFile) element).getType(), pathBuffer);				
-				case IJavaElement.TYPE:
-					return getTypeLocation((IType) element, pathBuffer);
-				case IJavaElement.FIELD:
-					return getFieldLocation((IField) element, pathBuffer);		
-				case IJavaElement.METHOD:
-					return getMethodLocation((IMethod) element, pathBuffer);
-				case IJavaElement.INITIALIZER:
-					return getTypeLocation(((IMember) element).getDeclaringType(), pathBuffer);			
-				case IJavaElement.IMPORT_DECLARATION:
-					IImportDeclaration decl= (IImportDeclaration) element;
-					
-					if (decl.isOnDemand()) {
-						IJavaElement cont= JavaModelUtil.findTypeContainer(element.getJavaProject(), Signature.getQualifier(decl.getElementName()));
-						if (cont instanceof IType) {
-							return getTypeLocation((IType) cont, pathBuffer);
-						} else if (cont instanceof IPackageFragment) {
-							return getPackageLocation((IPackageFragment) cont, pathBuffer);
-						}
-						return null;
-					} else {
-						IType imp= JavaModelUtil.findType(element.getJavaProject(), decl.getElementName());
-						return getTypeLocation((IType) imp, pathBuffer);
-					}
-				case IJavaElement.PACKAGE_DECLARATION:
-					IPackageFragment pack= (IPackageFragment) JavaModelUtil.findElementOfKind(element, IJavaElement.PACKAGE_FRAGMENT);
-					if (pack != null) {
-						return getPackageLocation((IPackageFragment) pack, pathBuffer);
-					}
-					return null;	
-				default:
+
+		String urlString= baseLocation.toExternalForm();
+
+		StringBuffer pathBuffer= new StringBuffer(urlString);
+		if (!urlString.endsWith("/")) {
+			pathBuffer.append('/');
+		}
+
+		switch (element.getElementType()) {
+			case IJavaElement.PACKAGE_FRAGMENT:
+				appendPackageSummaryPath((IPackageFragment) element, pathBuffer);
+				break;
+			case IJavaElement.JAVA_PROJECT:
+			case IJavaElement.PACKAGE_FRAGMENT_ROOT :
+				appendOverviewSummaryPath(pathBuffer);
+				break;
+			case IJavaElement.IMPORT_CONTAINER :
+				element= element.getParent();
+				// fall through
+			case IJavaElement.COMPILATION_UNIT :
+				IType mainType= JavaModelUtil.findPrimaryType((ICompilationUnit) element);
+				if (mainType == null) {
 					return null;
-			}
+				}
+				appendTypePath(mainType, pathBuffer);
+				break;
+			case IJavaElement.CLASS_FILE :
+				appendTypePath(((IClassFile) element).getType(), pathBuffer);
+				break;
+			case IJavaElement.TYPE :
+				appendTypePath((IType) element, pathBuffer);
+				break;
+			case IJavaElement.FIELD :
+				IField field= (IField) element;
+				appendTypePath(field.getDeclaringType(), pathBuffer);
+				if (includeMemberReference) {
+					appendFieldReference(field, pathBuffer);
+				}
+				break;
+			case IJavaElement.METHOD :
+				IMethod method= (IMethod) element;
+				appendTypePath(method.getDeclaringType(), pathBuffer);
+				if (includeMemberReference) {
+					appendMethodReference(method, pathBuffer);
+				}
+				break;
+			case IJavaElement.INITIALIZER :
+				appendTypePath(((IMember) element).getDeclaringType(), pathBuffer);
+				break;
+			case IJavaElement.IMPORT_DECLARATION :
+				IImportDeclaration decl= (IImportDeclaration) element;
+
+				if (decl.isOnDemand()) {
+					IJavaElement cont= JavaModelUtil.findTypeContainer(element.getJavaProject(), Signature.getQualifier(decl.getElementName()));
+					if (cont instanceof IType) {
+						appendTypePath((IType) cont, pathBuffer);
+					} else if (cont instanceof IPackageFragment) {
+						appendPackageSummaryPath((IPackageFragment) cont, pathBuffer);
+					}
+				} else {
+					IType imp= JavaModelUtil.findType(element.getJavaProject(), decl.getElementName());
+					appendTypePath((IType) imp, pathBuffer);
+				}
+				break;
+			case IJavaElement.PACKAGE_DECLARATION :
+				IJavaElement pack= JavaModelUtil.findElementOfKind(element, IJavaElement.PACKAGE_FRAGMENT);
+				if (pack != null) {
+					appendPackageSummaryPath((IPackageFragment) pack, pathBuffer);
+				} else {
+					return null;
+				}
+				break;
+			default :
+				return null;
+		}
+
+		try {
+			return new URL(pathBuffer.toString());
 		} catch (MalformedURLException e) {
 			JavaPlugin.log(e);
 		}
 		return null;
-	}
-	
-	
-	private static URL getTypeLocation(IType type, StringBuffer buf) throws MalformedURLException {
-		appendTypePath(type, buf);
-		URL url= new URL(buf.toString());
-		if (doesExist(url)) {
-			return url;
-		}
-		return null;
-	}
-	
-	private static URL getPackageLocation(IPackageFragment pack, StringBuffer buf) throws MalformedURLException {
+	}	
+		
+	private static void appendPackageSummaryPath(IPackageFragment pack, StringBuffer buf) {
 		String packPath= pack.getElementName().replace('.', '/');
 		buf.append(packPath);
 		buf.append("/package-summary.html");
-		URL url= new URL(buf.toString());
-		if (doesExist(url)) {
-			return url;
-		}
-		return null;
 	}
 	
-	private static URL getOverviewLocation(StringBuffer buf) throws MalformedURLException {
+	private static void appendOverviewSummaryPath(StringBuffer buf) {
 		buf.append("overview-summary.html");
-		URL url= new URL(buf.toString());
-		if (doesExist(url)) {
-			return url;
-		}
-		return null;		
 	}	
 	
 	private static boolean doesExist(URL url) {
@@ -295,29 +309,19 @@ public class JavaDocLocations {
 		buf.append(".html");
 	}		
 		
-	private static URL getFieldLocation(IField field, StringBuffer buf) throws JavaModelException, MalformedURLException {
-		URL typeURL= getTypeLocation(field.getDeclaringType(), buf);
-		if (typeURL == null) {
-			return null;
-		}
+	private static void appendFieldReference(IField field, StringBuffer buf) throws JavaModelException {
 		buf.append('#');
 		buf.append(field.getElementName());
-		return new URL(buf.toString());
 	}
 	
-	private static URL getMethodLocation(IMethod meth, StringBuffer buf) throws JavaModelException, MalformedURLException {
-		IType declaringType= meth.getDeclaringType();
-		
-		URL typeURL= getTypeLocation(declaringType, buf);
-		if (typeURL == null) {
-			return null;
-		}
+	private static void appendMethodReference(IMethod meth, StringBuffer buf) throws JavaModelException {
 		
 		buf.append('#');
 		buf.append(meth.getElementName());	
 		
 		buf.append('(');
 		String[] params= meth.getParameterTypes();
+		IType declaringType= meth.getDeclaringType();
 		for (int i= 0; i < params.length; i++) {
 			if (i != 0) {
 				buf.append(",%20");
@@ -334,7 +338,5 @@ public class JavaDocLocations {
 			}
 		}
 		buf.append(')');
-		
-		return new URL(buf.toString());
 	}
 }

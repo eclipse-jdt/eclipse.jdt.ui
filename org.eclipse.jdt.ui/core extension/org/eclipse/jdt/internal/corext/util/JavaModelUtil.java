@@ -289,6 +289,7 @@ public class JavaModelUtil {
 	/**
 	 * Gets the path of the underlying resource without throwing
 	 * a JavaModelException if the resource does not exist.
+	 * Returns <code>null</code> for libararies and elemens in libraries.
 	 */
 	public static IPath getUnderlyingPath(IJavaElement elem) {
 		switch (elem.getElementType()) {

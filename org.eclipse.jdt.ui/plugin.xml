@@ -192,8 +192,20 @@
 		objectClass="org.eclipse.core.resources.IFile"
 		class="org.eclipse.jdt.internal.ui.preferences.SourceAttachmentPropertyPage"
 		nameFilter="*.jar">
-    </page>  
-</extension>
+    </page>
+	<page name="%javadocLocationPageName"
+		id="org.eclipse.jdt.internal.ui.preferences"
+		objectClass="org.eclipse.core.resources.IProject"
+		class="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage">
+		<filter name="nature" value="org.eclipse.jdt.core.javanature"/>
+	</page>
+ 	<page name="%javadocLocationPageName"
+		id="org.eclipse.jdt.internal.ui.preferences"
+		objectClass="org.eclipse.jdt.core.IJavaProject"
+		class="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage">
+		<filter name="nature" value="org.eclipse.jdt.core.javanature"/>
+	</page>   
+ </extension>
 
 <extension
     point = "org.eclipse.ui.elementFactories">
