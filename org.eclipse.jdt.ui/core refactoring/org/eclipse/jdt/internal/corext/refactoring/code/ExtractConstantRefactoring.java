@@ -15,21 +15,25 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.core.filebuffers.ITextFileBuffer;
-
-import org.eclipse.text.edits.InsertEdit;
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
@@ -81,12 +85,6 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.DocumentChange;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextChange;
 
 public class ExtractConstantRefactoring extends Refactoring {
 
@@ -520,7 +518,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	private TextEdit createInsertDeclarationFirstEdit(String delimiter) throws JavaModelException, CoreException {
 		BodyDeclaration first = (BodyDeclaration) getBodyDeclarations().next();
 		int insertOffset = first.getStartPosition();
-		String text= createConstantDeclarationSource(delimiter) + delimiter + CodeFormatterUtil.createIndentString(CodeRefactoringUtil.getIndentationLevel(first, getFile()), fCu.getJavaProject());
+		String text= createConstantDeclarationSource(delimiter) + delimiter + CodeFormatterUtil.createIndentString(CodeRefactoringUtil.getIndentationLevel(first, fCu), fCu.getJavaProject());
 		return new InsertEdit(insertOffset, text);		
 	}
 	
@@ -571,7 +569,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		Assert.isNotNull(toInsertAfter);
 			
 		int insertOffset= getStartOfFollowingLine(toInsertAfter);
-		String text= CodeFormatterUtil.createIndentString(CodeRefactoringUtil.getIndentationLevel(toInsertAfter, getFile()), fCu.getJavaProject()) + createConstantDeclarationSource(delimiter) + delimiter;
+		String text= CodeFormatterUtil.createIndentString(CodeRefactoringUtil.getIndentationLevel(toInsertAfter, fCu), fCu.getJavaProject()) + createConstantDeclarationSource(delimiter) + delimiter;
 		return new InsertEdit(insertOffset, text);		
 	}
 	
@@ -916,10 +914,5 @@ public class ExtractConstantRefactoring extends Refactoring {
 		Assert.isNotNull(type);
 
 		return type;
-	}
-
-	// !!! - from ExtractTempRefactoring
-	private IFile getFile() {
-		return ResourceUtil.getFile(fCu);
 	}
 }

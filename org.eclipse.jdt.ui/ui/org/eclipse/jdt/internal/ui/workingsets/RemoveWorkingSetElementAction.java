@@ -31,7 +31,7 @@ public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 
 	public RemoveWorkingSetElementAction(IWorkbenchSite site) {
 		super(site);
-		setText("Remo&ve from Working Set");
+		setText(WorkingSetMessages.getString("RemoveWorkingSetElementAction.label")); //$NON-NLS-1$
 	}
 	
 	public void selectionChanged(IStructuredSelection selection) {

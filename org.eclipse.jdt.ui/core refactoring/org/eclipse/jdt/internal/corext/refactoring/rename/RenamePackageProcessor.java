@@ -74,6 +74,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResul
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -285,7 +286,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 				String message= RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.Packagered_only",  //$NON-NLS-1$
 									fPackage.getElementName()); 
 				result.addFatalError(message);
-			} else if (fPackage.getResource().isReadOnly()){
+			} else if (Resources.isReadOnly(fPackage.getResource())) {
 				String message= RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.resource_read_only", //$NON-NLS-1$
 						fPackage.getElementName());
 				result.addError(message);

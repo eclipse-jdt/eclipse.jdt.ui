@@ -30,6 +30,8 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
+import org.eclipse.jdt.internal.corext.util.Resources;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
@@ -148,7 +150,7 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 	}
 	
 	private boolean isReadOnly() {
-		return fProject.getResource().isReadOnly();
+		return Resources.isReadOnly(fProject.getResource());
 	}
 	
 	private boolean projectNameAlreadyExists(String newName){

@@ -25,6 +25,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Resources;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -70,7 +72,7 @@ public abstract class JDTChange extends Change {
 	}
 	
 	protected static void checkReadOnly(RefactoringStatus status, IResource resource) {
-		if (resource.isReadOnly()) {
+		if (Resources.isReadOnly(resource)) {
 			status.addFatalError(RefactoringCoreMessages.getFormattedString("Change.is_read_only", resource.getFullPath().toString())); //$NON-NLS-1$
 		}
 	}

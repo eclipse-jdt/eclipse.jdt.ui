@@ -27,7 +27,7 @@ public final class RawType extends HierarchyType {
 		Assert.isTrue(binding.isRawType());
 		super.initialize(binding, javaElementType);
 		TypeEnvironment environment= getEnvironment();
-		fTypeDeclaration= (GenericType)environment.create(binding.getGenericType());
+		fTypeDeclaration= (GenericType)environment.create(binding.getTypeDeclaration());
 	}
 	
 	public int getElementType() {

@@ -43,9 +43,6 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -91,7 +88,6 @@ import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
-import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -99,8 +95,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAwareSourceRangeComputer;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
@@ -840,41 +834,5 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 	public ICompilationUnit getCompilationUnit() {
 		return fCUnit;
-	}
-	
-	private String getMethodBodySource(ASTNode[] selectedNodes) throws BadLocationException, CoreException {
-		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
-		String documentPortionToScan= fDocument.get(fSelectionStart, fSelectionLength);
-		scanner.setSource(documentPortionToScan.toCharArray());
-		TokenScanner tokenizer= new TokenScanner(scanner);
-		int pos= tokenizer.getNextStartOffset(0, false);
-		ASTNode currentNode= selectedNodes[0];
-		int start= Math.min(fSelectionStart + pos, currentNode.getStartPosition());
-		
-		currentNode= selectedNodes[selectedNodes.length - 1];
-		int scannerStart= currentNode.getStartPosition() + currentNode.getLength() - fSelectionStart;
-		tokenizer.setOffset(scannerStart);
-		pos= scannerStart;
-		int token= -1;
-		try {
-			while (true) {
-				token= tokenizer.readNext(false);
-				pos= tokenizer.getCurrentEndOffset();
-			}
-		} catch (CoreException e) {
-		}
-		if (token == ITerminalSymbols.TokenNameCOMMENT_LINE) {
-			int index= pos - 1;
-			while(index >= 0 && Strings.isLineDelimiterChar(documentPortionToScan.charAt(index))) {
-				pos--;
-				index--;
-			}
-		}
-		int end= Math.max(fSelectionStart + pos, currentNode.getStartPosition() + currentNode.getLength());
-		
-		String[] lines= Strings.convertIntoLines(fDocument.get(start, end - start));
-		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(fCUnit.getJavaProject()), false);
-		
-		return Strings.concatenate(lines, fDocument.getLineDelimiter(0));
-	}
+	}	
 }

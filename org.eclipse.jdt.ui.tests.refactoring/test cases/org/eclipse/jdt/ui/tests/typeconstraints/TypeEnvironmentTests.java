@@ -211,7 +211,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 			assertEquals("Not same modifiers", bindings[i].getModifiers(), types[i].getModifiers());
 			testFlags(bindings[i], types[i]);
 			assertTrue("Not same erasure", types[i].getErasure().isEqualTo(bindings[i].getErasure()));
-			// assertTrue("Not same type declaration", types[i].getTypeDeclaration().isEqualTo(bindings[i].getTypeDeclaration()));
+			assertTrue("Not same type declaration", types[i].getTypeDeclaration().isEqualTo(bindings[i].getTypeDeclaration()));
 			assertTrue("Not same type", types[i] == environment.create(bindings[i]));
 			
 		}
@@ -250,8 +250,8 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 				if (coreResult != uiResult && !types[o].isUnboundWildcardType()) {
 					System.out.println("Different assignment rule(" +
 						PrettySignatures.get(bindings[i]) + "= " + PrettySignatures.get(bindings[o]) + 
-						"): core<" + coreResult +
-						"> ui<" + uiResult + ">");
+						"): Bindings<" + coreResult +
+						"> TType<" + uiResult + ">");
 				}
 			}
 		}

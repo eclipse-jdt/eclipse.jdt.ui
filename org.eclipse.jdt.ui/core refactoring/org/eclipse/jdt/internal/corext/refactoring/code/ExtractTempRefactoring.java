@@ -540,7 +540,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	private TextEdit createAndInsertTempDeclaration(String delimiter) throws CoreException {
 		ASTNode insertBefore= getNodeToInsertTempDeclarationBefore();
 		int insertOffset= insertBefore.getStartPosition();
-		String text= createTempDeclarationSource(getInitializerSource(), true, delimiter) + CodeFormatterUtil.createIndentString(CodeRefactoringUtil.getIndentationLevel(insertBefore, ResourceUtil.getFile(fCu)), fCu.getJavaProject());
+		String text= createTempDeclarationSource(getInitializerSource(), true, delimiter) + CodeFormatterUtil.createIndentString(CodeRefactoringUtil.getIndentationLevel(insertBefore, fCu), fCu.getJavaProject());
 		return new InsertEdit(insertOffset, text);
 	}
 

@@ -29,7 +29,7 @@ public final class ParameterizedType extends HierarchyType {
 		Assert.isTrue(binding.isParameterizedType());
 		super.initialize(binding, javaElementType);
 		TypeEnvironment environment= getEnvironment();
-		fTypeDeclaration= (GenericType)environment.create(binding.getGenericType());
+		fTypeDeclaration= (GenericType)environment.create(binding.getTypeDeclaration());
 		ITypeBinding[] typeArguments= binding.getTypeArguments();
 		fTypeArguments= new TType[typeArguments.length];
 		for (int i= 0; i < typeArguments.length; i++) {
