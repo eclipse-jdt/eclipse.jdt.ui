@@ -17,17 +17,19 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 
 
-public class SnippetFinder extends GenericVisitor {
+/* package */ class SnippetFinder extends GenericVisitor {
 	
 	public static class Match {
 		private List fNodes;
@@ -72,10 +74,14 @@ public class SnippetFinder extends GenericVisitor {
 		public boolean match(SimpleName candidate, Object s) {
 			if (!(s instanceof SimpleName))
 				return false;
-			if (candidate.isDeclaration())
-				return false;
 				
 			SimpleName snippet= (SimpleName)s;
+			if (candidate.isDeclaration() != snippet.isDeclaration())
+				return false;
+			
+			if (isLeftHandSideOfAssignment(candidate))
+				return false;
+					
 			IBinding cb= candidate.resolveBinding();
 			IBinding sb= snippet.resolveBinding();
 			if (cb == null || sb == null)
@@ -96,6 +102,13 @@ public class SnippetFinder extends GenericVisitor {
 			}
 			return Bindings.equals(cb, sb);	
 		}
+
+		private boolean isLeftHandSideOfAssignment(SimpleName candidate) {
+			// doesn't match if the candidate is the left hand side of a assignement. 
+			// Otherwise y= i; i= z; results in y= e(); e()= z;
+			ASTNode cParent= candidate.getParent();
+			return cParent != null && cParent.getNodeType() == ASTNode.ASSIGNMENT && ((Assignment)cParent).getLeftHandSide() == candidate;
+		}
 	}
 
 	private List fResult= new ArrayList(2);
@@ -103,6 +116,7 @@ public class SnippetFinder extends GenericVisitor {
 	private ASTNode[] fSnippet;
 	private int fIndex;
 	private Matcher fMatcher;
+	private int fTypes;
 	
 	private SnippetFinder(ASTNode[] snippet) {
 		fSnippet= snippet;
@@ -110,15 +124,23 @@ public class SnippetFinder extends GenericVisitor {
 		reset();
 	}
 	
-	public static Match[] perform(ASTNode start, ASTNode[] snippet) {
+	public static Match[] perform(TypeDeclaration start, ASTNode[] snippet) {
 		SnippetFinder finder= new SnippetFinder(snippet);
 		start.accept(finder);
 		return (Match[])finder.fResult.toArray(new Match[finder.fResult.size()]);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visitNode(org.eclipse.jdt.core.dom.ASTNode)
-	 */
+	public boolean visit(TypeDeclaration node) {
+		if (++fTypes > 1)
+			return false;
+		return super.visit(node);
+	}
+	
+	public void endVisit(TypeDeclaration node) {
+		--fTypes;
+		super.endVisit(node);
+	}
+	
 	protected boolean visitNode(ASTNode node) {
 		if (matches(node)) {
 			return false;
