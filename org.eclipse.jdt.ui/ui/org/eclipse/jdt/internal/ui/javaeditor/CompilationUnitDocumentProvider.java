@@ -304,25 +304,12 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		 * Creates <code>IBuffer</code>s based on documents.
 		 */
 		protected class BufferFactory implements IBufferFactory {
-						
-			private IDocument internalCreateDocument(IFileEditorInput input)  throws CoreException {
-				
-				IDocument document= createDocument(input);
-				
-				JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-				IDocumentPartitioner partitioner= tools.createDocumentPartitioner();
-				partitioner.connect(document);
-				document.setDocumentPartitioner(partitioner);
-				
-				return document;
-			}
 			
 			private IDocument internalGetDocument(IFileEditorInput input) throws CoreException {
 				IDocument document= getDocument(input);
 				if (document != null)
 					return document;
-					
-				return internalCreateDocument(input);
+				return CompilationUnitDocumentProvider.this.createDocument(input);
 			}
 			
 			public IBuffer createBuffer(IOpenable owner) {
@@ -526,7 +513,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	}
 		
 	/**
-	 * Replaces createAnnotionModel of the super class
+	 * Replaces createAnnotionModel of the super class.
 	 */
 	protected IAnnotationModel createCompilationUnitAnnotationModel(Object element) throws CoreException {
 		if ( !(element instanceof IFileEditorInput))
@@ -534,6 +521,21 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		
 		IFileEditorInput input= (IFileEditorInput) element;
 		return new CompilationUnitAnnotationModel(input.getFile(), isHandlingTemporaryProblems());
+	}
+	
+	/*
+	 * @see AbstractDocumentProvider#createDocument(Object)
+	 */
+	protected IDocument createDocument(Object element) throws CoreException {
+		IDocument document= super.createDocument(element);
+		if (document != null) {
+			JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
+			IDocumentPartitioner partitioner= tools.createDocumentPartitioner();
+			document.setDocumentPartitioner(partitioner);
+			partitioner.connect(document);
+		}
+		
+		return document;
 	}
 	
 	/*

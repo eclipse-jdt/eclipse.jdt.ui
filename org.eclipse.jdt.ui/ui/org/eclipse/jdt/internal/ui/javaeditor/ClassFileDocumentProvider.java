@@ -179,14 +179,11 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		return null;
 	}
 	
-	/**
-	 * Creates a document derriving the content from the given editor input.
-	 * @param the editor input providing the document content
-	 * @return the created document or <code>null</code> if no document could be created
-	 * @exception CoreException if the editor inpur could not be accessed
+	/*
+	 * @see AbstractDocumentProvider#createDocument(Object)
 	 */
-	protected IDocument createClassFileDocument(IClassFileEditorInput classFileEditorInput) throws CoreException {
-		IDocument document= createDocument(classFileEditorInput);
+	protected IDocument createDocument(Object element) throws CoreException {
+		IDocument document= super.createDocument(element);
 		if (document != null) {
 			JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 			IDocumentPartitioner partitioner= tools.createDocumentPartitioner();
@@ -217,7 +214,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 				}
 			}
 			
-			IDocument d= createClassFileDocument(input);
+			IDocument d= createDocument(input);
 			IAnnotationModel m= createClassFileAnnotationModel(input);
 			
 			if (external != null) {

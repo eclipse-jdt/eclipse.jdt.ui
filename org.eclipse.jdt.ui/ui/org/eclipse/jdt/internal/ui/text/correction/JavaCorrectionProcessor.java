@@ -111,22 +111,25 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 
 		ArrayList proposals= new ArrayList();
 		HashSet idsProcessed= new HashSet();
-			
-		for (Iterator iter= new ProblemAnnotationIterator(model); iter.hasNext();) {
-			IProblemAnnotation annot= (IProblemAnnotation) iter.next();
-			Position pos= model.getPosition((Annotation) annot);
-			if (pos != null) {
-				int start= pos.getOffset();
-				if (documentOffset >= start && documentOffset <= (start +  pos.getLength())) {
-					Integer probId= new Integer(annot.getId());
-					if (!idsProcessed.contains(probId)) {
-						ProblemPosition pp = new ProblemPosition(pos, annot, cu);
-						idsProcessed.add(probId);
-						collectCorrections(pp, proposals);
+		
+		if (model != null) {
+			for (Iterator iter= new ProblemAnnotationIterator(model); iter.hasNext();) {
+				IProblemAnnotation annot= (IProblemAnnotation) iter.next();
+				Position pos= model.getPosition((Annotation) annot);
+				if (pos != null) {
+					int start= pos.getOffset();
+					if (documentOffset >= start && documentOffset <= (start +  pos.getLength())) {
+						Integer probId= new Integer(annot.getId());
+						if (!idsProcessed.contains(probId)) {
+							ProblemPosition pp = new ProblemPosition(pos, annot, cu);
+							idsProcessed.add(probId);
+							collectCorrections(pp, proposals);
+						}
 					}
 				}
 			}
 		}
+		
 		if (proposals.isEmpty()) {
 			proposals.add(new NoCorrectionProposal(null));
 		}

@@ -59,14 +59,16 @@ public class JavaProblemHover implements IJavaEditorTextHover {
 		IDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
 		IAnnotationModel model= provider.getAnnotationModel(fCompilationUnitEditor.getEditorInput());
 		
-		Iterator e= new ProblemAnnotationIterator(model);
-		while (e.hasNext()) {
-			Annotation a= (Annotation) e.next();
-			Position p= model.getPosition(a);
-			if (p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
-				String msg= ((IProblemAnnotation) a).getMessage();
-				if (msg != null && msg.trim().length() > 0)
-					return formatMessage(msg);
+		if (model != null) {
+			Iterator e= new ProblemAnnotationIterator(model);
+			while (e.hasNext()) {
+				Annotation a= (Annotation) e.next();
+				Position p= model.getPosition(a);
+				if (p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
+					String msg= ((IProblemAnnotation) a).getMessage();
+					if (msg != null && msg.trim().length() > 0)
+						return formatMessage(msg);
+				}
 			}
 		}
 		
