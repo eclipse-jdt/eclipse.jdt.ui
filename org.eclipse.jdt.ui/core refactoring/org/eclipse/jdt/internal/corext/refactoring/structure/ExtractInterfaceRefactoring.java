@@ -1,7 +1,10 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -22,12 +25,17 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -173,24 +181,80 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private String createInterfaceMethodDeclarationsSource(IMethod iMethod) throws JavaModelException {
-		String methodSource= iMethod.getSource();
-		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(iMethod.getSourceRange().getOffset(), iMethod.getSourceRange().getLength()), true);
-		AST.parseCompilationUnit(fInputClass.getCompilationUnit(), false).accept(analyzer);
-		if (! (analyzer.getFirstSelectedNode() instanceof MethodDeclaration))
+		MethodDeclaration methodDeclaration= getMethodDeclarationNode(iMethod, false);
+		if (methodDeclaration == null)
 			return ""; //???
-		MethodDeclaration methodDeclaration= (MethodDeclaration) analyzer.getFirstSelectedNode();
 		Block body= methodDeclaration.getBody();
 		
 		if (body == null)
 			return iMethod.getSource();
 		StringBuffer methodSourceBuffer= new StringBuffer(iMethod.getSource());
 		int declarationRelativeBodyOffset= body.getStartPosition() - methodDeclaration.getStartPosition();
-		return methodSourceBuffer.replace(declarationRelativeBodyOffset, methodSource.length(), ";").toString();
+		return methodSourceBuffer.replace(declarationRelativeBodyOffset, iMethod.getSource().length(), ";").toString();//$NON-NLS-1$
 	}
 
-	private String createImportsSource() {
-		return "";
+	private MethodDeclaration getMethodDeclarationNode(IMethod iMethod, boolean resolveBindings) throws JavaModelException{
+		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(iMethod.getSourceRange().getOffset(), iMethod.getSourceRange().getLength()), true);
+		AST.parseCompilationUnit(fInputClass.getCompilationUnit(), resolveBindings).accept(analyzer);
+		if (! (analyzer.getFirstSelectedNode() instanceof MethodDeclaration))
+			return null; //???
+		return (MethodDeclaration) analyzer.getFirstSelectedNode();
 	}
+	
+	private String createImportsSource() throws JavaModelException {
+		StringBuffer buff= new StringBuffer();
+		ITypeBinding[] typesUsed= getTypesUsedInExtractedMemberDeclarations();
+		for (int i= 0; i < typesUsed.length; i++) {
+			ITypeBinding binding= typesUsed[i];
+			if (binding != null && ! binding.isPrimitive()){
+				buff.append("import ");
+				buff.append(Bindings.getFullyQualifiedImportName(binding));
+				buff.append(";");
+			}	
+		}
+		return buff.toString();
+	}
+
+	private ITypeBinding[] getTypesUsedInExtractedMemberDeclarations() throws JavaModelException{
+		Set typesUsed= new HashSet();
+		for (int i= 0; i < fExtractedMembers.length; i++) {
+			if (fExtractedMembers[i].getElementType() == IJavaElement.METHOD)
+				typesUsed.addAll(getTypesUsedInDeclaration((IMethod)fExtractedMembers[i]));
+			else if (fExtractedMembers[i].getElementType() == IJavaElement.FIELD)	
+				typesUsed.addAll(getTypesUsedInDeclaration((IField)fExtractedMembers[i]));	
+			else
+				Assert.isTrue(false);	
+		}
+		return (ITypeBinding[]) typesUsed.toArray(new ITypeBinding[typesUsed.size()]);
+	}
+	
+	//set of ITypeBindings
+	private Set getTypesUsedInDeclaration(IField iField) {
+		return new HashSet(0);
+	}
+
+	//set of ITypeBindings
+	private Set getTypesUsedInDeclaration(IMethod iMethod) throws JavaModelException {
+		MethodDeclaration methodDeclaration= getMethodDeclarationNode(iMethod, true);
+		if (methodDeclaration == null)
+			return new HashSet(0);
+		Set result= new HashSet();	
+		ITypeBinding returnTypeBinding= methodDeclaration.getReturnType().resolveBinding();
+		result.add(returnTypeBinding);
+			
+		for (Iterator iter= methodDeclaration.parameters().iterator(); iter.hasNext();) {
+			SingleVariableDeclaration varDeclaration= (SingleVariableDeclaration) iter.next();
+			result.add(varDeclaration.getType().resolveBinding()); 
+		}
+		
+		for (Iterator iter= methodDeclaration.thrownExceptions().iterator(); iter.hasNext();) {
+			Name exceptionName= (Name) iter.next();
+			result.add(exceptionName.resolveTypeBinding());
+		}
+			
+		return result;
+	}
+
 
 	private String createPackageDeclarationSource() {
 		return "package " + getInputClassPackage().getElementName() + ";";//$NON-NLS-2$ //$NON-NLS-1$
