@@ -255,6 +255,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			
 		//set default and focus
 		fClassToTestText.setText(fDefaultClassToTest);
+		
 		restoreWidgetValues();
 		setFocus();
 	}
@@ -598,6 +599,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 
 		if (visible && fFirstTime) {
 			handleFieldChanged(CLASS_TO_TEST); //creates error message when wizard is opened if TestCase already exists
+			if (getClassToTestText().equals(""))
+				setPageComplete(false);
 			fFirstTime= false;
 		}
 	}
