@@ -63,21 +63,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	
 	private class ActionGroupFactory implements IActionGroupFactory {
 		public ActionGroup createActionGroup(ISearchResultView part) {
-			return new JavaSearchActionGroup(part);
-		}
-//			OpenTypeHierarchyUtil.addToMenu(getWorbenchWindow(), menu, convertSelection(inputProvider.getSelection()));
-		
-		private Object convertSelection(ISelection selection) {
-			Object element= SelectionUtil.getSingleElement(selection);
-			if (!(element instanceof ISearchResultViewEntry))
-				return null;
-			IMarker marker= ((ISearchResultViewEntry)element).getSelectedMarker();
-			try {
-				return JavaCore.create((String) ((IMarker) marker).getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));	
-			} catch (CoreException ex) {
-				ExceptionHandler.log(ex, SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-1$
-				return null;
-			}
+			return new SearchViewActionGroup(part);
 		}
 	}
 	
