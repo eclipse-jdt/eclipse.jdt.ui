@@ -16,11 +16,23 @@ public interface IPainter {
 	int INTERNAL=			8;
 	int CONFIGURATION= 16;
 	
-	
+
+	/**	
+	 * Disposes this painter.
+	 * <p>
+	 * XXX: The relationship with deactivate is not yet defined.
+	 * </p>
+	 * */
 	void dispose();
 	
 	void paint(int reason);
-	
+
+	/**
+	 * Deactivates the painter.
+	 * <p>
+	 * XXX: The relationship with dispose is not yet defined.
+	 * </p>
+	 */
 	void deactivate(boolean redraw);
 	
 	void setPositionManager(IPositionManager manager);

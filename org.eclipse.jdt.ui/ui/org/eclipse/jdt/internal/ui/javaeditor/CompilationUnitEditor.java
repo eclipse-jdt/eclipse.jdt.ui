@@ -1346,9 +1346,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		if (fSelectionHistory != null)
 			fSelectionHistory.dispose();
 		
-		stopBracketHighlighting();
-		stopLineHighlighting();
-		
 		if (fPaintManager != null) {
 			fPaintManager.dispose();
 			fPaintManager= null;
