@@ -164,6 +164,55 @@ public class CopyTest extends RefactoringTest {
 		}
 	}
 	//---------------
+	
+	public void test_field_declared_in_multi_yes_type() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IField field= cu.getType("A").getField("bar");
+			IType type= cu.getType("A");
+			IJavaElement[] javaElements= { field };
+			Object destination= type;
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void test_fields_declared_in_multi_yes_type() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IField field1= cu.getType("A").getField("bar");
+			IField field2= cu.getType("A").getField("baz");
+			IType type= cu.getType("A");
+			IJavaElement[] javaElements= { field1, field2 };
+			Object destination= type;
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void test_fields_declared_in_multi_yes_type_1() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IField field1= cu.getType("A").getField("var11");
+			IField field2= cu.getType("A").getField("var2");
+			IField field3= cu.getType("A").getField("var3");
+			IType type= cu.getType("A");
+			IJavaElement[] javaElements= { field1, field2, field3};
+			Object destination= type;
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+
 	public void testDisabled_empty() throws Exception {
 		IJavaElement[] javaElements= {};
 		IResource[] resources= {};
@@ -1458,54 +1507,6 @@ public class CopyTest extends RefactoringTest {
 			IField otherField= cu.getType("A").getField("baz");
 			IJavaElement[] javaElements= { field };
 			Object destination= otherField;
-			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
-		} finally {
-			performDummySearch();
-			cu.delete(true, new NullProgressMonitor());
-		}
-	}
-
-	public void test_field_declared_in_multi_yes_type() throws Exception{
-		ICompilationUnit cu= null;
-		try {
-			cu= createCUfromTestFile(getPackageP(), "A");
-			IField field= cu.getType("A").getField("bar");
-			IType type= cu.getType("A");
-			IJavaElement[] javaElements= { field };
-			Object destination= type;
-			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
-		} finally {
-			performDummySearch();
-			cu.delete(true, new NullProgressMonitor());
-		}
-	}
-
-	public void test_fields_declared_in_multi_yes_type() throws Exception{
-		ICompilationUnit cu= null;
-		try {
-			cu= createCUfromTestFile(getPackageP(), "A");
-			IField field1= cu.getType("A").getField("bar");
-			IField field2= cu.getType("A").getField("baz");
-			IType type= cu.getType("A");
-			IJavaElement[] javaElements= { field1, field2 };
-			Object destination= type;
-			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
-		} finally {
-			performDummySearch();
-			cu.delete(true, new NullProgressMonitor());
-		}
-	}
-
-	public void test_fields_declared_in_multi_yes_type_1() throws Exception{
-		ICompilationUnit cu= null;
-		try {
-			cu= createCUfromTestFile(getPackageP(), "A");
-			IField field1= cu.getType("A").getField("var11");
-			IField field2= cu.getType("A").getField("var2");
-			IField field3= cu.getType("A").getField("var3");
-			IType type= cu.getType("A");
-			IJavaElement[] javaElements= { field1, field2, field3};
-			Object destination= type;
 			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
 		} finally {
 			performDummySearch();
