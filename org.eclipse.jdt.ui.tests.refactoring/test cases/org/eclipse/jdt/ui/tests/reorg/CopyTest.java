@@ -1199,7 +1199,7 @@ public class CopyTest extends RefactoringTest {
 	public void testDestination_method_no_folder() throws Exception{
 		ICompilationUnit cu= null;
 		IProject parentFolder= MySetup.getProject().getProject();
-		String folderName= "a.txt";
+		String folderName= "folder";
 		IFolder folder= parentFolder.getFolder(folderName);
 		folder.create(true, true, null);	
 
@@ -1676,11 +1676,12 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist after copying", file.exists());
 			
-			newFile= parentFolder.getFile(fileName);
+			newFile= MySetup.getProject().getProject().getFile(fileName);
 			assertTrue("new file does not exist after copying", newFile.exists());
 		} finally {
 			performDummySearch();
 			file.delete(true, false, null);
+			otherFile.delete(true, false, null);
 			if (newFile != null)
 				newFile.delete(true, false, null);
 		}
