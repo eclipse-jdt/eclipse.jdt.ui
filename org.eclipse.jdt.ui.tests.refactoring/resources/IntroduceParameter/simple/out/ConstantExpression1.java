@@ -6,7 +6,7 @@ public class ConstantExpression1 {
 	public static final int ZERO= -1;
 	public int m(int a, int second) {
 		int b= second;
-		return m(3 * a, ZERO - 2);
+		return m(3 * a, second);
 	}
 	public void use() {
 		m(17, ZERO - 2);

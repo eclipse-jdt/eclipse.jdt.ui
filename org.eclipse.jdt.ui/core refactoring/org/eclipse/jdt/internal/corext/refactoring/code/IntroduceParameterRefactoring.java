@@ -16,77 +16,59 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
-import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.MethodRef;
-import org.eclipse.jdt.core.dom.MethodRefParameter;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.SearchPattern;
+
+import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.structure.BodyUpdater;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 public class IntroduceParameterRefactoring extends Refactoring {
 	
@@ -95,16 +77,13 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	private ICompilationUnit fSourceCU;
 	private int fSelectionStart;
 	private int fSelectionLength;
-
-	private String fParameterName;
-
-	private CompilationUnitRewrite fSource;
-	private Expression fSelectedExpression;
-	private MethodDeclaration fMethodDeclaration;
-	private String[] fExcludedParameterNames;
-	private CompositeChange fChange;
-	private ICompilationUnit[] fAffectedCUs;
 	
+	private IMethod fMethod;
+	private ChangeSignatureRefactoring fChangeSignatureRefactoring;
+	private ParameterInfo fParameter;
+
+	private Expression fSelectedExpression;
+	private String[] fExcludedParameterNames;
 	
 	private IntroduceParameterRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(cu != null && cu.exists());
@@ -113,8 +92,6 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		fSourceCU= cu;
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
-		
-		fParameterName= ""; //$NON-NLS-1$
 	}
 	
 	public static boolean isAvailable(ASTNode[] selectedNodes, ASTNode coveringNode) {
@@ -140,26 +117,87 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			
 			if (! fSourceCU.isStructureKnown())		
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.syntax_error")); //$NON-NLS-1$
+			
+			IJavaElement enclosingElement= SelectionConverter.resolveEnclosingElement(fSourceCU, new TextSelection(fSelectionStart, fSelectionLength));
+			if (! (enclosingElement instanceof IMethod))
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.expression_in_method")); //$NON-NLS-1$
+			
+			fMethod= (IMethod) enclosingElement;
 			pm.worked(1);
 			
-			fSource= new CompilationUnitRewrite(fSourceCU);
-			initializeSelectedExpression();
+			// first try:
+			fChangeSignatureRefactoring= ChangeSignatureRefactoring.create(fMethod);
+			if (fChangeSignatureRefactoring == null)
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.expression_in_method")); //$NON-NLS-1$
+			RefactoringStatus result= fChangeSignatureRefactoring.checkInitialConditions(new SubProgressMonitor(pm, 1));
+			
+			if (result.hasFatalError()) {
+				RefactoringStatusEntry entry= result.getEntryMatchingSeverity(RefactoringStatus.FATAL);
+				if (entry.getCode() == RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD || entry.getCode() == RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE) {
+					// second try:
+					fChangeSignatureRefactoring= ChangeSignatureRefactoring.create((IMethod) entry.getData());
+					if (fChangeSignatureRefactoring == null)
+						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.expression_in_method")); //$NON-NLS-1$
+					result= fChangeSignatureRefactoring.checkInitialConditions(new SubProgressMonitor(pm, 1));
+					if (result.hasFatalError())
+						return result;
+				} else {
+					return result;
+				}
+			} else {
+				pm.worked(1);
+			}
+			
+			CompilationUnitRewrite cuRewrite= fChangeSignatureRefactoring.getBaseCuRewrite();
+			if (! cuRewrite.getCu().equals(fSourceCU))
+				cuRewrite= new CompilationUnitRewrite(fSourceCU); // TODO: should try to avoid throwing away this AST
+			
+			initializeSelectedExpression(cuRewrite);
 			pm.worked(1);
 		
-			RefactoringStatus result= checkSelection(new SubProgressMonitor(pm, 5));
+			result.merge(checkSelection(cuRewrite, new SubProgressMonitor(pm, 3)));
 			if (result.hasFatalError())
 				return result;
 
-			initializeExcludedParameterNames();
+			initializeExcludedParameterNames(cuRewrite);
+			
+			fParameter= ParameterInfo.createInfoForAddedParameter();
+			fParameter.setNewName(""); //$NON-NLS-1$
+			ITypeBinding typeBinding= fSelectedExpression.resolveTypeBinding();
+			fParameter.setNewTypeBinding(typeBinding);
+			fParameter.setNewTypeName(typeBinding.getName());
+			String defaultValue= fSourceCU.getBuffer().getText(fSelectedExpression.getStartPosition(), fSelectedExpression.getLength());
+			fParameter.setDefaultValue(defaultValue);
+			fChangeSignatureRefactoring.getParameterInfos().add(fParameter);
+			
+			fChangeSignatureRefactoring.setBodyUpdater(new BodyUpdater() {
+				public void updateBody(MethodDeclaration methodDeclaration, CompilationUnitRewrite cuRewrite, RefactoringStatus updaterResult) {
+					replaceSelectedExpression(cuRewrite);
+				}
+			});
+			
 			return result;
 		} finally {
 			pm.done();
 		}	
 	}
 
-	private void initializeSelectedExpression() throws JavaModelException {
+	private void replaceSelectedExpression(CompilationUnitRewrite cuRewrite) {
+		if (! fSourceCU.equals(cuRewrite.getCu()))
+			return;
+		// TODO: do for all methodDeclarations and replace matching fragments?
+		
+		// cannot use fSelectedExpression here, since it could be from another AST (if method was replaced by overridden):
+		Expression expression= (Expression) NodeFinder.perform(cuRewrite.getRoot(), fSelectedExpression.getStartPosition(), fSelectedExpression.getLength());
+		
+		ASTNode newExpression= cuRewrite.getRoot().getAST().newSimpleName(fParameter.getNewName());
+		String description= RefactoringCoreMessages.getString("IntroduceParameterRefactoring.replace"); //$NON-NLS-1$
+		cuRewrite.getASTRewrite().replace(expression, newExpression, cuRewrite.createGroupDescription(description));
+	}
+
+	private void initializeSelectedExpression(CompilationUnitRewrite cuRewrite) throws JavaModelException {
 		IASTFragment fragment= ASTFragmentFactory.createFragmentForSourceRange(
-				new SourceRange(fSelectionStart, fSelectionLength), fSource.getRoot(), fSource.getCu());
+				new SourceRange(fSelectionStart, fSelectionLength), cuRewrite.getRoot(), cuRewrite.getCu());
 		
 		if (! (fragment instanceof IExpressionFragment))
 			return;
@@ -179,16 +217,16 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		fSelectedExpression= expression;
 	}
 	
-	private RefactoringStatus checkSelection(IProgressMonitor pm) {
+	private RefactoringStatus checkSelection(CompilationUnitRewrite cuRewrite, IProgressMonitor pm) {
 		if (fSelectedExpression == null){
 			String message= RefactoringCoreMessages.getString("IntroduceParameterRefactoring.select");//$NON-NLS-1$
-			return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fSource.getRoot(), message);
+			return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, cuRewrite.getRoot(), message);
 		}	
 		
-		fMethodDeclaration= (MethodDeclaration) ASTNodes.getParent(fSelectedExpression, MethodDeclaration.class);
-		if (fMethodDeclaration == null)
+		MethodDeclaration methodDeclaration= (MethodDeclaration) ASTNodes.getParent(fSelectedExpression, MethodDeclaration.class);
+		if (methodDeclaration == null)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.expression_in_method")); //$NON-NLS-1$
-		if (fMethodDeclaration.resolveBinding() == null)
+		if (methodDeclaration.resolveBinding() == null)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.no_binding")); //$NON-NLS-1$
 		//TODO: check for rippleMethods -> find matching fragments, consider callers of all rippleMethods
 		
@@ -266,7 +304,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 
 	public void setParameterName(String name) {
 		Assert.isNotNull(name);
-		fParameterName= name;
+		fParameter.setNewName(name);
 	}
 	
 	/** 
@@ -276,7 +314,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	public String guessedParameterName() {
 		String[] proposals= guessParameterNames();
 		if (proposals.length == 0)
-			return fParameterName;
+			return fParameter.getNewName();
 		else
 			return proposals[0];
 	}
@@ -290,11 +328,10 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	 */
 	public String[] guessParameterNames() {
 		LinkedHashSet proposals= new LinkedHashSet(); //retain ordering, but prevent duplicates
-		String[] excludedVariableNames= getExcludedVariableNames();
 		if (fSelectedExpression instanceof MethodInvocation){
-			proposals.addAll(guessTempNamesFromMethodInvocation((MethodInvocation) fSelectedExpression, excludedVariableNames));
+			proposals.addAll(guessTempNamesFromMethodInvocation((MethodInvocation) fSelectedExpression, fExcludedParameterNames));
 		}
-		proposals.addAll(guessTempNamesFromExpression(fSelectedExpression, excludedVariableNames));
+		proposals.addAll(guessTempNamesFromExpression(fSelectedExpression, fExcludedParameterNames));
 		return (String[]) proposals.toArray(new String[proposals.size()]);
 	}
 	
@@ -329,15 +366,6 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		return Arrays.asList(proposals);
 	}
 	
-	private String[] getExcludedVariableNames() {
-		IBinding[] bindings= new ScopeAnalyzer(fSource.getRoot()).getDeclarationsInScope(fSelectedExpression.getStartPosition(), ScopeAnalyzer.VARIABLES);
-		String[] names= new String[bindings.length];
-		for (int i= 0; i < names.length; i++) {
-			names[i]= bindings[i].getName();
-		}
-		return names;
-	}
-	
 // ----------------------------------------------------------------------
 	
 	private static String getQualifiedName(ITypeBinding typeBinding) {
@@ -349,8 +377,8 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			return typeBinding.getElementType().getQualifiedName();
 	}
 
-	private void initializeExcludedParameterNames() {
-		IBinding[] bindings= new ScopeAnalyzer(fSource.getRoot()).getDeclarationsInScope(
+	private void initializeExcludedParameterNames(CompilationUnitRewrite cuRewrite) {
+		IBinding[] bindings= new ScopeAnalyzer(cuRewrite.getRoot()).getDeclarationsInScope(
 				fSelectedExpression.getStartPosition(), ScopeAnalyzer.VARIABLES);
 		fExcludedParameterNames= new String[bindings.length];
 		for (int i= 0; i < fExcludedParameterNames.length; i++) {
@@ -363,12 +391,12 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		if (! status.isOK())
 			return status;
 		else
-			return Checks.checkTempName(fParameterName);
+			return Checks.checkTempName(fParameter.getNewName());
 	}
 	
 	private RefactoringStatus checkExcludedParameterNames() {
 		for (int i= 0; i < fExcludedParameterNames.length; i++) {
-			if (fParameterName.equals(fExcludedParameterNames[i]))
+			if (fParameter.getNewName().equals(fExcludedParameterNames[i]))
 			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.duplicate_name")); //$NON-NLS-1$
 		}
 		return new RefactoringStatus();
@@ -377,199 +405,17 @@ public class IntroduceParameterRefactoring extends Refactoring {
 //--- checkInput
 	
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.preview"), 5); //$NON-NLS-1$
 		RefactoringStatus result= checkExcludedParameterNames();
 		if (result.hasFatalError())
 			return result;
-		
+
 		// TODO: check for name clashes in ripple methods, ...
 		
-		fChange= new DynamicValidationStateChange(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.introduce_parameter")); //$NON-NLS-1$
-		fSource.clearASTAndImportRewrites();
-		changeSource();
-		pm.worked(1);
+		return fChangeSignatureRefactoring.checkFinalConditions(pm);
 		
-		result.merge(changeReferences(new SubProgressMonitor(pm, 3)));
-		
-		fChange.add(fSource.createChange());
-
-		HashSet cus= new HashSet();
-		cus.add(fSource.getCu());
-		cus.addAll(Arrays.asList(fAffectedCUs));
-		result.merge(
-			Checks.validateModifiesFiles(ResourceUtil.getFiles(
-				(ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()])),
-				getValidationContext()));
-		if (result.hasFatalError())
-			return result;
-
-		pm.worked(1);
-
-		return result;
 	}
 	
-	private void changeSource() {
-		//TODO (47547): for constructors, must update implicit super(..) calls in some subclasses' constructors 
-		replaceSelectedExpression();		
-		addParameter();
-	}
-	
-	private void replaceSelectedExpression() {
-		ASTNode newExpression= fSource.getRoot().getAST().newSimpleName(fParameterName);
-		String description= RefactoringCoreMessages.getString("IntroduceParameterRefactoring.replace"); //$NON-NLS-1$
-		fSource.getASTRewrite().replace(fSelectedExpression, newExpression, fSource.createGroupDescription(description));
-	}
-
-	private void addParameter() {
-		AST ast= fSource.getRoot().getAST();
-		ASTRewrite astRewrite= fSource.getASTRewrite();
-		
-		SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
-		param.setName(ast.newSimpleName(fParameterName));
-		String type= fSource.getImportRewrite().addImport(fSelectedExpression.resolveTypeBinding());
-		param.setType((Type) astRewrite.createStringPlaceholder(type, ASTNode.SIMPLE_TYPE));
-		ListRewrite parameters= astRewrite.getListRewrite(fMethodDeclaration, MethodDeclaration.PARAMETERS_PROPERTY);
-		String description= RefactoringCoreMessages.getString("IntroduceParameterRefactoring.add_parameter"); //$NON-NLS-1$
-		TextEditGroup groupDescription= fSource.createGroupDescription(description);
-		parameters.insertLast(param, groupDescription);
-		
-		JavadocUtil.addParamJavadoc(fParameterName, fMethodDeclaration, fSource.getASTRewrite(),
-				fSource.getCu().getJavaProject(), groupDescription);
-	}
-
-	private RefactoringStatus changeReferences(SubProgressMonitor pm) throws CoreException {
-		pm.beginTask("", 2); //$NON-NLS-1$
-		RefactoringStatus result= new RefactoringStatus();
-		fAffectedCUs= findAffectedCompilationUnits(new SubProgressMonitor(pm, 1), result);
-		IMethodBinding method= fMethodDeclaration.resolveBinding();
-		SubProgressMonitor sub= new SubProgressMonitor(pm, 1);
-		sub.beginTask("", fAffectedCUs.length); //$NON-NLS-1$
-		for (int i= 0; i < fAffectedCUs.length; i++) {
-			CompilationUnitRewrite ast= getCURewrite(fAffectedCUs[i]);
-			ReferenceAnalyzer analyzer= new ReferenceAnalyzer(ast, method, fSelectedExpression);
-			ast.getRoot().accept(analyzer);
-			if (ast != fSource)
-				fChange.add(ast.createChange());
-			sub.worked(1);
-			if (sub.isCanceled())
-				throw new OperationCanceledException();
-		}
-		return result;
-	}
-	
-	private class ReferenceAnalyzer extends ASTVisitor {
-		private CompilationUnitRewrite fCURewrite;
-		private IMethodBinding fMethodBinding;
-		private Expression fExpression;
-
-		public ReferenceAnalyzer(CompilationUnitRewrite cuRewrite, IMethodBinding methodBinding, Expression expression) {
-			super(true);
-			fExpression= expression;
-			fCURewrite= cuRewrite;
-			fMethodBinding= methodBinding;
-		}
-		
-		private void addArgument(ASTRewrite astRewrite, ListRewrite argumentListRewrite) {
-			Expression argument;
-			if (fExpression.getAST() == astRewrite.getAST()) {
-				argument= (Expression) astRewrite.createCopyTarget(fExpression);
-			} else {
-				try {
-					String expression= fSource.getCu().getBuffer().getText(fExpression.getStartPosition(), fExpression.getLength());
-					argument= (Expression) astRewrite.createStringPlaceholder(expression, ASTNode.SIMPLE_NAME);
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
-					argument= (Expression) ASTNode.copySubtree(fCURewrite.getRoot().getAST(), fExpression);
-				}
-			}
-			String description= RefactoringCoreMessages.getString("IntroduceParameterRefactoring.add_argument"); //$NON-NLS-1$
-			argumentListRewrite.insertLast(argument, fCURewrite.createGroupDescription(description));
-		}
-
-		public boolean visit(MethodInvocation node) {
-			if (Bindings.equals(fMethodBinding, node.resolveMethodBinding())) {
-				ASTRewrite astRewrite= fCURewrite.getASTRewrite();
-				ListRewrite listRewrite= astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY);
-				addArgument(astRewrite, listRewrite);
-			}
-			return super.visit(node);
-		}
-		
-		public boolean visit(ClassInstanceCreation node) {
-			if (Bindings.equals(fMethodBinding, node.resolveConstructorBinding())) {
-				ASTRewrite astRewrite= fCURewrite.getASTRewrite();
-				ListRewrite listRewrite= astRewrite.getListRewrite(node, ClassInstanceCreation.ARGUMENTS_PROPERTY);
-				addArgument(astRewrite, listRewrite);
-			}
-			return super.visit(node);
-		}
-		
-		public boolean visit(ConstructorInvocation node) {
-			if (Bindings.equals(fMethodBinding, node.resolveConstructorBinding())) {
-				ASTRewrite astRewrite= fCURewrite.getASTRewrite();
-				ListRewrite listRewrite= astRewrite.getListRewrite(node, ConstructorInvocation.ARGUMENTS_PROPERTY);
-				addArgument(astRewrite, listRewrite);
-			}
-			return super.visit(node);
-		}
-		
-		public boolean visit(SuperMethodInvocation node) {
-			if (Bindings.equals(fMethodBinding, node.resolveMethodBinding())) {
-				ASTRewrite astRewrite= fCURewrite.getASTRewrite();
-				ListRewrite listRewrite= astRewrite.getListRewrite(node, SuperMethodInvocation.ARGUMENTS_PROPERTY);
-				addArgument(astRewrite, listRewrite);
-			}
-			return super.visit(node);
-		}
-		
-		public boolean visit(SuperConstructorInvocation node) {
-			if (Bindings.equals(fMethodBinding, node.resolveConstructorBinding())) {
-				ASTRewrite astRewrite= fCURewrite.getASTRewrite();
-				ListRewrite listRewrite= astRewrite.getListRewrite(node, SuperConstructorInvocation.ARGUMENTS_PROPERTY);
-				addArgument(astRewrite, listRewrite);
-			}
-			return super.visit(node);
-		}
-		
-		public boolean visit(MethodRef node) {
-			if (Bindings.equals(fMethodBinding, node.resolveBinding())) {
-				ASTRewrite astRewrite= fCURewrite.getASTRewrite();
-				ListRewrite listRewrite= astRewrite.getListRewrite(node, MethodRef.PARAMETERS_PROPERTY);
-				
-				List parameters= listRewrite.getOriginalList();
-				MethodRefParameter newParam= astRewrite.getAST().newMethodRefParameter();
-				// only add name iff first parameter already has a name:
-				if (parameters.size() > 0)
-					if (((MethodRefParameter) parameters.get(0)).getName() != null)
-						newParam.setName(astRewrite.getAST().newSimpleName(fParameterName));
-				
-				String type= fCURewrite.getImportRewrite().addImport(fSelectedExpression.resolveTypeBinding());
-				newParam.setType((Type) astRewrite.createStringPlaceholder(type, ASTNode.SIMPLE_TYPE));
-				String description= RefactoringCoreMessages.getString("IntroduceParameterRefactoring.add_javadoc_parameter"); //$NON-NLS-1$
-				listRewrite.insertLast(newParam, fCURewrite.createGroupDescription(description));
-			}
-			return false;
-		}
-	}
-	
-	private CompilationUnitRewrite getCURewrite(ICompilationUnit unit) {
-		if (fSource.getCu().equals(unit))
-			return fSource;
-		return new CompilationUnitRewrite(unit);
-	}
-
-	private ICompilationUnit[] findAffectedCompilationUnits(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
-		final IMethod method= (IMethod) fSourceCU.getElementAt(fMethodDeclaration.getName().getStartPosition());
-		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
-		engine.setFiltering(true, true);
-		engine.setScope(RefactoringScopeFactory.create(method));
-		engine.setStatus(status);
-		engine.searchPattern(new SubProgressMonitor(pm, 1));
-		return engine.getAffectedCompilationUnits();
-	}
-
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		pm.done();
-		return fChange;
+		return fChangeSignatureRefactoring.createChange(pm);
 	}
 }

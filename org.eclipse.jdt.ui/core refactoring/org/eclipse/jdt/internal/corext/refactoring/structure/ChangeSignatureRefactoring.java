@@ -140,6 +140,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private StubTypeContext fContextCuStartEnd;
 	private int fOldVarargIndex; // initialized in checkVarargs()
 
+	private BodyUpdater fBodyUpdater;
+	
 	private ChangeSignatureRefactoring(IMethod method) throws JavaModelException{
 		Assert.isNotNull(method);
 		fMethod= method;
@@ -287,6 +289,18 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	 */
 	public List getExceptionInfos(){
 		return fExceptionInfos;
+	}
+	
+	public void setBodyUpdater(BodyUpdater bodyUpdater) {
+		fBodyUpdater= bodyUpdater;
+	}
+	
+	/**
+	 * @deprecated consider removing this method
+	 * @return .
+	 */
+	public CompilationUnitRewrite getBaseCuRewrite() {
+		return fBaseCuRewrite;
 	}
 	
 	public RefactoringStatus checkSignature() {
@@ -1655,6 +1669,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			changeJavadocTags();
 			
 			checkIfDeletedParametersUsed();
+			
+			if (fBodyUpdater != null)
+				fBodyUpdater.updateBody(fMethDecl, fCuRewrite, fResult);
 		}
 		
 		/** @return {@inheritDoc} (element type: SingleVariableDeclaration) */
