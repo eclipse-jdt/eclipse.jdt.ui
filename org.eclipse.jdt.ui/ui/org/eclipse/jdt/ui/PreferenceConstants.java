@@ -1649,6 +1649,70 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */	
 	public static final String EDITOR_STICKY_OCCURRENCES= "stickyOccurrences"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that controls whether type occurrences are marked.
+	 * Only valid if {@link #EDITOR_MARK_OCCURRENCES} is <code>true</code>.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_MARK_TYPE_OCCURRENCES= "markTypeOccurrences"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether method occurrences are marked.
+	 * Only valid if {@link #EDITOR_MARK_OCCURRENCES} is <code>true</code>.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_MARK_METHOD_OCCURRENCES= "markMethodOccurrences"; //$NON-NLS-1$
+	/**
+	 * A named preference that controls whether non-constant field occurrences are marked.
+	 * Only valid if {@link #EDITOR_MARK_OCCURRENCES} is <code>true</code>.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_MARK_FIELD_OCCURRENCES= "markFieldOccurrences"; //$NON-NLS-1$
+	/**
+	 * A named preference that controls whether constant (static final) occurrences are marked.
+	 * Only valid if {@link #EDITOR_MARK_OCCURRENCES} is <code>true</code>.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_MARK_CONSTANT_OCCURRENCES= "markConstantOccurrences"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that controls whether local variable occurrences are marked.
+	 * Only valid if {@link #EDITOR_MARK_OCCURRENCES} is <code>true</code>.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES= "markLocalVariableOccurrences"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether exception occurrences are marked.
+	 * Only valid if {@link #EDITOR_MARK_OCCURRENCES} is <code>true</code>.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_MARK_EXCEPTION_OCCURRENCES= "markExceptionOccurrences"; //$NON-NLS-1$
 
 	/**
 	 * A named preference prefix for semantic highlighting preferences.
@@ -1689,54 +1753,6 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_BOLD_SUFFIX=".bold"; //$NON-NLS-1$
-	
-	/**
-	 * A named preference that controls whether type occurrences are marked. This
-	 * is only valid if {@link #EDITOR_MARK_OCCURRENCES} is <code>true</code>.
-	 * <p>
-	 * Value is of type <code>Boolean</code>.
-	 * </p>
-	 * <p>
-	 * 		1 << 0 : types
-	 * 		1 << 1 : methods
-	 * 		1 << 2 : fields
-	 * 		1 << 3 : local variables
-	 * </p>
-	 * 
-	 * @since 3.0
-	 */
-	public static final String EDITOR_MARK_TYPE_OCCURRENCES= "markTypeOccurrences"; //$NON-NLS-1$
-
-	/**
-	 * A named preference that controls whether method occurrences are marked. This
-	 * is only valid if {@link #EDITOR_MARK_OCCURRENCES} is <code>true</code>.
-	 * <p>
-	 * Value is of type <code>Boolean</code>.
-	 * </p>
-	 * 
-	 * @since 3.0
-	 */
-	public static final String EDITOR_MARK_METHOD_OCCURRENCES= "markMethodOccurrences"; //$NON-NLS-1$
-	/**
-	 * A named preference that controls whether field occurrences are marked. This
-	 * is only valid if {@link #EDITOR_MARK_OCCURRENCES} is <code>true</code>.
-	 * <p>
-	 * Value is of type <code>Boolean</code>.
-	 * </p>
-	 * 
-	 * @since 3.0
-	 */
-	public static final String EDITOR_MARK_FIELD_OCCURRENCES= "markFieldOccurrences"; //$NON-NLS-1$
-	/**
-	 * A named preference that controls whether local variable occurrences are marked. This
-	 * is only valid if {@link #EDITOR_MARK_OCCURRENCES} is <code>true</code>.
-	 * <p>
-	 * Value is of type <code>Boolean</code>.
-	 * </p>
-	 * 
-	 * @since 3.0
-	 */
-	public static final String EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES= "markLocalVariableOccurrences"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls disabling of the overwrite mode.

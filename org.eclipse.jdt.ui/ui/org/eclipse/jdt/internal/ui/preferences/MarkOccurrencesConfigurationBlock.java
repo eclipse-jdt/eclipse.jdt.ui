@@ -26,6 +26,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -35,6 +36,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
  * Configures Java Editor hover preferences.
@@ -90,18 +92,18 @@ class MarkOccurrencesConfigurationBlock {
 		String label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markOccurrences"); //$NON-NLS-1$
 		Button master= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_OCCURRENCES, 0); //$NON-NLS-1$
 		
-		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.stickyOccurrences"); //$NON-NLS-1$
-		Button slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_STICKY_OCCURRENCES, 0); //$NON-NLS-1$
-		createDependency(master, PreferenceConstants.EDITOR_STICKY_OCCURRENCES, slave);
-
 		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markTypeOccurrences"); //$NON-NLS-1$
-		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES, 0); //$NON-NLS-1$
+		Button slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES, 0); //$NON-NLS-1$
 		createDependency(master, PreferenceConstants.EDITOR_STICKY_OCCURRENCES, slave);
 		
 		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markMethodOccurrences"); //$NON-NLS-1$
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES, 0); //$NON-NLS-1$
 		createDependency(master, PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES, slave);
 		
+		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markConstantOccurrences"); //$NON-NLS-1$
+		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_CONSTANT_OCCURRENCES, 0); //$NON-NLS-1$
+		createDependency(master, PreferenceConstants.EDITOR_MARK_CONSTANT_OCCURRENCES, slave);
+
 		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markFieldOccurrences"); //$NON-NLS-1$
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES, 0); //$NON-NLS-1$
 		createDependency(master, PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES, slave);
@@ -109,10 +111,30 @@ class MarkOccurrencesConfigurationBlock {
 		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markLocalVariableOccurrences"); //$NON-NLS-1$
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES, 0); //$NON-NLS-1$
 		createDependency(master, PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES, slave);
+		
+		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markExceptionOccurrences"); //$NON-NLS-1$
+		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES, 0); //$NON-NLS-1$
+		createDependency(master, PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES, slave);
+
+		addFiller(composite);
+		
+		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.stickyOccurrences"); //$NON-NLS-1$
+		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_STICKY_OCCURRENCES, 0); //$NON-NLS-1$
+		createDependency(master, PreferenceConstants.EDITOR_STICKY_OCCURRENCES, slave);
 
 		return composite;
 	}
 	
+	private void addFiller(Composite composite) {
+		PixelConverter pixelConverter= new PixelConverter(composite);
+		
+		Label filler= new Label(composite, SWT.LEFT );
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 2;
+		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(1) / 2;
+		filler.setLayoutData(gd);
+	}
+
 	private Button addCheckBox(Composite parent, String label, String key, int indentation) {		
 		Button checkBox= new Button(parent, SWT.CHECK);
 		checkBox.setText(label);

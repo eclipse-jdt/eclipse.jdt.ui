@@ -148,6 +148,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 	private OverlayPreferenceStore fOverlayStore;
 	private JavaEditorHoverConfigurationBlock fJavaEditorHoverConfigurationBlock;
+	private MarkOccurrencesConfigurationBlock fOccurrencesConfigurationBlock;
 	
 	/**
 	 * Quick diff preferences. 
@@ -313,7 +314,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_WIDE_CARET));
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_OCCURRENCES));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_CONSTANT_OCCURRENCES));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_STICKY_OCCURRENCES));
+		
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB));
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FIND_SCOPE_COLOR));
@@ -679,21 +687,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.showPrintMargin"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN, 0);
 
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.markOccurrences"); //$NON-NLS-1$
-		Button master= addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_MARK_OCCURRENCES, 0); //$NON-NLS-1$
-		
-		label= PreferencesMessages.getString("JavaEditorPreferencePage.stickyOccurrences"); //$NON-NLS-1$
-		Button slave= addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_STICKY_OCCURRENCES, 0); //$NON-NLS-1$
-		createDependency(master, PreferenceConstants.EDITOR_MARK_OCCURRENCES, slave);
-
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.quickassist.lightbulb"); //$NON-NLS-1$
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB, 0); //$NON-NLS-1$
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.accessibility.disableCustomCarets"); //$NON-NLS-1$
-		master= addCheckBox(appearanceComposite, label, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS, 0);
+		Button master= addCheckBox(appearanceComposite, label, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS, 0);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.accessibility.wideCaret"); //$NON-NLS-1$
-		slave= addCheckBox(appearanceComposite, label, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_WIDE_CARET, 0);
+		Button slave= addCheckBox(appearanceComposite, label, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_WIDE_CARET, 0);
 		createDependency(master, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS, slave);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.annotationRollover"); //$NON-NLS-1$
@@ -1422,6 +1423,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.hoverTab.title")); //$NON-NLS-1$
 		fJavaEditorHoverConfigurationBlock= new JavaEditorHoverConfigurationBlock(this, fOverlayStore);
 		item.setControl(fJavaEditorHoverConfigurationBlock.createControl(folder));
+
+		item= new TabItem(folder, SWT.NONE);
+		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.occurrencesTab.title")); //$NON-NLS-1$
+		fOccurrencesConfigurationBlock= new MarkOccurrencesConfigurationBlock(this, fOverlayStore);
+		item.setControl(fOccurrencesConfigurationBlock.createControl(folder));
 		
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("JavaEditorPreferencePage.navigationTab.title")); //$NON-NLS-1$
@@ -1491,6 +1497,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		});
 		
 		fQuickDiffBlock.initialize();
+		fOccurrencesConfigurationBlock.initialize();
 	}
 	
 	private void initializeFields() {
@@ -1586,6 +1593,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 */
 	public boolean performOk() {
 		fJavaEditorHoverConfigurationBlock.performOk();
+		fOccurrencesConfigurationBlock.performOk();
 		fQuickDiffBlock.performOk();
 		fOverlayStore.setValue(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, computeStateMask(fBrowserLikeLinksKeyModifierText.getText()));
 		fOverlayStore.propagate();
@@ -1608,6 +1616,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		handleContentAssistColorListSelection();
 
 		fJavaEditorHoverConfigurationBlock.performDefaults();
+		fOccurrencesConfigurationBlock.performDefaults();
 		fQuickDiffBlock.performDefaults();
 
 		super.performDefaults();
@@ -1750,6 +1759,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				status= StatusUtil.getMoreSevere(s, status);
 			}
 		}	
+		status= StatusUtil.getMoreSevere(fOccurrencesConfigurationBlock.getStatus(), status);
 		status= StatusUtil.getMoreSevere(fJavaEditorHoverConfigurationBlock.getStatus(), status);
 		status= StatusUtil.getMoreSevere(getBrowserLikeLinksKeyModifierStatus(), status);
 		setValid(!status.matches(IStatus.ERROR));
