@@ -87,9 +87,7 @@ class GotoMarkerAction extends Action {
 			if (cf != null) {
 				IEditorPart editor= null;
 				try {		
-//REMOVE ME		editor= ((org.eclipse.ui.internal.WorkbenchPage)wbPage).openEditor(new ClassFileEditorInput(cf), JavaUI.ID_CF_EDITOR, false);
-//USE ME		editor= wbPage.openEditor(new ClassFileEditorInput(cf), JavaUI.ID_CF_EDITOR, false);
-				editor= wbPage.openEditor(new ClassFileEditorInput(cf), JavaUI.ID_CF_EDITOR);
+					editor= wbPage.openEditor(new ClassFileEditorInput(cf), JavaUI.ID_CF_EDITOR, false);
 				} catch (PartInitException ex) {
 					ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.openEditor.");
 				}
