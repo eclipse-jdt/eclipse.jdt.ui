@@ -94,11 +94,11 @@
 		<category
 		   id = "org.eclipse.jdt.junit"
 		   parentCategory="org.eclipse.jdt.ui.java"
-		   name="JUnit">
+		   name="%WizardCategory.name">
 		</category>
 		<wizard 
 			id="org.eclipse.jdt.junit.wizards.NewTestCaseCreationWizard"
-			name="TestCase"
+			name="%TestCaseWizard.name"
 			class="org.eclipse.jdt.internal.junit.wizards.NewTestCaseCreationWizard"
 			category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
 			icon="icons/ctool16/newtest_wiz.gif">
@@ -106,7 +106,7 @@
 	    </wizard>
 		<wizard 
 			id="org.eclipse.jdt.junit.wizards.NewTestSuiteCreationWizard"
-			name="TestSuite"
+			name="%TestSuiteWizard.name"
 			class="org.eclipse.jdt.internal.junit.wizards.NewTestSuiteCreationWizard"
 			category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
 			icon="icons/ctool16/newsuite_wiz.gif">
