@@ -11,7 +11,7 @@ import java.text.MessageFormat;import java.util.HashMap;import java.util.Itera
  */
 public class JDIModelPresentation extends LabelProvider implements IDebugModelPresentation {
 
-	protected static final String DISPLAY_HEX_VALUES= "org.eclipse.jdt.ui.displayHexValues";
+	public static final String DISPLAY_HEX_VALUES= "org.eclipse.jdt.ui.displayHexValues";
 	protected HashMap fAttributes= new HashMap(3);
 
 	static final Point BIG_SIZE= new Point(22, 16);
