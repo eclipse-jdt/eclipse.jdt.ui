@@ -948,11 +948,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				public ISchedulingRule getSchedulingRule() {
 					if (info.fElement instanceof IFileEditorInput) {
 						IFile file= ((IFileEditorInput) info.fElement).getFile();
-						IResourceRuleFactory ruleFactory= ResourcesPlugin.getWorkspace().getRuleFactory();
-						if (file == null || !file.exists())
-							return ruleFactory.createRule(file);
-						else
-							return ruleFactory.modifyRule(file);
+						return computeSchedulingRule(file);
 					} else
 						return null;
 				}
@@ -1040,5 +1036,38 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	 */
 	public ILineTracker createLineTracker(Object element) {
 		return new DefaultLineTracker();
+	}
+	
+	
+	/**
+	 * Computes the scheduling rule needed to create or modify a resource. If
+	 * the resource exists, its modify rule is returned. If it does not, the 
+	 * resource hierarchy is iterated towards the workspace root to find the
+	 * first parent of <code>toCreateOrModify</code> that exists. Then the
+	 * 'create' rule for the last non-existing resource is returned.
+	 * <p>
+	 * XXX This is a workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=67601
+	 * IResourceRuleFactory.createRule should iterate the hierarchy itself. 
+	 * </p>
+	 * <p> 
+	 * XXX to be replaced by call to TextFileDocumentProvider.computeSchedulingRule after 3.0
+	 * </p>
+	 * 
+	 * @param toCreateOrModify the resource to create or modify
+	 * @return the minimal scheduling rule needed to modify or create a resource
+	 */
+	private ISchedulingRule computeSchedulingRule(IResource toCreateOrModify) {
+		IResourceRuleFactory factory= ResourcesPlugin.getWorkspace().getRuleFactory();
+		if (toCreateOrModify.exists()) {
+			return factory.modifyRule(toCreateOrModify);
+		} else {
+			IResource parent= toCreateOrModify;
+			do {
+				toCreateOrModify= parent;
+				parent= toCreateOrModify.getParent();
+			} while (parent != null && !parent.exists());
+			
+			return factory.createRule(toCreateOrModify);
+		}
 	}
 }
