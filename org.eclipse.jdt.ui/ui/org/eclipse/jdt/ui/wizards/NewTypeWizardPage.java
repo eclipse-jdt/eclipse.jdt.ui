@@ -1444,7 +1444,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				if (fileComment != null && fileComment.length() > 0) {
 					buf.replace(0, 0, fileComment + lineDelimiter);
 				}
-				cu.commit(false, new SubProgressMonitor(monitor, 1));
+				cu.commitWorkingCopy(false, new SubProgressMonitor(monitor, 1));
 			} else {
 				if (needsSave) {
 					buf.save(null, false);
@@ -1459,7 +1459,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 		} finally {
 			if (createdWorkingCopy != null) {
-				createdWorkingCopy.destroy();
+				createdWorkingCopy.discardWorkingCopy();
 			}
 			monitor.done();
 		}
