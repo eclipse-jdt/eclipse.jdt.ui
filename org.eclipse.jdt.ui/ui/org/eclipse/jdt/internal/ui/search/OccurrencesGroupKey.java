@@ -18,7 +18,13 @@ public class OccurrencesGroupKey extends JavaElementLine {
 	private boolean fIsVariable;
 	
 	/**
+	 * Create a new occurrences group key.
+	 * 
 	 * @param element either an ICompilationUnit or an IClassFile
+	 * @param line the line number
+	 * @param lineContents the line contents
+	 * @param isWriteAccess <code>true</code> if it groups writable occurrences
+	 * @param isVariable <code>true</code> if it groups variable occurrences
 	 */
 	public OccurrencesGroupKey(IJavaElement element, int line, String lineContents, boolean isWriteAccess, boolean isVariable) {
 		super(element, line, lineContents);
