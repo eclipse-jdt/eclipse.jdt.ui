@@ -11,6 +11,11 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.sef;
 
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -25,19 +30,16 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.ui.help.WorkbenchHelp;
-
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -47,6 +49,10 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 
 	private SelfEncapsulateFieldRefactoring fRefactoring;
+	private IDialogSettings fSettings;
+	
+	private static final String GENERATE_JAVADOC= "GenerateJavadoc";  //$NON-NLS-1$
+	
 
 	public SelfEncapsulateFieldInputPage() {
 		super("InputPage", true); //$NON-NLS-1$
@@ -55,7 +61,9 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	}
 	
 	public void createControl(Composite parent) {
-		fRefactoring= (SelfEncapsulateFieldRefactoring)getRefactoring();		
+		fRefactoring= (SelfEncapsulateFieldRefactoring)getRefactoring();
+		loadSettings();
+		
 		Composite result= new Composite(parent, SWT.NONE);
 		setControl(result);
 		initializeDialogUnits(result);
@@ -110,6 +118,17 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		
 		createFieldAccessBlock(result);
 			
+		Button checkBox= new Button(result, SWT.CHECK);
+		checkBox.setText(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.generateJavadocComment")); //$NON-NLS-1$
+		checkBox.setSelection(fRefactoring.getGenerateJavadoc());
+		checkBox.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				setGenerateJavadoc(((Button)e.widget).getSelection());
+			}
+		});
+		checkBox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		
 		processValidation();
 		
 		getter.setFocus();
@@ -117,6 +136,15 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		Dialog.applyDialogFont(result);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.SEF_WIZARD_PAGE);		
 	}
+	
+	private void loadSettings() {
+		fSettings= getDialogSettings().getSection(SelfEncapsulateFieldWizard.DIALOG_SETTING_SECTION);
+		if (fSettings == null) {
+			fSettings= getDialogSettings().addNewSection(SelfEncapsulateFieldWizard.DIALOG_SETTING_SECTION);
+			fSettings.put(GENERATE_JAVADOC, JavaPreferencesSettings.getCodeGenerationSettings().createComments);
+		}
+		fRefactoring.setGenerateJavadoc(fSettings.getBoolean(GENERATE_JAVADOC));
+	}	
 
 	private void createAccessModifier(Composite result) {
 		int visibility= fRefactoring.getVisibility();
@@ -217,6 +245,11 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		}
 		combo.select(select);
 		fRefactoring.setInsertionIndex(select - 1);
+	}
+	
+	private void setGenerateJavadoc(boolean value) {
+		fSettings.put(GENERATE_JAVADOC, value);
+		fRefactoring.setGenerateJavadoc(value);
 	}
 	
 	private void processValidation() {
