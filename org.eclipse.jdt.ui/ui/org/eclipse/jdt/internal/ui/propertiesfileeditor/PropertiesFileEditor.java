@@ -36,6 +36,7 @@ public class PropertiesFileEditor extends TextEditor {
 	 * Creates a new properties file editor.
 	 */
 	public PropertiesFileEditor() {
+		setDocumentProvider(JavaPlugin.getDefault().getPropertiesFileDocumentProvider());
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		setPreferenceStore(store);
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();

@@ -19,11 +19,8 @@ import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPluginDescriptor;
@@ -32,7 +29,11 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
@@ -63,6 +64,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ConfigurationElementSorter;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IBufferFactory;
@@ -95,6 +97,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.preferences.MockupPreferenceStore;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.folding.JavaFoldingStructureProviderRegistry;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
@@ -212,6 +215,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	private JavaFoldingStructureProviderRegistry fFoldingStructureProviderRegistry;
 
+	/**
+	 * The shared Java properties file document provider.
+	 * @since 3.1
+	 */
+	private IDocumentProvider fPropertiesFileDocumentProvider;
 	
 	public static JavaPlugin getDefault() {
 		return fgJavaPlugin;
@@ -512,6 +520,19 @@ public class JavaPlugin extends AbstractUIPlugin {
 		return fCompilationUnitDocumentProvider;
 	}
 	
+	/**
+	 * Returns the shared document provider for Java properties files
+	 * used by this plug-in instance.  
+	 * 
+	 * @return the shared document provider for Java properties files
+	 * @since 3.1
+	 */
+	public synchronized IDocumentProvider getPropertiesFileDocumentProvider() {
+		if (fPropertiesFileDocumentProvider == null)
+			fPropertiesFileDocumentProvider= new PropertiesFileDocumentProvider();
+		return fPropertiesFileDocumentProvider;
+	}
+	
 	public synchronized ClassFileDocumentProvider getClassFileDocumentProvider() {
 		if (fClassFileDocumentProvider == null)
 			fClassFileDocumentProvider= new ClassFileDocumentProvider();
@@ -686,9 +707,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns the template context type registry for the java plugin.
+	 * Returns the template context type registry for the java plug-in.
 	 * 
-	 * @return the template context type registry for the java plugin
+	 * @return the template context type registry for the java plug-in
 	 * @since 3.0
 	 */
 	public ContextTypeRegistry getTemplateContextRegistry() {
