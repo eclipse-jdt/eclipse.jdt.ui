@@ -273,7 +273,7 @@ class RefactoringStatusViewer extends SashForm {
 	private RefactoringStatusEntry getFirstEntry() {
 		if (fStatus == null || !fStatus.hasEntries())
 			return null;
-		return (RefactoringStatusEntry)fStatus.getEntryAt(0);
+		return fStatus.getEntryAt(0);
 	}
 		
 	private void revealElement(boolean next) {
