@@ -529,25 +529,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 					if (binding == null)
 						return true; //XXX
 					IMethod method= Binding2JavaModel.find(binding, cu.getJavaProject());
-					if (method != null){
-						ISearchPattern pattern= SearchEngine.createSearchPattern(method, IJavaSearchConstants.REFERENCES);
-						IJavaSearchScope scope= RefactoringScopeFactory.create(method);
-						SearchResultGroup[] groups= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), scope, pattern);
-						for (int i= 0; i < groups.length; i++) {
-							ICompilationUnit referencedCU= groups[i].getCompilationUnit();
-							if (referencedCU == null)
-								continue;
-							SearchResult[] searchResults= groups[i].getSearchResults();
-							ASTNode[] referenceNodes= getAstNodes(searchResults, getAST(referencedCU));
-							for (int j= 0; j < referenceNodes.length; j++) {
-								ASTNode aSTNode= referenceNodes[j];
-								if (aSTNode.getParent() instanceof MethodInvocation){
-									if (! isMethodInvocationOk((MethodInvocation)aSTNode.getParent())	)
-										return true;
-								}
-							}
-						}
-					}	
+					if (method != null && anyReferenceHasDirectProblems(method, new SubProgressMonitor(pm, 1)))
+						return true;	
 				}
 			}	
 			
@@ -558,32 +541,9 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 					for (int i= 0; i < fragments.length; i++) {
 						IVariableBinding vb= fragments[i].resolveBinding();
 						IField field= Binding2JavaModel.lookupIField(vb, getCompilationUnit(fd).getJavaProject());
-						ISearchPattern pattern= SearchEngine.createSearchPattern(field, IJavaSearchConstants.REFERENCES);
-						IJavaSearchScope scope= RefactoringScopeFactory.create(field);
-						SearchResultGroup[] resultGroups= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), scope, pattern);
-						for (int j= 0; j < resultGroups.length; j++) {
-							ICompilationUnit referencedCU= resultGroups[i].getCompilationUnit();
-							if (referencedCU == null){
-								addAllToBadVarSet(fragments);
-								return true;
-							}	
-							SearchResult[] searchResults= resultGroups[i].getSearchResults();
-							ASTNode[] referenceNodes= getAstNodes(searchResults, getAST(referencedCU));
-							for (int k= 0; k < referenceNodes.length; k++) {
-								ASTNode aSTNode= referenceNodes[j];
-								//XXX code dup
-								if (aSTNode.getParent() instanceof MethodInvocation){
-									MethodInvocation mi= (MethodInvocation)aSTNode.getParent();
-									if (mi.getExpression() == aSTNode && ! isMethodInvocationOk(mi)){
-										addAllToBadVarSet(fragments);
-										return true;
-									}	
-								}
-								if (aSTNode.getParent() instanceof FieldAccess){
-									addAllToBadVarSet(fragments);
-									return true;
-								}
-							}
+						if (field != null && anyReferenceHasDirectProblems(field, new SubProgressMonitor(pm, 1))){
+							addAllToBadVarSet(fragments);
+							return true;						
 						}
 					}
 				}
@@ -609,15 +569,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				}	
 			} 
 			if (parentNode instanceof CastExpression){
-				ASTNode pp= getUnparenthesizedParent(parentNode);
-				//XXX code dup
-				if (pp instanceof FieldAccess)
+				if (isNotUpdatableReference(parentNode))
 					return true;
-				if (pp instanceof MethodInvocation){
-					MethodInvocation mi= (MethodInvocation)pp;
-					if (parentNode.getParent() == mi.getExpression() && ! isMethodInvocationOk(mi))
-						return true;
-				}	
 			}
 			return false;	
 		} finally {
@@ -625,6 +578,24 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		}	
 	}
 
+	private boolean anyReferenceHasDirectProblems(IMember member, IProgressMonitor pm) throws JavaModelException{
+		ISearchPattern pattern= SearchEngine.createSearchPattern(member, IJavaSearchConstants.REFERENCES);
+		IJavaSearchScope scope= RefactoringScopeFactory.create(member);
+		SearchResultGroup[] groups= RefactoringSearchEngine.search(pm, scope, pattern);
+		for (int i= 0; i < groups.length; i++) {
+			ICompilationUnit referencedCU= groups[i].getCompilationUnit();
+			if (referencedCU == null)
+				continue;
+			SearchResult[] searchResults= groups[i].getSearchResults();
+			ASTNode[] referenceNodes= getAstNodes(searchResults, getAST(referencedCU));
+			for (int j= 0; j < referenceNodes.length; j++) {
+				if (isNotUpdatableReference(referenceNodes[j]))
+					return true;
+			}
+		}
+		return false;
+	}
+	
 	private static ASTNode[] getAstNodes(SearchResult[] searchResults, CompilationUnit cuNode) {
 		List result= new ArrayList(searchResults.length);
 		for (int i= 0; i < searchResults.length; i++) {
@@ -973,21 +944,30 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			addToBadVarSet(variableDeclarations[i]);
 		}
 	}
-	
 
 	private boolean areAllTempReferencesOK(VariableDeclaration tempDeclaration) throws JavaModelException{
 		ASTNode[] tempReferences= TempOccurrenceFinder.findTempOccurrenceNodes(tempDeclaration, true, false);			
 		for (int i= 0; i < tempReferences.length; i++) {
-			ASTNode parentNode= tempReferences[i].getParent();
-			if (parentNode instanceof FieldAccess)
+			if (isNotUpdatableReference(tempReferences[i]))
 				return false;
-			if (parentNode instanceof MethodInvocation){
-				MethodInvocation mi= (MethodInvocation)parentNode;
-				if (tempReferences[i] == mi.getExpression() &&  ! isMethodInvocationOk(mi))
-					return false;
-			}	
 		}	
 		return true;
+	}
+	
+	//XXX needs better name
+	private boolean isNotUpdatableReference(ASTNode parentNode) throws JavaModelException{
+		ASTNode unparenthesizedParent= getUnparenthesizedParent(parentNode);
+		if (unparenthesizedParent instanceof FieldAccess)
+			return true;
+		if (unparenthesizedParent instanceof MethodInvocation){
+			MethodInvocation mi= (MethodInvocation)unparenthesizedParent;
+			//XXX
+			if (parentNode == mi.getExpression() && ! isMethodInvocationOk(mi)) 
+				return true;
+			if (mi.getExpression() != null && ASTNodes.isParent(parentNode, mi.getExpression()) && ! isMethodInvocationOk(mi))
+				return true;
+		}
+		return false;
 	}
 	
 	private boolean isMethodInvocationOk(MethodInvocation mi) throws JavaModelException{
