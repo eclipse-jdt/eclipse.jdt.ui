@@ -82,6 +82,7 @@ public class MultiMoveTests extends RefactoringTest {
 		MoveRefactoring ref= MoveRefactoring.create(elems, JavaPreferencesSettings.getCodeGenerationSettings(), null);
 		ref.setDestination(packP2);
 		ref.setUpdateReferences(true);
+		performDummySearch();
 		RefactoringStatus status= performRefactoring(ref);
 		
 		//-- checks
@@ -125,6 +126,7 @@ public class MultiMoveTests extends RefactoringTest {
 		MoveRefactoring ref= MoveRefactoring.create(elems, JavaPreferencesSettings.getCodeGenerationSettings(), null);
 		ref.setDestination(packP2);
 		ref.setUpdateReferences(true);
+		performDummySearch();
 		RefactoringStatus status= performRefactoring(ref);
 		
 		//-- checks
@@ -166,6 +168,7 @@ public class MultiMoveTests extends RefactoringTest {
 		MoveRefactoring ref= MoveRefactoring.create(elems, JavaPreferencesSettings.getCodeGenerationSettings(), null);
 		ref.setDestination(packP2);
 		ref.setUpdateReferences(true);
+		performDummySearch();
 		RefactoringStatus status= performRefactoring(ref);
 		
 		//-- checks
@@ -206,6 +209,7 @@ public class MultiMoveTests extends RefactoringTest {
 		MoveRefactoring ref= MoveRefactoring.create(elems, JavaPreferencesSettings.getCodeGenerationSettings(), null);
 		ref.setDestination(packP2);
 		ref.setUpdateReferences(true);
+		performDummySearch();
 		RefactoringStatus status= performRefactoring(ref);
 		
 		//-- checks

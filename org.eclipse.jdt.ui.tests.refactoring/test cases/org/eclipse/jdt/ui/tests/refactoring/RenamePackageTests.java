@@ -63,6 +63,7 @@ public class RenamePackageTests extends RefactoringTest {
 			}
 			IPackageFragment thisPackage= packages[0];
 			IRefactoring ref= createRefactoring(thisPackage, newPackageName);
+			performDummySearch();
 			RefactoringStatus result= performRefactoring(ref);
 			assertNotNull("precondition was supposed to fail", result);
 			if (fIsVerbose)
@@ -89,6 +90,7 @@ public class RenamePackageTests extends RefactoringTest {
 			}
 			IPackageFragment thisPackage= packages[0];
 			IRefactoring ref= createRefactoring(thisPackage, newPackageName);
+			performDummySearch();
 			RefactoringStatus result= performRefactoring(ref);
 			assertNotNull("precondition was supposed to fail", result);
 			if (fIsVerbose)
@@ -121,6 +123,7 @@ public class RenamePackageTests extends RefactoringTest {
 			IPackageFragment thisPackage= packages[0];
 			RenamePackageRefactoring ref= createRefactoring(thisPackage, newPackageName);
 			ref.setUpdateReferences(updateReferences);
+			performDummySearch();
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("preconditions were supposed to pass", null, result);
 			
@@ -261,6 +264,7 @@ public class RenamePackageTests extends RefactoringTest {
 		IPackageFragment thisPackage= packages[0];
 		thisPackage.getCorrespondingResource().setReadOnly(true);
 		RenamePackageRefactoring ref= createRefactoring(thisPackage, newPackageName);
+		performDummySearch();
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("preconditions were supposed to pass", null, result);
 		
