@@ -16,6 +16,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
+import org.eclipse.jdt.internal.corext.template.CodeTemplates;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.Templates;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -41,14 +42,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		Template[] typecomments= Templates.getInstance().getTemplates("typecomment");
-		for (int i= 0; i < typecomments.length; i++) {
-			typecomments[i].setPattern("/** typecomment template*/");	
-		}
-		Template[] filecomments= Templates.getInstance().getTemplates("filecomment");
-		for (int i= 0; i < filecomments.length; i++) {
-			filecomments[i].setPattern("/** filecomment template */");	
-		}
+		CodeTemplates.getCodeTemplate(CodeTemplates.TYPECOMMENT).setPattern("/** typecomment template*/");
 	    Hashtable options= JavaCore.getOptions();
 	    fCompactPref= options.get(JavaCore.FORMATTER_COMPACT_ASSIGNMENT);
 	    fTabPref= options.get(JavaCore.FORMATTER_TAB_CHAR);
