@@ -244,7 +244,7 @@ public class NewSelectionAnalyzer extends GenericVisitor {
 		return true;
 	}
 	
-	protected boolean isFirstNode() {
+	private boolean isFirstNode() {
 		return fSelectedNodes == null;
 	}
 	
