@@ -169,9 +169,9 @@ public class VariableSelectionBlock {
 		if (fVariable != null) {
 			IPath path= getVariablePath();
 			
-			if (path != null && findPath(path)) {
-				status.setError(NewWizardMessages.getString("VariableSelectionBlock.error.pathexists")); //$NON-NLS-1$
-			}
+			if (path != null) {				if (findPath(path)) {
+					status.setError(NewWizardMessages.getString("VariableSelectionBlock.error.pathexists")); //$NON-NLS-1$
+				} else if (!path.toFile().exists()) {					status.setError(NewWizardMessages.getString("VariableSelectionBlock.warning.pathnotexists")); //$NON-NLS-1$				}			}
 		}
 		return status;
 	}
