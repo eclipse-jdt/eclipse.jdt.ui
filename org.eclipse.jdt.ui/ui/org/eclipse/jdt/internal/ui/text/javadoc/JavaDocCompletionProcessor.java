@@ -5,6 +5,9 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
  * All Rights Reserved.
  */
 
+import java.util.Arrays;
+import java.util.Comparator;
+
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.text.IDocument;
@@ -25,23 +28,53 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.template.TemplateContext;
 import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
 
+
+
 /**
  * Simple Java doc completion processor.
  */
 public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	
+	private static class CompletionProposalComparator implements Comparator {
+		public int compare(Object o1, Object o2) {
+			ICompletionProposal c1= (ICompletionProposal) o1;
+			ICompletionProposal c2= (ICompletionProposal) o2;
+			return c1.getDisplayString().compareTo(c2.getDisplayString());
+		}
+	};
+	
 	private IEditorPart fEditor;
 	private IWorkingCopyManager fManager;
+	private char[] fProposalAutoActivationSet;
+	private Comparator fComparator;
 	private TemplateEngine fTemplateEngine;
-
-
+	
+	
 	public JavaDocCompletionProcessor(IEditorPart editor) {
 		fEditor= editor;
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
 		fTemplateEngine= new TemplateEngine(TemplateContext.JAVADOC);
 	}
 	
-
+	/**
+	 * Tells this processor to order the proposals alphabetically.
+	 * 
+	 * @param order <code>true</code> if proposals should be ordered.
+	 */
+	public void orderProposalsAlphabetically(boolean order) {
+		fComparator= order ? new CompletionProposalComparator() : null;
+	}
+	
+	/**
+	 * Tells this processor to restrict is proposals to those
+	 * starting with matching cases.
+	 * 
+	 * @param restrict <code>true</code> if proposals should be restricted
+	 */
+	public void restrictProposalsToMatchingCases(boolean restrict) {
+		// not yet supported
+	}
+	
 	/**
 	 * @see IContentAssistProcessor#getErrorMessage()
 	 */
@@ -67,7 +100,17 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
 	 */
 	public char[] getCompletionProposalAutoActivationCharacters() {
-		return null;
+		return fProposalAutoActivationSet;
+	}
+	
+	/**
+	 * Sets this processor's set of characters triggering the activation of the
+	 * completion proposal computation.
+	 * 
+	 * @param activationSet the activation set
+	 */
+	public void setCompletionProposalAutoActivationCharacters(char[] activationSet) {
+		fProposalAutoActivationSet= activationSet;
 	}
 
 	/**
@@ -117,6 +160,19 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 		System.arraycopy(templateResults, 0, total, 0, templateResults.length);
 		System.arraycopy(results, 0, total, templateResults.length, results.length);
 
-		return total;
+		/*
+		 * Order here and not in result collector to make sure that the order
+		 * applies to all proposals and not just those of the compilation unit. 
+		 */
+		return order(total);
+	}
+	
+	/**
+	 * Order the given proposals.
+	 */
+	private ICompletionProposal[] order(ICompletionProposal[] proposals) {
+		if (fComparator != null)
+			Arrays.sort(proposals, fComparator);
+		return proposals;	
 	}
 }

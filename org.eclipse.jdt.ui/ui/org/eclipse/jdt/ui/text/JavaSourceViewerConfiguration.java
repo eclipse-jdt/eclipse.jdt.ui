@@ -11,6 +11,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IAutoIndentStrategy;
@@ -42,6 +43,8 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
@@ -133,6 +136,14 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		return fTextEditor;
 	}
 	
+	/**
+	 * Returns the preference store used for by this configuration to initialize
+	 * the individula bits and pieces.
+	 */
+	protected IPreferenceStore getPreferenceStore() {
+		return JavaPlugin.getDefault().getPreferenceStore();
+	}
+	
 	/* 
 	 * @see ISourceViewerConfiguration#getPresentationReconciler(ISourceViewer)
 	 */
@@ -168,17 +179,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		assistant.setContentAssistProcessor(new JavaCompletionProcessor(getEditor()), IDocument.DEFAULT_CONTENT_TYPE);
 		assistant.setContentAssistProcessor(new JavaDocCompletionProcessor(getEditor()), JavaPartitionScanner.JAVA_DOC);
 		
-		assistant.enableAutoActivation(true);
-		assistant.setAutoActivationDelay(500);
-		assistant.setProposalPopupOrientation(assistant.PROPOSAL_OVERLAY);
+		ContentAssistPreference.configure(assistant, getPreferenceStore());
+		
 		assistant.setContextInformationPopupOrientation(assistant.CONTEXT_INFO_ABOVE);
 		assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
-		
-		Color background= getColorManager().getColor(new RGB(254, 241, 233));
-		assistant.setContextInformationPopupBackground(background);
-		assistant.setContextSelectorBackground(background);
-		assistant.setProposalSelectorBackground(background);
-		
+				
 		return assistant;
 	}
 	

@@ -19,7 +19,11 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
 import org.eclipse.ui.IEditorPart;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Hashtable;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -34,13 +38,31 @@ import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
  * Java completion processor.
  */
 public class JavaCompletionProcessor implements IContentAssistProcessor {
-		
+	
+	private static class CompletionProposalComparator implements Comparator {
+		public int compare(Object o1, Object o2) {
+			ICompletionProposal c1= (ICompletionProposal) o1;
+			ICompletionProposal c2= (ICompletionProposal) o2;
+			return c1.getDisplayString().compareTo(c2.getDisplayString());
+		}
+	};
+	
+	private final static String VISIBILITY= "org.eclipse.jdt.core.codeComplete.visibilityCheck";
+	private final static String ENABLED= "enabled";
+	private final static String DISABLED= "disabled";
+	
+	
 	private IEditorPart fEditor;
 	private ResultCollector fCollector;
 	private IWorkingCopyManager fManager;
 	private IContextInformationValidator fValidator;
+	
+	private char[] fProposalAutoActivationSet;
+	private Comparator fComparator;
+	
 	private TemplateEngine fTemplateEngine;
 	private ExperimentalResultCollector fExperimentalCollector;	
+	
 	
 	public JavaCompletionProcessor(IEditorPart editor) {
 		fEditor= editor;
@@ -48,6 +70,53 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
 		fTemplateEngine= new TemplateEngine(TemplateContext.JAVA);
 		fExperimentalCollector= new ExperimentalResultCollector();
+	}
+	
+	/**
+	 * Sets this processor's set of characters triggering the activation of the
+	 * completion proposal computation.
+	 * 
+	 * @param activationSet the activation set
+	 */
+	public void setCompletionProposalAutoActivationCharacters(char[] activationSet) {
+		fProposalAutoActivationSet= activationSet;
+	}
+	
+	/**
+	 * Tells this processor to restrict its proposal to those element
+	 * visible in the actual invocation context.
+	 * 
+	 * @param restrict <code>true</code> if proposals should be restricted
+	 */
+	public void restrictProposalsToVisibility(boolean restrict) {
+		Hashtable options= JavaCore.getOptions();
+		Object value= options.get(VISIBILITY);
+		if (value instanceof String) {
+			String newValue= restrict ? ENABLED : DISABLED;
+			if ( !newValue.equals((String) value)) {
+				options.put(VISIBILITY, newValue);
+				JavaCore.setOptions(options);
+			}
+		}
+	}
+	
+	/**
+	 * Tells this processor to order the proposals alphabetically.
+	 * 
+	 * @param order <code>true</code> if proposals should be ordered.
+	 */
+	public void orderProposalsAlphabetically(boolean order) {
+		fComparator= order ? new CompletionProposalComparator() : null;
+	}
+	
+	/**
+	 * Tells this processor to restrict is proposals to those
+	 * starting with matching cases.
+	 * 
+	 * @param restrict <code>true</code> if proposals should be restricted
+	 */
+	public void restrictProposalsToMatchingCases(boolean restrict) {
+		// not yet supported
 	}
 		
 	/**
@@ -77,9 +146,9 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
 	 */
 	public char[] getCompletionProposalAutoActivationCharacters() {
-		return new char[] { '.' };
+		return fProposalAutoActivationSet;
 	}
-
+	
 	/**
 	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)
 	 */
@@ -150,6 +219,19 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		System.arraycopy(templateResults, 0, total, 0, templateResults.length);
 		System.arraycopy(results, 0, total, templateResults.length, results.length);
 		
-		return total;
+		/*
+		 * Order here and not in result collector to make sure that the order
+		 * applies to all proposals and not just those of the compilation unit. 
+		 */
+		return order(total);
+	}
+	
+	/**
+	 * Order the given proposals.
+	 */
+	private ICompletionProposal[] order(ICompletionProposal[] proposals) {
+		if (fComparator != null)
+			Arrays.sort(proposals, fComparator);
+		return proposals;	
 	}
 }

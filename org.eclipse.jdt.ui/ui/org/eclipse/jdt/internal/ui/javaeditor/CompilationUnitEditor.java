@@ -100,6 +100,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.compare.JavaAddElementFromHistory;
 import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
+import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 
 /**
@@ -444,10 +445,6 @@ public class CompilationUnitEditor extends JavaEditor {
 	public final static String MATCHING_BRACKETS=  "matchingBrackets";
 	/** Preference key for matching brackets color */
 	public final static String MATCHING_BRACKETS_COLOR=  "matchingBracketsColor";
-	/** Preference key for auto content assist */
-	public final static String AUTO_CONTENT_ASSIST=  "autoContentAssist";
-	/** Preference key for auto content assist delay */
-	public final static String AUTO_CONTENT_ASSIST_DELAY=  "autoContentAssistDelay";
 	
 	
 	
@@ -909,7 +906,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		if (fBracketHighlighter == null) {
 			ISourceViewer sourceViewer= getSourceViewer();
 			fBracketHighlighter= new BracketHighlighter(sourceViewer);
-			fBracketHighlighter.setHighlightColor(getBracketHighlightingColor());
+			fBracketHighlighter.setHighlightColor(getColor(MATCHING_BRACKETS_COLOR));
 			fBracketHighlighter.install();
 		}
 	}
@@ -926,14 +923,8 @@ public class CompilationUnitEditor extends JavaEditor {
 		return store.getBoolean(MATCHING_BRACKETS);
 	}
 	
-	private boolean isAutoContentAssistEnabled() {
-		IPreferenceStore store= getPreferenceStore();
-		return store.getBoolean(AUTO_CONTENT_ASSIST);
-	}
-	
-	private Color getBracketHighlightingColor() {
-		IPreferenceStore store= getPreferenceStore();
-		RGB rgb= PreferenceConverter.getColor(store, MATCHING_BRACKETS_COLOR);
+	private Color getColor(String key) {
+		RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), key);
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		return textTools.getColorManager().getColor(rgb);
 	}
@@ -965,23 +956,32 @@ public class CompilationUnitEditor extends JavaEditor {
 	 * @see AbstractTextEditor#handlePreferenceStoreChanged(PropertyChangeEvent)
 	 */
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
-		String p= event.getProperty();
-		if (MATCHING_BRACKETS.equals(p)) {
-			if( isBracketHighlightingEnabled())
-				startBracketHighlighting();
-			else
-				stopBracketHighlighting();
-		} else if (MATCHING_BRACKETS_COLOR.equals(p)) {
-			if (fBracketHighlighter != null)
-				fBracketHighlighter.setHighlightColor(getBracketHighlightingColor());
-		} else if (AUTO_CONTENT_ASSIST.equals(p)) {
-			InternalSourceViewer isv= (InternalSourceViewer) getSourceViewer();
-			IContentAssistant assistant= isv.getContentAssistant();
-			if (assistant instanceof ContentAssistant) {
-				((ContentAssistant) assistant).enableAutoActivation(isAutoContentAssistEnabled());
+		
+		try {
+			
+			String p= event.getProperty();		
+			
+			if (MATCHING_BRACKETS.equals(p)) {
+				if (isBracketHighlightingEnabled())
+					startBracketHighlighting();
+				else
+					stopBracketHighlighting();
+				return;
 			}
-		} /* else if (AUTO_CONTENT_ASSIST_DELAY.equals ... */
-		super.handlePreferenceStoreChanged(event);
+			if (MATCHING_BRACKETS_COLOR.equals(p)) {
+				if (fBracketHighlighter != null)
+					fBracketHighlighter.setHighlightColor(getColor(MATCHING_BRACKETS_COLOR));
+				return;
+			} 
+			
+			InternalSourceViewer isv= (InternalSourceViewer) getSourceViewer();
+			IContentAssistant c= isv.getContentAssistant();
+			if (c instanceof ContentAssistant)
+				ContentAssistPreference.changeConfiguration((ContentAssistant) c, getPreferenceStore(), event);
+				
+		} finally {
+			super.handlePreferenceStoreChanged(event);
+		}
 	}
 
 	/*
