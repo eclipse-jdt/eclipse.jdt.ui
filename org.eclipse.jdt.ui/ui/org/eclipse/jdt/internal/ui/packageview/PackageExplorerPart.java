@@ -204,7 +204,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	};
 
 	
-	public PackageExplorerPart() {
+	public PackageExplorerPart() { 
 	}
 
 	/* (non-Javadoc)
@@ -270,9 +270,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		JavaPlugin.getDefault().getProblemMarkerManager().addListener(fViewer);		
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 		
-		int labelFlags= JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS |
-					JavaElementLabelProvider.SHOW_SMALL_ICONS | JavaElementLabelProvider.SHOW_VARIABLE | JavaElementLabelProvider.SHOW_PARAMETERS;
-		JavaElementLabelProvider labelProvider = new JavaElementLabelProvider(labelFlags);
+		JavaElementLabelProvider labelProvider = new JavaElementLabelProvider(getLabelProviderFlags());
 		labelProvider.setErrorTickManager(new MarkerErrorTickProvider());
 		fViewer.setLabelProvider(new DecoratingLabelProvider(labelProvider, null));
 		fViewer.setSorter(new JavaElementSorter());
@@ -1087,9 +1085,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * @param decorator a label decorator or <code>null</code> for no decorations.
 	 */
 	public void setLabelDecorator(ILabelDecorator decorator) {
-		int labelFlags= JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS |
-					JavaElementLabelProvider.SHOW_SMALL_ICONS | JavaElementLabelProvider.SHOW_VARIABLE;
-		JavaElementLabelProvider javaProvider= new JavaElementLabelProvider(labelFlags);
+		JavaElementLabelProvider javaProvider= new JavaElementLabelProvider(getLabelProviderFlags());
 		javaProvider.setErrorTickManager(new MarkerErrorTickProvider());
 		if (decorator == null) {
 			fViewer.setLabelProvider(javaProvider);
@@ -1098,6 +1094,13 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		}
 	}
 	
+	/**
+	 * Gets the standard label flags
+	 */
+	private int getLabelProviderFlags() {
+		return JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS |
+					JavaElementLabelProvider.SHOW_SMALL_ICONS | JavaElementLabelProvider.SHOW_VARIABLE | JavaElementLabelProvider.SHOW_PARAMETERS;
+	}		
 	/*
 	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 	 */
