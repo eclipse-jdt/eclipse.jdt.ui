@@ -82,8 +82,10 @@ public class SefTests extends AbstractSelectionTestCase {
 
 
 		SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field);
-		RefactoringStatus status= refactoring.checkAllConditions(new NullProgressMonitor());
-		assertTrue(status.hasError());
+		if (refactoring != null) {
+			RefactoringStatus status= refactoring.checkAllConditions(new NullProgressMonitor());
+			assertTrue(status.hasError());
+		}
 	}	
 	
 	private static IField getField(ICompilationUnit unit, String fieldName) throws Exception {
@@ -119,6 +121,10 @@ public class SefTests extends AbstractSelectionTestCase {
 	}
 	
 	public void testInvalidOverwrite() throws Exception {
+		invalidTest("field");
+	}
+	
+	public void testAnnotation() throws Exception {
 		invalidTest("field");
 	}
 	

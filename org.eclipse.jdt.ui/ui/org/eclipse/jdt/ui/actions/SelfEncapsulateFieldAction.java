@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -17,12 +21,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -114,7 +113,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 		}
 		IField field= (IField)elements[0];
 		try {
-			if (field.isBinary() || JdtFlags.isEnum(field)) {
+			if (!SelfEncapsulateFieldRefactoring.isAvailable(field)) {
 				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("SelfEncapsulateFieldAction.dialog.unavailable")); //$NON-NLS-1$
 				return;
 			}
@@ -140,11 +139,9 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 		Object element= selection.getFirstElement();
 		if (!(element instanceof IField))
 			return false;
-		final IField field= (IField) element;
 		try {
-			return !field.isBinary() && !JdtFlags.isEnum(field);
-		} catch (JavaModelException exception) {
-			JavaPlugin.log(exception);
+			return SelfEncapsulateFieldRefactoring.isAvailable((IField)element);
+		} catch (JavaModelException e) {
 			return false;
 		}
 	}
