@@ -7,11 +7,9 @@ package org.eclipse.jdt.internal.corext.refactoring.util;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AbstractVariableDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
+import org.eclipse.jdt.internal.compiler.ast.ImportReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
-import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
-import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.util.CharOperation;
 
 /**
@@ -42,7 +40,8 @@ public class ASTUtil {
 			return ((TypeDeclaration)node).declarationSourceStart;
 		if (node instanceof AbstractMethodDeclaration)
 			return ((AbstractMethodDeclaration)node).declarationSourceStart;
-			
+		if (node instanceof ImportReference)
+			return ((ImportReference)node).declarationSourceStart;
 		return node.sourceStart;
 	}
 	
@@ -57,7 +56,8 @@ public class ASTUtil {
 			return ((TypeDeclaration)node).declarationSourceEnd;
 		if (node instanceof AbstractMethodDeclaration)
 			return ((AbstractMethodDeclaration)node).declarationSourceEnd;
-			
+		if (node instanceof ImportReference)
+			return ((ImportReference)node).declarationSourceEnd;	
 		return node.sourceEnd;
 	}	
 }
