@@ -471,6 +471,8 @@ public class ConstraintCreator {
 	 */
 	public ITypeConstraint[] create(TypeDeclaration node) {
 		return EMPTY_ARRAY;
+		
+		// TODO account for enums and annotations
 	}
 
 	/* (non-Javadoc)

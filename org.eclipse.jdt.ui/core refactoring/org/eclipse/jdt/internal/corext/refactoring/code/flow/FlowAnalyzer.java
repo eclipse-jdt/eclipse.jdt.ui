@@ -766,6 +766,8 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		info.mergeFinally(getFlowInfo(node.getFinally()), fFlowContext);
 	}
 	
+	// TODO account for enums and annotations
+
 	public void endVisit(TypeDeclaration node) {
 		if (skipNode(node))
 			return;

@@ -555,6 +555,8 @@ public final class ConstraintCollector extends ASTVisitor {
 	public boolean visit(TypeDeclaration node) {
 		add(fCreator.create(node));
 		return true;
+		
+		// TODO account for enums and annotations
 	}
 	
 	/* (non-Javadoc)
