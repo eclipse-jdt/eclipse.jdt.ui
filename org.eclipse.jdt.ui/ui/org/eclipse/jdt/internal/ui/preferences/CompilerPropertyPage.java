@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -73,11 +74,11 @@ public class CompilerPropertyPage extends PropertyPage {
 		composite.setLayout(layout);
 				
 		fUseWorkspaceSettings= new Button(composite, SWT.RADIO);
-		fUseWorkspaceSettings.setText("Use workspace settings");
+		fUseWorkspaceSettings.setText(JavaUIMessages.getString("CompilerPropertyPage.useworkspacesettings.label"));
 		fUseWorkspaceSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		fUseProjectSettings= new Button(composite, SWT.RADIO);
-		fUseProjectSettings.setText("Use project settings");
+		fUseProjectSettings.setText(JavaUIMessages.getString("CompilerPropertyPage.useprojectsettings.label"));
 		fUseProjectSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
 		fUseProjectSettings.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent event) {
