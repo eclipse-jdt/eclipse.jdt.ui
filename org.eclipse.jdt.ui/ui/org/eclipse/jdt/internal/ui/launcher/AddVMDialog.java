@@ -274,9 +274,9 @@ public class AddVMDialog extends StatusDialog {
 			return null;
 		File f= new File(fSystemLibrarySource.getText());
 		if (!f.isFile())
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The selected system sources file doesn't exist", null);
+			return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, "The selected system sources file doesn't exist", null);
 		if (determinePackagePrefix(f) == null)
-			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "Could not find Object.java in the selected sources file", null);
+			return new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, "Could not find Object.java in the selected sources file", null);
 		return null;
 	}
 	
@@ -368,7 +368,10 @@ public class AddVMDialog extends StatusDialog {
 		if (fUseCustomLibrary.getSelection()) {
 			File systemLibrary= new File(fSystemLibrary.getText());
 			File source= new File(fSystemLibrarySource.getText());
-			IPath packageRoot= new Path(determinePackagePrefix(source));
+			String pathString= determinePackagePrefix(source);
+			if (pathString == null)
+				pathString= "";
+			IPath packageRoot= new Path(pathString);
 			vm.setLibraryLocation(new LibraryLocation(systemLibrary, source, packageRoot));
 		} else {
 			vm.setLibraryLocation(null);
