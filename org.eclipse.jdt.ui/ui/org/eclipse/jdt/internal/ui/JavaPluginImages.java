@@ -104,8 +104,6 @@ public class JavaPluginImages {
 	
 	public static final String IMG_OBJS_BREAKPOINT_INSTALLED= NAME_PREFIX + "brkpi_obj.gif"; //$NON-NLS-1$
 
-	public static final String IMG_OBJS_STACK_FRAME_SYNCH= NAME_PREFIX + "jstackframe_synch_obj.gif"; //$NON-NLS-1$
-
 	public static final String IMG_OBJS_SNIPPET_EVALUATING= NAME_PREFIX + "jsbook_eval_obj.gif"; //$NON-NLS-1$
 
 	public static final String IMG_OBJS_REFACTORING_FATAL= NAME_PREFIX + "fatalerror_obj.gif"; //$NON-NLS-1$
@@ -203,7 +201,6 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_EXCEPTION= createManaged(T_OBJ, IMG_OBJS_EXCEPTION);
 	public static final ImageDescriptor DESC_OBJS_BREAKPOINT_INSTALLED= createManaged(T_OBJ, IMG_OBJS_BREAKPOINT_INSTALLED);
 	public static final ImageDescriptor DESC_OBJS_ERROR= createManaged(T_OBJ, IMG_OBJS_ERROR);
-	public static final ImageDescriptor DESC_OBJS_STACK_FRAME_SYNCH= createManaged(T_OBJ, IMG_OBJS_STACK_FRAME_SYNCH);
 	
 	public static final ImageDescriptor DESC_OBJS_SNIPPET_EVALUATING= createManaged(T_OBJ, IMG_OBJS_SNIPPET_EVALUATING);
 
