@@ -42,17 +42,4 @@ public class ShowInheritedMembersAction extends Action {
 	public void run() {
 		fMethodsViewer.showInheritedMethods(isChecked());
 	}	
-
-	/*
-	 * @see Action#setChecked
-	 */	
-	public void setChecked(boolean checked) {
-		if (checked) {
-			setToolTipText(TypeHierarchyMessages.getString("ShowInheritedMembersAction.tooltip.checked")); //$NON-NLS-1$
-		} else {
-			setToolTipText(TypeHierarchyMessages.getString("ShowInheritedMembersAction.tooltip.unchecked")); //$NON-NLS-1$
-		}
-		super.setChecked(checked);
-	}
-	
 }

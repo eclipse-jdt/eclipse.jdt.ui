@@ -38,17 +38,4 @@ public class EnableMemberFilterAction extends Action {
 	public void run() {
 		fView.enableMemberFilter(isChecked());
 	}
-
-	/*
-	 * @see Action#actionPerformed
-	 */			
-	public void setChecked(boolean checked) {
-		if (checked) {
-			setToolTipText(TypeHierarchyMessages.getString("EnableMemberFilterAction.tooltip.checked")); //$NON-NLS-1$
-		} else {
-			setToolTipText(TypeHierarchyMessages.getString("EnableMemberFilterAction.tooltip.unchecked")); //$NON-NLS-1$
-		}
-		super.setChecked(checked);
-	}
-	
 }

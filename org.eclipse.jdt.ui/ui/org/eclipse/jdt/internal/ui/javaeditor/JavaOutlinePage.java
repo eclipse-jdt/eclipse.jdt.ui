@@ -593,6 +593,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					
 					setText(JavaEditorMessages.getString("JavaOutlinePage.Sort.label")); //$NON-NLS-1$
 					JavaPluginImages.setLocalImageDescriptors(this, "alphab_sort_co.gif"); //$NON-NLS-1$
+					setToolTipText(JavaEditorMessages.getString("JavaOutlinePage.Sort.tooltip")); //$NON-NLS-1$
+					setDescription(JavaEditorMessages.getString("JavaOutlinePage.Sort.description")); //$NON-NLS-1$
 					
 					boolean checked= JavaPlugin.getDefault().getPreferenceStore().getBoolean("LexicalSortingAction.isChecked"); //$NON-NLS-1$
 					valueChanged(checked, false);
@@ -605,10 +607,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				private void valueChanged(boolean on, boolean store) {
 					setChecked(on);
 					fOutlineViewer.setSorter(on ? fSorter : null);
-					
-					setToolTipText(on ? JavaEditorMessages.getString("JavaOutlinePage.Sort.tooltip.checked") : JavaEditorMessages.getString("JavaOutlinePage.Sort.tooltip.unchecked")); //$NON-NLS-2$ //$NON-NLS-1$
-					setDescription(on ? JavaEditorMessages.getString("JavaOutlinePage.Sort.description.checked") : JavaEditorMessages.getString("JavaOutlinePage.Sort.description.unchecked")); //$NON-NLS-2$ //$NON-NLS-1$
-					
+										
 					if (store)
 						JavaPlugin.getDefault().getPreferenceStore().setValue("LexicalSortingAction.isChecked", on); //$NON-NLS-1$
 				}

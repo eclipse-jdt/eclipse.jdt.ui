@@ -20,9 +20,6 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 	
 	private IPreferenceStore fStore;
 	
-	private String fToolTipChecked;
-	private String fToolTipUnchecked;
-	
 	/**
 	 * Constructs and updates the action.
 	 */
@@ -30,9 +27,7 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 		super(JavaEditorMessages.getResourceBundle(), "ToggleTextHover.", null); //$NON-NLS-1$
 		
 		JavaPluginImages.setToolImageDescriptors(this, "jdoc_hover_edit.gif"); //$NON-NLS-1$
-		
-		fToolTipChecked= JavaEditorMessages.getString("ToggleTextHover.tooltip.checked"); //$NON-NLS-1$
-		fToolTipUnchecked= JavaEditorMessages.getString("ToggleTextHover.tooltip.unchecked"); //$NON-NLS-1$
+		setToolTipText(JavaEditorMessages.getString("ToggleTextHover.tooltip")); //$NON-NLS-1$
 	
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.TOGGLE_TEXTHOVER_ACTION);	
 
@@ -48,10 +43,6 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 		return fStore;
 	}
 	
-	private String getToolTipText(boolean checked) {
-		return checked ? fToolTipChecked : fToolTipUnchecked;
-	}
-	
 	/**
 	 * @see IAction#actionPerformed
 	 */
@@ -59,7 +50,6 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 		boolean showHover= !getStore().getBoolean(IPreferencesConstants.EDITOR_SHOW_HOVER);
 		getStore().setValue(IPreferencesConstants.EDITOR_SHOW_HOVER, showHover);
 		setChecked(showHover);
-		setToolTipText(getToolTipText(showHover));
 	}
 	
 	/**
@@ -68,7 +58,6 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 	public void update() {
 		boolean showHover= getStore().getBoolean(IPreferencesConstants.EDITOR_SHOW_HOVER);
 		setChecked(showHover);
-		setToolTipText(getToolTipText(showHover));
 		setEnabled(true);
 	}
 	

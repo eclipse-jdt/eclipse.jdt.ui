@@ -20,10 +20,6 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 		
 	private IPreferenceStore fStore;
 
-	private String fToolTipChecked;
-	private String fToolTipUnchecked;
-	
-	
 	/**
 	 * Constructs and updates the action.
 	 */
@@ -31,9 +27,7 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 		super(JavaEditorMessages.getResourceBundle(), "TogglePresentation.", null); //$NON-NLS-1$
 		
 		JavaPluginImages.setToolImageDescriptors(this, "segment_edit.gif"); //$NON-NLS-1$
-		
-		fToolTipChecked= JavaEditorMessages.getString("TogglePresentation.tooltip.checked"); //$NON-NLS-1$
-		fToolTipUnchecked= JavaEditorMessages.getString("TogglePresentation.tooltip.unchecked"); //$NON-NLS-1$
+		setToolTipText(JavaEditorMessages.getString("TogglePresentation.tooltip")); //$NON-NLS-1$
 		
 		update();
 		WorkbenchHelp.setHelp(this,	IJavaHelpContextIds.TOGGLE_PRESENTATION_ACTION);
@@ -61,17 +55,12 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 		
 		boolean showAll= !editor.showsHighlightRangeOnly();
 		setChecked(showAll);
-		setToolTipText(getToolTipText(showAll));
 		
 		editor.showHighlightRangeOnly(showAll);
 		if (remembered != null)
 			editor.setHighlightRange(remembered.getOffset(), remembered.getLength(), true);
 		
 		getStore().setValue(IPreferencesConstants.EDITOR_SHOW_SEGMENTS, showAll);
-	}
-	
-	private String getToolTipText(boolean checked) {
-		return checked ? fToolTipChecked : fToolTipUnchecked;
 	}
 	
 	/**
@@ -81,7 +70,6 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 		ITextEditor editor= getTextEditor();
 		boolean checked= (editor != null && editor.showsHighlightRangeOnly());
 		setChecked(checked);
-		setToolTipText(getToolTipText(checked));
 		setEnabled(true);
 	}
 	
@@ -96,7 +84,6 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 			
 			boolean showSegments= getStore().getBoolean(IPreferencesConstants.EDITOR_SHOW_SEGMENTS);			
 			setChecked(showSegments);
-			setToolTipText(getToolTipText(showSegments));
 			
 			if (editor.showsHighlightRangeOnly() != showSegments) {
 				IRegion remembered= editor.getHighlightRange();
