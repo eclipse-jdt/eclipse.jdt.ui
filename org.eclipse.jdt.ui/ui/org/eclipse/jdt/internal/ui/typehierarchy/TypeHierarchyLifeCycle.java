@@ -92,7 +92,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	}
 		
 	public void ensureRefreshedTypeHierarchy(final IJavaElement element) throws JavaModelException {
-		if (element == null) {
+		if (element == null || !element.exists()) {
 			freeHierarchy();
 			return;
 		}
