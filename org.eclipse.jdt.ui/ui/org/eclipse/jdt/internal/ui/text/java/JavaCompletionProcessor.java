@@ -357,9 +357,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 				if (selection.y > 0)
 				collector.setReplacementLength(selection.y);
 				
-				boolean useCompletionRequestor= true;
-				// also check CodeCompletionTests.USE_COMPLETION_REQUESTOR
-				if (useCompletionRequestor)
+				if (JavaPlugin.USE_COMPLETION_REQUESTOR)
 					unit.codeComplete(offset, (CompletionRequestor) collector);
 				else
 					unit.codeComplete(offset, (ICompletionRequestor) collector);

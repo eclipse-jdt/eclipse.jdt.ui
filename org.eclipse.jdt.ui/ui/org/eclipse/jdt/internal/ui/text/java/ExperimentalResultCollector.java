@@ -11,10 +11,14 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
+
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -112,7 +116,21 @@ public class ExperimentalResultCollector extends ResultCollector {
 				lengths= new int[0];				
 			}
 			
-			return new ExperimentalProposal(buffer.toString(), start, end - start, original.getImage(), original.getDisplayString(), offsets, lengths, fTextViewer, relevance);
+			ExperimentalProposal experimental= new ExperimentalProposal(buffer.toString(), start, end - start, original.getImage(), original.getDisplayString(), offsets, lengths, fTextViewer, relevance);
+			experimental.setProposalInfo(original.getProposalInfo());
+			return experimental;
 		}
+	}
+	
+	
+	protected JavaCompletionProposal createTypeCompletion(CompletionProposal typeProposal) {
+		char[] signature= typeProposal.getSignature();
+		char[] packageName= Signature.getSignatureQualifier(signature); 
+		char[] typeName= Signature.getSignatureSimpleName(signature);
+
+		JavaCompletionProposal proposal= super.createTypeCompletion(typeProposal);
+		JavaCompletionProposal newProposal= new GenericJavaTypeProposal(proposal.getReplacementString(), fCompilationUnit, typeProposal.getReplaceStart(), typeProposal.getReplaceEnd() - typeProposal.getReplaceStart(), proposal.getImage(), proposal.getDisplayString(), fTextViewer, proposal.getRelevance(), typeProposal.getSignature(), String.valueOf(typeName), String.valueOf(packageName));
+		newProposal.setProposalInfo(proposal.getProposalInfo());
+		return newProposal;
 	}
 }

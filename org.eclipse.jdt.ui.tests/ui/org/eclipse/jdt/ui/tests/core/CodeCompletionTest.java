@@ -56,7 +56,6 @@ public class CodeCompletionTest extends CoreTests {
 	
 	private IJavaProject fJProject1;
 
-	private static final boolean USE_COMPLETION_REQUESTOR= true;
 
 	public CodeCompletionTest(String name) {
 		super(name);
@@ -112,7 +111,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	private void codeComplete(ICompilationUnit cu, int offset, ResultCollector collector) throws JavaModelException {
-		if (USE_COMPLETION_REQUESTOR)
+		if (JavaPlugin.USE_COMPLETION_REQUESTOR)
 			cu.codeComplete(offset, (CompletionRequestor) collector);
 		else
 			cu.codeComplete(offset, (ICompletionRequestor) collector);
@@ -1077,7 +1076,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 	
 	public void testEnumCompletions() throws Exception {
-		if (!USE_COMPLETION_REQUESTOR) {
+		if (!JavaPlugin.USE_COMPLETION_REQUESTOR) {
 			System.out.println("CodeCompletionTest.testEnumCompletions() disabled in legacy mode");
 			return;
 		}

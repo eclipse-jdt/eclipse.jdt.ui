@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -66,14 +67,20 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, String displayString, int relevance,
 		String typeName, String packageName)
 	{
-		super(replacementString, replacementOffset, replacementLength, image, displayString, relevance);
+		this(replacementString, cu, replacementOffset, replacementLength, image, displayString, relevance, typeName, packageName, null);
+	}
+	
+	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, String displayString, int relevance,
+		String typeName, String packageName, ITextViewer viewer)
+	{
+		super(replacementString, replacementOffset, replacementLength, image, displayString, relevance, viewer);
 		fCompilationUnit= cu;
 		fUnqualifiedTypeName= unqualify(typeName);
 		fFullyQualifiedTypeName= qualify(typeName, packageName);
 	}
 	
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
-		if (impStructure != null) {
+		if (impStructure != null && fFullyQualifiedTypeName != null && getReplacementString().startsWith(fFullyQualifiedTypeName)) {
 			IType[] types= impStructure.getCompilationUnit().getTypes();
 			if (types.length > 0 && types[0].getSourceRange().getOffset() <= offset) {
 				// ignore positions above type.

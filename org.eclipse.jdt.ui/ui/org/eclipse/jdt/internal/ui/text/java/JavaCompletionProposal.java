@@ -151,6 +151,17 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	}
 	
 	/**
+	 * Returns the additional proposal info, or <code>null</code> if none
+	 * exists.
+	 * 
+	 * @return the additional proposal info, or <code>null</code> if none
+	 *         exists
+	 */
+	public ProposalInfo getProposalInfo() {
+		return fProposalInfo;
+	}
+	
+	/**
 	 * Sets the cursor position relative to the insertion offset. By default this is the length of the completion string
 	 * (Cursor positioned after the completion)
 	 * @param cursorPosition The cursorPosition to set

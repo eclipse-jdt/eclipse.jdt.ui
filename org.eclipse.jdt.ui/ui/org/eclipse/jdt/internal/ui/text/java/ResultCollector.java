@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.codeassist.IExtendedCompletionRequestor;
 
+import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
@@ -51,7 +52,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  * Bin to collect the proposal of the infrastructure on code assist in a java text.
  */
 public class ResultCollector extends CompletionRequestor implements ICompletionRequestor, IExtendedCompletionRequestor {
-		
+	
 	private final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-', ' ' };
 	private final static char[] METHOD_TRIGGERS= new char[] { ';', ',', '.', '\t', '[', ' ' };
 	private final static char[] TYPE_TRIGGERS= new char[] { '.', '\t', '[', '(', ' ' };
@@ -93,7 +94,7 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 	/*
 	 * @see ICompletionRequestor#acceptClass
 	 */	
-	public void acceptClass(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
+	protected void internalAcceptType(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
 		if (TypeFilter.isFiltered(packageName, typeName)) {
 			return;
 		}
@@ -107,9 +108,23 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 	}
 	
 	/*
+	 * @see ICompletionRequestor#acceptClass
+	 */	
+	protected void internalAcceptType(CompletionProposal typeProposal) {
+		char[] signature= typeProposal.getSignature();
+		char[] packageName= Signature.getSignatureQualifier(signature); 
+		char[] typeName= Signature.getSignatureSimpleName(signature);
+		if (TypeFilter.isFiltered(packageName, typeName)) {
+			return;
+		}
+		
+		fTypes.add(createTypeCompletion(typeProposal));
+	}
+	
+	/*
 	 * @see ICompletionRequestor#acceptField
 	 */	
-	public void acceptField(
+	protected void internalAcceptField(
 		char[] declaringTypePackageName, char[] declaringTypeName, char[] name,
 		char[] typePackageName, char[] typeName, char[] completionName,
 		int modifiers, int start, int end, int relevance) {
@@ -140,25 +155,9 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 	}
 	
 	/*
-	 * @see ICompletionRequestor#acceptInterface
-	 */	
-	public void acceptInterface(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
-		if (TypeFilter.isFiltered(packageName, typeName)) {
-			return;
-		}
-		
-		ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, modifiers | Flags.AccInterface, false);
-		if (Flags.isDeprecated(modifiers))
-			descriptor= getDeprecatedDescriptor(descriptor);
-
-		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-		fTypes.add(createTypeCompletion(start, end, new String(completionName), descriptor, new String(typeName), new String(packageName), info, relevance));
-	}
-	
-	/*
 	 * @see ICompletionRequestor#acceptAnonymousType
 	 */
-	public void acceptAnonymousType(char[] superTypePackageName, char[] superTypeName, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames,
+	protected void internalAcceptAnonymousType(char[] superTypePackageName, char[] superTypeName, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames,
 			char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
 
 		if (TypeFilter.isFiltered(superTypePackageName, superTypeName)) {
@@ -173,7 +172,7 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 	/*
 	 * @see ICompletionRequestor#acceptKeyword
 	 */	
-	public void acceptKeyword(char[] keyword, int start, int end, int relevance) {
+	protected void internalAcceptKeyword(char[] keyword, int start, int end, int relevance) {
 		String kw= new String(keyword);
 		fKeywords.add(createCompletion(start, end, kw, null, kw, relevance));
 	}
@@ -181,7 +180,7 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 	/*
 	 * @see ICompletionRequestor#acceptLabel
 	 */	
-	public void acceptLabel(char[] labelName, int start, int end, int relevance) {
+	protected void internalAcceptLabel(char[] labelName, int start, int end, int relevance) {
 		String ln= new String(labelName);
 		fLabels.add(createCompletion(start, end, ln, null, ln, relevance));
 	}
@@ -189,7 +188,7 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 	/*
 	 * @see ICompletionRequestor#acceptLocalVariable
 	 */	
-	public void acceptLocalVariable(char[] name, char[] typePackageName, char[] typeName, int modifiers, int start, int end, int relevance) {
+	protected void internalAcceptLocalVariable(char[] name, char[] typePackageName, char[] typeName, int modifiers, int start, int end, int relevance) {
 		StringBuffer buf= new StringBuffer();
 		buf.append(name);
 		if (typeName != null) {
@@ -222,10 +221,10 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 	/*
 	 * @see ICompletionRequestor#acceptMethod
 	 */
-	public void acceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] name,
-		char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames,
-		char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers,
-		int start, int end, int relevance) {
+	protected void internalAcceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] name,
+			char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames,
+			char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers,
+			int start, int end, int relevance) {
 		
 		if (completionName == null)
 			return;
@@ -262,12 +261,62 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 		
 		fMethods.add(proposal);	
 	}
-
 	
+	protected void internalAcceptMethod(CompletionProposal method) {
+		char[] declaringTypePackageName= Signature.getSignatureQualifier(method.getDeclarationSignature());
+		char[] declaringTypeName= Signature.getSignatureSimpleName(method.getDeclarationSignature());
+		char[] name= method.getName();
+		char[] signature= SignatureUtil.unboundedSignature(method.getSignature());
+		char[][] parameterPackageNames= getParameterPackages(signature);
+		char[][] parameterTypeNames= getParameterTypes(signature);
+		char[][] parameterNames= method.findParameterNames(null) == null ? CharOperation.NO_CHAR_CHAR : method.findParameterNames(null);
+		char[] returnTypeName= Signature.getSignatureSimpleName(Signature.getReturnType(signature));
+		char[] completionName= method.getCompletion();
+		int modifiers= method.getFlags();
+		int start= method.getReplaceStart();
+		int end= method.getReplaceEnd();
+		int relevance= method.getRelevance();
+
+		if (completionName == null)
+			return;
+		
+		if (TypeFilter.isFiltered(declaringTypePackageName, declaringTypeName)) {
+			return;
+		}
+		
+		JavaCompletionProposal proposal= createMethodCallCompletion(declaringTypeName, name, parameterPackageNames, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end, relevance);
+		boolean isConstructor= returnTypeName == null || returnTypeName.length == 0;
+		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, isConstructor));
+
+		boolean hasOpeningBracket= completionName.length == 0 || (completionName.length > 0 && completionName[completionName.length - 1] == ')');
+	
+		ProposalContextInformation contextInformation= null;
+		if (hasOpeningBracket && parameterTypeNames.length > 0) {
+			contextInformation= new ProposalContextInformation();
+			contextInformation.setInformationDisplayString(getParameterSignature(parameterTypeNames, parameterNames));		
+			contextInformation.setContextDisplayString(proposal.getDisplayString());
+			contextInformation.setImage(proposal.getImage());
+			int position= (completionName.length == 0) ? fContextOffset : -1;
+			contextInformation.setContextInformationPosition(position);
+			proposal.setContextInformation(contextInformation);
+		}
+	
+		boolean userMustCompleteParameters= (contextInformation != null && completionName.length > 0);
+		char[] triggers= userMustCompleteParameters ? METHOD_WITH_ARGUMENTS_TRIGGERS : METHOD_TRIGGERS;
+		proposal.setTriggerCharacters(triggers);
+		
+		if (userMustCompleteParameters) {
+			// set the cursor before the closing bracket
+			proposal.setCursorPosition(completionName.length - 1);
+		}
+		
+		fMethods.add(proposal);	
+	}
+		
 	/*
 	 * @see ICompletionRequestor#acceptModifier
 	 */	
-	public void acceptModifier(char[] modifier, int start, int end, int relevance) {
+	protected void internalAcceptModifier(char[] modifier, int start, int end, int relevance) {
 		String mod= new String(modifier);
 		fModifiers.add(createCompletion(start, end, mod, null, mod, relevance));
 	}
@@ -275,7 +324,7 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 	/*
 	 * @see ICompletionRequestor#acceptPackage
 	 */	
-	public void acceptPackage(char[] packageName, char[] completionName, int start, int end, int relevance) {
+	protected void internalAcceptPackage(char[] packageName, char[] completionName, int start, int end, int relevance) {
 		if (TypeFilter.isFiltered(new String(packageName))) {
 			return;
 		}
@@ -284,21 +333,9 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 	}
 	
 	/*
-	 * @see ICompletionRequestor#acceptType
-	 */	
-	public void acceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end, int relevance) {
-		if (TypeFilter.isFiltered(packageName, typeName)) {
-			return;
-		}
-		
-		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-		fTypes.add(createTypeCompletion(start, end, new String(completionName), JavaPluginImages.DESC_OBJS_CLASS, new String(typeName), new String(packageName), info, relevance));
-	}
-	
-	/*
 	 * @see ICodeCompletionRequestor#acceptMethodDeclaration
 	 */
-	public void acceptMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int start, int end, int relevance) {
+	protected void internalAcceptMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int start, int end, int relevance) {
 		StringBuffer displayString= getMethodDisplayString(null, name, parameterTypeNames, parameterNames, returnTypeName);
 		displayString.append(" - "); //$NON-NLS-1$
 		displayString.append(JavaTextMessages.getFormattedString("ResultCollector.overridingmethod", new String(declaringTypeName))); //$NON-NLS-1$
@@ -328,7 +365,7 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 	/*
 	 * @see IExtendedCompletionRequestor#acceptPotentialMethodDeclaration
 	 */
-	public void acceptPotentialMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, int completionStart, int completionEnd, int relevance) {
+	protected void internalAcceptPotentialMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, int completionStart, int completionEnd, int relevance) {
 		if (fCompilationUnit == null) {
 			return;
 		}
@@ -351,7 +388,7 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 	/*
 	 * @see ICodeCompletionRequestor#acceptVariableName
 	 */
-	public void acceptVariableName(char[] typePackageName, char[] typeName, char[] name, char[] completionName, int start, int end, int relevance) {
+	protected void internalAcceptVariableName(char[] typePackageName, char[] typeName, char[] name, char[] completionName, int start, int end, int relevance) {
 		// XXX: To be revised
 		StringBuffer buf= new StringBuffer();
 		buf.append(name);
@@ -444,6 +481,37 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 		return new AnonymousTypeCompletionProposal(fJavaProject, fCompilationUnit, start, length, new String(completionName), nameBuffer.toString(), declTypeBuf.toString(), relevance);
 	}
 
+	protected JavaCompletionProposal createTypeCompletion(CompletionProposal typeProposal) {
+		char[] signature= typeProposal.getSignature();
+		char[] packageName= Signature.getSignatureQualifier(signature); 
+		char[] typeName= Signature.getSignatureSimpleName(signature);
+		
+		String completion= String.valueOf(typeProposal.getCompletion());
+		int modifiers= typeProposal.getFlags();
+		int start= typeProposal.getReplaceStart();
+		int end= typeProposal.getReplaceEnd();
+		int relevance= typeProposal.getRelevance();
+		
+		ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, modifiers, false);
+		if (Flags.isDeprecated(modifiers))
+			descriptor= getDeprecatedDescriptor(descriptor);
+
+		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append(typeName);
+		if (packageName.length > 0) {
+			buf.append(" - "); //$NON-NLS-1$
+			buf.append(packageName);
+		}
+		String name= buf.toString();
+
+		JavaCompletionProposal proposal= new JavaTypeCompletionProposal(completion, fCompilationUnit, start, getLength(start, end), getImage(descriptor), name, relevance, String.valueOf(typeName), String.valueOf(packageName));
+		proposal.setProposalInfo(info);
+		proposal.setTriggerCharacters(TYPE_TRIGGERS);
+		return proposal;
+	}
+	
 	
 	protected JavaCompletionProposal createTypeCompletion(int start, int end, String completion, ImageDescriptor descriptor, String typeName, String containerName, ProposalInfo proposalInfo, int relevance) {
 		
@@ -591,14 +659,14 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 	public void accept(CompletionProposal proposal) {
 		switch(proposal.getKind()) {
 			case CompletionProposal.KEYWORD:
-				this.acceptKeyword(
+				internalAcceptKeyword(
 						proposal.getName(),
 						proposal.getReplaceStart(),
 						proposal.getReplaceEnd(),
 						proposal.getRelevance());
 				break;
 			case CompletionProposal.PACKAGE_REF:
-				this.acceptPackage(
+				internalAcceptPackage(
 						proposal.getDeclarationSignature(),
 						proposal.getCompletion(),
 						proposal.getReplaceStart(),
@@ -606,36 +674,17 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 						proposal.getRelevance());
 				break;
 			case CompletionProposal.TYPE_REF:
-//				if((proposal.getFlags() & Flags.AccEnum) != 0) {
-//					// XXX handle enums
-//				} else 
-				if((proposal.getFlags() & Flags.AccInterface) != 0) {
-					this.acceptInterface(
-							proposal.getDeclarationSignature(),
-							Signature.getSignatureSimpleName(proposal.getSignature()),
-							proposal.getCompletion(),
-							proposal.getFlags() & ~Flags.AccInterface,
-							proposal.getReplaceStart(),
-							proposal.getReplaceEnd(),
-							proposal.getRelevance());
-				} else {
-					this.acceptClass(
-							proposal.getDeclarationSignature(),
-							Signature.getSignatureSimpleName(proposal.getSignature()),
-							proposal.getCompletion(),
-							proposal.getFlags(),
-							proposal.getReplaceStart(),
-							proposal.getReplaceEnd(),
-							proposal.getRelevance());
-				}
+				internalAcceptType(proposal);
 				break;
 			case CompletionProposal.FIELD_REF:
-				this.acceptField(
+				char[] signatureSimpleName= Signature.getSignatureSimpleName(proposal.getSignature());
+				if (signatureSimpleName == null) signatureSimpleName= CharOperation.NO_CHAR;
+				internalAcceptField(
 						Signature.getSignatureQualifier(proposal.getDeclarationSignature()),
 						Signature.getSignatureSimpleName(proposal.getDeclarationSignature()),
 						proposal.getName(),
 						Signature.getSignatureQualifier(proposal.getSignature()),
-						Signature.getSignatureSimpleName(proposal.getSignature()), 
+						signatureSimpleName, 
 						proposal.getCompletion(),
 						proposal.getFlags(),
 						proposal.getReplaceStart(),
@@ -644,24 +693,10 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 				);
 				break;
 			case CompletionProposal.METHOD_REF:
-				this.acceptMethod(
-						Signature.getSignatureQualifier(proposal.getDeclarationSignature()),
-						Signature.getSignatureSimpleName(proposal.getDeclarationSignature()),
-						proposal.getName(),
-						getParameterPackages(proposal.getSignature()),
-						getParameterTypes(proposal.getSignature()),
-						proposal.findParameterNames(null) == null ? CharOperation.NO_CHAR_CHAR : proposal.findParameterNames(null),
-						Signature.getSignatureQualifier(Signature.getReturnType(proposal.getSignature())),
-						Signature.getSignatureSimpleName(Signature.getReturnType(proposal.getSignature())),
-						proposal.getCompletion(),
-						proposal.getFlags(),
-						proposal.getReplaceStart(),
-						proposal.getReplaceEnd(),
-						proposal.getRelevance()
-				);
+				internalAcceptMethod(proposal);
 				break;
 			case CompletionProposal.METHOD_DECLARATION:
-				this.acceptMethodDeclaration(
+				internalAcceptMethodDeclaration(
 						Signature.getSignatureQualifier(proposal.getDeclarationSignature()),
 						Signature.getSignatureSimpleName(proposal.getDeclarationSignature()),
 						proposal.getName(),
@@ -678,7 +713,7 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 				);
 				break;
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
-				this.acceptAnonymousType(
+				internalAcceptAnonymousType(
 						Signature.getSignatureQualifier(proposal.getDeclarationSignature()),
 						Signature.getSignatureSimpleName(proposal.getDeclarationSignature()), 
 						getParameterPackages(proposal.getSignature()),
@@ -692,7 +727,7 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 				);
 				break;
 			case CompletionProposal.LABEL_REF :
-				this.acceptLabel(
+				internalAcceptLabel(
 						proposal.getCompletion(),
 						proposal.getReplaceStart(),
 						proposal.getReplaceEnd(),
@@ -700,10 +735,12 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 				);
 				break;
 			case CompletionProposal.LOCAL_VARIABLE_REF:
-				this.acceptLocalVariable(
+				signatureSimpleName= Signature.getSignatureSimpleName(proposal.getSignature());
+				if (signatureSimpleName == null) signatureSimpleName= CharOperation.NO_CHAR;
+				internalAcceptLocalVariable(
 						proposal.getCompletion(),
 						Signature.getSignatureQualifier(proposal.getSignature()),
-						Signature.getSignatureSimpleName(proposal.getSignature()),
+						signatureSimpleName,
 						proposal.getFlags(),
 						proposal.getReplaceStart(),
 						proposal.getReplaceEnd(),
@@ -711,10 +748,12 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 				);
 				break;
 			case CompletionProposal.VARIABLE_DECLARATION:
-				this.acceptLocalVariable(
+				signatureSimpleName= Signature.getSignatureSimpleName(proposal.getSignature());
+				if (signatureSimpleName == null) signatureSimpleName= CharOperation.NO_CHAR;
+				internalAcceptLocalVariable(
 						proposal.getCompletion(),
 						Signature.getSignatureQualifier(proposal.getSignature()),
-						Signature.getSignatureSimpleName(proposal.getSignature()),
+						signatureSimpleName,
 						proposal.getFlags(),
 						proposal.getReplaceStart(),
 						proposal.getReplaceEnd(),
@@ -722,7 +761,7 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 				);
 				break;
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
-				this.acceptPotentialMethodDeclaration(
+				internalAcceptPotentialMethodDeclaration(
 						Signature.getSignatureQualifier(proposal.getDeclarationSignature()),
 						Signature.getSignatureSimpleName(proposal.getDeclarationSignature()),
 						proposal.getName(),
@@ -734,15 +773,6 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 				
 		}
 	}	
-	public void beginReporting() {
-	}
-	
-	public void endReporting() {
-	}
-	
-	public void completionFailure(IProblem problem) {
-		fLastProblem= problem;
-	}
 	
 	private char[][] getParameterPackages(char[] methodSignature) {
 		char[][] parameterQualifiedTypes = Signature.getParameterTypes(methodSignature);
@@ -758,15 +788,153 @@ public class ResultCollector extends CompletionRequestor implements ICompletionR
 	private char[][] getParameterTypes(char[] methodSignature) {
 		char[][] parameterQualifiedTypes = Signature.getParameterTypes(methodSignature);
 		int length = parameterQualifiedTypes == null ? 0 : parameterQualifiedTypes.length;
-		char[][] parameterPackages = new char[length][];
+		char[][] parameterTypes = new char[length][];
 		for(int i = 0; i < length; i++) {
-			parameterPackages[i] = Signature.getSignatureSimpleName(parameterQualifiedTypes[i]);
+			parameterTypes[i] = Signature.getSignatureSimpleName(parameterQualifiedTypes[i]);
 		}
 
-		return parameterPackages;
+		return parameterTypes;
 	}
 
-	public void acceptError(IProblem error) {
+	/*
+	 * @see org.eclipse.jdt.core.CompletionRequestor#beginReporting()
+	 */
+	public void beginReporting() {
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.core.CompletionRequestor#endReporting()
+	 */
+	public void endReporting() {
+	}
+	
+	/* 
+	 * TODO remove once we're getting rid of ICompletionRequestor 
+	 * these are just the delegating implementation now
+	 */
+	
+	/*
+	 * @see org.eclipse.jdt.core.CompletionRequestor#completionFailure(org.eclipse.jdt.core.compiler.IProblem)
+	 */
+	public void completionFailure(IProblem problem) {
+		fLastProblem= problem;
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptAnonymousType(char[], char[], char[][], char[][], char[][], char[], int, int, int, int)
+	 */
+	public final void acceptAnonymousType(char[] superTypePackageName, char[] superTypeName, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
+		internalAcceptAnonymousType(superTypePackageName, superTypeName, parameterPackageNames, parameterTypeNames, parameterNames, completionName, modifiers, completionStart, completionEnd, relevance);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptClass(char[], char[], char[], int, int, int, int)
+	 */
+	public final void acceptClass(char[] packageName, char[] className, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
+		internalAcceptType(packageName, className, completionName, modifiers, completionStart, completionEnd, relevance);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptField(char[], char[], char[], char[], char[], char[], int, int, int, int)
+	 */
+	public final void acceptField(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[] typePackageName, char[] typeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
+		internalAcceptField(declaringTypePackageName, declaringTypeName, name, typePackageName, typeName, completionName, modifiers, completionStart, completionEnd, relevance);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptInterface(char[], char[], char[], int, int, int, int)
+	 */
+	public final void acceptInterface(char[] packageName, char[] interfaceName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
+		internalAcceptInterface(packageName, interfaceName, completionName, modifiers, completionStart, completionEnd, relevance);
+	}
+	
+	private void internalAcceptInterface(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
+		internalAcceptType(packageName, typeName, completionName, modifiers | Flags.AccInterface, start, end, relevance);
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptKeyword(char[], int, int, int)
+	 */
+	public final void acceptKeyword(char[] keywordName, int completionStart, int completionEnd, int relevance) {
+		internalAcceptKeyword(keywordName, completionStart, completionEnd, relevance);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptLabel(char[], int, int, int)
+	 */
+	public final void acceptLabel(char[] labelName, int completionStart, int completionEnd, int relevance) {
+		internalAcceptLabel(labelName, completionStart, completionEnd, relevance);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptLocalVariable(char[], char[], char[], int, int, int, int)
+	 */
+	public final void acceptLocalVariable(char[] name, char[] typePackageName, char[] typeName, int modifiers, int completionStart, int completionEnd, int relevance) {
+		internalAcceptLocalVariable(name, typePackageName, typeName, modifiers, completionStart, completionEnd, relevance);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptMethod(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int, int)
+	 */
+	public final void acceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
+		internalAcceptMethod(declaringTypePackageName, declaringTypeName, selector, parameterPackageNames, parameterTypeNames, parameterNames, returnTypePackageName, returnTypeName, completionName, modifiers, completionStart, completionEnd, relevance);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptMethodDeclaration(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int, int)
+	 */
+	public final void acceptMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
+		internalAcceptMethodDeclaration(declaringTypePackageName, declaringTypeName, selector, parameterPackageNames, parameterTypeNames, parameterNames, returnTypePackageName, returnTypeName, completionName, modifiers, completionStart, completionEnd, relevance);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptModifier(char[], int, int, int)
+	 */
+	public final void acceptModifier(char[] modifierName, int completionStart, int completionEnd, int relevance) {
+		internalAcceptModifier(modifierName, completionStart, completionEnd, relevance);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptPackage(char[], char[], int, int, int)
+	 */
+	public final void acceptPackage(char[] packageName, char[] completionName, int completionStart, int completionEnd, int relevance) {
+		internalAcceptPackage(packageName, completionName, completionStart, completionEnd, relevance);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptType(char[], char[], char[], int, int, int)
+	 */
+	public final void acceptType(char[] packageName, char[] typeName, char[] completionName, int completionStart, int completionEnd, int relevance) {
+		internalAcceptType(packageName, typeName, completionName, completionStart, completionEnd, relevance);
+	}
+
+	private void internalAcceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end, int relevance) {
+		if (TypeFilter.isFiltered(packageName, typeName)) {
+			return;
+		}
+		
+		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
+		fTypes.add(createTypeCompletion(start, end, new String(completionName), JavaPluginImages.DESC_OBJS_CLASS, new String(typeName), new String(packageName), info, relevance));
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptVariableName(char[], char[], char[], char[], int, int, int)
+	 */
+	public final void acceptVariableName(char[] typePackageName, char[] typeName, char[] name, char[] completionName, int completionStart, int completionEnd, int relevance) {
+		internalAcceptVariableName(typePackageName, typeName, name, completionName, completionStart, completionEnd, relevance);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.codeassist.IExtendedCompletionRequestor#acceptPotentialMethodDeclaration(char[], char[], char[], int, int, int)
+	 */
+	public final void acceptPotentialMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, int completionStart, int completionEnd, int relevance) {
+		internalAcceptPotentialMethodDeclaration(declaringTypePackageName, declaringTypeName, selector, completionStart, completionEnd, relevance);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.core.ICompletionRequestor#acceptError(org.eclipse.jdt.core.compiler.IProblem)
+	 */
+	public final void acceptError(IProblem error) {
 		completionFailure(error);
 	}
 }

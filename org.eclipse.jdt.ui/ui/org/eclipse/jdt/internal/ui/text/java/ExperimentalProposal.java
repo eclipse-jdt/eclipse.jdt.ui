@@ -40,24 +40,19 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 
 	private int[] fPositionOffsets;
 	private int[] fPositionLengths;
-	private ITextViewer fViewer;
 
 	private IRegion fSelectedRegion; // initialized by apply()
 		
 	/**
 	 * Creates a template proposal with a template and its context.
-	 * @param template  the template
-	 * @param context   the context in which the template was requested.
-	 * @param image     the icon of the proposal.
 	 */		
 	public ExperimentalProposal(String replacementString, int replacementOffset, int replacementLength, Image image,
 	    String displayString, int[] positionOffsets, int[] positionLengths, ITextViewer viewer, int relevance)
 	{
-		super(replacementString, replacementOffset, replacementLength, image, displayString, relevance);		
+		super(replacementString, replacementOffset, replacementLength, image, displayString, relevance, viewer);		
 
 		fPositionOffsets= positionOffsets;
 		fPositionLengths= positionLengths;
-		fViewer= viewer;
 	}
 
 	/*
@@ -69,7 +64,7 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 		int replacementOffset= getReplacementOffset();
 		String replacementString= getReplacementString();
 
-		if (fPositionOffsets.length > 0 && fViewer != null) {
+		if (fPositionOffsets.length > 0 && fTextViewer != null) {
 			try {
 				LinkedModeModel model= new LinkedModeModel();
 				for (int i= 0; i != fPositionOffsets.length; i++) {
@@ -84,8 +79,8 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 					model.addLinkingListener(new EditorHighlightingSynchronizer(editor));
 				}
 				
-				LinkedModeUI ui= new EditorLinkedModeUI(model, fViewer);
-				ui.setExitPosition(fViewer, replacementOffset + replacementString.length(), 0, Integer.MAX_VALUE);
+				LinkedModeUI ui= new EditorLinkedModeUI(model, fTextViewer);
+				ui.setExitPosition(fTextViewer, replacementOffset + replacementString.length(), 0, Integer.MAX_VALUE);
 				ui.setDoContextInfo(true);
 				ui.enter();
 	
@@ -124,7 +119,7 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 	}
 
 	private void openErrorDialog(BadLocationException e) {
-		Shell shell= fViewer.getTextWidget().getShell();
+		Shell shell= fTextViewer.getTextWidget().getShell();
 		MessageDialog.openError(shell, JavaTextMessages.getString("ExperimentalProposal.error.msg"), e.getMessage()); //$NON-NLS-1$
 	}	
 

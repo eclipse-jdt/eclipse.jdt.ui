@@ -132,6 +132,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	private static final String CODE_TEMPLATES_MIGRATION_KEY= "org.eclipse.jdt.ui.text.code_templates_migrated"; //$NON-NLS-1$
 	
+	/**
+	 * Temporary predicate, <code>true</code> if the new completion requestor should be used.
+	 */
+	public static final boolean USE_COMPLETION_REQUESTOR= true;
+	
 	private static JavaPlugin fgJavaPlugin;
 	
 	private static LinkedHashMap fgRepeatedMessages= new LinkedHashMap(20, 0.75f, true) {
