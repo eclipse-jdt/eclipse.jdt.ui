@@ -780,6 +780,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 		return null;
 	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#getInputElement()
+	 */
+	protected IJavaElement getInputJavaElement() {
+		return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(getEditorInput());
+	}
 	
 	/*
 	 * @see AbstractTextEditor#editorContextMenuAboutToShow(IMenuManager)
