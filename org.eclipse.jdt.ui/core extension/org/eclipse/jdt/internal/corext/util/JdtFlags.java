@@ -105,7 +105,7 @@ public class JdtFlags {
 			return ((TypeDeclaration)bodyDeclaration).getModifiers();
 		else if (bodyDeclaration instanceof Initializer)
 			return ((Initializer)bodyDeclaration).getModifiers();
-		Assert.isTrue(false, "unexpected type of BodyDeclaration");
+		Assert.isTrue(false, "unexpected type of BodyDeclaration"); //$NON-NLS-1$
 		return -1;
 	}
 
