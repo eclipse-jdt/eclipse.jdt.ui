@@ -231,7 +231,7 @@ public class PullUpRefactoring extends Refactoring {
 	private Set fCachedSkippedSuperclasses;
 
 	private PullUpRefactoring(IMember[] elements, CodeGenerationSettings preferenceSettings){
-		Assert.isTrue(elements.length > 0);
+		Assert.isNotNull(elements);
 		Assert.isNotNull(preferenceSettings);
 		fMembersToPullUp= elements;
 		fMethodsToDelete= new IMethod[0];
@@ -241,17 +241,35 @@ public class PullUpRefactoring extends Refactoring {
 		fCreateMethodStubs= true;
 	}
 	
-	public static PullUpRefactoring create(IMember[] elements, CodeGenerationSettings preferenceSettings) throws JavaModelException{
-		if (! isAvailable(elements))
+	public static PullUpRefactoring create(IMember[] members, CodeGenerationSettings preferenceSettings) throws JavaModelException{
+		if (! isAvailable(members))
 			return null;
-		return new PullUpRefactoring(elements, preferenceSettings);
+		if (isOneTypeWithPullableMembers(members)) {
+			PullUpRefactoring result= new PullUpRefactoring(new IMember[0], preferenceSettings);
+			result.fCachedDeclaringType= getSingleTopLevelType(members);
+			return result;
+		}
+		return new PullUpRefactoring(members, preferenceSettings);
 	}
 	
 	public static boolean isAvailable(IMember[] members) throws JavaModelException{
+		if (isOneTypeWithPullableMembers(members))
+			return true;
 		return 	members != null && 
 			   	members.length != 0 &&
 				areAllPullable(members) &&
 				haveCommonDeclaringType(members);
+	}
+	
+	private static boolean isOneTypeWithPullableMembers(IMember[] members) throws JavaModelException {
+		IType singleTopLevelType= getSingleTopLevelType(members);
+		return (singleTopLevelType != null && getPullableMembers(singleTopLevelType).length != 0);
+	}
+	
+	private static IType getSingleTopLevelType(IMember[] members) {
+		if (members != null && members.length == 1 && Checks.isTopLevelType(members[0]))
+			return (IType)members[0];
+		return null;
 	}
 	
 	/*
@@ -318,23 +336,28 @@ public class PullUpRefactoring extends Refactoring {
 		if (fCachedDeclaringType != null)
 			return fCachedDeclaringType;
 		//all members declared in same type - checked in precondition
-		fCachedDeclaringType= (IType)WorkingCopyUtil.getOriginal(fMembersToPullUp[0].getDeclaringType()); //index safe - checked in constructor
+		Assert.isTrue(fMembersToPullUp.length > 0);//ensured by constructor
+		fCachedDeclaringType= (IType)WorkingCopyUtil.getOriginal(fMembersToPullUp[0].getDeclaringType()); 
 		return fCachedDeclaringType;
 	}
 	
 	public IMember[] getPullableMembersOfDeclaringType() {
 		try{
-			List list= new ArrayList(3);
-			addAllPullable(getDeclaringType().getFields(), list);
-			addAllPullable(getDeclaringType().getMethods(), list);
-			addAllPullable(getDeclaringType().getTypes(), list);
-			return (IMember[]) list.toArray(new IMember[list.size()]);
+			return getPullableMembers(getDeclaringType());
 		} catch (JavaModelException e){
 			return new IMember[0];
 		}	
 	}
 	
-	private void addAllPullable(IMember[] members, List list) throws JavaModelException{
+	private static IMember[] getPullableMembers(IType type) throws JavaModelException {
+		List list= new ArrayList(3);
+		addAllPullable(type.getFields(), list);
+		addAllPullable(type.getMethods(), list);
+		addAllPullable(type.getTypes(), list);
+		return (IMember[]) list.toArray(new IMember[list.size()]);
+	}
+
+	private static void addAllPullable(IMember[] members, List list) throws JavaModelException{
 		for (int i= 0; i < members.length; i++) {
 			if (isPullable(members[i]))
 				list.add(members[i]);
@@ -1281,7 +1304,7 @@ public class PullUpRefactoring extends Refactoring {
 	private void addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
 		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
 		TextEdit resultingEdits= new MultiTextEdit();
-		rewrite.rewriteNode(textBuffer, resultingEdits, null);
+		rewrite.rewriteNode(textBuffer, resultingEdits);
 
 		TextChange textChange= manager.get(cu);
 		if (fImportEditManager.hasImportEditFor(cu))
@@ -1531,7 +1554,7 @@ public class PullUpRefactoring extends Refactoring {
 
 	private BodyDeclaration createNewTypeDeclarationNode(IType type, CompilationUnit declaringCuNode, ASTRewrite rewrite) throws JavaModelException {
 		TypeDeclaration oldType= ASTNodeSearchUtil.getTypeDeclarationNode(type, declaringCuNode);
-		return (BodyDeclaration)createPlaceholderForTypeDeclaration(oldType, getDeclaringWorkingCopy(), rewrite, true);
+		return createPlaceholderForTypeDeclaration(oldType, getDeclaringWorkingCopy(), rewrite, true);
 	}
 
 	private void copyMethodToTargetClass(IMethod method, CompilationUnit declaringCuNode, TypeDeclaration targetClass, ASTRewrite targetRewrite, IProgressMonitor pm) throws JavaModelException {

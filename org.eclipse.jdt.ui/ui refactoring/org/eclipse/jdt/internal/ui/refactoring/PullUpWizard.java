@@ -69,6 +69,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.PlatformUI;
@@ -162,7 +163,7 @@ public class PullUpWizard extends RefactoringWizard {
 					return;
 				Assert.isTrue(mac.isMethodInfo());
 				mac.setAction(action);
-				PullUpInputPage1.this.updateUIElements(null);
+				PullUpInputPage1.this.updateUIElements(null, true);
 			}
 		}
 
@@ -498,12 +499,12 @@ public class PullUpWizard extends RefactoringWizard {
 				int initialSelectionIndex= getInitialSelectionIndexForEditDialog(stringMapping, keys);
 				ComboSelectionDialog dialog= new ComboSelectionDialog(getShell(), shellTitle, labelText, keys, initialSelectionIndex);
 				dialog.setBlockOnOpen(true);
-				if (dialog.open() == Dialog.CANCEL)
+				if (dialog.open() == Window.CANCEL)
 					return;
 				int action= ((Integer)stringMapping.get(dialog.getSelectedString())).intValue();
 				setInfoAction(getSelectedMemberActionInfos(), action);
 			} finally{
-				updateUIElements(preserved);
+				updateUIElements(preserved, true);
 			}
 		}
 
@@ -555,13 +556,13 @@ public class PullUpWizard extends RefactoringWizard {
 			result.put(actionLabels[actionIndex], new Integer(actionIndex));
 		}
 
-		private void updateUIElements(ISelection preserved) {
+		private void updateUIElements(ISelection preserved, boolean displayErrorMessage) {
 			fTableViewer.refresh();
 			if (preserved != null){
 				fTableViewer.getControl().setFocus();
 				fTableViewer.setSelection(preserved);
 			}
-			checkPageCompletionStatus();
+			checkPageCompletionStatus(displayErrorMessage);
 			updateButtonEnablementState(fTableViewer.getSelection());
 			updateStatusLine();
 		}
@@ -597,7 +598,7 @@ public class PullUpWizard extends RefactoringWizard {
 				PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, new IRunnableWithProgress() {
 					public void run(IProgressMonitor pm) throws InvocationTargetException {
 						try {
-							markAsMembersToPullUp(getPullUpRefactoring().getAdditionalRequiredMembersToPullUp(pm));						
+							markAsMembersToPullUp(getPullUpRefactoring().getAdditionalRequiredMembersToPullUp(pm), true);						
 						} catch (JavaModelException e) {
 							throw new InvocationTargetException(e);
 						} finally {
@@ -652,7 +653,7 @@ public class PullUpWizard extends RefactoringWizard {
 						info.setAction(MemberActionInfo.PULL_UP_ACTION);
 					else
 						info.setAction(MemberActionInfo.NO_ACTION);
-					updateUIElements(null);
+					updateUIElements(null, true);
 				}
 			});
 			fTableViewer.addDoubleClickListener(new IDoubleClickListener(){
@@ -663,7 +664,7 @@ public class PullUpWizard extends RefactoringWizard {
 
 		
 			setTableInput();
-			markAsMembersToPullUp(getPullUpRefactoring().getMembersToPullUp());
+			markAsMembersToPullUp(getPullUpRefactoring().getMembersToPullUp(), false);
 			setupCellEditors(table);
 		}
 
@@ -722,9 +723,10 @@ public class PullUpWizard extends RefactoringWizard {
 			fTableViewer.setColumnProperties(new String[] {MEMBER_PROPERTY, ACTION_PROPERTY});
 		}
 		
-		private void checkPageCompletionStatus() {
+		private void checkPageCompletionStatus(boolean displayErrorMessage) {
 			if (areAllMembersMarkedAsWithNoAction()){
-				setErrorMessage(RefactoringMessages.getString("PullUpInputPage1.Select_members_to_pull_up")); //$NON-NLS-1$
+				if (displayErrorMessage)
+					setErrorMessage(RefactoringMessages.getString("PullUpInputPage1.Select_members_to_pull_up")); //$NON-NLS-1$
 				setPageComplete(false);
 			} else {
 				setErrorMessage(null);
@@ -782,9 +784,9 @@ public class PullUpWizard extends RefactoringWizard {
 			return fSuperclasses[fSuperclassCombo.getSelectionIndex()];
 		}
 
-		private void markAsMembersToPullUp(IMember[] elements){
+		private void markAsMembersToPullUp(IMember[] elements, boolean displayErrorMessage){
 			setActionForMembers(elements, MemberActionInfo.PULL_UP_ACTION);
-			updateUIElements(null);
+			updateUIElements(null, displayErrorMessage);
 		}
 		
 		private void setActionForMembers(IMember[] members, int action){
