@@ -247,12 +247,12 @@ public class ReorgCorrectionsSubProcessor {
 		return null;
 	}
 	
-	private static class ChangeTo50Compilace extends ChangeCorrectionProposal {
+	private static class ChangeTo50Compliance extends ChangeCorrectionProposal {
 	
 		private final IJavaProject fProject;
 		
-		public ChangeTo50Compilace(String name, IJavaProject project) {
-			super(name, null, 5, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+		public ChangeTo50Compliance(String name, IJavaProject project, int relevance) {
+			super(name, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 			fProject= project;
 		}
 		
@@ -274,9 +274,12 @@ public class ReorgCorrectionsSubProcessor {
 	public static void getNeed50ComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 		String label1= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.50_project_compliance.description"); //$NON-NLS-1$
-		proposals.add(new ChangeTo50Compilace(label1, cu.getJavaProject()));
-		String label2= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.50_workspace_compliance.description"); //$NON-NLS-1$
-		proposals.add(new ChangeTo50Compilace(label2, null));
+		proposals.add(new ChangeTo50Compliance(label1, cu.getJavaProject(), 5));
+		
+		if (cu.getJavaProject().getOption(JavaCore.COMPILER_COMPLIANCE, false) == null) {
+			String label2= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.50_workspace_compliance.description"); //$NON-NLS-1$
+			proposals.add(new ChangeTo50Compliance(label2, null, 6));
+		}
 	}
 	
 }
