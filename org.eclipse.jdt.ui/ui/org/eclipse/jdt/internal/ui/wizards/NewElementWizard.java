@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
 
 import org.eclipse.ui.INewWizard;
@@ -72,9 +71,11 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 	/**
 	 * Subclasses should override to perform the actions of the wizard.
 	 * This method is run in the wizard container's context as a workspace runnable.
+	 * @param monitor
+	 * @throws InterruptedException
+	 * @throws CoreException
 	 */
-	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
-	}
+	protected abstract void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException;
 	
 	protected void handleFinishException(Shell shell, InvocationTargetException e) {
 		String title= NewWizardMessages.getString("NewElementWizard.op_error.title"); //$NON-NLS-1$
@@ -116,7 +117,7 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 			}
 			String title= NewWizardMessages.getString("NewElementWizard.typecomment.deprecated.title"); //$NON-NLS-1$
 			String message= NewWizardMessages.getString("NewElementWizard.typecomment.deprecated.message"); //$NON-NLS-1$
-			OptionalMessageDialog.open(key, getShell(), title, Window.getDefaultImage(), message, MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0);
+			OptionalMessageDialog.open(key, getShell(), title, null, message, MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0);
 		}
 	}
 

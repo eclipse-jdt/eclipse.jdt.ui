@@ -54,7 +54,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 
@@ -176,7 +175,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 		if (fJSWPage.generateAnt()) {
 			//@Improve: make a better message
-			OptionalMessageDialog.open(JAVADOC_ANT_INFORMATION_DIALOG, getShell(), JavadocExportMessages.getString("JavadocWizard.antInformationDialog.title"), Window.getDefaultImage(), JavadocExportMessages.getString("JavadocWizard.antInformationDialog.message"), MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0); //$NON-NLS-1$ //$NON-NLS-2$
+			OptionalMessageDialog.open(JAVADOC_ANT_INFORMATION_DIALOG, getShell(), JavadocExportMessages.getString("JavadocWizard.antInformationDialog.title"), null, JavadocExportMessages.getString("JavadocWizard.antInformationDialog.message"), MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0); //$NON-NLS-1$ //$NON-NLS-2$
 			try {
 				fStore.createXML();
 			} catch (CoreException e) {
@@ -271,6 +270,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	 * files. The user is then asked to confirm if those resources should be saved or
 	 * not.
 	 * 
+	 * @param elements
 	 * @return <code>true</code> if all preconditions are satisfied otherwise false
 	 */
 	private boolean checkPreconditions(IJavaElement[] elements) {
@@ -291,6 +291,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	 * Returns the files which are not saved and which are
 	 * part of the files being exported.
 	 * 
+	 * @param resources
 	 * @return an array of unsaved files
 	 */
 	private IFile[] getUnsavedFiles(List resources) {
@@ -313,6 +314,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	 * Asks to confirm to save the modified resources
 	 * and save them if OK is pressed. Must be run in the display thread.
 	 * 
+	 * @param dirtyFiles
 	 * @return true if user pressed OK and save was successful.
 	 */
 	private boolean saveModifiedResourcesIfUserConfirms(IFile[] dirtyFiles) {
@@ -332,6 +334,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	/**
 	 * Asks the user to confirm to save the modified resources.
 	 * 
+	 * @param dirtyFiles
 	 * @return true if user pressed OK.
 	 */
 	private boolean confirmSaveModifiedResources(IFile[] dirtyFiles) {
@@ -359,7 +362,10 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	/**
 	 * Save all of the editors in the workbench.  Must be run in the display thread.
 	 * 
+	 * @param dirtyFiles
 	 * @return true if successful.
+	 * @throws CoreException
+	 * @throws InvocationTargetException
 	 */
 	private boolean saveModifiedResources(final IFile[] dirtyFiles) throws CoreException, InvocationTargetException {
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
