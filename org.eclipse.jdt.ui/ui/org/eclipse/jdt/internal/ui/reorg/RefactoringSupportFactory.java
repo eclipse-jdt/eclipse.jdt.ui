@@ -15,7 +15,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.cus.RenameCompilationUnitRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.packageroots.RenameSourceFolderRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.packages.RenamePackageRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.projects.RenameResourceRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.resources.RenameResourceRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.projects.RenameProjectRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
@@ -28,6 +28,8 @@ import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jdt.internal.core.refactoring.resources.*;
+
 
 
 public class RefactoringSupportFactory {
