@@ -21,7 +21,6 @@ import java.util.Set;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -82,6 +81,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -732,11 +732,11 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				parameterized.typeArguments().add(ast.newSimpleType(ast.newSimpleName(parameters[index].getElementName())));
 			type= parameterized;
 		}
-		final TextEditGroup group= rewrite.createGroupDescription(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.change_signature")); //$NON-NLS-1$
+		final ASTRewrite rewriter= rewrite.getASTRewrite();
 		if (declaration instanceof TypeDeclaration)
-			rewrite.getASTRewrite().getListRewrite(declaration, TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY).insertLast(type, group);
+			rewriter.getListRewrite(declaration, TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY).insertLast(type, null);
 		else if (declaration instanceof EnumDeclaration)
-			rewrite.getASTRewrite().getListRewrite(declaration, EnumDeclaration.SUPER_INTERFACE_TYPES_PROPERTY).insertLast(type, group);
+			rewriter.getListRewrite(declaration, EnumDeclaration.SUPER_INTERFACE_TYPES_PROPERTY).insertLast(type, null);
 	}
 
 	/**
@@ -770,7 +770,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					names[index]= parameters[index].getElementName();
 				typeComment= CodeGeneration.getTypeComment(copy, fSubType.getTypeQualifiedName('.'), names, delimiter);
 				fileComment= CodeGeneration.getFileComment(copy, delimiter);
-
 			}
 			final StringBuffer buffer= new StringBuffer(64);
 			createTypeDeclaration(sourceRewrite, declaration, buffer, status, new SubProgressMonitor(monitor, 1));
@@ -783,6 +782,20 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					buffer.insert(0, "package " + fSubType.getPackageFragment().getElementName() + ";"); //$NON-NLS-1$//$NON-NLS-2$
 				}
 				source= buffer.toString();
+			}
+			final IDocument document= new Document(source);
+			final TextEdit edit= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, source, 0, delimiter, copy.getJavaProject().getOptions(true));
+			if (edit != null) {
+				try {
+					edit.apply(document, TextEdit.UPDATE_REGIONS);
+				} catch (MalformedTreeException exception) {
+					JavaPlugin.log(exception);
+					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.internal_error"))); //$NON-NLS-1$
+				} catch (BadLocationException exception) {
+					JavaPlugin.log(exception);
+					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.internal_error"))); //$NON-NLS-1$
+				}
+				source= document.get();
 			}
 		} finally {
 			monitor.done();
@@ -1130,8 +1143,10 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 														edit.apply(document, TextEdit.UPDATE_REGIONS);
 													} catch (MalformedTreeException exception) {
 														JavaPlugin.log(exception);
+														status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.internal_error"))); //$NON-NLS-1$
 													} catch (BadLocationException exception) {
 														JavaPlugin.log(exception);
+														status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.internal_error"))); //$NON-NLS-1$
 													}
 													fSuperSource= document.get();
 													manager.remove(superUnit);
@@ -1142,7 +1157,8 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 								}
 							}
 						} catch (JavaModelException exception) {
-							status.merge(RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage()));
+							JavaPlugin.log(exception);
+							status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractInterfaceProcessor.internal_error"))); //$NON-NLS-1$
 						}
 					}
 
