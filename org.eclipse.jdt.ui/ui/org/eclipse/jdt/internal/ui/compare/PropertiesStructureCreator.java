@@ -157,9 +157,11 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		return false;
 	}
 	
+	/*
 	public void rewriteTree(Differencer differencer, IDiffContainer root) {
 		// empty implementation
 	}
+	*/
 	
 	public String getContents(Object node, boolean ignoreWhitespace) {
 		if (node instanceof IStreamContentAccessor) {
@@ -275,8 +277,20 @@ public class PropertiesStructureCreator implements IStructureCreator {
 	    		String value= ""; //$NON-NLS-1$
 				if (separatorPos < len)
 					value= convert(line.substring(valuePos, len));
-						    		
-	    		int length= (args[1]-1) - start;
+										    		
+	    		int length= args[1] - start;
+	    		
+				try {
+					String s= doc.get(start, length);
+					for (int i= s.length()-1; i >= 0; i--) {
+						char c= s.charAt(i);
+						if (c !='\r' && c != '\n')
+							break;
+						length--;
+					}
+				} catch (BadLocationException e) {
+				}
+	    		
 	     		new PropertyNode(root, 0, key, value, doc, start, length);
  				start= -1;
    			}
