@@ -402,10 +402,10 @@ public class ImportsStructure implements IImportsStructure {
 			String replaceString= getReplaceString(buffer, textRange);
 			if (replaceString != null) {
 				buffer.replace(textRange, replaceString);
+				if (save) {
+					TextBuffer.commitChanges(buffer, true, null);
+				}
 			}		
-			if (save) {
-				TextBuffer.commitChanges(buffer, true, null);
-			}
 		} finally {
 			if (buffer != null) {
 				TextBuffer.release(buffer);
