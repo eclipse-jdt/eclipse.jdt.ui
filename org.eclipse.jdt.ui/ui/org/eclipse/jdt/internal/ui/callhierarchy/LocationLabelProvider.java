@@ -40,10 +40,6 @@ class LocationLabelProvider extends LabelProvider implements ITableLabelProvider
         return getColumnImage(element, COLUMN_ICON);
     }
     
-    /**
-     * @param string
-     * @return String
-     */
     private String removeWhitespaceOutsideStringLiterals(CallLocation callLocation) {
         StringBuffer buf = new StringBuffer();
         boolean withinString = false;

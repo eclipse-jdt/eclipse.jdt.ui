@@ -269,7 +269,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     /**
      * called from ToggleCallModeAction.
-     * @param orientation CALL_MODE_CALLERS or CALL_MODE_CALLEES
+     * @param mode CALL_MODE_CALLERS or CALL_MODE_CALLEES
      */
     void setCallMode(int mode) {
         if (fCurrentCallMode != mode) {
@@ -390,9 +390,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			}
 		}
 	}
-    /**
-     * @param PAGE_EMPTY
-     */
+
     private void showPage(int page) {
         if (page == PAGE_EMPTY) {
             fPagebook.showPage(fNoHierarchyShownLabel);

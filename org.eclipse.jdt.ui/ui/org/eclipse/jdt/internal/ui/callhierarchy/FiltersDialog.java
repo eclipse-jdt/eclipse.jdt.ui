@@ -163,8 +163,6 @@ class FiltersDialog extends StatusDialog {
     
     /**
      * Updates the given filter from the UI state.
-     *
-     * @param filter the filter to update
      */
     private void updateFilterFromUI() {
         int maxCallDepth = Integer.parseInt(this.fMaxCallDepth.getText());
@@ -176,8 +174,6 @@ class FiltersDialog extends StatusDialog {
     
     /**
      * Updates the UI state from the given filter.
-     *
-     * @param filter the filter to use
      */
     private void updateUIFromFilter() {
       fMaxCallDepth.setText(String.valueOf(CallHierarchyUI.getDefault().getMaxCallDepth()));

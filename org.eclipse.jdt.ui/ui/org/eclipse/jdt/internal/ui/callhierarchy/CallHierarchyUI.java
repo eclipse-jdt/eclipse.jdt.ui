@@ -180,10 +180,6 @@ public class CallHierarchyUI {
         }
     }
 
-    /**
-     * @param elem
-     * @return
-     */
     public static IEditorPart isOpenInEditor(Object elem) {
         IJavaElement javaElement= null;
         if (elem instanceof MethodWrapper) {

@@ -81,10 +81,6 @@ class SearchScopeActionGroup extends ActionGroup {
 		fillContextMenu(actionBars.getMenuManager());
 	}
 	
-	/**
-	 * @param set
-	 * @param b
-	 */
 	protected void setActiveWorkingSets(IWorkingSet[] sets) {
 		if (sets != null) {
 			fSelectedWorkingSetNames = getWorkingSetNames(sets);
@@ -95,9 +91,6 @@ class SearchScopeActionGroup extends ActionGroup {
 		}
 	}
 	
-	/**
-	 * @param sets
-	 */
 	private String[] getWorkingSetNames(IWorkingSet[] sets) {
 		String[] result= new String[sets.length];
 		for (int i = 0; i < sets.length; i++) {
@@ -106,9 +99,6 @@ class SearchScopeActionGroup extends ActionGroup {
 		return result;
 	}
 	
-	/**
-	 * @return
-	 */
 	protected IWorkingSet[] getActiveWorkingSets() {
 		if (fSelectedWorkingSetNames != null) {
 			return getWorkingSets(fSelectedWorkingSetNames);
@@ -157,9 +147,6 @@ class SearchScopeActionGroup extends ActionGroup {
 		}
 	}
 	
-	/**
-	 * @return CallHierarchyViewPart
-	 */
 	protected CallHierarchyViewPart getView() {
 		return fView;
 	}
@@ -205,9 +192,6 @@ class SearchScopeActionGroup extends ActionGroup {
 		menu.appendToGroup(IContextMenuConstants.GROUP_SEARCH, javaSearchMM);
 	}
 	
-	/**
-	 * @return SearchScopeAction[]
-	 */
 	private Action[] getActions() {
 		List actions = new ArrayList(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 4);
 		addAction(actions, fSearchScopeWorkspaceAction);
@@ -234,9 +218,6 @@ class SearchScopeActionGroup extends ActionGroup {
 		return result;
 	}
 	
-	/**
-	 * @param result
-	 */
 	private void ensureExactlyOneCheckedAction(Action[] result) {
 		int checked = getCheckedActionCount(result);
 		if (checked != 1) {
@@ -250,10 +231,6 @@ class SearchScopeActionGroup extends ActionGroup {
 		}
 	}
 	
-	/**
-	 * @param result
-	 * @return
-	 */
 	private int getCheckedActionCount(Action[] result) {
 		// Ensure that exactly one action is selected
 		int checked= 0;
@@ -276,9 +253,6 @@ class SearchScopeActionGroup extends ActionGroup {
 		actions.add(action);
 	}
 	
-	/**
-	 * @param view
-	 */
 	private void createActions() {
 		fSearchScopeWorkspaceAction = new SearchScopeWorkspaceAction(this);
 		fSelectWorkingSetAction = new SelectWorkingSetAction(this);
@@ -295,9 +269,6 @@ class SearchScopeActionGroup extends ActionGroup {
 		setSelected(getSearchScopeAction(searchScopeType, workingSetNames), false);
 	}
 	
-	/**
-	 * @param memento
-	 */
 	public void saveState(IMemento memento) {
 		int type= getSearchScopeType();
 		memento.putInteger(TAG_SEARCH_SCOPE_TYPE, type);
@@ -310,9 +281,6 @@ class SearchScopeActionGroup extends ActionGroup {
 		}
 	}
 	
-	/**
-	 * @param memento
-	 */
 	public void restoreState(IMemento memento) {
 		String[] workingSetNames= null;
 		Integer scopeType= memento.getInteger(TAG_SEARCH_SCOPE_TYPE);
@@ -330,10 +298,6 @@ class SearchScopeActionGroup extends ActionGroup {
 		setSelected(getSearchScopeAction(scopeType.intValue(), workingSetNames), false);
 	}
 	
-	/**
-	 * @param i
-	 * @return
-	 */
 	private SearchScopeAction getSearchScopeAction(int searchScopeType, String[] workingSetNames) {
 		switch (searchScopeType) {
 			case SEARCH_SCOPE_TYPE_WORKSPACE: 
@@ -352,9 +316,6 @@ class SearchScopeActionGroup extends ActionGroup {
 		return null;
 	}
 	
-	/**
-	 * @return
-	 */
 	private int getSearchScopeType() {
 		if (fSelectedAction != null) {
 			return fSelectedAction.getSearchScopeType();
@@ -369,7 +330,7 @@ class SearchScopeActionGroup extends ActionGroup {
 	/**
 	 * Determines whether the specified working sets correspond to the currently selected working sets.
 	 * @param workingSets
-	 * @return
+	 * @return Returns true if the specified working sets correspond to the currently selected working sets
 	 */
 	private boolean isSelectedWorkingSet(IWorkingSet[] workingSets) {
 		if (fSelectedWorkingSetNames != null && fSelectedWorkingSetNames.length == workingSets.length) {
