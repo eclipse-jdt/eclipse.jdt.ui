@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
@@ -82,17 +83,6 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	    public int compare(Object left, Object right) {
 	     	String leftString= (String) left;
 	     	String rightString= (String) right;
-	     	
-	     	// XXX workaround for 6385
-	     	if (leftString.length() == 0) {
-	     	    JavaPlugin.log(new StringIndexOutOfBoundsException("type name was empty"));
-	     		return -1;
-	     	}
-	     	// XXX	
-	     	if (rightString.length() == 0) {
-	     	    JavaPlugin.log(new StringIndexOutOfBoundsException("type name was empty"));
-	     		return +1;
-	     	}
 	     		     	
 	     	if (Character.isLowerCase(leftString.charAt(0)) &&
 	     		!Character.isLowerCase(rightString.charAt(0)))
@@ -160,15 +150,23 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 		AllTypesSearchEngine engine= new AllTypesSearchEngine(JavaPlugin.getWorkspace());
 		
 		List typeList= engine.searchTypes(fRunnableContext, fScope, fStyle);
+
+		// #6385 workaround: filter out anonymous (!) classes
+		List filteredList= new ArrayList(typeList.size());
+		for (Iterator iterator = typeList.iterator(); iterator.hasNext();) {
+            TypeInfo info = (TypeInfo) iterator.next();
+            if (info.getTypeName().length() != 0)
+	            filteredList.add(info);
+        }
 		
-		if (typeList.isEmpty()) {
+		if (filteredList.isEmpty()) {
 			String title= JavaUIMessages.getString("TypeSelectionDialog.notypes.title"); //$NON-NLS-1$
 			String message= JavaUIMessages.getString("TypeSelectionDialog.notypes.message"); //$NON-NLS-1$
 			MessageDialog.openInformation(getShell(), title, message);
 			return CANCEL;
 		}
 			
-		TypeInfo[] typeRefs= (TypeInfo[])typeList.toArray(new TypeInfo[typeList.size()]);
+		TypeInfo[] typeRefs= (TypeInfo[])filteredList.toArray(new TypeInfo[filteredList.size()]);
 		setElements(typeRefs);
 
 		return super.open();
