@@ -109,7 +109,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
         if (!ActionUtil.isProcessable(getShell(), input))
             return;     
         
-        IJavaElement[] elements= SelectionConverter.codeResolveOrInputHandled(fEditor, getShell(), getDialogTitle());
+        IJavaElement[] elements= SelectionConverter.codeResolveOrInputHandled(fEditor, getShell(), getErrorDialogTitle());
         if (elements == null)
             return;
         List candidates= new ArrayList(elements.length);
@@ -164,7 +164,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
 
         if (!(input instanceof IJavaElement)) {
             IStatus status= createStatus(CallHierarchyMessages.getString("OpenCallHierarchyAction.messages.no_java_element")); //$NON-NLS-1$
-            ErrorDialog.openError(getShell(), getDialogTitle(), CallHierarchyMessages.getString("OpenCallHierarchyAction.messages.title"), status); //$NON-NLS-1$
+            openErrorDialog(status);
             return;
         }
         IJavaElement element= (IJavaElement) input;
@@ -176,20 +176,26 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
         if (status.isOK()) {
             run((IJavaElement[]) result.toArray(new IJavaElement[result.size()]));
         } else {
-            ErrorDialog.openError(getShell(), getDialogTitle(), CallHierarchyMessages.getString("OpenCallHierarchyAction.messages.title"), status); //$NON-NLS-1$
+            openErrorDialog(status);
         }
     }
     
-    public void run(IJavaElement[] elements) {
+    private int openErrorDialog(IStatus status) {
+        String message= CallHierarchyMessages.getString("OpenCallHierarchyAction.messages.title"); //$NON-NLS-1$
+        String dialogTitle= getErrorDialogTitle();
+        return ErrorDialog.openError(getShell(), dialogTitle, message, status);
+	}
+
+    private static String getErrorDialogTitle() {
+        return CallHierarchyMessages.getString("OpenCallHierarchyAction.dialog.title"); //$NON-NLS-1$
+    }
+    
+	public void run(IJavaElement[] elements) {
         if (elements.length == 0) {
             getShell().getDisplay().beep();
             return;
         }
         CallHierarchyUI.open(elements, getSite().getWorkbenchWindow());
-    }
-    
-    private static String getDialogTitle() {
-        return CallHierarchyMessages.getString("OpenCallHierarchyAction.dialog.title"); //$NON-NLS-1$
     }
     
     private static IStatus compileCandidates(List result, IJavaElement elem) {

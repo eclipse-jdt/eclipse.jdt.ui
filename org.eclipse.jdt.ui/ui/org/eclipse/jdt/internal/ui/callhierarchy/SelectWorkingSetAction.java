@@ -49,8 +49,8 @@ class SelectWorkingSetAction extends Action {
 			}
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, JavaPlugin.getActiveWorkbenchShell(), 
-					CallHierarchyMessages.getString("SelectWorkingSetAction.queryWorkingSets.title"), //$NON-NLS-1$
-					CallHierarchyMessages.getString("SelectWorkingSetAction.queryWorkingSets.message")); //$NON-NLS-1$
+					CallHierarchyMessages.getString("SelectWorkingSetAction.error.title"), //$NON-NLS-1$
+					CallHierarchyMessages.getString("SelectWorkingSetAction.error.message")); //$NON-NLS-1$
 		}
 	}
 }

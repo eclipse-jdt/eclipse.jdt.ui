@@ -44,8 +44,8 @@ class HistoryAction extends Action {
         setText(elementName);
         setImageDescriptor(getImageDescriptor(element));
 
-        setDescription(CallHierarchyMessages.getFormattedString(CallHierarchyMessages.getString("HistoryAction.description"), elementName)); //$NON-NLS-1$
-        setToolTipText(CallHierarchyMessages.getFormattedString(CallHierarchyMessages.getString("HistoryAction.tooltip"), elementName)); //$NON-NLS-1$
+        setDescription(CallHierarchyMessages.getFormattedString("HistoryAction.description", elementName)); //$NON-NLS-1$
+        setToolTipText(CallHierarchyMessages.getFormattedString("HistoryAction.tooltip", elementName)); //$NON-NLS-1$
         
         WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_HISTORY_ACTION);
     }

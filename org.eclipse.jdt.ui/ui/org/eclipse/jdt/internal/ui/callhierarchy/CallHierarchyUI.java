@@ -147,13 +147,11 @@ public class CallHierarchyUI {
 
             ErrorDialog.openError(shell, title,
                 CallHierarchyMessages.getString(
-                    "CallHierarchyUI.open_in_editor.error.messageProblems"), //$NON-NLS-1$
+                    "CallHierarchyUI.open_in_editor.error.message"), //$NON-NLS-1$
                 e.getStatus());
         } catch (PartInitException x) {
             String name = callLocation.getCalledMember().getElementName();
-            MessageDialog.openError(shell,
-                CallHierarchyMessages.getString(
-                    "CallHierarchyUI.open_in_editor.error.messageProblems"), //$NON-NLS-1$
+            MessageDialog.openError(shell, title,
                 CallHierarchyMessages.getFormattedString(
                     "CallHierarchyUI.open_in_editor.error.messageArgs", //$NON-NLS-1$
                     new String[] { name, x.getMessage() }));
