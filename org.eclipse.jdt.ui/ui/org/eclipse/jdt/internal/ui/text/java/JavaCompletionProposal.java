@@ -44,6 +44,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.ILinkedListener;
 import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedUIControl;
 import org.eclipse.jface.text.link.LinkedUIControl.ExitFlags;
@@ -201,7 +202,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 						int newOffset= fReplacementOffset + fCursorPosition;
 						
 						LinkedPositionGroup group= new LinkedPositionGroup();
-						group.createPosition(document, newOffset, 0);
+						group.addPosition(new LinkedPosition(document, newOffset, 0, LinkedPositionGroup.NO_STOP));
 						
 						LinkedEnvironment env= new LinkedEnvironment();
 						env.addGroup(group);

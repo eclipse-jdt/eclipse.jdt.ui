@@ -34,6 +34,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedUIControl;
 import org.eclipse.jface.text.link.ProposalPosition;
@@ -210,7 +211,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 					for (int i= 0; i < positions.size(); i++) {
 						ITrackedNodePosition pos= (ITrackedNodePosition) positions.get(i);
 						if (pos.getStartPosition() != -1) {
-							group.createPosition(document, pos.getStartPosition(), pos.getLength(), fPositionOrder.indexOf(pos));
+							group.addPosition(new LinkedPosition(document, pos.getStartPosition(), pos.getLength(), fPositionOrder.indexOf(pos)));
 						}
 					}
 				} else {

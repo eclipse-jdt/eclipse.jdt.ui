@@ -22,6 +22,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedUIControl;
 
@@ -71,7 +72,7 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 				LinkedEnvironment env= new LinkedEnvironment();
 				for (int i= 0; i != fPositionOffsets.length; i++) {
 					LinkedPositionGroup group= new LinkedPositionGroup();
-					group.createPosition(document, replacementOffset + fPositionOffsets[i], fPositionLengths[i]);
+					group.addPosition(new LinkedPosition(document, replacementOffset + fPositionOffsets[i], fPositionLengths[i], LinkedPositionGroup.NO_STOP));
 					env.addGroup(group);
 				}
 				

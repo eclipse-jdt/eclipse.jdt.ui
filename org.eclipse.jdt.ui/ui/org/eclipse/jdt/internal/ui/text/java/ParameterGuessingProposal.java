@@ -26,6 +26,7 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedUIControl;
 import org.eclipse.jface.text.link.ProposalPosition;
@@ -138,7 +139,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 					LinkedPositionGroup group= new LinkedPositionGroup();
 					int positionOffset= baseOffset + positionOffsets[i];
 					if (fChoices[i].length < 2) {
-						group.createPosition(document, positionOffset, positionLengths[i]);
+						group.addPosition(new LinkedPosition(document, positionOffset, positionLengths[i], LinkedPositionGroup.NO_STOP));
 					} else {
 						group.addPosition(new ProposalPosition(document, positionOffset, positionLengths[i], LinkedPositionGroup.NO_STOP, fChoices[i]));
 					}

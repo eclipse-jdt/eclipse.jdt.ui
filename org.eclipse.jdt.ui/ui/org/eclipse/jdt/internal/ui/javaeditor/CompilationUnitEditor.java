@@ -68,6 +68,7 @@ import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.link.ExclusivePositionUpdater;
 import org.eclipse.jface.text.link.ILinkedListener;
 import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedUIControl;
 import org.eclipse.jface.text.link.LinkedUIControl.ExitFlags;
@@ -574,7 +575,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					fBracketLevelStack.push(level);
 					
 					LinkedPositionGroup group= new LinkedPositionGroup(); 
-					group.createPosition(document, offset + 1, 0);
+					group.addPosition(new LinkedPosition(document, offset + 1, 0, LinkedPositionGroup.NO_STOP));
 
 					LinkedEnvironment env= new LinkedEnvironment();
 					env.addLinkedListener(this);

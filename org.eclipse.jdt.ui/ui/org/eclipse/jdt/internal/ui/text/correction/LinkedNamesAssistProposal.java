@@ -25,6 +25,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.LinkedEnvironment;
+import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedUIControl;
 
@@ -111,7 +112,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			LinkedPositionGroup group= new LinkedPositionGroup();
 			for (int i= 0; i < sameNodes.length; i++) {
 				ASTNode elem= sameNodes[i];
-				group.createPosition(document, elem.getStartPosition(), elem.getLength(), i);
+				group.addPosition(new LinkedPosition(document, elem.getStartPosition(), elem.getLength(), i));
 			}
 			
 			LinkedEnvironment enviroment= new LinkedEnvironment();
