@@ -93,8 +93,7 @@ public class SimpleTextEdit extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#doPerform
 	 */
-	public final void perform(TextBuffer buffer) throws CoreException {
-		String current= buffer.getContent(fRange.getOffset(), fRange.getLength());
+	public void perform(TextBuffer buffer) throws CoreException {
 		buffer.replace(fRange, fText);
 	}
 	
