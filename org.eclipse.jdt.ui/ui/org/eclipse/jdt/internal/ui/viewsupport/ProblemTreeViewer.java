@@ -123,7 +123,7 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 		IContentProvider provider= getContentProvider();
 		if (source != null && provider instanceof BaseJavaElementContentProvider) {
 			BaseJavaElementContentProvider javaProvider= (BaseJavaElementContentProvider)provider;
-			Object[] mapped= javaProvider.getCorrespondingJavaElements(source, true);
+			Object[] mapped= javaProvider.getCorrespondingJavaElements(source, false);
 			super.handleLabelProviderChanged(new LabelProviderChangedEvent((IBaseLabelProvider)event.getSource(), mapped));	
 			return;
 		} 
