@@ -47,152 +47,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
 
 	/**
-	 * Spelling problem to be accepted by problem requesters.
-	 */
-	private class CoreSpellingProblem implements IProblem {
-
-		/** The end offset of the problem */
-		private int fSourceEnd= 0;
-
-		/** The line number of the problem */
-		private int fLineNumber= 1;
-
-		/** The start offset of the problem */
-		private int fSourceStart= 0;
-
-		/** The description of the problem */
-		private String fMessage;
-
-		/** The misspelled word */
-		private String fWord;
-
-		/** Was the word found in the dictionary? */
-		private boolean fMatch;
-
-		/** Does the word start a new sentence? */
-		private boolean fSentence;
-
-		/**
-		 * Initialize with the given parameters.
-		 * 
-		 * @param start the start offset
-		 * @param end the end offset
-		 * @param line the line
-		 * @param message the message
-		 * @param word the word
-		 * @param match <code>true</code> iff the word was found in the dictionary
-		 * @param sentence <code>true</code> iff the word starts a sentence
-		 */
-		public CoreSpellingProblem(int start, int end, int line, String message, String word, boolean match, boolean sentence) {
-			super();
-			fSourceStart= start;
-			fSourceEnd= end;
-			fLineNumber= line;
-			fMessage= message;
-			fWord= word;
-			fMatch= match;
-			fSentence= sentence;
-		}
-		/*
-		 * @see org.eclipse.jdt.core.compiler.IProblem#getArguments()
-		 */
-		public String[] getArguments() {
-
-			String prefix= ""; //$NON-NLS-1$
-			String postfix= ""; //$NON-NLS-1$
-
-			try {
-
-				IRegion line= fDocument.getLineInformationOfOffset(fSourceStart);
-
-				prefix= fDocument.get(line.getOffset(), fSourceStart - line.getOffset());
-				postfix= fDocument.get(fSourceEnd + 1, line.getOffset() + line.getLength() - fSourceEnd);
-
-			} catch (BadLocationException exception) {
-				// Do nothing
-			}
-			return new String[] { fWord, prefix, postfix, fSentence ? Boolean.toString(true) : Boolean.toString(false), fMatch ? Boolean.toString(true) : Boolean.toString(false) };
-		}
-
-		/*
-		 * @see org.eclipse.jdt.core.compiler.IProblem#getID()
-		 */
-		public int getID() {
-			return SPELLING_PROBLEM_ID;
-		}
-
-		/*
-		 * @see org.eclipse.jdt.core.compiler.IProblem#getMessage()
-		 */
-		public String getMessage() {
-			return fMessage;
-		}
-
-		/*
-		 * @see org.eclipse.jdt.core.compiler.IProblem#getOriginatingFileName()
-		 */
-		public char[] getOriginatingFileName() {
-			return fEditor.getEditorInput().getName().toCharArray();
-		}
-
-		/*
-		 * @see org.eclipse.jdt.core.compiler.IProblem#getSourceEnd()
-		 */
-		public int getSourceEnd() {
-			return fSourceEnd;
-		}
-
-		/*
-		 * @see org.eclipse.jdt.core.compiler.IProblem#getSourceLineNumber()
-		 */
-		public int getSourceLineNumber() {
-			return fLineNumber;
-		}
-
-		/*
-		 * @see org.eclipse.jdt.core.compiler.IProblem#getSourceStart()
-		 */
-		public int getSourceStart() {
-			return fSourceStart;
-		}
-
-		/*
-		 * @see org.eclipse.jdt.core.compiler.IProblem#isError()
-		 */
-		public boolean isError() {
-			return false;
-		}
-
-		/*
-		 * @see org.eclipse.jdt.core.compiler.IProblem#isWarning()
-		 */
-		public boolean isWarning() {
-			return true;
-		}
-		
-		/*
-		 * @see org.eclipse.jdt.core.compiler.IProblem#setSourceStart(int)
-		 */
-		public void setSourceStart(int sourceStart) {
-			fSourceStart= sourceStart;
-		}
-		
-		/*
-		 * @see org.eclipse.jdt.core.compiler.IProblem#setSourceEnd(int)
-		 */
-		public void setSourceEnd(int sourceEnd) {
-			fSourceEnd= sourceEnd;
-		}
-		
-		/*
-		 * @see org.eclipse.jdt.core.compiler.IProblem#setSourceLineNumber(int)
-		 */
-		public void setSourceLineNumber(int lineNumber) {
-			fLineNumber= lineNumber;
-		}
-	}
-
-	/**
 	 * Spelling problem collector that forwards {@link SpellingProblem}s as
 	 * {@link IProblem}s to the {@link IProblemRequestor}.
 	 */
@@ -212,14 +66,13 @@ public class JavaSpellingReconcileStrategy implements IReconcilingStrategy, IRec
 						dictionaryMatch= ((JavaSpellingProblem)problem).isDictionaryMatch();
 						sentenceStart= ((JavaSpellingProblem) problem).isSentenceStart();
 					}
-					CoreSpellingProblem iProblem= new CoreSpellingProblem(problem.getOffset(), problem.getOffset() + problem.getLength() - 1, line, problem.getMessage(), word, dictionaryMatch, sentenceStart);
+					CoreSpellingProblem iProblem= new CoreSpellingProblem(problem.getOffset(), problem.getOffset() + problem.getLength() - 1, line, problem.getMessage(), word, dictionaryMatch, sentenceStart, fDocument, fEditor.getEditorInput().getName());
 					fRequester.acceptProblem(iProblem);
 				} catch (BadLocationException x) {
 					// drop this SpellingProblem
 				}
 			}
 		}
-
 
 		/*
 		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#beginReporting()
