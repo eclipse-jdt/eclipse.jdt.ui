@@ -66,7 +66,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	/** JavaElementLabels flags used for the tool tip text */
 	private static final long TOOLTIP_LABEL_FLAGS= JavaElementLabels.DEFAULT_QUALIFIED | JavaElementLabels.ROOT_POST_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH |
 			JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.M_EXCEPTIONS | 
-			JavaElementLabels.F_APP_TYPE_SIGNATURE;
+			JavaElementLabels.F_APP_TYPE_SIGNATURE | JavaElementLabels.T_TYPE_PARAMETERS;;
 
 
 	/*

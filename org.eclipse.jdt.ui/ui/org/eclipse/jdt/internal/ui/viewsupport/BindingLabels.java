@@ -32,7 +32,7 @@ public class BindingLabels {
 			javaElement= null;
 		}
 		if (javaElement != null)
-			return JavaElementLabels.getElementLabel(javaElement, JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES);
+			return JavaElementLabels.getElementLabel(javaElement, JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.ALL_DEFAULT);
 		else
 			return Bindings.asString(binding); //fallback: better than nothing
 	}

@@ -317,7 +317,7 @@ public final class MemberVisibilityAdjustor {
 	 */
 	public static String getLabel(final IJavaElement element) {
 		Assert.isNotNull(element);
-		return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES);
+		return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.ALL_DEFAULT);
 	}
 
 	/**

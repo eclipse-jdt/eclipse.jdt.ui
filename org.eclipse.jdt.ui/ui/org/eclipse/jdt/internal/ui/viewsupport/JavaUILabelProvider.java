@@ -45,7 +45,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider {
 	 * Creates a new label provider with default flags.
 	 */
 	public JavaUILabelProvider() {
-		this(JavaElementLabels.M_PARAMETER_TYPES, JavaElementImageProvider.OVERLAY_ICONS);
+		this(JavaElementLabels.ALL_DEFAULT, JavaElementImageProvider.OVERLAY_ICONS);
 	}
 
 	/**

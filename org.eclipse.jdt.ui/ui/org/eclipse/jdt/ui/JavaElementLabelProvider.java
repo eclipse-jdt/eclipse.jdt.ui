@@ -130,7 +130,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	private StorageLabelProvider fStorageLabelProvider;
 	private int fFlags;
 	private int fImageFlags;
-	private int fTextFlags;
+	private long fTextFlags;
 	
 	/**
 	 * Creates a new label provider with <code>SHOW_DEFAULT</code> flag.
@@ -192,7 +192,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	}	
 	
 	private void updateTextProviderFlags() {
-		fTextFlags= 0;
+		fTextFlags= JavaElementLabels.T_TYPE_PARAMETERS;
 		if (getFlag(SHOW_RETURN_TYPE)) {
 			fTextFlags |= JavaElementLabels.M_APP_RETURNTYPE;
 		}

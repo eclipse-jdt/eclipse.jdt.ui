@@ -135,7 +135,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 			return;
 		Shell shell= getShell();
 		try {
-			String labelName= JavaElementLabels.getElementLabel(element, JavaElementLabels.M_PARAMETER_TYPES);
+			String labelName= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT);
 			
 			URL baseURL= JavaUI.getJavadocBaseLocation(element);
 			if (baseURL == null) {

@@ -160,16 +160,22 @@ public class JavaElementLabels {
 	public final static long T_POST_QUALIFIED= 1L << 20;
 	
 	/**
+	 * Type names contain type parameteters.
+	 * e.g. <code>Map<S, T></code>
+	 */
+	public final static long T_TYPE_PARAMETERS= 1L << 21;
+	
+	/**
 	 * Declarations (import container / declarartion, package declarartion) are qualified.
 	 * e.g. <code>java.util.Vector.class/import container</code>
 	 */	
-	public final static long D_QUALIFIED= 1L << 23;
+	public final static long D_QUALIFIED= 1L << 24;
 	
 	/**
 	 * Declarations (import container / declarartion, package declarartion) are post qualified.
 	 * e.g. <code>import container - java.util.Vector.class</code>
 	 */	
-	public final static long D_POST_QUALIFIED= 1L << 24;	
+	public final static long D_POST_QUALIFIED= 1L << 25;	
 
 	/**
 	 * Class file names are fully qualified.
@@ -264,9 +270,9 @@ public class JavaElementLabels {
 	public final static long ALL_POST_QUALIFIED= F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED | P_POST_QUALIFIED | ROOT_POST_QUALIFIED;
 
 	/**
-	 *  Default options (M_PARAMETER_TYPES enabled)
+	 *  Default options (M_PARAMETER_TYPES,  M_APP_TYPE_PARAMETERS & T_TYPE_PARAMETERS enabled)
 	 */
-	public final static long ALL_DEFAULT= M_PARAMETER_TYPES | M_APP_TYPE_PARAMETERS;
+	public final static long ALL_DEFAULT= M_PARAMETER_TYPES | M_APP_TYPE_PARAMETERS | T_TYPE_PARAMETERS;
 
 	/**
 	 *  Default qualify options (All except Root and Package)
@@ -657,21 +663,23 @@ public class JavaElementLabels {
 			}
 		}
 		buf.append(typeName);
-		if (type.exists()) {
-			try {
-				ITypeParameter[] typeParameters = type.getTypeParameters();
-				if (typeParameters.length > 0) {
-					buf.append('<');
-					for (int i = 0; i < typeParameters.length; i++) {
-						if (i > 0) {
-							buf.append(COMMA_STRING);
+		if (getFlag(flags, T_TYPE_PARAMETERS)) {
+			if (type.exists()) {
+				try {
+					ITypeParameter[] typeParameters = type.getTypeParameters();
+					if (typeParameters.length > 0) {
+						buf.append('<');
+						for (int i = 0; i < typeParameters.length; i++) {
+							if (i > 0) {
+								buf.append(COMMA_STRING);
+							}
+							buf.append(typeParameters[i].getElementName());
 						}
-						buf.append(typeParameters[i].getElementName());
-					}
-					buf.append('>');
-				}		
-			} catch (JavaModelException e) {
-				// ignore
+						buf.append('>');
+					}		
+				} catch (JavaModelException e) {
+					// ignore
+				}
 			}
 		}
 		// post qualification

@@ -59,7 +59,7 @@ public class JavaWorkbenchAdapter implements IWorkbenchAdapter {
 	}
 
 	public String getLabel(Object element) {
-		return JavaElementLabels.getTextLabel(getJavaElement(element), JavaElementLabels.M_PARAMETER_TYPES);
+		return JavaElementLabels.getTextLabel(getJavaElement(element), JavaElementLabels.ALL_DEFAULT);
 	}
 
 	public Object getParent(Object element) {
