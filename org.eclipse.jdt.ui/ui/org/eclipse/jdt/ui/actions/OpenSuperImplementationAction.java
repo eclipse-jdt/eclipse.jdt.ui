@@ -10,30 +10,31 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
@@ -97,15 +98,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(fEditor != null);
-	}
-
-	private boolean checkEnabled(ITextSelection selection) {
-		try {
-			return fEditor != null && SelectionConverter.getElementAtOffset(fEditor) != null;
-		} catch (JavaModelException e) {
-		}
-		return false;
+		setEnabled(fEditor != null && getMethod(selection) != null);
 	}
 
 	/* (non-Javadoc)
@@ -134,19 +127,12 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 			return;
 		try {
 			IType declaringType= method.getDeclaringType();
-			ICompilationUnit cu= declaringType.getCompilationUnit();
-			if (cu != null && cu.isWorkingCopy()) {
-				declaringType= (IType) cu.getOriginal(declaringType);
-				if (!declaringType.exists()) {
-					return;
-				}
+			IType workingCopyType= (IType) EditorUtility.getWorkingCopy(declaringType);
+			if (workingCopyType != null) {
+				declaringType= workingCopyType;
 			}
-			ITypeHierarchy hierarchy= declaringType.newSupertypeHierarchy(null);
-			IMethod impl= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, declaringType, method.getElementName(), method.getParameterTypes(), method.isConstructor());
-			if (impl == null) {
-				// if no implementation found try to open a declaration
-				impl= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, declaringType, method.getElementName(), method.getParameterTypes(), method.isConstructor());
-			}
+			IMethod impl= findSuperImplementation(declaringType, method.getElementName(), method.getParameterTypes(), method.isConstructor());
+			
 			if (impl != null) {
 				OpenActionUtil.open(impl);
 			}
@@ -156,6 +142,17 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 			ErrorDialog.openError(getShell(), getDialogTitle(), message, e.getStatus());
 		}
 	}
+	
+	private IMethod findSuperImplementation(IType declaringType, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
+		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(declaringType);
+		IMethod impl= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, declaringType, name, paramTypes, isConstructor);
+		if (impl == null) {
+			// if no implementation found try to open a declaration
+			impl= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, declaringType, name, paramTypes, isConstructor);
+		}
+		return impl;
+	}
+	
 	
 	private IMethod getMethod(IStructuredSelection selection) {
 		if (selection.size() != 1)
@@ -175,6 +172,13 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 				if (method.exists()) {
 					int flags= method.getFlags();
 					if (!Flags.isStatic(flags) && !Flags.isPrivate(flags)) {
+						IType declaringType= method.getDeclaringType();
+						// if possible, make a check. don't care about working copies ect. In doubt, the action will be enabled.
+						if (SuperTypeHierarchyCache.hasInCache(declaringType)) {
+							if (findSuperImplementation(declaringType, method.getElementName(), method.getParameterTypes(), method.isConstructor()) == null) {
+								return null;
+							}
+						}
 						return method;
 					}
 				}
