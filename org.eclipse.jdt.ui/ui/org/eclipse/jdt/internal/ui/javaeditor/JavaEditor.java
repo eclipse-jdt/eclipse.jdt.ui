@@ -146,6 +146,8 @@ import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
+import org.eclipse.ui.internal.editors.text.EditorsPlugin;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -3124,7 +3126,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @since 3.0
 	 */
 	private boolean isNavigationTarget(Annotation annotation) {
-		Preferences preferences= Platform.getPlugin("org.eclipse.ui.editors").getPluginPreferences(); //$NON-NLS-1$
+		Preferences preferences= Platform.getPlugin(EditorsPlugin.PLUGIN_ID).getPluginPreferences();
 		AnnotationPreference preference= getAnnotationPreferenceLookup().getAnnotationPreference(annotation);
 //		See bug 41689
 //		String key= forward ? preference.getIsGoToNextNavigationTargetKey() : preference.getIsGoToPreviousNavigationTargetKey();
