@@ -64,6 +64,8 @@ public class MoveInnerToTopAction extends SelectionDispatchAction {
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canEnable(selection));
+		if (! isEnabled())
+			fRefactoring= null;
 	}
 
     /*
@@ -76,20 +78,26 @@ public class MoveInnerToTopAction extends SelectionDispatchAction {
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
 	protected void run(IStructuredSelection selection) {
-		startRefactoring();
+		if (fRefactoring == null)
+			selectionChanged(selection);
+		if (isEnabled())
+			startRefactoring();
+		fRefactoring= null;	
+		selectionChanged(selection);
 	}
 
     /*
      * @see SelectionDispatchAction#run(ITextSelection)
      */
 	protected void run(ITextSelection selection) {
-		if (! canRun(selection)){
+		if (canRun(selection)){
+			startRefactoring();	
+		} else {
 			String unavailable= "To activate this refactoring, please select the name of a class";
 			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable);
-			fRefactoring= null;
-			return;
 		}
-		startRefactoring();	
+		fRefactoring= null;
+		selectionChanged(selection);
 	}
 		
 	private boolean canEnable(IStructuredSelection selection){

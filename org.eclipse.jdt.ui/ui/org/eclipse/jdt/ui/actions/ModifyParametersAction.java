@@ -85,6 +85,8 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canEnable(selection));
+		if (! isEnabled())
+			fRefactoring= null;
 	}
 
     /*
@@ -97,20 +99,26 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
 	protected void run(IStructuredSelection selection) {
-		startRefactoring();
+		if (fRefactoring == null)
+			selectionChanged(selection);
+		if (isEnabled())
+			startRefactoring();
+		fRefactoring= null;	
+		selectionChanged(selection);
 	}
 
     /*
      * @see SelectionDispatchAction#run(ITextSelection)
      */
 	protected void run(ITextSelection selection) {
-		if (! canRun(selection)){
+		if (canRun(selection)){
+			startRefactoring();	
+		} else {
 			String unavailable= RefactoringMessages.getString("ModifyParametersAction.unavailable"); //$NON-NLS-1$
 			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
-			fRefactoring= null;
-			return;
 		}
-		startRefactoring();	
+		fRefactoring= null;
+		selectionChanged(selection);
 	}
 		
 	private boolean canEnable(IStructuredSelection selection){
