@@ -225,6 +225,7 @@ public class JdtActionConstants {
 	/**
 	 * Refactor menu: name of standard Inline Temp global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.InlineTemp"</code>).
+	 * @deprecated Use INLINE
 	 */
 	public static final String INLINE_TEMP= "org.eclipse.jdt.ui.actions.InlineTemp"; //$NON-NLS-1$
 	
@@ -243,26 +244,18 @@ public class JdtActionConstants {
 	public static final String EXTRACT_CONSTANT= "org.eclipse.jdt.ui.actions.ExtractConstant"; //$NON-NLS-1$
 
 	/**
-	 * Refactor menu: name of standard Inline Constant global action
-	 * (value <code>"org.eclipse.jdt.ui.actions.InlineConstant"</code>).
-	 * 
-	 * @since 2.1
-	 */
-	public static final String INLINE_CONSTANT= "org.eclipse.jdt.ui.actions.InlineConstant"; //$NON-NLS-1$
-
-	/**
 	 * Refactor menu: name of standard Extract Method global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ExtractMethod"</code>).
 	 */
 	public static final String EXTRACT_METHOD= "org.eclipse.jdt.ui.actions.ExtractMethod"; //$NON-NLS-1$
 
 	/**
-	 * Refactor menu: name of standard Inline Method global action
-	 * (value <code>"org.eclipse.jdt.ui.actions.InlineMethod"</code>).
-	 * 
+	 * Refactor menu: name of standard Inline global action 
+	 * (value <code>"org.eclipse.jdt.ui.actions.Inline"</code>).
+	 *
 	 * @since 2.1
 	 */
-	public static final String INLINE_METHOD= "org.eclipse.jdt.ui.actions.InlineMethod"; //$NON-NLS-1$
+	public static final String INLINE= "org.eclipse.jdt.ui.actions.Inline"; //$NON-NLS-1$
 
 	/**
 	 * Refactor menu: name of standard Extract Interface global action

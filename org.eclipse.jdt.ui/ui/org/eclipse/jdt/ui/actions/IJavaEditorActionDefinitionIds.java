@@ -222,16 +222,9 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String EXTRACT_CONSTANT= "org.eclipse.jdt.ui.edit.text.java.extract.constant"; //$NON-NLS-1$
 
 	/**
-	 * Action definition ID of the refactor -> inline constant action
-	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.inline.constant"</code>).
-	 * 
-	 * @since 2.1
-	 */
-	public static final String INLINE_CONSTANT= "org.eclipse.jdt.ui.edit.text.java.inline.constant"; //$NON-NLS-1$
-
-	/**
 	 * Action definition ID of the refactor -> inline local variable action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.inline.local.variable"</code>).
+	 * @deprecated Use INLINE
 	 */
 	public static final String INLINE_LOCAL_VARIABLE= "org.eclipse.jdt.ui.edit.text.java.inline.local.variable"; //$NON-NLS-1$
 	
@@ -248,12 +241,12 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String EXTRACT_METHOD= "org.eclipse.jdt.ui.edit.text.java.extract.method"; //$NON-NLS-1$
 
 	/**
-	 * Action definition ID of the refactor -> inline method action
-	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.inline.method"</code>).
-	 * 
+	 * Action definition ID of the refactor -> inline action
+	 * (value <code>"org. eclipse.jdt.ui.edit.text.java.inline"</code>).
+	 *
 	 * @since 2.1
 	 */
-	public static final String INLINE_METHOD= "org.eclipse.jdt.ui.edit.text.java.inline.method"; //$NON-NLS-1$
+	public static final String INLINE= "org.eclipse.jdt.ui.edit.text.java.inline"; //$NON-NLS-1$
 
 	/**
 	 * Action definition ID of the refactor -> extract interface action

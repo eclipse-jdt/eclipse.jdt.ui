@@ -50,17 +50,15 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fRenameAction;
 	private SelectionDispatchAction fModifyParametersAction;
 	private SelectionDispatchAction fPullUpAction;
-	private SelectionDispatchAction fInlineTempAction;
 	private SelectionDispatchAction fExtractTempAction;
 	private SelectionDispatchAction fExtractMethodAction;
 	private SelectionDispatchAction fExtractInterfaceAction;
 	private SelectionDispatchAction fMoveInnerToTopAction;
 	private SelectionDispatchAction fUseSupertypeAction;
-	private SelectionDispatchAction fInlineMethodAction;	
 	private SelectionDispatchAction fExtractConstantAction;
-	private SelectionDispatchAction fInlineConstantAction;
     private SelectionDispatchAction fPromoteTempAction;
     private SelectionDispatchAction fConvertAnonymousToNestedAction;
+	private SelectionDispatchAction fInlineAction;
 	
 	/**
 	 * Creates a new <code>RefactorActionGroup</code>. The group requires
@@ -118,12 +116,7 @@ public class RefactorActionGroup extends ActionGroup {
 		fMoveAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.MOVE_ELEMENT);
 		fMoveAction.update(selection);
 		editor.setAction("MoveElement", fMoveAction); //$NON-NLS-1$
-		
-		fInlineTempAction= new InlineTempAction(editor);
-		fInlineTempAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE_LOCAL_VARIABLE);
-		fInlineTempAction.update(selection);
-		editor.setAction("InlineLocalVariable", fInlineTempAction); //$NON-NLS-1$
-		
+				
 		fExtractTempAction= new ExtractTempAction(editor);
 		fExtractTempAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_LOCAL_VARIABLE);
 		initAction(fExtractTempAction, provider, selection);
@@ -134,11 +127,11 @@ public class RefactorActionGroup extends ActionGroup {
 		initAction(fExtractConstantAction, provider, selection);
 		editor.setAction("ExtractConstant", fExtractConstantAction); //$NON-NLS-1$
 
-		fInlineConstantAction= new InlineConstantAction(editor);
-		fInlineConstantAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE_CONSTANT);
-		fInlineConstantAction.update(selection);
-		editor.setAction("InlineConstant", fInlineConstantAction); //$NON-NLS-1$
-
+		fInlineAction= new InlineAction(editor);
+		fInlineAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE);
+		fInlineAction.update(selection);
+		editor.setAction("Inline", fInlineAction); //$NON-NLS-1$
+		
 		fExtractMethodAction= new ExtractMethodAction(editor);
 		fExtractMethodAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_METHOD);
 		initAction(fExtractMethodAction, provider, selection);
@@ -154,11 +147,6 @@ public class RefactorActionGroup extends ActionGroup {
 		initAction(fConvertAnonymousToNestedAction, provider, selection);
 		editor.setAction("ConvertAnonymousToNested", fConvertAnonymousToNestedAction); //$NON-NLS-1$
 
-		fInlineMethodAction= new InlineMethodAction(editor);
-		fInlineMethodAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE_METHOD);
-		fInlineMethodAction.update(selection);
-		editor.setAction("InlineMethod", fInlineMethodAction); //$NON-NLS-1$
-		
 		fExtractInterfaceAction= new ExtractInterfaceAction(editor);
 		fExtractInterfaceAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_INTERFACE);
 		fExtractInterfaceAction.update(selection);
@@ -205,8 +193,8 @@ public class RefactorActionGroup extends ActionGroup {
 		fUseSupertypeAction= new UseSupertypeAction(fSite);
 		initAction(fUseSupertypeAction, provider, selection);
 		
-		fInlineConstantAction= new InlineConstantAction(fSite);
-		initAction(fInlineConstantAction, provider, selection);
+		fInlineAction= new InlineAction(fSite);
+		initAction(fInlineAction, provider, selection);
 	}
 
 	private static void initAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection){
@@ -228,12 +216,10 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.RENAME, fRenameAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.MODIFY_PARAMETERS, fModifyParametersAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.PULL_UP, fPullUpAction);
-		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE_TEMP, fInlineTempAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_TEMP, fExtractTempAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_CONSTANT, fExtractConstantAction);
-		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE_CONSTANT, fInlineConstantAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_METHOD, fExtractMethodAction);
-		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE_METHOD, fInlineMethodAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE, fInlineAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_INTERFACE, fExtractInterfaceAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.MOVE_INNER_TO_TOP, fMoveInnerToTopAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.USE_SUPERTYPE, fUseSupertypeAction);
@@ -259,12 +245,10 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fRenameAction, provider);
 		disposeAction(fModifyParametersAction, provider);
 		disposeAction(fPullUpAction, provider);
-		disposeAction(fInlineTempAction, provider);
 		disposeAction(fExtractTempAction, provider);
 		disposeAction(fExtractConstantAction, provider);
-		disposeAction(fInlineConstantAction, provider);
 		disposeAction(fExtractMethodAction, provider);
-		disposeAction(fInlineMethodAction, provider);
+		disposeAction(fInlineAction, provider);
 		disposeAction(fExtractInterfaceAction, provider);
 		disposeAction(fMoveInnerToTopAction, provider);
 		disposeAction(fUseSupertypeAction, provider);
@@ -292,9 +276,7 @@ public class RefactorActionGroup extends ActionGroup {
 		addAction(refactorSubmenu, fExtractMethodAction);
 		addAction(refactorSubmenu, fExtractTempAction);
 		addAction(refactorSubmenu, fExtractConstantAction);
-		addAction(refactorSubmenu, fInlineConstantAction);
-		addAction(refactorSubmenu, fInlineMethodAction);
-		addAction(refactorSubmenu, fInlineTempAction);
+		addAction(refactorSubmenu, fInlineAction);
 		addAction(refactorSubmenu, fPromoteTempAction);
 		addAction(refactorSubmenu, fConvertAnonymousToNestedAction);
 		addAction(refactorSubmenu, fSelfEncapsulateField);
