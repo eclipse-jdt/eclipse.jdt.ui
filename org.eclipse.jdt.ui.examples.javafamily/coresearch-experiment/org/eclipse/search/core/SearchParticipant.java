@@ -71,7 +71,7 @@ public abstract class SearchParticipant {
 	 * @param String - a containerID identifying a registered initializer
 	 * @return ClasspathContainerInitializer - the registered classpath container initializer or <code>null</code> if 
 	 * none was found.
-	 * @since 2.1
+	 * @since 3.0
 	 */
 	public static SearchParticipant[] getRegisteredParticipants() {
 		return SearchCore.getParticipants();
