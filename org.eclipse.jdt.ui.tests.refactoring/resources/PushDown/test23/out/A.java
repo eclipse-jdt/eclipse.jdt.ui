@@ -8,6 +8,5 @@ class B extends A {
 	}
 
 	private int x;
-
 	private int bar;
 }
