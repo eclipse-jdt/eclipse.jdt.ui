@@ -17,6 +17,7 @@ import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.ui.IEditorPart;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -87,7 +88,7 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 		JavaEditorTextHoverDescriptor[] hoverDescs= JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();
 		for (int i= 0; i < hoverDescs.length; i++) {
 			// ensure that we don't add ourselves to the list
-			if (!JavaPlugin.ID_BESTMATCH_HOVER.equals(hoverDescs[i].getId()))
+			if (!PreferenceConstants.ID_BESTMATCH_HOVER.equals(hoverDescs[i].getId()))
 				fTextHoverSpecifications.add(hoverDescs[i]);
 		}
 		Collections.sort(fTextHoverSpecifications, new JavaEditorTextHoverDescriptorComparator());

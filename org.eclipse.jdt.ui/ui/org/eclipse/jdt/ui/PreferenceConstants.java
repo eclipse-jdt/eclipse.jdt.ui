@@ -446,6 +446,38 @@ public class PreferenceConstants {
 	public static final String EDITOR_TEXT_HOVER_MODIFIERS= "hoverModifiers"; //$NON-NLS-1$
 
 	/**
+	 * The id of the best match hover contributed for extension point
+	 * <code>javaEditorTextHovers</code>.
+	 *
+	 * @since 2.1
+	 */
+	public static String ID_BESTMATCH_HOVER= "org.eclipse.jdt.ui.BestMatchHover"; //$NON-NLS-1$
+
+	/**
+	 * The id of the source code hover contributed for extension point
+	 * <code>javaEditorTextHovers</code>.
+	 *
+	 * @since 2.1
+	 */
+	public static String ID_SOURCE_HOVER= "org.eclipse.jdt.ui.JavaSourceHover"; //$NON-NLS-1$
+
+	/**
+	 * The id of the javadoc hover contributed for extension point
+	 * <code>javaEditorTextHovers</code>.
+	 *
+	 * @since 2.1
+	 */
+	public static String ID_JAVADOC_HOVER= "org.eclipse.jdt.ui.JavadocHover"; //$NON-NLS-1$
+
+	/**
+	 * The id of the problem hover contributed for extension point
+	 * <code>javaEditorTextHovers</code>.
+	 *
+	 * @since 2.1
+	 */
+	public static String ID_PROBLEM_HOVER= "org.eclipse.jdt.ui.ProblemHover"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls whether bracket matching highlighting is turned on or off.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.

@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2003 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
 
@@ -42,6 +48,7 @@ import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -68,40 +75,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
  * of the plugin such as document providers and find-replace-dialogs.
  */
 public class JavaPlugin extends AbstractUIPlugin {
-		
-	// TODO: Evaluate if we should move these ID's to JavaUI
-	/**
-	 * The id of the best match hover contributed for extension point
-	 * <code>javaEditorTextHovers</code>.
-	 *
-	 * @since 2.1
-	 */
-	public static String ID_BESTMATCH_HOVER= "org.eclipse.jdt.ui.BestMatchHover"; //$NON-NLS-1$
-
-	/**
-	 * The id of the source code hover contributed for extension point
-	 * <code>javaEditorTextHovers</code>.
-	 *
-	 * @since 2.1
-	 */
-	public static String ID_SOURCE_HOVER= "org.eclipse.jdt.ui.JavaSourceHover"; //$NON-NLS-1$
-
-	/**
-	 * The id of the javadoc hover contributed for extension point
-	 * <code>javaEditorTextHovers</code>.
-	 *
-	 * @since 2.1
-	 */
-	public static String ID_JAVADOC_HOVER= "org.eclipse.jdt.ui.JavadocHover"; //$NON-NLS-1$
-
-	/**
-	 * The id of the problem hover contributed for extension point
-	 * <code>javaEditorTextHovers</code>.
-	 *
-	 * @since 2.1
-	 */
-	public static String ID_PROBLEM_HOVER= "org.eclipse.jdt.ui.ProblemHover"; //$NON-NLS-1$
-
 
 		
 	private static JavaPlugin fgJavaPlugin;
@@ -244,6 +217,20 @@ public class JavaPlugin extends AbstractUIPlugin {
 		super.startup();
 		registerAdapters();
 		
+
+		/*
+		 * Backward compatibility: propagate the Java editor font from a
+		 * pre-2.1 plug-in to the Platform UI's preference store to preserve
+		 * the Java editor font from a pre-2.1 workspace. This is done only
+		 * once.
+		 */
+		String fontPropagatedKey= "fontPropagated"; //$NON-NLS-1$
+		if (getPreferenceStore().contains(JFaceResources.TEXT_FONT) && !getPreferenceStore().isDefault(JFaceResources.TEXT_FONT)) {
+			if (!getPreferenceStore().getBoolean(fontPropagatedKey))
+				PreferenceConverter.setValue(PlatformUI.getWorkbench().getPreferenceStore(), PreferenceConstants.EDITOR_TEXT_FONT, PreferenceConverter.getFontDataArray(getPreferenceStore(), JFaceResources.TEXT_FONT));
+		}
+		getPreferenceStore().setValue(fontPropagatedKey, true);
+
 		/*
 		 * Backward compatibility: set the Java editor font in this plug-in's
 		 * preference store to let older versions access it. Since 2.1 the

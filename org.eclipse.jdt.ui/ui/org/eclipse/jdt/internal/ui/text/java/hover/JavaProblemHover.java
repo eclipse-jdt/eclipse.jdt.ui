@@ -22,6 +22,8 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
@@ -80,6 +82,6 @@ public class JavaProblemHover extends AbstractJavaEditorTextHover {
 	}
 
 	static boolean isJavaProblemHover(String id) {
-		return JavaPlugin.ID_PROBLEM_HOVER.equals(id);
+		return PreferenceConstants.ID_PROBLEM_HOVER.equals(id);
 	}
 }
