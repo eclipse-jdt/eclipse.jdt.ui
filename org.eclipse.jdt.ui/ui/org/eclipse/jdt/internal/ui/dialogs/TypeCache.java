@@ -1,5 +1,5 @@
 package org.eclipse.jdt.internal.ui.dialogs;import java.util.ArrayList;import java.util.List;import org.eclipse.jdt.core.ElementChangedEvent;import org.eclipse.jdt.core.IElementChangedListener;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaElementDelta;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;import org.eclipse.jface.operation.IRunnableContext;
-class TypeCache{
+public class TypeCache{
 
 	private static int fgLastStyle= -1;
 	private static List fgTypeList;
