@@ -620,11 +620,14 @@ public class ChangeParametersControl extends Composite {
 
 	private static void moveUp(List elements, List move) {
 		List res= new ArrayList(elements.size());
+		List deleted= new ArrayList();
 		Object floating= null;
 		for (Iterator iter= elements.iterator(); iter.hasNext();) {
 			Object curr= iter.next();
 			if (move.contains(curr)) {
 				res.add(curr);
+			} else if (((ParameterInfo) curr).isDeleted()) {
+				deleted.add(curr);
 			} else {
 				if (floating != null)
 					res.add(floating);
@@ -634,6 +637,7 @@ public class ChangeParametersControl extends Composite {
 		if (floating != null) {
 			res.add(floating);
 		}
+		res.addAll(deleted);
 		elements.clear();
 		for (Iterator iter= res.iterator(); iter.hasNext();) {
 			elements.add(iter.next());
