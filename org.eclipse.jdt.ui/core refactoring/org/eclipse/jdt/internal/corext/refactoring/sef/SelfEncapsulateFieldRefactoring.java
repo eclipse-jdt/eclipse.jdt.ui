@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
@@ -213,6 +214,11 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
 				new SubProgressMonitor(pm, 5), SearchEngine.createWorkspaceScope(),
 				SearchEngine.createSearchPattern(fField, IJavaSearchConstants.REFERENCES));
+				
+			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(affectedCUs)));
+			if (result.hasFatalError())
+				return result;
+				
 			pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.analyzing"));	 //$NON-NLS-1$
 			IProgressMonitor sub= new SubProgressMonitor(pm, 5);
 			sub.beginTask(NO_NAME, affectedCUs.length);
