@@ -111,12 +111,13 @@ public class CreateFileChange extends JDTChange {
 				}
 			}				
 		} finally {
-			pm.done();
 			try{
 				if (is != null)
 					is.close();
 			} catch (IOException ioe) {
 				throw new JavaModelException(ioe, IJavaModelStatusConstants.IO_EXCEPTION);
+			} finally {
+				pm.done();
 			}
 		}
 	}
