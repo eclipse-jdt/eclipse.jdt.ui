@@ -42,7 +42,7 @@ public final class SerialVersionComputer {
 			try {
 				final ObjectStreamClass stream= ObjectStreamClass.lookup(Class.forName(arguments[0]));
 				if (stream != null) {
-					System.out.println(ERROR_PREFIX + stream.getSerialVersionUID());
+					System.out.println(stream.getSerialVersionUID());
 					return;
 				} else
 					System.err.println(ERROR_PREFIX + SerialVersionMessages.getFormattedString("SerialVersionComputer.not.serializable", arguments[0])); //$NON-NLS-1$
