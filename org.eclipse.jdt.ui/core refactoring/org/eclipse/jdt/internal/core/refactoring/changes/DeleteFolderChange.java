@@ -1,3 +1,7 @@
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
 package org.eclipse.jdt.internal.core.refactoring.changes;
 
 import org.eclipse.core.resources.IFolder;
@@ -16,7 +20,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 
-public class DeleteFolderChange extends DeleteChange {
+public class DeleteFolderChange extends AbstractDeleteChange {
 	
 	private IPath fPath;
 	
@@ -36,28 +40,28 @@ public class DeleteFolderChange extends DeleteChange {
 		return ResourcesPlugin.getWorkspace().getRoot().getFolder(path);
 	}
 
-	/**
+	/* non java-doc
 	 * @see IChange#getName()
 	 */
 	public String getName() {
 		return "Delete folder " + fPath.lastSegment();
 	}
 	
-	/**
+	/* non java-doc
 	 * @see IChange#getCorrespondingJavaElement()
 	 */
 	public IJavaElement getCorrespondingJavaElement() {
 		return JavaCore.create(getFolder(fPath));
 	}
 
-	/**
+	/* non java-doc
 	 * @see DeleteChange#doDelete(IProgressMonitor)
 	 */
 	protected void doDelete(IProgressMonitor pm) throws CoreException{
 		IFolder folder= getFolder(fPath);
 		Assert.isNotNull(folder);
 		Assert.isTrue(folder.exists());
-		folder.delete(true, false, new SubProgressMonitor(pm, 1));
+		folder.delete(false, true, new SubProgressMonitor(pm, 1));
 	}
 }
 

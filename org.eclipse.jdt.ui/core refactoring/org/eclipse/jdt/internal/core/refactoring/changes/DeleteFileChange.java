@@ -1,3 +1,7 @@
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
 package org.eclipse.jdt.internal.core.refactoring.changes;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,41 +24,41 @@ import org.eclipse.jdt.internal.core.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 
-public class DeleteFileChange extends DeleteChange {
+public class DeleteFileChange extends AbstractDeleteChange {
 
 	private IPath fPath;
 	
 	public DeleteFileChange(IFile file){
 		Assert.isNotNull(file, "file"); 
-		fPath= ReorgUtils.getResourcePath(file);
+		fPath= Utils.getResourcePath(file);
 	}
 	
 	private IFile getFile(){
-		return ReorgUtils.getFile(fPath);
+		return Utils.getFile(fPath);
 	}
 	
-	/**
+	/* non java-doc
 	 * @see IChange#getName()
 	 */
 	public String getName() {
 		return "Delete file " + fPath.lastSegment(); 
 	}
 
-	/**
+	/* non java-doc
 	 * @see IChange#getCorrespondingJavaElement()
 	 */
 	public IJavaElement getCorrespondingJavaElement() {
 		return JavaCore.create(getFile());
 	}
 
-	/**
+	/* non java-doc
 	 * @see DeleteChange#doDelete(IProgressMonitor)
 	 */
 	protected void doDelete(IProgressMonitor pm) throws CoreException{
 		IFile file= getFile();
 		Assert.isNotNull(file);
 		Assert.isTrue(file.exists());
-		file.delete(true, false, pm);
+		file.delete(false, true, pm);
 	}
 }
 
