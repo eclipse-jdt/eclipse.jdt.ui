@@ -104,12 +104,12 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 	}
 	
 	/**
-	 * Tells this strategy whether to inform its participants.
+	 * Tells this strategy whether to inform its listeners.
 	 * 
-	 * @param notify <code>true</code> if participant should be notified
+	 * @param notify <code>true</code> if listeners should be notified
 	 */
-	public void notifyParticipants(boolean notify) {
-		fJavaStrategy.notifyParticipants(notify);
+	public void notifyListeners(boolean notify) {
+		fJavaStrategy.notifyListeners(notify);
 	}
 	
 	/*

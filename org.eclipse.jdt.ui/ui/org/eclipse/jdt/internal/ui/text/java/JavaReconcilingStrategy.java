@@ -44,17 +44,17 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	private IProgressMonitor fProgressMonitor;
 	private boolean fNotify= true;
 
-	private IJavaReconcilingListener fJavaReconcilingParticipant;
-	private boolean fIsJavaReconcilingParticipant;
+	private IJavaReconcilingListener fJavaReconcilingListener;
+	private boolean fIsJavaReconcilingListener;
 	
 	
 	public JavaReconcilingStrategy(ITextEditor editor) {
 		fEditor= editor;
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
 		fDocumentProvider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
-		fIsJavaReconcilingParticipant= fEditor instanceof IJavaReconcilingListener;
-		if (fIsJavaReconcilingParticipant)
-			fJavaReconcilingParticipant= (IJavaReconcilingListener)fEditor;
+		fIsJavaReconcilingListener= fEditor instanceof IJavaReconcilingListener;
+		if (fIsJavaReconcilingListener)
+			fJavaReconcilingListener= (IJavaReconcilingListener)fEditor;
 	}
 	
 	private IProblemRequestorExtension getProblemRequestorExtension() {
@@ -69,8 +69,8 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 		if (unit != null) {
 			try {
 				
-				if (fNotify && fIsJavaReconcilingParticipant)
-					fJavaReconcilingParticipant.aboutToBeReconciled();
+				if (fNotify && fIsJavaReconcilingListener)
+					fJavaReconcilingListener.aboutToBeReconciled();
 								
 				/* fix for missing cancel flag communication */
 				IProblemRequestorExtension extension= getProblemRequestorExtension();
@@ -81,7 +81,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 				
 				// reconcile
 				synchronized (unit) {
-					if (fIsJavaReconcilingParticipant)
+					if (fIsJavaReconcilingListener)
 						ast= unit.reconcile(true, true, null, fProgressMonitor);
 					else
 						unit.reconcile(false, true, null, fProgressMonitor);
@@ -91,10 +91,10 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 				if (extension != null)
 					extension.setProgressMonitor(null);
 				
-				// update participant
+				// notify listeners
 				try {
-					if (fIsJavaReconcilingParticipant && fNotify && !fProgressMonitor.isCanceled())
-						fJavaReconcilingParticipant.reconciled(ast);
+					if (fIsJavaReconcilingListener && fNotify && !fProgressMonitor.isCanceled())
+						fJavaReconcilingListener.reconciled(ast);
 				} finally {
 					fNotify= true;
 				}
@@ -140,11 +140,11 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	}
 	
 	/**
-	 * Tells this strategy whether to inform its participants.
+	 * Tells this strategy whether to inform its listeners.
 	 * 
-	 * @param notify <code>true</code> if participant should be notified
+	 * @param notify <code>true</code> if listeners should be notified
 	 */
-	public void notifyParticipants(boolean notify) {
+	public void notifyListeners(boolean notify) {
 		fNotify= notify;
 	}
 }

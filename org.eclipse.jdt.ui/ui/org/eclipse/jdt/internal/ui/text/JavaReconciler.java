@@ -252,7 +252,7 @@ public class JavaReconciler extends MonoReconciler {
 		
 		super.forceReconciling();
         JavaCompositeReconcilingStrategy strategy= (JavaCompositeReconcilingStrategy) getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
-		strategy.notifyParticipants(false);
+		strategy.notifyListeners(false);
 	}
     
 	/*
@@ -261,7 +261,7 @@ public class JavaReconciler extends MonoReconciler {
 	protected void reconcilerReset() {
 		super.reconcilerReset();
         JavaCompositeReconcilingStrategy strategy= (JavaCompositeReconcilingStrategy) getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
-		strategy.notifyParticipants(true);
+		strategy.notifyListeners(true);
 	}
 	
 	/*

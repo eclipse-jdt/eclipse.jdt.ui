@@ -1495,7 +1495,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	}
 	
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingParticipant#startReconciling()
+	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#aboutToBeReconciled()
 	 * @since 3.0
 	 */
 	public void aboutToBeReconciled() {
@@ -1507,7 +1507,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	}
 	
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingParticipant#reconciled(org.eclipse.jdt.core.dom.CompilationUnit)
+	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(org.eclipse.jdt.core.dom.CompilationUnit)
 	 * @since 3.0
 	 */
 	public void reconciled(CompilationUnit ast) {
@@ -1531,25 +1531,29 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	}
 	
 	/**
-	 * Adds the given participant.
-	 * Has no effect if an identical participant was not already registered.
+	 * Adds the given listener.
+	 * Has no effect if an identical listener was not already registered.
 	 * 
-	 * @param participant	The reconcile participant to be added
+	 * @param listener	The reconcile listener to be added
 	 * @since 3.0
 	 */
-	final void addReconcileParticipant(IJavaReconcilingListener participant) {
-		fReconcilingListeners.add(participant);
+	final void addReconcileListener(IJavaReconcilingListener listener) {
+		synchronized (fReconcilingListeners) {
+			fReconcilingListeners.add(listener);
+		}
 	}
 	
 	/**
-	 * Removes the given participant.
-	 * Has no effect if an identical participant was not already registered.
+	 * Removes the given listener.
+	 * Has no effect if an identical listener was not already registered.
 	 * 
-	 * @param participant	the reconcile participant to be removed
+	 * @param listener	the reconcile listener to be removed
 	 * @since 3.0
 	 */
-	final void removeReconcileParticipant(IJavaReconcilingListener participant) {
-		fReconcilingListeners.remove(participant);
+	final void removeReconcileListener(IJavaReconcilingListener listener) {
+		synchronized (fReconcilingListeners) {
+			fReconcilingListeners.remove(listener);
+		}
 	}
 		
 	protected void updateStateDependentActions() {
