@@ -126,7 +126,8 @@ public class ASTNodeSearchUtil {
 	}
 	
 	//returns an array becaus of the import container, which does not represent 1 node but many
-	public static ASTNode[] getDeclarationNode(IJavaElement element, CompilationUnit cuNode) throws JavaModelException {
+	//for fields, it returns the whole declaration node
+	public static ASTNode[] getDeclarationNodes(IJavaElement element, CompilationUnit cuNode) throws JavaModelException {
 		switch(element.getElementType()){
 			case IJavaElement.FIELD:
 				return new ASTNode[]{getFieldDeclarationNode((IField) element, cuNode)};
@@ -149,13 +150,7 @@ public class ASTNodeSearchUtil {
 	}
 
 	private static ASTNode getNameNode(IMember iMember, CompilationUnit cuNode) throws JavaModelException {
-		Selection selection= Selection.createFromStartLength(iMember.getNameRange().getOffset(), iMember.getNameRange().getLength());
-		SelectionAnalyzer selectionAnalyzer= new SelectionAnalyzer(selection, true);
-		cuNode.accept(selectionAnalyzer);
-		ASTNode node= selectionAnalyzer.getFirstSelectedNode();
-		if (node == null)
-			node= selectionAnalyzer.getLastCoveringNode();
-		return node;
+		return NodeFinder.perform(cuNode, iMember.getNameRange());
 	}
 
 	public static PackageDeclaration getPackageDeclarationNode(IPackageDeclaration reference, CompilationUnit cuNode) throws JavaModelException {
