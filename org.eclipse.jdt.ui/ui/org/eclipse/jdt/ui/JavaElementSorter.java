@@ -51,13 +51,14 @@ public class JavaElementSorter extends ViewerSorter {
 	private static final int IMPORT_CONTAINER= 11;
 	private static final int IMPORT_DECLARATION= 12;
 	private static final int TYPES= 13;
-	private static final int CONSTRUCTORS=	14;
-	private static final int STATIC_INIT= 15;
-	private static final int STATIC_METHODS= 16;
-	private static final int INIT= 17;
-	private static final int METHODS= 18;
-	private static final int STATIC_FIELDS= 19;
-	private static final int FIELDS= 20;
+	private static final int STATIC_INIT= 14;
+	private static final int STATIC_FIELDS= 15;	
+	private static final int STATIC_METHODS= 16;	
+
+	private static final int FIELDS= 17;	
+	private static final int CONSTRUCTORS=	18;
+	private static final int INIT= 19;
+	private static final int METHODS= 20;
 	
 	private static final int JAVAELEMENTS= 21;	
 	private static final int OTHERS= 22;	
