@@ -243,6 +243,7 @@ public class JavaElementLabels {
 	private static String fgPkgNamePrefix;
 	private static String fgPkgNamePostfix;
 	private static int fgPkgNameChars;
+	private static int fgPkgNameLength;
 
 	private JavaElementLabels() {
 	}
@@ -549,18 +550,21 @@ public class JavaElementLabels {
 			getPackageFragmentRootLabel((IPackageFragmentRoot) pack.getParent(), ROOT_QUALIFIED, buf);
 			buf.append('/');
 		}
+		refreshPackageNamePattern();
 		if (pack.isDefaultPackage()) {
 			buf.append(JavaUIMessages.getString("JavaElementLabels.default_package")); //$NON-NLS-1$
-		} else if (getFlag(flags, P_COMPRESSED)) {
+		} else if (getFlag(flags, P_COMPRESSED) && fgPkgNameLength >= 0) {
 				String name= pack.getElementName();
-				refreshPackageNamePattern();
 				int start= 0;
 				int dot= name.indexOf('.', start);
 				while (dot > 0) {
-					buf.append(fgPkgNamePrefix);
-					if (fgPkgNameChars > 0)
-						buf.append(name.substring(start, Math.min(start+ fgPkgNameChars, dot)));
-					buf.append(fgPkgNamePostfix);
+					if (dot - start > fgPkgNameLength-1) {
+						buf.append(fgPkgNamePrefix);
+						if (fgPkgNameChars > 0)
+							buf.append(name.substring(start, Math.min(start+ fgPkgNameChars, dot)));
+						buf.append(fgPkgNamePostfix);
+					} else
+						buf.append(name.substring(start, dot + 1));
 					start= dot + 1;
 					dot= name.indexOf('.', start);
 				}
@@ -612,6 +616,10 @@ public class JavaElementLabels {
 		String pattern= WorkInProgressPreferencePage.getPkgNamePatternForPackagesView();
 		if (pattern.equals(fgPkgNamePattern))
 			return;
+		else if (pattern.equals("")) {
+			fgPkgNameLength= -1;
+			return;
+		}
 		fgPkgNamePattern= pattern;
 		int i= 0;
 		fgPkgNameChars= 0;
@@ -625,10 +633,12 @@ public class JavaElementLabels {
 					fgPkgNamePrefix= pattern.substring(0, i);
 				if (i >= 0 && i < pattern.length())
 					fgPkgNamePostfix= pattern.substring(i+1);
+				fgPkgNameLength= fgPkgNamePrefix.length() + fgPkgNameChars + fgPkgNamePostfix.length();					
 				return;
 			}
 			i++;
 		}
 		fgPkgNamePrefix= pattern;
+		fgPkgNameLength= pattern.length();
 	}
 }
