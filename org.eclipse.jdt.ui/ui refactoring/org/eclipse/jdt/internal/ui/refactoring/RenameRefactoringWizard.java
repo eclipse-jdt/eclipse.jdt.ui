@@ -5,8 +5,8 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.core.refactoring.RefactoringStatus;
-import org.eclipse.jdt.core.refactoring.tagging.IRenameRefactoring;import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
+import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.core.refactoring.tagging.IRenameRefactoring;import org.eclipse.jdt.internal.core.refactoring.DebugUtils;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 
 public class RenameRefactoringWizard extends RefactoringWizard {
 	
@@ -29,6 +29,14 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	private RefactoringStatus validateNewName(String newName){
 		IRenameRefactoring ref= (IRenameRefactoring)getRefactoring();		
 		ref.setNewName(newName);
-		return ref.checkNewName();
+		try{
+			return ref.checkNewName();
+		} catch (JavaModelException e){
+			JdtHackFinder.fixMeSoon("should log the exception");
+			String msg= e.getMessage() == null ? "": e.getMessage();
+			RefactoringStatus result= new RefactoringStatus();
+			result.addFatalError("JavaModelException during name checking:" + msg);
+			return result;
+		}	
 	}
 }

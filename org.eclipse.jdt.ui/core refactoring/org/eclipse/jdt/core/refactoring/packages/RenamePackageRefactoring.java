@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.core.refactoring.RefactoringSearchEngine;
+import org.eclipse.jdt.internal.core.refactoring.DebugUtils;import org.eclipse.jdt.internal.core.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 import org.eclipse.jdt.internal.core.util.HackFinder;
 
@@ -175,7 +175,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		return result;
 	}
 	
-	public RefactoringStatus checkNewName(){
+	public RefactoringStatus checkNewName() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(Checks.checkPackageName(fNewName));
 		if (Checks.isAlreadyNamed(fPackage, fNewName))
@@ -183,36 +183,51 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		result.merge(checkPackageInCurrentRoot());
 		return result;
 	}
-	
-	
-	
-	private RefactoringStatus checkPackageInCurrentRoot(){
-		if  (((IPackageFragmentRoot)fPackage.getParent()).getPackageFragment(fNewName).exists()){
-			RefactoringStatus result= new RefactoringStatus();
-			result.addFatalError("Package already exists.");
-			return result;
-		}
+
+	/*
+	 * returns true if the new name is ok if the specified root.
+	 * if a package fragment with this name exists and has java resources,
+	 * then the name is not ok.
+	 */
+	private boolean isPackageNameOkInRoot(IPackageFragmentRoot root) throws JavaModelException{
+		IPackageFragment pack= root.getPackageFragment(fNewName);
+		if (! pack.exists())
+			return true;
+		else if (! pack.hasSubpackages()) //leaves are no good
+			return false;			
+		else if (pack.containsJavaResources())
+			return false;
+		else if (pack.getNonJavaResources().length != 0)
+			return false;
 		else 
-			return null;		
+			return true;	
+	}
+	
+	private RefactoringStatus checkPackageInCurrentRoot() throws JavaModelException{
+		IPackageFragmentRoot root= ((IPackageFragmentRoot)fPackage.getParent());
+		IPackageFragment pack= root.getPackageFragment(fNewName);
+		if (isPackageNameOkInRoot(root))
+			return null;
+		else{
+			RefactoringStatus result= new RefactoringStatus();
+			result.addFatalError("Package already exists");
+			return result;
+		}	
 	}
 
 	private ISearchPattern createSearchPattern(){
 		return SearchEngine.createSearchPattern(fPackage, IJavaSearchConstants.REFERENCES);
 	}
 	
-	private RefactoringStatus checkPackageName() throws JavaModelException{
-		RefactoringStatus r= checkPackageInCurrentRoot();
-		if (r != null && (!r.isOK())) 
-			return r;
-		
+	private RefactoringStatus checkPackageName() throws JavaModelException{		
 		RefactoringStatus result= new RefactoringStatus();
 		
 		IPackageFragmentRoot[] roots= fPackage.getJavaProject().getPackageFragmentRoots();
 		
 		for (int i= 0; i < roots.length; i++) {
-			if (roots[i].getPackageFragment(fNewName).exists()){
+			if (! isPackageNameOkInRoot(roots[i])){	
 				result.addFatalError("Package " + fNewName + " already exists in this project");
-				break;
+				return result;
 			}
 		}
 		return result;	

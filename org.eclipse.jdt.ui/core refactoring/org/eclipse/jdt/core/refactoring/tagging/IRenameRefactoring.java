@@ -5,7 +5,7 @@
  */
 package org.eclipse.jdt.core.refactoring.tagging;
 
-import org.eclipse.jdt.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.refactoring.RefactoringStatus;
 
 /**
  * Represents a refactoring that renames an <code>IJavaElement</code>.
@@ -32,6 +32,6 @@ public interface IRenameRefactoring {
 	 * Checks if the new name (set in <code>setNewName</code>) is valid for
 	 * the entity that this refactoring renames.
 	 */
-	public RefactoringStatus checkNewName();
+	public RefactoringStatus checkNewName() throws JavaModelException;
 	
 }
