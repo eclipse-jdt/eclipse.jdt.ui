@@ -60,17 +60,6 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 		
 		IJavaProject javaProject= JavaCore.create(page.getProject());
 		ISourceLocator locator= new WorkspaceSourceLocator(javaProject.getProject().getWorkspace());
-		String[] classPath= null;
-		MultiStatus warnings= new MultiStatus(JavaPlugin.getPluginId(), IStatus.OK, "status", null);
-		try {
-			classPath= JavaRuntime.computeDefaultRuntimeClassPath(javaProject);
-		} catch (CoreException e) {
-			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), ERROR_CLASSPATH_PREFIX, warnings);
-			return false;
-		}
-		
-		String[] extraPath = new String[classPath.length + 1];
-		System.arraycopy(classPath, 0, extraPath, 0, classPath.length);
 			
 		URL pluginInstallURL= JavaPlugin.getDefault().getDescriptor().getInstallURL();
 		URL jarURL = null;
@@ -85,9 +74,9 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 			return false;
 		}
 		
-		extraPath[classPath.length] = jarURL.getFile();
+		String[] classPath = new String[] {jarURL.getFile()};
 		
-		return doLaunch(javaProject, mode, page, extraPath, launcher);
+		return doLaunch(javaProject, mode, page, classPath, launcher);
 	}
 
 	protected boolean doLaunch(IJavaProject p, String mode, IFile page, String[] classPath, ILauncher launcherProxy) {
@@ -109,6 +98,7 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 				IPath osPath = outputFolder.getLocation();
 				String url = "file:/" + osPath.toOSString();
 				url = url.replace(File.separatorChar, '/');
+				url += '/';
 				config.setProgramArguments(new String[] {url});
 			} catch (JavaModelException e) {
 				return false;
@@ -137,7 +127,7 @@ public class ScrapbookLauncher extends JavaApplicationLauncher implements IDebug
 
 	IMarker createMagicBreakpoint(IType type) {
 		try {
-			return createSnippetSupportBreakpoint(type, 60, -1, -1, 0);
+			return createSnippetSupportBreakpoint(type, 54, -1, -1, 0);
 		} catch (DebugException e) {
 			e.printStackTrace();
 		}

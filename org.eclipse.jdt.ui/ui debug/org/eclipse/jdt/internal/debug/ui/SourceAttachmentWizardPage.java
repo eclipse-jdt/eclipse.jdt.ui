@@ -11,7 +11,7 @@ public class SourceAttachmentWizardPage extends WizardPage implements IStatusCha
 	private final static String PAGE_DESCRIPTION = PREFIX + "description";
 	private final static String NO_SOURCE = PREFIX + "no_source";
 	private static final String ERROR_PREFIX= PREFIX + "op_error.";	
-	private static final String ADD_TO_BUILD_PATH= PREFIX + "add_to_build_path_dialog";	
+	private static final String ERROR_TITLE= ERROR_PREFIX + "title";		private static final String ADD_TO_BUILD_PATH= PREFIX + "add_to_build_path_dialog";	
 
 	private Button fNoSourceButton;
 	private Control fBlockControl;
@@ -79,11 +79,19 @@ public class SourceAttachmentWizardPage extends WizardPage implements IStatusCha
 	protected Control createContents(Composite composite) {
 		try {
 			IJavaProject jproject= fJarRoot.getJavaProject();
-			IClasspathEntry entry= JavaModelUtility.getRawClasspathEntry(fJarRoot);			if (entry == null) {				// use a dummy entry to use for initialization				entry= JavaCore.newLibraryEntry(fJarRoot.getPath(), null, null);			}
+			IClasspathEntry[] entries= jproject.getRawClasspath();
+			
+			int index= findClasspathEntry(entries, fJarRoot.getPath());
+			IClasspathEntry entry;
+			if (index != -1) {
+				entry= entries[index];
+			} else {
+				entry= JavaCore.newLibraryEntry(fJarRoot.getPath(), null, null);
+			}
 			fSourceAttachmentBlock= new SourceAttachmentBlock(jproject.getProject(), this, entry);
 			return fSourceAttachmentBlock.createControl(composite);				
 		} catch (CoreException e) {
-			ErrorDialog.openError(getShell(), "Error", "", e.getStatus());
+			ErrorDialog.openError(getShell(), DebugUIUtils.getResourceString(ERROR_TITLE), "", e.getStatus());
 			return null;
 		}	
 	}
@@ -102,7 +110,32 @@ public class SourceAttachmentWizardPage extends WizardPage implements IStatusCha
 
 	}
 	
-	private IClasspathEntry[] modifyClasspath(IPackageFragmentRoot root, IPath attachPath, IPath attachRoot) throws JavaModelException{		IClasspathEntry entry= JavaModelUtility.getRawClasspathEntry(root);		if (entry != null) {			IClasspathEntry[] oldClasspath= root.getJavaProject().getRawClasspath();			IClasspathEntry[] newClasspath= new IClasspathEntry[oldClasspath.length];			for (int i= 0; i < oldClasspath.length; i++) {				if (oldClasspath[i] == entry) {					if (entry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {						newClasspath[i]= JavaCore.newVariableEntry(entry.getPath(), attachPath, attachRoot);					} else {						newClasspath[i]= JavaCore.newLibraryEntry(entry.getPath(), attachPath, attachRoot);					}				} else {					newClasspath[i]= oldClasspath[i];				}			}			return newClasspath;		}		return null;	}
+	private int findClasspathEntry(IClasspathEntry[] entries, IPath path) {
+		for (int i= 0; i < entries.length; i++) {
+			IClasspathEntry curr= entries[i];
+			if (curr.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+				curr= JavaCore.getResolvedClasspathEntry(curr);
+			}
+			if (curr.getEntryKind() == IClasspathEntry.CPE_LIBRARY && path.equals(curr.getPath())) {
+				return i;
+			}
+		}
+		return -1;
+	}
+			
+	private boolean modifyClasspathEntry(IClasspathEntry[] entries, IPath attachPath, IPath attachRoot) {
+		int index= findClasspathEntry(entries, fJarRoot.getPath());
+		if (index != -1) {
+			IClasspathEntry old= entries[index];
+			if (old.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+				entries[index]= JavaCore.newVariableEntry(old.getPath(), attachPath, attachRoot);
+			} else {
+				entries[index]= JavaCore.newLibraryEntry(old.getPath(), attachPath, attachRoot);
+			}
+			return true;
+		}
+		return false;
+	}	
 	
 	/**
 	 * The status has changed.  Update the state
@@ -143,7 +176,22 @@ public class SourceAttachmentWizardPage extends WizardPage implements IStatusCha
 				IPath attachPath= fSourceAttachmentBlock.getSourceAttachmentPath();
 				IPath attachRoot= fSourceAttachmentBlock.getSourceAttachmentRootPath();				
 				
-				IClasspathEntry[] entries= modifyClasspath(fJarRoot, attachPath, attachRoot);				if (entries == null) {					// root not found in classpath					if (fSourceAttachmentBlock.getSourceAttachmentPath() == null) {						return true;					} else if (!putJarOnClasspath()) {						// ignore changes and return						return true;					}					// put new on class path					entries= jproject.getRawClasspath();					int nEntries= entries.length;					IClasspathEntry[] incrEntries= new IClasspathEntry[nEntries + 1];					System.arraycopy(entries, 0, incrEntries, 0, nEntries);					incrEntries[nEntries]= JavaCore.newLibraryEntry(fJarRoot.getPath(), attachPath, attachRoot);					entries= incrEntries;				}
+				IClasspathEntry[] entries= jproject.getRawClasspath();
+				if (!modifyClasspathEntry(entries, attachPath, attachRoot)) {
+					// root not found in classpath
+					if (fSourceAttachmentBlock.getSourceAttachmentPath() == null) {
+						return true;
+					} else if (!putJarOnClasspath()) {
+						// ignore changes and return
+						return true;
+					}
+					// put new on class path
+					int nEntries= entries.length;
+					IClasspathEntry[] incrEntries= new IClasspathEntry[nEntries + 1];
+					System.arraycopy(entries, 0, incrEntries, 0, nEntries);
+					incrEntries[nEntries]= JavaCore.newLibraryEntry(fJarRoot.getPath(), attachPath, attachRoot);
+					entries= incrEntries;
+				}
 				final IClasspathEntry[] newEntries= entries;
 				
 				IRunnableWithProgress runnable= new IRunnableWithProgress() {
@@ -158,10 +206,10 @@ public class SourceAttachmentWizardPage extends WizardPage implements IStatusCha
 				};				
 				new ProgressMonitorDialog(getShell()).run(true, true, runnable);
 			} catch (JavaModelException e) {
-				MessageDialog.openError(getShell(), "Error", e.getMessage());
+				MessageDialog.openError(getShell(), DebugUIUtils.getResourceString(ERROR_TITLE), e.getMessage());
 				return false;							
 			} catch (InvocationTargetException e) {
-				MessageDialog.openError(getShell(), "Error", e.getMessage());
+				MessageDialog.openError(getShell(), DebugUIUtils.getResourceString(ERROR_TITLE), e.getMessage());
 				JavaPlugin.log(e);
 				return false;
 			} catch (InterruptedException e) {

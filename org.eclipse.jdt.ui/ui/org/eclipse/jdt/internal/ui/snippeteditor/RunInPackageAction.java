@@ -4,18 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.snippeteditor;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.ui.dialogs.SelectionDialog;
-
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.dialogs.SelectionDialog;
 
 /**
  * Runs a snippet in the context of a package
@@ -46,8 +35,8 @@ public class RunInPackageAction extends SnippetAction {
 			IJavaProject p= fEditor.getJavaProject();
 			//fix for 1G472LK: ITPJUI:WIN2000 - Package selection dialog must qualify package names regarding source folders
 			SelectionDialog dialog= JavaUI.createPackageDialog(shell, p, IJavaElementSearchConstants.CONSIDER_BINARIES);
-			dialog.setTitle("Run");
-			dialog.setMessage("Choose the package in which code is run");
+			dialog.setTitle(JavaPlugin.getResourceString(PREFIX + "dialog.title"));
+			dialog.setMessage(JavaPlugin.getResourceString(PREFIX + "dialog.message"));
 			String pkg= fEditor.getPackage();
 			if (pkg != null) {
 				dialog.setInitialSelections(new String[] {pkg});

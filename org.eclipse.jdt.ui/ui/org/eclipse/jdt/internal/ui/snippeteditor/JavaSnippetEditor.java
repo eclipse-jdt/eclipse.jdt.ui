@@ -196,7 +196,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		try {
 			getPage().setPersistentProperty(new QualifiedName(JavaPlugin.getPluginId(), PACKAGE_CONTEXT), packageName);
 		} catch (CoreException e) {
-			ErrorDialog.openError(getShell(), "Error setting package context", null, e.getStatus());
+			ErrorDialog.openError(getShell(), JavaPlugin.getResourceString(ERROR + "packagecontext"), null, e.getStatus());
 		}
 	}
 	
@@ -294,7 +294,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		}
 		if (getThread() == null) {
 			IStatus status = new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaUIStatus.INTERNAL_ERROR, 
-				"Evaluation failed: internal error - unable to obtain an execution context.", null);
+				JavaPlugin.getResourceString(ERROR + "noexecutioncontext"), null);
 			ErrorDialog.openError(getShell(), JavaPlugin.getResourceString(ERROR + "problemseval"), null, status);
 			evaluationEnds();
 			return;
@@ -308,21 +308,6 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	}
 
 	public void evaluationComplete(final IJavaEvaluationResult result) {
-		if (fThread != null) {
-			try {
-				fThread.resume();
-				int count= 0;
-				while (fThread != null && !fThread.isSuspended() && count < 20) {
-					try {
-						count++;
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-					}
-				}
-			} catch (DebugException e) {
-				// XXX: error
-			}
-		}
 		Runnable r = new Runnable() {
 			public void run() {
 				if (result.hasProblems()) {
@@ -507,8 +492,16 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		return true;
 	}
 		
-	void evaluationStarts() {
-		fEvaluating= true;
+	synchronized void evaluationStarts() {
+		if (fThread != null) {
+			try {
+				fThread.resume();
+				fThread = null;
+			} catch (DebugException e) {
+				// XXX: error
+			}
+		}		
+		fEvaluating = true;
 		fAttempts = 0;
 		fireEvalStateChanged();
 		showStatus(JavaPlugin.getResourceString(EVALUATING));
@@ -555,29 +548,27 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 						getShell().getDisplay().asyncExec(r);
 					}
 				}
+			} else if (de instanceof IJavaThread) {
+				if (e.getKind() == DebugEvent.SUSPEND) {
+					IJavaThread jt = (IJavaThread)de;
+					try {
+						IJavaStackFrame f= (IJavaStackFrame)jt.getTopStackFrame();
+						if (f != null) {
+							if (e.getDetail() == DebugEvent.STEP_END && f.getLineNumber() == 51 && f.getDeclaringTypeName().equals("org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookMain")) {
+								fThread = jt;
+							} else if (e.getDetail() == DebugEvent.BREAKPOINT && jt.getBreakpoint().equals(ScrapbookLauncher.getDefault().getMagicBreakpoint(jt.getDebugTarget()))) {
+								jt.stepOver();
+							}
+						}
+					} catch (DebugException ex) {
+						// XXX : error
+					}
+				}
 			}
 		}
 	}
 	
 	protected IJavaThread getThread() {
-		try {
-			if (fThread == null) {
-				IDebugElement[] threads = fVM.getChildren();
-				for (int i = 0; i < threads.length; i++) {
-					IJavaThread thread = (IJavaThread)threads[i];
-					if (thread.isSuspended() && thread.getTopStackFrame().getLineNumber() == 60) {
-						IJavaStackFrame frame = (IJavaStackFrame)thread.getTopStackFrame();
-						if (frame.getMethodName().equals("nop")) {
-							fThread = thread;
-							break;
-						}
-					}
-				}
-			}
-		} catch(DebugException e) {
-			JavaPlugin.log(e.getStatus());
-			return null;
-		}
 		return fThread;
 	}
 	
