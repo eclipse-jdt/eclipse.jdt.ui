@@ -40,7 +40,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	}
 	
 	public static class SwapDescription implements ChangeDescription {
-		int index;
+		final int index;
 		public SwapDescription(int index) {
 			this.index= index;
 		}
@@ -49,13 +49,13 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	public static class RemoveDescription implements ChangeDescription {
 	}
 	
-	private static class ModifyDescription implements ChangeDescription {
-		public String name;
-		public ITypeBinding type;
+	static class ModifyDescription implements ChangeDescription {
+		public final String name;
+		public final ITypeBinding type;
 		SingleVariableDeclaration resultingNode;
 		SimpleName resultingTagArg;
 		
-		public ModifyDescription(ITypeBinding type, String name) { 
+		private ModifyDescription(ITypeBinding type, String name) { 
 			this.type= type;
 			this.name= name;
 		}
