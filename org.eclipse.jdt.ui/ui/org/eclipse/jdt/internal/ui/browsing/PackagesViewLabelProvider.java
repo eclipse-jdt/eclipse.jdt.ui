@@ -39,7 +39,6 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 
 	private int fViewState;
 
-	private ElementImageProvider fElementImageProvider;
 	private ImageDescriptorRegistry fRegistry;
 	private TreeHierarchyLayoutProblemsDecorator fDecorator;
 
@@ -52,7 +51,6 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 		
 		Assert.isTrue(isValidState(state));
 		fViewState= state;
-		fElementImageProvider= new ElementImageProvider();
 		fRegistry= JavaPlugin.getImageDescriptorRegistry();
 		
 		fDecorator= new TreeHierarchyLayoutProblemsDecorator(isFlatView());
@@ -153,19 +151,5 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 			name= name.substring(name.lastIndexOf(".") + 1); //$NON-NLS-1$
 		return name;
 
-	}
-	
-	private class ElementImageProvider extends JavaElementImageProvider{
-		
-		public ElementImageProvider() {
-			super();
-		}
-		
-		public ImageDescriptor getCPImageDescriptor(LogicalPackage element, boolean isEmpty) {
-			if(isEmpty)
-				return JavaPluginImages.DESC_OBJS_EMPTY_LOGICAL_PACKAGE;
-			else
-				return JavaPluginImages.DESC_OBJS_LOGICAL_PACKAGE;		
-		}
 	}
 }

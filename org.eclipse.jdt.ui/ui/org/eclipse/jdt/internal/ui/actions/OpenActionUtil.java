@@ -15,6 +15,8 @@ import java.util.List;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.window.Window;
+
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
@@ -86,7 +88,7 @@ public class OpenActionUtil {
 		dialog.setMessage(message);
 		dialog.setElements(elements);
 		
-		if (dialog.open() == ElementListSelectionDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			Object[] selection= dialog.getResult();
 			if (selection != null && selection.length > 0) {
 				nResults= selection.length;

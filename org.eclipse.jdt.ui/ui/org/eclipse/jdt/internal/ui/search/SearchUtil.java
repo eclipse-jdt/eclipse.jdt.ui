@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
@@ -391,7 +392,7 @@ public class SearchUtil extends JavaModelUtil {
 				SearchMessages.getString("Search.FindReferencesAction.BinPrimConstWarnDialog.title"), //$NON-NLS-1$
 				null,
 				SearchMessages.getString("Search.FindReferencesAction.BinPrimConstWarnDialog.message"), //$NON-NLS-1$
-				OptionalMessageDialog.INFORMATION,
+				MessageDialog.INFORMATION,
 				new String[] { IDialogConstants.OK_LABEL },
 				0);
 	}

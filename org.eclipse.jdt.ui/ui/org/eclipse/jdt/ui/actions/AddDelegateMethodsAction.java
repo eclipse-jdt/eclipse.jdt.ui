@@ -316,7 +316,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 						try {
 							key = createSignatureKey(((Methods2Field) selection[i]).fMethod);
 						} catch (JavaModelException e) {
-							return new StatusInfo(StatusInfo.ERROR, e.toString());
+							return new StatusInfo(IStatus.ERROR, e.toString());
 						}
 					}
 					if (!map.add(key)) { //$NON-NLS-1$

@@ -142,7 +142,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 		else if (o instanceof ISelection)
 			return getJavaElement((IStructuredSelection)o, silent);
 		else if (SearchUtil.isISearchResultViewEntry(o))
-			return getJavaElement(SearchUtil.getJavaElement(o), silent);;
+			return getJavaElement(SearchUtil.getJavaElement(o), silent);
 		return null;
 	}
 
@@ -311,7 +311,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
 		IType type= getType(element);
 		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(type), getScopeDescription(type), getCollector());
-	};
+	}
 
 	abstract int getLimitTo();
 

@@ -105,7 +105,7 @@ public class ReferencesSearchGroup extends ActionGroup  {
 	private void registerAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection) {
 		action.update(selection);
 		provider.addSelectionChangedListener(action);
-	};
+	}
 
 	/**
 	 * Note: this method is for internal use only. Clients should not call this method.

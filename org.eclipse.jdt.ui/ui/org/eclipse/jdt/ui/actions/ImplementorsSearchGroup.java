@@ -96,7 +96,7 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 	private void registerAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection){
 		action.update(selection);
 		provider.addSelectionChangedListener(action);
-	};
+	}
 
 	private FindAction[] getActions(ISelection sel) {
 		ArrayList actions= new ArrayList(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 2);		

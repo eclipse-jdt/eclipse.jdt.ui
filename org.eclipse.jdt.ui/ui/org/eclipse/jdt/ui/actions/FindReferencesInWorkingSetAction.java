@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
-;
+
 
 /**
  * Finds references of the selected element in working sets.
@@ -122,7 +122,7 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 		}
 		SearchUtil.updateLRUWorkingSets(workingSets);
 		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(workingSets), getScopeDescription(workingSets), getCollector());
-	};
+	}
 
 	private IJavaSearchScope getScope(IWorkingSet[] workingSets) throws JavaModelException {
 		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(workingSets);

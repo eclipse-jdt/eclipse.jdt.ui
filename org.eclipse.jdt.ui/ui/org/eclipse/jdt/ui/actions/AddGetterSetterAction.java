@@ -636,7 +636,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			JavaPlugin.logErrorMessage("AddGetterSetterAction.showQueryDialog: No active shell found"); //$NON-NLS-1$
 			return IRequestQuery.CANCEL;
 		}		
-		final int[] result= { MessageDialog.CANCEL };
+		final int[] result= { Window.CANCEL };
 		shell.getDisplay().syncExec(new Runnable() {
 			public void run() {
 				String title= ActionMessages.getString("AddGetterSetterAction.QueryDialog.title"); //$NON-NLS-1$

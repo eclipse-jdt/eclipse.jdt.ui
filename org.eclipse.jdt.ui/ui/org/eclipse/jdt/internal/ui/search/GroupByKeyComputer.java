@@ -21,8 +21,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class GroupByKeyComputer implements IGroupByKeyComputer {
 
-	IJavaElement fLastJavaElement= null;;
-	String fLastHandle= null;;
+	IJavaElement fLastJavaElement= null;
+	String fLastHandle= null;
 
 	public Object computeGroupByKey(IMarker marker) {
 		if (marker == null)

@@ -973,7 +973,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		if (!(o instanceof IJavaElement)) {
 			setSelection(StructuredSelection.EMPTY, true);
 			return;
-		};
+		}
 		
 		IJavaElement je= (IJavaElement)o;
 		IJavaElement elementToSelect= getSuitableJavaElement(findElementToSelect(je));
@@ -1360,8 +1360,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		return fHasWorkingSetFilter;
 	}
 
-	protected void setOpenEditorGroup(OpenEditorActionGroup fOpenEditorGroup) {
-		this.fOpenEditorGroup= fOpenEditorGroup;
+	protected void setOpenEditorGroup(OpenEditorActionGroup openEditorGroup) {
+		fOpenEditorGroup= openEditorGroup;
 	}
 
 	protected OpenEditorActionGroup getOpenEditorGroup() {

@@ -23,6 +23,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -166,7 +167,7 @@ public class AddMethodStubAction extends Action {
 			JavaPlugin.logErrorMessage("AddMethodStubAction.showQueryDialog: No active shell found"); //$NON-NLS-1$
 			return IRequestQuery.CANCEL;
 		}
-		final int[] result= { MessageDialog.CANCEL };
+		final int[] result= { Window.CANCEL };
 		shell.getDisplay().syncExec(new Runnable() {
 			public void run() {
 				String title= JavaUIMessages.getString("AddMethodStubAction.QueryDialog.title"); //$NON-NLS-1$

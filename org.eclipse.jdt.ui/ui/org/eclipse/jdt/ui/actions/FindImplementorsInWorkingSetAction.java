@@ -99,7 +99,7 @@ public class FindImplementorsInWorkingSetAction extends FindImplementorsAction {
 		}
 		SearchUtil.updateLRUWorkingSets(workingSets);
 		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(workingSets), getScopeDescription(workingSets), getCollector());
-	};
+	}
 
 
 	private IJavaSearchScope getScope(IWorkingSet[] workingSets) throws JavaModelException {

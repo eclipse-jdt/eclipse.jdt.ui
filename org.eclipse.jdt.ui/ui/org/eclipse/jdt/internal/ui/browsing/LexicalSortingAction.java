@@ -63,4 +63,4 @@ class LexicalSortingAction extends Action {
 		if (store)
 			JavaPlugin.getDefault().getPreferenceStore().setValue(fPreferenceKey, on);
 	}
-};
+}

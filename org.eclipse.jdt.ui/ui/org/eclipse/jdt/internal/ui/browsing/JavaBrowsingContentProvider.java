@@ -192,7 +192,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		// filter out package fragments that correspond to projects and
 		// replace them with the package fragments directly
 		for (int i= 0; i < roots.length; i++) {
-			IPackageFragmentRoot root= (IPackageFragmentRoot)roots[i];
+			IPackageFragmentRoot root= roots[i];
 			if (!root.isExternal()) {
 				Object[] children= root.getChildren();
 				for (int k= 0; k < children.length; k++) 
@@ -453,7 +453,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 					else if (fViewer instanceof TableViewer)
 						((TableViewer)fViewer).add(newElements);
 					if (fViewer.testFindItem(elements[0]) != null)
-						fBrowsingPart.adjustInputAndSetSelection((IJavaElement)elements[0]);
+						fBrowsingPart.adjustInputAndSetSelection(elements[0]);
 				}
 			}
 		});
@@ -499,7 +499,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {
 					ctrl.setRedraw(false);
-					fBrowsingPart.adjustInputAndSetSelection((IJavaElement)element);
+					fBrowsingPart.adjustInputAndSetSelection(element);
 					ctrl.setRedraw(true);
 				}
 			}

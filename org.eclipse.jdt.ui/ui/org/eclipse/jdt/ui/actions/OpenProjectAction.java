@@ -14,10 +14,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -160,7 +160,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 		dialog.setElements(getClosedProjects());
 		dialog.setMultipleSelection(true);
 		int result= dialog.open();
-		if (result != Dialog.OK)
+		if (result != Window.OK)
 			return;
 		final Object[] projects= dialog.getResult();
 		IWorkspaceRunnable runnable= createRunnable(projects);

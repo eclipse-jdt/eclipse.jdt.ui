@@ -186,7 +186,7 @@ public class JavaSearchScopeFactory {
 	}
 
 	public void addJavaElements(Set javaElements, LogicalPackage selectedElement) {
-		IPackageFragment[] packages= ((LogicalPackage)selectedElement).getFragments();
+		IPackageFragment[] packages= selectedElement.getFragments();
 		for (int i= 0; i < packages.length; i++)
 			addJavaElements(javaElements, packages[i]);
 	}

@@ -120,7 +120,7 @@ public class PackagesView extends JavaBrowsingPart{
 			buf.append(message);
 			return buf.toString();
 		}
-	};
+	}
 
 
 	private SelectAllAction fSelectAllAction;
@@ -203,7 +203,7 @@ public class PackagesView extends JavaBrowsingPart{
 		else
 			viewer= createTreeViewer(parent);
 	
-		((PackageViewerWrapper)fWrappedViewer).setViewer(viewer);
+		fWrappedViewer.setViewer(viewer);
 		return fWrappedViewer;
 	}
 
@@ -463,7 +463,6 @@ public class PackagesView extends JavaBrowsingPart{
 	private class LayoutAction extends Action {
 
 		private int fState;
-		private Runnable fRunnable;
 
 		public LayoutAction(String text, int state) {
 			super(text);
@@ -480,7 +479,6 @@ public class PackagesView extends JavaBrowsingPart{
 
 		public void setRunnable(Runnable runnable) {
 			Assert.isNotNull(runnable);
-			fRunnable= runnable;
 		}
 
 		/*
