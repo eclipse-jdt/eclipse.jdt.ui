@@ -276,6 +276,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * Selects an member in the methods list
 	 */	
 	public void selectMember(IMember member) {
+		Control methodControl= fMethodsViewer.getControl();
+		if (methodControl != null && !methodControl.isDisposed()) {
+			fMethodsViewer.getControl().setFocus();
+		}
 		fMethodsViewer.setSelection(new StructuredSelection(member), true);
 	}	
 
@@ -317,6 +321,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				if (cu != null && cu.isWorkingCopy()) {
 					element= cu.getOriginal(element);
 				}
+				if (element.getElementType() == IJavaElement.METHOD || element.getElementType() == IJavaElement.FIELD || element.getElementType() == IJavaElement.INITIALIZER) {
+					element= ((IMember) element).getDeclaringType();
+				}
 			}
 		}
 		
@@ -324,7 +331,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			addHistoryEntry(element);
 		}
 			
-		updateInput(element);	
+		updateInput(element);
 	}
 	
 	/**

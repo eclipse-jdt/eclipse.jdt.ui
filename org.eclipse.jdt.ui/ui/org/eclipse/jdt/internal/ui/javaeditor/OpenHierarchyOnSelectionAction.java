@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 
@@ -57,37 +58,14 @@ public class OpenHierarchyOnSelectionAction extends OpenOnSelectionAction {
 	 * @see OpenJavaElementAction#open
 	 */
 	protected void open(ISourceReference sourceReference) throws JavaModelException, PartInitException {
-		IType type= getType(sourceReference);
-		if (type != null) {
-			TypeHierarchyViewPart part= OpenTypeHierarchyUtil.open(new IType[] { type }, fEditor.getSite().getWorkbenchWindow());
-			if (part != null)
-				part.selectMember(getMember(sourceReference));
+		if (sourceReference instanceof IMember) {
+			IMember member= (IMember) sourceReference;
+			OpenTypeHierarchyUtil.open(new IJavaElement[] { member }, fEditor.getSite().getWorkbenchWindow());
 		} else {
 			getShell().getDisplay().beep();
 		}
 	}
-	
-	protected IType getType(ISourceReference sourceReference) {
-		if ( !(sourceReference instanceof IJavaElement))
-			return null;
-			
-		IJavaElement e= (IJavaElement) sourceReference;
 		
-		while (e != null) {
-			if (e instanceof IType)
-				return (IType) e;
-			e= e.getParent();
-		}
-		
-		return null;
-	}
-	
-	protected IMember getMember(ISourceReference sourceReference) {
-		if (sourceReference instanceof IMember)
-			return (IMember) sourceReference;
-		return null;
-	}
-	
 	/**
 	 * @see OpenOnSelectionAction#openOnEmptySelection(ITextSelection)
 	 */
