@@ -19,16 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Preferences;
-import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -41,6 +31,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -58,10 +58,12 @@ import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.IWidgetTokenKeeper;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.Annotation;
@@ -110,13 +112,55 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
+import org
+	.eclipse
+	.jdt
+	.internal
+	.ui
+	.javaeditor
+	.selectionactions
+	.GoToNextPreviousMemberAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.SelectionHistory;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectHistoryAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
+import org
+	.eclipse
+	.jdt
+	.internal
+	.ui
+	.javaeditor
+	.selectionactions
+	.StructureSelectEnclosingAction;
+import org
+	.eclipse
+	.jdt
+	.internal
+	.ui
+	.javaeditor
+	.selectionactions
+	.StructureSelectHistoryAction;
+import org
+	.eclipse
+	.jdt
+	.internal
+	.ui
+	.javaeditor
+	.selectionactions
+	.StructureSelectNextAction;
+import org
+	.eclipse
+	.jdt
+	.internal
+	.ui
+	.javaeditor
+	.selectionactions
+	.StructureSelectPreviousAction;
+import org
+	.eclipse
+	.jdt
+	.internal
+	.ui
+	.javaeditor
+	.selectionactions
+	.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
@@ -900,21 +944,66 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	}
 
+	private static IRegion getSignedSelection(ITextViewer viewer) {
+
+		StyledText text= viewer.getTextWidget();
+		int caretOffset= text.getCaretOffset();
+		Point selection= text.getSelection();
+		
+		// caret left
+		int offset, length;
+		if (caretOffset == selection.x) {
+			offset= selection.y;
+			length= selection.x - selection.y;			
+			
+		// caret right
+		} else {
+			offset= selection.x;
+			length= selection.y - selection.x;			
+		}
+		
+		offset -= viewer.getVisibleRegion().getOffset();
+		
+		return new Region(offset, length);
+	}
+
+	private final static char[] BRACKETS= { '{', '}', '(', ')', '[', ']' };
+
+	private static boolean isBracket(char character) {
+		for (int i= 0; i != BRACKETS.length; ++i)
+			if (character == BRACKETS[i])
+				return true;
+		return false;
+	}
+
+	private static boolean isSurroundedByBrackets(IDocument document, int offset) {
+		if (offset == 0 || offset == document.getLength())
+			return false;
+
+		try {
+			return
+				isBracket(document.getChar(offset - 1)) &&
+				isBracket(document.getChar(offset));
+			
+		} catch (BadLocationException e) {
+			return false;	
+		}
+	} 
+
 	/**
 	 * Jumps to the matching bracket.
 	 */
 	public void gotoMatchingBracket() {
 
 		if (fBracketMatcher == null)
-			fBracketMatcher= new JavaPairMatcher(new char[] { '{', '}', '(', ')', '[', ']' });
+			fBracketMatcher= new JavaPairMatcher(BRACKETS);
 
 		ISourceViewer sourceViewer= getSourceViewer();
 		IDocument document= sourceViewer.getDocument();
 		if (document == null)
 			return;
 		
-		ISelectionProvider provider= getSelectionProvider();
-		ITextSelection selection= (ITextSelection) provider.getSelection();
+		IRegion selection= getSignedSelection(sourceViewer);
 
 		int selectionLength= Math.abs(selection.getLength());
 		if (selectionLength > 1) {
@@ -923,7 +1012,12 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			return;
 		}
 
-		IRegion region= fBracketMatcher.match(document, selection.getOffset());
+		// #26314
+		int sourceCaretOffset= selection.getOffset() + selection.getLength();
+		if (isSurroundedByBrackets(document, sourceCaretOffset))
+			sourceCaretOffset -= selection.getLength();
+
+		IRegion region= fBracketMatcher.match(document, sourceCaretOffset);
 		if (region == null) {
 			setStatusLineErrorMessage(JavaEditorMessages.getString("GotoMatchingBracket.error.noMatchingBracket"));	//$NON-NLS-1$		
 			sourceViewer.getTextWidget().getDisplay().beep();
@@ -946,8 +1040,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			return;
 		}
 
-		sourceViewer.setSelectedRange(targetOffset, selectionLength);
-		sourceViewer.revealRange(targetOffset, selectionLength);
+		if (selection.getLength() < 0)
+			targetOffset -= selection.getLength();
+
+		sourceViewer.setSelectedRange(targetOffset, selection.getLength());
+		sourceViewer.revealRange(targetOffset, selection.getLength());
 	}
 	
 	/**
