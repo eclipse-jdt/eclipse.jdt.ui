@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
@@ -32,23 +32,22 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.swt.layout.GridLayout;
 
 class ExternalizeWizardPage2 extends UserInputWizardPage {
 
@@ -76,16 +75,16 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		super(PAGE_NAME, true);
 		fErrorMap= new OrderedMap();
 		
-		fPropertyPackage= 	createStringButtonField(NLSUIMessages.getString("wizardPage2.package"), NLSUIMessages.getString("wizardPage2.browse"),  //$NON-NLS-2$ //$NON-NLS-1$
+		fPropertyPackage= 	createStringButtonField(NLSUIMessages.getString("wizardPage2.package"), NLSUIMessages.getString("wizardPage2.browse1"),  //$NON-NLS-2$ //$NON-NLS-1$
 									createPropertyPackageBrowseAdapter());
-		fPropertyFile= 		createStringButtonField(NLSUIMessages.getString("wizardPage2.property_file_name"), NLSUIMessages.getString("wizardPage2.browse"),  //$NON-NLS-2$ //$NON-NLS-1$
+		fPropertyFile= 		createStringButtonField(NLSUIMessages.getString("wizardPage2.property_file_name"), NLSUIMessages.getString("wizardPage2.browse2"),  //$NON-NLS-2$ //$NON-NLS-1$
 									createPropertyFileBrowseAdapter());				
 		fUseDefaultPattern= createCheckBoxField(NLSUIMessages.getString("wizardPage2.default_pattern")); //$NON-NLS-1$
 		fAccessorClassName= createStringField(NLSUIMessages.getString("wizardPage2.class_name")); //$NON-NLS-1$
 		fCodePattern= 		createStringField(NLSUIMessages.getString("wizardPage2.code_pattern")); //$NON-NLS-1$
 		fCreateAccessorClass= createCheckBoxField(NLSUIMessages.getString("wizardPage2.create_accessor")); //$NON-NLS-1$
 		fNewImport= 		createStringButtonField(NLSUIMessages.getString("wizardPage2.add_import"),  //$NON-NLS-1$
-									NLSUIMessages.getString("wizardPage2.browse"), //$NON-NLS-1$
+									NLSUIMessages.getString("wizardPage2.browse3"), //$NON-NLS-1$
 									createClassBrowseAdapter());
 	}
 		
@@ -177,8 +176,8 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 			public void dialogFieldChanged(DialogField field) {
 				validatePropertyPackage();
 			}
-			
 		});
+		LayoutUtil.setHorizontalGrabbing(fPropertyPackage.getTextControl(null));
 		
 		fPropertyFile.doFillIntoGrid(parent, 3);
 		fPropertyFile.setDialogFieldListener(new IDialogFieldListener() {
@@ -473,8 +472,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 			return;
 		}
 		
-		int dotIndex= fileName.indexOf(NLSRefactoring.PROPERTY_FILE_EXT);
-		if (dotIndex < 0 || fileName.lastIndexOf('.') != dotIndex) {
+		if (! fileName.endsWith(NLSRefactoring.PROPERTY_FILE_EXT)){
 			setInvalid(fPropertyFile, NLSUIMessages.getString("wizardPage2.file_name_must_end") + NLSRefactoring.PROPERTY_FILE_EXT + "\"."); //$NON-NLS-2$ //$NON-NLS-1$
 			return;
 		}
