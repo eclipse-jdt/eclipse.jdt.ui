@@ -82,6 +82,7 @@ public interface IJavaHelpContextIds {
 
 	public static final String OPEN_TYPE_ACTION= 												PREFIX + "open_type_action"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_IN_HIERARCHY_ACTION= 							PREFIX + "open_type_in_hierarchy_action"; //$NON-NLS-1$
+	
 	public static final String ADD_JAVADOC_STUB_ACTION= 									PREFIX + "add_javadoc_stub_action"; //$NON-NLS-1$
 	public static final String ADD_TASK_ACTION= 												PREFIX + "add_task_action"; //$NON-NLS-1$
 	public static final String EXTERNALIZE_STRINGS_ACTION= 								PREFIX + "externalize_strings_action"; //$NON-NLS-1$	
@@ -182,6 +183,7 @@ public interface IJavaHelpContextIds {
 	// Dialogs
 	public static final String MAINTYPE_SELECTION_DIALOG= PREFIX + "maintype_selection_dialog_context"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_DIALOG= PREFIX + "open_type_dialog_context"; //$NON-NLS-1$
+	public static final String OPEN_PACKAGE_DIALOG= PREFIX + "open_package_dialog_context"; //$NON-NLS-1$
 	public static final String SOURCE_ATTACHMENT_DIALOG= PREFIX + "source_attachment_dialog_context"; //$NON-NLS-1$
 	public static final String LIBRARIES_WORKBOOK_PAGE_ADVANCED_DIALOG= PREFIX + "advanced_dialog_context"; //$NON-NLS-1$
 	public static final String CONFIRM_SAVE_MODIFIED_RESOURCES_DIALOG= PREFIX + "confirm_save_modified_resources_dialog_context"; //$NON-NLS-1$
