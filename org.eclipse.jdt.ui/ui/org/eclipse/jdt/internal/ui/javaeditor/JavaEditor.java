@@ -1083,6 +1083,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
 				if (javaAnnotation.isRelevant())
 					return javaAnnotation.getAnnotationType();
+				return null;
 			}
 			return super.getType(annotation);
 		}
