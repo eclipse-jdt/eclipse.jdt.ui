@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating2;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
@@ -84,6 +85,30 @@ class TextMatchFinder {
 		}
 	}
 	
+	/**
+	 * @todo work in progress
+	 */
+	static void findTextMatches(IProgressMonitor pm, IJavaSearchScope scope, ITextUpdating2 processor, TextChangeManager manager) throws JavaModelException{
+		try{
+			if (! isSearchingNeeded(processor))
+				return;
+			RefactoringScanner scanner = createScanner(processor);
+			Map javaDocMatches= new HashMap();
+			Map commentsMatches= new HashMap();
+			Map stringMatches= new HashMap();
+			findTextMatches(pm, scope, scanner, javaDocMatches, commentsMatches, stringMatches);
+			int patternLength= scanner.getPattern().length();
+			String newName= processor.getNewElementName();
+			addMatches(manager, newName, patternLength, javaDocMatches, RefactoringCoreMessages.getString("TextMatchFinder.javadoc")); //$NON-NLS-1$
+			addMatches(manager, newName, patternLength, commentsMatches, RefactoringCoreMessages.getString("TextMatchFinder.comment")); //$NON-NLS-1$
+			addMatches(manager, newName, patternLength, stringMatches, RefactoringCoreMessages.getString("TextMatchFinder.string")); //$NON-NLS-1$
+		} catch(JavaModelException e){
+			throw e;	
+		} catch (CoreException e){
+			throw new JavaModelException(e);
+		}
+	}
+
 	private static void addMatches(TextChangeManager manager, String newText, int patternLength, Map matches, String matchName) throws CoreException{
 		for(Iterator iter= matches.keySet().iterator(); iter.hasNext();){
 			Object key= iter.next();
@@ -106,11 +131,23 @@ class TextMatchFinder {
 		return textUpdating.getUpdateComments() || textUpdating.getUpdateJavaDoc() || textUpdating.getUpdateStrings();
 	}
 	
+	private static boolean isSearchingNeeded(ITextUpdating2 textUpdating){
+		return textUpdating.getUpdateCommentsAndStrings();
+	}
+
 	private static RefactoringScanner createScanner(ITextUpdating textUpdating) {
 		RefactoringScanner scanner= new RefactoringScanner();
 		scanner.setAnalyzeComments(textUpdating.getUpdateComments());
 		scanner.setAnalyzeJavaDoc(textUpdating.getUpdateJavaDoc());
 		scanner.setAnalyzeStrings(textUpdating.getUpdateStrings());
+		scanner.setPattern(textUpdating.getCurrentElementName());
+		return scanner;
+	}
+
+	private static RefactoringScanner createScanner(ITextUpdating2 textUpdating) {
+		RefactoringScanner scanner= new RefactoringScanner();
+		scanner.setAnalyzeComments(textUpdating.getUpdateCommentsAndStrings());
+		scanner.setAnalyzeStrings(textUpdating.getUpdateCommentsAndStrings());
 		scanner.setPattern(textUpdating.getCurrentElementName());
 		return scanner;
 	}

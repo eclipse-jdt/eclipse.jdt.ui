@@ -94,9 +94,8 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		RenameFieldProcessor processor= new RenameFieldProcessor(classA.getField(fieldName));
 		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		processor.setUpdateReferences(updateReferences);
-		processor.setUpdateJavaDoc(updateJavaDoc);
-		processor.setUpdateComments(updateComments);
-		processor.setUpdateStrings(updateStrings);
+		assertTrue(updateComments == updateStrings); // will be merged
+		processor.setUpdateCommentsAndStrings(updateComments);
 		assertEquals("getter rename enabled", expectedGetterRenameEnabled, processor.canEnableGetterRenaming() == null);
 		assertEquals("setter rename enabled", expectedSetterRenameEnabled, processor.canEnableSetterRenaming() == null);
 		processor.setRenameGetter(renameGetter);

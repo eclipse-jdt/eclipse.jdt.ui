@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModific
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating2;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
-public class RenameFieldProcessor extends RenameProcessor implements IReferenceUpdating, ITextUpdating {
+public class RenameFieldProcessor extends RenameProcessor implements IReferenceUpdating, ITextUpdating2 {
 	
 	private static final String DECLARED_SUPERTYPE= RefactoringCoreMessages.getString("RenameFieldRefactoring.declared_in_supertype"); //$NON-NLS-1$
 	private IField fField;
@@ -66,9 +66,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	private ICompilationUnit[] fNewWorkingCopies;
 	private boolean fUpdateReferences;
 	
-	private boolean fUpdateJavaDoc;
-	private boolean fUpdateComments;
-	private boolean fUpdateStrings;
+	private boolean fUpdateCommentsAndStrings;
 	
 	private boolean fRenameGetter;
 	private boolean fRenameSetter;
@@ -91,14 +89,12 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 		fField= field;
 		setNewElementName(fField.getElementName());
 		fUpdateReferences= true;
-		fUpdateJavaDoc= false;
-		fUpdateComments= false;
-		fUpdateStrings= false;
+		fUpdateCommentsAndStrings= false;
 		
 		fRenameGetter= false;
 		fRenameSetter= false;
 	}
-
+	
 	public boolean isAvailable() throws CoreException {
 		if (fField == null)
 			return false;
@@ -180,34 +176,18 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 		return fField.getDeclaringType().getField(fNewElementName);
 	}
 	
-	//---- ITextUpdating ---------------------------------------------
+	//---- ITextUpdating2 ---------------------------------------------
 	
 	public boolean canEnableTextUpdating() {
 		return true;
 	}
 	
-	public boolean getUpdateJavaDoc() {
-		return fUpdateJavaDoc;
+	public boolean getUpdateCommentsAndStrings() {
+		return fUpdateCommentsAndStrings;
 	}
-
-	public boolean getUpdateComments() {
-		return fUpdateComments;
-	}
-
-	public boolean getUpdateStrings() {
-		return fUpdateStrings;
-	}
-
-	public void setUpdateJavaDoc(boolean update) {
-		fUpdateJavaDoc= update;
-	}
-
-	public void setUpdateComments(boolean update) {
-		fUpdateComments= update;
-	}
-
-	public void setUpdateStrings(boolean update) {
-		fUpdateStrings= update;
+	
+	public void setUpdateCommentsAndStrings(boolean update) {
+		fUpdateCommentsAndStrings= update;
 	}
 	
 	//---- IReferenceUpdating -----------------------------------
