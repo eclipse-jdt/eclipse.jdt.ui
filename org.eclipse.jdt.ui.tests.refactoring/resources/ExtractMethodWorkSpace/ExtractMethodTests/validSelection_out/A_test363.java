@@ -5,7 +5,7 @@ public class A_test363 {
 		return extracted();
 	}
 
-	protected Class extracted() {
+	protected Class<A_test363> extracted() {
 		return /*[*/A_test363.class/*]*/;
 	}
 }

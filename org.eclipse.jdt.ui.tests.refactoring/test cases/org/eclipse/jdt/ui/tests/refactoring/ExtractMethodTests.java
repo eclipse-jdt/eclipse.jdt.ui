@@ -35,8 +35,6 @@ import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class ExtractMethodTests extends AbstractSelectionTestCase {
-	private static final boolean BUG_79512= true;
-	private static final boolean BUG_79752= true;
 	private static final boolean BUG_79760= true;
 
 	private static ExtractMethodTestSetup fgTestSetup;
@@ -879,10 +877,6 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test363() throws Exception {
-		if (BUG_79512) {
-			System.out.println("test 363 disabled due to bug 79512");
-			return;
-		}
 		validSelectionTestChecked();
 	}
 	
@@ -1701,10 +1695,6 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test1108() throws Exception {
-		if (BUG_79512) {
-			System.out.println("test 1108 disabled due to bug 79512");
-			return;
-		}
 		genericTest();
 	}
 	
@@ -1719,10 +1709,6 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test1152() throws Exception {
-		if (BUG_79752) {
-			System.out.println("test 1152 disabled due to bug 79752");
-			return;
-		}
 		enumTest();
 	}
 	
