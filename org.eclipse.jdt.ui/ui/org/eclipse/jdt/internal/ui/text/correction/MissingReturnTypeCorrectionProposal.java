@@ -20,6 +20,8 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.dom.TypeRules;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class MissingReturnTypeCorrectionProposal extends ASTRewriteCorrectionProposal {
@@ -88,7 +90,7 @@ public class MissingReturnTypeCorrectionProposal extends ASTRewriteCorrectionPro
 			for (int i= 0; i < bindings.length; i++) {
 				IVariableBinding curr= (IVariableBinding) bindings[i];
 				ITypeBinding type= curr.getType();
-				if (type != null && ASTResolving.canAssign(type, returnBinding) && testModifier(curr)) {
+				if (type != null && TypeRules.canAssign(type, returnBinding) && testModifier(curr)) {
 					return ast.newSimpleName(curr.getName());
 				}
 			}

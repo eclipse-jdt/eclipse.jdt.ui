@@ -30,17 +30,18 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
-
+import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.NewMethodCompletionProposal;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 	private static final Class THIS= UnresolvedMethodsQuickFixTest.class;
@@ -1486,9 +1487,9 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 				assertNotNull(b1);
 				ITypeBinding b2= f2.resolveBinding().getType();
 				assertNotNull(b2);
-				boolean res= ASTResolving.canAssign(b1, b2.getQualifiedName());
+				boolean res= TypeRules.canAssign(b1, b2.getQualifiedName());
 				assertEquals(line, problems.length == 0, res);
-				boolean res2= ASTResolving.canAssign(b1, b2);
+				boolean res2= TypeRules.canAssign(b1, b2);
 				assertEquals(line, problems.length == 0, res2);			
 			}	
 		}

@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -214,7 +215,7 @@ public class UnresolvedElementsSubProcessor {
 					if (NameMatcher.isSimilarName(currName, identifier)) {
 						relevance += 3; // variable with a similar name than the unresolved variable
 					}
-					if (guessedType != null && ASTResolving.canAssign(guessedType, curr.getType())) {
+					if (guessedType != null && TypeRules.canAssign(guessedType, curr.getType())) {
 						relevance += 2; // unresolved variable can be assign to this variable 						
 					}
 					if (relevance > 0) {
@@ -521,7 +522,7 @@ public class UnresolvedElementsSubProcessor {
 		int diff= paramTypes.length - argTypes.length;
 		int[] indexSkipped= new int[diff];
 		for (int i= 0; i < paramTypes.length; i++) {
-			if (k < argTypes.length && ASTResolving.canAssign(argTypes[k], paramTypes[i])) {
+			if (k < argTypes.length && TypeRules.canAssign(argTypes[k], paramTypes[i])) {
 				k++; // match
 			} else {
 				if (nSkipped >= diff) {
@@ -610,7 +611,7 @@ public class UnresolvedElementsSubProcessor {
 		int diff= argTypes.length - paramTypes.length;
 		int[] indexSkipped= new int[diff];
 		for (int i= 0; i < argTypes.length; i++) {
-			if (k < paramTypes.length && ASTResolving.canAssign(argTypes[i], paramTypes[k])) {
+			if (k < paramTypes.length && TypeRules.canAssign(argTypes[i], paramTypes[k])) {
 				k++; // match
 			} else {
 				if (nSkipped >= diff) {
@@ -725,7 +726,7 @@ public class UnresolvedElementsSubProcessor {
 		int[] indexOfDiff= new int[paramTypes.length];
 		int nDiffs= 0;
 		for (int n= 0; n < argTypes.length; n++) {
-			if (!ASTResolving.canAssign(argTypes[n], paramTypes[n])) {
+			if (!TypeRules.canAssign(argTypes[n], paramTypes[n])) {
 				indexOfDiff[nDiffs++]= n;
 			}
 		}
@@ -747,7 +748,7 @@ public class UnresolvedElementsSubProcessor {
 		if (nDiffs == 2) { // try to swap
 			int idx1= indexOfDiff[0];
 			int idx2= indexOfDiff[1];
-			boolean canSwap= ASTResolving.canAssign(argTypes[idx1], paramTypes[idx2]) && ASTResolving.canAssign(argTypes[idx2], paramTypes[idx1]);
+			boolean canSwap= TypeRules.canAssign(argTypes[idx1], paramTypes[idx2]) && TypeRules.canAssign(argTypes[idx2], paramTypes[idx1]);
 			 if (canSwap) {
 				Expression arg1= (Expression) arguments.get(idx1);
 				Expression arg2= (Expression) arguments.get(idx2);
