@@ -1,7 +1,44 @@
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
- */package org.eclipse.jdt.internal.ui.nls;import java.util.ArrayList;import java.util.Iterator;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.graphics.Point;import org.eclipse.jface.action.IAction;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.IWorkbenchWindowActionDelegate;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.nls.model.NLSElement;import org.eclipse.jdt.internal.ui.nls.model.NLSLine;import org.eclipse.jdt.internal.ui.nls.model.NLSScanner;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
+ */package org.eclipse.jdt.internal.ui.nls;import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.nls.model.NLSElement;
+import org.eclipse.jdt.internal.ui.nls.model.NLSLine;
+import org.eclipse.jdt.internal.ui.nls.model.NLSScanner;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 
 	/*
@@ -26,4 +63,41 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 	 */
 	public void selectionChanged(IAction action, ISelection selection) {
 	}
-	protected IStructuredSelection getSelection() {		IWorkbenchWindow window= JavaPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow();		if (window == null)			return null;		ISelection selection= window.getSelectionService().getSelection();		if (selection instanceof IStructuredSelection)			return (IStructuredSelection) selection;		return null;	}		/**	 * returns Iterator over IPackageFragments	 */	protected Iterator getPackageFragments(IStructuredSelection selection) {		if (selection == null)			return null;					return selection.iterator();	}			private static LabelProvider createLabelProvider(){		return new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT){ 			public String getText(Object element) {				NonNLSElement nlsel= (NonNLSElement)element;				String res= nlsel.count + Messages.getString("FindStringsAction.in"); //$NON-NLS-1$				try{					return res + Refactoring.getResource(nlsel.cu).getProjectRelativePath();				}catch (JavaModelException e){					//show at least this					return res + nlsel.cu.getElementName();				}				}						public Image getImage(Object element) {				return super.getImage(((NonNLSElement)element).cu);			}		};	}			//-------private classes --------------			private static class NonNLSListDialog extends ListDialog{		NonNLSListDialog(Object input, int count){			super(JavaPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell(), 					input, 					Messages.getString("FindStringsAction.NLS_Tool"), //$NON-NLS-1$, 					count + Messages.getString("FindStringsAction.not_externalized"), //$NON-NLS-1$, 					new ListContentProvider(), createLabelProvider());		}		public void create() {			setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN);			super.create();		}		protected Point getInitialSize() {			return getShell().computeSize(400, SWT.DEFAULT, true);		}	}		private static class NonNLSElement{		ICompilationUnit cu;		int count;		NonNLSElement(ICompilationUnit cu, int count){			this.cu= cu;			this.count= count;		}	}}
+	protected IStructuredSelection getSelection() {		IWorkbenchWindow window= JavaPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow();		if (window == null)			return null;		ISelection selection= window.getSelectionService().getSelection();		if (selection instanceof IStructuredSelection)			return (IStructuredSelection) selection;		return null;	}		/**	 * returns Iterator over IPackageFragments	 */	protected Iterator getPackageFragments(IStructuredSelection selection) {		if (selection == null)			return null;					return selection.iterator();	}			private static LabelProvider createLabelProvider(){		return new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT){ 			public String getText(Object element) {				NonNLSElement nlsel= (NonNLSElement)element;				String res= nlsel.count + Messages.getString("FindStringsAction.in"); //$NON-NLS-1$				try{					return res + Refactoring.getResource(nlsel.cu).getProjectRelativePath();				}catch (JavaModelException e){					//show at least this					return res + nlsel.cu.getElementName();				}				}						public Image getImage(Object element) {				return super.getImage(((NonNLSElement)element).cu);			}		};	}			//-------private classes --------------			private static class NonNLSListDialog extends ListDialog{
+		private Button fCheckbox;
+				NonNLSListDialog(Object input, int count){			super(JavaPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell());
+			setInput(input);
+			setTitle(Messages.getString("FindStringsAction.NLS_Tool"));  //$NON-NLS-1$			setMessage(count + Messages.getString("FindStringsAction.not_externalized")); //$NON-NLS-1$, 			setContentProvider(new ListContentProvider());
+			setLabelProvider(createLabelProvider());
+		}
+		public void create() {			setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN);
+			super.create();		}
+		protected Point getInitialSize() {			return getShell().computeSize(400, SWT.DEFAULT, true);		}
+
+		protected void createButtonsForButtonBar(Composite parent) {
+			createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+		}	
+
+		protected Control createDialogArea(Composite parent) {
+			Composite result= (Composite)super.createDialogArea(parent);
+			fCheckbox= new Button(result, SWT.CHECK);
+			fCheckbox.setText("Show compilation units with no strings to externalize");
+			fCheckbox.setSelection(true);
+			fCheckbox.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					boolean show= NonNLSListDialog.this.fCheckbox.getSelection();
+					if  (show && NonNLSListDialog.this.hasFilters())
+						NonNLSListDialog.this.getTableViewer().resetFilters();
+					else if (! show && ! NonNLSListDialog.this.hasFilters())	
+						NonNLSListDialog.this.getTableViewer().addFilter(new ZeroStringsFilter());
+				}
+			});
+			return result;
+		}
+	}		private static class NonNLSElement{		ICompilationUnit cu;		int count;		NonNLSElement(ICompilationUnit cu, int count){			this.cu= cu;			this.count= count;		}	}
+	
+	private static class ZeroStringsFilter extends ViewerFilter{
+		public boolean select(Viewer viewer, Object parentElement, Object element) {
+			return ((NonNLSElement)element).count != 0;
+		}
+	}}
