@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -172,11 +173,19 @@ class ConstructorReferenceFinder {
 		}
 		return result;
 	}
-	
-	public static boolean isImplicitConstructorReferenceNodeInClassCreations(ASTNode node){
-		if (node instanceof Type && node.getParent() instanceof ClassInstanceCreation){
-			ClassInstanceCreation cic= (ClassInstanceCreation)node.getParent();
-			return (node.equals(cic.getType()));
+
+	public static boolean isImplicitConstructorReferenceNodeInClassCreations(ASTNode node) {
+		if (node instanceof Type) {
+			final ASTNode parent= node.getParent();
+			if (parent instanceof ClassInstanceCreation) {
+				return (node.equals(((ClassInstanceCreation) parent).getType()));
+			} else if (parent instanceof ParameterizedType) {
+				final ASTNode grandParent= parent.getParent();
+				if (grandParent instanceof ClassInstanceCreation) {
+					final ParameterizedType type= (ParameterizedType) ((ClassInstanceCreation) grandParent).getType();
+					return (node.equals(type.getType()));
+				}
+			}
 		}
 		return false;
 	}

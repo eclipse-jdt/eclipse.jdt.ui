@@ -432,7 +432,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			updateTypeReference(parameters, references[index], targetRewrite, targetUnit);
 		references= getReferenceNodesIn(processedNode, constructorReferences, targetUnit);
 		for (int index= 0; index < references.length; index++)
-			updateConstructorReference(references[index], targetRewrite, targetUnit);
+			updateConstructorReference(parameters, references[index], targetRewrite, targetUnit);
 	}
 
 	private void modifyInterfaceMemberModifiers(final ITypeBinding binding) {
@@ -946,7 +946,8 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		if (enclosingImport != null) 
 			updateReferenceInImport(enclosingImport, node, rewrite);
 		 else {
-			boolean updated= updateReference(parameters, node, rewrite);
+		 	final TextEditGroup group= rewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.update_type_reference")); //$NON-NLS-1$
+			boolean updated= updateReference(parameters, node, rewrite, group);
 			if (updated && !fType.getPackageFragment().equals(cu.getParent())) {
 				final String name= fType.getPackageFragment().getElementName() + '.' + fType.getElementName();
 				rewrite.getImportRemover().registerAddedImport(name);
@@ -963,24 +964,38 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		}
 	}
 
-	private boolean updateReference(ITypeBinding[] parameters, ASTNode node, CompilationUnitRewrite rewrite) {
-		if (node.getNodeType() == ASTNode.QUALIFIED_NAME)
-			return updateNameReference(parameters, (QualifiedName) node, rewrite);
-		else if (node.getNodeType() == ASTNode.SIMPLE_TYPE)
-			return updateNameReference(parameters, ((SimpleType) node).getName(), rewrite);
+	private boolean updateReference(ITypeBinding[] parameters, ASTNode node, CompilationUnitRewrite rewrite, TextEditGroup group) {
+		if (node instanceof SimpleType && node.getParent() instanceof ParameterizedType)
+			updateParameterizedTypeReference(parameters, (ParameterizedType) node.getParent(), rewrite, group);
+		if (node instanceof QualifiedName)
+			return updateNameReference(parameters, (QualifiedName) node, rewrite, group);
+		else if (node instanceof SimpleType)
+			return updateNameReference(parameters, ((SimpleType) node).getName(), rewrite, group);
 		else
 			return false;
 	}
 
-	private boolean updateNameReference(ITypeBinding[] parameters, Name name, CompilationUnitRewrite targetRewrite) {
+	private void updateParameterizedTypeReference(ITypeBinding[] parameters, ParameterizedType type, CompilationUnitRewrite targetRewrite, TextEditGroup group) {
+		if (!(type.getParent() instanceof ClassInstanceCreation)) {
+			final ListRewrite rewrite= targetRewrite.getASTRewrite().getListRewrite(type, ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
+			TypeParameter parameter= null;
+			for (int index= type.typeArguments().size(); index < parameters.length; index++) {
+				parameter= targetRewrite.getRoot().getAST().newTypeParameter();
+				parameter.setName(targetRewrite.getRoot().getAST().newSimpleName(parameters[index].getName()));
+				rewrite.insertLast(parameter, group);
+			}
+		}
+	}
+
+	private boolean updateNameReference(ITypeBinding[] parameters, Name name, CompilationUnitRewrite targetRewrite, TextEditGroup group) {
 		if (name instanceof SimpleName)	
 			return false;
 		if (ASTNodes.asString(name).equals(fType.getFullyQualifiedName('.'))){
-			targetRewrite.getASTRewrite().replace(name, name.getAST().newName(Strings.splitByToken((fType.getPackageFragment().getElementName() + '.' + fType.getElementName()), ".")), null); //$NON-NLS-1$
+			targetRewrite.getASTRewrite().replace(name, name.getAST().newName(Strings.splitByToken((fType.getPackageFragment().getElementName() + '.' + fType.getElementName()), ".")), group); //$NON-NLS-1$
 			targetRewrite.getImportRemover().registerRemovedNode(name);
 			return true;
 		}
-		targetRewrite.getASTRewrite().replace(name, name.getAST().newSimpleName(fType.getElementName()), null);
+		targetRewrite.getASTRewrite().replace(name, name.getAST().newSimpleName(fType.getElementName()), group);
 		targetRewrite.getImportRemover().registerRemovedNode(name);
 		return true;
 	}
@@ -1068,22 +1083,37 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		}
 	}
 
-	private void updateConstructorReference(ASTNode reference, CompilationUnitRewrite targetRewrite, ICompilationUnit cu) throws CoreException {
+	private void updateConstructorReference(ITypeBinding[] parameters, ASTNode reference, CompilationUnitRewrite targetRewrite, ICompilationUnit cu) throws CoreException {
+		final TextEditGroup group= targetRewrite.createGroupDescription(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.update_constructor_reference")); //$NON-NLS-1$
 		if (reference instanceof SuperConstructorInvocation)
-			updateConstructorReference((SuperConstructorInvocation) reference, targetRewrite, cu);
+			updateConstructorReference((SuperConstructorInvocation) reference, targetRewrite, cu, group);
 		else if (reference instanceof ClassInstanceCreation)
-			updateConstructorReference((ClassInstanceCreation) reference, targetRewrite, cu);
+			updateConstructorReference((ClassInstanceCreation) reference, targetRewrite, cu, group);
 		else if (reference.getParent() instanceof ClassInstanceCreation)
-			updateConstructorReference((ClassInstanceCreation) reference.getParent(), targetRewrite, cu);
+			updateConstructorReference((ClassInstanceCreation) reference.getParent(), targetRewrite, cu, group);
+		else if (reference.getParent() instanceof ParameterizedType && reference.getParent().getParent() instanceof ClassInstanceCreation)
+			updateConstructorReference(parameters, (ParameterizedType) reference.getParent(), targetRewrite, cu, group);
 	}
 
-	private void updateConstructorReference(final SuperConstructorInvocation invocation, final CompilationUnitRewrite targetRewrite, final ICompilationUnit unit) throws CoreException {
+	private void updateConstructorReference(ITypeBinding[] parameters, ParameterizedType type, CompilationUnitRewrite targetRewrite, ICompilationUnit cu, TextEditGroup group) throws CoreException {
+		final ListRewrite rewrite= targetRewrite.getASTRewrite().getListRewrite(type, ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
+		TypeParameter parameter= null;
+		for (int index= type.typeArguments().size(); index < parameters.length; index++) {
+			parameter= targetRewrite.getRoot().getAST().newTypeParameter();
+			parameter.setName(targetRewrite.getRoot().getAST().newSimpleName(parameters[index].getName()));
+			rewrite.insertLast(parameter, group);
+		}
+		if (type.getParent() instanceof ClassInstanceCreation)
+			updateConstructorReference((ClassInstanceCreation) type.getParent(), targetRewrite, cu, group);
+	}
+
+	private void updateConstructorReference(final SuperConstructorInvocation invocation, final CompilationUnitRewrite targetRewrite, final ICompilationUnit unit, TextEditGroup group) throws CoreException {
 		Assert.isNotNull(invocation);
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(unit);
 		final ASTRewrite rewrite= targetRewrite.getASTRewrite();
 		if (fCreateInstanceField)
-			insertExpressionAsParameter(invocation, rewrite, unit);
+			insertExpressionAsParameter(invocation, rewrite, unit, group);
 		final Expression expression= invocation.getExpression();
 		if (expression != null) {
 			rewrite.remove(expression, null);
@@ -1091,13 +1121,13 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		}
 	}
 
-	private void updateConstructorReference(final ClassInstanceCreation creation, final CompilationUnitRewrite targetRewrite, final ICompilationUnit unit) throws JavaModelException {
+	private void updateConstructorReference(final ClassInstanceCreation creation, final CompilationUnitRewrite targetRewrite, final ICompilationUnit unit, TextEditGroup group) throws JavaModelException {
 		Assert.isNotNull(creation);
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(unit);
 		final ASTRewrite rewrite= targetRewrite.getASTRewrite();
 		if (fCreateInstanceField)
-			insertExpressionAsParameter(creation, rewrite, unit);
+			insertExpressionAsParameter(creation, rewrite, unit, group);
 		final Expression expression= creation.getExpression();
 		if (expression != null) {
 			rewrite.remove(expression, null);
@@ -1116,19 +1146,19 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return (MethodDeclaration[]) result.toArray(new MethodDeclaration[result.size()]);
 	}
 
-	private boolean insertExpressionAsParameter(ClassInstanceCreation cic, ASTRewrite rewrite, ICompilationUnit cu) throws JavaModelException{
+	private boolean insertExpressionAsParameter(ClassInstanceCreation cic, ASTRewrite rewrite, ICompilationUnit cu, TextEditGroup group) throws JavaModelException{
 		final Expression expression= createEnclosingInstanceCreationString(cic, cu);
 		if (expression == null)
 			return false;
-		rewrite.getListRewrite(cic, ClassInstanceCreation.ARGUMENTS_PROPERTY).insertFirst(expression, null);
+		rewrite.getListRewrite(cic, ClassInstanceCreation.ARGUMENTS_PROPERTY).insertFirst(expression, group);
 		return true;
 	}
 
-	private boolean insertExpressionAsParameter(SuperConstructorInvocation sci, ASTRewrite rewrite, ICompilationUnit cu) throws JavaModelException{
+	private boolean insertExpressionAsParameter(SuperConstructorInvocation sci, ASTRewrite rewrite, ICompilationUnit cu, TextEditGroup group) throws JavaModelException{
 		final Expression expression= createEnclosingInstanceCreationString(sci, cu);
 		if (expression == null)
 			return false;
-		rewrite.getListRewrite(sci, SuperConstructorInvocation.ARGUMENTS_PROPERTY).insertFirst(expression, null);
+		rewrite.getListRewrite(sci, SuperConstructorInvocation.ARGUMENTS_PROPERTY).insertFirst(expression, group);
 		return true;
 	}
 
