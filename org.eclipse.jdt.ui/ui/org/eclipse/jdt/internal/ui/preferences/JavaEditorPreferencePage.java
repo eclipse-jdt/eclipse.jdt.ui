@@ -175,6 +175,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fBackgroundColorButton;
 	private Button fBoldCheckBox;
 	private Button fAddJavaDocTagsButton;
+	private Button fEscapeStringsButton;
 	private Button fGuessMethodArgumentsButton;
 	private SourceViewer fPreviewViewer;
 	private Color fBackgroundColor;
@@ -302,6 +303,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_BRACES));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_JAVADOCS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_WRAP_STRINGS));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ESCAPE_STRINGS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS));
 //		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FORMAT_JAVADOCS));
 		
@@ -819,7 +821,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		String[][] items= new String[listModelItems.size()][];
 		listModelItems.toArray(items);
 		return items;
-	}	private Control createTypingPage(Composite parent) {
+	}	
+	
+	private Control createTypingPage(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 1;
@@ -841,8 +845,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		group.setText(PreferencesMessages.getString("JavaEditorPreferencePage.typing.description")); //$NON-NLS-1$
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.wrapStrings"); //$NON-NLS-1$
-		addCheckBox(group, label, PreferenceConstants.EDITOR_WRAP_STRINGS, 1);
+		Button button= addCheckBox(group, label, PreferenceConstants.EDITOR_WRAP_STRINGS, 1);
 		
+		label= PreferencesMessages.getString("JavaEditorPreferencePage.escapeStrings"); //$NON-NLS-1$
+		fEscapeStringsButton= addCheckBox(group, label, PreferenceConstants.EDITOR_ESCAPE_STRINGS, 1);
+		createDependency(button, fEscapeStringsButton);
+
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.smartPaste"); //$NON-NLS-1$
 		addCheckBox(group, label, PreferenceConstants.EDITOR_SMART_PASTE, 1);
 
@@ -859,7 +867,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		addCheckBox(group, label, PreferenceConstants.EDITOR_CLOSE_BRACES, 1);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.closeJavaDocs"); //$NON-NLS-1$
-		Button button= addCheckBox(group, label, PreferenceConstants.EDITOR_CLOSE_JAVADOCS, 1);
+		button= addCheckBox(group, label, PreferenceConstants.EDITOR_CLOSE_JAVADOCS, 1);
 
 		label= PreferencesMessages.getString("JavaEditorPreferencePage.addJavaDocTags"); //$NON-NLS-1$
 		fAddJavaDocTagsButton= addCheckBox(group, label, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, 1);
@@ -1297,6 +1305,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		boolean closeJavaDocs= fOverlayStore.getBoolean(PreferenceConstants.EDITOR_CLOSE_JAVADOCS);
 		fAddJavaDocTagsButton.setEnabled(closeJavaDocs);
+		
+		fEscapeStringsButton.setEnabled(fOverlayStore.getBoolean(PreferenceConstants.EDITOR_WRAP_STRINGS));
 
 		boolean fillMethodArguments= fOverlayStore.getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES);
 		fGuessMethodArgumentsButton.setEnabled(fillMethodArguments);

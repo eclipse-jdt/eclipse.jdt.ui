@@ -14,7 +14,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultAutoIndentStrategy;
-import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -36,6 +35,84 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	
 	private String fPartitioning;
 	
+	/**
+	 * The input string doesn't contain any line delimiter.
+	 * 
+	 * @param inputString the given input string
+	 * @return the displayable string.
+	 */
+	private String displayString(String inputString, String indentation) {
+		
+		int length = inputString.length();
+		StringBuffer buffer = new StringBuffer(length);
+		java.util.StringTokenizer tokenizer = new java.util.StringTokenizer(inputString, "\n\r", true); //$NON-NLS-1$
+		while (tokenizer.hasMoreTokens()){
+	
+			String token = tokenizer.nextToken();
+			if (token.equals("\r")) { //$NON-NLS-1$
+				buffer.append("\\r"); //$NON-NLS-1$
+				if (tokenizer.hasMoreTokens()) {
+					token = tokenizer.nextToken();
+					if (token.equals("\n")) { //$NON-NLS-1$
+						buffer.append("\\n"); //$NON-NLS-1$
+						buffer.append("\" + \n"); //$NON-NLS-1$
+						buffer.append(indentation);
+						buffer.append("\""); //$NON-NLS-1$
+						continue;
+					} else {
+						buffer.append("\" + \n"); //$NON-NLS-1$
+						buffer.append(indentation);
+						buffer.append("\""); //$NON-NLS-1$
+					}
+				} else {
+					continue;
+				}
+			} else if (token.equals("\n")) { //$NON-NLS-1$
+				buffer.append("\\n"); //$NON-NLS-1$
+				buffer.append("\" + \n"); //$NON-NLS-1$
+				buffer.append(indentation);
+				buffer.append("\""); //$NON-NLS-1$
+				continue;
+			}	
+	
+			StringBuffer tokenBuffer = new StringBuffer();
+			for (int i = 0; i < token.length(); i++){ 
+				char c = token.charAt(i);
+				switch (c) {
+					case '\r' :
+						tokenBuffer.append("\\r"); //$NON-NLS-1$
+						break;
+					case '\n' :
+						tokenBuffer.append("\\n"); //$NON-NLS-1$
+						break;
+					case '\b' :
+						tokenBuffer.append("\\b"); //$NON-NLS-1$
+						break;
+					case '\t' :
+						// keep tabs verbatim
+						tokenBuffer.append("\t"); //$NON-NLS-1$
+						break;
+					case '\f' :
+						tokenBuffer.append("\\f"); //$NON-NLS-1$
+						break;
+					case '\"' :
+						tokenBuffer.append("\\\""); //$NON-NLS-1$
+						break;
+					case '\'' :
+						tokenBuffer.append("\\'"); //$NON-NLS-1$
+						break;
+					case '\\' :
+						tokenBuffer.append("\\\\"); //$NON-NLS-1$
+						break;
+					default :
+						tokenBuffer.append(c);
+				}
+			}
+			buffer.append(tokenBuffer.toString());
+		}
+		return buffer.toString();
+	}
+
 	/**
 	 * Creates a new Java string auto indent strategy for the given document partitioning.
 	 * 
@@ -66,31 +143,8 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return document.get(start, end - start);
 	}
 
-	private String getModifiedText(String string, String lineDelimiter, String indentation) throws BadLocationException {		
-
-		String indentedLine= lineDelimiter + indentation;
-		IDocument document= new Document(string);			
-		StringBuffer buffer= new StringBuffer();
-
-		IRegion line= document.getLineInformation(0);
-		buffer.append(document.get(line.getOffset(), line.getLength()));
-		buffer.append("\" +"); //$NON-NLS-1$
-
-		int lineCount= document.getNumberOfLines();
-		for (int i= 1; i < lineCount - 1; i++) {
-			line= document.getLineInformation(i);
-			buffer.append(indentedLine);
-			buffer.append('\"');
-			buffer.append(document.get(line.getOffset(), line.getLength()));
-			buffer.append("\" +"); //$NON-NLS-1$
-		}
-		
-		line= document.getLineInformation(lineCount - 1);
-		buffer.append(indentedLine);
-		buffer.append('\"');
-		buffer.append(document.get(line.getOffset(), line.getLength()));
-
-		return buffer.toString();
+	private String getModifiedText(String string, String indentation) throws BadLocationException {		
+		return displayString(string, indentation);
 	}
 
 	private void javaStringIndentAfterNewLine(IDocument document, DocumentCommand command) throws BadLocationException {
@@ -105,16 +159,18 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		if (command.offset == offset + length && document.getChar(offset + length - 1) == '\"')
 			return;
 
-		String[] legalLineDelimiters= document.getLegalLineDelimiters();
-		String lineDelimiter= legalLineDelimiters[0];
 		String indentation= getLineIndentation(document, command.offset);
 
 		IRegion line= document.getLineInformationOfOffset(offset);
 		String string= document.get(line.getOffset(), offset - line.getOffset());
 		if (string.trim().length() != 0)
 			indentation += String.valueOf("\t\t"); //$NON-NLS-1$
-
-		command.text= getModifiedText(command.text, lineDelimiter, indentation);		
+		
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+		if (isLineDelimiter(document, command.text))
+			command.text= "\" +" + command.text + indentation + "\"";  //$NON-NLS-1$//$NON-NLS-2$
+		else if (command.text.length() > 1 && preferenceStore.getBoolean(PreferenceConstants.EDITOR_ESCAPE_STRINGS))
+			command.text= getModifiedText(command.text, indentation);		
 	}
 	
 	private boolean isSmartMode() {
@@ -139,7 +195,7 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 			IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 				
-			if (preferenceStore.getBoolean(PreferenceConstants.EDITOR_WRAP_STRINGS) && isLineDelimiter(document, command.text) && isSmartMode())
+			if (preferenceStore.getBoolean(PreferenceConstants.EDITOR_WRAP_STRINGS) && isSmartMode())
 				javaStringIndentAfterNewLine(document, command);
 				
 		} catch (BadLocationException e) {

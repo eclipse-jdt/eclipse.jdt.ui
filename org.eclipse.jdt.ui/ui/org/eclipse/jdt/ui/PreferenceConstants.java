@@ -885,6 +885,16 @@ public class PreferenceConstants {
 	public final static String EDITOR_WRAP_STRINGS= "wrapStrings"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether the 'escape strings' feature is
+	 * enabled.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 3.0
+	 */
+	public final static String EDITOR_ESCAPE_STRINGS= "escapeStrings"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls whether the 'close brackets' feature is
 	 * enabled.
 	 * <p>
@@ -2018,6 +2028,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_CLOSE_BRACES, true);
 		store.setDefault(PreferenceConstants.EDITOR_CLOSE_JAVADOCS, true);
 		store.setDefault(PreferenceConstants.EDITOR_WRAP_STRINGS, true);
+		store.setDefault(PreferenceConstants.EDITOR_ESCAPE_STRINGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_FORMAT_JAVADOCS, false);
 
