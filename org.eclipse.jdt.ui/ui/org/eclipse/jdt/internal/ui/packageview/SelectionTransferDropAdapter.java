@@ -102,7 +102,9 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		initializeSelection();
 				
 		try {
-			if (operation == DND.DROP_COPY) {
+			if (operation == DND.DROP_DEFAULT) {
+				event.detail= handleValidateDefault(target, event);
+			} else if (operation == DND.DROP_COPY) {
 				event.detail= handleValidateCopy(target, event);
 			} else if (operation == DND.DROP_MOVE) {
 				event.detail= handleValidateMove(target, event);
@@ -163,13 +165,26 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		}
 	}
 	
+	private int handleValidateDefault(Object target, DropTargetEvent event) throws JavaModelException{
+		if (target == null)
+			return DND.DROP_NONE;
+			
+		if (canPasteSourceReferences(target))	
+			return handleValidateCopy(target, event);
+		else
+			return handleValidateMove(target, event);	
+	}
+	
 	private int handleValidateMove(Object target, DropTargetEvent event) throws JavaModelException{
 		if (target == null)
 			return DND.DROP_NONE;
 		
-		/*in case of source references (fields, methods, etc.) - we flip the copy/move behavior*/
-		if (canPasteSourceReferences(target))
-			return DND.DROP_COPY;
+		if (canPasteSourceReferences(target)){
+			if (canMoveSelectedSourceReferences(target))
+				return DND.DROP_MOVE;
+			else	
+				return DND.DROP_NONE;
+		}	
 		
 		if (fMoveRefactoring == null){
 			fMoveRefactoring= new MoveRefactoring(fElements, JavaPreferencesSettings.getCodeGenerationSettings());
@@ -236,13 +251,8 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	
 	private int handleValidateCopy(Object target, DropTargetEvent event) throws JavaModelException{
 
-		/*in case of source references (fields, methods, etc.) - we flip the copy/move behavior*/
-		if (canPasteSourceReferences(target)){
-			if (canMoveSelectedSourceReferences(target))
-				return DND.DROP_MOVE;
-			else	
-				return DND.DROP_NONE; //better than copy - changes the cursor which makes the ui more responsive
-		}		
+		if (canPasteSourceReferences(target))
+			return DND.DROP_COPY;
 		
 		if (fCopyRefactoring == null)
 			fCopyRefactoring= new CopyRefactoring(fElements);
