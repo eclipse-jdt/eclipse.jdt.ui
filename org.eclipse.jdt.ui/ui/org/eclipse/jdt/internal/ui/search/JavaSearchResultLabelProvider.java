@@ -23,6 +23,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
 
 public class JavaSearchResultLabelProvider extends LabelProvider {
 	public static final int SHOW_ELEMENT_CONTAINER= 1; // default
@@ -80,8 +82,9 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 
 	public Image getImage(Object o) {
 		IJavaElement javaElement= getJavaElement(o);
-		if (javaElement == null)
-			return null;
+
+		if (javaElement == null || !javaElement.exists())
+			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_FATAL);
 
 		Image image= fLabelProvider.getImage(javaElement);
 		if (fDecorator != null) {
