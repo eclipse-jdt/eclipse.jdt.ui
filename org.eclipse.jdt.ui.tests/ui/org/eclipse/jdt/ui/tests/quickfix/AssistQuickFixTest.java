@@ -3,12 +3,10 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import org.eclipse.core.runtime.Preferences;
-
-import org.eclipse.swt.graphics.Point;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.Document;
@@ -20,6 +18,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -62,10 +61,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN__JAVADOC_STUBS, false);
 		
-		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
+//		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
 	
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
-		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "fg");
+//		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+//		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "fg");
 		
 		
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
@@ -115,16 +114,16 @@ public class AssistQuickFixTest extends QuickFixTest {
 				buf= new StringBuffer();
 				buf.append("package test1;\n");
 				buf.append("public class E {\n");
-				buf.append("    private Class fClass;\n");
+				buf.append("    private Class class1;\n");
 				buf.append("\n");
 				buf.append("    public void foo() {\n");
-				buf.append("        fClass = getClass();\n");
+				buf.append("        class1 = getClass();\n");
 				buf.append("    }\n");
 				buf.append("}\n");
 				assertEqualString(preview, buf.toString());
 				
 				Point selection= proposal.getSelection(new Document(preview));
-				assertEquals("wrong selection", "fClass", preview.substring(selection.x, selection.x + selection.y));	
+				assertEquals("wrong selection", "class1", preview.substring(selection.x, selection.x + selection.y));	
 
 			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
 				assertTrue("same proposal kind", doLocal);
@@ -187,18 +186,18 @@ public class AssistQuickFixTest extends QuickFixTest {
 				buf.append("import java.util.Iterator;\n");
 				buf.append("import java.util.Vector;\n");				
 				buf.append("public class E {\n");
-				buf.append("    private Iterator fIterator;\n");	
+				buf.append("    private Iterator iterator;\n");	
 				buf.append("    public Vector goo() {\n");
 				buf.append("        return null;\n");
 				buf.append("    }\n");		
 				buf.append("    public void foo() {\n");
-				buf.append("        fIterator = goo().iterator();\n");
+				buf.append("        iterator = goo().iterator();\n");
 				buf.append("    }\n");
 				buf.append("}\n");
 				assertEqualString(preview, buf.toString());
 				
 				Point selection= proposal.getSelection(new Document(preview));
-				assertEquals("wrong selection", "fIterator", preview.substring(selection.x, selection.x + selection.y));	
+				assertEquals("wrong selection", "iterator", preview.substring(selection.x, selection.x + selection.y));	
 			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
 				assertTrue("same proposal kind", doLocal);
 				doLocal= false;
@@ -225,9 +224,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testAssignToLocal2CursorAtEnd() throws Exception {
-		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "_m");
+//		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
+//		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
+//		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "_m");
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -264,18 +263,18 @@ public class AssistQuickFixTest extends QuickFixTest {
 				buf.append("package test1;\n");
 				buf.append("import java.util.Vector;\n");				
 				buf.append("public class E {\n");
-				buf.append("    private Object[] objects_m;\n");	
+				buf.append("    private Object[] objects;\n");	
 				buf.append("    public Vector goo() {\n");
 				buf.append("        return null;\n");
 				buf.append("    }\n");		
 				buf.append("    public void foo() {\n");
-				buf.append("        objects_m = goo().toArray();\n");
+				buf.append("        objects = goo().toArray();\n");
 				buf.append("    }\n");
 				buf.append("}\n");
 				assertEqualString(preview, buf.toString());
 				
 				Point selection= proposal.getSelection(new Document(preview));
-				assertEquals("wrong selection", "objects_m", preview.substring(selection.x, selection.x + selection.y));						
+				assertEquals("wrong selection", "objects", preview.substring(selection.x, selection.x + selection.y));						
 			} else if (proposal.getVariableKind() == AssignToVariableAssistProposal.LOCAL) {
 				assertTrue("same proposal kind", doLocal);
 				doLocal= false;
