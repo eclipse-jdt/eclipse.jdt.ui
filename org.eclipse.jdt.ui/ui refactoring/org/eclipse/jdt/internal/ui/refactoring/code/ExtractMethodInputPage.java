@@ -29,11 +29,15 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.Document;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -42,12 +46,18 @@ import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeParametersControl;
 import org.eclipse.jdt.internal.ui.refactoring.IParameterListChangeListener;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
@@ -59,7 +69,8 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 	private ExtractMethodRefactoring fRefactoring;
 	private Text fTextField;
 	private boolean fFirstTime;
-	private Label fPreview;
+	private JavaSourceViewer fSignaturePreview;
+	private Document fSignaturePreviewDocument;
 	private IDialogSettings fSettings;
 	
 	private static final String DESCRIPTION = RefactoringMessages.getString("ExtractMethodInputPage.description");//$NON-NLS-1$
@@ -71,6 +82,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_CU);
 		setDescription(DESCRIPTION);
 		fFirstTime= true;
+		fSignaturePreviewDocument= new Document();
 	}
 
 	public void createControl(Composite parent) {
@@ -111,6 +123,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 					fRefactoring.setDestination(combo.getSelectionIndex());
 				}
 				public void widgetDefaultSelected(SelectionEvent e) {
+					// nothing
 				}
 			});
 		}
@@ -212,18 +225,8 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		layouter.perform(label);
 		
-		label= new Label(result, SWT.NONE);
-		gd= new GridData();
-		gd.verticalAlignment= GridData.BEGINNING;
-		label.setLayoutData(gd);
-		label.setText(RefactoringMessages.getString("ExtractMethodInputPage.signature_preview")); //$NON-NLS-1$
+		createSignaturePreview(result, layouter);
 		
-		fPreview= new Label(result, SWT.WRAP);
-		gd= new GridData(GridData.FILL_BOTH);
-		gd.widthHint= convertWidthInCharsToPixels(50);
-		fPreview.setLayoutData(gd);
-		
-		layouter.perform(label, fPreview, 1);
 		Dialog.applyDialogFont(result);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.EXTRACT_METHOD_WIZARD_PAGE);		
 	}
@@ -282,14 +285,59 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		fRefactoring.setGenerateJavadoc(value);
 	}
 	
+	private void createSignaturePreview(Composite composite, RowLayouter layouter) {
+		//XXX: same as in ChangeSignatureInputPage
+		
+		Label previewLabel= new Label(composite, SWT.NONE);
+		previewLabel.setText(RefactoringMessages.getString("ExtractMethodInputPage.signature_preview")); //$NON-NLS-1$
+		layouter.perform(previewLabel);
+		
+//		//XXX: use ViewForm to draw a flat border. Beware of common problems with wrapping layouts
+//		//inside GridLayout. GridData must be constrained to force wrapping. See bug 9866 et al.
+//		ViewForm border= new ViewForm(composite, SWT.BORDER | SWT.FLAT);
+		
+		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
+		fSignaturePreview= new JavaSourceViewer(composite, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.WRAP /*| SWT.BORDER*/, store);
+		fSignaturePreview.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
+		fSignaturePreview.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
+		fSignaturePreview.getTextWidget().setBackground(composite.getBackground());
+		fSignaturePreview.setDocument(fSignaturePreviewDocument);
+		fSignaturePreview.setEditable(false);
+		
+		//Layouting problems with wrapped text: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=9866
+		Control signaturePreviewControl= fSignaturePreview.getControl();
+		PixelConverter pixelConverter= new PixelConverter(signaturePreviewControl);
+		GridData gdata= new GridData(GridData.FILL_BOTH);
+		gdata.widthHint= pixelConverter.convertWidthInCharsToPixels(50);
+		gdata.heightHint= pixelConverter.convertHeightInCharsToPixels(2);
+		signaturePreviewControl.setLayoutData(gdata);
+		layouter.perform(signaturePreviewControl);
+		
+//		//XXX must force JavaSourceViewer text widget to wrap:
+//		border.setContent(signaturePreviewControl);
+//		GridData borderData= new GridData(GridData.FILL_BOTH);
+//		borderData.widthHint= gdata.widthHint;
+//		borderData.heightHint= gdata.heightHint;
+//		border.setLayoutData(borderData);
+	}
+	
 	private void updatePreview(String text) {
-		if (fPreview == null)
+		if (fSignaturePreview == null)
 			return;
 			
 		if (text.length() == 0)
 			text= "someMethodName";			 //$NON-NLS-1$
-			
-		fPreview.setText(fRefactoring.getSignature(text));
+		
+		int top= fSignaturePreview.getTextWidget().getTopPixel();
+		String signature;
+		try {
+			//TODO: use robust signature composer like in ChangeSignatureRefactoring
+			signature= fRefactoring.getSignature(text);
+		} catch (IllegalArgumentException e) { 
+			signature= ""; //$NON-NLS-1$ 
+		}
+		fSignaturePreviewDocument.set(signature);
+		fSignaturePreview.getTextWidget().setTopPixel(top);
 	}
 	
 	private void loadSettings() {
@@ -324,7 +372,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		if (!status.hasFatalError()) {
 			updatePreview(text);
 		} else {
-			fPreview.setText(""); //$NON-NLS-1$
+			fSignaturePreviewDocument.set(""); //$NON-NLS-1$
 		}
 		setPageComplete(status);
 	}
