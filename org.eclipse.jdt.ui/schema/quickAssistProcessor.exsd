@@ -60,7 +60,7 @@
                <documentation>
                   the name of the class that implements this Quick Assist processor. The
 class must be public and implement
-&lt;samp&gt;org.eclipse.jdt.ui.text.java.ICorrectionProcessor&lt;/samp&gt;
+&lt;samp&gt;org.eclipse.jdt.ui.text.java.IAssistProcessor&lt;/samp&gt;
 with a public 0-argument constructor.
                </documentation>
             </annotation>
