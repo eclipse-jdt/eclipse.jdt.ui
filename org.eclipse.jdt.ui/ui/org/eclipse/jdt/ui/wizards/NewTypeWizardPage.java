@@ -991,6 +991,15 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	    	if (root != null && !root.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true).equals(JavaCore.VERSION_1_5)) {
 				return new StatusInfo(IStatus.ERROR, NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.NotJDKCompliant", root.getJavaProject().getElementName()));  //$NON-NLS-1$
 	    	}
+	    	if (fTypeKind == ENUM_TYPE) {
+		    	try {
+		    	    // if findType(...) == null then Enum is unavailable
+		    	    if (findType(root.getJavaProject(), "java.lang.Enum") == null) //$NON-NLS-1$
+		    	        return new StatusInfo(IStatus.WARNING, NewWizardMessages.getString("NewTypeWizardPage.warning.EnumClassNotFound"));  //$NON-NLS-1$
+		    	} catch (JavaModelException e) {
+		    	    JavaPlugin.log(e);
+		    	}
+	    	}
 	    }
 		
 		fCurrPackageCompletionProcessor.setPackageFragmentRoot(getPackageFragmentRoot());
