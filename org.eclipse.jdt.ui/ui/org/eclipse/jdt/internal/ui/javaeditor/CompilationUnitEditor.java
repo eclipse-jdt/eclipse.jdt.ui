@@ -158,46 +158,13 @@ public class CompilationUnitEditor extends JavaEditor {
 			}
 		};
 		
+		getStatusLineManager().setErrorMessage("");
+		
 		if (unit != null) {
 			synchronized (unit) { performSaveOperation(operation, progressMonitor); }
 		} else 
 			performSaveOperation(operation, progressMonitor);
-			
-		getStatusLineManager().setErrorMessage("");
 	}
-	
-	/**
-	 * Performs the given save operation and handles errors.
-	 */
-	protected void performSaveOperation(WorkspaceModifyOperation operation, IProgressMonitor progressMonitor) {
-		
-		IDocumentProvider provider= getDocumentProvider();
-		
-		try {
-		
-			provider.aboutToChange(getEditorInput());
-			operation.run(progressMonitor);
-		
-		} catch (InterruptedException x) {
-		} catch (InvocationTargetException x) {
-		
-			Shell shell= getSite().getShell();
-			String title= getResourceString("Error.save.title");
-			String msg= getResourceString("Error.save.message");
-		
-			Throwable t= x.getTargetException();
-			if (t instanceof CoreException) {
-				CoreException cx= (CoreException) t;
-				ErrorDialog.openError(shell, title, msg, cx.getStatus());
-			} else {
-				MessageDialog.openError(shell, title, msg + t.getMessage());
-			}
-		
-		} finally {
-			provider.changed(getEditorInput());
-		}
-	}
-	
 	
 	public void gotoError(boolean forward) {
 		

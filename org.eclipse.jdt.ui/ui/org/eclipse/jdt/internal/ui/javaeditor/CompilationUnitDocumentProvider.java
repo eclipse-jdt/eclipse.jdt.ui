@@ -253,12 +253,15 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				// update structure, assumes lock on info.fCopy
 				info.fCopy.reconcile();
 				
-				// commit working copy
-				// HackFinder.fixme("cannot commit the same working copy twice");
-				info.fCopy.commit(false, monitor);
-				
 				ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
 				IResource resource= original.getUnderlyingResource();
+				
+				if (resource != null)
+					checkSynchronizationState(resource);
+				
+				// commit working copy
+				info.fCopy.commit(false, monitor);
+				
 				if (resource != null)
 					info.setModificationStamp(resource.getModificationStamp());
 				
