@@ -61,7 +61,7 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 		if (kind != IJavaElement.METHOD && kind != IJavaElement.FIELD && kind != IJavaElement.INITIALIZER) {
 			return null;
 		}
-		IType declaringType= (IType) JavaModelUtil.toOriginal(((IMember) element).getDeclaringType());
+		IType declaringType= ((IMember) element).getDeclaringType();
 		if (kind != IJavaElement.METHOD) {
 			return declaringType;
 		}
@@ -107,7 +107,7 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 	public Color getForeground(Object element) {
 		if (fMethodsViewer.isShowInheritedMethods() && element instanceof IMethod) {
 			IMethod curr= (IMethod) element;
-			IMember declaringType= JavaModelUtil.toOriginal(curr.getDeclaringType());
+			IMember declaringType= curr.getDeclaringType();
 			
 			if (declaringType.equals(fMethodsViewer.getInput())) {
 				if (fResolvedBackground == null) {

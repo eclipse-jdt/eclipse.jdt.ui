@@ -48,8 +48,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
-
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
@@ -118,7 +116,6 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	 * Set the input of this view.
 	 *  
 	 * @param input the input object
-	 * @return	<code>true</code> if the input was set successfully 
 	 */
 	abstract protected void setInput(Object input);
 
@@ -335,10 +332,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 		IJavaElement je= null;
 		if (element instanceof IAdaptable)
 			je= (IJavaElement)((IAdaptable)element).getAdapter(IJavaElement.class);
-			
-		if (je != null && je.getElementType() == IJavaElement.COMPILATION_UNIT)
-			je= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)je);
-			
+						
 		return je;
 	}
 
@@ -352,8 +346,6 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 		
 		if (cu == null || !cu.exists())
 			return null;
-		
-		cu= WorkingCopyUtil.getWorkingCopyIfExists(cu);
 		
 		// Use primary type if possible
 		IType primaryType= cu.findPrimaryType();

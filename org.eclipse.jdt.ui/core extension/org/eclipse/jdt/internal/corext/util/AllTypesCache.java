@@ -254,9 +254,7 @@ public class AllTypesCache {
 			for (int i= 0; i < primaryWorkingCopies.length; i++) {
 				ICompilationUnit curr= primaryWorkingCopies[i];
 				try {
-					synchronized (curr) {
-						curr.reconcile(); // force a reconcile to make sure all deltas are processed
-					}
+					JavaModelUtil.reconcile(curr);
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
 				}

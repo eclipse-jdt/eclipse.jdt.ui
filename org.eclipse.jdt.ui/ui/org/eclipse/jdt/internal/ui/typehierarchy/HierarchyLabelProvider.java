@@ -28,7 +28,6 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
@@ -144,8 +143,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 			return new JavaElementImageDescriptor(JavaPluginImages.DESC_OBJS_CLASS, 0, JavaElementImageProvider.BIG_SIZE);
 		}
 		
-		IType originalType= (IType) JavaModelUtil.toOriginal(type);
-		int flags= hierarchy.getCachedFlags(originalType);
+		int flags= hierarchy.getCachedFlags(type);
 		if (flags == -1) {
 			return new JavaElementImageDescriptor(JavaPluginImages.DESC_OBJS_CLASS, 0, JavaElementImageProvider.BIG_SIZE);
 		}

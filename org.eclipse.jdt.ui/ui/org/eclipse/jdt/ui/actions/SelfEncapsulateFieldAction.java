@@ -10,10 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -21,9 +17,11 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -150,20 +148,9 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	 * Should be private. But got shipped in this state in 2.0 so chaning this is a
 	 * breaking API change.
 	 */
-	public void run(IField selectedField) {
-		if (!ActionUtil.isProcessable(getShell(), selectedField))
+	public void run(IField field) {
+		if (!ActionUtil.isProcessable(getShell(), field))
 			return;
-		IField field= null;
-		try {
-			field= (IField)WorkingCopyUtil.getWorkingCopyIfExists(selectedField);
-		} catch (JavaModelException e) {
-		}
-		if (field == null) {
-			MessageDialog.openInformation(
-				getShell(), getDialogTitle(),
-				ActionMessages.getFormattedString("SelfEncapsulateFieldAction.dialog.field_doesnot_exit", selectedField.getElementName()));  //$NON-NLS-1$
-			return;
-		}
 		
 		try  {	
 			SelfEncapsulateFieldRefactoring refactoring= createRefactoring(field);

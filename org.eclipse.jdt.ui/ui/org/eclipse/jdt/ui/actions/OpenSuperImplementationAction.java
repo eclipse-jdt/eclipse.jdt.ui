@@ -126,7 +126,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		}		
 
 		try {
-			IType type= (IType) JavaModelUtil.toWorkingCopy(method.getDeclaringType());
+			IType type= method.getDeclaringType();
 
 			IMethod impl= findSuperImplementation(type, method.getElementName(), method.getParameterTypes(), method.isConstructor());
 			if (impl != null) {

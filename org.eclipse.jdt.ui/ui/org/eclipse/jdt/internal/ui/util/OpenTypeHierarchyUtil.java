@@ -115,7 +115,6 @@ public class OpenTypeHierarchyUtil {
 		IJavaElement perspectiveInput= input;
 		
 		if (input instanceof IMember) {
-			input= JavaModelUtil.toOriginal((IMember)input);
 			if (input.getElementType() != IJavaElement.TYPE) {
 				perspectiveInput= ((IMember)input).getDeclaringType();
 			} else {

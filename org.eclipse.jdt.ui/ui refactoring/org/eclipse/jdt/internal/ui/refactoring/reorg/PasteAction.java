@@ -77,7 +77,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -686,7 +685,7 @@ public class PasteAction extends SelectionDispatchAction{
 			}
 			
 			private ICompilationUnit getDestinationCu() {
-				return WorkingCopyUtil.getWorkingCopyIfExists(ReorgUtils.getCompilationUnit(fDestination));
+				return ReorgUtils.getCompilationUnit(fDestination);
 			}
 
 			public String getName() {

@@ -21,21 +21,8 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IParent;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.core.*;
  
 /**
  * A base content provider for Java elements. It provides access to the
@@ -382,9 +369,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
 	protected Object internalGetParent(Object element) {
-		if (element instanceof IJavaProject) {
-			return ((IJavaProject)element).getJavaModel();
-		}
+
 		// try to map resources to the containing package fragment
 		if (element instanceof IResource) {
 			IResource parent= ((IResource)element).getParent();
@@ -393,22 +378,14 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			if (jParent != null && jParent.exists()) 
 				return jParent;
 			return parent;
-		}
-
-		// for package fragments that are contained in a project package fragment
-		// we have to skip the package fragment root as the parent.
-		if (element instanceof IPackageFragment) {
-			IPackageFragmentRoot parent= (IPackageFragmentRoot)((IPackageFragment)element).getParent();
-			return skipProjectPackageFragmentRoot(parent);
-		}
-		if (element instanceof IJavaElement) {
-			IJavaElement candidate= ((IJavaElement)element).getParent();
-			// If the parent is a CU we might have shown working copy elements below CU level. If so
-			// return the original element instead of the working copy.
-			if (candidate != null && candidate.getElementType() == IJavaElement.COMPILATION_UNIT) {
-				candidate= JavaModelUtil.toOriginal((ICompilationUnit) candidate);
+		} else if (element instanceof IJavaElement) {
+			IJavaElement parent= ((IJavaElement) element).getParent();
+			// for package fragments that are contained in a project package fragment
+			// we have to skip the package fragment root as the parent.
+			if (element instanceof IPackageFragment) {
+				return skipProjectPackageFragmentRoot((IPackageFragmentRoot) parent);
 			}
-			return candidate;
+			return parent;
 		}
 		return null;
 	}

@@ -75,9 +75,7 @@ public final class ImportsStructure implements IImportsStructure {
 	 */	
 	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold, boolean restoreExistingImports) throws CoreException {
 		fCompilationUnit= cu;
-		synchronized (fCompilationUnit) {
-			fCompilationUnit.reconcile();
-		}
+		JavaModelUtil.reconcile(cu);
 	
 		IImportContainer container= cu.getImportContainer();
 		
@@ -579,7 +577,7 @@ public final class ImportsStructure implements IImportsStructure {
 		
 	private TextBuffer aquireTextBuffer() throws CoreException {
 		if (JavaModelUtil.isPrimary(fCompilationUnit)) {
-			IFile file= (IFile) JavaModelUtil.toOriginal(fCompilationUnit).getResource();
+			IFile file= (IFile) fCompilationUnit.getResource();
 			if (file.exists()) {
 				return TextBuffer.acquire(file);
 			}
@@ -590,7 +588,7 @@ public final class ImportsStructure implements IImportsStructure {
 	private void releaseTextBuffer(TextBuffer buffer) throws CoreException {
 		try {
 			if (JavaModelUtil.isPrimary(fCompilationUnit)) {
-				IFile file= (IFile) JavaModelUtil.toOriginal(fCompilationUnit).getResource();
+				IFile file= (IFile) fCompilationUnit.getResource();
 				if (file.exists()) {
 					return;
 				}
@@ -606,9 +604,8 @@ public final class ImportsStructure implements IImportsStructure {
 	 * @param textBuffer The textBuffer
 	 */
 	public IRegion getReplaceRange(TextBuffer textBuffer) throws JavaModelException {
-		synchronized (fCompilationUnit) {
-			fCompilationUnit.reconcile();
-		}
+		JavaModelUtil.reconcile(fCompilationUnit);
+
 		IImportContainer container= fCompilationUnit.getImportContainer();
 		if (container.exists()) {
 			ISourceRange importSourceRange= container.getSourceRange();

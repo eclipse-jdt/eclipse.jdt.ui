@@ -124,9 +124,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 								unit != null)
 							{
 								try {
-									synchronized (unit) {
-										unit.reconcile();
-									}
+									JavaModelUtil.reconcile(unit);
 									String string= createJavaDocTags(d, c, indentation, lineDelimiter, unit);
 									if (string != null)
 										d.replace(c.offset, 0, string);						

@@ -554,7 +554,7 @@ public class Bindings {
 		IJavaElement element= scope.findElement(getPathToCompilationUnit(type.getPackage(), typeElements[0]));
 		IType candidate= null;
 		if (element instanceof ICompilationUnit) {
-			candidate= JavaModelUtil.toWorkingCopy((ICompilationUnit)element).getType(typeElements[0]);
+			candidate= ((ICompilationUnit)element).getType(typeElements[0]);
 		} else if (element instanceof IClassFile) {
 			candidate= ((IClassFile)element).getType();
 		} else if (element == null) {

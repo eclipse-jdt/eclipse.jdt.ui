@@ -131,7 +131,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 					IProblemLocation location= findProblemLocation(input, marker);
 					if (location != null) {
 						
-						IInvocationContext context= new AssistContext(JavaModelUtil.toWorkingCopy(cu),  location.getOffset(), location.getLength());
+						IInvocationContext context= new AssistContext(cu,  location.getOffset(), location.getLength());
 						ArrayList proposals= new ArrayList();
 						JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
 						int nProposals= proposals.size();

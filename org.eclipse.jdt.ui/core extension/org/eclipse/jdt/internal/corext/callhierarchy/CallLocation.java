@@ -48,8 +48,8 @@ public class CallLocation implements IAdaptable {
      * @param end
      */
     public CallLocation(IMember member, IMember calledMember, int start, int end, int lineNumber) {
-        this.fMember = JavaModelUtil.toOriginal(member);
-        this.fCalledMember = JavaModelUtil.toOriginal(calledMember);
+        this.fMember = member;
+        this.fCalledMember = calledMember;
         this.fStart = start;
         this.fEnd = end;
         this.fLineNumber= lineNumber;

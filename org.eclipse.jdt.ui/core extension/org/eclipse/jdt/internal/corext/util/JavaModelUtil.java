@@ -25,11 +25,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.compiler.CharOperation;
 
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.core.BufferFactoryWrapper;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
  * Utility methods for the Java Model.
@@ -39,7 +35,7 @@ public final class JavaModelUtil {
 	/** 
 	 * Finds a type by its qualified type name (dot separated).
 	 * @param jproject The java project to search in
-	 * @param str The fully qualified name (type name with enclosing type names and package (all separated by dots))
+	 * @param fullyQualifiedName The fully qualified name (type name with enclosing type names and package (all separated by dots))
 	 * @return The type found, or null if not existing
 	 */	
 	public static IType findType(IJavaProject jproject, String fullyQualifiedName) throws JavaModelException {
@@ -431,9 +427,9 @@ public final class JavaModelUtil {
 	 * Parameter types are only compared by the simple name, no resolving for
 	 * the fully qualified type name is done. Constructors are only compared by
 	 * parameters, not the name.
-	 * @param Name of the method
-	 * @param The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
-	 * @param Specifies if the method is a constructor
+	 * @param name Name of the method
+	 * @param paramTypes The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
+	 * @param isConstructor Specifies if the method is a constructor
 	 * @return Returns <code>true</code> if the method has the given name and parameter types and constructor state.
 	 */
 	public static boolean isSameMethodSignature(String name, String[] paramTypes, boolean isConstructor, IMethod curr) throws JavaModelException {
@@ -460,7 +456,7 @@ public final class JavaModelUtil {
 	 * Tests if two <code>IPackageFragment</code>s represent the same logical java package.
 	 * @return <code>true</code> if the package fragments' names are equal.
 	 */
-	public static boolean isSamePackage(IPackageFragment pack1, IPackageFragment pack2) throws JavaModelException {
+	public static boolean isSamePackage(IPackageFragment pack1, IPackageFragment pack2) {
 		return pack1.getElementName().equals(pack2.getElementName());
 	}
 	
@@ -638,142 +634,46 @@ public final class JavaModelUtil {
 	
 	
 	/**
-	 * Returns the working copy of the given member. If the member is already in a
-	 * working copy or the member does not exist in the working copy the input is returned.
+	 * @deprecated Inline this method.
 	 */
 	public static IMember toWorkingCopy(IMember member) {
-		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
-			return member;
-		}
-		ICompilationUnit cu= member.getCompilationUnit();
-		if (cu != null && !cu.isWorkingCopy()) {
-			if (PRIMARY_ONLY) {
-				testCompilationUnitOwner("toWorkingCopy(IMember)", cu); //$NON-NLS-1$
-			}
-			
-			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
-			if (workingCopy != null) {
-				IJavaElement[] members= workingCopy.findElements(member);
-				if (members != null && members.length > 0) {
-					return (IMember) members[0];
-				}
-			}
-		}
 		return member;
 	}
 
 	/**
-	 * Returns the working copy of the given package declaration. If the package declaration is already in a
-	 * working copy or the package declaration does not exist in the working copy the input is returned.
+	 * @deprecated Inline this method.
 	 */
 	public static IPackageDeclaration toWorkingCopy(IPackageDeclaration declaration) {
-		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
-			return declaration;
-		}
-		ICompilationUnit cu= (ICompilationUnit)declaration.getAncestor(IJavaElement.COMPILATION_UNIT);
-		if (cu != null && !cu.isWorkingCopy()) {
-			if (PRIMARY_ONLY) {
-				testCompilationUnitOwner("toWorkingCopy(IPackageDeclaration)", cu); //$NON-NLS-1$
-			}	
-			
-			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
-			if (workingCopy != null) {
-				IJavaElement[] elements= workingCopy.findElements(declaration);
-				if (elements != null && elements.length > 0) {
-					return (IPackageDeclaration) elements[0];
-				}
-			}
-		}
 		return declaration;
 	}
 	
+	/**
+	 * @deprecated Inline this method.
+	 */
 	public static IJavaElement toWorkingCopy(IJavaElement elem) {
-		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
-			return elem;
-		}
-		
-		switch (elem.getElementType()) {
-			case IJavaElement.COMPILATION_UNIT:
-				return toWorkingCopy((ICompilationUnit) elem);
-			case IJavaElement.IMPORT_CONTAINER:
-				return toWorkingCopy((IImportContainer) elem);
-			case IJavaElement.IMPORT_DECLARATION:
-				return toWorkingCopy((IImportDeclaration) elem);
-			case IJavaElement.PACKAGE_DECLARATION:
-				return toWorkingCopy((IPackageDeclaration) elem);
-			case IJavaElement.METHOD:
-			case IJavaElement.FIELD:
-			case IJavaElement.TYPE:
-			case IJavaElement.INITIALIZER:
-				return toWorkingCopy((IMember) elem);
-			default:
-				return elem;
-		}
+		return elem;
 	}	
 
 	/**
-	 * Returns the working copy of the given import container. If the import container is already in a
-	 * working copy or the import container does not exist in the working copy the input is returned.
+	 * @deprecated Inline this method.
 	 */
 	public static IImportContainer toWorkingCopy(IImportContainer container) {
-		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
-			return container;
-		}
-		ICompilationUnit cu= (ICompilationUnit)container.getAncestor(IJavaElement.COMPILATION_UNIT);
-		if (cu != null && !cu.isWorkingCopy()) {
-			if (PRIMARY_ONLY) {
-				testCompilationUnitOwner("toWorkingCopy(IImportContainer)", cu); //$NON-NLS-1$
-			}	
-			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
-			if (workingCopy != null) {
-				IJavaElement[] elements= workingCopy.findElements(container);
-				if (elements != null && elements.length > 0) {
-					return (IImportContainer) elements[0];
-				}
-			}
-		}
 		return container;
+
 	}
 
 	/**
-	 * Returns the working copy of the given import declaration. If the import declaration is already in a
-	 * working copy or the import declaration does not exist in the working copy the input is returned.
+	 * @deprecated Inline this method.
 	 */
 	public static IImportDeclaration toWorkingCopy(IImportDeclaration importDeclaration) {
-		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
-			return importDeclaration;
-		}
-		ICompilationUnit cu= (ICompilationUnit)importDeclaration.getAncestor(IJavaElement.COMPILATION_UNIT);
-		if (cu != null && !cu.isWorkingCopy()) {
-			if (PRIMARY_ONLY) {
-				testCompilationUnitOwner("toWorkingCopy(IImportDeclaration)", cu); //$NON-NLS-1$
-			}	
-			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
-			if (workingCopy != null) {
-				IJavaElement[] elements= workingCopy.findElements(importDeclaration);
-				if (elements != null && elements.length > 0) {
-					return (IImportDeclaration) elements[0];
-				}
-			}
-		}
 		return importDeclaration;
 	}
 
 
 	/**
-	 * Returns the working copy CU of the given CU. If the CU is already a
-	 * working copy or the CU has no working copy the input CU is returned.
-	 */	
+	 * @deprecated Inline this method.
+	 */
 	public static ICompilationUnit toWorkingCopy(ICompilationUnit cu) {
-		if (PRIMARY_ONLY) {
-			testCompilationUnitOwner("toWorkingCopy(ICompilationUnit)", cu); //$NON-NLS-1$
-		}		
-		if (!cu.isWorkingCopy()) {
-			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
-			if (workingCopy != null) {
-				return workingCopy;
-			}
-		}
 		return cu;
 	}
 	
@@ -781,19 +681,7 @@ public final class JavaModelUtil {
 	 * Returns true if a cu is a primary cu (original or shared working copy)
 	 */
 	public static boolean isPrimary(ICompilationUnit cu) {
-		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
-			return cu.getOwner() == null;
-		} else {
-			WorkingCopyOwner owner= cu.getOwner();
-			if (owner == null) {
-				return true;
-			}
-			if (owner instanceof BufferFactoryWrapper) {
-				BufferFactoryWrapper wrapper= (BufferFactoryWrapper) owner;
-				return wrapper.factory == JavaUI.getBufferFactory();
-			}
-			return false;
-		}
+		return cu.getOwner() == null;
 	}
 	
 	

@@ -1472,9 +1472,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			boolean needsSave= !cu.isWorkingCopy();
 			imports.create(needsSave, new SubProgressMonitor(monitor, 1));
 	
-			synchronized(cu) {
-				cu.reconcile();
-			}			
+			JavaModelUtil.reconcile(cu);
+		
 			createTypeMembers(createdType, imports, new SubProgressMonitor(monitor, 1));
 	
 			// add imports
@@ -1484,9 +1483,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				imports.create(needsSave, null);
 			}
 			
-			synchronized(cu) {
-				cu.reconcile();
-			}
+			JavaModelUtil.reconcile(cu);
+			
 			ISourceRange range= createdType.getSourceRange();
 			
 			IBuffer buf= cu.getBuffer();
@@ -1521,7 +1519,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}	
 	
 	private boolean removeUnused(ICompilationUnit cu, ImportsManager imports) {
-		CompilationUnit root= AST.parseCompilationUnit(cu, true);
+		CompilationUnit root= AST.parseCompilationUnit(cu, true, null, null);
 		IProblem[] problems= root.getProblems();
 		boolean importRemoved= false;
 		for (int i= 0; i < problems.length; i++) {

@@ -13,11 +13,8 @@ package org.eclipse.jdt.internal.corext.util;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportContainer;
-import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
@@ -29,31 +26,25 @@ public class WorkingCopyUtil {
 	private WorkingCopyUtil(){
 	}
 	
+	/**
+	 * @deprecated Inline this method.
+	 */
 	public static IJavaElement getWorkingCopyIfExists(IJavaElement element) {
-		if (element == null) return null;
-		switch(element.getElementType()) {
-			case IJavaElement.COMPILATION_UNIT: return JavaModelUtil.toWorkingCopy((ICompilationUnit)element);
-			case IJavaElement.TYPE:
-			case IJavaElement.FIELD:
-			case IJavaElement.METHOD:
-			case IJavaElement.INITIALIZER: return JavaModelUtil.toWorkingCopy((IMember)element);
-			case IJavaElement.IMPORT_CONTAINER: return JavaModelUtil.toWorkingCopy((IImportContainer)element);
-			case IJavaElement.IMPORT_DECLARATION: return JavaModelUtil.toWorkingCopy((IImportDeclaration)element);
-			case IJavaElement.PACKAGE_DECLARATION: return JavaModelUtil.toWorkingCopy((IPackageDeclaration)element);
-			default: return element;
-		}
-	}
-
-	public static ICompilationUnit getWorkingCopyIfExists(ICompilationUnit cu){
-		if (cu == null)
-			return null;
-		return JavaModelUtil.toWorkingCopy(cu);
+		return element;
 	}
 	
-	public static IMember getWorkingCopyIfExists(IMember member) throws JavaModelException {
-		if (member == null)
-			return null;
-		return JavaModelUtil.toWorkingCopy(member);
+	/**
+	 * @deprecated Inline this method.
+	 */
+	public static ICompilationUnit getWorkingCopyIfExists(ICompilationUnit element) {
+		return element;
+	}
+	
+	/**
+	 * @deprecated Inline this method.
+	 */
+	public static IMember getWorkingCopyIfExists(IMember member) {
+		return member;
 	}
 	
 	public static IJavaElement getOriginal(IMember member){

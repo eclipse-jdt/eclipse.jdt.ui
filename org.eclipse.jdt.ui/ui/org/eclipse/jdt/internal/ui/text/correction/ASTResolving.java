@@ -19,12 +19,12 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class ASTResolving {
 	
@@ -487,7 +487,7 @@ public class ASTResolving {
 		if (binding != null && binding.isFromSource() && astRoot.findDeclaringNode(binding) == null) {
 			ICompilationUnit targetCU= Bindings.findCompilationUnit(binding, cu.getJavaProject());
 			if (targetCU != null) {
-				return JavaModelUtil.toWorkingCopy(targetCU);
+				return targetCU;
 			}
 			return null;
 		}

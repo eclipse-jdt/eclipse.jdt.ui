@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -213,12 +214,7 @@ public class SelectionConverter {
 	public static IJavaElement[] codeResolve(IJavaElement input, ITextSelection selection) throws JavaModelException {
 			if (input instanceof ICodeAssist) {
 				if (input instanceof ICompilationUnit) {
-					ICompilationUnit cunit= (ICompilationUnit)input;
-					if (cunit.isWorkingCopy()) {
-						synchronized (cunit) {
-							cunit.reconcile();
-						}
-					}
+					JavaModelUtil.reconcile((ICompilationUnit) input);
 				}
 				IJavaElement[] elements= ((ICodeAssist)input).codeSelect(selection.getOffset(), selection.getLength());
 				if (elements != null && elements.length > 0)
@@ -229,12 +225,8 @@ public class SelectionConverter {
 	
 	public static IJavaElement getElementAtOffset(IJavaElement input, ITextSelection selection) throws JavaModelException {
 		if (input instanceof ICompilationUnit) {
-			ICompilationUnit cunit= (ICompilationUnit)input;
-			if (cunit.isWorkingCopy()) {
-				synchronized (cunit) {
-					cunit.reconcile();
-				}
-			}
+			ICompilationUnit cunit= (ICompilationUnit) input;
+			JavaModelUtil.reconcile(cunit);
 			IJavaElement ref= cunit.getElementAt(selection.getOffset());
 			if (ref == null)
 				return input;
@@ -269,9 +261,7 @@ public class SelectionConverter {
 		IJavaElement atOffset= null;
 		if (input instanceof ICompilationUnit) {
 			ICompilationUnit cunit= (ICompilationUnit)input;
-			synchronized (cunit) {
-				cunit.reconcile();
-			}
+			JavaModelUtil.reconcile(cunit);
 			atOffset= cunit.getElementAt(selection.getOffset());
 		} else if (input instanceof IClassFile) {
 			IClassFile cfile= (IClassFile)input;

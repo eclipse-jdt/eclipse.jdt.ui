@@ -17,8 +17,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 
 class HierarchyOverrideIndicatorLabelDecorator extends OverrideIndicatorLabelDecorator {
 	
@@ -33,7 +31,7 @@ class HierarchyOverrideIndicatorLabelDecorator extends OverrideIndicatorLabelDec
 	 * @see OverrideIndicatorLabelDecorator#getOverrideIndicators(IMethod)
 	 */
 	protected int getOverrideIndicators(IMethod method) throws JavaModelException {
-		IType type= (IType) JavaModelUtil.toOriginal(method.getDeclaringType());
+		IType type= method.getDeclaringType();
 		ITypeHierarchy hierarchy= fHierarchy.getHierarchy();
 		if (hierarchy != null) {
 			return findInHierarchy(type, hierarchy, method.getElementName(), method.getParameterTypes());

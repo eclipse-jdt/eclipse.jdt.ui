@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 
@@ -55,7 +56,7 @@ public class ReorgCorrectionsSubProcessor {
 		String[] args= problem.getProblemArguments();
 		if (args.length == 2) {
 			ICompilationUnit cu= context.getCompilationUnit();
-			boolean isLinked= JavaModelUtil.toOriginal(cu).getResource().isLinked();
+			boolean isLinked= cu.getResource().isLinked();
 			
 			// rename type
 			proposals.add(new CorrectMainTypeNameProposal(cu, args[1], 5));
@@ -76,7 +77,7 @@ public class ReorgCorrectionsSubProcessor {
 		String[] args= problem.getProblemArguments();
 		if (args.length == 1) {
 			ICompilationUnit cu= context.getCompilationUnit();
-			boolean isLinked= JavaModelUtil.toOriginal(cu).getResource().isLinked();
+			boolean isLinked= cu.getResource().isLinked();
 			
 			// correct pack decl
 			int relevance= cu.getPackageDeclarations().length == 0 ? 7 : 5; // bug 38357
@@ -129,7 +130,7 @@ public class ReorgCorrectionsSubProcessor {
 		String name= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.organizeimports.description"); //$NON-NLS-1$
 		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 5) {
 			public void apply(IDocument document) {
-				IEditorInput input= new FileEditorInput((IFile) JavaModelUtil.toOriginal(cu).getResource());
+				IEditorInput input= new FileEditorInput((IFile) cu.getResource());
 				IWorkbenchPage p= JavaPlugin.getActivePage();
 				if (p == null) {
 					return;

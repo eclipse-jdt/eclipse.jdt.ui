@@ -14,18 +14,15 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.eclipse.compare.contentmergeviewer.ITokenComparator;
+import org.eclipse.compare.rangedifferencer.RangeDifference;
+import org.eclipse.compare.rangedifferencer.RangeDifferencer;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
-import org.eclipse.compare.contentmergeviewer.ITokenComparator;
-import org.eclipse.compare.rangedifferencer.RangeDifference;
-import org.eclipse.compare.rangedifferencer.RangeDifferencer;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -40,16 +37,16 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.Strings;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
@@ -239,7 +236,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 */
 	public void apply(IDocument document) {
 		try {
-			ICompilationUnit unit= JavaModelUtil.toOriginal(getCompilationUnit());
+			ICompilationUnit unit= getCompilationUnit();
 			IStatus status= Resources.makeCommittable(unit.getResource(), null);
 			if (!status.isOK()) {
 				String label= CorrectionMessages.getString("CUCorrectionProposal.error.title"); //$NON-NLS-1$

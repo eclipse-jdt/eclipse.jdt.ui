@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.ui.wizards.NewInterfaceWizardPage;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -50,7 +49,7 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 	 */
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		fPage.createType(monitor); // use the full progress monitor
-		ICompilationUnit cu= JavaModelUtil.toOriginal(fPage.getCreatedType().getCompilationUnit());
+		ICompilationUnit cu= fPage.getCreatedType().getCompilationUnit();
 		if (cu != null) {
 			IResource resource= cu.getResource();
 			selectAndReveal(resource);

@@ -29,8 +29,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.text.java.*;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.Template;
@@ -39,7 +41,6 @@ import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
 import org.eclipse.jdt.internal.corext.template.java.GlobalVariables;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.text.template.TemplateProposal;
@@ -112,7 +113,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 	}
 
 	private IDocument getDocument(ICompilationUnit cu) throws JavaModelException {
-		IFile file= (IFile) JavaModelUtil.toOriginal(cu).getResource();
+		IFile file= (IFile) cu.getResource();
 		IDocument document= JavaUI.getDocumentProvider().getDocument(new FileEditorInput(file));
 		if (document == null) {
 			return new Document(cu.getSource()); // only used by test cases

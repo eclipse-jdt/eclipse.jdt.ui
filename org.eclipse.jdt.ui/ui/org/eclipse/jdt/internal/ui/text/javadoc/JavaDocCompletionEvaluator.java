@@ -382,7 +382,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 					fResult.add(createSeeTypeCompletion(type.isClass(), wordStart, fCurrentPos, name, name, JavaModelUtil.getTypeContainerName(type).toCharArray(), 50));
 				}
 			} finally {
-				preparedCU.destroy();
+				preparedCU.discardWorkingCopy();
 			}
 		}
 	}
@@ -405,7 +405,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 				}
 			} finally {
 				preparedCU.getBuffer().setContents(fCompilationUnit.getBuffer().getCharacters());
-				preparedCU.destroy();
+				preparedCU.discardWorkingCopy();
 			}
 		}
 		return null;
@@ -423,14 +423,11 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 				content[i]= ' ';
 			}
 		}
-						
-		ICompilationUnit cu= fCompilationUnit;
-		cu= JavaModelUtil.toOriginal(cu);
 
 		/*
 		 * Explicitly create a new non-shared working copy.
 		 */
-		ICompilationUnit newCU= (ICompilationUnit) cu.getWorkingCopy();
+		ICompilationUnit newCU= fCompilationUnit.getWorkingCopy(null);
 		newCU.getBuffer().setContents(content);
 		return newCU;
 	}
