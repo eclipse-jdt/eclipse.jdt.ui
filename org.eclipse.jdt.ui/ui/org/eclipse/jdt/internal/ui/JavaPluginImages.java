@@ -8,10 +8,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.jface.action.IAction;
 
 /**
  * Bundle of most images used by the Java plugin.
@@ -21,11 +22,20 @@ public class JavaPluginImages {
 	private static final String NAME_PREFIX= "org.eclipse.jdt.ui."; //$NON-NLS-1$
 	private static final int    NAME_PREFIX_LENGTH= NAME_PREFIX.length();
 
-	// Subdirectory (under the package containing this class) where 16 color images are
+	// Subdirectory (under the package containing this class) where images are
 	private static URL fgIconBaseURL= null;
 	static {
+		String pathSuffix= ""; //$NON-NLS-1$
+		Display display= Display.getCurrent();
+		if (display == null)
+			// class might get loaded by non-UI thread.
+			display= Display.getDefault();
+		if (display != null && display.getCurrent().getIconDepth() > 4)
+			pathSuffix = "icons/full/"; //$NON-NLS-1$
+		else
+			pathSuffix = "icons/basic/"; //$NON-NLS-1$
 		try {
-			fgIconBaseURL= new URL(JavaPlugin.getDefault().getDescriptor().getInstallURL(), "icons/" ); //$NON-NLS-1$
+			fgIconBaseURL= new URL(JavaPlugin.getDefault().getDescriptor().getInstallURL(), pathSuffix); //$NON-NLS-1$
 		} catch (MalformedURLException e) {
 			// do nothing
 		}
@@ -129,11 +139,11 @@ public class JavaPluginImages {
 	/**
 	 * Set of predefined Image Descriptors.
 	 */
-	private static final String T_OBJ= "full/obj16"; //$NON-NLS-1$
-	private static final String T_OVR= "full/ovr16"; //$NON-NLS-1$
-	private static final String T_WIZBAN= "full/wizban"; //$NON-NLS-1$
-	private static final String T_LCL= "full/clcl16"; //$NON-NLS-1$
-	private static final String T_CTOOL= "full/ctool16"; //$NON-NLS-1$
+	private static final String T_OBJ= "obj16"; //$NON-NLS-1$
+	private static final String T_OVR= "ovr16"; //$NON-NLS-1$
+	private static final String T_WIZBAN= "wizban"; //$NON-NLS-1$
+	private static final String T_LCL= "clcl16"; //$NON-NLS-1$
+	private static final String T_CTOOL= "ctool16"; //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_MISC_PUBLIC= createManaged(T_OBJ, IMG_MISC_PUBLIC);
 	public static final ImageDescriptor DESC_MISC_PROTECTED= createManaged(T_OBJ, IMG_MISC_PROTECTED);
@@ -282,19 +292,19 @@ public class JavaPluginImages {
 	public static void setImageDescriptors(IAction action, String type, String relPath) {
 		
 		try {
-			ImageDescriptor id= ImageDescriptor.createFromURL(makeIconFileURL("full/d" + type, relPath)); //$NON-NLS-1$
+			ImageDescriptor id= ImageDescriptor.createFromURL(makeIconFileURL("d" + type, relPath)); //$NON-NLS-1$
 			if (id != null)
 				action.setDisabledImageDescriptor(id);
 		} catch (MalformedURLException e) {
 		}
 	
 		try {
-			ImageDescriptor id= ImageDescriptor.createFromURL(makeIconFileURL("full/c" + type, relPath)); //$NON-NLS-1$
+			ImageDescriptor id= ImageDescriptor.createFromURL(makeIconFileURL("c" + type, relPath)); //$NON-NLS-1$
 			if (id != null)
 				action.setHoverImageDescriptor(id);
 		} catch (MalformedURLException e) {
 		}
 	
-		action.setImageDescriptor(create("full/e" + type, relPath)); //$NON-NLS-1$
+		action.setImageDescriptor(create("e" + type, relPath)); //$NON-NLS-1$
 	}
 }
