@@ -40,6 +40,8 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -319,7 +321,9 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			CatchClause catchClause= getAST().newCatchClause();
 			tryStatement.catchClauses().add(catchClause);
 			SingleVariableDeclaration decl= getAST().newSingleVariableDeclaration();
-			String name= fScope.createName("e", false); //$NON-NLS-1$
+			String varName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME);
+			
+			String name= fScope.createName(varName, false);
 			decl.setName(getAST().newSimpleName(name));
 			decl.setType(ASTNodeFactory.newType(getAST(), type));
 			catchClause.setException(decl);

@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
@@ -295,7 +296,7 @@ public class LocalCorrectionsSubProcessor {
 			List catchClauses= surroundingTry.catchClauses();
 			for (int i= 0; i < uncaughtExceptions.length; i++) {
 				ITypeBinding excBinding= uncaughtExceptions[i];
-				String varName= "e"; //$NON-NLS-1$
+				String varName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME);
 				String imp= proposal.addImport(excBinding);
 				Name name= ASTNodeFactory.newName(ast, imp);
 				SingleVariableDeclaration var= ast.newSingleVariableDeclaration();

@@ -184,6 +184,17 @@ public class PreferenceConstants {
 	 */
 	public static final String CODEGEN_IS_FOR_GETTERS= "org.eclipse.jdt.ui.gettersetter.use.is"; //$NON-NLS-1$
 	
+	
+	/**
+	 * A named preference that defines the preferred variable names for exceptions in
+	 * catch clauses.
+	 * <p>
+	 * Value is of type <code>String</code>.
+	 * </p>
+	 * @since 3.0
+	 */	
+	public static final String CODEGEN_EXCEPTION_VAR_NAME= "org.eclipse.jdt.ui.exception.name"; //$NON-NLS-1$
+	
 	/**
 	 * A named preference that controls if comment stubs will be added
 	 * automatically to newly created types and methods.
@@ -295,6 +306,8 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 */
 	public static final String LINK_BROWSING_PACKAGES_TO_EDITOR= "org.eclipse.jdt.ui.browsing.packagestoeditor"; //$NON-NLS-1$
+
+
 
 	/**
 	 * A named preference that controls whether the types view's selection is
@@ -2054,6 +2067,7 @@ public class PreferenceConstants {
 		}
 		store.setDefault(PreferenceConstants.CODEGEN_KEYWORD_THIS, false);
 		store.setDefault(PreferenceConstants.CODEGEN_IS_FOR_GETTERS, true);
+		store.setDefault(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME, "e"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEGEN_ADD_COMMENTS, true);
 
 		// MembersOrderPreferencePage

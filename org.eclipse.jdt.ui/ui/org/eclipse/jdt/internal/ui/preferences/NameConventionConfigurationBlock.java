@@ -279,6 +279,10 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	private SelectionButtonDialogField fUseIsForBooleanGettersBox;
 	private static final String PREF_KEYWORD_THIS= PreferenceConstants.CODEGEN_KEYWORD_THIS;
 	private static final String PREF_IS_FOR_GETTERS= PreferenceConstants.CODEGEN_IS_FOR_GETTERS;
+	private static final String PREF_EXCEPTION_NAME= PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME;
+	
+	private StringDialogField fExceptionName;
+
 	
 	public NameConventionConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
 		super(context, project);
@@ -309,16 +313,22 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		} else {
 			fNameConventionList.enableButton(0, false);
 		}
+
+		IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
+		
+		fExceptionName= new StringDialogField();
+		fExceptionName.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.exceptionname.label")); //$NON-NLS-1$
+		fExceptionName.setText(preferenceStore.getString(PREF_EXCEPTION_NAME));
 		
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=38879
 		fUseKeywordThisBox= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);		
 		fUseKeywordThisBox.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.keywordthis.label")); //$NON-NLS-1$
-		fUseKeywordThisBox.setSelection(PreferenceConstants.getPreferenceStore().getBoolean(PREF_KEYWORD_THIS));
+		fUseKeywordThisBox.setSelection(preferenceStore.getBoolean(PREF_KEYWORD_THIS));
 		
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=39044
 		fUseIsForBooleanGettersBox= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);		
 		fUseIsForBooleanGettersBox.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.isforbooleangetters.label")); //$NON-NLS-1$
-		fUseIsForBooleanGettersBox.setSelection(PreferenceConstants.getPreferenceStore().getBoolean(PREF_IS_FOR_GETTERS));		
+		fUseIsForBooleanGettersBox.setSelection(preferenceStore.getBoolean(PREF_IS_FOR_GETTERS));		
 	}
 	
 	protected String[] getAllKeys() {
@@ -332,12 +342,12 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		setShell(parent.getShell());
 		
 		GridLayout layout= new GridLayout();
-		layout.numColumns= 2;
+		layout.numColumns= 3;
 
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(layout);
 
-		fNameConventionList.doFillIntoGrid(composite, 3);
+		fNameConventionList.doFillIntoGrid(composite, 4);
 		LayoutUtil.setHorizontalSpan(fNameConventionList.getLabelControl(null), 2);
 		Table table= fNameConventionList.getTableViewer().getTable();
 		GridData data= (GridData)fNameConventionList.getListControl(null).getLayoutData();
@@ -349,10 +359,13 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		data= (GridData)fNameConventionList.getButtonBox(null).getLayoutData();
 		data.grabExcessVerticalSpace= false;
 		data.verticalAlignment= GridData.BEGINNING;
+		
+		fUseKeywordThisBox.doFillIntoGrid(composite, 3);
+		fUseIsForBooleanGettersBox.doFillIntoGrid(composite, 3);
 
-		fUseKeywordThisBox.doFillIntoGrid(composite, 2);
-		fUseIsForBooleanGettersBox.doFillIntoGrid(composite, 2);
-
+		fExceptionName.doFillIntoGrid(composite, 2);
+		DialogField.createEmptySpace(parent);
+		
 		return composite;
 	}
 	
@@ -439,6 +452,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	public void performDefaults() {
 		super.performDefaults();
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		fExceptionName.setText(prefs.getDefaultString(PREF_EXCEPTION_NAME));
 		fUseKeywordThisBox.setSelection(prefs.getDefaultBoolean(PREF_KEYWORD_THIS));
 		fUseIsForBooleanGettersBox.setSelection(prefs.getDefaultBoolean(PREF_IS_FOR_GETTERS));
 	}
@@ -448,6 +462,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	 */
 	public boolean performOk(boolean enabled) {
 		IPreferenceStore prefs= PreferenceConstants.getPreferenceStore();
+		prefs.setValue(PREF_EXCEPTION_NAME, fExceptionName.getText());
 		prefs.setValue(PREF_KEYWORD_THIS, fUseKeywordThisBox.isSelected());
 		prefs.setValue(PREF_IS_FOR_GETTERS, fUseIsForBooleanGettersBox.isSelected());
 		JavaPlugin.getDefault().savePluginPreferences();
