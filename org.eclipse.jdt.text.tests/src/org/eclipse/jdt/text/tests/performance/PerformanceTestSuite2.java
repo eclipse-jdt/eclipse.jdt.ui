@@ -25,6 +25,6 @@ public class PerformanceTestSuite2 extends TestSuite {
 	
 	public PerformanceTestSuite2() {
 		addTest(OpenJavaEditorTest.suite());
-		addTest(new OpenTextEditorTest.Setup(EmptyTestCase.suite())); // the actual test runs in its own workbench (see test.xml)
+		addTest(new OpenTextEditorTest.Setup(EmptyTestCase.suite(), false)); // the actual test runs in its own workbench (see test.xml)
 	}
 }

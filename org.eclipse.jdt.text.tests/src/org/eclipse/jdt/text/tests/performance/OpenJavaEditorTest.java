@@ -35,23 +35,24 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 
 	public static class Setup extends TestSetup {
 
+		private boolean fTearDown;
+
 		public Setup(Test test) {
+			this(test, true);
+		}
+
+		public Setup(Test test, boolean tearDown) {
 			super(test);
+			fTearDown= tearDown;
 		}
 
 		protected void setUp() throws Exception {
 			ResourceTestHelper.replicate(PREFIX + FILE_SUFFIX, PREFIX, FILE_SUFFIX, WARM_UP_RUNS + MEASURED_RUNS, FILE_PREFIX, FILE_PREFIX, ResourceTestHelper.SKIP_IF_EXISTS);
 		}
-	}
-
-	public static class TearDown extends TestSetup {
-
-		public TearDown(Test test) {
-			super(test);
-		}
 
 		protected void tearDown() throws Exception {
-			ResourceTestHelper.delete(PREFIX, FILE_SUFFIX, WARM_UP_RUNS + MEASURED_RUNS);
+			if (fTearDown)
+				ResourceTestHelper.delete(PREFIX, FILE_SUFFIX, WARM_UP_RUNS + MEASURED_RUNS);
 		}
 	}
 
@@ -87,7 +88,7 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 		suite.addTest(new OpenJavaEditorTest("testOpenFirstEditor"));
 		suite.addTest(new OpenJavaEditorTest("testOpenJavaEditor1"));
 		suite.addTest(new OpenJavaEditorTest("testOpenJavaEditor2"));
-		return new PerformanceTestSetup(new Setup(new TearDown(suite)));
+		return new PerformanceTestSetup(new Setup(suite));
 	}
 	
 	/*

@@ -32,25 +32,27 @@ public class OpenTextEditorTest extends OpenEditorTest {
 
 	public static class Setup extends TestSetup {
 		
+		private boolean fTearDown;
+
 		public Setup(Test test) {
+			this(test, true);
+		}
+		
+		public Setup(Test test, boolean tearDown) {
 			super(test);
+			fTearDown= tearDown;
 		}
 		
 		protected void setUp() throws Exception {
 			ResourceTestHelper.replicate("/" + PerformanceTestSetup.PROJECT + ORIG_FILE, PREFIX, FILE_SUFFIX, WARM_UP_RUNS + MEASURED_RUNS, ResourceTestHelper.SKIP_IF_EXISTS);
 			EditorTestHelper.showPerspective(PERSPECTIVE);
 		}
-	}
-	
-	public static class TearDown extends TestSetup {
-		
-		public TearDown(Test test) {
-			super(test);
-		}
 		
 		protected void tearDown() throws Exception {
-			EditorTestHelper.showPerspective(PerformanceTestSetup.PERSPECTIVE);
-			ResourceTestHelper.delete(PREFIX, FILE_SUFFIX, WARM_UP_RUNS + MEASURED_RUNS);
+			if (fTearDown) {
+				EditorTestHelper.showPerspective(PerformanceTestSetup.PERSPECTIVE);
+				ResourceTestHelper.delete(PREFIX, FILE_SUFFIX, WARM_UP_RUNS + MEASURED_RUNS);
+			}
 		}
 	}
 	
@@ -90,7 +92,7 @@ public class OpenTextEditorTest extends OpenEditorTest {
 		suite.addTest(new OpenTextEditorTest("testOpenFirstEditor"));
 		suite.addTest(new OpenTextEditorTest("testOpenTextEditor1"));
 		suite.addTest(new OpenTextEditorTest("testOpenTextEditor2"));
-		return new CloseWorkbenchDecorator(new PerformanceTestSetup(new Setup(new TearDown(suite)), false));
+		return new CloseWorkbenchDecorator(new PerformanceTestSetup(new Setup(suite), false));
 	}
 	
 	/*
