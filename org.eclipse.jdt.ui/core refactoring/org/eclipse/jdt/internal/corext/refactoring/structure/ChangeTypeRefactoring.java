@@ -237,7 +237,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			// be optimistic.
 			return true;
 		}
-		if (PrimitiveType.toCode(Signature.toString(returnType)) != null)
+		if (returnType == null || PrimitiveType.toCode(Signature.toString(returnType)) != null)
 			return false;
 		return true;
 	}
