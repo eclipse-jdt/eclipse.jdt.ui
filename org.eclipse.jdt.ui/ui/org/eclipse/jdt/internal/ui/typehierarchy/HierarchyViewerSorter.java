@@ -27,10 +27,10 @@ public class HierarchyViewerSorter extends JavaElementSorter {
 	 * @see org.eclipse.jface.viewers.ViewerSorter#category(java.lang.Object)
 	 */
 	public int category(Object element) {
-		int cat= super.category(element) * 2;
+		int cat= super.category(element);
 		if (element instanceof IType) {
 			ITypeHierarchy hierarchy= fHierarchy.getHierarchy();
-			
+			cat+= 20;
 			if (hierarchy != null) {
 				IType type= (IType) JavaModelUtil.toOriginal((IType) element);
 				if (Flags.isInterface(hierarchy.getCachedFlags(type))) {
