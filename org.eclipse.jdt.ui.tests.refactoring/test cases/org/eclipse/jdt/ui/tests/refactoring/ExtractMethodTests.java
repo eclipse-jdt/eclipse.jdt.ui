@@ -20,11 +20,6 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class ExtractMethodTests extends AbstractSelectionTestCase {
 
-	public static final String SQUARE_BRACKET_OPEN= "/*[*/";
-	public static final int    SQUARE_BRACKET_OPEN_LENGTH= SQUARE_BRACKET_OPEN.length();
-	public static final String SQUARE_BRACKET_CLOSE=   "/*]*/";
-	public static final int    SQUARE_BRACKET_CLOSE_LENGTH= SQUARE_BRACKET_CLOSE.length();
-
 	private static ExtractMethodTestSetup fgTestSetup;
 	
 	public ExtractMethodTests(String name) {

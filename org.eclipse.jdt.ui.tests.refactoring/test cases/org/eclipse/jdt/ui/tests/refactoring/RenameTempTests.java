@@ -11,11 +11,12 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;public class RenameTempTests extends RefactoringTest{
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+public class RenameTempTests extends RefactoringTest{
 	
 	private static final Class clazz= RenameTempTests.class;
 	private static final String REFACTORING_PATH= "RenameTemp/";
@@ -59,8 +60,8 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
 	
 	private ISourceRange getSelection(ICompilationUnit cu) throws Exception{
 		String source= cu.getSource();
-		int offset= source.indexOf(ExtractMethodTests.SQUARE_BRACKET_OPEN);
-		int end= source.indexOf(ExtractMethodTests.SQUARE_BRACKET_CLOSE);
+		int offset= source.indexOf(AbstractSelectionTestCase.SQUARE_BRACKET_OPEN);
+		int end= source.indexOf(AbstractSelectionTestCase.SQUARE_BRACKET_CLOSE);
 		return new SourceRange(offset, end - offset);
 	}
 

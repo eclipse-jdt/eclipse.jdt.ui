@@ -7,11 +7,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class InlineTempTests extends RefactoringTest {
 
@@ -56,8 +56,8 @@ public class InlineTempTests extends RefactoringTest {
 	
 	private ISourceRange getSelection(ICompilationUnit cu) throws Exception{
 		String source= cu.getSource();
-		int offset= source.indexOf(ExtractMethodTests.SQUARE_BRACKET_OPEN);
-		int end= source.indexOf(ExtractMethodTests.SQUARE_BRACKET_CLOSE);
+		int offset= source.indexOf(AbstractSelectionTestCase.SQUARE_BRACKET_OPEN);
+		int end= source.indexOf(AbstractSelectionTestCase.SQUARE_BRACKET_CLOSE);
 		return new SourceRange(offset, end - offset);
 	}
 	

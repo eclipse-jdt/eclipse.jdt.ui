@@ -26,10 +26,10 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 
-	private static final String SQUARE_BRACKET_OPEN= "/*[*/";
-	private static final int    SQUARE_BRACKET_OPEN_LENGTH= SQUARE_BRACKET_OPEN.length();
-	private static final String SQUARE_BRACKET_CLOSE=   "/*]*/";
-	private static final int    SQUARE_BRACKET_CLOSE_LENGTH= SQUARE_BRACKET_CLOSE.length();
+	public static final String SQUARE_BRACKET_OPEN= "/*[*/";
+	public static final int    SQUARE_BRACKET_OPEN_LENGTH= SQUARE_BRACKET_OPEN.length();
+	public static final String SQUARE_BRACKET_CLOSE=   "/*]*/";
+	public static final int    SQUARE_BRACKET_CLOSE_LENGTH= SQUARE_BRACKET_CLOSE.length();
 	
 	protected static final int VALID_SELECTION=     1;
 	protected static final int INVALID_SELECTION=   2;
