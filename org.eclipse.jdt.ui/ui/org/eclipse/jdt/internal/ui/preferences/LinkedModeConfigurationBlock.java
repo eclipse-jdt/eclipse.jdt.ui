@@ -486,8 +486,8 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 	public void performDefaults() {
 		getPreferenceStore().loadDefaults();
 		
-		super.performDefaults();
 		handleAnnotationListSelection();
+		super.performDefaults();
 	}
 	
 	public void dispose() {
