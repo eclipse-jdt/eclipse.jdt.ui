@@ -38,8 +38,8 @@ import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.formatter.IContentFormatter;
 import org.eclipse.jface.text.formatter.MultiPassContentFormatter;
-import org.eclipse.jface.text.hyperlink.DefaultHyperlinkController;
-import org.eclipse.jface.text.hyperlink.IHyperlinkController;
+import org.eclipse.jface.text.hyperlink.DefaultHyperlinkPresenter;
+import org.eclipse.jface.text.hyperlink.IHyperlinkPresenter;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
@@ -829,18 +829,13 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	}
 	
 	/*
-	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getHyperlinksEnabled(org.eclipse.jface.text.source.ISourceViewer)
-	 * @since 3.1
-	 */
-	public boolean getHyperlinksEnabled(ISourceViewer sourceViewer) {
-		return fPreferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINKS_ENABLED);
-	}
-	
-	/*
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getHyperlinkDetectors(org.eclipse.jface.text.source.ISourceViewer)
 	 * @since 3.1
 	 */
 	public IHyperlinkDetector[] getHyperlinkDetectors(ISourceViewer sourceViewer) {
+		if (!fPreferenceStore.getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINKS_ENABLED))
+			return null;
+		
 		IHyperlinkDetector[] inheritedDetectors= super.getHyperlinkDetectors(sourceViewer);
 		
 		if (fTextEditor == null)
@@ -871,11 +866,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	}
 	
 	/*
-	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getHyperlinkController(org.eclipse.jface.text.source.ISourceViewer)
+	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getHyperlinkPresenter(org.eclipse.jface.text.source.ISourceViewer)
 	 * @since 3.1
 	 */
-	public IHyperlinkController getHyperlinkController(ISourceViewer sourceViewer) {
-		return new DefaultHyperlinkController(fPreferenceStore);
+	public IHyperlinkPresenter getHyperlinkPresenter(ISourceViewer sourceViewer) {
+		return new DefaultHyperlinkPresenter(fPreferenceStore);
 	}
 	
 	/**

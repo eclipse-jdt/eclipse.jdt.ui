@@ -72,10 +72,10 @@ public class NLSKeyHyperlink implements IHyperlink {
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getRegion()
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkRegion()
 	 * @since 3.1
 	 */
-	public IRegion getRegion() {
+	public IRegion getHyperlinkRegion() {
 		return fRegion;
 	}
 
@@ -152,10 +152,10 @@ public class NLSKeyHyperlink implements IHyperlink {
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getText()
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkText()
 	 * @since 3.1
 	 */
-	public String getText() {
+	public String getHyperlinkText() {
 		return null;
 	}
 }
