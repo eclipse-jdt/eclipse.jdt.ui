@@ -121,16 +121,23 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	 */
 	public static void initDefaults(IPreferenceStore store) {
 		Hashtable hashtable= JavaCore.getDefaultOptions();
+		Hashtable currOptions= JavaCore.getOptions();
 		String[] allKeys= getAllKeys();
 		for (int i= 0; i < allKeys.length; i++) {
 			String key= allKeys[i];
-			String value= (String) hashtable.get(key);
-			if (value != null) {
-				store.setDefault(key, value);
+			String defValue= (String) hashtable.get(key);
+			if (defValue != null) {
+				store.setDefault(key, defValue);
 			} else {
-				JavaPlugin.logErrorMessage("CodeFormatterPreferencePage: key is null: " + key);
+				JavaPlugin.logErrorMessage("CodeFormatterPreferencePage: value is null: " + key);
 			}
+			// update the JavaCore options from the pref store
+			String val= store.getString(key);
+			if (val != null) {
+				currOptions.put(key, val);
+			}			
 		}
+		JavaCore.setOptions(currOptions);
 	}
 
 	private static class ControlData {
@@ -398,9 +405,14 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	public boolean performOk() {
 		String[] allKeys= getAllKeys();
 		// preserve other options
+		// store in JCore and the preferences
 		Hashtable actualOptions= JavaCore.getOptions();
+		IPreferenceStore store= getPreferenceStore();
 		for (int i= 0; i < allKeys.length; i++) {
-			actualOptions.put(allKeys[i], fWorkingValues.get(allKeys[i]));
+			String key= allKeys[i];
+			String val=  (String) fWorkingValues.get(key);
+			actualOptions.put(key, val);
+			store.putValue(key, val);
 		}
 		JavaCore.setOptions(actualOptions);
 		return super.performOk();

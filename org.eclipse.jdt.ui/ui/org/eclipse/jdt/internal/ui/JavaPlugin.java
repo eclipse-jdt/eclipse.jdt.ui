@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.ui.launcher.VMPreferencePage;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.CompilerPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaDebugPreferencePage;
@@ -282,6 +283,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		ClasspathVariablesPreferencePage.initDefaults(store);
 		RefactoringPreferencePage.initDefaults(store);		
 		CodeFormatterPreferencePage.initDefaults(store);
+		CompilerPreferencePage.initDefaults(store);
 		
 		PackageExplorerPart.initDefaults(store);
 		JavaEditorPreferencePage.initDefaults(store);
