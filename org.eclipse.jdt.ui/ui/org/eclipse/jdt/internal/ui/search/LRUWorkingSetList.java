@@ -1,16 +1,15 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.eclipse.search.ui.IWorkingSet;
-import org.eclipse.search.ui.SearchUI;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
 
 public class LRUWorkingSetList {
 
@@ -49,7 +48,7 @@ public class LRUWorkingSetList {
 		Iterator iter= new ArrayList(fLRUList).iterator();
 		while (iter.hasNext()) {
 			IWorkingSet workingSet= (IWorkingSet)iter.next();
-			if (SearchUI.findWorkingSet(workingSet.getName()) == null)
+			if (PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSet.getName()) == null)
 				fLRUList.remove(workingSet);
 		}
 	}

@@ -4,16 +4,18 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.ui.dialogs.SelectionDialog;
+import org.eclipse.jface.dialogs.Dialog;
 
-import org.eclipse.search.ui.IWorkingSet;
-import org.eclipse.search.ui.SearchUI;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.IWorkingSetSelectionDialog;
+import org.eclipse.ui.dialogs.SelectionDialog;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPlugin;;
 
 public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 
@@ -41,7 +43,7 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 	protected JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
 		IWorkingSet workingSet= fWorkingSet;
 		if (fWorkingSet == null) {
-			workingSet= queryWorkingSet();
+			workingSet= JavaSearchScopeFactory.getInstance().queryWorkingSet();
 			if (workingSet == null)
 				return null;
 		}
@@ -56,14 +58,5 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 
 	private String getScopeDescription(IWorkingSet workingSet) {
 		return SearchMessages.getFormattedString("WorkingSetScope", new String[] {workingSet.getName()}); //$NON-NLS-1$
-
-	}
-
-	private IWorkingSet queryWorkingSet() throws JavaModelException {
-		SelectionDialog dialog= SearchUI.createWorkingSetDialog(JavaPlugin.getActiveWorkbenchShell());
-		if (dialog.open() == dialog.OK)
-			return (IWorkingSet)dialog.getResult()[0];
-		else
-			return null;
 	}
 }

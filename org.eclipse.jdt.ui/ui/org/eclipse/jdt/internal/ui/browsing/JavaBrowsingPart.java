@@ -12,8 +12,11 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Image;
@@ -31,6 +34,8 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -56,8 +61,10 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ResourceWorkingSetFilter;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.actions.OpenWithMenu;
@@ -105,6 +112,7 @@ import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
@@ -121,19 +129,20 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	// Actions
 	private BuildGroup fBuildGroup;
 	private ContextMenuGroup[] fStandardGroups;
-	private Menu fContextMenu;		
+	private ActionGroup fStandardActionGroups;
 	private OpenResourceAction fOpenCUAction;
 	private Action fOpenToAction;
 	private Action fShowNavigatorAction;
 	protected PropertyDialogAction fPropertyDialogAction;
  	private IRefactoringAction fDeleteAction;
  	private RefreshAction fRefreshAction;
+
+	private Menu fContextMenu;		
 	private IWorkbenchPart fPreviousSelectionProvider;
 	private Object fPreviousSelectedElement;
 	private Image fOriginalTitleImage;
-	private PatchedOpenInNewWindowAction fBrowseAction;
 	
-	private ActionGroup fStandardActionGroups;
+	private ResourceWorkingSetFilter fWorkingSetFilter;
 		
 	/*
 	 * Ensure selection changed events being processed only if
@@ -221,6 +230,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		
 		hookViewerListeners();
 
+		// Filters
+		addFilters();
+
 		// Initialize viewer input
 		fViewer.setContentProvider(createContentProvider());
 		setInitialInput();
@@ -228,9 +240,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		// Initialize selecton
 		setInitialSelection();
 		
-		// Filters
-		addFilters();
-
 		// Listen to workbench window changes
 		getViewSite().getWorkbenchWindow().getSelectionService().addSelectionListener(this);
 		getViewSite().getPage().addPartListener(fPartListener);
@@ -402,17 +411,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		
 		fDeleteAction= ReorgGroup.createDeleteAction(provider);
 		fRefreshAction= new RefreshAction(getShell());
-//		fFilterAction = new FilterSelectionAction(getShell(), this, PackagesMessages.getString("PackageExplorer.filters")); //$NON-NLS-1$
-//		fShowLibrariesAction = new ShowLibrariesAction(this, PackagesMessages.getString("PackageExplorer.referencedLibs")); //$NON-NLS-1$
-//		fShowBinariesAction = new ShowBinariesAction(getShell(), this, PackagesMessages.getString("PackageExplorer.binaryProjects")); //$NON-NLS-1$
-//		fFilterWorkingSetAction = new FilterWorkingSetAction(getShell(), this, "Filter Working Set..."); //$NON-NLS-1$
-//		fRemoveWorkingSetAction = new RemoveWorkingSetFilterAction(getShell(), this, "Remove Working Set Filter"); //$NON-NLS-1$
 		
 		IActionBars actionService= getViewSite().getActionBars();
 		actionService.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
 		ReorgGroup.addGlobalReorgActions(actionService, provider);
-		
-//		fBrowseAction= new BrowseAction(this);
 	}
 
 
@@ -580,12 +582,62 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		} else
 			setTitleImage(fTitleProvider.getImage(input));
 		setViewerInput(input);
+		updateTitle();
 	}
 
 	private void setViewerInput(Object input) {
 		fProcessSelectionEvents= false;
 		fViewer.setInput(input);
 		fProcessSelectionEvents= true;
+	}
+
+	void updateTitle() {
+		Object input= fViewer.getInput();
+//		String viewName= getConfigurationElement().getAttribute("name"); //$NON-NLS-1$
+//		IJavaElement javaModel= JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot());
+		IWorkingSet workingSet= fWorkingSetFilter.getWorkingSet();
+					
+		if (workingSet != null) {
+//			setTitle(viewName + ": " + workingSet.getName());
+			setTitleToolTip(getToolTipText(input));
+//		}
+//		else if (input == null || input.equals(javaModel)) {
+//			setTitle(viewName);
+//			setTitleToolTip(""); //$NON-NLS-1$
+		} else {
+//			setTitle(viewName + ": " + getLabelProvider().getText(input));
+			setTitleToolTip(getToolTipText(input));
+		}
+	}
+
+	/**
+	 * Returns the tool tip text for the given element.
+	 */
+	String getToolTipText(Object element) {
+		String result;
+		if (!(element instanceof IResource)) {
+			result= JavaElementLabels.getTextLabel(element, StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS);		
+		} else {
+			IPath path= ((IResource) element).getFullPath();
+			if (path.isRoot()) {
+				result= getConfigurationElement().getAttribute("name"); //$NON-NLS-1$
+			} else {
+				result= path.makeRelative().toString();
+			}
+		}
+		IWorkingSet ws= fWorkingSetFilter.getWorkingSet();
+		if (ws == null)
+			return result;
+		String wsstr= "Working Set: "+ws.getName();
+		if (result.length() == 0)
+			return wsstr;
+		return result + " - " + wsstr;
+	}
+	
+	public String getTitleToolTip() {
+		if (fViewer == null)
+			return super.getTitleToolTip();
+		return getToolTipText(fViewer.getInput());
 	}
 
 	/**
@@ -643,6 +695,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 */
 	protected void addFilters() {
 		// default is to have no filters
+		addWorkingSetChangeSupport();
+		IWorkingSet workingSet= getSite().getPage().getWorkingSet();
+		if (workingSet != null) {
+			fWorkingSetFilter= new ResourceWorkingSetFilter();
+			fWorkingSetFilter.setWorkingSet(workingSet);		
+			fViewer.addFilter(fWorkingSetFilter);
+		}		
 	}
 
 	/**
@@ -1046,4 +1105,56 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			return null;
 		}
 	}	
+	private IPropertyChangeListener addWorkingSetChangeSupport() {
+		final IPropertyChangeListener propertyChangeListener= createWorkingSetChangeListener();
+		final IWorkbenchPage page= getSite().getPage();
+
+		fWorkingSetFilter= new ResourceWorkingSetFilter();
+		fViewer.addFilter(fWorkingSetFilter);
+
+		// Register listener on working set
+		if (page.getWorkingSet() != null)		
+			page.getWorkingSet().addPropertyChangeListener(propertyChangeListener);				
+		
+		// Register listener on page
+		page.addPropertyChangeListener(propertyChangeListener);
+		
+		// Register dispose listener which removes the page listener
+		fViewer.getControl().addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				if (page!= null)
+					page.removePropertyChangeListener(propertyChangeListener);
+			}
+		});
+		
+		return propertyChangeListener;		
+	}
+
+	private IPropertyChangeListener createWorkingSetChangeListener() {
+		return new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				String property= event.getProperty();
+				if (IWorkbenchPage.CHANGE_WORKING_SET_REPLACE.equals(property)) {
+					IWorkingSet newWorkingSet= (IWorkingSet) event.getNewValue();
+
+					if (fWorkingSetFilter.getWorkingSet() != null)
+						fWorkingSetFilter.getWorkingSet().removePropertyChangeListener(this);
+
+					fWorkingSetFilter.setWorkingSet(newWorkingSet);	
+
+					if (newWorkingSet != null)
+						newWorkingSet.addPropertyChangeListener(this);	
+						
+					fViewer.getControl().setRedraw(false);
+					fViewer.refresh();
+					updateTitle();
+					fViewer.getControl().setRedraw(true);
+				}
+				else if (IWorkingSet.CHANGE_WORKING_SET_NAME_CHANGE.equals(property))
+					updateTitle();
+				else if (IWorkingSet.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property))
+					fViewer.refresh();			
+			}
+		};
+	}
 }

@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.search;import java.lang.reflect.InvocationTargetException;
@@ -13,7 +13,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 
-import org.eclipse.search.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -166,7 +168,7 @@ public abstract class ElementSearchAction extends JavaElementAction {
 			String[] lruWorkingSetNames= fgSettingsStore.getArray(STORE_LRU_WORKING_SET_NAMES);
 			if (lruWorkingSetNames != null) {
 				for (int i= lruWorkingSetNames.length - 1; i >= 0; i--) {
-					IWorkingSet workingSet= SearchUI.findWorkingSet(lruWorkingSetNames[i]);
+					IWorkingSet workingSet= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(lruWorkingSetNames[i]);
 					if (workingSet != null)
 						fgLRUWorkingSets.add(workingSet);
 				}

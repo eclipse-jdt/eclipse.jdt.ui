@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.search;
@@ -41,7 +41,9 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.IWorkbenchAdapter;
@@ -49,7 +51,6 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.search.ui.ISearchPage;
 import org.eclipse.search.ui.ISearchPageContainer;
 import org.eclipse.search.ui.ISearchResultViewEntry;
-import org.eclipse.search.ui.IWorkingSet;
 import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -69,7 +70,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
@@ -665,10 +666,18 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	 */
 	private IStructuredSelection asStructuredSelection() {
 		IWorkbenchWindow wbWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		if (wbWindow == null)
-			return StructuredSelection.EMPTY;
-		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(wbWindow.getSelectionService());
-		return provider.getSelection();
+		if (wbWindow != null) {
+			IWorkbenchPage page= wbWindow.getActivePage();
+			if (page != null) {
+				IWorkbenchPart part= page.getActivePart();
+				if (part != null)
+					try {
+						return SelectionConverter.getStructuredSelection(part);
+					} catch (JavaModelException ex) {
+					}
+			}
+		}
+		return StructuredSelection.EMPTY;
 	}
 	
 	/**

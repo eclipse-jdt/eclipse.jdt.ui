@@ -1,10 +1,10 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.search.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSet;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;

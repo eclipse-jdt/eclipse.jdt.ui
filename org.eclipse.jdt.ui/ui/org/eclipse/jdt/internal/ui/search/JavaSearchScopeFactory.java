@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.search;
@@ -15,21 +15,24 @@ import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.IWorkingSetSelectionDialog;
 
 import org.eclipse.search.ui.ISearchResultViewEntry;
-import org.eclipse.search.ui.IWorkingSet;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 public class JavaSearchScopeFactory {
-
-
 
 	private static JavaSearchScopeFactory fgInstance;
 	private static IJavaSearchScope EMPTY_SCOPE= SearchEngine.createJavaSearchScope(new IJavaElement[] {});
@@ -42,17 +45,39 @@ public class JavaSearchScopeFactory {
 			fgInstance= new JavaSearchScopeFactory();
 		return fgInstance;
 	}
-	
+
+	public IWorkingSet queryWorkingSet() throws JavaModelException {
+		IWorkingSetSelectionDialog dialog= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSetSelectionDialog(JavaPlugin.getActiveWorkbenchShell());
+		if (dialog.open() == Window.OK) {
+			IWorkingSet[] workingSets= dialog.getSelection();
+			if (workingSets.length > 0)
+				return workingSets[0];
+		}
+		return null;
+	}
+
+	public IJavaSearchScope createJavaSearchScope(IWorkingSet workingSet) {
+		IAdaptable[] elements= workingSet.getElements();
+		int length= elements.length;
+		if (length <= 0)
+			return EMPTY_SCOPE;
+		
+		Set javaElements= new HashSet(elements.length);
+		for (int i= 0; i < length; i++) {
+			if (elements[i] instanceof IJavaElement)
+				addJavaElements(javaElements, (IJavaElement)elements[i]);
+			else
+				addJavaElements(javaElements, elements[i]);
+		}
+		return SearchEngine.createJavaSearchScope((IJavaElement[])javaElements.toArray(new IJavaElement[javaElements.size()]));
+	}
+
 	public IJavaSearchScope createJavaSearchScope(IResource[] resources) {
 		if (resources == null)
 			return EMPTY_SCOPE;
 		Set javaElements= new HashSet(resources.length);
 		addJavaElements(javaElements, resources);
 		return SearchEngine.createJavaSearchScope((IJavaElement[])javaElements.toArray(new IJavaElement[javaElements.size()]));
-	}
-
-	public IJavaSearchScope createJavaSearchScope(IWorkingSet workingSet) {
-		return createJavaSearchScope(workingSet.getResources());
 	}
 
 	public IJavaSearchScope createJavaSearchScope(ISelection selection) {
@@ -86,8 +111,8 @@ public class JavaSearchScopeFactory {
 			addJavaElements(javaElements, resources[i]);
 	}
 
-	private void addJavaElements(Set javaElements, IResource resource) {
-		IJavaElement javaElement= JavaCore.create(resource);
+	private void addJavaElements(Set javaElements, IAdaptable resource) {
+		IJavaElement javaElement= (IJavaElement)resource.getAdapter(IJavaElement.class);
 		if (javaElement == null)
 			// not a Java resource
 			return;

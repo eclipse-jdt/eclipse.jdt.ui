@@ -7,7 +7,7 @@ package org.eclipse.jdt.internal.ui.search;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.eclipse.search.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSet;
 
 /**
  * Contribute Java search specific menu elements.

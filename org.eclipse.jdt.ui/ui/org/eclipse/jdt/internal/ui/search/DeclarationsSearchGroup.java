@@ -1,13 +1,13 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import org.eclipse.search.ui.IWorkingSet;
-import org.eclipse.search.ui.SearchUI;
+
+import org.eclipse.ui.IWorkingSet;
 
 /**
  * Contribute Java search specific menu elements.
