@@ -142,49 +142,53 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 		Context context= entry.getContext();
 		if (context == Context.NULL_CONTEXT)
 			return null;
-		IEditorInput editorInput= null;
 		SourceViewerConfiguration configuration= null;
-		IDocumentProvider provider= null;
 		ISourceRange range= null;
+		IDocument document= null;
 		try {
 			if (context instanceof FileContext) {
 				FileContext fc= (FileContext)context;
-				editorInput= new FileEditorInput(fc.getFile());
+				IEditorInput editorInput= new FileEditorInput(fc.getFile());
 				configuration= new SourceViewerConfiguration();
-				provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
 				range= fc.getSourceRange();
+				document= getDocument(JavaPlugin.getDefault().getCompilationUnitDocumentProvider(), editorInput);
 			} else if (context instanceof JavaSourceContext) {
 				JavaSourceContext jsc= (JavaSourceContext)context;
+				configuration= new JavaSourceViewerConfiguration(getJavaTextTools(), null);
 				range= jsc.getSourceRange();
 				if (jsc.isBinary()) {
-					editorInput= new InternalClassFileEditorInput(jsc.getClassFile());
-					configuration= new JavaSourceViewerConfiguration(getJavaTextTools(), null);
-					provider= JavaPlugin.getDefault().getClassFileDocumentProvider();
+					IEditorInput editorInput= new InternalClassFileEditorInput(jsc.getClassFile());
+					document= getDocument(JavaPlugin.getDefault().getClassFileDocumentProvider(), editorInput);
 				} else {
 					ICompilationUnit cunit= jsc.getCompilationUnit();
-					if (cunit.isWorkingCopy())
-						cunit= (ICompilationUnit)cunit.getOriginalElement();
-					editorInput= new FileEditorInput((IFile)cunit.getUnderlyingResource());
-					configuration= new JavaSourceViewerConfiguration(getJavaTextTools(), null);
-					provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
+					if (cunit.isWorkingCopy()) {
+						document= new Document(cunit.getSource());
+					} else {
+						IEditorInput editorInput= new FileEditorInput((IFile)cunit.getUnderlyingResource());
+						document= getDocument(JavaPlugin.getDefault().getCompilationUnitDocumentProvider(), editorInput);
+					}
 				}
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}
-		IDocument document= null;
-		if (editorInput != null) {
-			try {
-				provider.connect(editorInput);
-				document=provider.getDocument(editorInput);
-			} catch (CoreException e) {
-			} finally {
-				provider.disconnect(editorInput);
-			}
-		}
 		if (document == null || configuration == null)
 			return null;
 		return new SourceContextInput(document, configuration, range);
+	}
+	
+	private IDocument getDocument(IDocumentProvider provider, IEditorInput input) {
+		if (input == null)
+			return null;
+		IDocument result= null;
+		try {
+			provider.connect(input);
+			result= provider.getDocument(input);
+		} catch (CoreException e) {
+		} finally {
+			provider.disconnect(input);
+		}
+		return result;
 	}
 		 
 	//---- UI creation ----------------------------------------------------------------------
