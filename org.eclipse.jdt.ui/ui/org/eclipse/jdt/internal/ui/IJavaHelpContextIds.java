@@ -61,7 +61,6 @@ public interface IJavaHelpContextIds {
 
 	public static final String OPEN_PACKAGE_WIZARD_ACTION= 								PREFIX + "open_package_wizard_action"; //$NON-NLS-1$
 	public static final String OPEN_PROJECT_WIZARD_ACTION= 								PREFIX + "open_project_wizard_action"; //$NON-NLS-1$
-	public static final String OPEN_SNIPPET_WIZARD_ACTION= 								PREFIX + "open_snippet_wizard_action"; //$NON-NLS-1$
 	public static final String EDIT_WORKING_SET_ACTION= 									PREFIX + "edit_working_set_action"; //$NON-NLS-1$
 	public static final String CLEAR_WORKING_SET_ACTION= 									PREFIX + "clear_working_set_action"; //$NON-NLS-1$
 	public static final String GOTO_MARKER_ACTION= 											PREFIX + "goto_marker_action"; //$NON-NLS-1$
@@ -269,7 +268,6 @@ public interface IJavaHelpContextIds {
 		
 	// Wizard pages
 	public static final String NEW_JAVAPROJECT_WIZARD_PAGE= PREFIX + "new_javaproject_wizard_page_context"; //$NON-NLS-1$
-	public static final String NEW_SNIPPET_WIZARD_PAGE= PREFIX + "new_snippet_wizard_page_context"; //$NON-NLS-1$
 	public static final String NEW_PACKAGE_WIZARD_PAGE= PREFIX + "new_package_wizard_page_context"; //$NON-NLS-1$
 	public static final String NEW_CLASS_WIZARD_PAGE= PREFIX + "new_class_wizard_page_context"; //$NON-NLS-1$
 	public static final String NEW_INTERFACE_WIZARD_PAGE= PREFIX + "new_interface_wizard_page_context"; //$NON-NLS-1$
