@@ -7,8 +7,8 @@ package org.eclipse.jdt.ui.text;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
+import org.eclipse.jface.text.rules.RuleBasedPartitioner;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -182,7 +182,7 @@ public class JavaTextTools {
 			JavaPartitionScanner.JAVA_STRING
 		};
 		
-		return new DefaultPartitioner(getPartitionScanner(), types);
+		return new RuleBasedPartitioner(getPartitionScanner(), types);
 	}
 	
 	/**
@@ -195,7 +195,7 @@ public class JavaTextTools {
 	 * 			if there is none
 	 */
 	public String[] getPartitionManagingPositionCategories() {
-		return new String[] { DefaultPartitioner.CONTENT_TYPES_CATEGORY };
+		return new String[] { RuleBasedPartitioner.CONTENT_TYPES_CATEGORY };
 	}
 	
 	/**
