@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -329,6 +330,13 @@ public class ModifierCorrectionSubProcessor {
 		Block body= ast.newBlock();
 		decl.setBody(body);
 		rewrite.markAsInserted(body);
+		
+		Type returnType= decl.getReturnType();
+		if (!decl.isConstructor() && !"void".equals(ASTNodes.asString(returnType))) { //$NON-NLS-1$
+			ReturnStatement returnStatement= ast.newReturnStatement();
+			returnStatement.setExpression(ASTResolving.getInitExpression(returnType, decl.getExtraDimensions()));
+			body.statements().add(returnStatement);
+		}
 
 		String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.addmissingbody.description"); //$NON-NLS-1$
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
