@@ -112,7 +112,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		
 		processValidation();
 		
-		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.SEF_WIZARD_PAGE));		
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.SEF_WIZARD_PAGE);		
 	}
 	
 	private void createSeparator(Composite result, RowLayouter layouter) {

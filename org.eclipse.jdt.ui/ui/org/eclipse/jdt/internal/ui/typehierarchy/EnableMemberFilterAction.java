@@ -28,7 +28,7 @@ public class EnableMemberFilterAction extends Action {
 		fView= v;
 		setChecked(initValue);
 		
-		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ENABLE_METHODFILTER_ACTION });
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ENABLE_METHODFILTER_ACTION);
 		
 	}
 

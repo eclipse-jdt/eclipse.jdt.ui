@@ -48,7 +48,7 @@ public class ShowInPackageViewAction extends Action implements IUpdate, IObjectA
 		super(JavaUIMessages.getString("ShowInPackageViewAction.label")); //$NON-NLS-1$
 		setDescription(JavaUIMessages.getString("ShowInPackageViewAction.description")); //$NON-NLS-1$
 		setToolTipText(JavaUIMessages.getString("ShowInPackageViewAction.tooltip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.SHOW_IN_PACKAGEVIEW_ACTION });	
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SHOW_IN_PACKAGEVIEW_ACTION);	
 		fSelectionProvider= provider;
 	}
 	

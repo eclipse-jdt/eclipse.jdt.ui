@@ -90,7 +90,7 @@ public class ExtractMethodInputPage extends TextInputWizardPage {
 		fPreview.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		layouter.perform(label, fPreview, 1);
-		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.EXTRACT_METHOD_WIZARD_PAGE));		
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.EXTRACT_METHOD_WIZARD_PAGE);		
 	}	
 
 	private String getLabelText(){

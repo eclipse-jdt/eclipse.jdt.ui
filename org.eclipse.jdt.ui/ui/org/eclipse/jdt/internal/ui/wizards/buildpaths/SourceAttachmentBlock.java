@@ -318,7 +318,7 @@ public class SourceAttachmentBlock {
 			fJavaDocField.doFillIntoGrid(composite, 4);
 //		}
 		
-		WorkbenchHelp.setHelp(composite, new Object[] { IJavaHelpContextIds.SOURCE_ATTACHMENT_BLOCK });
+		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.SOURCE_ATTACHMENT_BLOCK);
 		return composite;
 	}
 	

@@ -103,7 +103,7 @@ public class NewInterfaceCreationWizardPage extends TypePage {
 		setControl(composite);
 		
 		setFocus();
-		WorkbenchHelp.setHelp(composite, new DialogPageContextComputer(this, IJavaHelpContextIds.NEW_INTERFACE_WIZARD_PAGE));		
+		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.NEW_INTERFACE_WIZARD_PAGE);		
 	}
 	
 }

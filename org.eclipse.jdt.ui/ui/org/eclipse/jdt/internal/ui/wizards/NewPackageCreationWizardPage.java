@@ -118,7 +118,7 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 		fPackageDialogField.setFocus();
 		
 		setControl(composite);
-		WorkbenchHelp.setHelp(composite, new DialogPageContextComputer(this, IJavaHelpContextIds.NEW_PACKAGE_WIZARD_PAGE));
+		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.NEW_PACKAGE_WIZARD_PAGE);
 	}
 	
 	protected void createPackageControls(Composite composite, int nColumns) {

@@ -52,7 +52,7 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 
-		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.WORK_IN_PROGRESS_PREFERENCE_PAGE));
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.WORK_IN_PROGRESS_PREFERENCE_PAGE);
 	}
 	
 	protected void createFieldEditors() {

@@ -76,7 +76,7 @@ public class JavaBrowsingPreferencePage extends FieldEditorPreferencePage implem
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.JAVA_BROWSING_PREFERENCE_PAGE));
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.JAVA_BROWSING_PREFERENCE_PAGE);
 	}
 	
 	protected void createFieldEditors() {

@@ -183,7 +183,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.CODE_MANIPULATION_PREFERENCE_PAGE));
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.CODE_MANIPULATION_PREFERENCE_PAGE);
 	}	
 
 	/*

@@ -210,7 +210,7 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 		gd.horizontalAlignment= MGridData.BEGINNING;		
 
 		setControl(composite);
-		WorkbenchHelp.setHelp(composite, new DialogPageContextComputer(this, IJavaHelpContextIds.NEW_PACKAGEROOT_WIZARD_PAGE));		
+		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.NEW_PACKAGEROOT_WIZARD_PAGE);		
 	}	
 		
 	// -------- ContainerFieldAdapter --------

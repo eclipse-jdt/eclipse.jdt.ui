@@ -647,8 +647,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 		ReorgGroup.addGlobalReorgActions(getViewSite().getActionBars(), getViewSite().getSelectionProvider());
 		
-		// fixed for 1GETAYN: ITPJUI:WIN - F1 help does nothing
-		WorkbenchHelp.setHelp(fPagebook, new ViewContextComputer(this, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW));
+		WorkbenchHelp.setHelp(fPagebook, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
 	}
 
 

@@ -26,7 +26,7 @@ public class MembersFilterAction extends Action {
 		fCheckedTooltip= ""; //$NON-NLS-1$
 		fUncheckedTooltip= ""; //$NON-NLS-1$
 		
-		WorkbenchHelp.setHelp(this,	new Object[] { contextHelpId });
+		WorkbenchHelp.setHelp(this, contextHelpId);
 
 		setChecked(initValue);
 	}

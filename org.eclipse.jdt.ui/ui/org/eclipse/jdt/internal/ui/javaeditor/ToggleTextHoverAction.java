@@ -33,7 +33,7 @@ public class ToggleTextHoverAction extends TextEditorAction {
 		fToolTipChecked= JavaEditorMessages.getString("ToggleTextHover.tooltip.checked"); //$NON-NLS-1$
 		fToolTipUnchecked= JavaEditorMessages.getString("ToggleTextHover.tooltip.unchecked"); //$NON-NLS-1$
 	
-		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.TOGGLE_TEXTHOVER_ACTION });	
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.TOGGLE_TEXTHOVER_ACTION);	
 	}
 	
 	private IPreferenceStore getStore() {

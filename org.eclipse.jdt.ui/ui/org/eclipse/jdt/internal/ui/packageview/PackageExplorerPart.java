@@ -385,7 +385,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fMemento= null;
 		// Set help for the view 
 		// fixed for 1GETAYN: ITPJUI:WIN - F1 help does nothing
-		WorkbenchHelp.setHelp(fViewer.getControl(), new ViewContextComputer(this, IJavaHelpContextIds.PACKAGE_VIEW));
+		WorkbenchHelp.setHelp(fViewer.getControl(), IJavaHelpContextIds.PACKAGE_VIEW);
 		
 		fillActionBars();
 

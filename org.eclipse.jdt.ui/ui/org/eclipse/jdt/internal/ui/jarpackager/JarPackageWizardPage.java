@@ -155,7 +155,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		update();
 		giveFocusToDestination();
 		
-		WorkbenchHelp.setHelp(composite, new DialogPageContextComputer(this, IJavaHelpContextIds.JARPACKAGER_WIZARD_PAGE));								
+		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.JARPACKAGER_WIZARD_PAGE);								
 	}
 
 	/**

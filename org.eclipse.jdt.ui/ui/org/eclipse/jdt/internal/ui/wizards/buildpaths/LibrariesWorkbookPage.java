@@ -471,7 +471,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		 */
 		protected void configureShell(Shell newShell) {
 			super.configureShell(newShell);
-			WorkbenchHelp.setHelp(newShell, new Object[] { IJavaHelpContextIds.VARIABLE_SELECTION_DIALOG });
+			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.VARIABLE_SELECTION_DIALOG);
 		}		
 
 		/*
@@ -525,7 +525,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		 */
 		protected void configureShell(Shell newShell) {
 			super.configureShell(newShell);
-			WorkbenchHelp.setHelp(newShell, new Object[] { IJavaHelpContextIds.SOURCE_ATTACHMENT_DIALOG });
+			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.SOURCE_ATTACHMENT_DIALOG);
 		}		
 				
 		protected Control createDialogArea(Composite parent) {

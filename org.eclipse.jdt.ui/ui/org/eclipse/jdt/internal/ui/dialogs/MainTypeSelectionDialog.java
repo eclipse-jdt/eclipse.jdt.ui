@@ -66,7 +66,7 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 	 */
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		WorkbenchHelp.setHelp(newShell, new Object[] { IJavaHelpContextIds.MAINTYPE_SELECTION_DIALOG });
+		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.MAINTYPE_SELECTION_DIALOG);
 	}
 
 	/*

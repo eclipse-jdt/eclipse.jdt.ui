@@ -155,7 +155,7 @@ public class NewClassCreationWizardPage extends TypePage {
 		setControl(composite);
 			
 		setFocus();
-		WorkbenchHelp.setHelp(composite, new DialogPageContextComputer(this, IJavaHelpContextIds.NEW_CLASS_WIZARD_PAGE));	
+		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.NEW_CLASS_WIZARD_PAGE);	
 	}
 	
 	protected void createMethodStubSelectionControls(Composite composite, int nColumns) {

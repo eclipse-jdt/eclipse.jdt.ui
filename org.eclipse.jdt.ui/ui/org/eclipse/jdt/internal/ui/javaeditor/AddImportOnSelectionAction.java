@@ -57,7 +57,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		setDescription(JavaEditorMessages.getString("AddImportOnSelection.description")); //$NON-NLS-1$
 		
 		fEditor= editor;
-		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ADD_IMPORT_ON_SELECTION_ACTION });	
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_IMPORT_ON_SELECTION_ACTION);	
 	}
 	
 	public AddImportOnSelectionAction() {

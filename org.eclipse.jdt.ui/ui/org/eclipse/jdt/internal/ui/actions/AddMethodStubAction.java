@@ -55,7 +55,7 @@ public class AddMethodStubAction extends Action {
 		setDescription(JavaUIMessages.getString("AddMethodStubAction.description")); //$NON-NLS-1$
 		setToolTipText(JavaUIMessages.getString("AddMethodStubAction.tooltip")); //$NON-NLS-1$
 		
-		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ADD_METHODSTUB_ACTION });		
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_METHODSTUB_ACTION);		
 	}
 
 	

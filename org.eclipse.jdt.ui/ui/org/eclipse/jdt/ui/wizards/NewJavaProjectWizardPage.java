@@ -190,7 +190,7 @@ public class NewJavaProjectWizardPage extends WizardPage {
 		Control control= fBuildPathsBlock.createControl(parent);
 		setControl(control);
 		
-		WorkbenchHelp.setHelp(control, new DialogPageContextComputer(this, IJavaHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE));
+		WorkbenchHelp.setHelp(control, IJavaHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
 	}
 	
 	/**

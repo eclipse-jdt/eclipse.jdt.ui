@@ -52,7 +52,7 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 	 */
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		WorkbenchHelp.setHelp(newShell, new Object[] { IJavaHelpContextIds.OPEN_TYPE_DIALOG });
+		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.OPEN_TYPE_DIALOG);
 	}	
 
 	/**

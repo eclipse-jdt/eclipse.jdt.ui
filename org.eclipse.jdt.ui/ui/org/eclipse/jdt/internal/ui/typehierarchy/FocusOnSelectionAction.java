@@ -32,7 +32,7 @@ public class FocusOnSelectionAction extends Action {
 		fViewPart= part;
 		fText= TypeHierarchyMessages.getString("FocusOnSelectionAction.label"); //$NON-NLS-1$
 		
-		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.FOCUS_ON_SELECTION_ACTION });
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FOCUS_ON_SELECTION_ACTION);
 	}
 	
 	private ISelection getSelection() {

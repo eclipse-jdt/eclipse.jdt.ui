@@ -50,7 +50,7 @@ public class OrganizeImportsAction extends Action {
 		setDescription(JavaEditorMessages.getString("OrganizeImportsAction.description")); //$NON-NLS-1$
 		
 		setContentEditor(editor);
-		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ORGANIZE_IMPORTS_ACTION });					
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ORGANIZE_IMPORTS_ACTION);					
 	}
 	
 	public static boolean canActionBeAdded(ISelection selection) {

@@ -34,7 +34,7 @@ public class FocusOnTypeAction extends Action {
 		setToolTipText(TypeHierarchyMessages.getString("FocusOnTypeAction.tooltip")); //$NON-NLS-1$
 		
 		fViewPart= part;
-		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.FOCUS_ON_TYPE_ACTION });
+		WorkbenchHelp.setHelp(this,	IJavaHelpContextIds.FOCUS_ON_TYPE_ACTION);
 	}
 	/*
 	 * @see Action#run

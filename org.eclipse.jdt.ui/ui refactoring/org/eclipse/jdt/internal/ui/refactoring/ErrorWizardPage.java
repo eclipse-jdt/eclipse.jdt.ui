@@ -209,7 +209,7 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 		
 		content.setWeights(new int[]{35, 65});
 		setControl(content);
-		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, fHelpContextID));			
+		WorkbenchHelp.setHelp(getControl(), fHelpContextID);			
 	}
 	
 	private  void createTableViewer(Composite parent) {

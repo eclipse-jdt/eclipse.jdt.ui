@@ -29,9 +29,7 @@ public class AddBookmarkAction extends Action {
 		super(WorkbenchMessages.getString("AddBookmarkLabel")); //$NON-NLS-1$
 		setId(ID);
 		setToolTipText(WorkbenchMessages.getString("AddBookmarkToolTip")); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(
-			this,
-			new Object[] { IHelpContextIds.ADD_BOOKMARK_ACTION });
+		WorkbenchHelp.setHelp(this, IHelpContextIds.ADD_BOOKMARK_ACTION);
 		fSelectionProvider= provider;
 	}
 

@@ -204,7 +204,7 @@ public class PullUpInputPage extends UserInputWizardPage {
 		setControl(composite);
 		
 		///FIX ME: wrong
-		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, fgHelpContextID));			
+		WorkbenchHelp.setHelp(getControl(), fgHelpContextID);			
 	}
 
 	/*

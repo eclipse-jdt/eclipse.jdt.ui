@@ -677,7 +677,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	final protected void setHelp() {
-		WorkbenchHelp.setHelp(fViewer.getControl(), new ViewContextComputer(this, getHelpContextId()));
+		WorkbenchHelp.setHelp(fViewer.getControl(), getHelpContextId());
 	}
 
 	/**

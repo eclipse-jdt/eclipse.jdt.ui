@@ -31,7 +31,7 @@ public class ShowInheritedMembersAction extends Action {
 
 		fMethodsViewer= viewer;
 		
-		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.SHOW_INHERITED_ACTION });
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SHOW_INHERITED_ACTION);
  
 		setChecked(initValue);
 	}

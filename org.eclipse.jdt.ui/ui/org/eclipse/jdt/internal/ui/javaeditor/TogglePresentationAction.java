@@ -32,7 +32,7 @@ public class TogglePresentationAction extends TextEditorAction {
 		fToolTipUnchecked= JavaEditorMessages.getString("TogglePresentation.tooltip.unchecked"); //$NON-NLS-1$
 		
 		update();
-		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.TOGGLE_PRESENTATION_ACTION });					
+		WorkbenchHelp.setHelp(this,	IJavaHelpContextIds.TOGGLE_PRESENTATION_ACTION);					
 	}
 	
 	/**

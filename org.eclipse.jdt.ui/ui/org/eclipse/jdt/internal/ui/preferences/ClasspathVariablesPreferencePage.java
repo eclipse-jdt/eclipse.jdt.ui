@@ -19,7 +19,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	/**
 	 * @see PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
 	 */
-	protected Control createContents(Composite parent) {		WorkbenchHelp.setHelp(parent, new DialogPageContextComputer(this, IJavaHelpContextIds.CP_VARIABLES_PREFERENCE_PAGE));		return fVariableBlock.createContents(parent);
+	protected Control createContents(Composite parent) {		WorkbenchHelp.setHelp(parent, IJavaHelpContextIds.CP_VARIABLES_PREFERENCE_PAGE);		return fVariableBlock.createContents(parent);
 	}
 	
 	/**

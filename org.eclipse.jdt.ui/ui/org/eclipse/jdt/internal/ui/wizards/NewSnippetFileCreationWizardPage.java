@@ -97,7 +97,7 @@ public class NewSnippetFileCreationWizardPage extends WizardNewFileCreationPage 
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.NEW_SNIPPET_WIZARD_PAGE));		
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.NEW_SNIPPET_WIZARD_PAGE);		
 	}
 
 }

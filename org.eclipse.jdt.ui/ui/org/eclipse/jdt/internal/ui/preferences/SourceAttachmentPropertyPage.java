@@ -76,7 +76,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 		label.setText(JavaUIMessages.getString("SourceAttachmentPropertyPage.noarchive.message")); //$NON-NLS-1$
 		label.setFont(composite.getFont());
 		
-		WorkbenchHelp.setHelp(composite, new DialogPageContextComputer(this, IJavaHelpContextIds.SOURCE_ATTACHMENT_PROPERTY_PAGE));		
+		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.SOURCE_ATTACHMENT_PROPERTY_PAGE);		
 		return label;
 	}
 

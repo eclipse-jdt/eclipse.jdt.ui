@@ -350,7 +350,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 		setControl(result);
 		
-		WorkbenchHelp.setHelp(result, new Object[] { IJavaHelpContextIds.JAVA_SEARCH_PAGE });	
+		WorkbenchHelp.setHelp(result, IJavaHelpContextIds.JAVA_SEARCH_PAGE);	
 	}
 
 	private Control createExpression(Composite parent) {

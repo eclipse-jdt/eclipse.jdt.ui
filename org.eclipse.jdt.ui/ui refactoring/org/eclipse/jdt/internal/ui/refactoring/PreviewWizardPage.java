@@ -363,7 +363,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		sashForm.setLayoutData(gd);
 		
 		setControl(result);
-		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.REFACTORING_PREVIEW_WIZARD_PAGE));
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.REFACTORING_PREVIEW_WIZARD_PAGE);
 	}
 	
 	/* (Non-JavaDoc)

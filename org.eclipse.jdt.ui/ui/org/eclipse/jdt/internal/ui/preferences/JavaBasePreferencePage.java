@@ -175,7 +175,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.JAVA_BASE_PREFERENCE_PAGE));
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.JAVA_BASE_PREFERENCE_PAGE);
 	}	
 
 	private Button addCheckBox(Composite parent, String label, String key) {

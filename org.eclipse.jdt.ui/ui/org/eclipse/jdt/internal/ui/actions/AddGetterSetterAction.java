@@ -56,7 +56,7 @@ public class AddGetterSetterAction extends Action {
 		setToolTipText(JavaUIMessages.getString("AddGetterSetterAction.tooltip")); //$NON-NLS-1$
 		fSelectionProvider= selProvider;
 		
-		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.GETTERSETTER_ACTION });
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GETTERSETTER_ACTION);
 	}
 
 				

@@ -102,7 +102,7 @@ public class VariableCreationDialog extends StatusDialog {
 	 */
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		WorkbenchHelp.setHelp(newShell, new Object[] { IJavaHelpContextIds.VARIABLE_CREATION_DIALOG });
+		WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.VARIABLE_CREATION_DIALOG);
 	}
 	
 

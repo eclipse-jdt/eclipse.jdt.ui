@@ -238,7 +238,7 @@ public class BuildPathsBlock {
 			fClassPathList.selectFirstElement();
 		}
 
-		WorkbenchHelp.setHelp(composite, new Object[] { IJavaHelpContextIds.BUILD_PATH_BLOCK });				
+		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.BUILD_PATH_BLOCK);				
 		return composite;
 	}
 	

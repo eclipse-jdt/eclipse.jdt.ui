@@ -69,7 +69,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 		setControl(composite);
 		update();
 
-		WorkbenchHelp.setHelp(composite, new DialogPageContextComputer(this, IJavaHelpContextIds.JAROPTIONS_WIZARD_PAGE));								
+		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.JAROPTIONS_WIZARD_PAGE);								
 		
 	}
 	/**

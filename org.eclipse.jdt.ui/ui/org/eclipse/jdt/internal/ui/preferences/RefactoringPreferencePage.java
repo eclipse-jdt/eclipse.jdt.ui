@@ -54,7 +54,7 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 	public void createControl(Composite parent) {
 		// added for 1GEUGE6: ITPJUI:WIN2000 - Help is the same on all preference pages
 		super.createControl(parent);
-		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.REFACTORING_PREFERENCE_PAGE));
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.REFACTORING_PREFERENCE_PAGE);
 	}		
 
 	public void createFieldEditors() {

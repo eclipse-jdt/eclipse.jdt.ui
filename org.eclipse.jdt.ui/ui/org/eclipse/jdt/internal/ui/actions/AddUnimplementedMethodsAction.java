@@ -48,7 +48,7 @@ public class AddUnimplementedMethodsAction extends Action {
 		setToolTipText(JavaUIMessages.getString("AddUnimplementedMethodsAction.tooltip")); //$NON-NLS-1$
 		fSelectionProvider= selProvider;
 		
-		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ADD_UNIMPLEMENTED_METHODS_ACTION });
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_UNIMPLEMENTED_METHODS_ACTION);
 		
 	}
 

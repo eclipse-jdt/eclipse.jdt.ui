@@ -48,7 +48,7 @@ public class ToggleViewAction extends Action {
 		fViewPart= v;
 		fViewerIndex= viewerIndex;
 		
-		WorkbenchHelp.setHelp(this,	new Object[] { contextHelpId });
+		WorkbenchHelp.setHelp(this, contextHelpId);
 	}
 				
 	public int getViewerIndex() {

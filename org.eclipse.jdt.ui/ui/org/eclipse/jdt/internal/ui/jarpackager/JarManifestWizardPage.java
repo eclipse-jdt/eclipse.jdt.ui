@@ -176,7 +176,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 		setControl(composite);
 		update();
 
-		WorkbenchHelp.setHelp(composite, new DialogPageContextComputer(this, IJavaHelpContextIds.JARMANIFEST_WIZARD_PAGE));								
+		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.JARMANIFEST_WIZARD_PAGE);								
 			
 	}
 	/**

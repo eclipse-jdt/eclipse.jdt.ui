@@ -50,7 +50,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	 * @see PreferencePage#createControl(Composite)
 	 */
 	protected Control createContents(Composite parent) {
-		WorkbenchHelp.setHelp(parent, new DialogPageContextComputer(this, IJavaHelpContextIds.BUILD_PATH_PROPERTY_PAGE));
+		WorkbenchHelp.setHelp(parent, IJavaHelpContextIds.BUILD_PATH_PROPERTY_PAGE);
 
 		// ensure the page has no special buttons
 		noDefaultAndApplyButton();		

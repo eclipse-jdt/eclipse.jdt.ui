@@ -47,7 +47,7 @@ public class ShowTypeHierarchyAction extends Action implements IUpdate {
 		setToolTipText(JavaUIMessages.getString("ShowTypeHierarchyAction.tooltip")); //$NON-NLS-1$
 		fSelectionProvider= selProvider;
 		
-		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.SHOW_IN_HIERARCHYVIEW_ACTION });	
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SHOW_IN_HIERARCHYVIEW_ACTION);	
 	}
 
 	/**
