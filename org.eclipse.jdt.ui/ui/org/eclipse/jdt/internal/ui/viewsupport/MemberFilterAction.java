@@ -8,6 +8,8 @@ import org.eclipse.jface.action.Action;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.ui.actions.*;
+
 /**
  * Action used to enable / disable method filter properties
  */
