@@ -135,16 +135,16 @@ public class TypeConstraintTests extends RefactoringTest {
 		String[] strings= {"[null] <= [a]", "[null] <= [b]", "[a] == [b]", "[a] =^= A", "[b] =^= A", "Decl(A:f()) =^= p.A"};
 		testConstraints(strings);
 	}
-//
-//	public void testConstraints4() throws Exception{
-//		String[] strings= {};
-//		testConstraints(strings);
-//	}	
-//
-//	public void testConstraints5() throws Exception{
-//		String[] strings= {};
-//		testConstraints(strings);
-//	}	
+
+	public void testConstraints4() throws Exception{
+		String[] strings= {"[as0] =^= A[]", "[a0] <= A", "[{a0,}] <= [as0]", "Decl(A:f()) =^= p.A", "[null] <= [a0]", "[a0] =^= A"};
+		testConstraints(strings);
+	}	
+
+	public void testConstraints5() throws Exception{
+		String[] strings= {"[as0] =^= A[]", "Decl(A:f()) =^= p.A", "[a0] <= A", "[a0] =^= A", "[null] <= [a0]", "[new A[]={a0,}] <= [as0]"};
+		testConstraints(strings);
+	}	
 
 	public void testConstraints6() throws Exception{
 		String[] strings= {"Decl(A:f()) =^= p.A", "Decl(A:A(A)) =^= p.A", "[new A(a0)] =^= p.A", "[a0] <= [Parameter(0,A:A(A))]", "[a1] =^= A", "[a0] =^= A", "[null] <= [a0]", "[new A(a0)] <= [a1]", "[Parameter(0,A:A(A))] =^= [a]"};
