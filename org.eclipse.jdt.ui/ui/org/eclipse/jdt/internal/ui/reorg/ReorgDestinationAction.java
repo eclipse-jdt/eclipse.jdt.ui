@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -127,11 +128,45 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 	abstract String getActionName();
 	abstract String getDestinationDialogMessage();
 	abstract ReorgRefactoring createRefactoring(List elements);
-	
-	//hook to override
+
 	//returns null iff canceled
-	Set getExcluded(ReorgRefactoring refactoring) throws JavaModelException{
-		return new HashSet(0);
+	private static Set getExcluded(ReorgRefactoring refactoring) throws JavaModelException{
+		Set elements= refactoring.getElementsThatExistInTarget();
+		Set result= new HashSet();
+		for (Iterator iter= elements.iterator(); iter.hasNext(); ){
+			Object o= iter.next();
+			int action= askIfOverwrite(ReorgUtils.getName(o));
+			if (action == IDialogConstants.CANCEL_ID)
+				return null;
+			if (action == IDialogConstants.YES_TO_ALL_ID)	
+				return new HashSet(0); //nothing excluded
+			if (action == IDialogConstants.NO_ID)		
+				result.add(o);	
+		}
+		return result;
+	}
+	
+	private static int askIfOverwrite(String elementName){
+		Shell shell= JavaPlugin.getActiveWorkbenchShell().getShell();
+		String title= ReorgMessages.getString("JdtMoveAction.move"); //$NON-NLS-1$
+		String question= ReorgMessages.getFormattedString("JdtMoveAction.overwrite", elementName);//$NON-NLS-1$
+		
+		String[] labels= new String[] {IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL,
+															 IDialogConstants.NO_LABEL,  IDialogConstants.CANCEL_LABEL };
+		final MessageDialog dialog = new MessageDialog(shell,	title, null, question, MessageDialog.QUESTION,	labels,  0);
+		shell.getDisplay().syncExec(new Runnable() {
+			public void run() {
+				dialog.open();
+			}
+		});
+		int result = dialog.getReturnCode();
+		if (result == 0)
+			return IDialogConstants.YES_ID;
+		if (result == 1)
+			return IDialogConstants.YES_TO_ALL_ID;
+		if (result == 2)
+			return IDialogConstants.NO_ID;
+		return IDialogConstants.CANCEL_ID;
 	}
 	
 	//hook to override

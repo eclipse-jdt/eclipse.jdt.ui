@@ -106,6 +106,8 @@ public class CopyRefactoring extends ReorgRefactoring {
 	private String createNewName(ICompilationUnit cu, IPackageFragment dest){
 		if (isNewNameOk(dest, cu.getElementName()))
 			return null;
+		if (! cu.getParent().equals(dest))	
+			return null;
 		int i= 1;
 		while (true){
 			String newName;
@@ -125,6 +127,8 @@ public class CopyRefactoring extends ReorgRefactoring {
 	
 	private String createNewName(IResource res, IContainer container){
 		if (isNewNameOk(container, res.getName()))
+			return null;
+		if (! res.getParent().equals(container))	
 			return null;
 		int i= 1;
 		while (true){
@@ -146,6 +150,9 @@ public class CopyRefactoring extends ReorgRefactoring {
 	private String createNewName(IPackageFragment pack, IPackageFragmentRoot root){
 		if (isNewNameOk(root, pack.getElementName()))
 			return null;
+		if (! pack.getParent().equals(root))	
+			return null;
+			
 		int i= 1;
 		while (true){
 			String newName;
@@ -198,26 +205,26 @@ public class CopyRefactoring extends ReorgRefactoring {
 	}
 	
 	IChange createChange(IProgressMonitor pm, ICompilationUnit cu) throws JavaModelException{
-			Object dest= getDestinationForCusAndFiles(getDestination());
-			if (dest instanceof IPackageFragment){
-				String newName= createNewName(cu, (IPackageFragment)dest);
-				CopyCompilationUnitChange simpleCopy= new CopyCompilationUnitChange(cu, (IPackageFragment)dest, newName);
-				if (newName == null || newName.equals(cu.getElementName()) || cu.findPrimaryType() == null)
-					return simpleCopy;
-				
-				try {
-					CompositeChange composite= new CompositeChange();
-					String newTypeName= newName.substring(0, newName.length() - ".java".length()); //$NON-NLS-1$
-					IPath newPath= ResourceUtil.getResource(cu).getParent().getFullPath().append(newName);				
-					composite.add(new CreateTextFileChange(newPath, getCopiedFileSource(pm, cu, newTypeName)));
-					return composite;
-				}catch(CoreException e) {
-					return simpleCopy; //fallback - no ui here
-				}
-			}	else {
-				Assert.isTrue(dest instanceof IContainer);//this should be checked before - in preconditions
-				return new CopyResourceChange(ResourceUtil.getResource(cu), (IContainer)dest, createNewName(ResourceUtil.getResource(cu), (IContainer)dest));
-			}		
+		Object dest= getDestinationForCusAndFiles(getDestination());
+		if (dest instanceof IPackageFragment){
+			String newName= createNewName(cu, (IPackageFragment)dest);
+			CopyCompilationUnitChange simpleCopy= new CopyCompilationUnitChange(cu, (IPackageFragment)dest, newName);
+			if (newName == null || newName.equals(cu.getElementName()) || cu.findPrimaryType() == null)
+				return simpleCopy;
+			
+			try {
+				CompositeChange composite= new CompositeChange();
+				String newTypeName= newName.substring(0, newName.length() - ".java".length()); //$NON-NLS-1$
+				IPath newPath= ResourceUtil.getResource(cu).getParent().getFullPath().append(newName);				
+				composite.add(new CreateTextFileChange(newPath, getCopiedFileSource(pm, cu, newTypeName)));
+				return composite;
+			}catch(CoreException e) {
+				return simpleCopy; //fallback - no ui here
+			}
+		}	else {
+			Assert.isTrue(dest instanceof IContainer);//this should be checked before - in preconditions
+			return new CopyResourceChange(ResourceUtil.getResource(cu), (IContainer)dest, createNewName(ResourceUtil.getResource(cu), (IContainer)dest));
+		}		
 	}
 
 	private static String getCopiedFileSource(IProgressMonitor pm, ICompilationUnit cu, String newTypeName) throws CoreException {

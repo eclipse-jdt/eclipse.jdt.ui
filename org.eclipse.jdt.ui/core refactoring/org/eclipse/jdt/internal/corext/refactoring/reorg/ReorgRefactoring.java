@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 
 public abstract class ReorgRefactoring extends Refactoring {
@@ -470,21 +471,40 @@ public abstract class ReorgRefactoring extends Refactoring {
 		
 		if (o instanceof ICompilationUnit){
 			Object dest= getDestinationForCusAndFiles(getDestination());
-			if (dest instanceof IPackageFragment)
+			ICompilationUnit cu= (ICompilationUnit)o;
+			if (dest instanceof IPackageFragment){
+				if (cu.getParent().equals(dest))
+					return false;
 				return causesNameConflict((IPackageFragment)dest, newName);
-			if (dest instanceof IContainer)	
+			}	
+			if (dest instanceof IContainer){
+				if (ResourceUtil.getResource(cu).getParent().equals(dest))
+					return false;
 				return causesNameConflict((IContainer)dest, newName);
+			}		
 			return true;	
 		}	
 
-		if (o instanceof IPackageFragmentRoot)
-			return causesNameConflict(getDestinationForSourceFolders(getDestination()), newName);
+		if (o instanceof IPackageFragmentRoot){
+			IProject dest= getDestinationForSourceFolders(getDestination());
+			if (((IPackageFragmentRoot)o).getJavaProject().getProject().equals(dest))
+				return false;
+			return causesNameConflict(dest, newName);
+		}	
 		
-		if (o instanceof IPackageFragment)
-			return causesNameConflict(getDestinationForPackages(getDestination()), newName);
+		if (o instanceof IPackageFragment){
+			IPackageFragmentRoot dest= getDestinationForPackages(getDestination());
+			if (((IPackageFragment)o).getParent().equals(dest))
+				return false;
+			return causesNameConflict(dest, newName);
+		}	
 		
-		if (o instanceof IResource)
-			return causesNameConflict(getDestinationForResources(getDestination()), newName);
+		if (o instanceof IResource){
+			IContainer dest= getDestinationForResources(getDestination());
+			if (((IResource)o).getParent().equals(dest))
+				return false;
+			return causesNameConflict(dest, newName);
+		}	
 
 		Assert.isTrue(false, RefactoringCoreMessages.getString("ReorgRefactoring.assert.whyhere"));	 //$NON-NLS-1$
 		return true;
