@@ -26,11 +26,13 @@ public class RefactoringScannerTests extends RefactoringTest{
 	}
 	
 	protected void setUp() throws Exception {
+		//no need to call super.setUp();
 		fScanner= new RefactoringScanner();
 		fScanner.setPattern("TestPattern");
 	}
 
 	protected void tearDown() throws Exception {
+		//no need to call super.tearDown();
 	}
 
 	private void helper(String fileName, int expectedMatchCount, boolean analyzeComments, boolean analyzeJavaDoc, boolean analyzeString)	throws Exception{
