@@ -181,7 +181,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	}
 
 
-	private void launchConfiguration(String mode, ILaunchConfiguration config) {
+	protected void launchConfiguration(String mode, ILaunchConfiguration config) {
 		try { 
 			if (config != null) {
 				DebugUITools.saveAndBuildBeforeLaunch();
