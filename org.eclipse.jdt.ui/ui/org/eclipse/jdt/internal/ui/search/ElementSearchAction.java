@@ -2,20 +2,28 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.search;import java.lang.reflect.InvocationTargetException;
+package org.eclipse.jdt.internal.ui.search;import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.search.ui.SearchUI;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+
+import org.eclipse.search.ui.SearchUI;
+
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  
 /**
@@ -33,6 +41,8 @@ public abstract class ElementSearchAction extends JavaElementAction {
 		JavaSearchOperation op= null;
 		try {
 			op= makeOperation(element);
+			if (op == null)
+				return;
 		} catch (JavaModelException ex) {
 			ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
@@ -70,12 +80,13 @@ public abstract class ElementSearchAction extends JavaElementAction {
 	}
 
 	protected JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
-		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(element), getScopeDescription(element), getCollector());
+		IType type= getType(element);
+		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(type), getScopeDescription(type), getCollector());
 	};
 
 	protected abstract int getLimitTo();
 
-	protected IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {
+	protected IJavaSearchScope getScope(IType element) throws JavaModelException {
 		return SearchEngine.createWorkspaceScope();
 	}
 
@@ -83,7 +94,22 @@ public abstract class ElementSearchAction extends JavaElementAction {
 		return new JavaSearchResultCollector();
 	}
 	
-	protected String getScopeDescription(IJavaElement type) {
+	protected String getScopeDescription(IType type) {
 		return SearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
+	}
+
+	private IType getType(IJavaElement element) {
+		IType type= null;
+		if (element.getElementType() == IJavaElement.TYPE)
+			type= (IType)element;
+		else if (element instanceof IMember)
+			type= ((IMember)element).getDeclaringType();
+		if (type != null) {
+			ICompilationUnit cu= type.getCompilationUnit();
+			if (cu != null && cu.isWorkingCopy())
+				type= (IType)cu.getOriginal(type);
+			return type;
+		}
+		return null;
 	}
 }

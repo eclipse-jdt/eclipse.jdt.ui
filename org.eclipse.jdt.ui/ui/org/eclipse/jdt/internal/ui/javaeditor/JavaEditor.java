@@ -132,8 +132,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		addGroup(menu, ITextEditorActionConstants.GROUP_EDIT, IContextMenuConstants.GROUP_GENERATE);
 		addGroup(menu, ITextEditorActionConstants.GROUP_EDIT, IContextMenuConstants.GROUP_NEW);
 		
-		MenuManager search= new JavaSearchGroup().getMenuManagerForGroup(isTextSelectionEmpty());
-		menu.appendToGroup(ITextEditorActionConstants.GROUP_FIND, search);
+		new JavaSearchGroup(false).fill(menu, ITextEditorActionConstants.GROUP_FIND, isTextSelectionEmpty());
 		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "ShowJavaDoc");
 		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "OpenSuperImplementation");
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_FIND, new ShowInPackageViewAction());

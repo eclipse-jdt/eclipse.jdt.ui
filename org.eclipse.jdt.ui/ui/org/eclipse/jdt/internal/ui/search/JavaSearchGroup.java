@@ -18,45 +18,63 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
  */
 public class JavaSearchGroup extends ContextMenuGroup  {
 
-	private ElementSearchAction[] fActions;
+	private JavaSearchSubGroup[] fGroups;
 
-	public static final String GROUP_NAME= IContextMenuConstants.GROUP_SEARCH;
+	public static final String GROUP_ID= IContextMenuConstants.GROUP_SEARCH;
+	public static final String GROUP_NAME= SearchMessages.getString("group.search"); //$NON-NLS-1$
+
+	private boolean fInline;
 
 	public JavaSearchGroup() {
-		fActions= new ElementSearchAction[] {
-			new FindReferencesAction(),
-			new FindDeclarationsAction(),
-			new FindHierarchyReferencesAction(),
-			new FindHierarchyDeclarationsAction(),
-			new FindImplementorsAction()
+		this(true);
+	}
+
+	public JavaSearchGroup(boolean inline) {
+		fInline= inline;
+		fGroups= new JavaSearchSubGroup[] {
+			new DeclarationsSearchGroup(),
+			new ReferencesSearchGroup(),
+			new ReadReferencesSearchGroup(),
+			new WriteReferencesSearchGroup(),
+			new ImplementorsSearchGroup()
 		};
 	}
 
 	public void fill(IMenuManager manager, GroupContext context) {
-		MenuManager javaSearchMM= new MenuManager(SearchMessages.getString("group.search"), GROUP_NAME); //$NON-NLS-1$
+		IMenuManager javaSearchMM;
+		if (fInline)
+			javaSearchMM= manager;
+		else
+			javaSearchMM= new MenuManager(GROUP_NAME, GROUP_ID); //$NON-NLS-1$
+
+		for (int i= 0; i < fGroups.length; i++)
+			fGroups[i].fill(javaSearchMM, context);
 		
-		for (int i= 0; i < fActions.length; i++) {
-			ElementSearchAction action= fActions[i];
-			if (action.canOperateOn(context.getSelection()))
-				javaSearchMM.add(action);
-		}
-		
-		if (!javaSearchMM.isEmpty())
-			manager.appendToGroup(GROUP_NAME, javaSearchMM);
+		if (!fInline && !javaSearchMM.isEmpty())
+			manager.appendToGroup(GROUP_ID, javaSearchMM);
 	}
 
 	public String getGroupName() {
 		return GROUP_NAME;
 	}
 	
-	public MenuManager getMenuManagerForGroup(boolean isTextSelectionEmpty) {
-		MenuManager javaSearchMM= new MenuManager(SearchMessages.getString("group.search"), GROUP_NAME); //$NON-NLS-1$
-		if (!isTextSelectionEmpty) {
-			javaSearchMM.add(new GroupMarker(GROUP_NAME));
-			for (int i= 0; i < fActions.length; i++)
-				javaSearchMM.appendToGroup(GROUP_NAME, fActions[i]);
+	public void fill(IMenuManager manager, String groupId, boolean isTextSelectionEmpty) {
+		if (isTextSelectionEmpty)
+			return;		
+
+		IMenuManager javaSearchMM;
+		if (fInline) {
+			javaSearchMM= manager;
+			javaSearchMM.appendToGroup(groupId, new GroupMarker(GROUP_ID));
+		} else {
+			javaSearchMM= new MenuManager(GROUP_NAME, groupId);
+			javaSearchMM.add(new GroupMarker(GROUP_ID));
 		}
-		return javaSearchMM;
+		
+		for (int i= 0; i < fGroups.length; i++)
+			javaSearchMM.appendToGroup(GROUP_ID, fGroups[i].getMenuManagerForGroup(isTextSelectionEmpty));
+			
+		if (!fInline && !javaSearchMM.isEmpty())
+			manager.appendToGroup(groupId, javaSearchMM);
 	}
 }
-
