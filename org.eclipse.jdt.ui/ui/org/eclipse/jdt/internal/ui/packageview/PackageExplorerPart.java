@@ -13,9 +13,11 @@ package org.eclipse.jdt.internal.ui.packageview;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
@@ -60,11 +62,11 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.ILabelDecorator;
@@ -112,6 +114,13 @@ import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.IPackagesViewPart;
+import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
@@ -134,16 +143,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.ConfigureWorkingSetAction;
+import org.eclipse.jdt.internal.ui.workingsets.HistoryWorkingSetUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
-
-import org.eclipse.jdt.ui.IPackagesViewPart;
-import org.eclipse.jdt.ui.JavaElementSorter;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
-import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
  
 /**
  * The ViewPart for the ProjectExplorer. It listens to part activation events.
@@ -497,6 +500,10 @@ public class PackageExplorerPart extends ViewPart
 			}
 		}
 		public ISelection getSelection() {
+			IContentProvider cp= getContentProvider();
+			if (!(cp instanceof IMultiElementTreeContentProvider)) {
+				return super.getSelection();
+			}
 			Control control = getControl();
 			if (control == null || control.isDisposed()) {
 				return StructuredSelection.EMPTY;
@@ -504,7 +511,7 @@ public class PackageExplorerPart extends ViewPart
 			Tree tree= getTree();
 			TreeItem[] selection= tree.getSelection();
 			List result= new ArrayList(selection.length);
-			Map element2TreeItem= new HashMap();
+			List treePaths= new ArrayList();
 			for (int i= 0; i < selection.length; i++) {
 				TreeItem item= selection[i];
 				Object element= getElement(item);
@@ -513,29 +520,137 @@ public class PackageExplorerPart extends ViewPart
 				if (!result.contains(element)) {
 					result.add(element);
 				}
-				Object obj= element2TreeItem.get(element);
-				if (obj == null) {
-					element2TreeItem.put(element, item);
-				} else if (obj instanceof TreeItem) {
-					List l= new ArrayList(2);
-					l.add(obj);
-					l.add(item);
-					element2TreeItem.put(element, l);
-				} else if (obj instanceof List) {
-					((List)obj).add(item);
-				} else {
-					Assert.isTrue(false, "Should not happen"); //$NON-NLS-1$
-				}
+				treePaths.add(createTreePath(item));
 			}
-			return new MultiElementSelection(result, element2TreeItem);
+			return new MultiElementSelection(this, result, (TreePath[])treePaths.toArray(new TreePath[treePaths.size()]));
 		}
-		
+		private TreePath createTreePath(TreeItem item) {
+			List result= new ArrayList();
+			result.add(item.getData());
+			TreeItem parent= item.getParentItem();
+			while (parent != null) {
+				result.add(parent.getData());
+				parent= parent.getParentItem();
+			}
+			Collections.reverse(result);
+			return new TreePath(result.toArray());
+		}
 		private Object getElement(TreeItem item) {
 			Object result= item.getData();
 			if (result == null)
 				return null;
 			return result;
-		}		
+		}
+		protected Widget internalGetWidgetToSelect(Object element) {
+			Widget result= findItem(element);
+			if (!(result instanceof TreeItem))
+				return result;
+			if (isInHistroyWorkingSet((TreeItem)result)) {
+				List l= (List)fAdditionalMappings.get(element);
+				if (l != null && !l.isEmpty()) {
+					return (Widget)l.get(0);
+				} else {
+					// this force to read the parent of the item which will not return
+					// the history working set. See corresponding content provider.
+					return null;
+				}
+			}
+			return result;
+		}
+		private boolean isInHistroyWorkingSet(TreeItem item) {
+			TreeItem parent= item.getParentItem();
+			while (parent != null) {
+				Object data= getElement(parent);
+				if (data instanceof IWorkingSet && HistoryWorkingSetUpdater.ID.equals(((IWorkingSet)data).getId()))
+					return true;
+				parent= parent.getParentItem();
+			}
+			return false;
+		}
+	    protected boolean isSameSelection(List items, Item[] current) {
+	    	if (items.size() != current.length)
+	    		return false;
+	    	Set newSelection= new HashSet(items);
+	    	for (int i= 0; i < current.length; i++) {
+				if (!newSelection.contains(current[i]))
+					return false;
+			}
+	    	return true;
+	    }
+	    //---- special handling to preserve the selection correctly
+	    private boolean fInPreserveSelection;
+		protected void preservingSelection(Runnable updateCode) {
+			try {
+				fInPreserveSelection= true;
+				super.preservingSelection(updateCode);
+			} finally {
+				fInPreserveSelection= false;
+			}
+		}
+		protected void setSelectionToWidget(ISelection selection, boolean reveal) {
+			if (!fInPreserveSelection || !(selection instanceof MultiElementSelection)) {
+				super.setSelectionToWidget(selection, reveal);
+				return;
+			}
+			IContentProvider cp= getContentProvider();
+			if (!(cp instanceof IMultiElementTreeContentProvider)) {
+				super.setSelectionToWidget(selection, reveal);
+				return;
+			}
+			IMultiElementTreeContentProvider contentProvider= (IMultiElementTreeContentProvider)cp;
+			MultiElementSelection toRestore= (MultiElementSelection)selection;
+			List pathsToSelect= new ArrayList();
+			for (Iterator iter= toRestore.iterator(); iter.hasNext();) {
+				Object element= iter.next();
+				TreePath[] pathsToRestore= toRestore.getTreePaths(element);
+				CustomHashtable currentParents= createRootAccessedMap(contentProvider.getTreePaths(element));
+				for (int i= 0; i < pathsToRestore.length; i++) {
+					TreePath path= pathsToRestore[i];
+					Object root= path.getFirstSegment();
+					if (root != null && path.equals((TreePath)currentParents.get(root), getComparer())) {
+						pathsToSelect.add(path);
+					}
+				}
+			}
+			List toSelect= new ArrayList();
+			for (Iterator iter= pathsToSelect.iterator(); iter.hasNext();) {
+				TreePath path= (TreePath)iter.next();
+				int size= path.getSegmentCount();
+				if (size == 0)
+					continue;
+				Widget current= getTree();
+				int last= size - 1;
+				Object segment;
+				for (int i= 0; i < size && current != null && (segment= path.getSegment(i)) != null; i++) {
+					internalExpandToLevel(current, 1);
+					current= internalFindChild(current, segment);
+					if (i == last)
+						toSelect.add(current);
+				}
+			}
+			getTree().setSelection((TreeItem[])toSelect.toArray(new TreeItem[toSelect.size()]));
+		}
+	    private Widget internalFindChild(Widget parent, Object element) {
+	        Item[] items = getChildren(parent);
+	        for (int i = 0; i < items.length; i++) {
+	            Item item = items[i];
+	            Object data = item.getData();
+	            if (data != null && equals(data, element))
+	                return item;
+	        }
+	        return null;
+	    }
+		private CustomHashtable createRootAccessedMap(TreePath[] paths) {
+			CustomHashtable result= new CustomHashtable(getComparer());
+			for (int i= 0; i < paths.length; i++) {
+				TreePath path= paths[i];
+				Object root= path.getFirstSegment();
+				if (root != null) {
+					result.put(root, path);
+				}
+			}
+			return result;
+		}
 	}
  
 	/* (non-Javadoc)

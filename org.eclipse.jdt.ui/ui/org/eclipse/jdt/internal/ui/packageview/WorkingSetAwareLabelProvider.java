@@ -17,16 +17,14 @@ import java.util.Map;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import org.eclipse.ui.IWorkingSet;
-
 
 public class WorkingSetAwareLabelProvider extends PackageExplorerLabelProvider {
 
 	private Map fImages= new HashMap();
 	
-	public WorkingSetAwareLabelProvider(long textFlags, int imageFlags, ITreeContentProvider cp) {
+	public WorkingSetAwareLabelProvider(long textFlags, int imageFlags, PackageExplorerContentProvider cp) {
 		super(textFlags, imageFlags, cp);
 	}
 

@@ -64,9 +64,10 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
  */
 class PackageExplorerContentProvider extends StandardJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
 	
-	protected static final int NONE= 0;
-	protected static final int PARENT_REFRESH= 1 << 0;
-	protected static final int GRANT_PARENT_REFRESH= 1 << 1;
+	protected static final int ORIGINAL= 0;
+	protected static final int PARENT= 1 << 0;
+	protected static final int GRANT_PARENT= 1 << 1;
+	protected static final int PROJECT= 1 << 2;
 	
 	TreeViewer fViewer;
 	private Object fInput;
@@ -75,9 +76,6 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	
 	private int fPendingChanges;
 	PackageExplorerPart fPart;
-
-
-	
 	
 	/**
 	 * Creates a new content provider for Java elements.
@@ -85,6 +83,14 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	public PackageExplorerContentProvider(PackageExplorerPart part, boolean provideMembers) {
 		super(provideMembers);	
 		fPart= part;
+	}
+	
+	/* package */ PackageFragmentProvider getPackageFragmentProvider() {
+		return fPackageFragmentProvider;
+	}
+	
+	protected Object getViewerInput() {
+		return fInput;
 	}
 	
 	/* (non-Javadoc)
@@ -111,7 +117,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			return false;
 		if (fInput instanceof WorkingSetModel)
 			return false;
-		postRefresh(fInput);
+		postRefresh(fInput, ORIGINAL, fInput);
 		return true;
 	}
 
@@ -328,12 +334,12 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		if (elementType == IJavaElement.JAVA_PROJECT) {
 			// handle open and closing of a project
 			if ((flags & (IJavaElementDelta.F_CLOSED | IJavaElementDelta.F_OPENED)) != 0) {			
-				postRefresh(element);
+				postRefresh(element, ORIGINAL, element);
 				return;
 			}
 			// if the raw class path has changed we refresh the entire project
 			if ((flags & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0) {
-				postRefresh(element);
+				postRefresh(element, ORIGINAL, element);
 				return;				
 			}
 		}
@@ -343,7 +349,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			if (element instanceof IPackageFragment) {
 				// refresh package fragment root to allow filtering empty (parent) packages: bug 72923
 				if (fViewer.testFindItem(parent) != null)
-					postRefresh(parent);
+					postRefresh(parent, PARENT, element);
 				return;
 			}
 			
@@ -354,7 +360,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			// a package becomes empty we remove it from the viewer. 
 			if (isPackageFragmentEmpty(element.getParent())) {
 				if (fViewer.testFindItem(parent) != null)
-					postRefresh(internalGetParent(parent));
+					postRefresh(internalGetParent(parent), GRANT_PARENT, element);
 			}  
 			return;
 		}
@@ -368,13 +374,13 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 				// 1GE8SI6: ITPJUI:WIN98 - Rename is not shown in Packages View
 				// avoid posting a refresh to an unvisible parent
 				if (parent.equals(fInput)) {
-					postRefresh(parent);
+					postRefresh(parent, PARENT, element);
 				} else {
 					// refresh from grandparent if parent isn't visible yet
 					if (fViewer.testFindItem(parent) == null)
-						postRefresh(grandparent);
+						postRefresh(grandparent, GRANT_PARENT, element);
 					else {
-						postRefresh(parent);
+						postRefresh(parent, PARENT, element);
 					}	
 				}
 				return;				
@@ -386,7 +392,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		if (elementType == IJavaElement.COMPILATION_UNIT) {
 			if (kind == IJavaElementDelta.CHANGED) {
 				// isStructuralCUChange already performed above
-				postRefresh(element);
+				postRefresh(element, ORIGINAL, element);
 				updateSelection(delta);
 			}
 			return;
@@ -399,7 +405,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		if (elementType == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
 			// the contents of an external JAR has changed
 			if ((flags & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0) {
-				postRefresh(element);
+				postRefresh(element, ORIGINAL, element);
 				return;
 			}
 			// the source attachment of a JAR has changed
@@ -408,7 +414,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			
 			if (isClassPathChange(delta)) {
 				 // throw the towel and do a full refresh of the affected java project. 
-				postRefresh(element.getJavaProject());
+				postRefresh(element.getJavaProject(), PROJECT, element);
 				return;
 			}
 		}
@@ -424,8 +430,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		return ((flags & IJavaElementDelta.F_CHILDREN) != 0) || ((flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED)) == IJavaElementDelta.F_CONTENT);
 	}
 	
-	/* package */ int handleAffectedChildren(IJavaElementDelta delta, IJavaElement element) throws JavaModelException {
-		int result= NONE;
+	/* package */ void handleAffectedChildren(IJavaElementDelta delta, IJavaElement element) throws JavaModelException {
 		IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();
 		if (affectedChildren.length > 1) {
 			// a package fragment might become non empty refresh from the parent
@@ -434,22 +439,22 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 				// 1GE8SI6: ITPJUI:WIN98 - Rename is not shown in Packages View
 				// avoid posting a refresh to an unvisible parent
 				if (element.equals(fInput)) {
-					postRefresh(element);
+					postRefresh(element, ORIGINAL, element);
 				} else {
-					result= PARENT_REFRESH;
-					postRefresh(parent);
+					postRefresh(parent, PARENT, element);
 				}
-				return result;
+				return;
 			}
 			// more than one child changed, refresh from here downwards
-			if (element instanceof IPackageFragmentRoot)
-				postRefresh(skipProjectPackageFragmentRoot((IPackageFragmentRoot)element));
-			else
-				postRefresh(element);
-			return result;
+			if (element instanceof IPackageFragmentRoot) {
+				Object toRefresh= skipProjectPackageFragmentRoot((IPackageFragmentRoot)element);
+				postRefresh(toRefresh, ORIGINAL, toRefresh);
+			} else {
+				postRefresh(element, ORIGINAL, element);
+			}
+			return;
 		}
 		processAffectedChildren(affectedChildren);
-		return result;
 	}
 	
 	protected void processAffectedChildren(IJavaElementDelta[] affectedChildren) throws JavaModelException {
@@ -530,7 +535,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		if ((status & IResourceDelta.REMOVED) != 0) {
 			if (parent instanceof IPackageFragment) {
 				// refresh one level above to deal with empty package filtering properly
-				postRefresh(internalGetParent(parent));
+				postRefresh(internalGetParent(parent), PARENT, parent);
 				return true;
 			} else 
 				postRemove(resource);
@@ -538,7 +543,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		if ((status & IResourceDelta.ADDED) != 0) {
 			if (parent instanceof IPackageFragment) {
 				// refresh one level above to deal with empty package filtering properly
-				postRefresh(internalGetParent(parent));	
+				postRefresh(internalGetParent(parent), PARENT, parent);	
 				return true;
 			} else
 				postAdd(parent, resource);
@@ -566,7 +571,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		
 		if (deltas.length > 1) {
 			// more than one child changed, refresh from here downwards
-			postRefresh(parent);
+			postRefresh(parent, ORIGINAL, parent);
 			return true;
 		}
 
@@ -578,7 +583,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 		return false;
 	}
 	
-	/* package */ void postRefresh(Object root) {
+	/* package */ void postRefresh(Object root, int relation, Object affectedElement) {
 		// JFace doesn't refresh when object isn't part of the viewer
 		// Therefore move the refresh start down to the viewer's input
 		if (isParent(root, fInput)) 

@@ -11,14 +11,12 @@
 package org.eclipse.jdt.internal.ui.packageview;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.swt.widgets.TreeItem;
-
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.StructuredViewer;
 
 /**
  * A special structured selection that carries additional information
@@ -27,58 +25,72 @@ import org.eclipse.jface.viewers.StructuredSelection;
  */
 public class MultiElementSelection extends StructuredSelection {
 	
-	private static final TreeItem[] EMPTY_TREE_ITEM_ARRAY= new TreeItem[0];
-	private static final Object[][] EMPTY_PARENT_CHAINS= new Object[0][0];
+	private static final TreePath[] EMPTY_TREE_PATHS= new TreePath[0];
 	
-	private Map fElement2TreeItem= new HashMap();
+	private TreePath[] fAllTreePaths;
+	private CustomHashtable fElement2TreePaths;
 	
-	public MultiElementSelection(List elements, Map element2TreeItem) {
+	public MultiElementSelection(StructuredViewer viewer, List elements, TreePath[] treePaths) {
 		super(elements);
-		fElement2TreeItem= element2TreeItem;
+		fAllTreePaths= treePaths;
+		fElement2TreePaths= createTreePathMap(viewer.getComparer());
+	}
+	
+	public TreePath[] getAllTreePaths() {
+		return fAllTreePaths;
+	}
+	
+	public TreePath[] getTreePaths(Object element) {
+		Object value= fElement2TreePaths.get(element);
+		if (value == null) {
+			return EMPTY_TREE_PATHS;
+		} else if (value instanceof TreePath) {
+			return new TreePath[] { (TreePath)value };
+		} else if (value instanceof List) {
+			List l= (List)value;
+			return (TreePath[])l.toArray(new TreePath[l.size()]);
+		} else {
+			Assert.isTrue(false, "Should not happen"); //$NON-NLS-1$
+			return null;
+		}
 	}
 
-	public int getNumberOfItems(Object element) {
-		Object obj= fElement2TreeItem.get(element);
-		if (obj == null)
-			return 0;
-		if (obj instanceof TreeItem)
-			return 1;
-		return ((List)obj).size();
-	}
-	
-	public TreeItem[] getItems(Object element) {
-		Object obj= fElement2TreeItem.get(element);
-		if (obj == null)
-			return EMPTY_TREE_ITEM_ARRAY;
-		if (obj instanceof TreeItem)
-			return new TreeItem[] {(TreeItem)obj};
-		List l= (List)obj;
-		return (TreeItem[])l.toArray(new TreeItem[l.size()]);
-	}
-	
-	public Object[][] getParentChains(Object element) {
-		Object obj= fElement2TreeItem.get(element);
-		if (obj == null)
-			return EMPTY_PARENT_CHAINS;
-		if (obj instanceof TreeItem)
-			return new Object[][]{ getParents((TreeItem)obj)};
-		List l= (List)obj;
-		List result= new ArrayList(l.size());
-		for (Iterator iter= l.iterator(); iter.hasNext();) {
-			result.add(getParents((TreeItem)iter.next()));
+	public boolean equals(Object o) {
+		if (!super.equals(o))
+			return false;
+		if (!getClass().getName().equals(o.getClass().getName()))
+			return false;
+		MultiElementSelection otherSelection= (MultiElementSelection)o;
+		if (fAllTreePaths.length != otherSelection.fAllTreePaths.length)
+			return false;
+		for (int i= 0; i < fAllTreePaths.length; i++) {
+			if (!fAllTreePaths[i].equals(otherSelection.fAllTreePaths[i]))
+				return false;
 		}
-		return (Object[][])result.toArray(new Object[result.size()][]);
+		return true;
 	}
 	
-	private Object[] getParents(TreeItem item) {
-		List result= new ArrayList();
-		TreeItem parent= item.getParentItem();
-		while (parent != null) {
-			// add null as well to signal unknown element
-			result.add(parent.getData());
-			parent= parent.getParentItem();
+	private CustomHashtable createTreePathMap(IElementComparer comparer) {
+		CustomHashtable result= new CustomHashtable(comparer);
+		for (int i= 0; i < fAllTreePaths.length; i++) {
+			TreePath path= fAllTreePaths[i];
+			Object key= path.getLastSegment();
+			if (key != null) {
+				Object value= result.get(key);
+				if (value == null) {
+					result.put(key, path);
+				} else if (value instanceof TreePath) {
+					List l= new ArrayList();
+					l.add(value);
+					l.add(path);
+					result.put(key, l);
+				} else if (value instanceof List) {
+					((List)value).add(path);
+				} else {
+					Assert.isTrue(false, "Should not happen"); //$NON-NLS-1$
+				}
+			}
 		}
-		result.add(item.getParent().getData());
-		return result.toArray();
+		return result;
 	}
 }

@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-
 import org.eclipse.jdt.core.IPackageFragment;
+
+import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 
@@ -27,12 +26,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
  */
 class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 	
-	private ITreeContentProvider fContentProvider;
+	private PackageExplorerContentProvider fContentProvider;
 
 	private boolean fIsFlatLayout;
 	private PackageExplorerProblemsDecorator fProblemDecorator;
 
-	PackageExplorerLabelProvider(long textFlags, int imageFlags, ITreeContentProvider cp) {
+	PackageExplorerLabelProvider(long textFlags, int imageFlags, PackageExplorerContentProvider cp) {
 		super(textFlags, imageFlags);
 		fProblemDecorator= new PackageExplorerProblemsDecorator();
 		addLabelDecorator(fProblemDecorator);
@@ -51,7 +50,7 @@ class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 		if (fragment.isDefaultPackage()) {
 			return super.getText(fragment);
 		} else {
-			Object parent= fContentProvider.getParent(fragment);
+			Object parent= fContentProvider.getPackageFragmentProvider().getParent(fragment);
 			if(parent instanceof IPackageFragment)
 				return getNameDelta((IPackageFragment) parent, fragment);
 			else return super.getText(fragment);

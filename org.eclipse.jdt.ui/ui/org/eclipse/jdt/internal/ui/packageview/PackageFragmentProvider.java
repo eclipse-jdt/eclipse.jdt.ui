@@ -245,7 +245,7 @@ public class PackageFragmentProvider implements IPropertyChangeListener {
 		return null;
 	}
 
-	public Object getActualParent(IPackageFragment fragment) {
+	private Object getActualParent(IPackageFragment fragment) {
 		try {
 
 			if (fragment.exists()) {

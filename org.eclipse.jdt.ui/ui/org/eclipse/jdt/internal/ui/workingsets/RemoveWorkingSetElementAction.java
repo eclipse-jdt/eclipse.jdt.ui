@@ -22,9 +22,10 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
 
-import org.eclipse.jdt.internal.ui.packageview.MultiElementSelection;
-
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
+import org.eclipse.jdt.internal.ui.packageview.MultiElementSelection;
+import org.eclipse.jdt.internal.ui.packageview.TreePath;
 
 public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 
@@ -46,12 +47,13 @@ public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 		IWorkingSet result= null;
 		for (Iterator iter= elements.iterator(); iter.hasNext();) {
 			Object element= iter.next();
-			Object[][] parents= ms.getParentChains(element);
-			if (parents.length != 1)
+			TreePath[] paths= ms.getTreePaths(element);
+			if (paths.length != 1)
 				return null;
-			if (parents[0].length == 0)
+			TreePath path= paths[0];
+			if (path.getSegmentCount() == 0)
 				return null;
-			Object candidate= parents[0][0];
+			Object candidate= path.getSegment(0);
 			if (!(candidate instanceof IWorkingSet))
 				return null;
 			if (result == null) {

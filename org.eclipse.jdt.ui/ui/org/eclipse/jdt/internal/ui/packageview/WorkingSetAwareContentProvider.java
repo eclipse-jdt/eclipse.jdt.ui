@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.JavaModelException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.eclipse.jdt.core.IJavaModel;
 
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -21,9 +23,10 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 
+import org.eclipse.jdt.internal.ui.workingsets.HistoryWorkingSetUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
 
-public class WorkingSetAwareContentProvider extends PackageExplorerContentProvider {
+public class WorkingSetAwareContentProvider extends PackageExplorerContentProvider implements IMultiElementTreeContentProvider {
 
 	private WorkingSetModel fWorkingSetModel;
 	private IPropertyChangeListener fListener;
@@ -75,34 +78,88 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object getParent(Object child) {
-		Object result= fWorkingSetModel.getParent(child);
-		if (result != null)
-			return result;
-		return super.getParent(child);
+	public TreePath[] getTreePaths(Object element) {
+		if (element instanceof IWorkingSet) {
+			TreePath path= new TreePath(new Object[] {element});
+			return new TreePath[] {path};
+		}
+		List modelParents= getModelPath(element);
+		List result= new ArrayList();
+		for (int i= 0; i < modelParents.size(); i++) {
+			result.addAll(getTreePaths(modelParents, i));
+		}
+		return (TreePath[])result.toArray(new TreePath[result.size()]);
 	}
-
+	
+	private List getModelPath(Object element) {
+		List result= new ArrayList();
+		result.add(element);
+		Object parent= super.getParent(element);
+		Object input= getViewerInput();
+		// stop at input or on JavaModel. We never visualize it anyway.
+		while (parent != null && !parent.equals(input) && !(parent instanceof IJavaModel)) {
+			result.add(parent);
+			parent= super.getParent(parent);
+		}
+		Collections.reverse(result);
+		return result;
+	}
+	
+	private List/*<TreePath>*/ getTreePaths(List modelParents, int index) {
+		List result= new ArrayList();
+		Object input= getViewerInput();
+		Object element= modelParents.get(index);
+		Object[] parents= fWorkingSetModel.getAllParents(element);
+		for (int i= 0; i < parents.length; i++) {
+			List chain= new ArrayList();
+			if (!parents[i].equals(input))
+				chain.add(parents[i]);
+			for (int m= index; m < modelParents.size(); m++) {
+				chain.add(modelParents.get(m));
+			}
+			result.add(new TreePath(chain.toArray()));
+		}
+		return result;
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
-	/* package */ int handleAffectedChildren(IJavaElementDelta delta, IJavaElement element) throws JavaModelException {
-		int result= super.handleAffectedChildren(delta, element);
-		/*
-		if ((result & PARENT_REFRESH) != 0 || (result & GRANT_PARENT_REFRESH) != 0) {
-			postRefresh(fWorkingSetModel.getAllParents(element), true);
+	public Object getParent(Object child) {
+		Object[] parents= fWorkingSetModel.getAllParents(child);
+		if(parents.length == 0)
+			return super.getParent(child);
+		Object first= parents[0];
+		if (first instanceof IWorkingSet && HistoryWorkingSetUpdater.ID.equals(((IWorkingSet)first).getId())) {
+			if (parents.length > 1) {
+				return parents[1];
+			} else {
+				return super.getParent(child);
+			}
 		}
-		*/
-		return result;
+		return first;
+	}
+	
+	/* package */ void postRefresh(Object root, int relation, Object affectedElement) {
+		super.postRefresh(root, relation, affectedElement);
+		if (relation == GRANT_PARENT) {
+			Object parent= internalGetParent(affectedElement);
+			Object[] allParents= fWorkingSetModel.getAllParents(parent);
+			for (int i= 0; i < allParents.length; i++) {
+				super.postRefresh(allParents[i], ORIGINAL, allParents[i]);
+			}
+		}
 	}
 	
 	private void workingSetModelChanged(PropertyChangeEvent event) {
 		String property= event.getProperty();
+		Object newValue= event.getNewValue();
 		if (WorkingSetModel.CHANGE_WORKING_SET_MODEL_CONTENT.equals(property)) {
-			postRefresh(fWorkingSetModel);
+			postRefresh(fWorkingSetModel, ORIGINAL, fWorkingSetModel);
 		} else if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
-			postRefresh(event.getNewValue());
+			postRefresh(newValue, ORIGINAL, newValue);
 		} else if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
-			postRefresh(event.getNewValue());
+			postRefresh(newValue, ORIGINAL, newValue);
 		}
 	}
 }
