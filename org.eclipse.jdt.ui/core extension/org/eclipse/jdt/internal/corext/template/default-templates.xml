@@ -67,4 +67,5 @@ return ${name};</template><template name="toarray" description="convert collecti
 }</template><template name="test" description="test method" context="java" enabled="true">public void test${name}() {
 	${cursor} 
 }</template>
+<template name="systrace" description="print current method to standard out" context="java" enabled="true">System.out.println(&quot;${enclosing_type}.${enclosing_method}()&quot;);</template>
 </templates>
