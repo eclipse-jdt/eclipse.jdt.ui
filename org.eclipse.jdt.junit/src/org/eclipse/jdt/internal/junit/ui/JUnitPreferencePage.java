@@ -90,7 +90,9 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		"junit.framework.TestResult", //$NON-NLS-1$
 		"junit.framework.TestSuite", //$NON-NLS-1$
 		"junit.framework.Assert", //$NON-NLS-1$
-		"java.lang.reflect.Method.invoke" //$NON-NLS-1$
+		"java.lang.reflect.Method.invoke", //$NON-NLS-1$
+		"junit.framework.TestResult$1" //$NON-NLS-1$
+
 	};
 
 	// Step filter widgets
