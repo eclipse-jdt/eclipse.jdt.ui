@@ -3017,5 +3017,27 @@
   	</objectState>
   </renameParticipant>
 </extension>
+   
+<extension point="org.eclipse.ui.views">
+	<view
+		id="org.eclipse.jdt.ui.SourceView"
+		name="%JavaSourceView"
+		icon="icons/full/cview16/source.gif"
+		category="org.eclipse.jdt.ui.java"
+		class="org.eclipse.jdt.internal.ui.infoviews.SourceView">
+	</view>
+</extension>
 
+<extension point="org.eclipse.ui.views">
+	<view
+		id="org.eclipse.jdt.ui.JavadocView"
+		name="%JavadocView"
+		icon="icons/full/cview16/javadoc.gif"
+		category="org.eclipse.jdt.ui.java"
+		class="org.eclipse.jdt.internal.ui.infoviews.JavadocView">
+	</view>
+</extension>
+
+</extension>
+   
 </plugin>
