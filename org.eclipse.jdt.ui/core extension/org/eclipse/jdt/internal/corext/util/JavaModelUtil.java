@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 /**
  * Utility methods for the Java Model.
  */
-public class JavaModelUtil {
+public final class JavaModelUtil {
 	
 	/** 
 	 * Finds a type by its qualified type name (dot separated).
@@ -170,7 +170,7 @@ public class JavaModelUtil {
 	 * @param member the member (eg. from the original)
 	 * @return the member found, or null if not existing
 	 */		
-	public static IMember findMemberInCompilationUnit(ICompilationUnit cu, IMember member) throws JavaModelException {
+	public static IMember findMemberInCompilationUnit(ICompilationUnit cu, IMember member) {
 		IJavaElement[] elements= cu.findElements(member);
 		if (elements != null && elements.length > 0) {
 			return (IMember) elements[0];
@@ -188,7 +188,7 @@ public class JavaModelUtil {
 	 * @param element the element to look for
 	 * @return an element of the given cu "equal" to the given element
 	 */		
-	public static IJavaElement findInCompilationUnit(ICompilationUnit cu, IJavaElement element) throws JavaModelException {
+	public static IJavaElement findInCompilationUnit(ICompilationUnit cu, IJavaElement element) {
 		IJavaElement[] elements= cu.findElements(element);
 		if (elements != null && elements.length > 0) {
 			return elements[0];
@@ -272,9 +272,14 @@ public class JavaModelUtil {
 	 * @param pack The package in focus
 	 */
 	public static boolean isVisible(IMember member, IPackageFragment pack) throws JavaModelException {
-		int otherflags= member.getFlags();
 		
-		if (Flags.isPublic(otherflags)) {
+		int type= member.getElementType();
+		if  (type == IJavaElement.INITIALIZER ||  (type == IJavaElement.METHOD && member.getElementName().startsWith("<"))) { //$NON-NLS-1$
+			return false;
+		}
+		
+		int otherflags= member.getFlags();
+		if (Flags.isPublic(otherflags) || member.getDeclaringType().isInterface()) { //$NON-NLS-1$
 			return true;
 		} else if (Flags.isPrivate(otherflags)) {
 			return false;
@@ -291,9 +296,14 @@ public class JavaModelUtil {
 	 * @param pack The package of the focus element focus
 	 */
 	public static boolean isVisibleInHierarchy(IMember member, IPackageFragment pack) throws JavaModelException {
+		int type= member.getElementType();
+		if  (type == IJavaElement.INITIALIZER ||  (type == IJavaElement.METHOD && member.getElementName().startsWith("<"))) { //$NON-NLS-1$
+			return false;
+		}
+		
 		int otherflags= member.getFlags();
 		
-		if (Flags.isPublic(otherflags) || Flags.isProtected(otherflags)) {
+		if (Flags.isPublic(otherflags) || Flags.isProtected(otherflags) || member.getDeclaringType().isInterface()) {
 			return true;
 		} else if (Flags.isPrivate(otherflags)) {
 			return false;
@@ -466,7 +476,7 @@ public class JavaModelUtil {
 	 * Returns true if the element is on the build path of the given project
 	 * @deprecated Use jproject.isOnClasspath(element);
 	 */	
-	public static boolean isOnBuildPath(IJavaProject jproject, IJavaElement element) throws JavaModelException {
+	public static boolean isOnBuildPath(IJavaProject jproject, IJavaElement element) {
 		return jproject.isOnClasspath(element);
 	}
 	
