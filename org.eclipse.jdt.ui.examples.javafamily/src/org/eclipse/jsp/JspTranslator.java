@@ -14,38 +14,46 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 
+import org.eclipse.jface.text.source.ITagHandler;
+import org.eclipse.jface.text.source.ITagHandlerFactory;
+import org.eclipse.jface.text.source.ITranslator;
+
+import org.eclipse.jdt.internal.ui.examples.jspeditor.Jsp2JavaTagHandlerFactory;
+
 /**
  * @author weinand
  */
-public class JspTranslator extends AbstractJspParser {
+public class JspTranslator extends AbstractJspParser implements ITranslator {
 	
 	boolean DEBUG= false;
-	boolean fIgnoreHTML= true;
 
-	boolean fInUseBean;
-	private boolean fInTagLib;
-	
 	StringBuffer fDeclarations= new StringBuffer();
 	StringBuffer fContent= new StringBuffer();
 	StringBuffer fLocalDeclarations= new StringBuffer();
-	String fId;
-	String fClass;
 	
-	private ArrayList fContentLines;
-	private ArrayList fDeclarationLines;
-	private ArrayList fLocalDeclarationLines;
+	private ArrayList fContentLines= new ArrayList();
+	private ArrayList fDeclarationLines= new ArrayList();
+	private ArrayList fLocalDeclarationLines= new ArrayList();
 	private int[] fSmap;
-	private String fTagLibValue;
+	
+	private ITagHandlerFactory fTagHandlerFactor;
+	private ITagHandler fCurrentTagHandler;
+
+	private StringBuffer[] fBuffers;
+	private ArrayList[] fLineMappingInfos;
 	
 	
 	public JspTranslator() {
+		
+		// Links for passing parameters to the tag handlers 
+		fBuffers= new StringBuffer[]  {fDeclarations, fLocalDeclarations, fContent};
+		fLineMappingInfos= new ArrayList[]  {fDeclarationLines, fLocalDeclarationLines, fContentLines};
 	}
 		
 	protected void startTag(boolean endTag, String name, int startName) {
-		
-		fInUseBean= "jsp:useBean".equals(name);
-		fInTagLib= "c:out".equals(name);
-		
+
+		fCurrentTagHandler= fTagHandlerFactor.getHandler(name);
+
 		if (DEBUG) {
 			if (endTag)
 				System.out.println("   </" + name + ">");
@@ -55,38 +63,19 @@ public class JspTranslator extends AbstractJspParser {
 	}
 	
 	protected void tagAttribute(String attrName, String value, int startName, int startValue) {
-		if (fInUseBean) {
-			if ("id".equals(attrName))
-				fId= value;
-			else if ("class".equals(attrName))
-				fClass= value;
-		}
-		if (fInTagLib) {
-			fTagLibValue= value;
-		}
+
+		if (fCurrentTagHandler != null)
+			fCurrentTagHandler.addAttribute(attrName, value);
+
 		if (DEBUG)
 			System.out.println("     " + attrName + "=\"" + value + "\"");
 	}
 	
 	protected void endTag(boolean end) {
-		if (fInUseBean) {
-			if (fId != null && fClass != null) {
-				fLocalDeclarations.append(fClass + " " + fId + "= new " + fClass + "();\n");
-				fLocalDeclarationLines.add(new Integer(fLines));
 
-				System.out.println("  jsp_typeRef/" + fClass);
+		if (fCurrentTagHandler != null)
+			fCurrentTagHandler.translate(fBuffers, fLineMappingInfos, fLines, fLines);
 
-				fId= fClass= null;
-			}
-			fInUseBean= false;
-		}
-		if (fInTagLib && fTagLibValue != null) {
-			fContent.append("System.out.println(" + fTagLibValue.substring(2, fTagLibValue.length() - 1) + ");\n");
-			fContentLines.add(new Integer(fLines));
-
-			fTagLibValue= null;
-			fInTagLib= false;
-		}
 		if (DEBUG) {
 			if (end)
 				System.out.println("   />");
@@ -148,12 +137,13 @@ public class JspTranslator extends AbstractJspParser {
 		fContent.setLength(0);
 		fLocalDeclarations.setLength(0);
 		
-		fLocalDeclarationLines= new ArrayList();
-		fContentLines= new ArrayList();
-		fDeclarationLines= new ArrayList();
+		fLocalDeclarationLines.clear();
+		fContentLines.clear();
+		fDeclarationLines.clear();
+		
 	}
 
-	public String createJava(Reader reader, String name) throws IOException {
+	public String translate(Reader reader, String name) throws IOException  {
 
 		StringBuffer buffer= new StringBuffer();
 		
@@ -216,5 +206,12 @@ public class JspTranslator extends AbstractJspParser {
 	
 	public int[] getSmap()  {
 		return fSmap;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.source.ITranslator#setTagHandlerFactory(org.eclipse.jface.text.source.ITagHandlerFactory)
+	 */
+	public void setTagHandlerFactory(ITagHandlerFactory tagHandlerFactory) {
+		fTagHandlerFactor= tagHandlerFactory;
 	}
 }

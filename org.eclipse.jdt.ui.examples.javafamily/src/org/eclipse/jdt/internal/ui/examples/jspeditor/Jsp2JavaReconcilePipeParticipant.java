@@ -21,10 +21,13 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
+import org.eclipse.jface.text.source.ITagHandler;
+import org.eclipse.jface.text.source.ITagHandlerFactory;
+import org.eclipse.jface.text.source.ITranslator;
 
 import org.eclipse.jsp.JspTranslator;
-import org.eclipse.text.reconcilerpipe.*;
 import org.eclipse.text.reconcilerpipe.AbstractReconcilePipeParticipant;
+import org.eclipse.text.reconcilerpipe.AnnotationAdapter;
 import org.eclipse.text.reconcilerpipe.IReconcilePipeParticipant;
 import org.eclipse.text.reconcilerpipe.IReconcileResult;
 import org.eclipse.text.reconcilerpipe.ITextModel;
@@ -40,12 +43,14 @@ import org.eclipse.text.reconcilerpipe.TextModelAdapter;
 public class Jsp2JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipant {
 	
 	private TextModelAdapter fModel;
-	private JspTranslator fJspTranslator= new JspTranslator();
+	private ITranslator fJspTranslator;
+	private ITagHandlerFactory fTagHandlerFactory;
 
 	/**
 	 * Creates the last reconcile participant of the pipe.
 	 */
 	public Jsp2JavaReconcilePipeParticipant() {
+		initialize();
 	}
 
 	/**
@@ -54,6 +59,13 @@ public class Jsp2JavaReconcilePipeParticipant extends AbstractReconcilePipeParti
 	 */
 	public Jsp2JavaReconcilePipeParticipant(IReconcilePipeParticipant participant) {
 		super(participant);
+		initialize();
+	}
+	
+	protected void initialize()  {
+		fJspTranslator= new JspTranslator();
+		fTagHandlerFactory= new Jsp2JavaTagHandlerFactory();
+		fJspTranslator.setTagHandlerFactory(fTagHandlerFactory);
 	}
 
 	/*
@@ -66,7 +78,7 @@ public class Jsp2JavaReconcilePipeParticipant extends AbstractReconcilePipeParti
 		
 		Reader reader= new StringReader(((TextModelAdapter)fInputModel).getDocument().get());
 		try {
-			String javaSource= fJspTranslator.createJava(reader, "Demo");
+			String javaSource= fJspTranslator.translate(reader, "Demo");
 			fModel= new TextModelAdapter(new Document(javaSource));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -117,54 +129,13 @@ public class Jsp2JavaReconcilePipeParticipant extends AbstractReconcilePipeParti
 				String jspLineStr= ((TextModelAdapter)getInputModel()).getDocument().get(((TextModelAdapter)getInputModel()).getDocument().getLineOffset(jspLine-1), ((TextModelAdapter)getInputModel()).getDocument().getLineLength(jspLine-1));
 
 				// XXX: Once partitioner is in place the partition can be used to ease section detection
+				ITagHandler handler= fTagHandlerFactory.findHandler(jspLineStr);
+				pos.offset += handler.backTranslateOffsetInLine(jspLineStr, null, relativeLineOffsetInJava);
 
-				int javaPartitionStart= 0;
-				if (jspLineStr.indexOf("<%") != -1) //$NON-NLS-1$
-					javaPartitionStart= handleJavaSection(jspLineStr, relativeLineOffsetInJava);
-				else if (jspLineStr.indexOf("<jsp:useBean id=\"") != -1)  { //$NON-NLS-1$
-					javaPartitionStart= handleUseBeanTag(jspLineStr, relativeLineOffsetInJava);
-				} else if (jspLineStr.indexOf("<c:out value=\"${") != -1)  {
-					javaPartitionStart= handleTagLib(jspLineStr, relativeLineOffsetInJava);
-				}
-				pos.offset += javaPartitionStart;
 			} catch (BadLocationException e) {
 				e.printStackTrace();
 			}
 		}
 		return inputResults;
-	}
-
-	private int handleJavaSection(String jspLineStr, int relativeLineOffsetInJava)  {
-		return jspLineStr.indexOf("<%") + 3; //$NON-NLS-1$
-	}
-
-	private int handleTagLib(String jspLineStr, int relativeLineOffsetInJava)  {
-		int javaFileOffset= "System.out.println(".length();
-		return jspLineStr.indexOf("<c:out value=\"${") + 16 - javaFileOffset; //$NON-NLS-1$
-	}
-	
-	/*
-	 * This is a good example where the relative line offset in the Java
-	 * document cannot be directly mapped back to Jsp document.
-	 */
-	private int handleUseBeanTag(String jspLineStr, int relativeLineOffsetInJava)  {
-
-		int javaPartitionStart;
-
-		int variableNameStart= jspLineStr.indexOf("<jsp:useBean id=\"") + 17; //$NON-NLS-1$
-		int variableNameLength= Math.max(0, jspLineStr.indexOf('"', variableNameStart) - variableNameStart);
-
-		int typeStart= jspLineStr.indexOf("class=\"") + 7; //$NON-NLS-1$
-		int typeLength= Math.max(0, jspLineStr.indexOf('"', typeStart) - typeStart);
-					
-		if (relativeLineOffsetInJava < typeLength)  {
-			javaPartitionStart= typeStart;
-		} else if (relativeLineOffsetInJava < typeLength + variableNameLength)
-			javaPartitionStart= variableNameStart;
-		else
-			javaPartitionStart= typeStart;
-
-		// start relative to Jsp line start
-		return javaPartitionStart - relativeLineOffsetInJava;
 	}
 }

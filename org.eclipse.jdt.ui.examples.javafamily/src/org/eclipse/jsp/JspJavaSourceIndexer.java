@@ -75,7 +75,7 @@ public class JspJavaSourceIndexer extends SourceIndexer {
 			content= document.getStringContent();
 			Reader reader= new StringReader(content);
 			jspParser= new JspTranslator();
-			java= jspParser.createJava(reader, n);
+			java= jspParser.translate(reader, n);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
