@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Type;
 
@@ -202,6 +203,22 @@ public class Bindings {
 		return false;
 	}
 	
+	/**
+	 * Finds the field specified by <code>fieldName<code> in
+	 * the given <code>type</code>. Returns <code>null</code> if no such field exits.
+	 */
+	public static IVariableBinding findFieldInType(ITypeBinding type, String fieldName) {
+		if (type.isPrimitive())
+			return null;
+		IVariableBinding[] fields= type.getDeclaredFields();
+		for (int i= 0; i < fields.length; i++) {
+			IVariableBinding field= fields[i];
+			if (field.getName().equals(fieldName))
+				return field;
+		}
+		return null;
+	}
+		
 	/**
 	 * Finds the method specified by <code>methodName<code> and </code>parameters</code> in
 	 * the given <code>type</code>. Returns <code>null</code> if no such method exits.
