@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.dialogs;
 
+import java.text.MessageFormat;
 import java.util.Iterator;
 
 import junit.framework.Assert;
@@ -17,9 +18,10 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -30,7 +32,6 @@ import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.ui.internal.WorkbenchMessages;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.dialogs.PropertyDialog;
 import org.eclipse.ui.internal.dialogs.PropertyPageContributorManager;
@@ -153,7 +154,7 @@ public class PreferencesTest extends TestCase {
 		if (!pages.hasNext()) {
 			return null;
 		} else {
-			title = WorkbenchMessages.format("PropertyDialog.propertyMessage", new Object[] {name});
+			title = MessageFormat.format("Properties for {0}", new Object[] {name});
 			dialog = new PropertyDialogWrapper(getShell(), manager, new StructuredSelection(element)); 
 			dialog.create();
 			dialog.getShell().setText(title);
