@@ -416,11 +416,13 @@ public class NLSRefactoring extends Refactoring {
 	private RefactoringStatus checkKeys() {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < fNlsSubs.length; i++)
-			checkKey(fNlsSubs[i].key, result, NLSHolder.UNWANTED_STRINGS);
+			result.merge(checkKey(fNlsSubs[i].key));
 		return result;
 	}	
 	
-	private void checkKey(String key, RefactoringStatus result, String[] unwantedStrings){
+	public static RefactoringStatus checkKey(String key){
+		RefactoringStatus result= new RefactoringStatus();
+		
 		if (key == null)
 			result.addFatalError(NLSMessages.getString("NLSrefactoring.null")); //$NON-NLS-1$
 
@@ -433,10 +435,11 @@ public class NLSRefactoring extends Refactoring {
 			result.addFatalError(NLSMessages.getString("NLSrefactoring.empty")); //$NON-NLS-1$
 		
 		//feature in resource bundle - does not work properly if keys have ":"
-		for (int i= 0; i < unwantedStrings.length; i++){
-			if (key.indexOf(unwantedStrings[i]) != -1)
-				result.addError(NLSMessages.getString("NLSrefactoring.key") + key + NLSMessages.getString("NLSrefactoring.should_not_contain") + "'" + unwantedStrings[i] + "'"); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+		for (int i= 0; i < NLSHolder.UNWANTED_STRINGS.length; i++){
+			if (key.indexOf(NLSHolder.UNWANTED_STRINGS[i]) != -1)
+				result.addError(NLSMessages.getString("NLSrefactoring.key") + key + NLSMessages.getString("NLSrefactoring.should_not_contain") + "'" + NLSHolder.UNWANTED_STRINGS[i] + "'"); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 		}
+		return result;
 	}
 	
 	private boolean willCreateAccessorClass() throws JavaModelException{
