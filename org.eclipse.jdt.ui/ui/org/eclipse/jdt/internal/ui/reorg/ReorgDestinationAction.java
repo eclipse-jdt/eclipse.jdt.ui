@@ -34,6 +34,8 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -51,8 +53,6 @@ import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.PackageFilter;
@@ -407,7 +407,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		}
 	}
 	//------
-	private static class ReorgSelectionValidator implements ISelectionValidator {
+	private static class ReorgSelectionValidator implements ISelectionStatusValidator {
 		private ReorgRefactoring fRefactoring;
 		
 		public ReorgSelectionValidator(ReorgRefactoring refactoring) {
