@@ -47,7 +47,7 @@
                   The class that implements this query participant. The class must be public and implement &lt;samp&gt;org.eclipse.jdt.ui.search.IQueryParticipant&lt;/samp&gt; with a zero-argument constructor.
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java"/>
+                  <meta.attribute kind="java" basedOn="org.eclipse.jdt.ui.search.IQueryParticipant"/>
                </appInfo>
             </annotation>
          </attribute>
