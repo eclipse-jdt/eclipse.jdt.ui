@@ -63,6 +63,15 @@ public class MultiTextEdit {
 	}
 
 	/**
+	 * Returns <code>true</code> if this text edit does not manage any child text edits, <code>false</code> otherwise.
+	 * 
+	 * @return <code>true</code> if this text edit does not manage any child text edits, <code>false</code> otherwise
+	 */	
+	public boolean isEmpty(){
+		return fChildren.isEmpty();
+	}
+
+	/**
 	 * Connects this text edit to the given <code>TextBufferEditor</code>. 
 	 * Note that this method <b>should only be called</b> by a <code>
 	 * TextBufferEditor</code>.
