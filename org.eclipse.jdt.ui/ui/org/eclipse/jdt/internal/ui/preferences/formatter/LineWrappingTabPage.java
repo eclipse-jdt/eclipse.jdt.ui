@@ -21,17 +21,9 @@ import java.util.Observer;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
-
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -44,12 +36,15 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 
 
 /**
@@ -117,49 +112,47 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		}
 
 		public void selectionChanged(SelectionChangedEvent event) {
-			final IStructuredSelection selection= (IStructuredSelection)event.getSelection();
-			
-			final Category category= (Category)selection.getFirstElement();
+		    if (event != null)
+		        fSelection= (IStructuredSelection)event.getSelection();
+		    
+		    if (fSelection.size() == 0) {
+		        disableAll();
+		        return;
+		    }
+		    
+		    if (!fOptionsGroup.isEnabled())
+		        enableDefaultComponents(true);
+		    
+		    fSelectionState.refreshState(fSelection);
+		    
+			final Category category= (Category)fSelection.getFirstElement();
 			fDialogSettings.put(PREF_CATEGORY_INDEX, category.index);
-
-			fCurrentKey= category.key;
 			
-			if (fCurrentKey != null) {
-				fOptionsGroup.setText(FormatterMessages.getString("LineWrappingTabPage.group") + category.name.toLowerCase()); //$NON-NLS-1$
-			} else {
-				fOptionsGroup.setText(""); //$NON-NLS-1$
-			}
-			setPreviewText(category.previewText);
-
-			final String value= (String)fWorkingValues.get(category.key);
-			final boolean enabled= value != null;
-			
-			if (enabled) {
-				
-				int wrappingStyle;
-				int indentStyle;
-				boolean forceWrapping;
-
-				try {
-					forceWrapping= DefaultCodeFormatterConstants.getForceWrapping(value);
-					indentStyle= DefaultCodeFormatterConstants.getIndentStyle(value);
-					wrappingStyle= DefaultCodeFormatterConstants.getWrappingStyle(value);
-				} catch (IllegalArgumentException e) {
-					forceWrapping= false;
-					indentStyle= DefaultCodeFormatterConstants.INDENT_DEFAULT;
-					wrappingStyle= DefaultCodeFormatterConstants.WRAP_NO_SPLIT;
-				}
-				fForceSplit.setSelection(forceWrapping);
-				fIndentStyleCombo.setText(INDENT_NAMES[indentStyle]);
-				fWrappingStyleCombo.setText(WRAPPING_NAMES[wrappingStyle]);
-				updateControls(wrappingStyle);
-			}
-			fForceSplit.setEnabled(enabled);
-			fIndentStyleCombo.setEnabled(enabled);
-			fWrappingStyleCombo.setEnabled(enabled);
+			fOptionsGroup.setText(getGroupLabel(category));
 		}
 		
-		public void restoreSelection() {
+		private String getGroupLabel(Category category) {
+		    if (fSelection.size() == 1) {
+			    if (fSelectionState.getElements().size() == 1)
+			        return FormatterMessages.getFormattedString("LineWrappingTabPage.group", category.name.toLowerCase()); //$NON-NLS-1$
+			    return FormatterMessages.getFormattedString("LineWrappingTabPage.multi_group", new String[] {category.name.toLowerCase(), Integer.toString(fSelectionState.getElements().size())}); //$NON-NLS-1$
+		    }
+			return FormatterMessages.getFormattedString("LineWrappingTabPage.multiple_selections", new String[] {Integer.toString(fSelectionState.getElements().size())}); //$NON-NLS-1$
+		}
+        
+        private void disableAll() {
+            enableDefaultComponents(false);
+            fIndentStyleCombo.setEnabled(false);       
+            fForceSplit.setEnabled(false);
+        }
+        
+        private void enableDefaultComponents(boolean enabled) {
+            fOptionsGroup.setEnabled(enabled);
+            fWrappingStyleCombo.setEnabled(enabled);
+            fWrappingStylePolicy.setEnabled(enabled);
+        }
+
+        public void restoreSelection() {
 			int index;
 			try {
 				index= fDialogSettings.getInt(PREF_CATEGORY_INDEX);
@@ -182,14 +175,170 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
         }
 	}
 	
-	protected final String[] INDENT_NAMES = {
+	private class SelectionState {
+	    private List fElements= new ArrayList();
+	    
+	    public void refreshState(IStructuredSelection selection) {
+	        Map wrappingStyleMap= new HashMap();
+		    Map indentStyleMap= new HashMap();
+		    Map forceWrappingMap= new HashMap();
+	        fElements.clear();
+	        evaluateElements(selection.iterator());
+	        evaluateMaps(wrappingStyleMap, indentStyleMap, forceWrappingMap);
+	        setPreviewText(getPreviewText(wrappingStyleMap, indentStyleMap, forceWrappingMap));
+	        refreshControls(wrappingStyleMap, indentStyleMap, forceWrappingMap);
+	    }
+	    
+	    public List getElements() {
+	        return fElements;
+	    }
+	    
+	    private void evaluateElements(Iterator iterator) {
+            Category category;
+            String value;
+            while (iterator.hasNext()) {
+                category= (Category) iterator.next();
+                value= (String)fWorkingValues.get(category.key);
+                if (value != null) {
+                    if (!fElements.contains(category))
+                        fElements.add(category);
+                }
+                else {
+                    evaluateElements(category.children.iterator());
+                }
+            }
+        }
+	    
+	    private void evaluateMaps(Map wrappingStyleMap, Map indentStyleMap, Map forceWrappingMap) {
+	        Iterator iterator= fElements.iterator();
+            while (iterator.hasNext()) {
+                insertIntoMap(wrappingStyleMap, indentStyleMap, forceWrappingMap, (Category)iterator.next());
+            }
+	    }
+  
+        private String getPreviewText(Map wrappingMap, Map indentMap, Map forceMap) {
+            Iterator iterator= fElements.iterator();
+            String previewText= ""; //$NON-NLS-1$
+            while (iterator.hasNext()) {
+                Category category= (Category)iterator.next();
+                previewText= previewText + category.previewText + "\n\n"; //$NON-NLS-1$
+            }
+            return previewText;
+        }
+        
+        private void insertIntoMap(Map wrappingMap, Map indentMap, Map forceMap, Category category) {
+            final String value= (String)fWorkingValues.get(category.key);
+            Integer wrappingStyle;
+            Integer indentStyle;
+            Boolean forceWrapping;
+            
+            try {
+                wrappingStyle= new Integer(DefaultCodeFormatterConstants.getWrappingStyle(value));
+                indentStyle= new Integer(DefaultCodeFormatterConstants.getIndentStyle(value));
+                forceWrapping= new Boolean(DefaultCodeFormatterConstants.getForceWrapping(value));
+            } catch (IllegalArgumentException e) {
+				forceWrapping= new Boolean(false);
+				indentStyle= new Integer(DefaultCodeFormatterConstants.INDENT_DEFAULT);
+				wrappingStyle= new Integer(DefaultCodeFormatterConstants.WRAP_NO_SPLIT);
+			} 
+			
+            increaseMapEntry(wrappingMap, wrappingStyle);
+            increaseMapEntry(indentMap, indentStyle);
+            increaseMapEntry(forceMap, forceWrapping);
+        }
+        
+        private void increaseMapEntry(Map map, Object type) {
+            Integer count= (Integer)map.get(type);
+            if (count == null) // not in map yet -> count == 0
+                map.put(type, new Integer(1));
+            else
+                map.put(type, new Integer(count.intValue() + 1));
+        }
+                
+        private void refreshControls(Map wrappingStyleMap, Map indentStyleMap, Map forceWrappingMap) {
+            updateCombos(wrappingStyleMap, indentStyleMap);
+            updateButton(forceWrappingMap);
+            Integer wrappingStyleMax= getWrappingStyleMax(wrappingStyleMap);
+			boolean isInhomogeneous= (fElements.size() != ((Integer)wrappingStyleMap.get(wrappingStyleMax)).intValue());
+			updateControlEnablement(isInhomogeneous, wrappingStyleMax.intValue());
+		    doUpdatePreview();
+        }
+        
+        private Integer getWrappingStyleMax(Map wrappingStyleMap) {
+            int maxCount= 0, maxStyle= 0;
+            for (int i=0; i<WRAPPING_NAMES.length; i++) {
+                Integer count= (Integer)wrappingStyleMap.get(new Integer(i));
+                if (count == null)
+                    continue;
+                if (count.intValue() > maxCount) {
+                    maxCount= count.intValue();
+                    maxStyle= i;
+                }
+            }
+            return new Integer(maxStyle);
+        }
+        
+        private void updateButton(Map forceWrappingMap) {
+            Integer nrOfTrue= (Integer)forceWrappingMap.get(Boolean.TRUE);
+            Integer nrOfFalse= (Integer)forceWrappingMap.get(Boolean.FALSE);
+            
+            if (nrOfTrue == null || nrOfFalse == null)
+                fForceSplit.setSelection(nrOfTrue != null);
+            else
+                fForceSplit.setSelection(nrOfTrue.intValue() > nrOfFalse.intValue());
+            
+            int max= getMax(nrOfTrue, nrOfFalse);
+            String label= FormatterMessages.getString("LineWrappingTabPage.force_split.checkbox.multi_text"); //$NON-NLS-1$
+            fForceSplit.setText(getLabelText(label, max, fElements.size())); //$NON-NLS-1$
+        }
+        
+        private String getLabelText(String label, int count, int nElements) {
+            if (nElements == 1 || count == 0)
+                return label;
+            return FormatterMessages.getFormattedString("LineWrappingTabPage.occurences", new String[] {label, Integer.toString(count), Integer.toString(nElements)}); //$NON-NLS-1$
+        }
+        
+        private int getMax(Integer nrOfTrue, Integer nrOfFalse) {
+            if (nrOfTrue == null)
+                return nrOfFalse.intValue();
+            if (nrOfFalse == null)
+                return nrOfTrue.intValue();
+            if (nrOfTrue.compareTo(nrOfFalse) >= 0)
+                return nrOfTrue.intValue();
+            return nrOfFalse.intValue();
+        }
+        
+        private void updateCombos(Map wrappingStyleMap, Map indentStyleMap) {
+            updateCombo(fWrappingStyleCombo, wrappingStyleMap, WRAPPING_NAMES);
+            updateCombo(fIndentStyleCombo, indentStyleMap, INDENT_NAMES);
+        }
+        
+        private void updateCombo(Combo combo, Map map, final String[] items) {
+            String[] newItems= new String[items.length];
+            int maxCount= 0, maxStyle= 0;
+                        
+            for(int i = 0; i < items.length; i++) {
+                Integer count= (Integer) map.get(new Integer(i));
+                int val= (count == null) ? 0 : count.intValue();
+                if (val > maxCount) {
+                    maxCount= val;
+                    maxStyle= i;
+                }                
+                newItems[i]= getLabelText(items[i], val, fElements.size()); 
+            }
+            combo.setItems(newItems);
+            combo.setText(newItems[maxStyle]);
+        }
+	}
+	
+	protected static final String[] INDENT_NAMES = {
 	    FormatterMessages.getString("LineWrappingTabPage.indentation.default"), //$NON-NLS-1$ 
 	    FormatterMessages.getString("LineWrappingTabPage.indentation.on_column"), //$NON-NLS-1$ 
 	    FormatterMessages.getString("LineWrappingTabPage.indentation.by_one") //$NON-NLS-1$
 	};
 	
 	
-	protected final String[] WRAPPING_NAMES = { 
+	protected static final String[] WRAPPING_NAMES = { 
 	    FormatterMessages.getString("LineWrappingTabPage.splitting.do_not_split"), //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.splitting.wrap_when_necessary"), // COMPACT_SPLIT //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.splitting.always_wrap_first_others_when_necessary"), // COMPACT_FIRST_BREAK_SPLIT  //$NON-NLS-1$
@@ -338,8 +487,9 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	protected final IDialogSettings fDialogSettings;	
 	
 	protected TreeViewer fCategoriesViewer;
+	protected Label fWrappingStylePolicy;
 	protected Combo fWrappingStyleCombo;
-	protected Label fIndentStyleLabel;
+	protected Label fIndentStylePolicy;
 	protected Combo fIndentStyleCombo;
 	protected Button fForceSplit;
 
@@ -357,11 +507,16 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	 * The category listener which makes the selection persistent.
 	 */
 	protected final CategoryListener fCategoryListener;
-
+	
 	/**
-	 * The key representing the category for which the options are currently shown. 
+	 * The current selection of elements. 
 	 */
-	protected String fCurrentKey;
+	protected IStructuredSelection fSelection;
+	
+	/**
+	 * An object containing the state for the UI.
+	 */
+	SelectionState fSelectionState;
 	
 	/**
 	 * A special options store wherein the preview line width is kept.
@@ -390,8 +545,6 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		
 		fCategories= createCategories();
 		fCategoryListener= new CategoryListener(fCategories);
-		
-		fCurrentKey= ((Category)fCategories.iterator().next()).key;
 	}
 	
 	/**
@@ -449,8 +602,8 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.getString("LineWrappingTabPage.width_indent.option.max_line_width"), DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, 0, 9999); //$NON-NLS-1$
 		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.getString("LineWrappingTabPage.width_indent.option.default_indent_wrapped"), DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION, 0, 9999); //$NON-NLS-1$
 		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.getString("LineWrappingTabPage.width_indent.option.default_indent_array"), DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION_FOR_ARRAY_INITIALIZER, 0, 9999); //$NON-NLS-1$ 
-		
-		fCategoriesViewer= new TreeViewer(composite /*categoryGroup*/, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL );
+
+		fCategoriesViewer= new TreeViewer(composite /*categoryGroup*/, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL );
 		fCategoriesViewer.setContentProvider(new ITreeContentProvider() {
 			public Object[] getElements(Object inputElement) {
 				return ((Collection)inputElement).toArray();
@@ -476,7 +629,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		fOptionsGroup = createGroup(numColumns, composite, "");  //$NON-NLS-1$
 		
 		// label "Select split style:"
-		createLabel(numColumns, fOptionsGroup, FormatterMessages.getString("LineWrappingTabPage.wrapping_policy.label.text")); //$NON-NLS-1$
+		fWrappingStylePolicy= createLabel(numColumns, fOptionsGroup, FormatterMessages.getString("LineWrappingTabPage.wrapping_policy.label.text")); //$NON-NLS-1$
 	
 		// combo SplitStyleCombo
 		fWrappingStyleCombo= new Combo(fOptionsGroup, SWT.SINGLE | SWT.READ_ONLY);
@@ -484,7 +637,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		fWrappingStyleCombo.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, 0));
 		
 		// label "Select indentation style:"
-		fIndentStyleLabel= createLabel(numColumns, fOptionsGroup, FormatterMessages.getString("LineWrappingTabPage.indentation_policy.label.text")); //$NON-NLS-1$
+		fIndentStylePolicy= createLabel(numColumns, fOptionsGroup, FormatterMessages.getString("LineWrappingTabPage.indentation_policy.label.text")); //$NON-NLS-1$
 		
 		// combo SplitStyleCombo
 		fIndentStyleCombo= new Combo(fOptionsGroup, SWT.SINGLE | SWT.READ_ONLY);
@@ -495,6 +648,9 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		fForceSplit= new Button(fOptionsGroup, SWT.CHECK);
 		fForceSplit.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, 0));
 		fForceSplit.setText(FormatterMessages.getString("LineWrappingTabPage.force_split.checkbox.text")); //$NON-NLS-1$
+		
+		// selection state object
+		fSelectionState= new SelectionState();
 	}
 	
 		
@@ -514,8 +670,6 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		
 		return composite;
 	}
-	
-	
 	
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreateJavaPreview(org.eclipse.swt.widgets.Composite)
@@ -568,58 +722,83 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		fPreview.setPreviewText(text);
 		fWorkingValues.put(LINE_SPLIT, normalSetting);
 	}
-
 	
 	protected void forceSplitChanged(boolean forceSplit) {
-		String value;
-		try {
-			value= (String)fWorkingValues.get(fCurrentKey);
-			value= DefaultCodeFormatterConstants.setForceWrapping(value, forceSplit);
-			fWorkingValues.put(fCurrentKey, value); 
-		} catch (Exception e) {
-			fWorkingValues.put(fCurrentKey, DefaultCodeFormatterConstants.createAlignmentValue(forceSplit, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, DefaultCodeFormatterConstants.INDENT_DEFAULT));
-			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, 
-				FormatterMessages.getFormattedString("LineWrappingTabPage.error.invalid_value", fCurrentKey), e)); //$NON-NLS-1$
-		} finally {
-			doUpdatePreview();
-		}
+	    Iterator iterator= fSelectionState.fElements.iterator();
+	    String currentKey;
+        while (iterator.hasNext()) {
+            currentKey= ((Category)iterator.next()).key;
+            try {
+                changeForceSplit(currentKey, forceSplit);
+            } catch (IllegalArgumentException e) {
+    			fWorkingValues.put(currentKey, DefaultCodeFormatterConstants.createAlignmentValue(forceSplit, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, DefaultCodeFormatterConstants.INDENT_DEFAULT));
+    			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, 
+    			        FormatterMessages.getFormattedString("LineWrappingTabPage.error.invalid_value", currentKey), e)); //$NON-NLS-1$
+    		}
+        }
+        fSelectionState.refreshState(fSelection);
+	}
+	
+	private void changeForceSplit(String currentKey, boolean forceSplit) throws IllegalArgumentException{
+		String value= (String)fWorkingValues.get(currentKey);
+		value= DefaultCodeFormatterConstants.setForceWrapping(value, forceSplit);
+		if (value == null)
+		    throw new IllegalArgumentException();
+		fWorkingValues.put(currentKey, value);
 	}
 	
 	protected void wrappingStyleChanged(int wrappingStyle) {
-		String value;
-		try {
-			value= (String)fWorkingValues.get(fCurrentKey);
-			value= DefaultCodeFormatterConstants.setWrappingStyle(value, wrappingStyle);
-			fWorkingValues.put(fCurrentKey, value);
-		} catch (Exception e) {
-			fWorkingValues.put(fCurrentKey, DefaultCodeFormatterConstants.createAlignmentValue(false, wrappingStyle, DefaultCodeFormatterConstants.INDENT_DEFAULT));
-			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, 
-				FormatterMessages.getFormattedString("LineWrappingTabPage.error.invalid_value", fCurrentKey), e)); //$NON-NLS-1$
-		} finally {
-			updateControls(wrappingStyle);
-			doUpdatePreview();
-		}
+	       Iterator iterator= fSelectionState.fElements.iterator();
+	       String currentKey;
+	        while (iterator.hasNext()) {
+	        	currentKey= ((Category)iterator.next()).key;
+	        	try {
+	        	    changeWrappingStyle(currentKey, wrappingStyle);
+	        	} catch (IllegalArgumentException e) {
+	    			fWorkingValues.put(currentKey, DefaultCodeFormatterConstants.createAlignmentValue(false, wrappingStyle, DefaultCodeFormatterConstants.INDENT_DEFAULT));
+	    			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, 
+	    			        FormatterMessages.getFormattedString("LineWrappingTabPage.error.invalid_value", currentKey), e)); //$NON-NLS-1$
+	        	}
+	        }
+	        fSelectionState.refreshState(fSelection);
+	}
+	
+	private void changeWrappingStyle(String currentKey, int wrappingStyle) throws IllegalArgumentException {
+	    String value= (String)fWorkingValues.get(currentKey);
+		value= DefaultCodeFormatterConstants.setWrappingStyle(value, wrappingStyle);
+		if (value == null)
+		    throw new IllegalArgumentException();
+		fWorkingValues.put(currentKey, value);
 	}
 	
 	protected void indentStyleChanged(int indentStyle) {
-		String value;
-		try {
-			value= (String)fWorkingValues.get(fCurrentKey);
-			value= DefaultCodeFormatterConstants.setIndentStyle(value, indentStyle);
-			fWorkingValues.put(fCurrentKey, value);
-		} catch (Exception e) {
-			fWorkingValues.put(fCurrentKey, DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, indentStyle));
-			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, 
-				FormatterMessages.getFormattedString("LineWrappingTabPage.error.invalid_value", fCurrentKey), e)); //$NON-NLS-1$
-		} finally {
-			doUpdatePreview();
-		}
+	    Iterator iterator= fSelectionState.fElements.iterator();
+	    String currentKey;
+        while (iterator.hasNext()) {
+            currentKey= ((Category)iterator.next()).key;
+        	try {
+            	changeIndentStyle(currentKey, indentStyle);
+        	} catch (IllegalArgumentException e) {
+    			fWorkingValues.put(currentKey, DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, indentStyle));
+    			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, 
+    			        FormatterMessages.getFormattedString("LineWrappingTabPage.error.invalid_value", currentKey), e)); //$NON-NLS-1$
+    		}
+        }
+        fSelectionState.refreshState(fSelection);
 	}
 	
-	protected void updateControls(int wrappingStyle) {
+	private void changeIndentStyle(String currentKey, int indentStyle) throws IllegalArgumentException{
+		String value= (String)fWorkingValues.get(currentKey);
+		value= DefaultCodeFormatterConstants.setIndentStyle(value, indentStyle);
+		if (value == null)
+		    throw new IllegalArgumentException();
+		fWorkingValues.put(currentKey, value);
+	}
+    
+    protected void updateControlEnablement(boolean inhomogenous, int wrappingStyle) {
 	    boolean doSplit= wrappingStyle != DefaultCodeFormatterConstants.WRAP_NO_SPLIT;
-	    fIndentStyleLabel.setEnabled(doSplit);
-	    fIndentStyleCombo.setEnabled(doSplit);
-	    fForceSplit.setEnabled(doSplit);
+	    fIndentStylePolicy.setEnabled(true);
+	    fIndentStyleCombo.setEnabled(inhomogenous || doSplit);
+	    fForceSplit.setEnabled(inhomogenous || doSplit);
 	}
 }
