@@ -48,7 +48,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	
 	public MembersView() {
 		setHasWorkingSetFilter(false);
-		setHasCustomSetFilter(false);
+		setHasCustomSetFilter(true);
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 	}
 

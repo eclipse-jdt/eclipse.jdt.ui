@@ -1828,13 +1828,24 @@ JavaStructureDiffViewerCreator
 	
 	<!-- Projects view -->
 	<filter
-		id= "org.eclipse.jdt.ui.PackagesView.LibraryFilter"
+		id= "org.eclipse.jdt.ui.ProjectsView.LibraryFilter"
 		name= "%HideReferencedLibraries.label"
 		description= "%HideReferencedLibraries.description"
 		viewId= "org.eclipse.jdt.ui.ProjectsView"
 		class= "org.eclipse.jdt.internal.ui.filters.LibraryFilter"
 		enabled= "false">
 	</filter>
+
+	<!-- Members view -->
+	<filter
+		id= "org.eclipse.jdt.ui.MembersView.ImportDeclarationFilter"
+		name= "%HideImportDeclaration.label"
+		description= "%HideImportDeclaration.description"
+		viewId= "org.eclipse.jdt.ui.MembersView"
+		class= "org.eclipse.jdt.internal.ui.filters.ImportDeclarationFilter"
+		enabled= "false">
+	</filter>
+
 </extension>
 
 </plugin>
