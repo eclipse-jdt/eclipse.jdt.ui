@@ -423,13 +423,19 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			if (!isLineTooLong(document, line) && !isLineTooShort(document, line))
 				return;
 		}
-
+		
+		boolean caretRelativeToParagraphOffset= false;
 		int caret= caretOffset[0];
 
 		int caretLine= document.getLineOfOffset(caret);
 		int lineOffset= document.getLineOffset(line);
 		int paragraphOffset= lineOffset + indent.length();
-		caret -= paragraphOffset;
+		if (paragraphOffset < caret) {
+			caret -= paragraphOffset;
+			caretRelativeToParagraphOffset= true;
+		} else {
+			caret -= lineOffset;
+		}
 
 		StringBuffer buffer= new StringBuffer();
 		int currentLine= line;
@@ -437,8 +443,10 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			
 			if (buffer.length() != 0 && !Character.isWhitespace(buffer.charAt(buffer.length() - 1))) {
 				buffer.append(' ');
-				if (currentLine <= caretLine)
+				if (currentLine <= caretLine) {
+					// in this case caretRelativeToParagraphOffset is always true
 					++caret;
+				}
 			}
 
 			String string= getLineContents(document, currentLine);			
@@ -446,12 +454,11 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			currentLine++;
 		}
 		String paragraph= buffer.toString();
-
+		
 		if (paragraph.trim().length() == 0)
 			return;
 
-		caretOffset[0]= caret;
-
+		caretOffset[0]= caretRelativeToParagraphOffset ? caret : 0;
 		String delimiter= document.getLineDelimiter(0);
 		String wrapped= formatParagraph(paragraph, caretOffset, indent, delimiter, getMargin());
 
@@ -459,7 +466,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		int end= document.getLineOffset(currentLine);
 		document.replace(beginning, end - beginning, wrapped.toString());
 
-		caretOffset[0] += beginning;
+		caretOffset[0]= caretRelativeToParagraphOffset ? caretOffset[0] + beginning : caret + beginning;
 	}
 	
 	/**
