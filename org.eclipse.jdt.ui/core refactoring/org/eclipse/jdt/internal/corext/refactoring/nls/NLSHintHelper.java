@@ -175,7 +175,7 @@ public class NLSHintHelper {
 		return null;
 	}
 
-	private static IFile getResourceBundleFile(IJavaProject javaProject, ITypeBinding accessorClass) throws JavaModelException {
+	public static IFile getResourceBundleFile(IJavaProject javaProject, ITypeBinding accessorClass) throws JavaModelException {
 		String resourceBundle= getResourceBundleName(javaProject, accessorClass);
 		if (resourceBundle == null) {
 			return null;
