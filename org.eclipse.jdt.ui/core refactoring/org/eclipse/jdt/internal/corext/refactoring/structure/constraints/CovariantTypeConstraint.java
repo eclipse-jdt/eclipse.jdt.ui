@@ -66,13 +66,13 @@ public final class CovariantTypeConstraint implements ITypeConstraint2 {
 	 * @see java.lang.Object#hashCode()
 	 */
 	public final int hashCode() {
-		return getLeft().hashCode() ^ 35 * getRight().hashCode();
+		return fDescendant.hashCode() ^ 35 * fAncestor.hashCode();
 	}
 
 	/*
 	 * @see java.lang.Object#toString()
 	 */
 	public final String toString() {
-		return getLeft().toString() + " <<= " + getRight().toString(); //$NON-NLS-1$ //$NON-NLS-2$
+		return fDescendant.toString() + " <<= " + fAncestor.toString(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }
