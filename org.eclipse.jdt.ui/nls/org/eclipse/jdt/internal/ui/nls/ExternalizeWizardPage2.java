@@ -300,7 +300,6 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 			return;
 
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[]{root.getJavaProject()});
-		IProject project= root.getJavaProject().getProject();
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES);
 		dialog.setTitle(Messages.getString("wizardPage2.Class_Selection")); //$NON-NLS-1$
 		dialog.setMessage(Messages.getString("wizardPage2.Choose_the_type_to_import")); //$NON-NLS-1$
