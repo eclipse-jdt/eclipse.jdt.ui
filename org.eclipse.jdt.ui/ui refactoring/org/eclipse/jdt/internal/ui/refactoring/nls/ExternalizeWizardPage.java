@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IStatus;
@@ -54,26 +53,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.ColumnLayoutData;
-import org.eclipse.jface.viewers.ColumnPixelData;
-import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.ICellModifier;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.IFontProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableLayout;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TextCellEditor;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
@@ -98,7 +78,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -160,18 +139,18 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		public Object getValue(Object element, String property) {
 			if (element instanceof NLSSubstitution) {
 				NLSSubstitution substitution= (NLSSubstitution) element;
-				if (PROPERTIES[KEY_PROP].equals(property))
-					return substitution.getKeyWithoutPrefix();
-				if (PROPERTIES[VAL_PROP].equals(property)) {
-					String value= substitution.getValue();
-					if (value != null) {
-						return value;
-					}
-					return ""; //$NON-NLS-1$
-				}
-				if (PROPERTIES[STATE_PROP].equals(property)) {
+				String res= null;
+				if (PROPERTIES[KEY_PROP].equals(property)) {
+					res= substitution.getKeyWithoutPrefix();
+				} else if (PROPERTIES[VAL_PROP].equals(property)) {
+					res= substitution.getValue();
+				} else if (PROPERTIES[STATE_PROP].equals(property)) {
 					return new Integer(substitution.getState());
 				}
+				if (res != null) {
+					return res;
+				}
+				return ""; //$NON-NLS-1$
 			}
 			return ""; //$NON-NLS-1$
 		}
@@ -328,11 +307,13 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		private StringDialogField fKeyField;
 		private StringDialogField fValueField;
 		private DialogField fMessageField;
+		private NLSSubstitution fSubstitution;
 
 		public NLSInputDialog(Shell parent, String title, String message, NLSSubstitution substitution) {
 			super(parent);
 			setTitle(title);
-
+			fSubstitution= substitution;
+			
 			fMessageField= new DialogField();
 			fMessageField.setLabelText(message);
 
@@ -344,7 +325,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			fValueField.setLabelText(NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Enter_value")); //$NON-NLS-1$
 			fValueField.setDialogFieldListener(this);
 
-			fKeyField.setText(substitution.getKeyWithoutPrefix());
+			if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
+				fKeyField.setText(substitution.getKeyWithoutPrefix());
+			} else {
+				fKeyField.setText(""); //$NON-NLS-1$
+			}
 			if (substitution.getValue() == null) {
 				fValueField.setText(""); //$NON-NLS-1$
 			} else {
@@ -368,14 +353,17 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			inner.setLayout(layout);
 
 			fMessageField.doFillIntoGrid(inner, 2);
-			fKeyField.doFillIntoGrid(inner, 2);
+			
+			if (fSubstitution.getState() == NLSSubstitution.EXTERNALIZED) {
+				fKeyField.doFillIntoGrid(inner, 2);
+				LayoutUtil.setWidthHint(fKeyField.getTextControl(null), convertWidthInCharsToPixels(45));
+			}
+			
 			fValueField.doFillIntoGrid(inner, 2);
-
-			LayoutUtil.setHorizontalGrabbing(fKeyField.getTextControl(null));
-			LayoutUtil.setWidthHint(fKeyField.getTextControl(null), convertWidthInCharsToPixels(45));
 			LayoutUtil.setWidthHint(fValueField.getTextControl(null), convertWidthInCharsToPixels(45));
+			LayoutUtil.setHorizontalGrabbing(fValueField.getTextControl(null));
 
-			fKeyField.postSetFocusOnDialogField(parent.getDisplay());
+			fValueField.postSetFocusOnDialogField(parent.getDisplay());
 
 			applyDialogFont(composite);
 			return composite;
@@ -385,47 +373,29 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
 		 */
 		public void dialogFieldChanged(DialogField field) {
-			IStatus keyStatus= validateIdentifiers(getTokens(fKeyField.getText(), ","), true); //$NON-NLS-1$
-			IStatus valueStatus= validateIdentifiers(getTokens(fValueField.getText(), ","), false); //$NON-NLS-1$
+			IStatus keyStatus= validateKey(fKeyField.getText()); //$NON-NLS-1$
+			//IStatus valueStatus= StatusInfo.OK_STATUS; // no validation yet
 
-			updateStatus(StatusUtil.getMoreSevere(valueStatus, keyStatus));
+			//updateStatus(StatusUtil.getMoreSevere(valueStatus, keyStatus));
+			updateStatus(keyStatus);
 		}
 
-		protected String[] getTokens(String text, String separator) {
-			StringTokenizer tok= new StringTokenizer(text, separator); //$NON-NLS-1$
-			int nTokens= tok.countTokens();
-			String[] res= new String[nTokens];
-			for (int i= 0; i < res.length; i++) {
-				res[i]= tok.nextToken().trim();
+
+		private IStatus validateKey(String val) {
+			if (fSubstitution.getState() != NLSSubstitution.EXTERNALIZED) {
+				return StatusInfo.OK_STATUS;
 			}
-			return res;
-		}
-
-		private IStatus validateIdentifiers(String[] values, boolean isKey) {
-			for (int i= 0; i < values.length; i++) {
-				String val= values[i];
-				if (val.length() == 0) {
-					if (isKey) {
-						return new StatusInfo(IStatus.ERROR, NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Error_empty_key")); //$NON-NLS-1$
-					} else {
-						return new StatusInfo(IStatus.ERROR, NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Error_empty_value")); //$NON-NLS-1$
-					}
-				}
-				// validation so keys don't contain spaces
-				if (isKey) {
-					if (!validateKey(val))
-						return new StatusInfo(IStatus.ERROR, NLSUIMessages.getFormattedString("ExternalizeWizardPage.NLSInputDialog.Error_invalid_key", val)); //$NON-NLS-1$
+			
+			if (val.length() == 0) {
+				return new StatusInfo(IStatus.ERROR, NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Error_empty_key")); //$NON-NLS-1$
+			}
+			// validation so keys don't contain spaces
+			for (int i= 0; i < val.length(); i++) {
+				if (Character.isWhitespace(val.charAt(i))) {
+					return new StatusInfo(IStatus.ERROR, NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Error_invalid_key")); //$NON-NLS-1$
 				}
 			}
-			return new StatusInfo();
-		}
-
-		private boolean validateKey(String s) {
-			for (int i= 0; i < s.length(); i++) {
-				if (Character.isWhitespace(s.charAt(i)))
-					return false;
-			}
-			return true;
+			return StatusInfo.OK_STATUS;
 		}
 	}
 
@@ -956,7 +926,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			if (dialog.open() == Window.CANCEL)
 				return;
 			KeyValuePair kvPair= dialog.getResult();
-			substitution.setKey(kvPair.getKey());
+			if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
+				substitution.setKey(kvPair.getKey());
+			}
 			substitution.setValue(kvPair.getValue());
 			fTableViewer.update(substitution, new String[]{PROPERTIES[KEY_PROP], PROPERTIES[VAL_PROP]});
 			validateKeys();
