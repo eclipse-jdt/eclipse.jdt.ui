@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.viewers.ISelection;
@@ -232,6 +233,9 @@ public class JavadocView extends AbstractInfoView {
 				 * from the SWT FAQ web site. 
 				 */
 				fIsUsingBrowserWidget= false;
+				String title= InfoViewMessages.getString("JavadocView.error.noBrowser.title"); //$NON-NLS-1$
+				String message= InfoViewMessages.getString("JavadocView.error.noBrowser.message"); //$NON-NLS-1$
+				MessageDialog.openError(parent.getShell(), title, message);
 			}
 		}
 		if (!fIsUsingBrowserWidget) {
