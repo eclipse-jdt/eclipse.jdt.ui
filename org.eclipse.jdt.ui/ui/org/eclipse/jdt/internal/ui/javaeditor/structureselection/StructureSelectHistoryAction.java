@@ -7,6 +7,7 @@ import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.ISourceRange;
 
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 
@@ -26,7 +27,7 @@ public class StructureSelectHistoryAction extends Action implements IUpdate {
 	}
 	
 	public void update() {
-		setEnabled(!fHistory.isEmpty());
+		setEnabled(null != SelectionConverter.getInputAsCompilationUnit(fEditor) && !fHistory.isEmpty());
 	}
 	
 	public void run() {
