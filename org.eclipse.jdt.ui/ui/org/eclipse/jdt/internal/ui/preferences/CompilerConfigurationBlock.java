@@ -179,7 +179,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		folder.setLayout(new TabFolderLayout());	
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
-		Composite commonComposite= createCommonMistakesTabContent(folder);
+		Composite commonComposite= createStyleTabContent(folder);
 		Composite unusedComposite= createUnusedCodeTabContent(folder);
 		Composite advancedComposite= createAdvancedTabContent(folder);
 		Composite complianceComposite= createComplianceTabContent(folder);
@@ -210,7 +210,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		return folder;
 	}
 
-	private Composite createCommonMistakesTabContent(Composite folder) {
+	private Composite createStyleTabContent(Composite folder) {
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
 		String[] errorWarningIgnoreLabels= new String[] {
@@ -240,9 +240,6 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_method_naming.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
 
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_incompatible_interface_method.label"); //$NON-NLS-1$
-		addComboBox(composite, label, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_hidden_catchblock.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_HIDDEN_CATCH_BLOCK, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 		
@@ -252,8 +249,12 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_no_effect_assignment.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_NO_EFFECT_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_char_array_in_concat.label"); //$NON-NLS-1$
-		addComboBox(composite, label, PREF_PB_CHAR_ARRAY_IN_CONCAT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_indirect_access_to_static.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_INDIRECT_STATIC_ACCESS, errorWarningIgnore, errorWarningIgnoreLabels, 0);	
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_accidential_assignement.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
 
 		return composite;
 	}
@@ -283,16 +284,9 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		gd.horizontalSpan= nColumns;
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
 		description.setLayoutData(gd);
-		
-		// indirect access to static member
-		String label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_indirect_access_to_static.label"); //$NON-NLS-1$
-		addComboBox(composite, label, PREF_PB_INDIRECT_STATIC_ACCESS, errorWarningIgnore, errorWarningIgnoreLabels, 0);	
-		
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_synth_access_emul.label"); //$NON-NLS-1$
+			
+		String label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_synth_access_emul.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_SYNTHETIC_ACCESS_EMULATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_accidential_assignement.label"); //$NON-NLS-1$
-		addComboBox(composite, label, PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_local_variable_hiding.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_LOCAL_VARIABLE_HIDING, errorWarningIgnore, errorWarningIgnoreLabels, 0);
@@ -306,6 +300,13 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_non_externalized_strings.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_incompatible_interface_method.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_char_array_in_concat.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_CHAR_ARRAY_IN_CONCAT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
 				
 		gd= new GridData();
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(6);
