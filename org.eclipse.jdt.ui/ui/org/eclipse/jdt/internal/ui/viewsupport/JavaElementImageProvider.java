@@ -57,6 +57,12 @@ public class JavaElementImageProvider {
 	 */	
 	public final static int LIGHT_TYPE_ICONS= 0x4;	
 
+	/**
+	 * Use the 'empty packages' image for packages with subpackags
+	 * but no Java Elements.
+	 */	
+	public final static int ALWAYS_PACKAGE_ICON= 0x8;
+
 
 	public static final Point SMALL_SIZE= new Point(16, 16);
 	public static final Point BIG_SIZE= new Point(22, 16);
@@ -113,6 +119,10 @@ public class JavaElementImageProvider {
 	private static boolean useLightIcons(int flags) {
 		return (flags & LIGHT_TYPE_ICONS) != 0;
 	}	
+	
+	private static boolean useAlwaysPackageIcon(int flags) {
+		return (flags & ALWAYS_PACKAGE_ICON) != 0;	
+	}
 	
 	/**
 	 * Returns an image descriptor for a java element. The descriptor includes overlays, if specified.
@@ -203,18 +213,7 @@ public class JavaElementImageProvider {
 				}
 				
 				case IJavaElement.PACKAGE_FRAGMENT:
-					IPackageFragment fragment= (IPackageFragment)element;
-					boolean doesNotContainJavaElements= false;
-					try {
-						doesNotContainJavaElements= !fragment.hasChildren();
-					} catch(JavaModelException e) {
-						return DESC_OBJ_FOLDER;
-					}
-					if (doesNotContainJavaElements && (fragment.getNonJavaResources().length >0)) 
-						return DESC_OBJ_FOLDER;
-					else if (doesNotContainJavaElements)
-						return JavaPluginImages.DESC_OBJS_EMPTY_PACKAGE;
-					return JavaPluginImages.DESC_OBJS_PACKAGE;
+					return getPackageFragmentIcon(element, renderFlags);
 
 					
 				case IJavaElement.COMPILATION_UNIT:
@@ -259,6 +258,24 @@ public class JavaElementImageProvider {
 			}
 			return JavaPluginImages.DESC_OBJS_GHOST;
 		}
+	}
+	
+	protected ImageDescriptor getPackageFragmentIcon(IJavaElement element, int renderFlags) throws JavaModelException {
+		IPackageFragment fragment= (IPackageFragment)element;
+		boolean doesNotContainJavaElements= false;
+		try {
+			doesNotContainJavaElements= !fragment.hasChildren();
+		} catch(JavaModelException e) {
+			return DESC_OBJ_FOLDER;
+		}
+		if(doesNotContainJavaElements && (fragment.getNonJavaResources().length >0)) {
+			if (fragment.hasSubpackages() && useAlwaysPackageIcon(renderFlags))
+				return JavaPluginImages.DESC_OBJS_EMPTY_PACKAGE;
+			else 
+				return DESC_OBJ_FOLDER;
+		 } else if (doesNotContainJavaElements)
+			return JavaPluginImages.DESC_OBJS_EMPTY_PACKAGE;
+		return JavaPluginImages.DESC_OBJS_PACKAGE;
 	}
 	
 	public void dispose() {
