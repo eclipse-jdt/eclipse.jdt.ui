@@ -489,7 +489,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	
 	private Control createPreviewer(Composite parent) {
 		
-		fJavaTextTools= new JavaTextTools(fOverlayStore);
+		fJavaTextTools= new JavaTextTools(fOverlayStore, false);
 		
 		fPreviewViewer= new SourceViewer(parent, null, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		fPreviewViewer.configure(new JavaSourceViewerConfiguration(fJavaTextTools, null));
@@ -1158,6 +1158,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	public void dispose() {
 		
 		if (fJavaTextTools != null) {
+			fJavaTextTools.dispose();
 			fJavaTextTools= null;
 		}
 		
@@ -1165,6 +1166,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			fOverlayStore.stop();
 			fOverlayStore= null;
 		}
+		if (fBackgroundColor != null && !fBackgroundColor.isDisposed())
+			fBackgroundColor.dispose();
 		
 		super.dispose();
 	}

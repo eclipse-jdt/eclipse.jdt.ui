@@ -60,7 +60,21 @@ public class JavaTextTools {
 	/** The preference change listener */
 	private PreferenceListener fPreferenceListener= new PreferenceListener();
 
-	
+
+	/**
+	 * Creates a new Java text tools collection.
+	 * @param store the preference store to initialize the text tools. The text tool
+	 * instance installs a listener on the passed preference store to adapt itself to 
+	 * changes in the preference store. In general <code>PreferenceConstants.
+	 * getPreferenceStore()</code> should be used to initialize the text tools.
+	 * 
+	 * @see org.eclipse.jdt.ui.PreferenceConstants#getPreferenceStore()
+	 * @since 2.0
+	 */
+	public JavaTextTools(IPreferenceStore store) {
+		this(store, true);
+	}
+
 	/**
 	 * Creates a new Java text tools collection.
 	 * 
@@ -68,15 +82,18 @@ public class JavaTextTools {
 	 * instance installs a listener on the passed preference store to adapt itself to 
 	 * changes in the preference store. In general <code>PreferenceConstants.
 	 * getPreferenceStore()</code> shoould be used to initialize the text tools.
+	 * @param autoDisposeOnDisplayDispose 	if <code>true</code>  the color manager
+	 * automatically disposes all managed colors when the current display gets disposed
+	 * and all calls to {@link org.eclipse.jface.text.source.ISharedTextColors#dispose()} are ignored.
 	 * 
 	 * @see org.eclipse.jdt.ui.PreferenceConstants#getPreferenceStore()
-	 * @since 2.0
+	 * @since 2.1
 	 */
-	public JavaTextTools(IPreferenceStore store) {
+	public JavaTextTools(IPreferenceStore store, boolean autoDisposeOnDisplayDispose) {
 		fPreferenceStore= store;
 		fPreferenceStore.addPropertyChangeListener(fPreferenceListener);
 		
-		fColorManager= new JavaColorManager();
+		fColorManager= new JavaColorManager(autoDisposeOnDisplayDispose);
 		fCodeScanner= new JavaCodeScanner(fColorManager, store);
 		fMultilineCommentScanner= new SingleTokenJavaScanner(fColorManager, store, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT);
 		fSinglelineCommentScanner= new SingleTokenJavaScanner(fColorManager, store, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);
