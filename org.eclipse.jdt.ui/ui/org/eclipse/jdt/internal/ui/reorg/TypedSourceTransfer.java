@@ -17,20 +17,20 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.compiler.ISourceElementRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 
-class JavaElementTransfer extends ByteArrayTransfer {
+class TypedSourceTransfer extends ByteArrayTransfer {
 
 	/**
 	 * Singleton instance.
 	 */
-	private static final JavaElementTransfer fgInstance = new JavaElementTransfer();
+	private static final TypedSourceTransfer fgInstance = new TypedSourceTransfer();
 	
 	// Create a unique ID to make sure that different Eclipse
-	// applications use different "types" of <code>JavaElementTransfer</code>
-	private static final String TYPE_NAME = "java-element-transfer-format:" + System.currentTimeMillis() + ":" + fgInstance.hashCode();//$NON-NLS-2$//$NON-NLS-1$
+	// applications use different "types" of <code>TypedSourceTransfer</code>
+	private static final String TYPE_NAME = "typed-source-transfer-format:" + System.currentTimeMillis() + ":" + fgInstance.hashCode();//$NON-NLS-2$//$NON-NLS-1$
 	
 	private static final int TYPEID = registerType(TYPE_NAME);
 
-	private JavaElementTransfer() {
+	private TypedSourceTransfer() {
 	}
 	
 	/**
@@ -38,7 +38,7 @@ class JavaElementTransfer extends ByteArrayTransfer {
  	*
  	* @return the singleton instance
  	*/
-	public static JavaElementTransfer getInstance() {
+	public static TypedSourceTransfer getInstance() {
 		return fgInstance;
 	}
 
@@ -62,23 +62,23 @@ class JavaElementTransfer extends ByteArrayTransfer {
 	 * Method declared on Transfer.
 	 */
 	protected void javaToNative(Object data, TransferData transferData) {
-		if (! canDataBeAccepted(data))
+		if (! (data instanceof TypedSource[]))
 			return;
-		IJavaElement[] sources = (IJavaElement[]) data;	
+		TypedSource[] sources = (TypedSource[]) data;	
 
 		/*
-		 * The java element serialization format is:
-		 *  (int) number of source references
-		 * Then, the following for each source reference:
-		 *  (String) java element handle identifier see <code>IJavaElement</code>
+		 * The serialization format is:
+		 *  (int) number of elements
+		 * Then, the following for each element:
+		 *  (int) type (see <code>IJavaElement</code>)
+		 *  (String) source of the element
 		 */
-		int count= sources.length;
 		
 		try {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			DataOutputStream dataOut = new DataOutputStream(out);
 
-			dataOut.writeInt(count);
+			dataOut.writeInt(sources.length);
 
 			for (int i = 0; i < sources.length; i++) {
 				writeJavaElement(dataOut, sources[i]);
@@ -106,7 +106,7 @@ class JavaElementTransfer extends ByteArrayTransfer {
 		DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
 		try {
 			int count = in.readInt();
-			IJavaElement[] results = new IJavaElement[count];
+			TypedSource[] results = new TypedSource[count];
 			for (int i = 0; i < count; i++) {
 				results[i] = readJavaElement(in);
 				Assert.isNotNull(results[i]);
@@ -117,19 +117,16 @@ class JavaElementTransfer extends ByteArrayTransfer {
 			return null;
 		}
 	}
-	
-	private static boolean canDataBeAccepted(Object data){
-		if (! (data instanceof IJavaElement[]))
-			return false;
-		return true;	
+
+	private static TypedSource readJavaElement(DataInputStream dataIn) throws IOException {
+		int type= dataIn.readInt();
+		String source= dataIn.readUTF();
+		return new TypedSource(source, type);
 	}
 
-	private static IJavaElement readJavaElement(DataInputStream dataIn) throws IOException {
-		return (IJavaElement)JavaCore.create(dataIn.readUTF());
-	}
-
-	private static void writeJavaElement(DataOutputStream dataOut, IJavaElement sourceReference) throws IOException, JavaModelException {
-		dataOut.writeUTF(((IJavaElement)sourceReference).getHandleIdentifier());
+	private static void writeJavaElement(DataOutputStream dataOut, TypedSource sourceReference) throws IOException, JavaModelException {
+		dataOut.writeInt(sourceReference.getType());
+		dataOut.writeUTF(sourceReference.getSource());
 	}
 }
 

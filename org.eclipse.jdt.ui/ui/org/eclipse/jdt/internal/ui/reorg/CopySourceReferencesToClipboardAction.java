@@ -39,29 +39,30 @@ public class CopySourceReferencesToClipboardAction extends SourceReferenceAction
 		copyToOSClipbard(SourceReferenceUtil.removeAllWithParentsSelected(elements));
 	}
 		
-	private static String convertToInputForOSClipboard(ISourceReference[] elems) throws JavaModelException {
+	private static String convertToInputForOSClipboard(TypedSource[] typedSources) throws JavaModelException {
 		String lineDelim= System.getProperty("line.separator", "\n"); //$NON-NLS-1$
 		StringBuffer buff= new StringBuffer();
-		for (int i= 0; i < elems.length; i++) {
-			buff.append(elems[i].getSource());
-			if (i != elems.length)
+		for (int i= 0; i < typedSources.length; i++) {
+			buff.append(typedSources[i].getSource());
+			if (i != typedSources.length)
 				buff.append(lineDelim);
 		}
 		return buff.toString();
 	}
 
-	private static IJavaElement[] convertToJavaElementArray(ISourceReference[] refs){
-		IJavaElement[] elems= new IJavaElement[refs.length];
+	private static TypedSource[] convertToTypedSourceArray(ISourceReference[] refs) throws JavaModelException {
+		TypedSource[] elems= new TypedSource[refs.length];
 		for (int i= 0; i < refs.length; i++) {
-			elems[i]= (IJavaElement)refs[i];
+			elems[i]= new TypedSource(refs[i]);
 		}
 		return elems;
 	}
 	
 	private static void copyToOSClipbard(ISourceReference[] refs)  throws JavaModelException {
 		Clipboard clipboard = new Clipboard(JavaPlugin.getActiveWorkbenchShell().getDisplay());
-		Object[] data= new Object[] { convertToInputForOSClipboard(refs), convertToJavaElementArray(refs)};
-		Transfer[] transfers= new Transfer[] { TextTransfer.getInstance(), JavaElementTransfer.getInstance()};
+		TypedSource[] typedSources= convertToTypedSourceArray(refs);
+		Object[] data= new Object[] { convertToInputForOSClipboard(typedSources), typedSources};
+		Transfer[] transfers= new Transfer[] { TextTransfer.getInstance(), TypedSourceTransfer.getInstance()};
 		clipboard.setContents(data, transfers);
 	}
 }
