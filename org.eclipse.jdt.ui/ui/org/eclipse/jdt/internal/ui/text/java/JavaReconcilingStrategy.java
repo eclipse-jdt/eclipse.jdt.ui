@@ -87,7 +87,8 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 						synchronized (unit) {
 							if (fIsJavaReconcilingListener) {
 								ast= unit.reconcile(AST.LEVEL_2_0, true, null, fProgressMonitor);
-								markAsUnmodifiable(ast);
+								if (ast != null)
+									markAsUnmodifiable(ast);
 							} else
 								unit.reconcile(0, true, null, fProgressMonitor);
 						}
