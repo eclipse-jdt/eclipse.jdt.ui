@@ -1,7 +1,7 @@
 package p;
 
 class A {
-	protected static class T{}
+	static class T{}
 }
 class B extends A {
 

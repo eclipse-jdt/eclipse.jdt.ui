@@ -866,15 +866,18 @@ public final class MemberVisibilityAdjustor {
 								IType superType= null;
 								for (int index= 0; index < types.length; index++) {
 									superType= types[index];
-									if (superType.equals(typeReferenced.getDeclaringType())) {
-										keyword= ModifierKeyword.PROTECTED_KEYWORD;
+									if (superType.equals(typeReferenced)) {
+										keyword= null;
 										return keyword;
 									}
 								}
 							}
-							if (typeReferenced.getCompilationUnit().equals(type.getCompilationUnit()))
-								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (typeReferenced.getCompilationUnit().getParent().equals(type.getCompilationUnit().getParent()))
+							if (typeReferenced.getCompilationUnit().equals(type.getCompilationUnit())) {
+								if (typeReferenced.getDeclaringType() != null)
+									keyword= null;
+								else
+									keyword= ModifierKeyword.PRIVATE_KEYWORD;
+							} else if (typeReferenced.getCompilationUnit().getParent().equals(type.getCompilationUnit().getParent()))
 								keyword= null;
 							break;
 						case IJavaElement.PACKAGE_FRAGMENT:
@@ -952,9 +955,12 @@ public final class MemberVisibilityAdjustor {
 									}
 								}
 							}
-							if (methodReferenced.getCompilationUnit().equals(type.getCompilationUnit()))
-								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (methodReferenced.getCompilationUnit().getParent().equals(type.getCompilationUnit().getParent()))
+							if (methodReferenced.getCompilationUnit().equals(type.getCompilationUnit())) {
+								if (methodReferenced.getDeclaringType().getDeclaringType() != null)
+									keyword= null;
+								else
+									keyword= ModifierKeyword.PRIVATE_KEYWORD;
+							} else if (methodReferenced.getCompilationUnit().getParent().equals(type.getCompilationUnit().getParent()))
 								keyword= null;
 							break;
 						case IJavaElement.PACKAGE_FRAGMENT:
