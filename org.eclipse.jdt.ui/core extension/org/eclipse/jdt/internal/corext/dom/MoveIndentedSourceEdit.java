@@ -101,26 +101,28 @@ public final class MoveIndentedSourceEdit extends MoveSourceEdit {
 	}
 	
 	private SimpleTextEdit[] getChangeIndentEdits(TextBuffer buffer, TextRange range) {
+		return getChangeIndentEdits(buffer, range, fSourceIndentLevel, fTabWidth, fDestinationIndent);
+	}
+	
+	public static SimpleTextEdit[] getChangeIndentEdits(TextBuffer buffer, TextRange range, int sourceIndent, int tabWidth, String destIndent) {
 		int endPos= range.getExclusiveEnd();
 		int firstLine= buffer.getLineOfOffset(range.getOffset());
 		int lastLine= buffer.getLineOfOffset(endPos - 1);
 		
 		int nLines= lastLine - firstLine;
 		if (nLines <= 0) {
-			return null;
+			return new SimpleTextEdit[0];
 		}
 		SimpleTextEdit[] res= new SimpleTextEdit[nLines];
 		for (int i= firstLine + 1, k= 0; i <= lastLine; i++) { // no indent for first line (contained in the formatted string)
 			String line= buffer.getLineContent(i);
 			int offset= buffer.getLineInformation(i).getOffset();
-			int length= line.length() - Strings.trimIndent(line, fSourceIndentLevel, fTabWidth).length();
+			int length= line.length() - Strings.trimIndent(line, sourceIndent, tabWidth).length();
 			if (offset + length > endPos) {
 				length= endPos - offset;
 			}
-			res[k++]= SimpleTextEdit.createReplace(offset, length, fDestinationIndent);
+			res[k++]= SimpleTextEdit.createReplace(offset, length, destIndent);
 		}
 		return res;	
-	}
-	
-	
+	}	
 }
