@@ -297,6 +297,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 	 */
 	private Control createWrapperClassControl(Composite parent) {
 		Composite result= new Composite(parent, SWT.NONE);
+		result.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		result.setLayout(layout);
@@ -353,6 +354,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 	 */
 	private Control createPropertyFileControl(Composite parent) {
 		Composite result= new Composite(parent, SWT.NONE);
+		result.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));		
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		result.setLayout(layout);
