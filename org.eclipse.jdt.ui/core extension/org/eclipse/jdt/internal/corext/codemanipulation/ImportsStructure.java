@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -48,6 +49,7 @@ public class ImportsStructure implements IImportsStructure {
 	
 	private boolean fRestoreExistingImports;
 	private boolean fFilterImplicitImports;
+	private boolean fFindAmbiguousImports;
 	
 	private int fNumberOfImportsCreated;
 	private boolean fHasChanges= false;
@@ -73,6 +75,7 @@ public class ImportsStructure implements IImportsStructure {
 		fImportOnDemandThreshold= importThreshold;
 		fRestoreExistingImports= restoreExistingImports && container.exists();
 		fFilterImplicitImports= true;
+		fFindAmbiguousImports= true;
 		
 		fPackageEntries= new ArrayList(20);
 		
@@ -214,6 +217,14 @@ public class ImportsStructure implements IImportsStructure {
 	 */
 	public void setFilterImplicitImports(boolean filterImplicitImports) {
 		fFilterImplicitImports= filterImplicitImports;
+	}
+	
+	/**
+	 * When set searches for imports that can not be folded into on-demand
+	 * imports but must be specified explicitly
+	 */
+	public void setFindAmbiguousImports(boolean findAmbiguousImports) {
+		fFindAmbiguousImports= findAmbiguousImports;
 	}	
 			
 	private static boolean sameMatchLenTest(String newName, String bestName, String currName, int matchLen) {				
@@ -298,7 +309,6 @@ public class ImportsStructure implements IImportsStructure {
 		if (JAVA_LANG.equals(qualifier)) { //$NON-NLS-1$
 			return true;
 		}
-		
 		String packageName= cu.getParent().getElementName();
 		if (qualifier.equals(packageName)) {
 			return true;
@@ -328,6 +338,10 @@ public class ImportsStructure implements IImportsStructure {
 		String typeContainerName= Signature.getQualifier(fullTypeName);
 		String typeName= Signature.getSimpleName(fullTypeName);
 		
+		if (typeContainerName.length() == 0 && PrimitiveType.toCode(typeName) != null) {
+			return fullTypeName;
+		}
+		
 		if (!"*".equals(typeName)) { //$NON-NLS-1$
 			String topLevelTypeName= Signature.getQualifier(fCompilationUnit.getElementName());
 			
@@ -346,9 +360,6 @@ public class ImportsStructure implements IImportsStructure {
 					return fullTypeName;
 				}
 			}
-			/*if (fFilterImplicitImports && isImplicitImport(typeContainerName, fCompilationUnit)) {
-				return typeName;
-			}*/
 		}
 		
 		ImportDeclEntry decl= new ImportDeclEntry(fullTypeName, null);
@@ -578,7 +589,7 @@ public class ImportsStructure implements IImportsStructure {
 				starImportPackages.add(pack.getName());
 			}
 		}
-		if (starImportPackages.size() == 0) {
+		if (!fFindAmbiguousImports || starImportPackages.size() == 0) {
 			return;
 		}
 		starImportPackages.add(fCompilationUnit.getParent().getElementName());
@@ -839,5 +850,7 @@ public class ImportsStructure implements IImportsStructure {
 	public boolean hasChanges() {
 		return fHasChanges;
 	}
+
+
 
 }
