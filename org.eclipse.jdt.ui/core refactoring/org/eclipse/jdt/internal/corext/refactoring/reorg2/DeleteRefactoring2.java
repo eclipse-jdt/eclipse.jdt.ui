@@ -708,9 +708,7 @@ public class DeleteRefactoring2 extends Refactoring{
 		private static boolean canDelete(IResource resource) {
 			if (resource == null || ! resource.exists() || resource.isPhantom())
 				return false;
-			if (resource instanceof IWorkspaceRoot)
-				return false;
-			if (resource instanceof IProject)
+			if (resource.getType() == IResource.ROOT || resource.getType() == IResource.PROJECT)
 				return false;
 			return true;
 		}
@@ -719,10 +717,7 @@ public class DeleteRefactoring2 extends Refactoring{
 			if (element == null || ! element.exists())
 				return false;
 		
-			if (element instanceof IJavaModel)
-				return false;
-
-			if (element instanceof IJavaProject)
+			if (element instanceof IJavaModel || element instanceof IJavaProject)
 				return false;
 		
 			if (element.getParent() != null && element.getParent().isReadOnly())
