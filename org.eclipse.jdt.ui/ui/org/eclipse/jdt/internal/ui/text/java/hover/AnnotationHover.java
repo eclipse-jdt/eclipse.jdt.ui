@@ -28,8 +28,6 @@ import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
@@ -64,7 +62,7 @@ public class AnnotationHover extends AbstractJavaEditorTextHover {
 		IAnnotationModel model= provider.getAnnotationModel(getEditor().getEditorInput());
 		
 		if (model != null) {
-			Iterator e= new JavaAnnotationIterator(model, true);
+			Iterator e= new JavaAnnotationIterator(model, true, true);
 			int layer= -1;
 			String message= null;
 			while (e.hasNext()) {
@@ -114,9 +112,5 @@ public class AnnotationHover extends AbstractJavaEditorTextHover {
 		if (annotation.isMarkedDeleted())
 			return null;
 		return EditorsUI.getAnnotationPreferenceLookup().getAnnotationPreference(annotation);
-	}
-
-	static boolean isJavaProblemHover(String id) {
-		return PreferenceConstants.ID_PROBLEM_HOVER.equals(id);
 	}
 }
