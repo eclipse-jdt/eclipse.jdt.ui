@@ -12,10 +12,13 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -89,6 +92,29 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 			fProblemItemMapper.removeFromMap(element, (Item) item);
 		}		
 		super.unmapElement(element, item);
+	}
+
+	/*
+	 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
+	 */
+	protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
+		Object o= event.getElement();
+		// map the event to the Java elements if possible
+		// this does not handle the ambiguity of default packages
+		
+		// needs to handle the case of:
+		// default package
+		// package fragment root on project
+		if (o instanceof IResource) {
+			IResource r= (IResource)o;
+			IJavaElement element= JavaCore.create(r);
+			if (element != null) {
+				LabelProviderChangedEvent e= new LabelProviderChangedEvent((IBaseLabelProvider)event.getSource(), element);
+				super.handleLabelProviderChanged(e);
+				return;
+			}
+		}
+		super.handleLabelProviderChanged(event);
 	}
 
 }
