@@ -2720,6 +2720,9 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				continue;
 				
 			Position p= model.getPosition(a);
+			if (p == null)
+				continue;
+			
 			if (!(p.includes(offset) || (p.getLength() == 0 && offset == p.offset))) {
 				
 				int currentDistance= 0;
