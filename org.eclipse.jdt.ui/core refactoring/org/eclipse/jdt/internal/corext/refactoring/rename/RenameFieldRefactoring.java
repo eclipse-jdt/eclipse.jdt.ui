@@ -66,7 +66,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	private boolean fRenameSetter;
 	
 	public RenameFieldRefactoring(IField field){
-		Assert.isTrue(field.exists());
+		Assert.isNotNull(field);
 		fField= field;
 		fNewName= fField.getElementName();
 		fUpdateReferences= true;

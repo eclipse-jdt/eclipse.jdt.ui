@@ -88,6 +88,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	private String fFilePatterns;
 
 	public RenameTypeRefactoring(IType type) {
+		Assert.isNotNull(type);
 		fType= type;
 		fNewName= type.getElementName();
 		fUpdateReferences= true; //default is yes

@@ -106,6 +106,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 															"short"});	//$NON-NLS-1$
 
 	public ChangeSignatureRefactoring(IMethod method){
+		Assert.isNotNull(method);
 		fMethod= method;
 		fParameterInfos= createParameterInfoList(method);
 		fAstManager= new ASTNodeMappingManager();
