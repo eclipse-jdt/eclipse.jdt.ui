@@ -37,7 +37,6 @@ import org.eclipse.jface.text.templates.ContextTypeRegistry;
 
 import org.eclipse.ui.IEditorPart;
 
-import org.eclipse.ui.texteditor.templates.TemplateProposal;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
@@ -51,6 +50,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 
 
 /**

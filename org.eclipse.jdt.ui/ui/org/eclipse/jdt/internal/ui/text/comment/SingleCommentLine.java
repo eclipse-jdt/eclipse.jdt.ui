@@ -36,57 +36,57 @@ public class SingleCommentLine extends CommentLine {
 		super(region);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#adapt(org.eclipse.jdt.internal.ui.text.comment.CommentLine)
+	/**
+	 * @inheritDoc
 	 */
 	protected void adapt(final CommentLine previous) {
 		// Do nothing
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#applyEnd(org.eclipse.jdt.internal.ui.text.comment.CommentRange,java.lang.String, int)
+	/**
+	 * @inheritDoc
 	 */
-	protected void applyEnd(final CommentRange range, final String indentation, final int length) {
+	protected void formatLowerBorder(final CommentRange range, final String indentation, final int length) {
 
 		final int offset= range.getOffset() + range.getLength();
 		final CommentRegion parent= getParent();
 
-		parent.applyText(parent.getDelimiter(), offset, parent.getLength() - offset);
+		parent.logEdit(parent.getDelimiter(), offset, parent.getLength() - offset);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#applyStart(org.eclipse.jdt.internal.ui.text.comment.CommentRange,java.lang.String, int)
+	/**
+	 * @inheritDoc
 	 */
-	protected void applyStart(final CommentRange range, final String indentation, final int length) {
+	protected void formatUpperBorder(final CommentRange range, final String indentation, final int length) {
 
 		final CommentRegion parent= getParent();
 
-		parent.applyText(getContentPrefix(), 0, range.getOffset() - parent.getOffset());
+		parent.logEdit(getContentPrefix(), 0, range.getOffset() - parent.getOffset());
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#getContentLinePrefix()
+	/**
+	 * @inheritDoc
 	 */
 	protected String getContentPrefix() {
 		return SINGLE_COMMENT_PREFIX;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#getEndLinePrefix()
+	/**
+	 * @inheritDoc
 	 */
 	protected String getEndingPrefix() {
 		return SINGLE_COMMENT_PREFIX;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#getStartLinePrefix()
+	/**
+	 * @inheritDoc
 	 */
 	protected String getStartingPrefix() {
 		return SINGLE_COMMENT_PREFIX;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#scanLine(int)
+	/**
+	 * @inheritDoc
 	 */
 	protected void scanLine(final int line) {
 
@@ -104,8 +104,8 @@ public class SingleCommentLine extends CommentLine {
 		}
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#tokenizeLine(int)
+	/**
+	 * @inheritDoc
 	 */
 	protected void tokenizeLine(final int line) {
 

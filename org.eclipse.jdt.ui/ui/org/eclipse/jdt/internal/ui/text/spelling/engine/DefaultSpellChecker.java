@@ -270,7 +270,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 */
 	public final boolean isCorrect(final String word) {
 
-		if (fIgnored.contains(word))
+		if (fIgnored.contains(word.toLowerCase()))
 			return true;
 
 		ISpellDictionary dictionary= null;

@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TypedPosition;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -41,21 +42,22 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 	/** Should root tags be separated from description? */
 	private boolean fSeparateRoots;
 
-	/**
-	 * Creates a new multi-comment region.
-	 * 
-	 * @param strategy
-	 *                  The comment formatting strategy used to format this comment
-	 *                  region
-	 * @param position
-	 *                  The typed position which forms this comment region
-	 * @param delimiter
-	 *                  The line delimiter to use in this comment region
-	 */
-	protected MultiCommentRegion(final CommentFormattingStrategy strategy, final TypedPosition position, final String delimiter) {
-		super(strategy, position, delimiter);
-
-		final Map preferences= strategy.getPreferences();
+ 	/**
+ 	 * Creates a new multi-comment region.
+ 	 * 
+	 * @param document
+	 *                   The document which contains the comment region
+ 	 * @param position
+	 *                   The position of this comment region in the document
+ 	 * @param delimiter
+	 *                   The line delimiter of this comment region
+	 * @param preferences
+	 *                   The formatting preferences for this region
+	 * @param textMeasurement
+	 *                   The text measurement. Can be <code>null</code>.
+ 	 */
+	protected MultiCommentRegion(final IDocument document, final TypedPosition position, final String delimiter, final Map preferences, final ITextMeasurement textMeasurement) {
+		super(document, position, delimiter, preferences, textMeasurement);
 
 		fIndentRoots= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS));
 		fIndentDescriptions= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION));
@@ -63,15 +65,15 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 		fParameterNewLine= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER));
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentRegion#canAppend(org.eclipse.jdt.internal.ui.text.comment.CommentLine,org.eclipse.jdt.internal.ui.text.comment.CommentRange, org.eclipse.jdt.internal.ui.text.comment.CommentRange, int, int)
+	/**
+	 * @inheritDoc
 	 */
-	protected boolean canAppend(final CommentLine line, final CommentRange previous, final CommentRange next, final int position, int count) {
+	protected boolean canAppend(final CommentLine line, final CommentRange previous, final CommentRange next, final int index, int count) {
 
 		final boolean blank= next.hasAttribute(COMMENT_BLANKLINE);
 
-		// TODO does not work for TestCase.java: <br>1) is not wrapped
-		if (next.getLength() <= 2 && !blank && !isCommentWord(next))
+		// Avoid wraping punctuation
+		if (next.getLength() <= 2 && !blank && isNonAlphaNumeric(next))
 			return true;
 
 		if (fParameterNewLine && line.hasAttribute(COMMENT_PARAMETER) && line.getSize() > 1)
@@ -82,7 +84,7 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 			if (previous.hasAttribute(COMMENT_ROOT))
 				return true;
 
-			if (position != 0 && (blank || previous.hasAttribute(COMMENT_BLANKLINE) || next.hasAttribute(COMMENT_PARAMETER) || next.hasAttribute(COMMENT_ROOT) || next.hasAttribute(COMMENT_SEPARATOR) || next.hasAttribute(COMMENT_NEWLINE) || previous.hasAttribute(COMMENT_BREAK) || previous.hasAttribute(COMMENT_SEPARATOR)))
+			if (index != 0 && (blank || previous.hasAttribute(COMMENT_BLANKLINE) || next.hasAttribute(COMMENT_PARAMETER) || next.hasAttribute(COMMENT_ROOT) || next.hasAttribute(COMMENT_SEPARATOR) || next.hasAttribute(COMMENT_NEWLINE) || previous.hasAttribute(COMMENT_BREAK) || previous.hasAttribute(COMMENT_SEPARATOR)))
 				return false;
 
 			if (next.hasAttribute(COMMENT_IMMUTABLE) && previous.hasAttribute(COMMENT_IMMUTABLE))
@@ -90,13 +92,13 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 		}
 
 		if (fIndentRoots && !line.hasAttribute(COMMENT_ROOT) && !line.hasAttribute(COMMENT_PARAMETER))
-			count -= stringToLength(line.getIndentation());
+			count -= stringToLength(line.getIndentationReference());
 
-		return super.canAppend(line, previous, next, position, count);
+		return super.canAppend(line, previous, next, index, count);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentRegion#getDelimiter(org.eclipse.jdt.internal.ui.text.comment.CommentLine, org.eclipse.jdt.internal.ui.text.comment.CommentLine, org.eclipse.jdt.internal.ui.text.comment.CommentRange, org.eclipse.jdt.internal.ui.text.comment.CommentRange, java.lang.String)
+	/**
+	 * @inheritDoc
 	 */
 	protected String getDelimiter(CommentLine predecessor, CommentLine successor, CommentRange previous, CommentRange next, String indentation) {
 
@@ -107,24 +109,24 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 			if (previous.hasAttribute(COMMENT_IMMUTABLE | COMMENT_SEPARATOR) && !next.hasAttribute(COMMENT_CODE) && !successor.hasAttribute(COMMENT_BLANKLINE))
 				return delimiter + delimiter;
 
-			else if (previous.hasAttribute(COMMENT_CODE) && !next.hasAttribute(COMMENT_CODE))
-				return getDelimiter();
-			
-			// remove any asterix borders inside code sections
-			else if (previous.hasAttribute(COMMENT_CODE) && next.hasAttribute(COMMENT_CODE))
-				return getDelimiter();
+//			else if (previous.hasAttribute(COMMENT_CODE) && !next.hasAttribute(COMMENT_CODE))
+//				return getDelimiter();
+//			
+//			// remove any asterisk borders inside code sections
+//			else if (previous.hasAttribute(COMMENT_CODE) && next.hasAttribute(COMMENT_CODE))
+//				return getDelimiter();
 
 			else if ((next.hasAttribute(COMMENT_IMMUTABLE | COMMENT_SEPARATOR) || ((fSeparateRoots || !isClearLines()) && previous.hasAttribute(COMMENT_PARAGRAPH))) && !successor.hasAttribute(COMMENT_BLANKLINE) && !predecessor.hasAttribute(COMMENT_BLANKLINE))
 				return delimiter + delimiter;
 
 			else if (fIndentRoots && !predecessor.hasAttribute(COMMENT_ROOT) && !predecessor.hasAttribute(COMMENT_PARAMETER) && !predecessor.hasAttribute(COMMENT_BLANKLINE))
-				return delimiter + stringToIndent(predecessor.getIndentation(), false);
+				return delimiter + stringToIndent(predecessor.getIndentationReference(), false);
 		}
 		return delimiter;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentRegion#getDelimiter(org.eclipse.jdt.internal.ui.text.comment.CommentRange,org.eclipse.jdt.internal.ui.text.comment.CommentRange)
+	/**
+	 * @inheritDoc
 	 */
 	protected String getDelimiter(final CommentRange previous, final CommentRange next) {
 
@@ -139,10 +141,10 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 			else if (!next.hasAttribute(COMMENT_CODE) && previous.hasAttribute(COMMENT_CODE))
 				return ""; //$NON-NLS-1$
 
-			else if (next.hasAttribute(COMMENT_CLOSE) && previous.getLength() <= 2 && !isCommentWord(previous))
+			else if (next.hasAttribute(COMMENT_CLOSE) && previous.getLength() <= 2 && !isAlphaNumeric(previous))
 				return ""; //$NON-NLS-1$
 
-			else if (previous.hasAttribute(COMMENT_OPEN) && next.getLength() <= 2 && !isCommentWord(next))
+			else if (previous.hasAttribute(COMMENT_OPEN) && next.getLength() <= 2 && !isAlphaNumeric(next))
 				return ""; //$NON-NLS-1$
 		}
 		return super.getDelimiter(previous, next);
@@ -151,8 +153,8 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 	/**
 	 * Should root tag parameter descriptions be indented after the tag?
 	 * 
-	 * @return <code>true</code> iff the descriptions should be indented after,
-	 *               <code>false</code> otherwise.
+	 * @return <code>true</code> iff the descriptions should be indented
+	 *               after, <code>false</code> otherwise.
 	 */
 	protected final boolean isIndentDescriptions() {
 		return fIndentDescriptions;
@@ -161,15 +163,15 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 	/**
 	 * Should root tag parameter descriptions be indented?
 	 * 
-	 * @return <code>true</code> iff the root tags should be indented,
-	 *               <code>false</code> otherwise.
+	 * @return <code>true</code> iff the root tags should be indented, <code>false</code>
+	 *               otherwise.
 	 */
 	protected final boolean isIndentRoots() {
 		return fIndentRoots;
 	}
 
 	/**
-	 * Marks the comment ranges confined by html tags.
+	 * Marks the comment ranges confined by HTML ranges.
 	 */
 	protected void markHtmlRanges() {
 		// Do nothing
@@ -179,9 +181,9 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 	 * Marks the comment range with its html tag attributes.
 	 * 
 	 * @param range
-	 *                  The comment range to mark
+	 *                   The comment range to mark
 	 * @param token
-	 *                  Token associated with the comment range
+	 *                   Token associated with the comment range
 	 */
 	protected void markHtmlTag(final CommentRange range, final String token) {
 		// Do nothing
@@ -191,18 +193,18 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 	 * Marks the comment range with its javadoc tag attributes.
 	 * 
 	 * @param range
-	 *                  The comment range to mark
+	 *                   The comment range to mark
 	 * @param token
-	 *                  Token associated with the comment range
+	 *                   Token associated with the comment range
 	 */
 	protected void markJavadocTag(final CommentRange range, final String token) {
 		range.markPrefixTag(COMMENT_ROOT_TAGS, COMMENT_TAG_PREFIX, token, COMMENT_ROOT);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentRegion#markRegion()
+	/**
+	 * @inheritDoc
 	 */
-	protected final void markRegion() {
+	protected void markRegion() {
 
 		int count= 0;
 		boolean paragraph= false;

@@ -25,27 +25,27 @@ public class JavaDocLine extends MultiCommentLine {
 	 * Creates a new javadoc line.
 	 * 
 	 * @param region
-	 *                  Comment region to create the line for
+	 *                   Comment region to create the line for
 	 */
 	protected JavaDocLine(final CommentRegion region) {
 		super(region);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#applyStart(org.eclipse.jdt.internal.ui.text.comment.CommentRange,java.lang.String, int)
+	/**
+	 * @inheritDoc
 	 */
-	protected void applyStart(final CommentRange range, final String indentation, final int length) {
+	protected void formatUpperBorder(final CommentRange range, final String indentation, final int length) {
 
 		final CommentRegion parent= getParent();
 
 		if (parent.isSingleLine() && parent.getSize() == 1) {
-			parent.applyText(getStartingPrefix() + CommentRegion.COMMENT_RANGE_DELIMITER, 0, range.getOffset());
+			parent.logEdit(getStartingPrefix() + CommentRegion.COMMENT_RANGE_DELIMITER, 0, range.getOffset());
 		} else
-			super.applyStart(range, indentation, length);
+			super.formatUpperBorder(range, indentation, length);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#getStartingPrefix()
+	/**
+	 * @inheritDoc
 	 */
 	protected String getStartingPrefix() {
 		return JAVADOC_START_PREFIX;

@@ -57,7 +57,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 	private int fPrefixLength;
 	
 	// emulate JavaPartitionScanner
-	private static final boolean fgEmulate= false;
+	private boolean fEmulate= false;
 	private int fJavaOffset;
 	private int fJavaLength;
 	
@@ -69,6 +69,14 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 		new Token(JAVA_CHARACTER),
 		new Token(JAVA_STRING)
 	};
+	
+	public FastJavaPartitionScanner(boolean emulate) {
+	    fEmulate= emulate;
+	}
+	
+	public FastJavaPartitionScanner() {
+	    this(false);
+	}
 
 	/*
 	 * @see org.eclipse.jface.text.rules.ITokenScanner#nextToken()
@@ -76,7 +84,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 	public IToken nextToken() {
 		
 		// emulate JavaPartitionScanner
-		if (fgEmulate) {
+		if (fEmulate) {
 			if (fJavaOffset != -1 && fTokenOffset + fTokenLength != fJavaOffset + fJavaLength) {
 				fTokenOffset += fTokenLength;		
 				return fTokens[JAVA];	
@@ -107,7 +115,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 
 	 		case '\r':
 	 			// emulate JavaPartitionScanner
-	 			if (!fgEmulate && fLast != CARRIAGE_RETURN) {
+	 			if (!fEmulate && fLast != CARRIAGE_RETURN) {
 						fLast= CARRIAGE_RETURN;
 						fTokenLength++;
 	 					continue;
@@ -122,7 +130,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 							IToken token= fTokens[fState];
 							
 				 			// emulate JavaPartitionScanner
-							if (fgEmulate) {
+							if (fEmulate) {
 								fTokenLength++;
 								fLast= NONE;
 								fPrefixLength= 0;
@@ -159,7 +167,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 				}
 
 			default:
-				if (!fgEmulate && fLast == CARRIAGE_RETURN) {			
+				if (!fEmulate && fLast == CARRIAGE_RETURN) {			
 					switch (fState) {
 					case SINGLE_LINE_COMMENT:
 					case CHARACTER:
@@ -420,7 +428,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 
 	private final IToken preFix(int state, int newState, int last, int prefixLength) {
 		// emulate JavaPartitionScanner
-		if (fgEmulate && state == JAVA && (fTokenLength - getLastLength(fLast) > 0)) {
+		if (fEmulate && state == JAVA && (fTokenLength - getLastLength(fLast) > 0)) {
 			fTokenLength -= getLastLength(fLast);
 			fJavaOffset= fTokenOffset;
 			fJavaLength= fTokenLength;
@@ -483,7 +491,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 		}
 
 		// emulate JavaPartitionScanner
-		if (fgEmulate) {
+		if (fEmulate) {
 			fJavaOffset= -1;
 			fJavaLength= 0;
 		}
@@ -502,7 +510,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 		fState= JAVA;
 
 		// emulate JavaPartitionScanner
-		if (fgEmulate) {
+		if (fEmulate) {
 			fJavaOffset= -1;
 			fJavaLength= 0;
 		}

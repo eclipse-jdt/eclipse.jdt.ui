@@ -35,9 +35,8 @@ import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
-import org.eclipse.jface.text.formatter.ContentFormatter2;
+import org.eclipse.jface.text.formatter.MultiPassContentFormatter;
 import org.eclipse.jface.text.formatter.IContentFormatter;
-import org.eclipse.jface.text.formatter.IFormattingStrategy;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.InformationPresenter;
@@ -73,8 +72,7 @@ import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
 import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
-import org.eclipse.jdt.internal.ui.text.comment.JavaDocRegion;
-import org.eclipse.jdt.internal.ui.text.comment.JavaSnippetFormattingStrategy;
+import org.eclipse.jdt.internal.ui.text.comment.DefaultTextMeasurement;
 import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
@@ -661,17 +659,14 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getContentFormatter(ISourceViewer)
 	 */
 	public IContentFormatter getContentFormatter(ISourceViewer sourceViewer) {
-
-		final ContentFormatter2 formatter= new ContentFormatter2();
-		formatter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
-		IFormattingStrategy strategy= new JavaFormattingStrategy(sourceViewer);
-		formatter.setFormattingStrategy(strategy);
-		formatter.setFormattingStrategy(strategy, IDocument.DEFAULT_CONTENT_TYPE);
-		formatter.setFormattingStrategy(new CommentFormattingStrategy(formatter, sourceViewer), IJavaPartitions.JAVA_DOC);
-		formatter.setFormattingStrategy(new CommentFormattingStrategy(formatter, sourceViewer), IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
-		formatter.setFormattingStrategy(new CommentFormattingStrategy(formatter, sourceViewer), IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
-		formatter.setFormattingStrategy(new JavaSnippetFormattingStrategy(sourceViewer), JavaDocRegion.JAVA_SNIPPET_PARTITION);
-
+		final MultiPassContentFormatter formatter= new MultiPassContentFormatter(getConfiguredDocumentPartitioning(sourceViewer), IDocument.DEFAULT_CONTENT_TYPE);
+		
+		formatter.setMasterStrategy(new JavaFormattingStrategy());
+		DefaultTextMeasurement textMeasurement= new DefaultTextMeasurement(sourceViewer.getTextWidget());
+		formatter.setSlaveStrategy(new CommentFormattingStrategy(textMeasurement), IJavaPartitions.JAVA_DOC);
+		formatter.setSlaveStrategy(new CommentFormattingStrategy(textMeasurement), IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
+		formatter.setSlaveStrategy(new CommentFormattingStrategy(textMeasurement), IJavaPartitions.JAVA_MULTI_LINE_COMMENT);		
+		
 		return formatter;
 	}
 	

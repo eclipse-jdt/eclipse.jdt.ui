@@ -11,16 +11,15 @@
 
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
-
 /**
  * Javadoc tag constants.
  * 
  * @since 3.0
  */
-public interface IJavaDocTagConstants extends ICommentTagConstants {
+public interface IJavaDocTagConstants {
 
 	/** Javadoc break tags */
-	public static final String[] JAVADOC_BREAK_TAGS= new String[] { "dd", "dt", "li", "td", "th", "tr", "h1", "h2", "h3", "h4", "h5", "h6", "q" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$ //$NON-NLS-14$
+	public static final String[] JAVADOC_BREAK_TAGS= new String[] { "dd", "dt", "li", "td", "th", "tr", "h1", "h2", "h3", "h4", "h5", "h6", "q" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$
 
 	/** Javadoc single break tag */
 	public static final String[] JAVADOC_SINGLE_BREAK_TAG= new String[] { "br" }; //$NON-NLS-1$

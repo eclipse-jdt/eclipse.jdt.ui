@@ -12,34 +12,31 @@
 package org.eclipse.jdt.internal.ui.text.comment;
 
 import java.util.LinkedList;
-import java.util.Map;
+
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.TypedPosition;
-import org.eclipse.jface.text.formatter.ContentFormatter2;
 import org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy;
-import org.eclipse.jface.text.formatter.FormattingContext;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
-import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
+
 /**
  * Formatting strategy for general source code comments.
- * <p>
- * This strategy implements <code>IFormattingStrategyExtension</code>. It
- * must be registered with a content formatter implementing <code>IContentFormatterExtension2<code>
- * to take effect.
  * 
  * @since 3.0
  */
@@ -53,10 +50,13 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	 * @param region
 	 *                  Comment region which owns the line
 	 * @param offset
-	 *                  Offset where to determine the indentation
+	 *                   Offset where to determine the indentation
+	 * @param tabs
+	 *                   <code>true</code> iff the indentation should use tabs
+	 *                   instead of spaces, <code>false</code> otherwise
 	 * @return The indentation of the line
 	 */
-	public static String getLineIndentation(final IDocument document, final CommentRegion region, final int offset) {
+	public static String getLineIndentation(final IDocument document, final CommentRegion region, final int offset, final boolean tabs) {
 
 		String result= ""; //$NON-NLS-1$
 
@@ -67,8 +67,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 			final int begin= line.getOffset();
 			final int end= Math.min(offset, line.getOffset() + line.getLength());
 
-			boolean useTab= JavaCore.TAB.equals(JavaCore.getOption(JavaCore.FORMATTER_TAB_CHAR));
-			result= region.stringToIndent(document.get(begin, end - begin), useTab);
+			result= region.stringToIndent(document.get(begin, end - begin), tabs);
 
 		} catch (BadLocationException exception) {
 			// Ignore and return empty
@@ -76,91 +75,83 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		return result;
 	}
 
-	/**
-	 * Content formatter with which this formatting strategy has been
-	 * registered
-	 */
-	private final ContentFormatter2 fFormatter;
+	/** Documents to be formatted by this strategy */
+	private final LinkedList fDocuments= new LinkedList();
 
 	/** Partitions to be formatted by this strategy */
 	private final LinkedList fPartitions= new LinkedList();
 
+	/** Text measurement, can be <code>null</code> */
+	private ITextMeasurement fTextMeasurement;
+
+	/**
+	 * Creates a new comment formatting strategy.
+	 */
+	public CommentFormattingStrategy() {
+		super();
+	}
+
 	/**
 	 * Creates a new comment formatting strategy.
 	 * 
-	 * @param formatter
-	 *                  The content formatter with which this formatting strategy has
-	 *                  been registered
-	 * @param viewer
-	 *                  The source viewer where to apply the formatting strategy
+	 * @param textMeasurement
+	 *                  The text measurement
 	 */
-	public CommentFormattingStrategy(final ContentFormatter2 formatter, final ISourceViewer viewer) {
-		super(viewer);
-
-		fFormatter= formatter;
+	public CommentFormattingStrategy(ITextMeasurement textMeasurement) {
+		super();
+		fTextMeasurement= textMeasurement;
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy#format()
+	/**
+	 * @inheritDoc
 	 */
 	public void format() {
 		super.format();
-
-		Assert.isLegal(fPartitions.size() > 0);
-
-		final IDocument document= getViewer().getDocument();
+		
+		final IDocument document= (IDocument) fDocuments.removeFirst();
 		final TypedPosition position= (TypedPosition)fPartitions.removeFirst();
-
-		try {
-
-			final ITypedRegion partition= TextUtilities.getPartition(document, fFormatter.getDocumentPartitioning(), position.getOffset());
-
-			position.offset= partition.getOffset();
-			position.length= partition.getLength();
-
-			final Map preferences= getPreferences();
-			final boolean format= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMAT));
-			final boolean header= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER));
-
-			if (format && (header || position.getOffset() != 0)) {
-
-				final CommentRegion region= CommentObjectFactory.createRegion(this, position, TextUtilities.getDefaultLineDelimiter(document));
-				final String indentation= getLineIndentation(document, region, position.getOffset());
-
-				region.format(indentation);
+		
+		if (document != null && position != null) {
+			final boolean format= getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_FORMAT) == IPreferenceStore.TRUE;
+			final boolean header= getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER) == IPreferenceStore.TRUE;
+			final boolean tabs= getPreferences().get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR).equals(JavaCore.TAB);
+			
+			final int offset= position.getOffset();
+			if (format && (header || offset != 0 || !position.getType().equals(IJavaPartitions.JAVA_DOC))) {
+				
+				final CommentRegion region= CommentObjectFactory.createRegion(document, position, TextUtilities.getDefaultLineDelimiter(document), getPreferences(), fTextMeasurement);
+				final TextEdit edit= region.format(getLineIndentation(document, region, offset, tabs));
+				try {
+					
+					if (edit != null)
+						edit.apply(document);
+					
+				} catch (MalformedTreeException exception) {
+					JavaPlugin.log(exception);
+				} catch (BadLocationException exception) {
+					JavaPlugin.log(exception);
+				}
 			}
-		} catch (BadLocationException exception) {
-			// Should not happen
 		}
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy#formatterStarts(org.eclipse.jface.text.formatter.IFormattingContext)
+	/**
+	 * @inheritDoc
 	 */
 	public void formatterStarts(IFormattingContext context) {
 		super.formatterStarts(context);
 
-		final FormattingContext current= (FormattingContext)context;
-
-		fPartitions.addLast(current.getProperty(FormattingContextProperties.CONTEXT_PARTITION));
+		fPartitions.addLast(context.getProperty(FormattingContextProperties.CONTEXT_PARTITION));
+		fDocuments.addLast(context.getProperty(FormattingContextProperties.CONTEXT_MEDIUM));
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy#formatterStops()
+	/**
+	 * @inheritDoc
 	 */
 	public void formatterStops() {
 		super.formatterStops();
 
 		fPartitions.clear();
-	}
-
-	/**
-	 * Returns the content formatter with which this formatting strategy has
-	 * been registered.
-	 * 
-	 * @return The content formatter
-	 */
-	public final ContentFormatter2 getFormatter() {
-		return fFormatter;
+		fDocuments.clear();
 	}
 }

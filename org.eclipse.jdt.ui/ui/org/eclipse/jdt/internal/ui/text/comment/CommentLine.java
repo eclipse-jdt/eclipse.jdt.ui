@@ -20,61 +20,106 @@ import java.util.LinkedList;
  */
 public abstract class CommentLine implements IBorderAttributes {
 
-	/** Prefix of non-formattable comments */
-	static final String NON_FORMAT_START_PREFIX= "/*-";
+	/** Prefix of non-formattable comment lines */
+	protected static final String NON_FORMAT_START_PREFIX= "/*-"; //$NON-NLS-1$
 
-	/** The javadoc attributes of this line */
+	/** The attributes of this line */
 	private int fAttributes= 0;
 
-	/** The region this comment line belongs to */
+	/** The parent region of this line */
 	private final CommentRegion fParent;
 
-	/** The sequence of comment ranges in this comment line */
+	/** The comment ranges in this line */
 	private final LinkedList fRanges= new LinkedList();
 
 	/**
 	 * Creates a new comment line.
 	 * 
-	 * @param region
-	 *                  Comment region to create the line for
+	 * @param parent
+	 *                   Comment region to create the comment line for
 	 */
-	protected CommentLine(final CommentRegion region) {
-		fParent= region;
+	protected CommentLine(final CommentRegion parent) {
+		fParent= parent;
 	}
 
 	/**
-	 * Gets the context information from the previous comment line and sets it
-	 * for the current one.
+	 * Adapts the line attributes from the previous line in the comment region.
 	 * 
 	 * @param previous
-	 *                  The previous comment line in the associated comment region
+	 *                   The previous comment line in the comment region
 	 */
 	protected abstract void adapt(final CommentLine previous);
 
 	/**
-	 * Appends the comment range to this comment line.
+	 * Appends the specified comment range to this comment line.
 	 * 
 	 * @param range
-	 *                  Comment range to append
+	 *                   Comment range to append to this line
 	 */
 	protected void append(final CommentRange range) {
 		fRanges.add(range);
 	}
 
 	/**
-	 * Applies the formatted lower border to the underlying document.
+	 * Formats this comment line as content line.
+	 * 
+	 * @param predecessor
+	 *                   The predecessor comment line in the comment region
+	 * @param last
+	 *                   The most recently processed comment range
+	 * @param indentation
+	 *                   The indentation of the comment region
+	 * @param line
+	 *                   The index of this comment line in the comment region
+	 * @return The first comment range in this comment line
+	 */
+	protected CommentRange formatLine(final CommentLine predecessor, final CommentRange last, final String indentation, final int line) {
+
+		int offset= 0;
+		int length= 0;
+
+		CommentRange next= last;
+		CommentRange previous= null;
+
+		final int stop= fRanges.size() - 1;
+		final int end= fParent.getSize() - 1;
+
+		for (int index= stop; index >= 0; index--) {
+
+			previous= next;
+			next= (CommentRange)fRanges.get(index);
+
+			if (fParent.canFormat(previous, next)) {
+
+				offset= next.getOffset() + next.getLength();
+				length= previous.getOffset() - offset;
+
+				if (index == stop && line != end)
+					fParent.logEdit(fParent.getDelimiter(predecessor, this, previous, next, indentation), offset, length);
+				else
+					fParent.logEdit(fParent.getDelimiter(previous, next), offset, length);
+			}
+		}
+		return next;
+	}
+
+	/**
+	 * Formats this comment line as end line having a lower border consisting
+	 * of content line prefixes.
 	 * 
 	 * @param range
-	 *                  Last comment range in the comment region
+	 *                   Last comment range of the last comment line in the comment
+	 *                   region
 	 * @param indentation
-	 *                  Indenation of the formatted lower border
+	 *                   The indentation of the comment region
 	 * @param length
-	 *                  The maximal length of text in this comment region measured in
-	 *                  average character widths
+	 *                   The maximal length of text in this comment region measured in
+	 *                   average character widths
 	 */
-	protected void applyEnd(final CommentRange range, final String indentation, final int length) {
+	protected void formatLowerBorder(final CommentRange range, final String indentation, final int length) {
 
 		final int offset= range.getOffset() + range.getLength();
+
 		final StringBuffer buffer= new StringBuffer(length);
 		final String end= getEndingPrefix();
 		final String delimiter= fParent.getDelimiter();
@@ -99,65 +144,22 @@ public abstract class CommentLine implements IBorderAttributes {
 			} else
 				buffer.append(end);
 		}
-		fParent.applyText(buffer.toString(), offset, fParent.getLength() - offset);
+		fParent.logEdit(buffer.toString(), offset, fParent.getLength() - offset);
 	}
 
 	/**
-	 * Applies the formatted comment line to the underlying document.
-	 * 
-	 * @param predecessor
-	 *                  The comment line predecessor of this line
-	 * @param last
-	 *                  The most recently applied comment range of the previous
-	 *                  comment line in the comment region
-	 * @param indentation
-	 *                  Indentation of the formatted comment line
-	 * @param line
-	 *                  The index of the comment line in the comment region
-	 * @return The first comment range in this comment line
-	 */
-	protected CommentRange applyLine(final CommentLine predecessor, final CommentRange last, final String indentation, final int line) {
-
-		int offset= 0;
-		int length= 0;
-
-		CommentRange next= last;
-		CommentRange previous= null;
-
-		final int stop= fRanges.size() - 1;
-		final int end= fParent.getSize() - 1;
-
-		for (int index= stop; index >= 0; index--) {
-
-			previous= next;
-			next= (CommentRange)fRanges.get(index);
-
-			if (fParent.canApply(previous, next)) {
-
-				offset= next.getOffset() + next.getLength();
-				length= previous.getOffset() - offset;
-
-				if (index == stop && line != end)
-					fParent.applyText(fParent.getDelimiter(predecessor, this, previous, next, indentation), offset, length);
-				else
-					fParent.applyText(fParent.getDelimiter(previous, next), offset, length);
-			}
-		}
-		return next;
-	}
-
-	/**
-	 * Applies the formatted upper border to the underlying document.
+	 * Formats this comment line as start line having an upper border
+	 * consisting of content line prefixes.
 	 * 
 	 * @param range
-	 *                  First comment range in the comment region
+	 *                   The first comment range in the comment region
 	 * @param indentation
-	 *                  Indentation of the formatted upper border
+	 *                   The indentation of the comment region
 	 * @param length
-	 *                  The maximal length of text in this comment region measured in
-	 *                  average character widths
+	 *                   The maximal length of text in this comment region measured in
+	 *                   average character widths
 	 */
-	protected void applyStart(final CommentRange range, final String indentation, final int length) {
+	protected void formatUpperBorder(final CommentRange range, final String indentation, final int length) {
 
 		final StringBuffer buffer= new StringBuffer(length);
 		final String start= getStartingPrefix();
@@ -182,7 +184,7 @@ public abstract class CommentLine implements IBorderAttributes {
 			buffer.append(indentation);
 			buffer.append(content);
 		}
-		fParent.applyText(buffer.toString(), 0, range.getOffset());
+		fParent.logEdit(buffer.toString(), 0, range.getOffset());
 	}
 
 	/**
@@ -213,7 +215,7 @@ public abstract class CommentLine implements IBorderAttributes {
 	 * 
 	 * @return The indentation reference string for this line
 	 */
-	protected String getIndentation() {
+	protected String getIndentationReference() {
 		return ""; //$NON-NLS-1$
 	}
 
@@ -264,10 +266,10 @@ public abstract class CommentLine implements IBorderAttributes {
 	}
 
 	/**
-	 * Scans this line in the comment region.
+	 * Scans this comment line for comment range boundaries.
 	 * 
 	 * @param line
-	 *                  Index of this line in the comment region
+	 *                   The index of this line in the comment region
 	 */
 	protected abstract void scanLine(final int line);
 
@@ -282,10 +284,10 @@ public abstract class CommentLine implements IBorderAttributes {
 	}
 
 	/**
-	 * Tokenizes this line into token ranges.
+	 * Tokenizes this comment line into comment ranges
 	 * 
 	 * @param line
-	 *                  Index of this line in the comment region
+	 *                   The index of this line in the comment region
 	 */
 	protected void tokenizeLine(final int line) {
 

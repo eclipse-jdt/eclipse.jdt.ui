@@ -11,12 +11,19 @@
 
 package org.eclipse.jdt.internal.ui.text.comment;
 
+import java.util.Map;
+
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TypedPosition;
 
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
 /**
  * Factory for comment related objects.
+ * <p>
+ * Use this factory to create comment objects specific to a certain comment
+ * type.
+ * </p>
  * 
  * @since 3.0
  */
@@ -47,26 +54,29 @@ public class CommentObjectFactory {
 	/**
 	 * Creates a comment region for a specific document partition type.
 	 * 
-	 * @param strategy
-	 *                  The comment formatting strategy used to format this comment
-	 *                  region
+	 * @param document
+	 *                   The document which contains the comment region
 	 * @param range
 	 *                  Range of the comment region in the document
 	 * @param delimiter
-	 *                  Line delimiter to use in the comment region
+	 *                   Line delimiter to use in the comment region
+	 * @param preferences
+	 *                   The preferences to use
+	 * @param textMeasurement
+	 *                   The text measurement. Can be <code>null</code>.
 	 * @return A new comment region for the comment region range in the
 	 *               document
 	 */
-	public static CommentRegion createRegion(final CommentFormattingStrategy strategy, final TypedPosition range, final String delimiter) {
+	public static CommentRegion createRegion(final IDocument document, final TypedPosition range, final String delimiter, final Map preferences, final ITextMeasurement textMeasurement) {
 
 		final String type= range.getType();
 
 		if (type.equals(IJavaPartitions.JAVA_DOC))
-			return new JavaDocRegion(strategy, range, delimiter);
+			return new JavaDocRegion(document, range, delimiter, preferences, textMeasurement);
 		else if (type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT))
-			return new MultiCommentRegion(strategy, range, delimiter);
+			return new MultiCommentRegion(document, range, delimiter, preferences, textMeasurement);
 
-		return new CommentRegion(strategy, range, delimiter);
+		return new CommentRegion(document, range, delimiter, preferences, textMeasurement);
 	}
 
 	/**

@@ -37,8 +37,8 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 	/** Line prefix of multi-line comment content lines */
 	public static final String MULTI_COMMENT_START_PREFIX= "/* "; //$NON-NLS-1$
 
-	/** The reference indentation of this line */
-	private String fIndentation= ""; //$NON-NLS-1$
+	/** The indentation reference of this line */
+	private String fReferenceIndentation= ""; //$NON-NLS-1$
 	
 	/** The javadoc tag lookup. */
 	private static final Set fgTagLookup;
@@ -81,7 +81,7 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 	protected void adapt(final CommentLine previous) {
 
 		if (!hasAttribute(COMMENT_ROOT) && !hasAttribute(COMMENT_PARAMETER) && !previous.hasAttribute(COMMENT_BLANKLINE))
-			fIndentation= previous.getIndentation();
+			fReferenceIndentation= previous.getIndentationReference();
 	}
 
 	/*
@@ -107,12 +107,12 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 				final String common= parent.getText(first.getOffset(), first.getLength()) + CommentRegion.COMMENT_RANGE_DELIMITER;
 
 				if (hasAttribute(COMMENT_ROOT))
-					fIndentation= common;
+					fReferenceIndentation= common;
 				else if (hasAttribute(COMMENT_PARAMETER)) {
 					if (parent.isIndentDescriptions())
-						fIndentation= common + "\t"; //$NON-NLS-1$
+						fReferenceIndentation= common + "\t"; //$NON-NLS-1$
 					else
-						fIndentation= common;
+						fReferenceIndentation= common;
 				}
 			}
 		}
@@ -138,8 +138,8 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 	 * 
 	 * @return The reference indentation for this line
 	 */
-	protected final String getIndentation() {
-		return fIndentation;
+	protected final String getIndentationReference() {
+		return fReferenceIndentation;
 	}
 
 	/*

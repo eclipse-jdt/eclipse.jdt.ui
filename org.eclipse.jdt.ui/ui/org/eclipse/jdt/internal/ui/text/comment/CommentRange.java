@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
  */
 public class CommentRange extends Position implements ICommentAttributes, IHtmlTagConstants {
 
-	/** The javadoc attributes of this range */
+	/** The attributes of this range */
 	private int fAttributes= 0;
 
 	/**
@@ -50,14 +50,14 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	}
 
 	/**
-	 * Is this javadoc range a closing html tag?
+	 * Does this comment range contain a closing HTML tag?
 	 * 
 	 * @param token
-	 *                  Token belonging to the javadoc range
+	 *                   Token belonging to the comment range
 	 * @param tag
-	 *                  Html tag to find
-	 * @return <code>true</code> iff this javadoc is a closing html tag,
-	 *               <code>false</code> otherwise
+	 *                   The HTML tag to check
+	 * @return <code>true</code> iff this comment range contains a closing
+	 *               html tag, <code>false</code> otherwise
 	 */
 	protected final boolean isClosingTag(final String token, final String tag) {
 
@@ -71,14 +71,14 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	}
 
 	/**
-	 * Is this javadoc range an opening html tag?
+	 * Does this comment range contain an opening HTML tag?
 	 * 
 	 * @param token
-	 *                  Token belonging to the javadoc range
+	 *                   Token belonging to the comment range
 	 * @param tag
-	 *                  Html tag to find
-	 * @return <code>true</code> iff this javadoc is an opening html tag,
-	 *               <code>false</code> otherwise
+	 *                   The HTML tag to check
+	 * @return <code>true</code> iff this comment range contains an opening
+	 *               html tag, <code>false</code> otherwise
 	 */
 	protected final boolean isOpeningTag(final String token, final String tag) {
 
@@ -92,20 +92,20 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	}
 
 	/**
-	 * Marks the comment range as having a certain html tag for line wrapping.
+	 * Mark the comment range with the occurred HTML tags.
 	 * 
 	 * @param tags
-	 *                  Html tags which cause the wrapping of the comment range
+	 *                   The HTML tags to test for their occurrence
 	 * @param token
-	 *                  Token belonging to the comment range
+	 *                   Token belonging to the comment range
 	 * @param attribute
-	 *                  Attribute to set if the html tag is present
+	 *                   Attribute to set if a HTML tag is present
 	 * @param open
-	 *                  <code>true</code> iff opening tags should be marked, <code>false</code>
-	 *                  otherwise.
+	 *                   <code>true</code> iff opening tags should be marked, <code>false</code>
+	 *                   otherwise.
 	 * @param close
-	 *                  <code>true</code> iff closing tags should be marked, <code>false</code>
-	 *                  otherwise.
+	 *                   <code>true</code> iff closing tags should be marked, <code>false</code>
+	 *                   otherwise.
 	 */
 	protected final void markHtmlTag(final String[] tags, final String token, final int attribute, final boolean open, final boolean close) {
 
@@ -132,16 +132,16 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	}
 
 	/**
-	 * Marks the comment range as having a certain tag for line wrapping
+	 * Mark the comment range with the occurred tags.
 	 * 
 	 * @param tags
-	 *                  Set of tags to mark for this comment range
-	 * @param prefix
-	 *                  The prefix common to all tags in the set
+	 *                   The tags to test for their occurrence
+	 * @param prefx
+	 *                   The prefix which is common to all the tags to test
 	 * @param token
-	 *                  Token belonging to the comment range
+	 *                   Token belonging to the comment range
 	 * @param attribute
-	 *                  Attribute to set if the html tag is present
+	 *                   Attribute to set if a tag is present
 	 */
 	protected final void markPrefixTag(final String[] tags, final char prefix, final String token, final int attribute) {
 
@@ -161,23 +161,22 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	}
 
 	/**
-	 * Marks an attributed comment range with the indicated attribute.
+	 * Marks the comment range with the HTML range tag.
 	 * 
 	 * @param token
-	 *                  Token belonging to the comment range
+	 *                   Token belonging to the comment range
 	 * @param tag
-	 *                  The html tag which confines the attributed comment ranges
+	 *                   The HTML tag which confines the HTML range
 	 * @param level
-	 *                  Hierarchical depth of layered attributed comment ranges
-	 * @param key
-	 *                  The key of the attribute to set when an attributed comment
-	 *                  range has been recognized
+	 *                   The nesting level of the current HTML range
+	 * @param attribute
+	 *                   Attribute to set if the comment range is in the HTML range
 	 * @param html
-	 *                  <code>true</code> iff html tags in this attributed comment
-	 *                  range should be attributed too, <code>false</code> otherwise
-	 * @return The new hierarchical depth of the attributed comment ranges
+	 *                   <code>true</code> iff the HTML tags in this HTML range
+	 *                   should be marked too, <code>false</code> otherwise
+	 * @return The new nesting level of the HTML range
 	 */
-	protected final int markRange(final String token, final String tag, int level, final int key, final boolean html) {
+	protected final int markTagRange(final String token, final String tag, int level, final int key, final boolean html) {
 
 		if (isOpeningTag(token, tag)) {
 			if (level++ > 0)
