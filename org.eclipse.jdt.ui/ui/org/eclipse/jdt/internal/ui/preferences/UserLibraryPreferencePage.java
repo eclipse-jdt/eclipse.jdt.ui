@@ -54,6 +54,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
@@ -282,7 +283,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				fields= new DialogField[] { fLocationField, fExportImportList };
 			}
 			LayoutUtil.doDefaultLayout(composite, fields, true, SWT.DEFAULT, SWT.DEFAULT);
-			LayoutUtil.setHorizontalGrabbing(fLocationField.getTextControl(null));
+			fExportImportList.getListControl(null).setLayoutData(new GridData(GridData.FILL_BOTH));
 			
 			fLocationField.postSetFocusOnDialogField(parent.getDisplay());
 			return composite;
