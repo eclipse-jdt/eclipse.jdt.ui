@@ -7,7 +7,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
-import java.util.Enumeration;import java.util.Hashtable;import java.util.ResourceBundle;import java.util.Vector;import org.eclipse.jdt.core.ElementChangedEvent;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IElementChangedListener;import org.eclipse.jdt.core.IField;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaElementDelta;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IParent;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.GenerateGroup;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;import org.eclipse.jdt.internal.ui.util.ArrayUtility;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jface.action.IAction;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.IToolBarManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.util.Assert;import org.eclipse.jface.util.ListenerList;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeViewer;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Item;import org.eclipse.swt.widgets.Menu;import org.eclipse.swt.widgets.Tree;import org.eclipse.swt.widgets.Widget;import org.eclipse.ui.part.Page;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import java.util.Enumeration;import java.util.Hashtable;import java.util.ResourceBundle;import java.util.Vector;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Item;import org.eclipse.swt.widgets.Menu;import org.eclipse.swt.widgets.Tree;import org.eclipse.swt.widgets.Widget;import org.eclipse.jface.action.IAction;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.IToolBarManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.util.Assert;import org.eclipse.jface.util.ListenerList;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeViewer;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.ui.part.Page;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.ui.views.contentoutline.IContentOutlinePage;import org.eclipse.jdt.core.ElementChangedEvent;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IElementChangedListener;import org.eclipse.jdt.core.IField;import org.eclipse.jdt.core.IInitializer;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaElementDelta;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IParent;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.GenerateGroup;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;import org.eclipse.jdt.internal.ui.util.ArrayUtility;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 
 /**
@@ -398,13 +398,57 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			
 			class LexicalSorter extends ViewerSorter {
 				
+				private static final int INNER_TYPES=		0;
+				private static final int CONSTRUCTORS=		1;
+				private static final int STATIC_INIT=		2;
+				private static final int STATIC_METHODS=	3;
+				private static final int INIT=				4;
+				private static final int METHODS=			5;
+				private static final int STATIC_FIELDS=		6;
+				private static final int FIELDS=			7;
+				private static final int OTHERS=			8;
+				
+				
 				public boolean isSorterProperty(Object element, Object property) {
 					return true;
 				}
 				
 				public int category(Object element) {
-					IJavaElement je= (IJavaElement) element;
-					return isInnerType(je) ? 0 : 1;
+					
+					try {
+						
+						IJavaElement je= (IJavaElement) element;
+						
+						switch (je.getElementType()) {
+							
+							case IJavaElement.METHOD: {
+								
+								IMethod method= (IMethod) je;
+								if (method.isConstructor())
+									return CONSTRUCTORS;
+									
+								int flags= method.getFlags();
+								return Flags.isStatic(flags) ? STATIC_METHODS : METHODS;
+							}
+							
+							case IJavaElement.FIELD: {
+								int flags= ((IField) je).getFlags();
+								return Flags.isStatic(flags) ? STATIC_FIELDS : FIELDS;
+							}
+							
+							case IJavaElement.INITIALIZER: {
+								int flags= ((IInitializer) je).getFlags();
+								return Flags.isStatic(flags) ? STATIC_INIT : INIT;
+							}
+						}
+						
+						if (isInnerType(je))
+							return INNER_TYPES;
+					
+					} catch (JavaModelException x) {
+					}
+					
+					return OTHERS;
 				}
 				
 				public int compare(Viewer viewer, Object e1, Object e2) {
@@ -418,57 +462,108 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				}
 			};
 			
-			public class LexicalSortingAction extends JavaUIAction {
+			class LexicalSortingAction extends JavaUIAction {
 				
 				private LexicalSorter fSorter= new LexicalSorter();
-						
-				public LexicalSortingAction(ResourceBundle bundle, String prefix, boolean checked) {
+				private String fKey;
+				
+				public LexicalSortingAction(ResourceBundle bundle, String prefix) {
 					super(bundle, prefix);
-					setImageDescriptor(org.eclipse.jdt.internal.ui.JavaPluginImages.DESC_LCL_LOCK_VIEW);
-					valueChanged(checked);
+					
+					fKey= prefix + "isChecked";
+					boolean checked= JavaPlugin.getDefault().getPreferenceStore().getBoolean(fKey);
+					valueChanged(checked, false);
 				}
 				
 				public void run() {
-					valueChanged(isChecked());
+					valueChanged(isChecked(), true);
 				}
 				
-				private void valueChanged(boolean on) {
+				private void valueChanged(boolean on, boolean store) {
 					setChecked(on);
 					fOutlineViewer.setSorter(on ? fSorter : null);
+					if (store)
+						JavaPlugin.getDefault().getPreferenceStore().setValue(fKey, on);
 				}
 			};
 			
-			public class FieldFilter extends ViewerFilter {
+			class FieldFilter extends ViewerFilter {
 				public boolean select(Viewer viewer, Object parentElement, Object element) {
 					return !(element instanceof IField);
 				}
 			}; 
 			
-			public class FieldFilterAction extends JavaUIAction {
+			class VisibilityFilter extends ViewerFilter {
 				
-				private FieldFilter fFilter= new FieldFilter();
+				public final static int PUBLIC=		0;
+				public final static int PROTECTED=	1;
+				public final static int PRIVATE=	2;
+				public final static int DEFAULT=	3;
 				
-				public FieldFilterAction(ResourceBundle bundle, String prefix, boolean checked) {
+				private int fVisibility;
+				
+				public VisibilityFilter(int visibility) {
+					fVisibility= visibility;
+				}
+				
+				public boolean select(Viewer viewer, Object parentElement, Object element) {
+					
+					if ( !(element instanceof IMember))
+						return true;
+						
+					IMember member= (IMember) element;
+					try {
+						
+						int flags= member.getFlags();
+						switch (fVisibility) {
+							case PUBLIC:
+								return Flags.isPublic(flags);
+							case PROTECTED:
+								return Flags.isProtected(flags);
+							case PRIVATE:
+								return Flags.isPrivate(flags);
+							case DEFAULT:
+								return !(Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPrivate(flags));
+						}
+					} catch (JavaModelException x) {
+					}
+					
+					// unreachable
+					return false;
+				}
+			}; 
+			
+			class FilterAction extends JavaUIAction {
+				
+				private ViewerFilter fFilter;
+				private String fKey;
+				
+				public FilterAction(ResourceBundle bundle, String prefix, ViewerFilter filter) {
 					super(bundle, prefix);
-					setImageDescriptor(org.eclipse.jdt.internal.ui.JavaPluginImages.DESC_LCL_LOCK_VIEW);
-					valueChanged(checked);
+					
+					fKey= prefix + "isChecked";
+					fFilter= filter;
+					
+					boolean checked= JavaPlugin.getDefault().getPreferenceStore().getBoolean(fKey);
+					valueChanged(checked, false);
 				}
 				
-				/*
-				 * @see Action#actionPerformed
-				 */		
 				public void run() {
-					valueChanged(isChecked());
+					valueChanged(isChecked(), true);
 				}
 				
-				private void valueChanged(boolean on) {
+				private void valueChanged(boolean on, boolean store) {
 					setChecked(on);
 					if (on) 
 						fOutlineViewer.addFilter(fFilter);
 					else
 						fOutlineViewer.removeFilter(fFilter);
+						
+					if (store)
+						JavaPlugin.getDefault().getPreferenceStore().setValue(fKey, on);
 				}
 			};
+
 			
 	private IJavaElement fInput;
 	private String fContextMenuID;
@@ -628,8 +723,9 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "AddEdition");
 		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "AddMethodEntryBreakpoint");
 		
-		addAction(menu, IContextMenuConstants.GROUP_VIEWER_SETUP, "FieldFilter");
-		addAction(menu, IContextMenuConstants.GROUP_VIEWER_SETUP, "LexicalSort");
+		addAction(menu, IContextMenuConstants.GROUP_VIEWER_SETUP, "SortMembers");
+		addAction(menu, IContextMenuConstants.GROUP_VIEWER_SETUP, "HideFields");
+		addAction(menu, IContextMenuConstants.GROUP_VIEWER_SETUP, "HideNonePublicMembers");
 		
 		ContextMenuGroup.add(menu, fActionGroups, fOutlineViewer);
 		addRefactoring(menu);	
@@ -653,14 +749,9 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			addSelectionChangedListener(updater);
 		}
 		
-//		if (toolBarManager != null) {
-//			toolBarManager.add(new FieldFilterAction(JavaPlugin.getResourceBundle(), "Outliner.FilterFields.", false));
-//			toolBarManager.add(new LexicalSortingAction(JavaPlugin.getResourceBundle(), "Outliner.LexicalSorting.", false));
-//			toolBarManager.update(true);
-//		}
-		
-		setAction("FieldFilter", new FieldFilterAction(JavaPlugin.getResourceBundle(), "Outliner.FilterFields.", false)); 
-		setAction("LexicalSort", new LexicalSortingAction(JavaPlugin.getResourceBundle(), "Outliner.LexicalSorting.", false));
+		setAction("SortMembers", new LexicalSortingAction(JavaPlugin.getResourceBundle(), "Outliner.SortMembers."));
+		setAction("HideFields", new FilterAction(JavaPlugin.getResourceBundle(), "Outliner.HideFields.", new FieldFilter()));
+		setAction("HideNonePublicMembers", new FilterAction(JavaPlugin.getResourceBundle(), "Outliner.HideNonePublicMembers.", new VisibilityFilter(VisibilityFilter.PUBLIC)));		
 	}	
 	
 	/**

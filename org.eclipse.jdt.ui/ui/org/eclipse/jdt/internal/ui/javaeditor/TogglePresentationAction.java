@@ -7,16 +7,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
-import java.util.ResourceBundle;
-
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.text.IRegion;
-
-import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.TextEditorAction;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import java.util.ResourceBundle;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.text.IRegion;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.TextEditorAction;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 /**
@@ -57,8 +48,8 @@ public class TogglePresentationAction extends TextEditorAction {
 		if (remembered != null)
 			editor.setHighlightRange(remembered.getOffset(), remembered.getLength(), true);
 		
-		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
-		settings.put(SHOW_SEGMENTS, showAll);
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(SHOW_SEGMENTS, showAll);
 	}
 	
 	/**
@@ -79,7 +70,7 @@ public class TogglePresentationAction extends TextEditorAction {
 		
 		if (editor != null) {
 			
-			boolean showSegments= JavaPlugin.getDefault().getDialogSettings().getBoolean(SHOW_SEGMENTS);
+			boolean showSegments= JavaPlugin.getDefault().getPreferenceStore().getBoolean(SHOW_SEGMENTS);
 			
 			if (isChecked() != showSegments)
 				setChecked(showSegments);
