@@ -156,11 +156,11 @@ public class TypeConstraintTests extends RefactoringTest {
 		testConstraints(strings);
 	}	
 
-//	public void testConstraints8() throws Exception{
-//		String[] strings= {};
-//		testConstraints(strings);
-//	}	
-//
+	public void testConstraints8() throws Exception{
+		String[] strings= {"Decl(A:x) =^= p.A", "Decl(A:f()) =^= p.A", "[aField.x] =^= java.lang.Object", "Decl(A:aField) =^= p.A", "[this] <= [aField.x]", "[aField] =^= A", "[x] =^= Object", "[this] =^= p.A", "[aField] <= Decl(A:x)"};
+		testConstraints(strings);
+	}	
+
 	public void testConstraints9() throws Exception{
 		String[] strings= {"Decl(A:f()) =^= p.A", "[a] =^= A", "[x] =^= boolean", "[a instanceof A] <= [x]", "[null] <= [a]", "[a] <= A or A <= [a]"};
 		testConstraints(strings);
