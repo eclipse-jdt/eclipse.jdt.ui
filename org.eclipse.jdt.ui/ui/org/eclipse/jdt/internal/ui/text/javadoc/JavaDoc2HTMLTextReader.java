@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.SubstitutionTextReader;
 
 
@@ -134,10 +135,9 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 			else {
 				buffer.append("<b>"); //$NON-NLS-1$
 				
-				int i= 0;
-				while (i < s.length() && Character.isLetterOrDigit(s.charAt(i))) { ++i; }
+				int i= getParamEndOffset(s);
 				if (i <= s.length()) {
-					buffer.append(s.substring(0, i));
+					buffer.append(HTMLPrinter.convertToHTMLContent(s.substring(0, i)));
 					buffer.append("</b>"); //$NON-NLS-1$
 					buffer.append(s.substring(i));
 				} else {
@@ -147,7 +147,31 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 			buffer.append("</dd>"); //$NON-NLS-1$
 		}
 	}
-	
+
+	private int getParamEndOffset(String s) {
+		int i= 0;
+		final int length= s.length();
+		// \s*
+		while (i < length && Character.isWhitespace(s.charAt(i)))
+			++i;
+		if (i < length && s.charAt(i) == '<') {
+			// generic type parameter
+			// read <\s*\w*\s*>
+			while (i < length && Character.isWhitespace(s.charAt(i)))
+				++i;
+			while (i < length && Character.isJavaIdentifierPart(s.charAt(i)))
+				++i;
+			while (i < length && s.charAt(i) != '>')
+				++i;
+		} else {
+			// simply read an identifier
+			while (i < length && Character.isJavaIdentifierPart(s.charAt(i)))
+				++i;
+		}
+		
+		return i;
+	}
+
 	private void print(StringBuffer buffer, String tag, List elements, boolean firstword) {
 		if ( !elements.isEmpty()) {
 			buffer.append("<dt>"); //$NON-NLS-1$
@@ -217,7 +241,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 	}
 	
 	/*
-	 * A '@' has been read. Process a jdoc tag
+	 * A '@' has been read. Process a javadoc tag
 	 */ 			
 	private String processSimpleTag() throws IOException {
 		
