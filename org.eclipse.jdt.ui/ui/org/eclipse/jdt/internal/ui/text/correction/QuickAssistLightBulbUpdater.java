@@ -41,6 +41,7 @@ import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -171,7 +172,10 @@ public class QuickAssistLightBulbUpdater {
 				if (cu != null) {
 					installSelectionListener();
 					Point point= fViewer.getSelectedRange();
-					CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+					ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+					parser.setSource(cu);
+					parser.setResolveBindings(true);
+					CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 					doSelectionChanged(point.x, point.y, astRoot);
 				}
 			} else {
@@ -247,6 +251,10 @@ public class QuickAssistLightBulbUpdater {
 	private boolean hasQuickFixLightBulb(IAnnotationModel model, int offset) {
 		try {
 			IDocument document= getDocument();
+			if (document == null) {
+				return false;
+			}
+			
 			int currLine= document.getLineOfOffset(offset);
 			
 			Iterator iter= new JavaAnnotationIterator(model, true);
