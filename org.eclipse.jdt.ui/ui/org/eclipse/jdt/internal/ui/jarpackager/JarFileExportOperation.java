@@ -51,16 +51,16 @@
 			exportResource(progressMonitor, pkgRoot, isInJavaProject, resource, destinationPath, isInOutputFolder);
 			progressMonitor.worked(1);
 			ModalContext.checkCanceled(progressMonitor);
-		} else if (element instanceof IPackageFragment)			exportPackageFragment(progressMonitor, (IPackageFragment)element);		else			exportContainer(progressMonitor, resource);
+		} else if (element instanceof IPackageFragment)			exportPackageFragment(progressMonitor, (IPackageFragment)element);		else			exportContainer(progressMonitor, (IContainer)resource);
 	}
 
-	private void exportPackageFragment(IProgressMonitor progressMonitor, IPackageFragment pkgFragment) throws java.lang.InterruptedException {		Object[] children;		try {			children= pkgFragment.getChildren();			for (int i= 0; i < children.length; i++)				exportElement(children[i], progressMonitor);			children= pkgFragment.getNonJavaResources();			for (int i= 0; i < children.length; i++)				exportElement(children[i], progressMonitor);		} catch (CoreException e) {			// this should never happen because an #isAccessible check is done before #members is invoked			addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.errorDuringExport", pkgFragment.toString()), e); //$NON-NLS-1$		}	}	private void exportContainer(IProgressMonitor progressMonitor, IResource resource) throws java.lang.InterruptedException {
+	private void exportPackageFragment(IProgressMonitor progressMonitor, IPackageFragment pkgFragment) throws java.lang.InterruptedException {		Object[] children;		try {			children= pkgFragment.getChildren();			for (int i= 0; i < children.length; i++)				exportElement(children[i], progressMonitor);			children= pkgFragment.getNonJavaResources();			for (int i= 0; i < children.length; i++)				exportElement(children[i], progressMonitor);		} catch (CoreException e) {			// this should never happen because an #isAccessible check is done before #members is invoked			addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.errorDuringExport", pkgFragment.toString()), e); //$NON-NLS-1$		}	}	private void exportContainer(IProgressMonitor progressMonitor, IContainer container) throws java.lang.InterruptedException {		if (container.getType() == IResource.FOLDER && isOutputFolder((IFolder)container))			return;		
 		IResource[] children= null;
 		try {
-			children= ((IContainer) resource).members();
+			children= container.members();
 		} catch (CoreException e) {
 			// this should never happen because an #isAccessible check is done before #members is invoked
-			addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.errorDuringExport", resource.getFullPath()), e); //$NON-NLS-1$
+			addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.errorDuringExport", container.getFullPath()), e); //$NON-NLS-1$
 		}
 		for (int i= 0; i < children.length; i++)
 			exportElement(children[i], progressMonitor);
@@ -93,7 +93,7 @@
 			}
 		}					
 	}
-
+	private boolean isOutputFolder(IFolder folder) {		try {			IJavaProject javaProject= JavaCore.create(folder.getProject());			IPath outputFolderPath= javaProject.getOutputLocation();			return folder.getFullPath().equals(outputFolderPath);		} catch (JavaModelException ex) {			return false;		}	}
 	private void exportClassFiles(IProgressMonitor progressMonitor, IPackageFragmentRoot pkgRoot, IResource resource, IJavaProject jProject, IPath destinationPath) {
 		if (fJarPackage.areClassFilesExported() && isJavaFile(resource) && pkgRoot != null) {
 			try {
