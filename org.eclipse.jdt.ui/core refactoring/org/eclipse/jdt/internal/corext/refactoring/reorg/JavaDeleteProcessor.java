@@ -419,7 +419,6 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 	private void recalculateElementsToDelete() throws CoreException {
 		//the sequence is critical here
 		
-		fJavaElements= ReorgUtils.toWorkingCopies(fJavaElements);
 		removeElementsWithParentsInSelection(); /*ask before adding empty cus - you don't want to ask if you, for example delete 
 												 *the package, in which the cus live*/
 		removeUnconfirmedFoldersThatContainSourceFolders(); /* a selected folder may be a parent of a source folder

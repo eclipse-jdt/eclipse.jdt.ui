@@ -30,13 +30,10 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportContainer;
-import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
@@ -50,7 +47,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 
 public class ReorgUtils {
@@ -240,28 +236,6 @@ public class ReorgUtils {
 		}
 	}
 
-	public static IJavaElement toWorkingCopy(IJavaElement element){
-		if (element instanceof ICompilationUnit)
-			return JavaModelUtil.toWorkingCopy((ICompilationUnit)element);
-		if (element instanceof IMember)
-			return JavaModelUtil.toWorkingCopy((IMember)element);
-		if (element instanceof IPackageDeclaration)
-			return JavaModelUtil.toWorkingCopy((IPackageDeclaration)element);
-		if (element instanceof IImportContainer)
-			return JavaModelUtil.toWorkingCopy((IImportContainer)element);			
-		if (element instanceof IImportDeclaration)
-			return JavaModelUtil.toWorkingCopy((IImportDeclaration)element);	
-		return element;
-	}
-	
-	public static IJavaElement[] toWorkingCopies(IJavaElement[] javaElements){
-		IJavaElement[] result= new IJavaElement[javaElements.length];
-		for (int i= 0; i < javaElements.length; i++) {
-			result[i]= ReorgUtils.toWorkingCopy(javaElements[i]);
-		}
-		return result;
-	}
-	
 	public static IResource[] getResources(List elements) {
 		List resources= new ArrayList(elements.size());
 		for (Iterator iter= elements.iterator(); iter.hasNext();) {
@@ -282,7 +256,7 @@ public class ReorgUtils {
 		return (IJavaElement[]) resources.toArray(new IJavaElement[resources.size()]);
 	}
 	
-	public static boolean isDeletedFromEditor(IJavaElement elem) throws JavaModelException{
+	public static boolean isDeletedFromEditor(IJavaElement elem) {
 		if (! isInsideCompilationUnit(elem))
 			return false;
 		if (elem instanceof IMember && ((IMember)elem).isBinary())
@@ -290,7 +264,10 @@ public class ReorgUtils {
 		ICompilationUnit cu= ReorgUtils.getCompilationUnit(elem);
 		if (cu == null)
 			return false;
-		ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
+		ICompilationUnit wc= cu;
+		// TODO have to understand if this method is needed any longer. Since
+		// with the new working copy support a element is never deleted from
+		// the editor if we have a primary working copy.
 		if (cu.equals(wc))
 			return false;
 		IJavaElement wcElement= JavaModelUtil.findInCompilationUnit(wc, elem);
@@ -456,7 +433,7 @@ public class ReorgUtils {
 		return getCorrespondingPackageFragmentRoot(javaProject) != null;
 	}
 	
-	private static boolean isPackageFragmentRootCorrespondingToProject(IPackageFragmentRoot root) throws JavaModelException {
+	private static boolean isPackageFragmentRootCorrespondingToProject(IPackageFragmentRoot root) {
 		return root.getResource() instanceof IProject;
 	}
 
@@ -488,7 +465,7 @@ public class ReorgUtils {
 		return resource.isAccessible() && resource instanceof IProject;
 	}
 
-	public static boolean canBeDestinationForLinkedResources(IJavaElement javaElement) throws JavaModelException {
+	public static boolean canBeDestinationForLinkedResources(IJavaElement javaElement) {
 		if (javaElement instanceof IPackageFragmentRoot){
 			return isPackageFragmentRootCorrespondingToProject((IPackageFragmentRoot)javaElement);
 		} else if (javaElement instanceof IJavaProject){
