@@ -287,7 +287,8 @@ public class CPListElement {
 				res= root.findMember(path);
 				if (res == null) {
 					if (!ArchiveFileFilter.isArchivePath(path)) {
-						if (root.getWorkspace().validatePath(path.toString(), IResource.FOLDER).isOK()) {
+						if (root.getWorkspace().validatePath(path.toString(), IResource.FOLDER).isOK()
+								&& root.getProject(path.segment(0)).exists()) {
 							res= root.getFolder(path);
 						}
 					}
