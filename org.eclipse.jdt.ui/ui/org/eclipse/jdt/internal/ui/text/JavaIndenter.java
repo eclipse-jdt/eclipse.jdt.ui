@@ -32,7 +32,10 @@ public class JavaIndenter {
 	private IDocument fDocument;
 	/** The indentation accumulated by <code>findPreviousIndenationUnit</code>. */
 	private int fIndent;
-	/** The absolute (character-counted) indentation offset for special cases (method defs, array initializers) */
+	/**
+	 * The absolute (character-counted) indentation offset for special cases
+	 * (method defs, array initializers)
+	 */
 	private int fAlign;
 	/** Whether to add one space to the absolute indentation. */
 	private boolean fAlignPlusOne;
@@ -183,6 +186,9 @@ public class JavaIndenter {
 			
 			// add additional indent
 			indent.append(createIndent(fIndent));
+			if (fIndent < 0)
+				unindent= true;
+			
 			if (unindent)
 				unindent(indent);
 				
@@ -284,7 +290,7 @@ public class JavaIndenter {
 	 * is set to <code>JavaHeuristicScanner.NOT_FOUND</code>.
 	 * 
 	 * @param position the position for which the reference is computed
-	 * @return the reference statement relative to which <code>position</code> should be indented.
+	 * @return the reference statement relative to which <code>position</code> should be indented, or {@link JavaHeuristicScanner#NOT_FOUND}
 	 */
 	public int findReferencePosition(int position) {
 		return findReferencePosition(position, false, false);
@@ -301,7 +307,7 @@ public class JavaIndenter {
 	 * @param position the position for which the reference is computed
 	 * @param danglingElse whether a dangling else should be assumed at <code>position</code>
 	 * @param matchBrace whether the position of the matching brace should be returned instead of doing code analysis
-	 * @return the reference statement relative to which <code>position</code> should be indented.
+	 * @return the reference statement relative to which <code>position</code> should be indented, or {@link JavaHeuristicScanner#NOT_FOUND}
 	 */
 	private int findReferencePosition(int position, boolean danglingElse, boolean matchBrace) {
 		fIndent= 0; // the indentation modification
@@ -314,9 +320,10 @@ public class JavaIndenter {
 		boolean hasBrace= false;
 		
 		if (matchBrace) {
-			if (!skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE))
+			if (!skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE)) {
 				fPosition= position;
-			else {
+				fIndent= -1;
+			} else {
 				indentBlockLess= false;
 				hasBrace= true;
 			}
@@ -678,6 +685,9 @@ public class JavaIndenter {
 	 * @return <code>true</code> if the current position looks like a method header.
 	 */
 	private boolean looksLikeMethodDecl() {
+		/*
+		 * TODO does not recognize package private constructors
+		 */
 		
 		nextToken();
 		if (fToken == Symbols.TokenIDENT) { // method name
