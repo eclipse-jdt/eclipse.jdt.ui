@@ -239,7 +239,7 @@ public class CallHierarchy {
         StringTokenizer tokenizer = new StringTokenizer(listString, ","); //$NON-NLS-1$
 
         while (tokenizer.hasMoreTokens()) {
-            String textFilter = tokenizer.nextToken();
+            String textFilter = tokenizer.nextToken().trim();
             list.add(new StringMatcher(textFilter, false, false));
         }
 
