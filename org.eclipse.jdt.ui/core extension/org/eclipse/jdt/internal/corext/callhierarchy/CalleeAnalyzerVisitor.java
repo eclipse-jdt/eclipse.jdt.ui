@@ -17,6 +17,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
@@ -183,15 +184,24 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
                         new SubProgressMonitor(fProgressMonitor, 100,
                             SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 
-                if ((calledMethod != null) && calledType.isInterface()) {
-                    calledMethod = findImplementingMethods(calledMethod);
-                }
+                IMember referencedMember= null;
+                if (calledMethod == null) {
+                    if (calledMethodBinding.isConstructor() && calledMethodBinding.getParameterTypes().length == 0) {
+                        referencedMember= calledType;
+                    }
+                } else { 
+                    if (calledType.isInterface()) {
+                        calledMethod = findImplementingMethods(calledMethod);
+                    }
 
-                if (!isIgnoredBySearchScope(calledMethod)) {
-                    fSearchResults.addMember(fMethod, calledMethod,
-                        node.getStartPosition(),
-                        node.getStartPosition() + node.getLength());
+                    if (!isIgnoredBySearchScope(calledMethod)) {
+                        referencedMember= calledMethod;
+                    }
                 }
+                
+                fSearchResults.addMember(fMethod, referencedMember,
+                    node.getStartPosition(),
+                    node.getStartPosition() + node.getLength());
             }
         } catch (JavaModelException jme) {
             JavaPlugin.log(jme);

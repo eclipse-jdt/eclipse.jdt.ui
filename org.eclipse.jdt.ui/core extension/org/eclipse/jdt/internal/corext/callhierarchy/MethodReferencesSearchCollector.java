@@ -62,6 +62,7 @@ class MethodReferencesSearchCollector implements IJavaSearchResultCollector {
                 case IJavaElement.METHOD:
                 case IJavaElement.TYPE:
                 case IJavaElement.FIELD:
+                case IJavaElement.INITIALIZER:
                     fSearchResults.addMember(member, member, start, end);
                     break;
             }
