@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
@@ -207,6 +208,8 @@ public class InlineTempRefactoring extends Refactoring {
 		if (expression instanceof ConditionalExpression)	
 			return true;	
 		if (expression instanceof Assignment)//for estetic reasons
+			return true;	
+		if (expression instanceof CastExpression)
 			return true;	
 		return false;		
 	}
