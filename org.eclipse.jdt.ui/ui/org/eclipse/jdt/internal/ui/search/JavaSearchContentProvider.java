@@ -18,9 +18,7 @@ public abstract class JavaSearchContentProvider implements IStructuredContentPro
 		// nothing to do
 	}
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		if (newInput instanceof JavaSearchResult) {
-			initialize((JavaSearchResult) newInput);
-		}
+		initialize((JavaSearchResult) newInput);
 	}
 	protected void initialize(JavaSearchResult result) {
 		fResult= result;

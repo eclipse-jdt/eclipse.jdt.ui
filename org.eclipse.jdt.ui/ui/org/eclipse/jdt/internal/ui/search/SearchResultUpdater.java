@@ -141,8 +141,10 @@ public class SearchResultUpdater implements IElementChangedListener, ISearchResu
 	}
 
 	public void searchResultRemoved(ISearchResult search) {
-		if (search.equals(fResult))
+		if (search.equals(fResult)) {
 			JavaCore.removeElementChangedListener(this);
+			NewSearchUI.getSearchManager().removeSearchResultListener(this);
+		}		
 	}
 
 	private void collectRemovals(Set removals, IResourceDelta delta) {
