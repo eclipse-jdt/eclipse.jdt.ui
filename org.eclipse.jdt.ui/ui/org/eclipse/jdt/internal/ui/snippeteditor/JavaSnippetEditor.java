@@ -1,9 +1,10 @@
+package org.eclipse.jdt.internal.ui.snippeteditor;
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.snippeteditor;
-
+ 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
@@ -38,7 +39,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.eval.IEvaluationContext;
 import org.eclipse.jdt.debug.core.IJavaDebugTarget;
-import org.eclipse.jdt.debug.core.IJavaEvaluationResult;
 import org.eclipse.jdt.debug.core.IJavaStackFrame;
 import org.eclipse.jdt.debug.core.IJavaThread;
 import org.eclipse.jdt.debug.core.IJavaType;
@@ -61,7 +61,6 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -203,30 +202,11 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 
 		ITextSelection selection= (ITextSelection) getSelectionProvider().getSelection();
 		String snippet= selection.getText();
-		if (snippet.length() == 0) {
-			selectLineForEvaluation(selection);
-			selection= (ITextSelection) getSelectionProvider().getSelection();
-			snippet= selection.getText();
-		}
 		fSnippetStart= selection.getOffset();
 		fSnippetEnd= fSnippetStart + selection.getLength();
 		
 		evaluate(snippet);			
 	}	
-	
-	/**
-	 * A request for evaluation has occurred.  Currently, the 
-	 * selection is empty.  Select the entire line of the empty
-	 * selection.
-	 */
-	protected void selectLineForEvaluation(ITextSelection selection) {
-		IDocument doc= getDocumentProvider().getDocument(getEditorInput());
-		try {
-			IRegion region= doc.getLineInformationOfOffset(selection.getOffset());
-			selectAndReveal(region.getOffset(), region.getLength());
-		} catch (BadLocationException ble) {
-		}
-	}
 	
 	protected void buildAndLaunch() {
 		IJavaProject javaProject= getJavaProject();

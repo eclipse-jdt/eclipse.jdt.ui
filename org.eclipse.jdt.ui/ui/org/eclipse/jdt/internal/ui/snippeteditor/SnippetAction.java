@@ -1,8 +1,9 @@
+package org.eclipse.jdt.internal.ui.snippeteditor;
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.snippeteditor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jface.action.Action;
@@ -21,8 +22,9 @@ public abstract class SnippetAction extends Action implements ISnippetStateChang
 	}
 		
 	public void setEditor(JavaSnippetEditor editor) {
-		if (fEditor != null)
+		if (fEditor != null) {
 			fEditor.removeSnippetStateChangedListener(this);
+		}
 		fEditor= editor;
 		if (fEditor != null) {
 			fEditor.addSnippetStateChangedListener(this);
@@ -45,10 +47,22 @@ public abstract class SnippetAction extends Action implements ISnippetStateChang
 	public void update() {
 		ITextSelection selection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
 		String text= selection.getText();
+		boolean enabled= false;
 		if (text != null) {
-			setEnabled(true);
-			return;
+			enabled= textHasContent(text);
 		} 
-		setEnabled(false);
+		setEnabled(enabled);
+	}
+	
+	protected boolean textHasContent(String text) {
+		int length= text.length();
+		if (length > 0) {
+			for (int i= 0; i < length; i++) {
+				if (Character.isLetterOrDigit(text.charAt(i))) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }
