@@ -15,6 +15,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -23,8 +26,9 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEditGroup;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -61,7 +65,6 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -81,9 +84,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 /**
  * Refactoring class that permits the substitution of a factory method
@@ -777,12 +778,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param unit the <code>CompilationUnit</code> to be rewritten
 	 * @param unitRewriter the rewriter
 	 * @param unitChange the compilation unit change
-	 * @throws JavaModelException
+	 * @throws CoreException
 	 * @return true iff at least one constructor call site was rewritten.
 	 */
 	private boolean replaceConstructorCalls(SearchResultGroup rg, CompilationUnit unit,
 											ASTRewrite unitRewriter, CompilationUnitChange unitChange)
-	throws JavaModelException {
+	throws CoreException {
 		Assert.isTrue(ASTCreator.getCu(unit).equals(rg.getCompilationUnit()));
 		SearchMatch[]	hits= rg.getSearchResults();
 		AST	ctorCallAST= unit.getAST();
@@ -811,13 +812,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param unitAST
 	 * @return may return null if this is really a constructor->constructor call (e.g. "this(...)")
 	 */
-	private ClassInstanceCreation getCtorCallAt(int start, int length, CompilationUnit unitAST) throws JavaModelException {
+	private ClassInstanceCreation getCtorCallAt(int start, int length, CompilationUnit unitAST) throws CoreException {
 		ICompilationUnit	unitHandle= ASTCreator.getCu(unitAST);
 		ASTNode		node= NodeFinder.perform(unitAST, start, length);
 
 		if (node == null)
-			throw new JavaModelException(new JavaModelStatus(IStatus.ERROR,
-				RefactoringCoreMessages.getFormattedString("IntroduceFactory.noASTNodeForConstructorSearchHit", //$NON-NLS-1$
+			throw new CoreException(new StatusInfo(IStatus.ERROR, RefactoringCoreMessages.getFormattedString("IntroduceFactory.noASTNodeForConstructorSearchHit", //$NON-NLS-1$
 					new Object[] {	Integer.toString(start), Integer.toString(start + length),
 									unitHandle.getSource().substring(start, start + length),
 									unitHandle.getElementName() })));
@@ -830,11 +830,11 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			if (init instanceof ClassInstanceCreation) {
 				return (ClassInstanceCreation) init;
 			} else if (init != null)
-				throw new JavaModelException(new JavaModelStatus(IStatus.ERROR,
+				throw new CoreException(new StatusInfo(IStatus.ERROR,
 					RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedInitializerNodeType", //$NON-NLS-1$
 										new Object[] { init.toString(), unitHandle.getElementName() })));
 			else
-				throw new JavaModelException(new JavaModelStatus(IStatus.ERROR,
+				throw new CoreException(new StatusInfo(IStatus.ERROR,
 					RefactoringCoreMessages.getFormattedString("IntroduceFactory.noConstructorCallNodeInsideFoundVarbleDecl", //$NON-NLS-1$
 										new Object[] { node.toString() })));
 		} else if (node instanceof ConstructorInvocation) {
@@ -852,7 +852,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			if (expr instanceof ClassInstanceCreation)
 				return (ClassInstanceCreation) expr;
 			else
-				throw new JavaModelException(new JavaModelStatus(IStatus.ERROR,
+				throw new CoreException(new StatusInfo(IStatus.ERROR,
 					RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHit", //$NON-NLS-1$
 						new Object[] { expr.toString(), unitHandle.getElementName() })));
 		} else if (node instanceof SimpleName && (node.getParent() instanceof MethodDeclaration || node.getParent() instanceof AbstractTypeDeclaration)) {
@@ -862,7 +862,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			fConstructorVisibility= Modifier.PROTECTED;
 			return null;
 		} else
-			throw new JavaModelException(new JavaModelStatus(IStatus.ERROR,
+			throw new CoreException(new StatusInfo(IStatus.ERROR,
 				RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHit", //$NON-NLS-1$
 					new Object[] {	node.getClass().getName() + "('" + node.toString() + "')", unitHandle.getElementName() }))); //$NON-NLS-1$ //$NON-NLS-2$
 	}
