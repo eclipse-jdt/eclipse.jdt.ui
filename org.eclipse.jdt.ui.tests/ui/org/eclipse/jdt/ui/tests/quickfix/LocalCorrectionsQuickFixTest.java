@@ -124,7 +124,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    public static void foo() {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu1= pack0.createCompilationUnit("A.java", buf.toString(), false, null);		
+		pack0.createCompilationUnit("A.java", buf.toString(), false, null);		
 		
 		buf= new StringBuffer();
 		buf.append("package pack;\n");
