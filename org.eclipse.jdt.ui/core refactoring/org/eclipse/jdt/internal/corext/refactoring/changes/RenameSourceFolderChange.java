@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
@@ -27,7 +26,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 
-	public RenameSourceFolderChange(IPackageFragmentRoot sourceFolder, String newName) throws JavaModelException {
+	public RenameSourceFolderChange(IPackageFragmentRoot sourceFolder, String newName) {
 		this(sourceFolder.getPath(), sourceFolder.getElementName(), newName);
 		Assert.isTrue(!sourceFolder.isReadOnly(), "should not be read only");  //$NON-NLS-1$
 		Assert.isTrue(!sourceFolder.isArchive(), "should not be an archive");  //$NON-NLS-1$

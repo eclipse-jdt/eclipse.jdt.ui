@@ -20,10 +20,7 @@ import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewDeltaTests;
 import org.eclipse.jdt.ui.tests.callhierarchy.CallHierarchyContentProviderTest;
 import org.eclipse.jdt.ui.tests.core.CoreTests;
-import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests1;
-import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests2;
-import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests3;
-import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests4;
+import org.eclipse.jdt.ui.tests.packageview.PackageExplorerContentProviderTests;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
 import org.eclipse.jdt.ui.tests.search.SearchTest;
 import org.eclipse.jdt.ui.tests.wizardapi.NewJavaProjectWizardTest;
@@ -52,10 +49,7 @@ public class AutomatedSuite extends TestSuite {
 		
 		addTest(NewJavaProjectWizardTest.suite());
 		
-		addTest(ContentProviderTests1.suite());
-		addTest(ContentProviderTests2.suite());
-		addTest(ContentProviderTests3.suite());
-		addTest(ContentProviderTests4.suite());	
+		addTest(PackageExplorerContentProviderTests.suite());
 		
 		addTest(PackagesViewContentProviderTests.suite());
 		addTest(PackagesViewDeltaTests.suite());

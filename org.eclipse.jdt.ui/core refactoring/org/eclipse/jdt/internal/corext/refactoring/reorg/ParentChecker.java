@@ -59,7 +59,7 @@ public class ParentChecker {
 		IJavaElement convertedToJava= JavaCore.create(commonResourceParent);
 		if (convertedToJava == null || 
 			! convertedToJava.exists() || 
-			! commonJavaElementParent.equals(ReorgUtils.toWorkingCopy(convertedToJava)))
+			! commonJavaElementParent.equals(convertedToJava))
 			return null;
 		return commonJavaElementParent;	
 	}
@@ -79,11 +79,10 @@ public class ParentChecker {
 	private boolean javaElementsHaveCommonParent() {
 		if (fJavaElements.length == 0)
 			return true;
-		IJavaElement[] javaElements= ReorgUtils.toWorkingCopies(fJavaElements);
-		IJavaElement firstParent= javaElements[0].getParent();
-		Assert.isNotNull(firstParent);//this should never happen			
-		for (int i= 1; i < javaElements.length; i++) {
-			if (! firstParent.equals(javaElements[i].getParent()))
+		IJavaElement firstParent= fJavaElements[0].getParent();
+		Assert.isNotNull(firstParent); //this should never happen			
+		for (int i= 1; i < fJavaElements.length; i++) {
+			if (! firstParent.equals(fJavaElements[i].getParent()))
 				return false;
 		}
 		return true;

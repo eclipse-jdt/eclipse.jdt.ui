@@ -107,7 +107,7 @@
    </extension>
    <extension
          point="org.eclipse.jdt.ui.quickAssistProcessors">
-      <quickFixProcessor
+      <quickAssistProcessor
             name="%exampleQuickAssistProcessor.name"
             class="org.eclipse.jdt.ui.examples.MyQuickAssistProcessor"
             id="org.eclipse.jdt.ui.examples.MyQuickAssistProcessor">
@@ -118,7 +118,7 @@
               </iterate>
            </with>
          </enablement>
-      </quickFixProcessor>
+      </quickAssistProcessor>
    </extension>
 
 </plugin>

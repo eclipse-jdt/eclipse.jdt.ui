@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -189,9 +188,7 @@ class ConstantChecks {
 		return new StaticFinalConstantChecker(ex).check();
 	}
 
-	public static boolean isLoadTimeConstant(IExpressionFragment ex) 
-		throws JavaModelException
-	{
+	public static boolean isLoadTimeConstant(IExpressionFragment ex) {
 		return new LoadTimeConstantChecker(ex).check();
 	}
 }

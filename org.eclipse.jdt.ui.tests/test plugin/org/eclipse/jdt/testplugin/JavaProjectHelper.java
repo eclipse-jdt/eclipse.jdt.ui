@@ -180,6 +180,13 @@ public class JavaProjectHelper {
 	 * Adds a source container to a IJavaProject.
 	 */		
 	public static IPackageFragmentRoot addSourceContainer(IJavaProject jproject, String containerName, IPath[] exclusionFilters) throws CoreException {
+		return addSourceContainer(jproject, containerName, new Path[0], exclusionFilters);
+	}
+	
+	/**
+	 * Adds a source container to a IJavaProject.
+	 */		
+	public static IPackageFragmentRoot addSourceContainer(IJavaProject jproject, String containerName, IPath[] inclusionFilters, IPath[] exclusionFilters) throws CoreException {
 		IProject project= jproject.getProject();
 		IContainer container= null;
 		if (containerName == null || containerName.length() == 0) {
@@ -193,7 +200,7 @@ public class JavaProjectHelper {
 		}
 		IPackageFragmentRoot root= jproject.getPackageFragmentRoot(container);
 		
-		IClasspathEntry cpe= JavaCore.newSourceEntry(root.getPath(), exclusionFilters);
+		IClasspathEntry cpe= JavaCore.newSourceEntry(root.getPath(), inclusionFilters, exclusionFilters, null);
 		addToClasspath(jproject, cpe);		
 		return root;
 	}

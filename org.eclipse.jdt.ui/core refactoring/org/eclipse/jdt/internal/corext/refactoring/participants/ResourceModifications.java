@@ -15,8 +15,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -106,7 +104,7 @@ public class ResourceModifications {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getParticipants(org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor)
 	 */
-	public RefactoringParticipant[] getParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException {
+	public RefactoringParticipant[] getParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
 		List result= new ArrayList(5);
 		if (fDelete != null) {
 			DeleteArguments arguments= new DeleteArguments();

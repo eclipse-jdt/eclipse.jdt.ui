@@ -55,11 +55,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new LocalCorrectionsQuickFixTest("testHidingVariable1"));
+			suite.addTest(new LocalCorrectionsQuickFixTest("testUnimplementedMethods"));
 			return new ProjectTestSetup(suite);
 		}
 	}

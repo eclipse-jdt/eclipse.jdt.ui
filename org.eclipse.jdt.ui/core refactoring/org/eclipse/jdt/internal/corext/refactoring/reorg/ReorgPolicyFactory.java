@@ -1846,7 +1846,7 @@ class ReorgPolicyFactory {
 			pm.done();
 		}
 
-		private void handleType(IType type, IPackageFragment destination, IProgressMonitor pm) throws JavaModelException {
+		private void handleType(IType type, IPackageFragment destination, IProgressMonitor pm) {
 			QualifiedNameFinder.process(fQualifiedNameSearchResult, type.getFullyQualifiedName(),  destination.getElementName() + "." + type.getTypeQualifiedName(), //$NON-NLS-1$
 				fFilePatterns, type.getJavaProject().getProject(), pm);
 		}	

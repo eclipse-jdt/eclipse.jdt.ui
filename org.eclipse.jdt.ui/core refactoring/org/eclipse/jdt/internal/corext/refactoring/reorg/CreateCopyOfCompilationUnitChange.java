@@ -97,7 +97,7 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 		}
 	}
 
-	private IPath constructNewPath(String newTypeName) throws JavaModelException{
+	private IPath constructNewPath(String newTypeName) {
 		return ResourceUtil.getResource(fOldCu).getParent().getFullPath().append(newTypeName + ".java"); //$NON-NLS-1$
 	}
 
@@ -108,7 +108,7 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 			String result= manager.get(wc).getPreviewContent(new NullProgressMonitor());
 			return result;
 		} finally {
-			wc.destroy();
+			wc.discardWorkingCopy();
 		}
 	}
 	

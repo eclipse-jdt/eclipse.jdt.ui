@@ -35,7 +35,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 
 	private boolean fUpdateReferences;
 	
-	public RenameJavaProjectChange(IJavaProject project, String newName, boolean updateReferences) throws JavaModelException {
+	public RenameJavaProjectChange(IJavaProject project, String newName, boolean updateReferences) {
 		this(project.getPath(), project.getElementName(), newName);
 		Assert.isTrue(!project.isReadOnly(), "should not be read only");  //$NON-NLS-1$
 		

@@ -743,6 +743,10 @@ public class StubUtility {
 	}
 
 	private static String resolveAndAdd(String refTypeSig, IType declaringType, IImportsStructure imports) throws JavaModelException {
+		String[] typeParameters= Signature.getTypeParameters(refTypeSig);
+		if (typeParameters.length > 0) {
+			// see bug 68847 
+		}
 		String resolvedTypeName= JavaModelUtil.getResolvedTypeName(refTypeSig, declaringType);
 		if (resolvedTypeName != null) {
 			StringBuffer buf= new StringBuffer();

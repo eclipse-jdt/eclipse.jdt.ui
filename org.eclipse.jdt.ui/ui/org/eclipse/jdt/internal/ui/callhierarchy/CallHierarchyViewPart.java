@@ -843,10 +843,10 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
             String scopeDescription = fSearchScopeActions.getFullDescription();
             String[] args = new String[] { elementName, scopeDescription};
 			if (fCurrentCallMode == CALL_MODE_CALLERS) {
-                setTitle(CallHierarchyMessages.getFormattedString("CallHierarchyViewPart.callsToMethod", args)); //$NON-NLS-1$
+                setContentDescription(CallHierarchyMessages.getFormattedString("CallHierarchyViewPart.callsToMethod", args)); //$NON-NLS-1$
                 fCallHierarchyViewer.setMethodWrapper(getCallerRoot());
             } else {
-                setTitle(CallHierarchyMessages.getFormattedString("CallHierarchyViewPart.callsFromMethod", args)); //$NON-NLS-1$
+                setContentDescription(CallHierarchyMessages.getFormattedString("CallHierarchyViewPart.callsFromMethod", args)); //$NON-NLS-1$
                 fCallHierarchyViewer.setMethodWrapper(getCalleeRoot());
             }
         }

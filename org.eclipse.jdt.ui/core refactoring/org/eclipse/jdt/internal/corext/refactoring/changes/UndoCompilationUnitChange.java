@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.ltk.core.refactoring.*;
 import org.eclipse.ltk.core.refactoring.Change;
@@ -27,13 +28,13 @@ import org.eclipse.ltk.core.refactoring.Change;
 	
 	private ICompilationUnit fCUnit;
 
-	public UndoCompilationUnitChange(String name, ICompilationUnit unit, UndoEdit undo, ContentStamp stampToRestore, int saveMode) throws CoreException {
+	public UndoCompilationUnitChange(String name, ICompilationUnit unit, UndoEdit undo, ContentStamp stampToRestore, int saveMode) throws JavaModelException {
 		super(name, getFile(unit), undo, stampToRestore, saveMode);
 		fCUnit= unit;
 	}
 
-	private static IFile getFile(ICompilationUnit cunit) throws CoreException {
-		return (IFile) cunit.getResource();
+	private static IFile getFile(ICompilationUnit cunit) throws JavaModelException {
+		return (IFile)cunit.getCorrespondingResource();
 	}
 	
 	/**

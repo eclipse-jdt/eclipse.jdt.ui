@@ -27,7 +27,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange {
 
-	public RenameCompilationUnitChange(ICompilationUnit cu, String newName) throws JavaModelException{
+	public RenameCompilationUnitChange(ICompilationUnit cu, String newName) {
 		this(ResourceUtil.getResource(cu).getFullPath(), cu.getElementName(), newName);
 		Assert.isTrue(!cu.isReadOnly(), "cu must not be read-only"); //$NON-NLS-1$
 	}
@@ -40,7 +40,7 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 		super(resourcePath, oldName, newName);
 	}
 	
-	protected IPath createNewPath() throws JavaModelException{
+	protected IPath createNewPath() {
 		if (getResourcePath().getFileExtension() != null)
 			return getResourcePath().removeFileExtension().removeLastSegments(1).append(getNewName());
 		else	
