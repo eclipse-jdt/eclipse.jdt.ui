@@ -1012,14 +1012,14 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testAll55()throws Exception{
-		printTestDisabledMessage("test for bug 32654 [Refactoring] Change method signature with problems");
-//		String[] signature= {"[QObject;", "I", "Z"};
-//		String[] newNames= {"e"};
-//		String[] newTypes= {"boolean"};
-//		String[] newDefaultValues= {"true"};
-//		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
-//		int[] newIndices= {2};
-//		helperAdd(signature, newParamInfo, newIndices);
+//		printTestDisabledMessage("test for bug 32654 [Refactoring] Change method signature with problems");
+		String[] signature= {"[QObject;", "I", "Z"};
+		String[] newNames= {"e"};
+		String[] newTypes= {"boolean"};
+		String[] newDefaultValues= {"true"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {2};
+		helperAdd(signature, newParamInfo, newIndices);
 
 	}
 
