@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2001 MyCorporation.
+ * (c) Copyright IBM Corp. 2000, 2001, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.junit.wizards;
@@ -26,7 +26,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.IEditorPart;
 
 /**
- * A wizard for creating TestSuites.
+ * A wizard for creating test suites.
  */
 public class NewTestSuiteCreationWizard extends JUnitWizard {
 
@@ -81,7 +81,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 				String originalContent= buf.getText(range.getOffset(), range.getLength());
 				int start= originalContent.indexOf(NewTestSuiteCreationWizardPage.START_MARKER);
 				if (start > -1) {
-					int end= originalContent.indexOf(NewTestSuiteCreationWizardPage.endMarker, start);
+					int end= originalContent.indexOf(NewTestSuiteCreationWizardPage.END_MARKER, start);
 					if (end < 0) {
 						fPage.cannotUpdateSuiteError();
 						return false;

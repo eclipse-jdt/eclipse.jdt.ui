@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2001 MyCorporation.
+ * (c) Copyright IBM Corp. 2000, 2001, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.junit.wizards;
@@ -20,7 +20,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
 /**
- * A group of controls used in the JUnit TestCase wizard.
+ * A group of controls used in the JUnit TestCase and TestSuite wizards
+ * for selecting method stubs to create.
  */
 public class MethodStubsSelectionButtonGroup {
 

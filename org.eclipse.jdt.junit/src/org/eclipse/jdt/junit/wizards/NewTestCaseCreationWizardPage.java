@@ -1,3 +1,7 @@
+/*
+ * (c) Copyright IBM Corp. 2000, 2001, 2002.
+ * All Rights Reserved.
+ */
 package org.eclipse.jdt.junit.wizards;
 
 import java.awt.Stroke;
@@ -124,7 +128,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	// -------- Initialization ---------
 
 	/**
-	 * Should be called from the wizard with the input element.
+	 * Should be called from the wizard with the initial selection and the 2nd page of the wizard..
 	 */
 	public void init(IStructuredSelection selection, NewTestCaseCreationWizardPage2 page2) {
 		fPage2= page2;
@@ -346,25 +350,28 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	}
 
 	/**
-	 * Gets the content of the class to test text field.
+	 * Returns the content of the class to test text field.
 	 */
 	public String getClassToTestText() {
 		return fClassToTestText.getText();
 	}
 	
+	/**
+	 * Returns the class to be tested.
+	 */
 	public IType getClassToTest() {
 		return fClassToTest;
 	}
 
 	/**
-	 * Sets the class to test name.
+	 * Sets the name of the class to test.
 	 */		
 	public void setClassToTest(String name) {
 		fClassToTestText.setText(name);
 	}	
 
-	/*
-	 * @see TypePage#evalMethods
+	/**
+	 * @see NewTypeWizardPage#createTypeMembers
 	 */
 	protected void createTypeMembers(IType type, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
 		fIndexOfFirstTestMethod= 0;
@@ -596,6 +603,9 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		}
 	}
 
+	/**
+	 * @see DialogPage#setVisible(boolean)
+	 */
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 
@@ -609,12 +619,17 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		if (visible) setFocus();
 	}
 	
+	/**
+	 * Returns the index of the first method that is a test method, i.e. excluding main, setUp() and tearDown().
+	 * If none of the aforementioned method stubs is created, then 0 is returned. As such method stubs are created,
+	 * this counter is incremented.
+	 */
 	public int getIndexOfFirstMethod() {
 		return fIndexOfFirstTestMethod;
 	}
 
 	/**
-	 * Creates a type using the current field values.
+	 * @see IDialogPage#createControl(Composite)
 	 */
 	public void createType(IProgressMonitor monitor) throws CoreException, InterruptedException {		
 		super.createType(monitor);

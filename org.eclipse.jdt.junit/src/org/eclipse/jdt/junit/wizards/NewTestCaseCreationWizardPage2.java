@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2001 MyCorporation.
+ * (c) Copyright IBM Corp. 2000, 2001, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.junit.wizards;
@@ -62,7 +62,7 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 		setDescription(Messages.getString("NewTestClassWizPage2.description")); //$NON-NLS-1$
 	}
 
-	/*
+	/**
 	 * @see IDialogPage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
@@ -187,6 +187,9 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 		spacer.setLayoutData(data);
 	}
 
+	/**
+	 * @see DialogPage#setVisible(boolean)
+	 */
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
@@ -218,6 +221,9 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 		}
 	}
 
+	/**
+	 * Returns all checked methods in the Methods tree.
+	 */
 	public IMethod[] getCheckedMethods() {
 		Object[] checkedObjects= fMethodsTree.getCheckedElements();
 		int methodCount= 0;
@@ -332,6 +338,9 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 		}
 	}
 
+	/**
+	 * Returns true iff the checkbox for creating tasks is checked.
+	 */
 	public boolean getCreateTasksButtonSelection() {
 		return fCreateTasksButton.getSelection();
 	}
@@ -346,6 +355,9 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 		fSelectedMethodsLabel.setText(Messages.getFormattedString(((checkedMethodCount==1)?"NewTestClassWizPage2.selected_methods.label_one":"NewTestClassWizPage2.selected_methods.label_many"), new Integer(checkedMethodCount))); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
+	/**
+	 * Returns all the methods in the Methods tree.
+	 */
 	public IMethod[] getAllMethods() {
 		return ((MethodsTreeContentProvider)fMethodsTree.getContentProvider()).getAllMethods();
 	}

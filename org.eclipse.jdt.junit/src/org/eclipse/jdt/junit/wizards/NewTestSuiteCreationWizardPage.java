@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2001 MyCorporation.
+ * (c) Copyright IBM Corp. 2000, 2001, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.junit.wizards;
@@ -69,7 +69,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 
 
 	public static final String START_MARKER= "//$JUnit-BEGIN$"; //$NON-NLS-1$
-	public static final String endMarker= "//$JUnit-END$"; //$NON-NLS-1$
+	public static final String END_MARKER= "//$JUnit-END$"; //$NON-NLS-1$
 	
 	private IPackageFragment fCurrentPackage;
 	private CheckboxTableViewer fClassesInSuiteTable;	
@@ -107,7 +107,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		fClassesInSuiteStatus= new JUnitStatus();
 	}
 
-	/*
+	/**
 	 * @see IDialogPage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
@@ -139,7 +139,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	}	
 
 	/**
-	 * Should be called from the wizard with the input element.
+	 * Should be called from the wizard with the initial selection.
 	 */
 	public void init(IStructuredSelection selection) {
 		IJavaElement jelem= getInitialJavaElement(selection);
@@ -185,6 +185,9 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		updateStatus(status);
 	}
 
+	/**
+	 * @see DialogPage#setVisible(boolean)
+	 */
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
@@ -324,6 +327,9 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		type.createMethod(fMethodStubsButtons.getMainMethod(getTypeName()), null, false, null);	
 	}
 
+	/**
+	 * Returns the string content for creating a new suite() method.
+	 */
 	public String getSuiteMethodString() throws JavaModelException {
 		IPackageFragment pack= getPackageFragment();
 		String packName= pack.getElementName();
@@ -333,13 +339,15 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		return suite.toString();
 	}
 	
-	public String getUpdatableString() throws JavaModelException {
+	/**
+	 * Returns the new code to be included in a new suite() or which replaces old code in an existing suite().
+	 */
+	public static String getUpdatableString(Object[] selectedClasses) throws JavaModelException {
 		StringBuffer suite= new StringBuffer();
 		suite.append(START_MARKER+"\n"); //$NON-NLS-1$
-		Object[] checkedObjects= fClassesInSuiteTable.getCheckedElements();
-		for (int i= 0; i < checkedObjects.length; i++) {
-			if (checkedObjects[i] instanceof IType) {
-				IType testType= (IType) checkedObjects[i];
+		for (int i= 0; i < selectedClasses.length; i++) {
+			if (selectedClasses[i] instanceof IType) {
+				IType testType= (IType) selectedClasses[i];
 				IMethod suiteMethod= testType.getMethod("suite", new String[] {}); //$NON-NLS-1$
 				if (!suiteMethod.exists()) {
 					suite.append("suite.addTest(new TestSuite("+testType.getElementName()+".class));"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -348,10 +356,17 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 				}
 			}
 		}
-		suite.append("\n"+endMarker); //$NON-NLS-1$
+		suite.append("\n"+END_MARKER); //$NON-NLS-1$
 		return suite.toString();
 	}
+	
+	private String getUpdatableString() throws JavaModelException {
+		return getUpdatableString(fClassesInSuiteTable.getCheckedElements());
+	}
 
+	/**
+	 * Runnable for replacing an existing suite() method.
+	 */
 	public IRunnableWithProgress getRunnable() {
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -391,16 +406,16 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 					String originalContent= buf.getText(range.getOffset(), range.getLength());
 					StringBuffer source= new StringBuffer(originalContent);
 					//using JDK 1.4
-					//int start= source.toString().indexOf(startMarker) --> int start= source.indexOf(startMarker);
+					//int start= source.toString().indexOf(START_MARKER) --> int start= source.indexOf(START_MARKER);
 					int start= source.toString().indexOf(START_MARKER);
 					if (start > -1) {
 						//using JDK 1.4
-						//int end= source.toString().indexOf(endMarker, start) --> int end= source.indexOf(endMarker, start)
-						int end= source.toString().indexOf(endMarker, start);
+						//int end= source.toString().indexOf(END_MARKER, start) --> int end= source.indexOf(END_MARKER, start)
+						int end= source.toString().indexOf(END_MARKER, start);
 						if (end > -1) {
 							monitor.subTask(Messages.getString("NewTestSuiteWizPage.createType.updating.suite_method")); //$NON-NLS-1$
 							monitor.worked(1);
-							end += endMarker.length();
+							end += END_MARKER.length();
 							source.replace(start, end, getUpdatableString());
 							buf.replace(range.getOffset(), range.getLength(), source.toString());
 							cu.reconcile(null);
@@ -439,6 +454,9 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		}
 	}
 
+	/**
+	 * Returns true iff an existing suite() method has been replaced.
+	 */
 	public boolean hasUpdatedExistingClass() {
 		return fUpdatedExistingClassButton;
 	}
@@ -550,14 +568,17 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	protected void setFocus() {
 		fSuiteNameText.setFocus();
 	}
-	
+
+	/**
+	 * Sets the classes in <code>elements</code> as checked.
+	 */	
 	public void setCheckedElements(Object[] elements) {
 		fClassesInSuiteTable.setCheckedElements(elements);
 	}
 	
 	protected void cannotUpdateSuiteError() {
 		MessageDialog.openError(getShell(), Messages.getString("NewTestSuiteWizPage.cannotUpdateDialog.title"), //$NON-NLS-1$
-			Messages.getFormattedString("NewTestSuiteWizPage.cannotUpdateDialog.message", new String[] {START_MARKER, endMarker})); //$NON-NLS-1$
+			Messages.getFormattedString("NewTestSuiteWizPage.cannotUpdateDialog.message", new String[] {START_MARKER, END_MARKER})); //$NON-NLS-1$
 
 	}
 

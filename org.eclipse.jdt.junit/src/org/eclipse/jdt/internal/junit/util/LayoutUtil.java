@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.junit.util;
 
-import org.eclipse.jdt.junit.wizards.SelectionButtonGroup;
+import org.eclipse.jdt.junit.wizards.MethodStubsSelectionButtonGroup;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -17,7 +17,7 @@ public class LayoutUtil {
 	/**
 	 * Calculates the number of columns needed by field editors
 	 */
-	public static int getNumberOfColumns(SelectionButtonGroup[] editors) {
+	public static int getNumberOfColumns(MethodStubsSelectionButtonGroup[] editors) {
 		int columnCount= 0;
 		for (int i= 0; i < editors.length; i++) {
 			columnCount= Math.max(editors[i].getNumberOfControls(), columnCount);
@@ -29,7 +29,7 @@ public class LayoutUtil {
 	 * Creates a composite and fills in the given editors.
 	 * @param labelOnTop Defines if the label of all fields should be on top of the fields
 	 */	
-	public static void doDefaultLayout(Composite parent, SelectionButtonGroup[] editors, boolean labelOnTop) {
+	public static void doDefaultLayout(Composite parent, MethodStubsSelectionButtonGroup[] editors, boolean labelOnTop) {
 		doDefaultLayout(parent, editors, labelOnTop, 0, 0, 0, 0);
 	}
 
@@ -39,7 +39,7 @@ public class LayoutUtil {
 	 * @param minWidth The minimal width of the composite
 	 * @param minHeight The minimal height of the composite 
 	 */
-	public static void doDefaultLayout(Composite parent, SelectionButtonGroup[] editors, boolean labelOnTop, int minWidth, int minHeight) {
+	public static void doDefaultLayout(Composite parent, MethodStubsSelectionButtonGroup[] editors, boolean labelOnTop, int minWidth, int minHeight) {
 		doDefaultLayout(parent, editors, labelOnTop, minWidth, minHeight, 0, 0);
 	}
 
@@ -51,7 +51,7 @@ public class LayoutUtil {
 	 * @param marginWidth The margin width to be used by the composite
 	 * @param marginHeight The margin height to be used by the composite
 	 */	
-	public static void doDefaultLayout(Composite parent, SelectionButtonGroup[] editors, boolean labelOnTop, int minWidth, int minHeight, int marginWidth, int marginHeight) {
+	public static void doDefaultLayout(Composite parent, MethodStubsSelectionButtonGroup[] editors, boolean labelOnTop, int minWidth, int minHeight, int marginWidth, int marginHeight) {
 		int nCulumns= getNumberOfColumns(editors);
 		Control[][] controls= new Control[editors.length][];
 		for (int i= 0; i < editors.length; i++) {

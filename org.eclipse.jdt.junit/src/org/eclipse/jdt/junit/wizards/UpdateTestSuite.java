@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2001 MyCorporation.
+ * (c) Copyright IBM Corp. 2000, 2001, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.junit.wizards;
@@ -98,7 +98,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			buf.close();
 			int start= originalContent.indexOf(NewTestSuiteCreationWizardPage.START_MARKER);
 			if (start > -1) {
-				if (originalContent.indexOf(NewTestSuiteCreationWizardPage.endMarker, start) > -1) {
+				if (originalContent.indexOf(NewTestSuiteCreationWizardPage.END_MARKER, start) > -1) {
 					CheckedTableSelectionDialog dialog= new CheckedTableSelectionDialog(fShell, lprovider, cprovider);
 					dialog.setValidator(new UpdateAllTestsValidator());
 					dialog.setTitle(Messages.getString("UpdateAllTests.title")); //$NON-NLS-1$
@@ -159,12 +159,12 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			if (start > -1) {
 				//using JDK 1.4
 				//int end= source.toString().indexOf(NewTestSuiteCreationWizardPage.endMarker, start) --> int end= source.indexOf(NewTestSuiteCreationWizardPage.endMarker, start)
-				int end= source.toString().indexOf(NewTestSuiteCreationWizardPage.endMarker, start);
+				int end= source.toString().indexOf(NewTestSuiteCreationWizardPage.END_MARKER, start);
 				if (end > -1) {
 					monitor.worked(1);
-					end += NewTestSuiteCreationWizardPage.endMarker.length();
+					end += NewTestSuiteCreationWizardPage.END_MARKER.length();
 					//					String updatableCode= source.substring(start,end+NewTestSuiteCreationWizardPage.endMarker.length());
-					source.replace(start, end, getUpdatableString());
+					source.replace(start, end, NewTestSuiteCreationWizardPage.getUpdatableString(fSelectedTestCases));
 					buf.replace(range.getOffset(), range.getLength(), source.toString());
 					monitor.worked(1);
 					fTestSuite.reconcile(null);
@@ -196,28 +196,10 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			}
 		};
 	}
-	
-	public String getUpdatableString() throws JavaModelException {
-		StringBuffer suite= new StringBuffer();
-		suite.append(NewTestSuiteCreationWizardPage.START_MARKER+"\n"); //$NON-NLS-1$
-		for (int i= 0; i < fSelectedTestCases.length; i++) {
-			if (fSelectedTestCases[i] instanceof IType) {
-				IType testType= (IType) fSelectedTestCases[i];
-				IMethod suiteMethod= testType.getMethod("suite", new String[] {}); //$NON-NLS-1$
-				if (!suiteMethod.exists()) {
-					suite.append("suite.addTest(new TestSuite("+testType.getElementName()+".class));"); //$NON-NLS-1$ //$NON-NLS-2$
-				} else {
-					suite.append("suite.addTest("+testType.getElementName()+".suite());"); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}
-		}
-		suite.append("\n"+NewTestSuiteCreationWizardPage.endMarker); //$NON-NLS-1$
-		return suite.toString();
-	}
 
 	private void cannotUpdateSuiteError() {
 		MessageDialog.openError(fShell, Messages.getString("UpdateAllTests.cannotUpdate.errorDialog.title"), //$NON-NLS-1$
-			Messages.getFormattedString("UpdateAllTests.cannotUpdate.errorDialog.message", new String[] {NewTestSuiteCreationWizardPage.START_MARKER, NewTestSuiteCreationWizardPage.endMarker})); //$NON-NLS-1$
+			Messages.getFormattedString("UpdateAllTests.cannotUpdate.errorDialog.message", new String[] {NewTestSuiteCreationWizardPage.START_MARKER, NewTestSuiteCreationWizardPage.END_MARKER})); //$NON-NLS-1$
 
 	}
 
