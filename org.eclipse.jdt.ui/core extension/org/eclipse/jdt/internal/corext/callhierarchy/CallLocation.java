@@ -18,28 +18,21 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.CompilationUnit;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CallLocation implements IAdaptable {
     public static final int UNKNOWN_LINE_NUMBER= -1;
-    private IMember fCalledMember;
     private IMember fMember;
-    private String fCallText;
-    private int fEnd;
+    private IMember fCalledMember;
     private int fStart;
-    private int fLineNumber;
+    private int fEnd;
 
-    /**
-     * @param method
-     * @param cu
-     * @param start
-     * @param end
-     */
-    public CallLocation(IMember member, IMember calledMember, int start, int end) {
-        this(member, calledMember, start, end, UNKNOWN_LINE_NUMBER);
-    }
+    private String fCallText;
+    private int fLineNumber;
 
     /**
      * @param method
@@ -81,41 +74,61 @@ public class CallLocation implements IAdaptable {
     }
 
     public int getLineNumber() {
-        if (fLineNumber == UNKNOWN_LINE_NUMBER) {
-        	//TODO (bug 56129): should not create an AST just to get the line number (very expensive).
-        	//Just create a Document on the IBuffer and get the line number from there.
-            CompilationUnit unit= CallHierarchy.getCompilationUnitNode(fMember, false);
-            if (unit != null) {
-                fLineNumber= unit.lineNumber(fStart);
-            }
-        }
+    	initCallTextAndLineNumber();
         return fLineNumber;
     }
     
+    public String getCallText() {
+    	initCallTextAndLineNumber();
+        return fCallText;
+    }
+
+    private void initCallTextAndLineNumber() {
+    	if (fCallText != null)
+    		return;
+    	
+        IBuffer buffer= getBufferForMember();
+        if (buffer == null) { //binary, without source attachment
+        	fCallText= ""; //$NON-NLS-1$
+        	fLineNumber= UNKNOWN_LINE_NUMBER;
+        	return;
+        }
+
+        fCallText= buffer.getText(fStart, (fEnd - fStart));
+        
+        if (fLineNumber == UNKNOWN_LINE_NUMBER) {
+            Document document= new Document(buffer.getContents());
+            try {
+                fLineNumber= document.getLineOfOffset(fStart);
+            } catch (BadLocationException e) {
+                JavaPlugin.log(e);
+            }
+        }
+    }
+    
+    /**
+     * Returns the IBuffer for the IMember represented by this CallLocation.
+     * 
+     * @return IBuffer for the IMember or null if the member doesn't have a buffer (for
+     *          example if it is a binary file without source attachment).
+     */
+    private IBuffer getBufferForMember() {
+        IBuffer buffer = null;
+        try {
+            IOpenable openable = fMember.getOpenable();
+            if (openable != null && fMember.exists()) {
+                buffer = openable.getBuffer();
+            }
+        } catch (JavaModelException e) {
+            JavaPlugin.log(e);
+        }
+        return buffer;
+    }
+
     public String toString() {
         return getCallText();
     }
     
-    public String getCallText() {
-        if (fCallText == null) {
-            try {
-				IOpenable openable= fMember.getOpenable();
-				if (openable == null) {
-					return ""; //$NON-NLS-1$
-                }
-				IBuffer buffer = openable.getBuffer();
-                if (buffer == null) { //binary, without source attachment
-                    return ""; //$NON-NLS-1$
-                }
-                fCallText= buffer.getText(fStart, (fEnd - fStart));
-            } catch (JavaModelException e) {
-                JavaPlugin.log(e);
-                return "";    //$NON-NLS-1$
-            }
-        }
-        return fCallText;
-    }
-
     public Object getAdapter(Class adapter) {
         if (IJavaElement.class.isAssignableFrom(adapter)) {
             return getMember();

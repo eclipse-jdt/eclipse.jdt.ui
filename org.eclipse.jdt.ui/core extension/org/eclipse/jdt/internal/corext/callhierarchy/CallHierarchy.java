@@ -136,11 +136,11 @@ public class CallHierarchy {
     }
 
     public IJavaSearchScope getSearchScope() {
-        if (fSearchScope != null) {
-            return fSearchScope;
+        if (fSearchScope == null) {
+            fSearchScope= SearchEngine.createWorkspaceScope();
         }
 
-        return SearchEngine.createWorkspaceScope();
+        return fSearchScope;
     }
 
     public void setSearchScope(IJavaSearchScope searchScope) {

@@ -30,7 +30,7 @@ class CallSearchResultCollector {
     }
 
     protected void addMember(IMember member, IMember calledMember, int start, int end) {
-        addMember(member, calledMember, start, end, -1);
+        addMember(member, calledMember, start, end, CallLocation.UNKNOWN_LINE_NUMBER);
     }
 
     protected void addMember(IMember member, IMember calledMember, int start, int end, int lineNumber) {
