@@ -69,7 +69,7 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 		fGroupId= IContextMenuConstants.GROUP_SEARCH;
 		
 		fFindDeclarationsAction= new FindDeclarationsAction(site);
-		fFindDeclarationsAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_PROJECTS);
+		fFindDeclarationsAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
 
 		fFindDeclarationsInProjectAction= new FindDeclarationsInProjectAction(site);
 		fFindDeclarationsInProjectAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_PROJECTS);
