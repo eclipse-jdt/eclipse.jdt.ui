@@ -1,5 +1,5 @@
 package p1;
-import p2.*;
+import p2.A;
 import p2.C;
 public class B{
 	C c;
