@@ -786,26 +786,33 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 	
 		int pos= rewriteRequiredNode(methodDecl.getName());
-		if (isModified(methodDecl)) {
-			String description= getDescription(methodDecl);
-			MethodDeclaration modifedNode= (MethodDeclaration) getModifiedNode(methodDecl);
-			rewriteExtraDimensions(methodDecl.getExtraDimensions(), modifedNode.getExtraDimensions(), pos, description);
-		}		
-		
 		try {
-			pos= methodDecl.getStartPosition(); // workaround for bug 22161
-			
 			List parameters= methodDecl.parameters();
 			if (hasChanges(parameters)) {
 				pos= ASTResolving.getPositionAfter(getScanner(pos), ITerminalSymbols.TokenNameLPAREN);
-				rewriteList(parameters, pos, "");
+				pos= rewriteList(parameters, pos, "");
 			} else {
-				visitList(parameters, pos);
+				pos= visitList(parameters, pos);
 			}
+			
+			if (isModified(methodDecl)) {
+				MethodDeclaration modifedNode= (MethodDeclaration) getModifiedNode(methodDecl);
+				int oldDim= methodDecl.getExtraDimensions();
+				int newDim= modifedNode.getExtraDimensions();
+				if (oldDim != newDim) {
+					int offset= ASTResolving.getPositionAfter(getScanner(pos), ITerminalSymbols.TokenNameRPAREN);
+					rewriteExtraDimensions(oldDim, newDim, offset, getDescription(methodDecl));
+				}
+			}				
 			
 			List exceptions= methodDecl.thrownExceptions();
 			if (hasChanges(exceptions)) {
 				pos= ASTResolving.getPositionAfter(getScanner(pos), ITerminalSymbols.TokenNameRPAREN);
+				int dim= methodDecl.getExtraDimensions();
+				while (dim > 0) {
+					pos= ASTResolving.getPositionAfter(getScanner(pos), ITerminalSymbols.TokenNameRBRACKET);
+					dim--;
+				}
 				rewriteList(exceptions, pos, " throws ");
 			} else {
 				visitList(exceptions, pos);
