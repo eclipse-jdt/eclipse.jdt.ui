@@ -32,8 +32,7 @@ public class TypeInfoLabelProvider extends LabelProvider {
 		return (fFlags & flag) != 0;
 	}
 
-	private String getPackageName(TypeInfo typeRef) {
-		String packName= typeRef.getPackageName();
+	private String getPackageName(String packName) {
 		if (packName.length() == 0)
 			return JavaUIMessages.getString("TypeInfoLabelProvider.default_package"); //$NON-NLS-1$
 		else
@@ -52,9 +51,11 @@ public class TypeInfoLabelProvider extends LabelProvider {
 		if (isSet(SHOW_TYPE_ONLY)) {
 			buf.append(typeRef.getTypeName());
 		} else if (isSet(SHOW_TYPE_CONTAINER_ONLY)) {
-			buf.append(typeRef.getTypeContainerName());
+			String containerName= typeRef.getTypeContainerName();
+			buf.append(getPackageName(containerName));
 		} else if (isSet(SHOW_PACKAGE_ONLY)) {
-			buf.append(getPackageName(typeRef));
+			String packName= typeRef.getPackageName();
+			buf.append(getPackageName(packName));
 		} else {
 			if (isSet(SHOW_FULLYQUALIFIED))
 				buf.append(typeRef.getFullyQualifiedName());
@@ -63,7 +64,8 @@ public class TypeInfoLabelProvider extends LabelProvider {
 
 			if (isSet(SHOW_PACKAGE_POSTFIX)) {
 				buf.append(JavaUIMessages.getString("TypeInfoLabelProvider.dash")); //$NON-NLS-1$
-				buf.append(getPackageName(typeRef));
+				String packName= typeRef.getPackageName();
+				buf.append(getPackageName(packName));
 			}
 		}
 		if (isSet(SHOW_ROOT_POSTFIX)) {
