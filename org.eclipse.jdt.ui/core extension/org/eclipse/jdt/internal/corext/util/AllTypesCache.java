@@ -423,8 +423,12 @@ public class AllTypesCache {
 						return true;
 					}
 					return processChildrenDelta(delta);
-				case IJavaElement.JAVA_MODEL:
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+					if (delta.getKind() == IJavaElementDelta.CHANGED && (delta.getFlags() & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0) {
+						return true;
+					}
+					// fall through
+				case IJavaElement.JAVA_MODEL:
 				case IJavaElement.PACKAGE_FRAGMENT:
 				case IJavaElement.CLASS_FILE:
 				case IJavaElement.TYPE: // type children can be inner classes
