@@ -486,7 +486,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * @return the line's BIDI segmentation
 	 * @throws BadLocationException in case lineOffset is not valid in document
 	 */
-	protected int[] getBidiLineSegments(IDocument document, int lineOffset) throws BadLocationException {
+	protected static int[] getBidiLineSegments(IDocument document, int lineOffset) throws BadLocationException {
 		
 		if (document == null)
 			return null;

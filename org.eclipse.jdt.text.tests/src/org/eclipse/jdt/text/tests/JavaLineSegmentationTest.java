@@ -14,6 +14,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.swt.widgets.Composite;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -21,12 +24,15 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.source.IOverviewRuler;
+import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.tests.TestTextViewer;
 
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 
 
 
@@ -90,18 +96,34 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("abcde");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 0);
+			int[] result= getBidiLineSegments(fTextViewer, 0);
 			checkSegmentation(result, null);
 		} catch (BadLocationException x) {
 			assertTrue(false);
 		}
+	}
+
+	// Helper to access protected method
+	static final class BidiComputer extends JavaSourceViewer {
+		public BidiComputer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
+			super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles, store);
+		}
+
+		public static int[] getBidiLineSegments(IDocument document, int lineOffset) throws BadLocationException {
+			return JavaSourceViewer.getBidiLineSegments(document, lineOffset);
+		}
+	}
+	
+	private int[] getBidiLineSegments(ITextViewer viewer, int lineOffset) throws BadLocationException {
+		IDocument document= viewer.getDocument();
+		return BidiComputer.getBidiLineSegments(document, lineOffset);
 	}
 	
 	public void test12() {
 		fDocument.set("abcde\n");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 0);
+			int[] result= getBidiLineSegments(fTextViewer, 0);
 			checkSegmentation(result, null);
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -112,7 +134,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\nabcde");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 1);
+			int[] result= getBidiLineSegments(fTextViewer, 1);
 			checkSegmentation(result, null);
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -123,7 +145,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\nabcde\n");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 1);
+			int[] result= getBidiLineSegments(fTextViewer, 1);
 			checkSegmentation(result, null);
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -135,7 +157,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\"ab\"cde");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 0);
+			int[] result= getBidiLineSegments(fTextViewer, 0);
 			checkSegmentation(result, new int[] { 0, 4 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -146,7 +168,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\"ab\"cde\n");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 0);
+			int[] result= getBidiLineSegments(fTextViewer, 0);
 			checkSegmentation(result, new int[] { 0, 4 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -157,7 +179,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\n\"ab\"cde");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 1);
+			int[] result= getBidiLineSegments(fTextViewer, 1);
 			checkSegmentation(result, new int[] { 0, 4 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -168,7 +190,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\n\"ab\"cde\n");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 1);
+			int[] result= getBidiLineSegments(fTextViewer, 1);
 			checkSegmentation(result, new int[] { 0, 4 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -180,7 +202,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\"ab\"c\"de\"");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 0);
+			int[] result= getBidiLineSegments(fTextViewer, 0);
 			checkSegmentation(result, new int[] { 0, 4, 5 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -191,7 +213,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\"ab\"c\"de\"\n");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 0);
+			int[] result= getBidiLineSegments(fTextViewer, 0);
 			checkSegmentation(result, new int[] { 0, 4, 5 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -202,7 +224,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\n\"ab\"c\"de\"");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 1);
+			int[] result= getBidiLineSegments(fTextViewer, 1);
 			checkSegmentation(result, new int[] { 0, 4, 5 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -213,7 +235,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\n\"ab\"c\"de\"\n");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 1);
+			int[] result= getBidiLineSegments(fTextViewer, 1);
 			checkSegmentation(result, new int[] { 0, 4, 5 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -225,7 +247,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\"ab\"\"cd\"e");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 0);
+			int[] result= getBidiLineSegments(fTextViewer, 0);
 			checkSegmentation(result, new int[] { 0, 4, 8 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -236,7 +258,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\"ab\"\"cd\"e\n");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 0);
+			int[] result= getBidiLineSegments(fTextViewer, 0);
 			checkSegmentation(result, new int[] { 0, 4, 8 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -247,7 +269,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\n\"ab\"\"cd\"e");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 1);
+			int[] result= getBidiLineSegments(fTextViewer, 1);
 			checkSegmentation(result, new int[] { 0, 4, 8 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -258,7 +280,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\n\"ab\"\"cd\"e\n");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 1);
+			int[] result= getBidiLineSegments(fTextViewer, 1);
 			checkSegmentation(result, new int[] { 0, 4, 8 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -270,7 +292,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\"ab\"\"cde\"");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 0);
+			int[] result= getBidiLineSegments(fTextViewer, 0);
 			checkSegmentation(result, new int[] { 0, 4 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -281,7 +303,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\"ab\"\"cde\"\n");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 0);
+			int[] result= getBidiLineSegments(fTextViewer, 0);
 			checkSegmentation(result, new int[] { 0, 4 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -292,7 +314,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\n\"ab\"\"cde\"");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 1);
+			int[] result= getBidiLineSegments(fTextViewer, 1);
 			checkSegmentation(result, new int[] { 0, 4 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -303,7 +325,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\n\"ab\"\"cde\"\n");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 1);
+			int[] result= getBidiLineSegments(fTextViewer, 1);
 			checkSegmentation(result, new int[] { 0, 4 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -315,7 +337,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\"abcde\"");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 0);
+			int[] result= getBidiLineSegments(fTextViewer, 0);
 			checkSegmentation(result, new int[] { 0 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -326,7 +348,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\"abcde\"\n");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 0);
+			int[] result= getBidiLineSegments(fTextViewer, 0);
 			checkSegmentation(result, new int[] { 0 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -337,7 +359,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\n\"abcde\"");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 1);
+			int[] result= getBidiLineSegments(fTextViewer, 1);
 			checkSegmentation(result, new int[] { 0 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -348,7 +370,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\n\"abcde\"\n");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 1);
+			int[] result= getBidiLineSegments(fTextViewer, 1);
 			checkSegmentation(result, new int[] { 0 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -359,7 +381,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("ab\"\"cde");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 0);
+			int[] result= getBidiLineSegments(fTextViewer, 0);
 			checkSegmentation(result, new int[] { 0,  2,  4});
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -370,7 +392,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("ab\"\"cde\n");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 0);
+			int[] result= getBidiLineSegments(fTextViewer, 0);
 			checkSegmentation(result, new int[] {  0,  2,  4 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -381,7 +403,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\nab\"\"cde");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 1);
+			int[] result= getBidiLineSegments(fTextViewer, 1);
 			checkSegmentation(result, new int[] {  0,  2,  4 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
@@ -392,7 +414,7 @@ public class JavaLineSegmentationTest extends TestCase {
 		fDocument.set("\nab\"\"cde\n");
 		fTextViewer.setDocument(fDocument);
 		try {
-			int[] result= JavaEditor.getBidiLineSegments(fTextViewer, 1);
+			int[] result= getBidiLineSegments(fTextViewer, 1);
 			checkSegmentation(result, new int[] {  0,  2,  4 });
 		} catch (BadLocationException x) {
 			assertTrue(false);
