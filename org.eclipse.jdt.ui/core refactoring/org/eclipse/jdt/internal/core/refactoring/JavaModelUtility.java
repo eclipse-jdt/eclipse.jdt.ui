@@ -6,7 +6,6 @@ package org.eclipse.jdt.internal.core.refactoring;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -18,7 +17,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /* non java-doc
@@ -153,5 +151,32 @@ public class JavaModelUtility {
 		}
 	}
 	
-	
+		/**
+	 * Tests if a method equals to the given signature.
+	 * Parameter types are only compared by the simple name, no resolving for
+	 * the fully qualified type name is done. Constructors are only compared by
+	 * parameters, not the name.
+	 * @param Name of the method
+	 * @param The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
+	 * @param Specifies if the method is a constructor
+	 * @return Returns <code>true</code> if the method has the given name and parameter types and constructor state.
+	 */
+	public static boolean isSameMethodSignature(String name, String[] paramTypes, boolean isConstructor, IMethod curr) throws JavaModelException {
+		if (isConstructor || name.equals(curr.getElementName())) {
+			if (isConstructor == curr.isConstructor()) {
+				String[] currParamTypes= curr.getParameterTypes();
+				if (paramTypes.length == currParamTypes.length) {
+					for (int i= 0; i < paramTypes.length; i++) {
+						String t1= Signature.getSimpleName(Signature.toString(paramTypes[i]));
+						String t2= Signature.getSimpleName(Signature.toString(currParamTypes[i]));
+						if (!t1.equals(t2)) {
+							return false;
+						}
+					}
+					return true;
+				}
+			}
+		}
+		return false;
+	}	
 }
