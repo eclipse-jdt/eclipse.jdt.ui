@@ -78,9 +78,11 @@ public class CompilationUnitRewrite {
 	 * Requests that the compiler should provide binding information for the AST
 	 * nodes it creates. To be effective, this method must be called before any
 	 * of {@link #getRoot()},{@link #getASTRewrite()},
-	 * {@link #getImportRemover()}.
+	 * {@link #getImportRemover()}. This method has no effect if the target object
+	 * has been created with {@link #CompilationUnitRewrite(ICompilationUnit, CompilationUnit)}.
 	 * <p>
-	 * Defaults to <b><code>true</code> </b> (do resolve bindings).
+	 * Defaults to <b><code>true</code></b> (do resolve bindings).
+	 * </p>
 	 * 
 	 * @param resolve
 	 *            <code>true</code> if bindings are wanted, and
