@@ -18,6 +18,7 @@ import java.util.HashSet;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -61,7 +62,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -169,7 +169,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 							break;
 						case IJavaElement.IMPORT_CONTAINER:
 							result.add(elem.getParent());
-							break;
+							break;							
 						case IJavaElement.PACKAGE_FRAGMENT:
 							collectCompilationUnits((IPackageFragment) elem, result);
 							break;
@@ -279,7 +279,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	public void runOnMultiple(final ICompilationUnit[] cus) {
 		try {
 			String message= ActionMessages.getString("OrganizeImportsAction.multi.status.description"); //$NON-NLS-1$
-			final MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, Status.OK, message, null);
+			final MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, message, null);
 			
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
 			dialog.run(true, true, new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {
@@ -337,12 +337,12 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 						IProblem parseError= op.getParseError();
 						if (parseError != null) {
 							String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.parse", cuLocation); //$NON-NLS-1$
-							status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
+							status.add(new Status(IStatus.INFO, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
 						} 	
 					} catch (CoreException e) {
 						JavaPlugin.log(e);
 						String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unexpected", e.getStatus().getMessage()); //$NON-NLS-1$
-						status.add(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, message, null));					
+						status.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));					
 					}
 
 					if (monitor.isCanceled()) {
@@ -360,7 +360,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		if (!project.isOnClasspath(cu)) {
 			String cuLocation= cu.getPath().makeRelative().toString();
 			String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.notoncp", cuLocation); //$NON-NLS-1$
-			status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
+			status.add(new Status(IStatus.INFO, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
 			return false;
 		}
 		return true;
@@ -377,10 +377,10 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				} catch (CoreException e) {
 					JavaPlugin.log(e);
 					String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unexpected", e.getStatus().getMessage()); //$NON-NLS-1$
-					status.add(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, message, null));					
+					status.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));					
 				} catch (OrganizeImportError e) {
 					String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unresolvable", cuLocation); //$NON-NLS-1$
-					status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
+					status.add(new Status(IStatus.INFO, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
 				}
 			}
 		};
