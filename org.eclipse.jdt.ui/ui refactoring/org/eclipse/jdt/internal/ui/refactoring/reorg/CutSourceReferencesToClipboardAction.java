@@ -420,8 +420,10 @@ public class CutSourceReferencesToClipboardAction extends SourceReferenceAction 
 				String text= lp.getText(element);
 				lp.dispose();
 				return text;
-			} else
-				return ReorgUtils.getName(element);
+			} else if (element instanceof IResource)
+				return ReorgUtils.getName((IResource)element);
+			Assert.isTrue(false);
+			return null;
 		}
 
 		//made protected for ui-less testing

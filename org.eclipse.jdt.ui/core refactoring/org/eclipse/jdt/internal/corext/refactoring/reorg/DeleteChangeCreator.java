@@ -64,7 +64,7 @@ class DeleteChangeCreator{
 		};
 		for (int i= 0; i < javaElements.length; i++) {
 			IJavaElement element= javaElements[i];
-			if (! ReorgUtils2.isInsideCompilationUnit(element))
+			if (! ReorgUtils.isInsideCompilationUnit(element))
 				composite.add(createDeleteChange(element));
 		}
 
@@ -128,7 +128,7 @@ class DeleteChangeCreator{
 		List result= new ArrayList();
 		for (int i= 0; i < javaElements.length; i++) {
 			IJavaElement element= javaElements[i];
-			if (ReorgUtils2.isInsideCompilationUnit(element))
+			if (ReorgUtils.isInsideCompilationUnit(element))
 				result.add(element);
 		}
 		return result;
@@ -141,7 +141,7 @@ class DeleteChangeCreator{
 		Map result= new HashMap();
 		for (Iterator iter= javaElements.iterator(); iter.hasNext();) {
 			IJavaElement element= (IJavaElement) iter.next();
-			ICompilationUnit cu= ReorgUtils2.getCompilationUnit(element);
+			ICompilationUnit cu= ReorgUtils.getCompilationUnit(element);
 			if (cu != null){
 				if (! result.containsKey(cu))
 					result.put(cu, new ArrayList(1));
@@ -152,7 +152,7 @@ class DeleteChangeCreator{
 	}
 
 	private static IChange createDeleteChange(IJavaElement javaElement) throws JavaModelException {
-		Assert.isTrue(! ReorgUtils2.isInsideCompilationUnit(javaElement));
+		Assert.isTrue(! ReorgUtils.isInsideCompilationUnit(javaElement));
 		
 		switch(javaElement.getElementType()){
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
@@ -196,7 +196,7 @@ class DeleteChangeCreator{
 		if (element instanceof ICompilationUnit || element instanceof IPackageFragment){
 			IResource resource;
 			if (element instanceof ICompilationUnit)
-				resource= ReorgUtils2.getResource((ICompilationUnit)element);
+				resource= ReorgUtils.getResource((ICompilationUnit)element);
 			else 
 				resource= ((IPackageFragment)element).getResource();
 			if (resource != null && resource.isLinked())

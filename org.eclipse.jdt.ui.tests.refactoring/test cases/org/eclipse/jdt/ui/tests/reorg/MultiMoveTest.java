@@ -27,7 +27,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.MoveRefactoring2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 ;
 
 public class MultiMoveTest extends RefactoringTest {
@@ -90,7 +90,7 @@ public class MultiMoveTest extends RefactoringTest {
 //			elems.add(p1B);
 			IResource[] resources= {};
 			IJavaElement[] javaElements= {p1A, p1B};
-			MoveRefactoring2 ref= MoveRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			MoveRefactoring ref= MoveRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 			ref.setReorgQueries(new MockReorgQueries());
 			ref.setDestination(packP2);
 			ref.setUpdateReferences(true);
@@ -139,7 +139,7 @@ public class MultiMoveTest extends RefactoringTest {
 //			elems.add(p3B);
 			IResource[] resources= {};
 			IJavaElement[] javaElements= {p1A, p1B};
-			MoveRefactoring2 ref= MoveRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			MoveRefactoring ref= MoveRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 			ref.setReorgQueries(new MockReorgQueries());
 			ref.setDestination(packP2);
 			ref.setUpdateReferences(true);
@@ -189,7 +189,7 @@ public class MultiMoveTest extends RefactoringTest {
 //			elems.add(p1A);
 			IResource[] resources= {};
 			IJavaElement[] javaElements= {p1A};
-			MoveRefactoring2 ref= MoveRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			MoveRefactoring ref= MoveRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 			ref.setReorgQueries(new MockReorgQueries());
 			ref.setDestination(packP2);
 			ref.setUpdateReferences(true);
@@ -239,7 +239,7 @@ public class MultiMoveTest extends RefactoringTest {
 //			elems.add(p1A);
 			IResource[] resources= {};
 			IJavaElement[] javaElements= {p1A};
-			MoveRefactoring2 ref= MoveRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			MoveRefactoring ref= MoveRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 			ref.setReorgQueries(new MockReorgQueries());
 			ref.setDestination(packP2);
 			ref.setUpdateReferences(true);

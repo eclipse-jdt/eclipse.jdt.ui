@@ -29,8 +29,9 @@ import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.CopyToClipboardAction;
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.PasteAction;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
+
 
 public class PasteActionTest extends RefactoringTest{
 

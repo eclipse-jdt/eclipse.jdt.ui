@@ -15,8 +15,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.OperationCanceledException;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.IConfirmQuery;
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgQueries;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IConfirmQuery;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 
 
 class MockReorgQueries implements IReorgQueries{

@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 public class PasteAction extends SelectionDispatchAction{
 
@@ -92,8 +92,8 @@ public class PasteAction extends SelectionDispatchAction{
 		TransferData[] availableDataTypes= fClipboard.getAvailableTypes();
 
 		List elements= selection.toList();
-		IResource[] resources= ReorgUtils2.getResources(elements);
-		IJavaElement[] javaElements= ReorgUtils2.getJavaElements(elements);
+		IResource[] resources= ReorgUtils.getResources(elements);
+		IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
 		IPaster paster= createEnabledPaster(availableDataTypes);
 		return paster != null && paster.canPasteOn(javaElements, resources);
 	}
@@ -139,8 +139,8 @@ public class PasteAction extends SelectionDispatchAction{
 		try {
 			TransferData[] availableTypes= fClipboard.getAvailableTypes();
 			List elements= selection.toList();
-			IResource[] resources= ReorgUtils2.getResources(elements);
-			IJavaElement[] javaElements= ReorgUtils2.getJavaElements(elements);
+			IResource[] resources= ReorgUtils.getResources(elements);
+			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
 			IPaster paster= createEnabledPaster(availableTypes);
 			if (paster != null && paster.canPasteOn(javaElements, resources))
 				paster.paste(javaElements, resources, availableTypes);
@@ -192,7 +192,7 @@ public class PasteAction extends SelectionDispatchAction{
 			if (resources != null)
 				result.addAll(Arrays.asList(resources));
 			if (javaElements != null)
-				result.addAll(Arrays.asList(ReorgUtils2.getResources(javaElements)));
+				result.addAll(Arrays.asList(ReorgUtils.getResources(javaElements)));
 			Assert.isTrue(result.size() > 0);
 			return (IProject[]) result.toArray(new IProject[result.size()]);
 		}
@@ -205,7 +205,7 @@ public class PasteAction extends SelectionDispatchAction{
 			IJavaElement[] javaElements= getClipboardJavaElements(availableDataTypes);
 			return 	javaElements != null && 
 					javaElements.length != 0 && 
-					! ReorgUtils2.hasElementsNotOfType(javaElements, IJavaElement.JAVA_PROJECT);
+					! ReorgUtils.hasElementsNotOfType(javaElements, IJavaElement.JAVA_PROJECT);
 		}
 
 		private boolean canPasteSimpleProjects(TransferData[] availableDataTypes) {

@@ -31,13 +31,13 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 
 
 public class ReorgMoveStarter {
-	private final MoveRefactoring2 fMoveRefactoring;
+	private final MoveRefactoring fMoveRefactoring;
 
-	private ReorgMoveStarter(MoveRefactoring2 moveRefactoring) {
+	private ReorgMoveStarter(MoveRefactoring moveRefactoring) {
 		Assert.isNotNull(moveRefactoring);
 		fMoveRefactoring= moveRefactoring;
 	}
@@ -46,7 +46,7 @@ public class ReorgMoveStarter {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
 		Assert.isNotNull(destination);
-		MoveRefactoring2 moveRefactoring= MoveRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+		MoveRefactoring moveRefactoring= MoveRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 		if (moveRefactoring == null)
 			return null;
 		if (! moveRefactoring.setDestination(destination).isOK())
@@ -58,7 +58,7 @@ public class ReorgMoveStarter {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
 		Assert.isNotNull(destination);
-		MoveRefactoring2 moveRefactoring= MoveRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+		MoveRefactoring moveRefactoring= MoveRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 		if (moveRefactoring == null)
 			return null;
 		if (! moveRefactoring.setDestination(destination).isOK())

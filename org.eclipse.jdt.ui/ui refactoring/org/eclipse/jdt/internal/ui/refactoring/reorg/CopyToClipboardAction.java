@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgEnablementPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 
@@ -93,8 +93,8 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			List elements= selection.toList();
-			IResource[] resources= ReorgUtils2.getResources(elements);
-			IJavaElement[] javaElements= ReorgUtils2.getJavaElements(elements);
+			IResource[] resources= ReorgUtils.getResources(elements);
+			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
 			if (elements.size() != resources.length + javaElements.length)
 				setEnabled(false);
 			else
@@ -111,8 +111,8 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 	public void run(IStructuredSelection selection) {
 		try {
 			List elements= selection.toList();
-			IResource[] resources= ReorgUtils2.getResources(elements);
-			IJavaElement[] javaElements= ReorgUtils2.getJavaElements(elements);
+			IResource[] resources= ReorgUtils.getResources(elements);
+			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
 			if (elements.size() == resources.length + javaElements.length && canEnable(resources, javaElements)) 
 				doRun(resources, javaElements);
 		} catch (JavaModelException e) {
@@ -163,16 +163,16 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			processResources(fileNames, namesBuf);
 			processJavaElements(fileNames, namesBuf);
 
-			IType[] mainTypes= ReorgUtils2.getMainTypes(fJavaElements);
-			ICompilationUnit[] cusOfMainTypes= ReorgUtils2.getCompilationUnits(mainTypes);
-			IResource[] resourcesOfMainTypes= ReorgUtils2.getResources(cusOfMainTypes);
+			IType[] mainTypes= ReorgUtils.getMainTypes(fJavaElements);
+			ICompilationUnit[] cusOfMainTypes= ReorgUtils.getCompilationUnits(mainTypes);
+			IResource[] resourcesOfMainTypes= ReorgUtils.getResources(cusOfMainTypes);
 			addFileNames(fileNames, resourcesOfMainTypes);
 			
-			IResource[] cuResources= ReorgUtils2.getResources(getCompilationUnits(fJavaElements));
+			IResource[] cuResources= ReorgUtils.getResources(getCompilationUnits(fJavaElements));
 			addFileNames(fileNames, cuResources);
 
-			IResource[] resourcesForClipboard= ReorgUtils2.union(fResources, ReorgUtils2.union(cuResources, resourcesOfMainTypes));
-			IJavaElement[] javaElementsForClipboard= ReorgUtils2.union(fJavaElements, cusOfMainTypes);
+			IResource[] resourcesForClipboard= ReorgUtils.union(fResources, ReorgUtils.union(cuResources, resourcesOfMainTypes));
+			IJavaElement[] javaElementsForClipboard= ReorgUtils.union(fJavaElements, cusOfMainTypes);
 			
 			TypedSource[] typedSources= TypedSource.createTypeSources(javaElementsForClipboard);
 			String[] fileNameArray= (String[]) fileNames.toArray(new String[fileNames.size()]);
@@ -180,7 +180,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		}
 
 		private static IJavaElement[] getCompilationUnits(IJavaElement[] javaElements) {
-			List cus= ReorgUtils2.getElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT);
+			List cus= ReorgUtils.getElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT);
 			return (ICompilationUnit[]) cus.toArray(new ICompilationUnit[cus.size()]);
 		}
 
@@ -198,8 +198,8 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		private void processJavaElements(Set fileNames, StringBuffer namesBuf) {
 			for (int i= 0; i < fJavaElements.length; i++) {
 				IJavaElement element= fJavaElements[i];
-				if (! ReorgUtils2.isInsideCompilationUnit(element))
-					addFileName(fileNames, ReorgUtils2.getResource(element));
+				if (! ReorgUtils.isInsideCompilationUnit(element))
+					addFileName(fileNames, ReorgUtils.getResource(element));
 
 				if (fResources.length > 0 || i > 0)
 					namesBuf.append('\n');
@@ -319,7 +319,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			if (JavaElementUtil.isDefaultPackage(element))		
 				return false;
 			
-			if (element instanceof IMember && ! ReorgUtils2.hasSourceAvailable((IMember)element))
+			if (element instanceof IMember && ! ReorgUtils.hasSourceAvailable((IMember)element))
 				return false;
 			
 			if (element instanceof IMember){
@@ -328,11 +328,11 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 				 * we just say 'no' to them
 				 */
 				IMember member= (IMember)element;
-				if (! member.isBinary() && ReorgUtils2.getCompilationUnit(member) == null)
+				if (! member.isBinary() && ReorgUtils.getCompilationUnit(member) == null)
 					return false;
 			}
 			
-			if (ReorgUtils2.isDeletedFromEditor(element))
+			if (ReorgUtils.isDeletedFromEditor(element))
 				return false;
 			
 			if (! (element instanceof IMember) && element.isReadOnly()) 
@@ -350,20 +350,20 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 
 		private boolean hasProjects() {
 			for (int i= 0; i < fResources.length; i++) {
-				if (ReorgUtils2.isProject(fResources[i])) return true;
+				if (ReorgUtils.isProject(fResources[i])) return true;
 			}
 			for (int i= 0; i < fJavaElements.length; i++) {
-				if (ReorgUtils2.isProject(fJavaElements[i])) return true;
+				if (ReorgUtils.isProject(fJavaElements[i])) return true;
 			}
 			return false;
 		}
 
 		private boolean hasNonProjects() {
 			for (int i= 0; i < fResources.length; i++) {
-				if (! ReorgUtils2.isProject(fResources[i])) return true;
+				if (! ReorgUtils.isProject(fResources[i])) return true;
 			}
 			for (int i= 0; i < fJavaElements.length; i++) {
-				if (! ReorgUtils2.isProject(fJavaElements[i])) return true;
+				if (! ReorgUtils.isProject(fJavaElements[i])) return true;
 			}
 			return false;
 		}

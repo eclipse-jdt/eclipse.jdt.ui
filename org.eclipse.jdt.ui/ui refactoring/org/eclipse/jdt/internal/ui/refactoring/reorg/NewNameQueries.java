@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -259,27 +260,32 @@ public class NewNameQueries implements INewNameQueries {
 			// Dialogs need to be created and opened in the UI thread
 			Runnable query = new Runnable() {
 				public void run() {
-					int resultId[]= {
-						IDialogConstants.YES_ID,
-						IDialogConstants.YES_TO_ALL_ID,
-						IDialogConstants.NO_ID,
-						IDialogConstants.CANCEL_ID};
- 
-					String message= createMessage(element, isReadOnly);
-					MessageDialog dialog= new MessageDialog(
-						parentShell, 
-						ReorgMessages.getString("ReorgQueries.Confirm_Overwritting"), //$NON-NLS-1$
-						null,
-						message,
-						MessageDialog.QUESTION,
-						new String[] {
-							IDialogConstants.YES_LABEL,
-							IDialogConstants.YES_TO_ALL_LABEL,
-							IDialogConstants.NO_LABEL,
-							IDialogConstants.CANCEL_LABEL },
-						0);
-					dialog.open();
-					result[0]= resultId[dialog.getReturnCode()];
+					try {
+						int resultId[]= {
+							IDialogConstants.YES_ID,
+							IDialogConstants.YES_TO_ALL_ID,
+							IDialogConstants.NO_ID,
+							IDialogConstants.CANCEL_ID};
+						 
+						String message= createMessage(element, isReadOnly);
+						MessageDialog dialog= new MessageDialog(
+							parentShell, 
+							ReorgMessages.getString("ReorgQueries.Confirm_Overwritting"), //$NON-NLS-1$
+							null,
+							message,
+							MessageDialog.QUESTION,
+							new String[] {
+								IDialogConstants.YES_LABEL,
+								IDialogConstants.YES_TO_ALL_LABEL,
+								IDialogConstants.NO_LABEL,
+								IDialogConstants.CANCEL_LABEL },
+							0);
+						dialog.open();
+						result[0]= resultId[dialog.getReturnCode()];
+					} catch (JavaModelException e) {
+						ExceptionHandler.handle(e, parentShell, "Error", "Internal error occurred. See log for details.");
+						result[0]= IDialogConstants.NO_ID;
+					}
 				}
 			};
 			parentShell.getDisplay().syncExec(query);
@@ -300,8 +306,17 @@ public class NewNameQueries implements INewNameQueries {
 			return false;
 		}
 	
-		private String createMessage(Object element, boolean isReadOnly) {
-			String[] keys= {ReorgUtils.getName(element)};
+		private String createMessage(Object element, boolean isReadOnly) throws JavaModelException{
+			
+			String[] keys;//s= {ReorgUtils2.getName(element)};
+			if (element instanceof IResource)
+				keys= new String[]{ReorgUtils.getName((IResource)element)};
+			else if (element instanceof IJavaElement)
+				keys= new String[]{ReorgUtils.getName((IJavaElement)element)};
+			else {
+				Assert.isTrue(false);
+				keys= null;
+			}
 			if (isReadOnly)
 				return ReorgMessages.getFormattedString("ReorgQueries.exists_read-only", keys); //$NON-NLS-1$
 		 	else

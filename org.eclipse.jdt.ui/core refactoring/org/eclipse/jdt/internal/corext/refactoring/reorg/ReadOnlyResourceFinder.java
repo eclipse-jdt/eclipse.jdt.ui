@@ -68,10 +68,10 @@ class ReadOnlyResourceFinder{
 				Assert.isTrue(((IClassFile)javaElement).getResource() instanceof IFile);
 				//fall thru
 			case IJavaElement.COMPILATION_UNIT:
-				IResource resource= ReorgUtils2.getResource(javaElement);
+				IResource resource= ReorgUtils.getResource(javaElement);
 				return (resource != null && resource.isReadOnly());
 			case IJavaElement.PACKAGE_FRAGMENT:
-				IResource packResource= ReorgUtils2.getResource(javaElement);
+				IResource packResource= ReorgUtils.getResource(javaElement);
 				if (packResource == null)
 					return false;
 				IPackageFragment pack= (IPackageFragment)javaElement;
@@ -88,7 +88,7 @@ class ReadOnlyResourceFinder{
 				IPackageFragmentRoot root= (IPackageFragmentRoot) javaElement;
 				if (root.isArchive())
 					return false;
-				IResource pfrResource= ReorgUtils2.getResource(javaElement);
+				IResource pfrResource= ReorgUtils.getResource(javaElement);
 				if (pfrResource == null)
 					return false;
 				if (pfrResource.isReadOnly())

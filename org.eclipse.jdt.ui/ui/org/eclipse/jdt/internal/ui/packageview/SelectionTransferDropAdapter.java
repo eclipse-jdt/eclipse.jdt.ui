@@ -38,16 +38,16 @@ import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgCopyStarter;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMoveStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring2;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring2;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implements TransferDropTargetListener {
 
 	private List fElements;
-	private MoveRefactoring2 fMoveRefactoring2;
+	private MoveRefactoring fMoveRefactoring2;
 	private int fCanMoveElements;
-	private CopyRefactoring2 fCopyRefactoring2;
+	private CopyRefactoring fCopyRefactoring2;
 	private int fCanCopyElements;
 	private ISelection fSelection;
 	private AddMethodStubAction fAddMethodStubAction;
@@ -158,9 +158,9 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			return DND.DROP_NONE;
 		
 		if (fMoveRefactoring2 == null) {
-			IResource[] resources= ReorgUtils2.getResources(fElements);
-			IJavaElement[] javaElements= ReorgUtils2.getJavaElements(fElements);
-			fMoveRefactoring2= MoveRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			IResource[] resources= ReorgUtils.getResources(fElements);
+			IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
+			fMoveRefactoring2= MoveRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 		}
 		
 		if (!canMoveElements())
@@ -196,8 +196,8 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}
 	
 	private void handleDropMove(final Object target, DropTargetEvent event) throws JavaModelException, InvocationTargetException, InterruptedException{
-		IJavaElement[] javaElements= ReorgUtils2.getJavaElements(fElements);
-		IResource[] resources= ReorgUtils2.getResources(fElements);
+		IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
+		IResource[] resources= ReorgUtils.getResources(fElements);
 		ReorgMoveStarter starter= null;
 		if (target instanceof IResource) 
 			starter= ReorgMoveStarter.create(javaElements, resources, (IResource)target);
@@ -210,9 +210,9 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private int handleValidateCopy(Object target, DropTargetEvent event) throws JavaModelException{
 
 		if (fCopyRefactoring2 == null) {
-			IResource[] resources= ReorgUtils2.getResources(fElements);
-			IJavaElement[] javaElements= ReorgUtils2.getJavaElements(fElements);
-			fCopyRefactoring2= CopyRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			IResource[] resources= ReorgUtils.getResources(fElements);
+			IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
+			fCopyRefactoring2= CopyRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 		}
 		
 		if (!canCopyElements())
@@ -236,8 +236,8 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}		
 	
 	private void handleDropCopy(final Object target, DropTargetEvent event) throws JavaModelException, InvocationTargetException, InterruptedException{
-		IJavaElement[] javaElements= ReorgUtils2.getJavaElements(fElements);
-		IResource[] resources= ReorgUtils2.getResources(fElements);
+		IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
+		IResource[] resources= ReorgUtils.getResources(fElements);
 		ReorgCopyStarter starter= null;
 		if (target instanceof IResource) 
 			starter= ReorgCopyStarter.create(javaElements, resources, (IResource)target);

@@ -33,8 +33,8 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring2;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 
 public class ReorgCopyAction extends SelectionDispatchAction {
@@ -55,8 +55,8 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 		}
 		try {
 			List elements= selection.toList();
-			IResource[] resources= ReorgUtils2.getResources(elements);
-			IJavaElement[] javaElements= ReorgUtils2.getJavaElements(elements);
+			IResource[] resources= ReorgUtils.getResources(elements);
+			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
 			if (elements.size() != resources.length + javaElements.length)
 				setEnabled(false);
 			else
@@ -68,7 +68,7 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 	}
 	
 	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		return CopyRefactoring2.isAvailable(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+		return CopyRefactoring.isAvailable(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
 	private CopyProjectAction createWorkbenchAction(IStructuredSelection selection) {
@@ -78,7 +78,7 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 	}
 	
 	private boolean canDelegateToWorkbenchAction(IStructuredSelection selection) {
-		return ReorgUtils2.containsOnlyProjects(selection.toList());
+		return ReorgUtils.containsOnlyProjects(selection.toList());
 	}
 
 	public void run(IStructuredSelection selection) {
@@ -88,8 +88,8 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 		}
 		try {
 			List elements= selection.toList();
-			IResource[] resources= ReorgUtils2.getResources(elements);
-			IJavaElement[] javaElements= ReorgUtils2.getJavaElements(elements);
+			IResource[] resources= ReorgUtils.getResources(elements);
+			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
 			if (canEnable(resources, javaElements)) 
 				startRefactoring(resources, javaElements);
 		} catch (JavaModelException e) {
@@ -98,7 +98,7 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 	}
 
 	private void startRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
-		CopyRefactoring2 refactoring= createRefactoring(resources, javaElements);
+		CopyRefactoring refactoring= createRefactoring(resources, javaElements);
 		RefactoringWizard wizard= createWizard(refactoring);
 		/*
 		 * We want to get the shell from the refactoring dialog but it's not known at this point, 
@@ -109,11 +109,11 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 		new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), false); //$NON-NLS-1$
 	}
 
-	private RefactoringWizard createWizard(CopyRefactoring2 refactoring) {
+	private RefactoringWizard createWizard(CopyRefactoring refactoring) {
 		return new ReorgCopyWizard(refactoring);
 	}
 
-	private CopyRefactoring2 createRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		return CopyRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+	private CopyRefactoring createRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
+		return CopyRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 }

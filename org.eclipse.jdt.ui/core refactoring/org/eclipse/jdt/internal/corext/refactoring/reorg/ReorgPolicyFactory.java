@@ -125,14 +125,14 @@ class ReorgPolicyFactory {
 		if (isNothingToReorg(resources, javaElements) || 
 			containsNull(resources) ||
 			containsNull(javaElements) ||
-			ReorgUtils2.hasElementsOfType(javaElements, IJavaElement.JAVA_PROJECT) ||
-			ReorgUtils2.hasElementsOfType(javaElements, IJavaElement.JAVA_MODEL) ||
-			ReorgUtils2.hasElementsOfType(resources, IResource.PROJECT | IResource.ROOT) ||
+			ReorgUtils.hasElementsOfType(javaElements, IJavaElement.JAVA_PROJECT) ||
+			ReorgUtils.hasElementsOfType(javaElements, IJavaElement.JAVA_MODEL) ||
+			ReorgUtils.hasElementsOfType(resources, IResource.PROJECT | IResource.ROOT) ||
 			! haveCommonParent(resources, javaElements))
 			return NO;
 			
-		if (ReorgUtils2.hasElementsOfType(javaElements, IJavaElement.PACKAGE_FRAGMENT)){
-			if (resources.length != 0 || ReorgUtils2.hasElementsNotOfType(javaElements, IJavaElement.PACKAGE_FRAGMENT))
+		if (ReorgUtils.hasElementsOfType(javaElements, IJavaElement.PACKAGE_FRAGMENT)){
+			if (resources.length != 0 || ReorgUtils.hasElementsNotOfType(javaElements, IJavaElement.PACKAGE_FRAGMENT))
 				return NO;
 			if (copy)
 				return new CopyPackagesPolicy(ArrayTypeConverter.toPackageArray(javaElements));
@@ -140,8 +140,8 @@ class ReorgPolicyFactory {
 				return new MovePackagesPolicy(ArrayTypeConverter.toPackageArray(javaElements));
 		}
 		
-		if (ReorgUtils2.hasElementsOfType(javaElements, IJavaElement.PACKAGE_FRAGMENT_ROOT)){
-			if (resources.length != 0 || ReorgUtils2.hasElementsNotOfType(javaElements, IJavaElement.PACKAGE_FRAGMENT_ROOT))
+		if (ReorgUtils.hasElementsOfType(javaElements, IJavaElement.PACKAGE_FRAGMENT_ROOT)){
+			if (resources.length != 0 || ReorgUtils.hasElementsNotOfType(javaElements, IJavaElement.PACKAGE_FRAGMENT_ROOT))
 				return NO;
 			if (copy)
 				return new CopyPackageFragmentRootsPolicy(ArrayTypeConverter.toPackageFragmentRootArray(javaElements));
@@ -149,22 +149,22 @@ class ReorgPolicyFactory {
 				return new MovePackageFragmentRootsPolicy(ArrayTypeConverter.toPackageFragmentRootArray(javaElements));
 		}
 		
-		if (ReorgUtils2.hasElementsOfType(resources, IResource.FILE | IResource.FOLDER) || ReorgUtils2.hasElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT)){
-			if (ReorgUtils2.hasElementsNotOfType(javaElements, IJavaElement.COMPILATION_UNIT))
+		if (ReorgUtils.hasElementsOfType(resources, IResource.FILE | IResource.FOLDER) || ReorgUtils.hasElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT)){
+			if (ReorgUtils.hasElementsNotOfType(javaElements, IJavaElement.COMPILATION_UNIT))
 				return NO;
-			if (ReorgUtils2.hasElementsNotOfType(resources, IResource.FILE | IResource.FOLDER))
+			if (ReorgUtils.hasElementsNotOfType(resources, IResource.FILE | IResource.FOLDER))
 				return NO;
 			if (copy)
-				return new CopyFilesFoldersAndCusPolicy(ReorgUtils2.getFiles(resources), ReorgUtils2.getFolders(resources), ArrayTypeConverter.toCuArray(javaElements));
+				return new CopyFilesFoldersAndCusPolicy(ReorgUtils.getFiles(resources), ReorgUtils.getFolders(resources), ArrayTypeConverter.toCuArray(javaElements));
 			else
-				return new MoveFilesFoldersAndCusPolicy(ReorgUtils2.getFiles(resources), ReorgUtils2.getFolders(resources), ArrayTypeConverter.toCuArray(javaElements), settings);
+				return new MoveFilesFoldersAndCusPolicy(ReorgUtils.getFiles(resources), ReorgUtils.getFolders(resources), ArrayTypeConverter.toCuArray(javaElements), settings);
 		}
 		
 		if (hasElementsSmallerThanCuOrClassFile(javaElements)){
 			//assertions guaranteed by common parent
 			Assert.isTrue(resources.length == 0);
-			Assert.isTrue(! ReorgUtils2.hasElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT));
-			Assert.isTrue(! ReorgUtils2.hasElementsOfType(javaElements, IJavaElement.CLASS_FILE));
+			Assert.isTrue(! ReorgUtils.hasElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT));
+			Assert.isTrue(! ReorgUtils.hasElementsOfType(javaElements, IJavaElement.CLASS_FILE));
 			Assert.isTrue(! hasElementsLargerThanCuOrClassFile(javaElements));
 			if (copy)
 				return new CopySubCuElementsPolicy(javaElements);
@@ -183,9 +183,9 @@ class ReorgPolicyFactory {
 
 	private static boolean hasElementsSmallerThanCuOrClassFile(IJavaElement[] javaElements) {
 		for (int i= 0; i < javaElements.length; i++) {
-			if (ReorgUtils2.isInsideCompilationUnit(javaElements[i]))
+			if (ReorgUtils.isInsideCompilationUnit(javaElements[i]))
 				return true;
-			if (ReorgUtils2.isInsideClassFile(javaElements[i]))
+			if (ReorgUtils.isInsideClassFile(javaElements[i]))
 				return true;
 		}
 		return false;
@@ -193,8 +193,8 @@ class ReorgPolicyFactory {
 
 	private static boolean hasElementsLargerThanCuOrClassFile(IJavaElement[] javaElements) {
 		for (int i= 0; i < javaElements.length; i++) {
-			if (! ReorgUtils2.isInsideCompilationUnit(javaElements[i]) &&
-				! ReorgUtils2.isInsideClassFile(javaElements[i]))
+			if (! ReorgUtils.isInsideCompilationUnit(javaElements[i]) &&
+				! ReorgUtils.isInsideClassFile(javaElements[i]))
 				return true;
 		}
 		return false;
@@ -340,10 +340,10 @@ class ReorgPolicyFactory {
 					return RefactoringStatus.createFatalErrorStatus("The selected destination is external to the workbench");
 			}
 	
-			if (ReorgUtils2.isInsideCompilationUnit(javaElement))
+			if (ReorgUtils.isInsideCompilationUnit(javaElement))
 				return RefactoringStatus.createFatalErrorStatus("Elements inside compilation units cannot be used as destinations for copying files, folders or compilation units");
 	
-			if (containsLinkedResources() && !ReorgUtils2.canBeDestinationForLinkedResources(javaElement))
+			if (containsLinkedResources() && !ReorgUtils.canBeDestinationForLinkedResources(javaElement))
 				return RefactoringStatus.createFatalErrorStatus("Linked resources can only be copied to projects");
 			return new RefactoringStatus();
 		}
@@ -359,7 +359,7 @@ class ReorgPolicyFactory {
 			if (isChildOfOrEqualToAnyFolder(resource))
 				return RefactoringStatus.createFatalErrorStatus("The selected resource cannot be used as a destination");
 						
-			if (containsLinkedResources() && !ReorgUtils2.canBeDestinationForLinkedResources(resource))
+			if (containsLinkedResources() && !ReorgUtils.canBeDestinationForLinkedResources(resource))
 				return RefactoringStatus.createFatalErrorStatus("Linked resources can only be copied to projects");
 	
 			return new RefactoringStatus();
@@ -389,7 +389,7 @@ class ReorgPolicyFactory {
 				return getAsContainer(resDest);
 			IJavaElement jelDest= getJavaElementDestination();
 			Assert.isNotNull(jelDest);				
-			return getAsContainer(ReorgUtils2.getResource(jelDest));
+			return getAsContainer(ReorgUtils.getResource(jelDest));
 		}
 				
 		protected IPackageFragment getDestinationAsPackageFragment() {
@@ -422,13 +422,13 @@ class ReorgPolicyFactory {
 		}
 
 		public final IResource[] getResources() {
-			return ReorgUtils2.union(fFiles, fFolders);
+			return ReorgUtils.union(fFiles, fFolders);
 		}
 
 		protected boolean containsLinkedResources() {
-			return 	ReorgUtils2.containsLinkedResources(fFiles) || 
-					ReorgUtils2.containsLinkedResources(fFolders) || 
-					ReorgUtils2.containsLinkedResources(fCus);
+			return 	ReorgUtils.containsLinkedResources(fFiles) || 
+					ReorgUtils.containsLinkedResources(fFolders) || 
+					ReorgUtils.containsLinkedResources(fCus);
 		}
 
 		protected final IFolder[] getFolders(){
@@ -663,7 +663,7 @@ class ReorgPolicyFactory {
 			Assert.isNotNull(destination);
 			if (!destination.exists())
 				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination for this operation");
-			if (! (destination instanceof ICompilationUnit) && ! ReorgUtils2.isInsideCompilationUnit(destination))
+			if (! (destination instanceof ICompilationUnit) && ! ReorgUtils.isInsideCompilationUnit(destination))
 				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination for this operation");
 
 			ICompilationUnit destinationCu= getDestinationCu(destination);
@@ -674,19 +674,19 @@ class ReorgPolicyFactory {
 			switch(destination.getElementType()){
 				case IJavaElement.COMPILATION_UNIT:
 					int[] types0= new int[]{IJavaElement.FIELD, IJavaElement.INITIALIZER, IJavaElement.METHOD};
-					if (ReorgUtils2.hasElementsOfType(getJavaElements(), types0))
+					if (ReorgUtils.hasElementsOfType(getJavaElements(), types0))
 						return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination for this operation");				
 					break;
 				case IJavaElement.PACKAGE_DECLARATION:
 					return RefactoringStatus.createFatalErrorStatus("Package declarations are not available as destinations");
 				
 				case IJavaElement.IMPORT_CONTAINER:
-					if (ReorgUtils2.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION))
+					if (ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION))
 						return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination for this operation");
 					break;
 					
 				case IJavaElement.IMPORT_DECLARATION:
-					if (ReorgUtils2.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION))
+					if (ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION))
 						return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination for this operation");
 					break;
 				
@@ -697,7 +697,7 @@ class ReorgPolicyFactory {
 				
 				case IJavaElement.TYPE:
 					int[] types1= new int[]{IJavaElement.IMPORT_DECLARATION, IJavaElement.IMPORT_CONTAINER, IJavaElement.PACKAGE_DECLARATION};
-					if (ReorgUtils2.hasElementsOfType(getJavaElements(), types1))
+					if (ReorgUtils.hasElementsOfType(getJavaElements(), types1))
 						return verifyDestination(destination.getParent());
 					break;
 			}
@@ -726,9 +726,9 @@ class ReorgPolicyFactory {
 		public boolean canEnable() throws JavaModelException {
 			if (! super.canEnable()) return false;
 			for (int i= 0; i < fPackageFragmentRoots.length; i++) {
-				if (! ReorgUtils2.isSourceFolder(fPackageFragmentRoots[i])) return false;
+				if (! ReorgUtils.isSourceFolder(fPackageFragmentRoots[i])) return false;
 			}
-			if (ReorgUtils2.containsLinkedResources(fPackageFragmentRoots)) 
+			if (ReorgUtils.containsLinkedResources(fPackageFragmentRoots)) 
 				return false;					
 			return true;
 		}
@@ -745,7 +745,7 @@ class ReorgPolicyFactory {
 				return RefactoringStatus.createFatalErrorStatus("Source folders can only be copied to Java projects");
 			if (javaElement.isReadOnly())
 				return RefactoringStatus.createFatalErrorStatus("Source folders cannot be copied to read-only elements");
-			if (ReorgUtils2.isPackageFragmentRoot((IJavaProject)javaElement))
+			if (ReorgUtils.isPackageFragmentRoot((IJavaProject)javaElement))
 				return RefactoringStatus.createFatalErrorStatus("Source folders cannot be copied or moved to projects that contain no source folders");
 			return new RefactoringStatus();
 		}
@@ -798,7 +798,7 @@ class ReorgPolicyFactory {
 					fPackageFragments[i].isReadOnly())
 					return false;
 			}
-			if (ReorgUtils2.containsLinkedResources(fPackageFragments))
+			if (ReorgUtils.containsLinkedResources(fPackageFragments))
 				return false;
 			return true;
 		}
@@ -825,7 +825,7 @@ class ReorgPolicyFactory {
 			}
 
 			if (javaElement instanceof IJavaProject)
-				return ReorgUtils2.getCorrespondingPackageFragmentRoot((IJavaProject) javaElement);				
+				return ReorgUtils.getCorrespondingPackageFragmentRoot((IJavaProject) javaElement);				
 			return null;
 		}
 		
@@ -834,7 +834,7 @@ class ReorgPolicyFactory {
 			if (! javaElement.exists())
 				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this operation");
 			IPackageFragmentRoot destRoot= getDestinationAsPackageFragmentRoot(javaElement);
-			if (! ReorgUtils2.isSourceFolder(destRoot))
+			if (! ReorgUtils.isSourceFolder(destRoot))
 				return RefactoringStatus.createFatalErrorStatus("Packages can only be moved or copied to source folders or Java projects that do not have source folders");
 			return new RefactoringStatus();
 		}
@@ -898,7 +898,7 @@ class ReorgPolicyFactory {
 		}
 			
 		public IFile[] getAllModifiedFiles() {
-			return ReorgUtils2.getFiles(new IResource[]{ReorgUtils2.getResource(getDestinationCu())});
+			return ReorgUtils.getFiles(new IResource[]{ReorgUtils.getResource(getDestinationCu())});
 		}
 	}
 	private static class CopyFilesFoldersAndCusPolicy extends FilesFoldersAndCusReorgPolicy implements ICopyPolicy{
@@ -940,7 +940,7 @@ class ReorgPolicyFactory {
 		}
 	
 		private static IChange copyFileToContainer(ICompilationUnit cu, IContainer dest, NewNameProposer nameProposer, INewNameQueries copyQueries) {
-			IResource resource= ReorgUtils2.getResource(cu);
+			IResource resource= ReorgUtils.getResource(cu);
 			return createCopyResourceChange(resource, nameProposer, copyQueries, dest);
 		}
 
@@ -961,7 +961,7 @@ class ReorgPolicyFactory {
 
 		private static IChange copyCuToPackage(ICompilationUnit cu, IPackageFragment dest, NewNameProposer nameProposer, INewNameQueries copyQueries) {
 			//XXX workaround for bug 31998 we will have to disable renaming of linked packages (and cus)
-			IResource res= ReorgUtils2.getResource(cu);
+			IResource res= ReorgUtils.getResource(cu);
 			if (res != null && res.isLinked()){
 				if (ResourceUtil.getResource(dest) instanceof IContainer)
 					return copyFileToContainer(cu, (IContainer)ResourceUtil.getResource(dest), nameProposer, copyQueries);
@@ -1081,7 +1081,7 @@ class ReorgPolicyFactory {
 		public String createNewName(ICompilationUnit cu, IPackageFragment destination){
 			if (isNewNameOk(destination, cu.getElementName()))
 				return null;
-			if (! ReorgUtils2.isParentInWorkspaceOrOnDisk(cu, destination))
+			if (! ReorgUtils.isParentInWorkspaceOrOnDisk(cu, destination))
 				return null;
 			int i= 1;
 			while (true){
@@ -1106,7 +1106,7 @@ class ReorgPolicyFactory {
 		public String createNewName(IResource res, IContainer destination){
 			if (isNewNameOk(destination, res.getName()))
 				return null;
-			if (! ReorgUtils2.isParentInWorkspaceOrOnDisk(res, destination))
+			if (! ReorgUtils.isParentInWorkspaceOrOnDisk(res, destination))
 				return null;
 			int i= 1;
 			while (true){
@@ -1128,7 +1128,7 @@ class ReorgPolicyFactory {
 		public String createNewName(IPackageFragment pack, IPackageFragmentRoot destination){
 			if (isNewNameOk(destination, pack.getElementName()))
 				return null;
-			if (! ReorgUtils2.isParentInWorkspaceOrOnDisk(pack, destination))
+			if (! ReorgUtils.isParentInWorkspaceOrOnDisk(pack, destination))
 				return null;
 			int i= 1;
 			while (true){
@@ -1195,7 +1195,7 @@ class ReorgPolicyFactory {
 
 		private static boolean isParentOfAny(IJavaProject javaProject, IPackageFragmentRoot[] roots) {
 			for (int i= 0; i < roots.length; i++) {
-				if (ReorgUtils2.isParentInWorkspaceOrOnDisk(roots[i], javaProject)) return true;
+				if (ReorgUtils.isParentInWorkspaceOrOnDisk(roots[i], javaProject)) return true;
 			}
 			return false;
 		}
@@ -1246,7 +1246,7 @@ class ReorgPolicyFactory {
 		private static boolean isParentOfAny(IPackageFragmentRoot root, IPackageFragment[] fragments) {
 			for (int i= 0; i < fragments.length; i++) {
 				IPackageFragment fragment= fragments[i];
-				if (ReorgUtils2.isParentInWorkspaceOrOnDisk(fragment, root)) return true;
+				if (ReorgUtils.isParentInWorkspaceOrOnDisk(fragment, root)) return true;
 			}
 			return false;
 		}
@@ -1633,7 +1633,7 @@ class ReorgPolicyFactory {
 		}
 
 		public IFile[] getAllModifiedFiles() {
-			return ReorgUtils2.getFiles(new IResource[]{ReorgUtils2.getResource(getSourceCu()), ReorgUtils2.getResource(getDestinationCu())});
+			return ReorgUtils.getFiles(new IResource[]{ReorgUtils.getResource(getSourceCu()), ReorgUtils.getResource(getDestinationCu())});
 		}
 	}
 		
@@ -1673,7 +1673,7 @@ class ReorgPolicyFactory {
 				IJavaElement element= fJavaElements[i];
 				if (element == null)
 					continue;
-				if (ReorgUtils2.isDeletedFromEditor(element))
+				if (ReorgUtils.isDeletedFromEditor(element))
 					continue;
 				element= WorkingCopyUtil.getWorkingCopyIfExists(element);
 				if (element instanceof IType) {

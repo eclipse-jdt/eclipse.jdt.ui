@@ -34,8 +34,8 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteRefactoring2;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 
 public class DeleteAction extends SelectionDispatchAction{
@@ -70,8 +70,8 @@ public class DeleteAction extends SelectionDispatchAction{
 		}
 		try {
 			List elements= selection.toList();
-			IResource[] resources= ReorgUtils2.getResources(elements);
-			IJavaElement[] javaElements= ReorgUtils2.getJavaElements(elements);
+			IResource[] resources= ReorgUtils.getResources(elements);
+			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
 			if (elements.size() != resources.length + javaElements.length)
 				setEnabled(false);
 			else
@@ -84,7 +84,7 @@ public class DeleteAction extends SelectionDispatchAction{
 	}
 	
 	private boolean canDelegateToWorkbenchAction(IStructuredSelection selection) {
-		return ReorgUtils2.containsOnlyProjects(selection.toList());
+		return ReorgUtils.containsOnlyProjects(selection.toList());
 	}
 
 	private static IAction createWorkbenchAction(IStructuredSelection selection) {
@@ -94,7 +94,7 @@ public class DeleteAction extends SelectionDispatchAction{
 	}
 
 	private static boolean canEnable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
-		return DeleteRefactoring2.isAvailable(resources, javaElements);
+		return DeleteRefactoring.isAvailable(resources, javaElements);
 	}
 	
 	/* (non-Javadoc)
@@ -107,8 +107,8 @@ public class DeleteAction extends SelectionDispatchAction{
 		}
 		try {
 			List elements= selection.toList();
-			IResource[] resources= ReorgUtils2.getResources(elements);
-			IJavaElement[] javaElements= ReorgUtils2.getJavaElements(elements);
+			IResource[] resources= ReorgUtils.getResources(elements);
+			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
 			if (canEnable(resources, javaElements)) 
 				startRefactoring(resources, javaElements);
 		} catch (JavaModelException e) {
@@ -117,7 +117,7 @@ public class DeleteAction extends SelectionDispatchAction{
 	}
 
 	private void startRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
-		DeleteRefactoring2 refactoring= createRefactoring(resources, javaElements);
+		DeleteRefactoring refactoring= createRefactoring(resources, javaElements);
 		RefactoringWizard wizard= createWizard(refactoring);
 		/*
 		 * We want to get the shell from the refactoring dialog but it's not known at this point, 
@@ -128,12 +128,12 @@ public class DeleteAction extends SelectionDispatchAction{
 			new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), false); //$NON-NLS-1$
 	}
 
-	private static RefactoringWizard createWizard(DeleteRefactoring2 refactoring){
+	private static RefactoringWizard createWizard(DeleteRefactoring refactoring){
 		return new DeleteWizard(refactoring);
 	}
 		
-	private DeleteRefactoring2 createRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements);
+	private DeleteRefactoring createRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
+		DeleteRefactoring ref= DeleteRefactoring.create(resources, javaElements);
 		ref.setSuggestGetterSetterDeletion(fSuggestGetterSetterDeletion);
 		return ref;
 	}

@@ -35,8 +35,8 @@ import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.DeleteRefactoring2;
-import org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgQueries;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 
 
 public class DeleteTest extends RefactoringTest{
@@ -57,11 +57,11 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	private void verifyDisabled(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		assertTrue("delete should be disabled", ! DeleteRefactoring2.isAvailable(resources, javaElements));
+		assertTrue("delete should be disabled", ! DeleteRefactoring.isAvailable(resources, javaElements));
 	}
 
 	private void verifyEnabled(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		assertTrue("delete should be enabled", DeleteRefactoring2.isAvailable(resources, javaElements));
+		assertTrue("delete should be enabled", DeleteRefactoring.isAvailable(resources, javaElements));
 	}
 
 	private IPackageFragmentRoot getArchiveRoot() throws JavaModelException, Exception {
@@ -86,7 +86,7 @@ public class DeleteTest extends RefactoringTest{
 	private void checkDelete(IJavaElement[] elems, boolean deleteCu) throws JavaModelException, Exception {
 		ICompilationUnit newCuA= null;
 		try {
-			DeleteRefactoring2 refactoring= DeleteRefactoring2.create(new IResource[0], elems);
+			DeleteRefactoring refactoring= DeleteRefactoring.create(new IResource[0], elems);
 			assertNotNull(refactoring);
 			refactoring.setQueries(createReorgQueries());
 			RefactoringStatus status= performRefactoring(refactoring);
@@ -539,7 +539,7 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(resources, javaElements);			
 		performDummySearch();			
 
-		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements);
+		DeleteRefactoring ref= DeleteRefactoring.create(resources, javaElements);
 		ref.setQueries(createReorgQueries());
 		RefactoringStatus status= performRefactoring(ref);
 		assertEquals("expected to pass", null, status);
@@ -557,7 +557,7 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(resources, javaElements);			
 		performDummySearch();			
 
-		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements);
+		DeleteRefactoring ref= DeleteRefactoring.create(resources, javaElements);
 		ref.setQueries(createReorgQueries());
 		RefactoringStatus status= performRefactoring(ref);
 		assertEquals("expected to pass", null, status);
@@ -578,7 +578,7 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(resources, javaElements);			
 		performDummySearch();			
 
-		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements);
+		DeleteRefactoring ref= DeleteRefactoring.create(resources, javaElements);
 		ref.setQueries(createReorgQueries());
 		RefactoringStatus status= performRefactoring(ref);
 		assertEquals("expected to pass", null, status);
@@ -595,7 +595,7 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(resources, javaElements);			
 		performDummySearch();			
 		
-		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements);
+		DeleteRefactoring ref= DeleteRefactoring.create(resources, javaElements);
 		ref.setQueries(createReorgQueries());
 		RefactoringStatus status= performRefactoring(ref);
 		assertEquals("expected to pass", null, status);
@@ -611,7 +611,7 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(resources, javaElements);			
 		performDummySearch();			
 		
-		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements);
+		DeleteRefactoring ref= DeleteRefactoring.create(resources, javaElements);
 		ref.setQueries(createReorgQueries());
 		RefactoringStatus status= performRefactoring(ref);
 		assertEquals("expected to pass", null, status);
@@ -627,7 +627,7 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(resources, javaElements);			
 		performDummySearch();			
 
-		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements);
+		DeleteRefactoring ref= DeleteRefactoring.create(resources, javaElements);
 		ref.setQueries(createReorgQueries());
 		RefactoringStatus status= performRefactoring(ref);
 		assertEquals("expected to pass", null, status);
@@ -644,7 +644,7 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(resources, javaElements);			
 		performDummySearch();			
 
-		DeleteRefactoring2 ref= DeleteRefactoring2.create(resources, javaElements);
+		DeleteRefactoring ref= DeleteRefactoring.create(resources, javaElements);
 		ref.setQueries(createReorgQueries());
 		RefactoringStatus status= performRefactoring(ref);
 		assertEquals("expected to pass", null, status);

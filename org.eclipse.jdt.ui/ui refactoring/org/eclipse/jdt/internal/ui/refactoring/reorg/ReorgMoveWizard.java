@@ -30,12 +30,12 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 
 
 public class ReorgMoveWizard extends RefactoringWizard{
 
-	public ReorgMoveWizard(MoveRefactoring2 ref) {
+	public ReorgMoveWizard(MoveRefactoring ref) {
 		super(ref, "Move");
 	}
 
@@ -53,8 +53,8 @@ public class ReorgMoveWizard extends RefactoringWizard{
 		return getMoveRefactoring().canUpdateReferences() || getMoveRefactoring().canEnableQualifiedNameUpdating();
 	}
 
-	private MoveRefactoring2 getMoveRefactoring(){
-		return (MoveRefactoring2) getRefactoring();
+	private MoveRefactoring getMoveRefactoring(){
+		return (MoveRefactoring) getRefactoring();
 	}
 
 	private static class MoveInputPage extends ReorgUserInputPage{
@@ -68,8 +68,8 @@ public class ReorgMoveWizard extends RefactoringWizard{
 			super(PAGE_NAME);
 		}
 
-		private MoveRefactoring2 getMoveRefactoring(){
-			return (MoveRefactoring2) getRefactoring();
+		private MoveRefactoring getMoveRefactoring(){
+			return (MoveRefactoring) getRefactoring();
 		}
 
 		protected Object getInitiallySelectedElement() {
@@ -84,7 +84,7 @@ public class ReorgMoveWizard extends RefactoringWizard{
 		}
 		
 		protected RefactoringStatus verifyDestination(Object selected) throws JavaModelException{
-			MoveRefactoring2 refactoring= getMoveRefactoring();
+			MoveRefactoring refactoring= getMoveRefactoring();
 			final RefactoringStatus refactoringStatus;
 			if (selected instanceof IJavaElement)
 				refactoringStatus= refactoring.setDestination((IJavaElement)selected);
@@ -98,7 +98,7 @@ public class ReorgMoveWizard extends RefactoringWizard{
 	
 		private void updateUIStatus() {
 			getRefactoringWizard().setPreviewReview(false);
-			MoveRefactoring2 refactoring= getMoveRefactoring();
+			MoveRefactoring refactoring= getMoveRefactoring();
 			if (fReferenceCheckbox != null){
 				fReferenceCheckbox.setEnabled(canUpdateReferences());
 				refactoring.setUpdateReferences(fReferenceCheckbox.getEnabled() && fReferenceCheckbox.getSelection());
@@ -118,7 +118,7 @@ public class ReorgMoveWizard extends RefactoringWizard{
 		}
 
 		private void addUpdateReferenceComponent(Composite result) {
-			final MoveRefactoring2 refactoring= getMoveRefactoring();
+			final MoveRefactoring refactoring= getMoveRefactoring();
 			if (! refactoring.canUpdateReferences())
 				return;
 			fReferenceCheckbox= new Button(result, SWT.CHECK);
@@ -135,7 +135,7 @@ public class ReorgMoveWizard extends RefactoringWizard{
 		}
 
 		private void addUpdateQualifiedNameComponent(Composite parent, int marginWidth) {
-			final MoveRefactoring2 refactoring= getMoveRefactoring();
+			final MoveRefactoring refactoring= getMoveRefactoring();
 			if (!refactoring.canEnableQualifiedNameUpdating() || !refactoring.canUpdateQualifiedNames())
 				return;
 			fQualifiedNameCheckbox= new Button(parent, SWT.CHECK);

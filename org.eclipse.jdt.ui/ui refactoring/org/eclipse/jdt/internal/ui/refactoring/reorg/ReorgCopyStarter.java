@@ -27,14 +27,14 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferences;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 
 
 public class ReorgCopyStarter {
 	
-	private final CopyRefactoring2 fCopyRefactoring;
+	private final CopyRefactoring fCopyRefactoring;
 
-	private ReorgCopyStarter(CopyRefactoring2 copyRefactoring) {
+	private ReorgCopyStarter(CopyRefactoring copyRefactoring) {
 		Assert.isNotNull(copyRefactoring);
 		fCopyRefactoring= copyRefactoring;
 	}
@@ -43,7 +43,7 @@ public class ReorgCopyStarter {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
 		Assert.isNotNull(destination);
-		CopyRefactoring2 copyRefactoring= CopyRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+		CopyRefactoring copyRefactoring= CopyRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 		if (copyRefactoring == null)
 			return null;
 		if (! copyRefactoring.setDestination(destination).isOK())
@@ -55,7 +55,7 @@ public class ReorgCopyStarter {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
 		Assert.isNotNull(destination);
-		CopyRefactoring2 copyRefactoring= CopyRefactoring2.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+		CopyRefactoring copyRefactoring= CopyRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 		if (copyRefactoring == null)
 			return null;
 		if (! copyRefactoring.setDestination(destination).isOK())

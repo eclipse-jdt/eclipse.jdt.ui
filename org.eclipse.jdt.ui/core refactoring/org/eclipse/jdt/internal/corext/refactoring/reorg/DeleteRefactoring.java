@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-public class DeleteRefactoring2 extends Refactoring{
+public class DeleteRefactoring extends Refactoring{
 	
 	private boolean fWasCanceled;
 	private boolean fSuggestGetterSetterDeletion;
@@ -62,7 +62,7 @@ public class DeleteRefactoring2 extends Refactoring{
 
 	private IChange fDeleteChange;
 	
-	private DeleteRefactoring2(IResource[] resources, IJavaElement[] javaElements){
+	private DeleteRefactoring(IResource[] resources, IJavaElement[] javaElements){
 		fResources= resources;
 		fJavaElements= javaElements;
 		fSuggestGetterSetterDeletion= true;//default
@@ -98,10 +98,10 @@ public class DeleteRefactoring2 extends Refactoring{
 		return new DeleteEnablementPolicy(resources, javaElements).canEnable();
 	}
 	
-	public static DeleteRefactoring2 create(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
+	public static DeleteRefactoring create(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
 		if (! isAvailable(resources, javaElements))
 			return null;
-		return new DeleteRefactoring2(resources, javaElements);
+		return new DeleteRefactoring(resources, javaElements);
 	}
 	
 	/* (non-Javadoc)
@@ -112,7 +112,7 @@ public class DeleteRefactoring2 extends Refactoring{
 		pm.beginTask("", 1); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(RefactoringStatus.create(Resources.checkInSync(fResources)));
-		IResource[] javaResources= ReorgUtils2.getResources(fJavaElements);
+		IResource[] javaResources= ReorgUtils.getResources(fJavaElements);
 		result.merge(RefactoringStatus.create(Resources.checkInSync(javaResources)));
 		pm.done();
 		return result;
@@ -154,7 +154,7 @@ public class DeleteRefactoring2 extends Refactoring{
 	private void recalculateElementsToDelete() throws CoreException {
 		//the sequence is critical here
 		
-		fJavaElements= ReorgUtils2.toWorkingCopies(fJavaElements);
+		fJavaElements= ReorgUtils.toWorkingCopies(fJavaElements);
 		removeElementsWithParentsInSelection(); /*ask before adding empty cus - you don't want to ask if you, for example delete 
 												 *the package, in which the cus live*/
 		removeUnconfirmedFoldersThatContainSourceFolders(); /* a selected folder may be a parent of a source folder
@@ -286,15 +286,15 @@ public class DeleteRefactoring2 extends Refactoring{
 	}
 	
 	private void addToSetToDelete(IJavaElement[] newElements){
-		fJavaElements= ReorgUtils2.union(fJavaElements, newElements);		
+		fJavaElements= ReorgUtils.union(fJavaElements, newElements);		
 	}
 	
 	private void removeFromSetToDelete(IResource[] resourcesToNotDelete) {
-		fResources= ReorgUtils2.setMinus(fResources, resourcesToNotDelete);
+		fResources= ReorgUtils.setMinus(fResources, resourcesToNotDelete);
 	}
 	
 	private void removeFromSetToDelete(IJavaElement[] elementsToNotDelete) {
-		fJavaElements= ReorgUtils2.setMinus(fJavaElements, elementsToNotDelete);
+		fJavaElements= ReorgUtils.setMinus(fJavaElements, elementsToNotDelete);
 	}
 	
 	//--- getter setter related methods
@@ -425,7 +425,7 @@ public class DeleteRefactoring2 extends Refactoring{
 		Set result= new HashSet();
 		for (int i= 0; i < fJavaElements.length; i++) {
 			IJavaElement element= fJavaElements[i];	
-			ICompilationUnit cu= ReorgUtils2.getCompilationUnit(element);
+			ICompilationUnit cu= ReorgUtils.getCompilationUnit(element);
 			if (cu != null && ! result.contains(cu) && willHaveAllTopLevelTypesDeleted(cu))
 				result.add(cu);
 		}
@@ -511,7 +511,7 @@ public class DeleteRefactoring2 extends Refactoring{
 			if (element instanceof IMember && ((IMember)element).isBinary())
 				return false;
 		
-			if (ReorgUtils2.isDeletedFromEditor(element))
+			if (ReorgUtils.isDeletedFromEditor(element))
 				return false;								
 				
 			//XXX workaround for 38450 Delete: Removing default package removes source folder
@@ -528,8 +528,8 @@ public class DeleteRefactoring2 extends Refactoring{
 		private static boolean isWorkingCopyElement(IJavaElement element) {
 			if (element instanceof IWorkingCopy) 
 				return ((IWorkingCopy)element).isWorkingCopy();
-			if (ReorgUtils2.isInsideCompilationUnit(element))
-				return ReorgUtils2.getCompilationUnit(element).isWorkingCopy();
+			if (ReorgUtils.isInsideCompilationUnit(element))
+				return ReorgUtils.getCompilationUnit(element).isWorkingCopy();
 			return false;
 		}
 

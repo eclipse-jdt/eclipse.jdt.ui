@@ -18,12 +18,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 
 
 public class ReorgCopyWizard extends RefactoringWizard {
 
-	public ReorgCopyWizard(CopyRefactoring2 ref) {
+	public ReorgCopyWizard(CopyRefactoring ref) {
 		super(ref, "Copy");
 	}
 
@@ -49,8 +49,8 @@ public class ReorgCopyWizard extends RefactoringWizard {
 			super(PAGE_NAME);
 		}
 
-		private CopyRefactoring2 getCopyRefactoring(){
-			return (CopyRefactoring2) getRefactoring();
+		private CopyRefactoring getCopyRefactoring(){
+			return (CopyRefactoring) getRefactoring();
 		}
 
 		protected Object getInitiallySelectedElement() {

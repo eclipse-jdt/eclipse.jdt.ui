@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-public final class CopyRefactoring2 extends Refactoring{
+public final class CopyRefactoring extends Refactoring{
 
 	private INewNameQueries fNewNameQueries;
 	private IReorgQueries fReorgQueries;
@@ -36,18 +36,18 @@ public final class CopyRefactoring2 extends Refactoring{
 		return isAvailable(ReorgPolicyFactory.createCopyPolicy(resources, javaElements, settings));
 	}
 	
-	public static CopyRefactoring2 create(IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
+	public static CopyRefactoring create(IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
 		ICopyPolicy copyPolicy= ReorgPolicyFactory.createCopyPolicy(resources, javaElements, settings);
 		if (! isAvailable(copyPolicy))
 			return null;
-		return new CopyRefactoring2(copyPolicy);
+		return new CopyRefactoring(copyPolicy);
 	}
 
 	private static boolean isAvailable(ICopyPolicy copyPolicy) throws JavaModelException{
 		return copyPolicy.canEnable();
 	}
 		
-	private CopyRefactoring2(ICopyPolicy copyPolicy) {
+	private CopyRefactoring(ICopyPolicy copyPolicy) {
 		fCopyPolicy= copyPolicy;
 	}
 	
@@ -66,7 +66,7 @@ public final class CopyRefactoring2 extends Refactoring{
 		try {
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(RefactoringStatus.create(Resources.checkInSync(fCopyPolicy.getResources())));
-			IResource[] javaResources= ReorgUtils2.getResources(fCopyPolicy.getJavaElements());
+			IResource[] javaResources= ReorgUtils.getResources(fCopyPolicy.getJavaElements());
 			result.merge(RefactoringStatus.create(Resources.checkInSync(javaResources)));
 			return result;
 		} finally {

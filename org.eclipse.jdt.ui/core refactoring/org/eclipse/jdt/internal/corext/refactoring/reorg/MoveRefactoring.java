@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolic
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-public class MoveRefactoring2 extends Refactoring implements IQualifiedNameUpdatingRefactoring{
+public class MoveRefactoring extends Refactoring implements IQualifiedNameUpdatingRefactoring{
 
 	private IReorgQueries fReorgQueries;
 	private IMovePolicy fMovePolicy;
@@ -38,14 +38,14 @@ public class MoveRefactoring2 extends Refactoring implements IQualifiedNameUpdat
 		return isAvailable(ReorgPolicyFactory.createMovePolicy(resources, javaElements, settings));
 	}
 
-	public static MoveRefactoring2 create(IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
+	public static MoveRefactoring create(IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
 		IMovePolicy movePolicy= ReorgPolicyFactory.createMovePolicy(resources, javaElements, settings);
 		if (! isAvailable(movePolicy))
 			return null;
-		return new MoveRefactoring2(movePolicy);
+		return new MoveRefactoring(movePolicy);
 	}
 
-	private MoveRefactoring2(IMovePolicy movePolicy) {
+	private MoveRefactoring(IMovePolicy movePolicy) {
 		fMovePolicy= movePolicy;
 	}
 	
@@ -65,7 +65,7 @@ public class MoveRefactoring2 extends Refactoring implements IQualifiedNameUpdat
 		try {
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(RefactoringStatus.create(Resources.checkInSync(fMovePolicy.getResources())));
-			IResource[] javaResources= ReorgUtils2.getResources(fMovePolicy.getJavaElements());
+			IResource[] javaResources= ReorgUtils.getResources(fMovePolicy.getJavaElements());
 			result.merge(RefactoringStatus.create(Resources.checkInSync(javaResources)));
 			return result;
 		} finally {

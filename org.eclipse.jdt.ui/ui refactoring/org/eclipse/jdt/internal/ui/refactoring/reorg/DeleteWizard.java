@@ -25,13 +25,13 @@ import org.eclipse.jdt.internal.ui.refactoring.MessageInputPage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteRefactoring2;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 public class DeleteWizard extends RefactoringWizard{
 	
-	public DeleteWizard(DeleteRefactoring2 ref) {
+	public DeleteWizard(DeleteRefactoring ref) {
 		super(ref, "Confirm Delete");
 	}
 
@@ -68,8 +68,8 @@ public class DeleteWizard extends RefactoringWizard{
 	 */
 	public boolean needsProgressMonitor() {
 		Refactoring refactoring= getRefactoring();
-		if (refactoring instanceof DeleteRefactoring2) {
-			DeleteRefactoring2 dr= (DeleteRefactoring2)refactoring;
+		if (refactoring instanceof DeleteRefactoring) {
+			DeleteRefactoring dr= (DeleteRefactoring)refactoring;
 			IResource[] resources= dr.getResourcesToDelete();
 			if (resources != null && resources.length > 0)
 				return true;
@@ -93,8 +93,8 @@ public class DeleteWizard extends RefactoringWizard{
 			super(PAGE_NAME, true, MessageInputPage.STYLE_QUESTION);
 		}
 
-		private DeleteRefactoring2 getDeleteRefactoring(){
-			return (DeleteRefactoring2)getRefactoring();
+		private DeleteRefactoring getDeleteRefactoring(){
+			return (DeleteRefactoring)getRefactoring();
 		}
 		
 		protected String getMessageString() {
@@ -116,9 +116,9 @@ public class DeleteWizard extends RefactoringWizard{
 
 		private String getNameOfSingleSelectedElement() throws JavaModelException{
 			if (getSingleSelectedResource() != null)
-				return ReorgUtils2.getName(getSingleSelectedResource());
+				return ReorgUtils.getName(getSingleSelectedResource());
 			else
-				return ReorgUtils2.getName(getSingleSelectedJavaElement());
+				return ReorgUtils.getName(getSingleSelectedJavaElement());
 		}
 
 		private IJavaElement getSingleSelectedJavaElement() {
@@ -223,7 +223,7 @@ public class DeleteWizard extends RefactoringWizard{
 		}
 
 		private static boolean isLinkedResource(IJavaElement element) {
-			return isLinked(ReorgUtils2.getResource(element));
+			return isLinked(ReorgUtils.getResource(element));
 		}
 		
 		private static boolean isLinked(IResource resource){

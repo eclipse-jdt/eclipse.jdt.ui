@@ -56,7 +56,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -125,7 +125,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 				return false;
 			if (elementType == IJavaElement.PACKAGE_FRAGMENT_ROOT){
 				IPackageFragmentRoot root= (IPackageFragmentRoot)javaElement;
-				if (root.isExternal() || ReorgUtils2.isClassFolder(root))
+				if (root.isExternal() || ReorgUtils.isClassFolder(root))
 					return false;
 			}
 		}
