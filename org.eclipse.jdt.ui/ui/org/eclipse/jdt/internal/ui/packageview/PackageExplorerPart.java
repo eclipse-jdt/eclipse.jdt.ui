@@ -311,7 +311,7 @@ public class PackageExplorerPart extends ViewPart
 				handleSelectionChanged(event);
 			}
 		};
-		fViewer.addSelectionChangedListener(fSelectionListener);
+		fViewer.addPostSelectionChangedListener(fSelectionListener);
 		
 		fViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
