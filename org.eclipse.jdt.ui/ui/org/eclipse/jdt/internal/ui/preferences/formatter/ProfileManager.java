@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -279,7 +279,12 @@ public class ProfileManager extends Observable {
 	/**
 	 * The key of the preference where the selected profile is stored.
 	 */
-	private final static String PROFILE_KEY= PreferenceConstants.FORMATTER_PROFILE; 
+	private final static String PROFILE_KEY= PreferenceConstants.FORMATTER_PROFILE;
+	
+	/**
+	 * The key of the preference where the version of the current settings is stored
+	 */
+	private final static String FORMATTER_SETTINGS_VERSION= "formatter_settings_version";  //$NON-NLS-1$
 
 	
 	/**
@@ -347,7 +352,7 @@ public class ProfileManager extends Observable {
 		}
 		
 		Collections.sort(fProfilesByName);
-		
+				
 		String profileId= new InstanceScope().getNode(JavaUI.ID_PLUGIN).get(PROFILE_KEY, JAVA_PROFILE);
 		Profile profile= (Profile) fProfiles.get(profileId);
 		if (profile == null) {
@@ -356,7 +361,6 @@ public class ProfileManager extends Observable {
 		fSelected= profile;
 		
 		if (context.getName() == ProjectScope.SCOPE) {
-			
 			Map map= readFromPreferenceStore(context, profile);
 			if (map != null) {
 				Profile matching= null;
@@ -395,7 +399,7 @@ public class ProfileManager extends Observable {
 		notifyObservers(new Integer(message));
 	}
 	
-	public boolean hasProjectSpecificSettings(IScopeContext context) {
+	public static boolean hasProjectSpecificSettings(IScopeContext context) {
 		IEclipsePreferences corePrefs= context.getNode(JavaCore.PLUGIN_ID);
 		for (final Iterator keyIter = fCoreKeys.iterator(); keyIter.hasNext(); ) {
 			final String key= (String) keyIter.next();
@@ -423,9 +427,18 @@ public class ProfileManager extends Observable {
 	 */
 	public Map readFromPreferenceStore(IScopeContext context, Profile workspaceProfile) {
 		final Map profileOptions= new HashMap();
+		IEclipsePreferences uiPrefs= context.getNode(JavaUI.ID_PLUGIN);
+		IEclipsePreferences corePrefs= context.getNode(JavaCore.PLUGIN_ID);
+		
+		int version= uiPrefs.getInt(FORMATTER_SETTINGS_VERSION, ProfileVersioner.VERSION_1);
+		if (version != ProfileVersioner.CURRENT_VERSION) {
+			Map allOptions= new HashMap();
+			addAll(uiPrefs, allOptions);
+			addAll(corePrefs, allOptions);
+			return ProfileVersioner.updateAndComplete(allOptions, version);
+		}
 		
 		boolean hasValues= false;
-		IEclipsePreferences corePrefs= context.getNode(JavaCore.PLUGIN_ID);
 		for (final Iterator keyIter = fCoreKeys.iterator(); keyIter.hasNext(); ) {
 			final String key= (String) keyIter.next();
 			Object val= corePrefs.get(key, null);
@@ -436,8 +449,6 @@ public class ProfileManager extends Observable {
 			}
 			profileOptions.put(key, val);
 		}
-		
-		IEclipsePreferences uiPrefs= context.getNode(JavaUI.ID_PLUGIN);
 		
 		for (final Iterator keyIter = fUIKeys.iterator(); keyIter.hasNext(); ) {
 			final String key= (String) keyIter.next();
@@ -453,11 +464,33 @@ public class ProfileManager extends Observable {
 		if (!hasValues) {
 			return null;
 		}
+
 		ProfileVersioner.setLatestCompliance(profileOptions);
 		return profileOptions;
 	}
 	
 	
+	/**
+	 * @param uiPrefs
+	 * @param allOptions
+	 */
+	private void addAll(IEclipsePreferences uiPrefs, Map allOptions) {
+		try {
+			String[] keys= uiPrefs.keys();
+			for (int i= 0; i < keys.length; i++) {
+				String key= keys[i];
+				String val= uiPrefs.get(key, null);
+				if (val != null) {
+					allOptions.put(key, val);
+				}
+			}
+		} catch (BackingStoreException e) {
+			// ignore
+		}
+		
+	}
+
+
 	/**
 	 * Update all formatter settings with the settings of the specified profile. 
 	 * @param profile The profile to write to the preference store
@@ -499,6 +532,8 @@ public class ProfileManager extends Observable {
 				uiPrefs.put(key, val);
 			}
 		}
+		
+		uiPrefs.putInt(FORMATTER_SETTINGS_VERSION, ProfileVersioner.CURRENT_VERSION);
 		
 		if (context.getName() == InstanceScope.SCOPE) {
 			final String oldProfile= uiPrefs.get(PROFILE_KEY, null);

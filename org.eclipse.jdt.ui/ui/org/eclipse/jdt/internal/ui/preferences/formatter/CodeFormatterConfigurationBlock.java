@@ -460,7 +460,7 @@ public class CodeFormatterConfigurationBlock {
 		if (fCurrContext.getName() != ProjectScope.SCOPE) {
 			return false;
 		}
-		return fProfileManager.hasProjectSpecificSettings(fCurrContext);
+		return ProfileManager.hasProjectSpecificSettings(fCurrContext);
 	}
 	
 	public boolean performOk(boolean enabled) {

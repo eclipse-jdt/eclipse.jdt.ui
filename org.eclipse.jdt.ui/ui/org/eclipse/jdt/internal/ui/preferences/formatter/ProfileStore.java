@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -40,19 +41,19 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+
+import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -62,6 +63,13 @@ import org.eclipse.jdt.internal.ui.JavaUIException;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 
 
@@ -371,23 +379,33 @@ public class ProfileStore {
 		return element;
 	}
 	
-	public static void checkCurrentOptionsVersion(IScopeContext context) {
-		
-		IEclipsePreferences uiPreferences= context.getNode(JavaUI.ID_PLUGIN);
+	public static void checkCurrentOptionsVersion() {
+		InstanceScope instanceofScope= new InstanceScope();
+		IEclipsePreferences uiPreferences= instanceofScope.getNode(JavaUI.ID_PLUGIN);
 		int version= uiPreferences.getInt(PREF_FORMATTER_PROFILES_VERSION, 0);
 		if (version >= ProfileVersioner.CURRENT_VERSION) {
 			return; // is up to date
 		}
 		try {
 			List profiles= ProfileStore.readProfiles();
-			if (profiles != null && !profiles.isEmpty()) {
-				ProfileManager manager= new ProfileManager(profiles, context);
-				Profile selected= manager.getSelected();
-				if (selected instanceof CustomProfile) {
-					manager.commitChanges(context); // updates JavaCore options
-				}
+			if (profiles == null) {
+				profiles= Collections.EMPTY_LIST;
 			}
+			ProfileManager manager= new ProfileManager(profiles, instanceofScope);
+			manager.commitChanges(instanceofScope); // updates JavaCore options
 			uiPreferences.putInt(PREF_FORMATTER_PROFILES_VERSION, ProfileVersioner.CURRENT_VERSION);
+			try {
+				IJavaProject[] javaProjects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
+				for (int i= 0; i < javaProjects.length; i++) {
+					ProjectScope scope= new ProjectScope(javaProjects[i].getProject());
+					if (ProfileManager.hasProjectSpecificSettings(scope)) {
+						manager= new ProfileManager(profiles, scope);
+						manager.commitChanges(scope); // updates JavaCore project options
+					}
+				}
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}

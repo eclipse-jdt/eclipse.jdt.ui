@@ -18,7 +18,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 
 
@@ -33,13 +32,19 @@ public class ProfileVersioner {
 	public static final int VERSION_7= 7; // after moving comment formatter to JDT Core
 //	public static final int VERSION_8= 8; // after splitting tabSize -> tabLength / indentSize
 	
-	public static final int CURRENT_VERSION= VERSION_6;
+	public static final int CURRENT_VERSION= VERSION_7;
 	
 	public static void updateAndComplete(CustomProfile profile) {
 		final Map oldSettings= profile.getSettings();
+		Map newSettings= updateAndComplete(oldSettings, profile.getVersion());
+		profile.setVersion(CURRENT_VERSION);
+		profile.setSettings(newSettings);
+	}
+	
+	public static Map updateAndComplete(Map oldSettings, int version) {
 		final Map newSettings= ProfileManager.getJavaSettings();
 		
-		switch (profile.getVersion()) {
+		switch (version) {
 
 		case VERSION_1:
 			version1to2(oldSettings);
@@ -58,9 +63,6 @@ public class ProfileVersioner {
 			
 		case VERSION_6:
 		    version6to7(oldSettings);
-//		    
-//		case VERSION_6:
-//		    version7to8(oldSettings);
 		    
 		default:
 		    for (final Iterator iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
@@ -76,9 +78,7 @@ public class ProfileVersioner {
 
 		}
 		setLatestCompliance(newSettings);
-		
-		profile.setVersion(CURRENT_VERSION);
-		profile.setSettings(newSettings);
+		return newSettings;
 	}
 	
 	/**
