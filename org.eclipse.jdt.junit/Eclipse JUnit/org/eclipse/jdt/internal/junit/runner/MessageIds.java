@@ -8,7 +8,11 @@ import org.eclipse.jdt.internal.junit.ui.*;
 
 /**
  * Message identifiers for messages sent by the
- * TestRunServer
+ * RemoteTestRunner. Most of the messages are
+ * notifications from the RemoteTestRunner.
+ * The only request message is TEST_STOP.
+ * 
+ * @see RemoteTestRunner
  */
 public class MessageIds {
 	public static final int MSG_HEADER_LENGTH= 8;

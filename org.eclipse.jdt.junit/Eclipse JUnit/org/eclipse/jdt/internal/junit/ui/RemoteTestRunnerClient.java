@@ -34,7 +34,10 @@ public class RemoteTestRunnerClient {
 	protected String fFailedTrace;
 	protected int fFailureKind;
 	protected long fElapsedTime;
-
+	
+	/**
+	 * Reads the message stream from the RemoteTestRunner
+	 */
 	private class ServerConnection extends Thread {
 		int fPort;
 		
@@ -126,6 +129,7 @@ public class RemoteTestRunnerClient {
 	protected void receiveMessage(String message) {
 		if(message == null)
 			return;	
+			
 		if (message.startsWith(MessageIds.TEST_TREE_START)) {
 			fListener.testTreeStart();
 			return;

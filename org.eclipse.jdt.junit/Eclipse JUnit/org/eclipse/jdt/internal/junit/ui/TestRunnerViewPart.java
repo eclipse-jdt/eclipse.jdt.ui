@@ -24,8 +24,10 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -63,6 +65,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 // !!internal import
+
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 import org.eclipse.jdt.internal.junit.runner.*;
@@ -104,6 +107,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IR
 	
 	protected final Image fTestIcon= TestRunnerViewPart.createImage("icons/testIcon.gif", getClass());
 	protected final Image fHierarchyIcon= TestRunnerViewPart.createImage("icons/hierarchy.gif", getClass());
+	protected final Image fStackViewIcon= TestRunnerViewPart.createImage("icons/stckframe_obj.gif", getClass());
 
 	protected RemoteTestRunnerClient fTestRunner;
 	
@@ -458,22 +462,22 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IR
 	}
 
 	protected SashForm createSashForm(Composite parent) {
-		SashForm sashForm= new SashForm(parent, SWT.VERTICAL);
-		GridLayout gridLayout= new GridLayout();
-		gridLayout.horizontalSpacing= 0;
-		gridLayout.verticalSpacing= 0;
-		gridLayout.marginHeight= 0;
-		gridLayout.marginWidth= 0;
-		sashForm.setLayout(gridLayout);
-		
-		fTabFolder= createTestRunViews(sashForm);
+		SashForm sashForm= new SashForm(parent, SWT.VERTICAL);		
+		ViewForm top= new ViewForm(sashForm, SWT.NONE);
+		fTabFolder= createTestRunViews(top);
 		fTabFolder.setLayoutData(new TabFolderLayout());
+		top.setContent(fTabFolder);
 		
-		fFailureView= new FailureDetailView(sashForm, this);
-		Composite traceView= fFailureView.getComposite();
-		traceView.setLayoutData(new GridData(GridData.GRAB_VERTICAL | GridData.FILL_BOTH));
-		
-		sashForm.setWeights(new int[]{75, 25});
+		ViewForm bottom= new ViewForm(sashForm, SWT.NONE);
+		fFailureView= new FailureDetailView(bottom, this);
+		bottom.setContent(fFailureView.getComposite()); 
+		CLabel label= new CLabel(bottom, SWT.NONE);
+		label.setText("Failure Trace");
+		label.setImage(fStackViewIcon);
+		bottom.setTopLeft(label);
+
+		Composite traceView= fFailureView.getComposite();		
+		sashForm.setWeights(new int[]{50, 50});
 		return sashForm;
 	}
 	
@@ -519,7 +523,6 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IR
 		
 		Composite counterPanel= createProgressCountPanel(parent);
 		counterPanel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
-
 		SashForm sashForm= createSashForm(parent);
 		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
 	}
