@@ -99,7 +99,7 @@ public class CallLocation implements IAdaptable {
         if (fLineNumber == UNKNOWN_LINE_NUMBER) {
             Document document= new Document(buffer.getContents());
             try {
-                fLineNumber= document.getLineOfOffset(fStart);
+                fLineNumber= document.getLineOfOffset(fStart) + 1;
             } catch (BadLocationException e) {
                 JavaPlugin.log(e);
             }
