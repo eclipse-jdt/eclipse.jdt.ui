@@ -34,7 +34,7 @@ public interface IInvocationContext {
 	int getSelectionOffset();
 		
 	/**
-	 * Creates an AST on the compilation unit and returns the AST root element. The AST returned is shared and must
+	 * Creates an partial AST on the compilation unit and the selection offset. Te returned AST is shared and must
 	 * not be modified (or modifications must be reverted back again)
 	 * @return CompilationUnit
 	 */
