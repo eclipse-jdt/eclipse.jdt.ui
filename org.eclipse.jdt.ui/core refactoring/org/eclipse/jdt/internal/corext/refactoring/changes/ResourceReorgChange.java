@@ -21,17 +21,20 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IDeepCopyQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 
 abstract class ResourceReorgChange extends Change {
 	
-	private IPath fResourcePath;
-	private boolean fIsFile;
-	private IPath fDestinationPath;
-	private boolean fIsDestinationProject;
-	private INewNameQuery fNewNameQuery;
-	
-	ResourceReorgChange(IResource res, IContainer dest, INewNameQuery nameQuery){
+	private final IPath fResourcePath;
+	private final boolean fIsFile;
+	private final IPath fDestinationPath;
+	private final boolean fIsDestinationProject;
+	private final INewNameQuery fNewNameQuery;
+	private final IDeepCopyQuery fDeepCopyQuery;
+
+	ResourceReorgChange(IResource res, IContainer dest, INewNameQuery nameQuery, IDeepCopyQuery deepCopyQuery){
 		Assert.isTrue(res instanceof IFile || res instanceof IFolder);
 		fIsFile= (res instanceof IFile);
 		fResourcePath= Utils.getResourcePath(res);
@@ -40,9 +43,10 @@ abstract class ResourceReorgChange extends Change {
 		fIsDestinationProject= (dest instanceof IProject);
 		fDestinationPath= Utils.getResourcePath(dest);
 		fNewNameQuery= nameQuery;
+		fDeepCopyQuery= deepCopyQuery;
 	}
 	
-	protected abstract void doPerform(IPath path, IProgressMonitor pm) throws JavaModelException;
+	protected abstract void doPerform(IPath path, IProgressMonitor pm) throws CoreException;
 	
 	/* non java-doc
 	 * @see IChange#perform(ChangeContext, IProgressMonitor)
@@ -56,12 +60,18 @@ abstract class ResourceReorgChange extends Change {
 			String newName= getNewResourceName();
 			deleteIfAlreadyExists(new SubProgressMonitor(pm, 1), newName);
 				
-			doPerform(getDestination().getFullPath().append(newName), new SubProgressMonitor(pm, 1));	
+			doPerform(getDestinationPath(newName), new SubProgressMonitor(pm, 1));	
+		} catch (JavaModelException e){
+			throw e;
 		} catch (CoreException e){
 			throw new JavaModelException(e);			
 		} finally {
 			pm.done();
 		}
+	}
+
+	protected IPath getDestinationPath(String newName) {
+		return getDestination().getFullPath().append(newName);
 	}
 
 	private void deleteIfAlreadyExists(IProgressMonitor pm, String newName) throws CoreException {
@@ -115,6 +125,36 @@ abstract class ResourceReorgChange extends Change {
 			return Utils.getProject(fDestinationPath);
 		else
 			return Utils.getFolder(fDestinationPath);	
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#getUndoChange()
+	 */
+	public IChange getUndoChange() {
+		return null;
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#isUndoable()
+	 */
+	public boolean isUndoable() {
+		return false;
+	}
+
+	protected int getReorgFlags() {
+		if (! getResource().isLinked())
+			return IResource.NONE;
+		else if (performDeepCopy())
+			return IResource.NONE;
+		else
+			return IResource.SHALLOW;
+	}
+
+	private boolean performDeepCopy() {
+		if (fDeepCopyQuery == null)
+			return false;
+		else	
+			return fDeepCopyQuery.performDeepCopy(getResource());
 	}
 }
 

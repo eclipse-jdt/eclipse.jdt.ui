@@ -3,11 +3,16 @@ package org.eclipse.jdt.internal.ui.reorg;
 import java.text.MessageFormat;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -22,6 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IDeepCopyQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -29,7 +35,11 @@ public class CopyQueries implements ICopyQueries {
 
 	private static final String EMPTY= " "; //XXX workaround for bug#16256 //$NON-NLS-1$
 
+	private IDeepCopyQuery fDeepCopyQuery;
+
 	public CopyQueries() {
+		//just one instance, so that we get the correct 'yes to all' behavior
+		fDeepCopyQuery= new DeepCopyQuery(); 
 	}
 
 	private static String removeTrailingJava(String name) {
@@ -158,4 +168,81 @@ public class CopyQueries implements ICopyQueries {
 		};	
 		return validator;
 	}			
+
+	public IDeepCopyQuery getDeepCopyQuery() {
+		return fDeepCopyQuery;
+	}
+	
+	private static class DeepCopyQuery implements IDeepCopyQuery{
+
+		private boolean alwaysDeepCopy= false;
+		private boolean neverDeepCopy= false;
+		private boolean fCanceled= false;
+		
+		public boolean performDeepCopy(final IResource source) {
+			final Shell parentShell= JavaPlugin.getActiveWorkbenchShell();
+			final int[] result = new int[1];
+			IPath location = source.getLocation();
+		
+			if (location == null) {
+				//undefined path variable
+				return false;
+			}
+			if (location.toFile().exists() == false) {
+				//link target does not exist
+				return false;
+			}
+			if (alwaysDeepCopy) {
+				return true;
+			}
+			if (neverDeepCopy) {
+				return false;
+			}
+			// Dialogs need to be created and opened in the UI thread
+			Runnable query = new Runnable() {
+				public void run() {
+					int resultId[]= {
+						IDialogConstants.YES_ID,
+						IDialogConstants.YES_TO_ALL_ID,
+						IDialogConstants.NO_ID,
+						IDialogConstants.NO_TO_ALL_ID,
+						IDialogConstants.CANCEL_ID};
+ 
+					String message= MessageFormat.format(	"Do you want to perform a deep copy of linked resource ''{0}''",
+						new Object[] {source.getFullPath().makeRelative()});
+					MessageDialog dialog= new MessageDialog(
+						parentShell, 
+						"Linked Resource",
+						null,
+						message,
+						MessageDialog.QUESTION,
+						new String[] {
+							IDialogConstants.YES_LABEL,
+							IDialogConstants.YES_TO_ALL_LABEL,
+							IDialogConstants.NO_LABEL,
+							IDialogConstants.NO_TO_ALL_LABEL,
+							IDialogConstants.CANCEL_LABEL },
+						0);
+					dialog.open();
+					result[0]= resultId[dialog.getReturnCode()];
+				}
+			};
+			parentShell.getDisplay().syncExec(query);
+			if (result[0] == IDialogConstants.YES_TO_ALL_ID) {
+				alwaysDeepCopy= true;
+				return true;		
+			}
+			if (result[0] == IDialogConstants.YES_ID) {
+				return true;
+			}
+			if (result[0] == IDialogConstants.NO_TO_ALL_ID) {
+				neverDeepCopy= true;
+			}
+			if (result[0] == IDialogConstants.CANCEL_ID) {
+				fCanceled= true;
+				throw new OperationCanceledException();
+			}
+			return false;
+		}
+	}
 }
