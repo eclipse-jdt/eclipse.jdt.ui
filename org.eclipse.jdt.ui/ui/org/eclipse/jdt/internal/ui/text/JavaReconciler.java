@@ -12,6 +12,12 @@
 package org.eclipse.jdt.internal.ui.text;
 
 
+import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.events.ShellListener;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
@@ -70,11 +76,32 @@ public class JavaReconciler extends MonoReconciler {
 		}
 	}
 	
+	/**
+	 * Internal Shell activation listener for activating the reconciler.
+	 */
+	class ActivationListener extends ShellAdapter {
+		
+		private Control fControl;
+		
+		public ActivationListener(Control control) {
+			fControl= control;
+		}
+		
+		/*
+		 * @see org.eclipse.swt.events.ShellAdapter#shellActivated(org.eclipse.swt.events.ShellEvent)
+		 */
+		public void shellActivated(ShellEvent e) {
+			if (!fControl.isDisposed() && fControl.isVisible())
+				JavaReconciler.this.forceReconciling();
+		}
+	}
 	
 	/** The reconciler's editor */
 	private ITextEditor fTextEditor;
 	/** The part listener */
 	private IPartListener fPartListener;
+	/** The shell listener */
+	private ShellListener fActivationListener;
 	
 	
 	/**
@@ -95,6 +122,10 @@ public class JavaReconciler extends MonoReconciler {
 		IWorkbenchPartSite site= fTextEditor.getSite();
 		IWorkbenchWindow window= site.getWorkbenchWindow();
 		window.getPartService().addPartListener(fPartListener);
+		
+		fActivationListener= new ActivationListener(textViewer.getTextWidget());
+		Shell shell= window.getShell();
+		shell.addShellListener(fActivationListener);
 	}
 
 	/*
@@ -106,6 +137,11 @@ public class JavaReconciler extends MonoReconciler {
 		IWorkbenchWindow window= site.getWorkbenchWindow();
 		window.getPartService().removePartListener(fPartListener);
 		fPartListener= null;
+		
+		Shell shell= window.getShell();
+		if (shell != null && !shell.isDisposed())
+			shell.removeShellListener(fActivationListener);
+		fActivationListener= null;
 		
 		super.uninstall();
 	}
