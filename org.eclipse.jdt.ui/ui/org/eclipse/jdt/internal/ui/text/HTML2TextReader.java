@@ -27,7 +27,7 @@ import org.eclipse.jface.text.TextPresentation;
 public class HTML2TextReader extends SubstitutionTextReader {
 	
 	
-	private static final String LINE_DELIM= System.getProperty("line.separator", "\n"); //$NON-NLS-1$
+	private static final String LINE_DELIM= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 	private static HashMap fgEntityLookup;
 	private static List fgTags;
