@@ -55,11 +55,10 @@ public abstract class SnippetAction extends Action implements ISnippetStateChang
 	protected boolean textHasContent(String text) {
 		text= text.trim();
 		int length= text.length();
-		if (length > 0) {
-			for (int i= 0; i < length; i++) {
-				if (Character.isLetterOrDigit(text.charAt(i))) {
-					return true;
-				}
+		for (int i= 0; i < length; i++) {
+			char c= text.charAt(i);
+			if (!Character.isWhitespace(c)) {
+				return true;
 			}
 		}
 		return false;
