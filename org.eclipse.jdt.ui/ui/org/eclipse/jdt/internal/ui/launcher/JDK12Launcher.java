@@ -49,8 +49,9 @@ public class JDK12Launcher extends JavaLauncher {
 
 		try {
 			Process p= Runtime.getRuntime().exec(cmdLine);
-			IProcess[] processes= new IProcess[] { DebugPlugin.getDefault().newProcess(p, renderCommandLine(cmdLine)) };
-			return new VMRunnerResult(null, processes);
+			IProcess process= DebugPlugin.getDefault().newProcess(p, renderProcessLabel(cmdLine));
+			process.setAttribute(ATTR_CMDLINE, renderCommandLine(cmdLine));
+			return new VMRunnerResult(null, new IProcess[] { process });
 		} catch (IOException e) {
 			showErrorDialog(ERROR_CREATE_PROCESS, new LauncherException(e));
 		}

@@ -71,7 +71,10 @@ public class J9DebugLauncher extends J9Launcher {
 			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), ERROR_CREATE_PROCESS, new LauncherException(e));
 			return null;
 		}
-		IProcess[] processes= new IProcess[] { DebugPlugin.getDefault().newProcess(p, renderCommandLine(cmdLine)), DebugPlugin.getDefault().newProcess(p2, renderCommandLine(new String[] { "j9Proxy" })) };
+		IProcess process1= DebugPlugin.getDefault().newProcess(p, renderProcessLabel(cmdLine));
+		IProcess process2= DebugPlugin.getDefault().newProcess(p2, renderProcessLabel(new String[] { "j9Proxy" }));
+		process1.setAttribute(ATTR_CMDLINE, renderCommandLine(cmdLine));
+		process2.setAttribute(ATTR_CMDLINE, proxyCmd);
 				
 		AttachingConnector connector= getConnector();
 		if (connector == null) {
@@ -88,8 +91,8 @@ public class J9DebugLauncher extends J9Launcher {
 			try {
 				VirtualMachine vm= connector.attach(map);
 				setTimeout(vm);
-				IDebugTarget debugTarget= JDIDebugModel.newDebugTarget(vm, renderDebugTarget(config.getClassToLaunch(), port), processes[0], true);
-				return new VMRunnerResult(debugTarget, processes);
+				IDebugTarget debugTarget= JDIDebugModel.newDebugTarget(vm, renderDebugTarget(config.getClassToLaunch(), port), process1, true);
+				return new VMRunnerResult(debugTarget, new IProcess[] { process1, process2 });
 			} catch (IOException e) {
 				String title= JavaLaunchUtils.getResourceString(ERROR_CONNECT+"title");
 				String msg= JavaLaunchUtils.getResourceString(ERROR_CONNECT+"message");

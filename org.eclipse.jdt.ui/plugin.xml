@@ -502,6 +502,18 @@
 		objectClass="org.eclipse.jdt.core.IJavaProject"
 		class="org.eclipse.jdt.internal.ui.launcher.SourceLookupPropertyPage"> 
     </page>
+	<page
+		id="org.eclipse.jdt.ui.launching.ProcessPage" 
+		name="Process Info"
+		objectClass="org.eclipse.debug.core.model.IProcess"
+		class="org.eclipse.jdt.internal.ui.launcher.ProcessPropertyPage"> 
+    </page>
+	<page
+		id="org.eclipse.jdt.ui.launching.ProcessPage" 
+		name="Process Info"
+		objectClass="org.eclipse.debug.core.model.IDebugTarget"
+		class="org.eclipse.jdt.internal.ui.launcher.ProcessPropertyPage"> 
+    </page>
 </extension>
 
 <extension point = "org.eclipse.ui.preferencePages">

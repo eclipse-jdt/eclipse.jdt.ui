@@ -13,8 +13,13 @@ public abstract class JavaLauncher implements IVMRunner {
 	protected final static String ERROR_CREATE_PROCESS= PREFIX+"error.create_process.";
 	protected final static String ERROR_LAUNCHING= PREFIX+"error.launch.";
 
+	public final static String ATTR_CMDLINE= JavaPlugin.getPluginId()+'.'+PREFIX+"cmdLine";
 	
-	public static String renderCommandLine(String[] commandLine) {
+	protected String renderDebugTarget(String classToRun, int host) {
+		return classToRun+" at localhost:"+host;
+	}
+
+	public static String renderProcessLabel(String[] commandLine) {
 		StringBuffer buf= new StringBuffer(commandLine[0]);
 		String timestamp= DateFormat.getInstance().format(new Date(System.currentTimeMillis()));
 		buf.append(" (");
@@ -23,14 +28,22 @@ public abstract class JavaLauncher implements IVMRunner {
 		return buf.toString();
 	}
 	
+	protected static String renderCommandLine(String[] commandLine) {
+		if (commandLine.length < 1)
+			return "";
+		StringBuffer buf= new StringBuffer(commandLine[0]);
+		for (int i= 1; i < commandLine.length; i++) {
+			buf.append(' ');
+			buf.append(commandLine[i]);
+		}	
+		return buf.toString();
+	}
+	
 	protected void addArguments(String[] args, List v) {
 		if (args == null)
 			return;
 		for (int i= 0; i < args.length; i++)
 			v.add(args[i]);
-	}
-	protected String renderDebugTarget(String classToRun, int host) {
-		return classToRun+" at localhost:"+host;
 	}
 	
 	protected void showErrorDialog(final String resourceKey, final IStatus error) {

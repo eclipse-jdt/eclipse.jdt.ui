@@ -92,7 +92,8 @@ public class JDK12DebugLauncher extends JDK12Launcher {
 					return null;
 				}
 		
-				IProcess[] processes= new IProcess[] {DebugPlugin.getDefault().newProcess(p, renderCommandLine(cmdLine))};
+				IProcess process= DebugPlugin.getDefault().newProcess(p, renderProcessLabel(cmdLine));
+				process.setAttribute(ATTR_CMDLINE, renderCommandLine(cmdLine));
 				try {
 					Thread.currentThread().sleep(5000);
 				} catch (InterruptedException e) {
@@ -102,8 +103,8 @@ public class JDK12DebugLauncher extends JDK12Launcher {
 					try {
 						VirtualMachine vm= connector.accept(map);
 						setTimeout(vm);
-						IDebugTarget debugTarget= JDIDebugModel.newDebugTarget(vm, renderDebugTarget(config.getClassToLaunch(), port), processes[0], true);
-						return new VMRunnerResult(debugTarget, processes);
+						IDebugTarget debugTarget= JDIDebugModel.newDebugTarget(vm, renderDebugTarget(config.getClassToLaunch(), port), process, true, false);
+						return new VMRunnerResult(debugTarget, new IProcess[] { process });
 					} catch (InterruptedIOException e) {
 						retry= askRetry(CONNECT_TIMEOUT);
 					}

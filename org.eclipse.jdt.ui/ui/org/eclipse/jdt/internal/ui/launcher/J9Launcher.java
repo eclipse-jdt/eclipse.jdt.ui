@@ -49,8 +49,9 @@ public class J9Launcher extends JavaLauncher {
 		arguments.copyInto(cmdLine);
 		try {
 			Process p= Runtime.getRuntime().exec(cmdLine);
-			IProcess[] processes= new IProcess[] { DebugPlugin.getDefault().newProcess(p, renderCommandLine(cmdLine)) };
-			return new VMRunnerResult(null, processes);
+			IProcess process= DebugPlugin.getDefault().newProcess(p, renderProcessLabel(cmdLine));
+			process.setAttribute(ATTR_CMDLINE, renderCommandLine(cmdLine));
+			return new VMRunnerResult(null, new IProcess[] { process });
 		} catch (IOException e) {
 			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), ERROR_CREATE_PROCESS, new LauncherException(e));
 		}
