@@ -869,7 +869,11 @@ public final class ImportsStructure implements IImportsStructure {
 			int line= document.getLineOfOffset(range.getOffset() + range.getLength());
 			IRegion region= document.getLineInformation(line + 1);
 			if (region != null) {
-				return region.getOffset();
+				IType[] types= fCompilationUnit.getTypes();
+				if (types.length > 0) {
+					return Math.min(types[0].getSourceRange().getOffset(), region.getOffset());
+				}
+				return range.getOffset() + range.getLength();
 			}
 		}
 		return 0;
