@@ -8,16 +8,19 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -92,5 +95,18 @@ public class ASTNodeSearchUtil {
 		}
 		return node;
 	}
+
+	public static MethodDeclaration getMethodDeclarationNode(IMethod iMethod, ASTNodeMappingManager astManager) throws JavaModelException {
+		Selection selection= Selection.createFromStartLength(iMethod.getNameRange().getOffset(), iMethod.getNameRange().getLength());
+		SelectionAnalyzer selectionAnalyzer= new SelectionAnalyzer(selection, true);
+		astManager.getAST(iMethod.getCompilationUnit()).accept(selectionAnalyzer);
+		ASTNode node= selectionAnalyzer.getFirstSelectedNode();
+		if (node == null)
+			node= selectionAnalyzer.getLastCoveringNode();
+		if (node == null)	
+			return null;
+		return (MethodDeclaration)ASTNodes.getParent(node, MethodDeclaration.class);
+	}
+	
 	
 }
