@@ -399,7 +399,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			FieldDeclaration decl= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
 			FieldDeclaration modified= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
 			modified.setModifiers(Modifier.PRIVATE);
-			GroupDescription description= new GroupDescription("Change visibility of field");
+			GroupDescription description= new GroupDescription(
+				RefactoringCoreMessages.getString("SelfEncapsulateField.change_visibility")); //$NON-NLS-1$
 			result.add(description);
 			rewriter.markAsModified(decl, modified, description);
 		}
