@@ -26,4 +26,11 @@ public class ResourceUtil {
 		return (IFile[]) files.toArray(new IFile[files.size()]);
 	}
 
+	public static IFile getFile(ICompilationUnit cu) throws JavaModelException{
+		IResource resource= Refactoring.getResource(cu);
+		if (resource.getType() == IResource.FILE)
+			return (IFile)resource;
+		else
+			return null;
+	}
 }
