@@ -130,9 +130,9 @@ public abstract class EvaluateAction extends Action implements IUpdate, IJavaEva
 			return null;
 		
 		Object sourceElement = locator.getSourceElement(stackFrame);
-		if (sourceElement instanceof IType)
-			return (IType) sourceElement;
-		
+		if (sourceElement instanceof IJavaElement) {
+			return (IJavaElement) sourceElement;
+		}			
 		return null;
 	}
 	

@@ -12,11 +12,10 @@ import org.eclipse.debug.core.model.ISourceLocator;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.debug.core.IJavaStackFrame;
-import org.eclipse.jdt.internal.core.SourceType;
-import org.eclipse.jdt.internal.core.refactoring.NullChange;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaParameterListValidator;
@@ -166,8 +165,11 @@ public class DisplayCompletionProcessor implements IContentAssistProcessor {
 			return null;
 		}
 		Object sourceElement= locator.getSourceElement(stackFrame);
-		if (sourceElement instanceof SourceType) {
-			return (ICompilationUnit)((SourceType)sourceElement).getCompilationUnit();
+		if (sourceElement instanceof IType) {
+			return (ICompilationUnit)((IType)sourceElement).getCompilationUnit();
+		}
+		if (sourceElement instanceof ICompilationUnit) {
+			return (ICompilationUnit)sourceElement;
 		}
 		return null;
 	}
