@@ -149,7 +149,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	}
 	
 	private static void checkName(RefactoringStatus status, String name, List usedNames) {
-		status.merge(Checks.checkFieldName(name));
+		status.merge(Checks.checkMethodName(name));
 		for (Iterator iter= usedNames.iterator(); iter.hasNext(); ) {
 			String selector= (String)iter.next();
 			if (selector.equals(name))
