@@ -41,7 +41,7 @@ public class EditWorkingSetAction extends Action {
 		super(WorkingSetMessages.getString("EditWorkingSetAction.text")); //$NON-NLS-1$
 		Assert.isNotNull(actionGroup);
 		setToolTipText(WorkingSetMessages.getString("EditWorkingSetAction.toolTip")); //$NON-NLS-1$
-		
+		setEnabled(actionGroup.getWorkingSet() != null);
 		fShell= shell;
 		fActionGroup= actionGroup;
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.EDIT_WORKING_SET_ACTION);
