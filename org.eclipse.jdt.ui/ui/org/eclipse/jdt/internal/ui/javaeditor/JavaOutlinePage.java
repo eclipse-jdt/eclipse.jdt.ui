@@ -786,8 +786,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	private Hashtable fActions= new Hashtable();
 	
 	private TogglePresentationAction fTogglePresentation;
-	private GotoErrorAction fPreviousError;
-	private GotoErrorAction fNextError;
+	private GotoAnnotationAction fPreviousAnnotation;
+	private GotoAnnotationAction fNextAnnotation;
 	private TextEditorAction fShowJavadoc;
 	private TextOperationAction fUndo;
 	private TextOperationAction fRedo;
@@ -808,15 +808,15 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		fEditor= editor;
 		
 		fTogglePresentation= new TogglePresentationAction();
-		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$
-		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
+		fPreviousAnnotation= new GotoAnnotationAction("PreviousAnnotation.", false); //$NON-NLS-1$
+		fNextAnnotation= new GotoAnnotationAction("NextAnnotation.", true); //$NON-NLS-1$
 		fShowJavadoc= (TextEditorAction) fEditor.getAction("ShowJavaDoc"); //$NON-NLS-1$
 		fUndo= (TextOperationAction) fEditor.getAction(ITextEditorActionConstants.UNDO);
 		fRedo= (TextOperationAction) fEditor.getAction(ITextEditorActionConstants.REDO);
 		
 		fTogglePresentation.setEditor(editor);
-		fPreviousError.setEditor(editor);
-		fNextError.setEditor(editor);	
+		fPreviousAnnotation.setEditor(editor);
+		fNextAnnotation.setEditor(editor);	
 		
 		fPropertyChangeListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
@@ -1007,12 +1007,12 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		
 		bars.setGlobalActionHandler(ITextEditorActionConstants.UNDO, fUndo);
 		bars.setGlobalActionHandler(ITextEditorActionConstants.REDO, fRedo);
-		bars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, fPreviousError);
-		bars.setGlobalActionHandler(ITextEditorActionConstants.NEXT, fNextError);
+		bars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, fPreviousAnnotation);
+		bars.setGlobalActionHandler(ITextEditorActionConstants.NEXT, fNextAnnotation);
 		bars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fShowJavadoc);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
-		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_NEXT_ANNOTATION, fNextError);
-		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, fPreviousError);
+		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY, fTogglePresentation);
+		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_NEXT_ANNOTATION, fNextAnnotation);
+		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, fPreviousAnnotation);
 		
 		
 		fActionGroups.fillActionBars(bars);
@@ -1067,8 +1067,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			fActionGroups.dispose();
 			
 		fTogglePresentation.setEditor(null);
-		fPreviousError.setEditor(null);
-		fNextError.setEditor(null);	
+		fPreviousAnnotation.setEditor(null);
+		fNextAnnotation.setEditor(null);	
 		
 		fOutlineViewer= null;
 		

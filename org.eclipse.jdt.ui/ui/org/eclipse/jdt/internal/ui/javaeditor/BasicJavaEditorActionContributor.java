@@ -13,16 +13,12 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
@@ -39,7 +35,6 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 
@@ -48,82 +43,11 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectio
  */
 public class BasicJavaEditorActionContributor extends BasicTextEditorActionContributor {
 	
-	
-		/**
-		 * Extends retarget action to make sure that state required for a toolbar actions is
-		 * also copied over from the actual action handler.
-		 */
-		protected static class RetargetToolbarAction extends RetargetAction {
-					
-			private String fDefaultLabel;
-					
-			public RetargetToolbarAction(ResourceBundle bundle, String prefix, String actionId, boolean checkStyle) {
-				super(actionId, getLabel(bundle, prefix));
-				fDefaultLabel= getText();
-				if (checkStyle)
-					setChecked(true);
-			}
-					
-			private static String getLabel(ResourceBundle bundle, String prefix) {
-				final String labelKey= "label"; //$NON-NLS-1$
-				try {
-					return bundle.getString(prefix + labelKey);
-				} catch (MissingResourceException e) {
-					return labelKey;
-				}
-			}
-					
-			/*
-			 * @see RetargetAction#propagateChange(PropertyChangeEvent)
-			 */
-			protected void propagateChange(PropertyChangeEvent event) {
-				if (ENABLED.equals(event.getProperty())) {
-					Boolean bool= (Boolean) event.getNewValue();
-					setEnabled(bool.booleanValue());
-				} else if (TEXT.equals(event.getProperty()))
-					setText((String) event.getNewValue());
-				else if (TOOL_TIP_TEXT.equals(event.getProperty()))
-					setToolTipText((String) event.getNewValue());
-				else if (CHECKED.equals(event.getProperty())) {
-					Boolean bool= (Boolean) event.getNewValue();
-					setChecked(bool.booleanValue());
-				}
-			}
-			
-			/*
-			 * @see RetargetAction#setActionHandler(IAction)
-			 */
-			protected void setActionHandler(IAction newHandler) {
-						
-				// default behavior
-				super.setActionHandler(newHandler);
-						
-				// update all the remaining issues
-				if (newHandler != null) {
-					setText(newHandler.getText());
-					setToolTipText(newHandler.getToolTipText());
-					setDescription(newHandler.getDescription());				
-					setImageDescriptor(newHandler.getImageDescriptor());
-					setHoverImageDescriptor(newHandler.getHoverImageDescriptor());
-					setDisabledImageDescriptor(newHandler.getDisabledImageDescriptor());
-					setMenuCreator(newHandler.getMenuCreator());
-					if (newHandler.getStyle() == IAction.AS_CHECK_BOX)
-						setChecked(newHandler.isChecked());
-				} else {
-					setText(fDefaultLabel);
-					setToolTipText(fDefaultLabel);
-					setDescription(fDefaultLabel);
-					setChecked(false);
-				}
-			}
-		}
-		
-	private List fRetargetToolbarActions= new ArrayList();
 	private List fPartListeners= new ArrayList();
 	
 	private TogglePresentationAction fTogglePresentation;
-	private GotoErrorAction fPreviousError;
-	private GotoErrorAction fNextError;
+	private GotoAnnotationAction fPreviousAnnotation;
+	private GotoAnnotationAction fNextAnnotation;
 	private RetargetTextEditorAction fGotoMatchingBracket;
 	private RetargetTextEditorAction fShowOutline;
 	private RetargetTextEditorAction fOpenStructure;
@@ -145,12 +69,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		
 		ResourceBundle b= JavaEditorMessages.getResourceBundle();
 		
-		RetargetAction a= new RetargetToolbarAction(b, "TogglePresentation.", IJavaEditorActionConstants.TOGGLE_PRESENTATION, true); //$NON-NLS-1$
-		a.setActionDefinitionId(IJavaEditorActionDefinitionIds.TOGGLE_PRESENTATION);
-		JavaPluginImages.setToolImageDescriptors(a, "segment_edit.gif"); //$NON-NLS-1$
-		fRetargetToolbarActions.add(a);
-		markAsPartListener(a);
-		
 		fRetargetShowJavaDoc= new RetargetAction(JdtActionConstants.SHOW_JAVA_DOC, JavaEditorMessages.getString("ShowJavaDoc.label")); //$NON-NLS-1$
 		fRetargetShowJavaDoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 		markAsPartListener(fRetargetShowJavaDoc);
@@ -158,11 +76,9 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		// actions that are "contributed" to editors, they are considered belonging to the active editor
 		fTogglePresentation= new TogglePresentationAction();
 		
-		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$
-		fPreviousError.setActionDefinitionId("org.eclipse.ui.navigate.previous"); //$NON-NLS-1$
-		
-		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
-		fNextError.setActionDefinitionId("org.eclipse.ui.navigate.next"); //$NON-NLS-1$
+		fPreviousAnnotation= new GotoAnnotationAction("PreviousAnnotation.", false); //$NON-NLS-1$
+
+		fNextAnnotation= new GotoAnnotationAction("NextAnnotation.", true); //$NON-NLS-1$
 		
 		fGotoMatchingBracket= new RetargetTextEditorAction(b, "GotoMatchingBracket."); //$NON-NLS-1$
 		fGotoMatchingBracket.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
@@ -209,11 +125,11 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		super.init(bars, page);
 		
 		// register actions that have a dynamic editor. 
-		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_NEXT_ANNOTATION, fNextError);
-		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, fPreviousError);
-		bars.setGlobalActionHandler(ITextEditorActionConstants.NEXT, fNextError);
-		bars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, fPreviousError);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
+		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_NEXT_ANNOTATION, fNextAnnotation);
+		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, fPreviousAnnotation);
+		bars.setGlobalActionHandler(ITextEditorActionConstants.NEXT, fNextAnnotation);
+		bars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, fPreviousAnnotation);
+		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY, fTogglePresentation);
 		
 		bars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fShowJavaDoc);
 	}
@@ -258,16 +174,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	}
 	
 	/*
-	 * @see EditorActionBarContributor#contributeToToolBar(IToolBarManager)
-	 */
-	public void contributeToToolBar(IToolBarManager tbm) {
-		tbm.add(new Separator());
-		Iterator e= fRetargetToolbarActions.iterator();
-		while (e.hasNext())
-			tbm.add((IAction) e.next());
-	}
-	
-	/*
 	 * @see EditorActionBarContributor#setActiveEditor(IEditorPart)
 	 */
 	public void setActiveEditor(IEditorPart part) {
@@ -284,8 +190,8 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			textEditor= (ITextEditor) part;
 			
 		fTogglePresentation.setEditor(textEditor);
-		fPreviousError.setEditor(textEditor);
-		fNextError.setEditor(textEditor);
+		fPreviousAnnotation.setEditor(textEditor);
+		fNextAnnotation.setEditor(textEditor);
 		
 		fGotoMatchingBracket.setAction(getAction(textEditor, GotoMatchingBracketAction.GOTO_MATCHING_BRACKET));
 		fShowJavaDoc.setAction(getAction(textEditor, "ShowJavaDoc")); //$NON-NLS-1$

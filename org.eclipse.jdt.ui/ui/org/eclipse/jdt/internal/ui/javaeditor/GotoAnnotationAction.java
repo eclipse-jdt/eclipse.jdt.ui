@@ -18,11 +18,11 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 
-public class GotoErrorAction extends TextEditorAction {
+public class GotoAnnotationAction extends TextEditorAction {
 		
 	private boolean fForward;
 	
-	public GotoErrorAction(String prefix, boolean forward) {
+	public GotoAnnotationAction(String prefix, boolean forward) {
 		super(JavaEditorMessages.getResourceBundle(), prefix, null);
 		fForward= forward;
 		if (forward)
