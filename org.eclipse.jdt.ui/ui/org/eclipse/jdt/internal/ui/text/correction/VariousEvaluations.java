@@ -16,22 +16,29 @@ import java.util.ArrayList;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 
-public class ReorgEvaluator {
+public class VariousEvaluations {
 	
 	public static void getWrongTypeNameProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		String[] args= problemPos.getArguments();
@@ -93,7 +100,36 @@ public class ReorgEvaluator {
 				}
 			});
 		}
-	}	
+	}
 	
+	public static void addCastProposal(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+		String[] args= problemPos.getArguments();
+		if (args.length == 2) {
+			String cast= '(' + Signature.getSimpleName(args[1]) + ")";
+			int pos= problemPos.getOffset();
+			try {
+				IScanner scanner= ToolFactory.createScanner(false, false, false);
+				IBuffer buf= problemPos.getCompilationUnit().getBuffer();
+				scanner.setSource(buf.getCharacters());
+				scanner.resetTo(problemPos.getOffset() + problemPos.getLength(), buf.getLength());
+				
+				if (scanner.getNextToken() == ITerminalSymbols.TokenNameEQUAL) {
+					pos= scanner.getCurrentTokenEndPosition() + 1;
+					cast= " " + cast;
+				} else {
+					cast= cast + " ";
+				}
+			} catch (InvalidInputException e) {
+			}
+			
+			String label= CorrectionMessages.getFormattedString("ReorgEvaluator.addcast.description", args[1]); //$NON-NLS-1$
+			InsertCorrectionProposal proposal= new InsertCorrectionProposal(problemPos, label, pos, cast, 1);
+			proposals.add(proposal);
+			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+			ImportEdit edit= new ImportEdit(proposal.getCompilationUnit(), settings);
+			edit.addImport(args[1]);
+			proposal.getCompilationUnitChange().addTextEdit("Import", edit);
+		}	
+	}
 
 }

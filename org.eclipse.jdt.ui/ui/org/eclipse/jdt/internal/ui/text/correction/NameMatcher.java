@@ -19,14 +19,14 @@ public class NameMatcher {
 	 * The range of is from 0 to 256. no similarity is negative
 	 */
 	public static boolean isSimilarName(String name1, String name2) {
-		return getSimilararity(name1, name2) >= 0;
+		return getSimilarity(name1, name2) >= 0;
 	}	
 		
 	/**
 	 * Returns a similarity value of the two names.
 	 * The range of is from 0 to 256. no similarity is negative
 	 */
-	public static int getSimilararity(String name1, String name2) {	
+	public static int getSimilarity(String name1, String name2) {	
 		if (name1.length() > name2.length()) {
 			String tmp= name1;
 			name1= name2;
@@ -61,4 +61,18 @@ public class NameMatcher {
 	private static boolean isSimilarChar(char ch1, char ch2) {
 		return Character.toLowerCase(ch1) == Character.toLowerCase(ch2);
 	}
+	
+	private static void test(String name1, String name2) {
+		int sim= getSimilarity(name1, name2);
+		System.out.println(name1 + " - " + name2 + " : " + sim); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	public static void main(String[] arguments) {
+		test("runner", "gunner"); //$NON-NLS-1$ //$NON-NLS-2$
+		test("rundner", "gunner"); //$NON-NLS-1$ //$NON-NLS-2$
+		test("rundner", "rund"); //$NON-NLS-1$ //$NON-NLS-2$
+		test("test", "rund"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+
 }

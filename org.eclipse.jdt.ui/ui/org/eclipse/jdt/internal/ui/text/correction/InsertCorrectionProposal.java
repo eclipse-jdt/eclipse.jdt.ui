@@ -22,16 +22,16 @@ import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
 
-public class InsertCharacterCorrectionProposal extends CUCorrectionProposal {
+public class InsertCorrectionProposal extends CUCorrectionProposal {
 	
 	private String fInsertionString;
-	private boolean fAtBeginning;
+	private int  fOffset;
 
 
-	public InsertCharacterCorrectionProposal(ProblemPosition problemPos, String label, String insertString, boolean atBeginning, int relevance) throws CoreException {
+	public InsertCorrectionProposal(ProblemPosition problemPos, String label, int offset, String insertString, int relevance) throws CoreException {
 		super(label, problemPos, relevance);
 		fInsertionString= insertString;
-		fAtBeginning= atBeginning;
+		fOffset= offset;
 	}
 
 	/*
@@ -40,22 +40,15 @@ public class InsertCharacterCorrectionProposal extends CUCorrectionProposal {
 	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
 		ProblemPosition problemPos= getProblemPosition();
 		
-		int offset= problemPos.getOffset() + problemPos.getLength();
-		offset= problemPos.getOffset();
-		if (!fAtBeginning) {
-			offset+= problemPos.getLength();
-			offset= correctOffset(offset, problemPos.getOffset(), getCompilationUnit());
-		}
-		
-		TextEdit edit= SimpleTextEdit.createInsert(offset, fInsertionString);
+		TextEdit edit= SimpleTextEdit.createInsert(fOffset, fInsertionString);
 		changeElement.addTextEdit(getDisplayString(), edit);
 	}
 	
-	private int correctOffset(int offset, int start, ICompilationUnit cu) {
+	public static int moveBack(int offset, int start, String ignoreCharacters, ICompilationUnit cu) {
 		try {
 			IBuffer buf= cu.getBuffer();
 			while (offset >= start) {
-				if ("\n\r".indexOf(buf.getChar(offset - 1)) == -1) { //$NON-NLS-1$
+				if (ignoreCharacters.indexOf(buf.getChar(offset - 1)) == -1) { //$NON-NLS-1$
 					return offset;
 				}
 				offset--;

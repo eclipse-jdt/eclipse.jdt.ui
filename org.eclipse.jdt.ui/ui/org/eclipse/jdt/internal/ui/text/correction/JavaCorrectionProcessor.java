@@ -109,39 +109,43 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			int id= problemPos.getId();
 			switch (id) {
 				case IProblem.UnterminatedString:
-					proposals.add(new InsertCharacterCorrectionProposal(problemPos, CorrectionMessages.getString("JavaCorrectionProcessor.addquote.description"), "\"", false, 0)); //$NON-NLS-1$ //$NON-NLS-2$
+					int pos= InsertCorrectionProposal.moveBack(problemPos.getOffset() + problemPos.getLength(), problemPos.getOffset(), "\n\r", problemPos.getCompilationUnit());
+					proposals.add(new InsertCorrectionProposal(problemPos, CorrectionMessages.getString("JavaCorrectionProcessor.addquote.description"), pos, "\"", 0)); //$NON-NLS-1$ //$NON-NLS-2$
 					break;
 				case IProblem.UnterminatedComment:
-					proposals.add(new InsertCharacterCorrectionProposal(problemPos, CorrectionMessages.getString("JavaCorrectionProcessor.addcomment.description"), "*/", false, 0)); //$NON-NLS-1$ //$NON-NLS-2$
+					proposals.add(new InsertCorrectionProposal(problemPos, CorrectionMessages.getString("JavaCorrectionProcessor.addcomment.description"), problemPos.getOffset() + problemPos.getLength(), "*/", 0)); //$NON-NLS-1$ //$NON-NLS-2$
 					break;
 				case IProblem.UndefinedMethod:
-					UnknownMethodEvaluator.getProposals(problemPos, proposals);
-					break;
-				case IProblem.UndefinedName:
+					UnresolvedElementsEvaluations.getMethodProposals(problemPos, proposals);
+					break;		
 				case IProblem.UndefinedField:
-					UnknownVariableEvaluator.getProposals(problemPos, proposals);
+				case IProblem.UndefinedName:
+					UnresolvedElementsEvaluations.getVariableProposals(problemPos, proposals);
 					break;					
 				case IProblem.PublicClassMustMatchFileName:
-					ReorgEvaluator.getWrongTypeNameProposals(problemPos, proposals);
+					VariousEvaluations.getWrongTypeNameProposals(problemPos, proposals);
 					break;
 				case IProblem.PackageIsNotExpectedPackage:
-					ReorgEvaluator.getWrongPackageDeclNameProposals(problemPos, proposals);
+					VariousEvaluations.getWrongPackageDeclNameProposals(problemPos, proposals);
 					break;
 				case IProblem.UndefinedType:
 				case IProblem.FieldTypeNotFound:
 				case IProblem.ArgumentTypeNotFound:
 				case IProblem.ReturnTypeNotFound:
-					UnknownTypeEvaluator.getTypeProposals(problemPos, UnknownTypeEvaluator.TYPE, proposals);
+					UnresolvedElementsEvaluations.getTypeProposals(problemPos, SimilarElementsRequestor.TYPES, proposals);
 					break;
 				case IProblem.SuperclassNotFound:
 				case IProblem.ExceptionTypeNotFound:
-					UnknownTypeEvaluator.getTypeProposals(problemPos, UnknownTypeEvaluator.CLASS, proposals);
+					UnresolvedElementsEvaluations.getTypeProposals(problemPos, SimilarElementsRequestor.CLASSES, proposals);
 					break;				
 				case IProblem.InterfaceNotFound: 
-					UnknownTypeEvaluator.getTypeProposals(problemPos, UnknownTypeEvaluator.INTERFACE, proposals);
+					UnresolvedElementsEvaluations.getTypeProposals(problemPos, SimilarElementsRequestor.INTERFACES, proposals);
 					break;	
+				case IProblem.TypeMismatch:
+					VariousEvaluations.addCastProposal(problemPos, proposals);
+					break;
 				default:
-					//proposals.add(new NoCorrectionProposal(problemPos));
+					proposals.add(new NoCorrectionProposal(problemPos));
 				
 			}
 		} catch (CoreException e) {
