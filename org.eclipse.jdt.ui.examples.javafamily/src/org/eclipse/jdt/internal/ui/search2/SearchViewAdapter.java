@@ -23,7 +23,6 @@ import org.eclipse.ui.PartInitException;
 /**
  * This class adapts a Search view to return an adapted Search view site.
  * 
- * @see org.eclipse.jdt.internal.ui.search.SearchViewSiteAdapter
  * @since 2.1
  */
 class SearchViewAdapter implements IViewPart {

@@ -17,6 +17,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jsp.JspUIPlugin;
+import org.eclipse.search.ui.ISearchPage;
+import org.eclipse.search.ui.ISearchPageContainer;
+import org.eclipse.search.ui.ISearchResultViewEntry;
+import org.eclipse.search.ui.SearchUI;
+
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IAdaptable;
 
@@ -38,14 +44,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-
-import org.eclipse.jface.text.ITextSelection;
-
-import org.eclipse.jsp.JspUIPlugin;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -54,11 +57,6 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.IWorkbenchAdapter;
-
-import org.eclipse.search.ui.ISearchPage;
-import org.eclipse.search.ui.ISearchPageContainer;
-import org.eclipse.search.ui.ISearchResultViewEntry;
-import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -73,25 +71,23 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.PrettySignature;
-import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
 public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSearchConstants {
 
-	public static final String EXTENSION_POINT_ID= "org.eclipse.jdt.ui.JavaSearchPage"; //$NON-NLS-1$
+	public static final String EXTENSION_POINT_ID= "org.eclipse.jdt.ui.JavaSearchPage"; 
 
 	// Dialog store id constants
-	private final static String PAGE_NAME= "JavaSearchPage"; //$NON-NLS-1$
-	private final static String STORE_CASE_SENSITIVE= PAGE_NAME + "CASE_SENSITIVE"; //$NON-NLS-1$
+	private final static String PAGE_NAME= "JavaSearchPage"; 
+	private final static String STORE_CASE_SENSITIVE= PAGE_NAME + "CASE_SENSITIVE"; 
 
 
 	private static List fgPreviousSearchPatterns= new ArrayList(20);
@@ -109,20 +105,20 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 	
 	private Button[] fSearchFor;
 	private String[] fSearchForText= {
-		SearchMessages.getString("SearchPage.searchFor.type"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.searchFor.method"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.searchFor.package"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.searchFor.constructor"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.searchFor.field")}; //$NON-NLS-1$
+		"&Type", 
+		"&Method", 
+		"&Package", 
+		"Co&nstructor", 
+		"&Field"}; 
 
 	private Button[] fLimitTo;
 	private String[] fLimitToText= {
-		SearchMessages.getString("SearchPage.limitTo.declarations"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.limitTo.implementors"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.limitTo.references"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.limitTo.allOccurrences"), //$NON-NLS-1$
-		SearchMessages.getString("SearchPage.limitTo.readReferences"), //$NON-NLS-1$		
-		SearchMessages.getString("SearchPage.limitTo.writeReferences")}; //$NON-NLS-1$
+		"Dec&larations", 
+		"&Implementors", 
+		"&References", 
+		"All &Occurrences", 
+		"Read A&ccess", 		
+		"Writ&e Access"}; 
 
 
 	private static class SearchPatternData {
@@ -159,14 +155,14 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 
 		// Setup search scope
 		IJavaSearchScope scope= null;
-		String scopeDescription= ""; //$NON-NLS-1$
+		String scopeDescription= ""; 
 		switch (getContainer().getSelectedScope()) {
 			case ISearchPageContainer.WORKSPACE_SCOPE:
-				scopeDescription= SearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
+				scopeDescription= "Workspace"; 
 				scope= SearchEngine.createWorkspaceScope();
 				break;
 			case ISearchPageContainer.SELECTION_SCOPE:
-				scopeDescription= SearchMessages.getString("SelectionScope"); //$NON-NLS-1$
+				scopeDescription= "Selection"; 
 				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(fStructuredSelection, true);
 				break;
 			case ISearchPageContainer.WORKING_SET_SCOPE:
@@ -174,7 +170,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 				// should not happen - just to be sure
 				if (workingSets == null || workingSets.length < 1)
 					return false;
-				scopeDescription= SearchMessages.getFormattedString("WorkingSetScope", SearchUtil.toString(workingSets)); //$NON-NLS-1$
+				scopeDescription= "Working Set - {0}"; 
 				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets(), true);
 				SearchUtil.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
 		}		
@@ -193,7 +189,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 		try {
 			getContainer().getRunnableContext().run(true, true, op);
 		} catch (InvocationTargetException ex) {
-			ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-2$ //$NON-NLS-1$
+			ExceptionHandler.handle(ex, shell, "Search Error", "An error occurred during the search operation");  
 			return false;
 		} catch (InterruptedException ex) {
 			return false;
@@ -255,7 +251,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 			if (fSearchFor[i].getSelection())
 				return i;
 		}
-		Assert.isTrue(false, "shouldNeverHappen"); //$NON-NLS-1$
+		Assert.isTrue(false, "shouldNeverHappen"); 
 		return -1;
 	}
 	
@@ -383,7 +379,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 
 		// Pattern text + info
 		Label label= new Label(result, SWT.LEFT);
-		label.setText(SearchMessages.getString("SearchPage.expression.label")); //$NON-NLS-1$
+		label.setText("Se&arch string (* = any string, ? = any character):"); 
 		gd= new GridData(GridData.BEGINNING);
 		gd.horizontalSpan= 2;
 //		gd.horizontalIndent= -gd.horizontalIndent;
@@ -409,7 +405,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 
 		// Ignore case checkbox		
 		fCaseSensitive= new Button(result, SWT.CHECK);
-		fCaseSensitive.setText(SearchMessages.getString("SearchPage.expression.caseSensitive")); //$NON-NLS-1$
+		fCaseSensitive.setText("Case sens&itive"); 
 		gd= new GridData();
 		fCaseSensitive.setLayoutData(gd);
 		fCaseSensitive.addSelectionListener(new SelectionAdapter() {
@@ -460,7 +456,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 
 	private Control createSearchFor(Composite parent) {
 		Group result= new Group(parent, SWT.NONE);
-		result.setText(SearchMessages.getString("SearchPage.searchFor.label")); //$NON-NLS-1$
+		result.setText("Search For"); 
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 3;
 		result.setLayout(layout);
@@ -483,7 +479,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 	
 	private Control createLimitTo(Composite parent) {
 		Group result= new Group(parent, SWT.NONE);
-		result.setText(SearchMessages.getString("SearchPage.limitTo.label")); //$NON-NLS-1$
+		result.setText("Limit To"); 
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		result.setLayout(layout);
@@ -581,7 +577,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 				break;
 			case IJavaElement.COMPILATION_UNIT:
 				ICompilationUnit cu= (ICompilationUnit)element;
-				String mainTypeName= element.getElementName().substring(0, element.getElementName().indexOf(".")); //$NON-NLS-1$
+				String mainTypeName= element.getElementName().substring(0, element.getElementName().indexOf(".")); 
 				IType mainType= cu.getType(mainTypeName);
 				mainTypeName= JavaModelUtil.getTypeQualifiedName(mainType);
 				try {					
@@ -595,7 +591,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 							break;
 					}
 				} catch (JavaModelException ex) {
-					ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.javaElementAccess.title"), SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
+					ExceptionHandler.handle(ex, "Search Error", "An error occurred while accessing a Java element");  
 					break;
 				}
 				searchFor= TYPE;
@@ -608,7 +604,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 				try {					
 					mainType= cf.getType();
 				} catch (JavaModelException ex) {
-					ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.javaElementAccess.title"), SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
+					ExceptionHandler.handle(ex, "Search Error", "An error occurred while accessing a Java element");  
 					break;
 				}
 				if (mainType == null)
@@ -635,7 +631,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 					if (method.isConstructor())
 						searchFor= CONSTRUCTOR;
 				} catch (JavaModelException ex) {
-					ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.javaElementAccess.title"), SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
+					ExceptionHandler.handle(ex, "Search Error", "An error occurred while accessing a Java element");  
 					break;
 				}		
 				limitTo= REFERENCES;
@@ -656,9 +652,9 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 			try {
 				text= reader.readLine();
 				if (text == null)
-					text= ""; //$NON-NLS-1$
+					text= ""; 
 			} catch (IOException ex) {
-				text= ""; //$NON-NLS-1$
+				text= ""; 
 			}
 			result= new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, text, null);
 		}
@@ -666,7 +662,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 	}
 	
 	private SearchPatternData getDefaultInitValues() {
-		return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, "", null); //$NON-NLS-1$
+		return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, "", null); 
 	}	
 
 	/*
@@ -696,7 +692,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 					try {
 						return SelectionConverter.getStructuredSelection(part);
 					} catch (JavaModelException ex) {
-						JspUIPlugin.log("internal error", ex); //$NON-NLS-1$
+						JspUIPlugin.log("internal error", ex); 
 					}
 			}
 		}

@@ -50,7 +50,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.search.IJavaSearchUIConstants;
 import org.eclipse.jdt.internal.ui.search.LRUWorkingSetsList;
-import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.WorkingSetComparator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -121,10 +120,10 @@ public class SearchUtil {
 			return je;
 		} catch (JavaModelException ex) {
 			if (!ex.isDoesNotExist())
-				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
+				ExceptionHandler.handle(ex, "Search Error", "An error occurred while creating a Java element"); //$NON-NLS-2$ //$NON-NLS-1$
 			return null;
 		} catch (CoreException ex) {
-			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
+			ExceptionHandler.handle(ex, "Search Error", "An error occurred while creating a Java element"); //$NON-NLS-2$ //$NON-NLS-1$
 			return null;
 		}
 	}
@@ -257,7 +256,7 @@ public class SearchUtil {
 			for (int i= 0; i < workingSets.length; i++) {
 				String workingSetName= workingSets[i].getName();
 				if (firstFound)
-					result= SearchMessages.getFormattedString("SearchUtil.workingSetConcatenation", new String[] {result, workingSetName}); //$NON-NLS-1$
+					result= "{0}, {1}"; //$NON-NLS-1$
 				else {
 					result= workingSetName;
 					firstFound= true;
@@ -357,9 +356,9 @@ public class SearchUtil {
 			OptionalMessageDialog.open(
 				BIN_PRIM_CONST_WARN_DIALOG_ID,
 				shell,
-				SearchMessages.getString("Search.FindReferencesAction.BinPrimConstWarnDialog.title"), //$NON-NLS-1$
+				"Search for References to a Binary Constant", //$NON-NLS-1$
 				null,
-				SearchMessages.getString("Search.FindReferencesAction.BinPrimConstWarnDialog.message"), //$NON-NLS-1$
+				"Matches to this constant will only be discovered in source files and binary files where the constant value is not inlined.", //$NON-NLS-1$
 				MessageDialog.INFORMATION,
 				new String[] { IDialogConstants.OK_LABEL },
 				0);
@@ -394,8 +393,8 @@ public class SearchUtil {
 	public static String getProjectScopeDescription(IType type) {
 		IJavaProject project= type.getJavaProject();
 		if (project != null)
-			return SearchMessages.getFormattedString("ProjectScope", project.getElementName()); //$NON-NLS-1$
+			return "Project {0}"; //$NON-NLS-1$
 		else 
-			return SearchMessages.getFormattedString("ProjectScope", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			return "Project {0}"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

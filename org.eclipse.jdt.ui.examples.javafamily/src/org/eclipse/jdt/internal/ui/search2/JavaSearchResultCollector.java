@@ -13,6 +13,10 @@ package org.eclipse.jdt.internal.ui.search2;
 import java.text.MessageFormat;
 import java.util.HashMap;
 
+import org.eclipse.search.ui.IActionGroupFactory;
+import org.eclipse.search.ui.ISearchResultView;
+import org.eclipse.search.ui.SearchUI;
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -26,10 +30,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.ActionGroup;
 
-import org.eclipse.search.ui.IActionGroupFactory;
-import org.eclipse.search.ui.ISearchResultView;
-import org.eclipse.search.ui.SearchUI;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -39,23 +39,18 @@ import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
-import org.eclipse.jdt.internal.ui.search.GotoMarkerAction;
-import org.eclipse.jdt.internal.ui.search.GroupByKeyComputer;
 import org.eclipse.jdt.internal.ui.search.IJavaSearchUIConstants;
-import org.eclipse.jdt.internal.ui.search.JavaSearchResultLabelProvider;
-import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 
 public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 
-	private static final String MATCH= SearchMessages.getString("SearchResultCollector.match"); //$NON-NLS-1$
-	private static final String MATCHES= SearchMessages.getString("SearchResultCollector.matches"); //$NON-NLS-1$
-	private static final String DONE= SearchMessages.getString("SearchResultCollector.done"); //$NON-NLS-1$
-	private static final String SEARCHING= SearchMessages.getString("SearchResultCollector.searching"); //$NON-NLS-1$
+	private static final String MATCH= "1 match"; 
+	private static final String MATCHES= "{0} matches"; 
+	private static final String DONE= "Search done: {0}."; 
+	private static final String SEARCHING= ""; 
 	private static final Boolean POTENTIAL_MATCH_VALUE= new Boolean(true);
-	private static final String POTENTIAL_MATCH_DIALOG_ID= "Search.PotentialMatchDialog"; //$NON-NLS-1$
+	private static final String POTENTIAL_MATCH_DIALOG_ID= "Search.PotentialMatchDialog"; 
 	
 	private IProgressMonitor fMonitor;
 	private ISearchResultView fView;
@@ -110,7 +105,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 			
 			String description= resource.getFullPath().lastSegment();
 			if (description == null)
-				description= "";  //$NON-NLS-1$
+				description= "";  
 			
 			HashMap attributes= new HashMap(3);
 			attributes.put(IMarker.CHAR_START, new Integer(Math.max(start, 0)));
@@ -139,9 +134,9 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 			fPotentialMatchCount++;
 			attributes.put(SearchUI.POTENTIAL_MATCH, POTENTIAL_MATCH_VALUE);
 			if (groupKey == null)
-				groupKey= "?:null"; //$NON-NLS-1$
+				groupKey= "?:null"; 
 			else
-				groupKey= "?:" + enclosingElement.getHandleIdentifier(); //$NON-NLS-1$
+				groupKey= "?:" + enclosingElement.getHandleIdentifier(); 
 		}			
 		ICompilationUnit cu= SearchUtil.findCompilationUnit(enclosingElement);
 		if (cu != null && cu.isWorkingCopy())
@@ -190,9 +185,9 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 		final Shell shell= fView.getSite().getShell();
 		final String title;
 		if (potentialMatchCount == 1)
-			title= new String(SearchMessages.getString("Search.potentialMatchDialog.title.foundPotentialMatch")); //$NON-NLS-1$
+			title= new String("Search: Found 1 Inexact Match"); 
 		else
-			title= new String(SearchMessages.getFormattedString("Search.potentialMatchDialog.title.foundPotentialMatches", "" + potentialMatchCount)); //$NON-NLS-1$ //$NON-NLS-2$
+			title= new String("Search: Found {0} Inexact Matches");  
 		
 		shell.getDisplay().syncExec(new Runnable() {
 			public void run() {
@@ -201,7 +196,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 					shell,
 					title,
 					null,
-					SearchMessages.getString("Search.potentialMatchDialog.message"), //$NON-NLS-1$,
+					"Inexact matches were found and will be displayed with a different\nforeground color. This can be configured on the Search preferences page.", 
 					MessageDialog.INFORMATION,
 					new String[] { IDialogConstants.OK_LABEL },
 					0);
