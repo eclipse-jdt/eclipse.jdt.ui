@@ -68,6 +68,17 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return false;
 	}
 
+	private static String getLineDelimiter(IDocument document) {
+		try {
+			if (document.getNumberOfLines() > 1)
+				return document.getLineDelimiter(0);
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+		}	
+
+		return System.getProperty("line.separator"); //$NON-NLS-1$
+	}
+
 	/**
 	 * Copies the indentation of the previous line and add a star.
 	 * If the javadoc just started on this line add standard method tags
@@ -103,7 +114,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 						if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(CompilationUnitEditor.CLOSE_JAVADOCS) &&
 							isNewComment(d, c.offset))
 						{
-							String lineDelimiter= d.getLegalLineDelimiters()[0];
+							String lineDelimiter= getLineDelimiter(d);
 
 							c.doit= false;
 							d.replace(c.offset, 0, lineDelimiter + indentation + " */"); //$NON-NLS-1$
