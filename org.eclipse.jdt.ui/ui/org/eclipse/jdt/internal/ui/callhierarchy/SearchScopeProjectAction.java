@@ -69,6 +69,6 @@ class SearchScopeProjectAction extends SearchScopeAction {
 			project = method.getJavaProject();
 		}
 
-		return SearchMessages.getFormattedString("ProjectScope", project.getElementName());
+		return SearchMessages.getFormattedString("ProjectScope", project.getElementName()); //$NON-NLS-1$
 	}
 }

@@ -108,7 +108,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		//Don't use endReporting() for long running operation.
 		pm.beginTask("", fProperties.size()); //$NON-NLS-1$
 		boolean hasUnused= false;		
-		pm.setTaskName("Searching for unused properties ...");
+		pm.setTaskName(NLSSearchMessages.getString("NLSSearchResultRequestor.searching")); //$NON-NLS-1$
 		String message= NLSSearchMessages.getFormattedString("NLSSearchResultCollector.unusedKeys", fPropertiesFile.getName()); //$NON-NLS-1$
 		FileEntry key= new FileEntry(fPropertiesFile, message);
 		

@@ -64,7 +64,7 @@ class SearchScopeHierarchyAction extends SearchScopeAction {
 	public String getFullDescription() {
 		IMethod method = this.fGroup.getView().getMethod();
 		
-		return SearchMessages.getFormattedString("HierarchyScope", method.getDeclaringType().getElementName());
+		return SearchMessages.getFormattedString("HierarchyScope", method.getDeclaringType().getElementName()); //$NON-NLS-1$
 	}
 
 }

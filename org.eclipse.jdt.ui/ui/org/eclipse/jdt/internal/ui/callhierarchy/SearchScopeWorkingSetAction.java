@@ -56,6 +56,6 @@ class SearchScopeWorkingSetAction extends SearchScopeAction {
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
 	 */
 	public String getFullDescription() {
-		return SearchMessages.getFormattedString("WorkingSetScope", SearchUtil.toString(fWorkingSets));
+		return SearchMessages.getFormattedString("WorkingSetScope", SearchUtil.toString(fWorkingSets)); //$NON-NLS-1$
 	}
 }

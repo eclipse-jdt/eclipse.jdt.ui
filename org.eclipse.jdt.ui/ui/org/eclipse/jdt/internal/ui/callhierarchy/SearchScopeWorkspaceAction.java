@@ -44,6 +44,6 @@ class SearchScopeWorkspaceAction extends SearchScopeAction {
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
 	 */
 	public String getFullDescription() {
-		return SearchMessages.getString("WorkspaceScope");
+		return SearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
 	}
 }
