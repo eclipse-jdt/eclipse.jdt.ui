@@ -18,6 +18,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
+import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -34,7 +35,8 @@ import org.eclipse.jdt.internal.corext.javadoc.JavaDocAccess;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.ProposalInfo;
 
 public class CompletionEvaluator {
 	
@@ -271,9 +273,9 @@ public class CompletionEvaluator {
 					return (new JavaDoc2HTMLTextReader(reader)).getString();
 				}				
 			} catch (JavaModelException e) {
-				JavaPlugin.getDefault().log(e);
+				JavaPlugin.log(e);
 			} catch (IOException e) {
-				JavaPlugin.getDefault().log(e);
+				JavaPlugin.log(e);
 			}
 		}
 		return null;
@@ -342,12 +344,7 @@ public class CompletionEvaluator {
 		int wordStart= fCurrentPos - arg.length();
 		int pidx= arg.indexOf('#');
 		if (pidx == -1) {
-			ICompletionProposal[] completions= getTypeNameCompletion(wordStart);
-			if (completions != null) {
-				for (int i= 0; i < completions.length; i++) {
-					fResult.add(completions[i]);
-				}
-			}
+			evalTypeNameCompletions(wordStart);
 		} else {
 			IType parent= null;
 			if (pidx > 0) {
@@ -374,19 +371,28 @@ public class CompletionEvaluator {
 		}
 	}
 	
-	private ICompletionProposal[] getTypeNameCompletion(int wordStart) throws JavaModelException {
+	private void evalTypeNameCompletions(int wordStart) throws JavaModelException {
 		ICompilationUnit preparedCU= createPreparedCU(wordStart, fCurrentPos);
 		if (preparedCU != null) {
-			ResultCollector collector= new ResultCollector();
-			collector.reset(fCurrentPos, fCompilationUnit.getJavaProject(), fCompilationUnit);
+			CompletionRequestorAdapter requestor= new CompletionRequestorAdapter() {
+				public void acceptClass(char[] packageName, char[] className, char[] completionName, int modifiers, int start, int end) {
+					fResult.add(createSeeTypeCompletion(true, start, end, completionName, className, packageName));
+				}
+
+				public void acceptInterface(char[] packageName, char[] interfaceName, char[] completionName, int modifiers, int start, int end) {
+					fResult.add(createSeeTypeCompletion(false, start, end, completionName, interfaceName, packageName));
+				}
+
+				public void acceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end) {
+					fResult.add(createSeeTypeCompletion(true, start, end, completionName, typeName, packageName));
+				}
+			};
 			try {
-				preparedCU.codeComplete(fCurrentPos, collector);
+				preparedCU.codeComplete(fCurrentPos, requestor);
 			} finally {
 				preparedCU.destroy();
 			}
-			return collector.getResults();
 		}
-		return null;
 	}
 		
 	private IType getTypeNameResolve(int wordStart, int wordEnd) throws JavaModelException {
@@ -411,20 +417,17 @@ public class CompletionEvaluator {
 			return null;
 		}
 		int startpos= ((ISourceReference)elem).getSourceRange().getOffset();
-		// 1GEYJ5Z: ITPJUI:WINNT - smoke120: code assist in @see tag can result data loss
 		char[] content= (char[]) fCompilationUnit.getBuffer().getCharacters().clone();
+		if (elem instanceof IType && (((IType)elem).getDeclaringType() == null) && (wordStart + 6 < content.length)) {
+			content[startpos++]= 'i'; content[startpos++]= 'm'; content[startpos++]= 'p';
+			content[startpos++]= 'o'; content[startpos++]= 'r'; content[startpos++]= 't';
+		}		
 		if (wordStart < content.length) {
 			for (int i= startpos; i < wordStart; i++) {
 				content[i]= ' ';
 			}
 		}
-		
-		if (wordEnd + 2 < content.length) {
-			// XXX: workaround for 1GAVL08
-			content[wordEnd]= ' ';
-			content[wordEnd + 1]= 'x';
-		}
-				
+						
 		ICompilationUnit cu= fCompilationUnit;
 		if (cu.isWorkingCopy()) {
 			cu= (ICompilationUnit) cu.getOriginalElement();
@@ -443,5 +446,31 @@ public class CompletionEvaluator {
 		
 		return new CompletionProposal(newText, offset, length, newText.length(), image, labelText, null, info);
 	}
+	
+	private ICompletionProposal createSeeTypeCompletion(boolean isClass, int start, int end, char[] completion, char[] typeName, char[] containerName) {
+		ProposalInfo proposalInfo= new ProposalInfo(fCompilationUnit.getJavaProject(), containerName, typeName); 
+		StringBuffer nameBuffer= new StringBuffer();
+		nameBuffer.append(typeName);
+		if (containerName != null) {
+			nameBuffer.append(" - "); //$NON-NLS-1$
+			if (containerName.length > 0) {
+				nameBuffer.append(containerName);
+			} else {
+				nameBuffer.append(JavaDocMessages.getString("CompletionEvaluator.default_package"));
+			}
+		}
+		String imageKey= isClass ? JavaPluginImages.IMG_OBJS_CLASS : JavaPluginImages.IMG_OBJS_INTERFACE;
+
+		int compLen= completion.length;
+		if (compLen > 0 && completion[compLen - 1] == ';') {
+			compLen--; // remove the semicolon from import proposals
+		}
+
+		JavaCompletionProposal proposal= new JavaCompletionProposal(new String(completion, 0, compLen), start, end - start, JavaPluginImages.get(imageKey), nameBuffer.toString());
+		proposal.setProposalInfo(proposalInfo);
+		proposal.setTriggerCharacters( new char[] { '#' });
+		return proposal;
+	}
+	
 
 }
