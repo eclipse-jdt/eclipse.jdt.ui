@@ -21,28 +21,28 @@ import org.eclipse.jdt.core.JavaModelException;
 public class MemberFilter extends ViewerFilter {
 
 	public static final int FILTER_NONPUBLIC= 1;
-	public static final int SHOW_STATIC= 2;
-	public static final int SHOW_FIELDS= 4;
+	public static final int FILTER_STATIC= 2;
+	public static final int FILTER_FIELDS= 4;
 	
 	private int fFilterProperties;
 
 	/**
-	 * Modifies filter and add a property
+	 * Modifies filter and add a property to filter for
 	 */
-	public final void addProperty(int property) {
-		fFilterProperties |= property;
+	public final void addFilter(int filter) {
+		fFilterProperties |= filter;
 	}
 	/**
-	 * Modifies filter and remove a property
+	 * Modifies filter and remove a property to filter for
 	 */	
-	public final void removeProperty(int property) {
-		fFilterProperties &= (-1 ^ property);
+	public final void removeFilter(int filter) {
+		fFilterProperties &= (-1 ^ filter);
 	}
 	/**
 	 * Tests if a property is filtered
 	 */		
-	public final boolean hasProperty(int property) {
-		return (fFilterProperties & property) != 0;
+	public final boolean hasFilter(int filter) {
+		return (fFilterProperties & filter) != 0;
 	}
 	
 	/*
@@ -51,29 +51,25 @@ public class MemberFilter extends ViewerFilter {
 	public boolean isFilterProperty(Object element, Object property) {
 		return false;
 	}
-	
 	/*
 	 * @see ViewerFilter@select
 	 */		
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		try {
+			if (hasFilter(FILTER_FIELDS) && element instanceof IField) {
+				return false;
+			}
 			if (element instanceof IMember) {
-				
 				IMember member= (IMember)element;
 				if (member.getElementName().startsWith("<")) { // filter out <clinit> //$NON-NLS-1$
 					return false;
 				}
 				int flags= member.getFlags();
-				if (!Flags.isPublic(flags) && !isMemberInInterface(member) && !isTopLevelType(member)) {
-					if (hasProperty(FILTER_NONPUBLIC)) {
-						return false;
-					}
+				if (hasFilter(FILTER_STATIC) && (Flags.isStatic(flags) || isFieldInInterface(member))) {
+					return false;
 				}
-				boolean isField= member.getElementType() == IJavaElement.FIELD;
-				boolean isStatic= Flags.isStatic(flags) || isFieldInInterface(member);
-				
-				if (isField || isStatic) {
-					return (isField && hasProperty(SHOW_FIELDS)) || (isStatic && hasProperty(SHOW_STATIC));
+				if (hasFilter(FILTER_NONPUBLIC) && !Flags.isPublic(flags) && !isMemberInInterface(member) && !isTopLevelType(member)) {
+					return false;
 				}
 			}			
 		} catch (JavaModelException e) {
