@@ -1306,15 +1306,15 @@ class ReorgPolicyFactory {
 				return superStatus;
 
 			Object commonParent= new ParentChecker(getResources(), getJavaElements()).getCommonParent();
-			if (destination.equals(commonParent) || destination.getParent().equals(commonParent))
-				return RefactoringStatus.createFatalErrorStatus("The selected elements cannot be the destination of this move operation.");
-			if (commonParent instanceof IResource){
-				IJavaElement commonJavaParent= JavaCore.create((IResource)commonParent);
-				if (commonJavaParent != null && commonJavaParent.exists()){
-					if (destination.equals(commonParent) || destination.getParent().equals(commonParent))
-						return RefactoringStatus.createFatalErrorStatus("The selected elements cannot be the destination of this move operation.");					
-				}
-			}
+			if (destination.equals(commonParent)) 
+				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this move operation.");
+			IContainer destinationAsContainer= getDestinationAsContainer();
+			if (destinationAsContainer != null && destinationAsContainer.equals(commonParent))
+				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this move operation.");
+			IPackageFragment destinationAsPackage= getDestinationAsPackageFragment();
+			if (destinationAsPackage != null && destinationAsPackage.equals(commonParent))
+				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this move operation.");
+				
 			return superStatus;
 		}
 		
@@ -1324,17 +1324,14 @@ class ReorgPolicyFactory {
 				return superStatus;
 
 			Object commonParent= getCommonParent();
-			if (commonParent instanceof IResource){
-				IResource commonResourceParent= (IResource)commonParent;
-				if (ReorgUtils2.areEqualInWorkspaceOrOnDisk(destination, commonResourceParent) || ReorgUtils2.isParentInWorkspaceOrOnDisk(destination, commonResourceParent))
-					return RefactoringStatus.createFatalErrorStatus("The selected elements cannot be the destination of this move operation.");					
-			}
-			if (commonParent instanceof IJavaElement){
-				IJavaElement commonJavaParent= (IJavaElement)commonParent;
-				IJavaElement javaParentOfDestination= JavaCore.create(destination.getParent());
-				if (javaParentOfDestination != null && javaParentOfDestination.exists() && commonJavaParent.equals(javaParentOfDestination))
-					return RefactoringStatus.createFatalErrorStatus("The selected elements cannot be the destination of this move operation.");
-			}
+			if (destination.equals(commonParent)) 
+				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this move operation.");
+			IContainer destinationAsContainer= getDestinationAsContainer();
+			if (destinationAsContainer != null && destinationAsContainer.equals(commonParent))
+				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this move operation.");
+			IPackageFragment destinationAsPackage= getDestinationAsPackageFragment();
+			if (destinationAsPackage != null && destinationAsPackage.equals(commonParent))
+				return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this move operation.");
 
 			return superStatus;
 		}
