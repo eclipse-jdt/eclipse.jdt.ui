@@ -1,10 +1,10 @@
+package org.eclipse.jdt.internal.debug.ui;
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-
-package org.eclipse.jdt.internal.debug.ui;
-
+ 
 import java.util.Iterator;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
@@ -19,6 +19,7 @@ import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
@@ -35,6 +36,30 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 
 	protected IStructuredSelection fCurrentSelection;
 
+	/**
+	 * A dialog that sets the focus to the text area.
+	 */
+	class HitCountDialog extends InputDialog {
+		protected  HitCountDialog(Shell parentShell,
+									String dialogTitle,
+									String dialogMessage,
+									String initialValue,
+									IInputValidator validator) {
+			super(parentShell, dialogTitle, dialogMessage, initialValue, validator);
+		}
+		
+		public int open() {
+			Display display= JavaPlugin.getActiveWorkbenchWindow().getShell().getDisplay();
+			display.asyncExec(new Runnable() {
+				public void run() {
+					getText().setFocus();
+				}
+			});
+			
+			return super.open();
+		}
+	}
+	
 	public BreakpointHitCountAction() {
 		setEnabled(false);
 	}
@@ -105,7 +130,7 @@ public class BreakpointHitCountAction extends Action implements IViewActionDeleg
 			initialValue= INITIAL_VALUE;
 		}
 		Shell activeShell= JavaPlugin.getActiveWorkbenchWindow().getShell();
-		InputDialog dialog= new InputDialog(activeShell, title, message, initialValue, validator);
+		InputDialog dialog= new HitCountDialog(activeShell, title, message, initialValue, validator);
 		if (dialog.open() != dialog.OK) {
 			return -1;
 		}
