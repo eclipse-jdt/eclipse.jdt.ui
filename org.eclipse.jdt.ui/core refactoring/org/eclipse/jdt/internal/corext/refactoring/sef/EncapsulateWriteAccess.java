@@ -27,7 +27,7 @@ final class EncapsulateWriteAccess extends MultiTextEdit {
 			add(SimpleTextEdit.createReplace(offset, length, setter + "(")); //$NON-NLS-1$
 			add(SimpleTextEdit.createInsert(bracket, ")")); //$NON-NLS-1$
 		} else {
-			boolean needsParentheses= ASTNodes.needsParenthesis(assignment.getRightHandSide());
+			boolean needsParentheses= ASTNodes.needsParentheses(assignment.getRightHandSide());
 			add(SimpleTextEdit.createInsert(offset, setter + "(")); //$NON-NLS-1$
 			add(SimpleTextEdit.createReplace(offset, length, getGetter(getter, assignment) + "() " + getOperator(assignment) + " " + (needsParentheses ? "(" : ""))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			add(SimpleTextEdit.createInsert(bracket, ")" + (needsParentheses ? ")" : ""))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

@@ -140,7 +140,7 @@ public class SourceProvider {
 	public boolean needsReturnedExpressionParenthesis() {
 		ASTNode last= getLastStatement();
 		if (last instanceof ReturnStatement) {
-			return ASTNodes.needsParenthesis(((ReturnStatement)last).getExpression());
+			return ASTNodes.needsParentheses(((ReturnStatement)last).getExpression());
 		}
 		return false;
 	}
