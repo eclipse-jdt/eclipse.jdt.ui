@@ -8,10 +8,14 @@ package org.eclipse.jdt.internal.ui.actions;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IObjectActionDelegate;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.Flags;
@@ -30,9 +34,16 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 /**
  * On a selected method; opens the implementation in the super type (if existing)
  */
-public class OpenSuperImplementationAction extends Action implements IUpdate {
+public class OpenSuperImplementationAction extends Action implements IUpdate, IObjectActionDelegate {
 	private int fFoo;
 	private StructuredSelectionProvider fSelectionProvider;
+	
+	/**
+	 * Use only for IWorkbenchWindowActionDelegates!
+	 */ 
+	public OpenSuperImplementationAction() {
+		this(null);
+	}
 	
 	public OpenSuperImplementationAction(StructuredSelectionProvider provider) {
 		super();
@@ -51,6 +62,10 @@ public class OpenSuperImplementationAction extends Action implements IUpdate {
 	}
 	
 	private IMethod getMethod() {
+		if (fSelectionProvider == null) {
+			return null;
+		}
+		
 		IStructuredSelection selection= fSelectionProvider.getSelection(StructuredSelectionProvider.FLAGS_DO_ELEMENT_AT_OFFSET);
 		if (selection.size() != 1)
 			return null;
@@ -98,4 +113,25 @@ public class OpenSuperImplementationAction extends Action implements IUpdate {
 			ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), title, message, e.getStatus());
 		}
 	}
+
+	/*
+	 * @see IActionDelegate#run(IAction)
+	 */
+	public void run(IAction action) {
+		run();
+	}
+
+	/*
+	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
+	 */
+	public void selectionChanged(IAction action, ISelection selection) {
+	}
+
+	/*
+	 * @see IObjectActionDelegate#setActivePart(IAction, IWorkbenchPart)
+	 */
+	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
+		fSelectionProvider= StructuredSelectionProvider.createFrom(targetPart.getSite().getWorkbenchWindow().getSelectionService());
+	}
+
 }

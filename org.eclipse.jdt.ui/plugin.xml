@@ -367,6 +367,19 @@
 			enablesFor="+">
 		</action>
 	</viewerContribution>
+	
+	<objectContribution
+		id="org.eclipse.jdt.ui.actions.OpenSuperImplementationAction"
+		objectClass="org.eclipse.jdt.core.IMethod">
+		<action
+			id="org.eclipse.jdt.ui.actions.OpenSuperImplementationAction"
+			label="%OpenSuperImplementationAction.label"
+			tooltip="%OpenSuperImplementationAction.tooltip"
+			menubarPath="group.open"
+			class="org.eclipse.jdt.internal.ui.actions.OpenSuperImplementationAction"
+			enablesFor="1">
+		</action>
+	</objectContribution>
 </extension>
 
 <!-- =========================================================================== -->
