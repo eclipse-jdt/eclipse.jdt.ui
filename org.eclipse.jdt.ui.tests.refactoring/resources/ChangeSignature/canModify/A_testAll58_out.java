@@ -1,6 +1,6 @@
 package p;
 
-public abstract class A {
+abstract class A {
 	public abstract int m(String[] bbb[][], int abb);
 }
 class B extends A {
