@@ -324,17 +324,20 @@ public class Bindings {
 		String methodName= method.getName();
 		ITypeBinding[] parameters= method.getParameterTypes();
 		
-		ITypeBinding[] interfaces= type.getInterfaces();
-		for (int i= 0; i < interfaces.length; i++) {
-			IMethodBinding res= findMethodInHierarchy(interfaces[i], methodName, parameters);
-			if (res != null) {
-				if (isVisibleInHierarchy(res, method.getDeclaringClass().getPackage())) {
+		if (type.getSuperclass() != null) {
+			IMethodBinding res= findMethodInHierarchy(type.getSuperclass(), methodName, parameters);
+			if (res != null && !Modifier.isPrivate(res.getModifiers())) {
+				if (!testVisibility || isVisibleInHierarchy(res, method.getDeclaringClass().getPackage())) {
 					return res;
 				}
 			}
 		}
-		if (type.getSuperclass() != null) {
-			return findMethodInHierarchy(type.getSuperclass(), methodName, parameters);
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			IMethodBinding res= findMethodInHierarchy(interfaces[i], methodName, parameters);
+			if (res != null) {
+				return res; // methods from interfaces are always public and therefore visible
+			}
 		}
 		return null;
 	}

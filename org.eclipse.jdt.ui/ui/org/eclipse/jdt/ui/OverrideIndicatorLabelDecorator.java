@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -169,7 +170,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 			if (binding != null) {
 				IMethodBinding defining= Bindings.findMethodDefininition(binding, true);
 				if (defining != null) {
-					if (defining.getDeclaringClass().isInterface()) {
+					if (JdtFlags.isAbstract(defining)) {
 						return JavaElementImageDescriptor.IMPLEMENTS;
 					} else {
 						return JavaElementImageDescriptor.OVERRIDES;
@@ -191,14 +192,12 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 * @throws JavaModelException
 	 */
 	protected int findInHierarchy(IType type, ITypeHierarchy hierarchy, String name, String[] paramTypes) throws JavaModelException {
-		IMethod overridden= JavaModelUtil.findMethodImplementationInHierarchy(hierarchy, type, name, paramTypes, false);
-		if (overridden != null && JavaModelUtil.isVisibleInHierarchy(overridden, type.getPackageFragment())) {
-			return JavaElementImageDescriptor.OVERRIDES;
-		}
-		IType[] interfaces= hierarchy.getAllSuperInterfaces(type);
-		for (int i= 0; i < interfaces.length; i++) {
-			if (JavaModelUtil.findMethod(name, paramTypes, false, interfaces[i]) != null) {
-				return JavaElementImageDescriptor.IMPLEMENTS; // methods in interfaces are always visible
+		IMethod defining= JavaModelUtil.findMethodDefininition(hierarchy, type, name, paramTypes, false, true);
+		if (defining != null) {
+			if (JdtFlags.isAbstract(defining)) {
+				return JavaElementImageDescriptor.IMPLEMENTS;
+			} else {
+				return JavaElementImageDescriptor.OVERRIDES;
 			}
 		}
 		return 0;

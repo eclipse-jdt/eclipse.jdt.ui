@@ -418,7 +418,57 @@ public final class JavaModelUtil {
 			}
 		}
 		return null;
-	}	
+	}
+	
+	private static IMethod findMethodInHierarchy(ITypeHierarchy hierarchy, IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
+		IMethod method= findMethod(name, paramTypes, isConstructor, type);
+		if (method != null) {
+			return method;
+		}
+		IType superClass= hierarchy.getSuperclass(type);
+		if (superClass != null) {
+			return findMethodInHierarchy(hierarchy, superClass, name, paramTypes, isConstructor);
+		}
+		if (!isConstructor) {
+			IType[] superInterfaces= hierarchy.getSuperInterfaces(type);
+			for (int i= 0; i < superInterfaces.length; i++) {
+				IMethod res= findMethodInHierarchy(hierarchy, superInterfaces[i], name, paramTypes, false);
+				if (res != null) {
+					return res;
+				}
+			}
+		}
+		return method;		
+	}
+	
+		
+	/**
+	 * Finds the method that is defines/declares the given method. The search is bottom-up, so this
+	 * returns the nearest defining/declaring method.
+	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
+	 * @throws JavaModelException
+	 */
+	public static IMethod findMethodDefininition(ITypeHierarchy typeHierarchy, IType type, String methodName, String[] paramTypes, boolean isConstructor, boolean testVisibility) throws JavaModelException {		
+		IType superClass= typeHierarchy.getSuperclass(type);
+		if (superClass != null) {
+			IMethod res= findMethodInHierarchy(typeHierarchy, superClass, methodName, paramTypes, isConstructor);
+			if (res != null && !Flags.isPrivate(res.getFlags())) {
+				if (!testVisibility || isVisibleInHierarchy(res, type.getPackageFragment())) {
+					return res;
+				}
+			}
+		}
+		if (!isConstructor) {
+			IType[] interfaces= typeHierarchy.getSuperInterfaces(type);
+			for (int i= 0; i < interfaces.length; i++) {
+				IMethod res= findMethodInHierarchy(typeHierarchy, interfaces[i], methodName, paramTypes, false);
+				if (res != null) {
+					return res; // methods from interfaces are always public and therefore visible
+				}
+			}
+		}
+		return null;
+	}
 	
 	/**
 	 * Tests if a method equals to the given signature.

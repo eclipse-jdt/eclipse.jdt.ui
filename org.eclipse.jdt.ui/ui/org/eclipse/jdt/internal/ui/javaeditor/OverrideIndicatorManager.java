@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -233,9 +234,9 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 						ITypeBinding definingType= definingMethod.getDeclaringClass();
 						String qualifiedMethodName= definingType.getQualifiedName() + "." + binding.getName(); //$NON-NLS-1$
 						
-						boolean isOverwriteIndicator= definingType.isInterface();
+						boolean isImplements= JdtFlags.isAbstract(definingMethod);
 						String text;
-						if (isOverwriteIndicator)
+						if (isImplements)
 							text= JavaEditorMessages.getFormattedString("OverrideIndicatorManager.implements", qualifiedMethodName); //$NON-NLS-1$
 						else
 							text= JavaEditorMessages.getFormattedString("OverrideIndicatorManager.overrides", qualifiedMethodName); //$NON-NLS-1$
@@ -244,7 +245,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 						Position position= new Position(name.getStartPosition(), name.getLength());
 
 						annotationMap.put(
-								new OverrideIndicator(isOverwriteIndicator, text, binding.getKey()), //$NON-NLS-1$
+								new OverrideIndicator(isImplements, text, binding.getKey()), //$NON-NLS-1$
 								position);
 
 					}

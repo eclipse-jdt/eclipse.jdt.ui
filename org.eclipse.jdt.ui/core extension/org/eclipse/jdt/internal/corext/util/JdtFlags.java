@@ -43,6 +43,12 @@ public class JdtFlags {
 			return true;
 		return Flags.isAbstract(member.getFlags());	
 	}
+	
+	public static boolean isAbstract(IMethodBinding member) {
+		if (isInterfaceMember(member))
+			return true;
+		return Modifier.isAbstract(member.getModifiers());	
+	}
 
 	public static boolean isDeprecated(IMember member) throws JavaModelException{
 		return Flags.isDeprecated(member.getFlags());
