@@ -40,7 +40,7 @@ public class LineBreakingReader {
 	
 	private int findNextBreakOffset(int currOffset) {		int currWidth= 0;		int nextOffset= fLineBreakIterator.following(currOffset);
 		while (nextOffset != BreakIterator.DONE) {			String word= fLine.substring(currOffset, nextOffset);			int wordWidth= fGC.textExtent(word).x;			int nextWidth= wordWidth + currWidth;
-			if (nextWidth > fMaxWidth) {				if (currWidth > 0) {					return currOffset;				} else {					return nextWidth;				}
+			if (nextWidth > fMaxWidth) {				if (currWidth > 0) {					return currOffset;				} else {					return nextOffset;				}
 			}
 			currWidth= nextWidth;			currOffset= nextOffset;			nextOffset= fLineBreakIterator.next();
 		}
