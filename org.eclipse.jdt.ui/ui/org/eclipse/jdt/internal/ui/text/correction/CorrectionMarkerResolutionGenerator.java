@@ -19,6 +19,8 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.IAnnotationModel;
@@ -26,6 +28,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerResolution;
+import org.eclipse.ui.IMarkerResolution2;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 import org.eclipse.ui.IMarkerResolutionGenerator2;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -49,7 +52,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
   */
 public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGenerator, IMarkerResolutionGenerator2 {
 
-	public static class CorrectionMarkerResolution implements IMarkerResolution {
+	public static class CorrectionMarkerResolution implements IMarkerResolution, IMarkerResolution2 {
 	
 		private ICompilationUnit fCompilationUnit;
 		private int fOffset;
@@ -93,6 +96,20 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.ui.IMarkerResolution2#getDescription()
+		 */
+		public String getDescription() {
+			return fProposal.getAdditionalProposalInfo();
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.ui.IMarkerResolution2#getImage()
+		 */
+		public Image getImage() {
+			return fProposal.getImage();
 		}
 	
 	}
