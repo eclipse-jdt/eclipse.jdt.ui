@@ -54,14 +54,10 @@ public abstract class ReorgAction extends RefactoringAction {
 			//cannot fork - must run in the ui thread
 			new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell()).run(false, true, op);
 		} catch (InvocationTargetException e) {
-			Throwable t= e.getTargetException();
-			if (t instanceof CoreException)
-				handler.getStatus().merge(((CoreException) t).getStatus());
-			JavaPlugin.log(t);	
-			if (t instanceof Error)
-				throw (Error)t;
-			if (t instanceof RuntimeException)
-				throw (RuntimeException)t;
+			Throwable target= e.getTargetException();
+			if (target instanceof CoreException)
+				handler.getStatus().merge(((CoreException) target).getStatus());
+			JavaPlugin.log(e);	
 			//fall thru
 		} catch (InterruptedException e) {
 			//fall thru
