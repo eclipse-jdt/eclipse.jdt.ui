@@ -49,7 +49,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingMethodDeclTest("testMethodBody"));
+			suite.addTest(new ASTRewritingMethodDeclTest("testMethodDeclaration_bug24916"));
 			return suite;
 		}
 	}
@@ -1081,7 +1081,6 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 	
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		CompilationUnitChange compilationUnitChange= proposal.getCompilationUnitChange();
-		compilationUnitChange.getPreviewContent();
 		compilationUnitChange.setSave(true);
 		
 		proposal.apply(null);
@@ -1093,6 +1092,55 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
-	}	
+	}
+	
+	private boolean BUG_24916= true;
+	
+	public void testMethodDeclaration_bug24916() throws Exception {
+		if (BUG_24916) {
+			return;
+		}
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class DD {\n");
+		buf.append("    private int DD()[]{\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("DD.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "DD");
+		AST ast= astRoot.getAST();
+
+		{
+			MethodDeclaration methodDecl= findMethodDeclaration(type, "DD");
+			
+			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
+			modifiedNode.setConstructor(true); // no change
+			modifiedNode.setModifiers(methodDecl.getModifiers()); // no change
+			modifiedNode.setExtraDimensions(methodDecl.getModifiers());// no change
+			rewrite.markAsModified(methodDecl, modifiedNode);
+			
+			rewrite.markAsRemoved(methodDecl.getReturnType());
+		}
+
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+
+		proposal.apply(null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class DD {\n");
+		buf.append("    private DD()[]{\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+		
 	
 }
