@@ -226,6 +226,7 @@ public class JavadocView extends AbstractInfoView {
 	protected void internalCreatePartControl(Composite parent) {
 		try {
 			fBrowser= new Browser(parent, SWT.NONE);
+			fIsUsingBrowserWidget= true;
 		} catch (SWTError er) {
 			/* The Browser widget throws an SWTError if it fails to
 			 * instantiate properly. Application code should catch
@@ -239,6 +240,7 @@ public class JavadocView extends AbstractInfoView {
 			MessageDialog.openError(parent.getShell(), title, message);
 			
 			fText= new StyledText(parent, SWT.V_SCROLL | SWT.H_SCROLL);
+			fIsUsingBrowserWidget= false;
 			fText.setEditable(false);
 			fPresenter= new HTMLTextPresenter(false);
 			
