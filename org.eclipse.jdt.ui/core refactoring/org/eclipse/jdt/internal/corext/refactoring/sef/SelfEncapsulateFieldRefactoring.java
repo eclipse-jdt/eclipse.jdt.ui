@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -37,6 +38,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
@@ -594,8 +596,10 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			isStatic= JdtFlags.isStatic(fField);
 		} catch(JavaModelException e) {
 		}
-		if (isStatic && fArgName.equals(fieldName) && fieldName.equals(fField.getDeclaringType().getElementName()))
-			fArgName= "_" + fieldName; //$NON-NLS-1$
+		if ((isStatic && fArgName.equals(fieldName) 
+			&& fieldName.equals(fField.getDeclaringType().getElementName()))
+			|| JavaConventions.validateIdentifier(fArgName).getSeverity() == IStatus.ERROR)
+			fArgName= "_" + fArgName; //$NON-NLS-1$
 	}
 	
 	private RefactoringStatus validateModifiesFiles(){
