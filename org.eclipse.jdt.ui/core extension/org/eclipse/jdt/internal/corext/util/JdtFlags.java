@@ -15,7 +15,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
@@ -56,19 +61,50 @@ public class JdtFlags {
 	public static boolean isPackageVisible(IMember member) throws JavaModelException{
 		return (! isPrivate(member) && ! isProtected(member) && ! isPublic(member));
 	}
+
+	public static boolean isPackageVisible(BodyDeclaration bodyDeclaration) {
+		return (! isPrivate(bodyDeclaration) && ! isProtected(bodyDeclaration) && ! isPublic(bodyDeclaration));
+	}
 	
 	public static boolean isPrivate(IMember member) throws JavaModelException{
 		return Flags.isPrivate(member.getFlags());
+	}
+
+	public static boolean isPrivate(BodyDeclaration bodyDeclaration) {
+		return Modifier.isPrivate(getModifiers(bodyDeclaration));
 	}
 
 	public static boolean isProtected(IMember member) throws JavaModelException{
 		return Flags.isProtected(member.getFlags());
 	}
 
+	public static boolean isProtected(BodyDeclaration bodyDeclaration) {
+		return Modifier.isProtected(getModifiers(bodyDeclaration));
+	}
+
 	public static boolean isPublic(IMember member) throws JavaModelException{
 		if (isInterfaceMember(member))
 			return true;
 		return Flags.isPublic(member.getFlags());
+	}
+
+	public static boolean isPublic(BodyDeclaration bodyDeclaration) {
+		if (isInterfaceMember(bodyDeclaration))
+			return true;
+		return Modifier.isPublic(getModifiers(bodyDeclaration));
+	}
+
+	private static int getModifiers(BodyDeclaration bodyDeclaration) {
+		if (bodyDeclaration instanceof MethodDeclaration)
+			return ((MethodDeclaration)bodyDeclaration).getModifiers();
+		else if (bodyDeclaration instanceof FieldDeclaration)
+			return ((FieldDeclaration)bodyDeclaration).getModifiers();
+		else if (bodyDeclaration instanceof TypeDeclaration)
+			return ((TypeDeclaration)bodyDeclaration).getModifiers();
+		else if (bodyDeclaration instanceof Initializer)
+			return ((Initializer)bodyDeclaration).getModifiers();
+		Assert.isTrue(false, "unexpected type of BodyDeclaration");
+		return -1;
 	}
 
 	public static boolean isStatic(IMember member) throws JavaModelException{
@@ -110,6 +146,12 @@ public class JdtFlags {
 	private static boolean isInterfaceMember(IMember member) throws JavaModelException {
 		return member.getDeclaringType() != null && member.getDeclaringType().isInterface();
 	}
+	
+	private static boolean isInterfaceMember(BodyDeclaration bodyDeclaration) {
+		return 	(bodyDeclaration.getParent() instanceof TypeDeclaration) &&
+				((TypeDeclaration)bodyDeclaration.getParent()).isInterface();
+	}
+
 	private static boolean isNestedInterface(IMember member) throws JavaModelException{
 		return member.getElementType() == IJavaElement.TYPE && 
 				member.getDeclaringType() != null &&
@@ -129,6 +171,19 @@ public class JdtFlags {
 		else if (isPackageVisible(member))
 			return Modifier.NONE;
 		else if (isPrivate(member))
+			return Modifier.PRIVATE;
+		Assert.isTrue(false);
+		return VISIBILITY_CODE_INVALID;
+	}
+	
+	public static int getVisibilityCode(BodyDeclaration bodyDeclaration) throws JavaModelException{
+		if (isPublic(bodyDeclaration))
+			return Modifier.PUBLIC;
+		else if (isProtected(bodyDeclaration))
+			return Modifier.PROTECTED;
+		else if (isPackageVisible(bodyDeclaration))
+			return Modifier.NONE;
+		else if (isPrivate(bodyDeclaration))
 			return Modifier.PRIVATE;
 		Assert.isTrue(false);
 		return VISIBILITY_CODE_INVALID;
