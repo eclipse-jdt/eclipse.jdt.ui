@@ -26,8 +26,12 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 
@@ -57,7 +61,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		return Character.toUpperCase(name.charAt(0)) + name.substring(1) + ".java";
 	}
 	
-	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
+	protected void performTestInlineCall(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
@@ -72,10 +76,34 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTest(unit, refactoring, mode, out, true);
 	}
 
+	private void performTestInlineMethod(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
+		ICompilationUnit unit= createCU(packageFragment, id);
+		IType type= unit.getTypes()[0];
+		IMethod method= getMethodToInline(type);
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, 
+			method.getNameRange().getOffset(), method.getNameRange().getLength());
+		String out= null;
+		switch (mode) {
+			case COMPARE_WITH_OUTPUT:
+				out= getProofedContent(outputFolder, id);
+				break;		
+		}
+		performTest(unit, refactoring, mode, out, true);
+	}
+	
+	private IMethod getMethodToInline(IType type) throws CoreException {
+		IMethod[] methods= type.getMethods();
+		for (int i= 0; i < methods.length; i++) {
+			if ("toInline".equals(methods[i].getElementName()))
+				return methods[i];
+		}
+		return null;
+	}
+
 	/* *********************** Invalid Tests ******************************* */
 		
 	protected void performInvalidTest() throws Exception {
-		performTest(fgTestSetup.getInvalidPackage(), getName(), INVALID_SELECTION, null);
+		performTestInlineCall(fgTestSetup.getInvalidPackage(), getName(), INVALID_SELECTION, null);
 	}
 	
 	public void testRecursion() throws Exception {
@@ -129,7 +157,11 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	/* *********************** Simple Tests ******************************* */
 		
 	private void performSimpleTest() throws Exception {
-		performTest(fgTestSetup.getSimplePackage(), getName(), COMPARE_WITH_OUTPUT, "simple_out");
+		performTestInlineCall(fgTestSetup.getSimplePackage(), getName(), COMPARE_WITH_OUTPUT, "simple_out");
+	}
+	
+	private void performSimpleTestInlineMethod() throws Exception {
+		performTestInlineMethod(fgTestSetup.getSimplePackage(), getName(), COMPARE_WITH_OUTPUT, "simple_out");
 	}
 	
 	public void testBasic1() throws Exception {
@@ -178,12 +210,20 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 
 	public void testCatchClause() throws Exception {
 		performSimpleTest();
-	}	
+	}
+	
+	public void testTwoCalls() throws Exception {
+		performSimpleTestInlineMethod();
+	}
+
+	public void testNestedCalls() throws Exception {
+		performSimpleTestInlineMethod();
+	}
 
 	/* *********************** Argument Tests ******************************* */
 		
 	private void performArgumentTest() throws Exception {
-		performTest(fgTestSetup.getArgumentPackage(), getName(), COMPARE_WITH_OUTPUT, "argument_out");
+		performTestInlineCall(fgTestSetup.getArgumentPackage(), getName(), COMPARE_WITH_OUTPUT, "argument_out");
 	}
 	
 	public void testFieldReference() throws Exception {
@@ -277,7 +317,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	/* *********************** Name Conflict Tests ******************************* */
 		
 	private void performNameConflictTest() throws Exception {
-		performTest(fgTestSetup.getNameConflictPackage(), getName(), COMPARE_WITH_OUTPUT, "nameconflict_out");
+		performTestInlineCall(fgTestSetup.getNameConflictPackage(), getName(), COMPARE_WITH_OUTPUT, "nameconflict_out");
 	}
 	
 	public void testSameLocal() throws Exception {
@@ -315,7 +355,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	/* *********************** Call Tests ******************************* */
 		
 	private void performCallTest() throws Exception {
-		performTest(fgTestSetup.getCallPackage(), getName(), COMPARE_WITH_OUTPUT, "call_out");
+		performTestInlineCall(fgTestSetup.getCallPackage(), getName(), COMPARE_WITH_OUTPUT, "call_out");
 	}
 	
 	public void testExpressionStatement() throws Exception {
@@ -341,7 +381,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	/* *********************** Expression Tests ******************************* */
 		
 	private void performExpressionTest() throws Exception {
-		performTest(fgTestSetup.getExpressionPackage(), getName(), COMPARE_WITH_OUTPUT, "expression_out");
+		performTestInlineCall(fgTestSetup.getExpressionPackage(), getName(), COMPARE_WITH_OUTPUT, "expression_out");
 	}
 	
 	public void testSimpleExpression() throws Exception {
@@ -371,7 +411,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	/* *********************** Control Statements Tests ******************************* */
 		
 	private void performControlStatementTest() throws Exception {
-		performTest(fgTestSetup.getControlStatementPackage(), getName(), COMPARE_WITH_OUTPUT, "controlStatement_out");
+		performTestInlineCall(fgTestSetup.getControlStatementPackage(), getName(), COMPARE_WITH_OUTPUT, "controlStatement_out");
 	}
 	
 	public void testForEmpty() throws Exception {
@@ -413,7 +453,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	/* *********************** Receiver Tests ******************************* */
 		
 	private void performReceiverTest() throws Exception {
-		performTest(fgTestSetup.getReceiverPackage(), getName(), COMPARE_WITH_OUTPUT, "receiver_out");
+		performTestInlineCall(fgTestSetup.getReceiverPackage(), getName(), COMPARE_WITH_OUTPUT, "receiver_out");
 	}
 	
 	public void testNoImplicitReceiver() throws Exception {
@@ -475,7 +515,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	/* *********************** Import Tests ******************************* */
 		
 	private void performImportTest() throws Exception {
-		performTest(fgTestSetup.getImportPackage(), getName(), COMPARE_WITH_OUTPUT, "import_out");
+		performTestInlineCall(fgTestSetup.getImportPackage(), getName(), COMPARE_WITH_OUTPUT, "import_out");
 	}
 		
 	public void testUseArray() throws Exception {
@@ -525,7 +565,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	/* *********************** Cast Tests ******************************* */
 
 	private void performCastTest() throws Exception {
-		performTest(fgTestSetup.getCastPackage(), getName(), COMPARE_WITH_OUTPUT, "cast_out");
+		performTestInlineCall(fgTestSetup.getCastPackage(), getName(), COMPARE_WITH_OUTPUT, "cast_out");
 	}
 	
 	public void testNotOverloaded() throws Exception {
@@ -567,7 +607,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	/* *********************** Enum Tests ******************************* */
 
 	private void performEnumTest() throws Exception {
-		performTest(fgTestSetup.getEnumPackage(), getName(), COMPARE_WITH_OUTPUT, "enum_out");
+		performTestInlineCall(fgTestSetup.getEnumPackage(), getName(), COMPARE_WITH_OUTPUT, "enum_out");
 	}
 	
 	public void testBasic() throws Exception {
@@ -581,7 +621,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	/* *********************** Generic Tests ******************************* */
 
 	private void performGenericTest() throws Exception {
-		performTest(fgTestSetup.getGenericPackage(), getName(), COMPARE_WITH_OUTPUT, "generic_out");
+		performTestInlineCall(fgTestSetup.getGenericPackage(), getName(), COMPARE_WITH_OUTPUT, "generic_out");
 	}
 	
 	public void testClassInstance() throws Exception {

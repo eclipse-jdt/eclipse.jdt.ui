@@ -30,6 +30,11 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextChange;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
@@ -46,11 +51,6 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
@@ -213,12 +213,16 @@ public class InlineMethodRefactoring extends Refactoring {
 				MultiTextEdit root= new MultiTextEdit();
 				CompilationUnitChange change= (CompilationUnitChange)fChangeManager.get(unit);
 				change.setEdit(root);
-				inliner= new CallInliner(unit, fSourceProvider);
 				BodyDeclaration[] bodies= fTargetProvider.getAffectedBodyDeclarations(unit, new SubProgressMonitor(pm, 1));
+				if (bodies.length == 0)
+					continue;
+				inliner= new CallInliner(unit, bodies[0].getAST(), fSourceProvider);
 				for (int b= 0; b < bodies.length; b++) {
 					BodyDeclaration body= bodies[b];
 					inliner.initialize(body);
-					ASTNode[] invocations= fTargetProvider.getInvocations(body, new SubProgressMonitor(pm, 1));
+					RefactoringStatus nestedInvocations= new RefactoringStatus();
+					ASTNode[] invocations= removeNestedCalls(nestedInvocations, unit, 
+						fTargetProvider.getInvocations(body, new SubProgressMonitor(pm, 1)));
 					for (int i= 0; i < invocations.length; i++) {
 						ASTNode invocation= invocations[i];
 						result.merge(inliner.initialize(invocation, fTargetProvider.getStatusSeverity()));
@@ -226,18 +230,22 @@ public class InlineMethodRefactoring extends Refactoring {
 							break;
 						if (result.getSeverity() < fTargetProvider.getStatusSeverity()) {
 							added= true;
-							TextEdit edit= inliner.perform();
-							change.addTextEditGroup( 
-								new TextEditGroup(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.inline"), new TextEdit[] { edit })); //$NON-NLS-1$
-							root.addChild(edit);
+							inliner.perform(new TextEditGroup(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.inline"))); //$NON-NLS-1$
 						} else {
 							fDeleteSource= false;
 						}
+					}
+					// do this after we have inlined the method calls. We still want
+					// to generate the modifications.
+					if (!nestedInvocations.isOK()) {
+						result.merge(nestedInvocations);
+						fDeleteSource= false;
 					}
 				}
 				if (!added) {
 					fChangeManager.remove(unit);
 				} else {
+					root.addChild(inliner.getModifications());
 					ImportRewrite rewrite= inliner.getImportEdit();
 					if (!rewrite.isEmpty()) {
 						TextEdit edit= rewrite.createEdit(inliner.getBuffer().getDocument());
@@ -399,6 +407,39 @@ public class InlineMethodRefactoring extends Refactoring {
 				result.addError(
 					RefactoringCoreMessages.getFormattedString(key, types[i].getElementName()), 
 					JavaStatusContext.create(overridden[0]));
+			}
+		}
+	}
+	
+	private ASTNode[] removeNestedCalls(RefactoringStatus status, ICompilationUnit unit, ASTNode[] invocations) {
+		if (invocations.length <= 1)
+			return invocations;
+		ASTNode[] parents= new ASTNode[invocations.length];
+		for (int i= 0; i < invocations.length; i++) {
+			parents[i]= invocations[i].getParent();
+		}
+		for (int i= 0; i < invocations.length; i++) {
+			removeNestedCalls(status, unit, parents, invocations, i);
+		}
+		List result= new ArrayList();
+		for (int i= 0; i < invocations.length; i++) {
+			if (invocations[i] != null)
+				result.add(invocations[i]);
+		}
+		return (ASTNode[])result.toArray(new ASTNode[result.size()]);
+	}
+	
+	private void removeNestedCalls(RefactoringStatus status, ICompilationUnit unit, ASTNode[] parents, ASTNode[] invocations, int index) {
+		ASTNode invocation= invocations[index];
+		for (int i= 0; i < parents.length; i++) {
+			ASTNode parent= parents[i];
+			while (parent != null) {
+				if (parent == invocation) {
+					status.addError("Nested invocation. Only the innermost invocation will be inlined", 
+						JavaStatusContext.create(unit, parent));
+					invocations[index]= null;
+				}
+				parent= parent.getParent();
 			}
 		}
 	}

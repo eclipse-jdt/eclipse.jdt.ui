@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -111,6 +112,7 @@ public class CallInliner {
 	
 	private int fInsertionIndex;
 	private ListRewrite fListRewrite;
+	private ASTNode fNodeForListRewrite;
 	
 	private boolean fNeedsStatement;
 	private ASTNode fTargetNode;
@@ -218,13 +220,14 @@ public class CallInliner {
 		}
 	}
 
-	public CallInliner(ICompilationUnit unit, SourceProvider provider) throws CoreException {
+	public CallInliner(ICompilationUnit unit, AST ast, SourceProvider provider) throws CoreException {
 		super();
 		fCUnit= unit;
 		fBuffer= RefactoringFileBuffers.acquire(fCUnit);
 		fSourceProvider= provider;
 		fImportEdit= new ImportRewrite(fCUnit);
 		fLocals= new ArrayList(3);
+		fRewrite= ASTRewrite.create(ast);
 	}
 
 	public void dispose() {
@@ -268,7 +271,7 @@ public class CallInliner {
 		if (result.getSeverity() >= severity)
 			return result;
 		
-		initializeRewriter();
+		initializeRewriteState();
 		initializeTargetNode();
 		flowAnalysis();
 		
@@ -286,18 +289,11 @@ public class CallInliner {
 		return result;
 	}
 
-	private void initializeRewriter() {
+	private void initializeRewriteState() {
 		// field initializer can be inside of a block if used in a local class
 		// but block can't be a child of field initializer
-		ASTNode parentField= ASTNodes.getParent(fInvocation, ASTNode.FIELD_DECLARATION);
-		if(parentField != null) {
-			fRewrite= ASTRewrite.create(parentField.getAST());
+		if(ASTNodes.getParent(fInvocation, ASTNode.FIELD_DECLARATION) != null) {
 			fFieldInitializer= true;
-		}
-		else {
-			ASTNode parentBlock= ASTNodes.getParent(fInvocation, ASTNode.BLOCK);
-			Assert.isNotNull(parentBlock);
-			fRewrite= ASTRewrite.create(parentBlock.getAST());
 		}
 	}
 
@@ -461,16 +457,18 @@ public class CallInliner {
 		}
 	}
 	
-	public TextEdit perform() throws CoreException {
+	public void perform(TextEditGroup textEditGroup) throws CoreException {
 		
 		String[] blocks= fSourceProvider.getCodeBlocks(fContext);
 		if(!fFieldInitializer) {
 			initializeInsertionPoint(fSourceProvider.getNumberOfStatements() + fLocals.size());
 		}
 		
-		addNewLocals();
-		replaceCall(blocks);
-		
+		addNewLocals(textEditGroup);
+		replaceCall(blocks, textEditGroup);
+	}
+	
+	public TextEdit getModifications() {
 		return fRewrite.rewriteAST(fBuffer.getDocument(), fCUnit.getJavaProject().getOptions(true));
 	}
 
@@ -548,28 +546,28 @@ public class CallInliner {
 		}
 	}
 
-	private void addNewLocals() {
+	private void addNewLocals(TextEditGroup textEditGroup) {
 		if (fLocals.isEmpty())
 			return;
 		for (Iterator iter= fLocals.iterator(); iter.hasNext();) {
 			ASTNode element= (ASTNode)iter.next();
-			fListRewrite.insertAt(element, fInsertionIndex++, null);
+			fListRewrite.insertAt(element, fInsertionIndex++, textEditGroup);
 		}
 	}
 
-	private void replaceCall(String[] blocks) {
+	private void replaceCall(String[] blocks, TextEditGroup textEditGroup) {
 		// Inline empty body
 		if (blocks.length == 0) {
 			if (fNeedsStatement) {
-				fRewrite.replace(fTargetNode, fTargetNode.getAST().newEmptyStatement(), null);
+				fRewrite.replace(fTargetNode, fTargetNode.getAST().newEmptyStatement(), textEditGroup);
 			} else {
-				fRewrite.remove(fTargetNode, null);
+				fRewrite.remove(fTargetNode, textEditGroup);
 			}
 		} else {
 			ASTNode node= null;
 			for (int i= 0; i < blocks.length - 1; i++) {
 				node= fRewrite.createStringPlaceholder(blocks[i], ASTNode.RETURN_STATEMENT);
-				fListRewrite.insertAt(node, fInsertionIndex++, null);
+				fListRewrite.insertAt(node, fInsertionIndex++, textEditGroup);
 			}
 			String block= blocks[blocks.length - 1];
 			// We can inline a call where the declaration is a function and the call itself
@@ -615,13 +613,13 @@ public class CallInliner {
 			// Now replace the target node with the source node
 			if (node != null) {
 				if (fTargetNode == null) {
-					fListRewrite.insertAt(node, fInsertionIndex++, null);
+					fListRewrite.insertAt(node, fInsertionIndex++, textEditGroup);
 				} else {
-					fRewrite.replace(fTargetNode, node, null);
+					fRewrite.replace(fTargetNode, node, textEditGroup);
 				}
 			} else {
 				if (fTargetNode != null) {
-					fRewrite.remove(fTargetNode, null);
+					fRewrite.remove(fTargetNode, textEditGroup);
 				}
 			}
 		}
@@ -706,12 +704,18 @@ public class CallInliner {
 		int type= container.getNodeType();
 		if (type == ASTNode.BLOCK) { 
 			Block block= (Block)container;
-			fListRewrite= fRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-			fInsertionIndex= block.statements().indexOf(parentStatement);
+			if (block != fNodeForListRewrite) {
+				fListRewrite= fRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+				fNodeForListRewrite= block;
+			}
+			fInsertionIndex= fListRewrite.getRewrittenList().indexOf(parentStatement);
 		} else if (type == ASTNode.SWITCH_STATEMENT) {
 			SwitchStatement switchStatement= (SwitchStatement)container;
-			fListRewrite= fRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
-			fInsertionIndex= switchStatement.statements().indexOf(parentStatement);
+			if (switchStatement != fNodeForListRewrite) {
+				fListRewrite= fRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
+				fNodeForListRewrite= switchStatement;
+			}
+			fInsertionIndex= fListRewrite.getRewrittenList().indexOf(parentStatement);
 		} else if (isControlStatement(container)) {
 			fNeedsStatement= true;
 			if (nos > 1) {
@@ -744,6 +748,7 @@ public class CallInliner {
 				Assert.isNotNull(currentStatement);
 				fRewrite.replace(currentStatement, block, null);
 				fListRewrite= fRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+				fNodeForListRewrite= block;
 				// The method to be inlined is not the body of the control statement.
 				if (currentStatement != fTargetNode) {
 					fListRewrite.insertLast(fRewrite.createCopyTarget(currentStatement), null);
