@@ -18,7 +18,7 @@ class SearchUsagesInFileLabelProvider extends JavaSearchResultLabelProvider {
 		try {
 			String text= (String)marker.getAttribute(IMarker.MESSAGE);
 			if (text != null)
-				return text;
+				return text.replace('\t', ' ');
 		} catch (CoreException ex) {
 			return "";  //$NON-NLS-1$
 		}
