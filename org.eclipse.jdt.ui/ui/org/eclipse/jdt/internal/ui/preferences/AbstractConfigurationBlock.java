@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jface.text.Assert;
 
@@ -282,6 +283,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	}
 
 	protected void updateSectionStyle(ExpandableComposite excomposite) {
+		excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
 	}
 	
 	private void makeScrollableCompositeAware(Control control) {
