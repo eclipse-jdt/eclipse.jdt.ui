@@ -67,7 +67,7 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 			result.addError("Renaming " + getMethod().getElementName() +" requires renaming a native method. Refactoring will cause UnsatisfiedLinkError on runtime.");
 		pm.subTask("analyzing hierarchy");
 		if (hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 2), getMethod(), getNewName()))
-			result.addError("Hierarchy declares a method " + getNewName() + " and the same number of parameters.");		
+			result.addError("Hierarchy declares a method " + getNewName() + " with the same number of parameters.");		
 		result.merge(analyzeCompilationUnits(new SubProgressMonitor(pm, 3)));	
 		pm.done();
 		return result;
