@@ -318,12 +318,6 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		return true;
 	}
 	/*
-	 * Overrides method from WizardDataTransferPage
-	 */
-//	protected boolean allowNewContainerName() {
-	//	return true;
-//	}
-	/*
 	 * Overrides method from WizardExportPage
 	 */
 	protected void createDestinationGroup(Composite parent) {
@@ -521,8 +515,13 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	 * Overrides method from WizardDataTransferPage
 	 */
 	protected boolean validateDestinationGroup() {
-		if (fDestinationNamesCombo.getText().length() == 0){
+		if (fDestinationNamesCombo.getText().length() == 0) {
 			setErrorMessage("Invalid JAR location.");
+			return false;
+		}
+		if (fJarPackage.getJarLocation().toString().endsWith("/")) {
+			setErrorMessage("Export destination must be a JAR file, not a directory.");
+			fDestinationNamesCombo.setFocus();
 			return false;
 		}
 		return ensureTargetFileIsValid(fJarPackage.getJarLocation().toFile());
@@ -531,19 +530,6 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	 * Overrides method from WizardDataTransferPage
 	 */
 	protected boolean validateOptionsGroup() {
-		/*
-		if (fJarPackage.isDescriptionSaved()){
-			if (fDescriptionFileText.getText().length() == 0) {
-				setErrorMessage("Invalid description file.");
-				return false;
-			}
-			String fileExtension= fJarPackage.getDescriptionLocation().getFileExtension();
-			if (fileExtension == null || !fileExtension.equals(JarPackage.DESCRIPTION_EXTENSION)) {
-				setErrorMessage("Description file extension must be '.jardesc'");
-				return false;
-			}
-		}
-		*/
 		return true;
 	}
 	/*
