@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants;
 
-public interface IRenameParticipant extends IRefactoringParticipant {
-	public void setNewName(String newName);
+public interface IMoveParticipant extends IRefactoringParticipant {
+
+	public void setTarget(Object target);
+
 }

@@ -10,6 +10,27 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants;
 
-public interface IRenameParticipant extends IRefactoringParticipant {
-	public void setNewName(String newName);
+import org.eclipse.jdt.internal.corext.Assert;
+
+public abstract class MoveParticipant implements IMoveParticipant {
+
+	private IRefactoringProcessor fProcessor;
+	private Object fTarget;
+	
+	public void initialize(IRefactoringProcessor processor) {
+		Assert.isNotNull(processor);
+		fProcessor= processor;
+	}
+	
+	public IRefactoringProcessor getProcessor() {
+		return fProcessor;
+	}
+	
+	public Object getTarget() {
+		return fTarget;
+	}
+
+	public void setTarget(Object target) {
+		fTarget= target;
+	}
 }

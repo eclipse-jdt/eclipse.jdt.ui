@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.participants;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
-public class RenameProcessorElement {
+public class ProcessorDescriptor {
 	
 	private IConfigurationElement fConfigurationElement;
 
@@ -23,7 +23,7 @@ public class RenameProcessorElement {
 	
 	private static final String OBJECT_STATE= "objectState"; //$NON-NLS-1$
 
-	public RenameProcessorElement(IConfigurationElement element) {
+	public ProcessorDescriptor(IConfigurationElement element) {
 		fConfigurationElement= element;
 	}
 	
@@ -39,7 +39,7 @@ public class RenameProcessorElement {
 		return fConfigurationElement.getAttribute(OVERRIDE);
 	}
 
-	public boolean matches(Object element) {
+	public boolean matches(Object element) throws CoreException {
 		IConfigurationElement objectState= fConfigurationElement.getChildren(OBJECT_STATE)[0];
 		if (objectState != null) {
 			Expression exp= new ObjectStateExpression(objectState);
@@ -48,7 +48,7 @@ public class RenameProcessorElement {
 		return true;
 	}
 
-	public IRenameProcessor createProcessor() throws CoreException {
-		return (IRenameProcessor)fConfigurationElement.createExecutableExtension(CLASS);
+	public IRefactoringProcessor createProcessor() throws CoreException {
+		return (IRefactoringProcessor)fConfigurationElement.createExecutableExtension(CLASS);
 	}
 }

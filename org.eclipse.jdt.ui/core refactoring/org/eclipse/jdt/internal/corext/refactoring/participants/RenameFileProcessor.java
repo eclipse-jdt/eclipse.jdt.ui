@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -27,10 +28,9 @@ public class RenameFileProcessor extends RenameProcessor {
 	private IFile fFile;
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.IRenameParticipant#init(java.lang.Object)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.IRenameParticipant#initialize(java.lang.Object)
 	 */
-	public void initialize(RenameRefactoring refactoring, Object elementToBeRenamed) {
-		super.initialize(refactoring);
+	public void initialize(Object elementToBeRenamed) {
 		Assert.isTrue(elementToBeRenamed instanceof IFile);
 		fFile= (IFile)elementToBeRenamed;
 	}
@@ -38,16 +38,33 @@ public class RenameFileProcessor extends RenameProcessor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#getRefactoringName()
 	 */
-	public String getRefactoringName() {
+	public String getProcessorName() {
 		return "Rename Resource"; //$NON-NLS-1$
 	}
 
 	public boolean isAvailable() {
 		return true;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor#getScope()
+	 */
+	public IProject[] getScope() {
+		return Processors.computeScope(fFile);
+	}
 
-	public Object[] getProcessableElements() {
-		return new Object[] { fFile };
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor#getElement()
+	 */
+	public Object getElement() {
+		return fFile;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor#getResourceModifications()
+	 */
+	public ResourceModifications getResourceModifications() {
+		return null;
 	}
 	
 	/* (non-Javadoc)

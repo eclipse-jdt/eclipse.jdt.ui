@@ -11,28 +11,30 @@
 package org.eclipse.jdt.internal.corext.refactoring.participants;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
 
-public abstract class Expression {
-	
-	protected final String VALUE= "value"; //$NON-NLS-1$
-	
-	public abstract boolean evaluate(Object element) throws CoreException;
+import org.eclipse.core.resources.IProject;
 
-	protected static boolean isInstanceOf(Object element, String type) {
-		return isSubtype(element.getClass(), type); 
+
+public class NatureExpression extends Expression {
+
+	private String fValue;
+	
+	public static final String NAME= "nature";  //$NON-NLS-1$
+
+	public NatureExpression(IConfigurationElement element) {
+		fValue= element.getAttribute(VALUE);
 	}
-	
-	private static boolean isSubtype(Class clazz, String type) {
-		if (clazz.getName().equals(type))
-			return true;
-		Class superClass= clazz.getSuperclass();
-		if (superClass != null && isSubtype(superClass, type))
-			return true;
-		Class[] interfaces= clazz.getInterfaces();
-		for (int i= 0; i < interfaces.length; i++) {
-			if (isSubtype(interfaces[i], type))
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
+	 */
+	public boolean evaluate(Object element) throws CoreException {
+		IProject[] projects= (IProject[])element;
+		for (int i= 0; i < projects.length; i++) {
+			if (projects[i].hasNature(fValue))
 				return true;
-		} 
+		}
 		return false;
-	}		
+	}
 }

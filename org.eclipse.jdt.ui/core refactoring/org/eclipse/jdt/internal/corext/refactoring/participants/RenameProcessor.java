@@ -10,22 +10,13 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.internal.corext.Assert;
 
 public abstract class RenameProcessor implements IRenameProcessor {
 
-	private RenameRefactoring fRefactoring;
-	private String fNewName; 
-	
-	public void initialize(RenameRefactoring refactoring) {
-		Assert.isNotNull(refactoring);
-		fRefactoring= refactoring;
-	}
-	
-	public RenameRefactoring getRefactoring() {
-		return fRefactoring;
-	}
+	private String fNewName;
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#setNewName(java.lang.String)
@@ -40,5 +31,12 @@ public abstract class RenameProcessor implements IRenameProcessor {
 	 */
 	public String getNewName() {
 		return fNewName;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor#getDerivedElements()
+	 */
+	public Object[] getDerivedElements() throws CoreException {
+		return new Object[0];
 	}
 }

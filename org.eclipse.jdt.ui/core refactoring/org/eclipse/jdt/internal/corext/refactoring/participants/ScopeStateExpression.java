@@ -11,20 +11,12 @@
 package org.eclipse.jdt.internal.corext.refactoring.participants;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 
-import org.eclipse.core.resources.IResource;
 
+public class ScopeStateExpression extends CompositeExpression {
 
-public class ObjectStateExpression extends CompositeExpression {
-	
-	private String fAdaptable;
-	
-	private static final String ADAPTABLE= "adaptable"; //$NON-NLS-1$
-	
-	public ObjectStateExpression(IConfigurationElement element) {
-		fAdaptable= element.getAttribute(ADAPTABLE);
+	public ScopeStateExpression(IConfigurationElement element) {
 		parse(element);
 	}
 
@@ -32,19 +24,17 @@ public class ObjectStateExpression extends CompositeExpression {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
 	 */
 	public boolean evaluate(Object element) throws CoreException {
-		if (fAdaptable != null) {
-			if (("*".equals(fAdaptable) || isInstanceOf(element, fAdaptable)) && (element instanceof IAdaptable)) //$NON-NLS-1$
-				element= ((IAdaptable)element).getAdapter(IResource.class); 
-		}
+		if (fExpressions == null || fExpressions.size() == 0)
+			return false;
 		return evaluateAnd(element);
 	}
-
+	
 	private void parse(IConfigurationElement root) {
 		IConfigurationElement[] children= root.getChildren();
 		for (int i= 0; i < children.length; i++) {
 			String name= children[i].getName();
-			if (PropertyExpression.NAME.equals(name)) {
-				add(new PropertyExpression(children[i]));
+			if (NatureExpression.NAME.equals(name)) {
+				add(new NatureExpression(children[i]));
 			}
 		}
 	}

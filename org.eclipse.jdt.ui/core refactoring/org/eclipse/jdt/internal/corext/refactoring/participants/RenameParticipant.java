@@ -12,17 +12,25 @@ package org.eclipse.jdt.internal.corext.refactoring.participants;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-
 public abstract class RenameParticipant implements IRenameParticipant {
 
-	private RenameRefactoring fRefactoring;
+	private IRefactoringProcessor fProcessor;
+	private String fNewName;
 	
-	public void initialize(RenameRefactoring refactoring) {
-		Assert.isNotNull(refactoring);
-		fRefactoring= refactoring;
+	public void initialize(IRefactoringProcessor processor) {
+		Assert.isNotNull(processor);
+		fProcessor= processor;
 	}
 	
-	public RenameRefactoring getRefactoring() {
-		return fRefactoring;
+	public IRefactoringProcessor getProcessor() {
+		return fProcessor;
+	}
+	
+	public String getNewName() {
+		return fNewName;
+	}
+	
+	public void setNewName(String name) {
+		fNewName= name;
 	}
 }

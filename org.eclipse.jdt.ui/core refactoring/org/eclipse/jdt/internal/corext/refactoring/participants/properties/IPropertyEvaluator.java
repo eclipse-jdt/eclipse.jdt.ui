@@ -8,8 +8,14 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.participants;
+package org.eclipse.jdt.internal.corext.refactoring.participants.properties;
 
-public interface IRenameParticipant extends IRefactoringParticipant {
-	public void setNewName(String newName);
+
+public interface IPropertyEvaluator {
+	
+	static final int FALSE= 0;
+	static final int TRUE= 1;
+	static final int UNKNOWN= 2; 
+	
+	public int eval(Object o, String name, String value);
 }

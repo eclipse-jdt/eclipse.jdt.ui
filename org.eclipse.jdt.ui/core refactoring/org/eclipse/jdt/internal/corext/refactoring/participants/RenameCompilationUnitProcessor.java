@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -47,26 +48,49 @@ public class RenameCompilationUnitProcessor extends RenameProcessor implements I
 	private ICompilationUnit fCu;
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#initialize(org.eclipse.jdt.internal.corext.refactoring.participants.RenameRefactoring, java.lang.Object)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#initialize(java.lang.Object)
 	 */
-	public void initialize(RenameRefactoring refactoring, Object element) throws CoreException {
-		super.initialize(refactoring);
+	public void initialize(Object element) throws CoreException {
 		Assert.isNotNull(element);
 		fCu= (ICompilationUnit)element;
 		Assert.isTrue(! fCu.isWorkingCopy());
 		computeRenameTypeProcessor();
 		fNewName= fCu.getElementName();
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor#getScope()
+	 */
+	public IProject[] getScope() throws CoreException {
+		return JavaProcessors.computeScope(fCu);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor#getElement()
+	 */
+	public Object getElement() {
+		return fCu;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#getProcessableElements()
 	 */
-	public Object[] getProcessableElements() {
-		List result= new ArrayList(2);
-		result.add(fCu);
-		if (fRenameTypeProcessor != null)
-			result.add(fRenameTypeProcessor.getType());
-		return result.toArray();
+	public Object[] getDerivedElements() {
+		if (fRenameTypeProcessor == null)
+			return new Object[0];
+		return new Object[] {fRenameTypeProcessor.getType()};
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor#getResourceModifications()
+	 */
+	public ResourceModifications getResourceModifications() {
+		IResource resource= fCu.getResource();
+		if (resource == null)
+			return null;
+		ResourceModifications result= new ResourceModifications();
+		result.setRename(resource, fNewName + JAVA_CU_SUFFIX);
+		return result;
 	}
 	
 	public boolean isAvailable() {
@@ -130,7 +154,7 @@ public class RenameCompilationUnitProcessor extends RenameProcessor implements I
 		return getSimpleCUName();
 	}
 	
-	public String getRefactoringName() {
+	public String getProcessorName() {
 		return RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.name",  //$NON-NLS-1$
 															new String[]{fCu.getElementName(), getNewCuName()});
 	}
@@ -336,7 +360,7 @@ public class RenameCompilationUnitProcessor extends RenameProcessor implements I
 		IType type= getTypeWithTheSameName();
 		if (type != null) {
 			fRenameTypeProcessor= new RenameTypeProcessor();
-			fRenameTypeProcessor.initialize(getRefactoring(), type);
+			fRenameTypeProcessor.initialize(type);
 			if (!fRenameTypeProcessor.isAvailable())
 				fRenameTypeProcessor= null; 
 		} else {

@@ -12,21 +12,25 @@ package org.eclipse.jdt.internal.corext.refactoring.participants;
 
 import org.eclipse.core.runtime.CoreException;
 
-public class RenameExtensionManager {
+public class MoveExtensionManager {
 	
-	private static final String PROCESSOR_EXT_POINT= "renameProcessor"; //$NON-NLS-1$
-	private static final String PARTICIPANT_EXT_POINT= "renameParticipants"; //$NON-NLS-1$
+	private static final String PROCESSOR_EXT_POINT= "moveProcessor"; //$NON-NLS-1$
+	private static final String PARTICIPANT_EXT_POINT= "moveParticipants"; //$NON-NLS-1$
 	
 	private static ExtensionManager fInstance= new ExtensionManager(PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT);
 	
-	public static IRenameProcessor getProcessor(Object element) throws CoreException {
-		return (IRenameProcessor)fInstance.getProcessor(element);
+	public static IMoveProcessor getProcessor(Object element) throws CoreException {
+		return (IMoveProcessor)fInstance.getProcessor(element);
 	}
+	
+	public static IMoveParticipant[] getParticipants(IRefactoringProcessor processor) throws CoreException {
+		return getParticipants(processor, processor.getDerivedElements());		
+	}		
 
-	public static IRenameParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements) throws CoreException {
+	public static IMoveParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements) throws CoreException {
 		IRefactoringParticipant[] participants= fInstance.getParticipants(processor, elements);
-		IRenameParticipant[] result= new IRenameParticipant[participants.length];
+		IMoveParticipant[] result= new IMoveParticipant[participants.length];
 		System.arraycopy(participants, 0, result, 0, participants.length);
 		return result;
-	}	
+	}
 }

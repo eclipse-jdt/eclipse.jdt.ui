@@ -98,16 +98,9 @@ public class LaunchConfigUpdater extends RenameParticipant {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#initialize(org.eclipse.jdt.internal.corext.refactoring.participants.RenameRefactoring, java.lang.Object)
 	 */
-	public void initialize(RenameRefactoring refactoring, Object element) {
-		super.initialize(refactoring);
+	public void initialize(IRefactoringProcessor processor, Object element) {
+		super.initialize(processor);
 		fType= (IType)element;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#getElement()
-	 */
-	public Object getElement() {
-		return fType;
 	}
 
 	/* (non-Javadoc)
@@ -148,7 +141,7 @@ public class LaunchConfigUpdater extends RenameParticipant {
 			String mainType= configs[i].getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
 			if (typeName.equals(mainType)) {
 				if (result == null)
-					result= new LaunchConfigChange(fType, configs[i], getRefactoring().getNewName());
+					result= new LaunchConfigChange(fType, configs[i], getNewName());
 			}
 		}
 		return result;

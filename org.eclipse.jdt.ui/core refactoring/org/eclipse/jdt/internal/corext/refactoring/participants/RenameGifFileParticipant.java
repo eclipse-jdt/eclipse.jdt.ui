@@ -27,8 +27,8 @@ public class RenameGifFileParticipant extends RenameParticipant {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.IRenameParticipant#init(java.lang.Object)
 	 */
-	public void initialize(RenameRefactoring refactoring, Object elementToBeRenamed) {
-		super.initialize(refactoring);
+	public void initialize(IRefactoringProcessor processor, Object elementToBeRenamed) {
+		super.initialize(processor);
 		Assert.isTrue(elementToBeRenamed instanceof IFile);
 		fFile= (IFile)elementToBeRenamed;
 	}
@@ -40,14 +40,6 @@ public class RenameGifFileParticipant extends RenameParticipant {
 		return true;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#getElement()
-	 */
-	public Object getElement() {
-		// TODO Auto-generated method stub
-		return fFile;
-	}
-
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.IRenameParticipant#checkActivation()
 	 */

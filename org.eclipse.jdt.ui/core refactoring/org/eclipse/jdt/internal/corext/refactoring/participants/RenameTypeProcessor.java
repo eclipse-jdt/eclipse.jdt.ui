@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -87,10 +88,9 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 	private String fFilePatterns;
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#initialize(org.eclipse.jdt.internal.corext.refactoring.participants.RenameRefactoring, java.lang.Object)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#initialize(java.lang.Object)
 	 */
-	public void initialize(RenameRefactoring refactoring, Object element) throws CoreException {
-		super.initialize(refactoring);
+	public void initialize(Object element) throws CoreException {
 		Assert.isNotNull(element);
 		fType= (IType)element;
 		fNewName= fType.getElementName();
@@ -100,6 +100,13 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		fUpdateStrings= false;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor#getScope()
+	 */
+	public IProject[] getScope() throws CoreException {
+		return JavaProcessors.computeScope(fType);
+	}
+
 	public boolean isAvailable() {
 		try {
 			if (! Checks.isAvailable(fType))
@@ -113,16 +120,35 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor#getElement()
+	 */
+	public Object getElement() {
+		return fType;
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#getProcessableElements()
 	 */
-	public Object[] getProcessableElements() {
-		List result= new ArrayList();
-		if (isPrimaryType())
-			result.add(fType.getCompilationUnit());
-		result.add(fType);
-		return result.toArray();
+	public Object[] getDerivedElements() throws CoreException {
+		if (!isPrimaryType())
+			return super.getDerivedElements();
+		return new Object[] { fType.getCompilationUnit() };
 	}
-	 
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor#getResourceModifications()
+	 */
+	public ResourceModifications getResourceModifications() {
+		if (!isPrimaryType())
+			return null;
+		IResource resource= fType.getCompilationUnit().getResource();
+		if (resource == null)
+			return null;
+		ResourceModifications result= new ResourceModifications();
+		result.setRename(resource, fNewName + ".java"); //$NON-NLS-1$
+		return result;		
+	}
+		 
 	public Object getNewElement(){
 		IPackageFragment parent= fType.getPackageFragment();
 		ICompilationUnit cu;
@@ -208,7 +234,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		return fType.getElementName();
 	}
 	
-	public String getRefactoringName(){
+	public String getProcessorName(){
 		return RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name",  //$NON-NLS-1$
 														new String[]{JavaModelUtil.getFullyQualifiedName(fType), fNewName});
 	}
