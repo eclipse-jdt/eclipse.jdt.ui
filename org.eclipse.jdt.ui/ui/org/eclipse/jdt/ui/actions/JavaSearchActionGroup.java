@@ -11,7 +11,10 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IInputSelectionProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IActionBars;
@@ -21,7 +24,6 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
-
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.FindDeclarationsAction;
 import org.eclipse.jdt.internal.ui.search.FindDeclarationsInHierarchyAction;
@@ -152,71 +154,95 @@ public class JavaSearchActionGroup extends ActionGroup {
 	 * </p>
 	 */
 	public JavaSearchActionGroup(JavaEditor editor) {
+		Assert.isNotNull(editor);
 		fEditor= editor;
 		
 		fFindReferencesAction= new FindReferencesAction(editor);
 		fFindReferencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKSPACE);
-		editor.setAction("SearchReferencesInWorkspace", fFindReferencesAction); //$NON-NLS-1$
+		fEditor.setAction("SearchReferencesInWorkspace", fFindReferencesAction); //$NON-NLS-1$
 
-		fFindReferencesInHierarchyAction= new FindReferencesInHierarchyAction(editor);
+		fFindReferencesInHierarchyAction= new FindReferencesInHierarchyAction(fEditor);
 		fFindReferencesInHierarchyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_HIERARCHY);
-		editor.setAction("SearchReferencesInHierarchy", fFindReferencesInHierarchyAction); //$NON-NLS-1$
+		fEditor.setAction("SearchReferencesInHierarchy", fFindReferencesInHierarchyAction); //$NON-NLS-1$
 		
-		fFindReferencesInWorkingSetAction= new FindReferencesInWorkingSetAction(editor);
+		fFindReferencesInWorkingSetAction= new FindReferencesInWorkingSetAction(fEditor);
 		fFindReferencesInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKING_SET);
-		editor.setAction("SearchReferencesInWorkingSet", fFindReferencesInWorkingSetAction); //$NON-NLS-1$
+		fEditor.setAction("SearchReferencesInWorkingSet", fFindReferencesInWorkingSetAction); //$NON-NLS-1$
 		
-		fFindReadReferencesAction= new FindReadReferencesAction(editor);
+		fFindReadReferencesAction= new FindReadReferencesAction(fEditor);
 		fFindReadReferencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_READ_ACCESS_IN_WORKSPACE);
-		editor.setAction("SearchReadAccessInWorkspace", fFindReadReferencesAction); //$NON-NLS-1$		
+		fEditor.setAction("SearchReadAccessInWorkspace", fFindReadReferencesAction); //$NON-NLS-1$
 		
-		fFindReadReferencesInHierarchyAction= new FindReadReferencesInHierarchyAction(editor);
+		fFindReadReferencesInHierarchyAction= new FindReadReferencesInHierarchyAction(fEditor);
 		fFindReadReferencesInHierarchyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_READ_ACCESS_IN_HIERARCHY);
-		editor.setAction("SearchReadAccessInHierarchy", fFindReadReferencesInHierarchyAction); //$NON-NLS-1$		
+		fEditor.setAction("SearchReadAccessInHierarchy", fFindReadReferencesInHierarchyAction); //$NON-NLS-1$
 
-		fFindReadReferencesInWorkingSetAction= new FindReadReferencesInWorkingSetAction(editor);
+		fFindReadReferencesInWorkingSetAction= new FindReadReferencesInWorkingSetAction(fEditor);
 		fFindReadReferencesInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_READ_ACCESS_IN_WORKING_SET);
-		editor.setAction("SearchReadAccessInWorkingSet", fFindReadReferencesInWorkingSetAction); //$NON-NLS-1$		
+		fEditor.setAction("SearchReadAccessInWorkingSet", fFindReadReferencesInWorkingSetAction); //$NON-NLS-1$
 
-		fFindWriteReferencesAction= new FindWriteReferencesAction(editor);
+		fFindWriteReferencesAction= new FindWriteReferencesAction(fEditor);
 		fFindWriteReferencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_WRITE_ACCESS_IN_WORKSPACE);
-		editor.setAction("SearchWriteAccessInWorkspace", fFindWriteReferencesAction); //$NON-NLS-1$		
+		fEditor.setAction("SearchWriteAccessInWorkspace", fFindWriteReferencesAction); //$NON-NLS-1$
 
-		fFindWriteReferencesInHierarchyAction= new FindWriteReferencesInHierarchyAction(editor);
+		fFindWriteReferencesInHierarchyAction= new FindWriteReferencesInHierarchyAction(fEditor);
 		fFindWriteReferencesInHierarchyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_WRITE_ACCESS_IN_HIERARCHY);
-		editor.setAction("SearchWriteAccessInHierarchy", fFindWriteReferencesInHierarchyAction); //$NON-NLS-1$		
+		fEditor.setAction("SearchWriteAccessInHierarchy", fFindWriteReferencesInHierarchyAction); //$NON-NLS-1$
 
-		fFindWriteReferencesInWorkingSetAction= new FindWriteReferencesInWorkingSetAction(editor);
+		fFindWriteReferencesInWorkingSetAction= new FindWriteReferencesInWorkingSetAction(fEditor);
 		fFindWriteReferencesInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_WRITE_ACCESS_IN_WORKING_SET);
-		editor.setAction("SearchWriteAccessInWorkingSet", fFindWriteReferencesInWorkingSetAction); //$NON-NLS-1$		
+		fEditor.setAction("SearchWriteAccessInWorkingSet", fFindWriteReferencesInWorkingSetAction); //$NON-NLS-1$
 
-		fFindDeclarationsAction= new FindDeclarationsAction(editor);
+		fFindDeclarationsAction= new FindDeclarationsAction(fEditor);
 		fFindDeclarationsAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
-		editor.setAction("SearchDeclarationsInWorkspace", fFindDeclarationsAction); //$NON-NLS-1$		
+		fEditor.setAction("SearchDeclarationsInWorkspace", fFindDeclarationsAction); //$NON-NLS-1$
 
-		fFindDeclarationsInHierarchyAction= new FindDeclarationsInHierarchyAction(editor);
+		fFindDeclarationsInHierarchyAction= new FindDeclarationsInHierarchyAction(fEditor);
 		fFindDeclarationsInHierarchyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_HIERARCHY);
-		editor.setAction("SearchDeclarationsInHierarchy", fFindDeclarationsInHierarchyAction); //$NON-NLS-1$		
+		fEditor.setAction("SearchDeclarationsInHierarchy", fFindDeclarationsInHierarchyAction); //$NON-NLS-1$
 
-		fFindDeclarationsInWorkingSetAction= new FindDeclarationsInWorkingSetAction(editor);
+		fFindDeclarationsInWorkingSetAction= new FindDeclarationsInWorkingSetAction(fEditor);
 		fFindDeclarationsInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKING_SET);
-		editor.setAction("SearchDeclarationsInWorkingSet", fFindDeclarationsInWorkingSetAction); //$NON-NLS-1$		
+		fEditor.setAction("SearchDeclarationsInWorkingSet", fFindDeclarationsInWorkingSetAction); //$NON-NLS-1$
 
-		fFindImplementorsAction= new FindImplementorsAction(editor);
+		fFindImplementorsAction= new FindImplementorsAction(fEditor);
 		fFindImplementorsAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENTORS_IN_WORKSPACE);
-		editor.setAction("SearchImplementorsInWorkspace", fFindImplementorsAction); //$NON-NLS-1$		
+		fEditor.setAction("SearchImplementorsInWorkspace", fFindImplementorsAction); //$NON-NLS-1$
 
-		fFindImplementorsInWorkingSetAction= new FindImplementorsInWorkingSetAction(editor);
+		fFindImplementorsInWorkingSetAction= new FindImplementorsInWorkingSetAction(fEditor);
 		fFindImplementorsInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENTORS_IN_WORKING_SET);
-		editor.setAction("SearchImplementorsInWorkingSet", fFindImplementorsInWorkingSetAction); //$NON-NLS-1$		
+		fEditor.setAction("SearchImplementorsInWorkingSet", fFindImplementorsInWorkingSetAction); //$NON-NLS-1$
 
-		fOldGroup= new JavaSearchGroup(editor);
-		initialize(editor.getEditorSite(), true);
+		fOldGroup= new JavaSearchGroup(fEditor);
+		initialize(fEditor.getEditorSite(), true);
 	}
 
 	private void initialize(IWorkbenchSite site, boolean isJavaEditor) {
 		fSite= site;
+		ISelectionProvider provider= fSite.getSelectionProvider();
+		ISelection selection= provider.getSelection();
+		if (!isJavaEditor) {
+			registerAction(fFindReferencesAction, provider, selection);
+			registerAction(fFindReferencesInHierarchyAction, provider, selection);
+			registerAction(fFindReferencesInWorkingSetAction, provider, selection);
+			registerAction(fFindReadReferencesAction, provider, selection);
+			registerAction(fFindReadReferencesInHierarchyAction, provider, selection);
+			registerAction(fFindReadReferencesInWorkingSetAction, provider, selection);
+			registerAction(fFindWriteReferencesAction, provider, selection);
+			registerAction(fFindWriteReferencesInHierarchyAction, provider, selection);
+			registerAction(fFindWriteReferencesInWorkingSetAction, provider, selection);
+			registerAction(fFindDeclarationsAction, provider, selection);
+			registerAction(fFindDeclarationsInHierarchyAction, provider, selection);
+			registerAction(fFindDeclarationsInWorkingSetAction, provider, selection);
+			registerAction(fFindImplementorsAction, provider, selection);
+			registerAction(fFindImplementorsInWorkingSetAction, provider, selection);
+		}
 	}
+
+	private void registerAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection){
+		action.update(selection);
+		provider.addSelectionChangedListener(action);
+	};
 
 	/* (non-Javadoc)
 	 * Method declared in ActionGroup
@@ -254,4 +280,33 @@ public class JavaSearchActionGroup extends ActionGroup {
 		super.fillContextMenu(menu);
 		fOldGroup.fill(menu, fOldContext);
 	}	
+
+	/*
+	 * @see ActionGroup#dispose()
+	 */
+	public void dispose() {
+		ISelectionProvider provider= fSite.getSelectionProvider();
+		if (provider != null) {
+			disposeAction(fFindReferencesAction, provider);
+			disposeAction(fFindReferencesInHierarchyAction, provider);
+			disposeAction(fFindReferencesInWorkingSetAction, provider);
+			disposeAction(fFindReadReferencesAction, provider);
+			disposeAction(fFindReadReferencesInHierarchyAction, provider);
+			disposeAction(fFindReadReferencesInWorkingSetAction, provider);
+			disposeAction(fFindWriteReferencesAction, provider);
+			disposeAction(fFindWriteReferencesInHierarchyAction, provider);
+			disposeAction(fFindWriteReferencesInWorkingSetAction, provider);
+			disposeAction(fFindDeclarationsAction, provider);
+			disposeAction(fFindDeclarationsInHierarchyAction, provider);
+			disposeAction(fFindDeclarationsInWorkingSetAction, provider);
+			disposeAction(fFindImplementorsAction, provider);
+			disposeAction(fFindImplementorsInWorkingSetAction, provider);
+		}
+		super.dispose();
+	}
+	
+	private void disposeAction(ISelectionChangedListener action, ISelectionProvider provider) {
+		if (action != null)
+			provider.removeSelectionChangedListener(action);
+	}
 }
