@@ -51,6 +51,8 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 	/** prefix for resources */
 	private static final String PREFIX= "WorkInProgress."; //$NON-NLS-1$
 	
+	public final static String PREF_FORMATTER= "use_new_formatter"; //$NON-NLS-1$
+	public final static String PREF_BGSEARCH= "search_in_background"; //$NON-NLS-1$
 	public final static String PREF_SEARCH_MENU= "small_search_menu"; //$NON-NLS-1$
 	
 	/** 
@@ -147,13 +149,13 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		group.setLayout(new GridLayout());
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setText(PreferencesMessages.getString(PREFIX + "editor")); //$NON-NLS-1$
-
+	
 		addCheckBox(group, PreferencesMessages.getString(PREFIX + "markOccurrences"), PreferenceConstants.EDITOR_MARK_OCCURRENCES); //$NON-NLS-1$
 		createSpacer(group, 1);
-
+	
 		Label label= new Label(group, SWT.NONE);
 		label.setText(PreferencesMessages.getString(PREFIX + "smartTyping.label")); //$NON-NLS-1$
-
+	
 		Button button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "smartTyping.smartSemicolon"), PreferenceConstants.EDITOR_SMART_SEMICOLON); //$NON-NLS-1$
 		fSmartTypingItems.add(button);
 		
@@ -189,7 +191,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		l.setLayoutData(gd);
-
+	
 		Composite editorComposite= new Composite(group, SWT.NONE);
 		layout= new GridLayout();
 		layout.numColumns= 2;
@@ -199,7 +201,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
 		gd.horizontalSpan= 2;
 		editorComposite.setLayoutData(gd);		
-
+	
 		fQuickDiffProviderList= new org.eclipse.swt.widgets.List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
 		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
 		gd.heightHint= convertHeightInCharsToPixels(4);
@@ -228,7 +230,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 			public void widgetSelected(SelectionEvent e) {
 				handleProviderListSelection();
 			}
-
+	
 		});
 		
 		fSetDefaultButton.addSelectionListener(new SelectionListener() {
@@ -270,21 +272,22 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 				}
 			}
 		});
-
-
+	
+	
 		group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setText(PreferencesMessages.getString(PREFIX + "quickassist.group")); //$NON-NLS-1$
 		
 		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "quickassist.option"), PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB); //$NON-NLS-1$ //$NON-NLS-2$
-		
+	
 		group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setText(PreferencesMessages.getString(PREFIX + "search")); //$NON-NLS-1$
 		
 		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "search.small_menu"), PREF_SEARCH_MENU); //$NON-NLS-1$
+		button= addCheckBox(group, PreferencesMessages.getString(PREFIX+"newsearch.option"), PREF_BGSEARCH); //$NON-NLS-1$
 		return result;
 	}
 	

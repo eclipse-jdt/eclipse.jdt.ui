@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
+import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.PrettySignature;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
@@ -112,8 +113,30 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 			return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(workingSets), getScopeDescription(workingSets), getCollector());
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.actions.FindDeclarationsAction#createJob(org.eclipse.jdt.core.IJavaElement, org.eclipse.jdt.internal.ui.search.JavaSearchResult)
+	 */
+	protected JavaSearchQuery createJob(IJavaElement element) throws JavaModelException {
+		IWorkingSet[] workingSets= fWorkingSet;
+		if (fWorkingSet == null) {
+			workingSets= JavaSearchScopeFactory.getInstance().queryWorkingSets();
+			if (workingSets == null)
+				return null;
+		}
+		SearchUtil.updateLRUWorkingSets(workingSets);
+		if (element.getElementType() == IJavaElement.METHOD) {
+			IMethod method= (IMethod)element;
+			int searchFor= IJavaSearchConstants.METHOD;
+			if (method.isConstructor())
+				searchFor= IJavaSearchConstants.CONSTRUCTOR;
+			String pattern= PrettySignature.getUnqualifiedMethodSignature(method);
+			return new JavaSearchQuery(searchFor, getLimitTo(), pattern, true, getScope(workingSets), getScopeDescription(workingSets));
+		}
+		else
+			return new JavaSearchQuery(element, getLimitTo(), getScope(workingSets), getScopeDescription(workingSets));
+	}
 
-	private IJavaSearchScope getScope(IWorkingSet[] workingSets) throws JavaModelException {
+	private IJavaSearchScope getScope(IWorkingSet[] workingSets) {
 		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(workingSets);
 	}
 

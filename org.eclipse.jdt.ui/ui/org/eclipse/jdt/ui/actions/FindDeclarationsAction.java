@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
 import org.eclipse.jdt.internal.ui.search.PrettySignature;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
@@ -95,4 +96,19 @@ public class FindDeclarationsAction extends FindAction {
 	int getLimitTo() {
 		return IJavaSearchConstants.DECLARATIONS;
 	}
+	
+	protected JavaSearchQuery createJob(IJavaElement element) throws JavaModelException {
+		if (element.getElementType() == IJavaElement.METHOD) {
+			IMethod method= (IMethod)element;
+			int searchFor= IJavaSearchConstants.METHOD;
+			if (method.isConstructor())
+				searchFor= IJavaSearchConstants.CONSTRUCTOR;
+			IType type= getType(element);
+			String pattern= PrettySignature.getUnqualifiedMethodSignature(method);
+			return new JavaSearchQuery(searchFor, getLimitTo(), pattern, true, getScope(type), getScopeDescription(type));
+		}
+		else
+			return super.createJob(element);
+	}
+
 }

@@ -10,18 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
  * Finds implementors of the selected element in the enclosing project.
@@ -61,7 +63,7 @@ public class FindImplementorsInProjectAction extends FindImplementorsAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENTORS_IN_PROJECT_ACTION);
 	}
 	
-	IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {
+	IJavaSearchScope getScope(IJavaElement element) {
 		return JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(element);
 	}
 
@@ -69,7 +71,10 @@ public class FindImplementorsInProjectAction extends FindImplementorsAction {
 		return SearchUtil.getProjectScopeDescription(element);
 	}
 
-	JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
+	JavaSearchOperation makeOperation(IJavaElement element) {
 		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(element), getScopeDescription(element), getCollector());
+	}
+	protected JavaSearchQuery createJob(IJavaElement element) {
+		return new JavaSearchQuery(element, getLimitTo(), getScope(element), getScopeDescription(element));
 	}
 }

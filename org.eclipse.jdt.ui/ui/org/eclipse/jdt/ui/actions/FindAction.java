@@ -21,14 +21,16 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.jface.text.ITextSelection;
+
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
+import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -50,7 +52,11 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
+import org.eclipse.jdt.internal.ui.search.JavaSearchDescription;
 import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
+import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
+import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
 import org.eclipse.jdt.internal.ui.search.JavaSearchResultCollector;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
@@ -265,48 +271,74 @@ public abstract class FindAction extends SelectionDispatchAction {
 		
 		if (!ActionUtil.isProcessable(getShell(), element))
 			return;
-		
-		SearchUI.activateSearchResultView();
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
-		JavaSearchOperation op= null;
-		try {
-			op= makeOperation(element);
-			if (op == null)
-				return;
+		
+		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_BGSEARCH)) {
+			try {
+			performNewSearch(element);
 		} catch (JavaModelException ex) {
 			ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-1$ //$NON-NLS-2$
-			return;
 		}
-		IWorkspaceDescription workspaceDesc= JavaPlugin.getWorkspace().getDescription();
-		boolean isAutoBuilding= workspaceDesc.isAutoBuilding();
-		if (isAutoBuilding) {
-			// disable auto-build during search operation
-			workspaceDesc.setAutoBuilding(false);
+		} else {
+			SearchUI.activateSearchResultView();
+			JavaSearchOperation op= null;
 			try {
-				JavaPlugin.getWorkspace().setDescription(workspaceDesc);
+				op= makeOperation(element);
+				if (op == null)
+					return;
+			} catch (JavaModelException ex) {
+				ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-1$ //$NON-NLS-2$
+				return;
 			}
-			catch (CoreException ex) {
-			ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.setDescription.title"), SearchMessages.getString("Search.Error.setDescription.message")); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-		}
-		try {
-			new ProgressMonitorDialog(shell).run(true, true, op);
-		} catch (InvocationTargetException ex) {
-			ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch(InterruptedException e) {
-		} finally {
+			IWorkspaceDescription workspaceDesc= JavaPlugin.getWorkspace().getDescription();
+			boolean isAutoBuilding= workspaceDesc.isAutoBuilding();
 			if (isAutoBuilding) {
-				// enable auto-building again
-				workspaceDesc= JavaPlugin.getWorkspace().getDescription();
-				workspaceDesc.setAutoBuilding(true);
+				// disable auto-build during search operation
+				workspaceDesc.setAutoBuilding(false);
 				try {
 					JavaPlugin.getWorkspace().setDescription(workspaceDesc);
 				}
 				catch (CoreException ex) {
 					ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.setDescription.title"), SearchMessages.getString("Search.Error.setDescription.message")); //$NON-NLS-1$ //$NON-NLS-2$
 				}
-			}				
+			}
+			try {
+				new ProgressMonitorDialog(shell).run(true, true, op);
+			} catch (InvocationTargetException ex) {
+				ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-1$ //$NON-NLS-2$
+			} catch(InterruptedException e) {
+				// means it's cancelled
+			} finally {
+				if (isAutoBuilding) {
+					// enable auto-building again
+					workspaceDesc= JavaPlugin.getWorkspace().getDescription();
+					workspaceDesc.setAutoBuilding(true);
+					try {
+						JavaPlugin.getWorkspace().setDescription(workspaceDesc);
+					}
+					catch (CoreException ex) {
+						ExceptionHandler.handle(ex, shell, SearchMessages.getString("Search.Error.setDescription.title"), SearchMessages.getString("Search.Error.setDescription.message")); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+				}				
+			}
 		}
+	}
+
+	private void performNewSearch(IJavaElement element) throws JavaModelException {
+		JavaSearchQuery job= createJob(element);
+		JavaSearchResult result= new JavaSearchResult(job);
+		NewSearchUI.activateSearchResultView();
+		NewSearchUI.runSearchInBackground(job, result);
+	}
+
+	protected JavaSearchQuery createJob(IJavaElement element) throws JavaModelException {
+		IType type= getType(element);
+		return new JavaSearchQuery(element, getLimitTo(), getScope(type), getScopeDescription(type));
+	}
+
+	protected Object createSearchDescription(IJavaElement element) {
+		IType type= getType(element);
+		return new JavaSearchDescription(getLimitTo(), element, null, getScopeDescription(type));
 	}
 
 	JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {

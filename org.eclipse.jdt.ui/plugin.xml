@@ -754,6 +754,16 @@
             id="org.eclipse.search.internal.ui.MatchPositionSorter">
       </sorter>
    </extension>
+   
+   <extension
+    	id="JavaSearchResultPage"
+        point="org.eclipse.search.searchResultViewPages">
+		<viewPage
+			targetClass="org.eclipse.jdt.internal.ui.search.JavaSearchResult"
+			class="org.eclipse.jdt.internal.ui.search.JavaSearchResultPage">
+		</viewPage>
+	</extension>
+  
 <!-- =========================================================================== -->
 <!-- Java Compare                                                                -->
 <!-- =========================================================================== -->
