@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
@@ -18,14 +17,13 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 
 public class NewInterfaceCreationWizardPage extends TypePage {
 	
 	private final static String PAGE_NAME= "NewInterfaceCreationWizardPage"; //$NON-NLS-1$
 		
-	public NewInterfaceCreationWizardPage(IWorkspaceRoot root) {
-		super(false, PAGE_NAME, root);
+	public NewInterfaceCreationWizardPage() {
+		super(false, PAGE_NAME);
 		
 		setTitle(NewWizardMessages.getString("NewInterfaceCreationWizardPage.title")); //$NON-NLS-1$
 		setDescription(NewWizardMessages.getString("NewInterfaceCreationWizardPage.description"));			 //$NON-NLS-1$
@@ -41,37 +39,39 @@ public class NewInterfaceCreationWizardPage extends TypePage {
 			
 		initContainerPage(jelem);
 		initTypePage(jelem);
-		updateStatus(findMostSevereStatus());
+		doStatusUpdate();
 	}		
 	
 	// ------ validation --------
-	
-	/**
-	 * Finds the most severe error (if there is one)
-	 */
-	private IStatus findMostSevereStatus() {
-		return StatusUtil.getMostSevere(new IStatus[] {
+
+	private void doStatusUpdate() {
+		// status of all used components
+		IStatus[] status= new IStatus[] {
 			fContainerStatus,
 			isEnclosingTypeSelected() ? fEnclosingTypeStatus : fPackageStatus,
 			fTypeNameStatus,
 			fModifierStatus,
 			fSuperInterfacesStatus
-		});		
-	}
+		};
 		
-	/**
+		// the mode severe status will be displayed and the ok button enabled/disabled.
+		updateStatus(status);
+	}
+
+			
+	/*
 	 * @see ContainerPage#handleFieldChanged
 	 */
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
 		
-		updateStatus(findMostSevereStatus());
+		doStatusUpdate();
 	}
 	
 	
 	// ------ ui --------
 	
-	/**
+	/*
 	 * @see WizardPage#createControl
 	 */
 	public void createControl(Composite parent) {
@@ -82,7 +82,6 @@ public class NewInterfaceCreationWizardPage extends TypePage {
 		int nColumns= 4;
 		
 		GridLayout layout= new GridLayout();
-		//layout.minimumWidth= convertWidthInCharsToPixels(80);
 		layout.numColumns= nColumns;		
 		composite.setLayout(layout);
 		
@@ -95,8 +94,6 @@ public class NewInterfaceCreationWizardPage extends TypePage {
 		createTypeNameControls(composite, nColumns);
 		createModifierControls(composite, nColumns);
 
-		// createSeparator(composite, nColumns);
-		
 		createSuperInterfacesControls(composite, nColumns);
 						
 		setControl(composite);

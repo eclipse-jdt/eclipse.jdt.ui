@@ -13,6 +13,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -55,7 +56,6 @@ import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -89,13 +89,13 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 	
 	private IPackageFragmentRoot fCreatedRoot;
 	
-	public NewSourceFolderCreationWizardPage(IWorkspaceRoot root) {
+	public NewSourceFolderCreationWizardPage() {
 		super(PAGE_NAME);
 		
 		setTitle(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.title")); //$NON-NLS-1$
 		setDescription(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.description"));		 //$NON-NLS-1$
 		
-		fWorkspaceRoot= root;
+		fWorkspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
 		
 		RootFieldAdapter adapter= new RootFieldAdapter();
 		
@@ -185,8 +185,6 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 		GridLayout layout= new GridLayout();
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;	
-		//layout.minimumWidth= convertWidthInCharsToPixels(80);
-		//layout.minimumHeight= convertHeightInCharsToPixels(20);
 		layout.numColumns= 3;
 		composite.setLayout(layout);
 				
@@ -254,7 +252,7 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 				updateRootStatus();
 			}
 		}
-		updateStatus(findMostSevereStatus());
+		updateStatus(new IStatus[] { fProjectStatus, fRootStatus });
 	}
 	
 	
@@ -262,7 +260,7 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 		fCurrJProject= null;
 		
 		String str= fProjectField.getText();
-		if ("".equals(str)) { //$NON-NLS-1$
+		if (str.length() == 0) {
 			fProjectStatus.setError(NewWizardMessages.getString("NewSourceFolderCreationWizardPage.error.EnterProjectName")); //$NON-NLS-1$
 			return;
 		}
@@ -336,10 +334,6 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 		}
 	}	
 				
-	protected IStatus findMostSevereStatus() {
-		return StatusUtil.getMoreSevere(fProjectStatus, fRootStatus);
-	}
-	
 	// ---- creation ----------------
 	/** 
 	 * @see NewElementWizardPage#getRunnable
@@ -418,7 +412,7 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 		try {
 			projects= JavaCore.create(fWorkspaceRoot).getJavaProjects();
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e.getStatus());
+			JavaPlugin.log(e);
 			projects= new IJavaProject[0];
 		}
 		
@@ -509,7 +503,7 @@ public class NewSourceFolderCreationWizardPage extends NewElementWizardPage {
 				res.add(container);
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e.getStatus());
+			JavaPlugin.log(e);
 		}	
 		
 		for (int i= 0; i < fEntries.length; i++) {

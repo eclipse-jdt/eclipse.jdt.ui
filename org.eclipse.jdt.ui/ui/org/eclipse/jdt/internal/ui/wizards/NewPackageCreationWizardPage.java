@@ -6,7 +6,6 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,7 +31,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
@@ -52,9 +50,10 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 	protected IStatus fPackageStatus;
 	
 	private IPackageFragment fCreatedPackageFragment;
+
 	
-	public NewPackageCreationWizardPage(IWorkspaceRoot root) {
-		super(PAGE_NAME, root);
+	public NewPackageCreationWizardPage() {
+		super(PAGE_NAME);
 		
 		setTitle(NewWizardMessages.getString("NewPackageCreationWizardPage.title")); //$NON-NLS-1$
 		setDescription(NewWizardMessages.getString("NewPackageCreationWizardPage.description"));		 //$NON-NLS-1$
@@ -81,7 +80,7 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 		
 		initContainerPage(jelem);
 		setPackageText(""); //$NON-NLS-1$
-		updateStatus(findMostSevereStatus());
+		updateStatus(new IStatus[] { fContainerStatus, fPackageStatus });		
 	}
 	
 	// -------- UI Creation ---------
@@ -150,16 +149,9 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 			fPackageStatus= packageChanged();
 		}
 		// do status line update
-		updateStatus(findMostSevereStatus());		
+		updateStatus(new IStatus[] { fContainerStatus, fPackageStatus });		
 	}	
-	
-	/**
-	 * Finds the most severe error (if there is one)
-	 */
-	protected IStatus findMostSevereStatus() {
-		return StatusUtil.getMoreSevere(fContainerStatus, fPackageStatus);
-	}	
-		
+			
 	// ----------- validation ----------
 			
 	/**
@@ -167,8 +159,8 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 	 */
 	private IStatus packageChanged() {
 		StatusInfo status= new StatusInfo();
-		String packName= fPackageDialogField.getText();
-		if (!"".equals(packName)) { //$NON-NLS-1$
+		String packName= getPackageText();
+		if (packName.length() > 0) {
 			IStatus val= JavaConventions.validatePackageName(packName);
 			if (val.getSeverity() == IStatus.ERROR) {
 				status.setError(NewWizardMessages.getFormattedString("NewPackageCreationWizardPage.error.InvalidPackageName", val.getMessage())); //$NON-NLS-1$
@@ -204,7 +196,7 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 					}
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e.getStatus());
+				JavaPlugin.log(e);
 			}
 			
 		}
@@ -222,7 +214,7 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 		
 	// ---- creation ----------------
 
-	/**
+	/*
 	 * @see NewElementWizardPage#getRunnable
 	 */		
 	public IRunnableWithProgress getRunnable() {
@@ -243,7 +235,7 @@ public class NewPackageCreationWizardPage extends ContainerPage {
 		return fCreatedPackageFragment;
 	}
 	
-	protected void createPackage(IProgressMonitor monitor) throws JavaModelException, CoreException, InterruptedException {
+	protected void createPackage(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		String packName= getPackageText();
 		fCreatedPackageFragment= root.createPackageFragment(packName, true, monitor);

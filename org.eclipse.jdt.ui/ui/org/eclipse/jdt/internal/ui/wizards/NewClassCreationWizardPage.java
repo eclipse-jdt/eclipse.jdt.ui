@@ -7,7 +7,6 @@ package org.eclipse.jdt.internal.ui.wizards;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -16,6 +15,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -27,11 +27,9 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;
-
 
 public class NewClassCreationWizardPage extends TypePage {
 	
@@ -42,9 +40,8 @@ public class NewClassCreationWizardPage extends TypePage {
 	private final static String SETTINGS_CREATEUNIMPLEMENTED= "create_unimplemented"; //$NON-NLS-1$
 	
 	private SelectionButtonDialogFieldGroup fMethodStubsButtons;
-	
-	public NewClassCreationWizardPage(IWorkspaceRoot root) {
-		super(true, PAGE_NAME, root);
+	public NewClassCreationWizardPage() {
+		super(true, PAGE_NAME);
 		
 		setTitle(NewWizardMessages.getString("NewClassCreationWizardPage.title")); //$NON-NLS-1$
 		setDescription(NewWizardMessages.getString("NewClassCreationWizardPage.description")); //$NON-NLS-1$
@@ -56,18 +53,15 @@ public class NewClassCreationWizardPage extends TypePage {
 		fMethodStubsButtons= new SelectionButtonDialogFieldGroup(SWT.CHECK, buttonNames3, 1);
 		fMethodStubsButtons.setLabelText(NewWizardMessages.getString("NewClassCreationWizardPage.methods.label"));		 //$NON-NLS-1$
 	}
-
 	// -------- Initialization ---------
-
 	/**
 	 * Should be called from the wizard with the input element.
 	 */
 	public void init(IStructuredSelection selection) {
 		IJavaElement jelem= getInitialJavaElement(selection);
-
 		initContainerPage(jelem);
 		initTypePage(jelem);
-		updateStatus(findMostSevereStatus());
+		doStatusUpdate();
 		
 		boolean createMain= false;
 		boolean createConstructors= false;
@@ -82,22 +76,23 @@ public class NewClassCreationWizardPage extends TypePage {
 		fMethodStubsButtons.setSelection(1, createConstructors);
 		fMethodStubsButtons.setSelection(2, createUnimplemented);
 	}
-
 	// ------ validation --------
 	
-	/**
-	 * Finds the most severe error (if there is one)
-	 */
-	private IStatus findMostSevereStatus() {
-		return StatusUtil.getMostSevere(new IStatus[] {
+	private void doStatusUpdate() {
+		// status of all used components
+		IStatus[] status= new IStatus[] {
 			fContainerStatus,
 			isEnclosingTypeSelected() ? fEnclosingTypeStatus : fPackageStatus,
 			fTypeNameStatus,
 			fModifierStatus,
 			fSuperClassStatus,
 			fSuperInterfacesStatus
-		});
+		};
+		
+		// the mode severe status will be displayed and the ok button enabled/disabled.
+		updateStatus(status);
 	}
+	
 	
 	/*
 	 * @see ContainerPage#handleFieldChanged
@@ -105,7 +100,7 @@ public class NewClassCreationWizardPage extends TypePage {
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
 		
-		updateStatus(findMostSevereStatus());
+		doStatusUpdate();
 	}
 	
 	
@@ -122,9 +117,10 @@ public class NewClassCreationWizardPage extends TypePage {
 		int nColumns= 4;
 		
 		GridLayout layout= new GridLayout();
-		//layout.minimumWidth= convertWidthInCharsToPixels(80);
 		layout.numColumns= nColumns;		
 		composite.setLayout(layout);
+		
+		// pick & choose the wanted UI components
 		
 		createContainerControls(composite, nColumns);	
 		createPackageControls(composite, nColumns);	
@@ -134,14 +130,10 @@ public class NewClassCreationWizardPage extends TypePage {
 		
 		createTypeNameControls(composite, nColumns);
 		createModifierControls(composite, nColumns);
-
-		//// createSeparator(composite, nColumns);
-				
+			
 		createSuperClassControls(composite, nColumns);
 		createSuperInterfacesControls(composite, nColumns);
 				
-		////createSeparator(composite, nColumns);
-		
 		createMethodStubSelectionControls(composite, nColumns);
 		
 		setControl(composite);
@@ -151,9 +143,13 @@ public class NewClassCreationWizardPage extends TypePage {
 	}
 	
 	protected void createMethodStubSelectionControls(Composite composite, int nColumns) {
-		LayoutUtil.setHorizontalSpan(fMethodStubsButtons.getLabelControl(composite), nColumns);
+		Control labelControl= fMethodStubsButtons.getLabelControl(composite);
+		LayoutUtil.setHorizontalSpan(labelControl, nColumns);
+		
 		DialogField.createEmptySpace(composite);
-		LayoutUtil.setHorizontalSpan(fMethodStubsButtons.getSelectionButtonsGroup(composite), nColumns - 1);	
+		
+		Control buttonGroup= fMethodStubsButtons.getSelectionButtonsGroup(composite);
+		LayoutUtil.setHorizontalSpan(buttonGroup, nColumns - 1);	
 	}	
 	
 	// ---- creation ----------------

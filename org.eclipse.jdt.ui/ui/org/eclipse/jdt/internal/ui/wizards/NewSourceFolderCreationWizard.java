@@ -5,7 +5,6 @@
 package org.eclipse.jdt.internal.ui.wizards;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
 
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -25,18 +24,17 @@ public class NewSourceFolderCreationWizard extends NewElementWizard {
 		setWindowTitle(NewWizardMessages.getString("NewSourceFolderCreationWizard.title")); //$NON-NLS-1$
 	}
 
-	/**
+	/*
 	 * @see Wizard#addPages
 	 */	
 	public void addPages() {
 		super.addPages();
-		IWorkspace workspace= JavaPlugin.getWorkspace();
-		fPage= new NewSourceFolderCreationWizardPage(workspace.getRoot());
+		fPage= new NewSourceFolderCreationWizardPage();
 		addPage(fPage);
 		fPage.init(getSelection());
 	}			
 
-	/**
+	/*
 	 * @see Wizard#performFinish
 	 */		
 	public boolean performFinish() {
@@ -47,7 +45,7 @@ public class NewSourceFolderCreationWizard extends NewElementWizard {
 				selectAndReveal(resource);
 				openResource(resource);
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e.getStatus());
+				JavaPlugin.log(e);
 				// let pass, only reveal and open will fail
 			}
 			return true;

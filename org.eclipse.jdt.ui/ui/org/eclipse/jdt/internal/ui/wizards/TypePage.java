@@ -150,9 +150,16 @@ public abstract class TypePage extends ContainerPage {
 	
 	private final int PUBLIC_INDEX= 0, DEFAULT_INDEX= 1, PRIVATE_INDEX= 2, PROTECTED_INDEX= 3;
 	private final int ABSTRACT_INDEX= 0, FINAL_INDEX= 1;
-	
+
+	/**
+	 * @deprecated use TypePage(boolean, String) instead.
+	 */
 	public TypePage(boolean isClass, String pageName, IWorkspaceRoot root) {
-		super(pageName, root);
+		this(isClass, pageName);
+	}
+	
+	public TypePage(boolean isClass, String pageName) {
+		super(pageName);
 		fCreatedType= null;
 		
 		fIsClass= isClass;
@@ -281,7 +288,7 @@ public abstract class TypePage extends ContainerPage {
 					}
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e.getStatus());
+				JavaPlugin.log(e);
 				// ignore this exception now
 			}
 		}			
@@ -584,7 +591,7 @@ public abstract class TypePage extends ContainerPage {
 	}	
 
 	/**
-	 * Returns the encloding type corresponding to the current input.
+	 * Returns the enclosing type corresponding to the current input.
 	 * @return Returns <code>null</code> if enclosing type is not selected or the input could not
 	 * be resolved.
 	 */
@@ -596,7 +603,7 @@ public abstract class TypePage extends ContainerPage {
 	}
 
 	/**
-	 * Sets the package fragment.
+	 * Sets the enclosing type.
 	 * This will update model and the text of the control.
 	 * @param canBeModified Selects if the enclosing type can be changed by the user
 	 */	
@@ -721,6 +728,7 @@ public abstract class TypePage extends ContainerPage {
 
 	/**
 	 * Sets the super interfaces.
+	 * @param canBeModified Selects if the modifiers can be changed by the user.
 	 * @param interfacesNames a list of String
 	 */	
 	public void setSuperInterfaces(List interfacesNames, boolean canBeModified) {
@@ -768,7 +776,7 @@ public abstract class TypePage extends ContainerPage {
 					}
 				}
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e.getStatus());
+				JavaPlugin.log(e);
 				// let pass			
 			}
 			
@@ -783,7 +791,7 @@ public abstract class TypePage extends ContainerPage {
 	 * Updates the 'default' label next to the package field.
 	 */	
 	private void updatePackageStatusLabel() {
-		String packName= fPackageDialogField.getText();
+		String packName= getPackageText();
 		
 		if (packName.length() == 0) {
 			fPackageDialogField.setStatus(NewWizardMessages.getString("TypePage.default")); //$NON-NLS-1$
@@ -843,7 +851,7 @@ public abstract class TypePage extends ContainerPage {
 			return status;
 		} catch (JavaModelException e) {
 			status.setError(NewWizardMessages.getString("TypePage.error.EnclosingTypeNotExists")); //$NON-NLS-1$
-			JavaPlugin.log(e.getStatus());
+			JavaPlugin.log(e);
 			return status;
 		}
 	}
@@ -943,7 +951,7 @@ public abstract class TypePage extends ContainerPage {
 				fSuperClass= type;
 			} catch (JavaModelException e) {
 				status.setError(NewWizardMessages.getString("TypePage.error.InvalidSuperClassName")); //$NON-NLS-1$
-				JavaPlugin.log(e.getStatus());
+				JavaPlugin.log(e);
 			}							
 		} else {
 			status.setError(""); //$NON-NLS-1$
@@ -1016,7 +1024,7 @@ public abstract class TypePage extends ContainerPage {
 						}
 					}
 				} catch (JavaModelException e) {
-					JavaPlugin.log(e.getStatus());
+					JavaPlugin.log(e);
 					// let pass, checking is an extra
 				}					
 			}				
@@ -1167,7 +1175,7 @@ public abstract class TypePage extends ContainerPage {
 		if (!isInnerClass) {
 			lineDelimiter= System.getProperty("line.separator", "\n");
 			
-			String packStatement= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ";" + lineDelimiter;
+			String packStatement= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ";" + lineDelimiter + lineDelimiter;
 			ICompilationUnit parentCU= pack.createCompilationUnit(clName + ".java", packStatement, false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$
 
 			imports= new ImportsStructure(parentCU, prefOrder, threshold, false);
@@ -1197,7 +1205,7 @@ public abstract class TypePage extends ContainerPage {
 			indent= StubUtility.getIndentUsed(enclosingType) + 1;
 		}
 		
-		// add imports for superclass/interfaces, so the type can be parsed correctly
+		// add imports for superclass/interfaces, so types can be resolved correctly
 		imports.create(!isInnerClass, new SubProgressMonitor(monitor, 1));
 		
 		String[] methods= evalMethods(createdType, imports, new SubProgressMonitor(monitor, 1));
@@ -1274,7 +1282,7 @@ public abstract class TypePage extends ContainerPage {
 				imports.addImport(typename);
 				buf.append(Signature.getSimpleName(typename));
 				if (i < last) {
-					buf.append(", "); //$NON-NLS-1$
+					buf.append(',');
 				}
 			}
 		}
@@ -1300,7 +1308,7 @@ public abstract class TypePage extends ContainerPage {
 		buf.append(getTypeName());
 		writeSuperClass(buf, imports);
 		writeSuperInterfaces(buf, imports);	
-		buf.append(" {"); //$NON-NLS-1$
+		buf.append('{');
 		buf.append(lineDelimiter);
 		buf.append(lineDelimiter);
 		buf.append('}');
@@ -1340,6 +1348,9 @@ public abstract class TypePage extends ContainerPage {
 		return null;
 	}
 	
+	/**
+	 * Gets the template of the given name, evaluated in the context of a CU.
+	 */
 	protected String getTemplate(String name, ICompilationUnit parentCU) {
 		Template[] templates= Templates.getInstance().getTemplates();
 		try {
@@ -1355,8 +1366,8 @@ public abstract class TypePage extends ContainerPage {
 	}	
 	
 	/**
-	 * Creates the bodies of all unimplemented methods or/and all constructors
-	 * Can be used by implementors of TypePage to add method stub checkboxes
+	 * Creates the bodies of all unimplemented methods or/and all constructors.
+	 * Can be used by implementors of TypePage to add method stub checkboxes.
 	 */
 	protected String[] constructInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
 		List newMethods= new ArrayList();
@@ -1388,7 +1399,7 @@ public abstract class TypePage extends ContainerPage {
 	
 	// ---- creation ----------------
 
-	/**
+	/*
 	 * @see NewElementWizardPage#getRunnable
 	 */		
 	public IRunnableWithProgress getRunnable() {				

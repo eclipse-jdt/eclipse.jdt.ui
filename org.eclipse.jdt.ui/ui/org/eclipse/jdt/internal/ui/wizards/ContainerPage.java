@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.ui.wizards;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
@@ -64,9 +65,16 @@ public abstract class ContainerPage extends NewElementWizardPage {
 	
 	private IWorkspaceRoot fWorkspaceRoot;
 	
+	/**
+	 * @deprecated use ContainerPage(String) instead
+	 */
 	public ContainerPage(String name, IWorkspaceRoot root) {
+		this(name);
+	}
+	
+	public ContainerPage(String name) {
 		super(name);
-		fWorkspaceRoot= root;	
+		fWorkspaceRoot= ResourcesPlugin.getWorkspace().getRoot();	
 		ContainerFieldAdapter adapter= new ContainerFieldAdapter();
 		
 		fContainerDialogField= new StringButtonDialogField(adapter);
@@ -215,7 +223,7 @@ public abstract class ContainerPage extends NewElementWizardPage {
 		
 		fCurrRoot= null;
 		String str= getContainerText();
-		if ("".equals(str)) { //$NON-NLS-1$
+		if (str.length() == 0) {
 			status.setError(NewWizardMessages.getString("ContainerPage.error.EnterContainerName")); //$NON-NLS-1$
 			return status;
 		}

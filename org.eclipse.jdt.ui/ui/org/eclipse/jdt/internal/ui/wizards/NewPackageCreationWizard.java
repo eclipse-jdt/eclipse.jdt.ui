@@ -29,8 +29,7 @@ public class NewPackageCreationWizard extends NewElementWizard {
 	 */	
 	public void addPages() {
 		super.addPages();
-		IWorkspace workspace= JavaPlugin.getWorkspace();
-		fPage= new NewPackageCreationWizardPage(workspace.getRoot());
+		fPage= new NewPackageCreationWizardPage();
 		addPage(fPage);
 		fPage.init(getSelection());
 	}	

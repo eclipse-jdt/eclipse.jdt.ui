@@ -49,5 +49,13 @@ public abstract class NewElementWizardPage extends WizardPage {
 			StatusUtil.applyToStatusLine(this, status);
 		}
 	}
+	
+	/**
+	 * Updates the status line and the ok button depending on the most severe error.
+	 * In case of two errors with the same severity, the status with lower index is taken.
+	 */
+	protected void updateStatus(IStatus[] status) {
+		updateStatus(StatusUtil.getMostSevere(status));
+	}	
 			
 }

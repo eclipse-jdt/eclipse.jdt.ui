@@ -5,7 +5,6 @@
 package org.eclipse.jdt.internal.ui.wizards;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -29,8 +28,7 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 	 */	
 	public void addPages() {
 		super.addPages();		
-		IWorkspace workspace= JavaPlugin.getWorkspace();
-		fPage= new NewInterfaceCreationWizardPage(workspace.getRoot());
+		fPage= new NewInterfaceCreationWizardPage();
 		addPage(fPage);
 		fPage.init(getSelection());	
 	}
@@ -50,7 +48,7 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 				selectAndReveal(resource);
 				openResource(resource);
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e.getStatus());
+				JavaPlugin.log(e);
 				// let pass, only reveal and open will fail
 			}
 			return true;
