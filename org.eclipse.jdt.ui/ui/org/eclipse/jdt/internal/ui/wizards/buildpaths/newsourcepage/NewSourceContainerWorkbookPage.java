@@ -40,6 +40,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.IDocument;
 
@@ -125,12 +127,11 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         try {
             if (ClasspathModifier.hasOutputFolders(javaProject, null)) {
                 fUseFolderOutputs.setSelection(true);
-                fPackageExplorer.showOutputFolders(true);
-                
+                fUseFolderOutputs.dialogFieldChanged();
             }
             else {
                 fUseFolderOutputs.setSelection(false);
-                fPackageExplorer.showOutputFolders(false);
+                fUseFolderOutputs.dialogFieldChanged();
             }
         } catch (JavaModelException e) {
             ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("NewSourceContainerWorkbookPage.Exception.init"), e.getMessage()); //$NON-NLS-1$
@@ -276,10 +277,11 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         fUseFolderOutputs.getSelectionButton(null).addSelectionListener(new SelectionListener(){
 
             public void widgetSelected(SelectionEvent event) {
-                fPackageExplorer.showOutputFolders(fUseFolderOutputs.getSelectionButton(null).getSelection());
+                boolean show= fUseFolderOutputs.getSelectionButton(null).getSelection();
+                fPackageExplorer.showOutputFolders(show);
                 try {
-                    List list= fPackageExplorer.getSelection();
-                    actionGroup.refresh(new DialogExplorerActionContext(list, fHintTextGroup.getJavaProject()));
+                    ISelection selection= fPackageExplorer.getSelection();
+                    actionGroup.refresh(new DialogExplorerActionContext(selection, fHintTextGroup.getJavaProject()));
                 } catch (JavaModelException e) {
                     ExceptionHandler.handle(e, getShell(),
                             NewWizardMessages.getString("NewSourceContainerWorkbookPage.Exception.refresh"), e.getMessage()); //$NON-NLS-1$
@@ -374,8 +376,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         
         IJavaProject project= fHintTextGroup.getJavaProject();
         try {
-            List list= new ArrayList();
-            list= fHintTextGroup.getSelection();
+            List list= ((IStructuredSelection)fHintTextGroup.getSelection()).toList();
             List existingEntries= ClasspathModifier.getExistingEntries(project);
         
             for(int i= 0; i < list.size(); i++) {

@@ -43,7 +43,7 @@ public final class CreateFolderOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public CreateFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.CreateFolder"), IClasspathInformationProvider.CREATE_FOLDER); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.CreateFolder.tooltip"), IClasspathInformationProvider.CREATE_FOLDER); //$NON-NLS-1$
     }
     
     /**

@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackag
 
 
 /**
- * Operation to exclude an <code>IJavaElement</code>.
+ * Operation to exclude objects of type <code>IJavaElement</code>.
  * 
  * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier#exclude(List, IJavaProject, IProgressMonitor)
  * @see org.eclipse.jdt.internal.corext.buildpath.UnexcludeOperation
@@ -46,7 +46,7 @@ public class ExcludeOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public ExcludeOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Exclude"), IClasspathInformationProvider.EXCLUDE); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Exclude.tooltip"), IClasspathInformationProvider.EXCLUDE); //$NON-NLS-1$
     }
     
     /**
@@ -59,7 +59,7 @@ public class ExcludeOperation extends ClasspathModifierOperation {
     public void run(IProgressMonitor monitor) throws InvocationTargetException {
         List result= null;
         try {
-            List javaElements= fInformationProvider.getSelection();
+            List javaElements= getSelectedElements();
             IJavaProject project= fInformationProvider.getJavaProject();
             result= exclude(javaElements, project, monitor);
         } catch (CoreException e) {
@@ -109,7 +109,7 @@ public class ExcludeOperation extends ClasspathModifierOperation {
      * @return a string describing the operation
      */
     public String getDescription(int type) {
-        IJavaElement elem= (IJavaElement)fInformationProvider.getSelection().get(0);
+        IJavaElement elem= (IJavaElement)getSelectedElements().get(0);
         if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT)
             return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.ExcludePackage", elem.getElementName()); //$NON-NLS-1$
         if (type == DialogPackageExplorerActionGroup.INCLUDED_FOLDER)

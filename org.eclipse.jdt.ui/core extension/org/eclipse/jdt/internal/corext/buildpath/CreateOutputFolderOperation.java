@@ -43,7 +43,7 @@ public class CreateOutputFolderOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public CreateOutputFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.CreateOutput"), IClasspathInformationProvider.CREATE_OUTPUT); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.CreateOutput.tooltip"), IClasspathInformationProvider.CREATE_OUTPUT); //$NON-NLS-1$
     }
     
     /**
@@ -57,7 +57,7 @@ public class CreateOutputFolderOperation extends ClasspathModifierOperation {
     public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         List result= new ArrayList();
         try {
-            IPackageFragmentRoot root= (IPackageFragmentRoot)fInformationProvider.getSelection().get(0);
+            IPackageFragmentRoot root= (IPackageFragmentRoot)getSelectedElements().get(0);
             IJavaProject project= fInformationProvider.getJavaProject();
             IOutputLocationQuery query= fInformationProvider.getOutputLocationQuery();
             result.add(createOutputFolder(root, query, project, monitor));

@@ -133,12 +133,10 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
-            File file= new File(fCurrProjectLocation.append(fCurrProject.getName()).append(".classpath").toString()); //$NON-NLS-1$
-            if (!file.exists())
-                removeClasspathFile= true;
-            file= new File(fCurrProjectLocation.append(fCurrProject.getName()).append(".project").toString()); //$NON-NLS-1$
-            if (!file.exists())
-                removeProjectFile= true;
+            
+            removeClasspathFile= !fileExists(".classpath"); //$NON-NLS-1$
+            removeProjectFile= !fileExists(".project"); //$NON-NLS-1$
+            
 			createProject(fCurrProject, fCurrProjectLocation, new SubProgressMonitor(monitor, 1));
 				
 			IClasspathEntry[] entries= null;
@@ -149,9 +147,8 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 					final ClassPathDetector detector= new ClassPathDetector(fCurrProject);
 					entries= detector.getClasspath();
                     outputLocation= detector.getOutputLocation();
-                    if (outputLocation == null || !fCurrProject.getFolder(outputLocation.removeFirstSegments(fCurrProject.getFullPath().segmentCount())).exists())
+                    if (outputLocation == null || fCurrProject.findMember(outputLocation.removeFirstSegments(fCurrProject.getFullPath().segmentCount())) == null)
                         removeOutputFolder= true;
-                    outputLocation= detector.getOutputLocation();
 				}
 			} else if (fFirstPage.isSrcBin()) {
 				IPreferenceStore store= PreferenceConstants.getPreferenceStore();
@@ -394,5 +391,13 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
         } else {
             list.add(entry);
         }
+    }
+    
+    private boolean fileExists(String fileName) {
+        IPath fileLocation= fCurrProjectLocation;
+        if (fFirstPage.isInWorkspace())
+            fileLocation= fileLocation.append(fCurrProject.getName());
+        File file= fileLocation.append(fileName).toFile();
+        return file.exists();
     }
 }

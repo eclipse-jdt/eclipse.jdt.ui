@@ -36,6 +36,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -216,7 +218,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * @return the current selection
      * @see IClasspathInformationProvider#getSelection()
      */
-    public List getSelection() {
+    public ISelection getSelection() {
         return fPackageExplorer.getSelection();
     }
     
@@ -255,7 +257,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
         switch(actionType) {
             case CREATE_FOLDER: handleFolderCreation(resultElements); break;
             case CREATE_LINK: handleFolderCreation(resultElements); break;
-            case EDIT: handleEdit(resultElements, false); break;
+            case EDIT_FILTERS: defaultHandle(resultElements, false); break;
             case ADD_TO_BP: handleAddToCP(resultElements); break;
             case REMOVE_FROM_BP: handleRemoveFromBP(resultElements, false); break;
             case INCLUDE: defaultHandle(resultElements, true); break;
@@ -263,6 +265,7 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
             case UNINCLUDE: defaultHandle(resultElements, false); break;
             case UNEXCLUDE: defaultHandle(resultElements, true); break;
             case RESET: defaultHandle(resultElements, false); break;
+            case EDIT_OUTPUT: handleEditOutputFolder(resultElements); break;
             case RESET_ALL: handleResetAll(); break;
             default: break;
         }
@@ -292,28 +295,6 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
         } catch (JavaModelException e) {
             ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("HintTextGroup.Exception.Title.refresh"), e.getLocalizedMessage()); //$NON-NLS-1$
         }
-    }
-    
-    /**
-     * Handle edit on either:
-     * <li>Inclusion and exclusion filters of a source folder</li>
-     * <li>The output folder of a source folder</li>
-     * 
-     * @param result the result list of an object to be selected by the 
-     * <code>fPackageExplorer</code>. In this case, the list only can 
-     * have size one and contains either an element of type <code>IJavaElement</code> 
-     * or <code>CPlistElementAttribute</code>
-     * @param forceRebuild <code>true</code> if the area containing 
-     * the links and their descriptions should be rebuilt, <code>
-     * false</code> otherwise
-     */
-    private void handleEdit(List result, boolean forceRebuild) {
-        if (result.size() != 1)
-            return;
-        if (result.get(0) instanceof IJavaElement)
-            defaultHandle(result, forceRebuild);
-        else
-            handleEditOutputFolder(result);
     }
     
     /**
@@ -397,6 +378,8 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * <code>CPListElementAttribute</code> which can be <code>null</code>
      */
     private void handleEditOutputFolder(List result) {
+        if(result.size() == 0)
+            return;
         CPListElementAttribute attribute= (CPListElementAttribute)result.get(0);
         if (attribute != null) {
             fPackageExplorer.setSelection(result);
@@ -500,7 +483,8 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      * @see IClasspathInformationProvider#getFolderCreationQuery()
      */
     public IFolderCreationQuery getFolderCreationQuery() {
-        return ClasspathModifierQueries.getDefaultFolderCreationQuery(getShell(), getSelection().get(0));
+        IStructuredSelection selection= (IStructuredSelection)getSelection();
+        return ClasspathModifierQueries.getDefaultFolderCreationQuery(getShell(), selection.getFirstElement());
     }
     
     /**

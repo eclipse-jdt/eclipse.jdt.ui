@@ -26,9 +26,8 @@ public class HelpAction extends Action {
     public HelpAction() {
         super();
         setImageDescriptor(JavaPluginImages.DESC_OBJS_HELP);
-        String text= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Help"); //$NON-NLS-1$
-        setText(text);
-        setToolTipText(text);
+        setText(NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Help.label")); //$NON-NLS-1$
+        setToolTipText(NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Help.tooltip")); //$NON-NLS-1$;
     }
     
     public void run() {

@@ -11,7 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -196,7 +195,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
                     IJavaProject project= (IJavaProject)element;
                     if (project.isOnClasspath(project)) {
                         IPackageFragmentRoot root= project.findPackageFragmentRoot(project.getPath());
-                        if (ClasspathModifier.filtersSet(root))
+                        if (root != null && ClasspathModifier.filtersSet(root))
                             return getBlueColor();
                     }
                 }
@@ -253,17 +252,26 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
     private final class PackageFilter extends LibraryFilter {
         private OutputFolderFilter fOutputFolderFilter= new OutputFolderFilter();
         public boolean select(Viewer viewer, Object parentElement, Object element) {
-            if (element instanceof IFile) {
-                IFile file= (IFile) element;
-                if (file.getName().equals(".classpath") || file.getName().equals(".project")) //$NON-NLS-1$//$NON-NLS-2$
-                    return false;
+            try {
+                if (element instanceof IFile) {
+                    IFile file= (IFile) element;
+                    if (file.getName().equals(".classpath") || file.getName().equals(".project")) //$NON-NLS-1$//$NON-NLS-2$
+                        return false;
+                }
+                if (element instanceof IPackageFragmentRoot) {
+                    IClasspathEntry cpe= ((IPackageFragmentRoot)element).getRawClasspathEntry();
+                    if (cpe == null || cpe.getEntryKind() == IClasspathEntry.CPE_CONTAINER)
+                        return false;
+                }
+            } catch (JavaModelException e) {
+                JavaPlugin.log(e);
             }
-            if (element instanceof IPackageFragmentRoot) {
+            /*if (element instanceof IPackageFragmentRoot) {
                 IPackageFragmentRoot root= (IPackageFragmentRoot)element;
                 if (root.getElementName().endsWith(".jar") || root.getElementName().endsWith(".zip")) //$NON-NLS-1$ //$NON-NLS-2$
                     return false;
-            }
-            return super.select(viewer, parentElement, element) && fOutputFolderFilter.select(viewer, parentElement, element);
+            }*/
+            return /*super.select(viewer, parentElement, element) &&*/ fOutputFolderFilter.select(viewer, parentElement, element);
         }
     }
     
@@ -288,7 +296,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
     /** Stores the current selection in the tree 
      * @see #getSelection()
      */
-    private List fCurrentSelection;
+    private ISelection fCurrentSelection;
     
     /** The current java project
      * @see #setInput(IJavaProject)
@@ -297,7 +305,6 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
     
     public DialogPackageExplorer() {
         fActionGroup= null;
-        fCurrentSelection= new ArrayList();
         fCurrJProject= null;
     }
     
@@ -391,6 +398,13 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
         ISelection selection= new StructuredSelection(project);
         fPackageViewer.setSelection(selection);
         fPackageViewer.expandToLevel(2);
+        fCurrentSelection= selection;
+        try {
+            if (fActionGroup != null)
+                fActionGroup.refresh(new DialogExplorerActionContext(fCurrentSelection, fCurrJProject));
+        } catch (JavaModelException e) {
+            JavaPlugin.log(e);
+        }
     }
     
     /**
@@ -420,10 +434,9 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      * The the current list of selected elements. The 
      * list may be empty if no element is selected.
      * 
-     * @return a list of elements currently selected 
-     * in the tree
+     * @return the current selection
      */
-    public List getSelection() {
+    public ISelection getSelection() {
         return fCurrentSelection;
     }
     
@@ -456,6 +469,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      */
     public void showOutputFolders(boolean showOutputFolders) {
         fShowOutputFolders= showOutputFolders;
+        fActionGroup.showOutputFolders(showOutputFolders);
         fPackageViewer.refresh();
     }
 
@@ -467,7 +481,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
      * @see DialogPackageExplorerActionGroup#setContext(DialogExplorerActionContext)
      */
     public void selectionChanged(SelectionChangedEvent event) {
-        fCurrentSelection= ((IStructuredSelection)event.getSelection()).toList();
+        fCurrentSelection= (IStructuredSelection)event.getSelection();
         try {
             if (fActionGroup != null)
                 fActionGroup.setContext(new DialogExplorerActionContext(fCurrentSelection, fCurrJProject));

@@ -41,7 +41,7 @@ public class LinkedSourceFolderOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public LinkedSourceFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Link"), IClasspathInformationProvider.CREATE_LINK); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Link.tooltip"), IClasspathInformationProvider.CREATE_LINK); //$NON-NLS-1$
     }
     
     /**

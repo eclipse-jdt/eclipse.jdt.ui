@@ -25,11 +25,13 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.actions.ActionContext;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -42,7 +44,8 @@ import org.eclipse.jdt.internal.corext.buildpath.AddToClasspathOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
 import org.eclipse.jdt.internal.corext.buildpath.CreateFolderOperation;
-import org.eclipse.jdt.internal.corext.buildpath.EditOperation;
+import org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation;
+import org.eclipse.jdt.internal.corext.buildpath.EditOutputFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ExcludeOperation;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 import org.eclipse.jdt.internal.corext.buildpath.IPackageExplorerActionListener;
@@ -58,6 +61,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.util.ViewerPane;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 
 /**
@@ -73,7 +77,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
  * @see org.eclipse.jdt.internal.corext.buildpath.UnincludeOperation
  * @see org.eclipse.jdt.internal.corext.buildpath.ExcludeOperation
  * @see org.eclipse.jdt.internal.corext.buildpath.UnexcludeOperation
- * @see org.eclipse.jdt.internal.corext.buildpath.EditOperation
+ * @see org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation
  * @see org.eclipse.jdt.internal.corext.buildpath.ResetOperation
  */
 public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
@@ -88,14 +92,31 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
          * For reasons of completeness, the selection of the super class 
          * <code>ActionContext</code> is also set, but is not intendet to be used.
          * 
-         * @param selectedElements a list of elements which are currently selected
+         * @param selection the current selection
+         * @param jProject the element's Java project
+         */
+        public DialogExplorerActionContext(ISelection selection, IJavaProject jProject) {
+            super(null);
+            fJavaProject= jProject;
+            fSelectedElements= ((IStructuredSelection)selection).toList();
+            IStructuredSelection structuredSelection= new StructuredSelection(new Object[] {fSelectedElements, jProject});
+            super.setSelection(structuredSelection);
+        }
+        
+        /**
+         * Constructor to create an action context for the dialog package explorer.
+         * 
+         * For reasons of completeness, the selection of the super class 
+         * <code>ActionContext</code> is also set, but is not intendet to be used.
+         * 
+         * @param selectedElements a list of currently selected elements
          * @param jProject the element's Java project
          */
         public DialogExplorerActionContext(List selectedElements, IJavaProject jProject) {
             super(null);
             fJavaProject= jProject;
             fSelectedElements= selectedElements;
-            IStructuredSelection structuredSelection= new StructuredSelection(new Object[] {selectedElements, jProject});
+            IStructuredSelection structuredSelection= new StructuredSelection(new Object[] {fSelectedElements, jProject});
             super.setSelection(structuredSelection);
         }
         
@@ -132,16 +153,20 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     public static final int INCLUDED_FOLDER= 0xB;
     /** Output folder (for a source folder) */
     public static final int OUTPUT= 0xC;
+    /** An archive element (.zip or .jar) */
+    public static final int ARCHIVE= 0xD;
     /** A IPackageFragmentRoot with include/exclude filters set */
-    public static final int MODIFIED_FRAGMENT_ROOT= 0xD;
+    public static final int MODIFIED_FRAGMENT_ROOT= 0xE;
     /** Default package fragment */
-    public static final int DEFAULT_FRAGMENT= 0xE;
+    public static final int DEFAULT_FRAGMENT= 0xF;
     /** Undefined type */
-    public static final int UNDEFINED= 0xF;
+    public static final int UNDEFINED= 0x10;
     /** Multi selection */
-    public static final int MULTI= 0x10;
+    public static final int MULTI= 0x11;
     /** No elements selected */
-    public static final int NULL_SELECTION= 0x11;
+    public static final int NULL_SELECTION= 0x12;
+    /** Elements that are contained in an archive (.jar or .zip) */
+    public static final int ARCHIVE_RESOURCE= 0x13;
     
     private ClasspathModifierAction[] fActions;
     private int fLastType;
@@ -166,43 +191,65 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         ClasspathModifierOperation op;
         op= new CreateFolderOperation(listener, provider);
         /*addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_TOOL_NEWPACKROOT, JavaPluginImages.DESC_DLCLL_NEWPACKROOT, 
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.CreateFolder")), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.CreateFolder.label"), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.CreateFolder.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
                 IClasspathInformationProvider.CREATE_FOLDER);*/
         op= new AddToClasspathOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_ADD_TO_BP, JavaPluginImages.DESC_DLCL_ADD_TO_BP, 
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddToCP")), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddToCP.label"), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddToCP.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
                 IClasspathInformationProvider.ADD_TO_BP);
         op= new RemoveFromClasspathOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_REMOVE_FROM_BP, JavaPluginImages.DESC_DLCL_REMOVE_FROM_BP, 
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.RemoveFromCP")), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.RemoveFromCP.label"), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.RemoveFromCP.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
                 IClasspathInformationProvider.REMOVE_FROM_BP);
         /*op= new IncludeOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_INCLUSION, JavaPluginImages.DESC_DLCL_INCLUSION, 
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Include")), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Include.label"), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Include.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
                 IClasspathInformationProvider.INCLUDE);
         op= new UnincludeOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_INCLUSION_UNDO, JavaPluginImages.DESC_DLCL_INCLUSION_UNDO, 
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Uninclude")), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Uninclude.label"), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Uninclude.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
                 IClasspathInformationProvider.UNINCLUDE);*/
         op= new ExcludeOperation(listener, provider);
-        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_EXCLUSION, JavaPluginImages.DESC_DLCL_EXCLUSION, 
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Exclude")), //$NON-NLS-1$
+        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_EXCLUSION, JavaPluginImages.DESC_DLCL_EXCLUSION,
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Exclude.label"), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Exclude.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
                 IClasspathInformationProvider.EXCLUDE);
         op= new UnexcludeOperation(listener, provider);
-        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_INCLUSION, JavaPluginImages.DESC_DLCL_INCLUSION, 
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Unexclude")), //$NON-NLS-1$
+        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_INCLUSION, JavaPluginImages.DESC_DLCL_INCLUSION,
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Unexclude.label"), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Unexclude.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
                 IClasspathInformationProvider.UNEXCLUDE);
-        op= new EditOperation(listener, provider);
-        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_OBJS_TEXT_EDIT, JavaPluginImages.DESC_DLCL_TEXT_EDIT, 
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit")), //$NON-NLS-1$
-                IClasspathInformationProvider.EDIT);
+        op= new EditFiltersOperation(listener, provider);
+        ClasspathModifierAction action= new ClasspathModifierAction(op, JavaPluginImages.DESC_OBJS_TEXT_EDIT, JavaPluginImages.DESC_DLCL_TEXT_EDIT,
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit.label"), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit.tooltip"), IAction.AS_PUSH_BUTTON); //$NON-NLS-1$
+        ClasspathModifierDropDownAction dropDown= new ClasspathModifierDropDownAction(action, 
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Configure.label"), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Configure.tooltip")); //$NON-NLS-1$
+        addAction(dropDown, IClasspathInformationProvider.EDIT_FILTERS);
+        op= new EditOutputFolderOperation(listener, provider);
+        action= new ClasspathModifierAction(op, JavaPluginImages.DESC_OBJS_OUTPUT_FOLDER_ATTRIB, JavaPluginImages.DESC_DLCL_OUTPUT_FOLDER_ATTRIB,
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.EditOutput.label"), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.EditOutput.tooltip"), IAction.AS_PUSH_BUTTON); //$NON-NLS-1$
+        dropDown.addAction(action);
+        /*addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_OBJS_TEXT_EDIT, JavaPluginImages.DESC_DLCL_TEXT_EDIT, 
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit.label"), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
+                IClasspathInformationProvider.EDIT);*/
         op= new LinkedSourceFolderOperation(listener, provider);
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_TOOL_NEWPACKROOT, JavaPluginImages.DESC_DLCL_NEWPACKROOT, 
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Link")), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Link.label"), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Link.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
                 IClasspathInformationProvider.CREATE_LINK);
         op= new ResetAllOperation(listener, provider);
-        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_CLEAR, JavaPluginImages.DESC_DLCL_CLEAR, 
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.UndoAll")), //$NON-NLS-1$
+        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_CLEAR, JavaPluginImages.DESC_DLCL_CLEAR,
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.UndoAll.label"), //$NON-NLS-1$
+                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.UndoAll.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
                 IClasspathInformationProvider.RESET_ALL);
     }
 
@@ -221,6 +268,20 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      */
     public ClasspathModifierAction getAction(int type) {
         return fActions[type];
+    }
+    
+    /**
+     * Method that is called whenever setting of 
+     * output folders is allowed or forbidden (for example 
+     * on changing a checkbox with this setting):
+     * 
+     * @param showOutputFolders <code>true</code> if output 
+     * folders should be shown, <code>false</code> otherwise.
+     */
+    public void showOutputFolders(boolean showOutputFolders) {
+        ClasspathModifierDropDownAction action= (ClasspathModifierDropDownAction)getAction(IClasspathInformationProvider.EDIT_FILTERS);
+        EditOutputFolderOperation operation= (EditOutputFolderOperation)action.getActions()[1].getOperation();
+        operation.showOutputFolders(showOutputFolders);
     }
     
     /**
@@ -254,7 +315,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         pane.setTopRight(tb);
         ToolBarManager tbm= new ToolBarManager(tb);
         for (int i= fContextSensitiveActions; i < fActions.length; i++) {
-            tbm.add(fActions[i]);
+            if (i != IClasspathInformationProvider.EDIT_OUTPUT)
+                tbm.add(fActions[i]);
         }
         tbm.add(new HelpAction());
         tbm.update(true);
@@ -395,9 +457,9 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         String[] descriptions= new String[availableActions.size()];
         if (availableActions.size() > 0) {
             for(int i= 0; i < availableActions.size(); i++) {
-                int index= ((Integer)availableActions.get(i)).intValue();
-                actions[i]= fActions[index];
-                descriptions[i]= fActions[index].getDescription(type);
+                ClasspathModifierAction action= (ClasspathModifierAction)availableActions.get(i);
+                actions[i]= action;
+                descriptions[i]= action.getDescription(type);
             }
         } else
             descriptions= noAction(type);
@@ -460,6 +522,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
             case DEFAULT_FRAGMENT | MULTI: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.DefaultPackage"); break; //$NON-NLS-1$
             case NULL_SELECTION: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.NullSelection"); break; //$NON-NLS-1$
             case MULTI: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.MultiSelection"); break; //$NON-NLS-1$
+            case ARCHIVE_RESOURCE: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.ArchiveResource"); break; //$NON-NLS-1$
             default: reason= NewWizardMessages.getString("PackageExplorerActionGroup.NoAction.NoReason"); //$NON-NLS-1$
         }
         return new String[] {reason};
@@ -495,19 +558,29 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
             if (obj instanceof IPackageFragmentRoot)
                 return ClasspathModifier.filtersSet((IPackageFragmentRoot)obj) ? MODIFIED_FRAGMENT_ROOT : PACKAGE_FRAGMENT_ROOT;
             if (obj instanceof IPackageFragment) {
-                if (ClasspathModifier.isDefaultFragment((IPackageFragment)obj))
+                if (ClasspathModifier.isDefaultFragment((IPackageFragment)obj)) {
+                    if (((IPackageFragmentRoot)((IJavaElement)obj).getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT)).isArchive())
+                        return ARCHIVE_RESOURCE;
                     return DEFAULT_FRAGMENT;
+                }
                 if (ClasspathModifier.isIncluded((IJavaElement)obj, project, null))
                     return INCLUDED_FOLDER;
+                if (((IPackageFragmentRoot)((IJavaElement)obj).getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT)).isArchive())
+                    return ARCHIVE_RESOURCE;
                 return PACKAGE_FRAGMENT;
             }
-            if (obj instanceof ICompilationUnit)
+            if (obj instanceof ICompilationUnit) {
+                if (((IPackageFragmentRoot)((IJavaElement)obj).getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT)).isArchive())
+                    return ARCHIVE_RESOURCE;
                 return ClasspathModifier.isIncluded((IJavaElement)obj, project, null) ? INCLUDED_FILE : COMPILATION_UNIT;
+            }
             if (obj instanceof IFolder) {
                 return getFolderType((IFolder)obj, project);
             }
             if (obj instanceof IFile)
                 return getFileType((IFile)obj, project);
+            if (obj instanceof IClassFile)
+                return FILE;
             if (obj instanceof CPListElementAttribute)
                 return ClasspathModifier.isDefaultOutputFolder((CPListElementAttribute) obj) ? DEFAULT_OUTPUT : OUTPUT;
         return UNDEFINED;
@@ -544,6 +617,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @throws JavaModelException 
      */
     private static int getFileType(IFile file, IJavaProject project) throws JavaModelException {
+        if (isArchive(file, project))
+            return ARCHIVE;
         if (!file.getName().endsWith(".java")) //$NON-NLS-1$
             return FILE;
         if (file.getParent().getFullPath().equals(project.getPath())) {
@@ -553,6 +628,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         }
         if (ClasspathModifier.getFragmentRoot(file, project, null) == null)
             return FILE;
+        if (ClasspathModifier.getFragmentRoot(file, project, null).isArchive())
+            return ARCHIVE_RESOURCE;
         if (ClasspathModifier.getFragmentRoot(file, project, null).equals(JavaCore.create(file.getParent())))
             return EXCLUDED_FILE;
         if (ClasspathModifier.getFragment(file.getParent()) == null) {
@@ -561,6 +638,23 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
             return EXCLUDED_FILE;
         }
         return EXCLUDED_FILE;
+    }
+    
+    /**
+     * Check whether the provided file is an archive (.jar or .zip).
+     * 
+     * @param file the file to be checked
+     * @param project the Java project
+     * @return <code>true</code> if the file is an archive, <code>false</code> 
+     * otherwise
+     * @throws JavaModelException
+     */
+    private static boolean isArchive(IFile file, IJavaProject project) throws JavaModelException {
+        if (!ArchiveFileFilter.isArchivePath(file.getFullPath()))
+            return false;
+        if (project != null && project.exists() && (project.findPackageFragmentRoot(file.getFullPath()) == null))
+            return true;
+        return false;
     }
     
     /**
@@ -579,16 +673,42 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
             types[i]= getType(selectedElements.get(i), project);
         }
         for(int i= 0; i < fActions.length; i++) {
-            if(fActions[i].isValid(selectedElements, types)) {
-                actions.add(new Integer(i));
-                if (!fActions[i].isEnabled())
-                    fActions[i].setEnabled(true);
-            } else {
-                if (fActions[i].isEnabled())
-                    fActions[i].setEnabled(false);
+            if(fActions[i] instanceof ClasspathModifierDropDownAction) {
+                if(changeEnableState(fActions[i], selectedElements, types)) {
+                    ClasspathModifierAction[] dropDownActions= ((ClasspathModifierDropDownAction)fActions[i]).getActions();
+                    for(int j= 0; j < dropDownActions.length; j++) {
+                        if(changeEnableState(dropDownActions[j], selectedElements, types))
+                            actions.add(dropDownActions[j]);
+                    }
+                }
+            }
+            else if(changeEnableState(fActions[i], selectedElements, types)) {
+                actions.add(fActions[i]);
             }
         }
         return actions;
+    }
+    
+    /**
+     * Changes the enabled state of an action if necessary.
+     * 
+     * @param action the action to change it's state for
+     * @param selectedElements a list of selected elements
+     * @param types an array of types corresponding to the types of 
+     * the selected elements 
+     * @return <code>true</code> if the action is valid (= enabled), <code>false</code> otherwise
+     * @throws JavaModelException
+     */
+    private boolean changeEnableState(ClasspathModifierAction action, List selectedElements, int[] types) throws JavaModelException {
+        if(action.isValid(selectedElements, types)) {
+            if (!action.isEnabled())
+                action.setEnabled(true);
+            return true;
+        } else {
+            if (action.isEnabled())
+                action.setEnabled(false);
+            return false;
+        }
     }
     
     /**
@@ -599,7 +719,16 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     public void fillContextMenu(IMenuManager menu) {        
         for (int i= 0; i < fContextSensitiveActions; i++) {
             IAction action= getAction(i);
-            if (action.isEnabled())
+            if (action instanceof ClasspathModifierDropDownAction) {
+                if (action.isEnabled()) {
+                    IAction[] actions= ((ClasspathModifierDropDownAction)action).getActions();
+                    for(int j= 0; j < actions.length; j++) {
+                        if(actions[j].isEnabled())
+                            menu.add(actions[j]);
+                    }
+                }
+            }
+            else if (action.isEnabled())
                 menu.add(action);
         }
         super.fillContextMenu(menu);

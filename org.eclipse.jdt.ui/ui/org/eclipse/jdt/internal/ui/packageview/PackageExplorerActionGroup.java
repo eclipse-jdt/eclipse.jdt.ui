@@ -58,6 +58,7 @@ import org.eclipse.ui.views.framelist.UpAction;
 
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetActionGroup;
 
@@ -116,6 +117,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			new NewWizardsActionGroup(site),
 			fNavigateActionGroup= new NavigateActionGroup(fPart), 
 			new CCPActionGroup(fPart),
+            new GenerateBuildPathActionGroup(fPart),
 			new GenerateActionGroup(fPart), 
 			fRefactorActionGroup= new RefactorActionGroup(fPart),
 			new ImportActionGroup(fPart),

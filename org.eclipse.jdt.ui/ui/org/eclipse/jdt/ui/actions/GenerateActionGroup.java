@@ -103,8 +103,6 @@ public class GenerateActionGroup extends ActionGroup {
 	private ExternalizeStringsAction fExternalizeStrings;
 	private FindStringsToExternalizeAction fFindStringsToExternalize;
 	private SurroundWithTryCatchAction fSurroundWithTryCatch;
-	private AddToClasspathAction fAddToClasspathAction;
-	private RemoveFromClasspathAction fRemoveFromClasspathAction;
 	
 	private OrganizeImportsAction fOrganizeImports;
 	private SortMembersAction fSortMembers;
@@ -235,8 +233,6 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddBookmark= new AddBookmarkAction(site.getShell());
 		fAddBookmark.setActionDefinitionId(IWorkbenchActionDefinitionIds.ADD_BOOKMARK);
 		
-		fAddToClasspathAction= new AddToClasspathAction(site);
-		fRemoveFromClasspathAction= new RemoveFromClasspathAction(site);
 		// context-menu only -> no action definition ids
 		
 		fAddTaskAction= new AddTaskAction(site);
@@ -264,8 +260,6 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddUnimplementedConstructors.update(selection);	
 		fGenerateConstructorUsingFields.update(selection);
 		fAddJavaDocStub.update(selection);
-		fAddToClasspathAction.update(selection);
-		fRemoveFromClasspathAction.update(selection);
 		fExternalizeStrings.update(selection);
 		fFindStringsToExternalize.update(selection);
 		fAddTaskAction.update(selection);
@@ -286,8 +280,6 @@ public class GenerateActionGroup extends ActionGroup {
 		registerSelectionListener(provider, fGenerateConstructorUsingFields);
 		registerSelectionListener(provider, fAddJavaDocStub);
 		registerSelectionListener(provider, fAddBookmark);
-		registerSelectionListener(provider, fAddToClasspathAction);
-		registerSelectionListener(provider, fRemoveFromClasspathAction);
 		registerSelectionListener(provider, fExternalizeStrings);
 		registerSelectionListener(provider, fFindStringsToExternalize);
 		registerSelectionListener(provider, fOrganizeImports);
@@ -394,8 +386,6 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(source, fAddUnimplementedConstructors);
 		added+= addAction(source, fGenerateConstructorUsingFields);
 		added+= addAction(source, fAddJavaDocStub);
-		added+= addAction(source, fAddToClasspathAction);
-		added+= addAction(source, fRemoveFromClasspathAction);
 		source.add(new Separator(GROUP_CODE));		
 		added+= addAction(source, fSurroundWithTryCatch);
 		added+= addAction(source, fExternalizeStrings);

@@ -34,15 +34,17 @@ public class ClasspathModifierAction extends Action {
      * @param operation the operation to execute inside the action
      * @param imageDescriptor the image descriptor for the icon
      * @param disabledImageDescriptor the image descriptor for the disabled icon
-     * @param text the text to be set for the action and for the tool tip
+     * @param text the text to be set as label for the action
+     * @param tooltip the text to be set as tool tip
      * 
      * @see ClasspathModifierOperation
      */
-    public ClasspathModifierAction(ClasspathModifierOperation operation, ImageDescriptor imageDescriptor, ImageDescriptor disabledImageDescriptor, String text) {
+    public ClasspathModifierAction(ClasspathModifierOperation operation, ImageDescriptor imageDescriptor, ImageDescriptor disabledImageDescriptor, String text, String tooltip, int style) {
+        super(text, style);
         setImageDescriptor(imageDescriptor);
         setDisabledImageDescriptor(disabledImageDescriptor);
         setText(text);
-        setToolTipText(text);
+        setToolTipText(tooltip);
         fOperation= operation;
     }
 

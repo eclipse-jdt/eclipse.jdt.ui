@@ -291,6 +291,7 @@ public class JavaPluginImages {
     public static final ImageDescriptor DESC_DLCL_REMOVE_FROM_BP= create(T_DLCL, "remove_from_buildpath.gif"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_DLCL_INCLUSION= create(T_DLCL, "inclusion_filter_attrib.gif"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_DLCL_EXCLUSION= create(T_DLCL, "exclusion_filter_attrib.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_DLCL_OUTPUT_FOLDER_ATTRIB= create(T_DLCL, "output_folder_attrib.gif"); //$NON-NLS-1$
 //    public static final ImageDescriptor DESC_DLCL_INCLUSION_UNDO= create(T_DLCL, "inclusion_filter_attrib_undo.gif"); //$NON-NLS-1$
 //    public static final ImageDescriptor DESC_DLCL_EXCLUSION_UNDO= create(T_DLCL, "exclusion_filter_attrib_undo.gif"); //$NON-NLS-1$
 	

@@ -427,7 +427,7 @@ public class ClasspathModifierQueries {
      * @return an <code>IInclusionExclusionQuery</code> that can be executed
      * 
      * @see ClasspathModifierQueries.IInclusionExclusionQuery
-     * @see org.eclipse.jdt.internal.corext.buildpath.EditOperation
+     * @see org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation
      */
     public static IInclusionExclusionQuery getDefaultInclusionExclusionQuery(final Shell shell) {
         return new IInclusionExclusionQuery() {
@@ -470,7 +470,7 @@ public class ClasspathModifierQueries {
      * 
      * @see ClasspathModifierQueries.IOutputLocationQuery
      * @see org.eclipse.jdt.internal.corext.buildpath.CreateOutputFolderOperation
-     * @see org.eclipse.jdt.internal.corext.buildpath.EditOperation
+     * @see org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation
      */
     public static IOutputLocationQuery getDefaultOutputLocationQuery(final Shell shell, final IPath projectOutputLocation, final List classpathList) {
         return new IOutputLocationQuery() {

@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -29,7 +30,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 
 
 /**
- * Operation to add an object (of type <code>IFolder</code> or <code>
+ * Operation to add objects (of type <code>IFolder</code> or <code>
  * IJavaElement</code> to the classpath.
  * 
  * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier#addToClasspath(List, IJavaProject, IOutputFolderQuery, IProgressMonitor)
@@ -49,7 +50,7 @@ public class AddToClasspathOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public AddToClasspathOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddToCP"), IClasspathInformationProvider.ADD_TO_BP); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddToCP.tooltip"), IClasspathInformationProvider.ADD_TO_BP); //$NON-NLS-1$
     }
     
     /**
@@ -63,7 +64,7 @@ public class AddToClasspathOperation extends ClasspathModifierOperation {
     public void run(IProgressMonitor monitor) throws InvocationTargetException {
         List result= null;
         try {
-            List elements= fInformationProvider.getSelection();
+            List elements= getSelectedElements();
             IJavaProject project= fInformationProvider.getJavaProject();
             IOutputFolderQuery query= fInformationProvider.getOutputFolderQuery();
             result= addToClasspath(elements, project, query, monitor);
@@ -99,6 +100,7 @@ public class AddToClasspathOperation extends ClasspathModifierOperation {
                 case DialogPackageExplorerActionGroup.INCLUDED_FOLDER: break; // is ok
                 case DialogPackageExplorerActionGroup.FOLDER: break; // is ok
                 case DialogPackageExplorerActionGroup.EXCLUDED_FOLDER: break; // is ok
+                case DialogPackageExplorerActionGroup.ARCHIVE: break; // is ok
                 default: return false; // all others are not ok
             }
             
@@ -133,7 +135,7 @@ public class AddToClasspathOperation extends ClasspathModifierOperation {
      * @return a string describing the operation
      */
     public String getDescription(int type) {
-        Object obj= fInformationProvider.getSelection().get(0);
+        Object obj= getSelectedElements().get(0);
         if (type == DialogPackageExplorerActionGroup.JAVA_PROJECT)
             return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.ProjectToBuildpath", ((IJavaProject)obj).getElementName()); //$NON-NLS-1$
         if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT)
@@ -144,6 +146,8 @@ public class AddToClasspathOperation extends ClasspathModifierOperation {
             return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.toBuildpath", new String[] {"folder", ((IFolder)obj).getName()}); //$NON-NLS-1$ //$NON-NLS-2$
         if (type == DialogPackageExplorerActionGroup.EXCLUDED_FOLDER)
             return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.toBuildpath", new String[] {"folder", ((IFolder)obj).getName()}); //$NON-NLS-1$ //$NON-NLS-2$
+        if (type == DialogPackageExplorerActionGroup.ARCHIVE)
+            return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.toBuildpath", new String[] {"archive", ((IFile)obj).getName()}); //$NON-NLS-1$ //$NON-NLS-2$
         return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Default.toBuildpath"); //$NON-NLS-1$
     }
 }

@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackag
 
 
 /**
- * Operation to remove a source folder (of type <code>
+ * Operation to remove source folders (of type <code>
  * IPackageFragmentRoot</code> from the classpath.
  * 
  * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier#removeFromClasspath(List, IJavaProject, IProgressMonitor)
@@ -48,7 +48,7 @@ public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public RemoveFromClasspathOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.RemoveFromCP"), IClasspathInformationProvider.REMOVE_FROM_BP); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.RemoveFromCP.tooltip"), IClasspathInformationProvider.REMOVE_FROM_BP); //$NON-NLS-1$
     }
     
     /**
@@ -62,7 +62,7 @@ public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
         List result= null;
         try {
             IJavaProject project= fInformationProvider.getJavaProject();
-            List elements= fInformationProvider.getSelection();
+            List elements= getSelectedElements();
             result= removeFromClasspath(elements, project, monitor);
         } catch (CoreException e) {
             fException= e;
@@ -115,7 +115,7 @@ public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
      * @return a string describing the operation
      */
     public String getDescription(int type) {
-        IJavaElement elem= (IJavaElement)fInformationProvider.getSelection().get(0);
+        IJavaElement elem= (IJavaElement)getSelectedElements().get(0);
         if (type == DialogPackageExplorerActionGroup.JAVA_PROJECT)
             return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.ProjectFromBuildpath", elem.getElementName()); //$NON-NLS-1$
         if (type == DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT_ROOT ||

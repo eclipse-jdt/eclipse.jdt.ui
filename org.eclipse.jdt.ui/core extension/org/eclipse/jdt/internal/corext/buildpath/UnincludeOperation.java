@@ -25,8 +25,8 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackag
 
 
 /**
- * Operation to uninclude (this is the reverse action to include) a 
- * <code>IJavaElement</code>.
+ * Operation to uninclude objects of type <code>IJavaElement</code> 
+ * (this is the reverse action to include).
  * 
  * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier#unInclude(List, IJavaProject, IProgressMonitor)
  * @see org.eclipse.jdt.internal.corext.buildpath.IncludeOperation
@@ -46,7 +46,7 @@ public class UnincludeOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public UnincludeOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Uninclude"), IClasspathInformationProvider.UNINCLUDE); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Uninclude.tooltip"), IClasspathInformationProvider.UNINCLUDE); //$NON-NLS-1$
     }
     
     /**
@@ -59,7 +59,7 @@ public class UnincludeOperation extends ClasspathModifierOperation {
     public void run(IProgressMonitor monitor) throws InvocationTargetException {
         List result= null;
         try {
-            List elements= fInformationProvider.getSelection();
+            List elements= getSelectedElements();
             IJavaProject project= fInformationProvider.getJavaProject();
             result= unInclude(elements, project, monitor);
         } catch (CoreException e) {

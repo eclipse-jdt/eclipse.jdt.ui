@@ -40,7 +40,7 @@ public class ResetAllOutputFoldersOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public ResetAllOutputFoldersOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Reset"), IClasspathInformationProvider.RESET); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Reset.tooltip"), IClasspathInformationProvider.RESET); //$NON-NLS-1$
     }
     
     /**

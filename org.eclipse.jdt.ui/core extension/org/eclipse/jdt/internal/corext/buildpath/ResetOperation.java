@@ -45,7 +45,7 @@ public class ResetOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public ResetOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Reset"), IClasspathInformationProvider.RESET); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Reset.tooltip"), IClasspathInformationProvider.RESET); //$NON-NLS-1$
     }
     
     /**
@@ -58,7 +58,7 @@ public class ResetOperation extends ClasspathModifierOperation {
     public void run(IProgressMonitor monitor) throws InvocationTargetException {
         List result= null;
         try {
-            List selection= fInformationProvider.getSelection();
+            List selection= getSelectedElements();
             IJavaProject project= fInformationProvider.getJavaProject();
             result= reset(selection, project, monitor);
         } catch (CoreException e) {

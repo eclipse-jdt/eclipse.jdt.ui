@@ -24,20 +24,16 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
 
 /**
  * Operation to edit the inclusion / exclusion filters of an
- * <code>IJavaElement</code> or the output folder of type 
- * <code>CPListElementAttribute</code>.
+ * <code>IJavaElement</code>.
  * 
  * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier#editFilters(IJavaElement, IJavaProject, IInclusionExclusionQuery, IProgressMonitor)
  */
-public class EditOperation extends ClasspathModifierOperation {
+public class EditFiltersOperation extends ClasspathModifierOperation {
     
     /**
      * Constructor
@@ -50,33 +46,26 @@ public class EditOperation extends ClasspathModifierOperation {
      * @see IClasspathInformationProvider
      * @see ClasspathModifier
      */
-    public EditOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit"), IClasspathInformationProvider.EDIT); //$NON-NLS-1$
+    public EditFiltersOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Edit.tooltip"), IClasspathInformationProvider.EDIT_FILTERS); //$NON-NLS-1$
     }
     
     /**
      * Method which runs the actions with a progress monitor.<br>
      * 
-     * This operation requires the following queries:
+     * This operation requires the following query:
      * <li>IInclusionExclusionQuery</li>
-     * <li>IOutputLocationQuery</li>
      * 
      * @param monitor a progress monitor, can be <code>null</code>
      */
     public void run(IProgressMonitor monitor) throws InvocationTargetException {
         Object result= null;
         try {
-            Object selection= fInformationProvider.getSelection().get(0);
+            Object selection= getSelectedElements().get(0);
             IJavaProject project= fInformationProvider.getJavaProject();
-            if (selection instanceof IJavaElement) {
-                IJavaElement javaElement= (IJavaElement)selection;
-                IInclusionExclusionQuery query= fInformationProvider.getInclusionExclusionQuery();
-                result= editFilters(javaElement, project, query, monitor);
-            } else {
-                CPListElement selElement= ((CPListElementAttribute)selection).getParent();
-                IOutputLocationQuery query= fInformationProvider.getOutputLocationQuery();
-                result= editOutputFolder(selElement, project, query, monitor);
-            }
+            IJavaElement javaElement= (IJavaElement)selection;
+            IInclusionExclusionQuery query= fInformationProvider.getInclusionExclusionQuery();
+            result= editFilters(javaElement, project, query, monitor);
         } catch (CoreException e) {
             fException= e;
             result= null;
@@ -111,7 +100,9 @@ public class EditOperation extends ClasspathModifierOperation {
             if (!project.isOnClasspath(project.getUnderlyingResource()))
                 return false;
         }
-        else if (!(element instanceof IPackageFragmentRoot || element instanceof CPListElementAttribute))
+        else if (!(element instanceof IPackageFragmentRoot))
+            return false;
+        if(element instanceof IPackageFragmentRoot && ((IPackageFragmentRoot)element).isArchive())
             return false;
         return true;
     }
@@ -135,10 +126,6 @@ public class EditOperation extends ClasspathModifierOperation {
             return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Edit"); //$NON-NLS-1$
         if (type == DialogPackageExplorerActionGroup.MODIFIED_FRAGMENT_ROOT)
             return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Edit"); //$NON-NLS-1$
-        if (type == DialogPackageExplorerActionGroup.OUTPUT)
-            return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.EditOutputFolder"); //$NON-NLS-1$
-        if (type == DialogPackageExplorerActionGroup.DEFAULT_OUTPUT)
-            return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.EditOutputFolder"); //$NON-NLS-1$
         return NewWizardMessages.getString("PackageExplorerActionGroup.FormText.Default.Edit"); //$NON-NLS-1$
     }
 }

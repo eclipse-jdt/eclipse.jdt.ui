@@ -42,7 +42,7 @@ public class ResetAllOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public ResetAllOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.UndoAll"), IClasspathInformationProvider.RESET_ALL); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.UndoAll.tooltip"), IClasspathInformationProvider.RESET_ALL); //$NON-NLS-1$
     }
 
     /**

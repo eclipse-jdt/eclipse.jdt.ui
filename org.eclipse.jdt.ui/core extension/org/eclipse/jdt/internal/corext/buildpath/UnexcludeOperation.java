@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackag
 
 
 /**
- * Operation to unexclude an <code>IResource</code>. This is the 
+ * Operation to unexclude objects of type <code>IResource</code>. This is the 
  * reverse action to exclude.
  * 
  * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier#unExclude(List, IJavaProject, IProgressMonitor)
@@ -48,7 +48,7 @@ public class UnexcludeOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public UnexcludeOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Unexclude"), IClasspathInformationProvider.UNEXCLUDE); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Unexclude.tooltip"), IClasspathInformationProvider.UNEXCLUDE); //$NON-NLS-1$
     }
     
     /**
@@ -61,7 +61,7 @@ public class UnexcludeOperation extends ClasspathModifierOperation {
     public void run(IProgressMonitor monitor) throws InvocationTargetException {
         List result= null;
         try {
-            List resources= fInformationProvider.getSelection();
+            List resources= getSelectedElements();
             IJavaProject project= fInformationProvider.getJavaProject();
             result= unExclude(resources, project, monitor);
         } catch (CoreException e) {
@@ -156,7 +156,7 @@ public class UnexcludeOperation extends ClasspathModifierOperation {
      * @return a string describing the operation
      */
     public String getDescription(int type) {
-        IResource resource= (IResource)fInformationProvider.getSelection().get(0);
+        IResource resource= (IResource)getSelectedElements().get(0);
         if (type == DialogPackageExplorerActionGroup.FOLDER)
             return NewWizardMessages.getFormattedString("PackageExplorerActionGroup.FormText.UnexcludeFolder", resource.getName()); //$NON-NLS-1$
         if (type == DialogPackageExplorerActionGroup.EXCLUDED_FILE)

@@ -47,11 +47,11 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock.IRemoveOldBinariesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
 
 public class ClasspathModifier {
     
@@ -61,7 +61,7 @@ public class ClasspathModifier {
      * folder changes one of it's inclusion/exclusion filters, then 
      * this event will be fired.
      */
-    public static interface IClasspathModifierListener {        
+    public static interface IClasspathModifierListener { 
         /**
          * The new build path entry that was generated upon calling a method of 
          * <code>ClasspathModifier</code>. The type indicates which kind of 
@@ -152,7 +152,8 @@ public class ClasspathModifier {
      * Add a list of elements to the build path.
      * 
      * @param elements a list of elements to be added to the build path. An element 
-     * must either be of type <code>IFolder</code> or <code>IJavaElement</code>
+     * must either be of type <code>IFolder</code>, <code>IJavaElement</code> or 
+     * <code>IFile</code> (only allowed if the file is a .jar or .zip file!).
      * @param project the Java project
      * @param query for information about whether the project should be removed as
      * source folder and update build folder
@@ -200,8 +201,8 @@ public class ClasspathModifier {
                 for(int i= 0; i < elements.size(); i++) {
                     Object element= elements.get(i);
                     CPListElement entry;
-                    if (element instanceof IFolder)
-                        entry= addToClasspath((IFolder)element, existingEntries, newEntries, project, monitor);
+                    if (element instanceof IResource)
+                        entry= addToClasspath((IResource)element, existingEntries, newEntries, project, monitor);
                     else
                         entry= addToClasspath((IJavaElement)element, existingEntries, newEntries, project, monitor);
                     newEntries.add(entry);
@@ -241,8 +242,8 @@ public class ClasspathModifier {
      * must either be of type <code>IJavaProject</code> or <code>IPackageFragmentRoot</code>
      * @param project the Java project
      * @param monitor progress monitor, can be <code>null</code> 
-     * @return returns a list of elements of type <code>IPackageFragmentRoot</code> or 
-     * <code>IJavaProject</code> that have been added to the build path
+     * @return returns a list of elements of type <code>IFile</code> (in case of removed archives) or 
+     * <code>IFolder</code> that have been removed from the build path
      * @throws CoreException 
      * @throws OperationCanceledException 
      */
@@ -532,7 +533,7 @@ public class ClasspathModifier {
         if (query.doQuery(element)) {
             IOutputFolderQuery outputFolderQuery= query.getOutputFolderQuery(query.getOutputLocation());
             if (outputFolderQuery.getDesiredOutputLocation().segmentCount() == 1) {
-                if (!outputFolderQuery.doQuery(true, getTrueValidator(), project))
+                if (!outputFolderQuery.doQuery(true, getTrueValidator(project), project))
                     return null;
                 project.setOutputLocation(outputFolderQuery.getOutputLocation(), null);
                 if (outputFolderQuery.removeProjectFromClasspath()) {
@@ -785,6 +786,8 @@ public class ClasspathModifier {
             monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ContainsPath"), 4); //$NON-NLS-1$
             IPackageFragmentRoot root= (IPackageFragmentRoot) selection.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
             IClasspathEntry entry= root.getRawClasspathEntry();
+            if(entry == null)
+                return false;
             return contains(selection.getPath().removeFirstSegments(root.getPath().segmentCount()), entry.getInclusionPatterns(), new SubProgressMonitor(monitor, 2));
         } finally {
             monitor.done();
@@ -920,7 +923,9 @@ public class ClasspathModifier {
      * @return <code>true</code> inclusion or exclusion filter set,
      * <code>false</code> otherwise.
      */
-    public static boolean filtersSet(IPackageFragmentRoot root) throws JavaModelException{
+    public static boolean filtersSet(IPackageFragmentRoot root) throws JavaModelException {
+        if(root == null)
+            return false;
         IClasspathEntry entry= root.getRawClasspathEntry();
         IPath[] inclusions= entry.getInclusionPatterns();
         IPath[] exclusions= entry.getExclusionPatterns();
@@ -932,22 +937,23 @@ public class ClasspathModifier {
     }
 
     /**
-     * Add a folder to the build path.
+     * Add a resource to the build path.
      * 
-     * @param folder a folder to be added to the build path
+     * @param resource the resource to be added to the build path
      * @param project the Java project
      * @param monitor progress monitor, can be <code>null</code> 
      * @return returns the new element of type <code>IPackageFragmentRoot</code> that has been added to the build path
      * @throws CoreException 
      * @throws OperationCanceledException 
      */
-    private CPListElement addToClasspath(IFolder folder, List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException{
+    private CPListElement addToClasspath(IResource resource, List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException{
         if (monitor == null)
             monitor= new NullProgressMonitor();
         try {
             monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.AddToBuildpath"), 2); //$NON-NLS-1$
-            exclude(folder.getFullPath(), existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
-            CPListElement entry= new CPListElement(project, IClasspathEntry.CPE_SOURCE, folder.getFullPath(), folder);
+            exclude(resource.getFullPath(), existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
+            int entryKind= resource instanceof IFolder ? IClasspathEntry.CPE_SOURCE : IClasspathEntry.CPE_LIBRARY;
+            CPListElement entry= new CPListElement(project, entryKind, resource.getFullPath(), resource);
             return entry;
         } finally {
             monitor.done();
@@ -1000,9 +1006,10 @@ public class ClasspathModifier {
      * entries of the project. The entry for the root will be looked up and removed from the list.
      * @param project the Java project
      * @param monitor progress monitor, can be <code>null</code>
-     * @return returns the <code>IFolder</code> that has been removed from the build path
+     * @return returns the <code>IResource</code> that has been removed from the build path; 
+     * is of type <code>IFile</code> if the root was an archive, otherwise <code>IFolder</code>
      */
-    private IFolder removeFromClasspath(IPackageFragmentRoot root, List existingEntries, IJavaProject project, IProgressMonitor monitor) throws CoreException {
+    private IResource removeFromClasspath(IPackageFragmentRoot root, List existingEntries, IJavaProject project, IProgressMonitor monitor) throws CoreException {
         if (monitor == null)
             monitor= new NullProgressMonitor();
         try {
@@ -1010,8 +1017,12 @@ public class ClasspathModifier {
             IClasspathEntry entry= root.getRawClasspathEntry();
             CPListElement elem= CPListElement.createFromExisting(entry, project);
             existingEntries.remove(elem);
-            IFolder folder= project.getProject().getWorkspace().getRoot().getFolder(root.getPath());
-            return folder;
+            IResource resource;
+            if(root.isArchive())
+                resource= project.getProject().getWorkspace().getRoot().getFile(root.getPath());
+            else
+                resource= project.getProject().getWorkspace().getRoot().getFolder(root.getPath());
+            return resource;
         } finally {
             monitor.done();
         }
@@ -1590,7 +1601,7 @@ public class ClasspathModifier {
             if (!project.getPath().equals(path)) {
                 IResource res= workspaceRoot.findMember(path);
                 if (res != null) {
-                    if (res.getType() != IResource.FOLDER) {
+                    if (res.getType() != IResource.FOLDER && res.getType() != IResource.FILE) {
                         rootStatus.setError(NewWizardMessages.getString("NewSourceFolderWizardPage.error.NotAFolder")); //$NON-NLS-1$
                         throw new CoreException(rootStatus);
                     }
@@ -1679,8 +1690,8 @@ public class ClasspathModifier {
             fListener.classpathEntryChanged(newEntries);
     }
     
-    private OutputFolderValidator getTrueValidator() throws JavaModelException {
-        return new OutputFolderValidator(null, null) {
+    private OutputFolderValidator getTrueValidator(IJavaProject project) throws JavaModelException {
+        return new OutputFolderValidator(null, project) {
             public boolean validate(IPath outputLocation) {
                 return true;
             }

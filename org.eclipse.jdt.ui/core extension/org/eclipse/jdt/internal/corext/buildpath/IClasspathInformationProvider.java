@@ -18,6 +18,8 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.viewers.ISelection;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -43,7 +45,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
  * @see org.eclipse.jdt.internal.corext.buildpath.UnincludeOperation
  * @see org.eclipse.jdt.internal.corext.buildpath.ExcludeOperation
  * @see org.eclipse.jdt.internal.corext.buildpath.UnexcludeOperation
- * @see org.eclipse.jdt.internal.corext.buildpath.EditOperation
+ * @see org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation
  * @see org.eclipse.jdt.internal.corext.buildpath.ResetOperation
  */
 public interface IClasspathInformationProvider {
@@ -51,14 +53,15 @@ public interface IClasspathInformationProvider {
     public static final int REMOVE_FROM_BP= 0x01;
     public static final int EXCLUDE= 0x02;
     public static final int UNEXCLUDE= 0x03;
-    public static final int EDIT= 0x04;
+    public static final int EDIT_FILTERS= 0x04;
     public static final int CREATE_LINK= 0x05;
     public static final int RESET_ALL= 0x06;
-    public static final int CREATE_OUTPUT= 0x07;
-    public static final int RESET= 0x08;
-    public static final int INCLUDE= 0x09;
-    public static final int UNINCLUDE= 0xA;
-    public static final int CREATE_FOLDER= 0xB;
+    public static final int EDIT_OUTPUT= 0x07;
+    public static final int CREATE_OUTPUT= 0x08;
+    public static final int RESET= 0x09;
+    public static final int INCLUDE= 0xA;
+    public static final int UNINCLUDE= 0xB;
+    public static final int CREATE_FOLDER= 0xC;
     
     /**
      * Method to invoce the <code>IClasspathInformationProvider</code> to 
@@ -97,7 +100,7 @@ public interface IClasspathInformationProvider {
      * @return the current list of selected elements from the provider, must not be 
      * <code>null</code>
      */
-    public List getSelection();
+    public ISelection getSelection();
     
     /**
      * Method to retrieve the Java project from the provider.

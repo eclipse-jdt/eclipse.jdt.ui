@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackag
 
 
 /**
- * Operation to include an object (which is either of type 
+ * Operation to include objects of type  
  * <code>IResource</code> or <code>IJavaElement</code>.
  * 
  * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier#include(List, IJavaProject, IProgressMonitor)
@@ -47,7 +47,7 @@ public class IncludeOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
     public IncludeOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Include"), IClasspathInformationProvider.INCLUDE); //$NON-NLS-1$
+        super(listener, informationProvider, NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.Include.tooltip"), IClasspathInformationProvider.INCLUDE); //$NON-NLS-1$
     }
     
     /**
@@ -60,7 +60,7 @@ public class IncludeOperation extends ClasspathModifierOperation {
     public void run(IProgressMonitor monitor) throws InvocationTargetException {
         List result= null;
         try {
-            List elements= fInformationProvider.getSelection();
+            List elements= getSelectedElements();
             IJavaProject project= fInformationProvider.getJavaProject();
             result= include(elements, project, monitor);
         } catch (CoreException e) {
