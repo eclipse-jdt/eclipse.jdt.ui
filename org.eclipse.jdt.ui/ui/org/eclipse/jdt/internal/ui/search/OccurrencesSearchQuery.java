@@ -11,13 +11,16 @@
 
 package org.eclipse.jdt.internal.ui.search;
 
+import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.ISearchResult;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.IJavaElement;
+
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.ISearchResult;
+
+import org.eclipse.jdt.core.IJavaElement;
 
 
 public class OccurrencesSearchQuery implements ISearchQuery {
@@ -43,13 +46,15 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 	 * @see org.eclipse.search.ui.ISearchQuery#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public IStatus run(IProgressMonitor monitor) {
-		fFinder.perform();
-		org.eclipse.search.ui.text.Match[] matches= Match.convert(fFinder.getOccurrenceMatches(fElement, fDocument));
-		fResult.addMatches(matches);
-		//Don't leak AST:
-		fFinder= null;
-		fDocument= null;
-		monitor.done();
+		if (fFinder != null) {
+			fFinder.perform();
+			org.eclipse.search.ui.text.Match[] matches= Match.convert(fFinder.getOccurrenceMatches(fElement, fDocument));
+			fResult.addMatches(matches);
+			//Don't leak AST:
+			fFinder= null;
+			fDocument= null;
+			monitor.done();
+		}
 		return Status.OK_STATUS;
 	}
 	
