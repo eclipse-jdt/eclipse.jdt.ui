@@ -36,8 +36,6 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
-import org.eclipse.jdt.internal.corext.Assert;
-
 /**
  * Utility methods for the Java Model.
  */
@@ -70,6 +68,8 @@ public class JavaModelUtil {
 			IJavaElement element= children[i];
 			if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT){
 				IPackageFragment pack= (IPackageFragment)element;
+				if (! fullyQualifiedName.startsWith(pack.getElementName()))
+					continue;
 				IType type= findType(pack, fullyQualifiedName);
 				if (type != null && type.exists())
 					return type;
@@ -80,8 +80,8 @@ public class JavaModelUtil {
 	
 	private static IType findType(IPackageFragment pack, String fullyQualifiedName) throws JavaModelException{
 		ICompilationUnit[] cus= pack.getCompilationUnits();
-		for (int k= 0; k < cus.length; k++) {
-			ICompilationUnit unit= cus[k];
+		for (int i= 0; i < cus.length; i++) {
+			ICompilationUnit unit= cus[i];
 			IType type= findType(unit, fullyQualifiedName);
 			if (type != null && type.exists())
 				return type;
@@ -631,6 +631,7 @@ public class JavaModelUtil {
 	}
 
 	public static IType[] getAllSuperTypes(IType type, IProgressMonitor pm) throws JavaModelException {
+		//workaround for bugs 23644 and 23656
 		try{
 			pm.beginTask("", 3);
 			ITypeHierarchy hierarchy= type.newSupertypeHierarchy(new SubProgressMonitor(pm, 1));
@@ -644,24 +645,11 @@ public class JavaModelUtil {
 				IType[] superTypes= getAllSuperTypes(superType, new SubProgressMonitor(subPm, 1));
 				types.addAll(Arrays.asList(superTypes));
 			}
-			types.add(getObject(type.getJavaProject()));
+			types.add(type.getJavaProject().findType("java.lang.Object"));//$NON-NLS-1$
 			subPm.done();
 			return (IType[]) types.toArray(new IType[types.size()]);
 		} finally {
 			pm.done();
 		}	
-	}
-	private static IType getObject(IJavaProject jProject) throws JavaModelException {
-		return jProject.findType("java.lang.Object");//$NON-NLS-1$
-	}
-	
-	public static IType getMethodParameterType(IMethod method, int parameterIndex) throws JavaModelException{
-		Assert.isTrue(parameterIndex >=0);
-		if (method.getNumberOfParameters() < parameterIndex)
-			return null;
-		String fqn= getResolvedTypeName(method.getParameterTypes()[parameterIndex], method.getDeclaringType());
-		if (fqn == null)
-			return null;
-		return JavaModelUtil.findType(method.getJavaProject(), fqn);	
 	}
 }
