@@ -3,6 +3,9 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ui.model.IWorkbenchAdapter;
@@ -592,7 +595,8 @@ public class JavaElementLabels {
 	 */	
 	public static void getPackageFragmentRootLabel(IPackageFragmentRoot root, int flags, StringBuffer buf) {
 		boolean varNamePrepended= false;
-		if (root.isArchive() && getFlag(flags, ROOT_VARIABLE)) {
+		boolean isArchive= root.isArchive();
+		if (isArchive && getFlag(flags, ROOT_VARIABLE)) {
 			try {
 				IClasspathEntry rawEntry= root.getRawClasspathEntry();
 				if (rawEntry != null) {
@@ -606,7 +610,8 @@ public class JavaElementLabels {
 				JavaPlugin.log(e); // problems with class path
 			}
 		}
-		if (root.isExternal()) {
+		boolean isExternal= root.isExternal();
+		if (isExternal) {
 			IPath path= root.getPath();
 			int segements= path.segmentCount();
 			if (segements > 0 && !varNamePrepended) {
@@ -618,15 +623,39 @@ public class JavaElementLabels {
 			} else {
 				buf.append(path.toOSString());
 			}
+		} else if (isArchive && !isExternal && !getFlag(flags, ROOT_QUALIFIED | ROOT_POST_QUALIFIED)) {
+			IPath path= root.getPath();
+			String qualified= null;
+			String name= null;
+			int segments= path.segmentCount();
+			if (segments > 1) {
+				name= path.segment(segments - 1);
+				qualified= path.removeLastSegments(1).makeRelative().toString(); 
+			} else {
+				name= path.toString();
+			}
+			if (JavaModelUtil.isReferenced(root)) {
+				buf.append(name);
+				if (qualified != null) {
+					buf.append(CONCAT_STRING);
+					buf.append(qualified);
+				}
+			} else {
+				buf.append(name);
+			}
 		} else {
 			if (getFlag(flags, ROOT_QUALIFIED)) {
-				buf.append(root.getPath().makeRelative().toString());
+				// This is necessary since the path of an internal Jar is always the
+				// path to its resource. But it may be referenced.
+				buf.append(root.getParent().getPath().makeRelative().toString());
+				buf.append('/');
+				buf.append(root.getElementName());
 			} else {
 				buf.append(root.getElementName());
 			}
 			if (getFlag(flags, ROOT_POST_QUALIFIED)) {
 				buf.append(CONCAT_STRING);
-				buf.append(root.getParent().getElementName());
+				buf.append(root.getParent().getPath().makeRelative().toString());
 			}
 		}		
 	}	

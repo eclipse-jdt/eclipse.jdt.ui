@@ -10,12 +10,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
@@ -61,6 +63,22 @@ public class JavaModelUtil {
 				return type;
 		}	
 		return null;
+	}
+	
+	/**
+	 * Returns <code>true</code> if the given package fragment root is
+	 * referenced. This means it is own by a different project but is referenced
+	 * by the root's parent. Returns <code>false</code> if the given root
+	 * doesn't have an underlying resource.
+	 */
+	public static boolean isReferenced(IPackageFragmentRoot root) {
+		IResource resource= root.getResource();
+		if (resource != null) {
+			IProject jarProject= resource.getProject();
+			IProject container= root.getJavaProject().getProject();
+			return !container.equals(jarProject);
+		}
+		return false;
 	}
 	
 	private static IType findType(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException{
