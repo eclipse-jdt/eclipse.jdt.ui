@@ -7,6 +7,8 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jface.wizard.IWizardPage;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
@@ -29,6 +31,27 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 	public UserInputWizardPage(String name, boolean isLastUserPage) {
 		super(name);
 		fIsLastUserPage= isLastUserPage;
+	}
+	
+	/**
+	 * Sets the page's complete status depending on the given <tt>
+	 * ReactoringStatus</tt>.
+	 * 	 * @param status the <tt>RefactoringStatus</tt>	 */
+	public void setPageComplete(RefactoringStatus status) {
+		getRefactoringWizard().setStatus(status);
+
+		int severity= status.getSeverity();
+		if (severity == RefactoringStatus.FATAL){
+			setPageComplete(false);
+			setErrorMessage(status.getFirstMessage(severity));	
+		} else {
+			setPageComplete(true);
+			setErrorMessage(null);
+			if (severity == RefactoringStatus.OK)
+				setMessage(null, NONE);
+			else	
+				setMessage(status.getFirstMessage(severity), getCorrespondingIStatusSeverity(severity));	
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -102,5 +125,17 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 		}
 		
 		return result;	
+	}
+	
+	private static int getCorrespondingIStatusSeverity(int severity) {
+		if (severity == RefactoringStatus.FATAL)
+			return IStatus.ERROR;
+		if (severity == RefactoringStatus.ERROR)
+			return IStatus.WARNING;
+		if (severity == RefactoringStatus.WARNING)
+			return IStatus.WARNING;
+		if (severity == RefactoringStatus.INFO)
+			return IStatus.INFO;
+		return IStatus.OK;			
 	}
 }

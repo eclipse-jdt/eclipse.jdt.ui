@@ -302,14 +302,14 @@ public class ExtractMethodRefactoring extends Refactoring {
 				ParameterInfo other= (ParameterInfo) others.next();
 				if (parameter != other && other.getNewName().equals(parameter.getNewName())) {
 					result.addError(RefactoringCoreMessages.getFormattedString(
-						"ExtractMethodRefactoring.error.sameParameter", 
+						"ExtractMethodRefactoring.error.sameParameter", //$NON-NLS-1$
 						other.getNewName()));
 					return result;
 				}
 			}
 			if (parameter.isRenamed() && fUsedNames.contains(parameter.getNewName())) {
 				result.addError(RefactoringCoreMessages.getFormattedString(
-					"ExtractMethodRefactoring.error.nameInUse", 
+					"ExtractMethodRefactoring.error.nameInUse", //$NON-NLS-1$
 					parameter.getNewName()));
 				return result;
 			}
