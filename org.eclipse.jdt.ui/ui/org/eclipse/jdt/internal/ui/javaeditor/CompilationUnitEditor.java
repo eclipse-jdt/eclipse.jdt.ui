@@ -40,7 +40,6 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -54,7 +53,6 @@ import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextOperationTarget;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.IWidgetTokenKeeper;
@@ -84,6 +82,7 @@ import org.eclipse.ui.texteditor.TextOperationAction;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
@@ -639,6 +638,199 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	}
 	
+	/**
+	 * Remembers additional data for a given
+	 * offset to be able restore it later.
+	 * 
+	 * @since 3.0
+	 */
+	private class RememberedOffset {
+		/** Remembered line for the given offset */
+		private int fLine;
+		/** Remembered column for the given offset*/
+		private int fColumn;
+		/** Remembered Java element for the given offset*/
+		private IJavaElement fElement;
+		/** Remembered Java element line for the given offset*/
+		private int fElementLine;
+		
+		/**
+		 * Store visual properties of the given offset.  
+		 * 
+		 * @param offset Offset in the document
+		 */
+		public void setOffset(int offset) {
+			try {
+				IDocument document= getSourceViewer().getDocument();
+				fLine= document.getLineOfOffset(offset);
+				fColumn= offset - document.getLineOffset(fLine);
+				fElement= getElementAt(offset, true);
+
+				fElementLine= -1;
+				if (fElement instanceof IMember) {
+					ISourceRange range= ((IMember) fElement).getNameRange();
+					if (range != null)
+						fElementLine= document.getLineOfOffset(range.getOffset());
+				}
+				if (fElementLine == -1)
+					fElementLine= document.getLineOfOffset(getOffset(fElement));
+			} catch (BadLocationException e) {
+				// should not happen
+				JavaPlugin.log(e);
+				clear();
+			} catch (JavaModelException e) {
+				// should not happen
+				JavaPlugin.log(e.getStatus());
+				clear();
+			}
+		}
+
+		/**
+		 * Return offset recomputed from stored visual properties.  
+		 * 
+		 * @return Offset in the document
+		 */
+		public int getOffset() {
+			try {
+				IJavaElement newElement= getElement();
+				if (newElement == null)
+					return -1;
+				
+				IDocument document= getSourceViewer().getDocument();
+				int newElementLine= -1;
+				if (newElement instanceof IMember) {
+					ISourceRange range= ((IMember) newElement).getNameRange();
+					if (range != null)
+						newElementLine= document.getLineOfOffset(range.getOffset());
+				}
+				if (newElementLine == -1)
+					newElementLine= document.getLineOfOffset(getOffset(newElement));
+				if (newElementLine == -1)
+					return -1;
+
+				int offset= document.getLineOffset(fLine + newElementLine - fElementLine) + fColumn;
+
+				if (!containsOffset(newElement, offset))
+					return -1;
+				
+				return offset;
+			} catch (BadLocationException e) {
+				// should not happen
+				JavaPlugin.log(e);
+				return -1;
+			} catch (JavaModelException e) {
+				// should not happen
+				JavaPlugin.log(e.getStatus());
+				return -1;
+			}
+		}
+		
+		/**
+		 * Return Java element recomputed from stored visual properties.  
+		 * 
+		 * @return Java element
+		 */
+		public IJavaElement getElement() {
+			if (fElement == null)
+				return null;
+			
+			return findElement(fElement);
+		}
+
+		/**
+		 * Clears the stored position 
+		 */
+		public void clear() {
+			fLine= -1;
+			fColumn= -1;
+			fElement= null;
+			fElementLine= -1;
+		}
+		
+		/**
+		 * Does the given Java element contain the given offset?
+		 * @param element Java element
+		 * @param offset Offset
+		 * @return <code>true</code> iff the Java element contains the offset
+		 */
+		private boolean containsOffset(IJavaElement element, int offset) {
+			int elementOffset= getOffset(element);
+			int elementLength= getLength(element);
+			return (elementOffset > -1 && elementLength > -1) ? (offset >= elementOffset && offset < elementOffset + elementLength) : false;
+		}
+		/**
+		 * Returns the offset of the given Java element.
+		 * 
+		 * @param element	Java element
+		 * @return Offset of the given Java element
+		 */
+		private int getOffset(IJavaElement element) {
+			if (element instanceof ISourceReference) {
+				ISourceReference sr= (ISourceReference) element;
+				try {
+					ISourceRange srcRange= sr.getSourceRange();
+					if (srcRange != null)
+						return srcRange.getOffset();
+				} catch (JavaModelException e) {
+				}
+			}
+			return -1;	
+		}
+		
+		/**
+		 * Returns the length of the given Java element.
+		 * 
+		 * @param element	Java element
+		 * @return Length of the given Java element
+		 */
+		private int getLength(IJavaElement element) {
+			if (element instanceof ISourceReference) {
+				ISourceReference sr= (ISourceReference) element;
+				try {
+					ISourceRange srcRange= sr.getSourceRange();
+					if (srcRange != null)
+						return srcRange.getLength();
+				} catch (JavaModelException e) {
+				}
+			}
+			return -1;	
+		}
+		
+		/**
+		 * Returns the updated java element for the old java element.
+		 * 
+		 * @param element Old Java element
+		 * @return Updated Java element
+		 */
+		private IJavaElement findElement(IJavaElement element) {
+			
+			if (element == null)
+				return null;
+			
+			IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
+			ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
+			
+			if (unit != null) {
+				try {
+					
+					synchronized (unit) {
+						unit.reconcile(false, null);
+					}
+					IJavaElement[] findings= unit.findElements(element);
+					if (findings != null && findings.length > 0)
+						return findings[0];
+				
+				} catch (JavaModelException x) {
+					JavaPlugin.log(x.getStatus());
+					// nothing found, be tolerant and go on
+				}
+			}
+			
+			return null;
+		}
+		
+	}
+	
 	/** Preference key for code formatter tab size */
 	private final static String CODE_FORMATTER_TAB_SIZE= JavaCore.FORMATTER_TAB_SIZE;
 	/** Preference key for inserting spaces rather than tabs */
@@ -655,12 +847,21 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private JavaEditorErrorTickUpdater fJavaEditorErrorTickUpdater;
 	/** The editor's tab converter */
 	private TabConverter fTabConverter;
-	/** The remembered java element */
-	private IJavaElement fRememberedElement;
-	/** The remembered selection */
-	private ITextSelection fRememberedSelection;
-	/** The remembered java element offset */
-	private int fRememberedElementOffset;
+	/**
+	 * The remembered selection start.
+	 * @since 3.0
+	 */
+	private RememberedOffset fRememberedSelectionStartOffset= new RememberedOffset();
+	/**
+	 * The remembered selection end.
+	 * @since 3.0
+	 */
+	private RememberedOffset fRememberedSelectionEndOffset= new RememberedOffset();
+	/**
+	 * The remembered selection sign (<code>true</code> for right-to-left selection).
+	 * @since 3.0
+	 */
+	private boolean fRememberedSelectionSign;
 	/** The bracket inserter. */
 	private BracketInserter fBracketInserter= new BracketInserter();
 
@@ -808,7 +1009,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			try {
 				if (reconcile) {
 					synchronized (unit) {
-						unit.reconcile();
+						unit.reconcile(false, null);
 					}
 					return unit.getElementAt(offset);
 				} else if (unit.isConsistent())
@@ -1262,62 +1463,24 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		fGenerateActionGroup.editorStateChanged();
 	}
 	
-	/**
-	 * Returns the updated java element for the old java element.
-	 */
-	private IJavaElement findElement(IJavaElement element) {
-		
-		if (element == null)
-			return null;
-		
-		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-		ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
-		
-		if (unit != null) {
-			try {
-				
-				synchronized (unit) {
-					unit.reconcile();
-				}
-				IJavaElement[] findings= unit.findElements(element);
-				if (findings != null && findings.length > 0)
-					return findings[0];
-			
-			} catch (JavaModelException x) {
-				JavaPlugin.log(x.getStatus());
-				// nothing found, be tolerant and go on
-			}
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * Returns the offset of the given Java element.
-	 */
-	private int getOffset(IJavaElement element) {
-		if (element instanceof ISourceReference) {
-			ISourceReference sr= (ISourceReference) element;
-			try {
-				ISourceRange srcRange= sr.getSourceRange();
-				if (srcRange != null)
-					return srcRange.getOffset();
-			} catch (JavaModelException e) {
-			}
-		}
-		return -1;	
-	}
-	
 	/*
 	 * @see AbstractTextEditor#rememberSelection()
 	 */
 	protected void rememberSelection() {
-		ISelectionProvider sp= getSelectionProvider();
-		fRememberedSelection= (sp == null ? null : (ITextSelection) sp.getSelection());
-		if (fRememberedSelection != null) {
-			fRememberedElement= getElementAt(fRememberedSelection.getOffset(), true);
-			fRememberedElementOffset= getOffset(fRememberedElement); 
-		}
+		IRegion selection= getSignedSelection(getSourceViewer());
+		int startOffset= selection.getOffset();
+		int endOffset= startOffset + selection.getLength();
+
+		
+		// remember offset of right-most selected character
+		fRememberedSelectionSign= startOffset > endOffset;
+		if (fRememberedSelectionSign)
+			startOffset--;
+		else
+			endOffset--;
+		
+		fRememberedSelectionStartOffset.setOffset(startOffset);
+		fRememberedSelectionEndOffset.setOffset(endOffset);
 	}
 	
 	/*
@@ -1327,19 +1490,40 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		
 		try {
 			
-			if (getSourceViewer() == null || fRememberedSelection == null)
-				return;
-				
-			IJavaElement newElement= findElement(fRememberedElement);
-			int newOffset= getOffset(newElement);
-			int delta= (newOffset > -1 && fRememberedElementOffset > -1) ? newOffset - fRememberedElementOffset : 0;
-			if (isValidSelection(delta + fRememberedSelection.getOffset(), fRememberedSelection.getLength()))
-				selectAndReveal(delta + fRememberedSelection.getOffset(), fRememberedSelection.getLength());			
+			int startOffset= fRememberedSelectionStartOffset.getOffset();
+			int endOffset= fRememberedSelectionEndOffset.getOffset();
 			
+			// restore offset of right-most selected character plus one
+			if (fRememberedSelectionSign) {
+				if (startOffset != -1)
+					startOffset++;
+			} else {
+				if (endOffset != -1)
+					endOffset++;
+			}
+			
+			if (startOffset == -1)
+				startOffset= endOffset; // fallback to carret offset
+			
+			if (endOffset == -1)
+				endOffset= startOffset; // fallback to other offset
+			
+			IJavaElement element;
+			if (endOffset == -1) {
+				 // fallback to element selection
+				element= fRememberedSelectionEndOffset.getElement();
+				if (element == null)
+					element= fRememberedSelectionStartOffset.getElement();
+				if (element != null)
+					setSelection(element);
+				return;
+			}
+						
+			if (isValidSelection(startOffset, endOffset - startOffset))
+				selectAndReveal(startOffset, endOffset - startOffset);
 		} finally {
-			fRememberedSelection= null;
-			fRememberedElement= null;
-			fRememberedElementOffset= -1;
+			fRememberedSelectionStartOffset.clear();
+			fRememberedSelectionEndOffset.clear();
 		}
 	}
 	
