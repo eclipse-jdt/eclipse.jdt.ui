@@ -112,7 +112,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			ICompilationUnit cu= getCompilationUnit(marker);
 			if (cu != null) {
 				IEditorInput input= EditorUtility.getEditorInput(cu);
-				if (input != null) { // only works with element open in editor
+				if (input != null) {
 					CorrectionContext context= findCorrectionContext(input, marker);
 					if (context != null) {
 						ArrayList proposals= new ArrayList();
