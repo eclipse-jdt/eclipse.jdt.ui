@@ -416,8 +416,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				initSelections();
 			}
 			fPattern.setFocus();
-			getContainer().setPerformActionEnabled(fPattern.getText().length() > 0);
 		}
+		updateOKStatus();
 		super.setVisible(visible);
 	}
 	
@@ -549,11 +549,12 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		fPattern.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				handlePatternSelected();
+				updateOKStatus();
 			}
 		});
 		fPattern.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				getContainer().setPerformActionEnabled(getPattern().length() > 0);
+				updateOKStatus();
 				updateCaseSensitiveCheckbox();
 			}
 		});
@@ -577,6 +578,11 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		
 		return result;
 	}
+	
+	final void updateOKStatus() {
+		getContainer().setPerformActionEnabled(getPattern().length() > 0);
+	}
+	
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
