@@ -47,6 +47,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
@@ -66,6 +67,8 @@ import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
 
+import org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPreferencePage;
+
 /**
  * Represents the java plugin. It provides a series of convenience methods such as
  * access to the workbench, keeps track of elements shared by all editors and viewers
@@ -75,6 +78,15 @@ public class JavaPlugin extends AbstractUIPlugin {
 		
 	private static JavaPlugin fgJavaPlugin;
 
+	/*
+	 * Work in progress. Might be moved to Java UI.
+	 */
+	public static String ID_BROWSING_PERSPECTIVE= JavaUI.ID_PLUGIN + ".JavaBrowsingPerspective";	
+	public static String ID_PROJECTS_VIEW= JavaUI.ID_PLUGIN + ".ProjectsView";
+	public static String ID_PACKAGES_VIEW= JavaUI.ID_PLUGIN + ".PackagesView";
+	public static String ID_TYPES_VIEW= JavaUI.ID_PLUGIN + ".TypesView";
+	public static String ID_MEMBERS_VIEW= JavaUI.ID_PLUGIN + ".MembersView";
+	
 	private CompilationUnitDocumentProvider fCompilationUnitDocumentProvider;
 	private ClassFileDocumentProvider fClassFileDocumentProvider;
 	private JavaTextTools fJavaTextTools;
@@ -305,5 +317,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 		CodeGenerationPreferencePage.initDefaults(store);
 		
 		WorkInProgressPreferencePage.initDefaults(store);
+		JavaBrowsingPreferencePage.initDefaults(store);
 	}
 }

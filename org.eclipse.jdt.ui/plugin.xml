@@ -797,4 +797,100 @@ JavaStructureDiffViewerCreator
    </page>
 </extension>
                                                             -->
+
+<!-- =========================================================================== -->
+<!-- Java Browsing 																 -->
+<!-- =========================================================================== -->
+
+<extension 
+	point="org.eclipse.ui.perspectives">
+	<perspective
+		id="org.eclipse.jdt.ui.JavaBrowsingPerspective"
+		name="%Browsing.perspectiveName"
+		icon="icons/full/cview16/browse_persp.gif"
+		class="org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPerspectiveFactory">
+	</perspective>
+</extension>
+
+
+<extension point="org.eclipse.ui.perspectiveExtensions">
+	<perspectiveExtension 
+		targetID="org.eclipse.ui.resourcePerspective">
+		<perspectiveShortcut id="org.eclipse.jdt.ui.JavaBrowsingPerspective"/>
+	</perspectiveExtension>
+	<perspectiveExtension 
+		targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+		<perspectiveShortcut id="org.eclipse.jdt.ui.JavaBrowsingPerspective"/>
+	</perspectiveExtension>
+	<perspectiveExtension 
+		targetID="org.eclipse.jdt.ui.JavaPerspective">
+		<perspectiveShortcut id="org.eclipse.jdt.ui.JavaBrowsingPerspective"/>
+	</perspectiveExtension>
+	<perspectiveExtension 
+		targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+		<perspectiveShortcut id="org.eclipse.jdt.ui.JavaPerspective"/>
+	</perspectiveExtension>
+	<perspectiveExtension 
+		targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+		<perspectiveShortcut id="org.eclipse.debug.ui.DebugPerspective"/>
+	</perspectiveExtension>
+	<perspectiveExtension targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+			<perspectiveShortcut id="org.eclipse.vcm.ui.vcmPerspective" /> 
+		</perspectiveExtension>
+	<perspectiveExtension 
+		targetID="org.eclipse.debug.ui.DebugPerspective">
+		<perspectiveShortcut id="org.eclipse.jdt.ui.JavaBrowsingPerspective"/>
+	</perspectiveExtension>
+</extension>
+
+
+<extension 
+	point="org.eclipse.ui.views">
+	<category 
+		id="org.eclipse.jdt.ui.java.browsing"
+		name="%Browsing.viewCategoryName">
+	</category>
+
+	<view
+		id="org.eclipse.jdt.ui.ProjectsView"
+		name="%Browsing.projectsViewName"
+		category="org.eclipse.jdt.ui.java.browsing"
+		class="org.eclipse.jdt.internal.ui.browsing.ProjectsView"
+		icon="icons/full/cview16/projects.gif">
+	</view>
+
+	<view
+		id="org.eclipse.jdt.ui.PackagesView"
+		name="%Browsing.packagesViewName"
+		category="org.eclipse.jdt.ui.java.browsing"
+		class="org.eclipse.jdt.internal.ui.browsing.PackagesView"
+		icon="icons/full/cview16/packages.gif">
+	</view>
+
+	<view
+		id="org.eclipse.jdt.ui.TypesView"
+		name="%Browsing.typesViewName"
+		category="org.eclipse.jdt.ui.java.browsing"
+		class="org.eclipse.jdt.internal.ui.browsing.TypesView"
+		icon="icons/full/cview16/types.gif">
+	</view>
+
+	<view
+		id="org.eclipse.jdt.ui.MembersView"
+		name="%Browsing.membersViewName"
+		category="org.eclipse.jdt.ui.java.browsing"
+		class="org.eclipse.jdt.internal.ui.browsing.MembersView"
+		icon="icons/full/cview16/members.gif">
+	</view>
+</extension>
+
+<extension
+	point="org.eclipse.ui.preferencePages">
+	<page name="%Browsing.preferencePageName"
+		id="org.eclipse.jdt.ui.preferences.JavaBrowsingPreferencePage"
+		class="org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPreferencePage"
+		category="org.eclipse.jdt.ui.preferences.WorkInProgressPreferencePage">
+	</page>
+</extension>
+
 </plugin>

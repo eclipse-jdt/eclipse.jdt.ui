@@ -60,6 +60,10 @@ public interface IJavaHelpContextIds {
 	// view parts
 	public static final String PACKAGE_VIEW= PREFIX + "package_view_context"; //$NON-NLS-1$
 	public static final String TYPE_HIERARCHY_VIEW= PREFIX + "type_hierarchy_view_context"; //$NON-NLS-1$
+	public static final String PROJECTS_VIEW= PREFIX + "projects_view_context"; //$NON-NLS-1$
+	public static final String PACKAGES_VIEW= PREFIX + "packages_view_context"; //$NON-NLS-1$
+	public static final String TYPES_VIEW= PREFIX + "types_view_context"; //$NON-NLS-1$
+	public static final String MEMBERS_VIEW= PREFIX + "members_view_context"; //$NON-NLS-1$
 
 	// Preference/Property pages
 	public static final String BUILD_PATH_PROPERTY_PAGE= PREFIX + "build_path_property_page_context"; //$NON-NLS-1$
@@ -76,6 +80,7 @@ public interface IJavaHelpContextIds {
 	public static final String COMPILER_PREFERENCE_PAGE= PREFIX + "compiler_preference_page_context"; //$NON-NLS-1$
 	public static final String TEMPLATE_PREFERENCE_PAGE= PREFIX + "template_preference_page_context"; //$NON-NLS-1$
 	public static final String WORK_IN_PROGRESS_PREFERENCE_PAGE= PREFIX + "work_in_progress_preference_page_context"; //$NON-NLS-1$
+	public static final String JAVA_BROWSING_PREFERENCE_PAGE= PREFIX + "java_browsing_preference_page_context"; //$NON-NLS-1$	
 
 	// Wizard pages
 	public static final String NEW_JAVAPROJECT_WIZARD_PAGE= PREFIX + "new_javaproject_wizard_page_context"; //$NON-NLS-1$
