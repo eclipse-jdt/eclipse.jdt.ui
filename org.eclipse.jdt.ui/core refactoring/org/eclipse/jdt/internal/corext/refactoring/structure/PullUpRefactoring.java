@@ -24,7 +24,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
@@ -34,7 +33,6 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -54,6 +52,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class PullUpRefactoring extends Refactoring {
@@ -721,12 +720,11 @@ public class PullUpRefactoring extends Refactoring {
 	}
 		
 	private TextEdit createAddMemberEdit(String methodSource) throws JavaModelException {
-		int tabWidth=getTabWidth();
 		IMethod sibling= getLastMethod(getSuperType(new NullProgressMonitor()));
 		if (sibling != null)
-			return new MemberEdit(sibling, MemberEdit.INSERT_AFTER, new String[]{ methodSource}, tabWidth);
+			return new MemberEdit(sibling, MemberEdit.INSERT_AFTER, new String[]{ methodSource}, CodeFormatterUtil.getTabWidth());
 		return
-			new MemberEdit(getSuperType(new NullProgressMonitor()), MemberEdit.ADD_AT_END, new String[]{ methodSource}, tabWidth);
+			new MemberEdit(getSuperType(new NullProgressMonitor()), MemberEdit.ADD_AT_END, new String[]{ methodSource}, CodeFormatterUtil.getTabWidth());
 	}
 
 	private void addDeleteMembersChange(TextChangeManager manager) throws CoreException {
@@ -754,19 +752,13 @@ public class PullUpRefactoring extends Refactoring {
 	private void addAddImportsChange(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getSuperType(new NullProgressMonitor()).getCompilationUnit());		
 		IType[] referencedTypes= ReferenceFinderUtil.getTypesReferencedIn(fElementsToPullUp, pm);
-		ImportEdit importEdit= new ImportEdit(cu, fPreferenceSettings);
+		ImportEditManager importEditManager= new ImportEditManager(fPreferenceSettings);
 		for (int i= 0; i < referencedTypes.length; i++) {
-			IType iType= referencedTypes[i];
-			importEdit.addImport(JavaModelUtil.getFullyQualifiedName(iType));
+			importEditManager.addImportTo(referencedTypes[i], cu);
 		}
-		if (! importEdit.isEmpty())
-			manager.get(cu).addTextEdit(RefactoringCoreMessages.getString("PullUpRefactoring.update_imports"), importEdit); //$NON-NLS-1$
+		importEditManager.fill(manager);
 	}
 
-	private static int getTabWidth() {
-		return Integer.parseInt((String)JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_SIZE));
-	}
-	
 	private static boolean needsToChangeVisibility(IMember method) throws JavaModelException {
 		return ! (JdtFlags.isPublic(method) || JdtFlags.isProtected(method));
 	}
