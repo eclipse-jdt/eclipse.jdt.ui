@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
@@ -155,10 +156,17 @@ public abstract class StructureSelectionAction extends Action {
 	private CompilationUnit getAST(ISourceReference sr) {
 
 		if (sr instanceof ICompilationUnit) {
+			CompilationUnit sharedAST= JavaPlugin.getDefault().getASTProvider().getAST((ICompilationUnit) sr, ASTProvider.WAIT_NO, null);
+			if (sharedAST != null)
+				return sharedAST;
 			ASTParser p= ASTParser.newParser(AST.JLS3);
 			p.setSource((ICompilationUnit) sr);
 			return (CompilationUnit) p.createAST(null);
+		
 		} else if (sr instanceof IClassFile) {
+			CompilationUnit sharedAST= JavaPlugin.getDefault().getASTProvider().getAST((IClassFile) sr, ASTProvider.WAIT_NO, null);
+			if (sharedAST != null)
+				return sharedAST;
 			ASTParser p= ASTParser.newParser(AST.JLS3);
 			p.setSource((IClassFile) sr);
 			return (CompilationUnit) p.createAST(null);
