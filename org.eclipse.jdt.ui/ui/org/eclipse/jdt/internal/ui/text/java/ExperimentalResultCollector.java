@@ -59,7 +59,7 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 		String displayName= getLabelProvider().createLabel(methodProposal);
 		int start= methodProposal.getReplaceStart();
 		int end= methodProposal.getReplaceEnd();
-		int relevance= methodProposal.getRelevance();
+		int relevance= computeRelevance(methodProposal);
 		String name= String.valueOf(methodProposal.getName());
 		
 		

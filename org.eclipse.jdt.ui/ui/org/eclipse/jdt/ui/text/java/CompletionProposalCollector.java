@@ -533,7 +533,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	
 	private IJavaCompletionProposal createAnnotationAttributeReferenceProposal(CompletionProposal proposal) {
 		String displayString= fLabelProvider.createLabelWithTypeAndDeclaration(proposal);
-		ImageDescriptor descriptor= fLabelProvider.createImageDescriptor(proposal);
+		ImageDescriptor descriptor= fLabelProvider.createMethodImageDescriptor(proposal);
 		String completion= String.valueOf(proposal.getCompletion());
 		return new JavaCompletionProposal(completion, proposal.getReplaceStart(), getLength(proposal), getImage(descriptor), displayString, computeRelevance(proposal));
 	}
@@ -628,18 +628,17 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 	
 	private IJavaCompletionProposal createMethodReferenceProposal(CompletionProposal methodProposal) {
-		Image image= getImage(fLabelProvider.createImageDescriptor(methodProposal));
-		String displayName= fLabelProvider.createLabel(methodProposal);
+		Image image= getImage(fLabelProvider.createMethodImageDescriptor(methodProposal));
+		String displayName= fLabelProvider.createMethodProposalLabel(methodProposal);
 		String completion= String.valueOf(methodProposal.getCompletion());
 		int start= methodProposal.getReplaceStart();
-		int relevance= methodProposal.getRelevance();
+		int relevance= computeRelevance(methodProposal);
 		
 		JavaCompletionProposal proposal= new JavaCompletionProposal(completion, start, getLength(methodProposal), image, displayName, relevance);
 		
 		if (fJavaProject != null)
 			proposal.setProposalInfo(new MethodProposalInfo(fJavaProject, methodProposal));
 
-		char[] completionName= methodProposal.getCompletion();
 		boolean hasParameters= Signature.getParameterCount(methodProposal.getSignature()) > 0;
 		if (hasParameters) {
 			IContextInformation contextInformation= createMethodContextInformation(methodProposal);
@@ -647,9 +646,9 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		
 			proposal.setTriggerCharacters(METHOD_WITH_ARGUMENTS_TRIGGERS);
 			
-			if (completionName.length > 0) {
+			if (completion.endsWith(")")) { //$NON-NLS-1$
 				// set the cursor before the closing bracket
-				proposal.setCursorPosition(completionName.length - 1);
+				proposal.setCursorPosition(completion.length() - 1);
 			}
 		} else {
 			proposal.setTriggerCharacters(METHOD_TRIGGERS);
@@ -676,8 +675,8 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		
 		String completion= String.valueOf(typeProposal.getCompletion());
 		int start= typeProposal.getReplaceStart();
-		ImageDescriptor descriptor= fLabelProvider.createImageDescriptor(typeProposal);
-		String label= fLabelProvider.createLabel(typeProposal);
+		ImageDescriptor descriptor= fLabelProvider.createTypeImageDescriptor(typeProposal);
+		String label= fLabelProvider.createTypeProposalLabel(typeProposal);
 		int relevance= computeRelevance(typeProposal);
 
 		JavaCompletionProposal proposal= new JavaTypeCompletionProposal(completion, fCompilationUnit, start, getLength(typeProposal), getImage(descriptor), label, relevance, typeName, packageName);
