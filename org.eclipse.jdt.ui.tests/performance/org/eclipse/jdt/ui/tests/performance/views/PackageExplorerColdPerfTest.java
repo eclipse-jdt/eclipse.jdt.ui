@@ -20,37 +20,39 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.test.performance.Dimension;
-
 import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
 
-public class PackageExplorerEmptyPerfTest extends JdtPerformanceTestCase {
+public class PackageExplorerColdPerfTest extends JdtPerformanceTestCase {
 
 	public static Test setUpTest(Test someTest) {
 		return new TestSetup(someTest);
 	}
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite("PackageExplorerEmptyPerfTest");
-		suite.addTest(new PackageExplorerPerfTest("testOpen"));
+		TestSuite suite= new TestSuite("PackageExplorerColdPerfTest");
+		suite.addTest(new PackageExplorerColdPerfTest("testOpen"));
 		return new TestSetup(suite);
 	}
 
-	public PackageExplorerEmptyPerfTest(String name) {
+	public PackageExplorerColdPerfTest(String name) {
 		super(name);
 	}
 
+	public final void finishMeasurements() {
+		super.finishMeasurements();
+	}
+
+	public final void startMeasuring() {
+		super.startMeasuring();
+	}
+
 	public void testOpen() throws Exception {
-		tagAsGlobalSummary("Open Empty Package Explorer - Cold", Dimension.CPU_TIME);
 		IWorkbenchWindow activeWorkbenchWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page= activeWorkbenchWindow.getActivePage();
 		page.close();
 		page= activeWorkbenchWindow.openPage("org.eclipse.ui.resourcePerspective", ResourcesPlugin.getWorkspace().getRoot());
 		joinBackgroudActivities();
-		startMeasuring();
-		page.showView(JavaUI.ID_PACKAGES);
-		finishMeasurements();
+		MockupPackageExplorerPart.fgTest= this;
+		page.showView("org.eclipse.jdt.ui.tests.MockPackageExplorer");
 	}
 }
