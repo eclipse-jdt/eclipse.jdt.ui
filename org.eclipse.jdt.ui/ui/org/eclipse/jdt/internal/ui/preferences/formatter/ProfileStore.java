@@ -219,10 +219,12 @@ public class ProfileStore {
 			final FileReader reader= new FileReader(file);
 			try {
 				List res= readProfilesFromStream(new InputSource(reader));
-				for (int i= 0; i < res.size(); i++) {
-					ProfileVersioner.updateAndComplete((CustomProfile) res.get(i));
+				if (res != null) {
+					for (int i= 0; i < res.size(); i++) {
+						ProfileVersioner.updateAndComplete((CustomProfile) res.get(i));
+					}
+					writeProfiles(res);
 				}
-				writeProfiles(res);
 				file.delete(); // remove after successful write
 				return res;
 			} finally {
