@@ -89,7 +89,8 @@ public abstract class OpenCloseWorkingSetAction extends SelectionDispatchAction 
 	}
 
 	public void selectionChanged(IStructuredSelection selection) {
-		setEnabled(getProjects(selection) != null);
+		List projects= getProjects(selection);
+		setEnabled(projects != null && projects.size() > 0);
 	}
 	
 	public void run(IStructuredSelection selection) {
