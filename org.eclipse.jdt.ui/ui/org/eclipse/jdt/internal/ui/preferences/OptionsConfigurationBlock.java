@@ -159,7 +159,7 @@ public abstract class OptionsConfigurationBlock {
 		ControlData data= new ControlData(key, values);
 		
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= 2;
+		gd.horizontalSpan= 3;
 		gd.horizontalIndent= indent;
 		
 		Button checkBox= new Button(parent, SWT.CHECK);
@@ -190,6 +190,9 @@ public abstract class OptionsConfigurationBlock {
 		comboBox.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		comboBox.addSelectionListener(getSelectionListener());
 		
+		Label placeHolder= new Label(parent, SWT.NONE);
+		placeHolder.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
 		String currValue= (String)fWorkingValues.get(key);	
 		comboBox.select(data.getSelection(currValue));
 		
@@ -214,6 +217,7 @@ public abstract class OptionsConfigurationBlock {
 			data.widthHint= widthHint;
 		}
 		data.horizontalIndent= indent;
+		data.horizontalSpan= 2;
 		textBox.setLayoutData(data);
 
 		fTextBoxes.add(textBox);

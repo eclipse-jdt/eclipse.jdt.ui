@@ -49,14 +49,16 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_SOURCE_FILE_ATTR= JavaCore.COMPILER_SOURCE_FILE_ATTR;
 	private static final String PREF_CODEGEN_UNUSED_LOCAL= JavaCore.COMPILER_CODEGEN_UNUSED_LOCAL;
 	private static final String PREF_CODEGEN_TARGET_PLATFORM= JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM;
-	private static final String PREF_PB_UNREACHABLE_CODE= JavaCore.COMPILER_PB_UNREACHABLE_CODE;
-	private static final String PREF_PB_INVALID_IMPORT= JavaCore.COMPILER_PB_INVALID_IMPORT;
+	//private static final String PREF_PB_UNREACHABLE_CODE= JavaCore.COMPILER_PB_UNREACHABLE_CODE;
+	//private static final String PREF_PB_INVALID_IMPORT= JavaCore.COMPILER_PB_INVALID_IMPORT;
 	private static final String PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD= JavaCore.COMPILER_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD;
 	private static final String PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME= JavaCore.COMPILER_PB_METHOD_WITH_CONSTRUCTOR_NAME;
 	private static final String PREF_PB_DEPRECATION= JavaCore.COMPILER_PB_DEPRECATION;
 	private static final String PREF_PB_HIDDEN_CATCH_BLOCK= JavaCore.COMPILER_PB_HIDDEN_CATCH_BLOCK;
 	private static final String PREF_PB_UNUSED_LOCAL= JavaCore.COMPILER_PB_UNUSED_LOCAL;
 	private static final String PREF_PB_UNUSED_PARAMETER= JavaCore.COMPILER_PB_UNUSED_PARAMETER;
+	private static final String PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING= JavaCore.COMPILER_PB_UNUSED_PARAMETER_WHEN_OVERRIDING_CONCRETE;
+	private static final String PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT= JavaCore.COMPILER_PB_UNUSED_PARAMETER_WHEN_IMPLEMENTING_ABSTRACT;
 	private static final String PREF_PB_SYNTHETIC_ACCESS_EMULATION= JavaCore.COMPILER_PB_SYNTHETIC_ACCESS_EMULATION;
 	private static final String PREF_PB_NON_EXTERNALIZED_STRINGS= JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL;
 	private static final String PREF_PB_ASSERT_AS_IDENTIFIER= JavaCore.COMPILER_PB_ASSERT_IDENTIFIER;
@@ -70,7 +72,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_PB_LOCAL_VARIABLE_HIDING= JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING;
 	private static final String PREF_PB_FIELD_HIDING= JavaCore.COMPILER_PB_FIELD_HIDING;
 	private static final String PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD= JavaCore.COMPILER_PB_SPECIAL_PARAMETER_HIDING_FIELD;
-
+	private static final String PREF_PB_INDIRECT_STATIC_ACCESS= JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS;
+	private static final String PREF_PB_SUPERFLUOUS_SEMICOLON= JavaCore.COMPILER_PB_SUPERFLUOUS_SEMICOLON;
 
 	private static final String PREF_SOURCE_COMPATIBILITY= JavaCore.COMPILER_SOURCE;
 	private static final String PREF_COMPLIANCE= JavaCore.COMPILER_COMPLIANCE;
@@ -84,7 +87,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_PB_INCOMPLETE_BUILDPATH= JavaCore.CORE_INCOMPLETE_CLASSPATH;
 	private static final String PREF_PB_CIRCULAR_BUILDPATH= JavaCore.CORE_CIRCULAR_CLASSPATH;
 	private static final String PREF_PB_INCOMPATIBLE_JDK_LEVEL= JavaCore.CORE_INCOMPATIBLE_JDK_LEVEL;
-	private static final String PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE= JavaCore.COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE;
+	private static final String PREF_PB_DEPRECATION_IN_DEPRECATED_CODE= JavaCore.COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE;
 	private static final String PREF_PB_DUPLICATE_RESOURCE= JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE;
 	private static final String PREF_PB_INCOMPATIBLE_INTERFACE_METHOD= JavaCore.COMPILER_PB_INCOMPATIBLE_NON_INHERITED_INTERFACE_METHOD;
 
@@ -132,16 +135,17 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private final String[] KEYS= new String[] {
 		PREF_LOCAL_VARIABLE_ATTR, PREF_LINE_NUMBER_ATTR, PREF_SOURCE_FILE_ATTR, PREF_CODEGEN_UNUSED_LOCAL,
-		PREF_CODEGEN_TARGET_PLATFORM, PREF_PB_UNREACHABLE_CODE, PREF_PB_INVALID_IMPORT, PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD,
+		PREF_CODEGEN_TARGET_PLATFORM, PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD,
 		PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, PREF_PB_DEPRECATION, PREF_PB_HIDDEN_CATCH_BLOCK, PREF_PB_UNUSED_LOCAL,
 		PREF_PB_UNUSED_PARAMETER, PREF_PB_SYNTHETIC_ACCESS_EMULATION, PREF_PB_NON_EXTERNALIZED_STRINGS,
 		PREF_PB_ASSERT_AS_IDENTIFIER, PREF_PB_UNUSED_IMPORT, PREF_PB_MAX_PER_UNIT, PREF_SOURCE_COMPATIBILITY, PREF_COMPLIANCE, 
 		PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_STATIC_ACCESS_RECEIVER, PREF_PB_INCOMPLETE_BUILDPATH,
-		PREF_PB_CIRCULAR_BUILDPATH, PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE, PREF_BUILD_CLEAN_OUTPUT_FOLDER,
+		PREF_PB_CIRCULAR_BUILDPATH, PREF_PB_DEPRECATION_IN_DEPRECATED_CODE, PREF_BUILD_CLEAN_OUTPUT_FOLDER,
 		PREF_PB_DUPLICATE_RESOURCE, PREF_PB_NO_EFFECT_ASSIGNMENT, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD,
 		PREF_PB_UNUSED_PRIVATE, PREF_PB_CHAR_ARRAY_IN_CONCAT, PREF_ENABLE_EXCLUSION_PATTERNS, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS,
 		PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT, PREF_PB_LOCAL_VARIABLE_HIDING, PREF_PB_FIELD_HIDING,
-		PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD, PREF_PB_INCOMPATIBLE_JDK_LEVEL
+		PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD, PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_PB_INDIRECT_STATIC_ACCESS,
+		PREF_PB_SUPERFLUOUS_SEMICOLON, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT
 	};	
 	
 	protected String[] getAllKeys() {
@@ -172,18 +176,23 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		folder.setLayout(new TabFolderLayout());	
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
-		Composite problemsComposite= createProblemsTabContent(folder);
-		Composite styleComposite= createStyleTabContent(folder);
+		Composite commonComposite= createCommonMistakesTabContent(folder);
+		Composite unusedComposite= createUnusedCodeTabContent(folder);
+		Composite advancedComposite= createAdvancedTabContent(folder);
 		Composite complianceComposite= createComplianceTabContent(folder);
-		Composite othersComposite= createOthersTabContent(folder);
+		Composite othersComposite= createBuildPathTabContent(folder);
 
 		TabItem item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.problems.tabtitle")); //$NON-NLS-1$
-		item.setControl(problemsComposite);
+		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.common.tabtitle")); //$NON-NLS-1$
+		item.setControl(commonComposite);
 
 		item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.style.tabtitle")); //$NON-NLS-1$
-		item.setControl(styleComposite);
+		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.advanced.tabtitle")); //$NON-NLS-1$
+		item.setControl(advancedComposite);
+
+		item= new TabItem(folder, SWT.NONE);
+		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.unused.tabtitle")); //$NON-NLS-1$
+		item.setControl(unusedComposite);
 	
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.compliance.tabtitle")); //$NON-NLS-1$
@@ -198,7 +207,55 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		return folder;
 	}
 
-	private Composite createStyleTabContent(TabFolder folder) {
+	private Composite createCommonMistakesTabContent(Composite folder) {
+		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
+		
+		String[] errorWarningIgnoreLabels= new String[] {
+			PreferencesMessages.getString("CompilerConfigurationBlock.error"),  //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.warning"), //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.ignore") //$NON-NLS-1$
+		};
+
+		int nColumns= 3;
+		
+		GridLayout layout= new GridLayout();
+		layout.numColumns= nColumns;
+
+		Composite composite= new Composite(folder, SWT.NULL);
+		composite.setLayout(layout);
+		
+		Label description= new Label(composite, SWT.WRAP);
+		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.common.description")); //$NON-NLS-1$
+		GridData gd= new GridData();
+		gd.horizontalSpan= nColumns;
+		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
+		description.setLayoutData(gd);		
+
+		String label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_overriding_pkg_dflt.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_method_naming.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_incompatible_interface_method.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_hidden_catchblock.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_HIDDEN_CATCH_BLOCK, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_static_access_receiver.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_STATIC_ACCESS_RECEIVER, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_no_effect_assignment.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_NO_EFFECT_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_char_array_in_concat.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_CHAR_ARRAY_IN_CONCAT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		return composite;
+	}
+
+	private Composite createAdvancedTabContent(TabFolder folder) {
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
 		String[] errorWarningIgnoreLabels= new String[] {
@@ -209,63 +266,116 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		
 		String[] enabledDisabled= new String[] { ENABLED, DISABLED };
 		
+		int nColumns= 3;
+		
 		GridLayout layout= new GridLayout();
-		layout.numColumns= 2;
-		//layout.verticalSpacing= 2;		
+		layout.numColumns= nColumns;
 					
-		Composite styleComposite= new Composite(folder, SWT.NULL);
-		styleComposite.setLayout(layout);
+		Composite composite= new Composite(folder, SWT.NULL);
+		composite.setLayout(layout);
 
-		Label description= new Label(styleComposite, SWT.WRAP);
-		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.style.description")); //$NON-NLS-1$
+		Label description= new Label(composite, SWT.WRAP);
+		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.advanced.description")); //$NON-NLS-1$
 		GridData gd= new GridData();
-		gd.horizontalSpan= 2;
+		gd.horizontalSpan= nColumns;
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
 		description.setLayoutData(gd);
-
-		String label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_overriding_pkg_dflt.label"); //$NON-NLS-1$
-		addComboBox(styleComposite, label, PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
-
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_method_naming.label"); //$NON-NLS-1$
-		addComboBox(styleComposite, label, PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
-
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_incompatible_interface_method.label"); //$NON-NLS-1$
-		addComboBox(styleComposite, label, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_hidden_catchblock.label"); //$NON-NLS-1$
-		addComboBox(styleComposite, label, PREF_PB_HIDDEN_CATCH_BLOCK, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 		
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_static_access_receiver.label"); //$NON-NLS-1$
-		addComboBox(styleComposite, label, PREF_PB_STATIC_ACCESS_RECEIVER, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		// indirect access to static member
+		String label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_indirect_access_to_static.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_INDIRECT_STATIC_ACCESS, errorWarningIgnore, errorWarningIgnoreLabels, 0);	
 		
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_synth_access_emul.label"); //$NON-NLS-1$
-		addComboBox(styleComposite, label, PREF_PB_SYNTHETIC_ACCESS_EMULATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_no_effect_assignment.label"); //$NON-NLS-1$
-		addComboBox(styleComposite, label, PREF_PB_NO_EFFECT_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_char_array_in_concat.label"); //$NON-NLS-1$
-		addComboBox(styleComposite, label, PREF_PB_CHAR_ARRAY_IN_CONCAT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(composite, label, PREF_PB_SYNTHETIC_ACCESS_EMULATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_accidential_assignement.label"); //$NON-NLS-1$
-		addComboBox(styleComposite, label, PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(composite, label, PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_local_variable_hiding.label"); //$NON-NLS-1$
-		addComboBox(styleComposite, label, PREF_PB_LOCAL_VARIABLE_HIDING, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(composite, label, PREF_PB_LOCAL_VARIABLE_HIDING, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_special_param_hiding.label"); //$NON-NLS-1$
-		addCheckBox(styleComposite, label, PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD, enabledDisabled, indent);
+		addCheckBox(composite, label, PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD, enabledDisabled, indent);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_field_hiding.label"); //$NON-NLS-1$
-		addComboBox(styleComposite, label, PREF_PB_FIELD_HIDING, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(composite, label, PREF_PB_FIELD_HIDING, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_non_externalized_strings.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+				
+		gd= new GridData();
+		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(6);
+		
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_max_per_unit.label"); //$NON-NLS-1$
+		Text text= addTextField(composite, label, PREF_PB_MAX_PER_UNIT, 0, 0);
+		text.setTextLimit(6);
+		text.setLayoutData(gd);
 
-		return styleComposite;
+		return composite;
+	}
+
+	private Composite createUnusedCodeTabContent(TabFolder folder) {
+		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
+		
+		String[] errorWarningIgnoreLabels= new String[] {
+			PreferencesMessages.getString("CompilerConfigurationBlock.error"),  //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.warning"), //$NON-NLS-1$
+			PreferencesMessages.getString("CompilerConfigurationBlock.ignore") //$NON-NLS-1$
+		};
+		
+		String[] enabledDisabled= new String[] { ENABLED, DISABLED };
+		
+		int nColumns= 3;
+		
+		GridLayout layout= new GridLayout();
+		layout.numColumns= nColumns;
+					
+		Composite composite= new Composite(folder, SWT.NULL);
+		composite.setLayout(layout);
+
+		Label description= new Label(composite, SWT.WRAP);
+		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.unused.description")); //$NON-NLS-1$
+		GridData gd= new GridData();
+		gd.horizontalSpan= nColumns;
+		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
+		description.setLayoutData(gd);
+		
+		Composite combos= composite;
+		
+		String label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_local.label"); //$NON-NLS-1$
+		addComboBox(combos, label, PREF_PB_UNUSED_LOCAL, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_parameter.label"); //$NON-NLS-1$
+		addComboBox(combos, label, PREF_PB_UNUSED_PARAMETER, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		
+		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_signal_param_in_overriding.label"); //$NON-NLS-1$
+		addCheckBox(combos, label, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, enabledDisabled, indent);
+		
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_signal_param_in_abstract.label"); //$NON-NLS-1$
+		addCheckBox(combos, label, PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT, enabledDisabled, indent);		
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_imports.label"); //$NON-NLS-1$
+		addComboBox(combos, label, PREF_PB_UNUSED_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_private.label"); //$NON-NLS-1$
+		addComboBox(combos, label, PREF_PB_UNUSED_PRIVATE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation.label"); //$NON-NLS-1$
+		addComboBox(combos, label, PREF_PB_DEPRECATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation_in_deprecation.label"); //$NON-NLS-1$
+		addCheckBox(composite, label, PREF_PB_DEPRECATION_IN_DEPRECATED_CODE, enabledDisabled, indent);		
+	
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_superfluous_semicolon.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_SUPERFLUOUS_SEMICOLON, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+	
+		return composite;
 	}
 
 
-	private Composite createOthersTabContent(TabFolder folder) {
+	private Composite createBuildPathTabContent(TabFolder folder) {
 		String[] abortIgnoreValues= new String[] { ABORT, IGNORE };
 		String[] cleanIgnoreValues= new String[] { CLEAN, IGNORE };
 		String[] enableDisableValues= new String[] { ENABLED, DISABLED };
@@ -276,9 +386,11 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.getString("CompilerConfigurationBlock.error"),  //$NON-NLS-1$
 			PreferencesMessages.getString("CompilerConfigurationBlock.warning") //$NON-NLS-1$
 		};
-			
+		
+		int nColumns= 3;
+		
 		GridLayout layout= new GridLayout();
-		layout.numColumns= 2;
+		layout.numColumns= nColumns;
 
 		Composite othersComposite= new Composite(folder, SWT.NULL);
 		othersComposite.setLayout(layout);
@@ -286,26 +398,17 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		Label description= new Label(othersComposite, SWT.WRAP);
 		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.build_warnings.description")); //$NON-NLS-1$
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
-		gd.horizontalSpan= 2;
-		// gd.widthHint= convertWidthInCharsToPixels(50);
+		gd.horizontalSpan= nColumns;
 		description.setLayoutData(gd);
-		
-		Composite combos= new Composite(othersComposite, SWT.NULL);
-		gd= new GridData(GridData.FILL | GridData.GRAB_HORIZONTAL);
-		gd.horizontalSpan= 2;
-		combos.setLayoutData(gd);
-		GridLayout cl= new GridLayout();
-		cl.numColumns=2; cl.marginWidth= 0; cl.marginHeight= 0;
-		combos.setLayout(cl);
-		
+				
 		String label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_incomplete_build_path.label"); //$NON-NLS-1$
-		addComboBox(combos, label, PREF_PB_INCOMPLETE_BUILDPATH, errorWarning, errorWarningLabels, 0);	
+		addComboBox(othersComposite, label, PREF_PB_INCOMPLETE_BUILDPATH, errorWarning, errorWarningLabels, 0);	
 		
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_build_path_cycles.label"); //$NON-NLS-1$
-		addComboBox(combos, label, PREF_PB_CIRCULAR_BUILDPATH, errorWarning, errorWarningLabels, 0);
+		addComboBox(othersComposite, label, PREF_PB_CIRCULAR_BUILDPATH, errorWarning, errorWarningLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_duplicate_resources.label"); //$NON-NLS-1$
-		addComboBox(combos, label, PREF_PB_DUPLICATE_RESOURCE, errorWarning, errorWarningLabels, 0);
+		addComboBox(othersComposite, label, PREF_PB_DUPLICATE_RESOURCE, errorWarning, errorWarningLabels, 0);
 
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
@@ -315,7 +418,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.getString("CompilerConfigurationBlock.ignore") //$NON-NLS-1$
 		};
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_check_prereq_binary_level.label");  //$NON-NLS-1$
-		addComboBox(combos, label, PREF_PB_INCOMPATIBLE_JDK_LEVEL, errorWarningIgnore, errorWarningIgnoreLabels, 0);	
+		addComboBox(othersComposite, label, PREF_PB_INCOMPATIBLE_JDK_LEVEL, errorWarningIgnore, errorWarningIgnoreLabels, 0);	
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.build_invalid_classpath.label"); //$NON-NLS-1$
 		addCheckBox(othersComposite, label, PREF_BUILD_INVALID_CLASSPATH, abortIgnoreValues, 0);
@@ -333,7 +436,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		description= new Label(othersComposite, SWT.WRAP);
 		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.resource_filter.description")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL);
-		gd.horizontalSpan= 2;
+		gd.horizontalSpan= nColumns;
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(60);
 		description.setLayoutData(gd);
 		
@@ -344,90 +447,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(10);
 		
 		return othersComposite;
-
 	}
-
-
-	private Composite createProblemsTabContent(Composite folder) {
-		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
-		
-		String[] errorWarningIgnoreLabels= new String[] {
-			PreferencesMessages.getString("CompilerConfigurationBlock.error"),  //$NON-NLS-1$
-			PreferencesMessages.getString("CompilerConfigurationBlock.warning"), //$NON-NLS-1$
-			PreferencesMessages.getString("CompilerConfigurationBlock.ignore") //$NON-NLS-1$
-		};
-		
-		String[] enabledDisabled= new String[] { ENABLED, DISABLED };
-			
-		GridLayout layout= new GridLayout();
-		layout.numColumns= 2;
-		//layout.verticalSpacing= 2;
-
-		Composite problemsComposite= new Composite(folder, SWT.NULL);
-		problemsComposite.setLayout(layout);
-
-		Label description= new Label(problemsComposite, SWT.WRAP);
-		description.setText(PreferencesMessages.getString("CompilerConfigurationBlock.problems.description")); //$NON-NLS-1$
-		GridData gd= new GridData();
-		gd.horizontalSpan= 2;
-		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
-		description.setLayoutData(gd);
-
-		Composite combos= new Composite(problemsComposite, SWT.NULL);
-		gd= new GridData();
-		gd.horizontalSpan= 2;
-		combos.setLayoutData(gd);
-		GridLayout cl= new GridLayout();
-		cl.numColumns=2; cl.marginWidth= 0; cl.marginHeight= 0;
-		combos.setLayout(cl);
-
-		String label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unreachable_code.label"); //$NON-NLS-1$
-		addComboBox(combos, label, PREF_PB_UNREACHABLE_CODE, errorWarningIgnore, errorWarningIgnoreLabels, 0);	
-		
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_invalid_import.label"); //$NON-NLS-1$
-		addComboBox(combos, label, PREF_PB_INVALID_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_local.label"); //$NON-NLS-1$
-		addComboBox(combos, label, PREF_PB_UNUSED_LOCAL, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_parameter.label"); //$NON-NLS-1$
-		addComboBox(combos, label, PREF_PB_UNUSED_PARAMETER, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_imports.label"); //$NON-NLS-1$
-		addComboBox(combos, label, PREF_PB_UNUSED_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_private.label"); //$NON-NLS-1$
-		addComboBox(combos, label, PREF_PB_UNUSED_PRIVATE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_non_externalized_strings.label"); //$NON-NLS-1$
-		addComboBox(combos, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation.label"); //$NON-NLS-1$
-		addComboBox(combos, label, PREF_PB_DEPRECATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation_in_deprecation.label"); //$NON-NLS-1$
-		addCheckBox(problemsComposite, label, PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE, enabledDisabled, 0);
-
-		Composite textField= new Composite(problemsComposite, SWT.NULL);
-		gd= new GridData(GridData.FILL | GridData.GRAB_HORIZONTAL);
-		gd.horizontalSpan= 2;
-		textField.setLayoutData(gd);
-		cl= new GridLayout();
-		cl.numColumns=2; cl.marginWidth= 0; cl.marginHeight= 0;
-		textField.setLayout(cl);
-		
-		gd= new GridData();
-		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(6);
-		
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_max_per_unit.label"); //$NON-NLS-1$
-		Text text= addTextField(textField, label, PREF_PB_MAX_PER_UNIT, 0, 0);
-		text.setTextLimit(6);
-		text.setLayoutData(gd);
-
-
-		return problemsComposite;
-	}
-	
 	
 	private Composite createComplianceTabContent(Composite folder) {
 		GridLayout layout= new GridLayout();
@@ -442,8 +462,10 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		Composite compComposite= new Composite(folder, SWT.NULL);
 		compComposite.setLayout(layout);
 
+		int nColumns= 3;
+
 		layout= new GridLayout();
-		layout.numColumns= 2;
+		layout.numColumns= nColumns;
 
 		Group group= new Group(compComposite, SWT.NONE);
 		group.setText(PreferencesMessages.getString("CompilerConfigurationBlock.compliance.group.label")); //$NON-NLS-1$
@@ -489,7 +511,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		fComplianceControls.removeAll(Arrays.asList(otherChildren));
 
 		layout= new GridLayout();
-		layout.numColumns= 2;
+		layout.numColumns= nColumns;
 
 		group= new Group(compComposite, SWT.NONE);
 		group.setText(PreferencesMessages.getString("CompilerConfigurationBlock.classfiles.group.label")); //$NON-NLS-1$

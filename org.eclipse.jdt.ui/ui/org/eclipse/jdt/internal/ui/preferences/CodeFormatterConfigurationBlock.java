@@ -111,6 +111,8 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 		
 		int textWidth= fPixelConverter.convertWidthInCharsToPixels(6);
 		
+		int nColumns= 3;
+		
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
@@ -125,7 +127,7 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 		String[] insertNotInsert= new String[] { INSERT, DO_NOT_INSERT };
 		
 		layout= new GridLayout();
-		layout.numColumns= 2;
+		layout.numColumns= nColumns;
 		
 		Composite newlineComposite= new Composite(folder, SWT.NULL);
 		newlineComposite.setLayout(layout);
@@ -146,7 +148,7 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 		addCheckBox(newlineComposite, label, PREF_NEWLINE_EMPTY_BLOCK, insertNotInsert, 0);	
 		
 		layout= new GridLayout();
-		layout.numColumns= 2;	
+		layout.numColumns= nColumns;	
 		
 		Composite lineSplittingComposite= new Composite(folder, SWT.NULL);
 		lineSplittingComposite.setLayout(layout);
@@ -155,7 +157,7 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 		addTextField(lineSplittingComposite, label, PREF_LINE_SPLIT, 0, textWidth);
 
 		layout= new GridLayout();
-		layout.numColumns= 2;	
+		layout.numColumns= nColumns;	
 		
 		Composite styleComposite= new Composite(folder, SWT.NULL);
 		styleComposite.setLayout(layout);
