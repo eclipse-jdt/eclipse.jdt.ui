@@ -104,13 +104,10 @@ class SourceFirstPackageSelectionDialogField {
 
 		public void dialogFieldChanged(DialogField field) {
 			String packName= fPackageSelection.getText();
-
-			if (packName.length() == 0) {
-				fPackageSelection.setStatus("(default)"); //$NON-NLS-1$
-			} else {
+			if (packName.length() == 0)
+				fPackageSelection.setStatus(NLSUIMessages.getString("NLSAccessorConfigurationDialog.default")); //$NON-NLS-1$
+			else
 				fPackageSelection.setStatus(""); //$NON-NLS-1$
-			}
-
 		}
 	}
 
