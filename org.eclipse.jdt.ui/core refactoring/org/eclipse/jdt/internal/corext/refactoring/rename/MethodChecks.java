@@ -25,6 +25,8 @@ public class MethodChecks {
 	}
 	
 	public static boolean isVirtual(IMethod method) throws JavaModelException {
+		if (method.isConstructor())
+			return false;
 		if (method.getDeclaringType().isInterface())
 			return false;
 		if (JdtFlags.isPrivate(method))	
