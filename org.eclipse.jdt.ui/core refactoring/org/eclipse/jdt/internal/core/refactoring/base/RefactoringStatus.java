@@ -72,6 +72,7 @@ public class RefactoringStatus {
 	private static RefactoringStatus createStatus(int severity, String msg){
 		RefactoringStatus result= new RefactoringStatus(); 
 		result.fEntries.add(new RefactoringStatusEntry(msg, severity));
+		result.fSeverity= severity;
 		return result;
 	}
 	
