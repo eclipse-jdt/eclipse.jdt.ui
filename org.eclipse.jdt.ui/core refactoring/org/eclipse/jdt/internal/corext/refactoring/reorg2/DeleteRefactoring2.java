@@ -748,7 +748,11 @@ public class DeleteRefactoring2 extends Refactoring{
 		
 			if (ReorgUtils2.isDeletedFromEditor(element))
 				return false;								
-				
+			
+			//XXX workaround for 38450 Delete: Removing default package removes source folder
+			if (JavaElementUtil.isDefaultPackage(element))
+				return false;
+												
 			return true;
 		}
 	
