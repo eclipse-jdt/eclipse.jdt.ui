@@ -29,7 +29,8 @@ public class ImportEdit extends SimpleTextEdit {
 	
 	private ICompilationUnit fCUnit;
 	private CodeGenerationSettings fSettings;
-	private List fImports;
+	private List fAddedImports;
+	private List fRemovedImports;
 	private boolean fFilterImplicitImports;
 	
 	public ImportEdit(ICompilationUnit cunit, CodeGenerationSettings settings) {
@@ -37,13 +38,15 @@ public class ImportEdit extends SimpleTextEdit {
 		Assert.isNotNull(settings);
 		fCUnit= cunit;
 		fSettings= settings;
-		fImports= new ArrayList(3);
+		fAddedImports= new ArrayList(3);
+		fRemovedImports= new ArrayList(0);
 		fFilterImplicitImports= true;
 	}
 
-	private ImportEdit(ICompilationUnit cunit, CodeGenerationSettings settings, List imports) {
+	private ImportEdit(ICompilationUnit cunit, CodeGenerationSettings settings, List addedImports, List removedImports) {
 		this(cunit, settings);
-		fImports= new ArrayList(imports);
+		fAddedImports= new ArrayList(addedImports);
+		fRemovedImports= new ArrayList(removedImports);
 	}
 	
 	/**
@@ -65,7 +68,11 @@ public class ImportEdit extends SimpleTextEdit {
 			return;
 		if ("java.lang".equals(qualifiedTypeName.substring(0, index)))
 			return;
-		fImports.add(qualifiedTypeName);
+		fAddedImports.add(qualifiedTypeName);
+	}
+	
+	public void removeImport(String qualifiedTypeName) {
+		fRemovedImports.add(qualifiedTypeName);
 	}
 	
 	/**
@@ -76,7 +83,7 @@ public class ImportEdit extends SimpleTextEdit {
 	 * 	container; otherwise <code>false</code> is returned
 	 */
 	public boolean isEmpty() {
-		return fImports.isEmpty();
+		return fAddedImports.isEmpty() && fRemovedImports.isEmpty();
 	}
 	
 	/* non Java-doc
@@ -86,9 +93,13 @@ public class ImportEdit extends SimpleTextEdit {
 		TextBuffer buffer= editor.getTextBuffer();
 		ImportsStructure importStructure= new ImportsStructure(fCUnit, fSettings.importOrder, fSettings.importThreshold, true);
 		importStructure.setFilterImplicitImports(fFilterImplicitImports);
-		for (Iterator iter= fImports.iterator(); iter.hasNext();) {
+		for (Iterator iter= fAddedImports.iterator(); iter.hasNext();) {
 			importStructure.addImport((String)iter.next());
 		}
+		for (Iterator iter= fRemovedImports.iterator(); iter.hasNext();) {
+			importStructure.removeImport((String)iter.next());
+		}
+		
 		TextRange range= importStructure.getReplaceRange(buffer);
 		String text= importStructure.getReplaceString(buffer, range);
 		if (text != null) {
@@ -101,7 +112,7 @@ public class ImportEdit extends SimpleTextEdit {
 	 * @see TextEdit#connect
 	 */
 	public TextEdit copy() throws CoreException {
-		return new ImportEdit(fCUnit, fSettings, fImports);
+		return new ImportEdit(fCUnit, fSettings, fAddedImports, fRemovedImports);
 	}
 	
 	/* non Java-doc

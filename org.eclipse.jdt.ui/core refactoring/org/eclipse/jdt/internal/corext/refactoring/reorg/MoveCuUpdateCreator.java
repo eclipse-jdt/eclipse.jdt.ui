@@ -5,8 +5,11 @@
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
@@ -34,19 +37,21 @@ import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.Utils;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class MoveCuUpdateCreator {
 	
 	private ICompilationUnit[] fCus;
 	private IPackageFragment fDestination;
 	private CodeGenerationSettings fSettings;
+	
+	private Map fImportEdits; //ICompilationUnit -> ImportEdit
 	
 	public MoveCuUpdateCreator(ICompilationUnit cu, IPackageFragment pack, CodeGenerationSettings settings){
 		this(new ICompilationUnit[]{cu}, pack, settings);
@@ -59,6 +64,7 @@ public class MoveCuUpdateCreator {
 		fCus= convertToOriginals(cus);
 		fDestination= pack;
 		fSettings= settings;
+		fImportEdits= new HashMap();
 	}
 	
 	private static ICompilationUnit[] convertToOriginals(ICompilationUnit[] cus){
@@ -81,6 +87,12 @@ public class MoveCuUpdateCreator {
 			TextChangeManager changeManager= new TextChangeManager();
 			addUpdates(changeManager, new SubProgressMonitor(pm, 1));
 			addImportsToDestinationPackage(changeManager, new SubProgressMonitor(pm, 1));
+			
+			for (Iterator iter= fImportEdits.keySet().iterator(); iter.hasNext();) {
+				ICompilationUnit cu= (ICompilationUnit)iter.next();
+				ImportEdit importEdit= (ImportEdit)fImportEdits.get(cu);
+				changeManager.get(cu).addTextEdit("add import", importEdit);
+			}
 			return new CompositeChange("reorganize elements", changeManager.getAllChanges());
 		} catch (CoreException e){	
 			throw new JavaModelException(e);
@@ -119,6 +131,12 @@ public class MoveCuUpdateCreator {
 						TextEdit edit= new UpdateTypeReferenceEdit(results[j], getPackage(movedUnit), fDestination);
 						changeManager.get(referencingCu).addTextEdit("update references", edit);
 					}	
+					if (results[j].getEnclosingElement().getElementType() == IJavaElement.IMPORT_DECLARATION){
+						ImportEdit importEdit= getImportEdit(referencingCu);
+						IType primaryType= JavaModelUtil.findPrimaryType(movedUnit);
+						importEdit.removeImport(primaryType.getFullyQualifiedName());
+						importEdit.addImport(fDestination.getElementName() + "." + primaryType.getElementName());
+					}	
 				}
 			}
 		} finally{
@@ -139,19 +157,22 @@ public class MoveCuUpdateCreator {
 		}
 	}
 	
-	private static boolean addImport(boolean force, TextChangeManager changeManager, IPackageFragment pack, ICompilationUnit cu, CodeGenerationSettings settings) throws JavaModelException {		
-		try{
-			if (cu.getImport(pack.getElementName() + ".*").exists()) 
-				return false;
+	private boolean addImport(boolean force, TextChangeManager changeManager, IPackageFragment pack, ICompilationUnit cu, CodeGenerationSettings settings) throws JavaModelException {		
+		if (cu.getImport(pack.getElementName() + ".*").exists()) 
+			return false;
+
+		ImportEdit importEdit= getImportEdit(cu);
+		importEdit.setFilterImplicitImports(!force);
+		importEdit.addImport(pack.getElementName() + ".*");
+		return true;
+	}
 	
-			ImportEdit importEdit= new ImportEdit(cu, settings);
-			importEdit.addImport(pack.getElementName() + ".*");
-			importEdit.setFilterImplicitImports(!force);
-			changeManager.get(cu).addTextEdit("add import", importEdit);
-			return true;
-		} catch (CoreException e){
-			throw new JavaModelException(e);
-		}	
+	private ImportEdit getImportEdit(ICompilationUnit cu){
+		if (fImportEdits.containsKey(cu))	
+			return (ImportEdit)fImportEdits.get(cu);
+		ImportEdit importEdit= new ImportEdit(cu, fSettings);
+		fImportEdits.put(cu, importEdit);
+		return importEdit;	
 	}
 	
 	private ICompilationUnit[] collectCusThatWillImportDestinationPackage(IProgressMonitor pm) throws JavaModelException{
@@ -200,9 +221,9 @@ public class MoveCuUpdateCreator {
 
 	private static boolean isQualifiedReference(SearchResult searchResult) throws JavaModelException{
 		if (searchResult.getEnclosingElement() instanceof IImportDeclaration)
-			return true;
+			return false;
 
-		//XXX very nasty
+		//XXX needs improvement
 		IResource resource= searchResult.getResource();
 		IJavaElement element= JavaCore.create(resource);
 		if (element == null || ! (element instanceof ICompilationUnit))
@@ -213,7 +234,7 @@ public class MoveCuUpdateCreator {
 		String source= ((ICompilationUnit)element).getBuffer().getText(offset, end - offset);
 		if (source.indexOf(".") != -1)
 			return true;
-		//--
+
 		return false;	
 	}
 	
