@@ -39,6 +39,10 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 		return new MySetup(new TestSuite(clazz));
 	}
 
+	public static Test setUpTest(Test test) {
+		return new MySetup(test);
+	}
+	
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}

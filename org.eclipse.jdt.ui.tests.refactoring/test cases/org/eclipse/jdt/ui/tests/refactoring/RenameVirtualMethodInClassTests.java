@@ -38,6 +38,10 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		return new MySetup(new TestSuite(clazz));
 	}
 	
+	public static Test setUpTest(Test test) {
+		return new MySetup(test);
+	}
+	
 	protected String getRefactoringPath(){
 		return REFACTORING_PATH;
 	}
@@ -402,6 +406,11 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 
 	public void test37() throws Exception{
 		helper2_0("foo", "bar", new String[] {"QA;"}, true);
+	}
+	
+	public void test38() throws Exception {
+		printTestDisabledMessage("difficult to set up test in current testing framework");
+//		helper2();
 	}
 	
 	//anonymous inner class

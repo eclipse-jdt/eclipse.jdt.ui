@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -30,11 +31,14 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -50,6 +54,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -343,8 +348,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		try {
 			pm.beginTask("", 3); //$NON-NLS-1$
 			
+			IMethod[] clashingMethods= searchForDeclarationsOfNewMethod(new SubProgressMonitor(pm, 1));
+			if (clashingMethods.length == 0)
+				return new RefactoringStatus(); // no need for shadowing analysis
+			
 			SearchResultGroup[] oldOccurrences= getOccurrences();
-			SearchResultGroup[] newOccurrences= getNewOccurrences(new SubProgressMonitor(pm, 1));
+			SearchResultGroup[] newOccurrences= getNewOccurrences(new SubProgressMonitor(pm, 2));
 			RefactoringStatus result= RenameAnalyzeUtil.analyzeRenameChanges(fChangeManager, oldOccurrences, newOccurrences);
 			return result;
 		} finally{
@@ -357,6 +366,34 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		}
 	}
 
+	private IMethod[] searchForDeclarationsOfNewMethod(IProgressMonitor pm) throws CoreException {
+		SearchPattern pattern= createNewMethodPattern();
+		final List results= new ArrayList();
+		new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(),
+				RefactoringScopeFactory.create(getMethod().getJavaProject()),
+				new SearchRequestor() {
+					public void acceptSearchMatch(SearchMatch match) throws CoreException {
+						results.add(match.getElement());
+					}
+				}, pm);
+		return (IMethod[]) results.toArray(new IMethod[results.size()]);
+	}
+	
+	private SearchPattern createNewMethodPattern() throws JavaModelException {
+		StringBuffer stringPattern= new StringBuffer(getNewElementName()).append('(');
+		int paramCount= getMethod().getParameterNames().length;
+		while (paramCount > 1) {
+			stringPattern.append("*,"); //$NON-NLS-1$
+			--paramCount;
+		}
+		if (paramCount > 0)
+			stringPattern.append('*');
+		stringPattern.append(')');
+		
+		return SearchPattern.createPattern(stringPattern.toString(), IJavaSearchConstants.METHOD,
+				IJavaSearchConstants.DECLARATIONS, SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE);
+	}
+	
 	private SearchResultGroup[] getNewOccurrences(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 3); //$NON-NLS-1$
 		try {

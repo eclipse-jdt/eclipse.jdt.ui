@@ -43,8 +43,6 @@ public class RippleMethodFinder {
 		//no instances
 	}
 	
-	//TODO: is it true that method must be from an interface iff there
-	// is an interface among the most abstract types?
 	/**
 	 * Finds all methods along the 'ripple'.
 	 * 
@@ -53,22 +51,19 @@ public class RippleMethodFinder {
 	 * @param pm a {@link IProgressMonitor}
 	 * @param owner a {@link WorkingCopyOwner}, or <code>null</code>
 	 * @return the ripple methods
+	 * @throws JavaModelException if something is wrong with <code>method</code> or its ripple.
 	 */
 	public static IMethod[] getRelatedMethods(IMethod method, IProgressMonitor pm, WorkingCopyOwner owner) throws JavaModelException {
 		try{
 			if (! MethodChecks.isVirtual(method) && ! method.getDeclaringType().isInterface())
 				return new IMethod[]{method};
-		
-			if (method.getDeclaringType().isInterface())
-				return getAllRippleMethods(method, pm, owner);
-
-			return getVirtualMethodsInHierarchy(method, pm, owner);
+			
+			return getAllRippleMethods(method, pm, owner);
 		} finally{
 			pm.done();
 		}	
 	}
 	
-		
 	/*
 	 * We use the following algorithm to find methods to rename:
 	 * Input: type T, method m
@@ -204,22 +199,6 @@ public class RippleMethodFinder {
 	}
 	
 	//---
-	private static IMethod[] getVirtualMethodsInHierarchy(IMethod method, IProgressMonitor pm, WorkingCopyOwner owner) throws JavaModelException{
-		List methods= new ArrayList();
-		//
-		methods.add(method);
-		//
-		IType type= method.getDeclaringType();
-		ITypeHierarchy hier= newTypeHierarchy(type, owner, pm);
-		IType[] subtypes= hier.getAllSubtypes(type);
-		for (int i= 0; i < subtypes.length; i++){
-			IMethod subMethod= Checks.findSimilarMethod(method, subtypes[i]);
-			if (subMethod != null){
-				methods.add(subMethod);
-			}
-		}
-		return (IMethod[]) methods.toArray(new IMethod[methods.size()]);
-	}
 	
 	private static ITypeHierarchy newTypeHierarchy(IType type, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		if (owner == null)
