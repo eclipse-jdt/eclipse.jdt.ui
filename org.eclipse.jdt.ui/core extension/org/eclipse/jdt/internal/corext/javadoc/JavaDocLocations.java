@@ -205,15 +205,23 @@ public class JavaDocLocations {
 	private static void convertContainer(IClasspathEntry entry, IJavaProject project, Map oldLocationMap) {
 		try {
 			IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), project);
+			if (container == null) {
+				return;
+			}
+			
 			IClasspathEntry[] entries= container.getClasspathEntries();
+			boolean hasChange= false;
 			for (int i= 0; i < entries.length; i++) {
 				IClasspathEntry curr= entries[i];
 				IClasspathEntry updatedEntry= getConvertedEntry(curr, project, oldLocationMap);
 				if (updatedEntry != null) {
 					entries[i]= updatedEntry;
+					hasChange= true;
 				}
 			}
-			BuildPathSupport.requestContainerUpdate(project, container, entries);
+			if (hasChange) {
+				BuildPathSupport.requestContainerUpdate(project, container, entries);
+			}
 		} catch (CoreException e) {
 			// ignore
 		}
