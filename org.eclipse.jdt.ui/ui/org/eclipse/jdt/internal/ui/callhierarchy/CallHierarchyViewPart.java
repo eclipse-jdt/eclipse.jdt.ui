@@ -20,9 +20,12 @@ import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
@@ -133,6 +136,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private CompositeActionGroup fActionGroups;
     private CallHierarchyViewer fCallHierarchyViewer;
     private boolean fShowCallDetails;
+	protected Composite fParent;
 
     public CallHierarchyViewPart() {
         super();
@@ -289,6 +293,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     }   
             
     public void createPartControl(Composite parent) {
+    	fParent= parent;
+    	addResizeListener(parent);
         fPagebook = new PageBook(parent, SWT.NONE);
 
         // Page 1: Viewers
@@ -328,6 +334,24 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
             restoreState(fMemento);
         }
    }
+
+	private void addResizeListener(Composite parent) {
+		parent.addControlListener(new ControlListener() {
+			public void controlMoved(ControlEvent e) {
+			}
+			public void controlResized(ControlEvent e) {
+				if (fCurrentOrientation == VIEW_ORIENTATION_SINGLE)
+					return;
+				Point size= fParent.getSize();
+				if (size.x != 0 && size.y != 0) {
+					if (size.x > size.y) 
+						setOrientation(VIEW_ORIENTATION_HORIZONTAL);
+					else 
+						setOrientation(VIEW_ORIENTATION_VERTICAL);
+				}
+			}
+		});
+	}
 
     /**
      * @param PAGE_EMPTY
