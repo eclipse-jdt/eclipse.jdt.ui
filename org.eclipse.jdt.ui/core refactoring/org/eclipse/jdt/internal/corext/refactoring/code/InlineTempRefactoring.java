@@ -44,7 +44,7 @@ public class InlineTempRefactoring extends Refactoring {
 	
 	//the following fields are set after the construction
 	private VariableDeclaration fTempDeclaration;
-	private CompilationUnit fCompilationUnit;
+	private CompilationUnit fCompilationUnitNode;
 
 	public InlineTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
@@ -97,11 +97,11 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 
 	private void initializeAST() throws JavaModelException {
-		fCompilationUnit= AST.parseCompilationUnit(fCu, true);
+		fCompilationUnitNode= AST.parseCompilationUnit(fCu, true);
 	}
 	
 	private RefactoringStatus checkSelection() throws JavaModelException {
-		fTempDeclaration= TempDeclarationFinder2.findTempDeclaration(fCompilationUnit, fSelectionStart, fSelectionLength);
+		fTempDeclaration= TempDeclarationFinder2.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
 		
 		if (fTempDeclaration == null)
 			return RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
@@ -118,7 +118,7 @@ public class InlineTempRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkAssignments() throws JavaModelException {
 		TempAssignmentFinder assignmentFinder= new TempAssignmentFinder(fTempDeclaration);
-		fCompilationUnit.accept(assignmentFinder);
+		fCompilationUnitNode.accept(assignmentFinder);
 		if (! assignmentFinder.hasAssignments())
 			return new RefactoringStatus();
 		int start= assignmentFinder.getFirstAssignment().getStartPosition();
@@ -194,7 +194,7 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 	
 	private Integer[] getOccurrenceOffsets() throws JavaModelException{
-		return TempOccurrenceFinder2.findTempOccurrenceOffsets(fCompilationUnit, fTempDeclaration, true, false);
+		return TempOccurrenceFinder2.findTempOccurrenceOffsets(fCompilationUnitNode, fTempDeclaration, true, false);
 	}	
 	
 	private static boolean needsBracketsAroundReferences(Expression expression){
