@@ -75,6 +75,12 @@ class ParameterOffsetFinder extends AbstractRefactoringASTAnalyzer{
 			fParamBindings= RenameParameterASTAnalyzer.getArgumentBindings(methodDeclaration);
 		return true;
 	}
+	
+	public boolean visit(ConstructorDeclaration constructorDeclaration, ClassScope scope) {
+		if (constructorDeclaration.declarationSourceStart == fMethodSourceRange.getOffset())
+			fParamBindings= RenameParameterASTAnalyzer.getArgumentBindings(constructorDeclaration);
+		return true;
+	}
 		
 	public boolean visit(Argument argument, BlockScope scope) {
 		if (withinMethod(argument) 

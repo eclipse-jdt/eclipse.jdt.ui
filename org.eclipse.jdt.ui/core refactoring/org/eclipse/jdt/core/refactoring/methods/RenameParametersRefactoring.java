@@ -62,9 +62,6 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(getMethod()));
-		HackFinder.fixMeSoon("fix this");
-		if (getMethod().isConstructor())
-			result.addFatalError("Temporarily not available for constructors");
 		if (fOldParameterNames == null || fOldParameterNames.length == 0)
 			result.addFatalError("Only applicable to methods with parameters."); 
 		return result;

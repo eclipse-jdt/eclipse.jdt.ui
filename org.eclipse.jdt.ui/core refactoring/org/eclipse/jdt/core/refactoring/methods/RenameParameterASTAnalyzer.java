@@ -90,7 +90,7 @@ class RenameParameterASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 	
 	//must be static and not-private
 	//used by the OffsetFinder
-	static List getArgumentBindings(MethodDeclaration methodDeclaration){
+	static List getArgumentBindings(AbstractMethodDeclaration methodDeclaration){
 		Argument[] arguments= methodDeclaration.arguments;
 		List list= new ArrayList(arguments.length);
 		for (int i= 0; i < arguments.length; i++)
@@ -176,5 +176,9 @@ class RenameParameterASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 		return true;
 	}
 	
-	
+	public boolean visit(ConstructorDeclaration constructorDeclaration, ClassScope scope) {
+		if (constructorDeclaration.declarationSourceStart == fMethodSourceRange.getOffset())
+			fParamBindings= getArgumentBindings(constructorDeclaration);
+		return true;
+	}
 }
