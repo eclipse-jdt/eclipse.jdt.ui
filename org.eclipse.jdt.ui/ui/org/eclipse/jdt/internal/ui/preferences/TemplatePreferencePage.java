@@ -61,6 +61,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -451,7 +452,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		template.setContext(CONTEXTS[0]);
 		
 		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), template, false, true, CONTEXTS);
-		if (dialog.open() == EditTemplateDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			fTemplates.add(template);
 			fTableViewer.refresh();
 			fTableViewer.setChecked(template, template.isEnabled());
@@ -473,7 +474,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 	private void edit(Template template) {
 		Template newTemplate= new Template(template);
 		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), newTemplate, true, true, CONTEXTS);
-		if (dialog.open() == EditTemplateDialog.OK) {
+		if (dialog.open() == Window.OK) {
 
 			if (!newTemplate.getName().equals(template.getName()) &&
 				MessageDialog.openQuestion(getShell(),

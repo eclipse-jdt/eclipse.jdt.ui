@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Table;
 
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -279,7 +280,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		}
 		
 		TodoTaskInputDialog dialog= new TodoTaskInputDialog(getShell(), edited, fTodoTasksList.getElements());
-		if (dialog.open() == TodoTaskInputDialog.OK) {
+		if (dialog.open() == Window.OK) {
 			if (edited != null) {
 				fTodoTasksList.replaceElement(edited, dialog.getResult());
 			} else {
