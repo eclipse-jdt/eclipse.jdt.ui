@@ -129,6 +129,9 @@ public class GenerateActionGroup extends ActionGroup {
 		editor.setAction("AddUnimplementedConstructors", fAddUnimplementedConstructors); //$NON-NLS-1$		
 		
 		fAddJavaDocStub= new AddJavaDocStubAction(editor);
+		fAddJavaDocStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_JAVADOC_COMMENT);
+		editor.setAction("AddJavadocComment", fAddJavaDocStub); //$NON-NLS-1$		
+
 		
 		fSurroundWithTryCatch= new SurroundWithTryCatchAction(editor);
 		fSurroundWithTryCatch.setActionDefinitionId(IJavaEditorActionDefinitionIds.SURROUND_WITH_TRY_CATCH);

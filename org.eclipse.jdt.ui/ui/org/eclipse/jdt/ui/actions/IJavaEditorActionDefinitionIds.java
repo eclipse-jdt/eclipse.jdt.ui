@@ -133,11 +133,18 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 
 	/**
 	 * Action definition ID of the source -> sort order action (value
-	 * <code>"org. eclipse. jdt.ui.edit.text.java.sort.members"</code>).
+	 * <code>"org.eclipse.jdt.ui.edit.text.java.sort.members"</code>).
 	 * @since 2.1
 	 */
 	public static final String SORT_MEMBERS= "org.eclipse.jdt.ui.edit.text.java.sort.members"; //$NON-NLS-1$
-		
+
+	/**
+	 * Action definition ID of the source -> add javadoc comment action (value
+	 * <code>"org.eclipse.jdt.ui.edit.text.java.add.javadoc.comment"</code>).
+	 * @since 2.1
+	 */		
+	public static final String ADD_JAVADOC_COMMENT= "org.eclipse.jdt.ui.edit.text.java.add.javadoc.comment"; //$NON-NLS-1$
+
 	/**
 	 * Action definition ID of the source -> surround with try/catch action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch"</code>).

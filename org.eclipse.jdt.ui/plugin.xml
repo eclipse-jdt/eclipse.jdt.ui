@@ -1602,10 +1602,17 @@
 		description= "%ActionDefinition.addImport.description"
 	/>
 	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.sort.members"
+		name= "%ActionDefinition.sortMembers.name"
+		description= "%ActionDefinition.sortMembers.description"
+	/>
+
+	<actionDefinition
 		id="org.eclipse.jdt.ui.edit.text.java.organize.imports"
 		name= "%ActionDefinition.organizeImports.name"
 		description= "%ActionDefinition.organizeImports.description"
 	/>
+	
 	<actionDefinition
 		id="org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch"
 		name= "%ActionDefinition.surroundWith.tryCatch.name"
@@ -1616,6 +1623,22 @@
 		name= "%ActionDefinition.overrideMethods.name"
 		description= "%ActionDefinition.overrideMethods.description"
 	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.create.getter.setter"
+		name= "%ActionDefinition.getterSetter.name"
+		description= "%ActionDefinition.getterSetter.description"
+	/>	
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.create.delegate.methods"
+		name= "%ActionDefinition.delegateMethods.name"
+		description= "%ActionDefinition.delegateMethods.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.add.javadoc.comment"
+		name= "%ActionDefinition.addJavadocComment.name"
+		description= "%ActionDefinition.addJavadocComment.description"
+	/>
+	
 	<actionDefinition
 		id="org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors"
 		name= "%ActionDefinition.addUnimplementedConstructors.name"
