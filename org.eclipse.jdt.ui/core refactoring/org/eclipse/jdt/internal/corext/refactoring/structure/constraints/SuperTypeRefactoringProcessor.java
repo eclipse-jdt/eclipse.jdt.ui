@@ -69,8 +69,11 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -83,6 +86,30 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor {
 
 	/**
+	 * Returns a new ast node corresponding to the given type.
+	 * 
+	 * @param ast the target ast
+	 * @param type the specified type
+	 * @return A corresponding ast node
+	 */
+	protected static ASTNode createCorrespondingNode(final AST ast, final TType type) {
+		return ast.newSimpleType(ast.newSimpleName(type.getName()));
+	}
+
+	/** The obsolete casts (element type: <code>&ltICompilationUnit, Collection&ltCastVariable2&gt&gt</code>) */
+	protected Map fObsoleteCasts= null;
+
+	/** The working copy owner */
+	protected final WorkingCopyOwner fOwner= new WorkingCopyOwner() {
+	};
+
+	/** The super type as replacement */
+	protected TType fSuperType= null;
+
+	/** The type occurrences (element type: <code>&ltICompilationUnit, Collection&ltIDeclaredConstraintVariable&gt&gt</code>) */
+	protected Map fTypeOccurrences= null;
+
+	/**
 	 * Returns the field which corresponds to the specified variable declaration fragment
 	 * 
 	 * @param fragment the variable declaration fragment
@@ -90,16 +117,110 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @return the corresponding field
 	 * @throws JavaModelException if an error occurs
 	 */
-	protected static IField getCorrespondingField(final VariableDeclarationFragment fragment, final IJavaProject project) throws JavaModelException {
+	protected IField getCorrespondingField(final VariableDeclarationFragment fragment, final IJavaProject project) throws JavaModelException {
 		Assert.isNotNull(fragment);
 		Assert.isNotNull(project);
 		final IBinding binding= fragment.getName().resolveBinding();
 		if (binding instanceof IVariableBinding) {
 			final IVariableBinding variable= (IVariableBinding) binding;
 			if (variable.isField())
-				return Bindings.findField(variable, project);
+				return Bindings.findField(variable, project, fOwner);
 		}
 		return null;
+	}
+
+	/**
+	 * Computes the compilation units of fields referencing the specified type occurrences.
+	 * 
+	 * @param units the compilation unit map (element type: <code>&ltIJavaProject, Set&ltICompilationUnit&gt&gt</code>)
+	 * @param nodes the ast nodes representing the type occurrences
+	 * @throws JavaModelException if an error occurs
+	 */
+	protected final void getFieldReferencingCompilationUnits(final Map units, final ASTNode[] nodes) throws JavaModelException {
+		Assert.isNotNull(units);
+		Assert.isNotNull(nodes);
+		ASTNode node= null;
+		IField field= null;
+		IJavaProject project= null;
+		for (int index= 0; index < nodes.length; index++) {
+			node= nodes[index];
+			project= RefactoringASTParser.getCompilationUnit(node).getJavaProject();
+			if (project != null) {
+				final List fields= getReferencingFields(node, project);
+				for (int offset= 0; offset < fields.size(); offset++) {
+					field= (IField) fields.get(offset);
+					Set set= (Set) units.get(project);
+					if (set == null) {
+						set= new HashSet();
+						units.put(project, set);
+					}
+					final ICompilationUnit unit= field.getCompilationUnit();
+					if (unit != null)
+						set.add(unit);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Computes the compilation units of methods referencing the specified type occurrences.
+	 * 
+	 * @param units the compilation unit map (element type: <code>&ltIJavaProject, Set&ltICompilationUnit&gt&gt</code>)
+	 * @param nodes the ast nodes representing the type occurrences
+	 * @throws JavaModelException if an error occurs
+	 */
+	protected final void getMethodReferencingCompilationUnits(final Map units, final ASTNode[] nodes) throws JavaModelException {
+		Assert.isNotNull(units);
+		Assert.isNotNull(nodes);
+		ASTNode node= null;
+		IMethod method= null;
+		IJavaProject project= null;
+		for (int index= 0; index < nodes.length; index++) {
+			node= nodes[index];
+			project= RefactoringASTParser.getCompilationUnit(node).getJavaProject();
+			if (project != null) {
+				method= getReferencingMethod(node, project);
+				if (method != null) {
+					Set set= (Set) units.get(project);
+					if (set == null) {
+						set= new HashSet();
+						units.put(project, set);
+					}
+					final ICompilationUnit unit= method.getCompilationUnit();
+					if (unit != null)
+						set.add(unit);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Computes the compilation units referencing the subtype to replace.
+	 * 
+	 * @param type the subtype
+	 * @param monitor the progress monitor to use
+	 * @param status the refactoring status
+	 * @return the referenced compilation units (element type: <code>&ltIJavaProject, Collection&ltSearchResultGroup&gt&gt</code>)
+	 * @throws JavaModelException if an error occurs
+	 */
+	protected final Map getReferencingCompilationUnits(final IType type, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
+		Assert.isNotNull(type);
+		Assert.isNotNull(monitor);
+		Assert.isNotNull(status);
+		try {
+			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
+			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2();
+			engine.setOwner(fOwner);
+			engine.setFiltering(true, true);
+			engine.setStatus(status);
+			engine.setScope(RefactoringScopeFactory.create(type));
+			engine.setPattern(SearchPattern.createPattern(type, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
+			engine.searchPattern(new SubProgressMonitor(monitor, 1));
+			return engine.getAffectedProjects();
+		} finally {
+			monitor.done();
+		}
 	}
 
 	/**
@@ -110,7 +231,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @return the referencing fields
 	 * @throws JavaModelException if an error occurs
 	 */
-	protected static List getReferencingFields(final ASTNode node, final IJavaProject project) throws JavaModelException {
+	protected List getReferencingFields(final ASTNode node, final IJavaProject project) throws JavaModelException {
 		Assert.isNotNull(node);
 		Assert.isNotNull(project);
 		List result= Collections.EMPTY_LIST;
@@ -139,7 +260,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @return the referencing method
 	 * @throws JavaModelException if an error occurs
 	 */
-	protected static IMethod getReferencingMethod(final ASTNode node, final IJavaProject project) throws JavaModelException {
+	protected IMethod getReferencingMethod(final ASTNode node, final IJavaProject project) throws JavaModelException {
 		Assert.isNotNull(node);
 		Assert.isNotNull(project);
 		if (node instanceof Type) {
@@ -147,117 +268,118 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			if (parent instanceof MethodDeclaration) {
 				final IMethodBinding binding= ((MethodDeclaration) parent).resolveBinding();
 				if (binding != null)
-					return Bindings.findMethod(binding, project);
+					return Bindings.findMethod(binding, project, fOwner);
 			}
 		}
 		return null;
 	}
 
-	/** The obsolete casts (element type: <code>&ltICompilationUnit, Collection&ltCastVariable2&gt&gt</code>) */
-	protected Map fObsoleteCasts= null;
-
-	/** The working copy owner */
-	protected final WorkingCopyOwner fOwner= new WorkingCopyOwner() {
-	};
-
-	/** The type matches (element type: <code>&ltICompilationUnit, Collection&ltIDeclaredConstraintVariable&gt</code>) */
-	protected Map fTypeMatches= null;
-
-	/** The type name */
-	protected String fTypeName;
+	/**
+	 * Performs the first pass of processing the affected compilation units.
+	 * 
+	 * @param creator the constraints creator to use
+	 * @param units the compilation unit map (element type: <code>&ltIJavaProject, Set&ltICompilationUnit&gt&gt</code>)
+	 * @param groups the search result group map
+	 * @param unit the compilation unit of the subtype
+	 * @param node the compilation unit node of the subtype
+	 */
+	protected final void performFirstPass(final SuperTypeConstraintsCreator creator, final Map units, final Map groups, final ICompilationUnit unit, final CompilationUnit node) {
+		node.setProperty(RefactoringASTParser.SOURCE_PROPERTY, unit);
+		node.accept(creator);
+		final SearchResultGroup group= (SearchResultGroup) groups.get(unit);
+		if (group != null) {
+			final ASTNode[] nodes= ASTNodeSearchUtil.getAstNodes(group.getSearchResults(), node);
+			try {
+				getMethodReferencingCompilationUnits(units, nodes);
+				getFieldReferencingCompilationUnits(units, nodes);
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+		}
+	}
 
 	/**
-	 * Computes the possible supertype changes to be made by the refactoring.
+	 * Performs the second pass of processing the affected compilation units.
 	 * 
-	 * @param type the subtype java element
-	 * @param subType the type binding of the subtype to replace
-	 * @param superType the type binding of the supertype to use as replacement
-	 * @param monitor the progress monitor to use
-	 * @param status the refactoring status
-	 * @throws JavaModelException if an error occurs
+	 * @param creator the constraints creator to use
+	 * @param unit the compilation unit of the subtype
+	 * @param node the compilation unit node of the subtype
 	 */
-	protected final void computeSupertypeChanges(final IType type, final ITypeBinding subType, final ITypeBinding superType, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
-		Assert.isNotNull(type);
-		Assert.isNotNull(subType);
-		Assert.isNotNull(superType);
-		Assert.isNotNull(monitor);
-		Assert.isNotNull(status);
-		final SuperTypeConstraintsModel model= new SuperTypeConstraintsModel();
-		final SuperTypeConstraintsCreator creator= new SuperTypeConstraintsCreator(model);
-		try {
-			monitor.beginTask("", 2); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
-			final Map firstPass= getReferencingCompilationUnits(type, new SubProgressMonitor(monitor, 1), status);
-			final Map secondPass= new HashMap(firstPass.size());
-			IJavaProject project= null;
-			Collection collection= null;
-			for (final Iterator iterator= firstPass.keySet().iterator(); iterator.hasNext();) {
-				project= (IJavaProject) iterator.next();
-				collection= (Collection) firstPass.get(project);
-				if (collection != null) {
-					final Map groups= new HashMap(collection.size());
-					for (final Iterator iter= collection.iterator(); iter.hasNext();) {
-						final SearchResultGroup group= (SearchResultGroup) iter.next();
-						groups.put(group.getCompilationUnit(), group);
-					}
-					final ASTParser parser= ASTParser.newParser(AST.JLS3);
-					parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-					parser.setResolveBindings(true);
-					parser.setProject(project);
-					final Set keys= groups.keySet();
-					parser.createASTs((ICompilationUnit[]) keys.toArray(new ICompilationUnit[keys.size()]), new String[0], new ASTRequestor() {
+	protected final void performSecondPass(final SuperTypeConstraintsCreator creator, final ICompilationUnit unit, final CompilationUnit node) {
+		node.setProperty(RefactoringASTParser.SOURCE_PROPERTY, unit);
+		node.accept(creator);
+	}
 
-						public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
-							monitor.subTask(unit.getElementName());
-							node.setProperty(RefactoringASTParser.SOURCE_PROPERTY, unit);
-							node.accept(creator);
-							final SearchResultGroup group= (SearchResultGroup) groups.get(unit);
-							if (group != null) {
-								final ASTNode[] nodes= ASTNodeSearchUtil.getAstNodes(group.getSearchResults(), node);
-								try {
-									getMethodReferencingCompilationUnits(secondPass, nodes);
-									getFieldReferencingCompilationUnits(secondPass, nodes);
-								} catch (JavaModelException exception) {
-									JavaPlugin.log(exception);
-								}
-							}
-						}
+	/**
+	 * Rewrites the specified ast node.
+	 * 
+	 * @param rewrite the ast rewrite to use
+	 * @param target the target compilation unit node
+	 * @param group the text edit group to use
+	 * @param node the ast node to rewrite
+	 */
+	protected void rewriteArrayType(final ASTRewrite rewrite, final CompilationUnit target, final TextEditGroup group, final ASTNode node) {
+		rewrite.replace(node, createCorrespondingNode(target.getAST(), fSuperType), group);
+	}
 
-						public final void acceptBinding(final String key, final IBinding binding) {
-							// Do nothing
-						}
-					}, new SubProgressMonitor(monitor, 1));
-				}
-			}
-			for (final Iterator iterator= secondPass.keySet().iterator(); iterator.hasNext();) {
-				project= (IJavaProject) iterator.next();
-				collection= (Set) secondPass.get(project);
-				if (collection != null) {
-					final ASTParser parser= ASTParser.newParser(AST.JLS3);
-					parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-					parser.setResolveBindings(true);
-					parser.setProject(project);
-					parser.createASTs((ICompilationUnit[]) collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
+	/**
+	 * Rewrites the specified ast node.
+	 * 
+	 * @param rewrite the ast rewrite to use
+	 * @param target the target compilation unit node
+	 * @param group the text edit group to use
+	 * @param node the ast node to rewrite
+	 */
+	protected void rewriteCastExpression(final ASTRewrite rewrite, final CompilationUnit target, final TextEditGroup group, final CastExpression node) {
+		rewrite.replace(node.getType(), createCorrespondingNode(target.getAST(), fSuperType), group);
+	}
 
-						public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
-							monitor.subTask(unit.getElementName());
-							node.setProperty(RefactoringASTParser.SOURCE_PROPERTY, unit);
-							node.accept(creator);
-						}
+	/**
+	 * Rewrites the specified ast node.
+	 * 
+	 * @param rewrite the ast rewrite to use
+	 * @param target the target compilation unit node
+	 * @param group the text edit group to use
+	 * @param node the ast node to rewrite
+	 */
+	protected void rewriteFieldDeclaration(final ASTRewrite rewrite, final CompilationUnit target, final TextEditGroup group, final FieldDeclaration node) {
+		rewrite.replace(node.getType(), createCorrespondingNode(target.getAST(), fSuperType), group);
+	}
 
-						public final void acceptBinding(final String key, final IBinding binding) {
-							// Do nothing
-						}
-					}, new SubProgressMonitor(monitor, 1));
-				}
-			}
-			final SuperTypeConstraintsSolver solver= new SuperTypeConstraintsSolver(model);
-			solver.solveConstraints();
-			fTypeMatches= solver.getTypeMatches();
-			fObsoleteCasts= solver.getObsoleteCasts();
-		} finally {
-			monitor.done();
-		}
+	/**
+	 * Rewrites the specified ast node.
+	 * 
+	 * @param rewrite the ast rewrite to use
+	 * @param target the target compilation unit node
+	 * @param group the text edit group to use
+	 * @param node the ast node to rewrite
+	 */
+	protected void rewriteMethodReturnType(final ASTRewrite rewrite, final CompilationUnit target, final TextEditGroup group, final MethodDeclaration node) {
+		rewrite.replace(node.getReturnType2(), createCorrespondingNode(target.getAST(), fSuperType), group);
+	}
+
+	/**
+	 * Rewrites the specified ast node.
+	 * 
+	 * @param rewrite the ast rewrite to use
+	 * @param target the target compilation unit node
+	 * @param group the text edit group to use
+	 * @param node the ast node to rewrite
+	 */
+	protected void rewriteQualifiedName(final ASTRewrite rewrite, final CompilationUnit target, final TextEditGroup group, final ASTNode node) {
+		rewrite.replace(node, createCorrespondingNode(target.getAST(), fSuperType), group);
+	}
+
+	/**
+	 * Rewrites the specified ast node.
+	 * 
+	 * @param rewrite the ast rewrite to use
+	 * @param target the target compilation unit node
+	 * @param group the text edit group to use
+	 * @param node the ast node to rewrite
+	 */
+	protected void rewriteSingleVariableDeclaration(final ASTRewrite rewrite, final CompilationUnit target, final TextEditGroup group, final SingleVariableDeclaration node) {
+		rewrite.replace(node.getType(), createCorrespondingNode(target.getAST(), fSuperType), group);
 	}
 
 	/**
@@ -270,7 +392,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @param replacements the set of variable binding keys of formal parameters which must be replaced
 	 * @param group the text edit group to use
 	 */
-	protected final void createTypeOccurrenceReplacement(final CompilationUnitRange range, final ASTRewrite rewrite, final CompilationUnit target, final CompilationUnit source, final Set replacements, final TextEditGroup group) {
+	protected final void rewriteTypeOccurrence(final CompilationUnitRange range, final ASTRewrite rewrite, final CompilationUnit target, final CompilationUnit source, final Set replacements, final TextEditGroup group) {
 		Assert.isNotNull(rewrite);
 		Assert.isNotNull(target);
 		Assert.isNotNull(source);
@@ -361,169 +483,65 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	}
 
 	/**
-	 * Computes the compilation units of fields referencing the specified type occurrences.
+	 * Creates the necessary text edits to replace the subtype occurrence by a supertype.
 	 * 
-	 * @param map the compilation unit map (element type: <code>&ltIJavaProject, Set&ltICompilationUnit&gt&gt</code>)
-	 * @param nodes the ast nodes representing the type occurrences
-	 * @throws JavaModelException if an error occurs
+	 * @param manager the text change manager to use
+	 * @param subRewrite the compilation unit rewrite of the subtype
+	 * @param unit the compilation unit
+	 * @param node the compilation unit node
+	 * @param replacements the set of variable binding keys of formal parameters which must be replaced
 	 */
-	protected final void getFieldReferencingCompilationUnits(final Map map, final ASTNode[] nodes) throws JavaModelException {
-		Assert.isNotNull(map);
-		Assert.isNotNull(nodes);
-		ASTNode node= null;
-		IField field= null;
-		IJavaProject project= null;
-		for (int index= 0; index < nodes.length; index++) {
-			node= nodes[index];
-			project= RefactoringASTParser.getCompilationUnit(node).getJavaProject();
-			if (project != null) {
-				final List fields= getReferencingFields(node, project);
-				for (int offset= 0; offset < fields.size(); offset++) {
-					field= (IField) fields.get(offset);
-					Set set= (Set) map.get(project);
-					if (set == null) {
-						set= new HashSet();
-						map.put(project, set);
-					}
-					final ICompilationUnit unit= field.getCompilationUnit();
-					if (unit != null)
-						set.add(unit);
-				}
-			}
-		}
-	}
+	protected abstract void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite subRewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements);
 
 	/**
-	 * Computes the compilation units of methods referencing the specified type occurrences.
+	 * Creates the necessary text edits to replace the subtype occurrences by a supertype.
 	 * 
-	 * @param map the compilation unit map (element type: <code>&ltIJavaProject, Set&ltICompilationUnit&gt&gt</code>)
-	 * @param nodes the ast nodes representing the type occurrences
-	 * @throws JavaModelException if an error occurs
-	 */
-	protected final void getMethodReferencingCompilationUnits(final Map map, final ASTNode[] nodes) throws JavaModelException {
-		Assert.isNotNull(map);
-		Assert.isNotNull(nodes);
-		ASTNode node= null;
-		IMethod method= null;
-		IJavaProject project= null;
-		for (int index= 0; index < nodes.length; index++) {
-			node= nodes[index];
-			project= RefactoringASTParser.getCompilationUnit(node).getJavaProject();
-			if (project != null) {
-				method= getReferencingMethod(node, project);
-				if (method != null) {
-					Set set= (Set) map.get(project);
-					if (set == null) {
-						set= new HashSet();
-						map.put(project, set);
-					}
-					final ICompilationUnit unit= method.getCompilationUnit();
-					if (unit != null)
-						set.add(unit);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Computes the compilation units referencing the subtype to replace.
-	 * 
-	 * @param type the subtype
+	 * @param manager the text change manager to use
+	 * @param subRewrite the compilation unit rewrite of the subtype
+	 * @param subUnit the compilation unit of the subtype
+	 * @param subNode the compilation unit node of the subtype
+	 * @param replacements the set of variable binding keys of formal parameters which must be replaced
 	 * @param monitor the progress monitor to use
-	 * @param status the refactoring status
-	 * @return the referenced compilation units (element type: <code>&ltIJavaProject, Collection&ltSearchResultGroup&gt&gt</code>)
-	 * @throws JavaModelException if an error occurs
 	 */
-	protected final Map getReferencingCompilationUnits(final IType type, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
-		Assert.isNotNull(type);
-		Assert.isNotNull(monitor);
-		Assert.isNotNull(status);
-		try {
-			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
-			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2();
-			engine.setOwner(fOwner);
-			engine.setFiltering(true, true);
-			engine.setStatus(status);
-			engine.setScope(RefactoringScopeFactory.create(type));
-			engine.setPattern(SearchPattern.createPattern(type, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
-			engine.searchPattern(new SubProgressMonitor(monitor, 1));
-			return engine.getAffectedProjects();
-		} finally {
-			monitor.done();
+	protected final void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite subRewrite, final ICompilationUnit subUnit, final CompilationUnit subNode, final Set replacements, final IProgressMonitor monitor) {
+		if (fTypeOccurrences != null) {
+			final Set units= new HashSet(fTypeOccurrences.keySet());
+			units.remove(subUnit);
+			final Map projects= new HashMap();
+			Collection collection= null;
+			IJavaProject project= null;
+			ICompilationUnit current= null;
+			for (final Iterator iterator= units.iterator(); iterator.hasNext();) {
+				current= (ICompilationUnit) iterator.next();
+				project= current.getJavaProject();
+				collection= (Collection) projects.get(project);
+				if (collection == null) {
+					collection= new ArrayList();
+					projects.put(project, collection);
+				}
+				collection.add(current);
+			}
+			final ASTParser parser= ASTParser.newParser(AST.JLS3);
+			for (final Iterator iterator= projects.keySet().iterator(); iterator.hasNext();) {
+				project= (IJavaProject) iterator.next();
+				collection= (Collection) projects.get(project);
+				parser.setWorkingCopyOwner(fOwner);
+				parser.setResolveBindings(true);
+				parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+				parser.setProject(project);
+				parser.createASTs((ICompilationUnit[]) collection.toArray(new ICompilationUnit[collection.size()]), new String[0], new ASTRequestor() {
+
+					public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
+						rewriteTypeOccurrences(manager, subRewrite, unit, node, replacements);
+					}
+
+					public final void acceptBinding(final String key, final IBinding binding) {
+						// Do nothing
+					}
+				}, new SubProgressMonitor(monitor, 1));
+			}
+			rewriteTypeOccurrences(manager, subRewrite, subUnit, subNode, replacements);
 		}
-	}
-
-	/**
-	 * Rewrites the specified ast node.
-	 * 
-	 * @param rewrite the ast rewrite to use
-	 * @param target the target compilation unit node
-	 * @param group the text edit group to use
-	 * @param node the ast node to rewrite
-	 */
-	protected void rewriteArrayType(final ASTRewrite rewrite, final CompilationUnit target, final TextEditGroup group, final ASTNode node) {
-		rewrite.replace(node, target.getAST().newSimpleName(fTypeName), group);
-	}
-
-	/**
-	 * Rewrites the specified ast node.
-	 * 
-	 * @param rewrite the ast rewrite to use
-	 * @param target the target compilation unit node
-	 * @param group the text edit group to use
-	 * @param node the ast node to rewrite
-	 */
-	protected void rewriteCastExpression(final ASTRewrite rewrite, final CompilationUnit target, final TextEditGroup group, final CastExpression node) {
-		rewrite.replace(node.getType(), target.getAST().newSimpleType(target.getAST().newSimpleName(fTypeName)), group);
-	}
-
-	/**
-	 * Rewrites the specified ast node.
-	 * 
-	 * @param rewrite the ast rewrite to use
-	 * @param target the target compilation unit node
-	 * @param group the text edit group to use
-	 * @param node the ast node to rewrite
-	 */
-	protected void rewriteFieldDeclaration(final ASTRewrite rewrite, final CompilationUnit target, final TextEditGroup group, final FieldDeclaration node) {
-		rewrite.replace(node.getType(), target.getAST().newSimpleType(target.getAST().newSimpleName(fTypeName)), group);
-	}
-
-	/**
-	 * Rewrites the specified ast node.
-	 * 
-	 * @param rewrite the ast rewrite to use
-	 * @param target the target compilation unit node
-	 * @param group the text edit group to use
-	 * @param node the ast node to rewrite
-	 */
-	protected void rewriteMethodReturnType(final ASTRewrite rewrite, final CompilationUnit target, final TextEditGroup group, final MethodDeclaration node) {
-		rewrite.replace(node.getReturnType2(), target.getAST().newSimpleType(target.getAST().newSimpleName(fTypeName)), group);
-	}
-
-	/**
-	 * Rewrites the specified ast node.
-	 * 
-	 * @param rewrite the ast rewrite to use
-	 * @param target the target compilation unit node
-	 * @param group the text edit group to use
-	 * @param node the ast node to rewrite
-	 */
-	protected void rewriteQualifiedName(final ASTRewrite rewrite, final CompilationUnit target, final TextEditGroup group, final ASTNode node) {
-		rewrite.replace(node, target.getAST().newSimpleName(fTypeName), group);
-	}
-
-	/**
-	 * Rewrites the specified ast node.
-	 * 
-	 * @param rewrite the ast rewrite to use
-	 * @param target the target compilation unit node
-	 * @param group the text edit group to use
-	 * @param node the ast node to rewrite
-	 */
-	protected void rewriteSingleVariableDeclaration(final ASTRewrite rewrite, final CompilationUnit target, final TextEditGroup group, final SingleVariableDeclaration node) {
-		rewrite.replace(node.getType(), target.getAST().newSimpleType(target.getAST().newSimpleName(fTypeName)), group);
 	}
 
 	/**
@@ -535,6 +553,98 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @param node the ast node to rewrite
 	 */
 	protected void rewriteVariableDeclarationFragment(final ASTRewrite rewrite, final CompilationUnit target, final TextEditGroup group, final VariableDeclarationFragment node) {
-		rewrite.replace(((VariableDeclarationStatement) node.getParent()).getType(), target.getAST().newSimpleType(target.getAST().newSimpleName(fTypeName)), group);
+		rewrite.replace(((VariableDeclarationStatement) node.getParent()).getType(), createCorrespondingNode(target.getAST(), fSuperType), group);
+	}
+
+	/**
+	 * Solves the supertype constraints to replace subtype by a supertype.
+	 * 
+	 * @param subUnit the compilation unit of the subtype
+	 * @param subNode the compilation unit node of the subtype
+	 * @param type the java element of the subtype
+	 * @param subType the type binding of the subtype to replace
+	 * @param superType the type binding of the supertype to use as replacement
+	 * @param monitor the progress monitor to use
+	 * @param status the refactoring status
+	 * @throws JavaModelException if an error occurs
+	 */
+	protected final void solveSuperTypeConstraints(final ICompilationUnit subUnit, final CompilationUnit subNode, final IType type, final ITypeBinding subType, final ITypeBinding superType, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
+		final SuperTypeConstraintsModel model= new SuperTypeConstraintsModel(subType, superType);
+		final SuperTypeConstraintsCreator creator= new SuperTypeConstraintsCreator(model);
+		fSuperType= model.getSuperType();
+		try {
+			monitor.beginTask("", 3); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.creating")); //$NON-NLS-1$
+			final Map firstPass= getReferencingCompilationUnits(type, new SubProgressMonitor(monitor, 1), status);
+			final Map secondPass= new HashMap(firstPass.size());
+			IJavaProject project= null;
+			Collection collection= null;
+			final ASTParser parser= ASTParser.newParser(AST.JLS3);
+			SearchResultGroup group= null;
+			final Map groups= new HashMap();
+			for (final Iterator outer= firstPass.keySet().iterator(); outer.hasNext();) {
+				project= (IJavaProject) outer.next();
+				collection= (Collection) firstPass.get(project);
+				if (collection != null) {
+					for (final Iterator inner= collection.iterator(); inner.hasNext();) {
+						group= (SearchResultGroup) inner.next();
+						groups.put(group.getCompilationUnit(), group);
+					}
+				}
+			}
+			for (final Iterator iterator= firstPass.keySet().iterator(); iterator.hasNext();) {
+				project= (IJavaProject) iterator.next();
+				collection= (Collection) firstPass.get(project);
+				if (collection != null && !collection.isEmpty()) {
+					parser.setWorkingCopyOwner(fOwner);
+					parser.setResolveBindings(true);
+					parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+					parser.setProject(project);
+					final Set units= new HashSet(groups.keySet());
+					units.remove(subUnit);
+					parser.createASTs((ICompilationUnit[]) units.toArray(new ICompilationUnit[units.size()]), new String[0], new ASTRequestor() {
+
+						public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
+							monitor.subTask(unit.getElementName());
+							performFirstPass(creator, secondPass, groups, unit, node);
+						}
+
+						public final void acceptBinding(final String key, final IBinding binding) {
+							// Do nothing
+						}
+					}, new SubProgressMonitor(monitor, 1));
+				}
+			}
+			performFirstPass(creator, secondPass, groups, subUnit, subNode);
+			for (final Iterator iterator= secondPass.keySet().iterator(); iterator.hasNext();) {
+				project= (IJavaProject) iterator.next();
+				collection= (Collection) secondPass.get(project);
+				if (collection != null && !collection.isEmpty()) {
+					parser.setWorkingCopyOwner(fOwner);
+					parser.setResolveBindings(true);
+					parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+					parser.setProject(project);
+					final Set units= new HashSet(collection);
+					units.remove(subUnit);
+					parser.createASTs((ICompilationUnit[]) units.toArray(new ICompilationUnit[units.size()]), new String[0], new ASTRequestor() {
+
+						public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
+							monitor.subTask(unit.getElementName());
+							performSecondPass(creator, unit, node);
+						}
+
+						public final void acceptBinding(final String key, final IBinding binding) {
+							// Do nothing
+						}
+					}, new SubProgressMonitor(monitor, 1));
+				}
+			}
+			final SuperTypeConstraintsSolver solver= new SuperTypeConstraintsSolver(model);
+			solver.solveConstraints();
+			fTypeOccurrences= solver.getTypeOccurrences();
+			fObsoleteCasts= solver.getObsoleteCasts();
+		} finally {
+			monitor.done();
+		}
 	}
 }
