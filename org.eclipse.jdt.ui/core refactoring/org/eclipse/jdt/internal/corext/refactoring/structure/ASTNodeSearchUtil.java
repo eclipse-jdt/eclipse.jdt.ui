@@ -25,8 +25,10 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -134,6 +136,14 @@ public class ASTNodeSearchUtil {
 
 	public static AnnotationTypeDeclaration getAnnotationTypeDeclarationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
 		return (AnnotationTypeDeclaration) ASTNodes.getParent(getNameNode(iType, cuNode), AnnotationTypeDeclaration.class);
+	}
+
+	public static BodyDeclaration getBodyDeclarationNode(IMember iMember, CompilationUnit cuNode) throws JavaModelException {
+		return (BodyDeclaration) ASTNodes.getParent(getNameNode(iMember, cuNode), BodyDeclaration.class);
+	}
+
+	public static AbstractTypeDeclaration getAbstractTypeDeclarationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
+		return (AbstractTypeDeclaration) ASTNodes.getParent(getNameNode(iType, cuNode), AbstractTypeDeclaration.class);
 	}
 
 	public static TypeDeclaration getTypeDeclarationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
