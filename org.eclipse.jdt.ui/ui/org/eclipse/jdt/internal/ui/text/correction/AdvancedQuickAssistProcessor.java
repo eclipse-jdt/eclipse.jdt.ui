@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -66,7 +67,12 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					|| getCastAndAssignIfStatementProposals(context, coveringNode, null)
 					|| getPickOutStringProposals(context, coveringNode, null)
 					|| getReplaceIfElseWithConditionalProposals(context, coveringNode, null)
-					|| getReplaceConditionalWithIfElseProposals(context, coveringNode, null);
+					|| getReplaceConditionalWithIfElseProposals(context, coveringNode, null)
+					|| getInverseLocalVariableProposals(context, coveringNode, null)
+					|| getPushNegationDownProposals(context, coveringNode, null)
+					|| getPullNegationUpProposals(context, coveringNode, coveredNodes, null)
+					|| getJoinIfListInIfElseIfProposals(context, coveringNode, coveredNodes, null)
+					|| getConvertSwitchToIfProposals(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -98,6 +104,11 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getPickOutStringProposals(context, coveringNode, resultingCollections);
 				getReplaceIfElseWithConditionalProposals(context, coveringNode, resultingCollections);
 				getReplaceConditionalWithIfElseProposals(context, coveringNode, resultingCollections);
+				getInverseLocalVariableProposals(context, coveringNode, resultingCollections);
+				getPushNegationDownProposals(context, coveringNode, resultingCollections);
+				getPullNegationUpProposals(context, coveringNode, coveredNodes, resultingCollections);
+				getJoinIfListInIfElseIfProposals(context, coveringNode, coveredNodes, resultingCollections);
+				getConvertSwitchToIfProposals(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -398,6 +409,14 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 	private static Expression getInversedBooleanExpression(AST ast, ASTRewrite rewrite, Expression expression) {
+		if (expression instanceof BooleanLiteral) {
+			BooleanLiteral booleanLiteral = (BooleanLiteral) expression;
+			if (booleanLiteral.booleanValue()) {
+				return ast.newBooleanLiteral(false);
+			} else {
+				return ast.newBooleanLiteral(true);
+			}
+		}
 		if (expression instanceof InfixExpression) {
 			InfixExpression infixExpression = (InfixExpression) expression;
 			InfixExpression.Operator operator = infixExpression.getOperator();
@@ -1658,5 +1677,366 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 		resultingCollections.add(proposal);
 		return true;
+	}
+	private static boolean getInverseLocalVariableProposals(IInvocationContext context,
+			ASTNode covering,
+			Collection resultingCollections) {
+		// cursor should be placed on variable name
+		if (covering.getLocationInParent() != VariableDeclarationFragment.NAME_PROPERTY) {
+			return false;
+		}
+		// check that variable has initialization at place of definition
+		VariableDeclarationFragment vdf= (VariableDeclarationFragment) covering.getParent();
+		if (vdf.getInitializer() == null) {
+			return false;
+		}
+		final AST ast= covering.getAST();
+		
+		// we operate only on boolean variable
+		final ITypeBinding variableBinding= vdf.getName().resolveTypeBinding();
+		
+		if (variableBinding != ast.resolveWellKnownType("boolean")) { //$NON-NLS-1$
+			return false;
+		}
+		final MethodDeclaration method= ASTResolving.findParentMethodDeclaration(covering);
+
+		// check that there are no assignments for this variable
+		final boolean hasAssignments[]= { false };
+		method.accept(new GenericVisitor() {
+			protected boolean visitNode(ASTNode node) {
+				return !hasAssignments[0];
+			}
+			public void endVisit(Assignment node) {
+				if (node.getLeftHandSide() instanceof SimpleName) {
+					SimpleName name= (SimpleName) node.getLeftHandSide();
+					if (name.resolveBinding() == variableBinding) {
+						hasAssignments[0]= true;
+					}
+				}
+			}
+		});
+		if (hasAssignments[0]) {
+			return false;
+		}
+		// ok, we could produce quick assist
+		if (resultingCollections == null) {
+			return true;
+		}
+		//
+
+		final ASTRewrite rewrite= ASTRewrite.create(ast);
+		// replace initializer for variable
+		rewrite.replace(vdf.getInitializer(), getInversedBooleanExpression(ast, rewrite, vdf.getInitializer()), null);
+		// create proposal
+		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.inverseBooleanVariable"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+		final String KEY_NAME= "name"; //$NON-NLS-1$
+		final LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		
+		// add positions for variable declaration
+		ITrackedNodePosition nameTrack= rewrite.track(vdf.getName());
+		proposal.addLinkedPosition(nameTrack, true, KEY_NAME);
+		proposal.setEndPosition(nameTrack);
+		// iterate over method and replace variable references with negated reference
+		method.accept(new ASTVisitor() {
+			public void endVisit(SimpleName name) {
+				if (name.resolveBinding() != variableBinding) {
+					return;
+				}
+				if (name.getParent() instanceof VariableDeclarationFragment) {
+					return;
+				}
+				if ((name.getParent() instanceof PrefixExpression)
+					&& (((PrefixExpression) name.getParent()).getOperator() == PrefixExpression.Operator.NOT)) {
+					rewrite.replace(name.getParent(), name, null);
+					proposal.addLinkedPosition(rewrite.track(name), false, KEY_NAME);
+				} else {
+					PrefixExpression expression= ast.newPrefixExpression();
+					expression.setOperator(PrefixExpression.Operator.NOT);
+					Expression nameCopy= (Expression) rewrite.createMoveTarget(name);
+					expression.setOperand(nameCopy);
+					rewrite.replace(name, expression, null);
+					proposal.addLinkedPosition(rewrite.track(nameCopy), false, KEY_NAME);
+				}
+			}
+		});
+		// add correction proposal
+		resultingCollections.add(proposal);
+		return true;
+	}
+	private static boolean getPushNegationDownProposals(IInvocationContext context,
+			ASTNode covering,
+			Collection resultingCollections) {
+		PrefixExpression negationExpression= null;
+		ParenthesizedExpression parenthesizedExpression= null;
+		// check for case when cursor is on '!' before parentheses
+		if (covering instanceof PrefixExpression) {
+			PrefixExpression prefixExpression= (PrefixExpression) covering;
+			if ((prefixExpression.getOperator() == PrefixExpression.Operator.NOT)
+				&& (prefixExpression.getOperand() instanceof ParenthesizedExpression)) {
+				negationExpression= prefixExpression;
+				parenthesizedExpression= (ParenthesizedExpression) prefixExpression.getOperand();
+			}
+		}
+		// check for case when cursor is on parenthesized expression that is negated
+		if ((covering instanceof ParenthesizedExpression)
+			&& (covering.getParent() instanceof PrefixExpression)
+			&& (((PrefixExpression) covering.getParent()).getOperator() == PrefixExpression.Operator.NOT)) {
+			negationExpression= (PrefixExpression) covering.getParent();
+			parenthesizedExpression= (ParenthesizedExpression) covering;
+		}
+		//
+		if (negationExpression == null) {
+			return false;
+		}
+		// ok, we could produce quick assist
+		if (resultingCollections == null) {
+			return true;
+		}
+		//
+		final AST ast= covering.getAST();
+		final ASTRewrite rewrite= ASTRewrite.create(ast);
+		// prepared inversed expression
+		Expression inversedExpression= getInversedBooleanExpression(ast,
+			rewrite,
+			parenthesizedExpression.getExpression());
+		// check, may be we should keep parentheses 
+		boolean keepParentheses= false;
+		if (negationExpression.getParent() instanceof Expression) {
+			int parentPrecedence= getExpressionPrecedence((Expression) negationExpression.getParent());
+			int inversedExpressionPrecedence= getExpressionPrecedence(inversedExpression);
+			keepParentheses= parentPrecedence < inversedExpressionPrecedence;
+		}
+		// replace negated expression with inversed one
+		if (keepParentheses) {
+			ParenthesizedExpression pe= ast.newParenthesizedExpression();
+			pe.setExpression(inversedExpression);
+			rewrite.replace(negationExpression, pe, null);
+		} else {
+			rewrite.replace(negationExpression, inversedExpression, null);
+		}
+		// add correction proposal
+		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.pushNegationDown"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		resultingCollections.add(proposal);
+		return true;
+	}
+	private static boolean getPullNegationUpProposals(IInvocationContext context,
+			ASTNode covering,
+			ArrayList coveredNodes,
+			Collection resultingCollections) {
+		if (coveredNodes.size() != 1) {
+			return false;
+		}
+		//
+		ASTNode fullyCoveredNode= (ASTNode) coveredNodes.get(0);
+		if (!(fullyCoveredNode instanceof Expression)) {
+			return false;
+		}
+		Expression expression= (Expression) fullyCoveredNode;
+		// we operate only on boolean variable
+		final ITypeBinding variableBinding= expression.resolveTypeBinding();
+		final AST ast= covering.getAST();
+		if (variableBinding != ast.resolveWellKnownType("boolean")) { //$NON-NLS-1$
+			return false;
+		}
+		// ok, we could produce quick assist
+		if (resultingCollections == null) {
+			return true;
+		}
+		//
+
+		final ASTRewrite rewrite= ASTRewrite.create(ast);
+		// prepared inversed expression
+		Expression inversedExpression= getInversedBooleanExpression(ast, rewrite, expression);
+		// prepare ParenthesizedExpression
+		ParenthesizedExpression parenthesizedExpression = ast.newParenthesizedExpression();
+		parenthesizedExpression.setExpression(inversedExpression);
+		// prepare NOT prefix expression
+		PrefixExpression prefixExpression = ast.newPrefixExpression();
+		prefixExpression.setOperator(PrefixExpression.Operator.NOT);
+		prefixExpression.setOperand(parenthesizedExpression);
+		// replace old expresson 
+		rewrite.replace(expression, prefixExpression, null);
+		// add correction proposal
+		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.pullNegationUp"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		resultingCollections.add(proposal);
+		return true;
+	}
+	private static boolean getJoinIfListInIfElseIfProposals(IInvocationContext context,
+			ASTNode covering,
+			ArrayList coveredNodes,
+			Collection resultingCollections) {
+		if (coveredNodes.isEmpty()) {
+			return false;
+		}
+		// check that all selected nodes are 'if' statements with only 'then' statement
+		for (Iterator I= coveredNodes.iterator(); I.hasNext();) {
+			ASTNode node= (ASTNode) I.next();
+			if (!(node instanceof IfStatement)) {
+				return false;
+			}
+			IfStatement ifStatement= (IfStatement) node;
+			if (ifStatement.getElseStatement() != null) {
+				return false;
+			}
+		}
+		// ok, we could produce quick assist
+		if (resultingCollections == null) {
+			return true;
+		}
+		//
+		final AST ast= covering.getAST();
+		final ASTRewrite rewrite= ASTRewrite.create(ast);
+		//
+		IfStatement firstIfStatement= (IfStatement) coveredNodes.get(0);
+		IfStatement firstNewIfStatement= null;
+		//
+		IfStatement prevIfStatement= null;
+		for (Iterator I= coveredNodes.iterator(); I.hasNext();) {
+			IfStatement ifStatement= (IfStatement) I.next();
+			// prepare new 'if' statement
+			IfStatement newIfStatement= ast.newIfStatement();
+			newIfStatement.setExpression((Expression) rewrite.createMoveTarget(ifStatement.getExpression()));
+			// prepare 'then' statement and convert into block if needed
+			Statement thenStatement= (Statement) rewrite.createMoveTarget(ifStatement.getThenStatement());
+			if (!(thenStatement instanceof Block)) {
+				Block thenBlock= ast.newBlock();
+				thenBlock.statements().add(thenStatement);
+				thenStatement= thenBlock;
+			}
+			newIfStatement.setThenStatement(thenStatement);
+			//
+			if (prevIfStatement != null) {
+				prevIfStatement.setElseStatement(newIfStatement);
+				rewrite.remove(ifStatement, null);
+			} else {
+				firstNewIfStatement= newIfStatement;
+			}
+			prevIfStatement= newIfStatement;
+		}
+		rewrite.replace(firstIfStatement, firstNewIfStatement, null);
+		// add correction proposal
+		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.joinIfSequence"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		resultingCollections.add(proposal);
+		return true;
+	}
+	private static boolean getConvertSwitchToIfProposals(IInvocationContext context,
+			ASTNode covering,
+			Collection resultingCollections) {
+		if (!(covering instanceof SwitchStatement)) {
+			return false;
+		}
+		// ok, we could produce quick assist (if all 'case' statements end with 'break')
+		if (resultingCollections == null) {
+			return true;
+		}
+		//
+		final AST ast= covering.getAST();
+		final ASTRewrite rewrite= ASTRewrite.create(ast);
+		//
+		SwitchStatement switchStatement= (SwitchStatement) covering;
+		IfStatement firstIfStatement= null;
+		IfStatement currentIfStatement= null;
+		Block currentBlock= null;
+		Block defaultBlock= null;
+		InfixExpression currentCondition= null;
+		boolean defaultFound= false;
+		//
+		for (Iterator I= switchStatement.statements().iterator(); I.hasNext();) {
+			Statement statement= (Statement) I.next();
+			if (statement instanceof SwitchCase) {
+				SwitchCase switchCase= (SwitchCase) statement;
+				// special case: passthrough
+				if (currentBlock != null) {
+					return false;
+				}
+				// for 'default' we just will not create condition
+				if (switchCase.isDefault()) {
+					defaultFound= true;
+					if (currentCondition != null) {
+						// we can not convert one or more 'case' statements and 'default' nor in conditional if, nor in 'else' without code duplication
+						return false;
+					}
+					continue;
+				}
+				if (defaultFound) {
+					return false;
+				}
+				// prepare condition
+				InfixExpression switchCaseCondition= createSwitchCaseCondition(ast,
+					rewrite,
+					switchStatement,
+					switchCase);
+				if (currentCondition == null) {
+					currentCondition= switchCaseCondition;
+				} else {
+					InfixExpression condition= ast.newInfixExpression();
+					condition.setOperator(InfixExpression.Operator.CONDITIONAL_OR);
+					condition.setLeftOperand(currentCondition);
+					condition.setRightOperand(switchCaseCondition);
+					currentCondition= condition;
+				}
+			} else if (statement instanceof BreakStatement) {
+				currentBlock= null;
+			} else {
+				if (currentBlock == null) {
+					defaultFound= false;
+					if (currentCondition != null) {
+						IfStatement ifStatement;
+						if (firstIfStatement == null) {
+							firstIfStatement= ast.newIfStatement();
+							ifStatement= firstIfStatement;
+						} else {
+							ifStatement= ast.newIfStatement();
+							currentIfStatement.setElseStatement(ifStatement);
+						}
+						currentIfStatement= ifStatement;
+						ifStatement.setExpression(currentCondition);
+						currentCondition= null;
+						currentBlock= ast.newBlock();
+						ifStatement.setThenStatement(currentBlock);
+					} else {
+						// case for default:
+						defaultBlock= ast.newBlock();
+						currentBlock= defaultBlock;
+						// delay adding of default block
+					}
+				}
+				currentBlock.statements().add(rewrite.createCopyTarget(statement));
+			}
+		}
+		// check, may be we have delayed default block
+		if (defaultBlock != null) {
+			currentIfStatement.setElseStatement(defaultBlock);
+		}
+		// replace 'switch' with single if-else-if statement
+		rewrite.replace(switchStatement, firstIfStatement, null);
+		// add correction proposal
+		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.convertSwitchToIf"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		resultingCollections.add(proposal);
+		return true;
+	}
+	private static InfixExpression createSwitchCaseCondition(AST ast,
+			ASTRewrite rewrite,
+			SwitchStatement switchStatement,
+			SwitchCase switchCase) {
+		InfixExpression condition= ast.newInfixExpression();
+		condition.setOperator(InfixExpression.Operator.EQUALS);
+		//
+		Expression leftExpression= (Expression) rewrite.createCopyTarget(switchStatement.getExpression());
+		condition.setLeftOperand(leftExpression);
+		//
+		Expression rightExpression= (Expression) rewrite.createCopyTarget(switchCase.getExpression());
+		condition.setRightOperand(rightExpression);
+		//
+		return condition;
 	}
 }
