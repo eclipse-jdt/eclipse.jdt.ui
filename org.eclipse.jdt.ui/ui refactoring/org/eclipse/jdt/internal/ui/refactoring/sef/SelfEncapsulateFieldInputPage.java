@@ -212,7 +212,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 				combo.add(JavaElementLabels.getElementLabel(methods[i], JavaElementLabels.M_PARAMETER_TYPES));
 			}
 			if (methods.length > 0)
-				select= 1;
+				select= methods.length;
 		} catch (JavaModelException e) {
 			// Fall through
 		}
