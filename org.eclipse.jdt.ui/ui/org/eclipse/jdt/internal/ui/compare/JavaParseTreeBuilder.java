@@ -8,12 +8,11 @@ import java.util.Stack;
 
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.jdt.internal.compiler.IProblem;
-import org.eclipse.jdt.internal.compiler.ISourceElementRequestor;
+import org.eclipse.jdt.internal.compiler.*;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 
 
-class JavaParseTreeBuilder implements ISourceElementRequestor, ICompilationUnit {
+class JavaParseTreeBuilder extends SourceElementRequestorAdapter implements ICompilationUnit {
 	
 	private static final boolean SHOW_COMPILATIONUNIT= true;
 
@@ -128,43 +127,6 @@ class JavaParseTreeBuilder implements ISourceElementRequestor, ICompilationUnit 
 		pop(declarationEnd);
 	}
 
-	//---- no ops
-
-	public void acceptConstructorReference(char[] p1, int p2, int p3){
-	}
-	
-	public void acceptFieldReference(char[] p1, int p2){
-	}
-	
-	public void acceptLineSeparatorPositions(int[] p1){
-	}
-	
-	public void acceptMethodReference(char[] p1, int p2, int p3){
-	}
-	
-	public void acceptProblem(IProblem p1){
-	}
-	
-	public void acceptTypeReference(char[][] p1, int p2, int p3){
-	}
-	
-	public void acceptTypeReference(char[] p1, int p2){
-	}
-	
-	public void acceptUnknownReference(char[][] p1, int p2, int p3){
-	}
-	
-	public void acceptUnknownReference(char[] p1, int p2){
-	}
-	
-	public void enterInitializer(int declarationStart, int modifiers) {
-	}
-
-	public void exitInitializer(int declarationEnd) {
-	}	
-	
-	//----
-	
 	private IDocument getDocument() {
 		JavaNode top= (JavaNode) fStack.peek();
 		return top.getDocument();
