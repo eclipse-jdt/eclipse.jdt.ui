@@ -13,6 +13,32 @@ import org.eclipse.ui.IWorkbenchActionConstants;
  * </p>
  */
 public interface IContextMenuConstants {
+	
+	
+	/**
+	 * Pop-up menu target IDs for the Type Hierarchy viewpart.
+	 * Type hierarchy view target ID
+	 */
+	public static final String TARGET_ID_HIERARCHY_VIEW= JavaUI.ID_TYPE_HIERARCHY + ".typehierarchy"; //$NON-NLS-1$	
+
+	/**
+	 * Pop-up menu target IDs for the Type Hierarchy viewpart.
+	 * Supertype hierarchy view target ID
+	 */
+	public static final String TARGET_ID_SUPERTYPES_VIEW= JavaUI.ID_TYPE_HIERARCHY + ".supertypes"; //$NON-NLS-1$	
+
+	/**
+	 * Pop-up menu target IDs for the Type Hierarchy viewpart.
+	 * Subtype hierarchy view target ID
+	 */
+	public static final String TARGET_ID_SUBTYPES_VIEW= JavaUI.ID_TYPE_HIERARCHY + ".subtypes"; //$NON-NLS-1$	
+
+	/**
+	 * Pop-up menu target IDs for the Type Hierarchy viewpart.
+	 * Member view target ID
+	 */
+	public static final String TARGET_ID_MEMBERS_VIEW= JavaUI.ID_TYPE_HIERARCHY + ".members"; //$NON-NLS-1$	
+	
 
 	/**
 	 * Pop-up menu: name of group for goto actions (value <code>"group.open"</code>).

@@ -392,31 +392,31 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		// Create the viewers
 		final TypeHierarchyViewer superTypesViewer= new SuperTypeHierarchyViewer(fViewerbook, fHierarchyLifeCycle, this);
 		superTypesViewer.getControl().setVisible(false);
-		superTypesViewer.setMenuListener(new IMenuListener() {
+		superTypesViewer.initContextMenu(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager menu) {
 				fillTypesViewerContextMenu(superTypesViewer, menu);
 			}
-		});
+		}, IContextMenuConstants.TARGET_ID_SUPERTYPES_VIEW,	getSite());
 		superTypesViewer.addSelectionChangedListener(selectionChangedListener);		
 		superTypesViewer.getControl().addKeyListener(keyListener);
 		
 		final TypeHierarchyViewer subTypesViewer= new SubTypeHierarchyViewer(fViewerbook, fHierarchyLifeCycle, this);
 		subTypesViewer.getControl().setVisible(false);
-		subTypesViewer.setMenuListener(new IMenuListener() {
+		subTypesViewer.initContextMenu(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager menu) {
 				fillTypesViewerContextMenu(subTypesViewer, menu);
 			}
-		});
+		}, IContextMenuConstants.TARGET_ID_SUBTYPES_VIEW, getSite());
 		subTypesViewer.addSelectionChangedListener(selectionChangedListener);
 		subTypesViewer.getControl().addKeyListener(keyListener);
 		
 		final TypeHierarchyViewer vajViewer= new TraditionalHierarchyViewer(fViewerbook, fHierarchyLifeCycle, this);
 		vajViewer.getControl().setVisible(false);
-		vajViewer.setMenuListener(new IMenuListener() {
+		vajViewer.initContextMenu(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager menu) {
 				fillTypesViewerContextMenu(vajViewer, menu);
 			}
-		});
+		}, IContextMenuConstants.TARGET_ID_HIERARCHY_VIEW,	getSite());
 		vajViewer.addSelectionChangedListener(selectionChangedListener);
 		vajViewer.getControl().addKeyListener(keyListener);
 		
@@ -451,11 +451,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 	private Control createMethodViewerControl(Composite parent) {
 	
 		fMethodsViewer= new MethodsViewer(parent, this);
-		fMethodsViewer.setMenuListener(new IMenuListener() {
+		fMethodsViewer.initContextMenu(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager menu) {
 				fillMethodsViewerContextMenu(menu);
 			}
-		});
+		}, IContextMenuConstants.TARGET_ID_MEMBERS_VIEW, getSite());
 		fMethodsViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				methodSelectionChanged(event.getSelection());
@@ -543,7 +543,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		
 		getSite().setSelectionProvider(selProvider);
 		getSite().getPage().addPartListener(fPartListener);
-		
+				
 		fFocusOnSelectionAction= new FocusOnSelectionAction(this, selProvider);		
 		
 		IType input= determineInputElement();

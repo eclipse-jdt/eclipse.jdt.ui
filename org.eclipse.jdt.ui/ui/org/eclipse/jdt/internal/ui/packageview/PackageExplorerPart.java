@@ -160,7 +160,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		menuMgr.addMenuListener(this);
 		fContextMenu= menuMgr.createContextMenu(fViewer.getTree());
 		fViewer.getTree().setMenu(fContextMenu);
-		getSite().registerContextMenu(menuMgr.getId(), menuMgr, fViewer);		
+		getSite().registerContextMenu(menuMgr, fViewer);
 		
 		makeActions(); // call before registering for selection changes
 			
@@ -533,8 +533,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * Returns whether the preference to link selection to active editor is enabled.
 	 */
 	boolean isLinkingEnabled() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return (store != null && store.getBoolean(IPreferencesConstants.LINK_PACKAGES_TO_EDITOR));
+		return JavaBasePreferencePage.linkPackageSelectionToEditor();
 	}
 
 	/**

@@ -586,7 +586,7 @@
 			label="%showFinalAction.label"
 			toolbarPath="javaVariableFilters"
 			icon="icons/full/elcl16/final_co.gif"
-			tooltip="showFinalAction.tooltip"
+			tooltip="%showFinalAction.tooltip"
 			state="true"
 			class="org.eclipse.jdt.internal.debug.ui.ShowFinalFieldsAction">
 		</action>

@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartSite;
 
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
@@ -87,12 +88,13 @@ public abstract class TypeHierarchyViewer extends TreeViewer {
 	/**
 	 * Attaches a contextmenu listener to the tree
 	 */
-	public void setMenuListener(IMenuListener menuListener) {
+	public void initContextMenu(IMenuListener menuListener, String popupId, IWorkbenchPartSite viewSite) {
 		MenuManager menuMgr= new MenuManager();
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(menuListener);
 		Menu menu= menuMgr.createContextMenu(getTree());
-		getTree().setMenu(menu);		
+		getTree().setMenu(menu);
+		viewSite.registerContextMenu(popupId, menuMgr, this);
 	}
 	
 	protected void handleDispose(DisposeEvent event) {

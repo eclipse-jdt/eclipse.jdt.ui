@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartSite;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
@@ -206,12 +207,13 @@ public class MethodsViewer extends TableViewer {
 	/**
 	 * Attaches a contextmenu listener to the table
 	 */
-	public void setMenuListener(IMenuListener menuListener) {
+	public void initContextMenu(IMenuListener menuListener, String popupId, IWorkbenchPartSite viewSite) {
 		MenuManager menuMgr= new MenuManager();
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(menuListener);
 		Menu menu= menuMgr.createContextMenu(getTable());
-		getTable().setMenu(menu);		
+		getTable().setMenu(menu);
+		viewSite.registerContextMenu(popupId, menuMgr, this);
 	}	
 		
 	protected void handleDispose(DisposeEvent event) {
