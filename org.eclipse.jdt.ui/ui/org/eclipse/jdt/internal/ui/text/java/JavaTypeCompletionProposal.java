@@ -81,15 +81,16 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 	/**
 	 * To be o
 	 */
-	protected String updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
+	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
 		if (impStructure != null) {
 			IType[] types= impStructure.getCompilationUnit().getTypes();
 			if (types.length > 0 && types[0].getSourceRange().getOffset() <= offset) {
 				// ignore positions above type.
-				return impStructure.addImport(getReplacementString());
+				setReplacementString(impStructure.addImport(getReplacementString()));
+				return true;
 			}
 		}
-		return null;
+		return false;
 	}
 	
 	
@@ -107,10 +108,8 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 				impStructure= new ImportsStructure(fCompilationUnit, prefOrder, threshold, true);
 			}
 			
-			String replacementString= updateReplacementString(document, trigger, offset, impStructure);
-			if (replacementString != null) {
-				setReplacementString(replacementString);
-				setCursorPosition(replacementString.length());
+			if (updateReplacementString(document, trigger, offset, impStructure)) {
+				setCursorPosition(getReplacementString().length());
 			}
 			
 			super.apply(document, trigger, offset);

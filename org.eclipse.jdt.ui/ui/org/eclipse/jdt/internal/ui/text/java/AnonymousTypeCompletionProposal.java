@@ -10,9 +10,9 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -28,11 +28,11 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.OverrideMethodQuery;
-import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal {
@@ -75,29 +75,38 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	/* (non-Javadoc)
 	 * @see JavaTypeCompletionProposal#updateReplacementString(char, int, ImportsStructure)
 	 */
-	protected String updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
+	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
 		String replacementString= getReplacementString();
 		
 		// construct replacement text
 		StringBuffer buf= new StringBuffer();
 		buf.append(replacementString);
+		
 		if (!replacementString.endsWith(")")) { //$NON-NLS-1$
 			buf.append(')');
 		}	
 		buf.append(" {\n"); //$NON-NLS-1$
 		if (!createStubs(buf, impStructure)) {
-			return null;
+			return false;
 		}
 		buf.append("}"); //$NON-NLS-1$
 		
 		// use the code formatter
 		String lineDelim= StubUtility.getLineDelimiterFor(document);
-		int tabWidth= CodeFormatterPreferencePage.getTabSize();
+		int tabWidth= CodeFormatterUtil.getTabWidth();
 		IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
 		int indent= Strings.computeIndent(document.get(region.getOffset(), region.getLength()), tabWidth);
 		
 		String replacement= StubUtility.codeFormat(buf.toString(), indent, lineDelim);
-		return Strings.trimLeadingTabsAndSpaces(replacement);
+		setReplacementString(Strings.trimLeadingTabsAndSpaces(replacement));
+		int pos= offset;
+		while (pos < document.getLength() && Character.isWhitespace(document.getChar(pos))) {
+			pos++;
+		}
+		if (pos < document.getLength() && document.getChar(pos) == ')') {
+			setReplacementLength(pos - offset + 1);
+		}
+		return true;
 	}	
 	
 	private boolean createStubs(StringBuffer buf, ImportsStructure imports) throws JavaModelException {

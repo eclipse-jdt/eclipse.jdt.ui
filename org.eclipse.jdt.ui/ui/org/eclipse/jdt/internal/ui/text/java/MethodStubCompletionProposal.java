@@ -55,7 +55,7 @@ public class MethodStubCompletionProposal extends JavaTypeCompletionProposal {
 	/* (non-Javadoc)
 	 * @see JavaTypeCompletionProposal#updateReplacementString(IDocument, char, int, ImportsStructure)
 	 */
-	protected String updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
+	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
 		IType declaringType= fJavaProject.findType(fTypeName);
 		if (declaringType != null) {
 			IMethod method= JavaModelUtil.findMethod(fMethodName, fParamTypes, false, declaringType);
@@ -82,11 +82,11 @@ public class MethodStubCompletionProposal extends JavaTypeCompletionProposal {
 				int indent= Strings.computeIndent(document.get(lineStart, getReplacementOffset() - lineStart), settings.tabWidth);
 
 				String replacement= StubUtility.codeFormat(stub, indent, lineDelim);
-				return Strings.trimLeadingTabsAndSpaces(replacement);
+				setReplacementString(Strings.trimLeadingTabsAndSpaces(replacement));
 			}
 		}
 
-		return null;
+		return false;
 	}
 
 }
