@@ -470,12 +470,7 @@ public class TemplateCollector implements ICompletionRequestor {
 		if (types.length == 0)
 			return null;
 		
-		String[][] resolvedTypeNames= types[0].resolveType(typeName);
-
-		if (resolvedTypeNames == null)
-			return null;
-			
-		return resolvedTypeNames[0][0] + '.' + resolvedTypeNames[0][1];
+		return types[0].getFullyQualifiedName();		
 	}	
 	
 	// type names must be fully qualified
