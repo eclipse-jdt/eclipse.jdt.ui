@@ -750,8 +750,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		}
 				
 		addAction(menu, IContextMenuConstants.GROUP_OPEN, "OpenImportDeclaration");
-		addAction(menu, IContextMenuConstants.GROUP_SHOW, "ShowInPackageView");
 		addAction(menu, IContextMenuConstants.GROUP_SHOW, "ShowTypeHierarchy");
+		addAction(menu, IContextMenuConstants.GROUP_SHOW, "ShowInPackageView");
 		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "DeleteElement");
 		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "ReplaceWithEdition");
 		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "AddEdition");
