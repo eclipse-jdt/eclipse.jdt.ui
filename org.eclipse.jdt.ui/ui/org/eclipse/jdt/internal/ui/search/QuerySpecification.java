@@ -37,7 +37,7 @@ public abstract class QuerySpecification {
 	}
 	
 	/**
-	 * Returns a human readeable description of the search scope.
+	 * Returns a human readable description of the search scope.
 	 * @see #getScope()
 	 * @return A description of the search scope. 
 	 */

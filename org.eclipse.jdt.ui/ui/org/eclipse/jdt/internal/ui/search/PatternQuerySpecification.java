@@ -33,7 +33,7 @@ public class PatternQuerySpecification extends QuerySpecification {
 	 * @param caseSensitive Whether the query shoudl be case sensitive.
 	 * @param limitTo The kind of occurrence the query should search for
 	 * @param scope The scope to search in.
-	 * @param scopeDescription A human readeable description of the search
+	 * @param scopeDescription A human readable description of the search
 	 *                scope.
 	 */
 	public PatternQuerySpecification(String pattern, int searchFor, boolean caseSensitive, int limitTo, IJavaSearchScope scope, String scopeDescription) {

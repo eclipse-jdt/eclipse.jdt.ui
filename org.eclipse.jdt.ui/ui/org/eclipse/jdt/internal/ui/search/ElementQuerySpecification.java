@@ -26,7 +26,7 @@ public class ElementQuerySpecification extends QuerySpecification {
 	 * @param javaElement The java element the query should search for.
 	 * @param limitTo		  The kind of occurrence the query should search for
 	 * @param scope		  The scope to search in.
-	 * @param scopeDescription A human readeable description of the search scope.
+	 * @param scopeDescription A human readable description of the search scope.
 	 */
 	public ElementQuerySpecification(IJavaElement javaElement, int limitTo, IJavaSearchScope scope, String scopeDescription) {
 		super(limitTo, scope, scopeDescription);
