@@ -1,21 +1,20 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import org.eclipse.jdt.internal.compiler.ast.Argument;
-import org.eclipse.jdt.internal.compiler.ast.AstNode;
-import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.NameReference;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
-import org.eclipse.jdt.internal.corext.refactoring.ExtendedBuffer;
-import org.eclipse.jdt.internal.corext.refactoring.util.AST;
-import org.eclipse.jdt.internal.corext.refactoring.util.NewSelectionAnalyzer;
-import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
+import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 public class TempDeclarationFinder {
-	
+
 	//no instances
 	private TempDeclarationFinder(){}
 	
@@ -23,23 +22,33 @@ public class TempDeclarationFinder {
 	 * @return <code>null</code> if the selection is invalid of does not cover a temp
 	 * declaration or reference.
 	 */
-	public static LocalDeclaration findTempDeclaration(AST ast, ICompilationUnit cu, int selectionOffset, int selectionLength) throws JavaModelException{
-		TempSelectionAnalyzer analyzer= new TempSelectionAnalyzer(cu, selectionOffset, selectionLength);
-		ast.accept(analyzer);
+	public static VariableDeclaration findTempDeclaration(CompilationUnit cu, int selectionOffset, int selectionLength) {
+		TempSelectionAnalyzer analyzer= new TempSelectionAnalyzer(selectionOffset, selectionLength);
+		cu.accept(analyzer);
 		
-		AstNode[] selected= analyzer.getSelectedNodes();
-		if (selected == null || selected.length != 1){
+		ASTNode[] selected= analyzer.getSelectedNodes();
+		if (selected == null || selected.length != 1)
 			return null;
-		} else if (selected[0] instanceof LocalDeclaration && (!(selected[0] instanceof Argument))){
-			return (LocalDeclaration)selected[0];
-		} else if (selected[0] instanceof NameReference){
-			NameReference reference= (NameReference)selected[0];
-			if (reference.binding instanceof LocalVariableBinding){
-				LocalVariableBinding localBinding= (LocalVariableBinding)reference.binding;
-				if (! localBinding.isArgument){
-					return localBinding.declaration;
-				}	
-			}
+			
+		ASTNode selectedNode= selected[0];
+		if (selectedNode instanceof VariableDeclaration)
+			return (VariableDeclaration)selectedNode;
+		
+		if (selectedNode instanceof Name){
+			Name reference= (Name)selectedNode;
+			IBinding binding= reference.resolveBinding();
+			if (binding == null)
+				return null;
+			ASTNode declaringNode= cu.findDeclaringNode(binding);
+			if (declaringNode instanceof VariableDeclaration)
+				return (VariableDeclaration)declaringNode;
+			else
+				return null;	
+		} else if (selectedNode instanceof VariableDeclarationStatement){
+			VariableDeclarationStatement vds= (VariableDeclarationStatement)selectedNode;
+			if (vds.fragments().size() != 1)
+				return null;
+			return (VariableDeclaration)vds.fragments().get(0);
 		}
 		return null;
 	} 
@@ -47,33 +56,43 @@ public class TempDeclarationFinder {
 	/*
 	 * Class used to extract selected nodes from an AST.
 	 * Subclassing <code>SelectionAnalyzer</code> is needed to support activation 
-	 * when only a part of the LocalDeclaration node is selected
+	 * when only a part of the <code>VariableDeclaration</code> node is selected
 	 */
-	private static class TempSelectionAnalyzer extends NewSelectionAnalyzer {
+	private static class TempSelectionAnalyzer extends SelectionAnalyzer {
 
-		private AstNode fNode;
+		private ASTNode fNode;
 
-		TempSelectionAnalyzer(ICompilationUnit cu, int selectionOffset, int selectionLength) throws JavaModelException {
-			super(new ExtendedBuffer(cu.getBuffer()), Selection.createFromStartLength(selectionOffset, selectionLength));
+		TempSelectionAnalyzer(int selectionOffset, int selectionLength){
+			super(Selection.createFromStartLength(selectionOffset, selectionLength), true);
 		}
 
 		//overridden
-		public boolean visit(LocalDeclaration node, BlockScope scope) {
-			int start= node.declarationSourceStart;
-			int end= node.sourceEnd;
-			if (fSelection.start >= start && fSelection.end <= end) {
-				fNode= node;
-				return true;
+		public boolean visitNode(ASTNode node) {
+			if (!(node instanceof VariableDeclaration))
+				return super.visitNode(node);
+			VariableDeclaration vd= (VariableDeclaration)node;
+			if (vd.getInitializer() != null){
+				TextRange declarationRange= TextRange.createFromStartAndExclusiveEnd(node.getStartPosition(), vd.getInitializer().getStartPosition());
+				if (getSelection().coveredBy(declarationRange)){
+					fNode= node;
+					return false;
+				} else 
+					return super.visitNode(node);
+			} else {
+				if (getSelection().coveredBy(node)){
+					fNode= node;
+					return false;
+				} else 
+					return super.visitNode(node);
 			}
-			return super.visit(node, scope);
 		}
 		
 		//overridden
-		public AstNode[] getSelectedNodes() {
+		public ASTNode[] getSelectedNodes() {
 			if (fNode != null)
-				return new AstNode[] { fNode };
+				return new ASTNode[] { fNode };
 			return super.getSelectedNodes();
 		}
 	}
-}
 
+}
