@@ -161,7 +161,13 @@ public abstract class RefactoringTest extends TestCase {
 			return pack.getCompilationUnit(name);
 		ICompilationUnit cu= pack.createCompilationUnit(name, contents, true, null);
 		cu.save(null, true);
+		forceIndexing();
 		return cu;
+	}
+
+	//BOGUS??
+	protected void forceIndexing() {
+		JavaModelManager.getJavaModelManager().getIndexManager().checkIndexConsistency();
 	}
 
 	/**
