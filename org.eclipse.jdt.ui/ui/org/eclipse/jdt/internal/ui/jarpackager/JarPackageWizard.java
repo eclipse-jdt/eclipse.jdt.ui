@@ -4,7 +4,40 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.lang.reflect.InvocationTargetException;import java.net.MalformedURLException;import java.net.URL;import java.util.ArrayList;import java.util.Iterator;import java.util.List;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.resource.ImageDescriptor;import org.eclipse.jface.util.Assert;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.jface.wizard.Wizard;import org.eclipse.ui.IExportWizard;import org.eclipse.ui.IWorkbench;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.Wizard;
+
+import org.eclipse.ui.IExportWizard;
+import org.eclipse.ui.IWorkbench;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 /**
  * Standard workbench wizard for exporting resources from the workspace
@@ -107,6 +140,14 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	 * Method declared on IWizard.
 	 */
 	public boolean performFinish() {
+		/*
+		 * Compute and assign the minmal export list for the JAR description.
+		 * This is not done on each model update since it is only if the JAR
+		 * description is saved to a file.
+		 */
+		if (fJarPackage.isDescriptionSaved())
+			fJarPackageWizardPage.setSelectedElementsWithoutContainedChildren();
+
 		if (!executeExportOperation(new JarFileExportOperation(fJarPackage, getShell())))
 			return false;
 		

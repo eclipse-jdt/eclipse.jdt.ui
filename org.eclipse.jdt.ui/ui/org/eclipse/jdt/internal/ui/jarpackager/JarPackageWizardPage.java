@@ -5,10 +5,12 @@
 package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IPath;
@@ -38,7 +40,12 @@ import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -206,15 +213,6 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	 */
 	protected Iterator getSelectedResourcesIterator() {
 		return fInputGroup.getAllCheckedListItems();
-	}
-	/**
-	 * Returns this page's collection of containers in which at least one element
-	 * is selected for export.
-	 *
-	 * @return a set containers that contain at least one element currently selected for export
-	 */
-	protected Set getSelectedContainers() {
-		return fInputGroup.getAllCheckedTreeItems();
 	}
 	/**
 	 * Persists resource specification control setting that are to be restored
@@ -621,5 +619,96 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		super.setPreviousPage(page);
 		if (getControl() != null)
 			updatePageCompletion();
+	}
+
+	void setSelectedElementsWithoutContainedChildren() {
+		Set closure= removeContainedChildren(fInputGroup.getWhiteCheckedTreeItems());
+		closure.addAll(getExportedNonContainers());
+		fJarPackage.setSelectedElementsClosure(closure);
+	}
+
+	private Set removeContainedChildren(Set elements) {
+		Set newList= new HashSet(elements.size());
+		Set javaElementResources= getCorrespondingContainers(elements);
+		Iterator iter= elements.iterator();
+		boolean removedOne= false;
+		while (iter.hasNext()) {
+			Object element= iter.next();
+			Object parent;
+			if (element instanceof IResource)
+				parent= ((IResource)element).getParent();
+			else if (element instanceof IJavaElement) {
+				parent= ((IJavaElement)element).getParent();
+				if (parent instanceof IPackageFragmentRoot) {
+					IPackageFragmentRoot pkgRoot= (IPackageFragmentRoot)parent;
+					try {
+						if (pkgRoot.getCorrespondingResource() instanceof IProject)
+							parent= pkgRoot.getJavaProject();
+					} catch (JavaModelException ex) {
+						// leave parent as is
+					}
+				}
+			}
+			else {
+				// unknown type
+				newList.add(element);
+				continue;
+			}
+			if (element instanceof IJavaModel || ((!(parent instanceof IJavaModel)) && (elements.contains(parent) || javaElementResources.contains(parent))))
+				removedOne= true;
+			else
+				newList.add(element);
+		}
+		if (removedOne)
+			return removeContainedChildren(newList);
+		else
+			return newList;
+	}
+
+	private Set getExportedNonContainers() {
+		Set whiteCheckedTreeItems= fInputGroup.getWhiteCheckedTreeItems();
+		Set exportedNonContainers= new HashSet(whiteCheckedTreeItems.size());
+		Set javaElementResources= getCorrespondingContainers(whiteCheckedTreeItems);
+		Iterator iter= fInputGroup.getAllCheckedListItems();
+		while (iter.hasNext()) {
+			Object element= iter.next();
+			Object parent= null;
+			if (element instanceof IResource)
+				parent= ((IResource)element).getParent();
+			else if (element instanceof IJavaElement)
+				parent= ((IJavaElement)element).getParent();
+			if (!whiteCheckedTreeItems.contains(parent) && !javaElementResources.contains(parent))
+				exportedNonContainers.add(element);
+		}
+		return exportedNonContainers;
+	}
+	/*
+	 * Create a list with the folders / projects that correspond
+	 * to the Java elements (Java project, package, package root)
+	 */
+	private Set getCorrespondingContainers(Set elements) {
+		Set javaElementResources= new HashSet(elements.size());
+		Iterator iter= elements.iterator();
+		while (iter.hasNext()) {
+			Object element= iter.next();
+			if (element instanceof IJavaElement) {
+				IJavaElement je= (IJavaElement)element;
+				int type= je.getElementType();
+				if (type == IJavaElement.JAVA_PROJECT || type == IJavaElement.PACKAGE_FRAGMENT || type == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+					// exclude default package since it is covered by the root
+					if (!(type == IJavaElement.PACKAGE_FRAGMENT && ((IPackageFragment)element).isDefaultPackage())) {
+						Object resource;
+						try {
+							resource= je.getCorrespondingResource();
+						} catch (JavaModelException ex) {
+							resource= null;
+						}
+						if (resource != null)
+							javaElementResources.add(resource);
+					}
+				}
+			}
+		}
+		return javaElementResources;
 	}
 }

@@ -104,7 +104,7 @@ public class JarPackageWriter extends Object {
 		xmlJarDesc.appendChild(selectedElements);
 		selectedElements.setAttribute("exportClassFiles", "" + jarPackage.areClassFilesExported()); //$NON-NLS-2$ //$NON-NLS-1$
 		selectedElements.setAttribute("exportJavaFiles", "" + jarPackage.areJavaFilesExported()); //$NON-NLS-2$ //$NON-NLS-1$
-		Iterator iter= jarPackage.getSelectedElements().iterator();
+		Iterator iter= jarPackage.getSelectedElementsClosure();
 		while (iter.hasNext()) {
 			Object element= iter.next();
 			if (element instanceof IResource)

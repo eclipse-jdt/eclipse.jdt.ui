@@ -1,40 +1,10 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.jarpackager;import java.io.ByteArrayOutputStream;
-import java.io.BufferedWriter;
-import java.io.File;import java.io.InputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.util.ArrayList;import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.util.Assert;
-
-import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaModelMarker;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.jarpackager;import java.io.ByteArrayOutputStream;import java.io.File;import java.io.IOException;import java.io.InputStream;import java.io.OutputStream;import java.io.Serializable;import java.util.ArrayList;import java.util.HashSet;import java.util.Iterator;import java.util.List;import java.util.Set;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.Path;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.operation.IRunnableContext;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaModelMarker;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
 
 /**
  * Model for a JAR package. Describes a JAR package including all
  * options to regenerate the JAR.
  */
-public class JarPackage implements java.io.Serializable {
+public class JarPackage implements Serializable {
 
 	// Constants
 	public static final String EXTENSION= "jar"; //$NON-NLS-1$
@@ -42,14 +12,13 @@ public class JarPackage implements java.io.Serializable {
 
 	private String	fManifestVersion;
 	private transient boolean fIsUsedToInitialize;
-
 	/*
 	 * What to export - internal locations
 	 * The list fExportedX is null if fExportX is false)
 	 */	
 	private boolean fExportClassFiles;		// export generated class files and resources
 	private boolean	fExportJavaFiles;		// export java files and resources
-	private List	fSelectedElements;		// internal locations
+	/*	 * List which contains all the the elements (no containers) to export	 */	private List	fSelectedElements;		// internal locations	/*	 * Closure of elements and containers selected for export	 */	private transient Set fSelectedElementsClosure;
 
 	private IPath	fJarLocation;			// external location
 
@@ -88,7 +57,7 @@ public class JarPackage implements java.io.Serializable {
  	private IType fMainClass;
 	
 	private String fDownloadExtensionsPath;	
-	/*	 * Error handling	 */	 private boolean fExportErrors;	 private boolean fExportWarnings;	 private boolean fLogErrors;	 private boolean fLogWarnings;
+	/*	 * Error handling	 */	 private boolean fExportErrors;	 private boolean fExportWarnings;	 private boolean fLogErrors;	 private boolean fLogWarnings;
 	public JarPackage() {		setIsUsedToInitialize(false);
 		setExportClassFiles(true);
 		setCompress(true);
@@ -498,4 +467,4 @@ public class JarPackage implements java.io.Serializable {
 		display.syncExec(runnable);	
 		return returnValue.value;
 	}
-}
+	/**	 * Sets the minimal list of selected containers and elements.	 * A selected element is only in the list, if its container is	 * NOT in the list and a container is only in the list if all its	 * elements have been selected for export.	 * 	 * Note:	 * - This method is only valid during the export operation and	 * only if the JAR description is saved. <code>null</code> is returned	 * in all other cases.	 * - Only one call to this method is allowed per export operation.	 * - The same list could be computed from the list of selected	 *	 elements. This is not done because most of the information	 *	 (e.g. containers of which all elements are exported) is already	 *	 available in the JarPackageWizardPage.	 */	void setSelectedElementsClosure(Set elements) {		fSelectedElementsClosure= elements;	}	/**	 * Returns the minimal list of selected containers and elements.	 * A selected element is only in the list, if its container is	 * NOT in the list and a container is only in the list if all its	 * elements have been selected for export.	 * 	 * Note:	 * - This method is only valid during the export operation and	 * only if the JAR description is saved. <code>null</code> is returned	 * in all other cases.	 * - Only one call to this method is allowed per export operation.	 * - The same list could be computed from the list of selected	 *	 elements. This is not done because most of the information	 *	 (e.g. containers of which all elements are exported) is already	 *	 available in the JarPackageWizardPage.	 * 	 */	Iterator getSelectedElementsClosure() {		if (fSelectedElementsClosure == null)			/*			 * XXX: Should compute the closure here to be more flexible,			 *		but currently the closure is only used by the writer			 *		when the closure is known.			 */			return null;		else {			Set tmp= fSelectedElementsClosure;			fSelectedElementsClosure= null;			return tmp.iterator();		}	}}

@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -318,15 +319,10 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 *	@return java.util.Vector
 	 */
 	public Iterator getAllCheckedListItems() {
-		List result= new ArrayList();
+		Set result= new HashSet();
 		Iterator listCollectionsEnum= fCheckedStateStore.values().iterator();
-
-		while (listCollectionsEnum.hasNext()) {
-			Iterator currentCollection= ((List) listCollectionsEnum.next()).iterator();
-			while (currentCollection.hasNext())
-				result.add(currentCollection.next());
-		}
-
+		while (listCollectionsEnum.hasNext())
+			result.addAll((List)listCollectionsEnum.next());
 		return result.iterator();
 	}
 	/**
@@ -336,7 +332,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 *	@return java.util.Vector
 	 */
 	public Set getAllCheckedTreeItems() {
-		return fCheckedStateStore.keySet();
+		return new HashSet(fCheckedStateStore.keySet());
 	}
 	/**
 	 *	Answers the number of elements that have been checked by the
@@ -772,5 +768,9 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 
 	private Object[] getListElements(Object element) {
 		return filter(fListViewer.getFilters(), fListContentProvider.getElements(element));
+	}
+
+	public Set getWhiteCheckedTreeItems() {
+		return new HashSet(fWhiteCheckedTreeItems);
 	}
 }
