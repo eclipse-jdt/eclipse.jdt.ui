@@ -138,7 +138,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 	
-	public static void addOverridesFinalProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws JavaModelException {
+	public static void addOverridesFinalProposals(IInvocationContext context, IProblemLocation problem, Collection proposals, int kind) throws JavaModelException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -148,23 +148,49 @@ public class ModifierCorrectionSubProcessor {
 		
 		IMethodBinding method= ((MethodDeclaration) selectedNode).resolveBinding();
 		ITypeBinding curr= method.getDeclaringClass();
-		IMethodBinding overridden= null;
-		while (overridden == null && curr.getSuperclass() != null) {
+		IMethodBinding overriddenClass= null;
+		
+		
+		if (overriddenClass == null && curr.getSuperclass() != null) {
 			curr= curr.getSuperclass();
-			overridden= Bindings.findMethodInType(curr, method.getName(), method.getParameterTypes());
+			overriddenClass= Bindings.findMethodInType(curr, method.getName(), method.getParameterTypes());
 		}
-		if (overridden == null) {
-			return;
+		if (overriddenClass != null) {
+			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), curr);
+			if (targetCU != null) {
+				String methodName= curr.getName() + '.' + overriddenClass.getName();
+				String label;
+				int excludedModifiers;
+				int includedModifiers;			
+				switch (kind) {
+					case TO_VISIBLE:
+						excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
+						includedModifiers= method.getModifiers() & (Modifier.PROTECTED | Modifier.PUBLIC);
+						label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changeoverriddenvisibility.description", new String[] { methodName, getVisibilityString(includedModifiers) }); //$NON-NLS-1$
+						break;
+					case TO_NON_FINAL:	
+						label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemethodtononfinal.description", methodName); //$NON-NLS-1$
+						excludedModifiers= Modifier.FINAL;
+						includedModifiers= 0;
+						break;
+					default:
+						return;
+				}
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, overriddenClass, selectedNode, includedModifiers, excludedModifiers, 9, image));
+			}
+		}
+		if (kind == TO_VISIBLE && problem.getProblemId() != IProblem.OverridingNonVisibleMethod) {
+			IMethodBinding defining= Bindings.findDefiningMethod(method);
+			if (defining != null) {
+				int excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
+				int includedModifiers= defining.getModifiers() & (Modifier.PROTECTED | Modifier.PUBLIC);
+				String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemethodvisibility.description", new String[] { getVisibilityString(includedModifiers) }); //$NON-NLS-1$
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				proposals.add(new ModifierChangeCompletionProposal(label, cu, method, selectedNode, includedModifiers, excludedModifiers, 8, image));
+			}
 		}
 		
-		ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), curr);
-		if (targetCU != null) {
-			String methodName= curr.getName() + '.' + overridden.getName();
-			
-			String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemethodtononfinal.description", methodName); //$NON-NLS-1$
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			proposals.add(new ModifierChangeCompletionProposal(label, targetCU, overridden, selectedNode, 0, Modifier.FINAL, 9, image));
-		}
 	}
 	
 	

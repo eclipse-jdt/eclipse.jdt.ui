@@ -125,6 +125,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.FinalFieldAssignment:
 			case IProblem.DuplicateBlankFinalFieldInitialization:
 			case IProblem.FinalMethodCannotBeOverridden:
+			case IProblem.InheritedMethodReducesVisibility:
+			case IProblem.MethodReducesVisibility:
+			case IProblem.OverridingNonVisibleMethod:
 			case IProblem.LocalVariableHidingLocalVariable:
 			case IProblem.LocalVariableHidingField:
 			case IProblem.FieldHidingLocalVariable:
@@ -275,8 +278,13 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.DuplicateBlankFinalFieldInitialization:
 				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_FINAL, 9); 
 				break;
+			case IProblem.InheritedMethodReducesVisibility:
+			case IProblem.MethodReducesVisibility:
+			case IProblem.OverridingNonVisibleMethod:
+				ModifierCorrectionSubProcessor.addOverridesFinalProposals(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE);
+				break;			
 			case IProblem.FinalMethodCannotBeOverridden:
-				ModifierCorrectionSubProcessor.addOverridesFinalProposals(context, problem, proposals);
+				ModifierCorrectionSubProcessor.addOverridesFinalProposals(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_FINAL);
 				break;			
 			case IProblem.NotVisibleMethod:
 			case IProblem.NotVisibleConstructor:

@@ -56,7 +56,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ModifierCorrectionsQuickFixTest("testOuterLocalMustBeFinal"));
+			suite.addTest(new ModifierCorrectionsQuickFixTest("testInheritedMethodReducesVisibleMethod"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -1296,6 +1296,98 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");		
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
+	}
+	
+	
+	public void testOverridesNonVisibleMethod() throws Exception {
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class C {\n");
+		buf.append("    void foo() {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		pack2.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.C;\n");
+		buf.append("public class E extends C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testOverridesMoreVisibleMethod() throws Exception {
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		pack2.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.C;\n");
+		buf.append("public class E extends C {\n");
+		buf.append("    protected void foo() {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class C {\n");
+		buf.append("    protected void foo() {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.C;\n");
+		buf.append("public class E extends C {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+
 	}
 	
 }

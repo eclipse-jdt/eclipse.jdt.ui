@@ -23,6 +23,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.LinkedEnvironment;
 
+import org.eclipse.ui.IEditorPart;
+
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -55,13 +57,13 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	 */
 	public void apply(IDocument document) {
 		try {
-			performChange(document);
+			performChange(document, JavaPlugin.getActivePage().getActiveEditor());
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, CorrectionMessages.getString("ChangeCorrectionProposal.error.title"), CorrectionMessages.getString("ChangeCorrectionProposal.error.message"));  //$NON-NLS-1$//$NON-NLS-2$
 		}
 	}
 	
-	protected void performChange(IDocument document) throws CoreException {
+	protected void performChange(IDocument document, IEditorPart activeEditor) throws CoreException {
 		Change change= null;
 		try {
 			change= getChange();

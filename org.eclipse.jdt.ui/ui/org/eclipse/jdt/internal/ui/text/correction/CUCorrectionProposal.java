@@ -30,6 +30,9 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
@@ -41,6 +44,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -230,7 +234,19 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			if (!canEdit) {
 				return;
 			}
-			performChange(document);
+			ICompilationUnit unit= getCompilationUnit();
+			IEditorPart part= EditorUtility.isOpenInEditor(unit);
+			if (part == null) {
+				part= EditorUtility.openInEditor(unit, true);
+			}
+			IWorkbenchPage page= JavaPlugin.getActivePage();
+			if (page != null && part != null) {
+				page.bringToTop(part);
+			}
+			if (part != null) {
+				part.setFocus();
+			}
+			performChange(document, part);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, CorrectionMessages.getString("CUCorrectionProposal.error.title"), CorrectionMessages.getString("CUCorrectionProposal.error.message"));  //$NON-NLS-1$//$NON-NLS-2$
 		}

@@ -39,7 +39,6 @@ import org.eclipse.jface.text.link.LinkedUIControl;
 import org.eclipse.jface.text.link.ProposalPosition;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.link.EditorHistoryUpdater;
 
@@ -56,7 +55,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ITrackedNodePosition;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
@@ -125,31 +123,13 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		}
 		return linkedGroup;
 	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.jface.text.IDocument)
+	
+	/*(non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.jface.text.IDocument, org.eclipse.ui.IEditorPart)
 	 */
-	protected void performChange(IDocument document) throws CoreException {
+	protected void performChange(IDocument document, IEditorPart part) throws CoreException {
 		try {
-			ICompilationUnit unit= getCompilationUnit();
-			getCompilationUnitChange(); // force creation of the change
-						
-			IEditorPart part= null;
-			if (fSelectionDescription != null || (fLinkGroups != null && !fLinkGroups.isEmpty())) {
-				part= EditorUtility.isOpenInEditor(unit);
-				if (part == null) {
-					part= EditorUtility.openInEditor(unit, true);
-				}
-				IWorkbenchPage page= JavaPlugin.getActivePage();
-				if (page != null && part != null) {
-					page.bringToTop(part);
-				}
-				if (part != null) {
-					part.setFocus();
-				}
-			}
-			
-			super.performChange(document);
+			super.performChange(document, part);
 
 			if (part == null) {
 				return;
