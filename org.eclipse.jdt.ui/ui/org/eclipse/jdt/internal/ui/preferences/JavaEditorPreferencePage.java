@@ -737,10 +737,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_DELAY, 4, 0, true);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJava"); //$NON-NLS-1$
-		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, 25, 0, false);
+		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, 4, 0, false);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJavaDoc"); //$NON-NLS-1$
-		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, 25, 0, false);
+		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, 4, 0, false);
 				
 				
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.backgroundForCompletionProposals"); //$NON-NLS-1$
