@@ -1124,7 +1124,7 @@ public class JavadocOptionsManager {
 	}
 
 	private boolean getValidProject(IJavaProject project) {
-		if (project != null) {
+		if (project != null && project.exists()) {
 			try {
 				IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 				for (int i= 0; i < roots.length; i++) {
