@@ -152,7 +152,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_CLASS= createManaged(T_OBJ, IMG_OBJS_CLASS);
 	public static final ImageDescriptor DESC_OBJS_CLASS_DEFAULT= createManaged(T_OBJ, IMG_OBJS_CLASS_DEFAULT);
 	
-	public static final ImageDescriptor DESC_OBJS_INNER_CLASS= create(T_OBJ, "innerclass_obj.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OBJS_INNER_CLASS_PUBLIC= create(T_OBJ, "innerclass_public_obj.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_INNER_CLASS_DEFAULT= create(T_OBJ, "innerclass_default_obj.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_INNER_CLASS_PROTECTED= create(T_OBJ, "innerclass_protected_obj.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_INNER_CLASS_PRIVATE= create(T_OBJ, "innerclass_private_obj.gif"); //$NON-NLS-1$
@@ -162,7 +162,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_INTERFACE= createManaged(T_OBJ, IMG_OBJS_INTERFACE);
 	public static final ImageDescriptor DESC_OBJS_INTERFACE_DEFAULT= createManaged(T_OBJ, IMG_OBJS_INTERFACE_DEFAULT);
 	
-	public static final ImageDescriptor DESC_OBJS_INNER_INTERFACE= create(T_OBJ, "innerinterface_obj.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OBJS_INNER_INTERFACE_PUBLIC= create(T_OBJ, "innerinterface_public_obj.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_INNER_INTERFACE_DEFAULT= create(T_OBJ, "innerinterface_default_obj.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_INNER_INTERFACE_PROTECTED= create(T_OBJ, "innerinterface_protected_obj.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_INNER_INTERFACE_PRIVATE= create(T_OBJ, "innerinterface_private_obj.gif"); //$NON-NLS-1$

@@ -365,7 +365,7 @@ public class JavaElementImageProvider {
 	
 	private ImageDescriptor getInnerClassImageDescriptor(int flags) {
 		if (Flags.isPublic(flags))
-			return JavaPluginImages.DESC_OBJS_INNER_CLASS;
+			return JavaPluginImages.DESC_OBJS_INNER_CLASS_PUBLIC;
 		else if (Flags.isPrivate(flags))
 			return JavaPluginImages.DESC_OBJS_INNER_CLASS_PRIVATE;
 		else if (Flags.isProtected(flags))
@@ -383,7 +383,7 @@ public class JavaElementImageProvider {
 	
 	private ImageDescriptor getInnerInterfaceImageDescriptor(int flags) {
 		if (Flags.isPublic(flags))
-			return JavaPluginImages.DESC_OBJS_INTERFACE;
+			return JavaPluginImages.DESC_OBJS_INNER_INTERFACE_PUBLIC;
 		else if (Flags.isPrivate(flags))
 			return JavaPluginImages.DESC_OBJS_INNER_INTERFACE_PRIVATE;
 		else if (Flags.isProtected(flags))
