@@ -112,4 +112,8 @@ public class SefTests extends AbstractSelectionTestCase {
 	public void testNestedRead() throws Exception {
 		objectTest("field");
 	}
+	
+	public void testArrayRead() throws Exception {
+		objectTest("field");
+	}	
 }
