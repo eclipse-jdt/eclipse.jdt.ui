@@ -29,6 +29,8 @@ public class DeleteSupport implements IDeleteSupport {
 				IResource res= element.getCorrespondingResource();
 				if (res == null)
 					return false;
+				if (!res.getProject().equals(element.getJavaProject().getProject()))
+					return false;
 			} catch (JavaModelException e) {
 				return false;
 			}
