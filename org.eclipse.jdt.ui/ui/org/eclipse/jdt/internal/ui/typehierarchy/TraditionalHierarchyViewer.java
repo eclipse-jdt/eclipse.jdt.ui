@@ -4,13 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.ui.IWorkbenchPart;
-
-import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.swt.widgets.Composite;import org.eclipse.ui.IWorkbenchPart;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * A TypeHierarchyViewer that looks like the type hierarchy view of VA/Java:
@@ -56,16 +50,20 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 	/**
 	 * Content provider for the supertype hierarchy
 	 */	
-	private static class TraditionalHierarchyContentProvider extends TypeHierarchyContentProvider {
+	private static class TraditionalHierarchyContentProvider extends TypeHierarchyContentProvider implements ITypeHierarchyLifeCycleListener {
 		
 		// the hierarchy up to the input type
 		private IType[] fSuperTypesList;
 		private IType fInput;
-	
+		
+		private boolean fUpdateNeeded;
+			
 		public TraditionalHierarchyContentProvider(TypeHierarchyLifeCycle provider) {
 			super(provider);
 			fSuperTypesList= null;
 			fInput= null;
+			
+			provider.addChangedListener(this);
 		}
 		
 		public int getExpandLevel() {
@@ -117,17 +115,22 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 		}	
 		
 		private void updateSuperTypesList() {
-			IType input= getInputType();
-			if (input != null) {
-				if (!input.equals(fInput)) {
-					fInput= input;
-					fSuperTypesList= getHierarchy().getAllSuperclasses(input);
+			if (fUpdateNeeded) {
+				fInput= getInputType();
+				if (fInput != null) {
+					fSuperTypesList= getHierarchy().getAllSuperclasses(fInput);
+				} else {
+					fSuperTypesList= null;
 				}
-			} else {
-				fInput= null;
-				fSuperTypesList= null;
 			}
 		}		
 		
+		/**
+		 * @see ITypeHierarchyLifeCycleListener#typeHierarchyChanged(TypeHierarchyLifeCycle)
+		 */
+		public void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchyProvider) {
+			fUpdateNeeded= true;
+		}
+
 	}
 }
