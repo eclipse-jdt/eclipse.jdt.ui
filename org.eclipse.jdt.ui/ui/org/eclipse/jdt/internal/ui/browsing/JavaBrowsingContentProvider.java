@@ -230,7 +230,8 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	protected void processDelta(IJavaElementDelta delta) throws JavaModelException {
 		int kind= delta.getKind();
 		int flags= delta.getFlags();
-		IJavaElement element= delta.getElement();
+		final IJavaElement element= delta.getElement();
+		final boolean isElementValidForView= fBrowsingPart.isValidElement(element);
 
 		if (!getProvideWorkingCopy() && element instanceof IWorkingCopy && ((IWorkingCopy)element).isWorkingCopy())
 			return;
@@ -243,9 +244,10 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			postRefresh(element);
 			return;
 		}
+		
 		if (kind == IJavaElementDelta.REMOVED) {
 			Object parent= internalGetParent(element);
-			if (fBrowsingPart.isValidElement(element)) {
+			if (isElementValidForView) {
 				if (element instanceof IClassFile) {
 					postRemove(((IClassFile)element).getType());
 				} else if (element instanceof ICompilationUnit && !((ICompilationUnit)element).isWorkingCopy()) {
@@ -287,7 +289,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			return;
 		
 		if (kind == IJavaElementDelta.ADDED) {
-			if (fBrowsingPart.isValidElement(element)) {
+			if (isElementValidForView) {
 				Object parent= internalGetParent(element);				
 				if (element instanceof IClassFile) {
 					postAdd(parent, ((IClassFile)element).getType());
@@ -313,10 +315,13 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			return;
 		}
 
-		if (fInput != null && fInput.equals(element)) {
-			if (kind == IJavaElementDelta.CHANGED && (flags & IJavaElementDelta.F_CHILDREN) != 0 && (flags & IJavaElementDelta.F_FINE_GRAINED) != 0) {
+		if (kind == IJavaElementDelta.CHANGED) {
+			if (fInput != null && fInput.equals(element) && (flags & IJavaElementDelta.F_CHILDREN) != 0 && (flags & IJavaElementDelta.F_FINE_GRAINED) != 0) {
 				postRefresh(null, true);
 				return;
+			}
+			if (isElementValidForView && (flags & IJavaElementDelta.F_MODIFIERS) != 0) {
+					postUpdateIcon(element);
 			}
 		}
 
@@ -348,7 +353,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 				}
 			}
 			// more than one child changed, refresh from here downwards
-			if (element instanceof IPackageFragmentRoot && fBrowsingPart.isValidElement(element)) {
+			if (element instanceof IPackageFragmentRoot && isElementValidForView) {
 				postRefresh(skipProjectPackageFragmentRoot((IPackageFragmentRoot)element));
 				return;
 			}
