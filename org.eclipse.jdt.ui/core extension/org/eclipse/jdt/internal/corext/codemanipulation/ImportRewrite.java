@@ -22,6 +22,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Type;
 
@@ -109,6 +110,17 @@ public final class ImportRewrite {
 	}
 	
 	/**
+	 * Adds a new static import declaration that is sorted in the structure using
+	 * a best match algorithm. 
+	 * @param binding The binding of the member to be added
+	 * @return Returns the simple name that can be used in the code or the
+	 * fully qualified type name if an import conflict prevented the import.
+	 */
+	public String addStaticImport(IBinding binding) {
+		return fImportsStructure.addStaticImport(binding);
+	}
+	
+	/**
 	 * Adds a new import declaration that is sorted in the structure using
 	 * a best match algorithm. If an import already exists, the import is
 	 * not added.  The type binding can be an array binding. No import is added for unnamed
@@ -165,7 +177,7 @@ public final class ImportRewrite {
 	}
 	
 	/**
-	 * Removes an static import declaration for a static member or a static on-demand import.
+	 * Removes a static import declaration for a static member or a static on-demand import.
 	 * @param qualifiedName The qualified name the static member to be removed as import
 	 * @return Returns true if an import for the given type existed.
 	 */
