@@ -23,12 +23,26 @@ abstract public class TextSelectionAction extends Action implements IUpdate, IWo
 	private JavaEditor fEditor;
 	private IAction fAction;
 	private IWorkbenchWindow fWorkbenchWindow;
+
+	private String fOperationNotAvailableDialogMessage;
+	private String fOperationNotAvailableDialogTitle;
 	
 	/**
 	 * Creates a new action when used as an action delegate.
 	 */
 	public TextSelectionAction(String name) {
+		this(name, "Refactoring", "Cannot perform this action on the current text selection.");
+	}
+	
+	/**
+	 * Creates a new action when used as an action delegate.
+	 */
+	protected TextSelectionAction(String name, String operationNonAvailableDialogTitle, String operationNonAvailableDialogMessage) {
 		super(name);
+		Assert.isNotNull(operationNonAvailableDialogTitle);
+		Assert.isNotNull(operationNonAvailableDialogMessage);
+		fOperationNotAvailableDialogTitle= operationNonAvailableDialogTitle;
+		fOperationNotAvailableDialogMessage= operationNonAvailableDialogMessage;
 	}
 	
 	/* (non-JavaDoc)
@@ -36,11 +50,6 @@ abstract public class TextSelectionAction extends Action implements IUpdate, IWo
 	 */
 	public void update() {
 		setEnabled(canOperateOn());
-	}
-	
-	//-- hooks --
-	protected String getDialogTitle(){
-		return getText();
 	}
 	
 	protected boolean canOperateOnEmptySelection(){
@@ -79,13 +88,13 @@ abstract public class TextSelectionAction extends Action implements IUpdate, IWo
 			setEditor((JavaEditor)part);
 			if (!canOperateOn()) {
 				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), 
-					getDialogTitle(),
-					"Cannot perform this action on the current text selection.");
+					fOperationNotAvailableDialogTitle,
+					fOperationNotAvailableDialogMessage);
 				return;
 			}
 		} else {
 			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), 
-				getDialogTitle(),
+				getText(),
 				"Active part is not a Java Editor.");
 			fAction.setEnabled(false);
 			return;

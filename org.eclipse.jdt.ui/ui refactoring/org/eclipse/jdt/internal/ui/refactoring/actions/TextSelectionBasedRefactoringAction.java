@@ -17,11 +17,8 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.TextSelectionAction;
 
 public abstract class TextSelectionBasedRefactoringAction extends TextSelectionAction{
 
-	/**
-	 * Creates a new action when used as an action delegate.
-	 */
-	public TextSelectionBasedRefactoringAction(String name) {
-		super(name);
+	protected TextSelectionBasedRefactoringAction(String name, String operationNonAvailableDialogTitle, String operationNonAvailableDialogMessage) {
+		super(name, operationNonAvailableDialogTitle, operationNonAvailableDialogMessage);
 	}
 	
 	/* (non-JavaDoc)
@@ -30,9 +27,9 @@ public abstract class TextSelectionBasedRefactoringAction extends TextSelectionA
 	public void run() {
 	try{
 			Refactoring refactoring=  createRefactoring(getCompilationUnit(), getTextSelection());
-			RefactoringAction.activateRefactoringWizard(refactoring, createWizard(refactoring), getDialogTitle(), false);
+			RefactoringAction.activateRefactoringWizard(refactoring, createWizard(refactoring), getText(), false);
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, getDialogTitle(), "Unexpected exception occurred. See log for details.");
+			ExceptionHandler.handle(e, getText(), "Unexpected exception occurred. See log for details.");
 		}	
 	}
 	
