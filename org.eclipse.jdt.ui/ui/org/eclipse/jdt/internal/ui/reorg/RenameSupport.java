@@ -6,24 +6,7 @@
 
 package org.eclipse.jdt.internal.ui.reorg;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ISourceManipulation;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
+import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.ISourceManipulation;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;
 
 public class RenameSupport implements IRenameSupport {
 
@@ -52,6 +35,15 @@ public class RenameSupport implements IRenameSupport {
 			else 
 				res= ws.getRoot().getFolder(path);
 			return JavaCore.create(res);
+		}
+		
+		if (element instanceof IJavaProject) {
+			IJavaProject p= (IJavaProject)element;
+			IProject project= p.getProject();
+			IContainer parent= project.getParent();
+			IPath newPath= parent.getFullPath().append(newName);
+			p.getProject().move(newPath, true, pm);
+			return parent.findMember(newName);
 		}
 		return null;
 	}
@@ -88,7 +80,8 @@ public class RenameSupport implements IRenameSupport {
 				return false;
 			return element instanceof IPackageFragmentRoot || 
 				element instanceof IPackageFragment ||
-				element instanceof ICompilationUnit;
+				element instanceof ICompilationUnit ||
+				element instanceof IJavaProject;
 		}
 		
 		if (element instanceof IFolder)

@@ -37,6 +37,7 @@ public class ReorgSupportFactory {
 	private static IDeleteSupport fgDeleteSupport= new DeleteSupport();
 	private static IRenameSupport fgRenameSupport= new RenameSupport();
 	private static INamingPolicy fgPackageRootNamingPolicy= new PackageFragmentRootNamingPolicy();
+	private static INamingPolicy fgProjectNamingPolicy= new ProjectNamingPolicy();
 	
 	public static ICopySupport createCopySupport(List elements) {
 		if (hasParentCollision(elements))
@@ -171,9 +172,10 @@ public class ReorgSupportFactory {
 			return (INamingPolicy)fgPackageReorgSupport;
 		if (element instanceof ICompilationUnit)
 			return (INamingPolicy)fgCUReorgSupport;
-		if (element instanceof IResource) {
+		if (element instanceof IResource)
 			return (INamingPolicy)fgResourceReorgSupport;
-		}
+		if (element instanceof IJavaProject)
+			return fgProjectNamingPolicy;
 		return NoReorgSupport.getInstance();
 	}
 	
