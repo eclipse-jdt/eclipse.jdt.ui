@@ -24,43 +24,4 @@
       <import plugin="org.eclipse.jdt.ui.tests"/>
       <import plugin="org.eclipse.core.runtime.compatibility" optional="true"/>
    </requires>
-
-   <extension point="org.eclipse.jdt.ui.propertyTesters">
-      <propertyTester
-            namespace="org.eclipse.jdt.ui.tests.refactoring"
-            properties="simple, overridden, ordering, chainOrdering"
-            type="org.eclipse.jdt.ui.tests.xml.A"
-            class="org.eclipse.jdt.ui.tests.xml.A_TypeExtender"
-            id="org.eclipse.jdt.ui.tests.A_TypeExtender">
-      </propertyTester>
-      <propertyTester
-            namespace="org.eclipse.jdt.ui.tests.refactoring"
-            properties="chaining, chainOrdering"
-            type="org.eclipse.jdt.ui.tests.xml.A"
-            class="org.eclipse.jdt.ui.tests.xml.A_TypeExtender2"
-            id="org.eclipse.jdt.ui.tests.A_TypeExtender2">
-      </propertyTester>
-      <propertyTester
-            namespace="org.eclipse.jdt.ui.tests.refactoring"
-            properties="overridden"
-            type="org.eclipse.jdt.ui.tests.xml.B"
-            class="org.eclipse.jdt.ui.tests.xml.B_TypeExtender"
-            id="org.eclipse.jdt.ui.tests.B_TypeExtender">
-      </propertyTester>
-      <propertyTester
-            namespace="org.eclipse.jdt.ui.tests.refactoring"
-            properties="ordering"
-            type="org.eclipse.jdt.ui.tests.xml.I"
-            class="org.eclipse.jdt.ui.tests.xml.I_TypeExtender"
-            id="org.eclipse.jdt.ui.tests.I_TypeExtender">
-      </propertyTester>
-      
-      <propertyTester
-            namespace="org.eclipse.jdt.ui.tests.refactoring2"
-            properties="differentNamespace"
-            type="org.eclipse.jdt.ui.tests.xml.A"
-            class="org.eclipse.jdt.ui.tests.xml.A_TypeExtender3"
-            id="org.eclipse.jdt.ui.tests.A_TypeExtender">
-      </propertyTester>
-   </extension>
 </plugin>

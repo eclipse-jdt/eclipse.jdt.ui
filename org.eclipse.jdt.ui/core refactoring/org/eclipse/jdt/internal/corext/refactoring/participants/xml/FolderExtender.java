@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
 import org.eclipse.core.resources.IFolder;
 
+import org.eclipse.core.expressions.PropertyTester;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 

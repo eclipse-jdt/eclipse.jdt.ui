@@ -5,6 +5,7 @@
 	<projects>
 		<project>org.eclipse.compare</project>
 		<project>org.eclipse.core.boot</project>
+		<project>org.eclipse.core.expressions</project>
 		<project>org.eclipse.core.filebuffers</project>
 		<project>org.eclipse.core.resources</project>
 		<project>org.eclipse.core.runtime.compatibility</project>

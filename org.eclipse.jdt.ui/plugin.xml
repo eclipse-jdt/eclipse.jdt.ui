@@ -17,6 +17,7 @@
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.ui.console"/>
       <import plugin="org.eclipse.help"/>
+      <import plugin="org.eclipse.core.expressions"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.search"/>
@@ -83,7 +84,6 @@
 	</decorator>	
 </extension>
 -->
-   <extension-point id="propertyTesters" name="%propertyTesterExtensionPoint" schema="schema/propertyTesters.exsd"/>
    <extension-point id="renameProcessors" name="%renameProcessorExtensionPoint"/>
    <extension-point id="deleteProcessors" name="%deleteProcessorExtensionPoint"/>
    <extension-point id="renameParticipants" name="%renameParticipantsExtensionPoint"/>
@@ -3859,7 +3859,7 @@
    
 <!-- property testers -->
    
-   <extension point="org.eclipse.jdt.ui.propertyTesters">
+   <extension point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
       		namespace="org.eclipse.jdt.ui"
             properties="matchesPattern, projectNature, canDelete"
@@ -3868,7 +3868,7 @@
             id="org.eclipse.jdt.IResourceExtender">
       </propertyTester>
    </extension>
-   <extension point="org.eclipse.jdt.ui.propertyTesters">
+   <extension point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
       		namespace="org.eclipse.jdt.ui"
             properties="isCompilationUnit"

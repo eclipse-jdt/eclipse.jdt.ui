@@ -10,10 +10,11 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
+import org.eclipse.core.expressions.PropertyTester;
+
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.PropertyTester;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 /**

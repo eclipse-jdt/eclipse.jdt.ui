@@ -20,6 +20,7 @@
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.expressions"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.core.runtime.compatibility" optional="true"/>
       <import plugin="org.eclipse.core.boot"/>
@@ -232,7 +233,7 @@
             id="org.eclipse.jdt.junit.JUnitQuickFixProcessor">
       </quickFixProcessor>
    </extension>
-   <extension point="org.eclipse.jdt.ui.propertyTesters">
+   <extension point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
       		namespace="org.eclipse.jdt.junit"
             properties="isTest"

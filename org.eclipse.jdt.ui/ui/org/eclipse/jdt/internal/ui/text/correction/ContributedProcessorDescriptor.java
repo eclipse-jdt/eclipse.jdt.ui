@@ -14,13 +14,14 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.core.expressions.EvaluationContext;
+import org.eclipse.core.expressions.EvaluationResult;
+import org.eclipse.core.expressions.Expression;
+import org.eclipse.core.expressions.ExpressionConverter;
+import org.eclipse.core.expressions.ExpressionTagNames;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionConverter;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EvaluationResult;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EvaluationContext;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionTagNames;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 

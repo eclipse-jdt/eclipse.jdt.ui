@@ -25,9 +25,10 @@ import org.eclipse.core.runtime.IPluginRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 
+import org.eclipse.core.expressions.EvaluationContext;
+import org.eclipse.core.expressions.IEvaluationContext;
+
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IEvaluationContext;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EvaluationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -163,25 +164,30 @@ public class ExtensionManager {
 		return result;
 	}
 	
-	public IRefactoringParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements, IEvaluationContext pool, SharableParticipants shared) throws CoreException {
+	public IRefactoringParticipant[] getParticipants(IRefactoringProcessor processor, Object[] elements, IEvaluationContext evalContext, SharableParticipants shared) throws CoreException {
 		List result= new ArrayList();
 		for (int i= 0; i < elements.length; i++) {
 			Object element= elements[i];
 			for (Iterator iter= fParticipants.iterator(); iter.hasNext();) {
 				ParticipantDescriptor descriptor= (ParticipantDescriptor)iter.next();
-				if (descriptor.matches(pool)) {
-					IRefactoringParticipant participant= shared.get(descriptor);
-					if (participant != null) {
-						((ISharableParticipant)participant).addElement(element);
-					} else {
-						participant= descriptor.createParticipant();
-						participant.initialize(processor, element);
-						if (participant.isAvailable()) {
-							result.add(participant);
-							if (participant instanceof ISharableParticipant)
-								shared.put(descriptor, participant);
+				try {
+					if (descriptor.matches(evalContext)) {
+						IRefactoringParticipant participant= shared.get(descriptor);
+						if (participant != null) {
+							((ISharableParticipant)participant).addElement(element);
+						} else {
+							participant= descriptor.createParticipant();
+							participant.initialize(processor, element);
+							if (participant.isAvailable()) {
+								result.add(participant);
+								if (participant instanceof ISharableParticipant)
+									shared.put(descriptor, participant);
+							}
 						}
 					}
+				} catch (CoreException e) {
+					JavaPlugin.log(e.getStatus());
+					iter.remove();
 				}
 			}
 		}

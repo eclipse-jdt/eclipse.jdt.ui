@@ -15,12 +15,13 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.core.expressions.EvaluationResult;
+import org.eclipse.core.expressions.Expression;
+import org.eclipse.core.expressions.ExpressionConverter;
+import org.eclipse.core.expressions.ExpressionTagNames;
+import org.eclipse.core.expressions.IEvaluationContext;
+
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.EvaluationResult;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.Expression;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionConverter;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.ExpressionTagNames;
-import org.eclipse.jdt.internal.corext.refactoring.participants.xml.IEvaluationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
