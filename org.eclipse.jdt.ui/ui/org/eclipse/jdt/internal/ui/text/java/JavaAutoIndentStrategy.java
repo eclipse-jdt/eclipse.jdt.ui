@@ -339,7 +339,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			int lineEnd= reg.getOffset() + reg.getLength();
 
 			int contentStart= findEndOfWhiteSpace(d, c.offset, lineEnd);
-			c.length=  contentStart - c.offset;
+			c.length=  Math.max(contentStart - c.offset, 0);
 		
 			int start= reg.getOffset();
 			ITypedRegion region= TextUtilities.getPartition(d, fPartitioning, start);

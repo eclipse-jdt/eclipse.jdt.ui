@@ -388,7 +388,7 @@ public class JavaIndenter {
 					break;
 					
 				case Symbols.TokenQUESTIONMARK: // ternary expressions
-					if (takeNextExit)
+					if (takeNextExit && prefTenaryDeepAlign())
 						fAlign= fPosition;
 					nextToken();
 					break;
@@ -399,20 +399,14 @@ public class JavaIndenter {
 				case Symbols.TokenLBRACE:
 				
 					int searchPos= fPreviousPos;
-					int bracePos= fPosition;
 					
 					// special array handling
 					nextToken();
 					if (fToken == Symbols.TokenEQUAL || skipBrackets()) {
 						int first= fScanner.findNonWhitespaceForwardInAnyPartition(searchPos, position);
 						// ... with a first element already defined - take its offset
-						if (prefArrayDeepIndent()) {
-							if (first != JavaHeuristicScanner.NOT_FOUND)
-								fAlign= first;
-							else {
-								fAlign= bracePos;
-								fAlignPlusOne= true;
-							}
+						if (prefArrayDeepIndent() && first != JavaHeuristicScanner.NOT_FOUND) {
+							fAlign= first;
 						} else
 							fIndent += prefArrayIndent();
 					}
@@ -445,7 +439,7 @@ public class JavaIndenter {
 					if (found)
 						return fScanner.findNonWhitespaceForward(0, position);
 					
-					return 0;
+					return JavaHeuristicScanner.NOT_FOUND;
 					
 				// RBRACE is either the end of a statement as SEMICOLON, 
 				// or - if no statement start can be found - must be skipped as RPAREN and RBRACKET
@@ -469,15 +463,9 @@ public class JavaIndenter {
 						fIndent += prefCallContinuationIndent();
 					
 					searchPos= fPreviousPos;
-					int parenPos= fPosition;
 					
-					if (prefMethodDeclDeepIndent() && looksLikeMethodDecl()) {
-						if (found)
-							fAlign= fScanner.findNonWhitespaceForward(searchPos, position);
-						else {
-							fAlign= parenPos;
-							fAlignPlusOne= true;
-						}
+					if (prefMethodDeclDeepIndent() && looksLikeMethodDecl() && found) {
+						fAlign= fScanner.findNonWhitespaceForward(searchPos, position);
 					}
 					
 					break;
@@ -746,6 +734,11 @@ public class JavaIndenter {
 	private boolean prefArrayDeepIndent() {
 		// TODO preference lookup
 		return false;
+	}
+
+	private boolean prefTenaryDeepAlign() {
+		// TODO preference lookup
+		return true;
 	}
 
 }

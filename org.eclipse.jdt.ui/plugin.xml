@@ -2108,6 +2108,12 @@
 		name= "%ActionDefinition.indent.name"
 		description= "%ActionDefinition.indent.description">
 	</command>
+	<keyBinding
+		string="Ctrl+I"
+		scope="org.eclipse.jdt.ui.javaEditorScope"
+		command="org.eclipse.jdt.ui.edit.text.java.indent"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+	</keyBinding>
       
 <!-- refactoring -->    
 	<command

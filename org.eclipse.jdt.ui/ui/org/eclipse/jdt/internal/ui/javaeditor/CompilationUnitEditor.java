@@ -697,16 +697,26 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		markAsSelectionDependentAction("RemoveBlockComment", true); //$NON-NLS-1$		
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.REMOVE_BLOCK_COMMENT_ACTION);
 		
-		action= new IndentAction(JavaEditorMessages.getResourceBundle(), "Editor.Indent.", this); //$NON-NLS-1$
+		action= new IndentAction(JavaEditorMessages.getResourceBundle(), "Indent.", this); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.INDENT);		
 		setAction("Indent", action); //$NON-NLS-1$
 		markAsStateDependentAction("Indent", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("Indent", true); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.INDENT_ACTION);
 		
+		action= new IndentAction(JavaEditorMessages.getResourceBundle(), "Indent.", this) { //$NON-NLS-1$
+			public void update() {
+				updateForTab();
+			}
+		};
+		setAction("IndentOnTab", action); //$NON-NLS-1$
+		markAsStateDependentAction("IndentOnTab", true); //$NON-NLS-1$
+		markAsSelectionDependentAction("IndentOnTab", true); //$NON-NLS-1$
+		
 		if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_TAB)) {
-			removeActionActivationCode(ITextEditorActionConstants.SHIFT_RIGHT);
-			setActionActivationCode("Indent", '\t', -1, SWT.NONE); //$NON-NLS-1$
+			// don't replace Shift Right - have to make sure their enablement is mutually exclusive
+//			removeActionActivationCode(ITextEditorActionConstants.SHIFT_RIGHT);
+			setActionActivationCode("IndentOnTab", '\t', -1, SWT.NONE); //$NON-NLS-1$
 		}
 		
 		fGenerateActionGroup= new GenerateActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
@@ -1149,11 +1159,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				
 				if (PreferenceConstants.EDITOR_SMART_TAB.equals(p)) {
 					if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_TAB)) {
-						removeActionActivationCode(ITextEditorActionConstants.SHIFT_RIGHT);
-						setActionActivationCode("Indent", '\t', -1, SWT.NONE); //$NON-NLS-1$
+						setActionActivationCode("IndentOnTab", '\t', -1, SWT.NONE); //$NON-NLS-1$
 					} else {
-						removeActionActivationCode("Indent"); //$NON-NLS-1$
-						setActionActivationCode(ITextEditorActionConstants.SHIFT_RIGHT, '\t', -1, SWT.NONE);
+						removeActionActivationCode("IndentOnTab"); //$NON-NLS-1$
 					}
 				}
 

@@ -243,6 +243,17 @@ public class IndentAction extends TextEditorAction {
 		super.update();
 		
 		if (isEnabled())
+			setEnabled(!getSelection().isEmpty());
+	}
+	
+	/**
+	 * Enablement when tab key is pressed - the current selection has to be empty and in the
+	 * whitespace in the beginning of a line.
+	 */
+	protected void updateForTab() {
+		super.update();
+		
+		if (isEnabled())
 			setEnabled(isSmartMode() && isValidSelection());
 	}
 	
@@ -273,7 +284,8 @@ public class IndentAction extends TextEditorAction {
 			if (length == 0)
 				return document.get(lineOffset, offset - lineOffset).trim().length() == 0;
 			else
-				return lineOffset + firstLine.getLength() < offset + length;
+//				return lineOffset + firstLine.getLength() < offset + length;
+				return false; // only enable for empty selections for now
 			
 		} catch (BadLocationException e) {
 		}
