@@ -34,19 +34,29 @@ public class SearchEngine {
 		private HashMap fMap= new HashMap();
 		
 		public void addRef(String word, String path) {
-			fMap.put(word, path);
+			System.err.println("Index.add: " + path + " " + word);
+			HashMap words= (HashMap) fMap.get(path);
+			if (words == null) {
+				words= new HashMap();
+				fMap.put(path, words);
+			}
+			words.put(word, word);
+		}
+		
+		public void remove(String path) {
+			System.err.println("Index.remove: " + path);
+			fMap.remove(path);
 		}
 		
 		public void queryPrefix(HashSet results, String w) {
 			Iterator iter= fMap.keySet().iterator();
 			while (iter.hasNext()) {
-				String k= (String) iter.next();
-				if (k.startsWith(w)) {
-					String path= (String) fMap.get(k);
+				String path= (String) iter.next();
+				HashMap words= (HashMap) fMap.get(path);
+				if (words.containsKey(w))
 					results.add(path);
-				}
-			}		
-		}	
+			}
+		}
 	}
 		
 	/* Waiting policies */
@@ -84,11 +94,13 @@ public class SearchEngine {
 	 * Note: the actual operation is performed in background
 	 */
 	public void remove(String resourceName, IPath indexedContainer) {
-		//fIndexManager.remove(resourceName, indexedContainer);
+		IIndex index= getIndex(indexedContainer, false);
+		if (index != null)
+			index.remove(resourceName);
 	}
 	
 	public void add(IPath indexedContainer, IIndexer indexer) {
-		IIndex index= getIndex(indexedContainer);
+		IIndex index= getIndex(indexedContainer, true);
 		try {
 			indexer.index(index);
 		} catch (IOException e) {
@@ -128,9 +140,9 @@ public class SearchEngine {
 		}
 	}
 
-	public IIndex getIndex(IPath indexPath) {
+	public IIndex getIndex(IPath indexPath, boolean create) {
 		IIndex ix= (IIndex) fIndexes.get(indexPath);
-		if (ix == null) {
+		if (create && ix == null) {
 			ix= new MyIndex();
 			fIndexes.put(indexPath, ix);
 		}
@@ -180,7 +192,7 @@ public class SearchEngine {
 		int count = 0;
 		for (int i = 0; i < length; i++){
 			// may trigger some index recreation work
-			IIndex index = getIndex(fIndexKeys[i]);
+			IIndex index = getIndex(fIndexKeys[i], false);
 			if (index != null) indexes[count++] = index; // only consider indexes which are ready yet
 		}
 		if (count != length) {
