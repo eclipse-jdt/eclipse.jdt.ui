@@ -75,16 +75,16 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		super(PAGE_NAME, true);
 		fErrorMap= new OrderedMap();
 		
-		fPropertyPackage= 	createStringButtonField(Messages.getString("wizardPage2.package"), Messages.getString("wizardPage2.browse"),  //$NON-NLS-2$ //$NON-NLS-1$
+		fPropertyPackage= 	createStringButtonField(NLSUIMessages.getString("wizardPage2.package"), NLSUIMessages.getString("wizardPage2.browse"),  //$NON-NLS-2$ //$NON-NLS-1$
 									createPropertyPackageBrowseAdapter());
-		fPropertyFile= 		createStringButtonField(Messages.getString("wizardPage2.property_file_name"), Messages.getString("wizardPage2.browse"),  //$NON-NLS-2$ //$NON-NLS-1$
+		fPropertyFile= 		createStringButtonField(NLSUIMessages.getString("wizardPage2.property_file_name"), NLSUIMessages.getString("wizardPage2.browse"),  //$NON-NLS-2$ //$NON-NLS-1$
 									createPropertyFileBrowseAdapter());				
-		fUseDefaultPattern= createCheckBoxField(Messages.getString("wizardPage2.default_pattern")); //$NON-NLS-1$
-		fAccessorClassName= createStringField(Messages.getString("wizardPage2.class_name")); //$NON-NLS-1$
-		fCodePattern= 		createStringField(Messages.getString("wizardPage2.code_pattern")); //$NON-NLS-1$
-		fCreateAccessorClass= createCheckBoxField(Messages.getString("wizardPage2.create_accessor")); //$NON-NLS-1$
-		fNewImport= 		createStringButtonField(Messages.getString("wizardPage2.add_import"),  //$NON-NLS-1$
-									Messages.getString("wizardPage2.browse"), //$NON-NLS-1$
+		fUseDefaultPattern= createCheckBoxField(NLSUIMessages.getString("wizardPage2.default_pattern")); //$NON-NLS-1$
+		fAccessorClassName= createStringField(NLSUIMessages.getString("wizardPage2.class_name")); //$NON-NLS-1$
+		fCodePattern= 		createStringField(NLSUIMessages.getString("wizardPage2.code_pattern")); //$NON-NLS-1$
+		fCreateAccessorClass= createCheckBoxField(NLSUIMessages.getString("wizardPage2.create_accessor")); //$NON-NLS-1$
+		fNewImport= 		createStringButtonField(NLSUIMessages.getString("wizardPage2.add_import"),  //$NON-NLS-1$
+									NLSUIMessages.getString("wizardPage2.browse"), //$NON-NLS-1$
 									createClassBrowseAdapter());
 	}
 		
@@ -168,7 +168,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		parent.setLayout(layout);
 		
 		Separator label= new Separator(SWT.NONE);
-		((Label)label.getSeparator(parent)).setText(Messages.getString("wizardPage2.property_location")); //$NON-NLS-1$
+		((Label)label.getSeparator(parent)).setText(NLSUIMessages.getString("wizardPage2.property_location")); //$NON-NLS-1$
 		label.doFillIntoGrid(parent, 3, 20);
 		
 		fPropertyPackage.doFillIntoGrid(parent, 3);
@@ -189,9 +189,9 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		Separator s= new Separator(SWT.SEPARATOR | SWT.HORIZONTAL);
 		s.doFillIntoGrid(parent, 3);
 		
-		fCreateAccessorClass.setLabelText(Messages.getString("wizardPage2.create_accessor")  //$NON-NLS-1$
+		fCreateAccessorClass.setLabelText(NLSUIMessages.getString("wizardPage2.create_accessor")  //$NON-NLS-1$
 										+ "\"" + getPackageName(getCu()) + "\""  //$NON-NLS-2$ //$NON-NLS-1$
-										+ Messages.getString("wizardPage2.if_needed")); //$NON-NLS-1$
+										+ NLSUIMessages.getString("wizardPage2.if_needed")); //$NON-NLS-1$
 		fCreateAccessorClass.doFillIntoGrid(parent, 3);		
 		fCreateAccessorClass.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
@@ -231,7 +231,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 	private static String getPackageName(ICompilationUnit cu){
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		if (pack.isDefaultPackage())
-			return Messages.getString("wizardPage2.default_package"); //$NON-NLS-1$
+			return NLSUIMessages.getString("wizardPage2.default_package"); //$NON-NLS-1$
 		return pack.getElementName();
 	}
 	
@@ -265,7 +265,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		}
 		
 		if (className.indexOf(".") != -1){ //$NON-NLS-1$
-			setInvalid(fAccessorClassName, Messages.getString("wizardPage2.no_dot")); //$NON-NLS-1$
+			setInvalid(fAccessorClassName, NLSUIMessages.getString("wizardPage2.no_dot")); //$NON-NLS-1$
 			return;
 		}
 		
@@ -301,9 +301,9 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[]{root.getJavaProject()});
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES);
-		dialog.setTitle(Messages.getString("wizardPage2.Class_Selection")); //$NON-NLS-1$
-		dialog.setMessage(Messages.getString("wizardPage2.Choose_the_type_to_import")); //$NON-NLS-1$
-		dialog.setUpperListLabel(Messages.getString("wizardPage2.Matching_classes")); //$NON-NLS-1$
+		dialog.setTitle(NLSUIMessages.getString("wizardPage2.Class_Selection")); //$NON-NLS-1$
+		dialog.setMessage(NLSUIMessages.getString("wizardPage2.Choose_the_type_to_import")); //$NON-NLS-1$
+		dialog.setUpperListLabel(NLSUIMessages.getString("wizardPage2.Matching_classes")); //$NON-NLS-1$
 		String guessTypeName= fNewImport.getText().substring(fNewImport.getText().lastIndexOf(".") + 1); //$NON-NLS-1$
 		dialog.setFilter(guessTypeName);
 		if (dialog.open() == dialog.OK) {
@@ -315,8 +315,8 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 	private void browseForPropertyFile(){
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), getLabelProvider());
 		dialog.setIgnoreCase(false);
-		dialog.setTitle(Messages.getString("wizardPage2.Property_File_Selection"));  //$NON-NLS-1$
-		dialog.setMessage(Messages.getString("wizardPage2.Choose_the_property_file")); //$NON-NLS-1$
+		dialog.setTitle(NLSUIMessages.getString("wizardPage2.Property_File_Selection"));  //$NON-NLS-1$
+		dialog.setMessage(NLSUIMessages.getString("wizardPage2.Choose_the_property_file")); //$NON-NLS-1$
 		dialog.setElements(createFileListInput());
 		dialog.setFilter("*" + NLSRefactoring.PROPERTY_FILE_EXT); //$NON-NLS-1$
 		if (dialog.open() == ElementListSelectionDialog.OK) { 
@@ -328,8 +328,8 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 	private void browseForPropertyPackage(){
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), getLabelProvider());
 		dialog.setIgnoreCase(false);
-		dialog.setTitle(Messages.getString("wizardPage2.package_selection")); //$NON-NLS-1$
-		dialog.setMessage(Messages.getString("wizardPage2.choose_package")); //$NON-NLS-1$
+		dialog.setTitle(NLSUIMessages.getString("wizardPage2.package_selection")); //$NON-NLS-1$
+		dialog.setMessage(NLSUIMessages.getString("wizardPage2.choose_package")); //$NON-NLS-1$
 		dialog.setElements(createPackageListInput());
 		dialog.setFilter(""); //$NON-NLS-1$
 		if (dialog.open() == ElementListSelectionDialog.OK) { 
@@ -356,7 +356,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 			}
 			return result.toArray();
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, Messages.getString("wizardPage2.externalizing"), Messages.getString("wizardPage2.exception")); //$NON-NLS-2$ //$NON-NLS-1$
+			ExceptionHandler.handle(e, NLSUIMessages.getString("wizardPage2.externalizing"), NLSUIMessages.getString("wizardPage2.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 			return new Object[0];
 		}
 	}	
@@ -380,7 +380,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 			}
 			return result.toArray();
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, Messages.getString("wizardPage2.externalizing"), Messages.getString("wizardPage2.exception")); //$NON-NLS-2$ //$NON-NLS-1$
+			ExceptionHandler.handle(e, NLSUIMessages.getString("wizardPage2.externalizing"), NLSUIMessages.getString("wizardPage2.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 			return new Object[0];
 		}
 	}
@@ -445,16 +445,16 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		try {
 			IJavaElement element= project.findElement(pkgPath);
 			if (element == null || !element.exists()) {
-				setInvalid(fPropertyPackage, Messages.getString("wizardPage2.must_exist")); //$NON-NLS-1$
+				setInvalid(fPropertyPackage, NLSUIMessages.getString("wizardPage2.must_exist")); //$NON-NLS-1$
 				return;
 			}
 			fPkgFragment= (IPackageFragment)element;
 			if (! canAddPackage(fPkgFragment)){
-				setInvalid(fPropertyPackage, Messages.getString("wizardPage2.incorrect_package")); //$NON-NLS-1$
+				setInvalid(fPropertyPackage, NLSUIMessages.getString("wizardPage2.incorrect_package")); //$NON-NLS-1$
 				return;
 			}
 			if (! canAddPackageRoot((IPackageFragmentRoot)fPkgFragment.getParent())){
-				setInvalid(fPropertyPackage, Messages.getString("wizardPage2.incorrect_package")); //$NON-NLS-1$
+				setInvalid(fPropertyPackage, NLSUIMessages.getString("wizardPage2.incorrect_package")); //$NON-NLS-1$
 				return;
 			}
 		} catch (JavaModelException e) {
@@ -468,13 +468,13 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 	private void validatePropertyFilename() {
 		String fileName= fPropertyFile.getText();
 		if (fileName == null || "".equals(fileName)) { //$NON-NLS-1$
-			setInvalid(fPropertyFile, Messages.getString("wizardPage2.enter_name")); //$NON-NLS-1$
+			setInvalid(fPropertyFile, NLSUIMessages.getString("wizardPage2.enter_name")); //$NON-NLS-1$
 			return;
 		}
 		
 		int dotIndex= fileName.indexOf(NLSRefactoring.PROPERTY_FILE_EXT);
 		if (dotIndex < 0 || fileName.lastIndexOf('.') != dotIndex) {
-			setInvalid(fPropertyFile, Messages.getString("wizardPage2.file_name_must_end") + NLSRefactoring.PROPERTY_FILE_EXT + "\"."); //$NON-NLS-2$ //$NON-NLS-1$
+			setInvalid(fPropertyFile, NLSUIMessages.getString("wizardPage2.file_name_must_end") + NLSRefactoring.PROPERTY_FILE_EXT + "\"."); //$NON-NLS-2$ //$NON-NLS-1$
 			return;
 		}
 		setValid(fPropertyFile);
@@ -542,7 +542,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 			getNLSRefactoring().setAddedImportDeclaration(fNewImport.getText());
 			getNLSRefactoring().setCreateAccessorClass(fCreateAccessorClass.isSelected());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, Messages.getString("wizardPage2.externalizing"), Messages.getString("wizardPage2.exception_change")); //$NON-NLS-2$ //$NON-NLS-1$
+			ExceptionHandler.handle(e, NLSUIMessages.getString("wizardPage2.externalizing"), NLSUIMessages.getString("wizardPage2.exception_change")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
 }

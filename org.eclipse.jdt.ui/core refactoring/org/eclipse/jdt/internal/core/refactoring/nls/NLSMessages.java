@@ -7,11 +7,14 @@ package org.eclipse.jdt.internal.core.refactoring.nls;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-class Messages {
+class NLSMessages {
 
-	private static final String RESOURCE_BUNDLE= "org.eclipse.jdt.internal.core.refactoring.nls.nls"; //$NON-NLS-1$
+	private static final String RESOURCE_BUNDLE= NLSMessages.class.getName();
 
 	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
+
+	private NLSMessages() {
+	}
 
 	public static String getString(String key) {
 		try {

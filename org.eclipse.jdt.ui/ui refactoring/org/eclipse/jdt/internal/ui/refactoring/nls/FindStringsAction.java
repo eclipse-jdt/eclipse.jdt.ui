@@ -72,7 +72,7 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 			}
 			showResults(l);
 		}catch(JavaModelException e) {
-			ExceptionHandler.handle(e, Messages.getString("FindStringsAction.title"), Messages.getString("FindStringsAction.see_log")); //$NON-NLS-2$ //$NON-NLS-1$
+			ExceptionHandler.handle(e, NLSUIMessages.getString("FindStringsAction.title"), NLSUIMessages.getString("FindStringsAction.see_log")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
 	
@@ -120,7 +120,7 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 			}
 			return result;
 		}catch(JavaModelException e) {
-			ExceptionHandler.handle(e, Messages.getString("FindStringsAction.title"), Messages.getString("FindStringsAction.see_log")); //$NON-NLS-2$ //$NON-NLS-1$
+			ExceptionHandler.handle(e, NLSUIMessages.getString("FindStringsAction.title"), NLSUIMessages.getString("FindStringsAction.see_log")); //$NON-NLS-2$ //$NON-NLS-1$
 			return 0;
 		}catch(InvalidInputException iie) {
 			JavaPlugin.log(iie);
@@ -168,7 +168,7 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 		return new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT){ 
 			public String getText(Object element) {
 				NonNLSElement nlsel= (NonNLSElement)element;
-				String res= nlsel.count + Messages.getString("FindStringsAction.in"); //$NON-NLS-1$
+				String res= nlsel.count + NLSUIMessages.getString("FindStringsAction.in"); //$NON-NLS-1$
 				try{
 					return res + Refactoring.getResource(nlsel.cu).getProjectRelativePath();
 				}catch (JavaModelException e){
@@ -191,8 +191,8 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 		NonNLSListDialog(Object input, int count){
 			super(JavaPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell());
 			setInput(input);
-			setTitle(Messages.getString("FindStringsAction.NLS_Tool"));  //$NON-NLS-1$
-			setMessage(count + Messages.getString("FindStringsAction.not_externalized")); //$NON-NLS-1$, 
+			setTitle(NLSUIMessages.getString("FindStringsAction.NLS_Tool"));  //$NON-NLS-1$
+			setMessage(count + NLSUIMessages.getString("FindStringsAction.not_externalized")); //$NON-NLS-1$, 
 			setContentProvider(new ListContentProvider());
 			setLabelProvider(createLabelProvider());
 		}

@@ -72,7 +72,7 @@ public class ExternalizeAction implements IWorkbenchWindowActionDelegate{
 	
 			Refactoring refactoring= createNewRefactoringInstance(unit);
 			ExternalizeWizard wizard= new ExternalizeWizard(refactoring);
-			String title= Messages.getString("action.name"); //$NON-NLS-1$
+			String title= NLSUIMessages.getString("action.name"); //$NON-NLS-1$
 			RefactoringAction.activateRefactoringWizard(refactoring, wizard, title);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, "Externalize Strings", "Unexpected exception. See log for details.");

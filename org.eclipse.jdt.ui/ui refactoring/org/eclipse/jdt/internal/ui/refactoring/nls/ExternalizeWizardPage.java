@@ -84,8 +84,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		
 		fgTitles= new String[SIZE];
 		fgTitles[TASK_PROP]= ""; //$NON-NLS-1$
-		fgTitles[KEY_PROP]= Messages.getString("ExternalizeWizard.key");  //$NON-NLS-1$
-		fgTitles[VAL_PROP]= Messages.getString("ExternalizeWizard.value");  //$NON-NLS-1$
+		fgTitles[KEY_PROP]= NLSUIMessages.getString("ExternalizeWizard.key");  //$NON-NLS-1$
+		fgTitles[VAL_PROP]= NLSUIMessages.getString("ExternalizeWizard.value");  //$NON-NLS-1$
 	}
 	
 	private class CellModifier implements ICellModifier {
@@ -302,7 +302,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		c.setLayout(new GridLayout());
 		
 		Label l= new Label(c, SWT.NONE);
-		l.setText(Messages.getString("wizardPage.context")); //$NON-NLS-1$
+		l.setText(NLSUIMessages.getString("wizardPage.context")); //$NON-NLS-1$
 		l.setLayoutData(new GridData());
 		
 		// source viewer
@@ -325,7 +325,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			fSourceViewer.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
 			
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, Messages.getString("wizardPage.title"), Messages.getString("wizardPage.exception")); //$NON-NLS-2$ //$NON-NLS-1$
+			ExceptionHandler.handle(e, NLSUIMessages.getString("wizardPage.title"), NLSUIMessages.getString("wizardPage.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
 	
@@ -336,7 +336,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		composite.setLayout(gl);
 		
 		Label l= new Label(composite, SWT.NONE);
-		l.setText(Messages.getString("wizardPage.common_prefix")); //$NON-NLS-1$
+		l.setText(NLSUIMessages.getString("wizardPage.common_prefix")); //$NON-NLS-1$
 		l.setLayoutData(new GridData());
 		
 		fPrefixField= new Text(composite, SWT.SINGLE | SWT.BORDER);
@@ -396,7 +396,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		c.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		Label l= new Label(c, SWT.NONE);
-		l.setText(Messages.getString("wizardPage.strings_to_externalize")); //$NON-NLS-1$
+		l.setText(NLSUIMessages.getString("wizardPage.strings_to_externalize")); //$NON-NLS-1$
 		l.setLayoutData(new GridData());
 		
 		fTable= new Table(c, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION | SWT.HIDE_SELECTION | SWT.BORDER);
@@ -428,7 +428,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		buttonComp.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 		
 		Button translateSelected= new Button(buttonComp, SWT.PUSH);
-		translateSelected.setText(Messages.getString("wizardPage.Translate_Selected")); //$NON-NLS-1$
+		translateSelected.setText(NLSUIMessages.getString("wizardPage.Translate_Selected")); //$NON-NLS-1$
 		translateSelected.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		translateSelected.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
@@ -437,7 +437,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		});
 		
 		Button noTranslateSelected= new Button(buttonComp, SWT.PUSH);
-		noTranslateSelected.setText(Messages.getString("wizardPage.Never_Translate_Selected")); //$NON-NLS-1$
+		noTranslateSelected.setText(NLSUIMessages.getString("wizardPage.Never_Translate_Selected")); //$NON-NLS-1$
 		noTranslateSelected.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		noTranslateSelected.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
@@ -446,7 +446,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		});
 		
 		Button skipSelected= new Button(buttonComp, SWT.PUSH);
-		skipSelected.setText(Messages.getString("wizardPage.Skip_Selected")); //$NON-NLS-1$
+		skipSelected.setText(NLSUIMessages.getString("wizardPage.Skip_Selected")); //$NON-NLS-1$
 		skipSelected.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		skipSelected.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
@@ -481,9 +481,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	
 	private void updateLabels(){
 		NLSSubstitution[] elems= getNlsSubstutions(); //calculate only once
-		fTranslateLabel.setText(Messages.getString("wizardPage.translate") + NLSSubstitution.countItems(elems, NLSSubstitution.TRANSLATE)); //$NON-NLS-1$
-		fNoTranslateLabel.setText(Messages.getString("wizardPage.never_translate") + NLSSubstitution.countItems(elems, NLSSubstitution.NEVER_TRANSLATE)); //$NON-NLS-1$
-		fSkipLabel.setText(Messages.getString("wizardPage.skip") + NLSSubstitution.countItems(elems, NLSSubstitution.SKIP)); //$NON-NLS-1$
+		fTranslateLabel.setText(NLSUIMessages.getString("wizardPage.translate") + NLSSubstitution.countItems(elems, NLSSubstitution.TRANSLATE)); //$NON-NLS-1$
+		fNoTranslateLabel.setText(NLSUIMessages.getString("wizardPage.never_translate") + NLSSubstitution.countItems(elems, NLSSubstitution.NEVER_TRANSLATE)); //$NON-NLS-1$
+		fSkipLabel.setText(NLSUIMessages.getString("wizardPage.skip") + NLSSubstitution.countItems(elems, NLSSubstitution.SKIP)); //$NON-NLS-1$
 	}
 			
 	private void selectionChanged(SelectionChangedEvent event) {
