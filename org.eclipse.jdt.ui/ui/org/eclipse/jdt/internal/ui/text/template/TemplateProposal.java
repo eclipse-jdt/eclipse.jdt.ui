@@ -46,6 +46,7 @@ public class TemplateProposal implements IJavaCompletionProposal {
 	private final ITextViewer fViewer;
 	private final Image fImage;
 	private final IRegion fRegion;
+	private int fRelevance;
 
 	private TemplateBuffer fTemplateBuffer;
 	private String fOldText;
@@ -68,6 +69,22 @@ public class TemplateProposal implements IJavaCompletionProposal {
 		fViewer= viewer;
 		fImage= image;
 		fRegion= region;
+		
+		if (context instanceof JavaContext) {
+			switch (((JavaContext) context).getCharacterBeforeStart()) {
+			// high relevance after whitespace
+			case ' ':
+			case '\r':
+			case '\n':
+			case '\t':
+				fRelevance= 90;
+				break;
+			default:
+				fRelevance= 0;
+			}
+		} else {
+			fRelevance= 90;			
+		}		
 	}
 
 	/*
@@ -250,23 +267,15 @@ public class TemplateProposal implements IJavaCompletionProposal {
 	 * @see IJavaCompletionProposal#getRelevance()
 	 */
 	public int getRelevance() {
-
-		if (fContext instanceof JavaContext) {
-			JavaContext context= (JavaContext) fContext;
-			switch (context.getCharacterBeforeStart()) {
-			// high relevance after whitespace
-			case ' ':
-			case '\r':
-			case '\n':
-			case '\t':
-				return 90;
-
-			default:
-				return 0;
-			}
-		} else {
-			return 90;			
-		}
+		return fRelevance;
 	}
+
+	public void setRelevance(int relevance) {
+		fRelevance= relevance;
+	}
+	
+	public String getTemplateName() {
+		return fTemplate.getName();
+	}	
 
 }

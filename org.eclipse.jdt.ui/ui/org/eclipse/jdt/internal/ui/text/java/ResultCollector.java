@@ -319,6 +319,10 @@ public class ResultCollector extends CompletionRequestorAdapter {
 		}		
 		return result;
 	}
+	
+	public JavaCompletionProposal[] getKeywordCompletions() {
+		return (JavaCompletionProposal[]) fKeywords.toArray(new JavaCompletionProposal[fKeywords.size()]);
+	}
 
 	private StringBuffer getMethodDisplayString(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName) {
 		StringBuffer nameBuffer= new StringBuffer();

@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
 import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
+import org.eclipse.jdt.internal.ui.text.template.TemplateProposal;
 
 
 /**
@@ -187,7 +188,11 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	public String getErrorMessage() {
 		if (fNumberOfComputedResults == 0)
 			return JavaUIMessages.getString("JavaEditor.codeassist.noCompletions"); //$NON-NLS-1$
-		return fCollector.getErrorMessage();
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES)) {
+			return fExperimentalCollector.getErrorMessage();
+		} else {
+			return fCollector.getErrorMessage();
+		}
 	}
 
 	/**
@@ -305,49 +310,32 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
 		IJavaCompletionProposal[] results;
 
-		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES)) {
-				
-			try {
-				if (unit != null) {
-
-					fExperimentalCollector.setPreventEating(false);	
-					fExperimentalCollector.reset(offset, contextOffset, unit.getJavaProject(), fAllowAddImports ? unit : null);
-					fExperimentalCollector.setViewer(viewer);
-					
-					Point selection= viewer.getSelectedRange();
-					if (selection.y > 0)
-						fExperimentalCollector.setReplacementLength(selection.y);
-					
-					unit.codeComplete(offset, fExperimentalCollector);
-				}
-			} catch (JavaModelException x) {
-				Shell shell= viewer.getTextWidget().getShell();
-				ErrorDialog.openError(shell, JavaTextMessages.getString("CompletionProcessor.error.accessing.title"), JavaTextMessages.getString("CompletionProcessor.error.accessing.message"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
-			}				
-
-			results= fExperimentalCollector.getResults();
-
+		ResultCollector collector;
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES)) {
+			collector= fExperimentalCollector;
 		} else {
-
-			try {
-				if (unit != null) {
-
-					fCollector.setPreventEating(false);	
-					fCollector.setViewer(viewer);
-					fCollector.reset(offset, contextOffset, unit.getJavaProject(), fAllowAddImports ? unit : null);
-					Point selection= viewer.getSelectedRange();
-					if (selection.y > 0)
-						fCollector.setReplacementLength(selection.y);
-					
-					unit.codeComplete(offset, fCollector);
-				}
-			} catch (JavaModelException x) {
-				Shell shell= viewer.getTextWidget().getShell();
-				ErrorDialog.openError(shell, JavaTextMessages.getString("CompletionProcessor.error.accessing.title"), JavaTextMessages.getString("CompletionProcessor.error.accessing.message"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
-			}
-			
-			results= fCollector.getResults();
+			collector= fCollector;
 		}
+			
+		try {
+			if (unit != null) {
+
+				collector.setPreventEating(false);	
+				collector.reset(offset, contextOffset, unit.getJavaProject(), fAllowAddImports ? unit : null);
+				collector.setViewer(viewer);
+				
+				Point selection= viewer.getSelectedRange();
+				if (selection.y > 0)
+				collector.setReplacementLength(selection.y);
+				
+				unit.codeComplete(offset, collector);
+			}
+		} catch (JavaModelException x) {
+			Shell shell= viewer.getTextWidget().getShell();
+			ErrorDialog.openError(shell, JavaTextMessages.getString("CompletionProcessor.error.accessing.title"), JavaTextMessages.getString("CompletionProcessor.error.accessing.message"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
+		}				
+
+		results= collector.getResults();
 
 		if (fTemplateEngine != null) {
 			try {
@@ -358,7 +346,19 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 				ErrorDialog.openError(shell, JavaTextMessages.getString("CompletionProcessor.error.accessing.title"), JavaTextMessages.getString("CompletionProcessor.error.accessing.message"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 			}				
 			
-			IJavaCompletionProposal[] templateResults= fTemplateEngine.getResults();
+			TemplateProposal[] templateResults= fTemplateEngine.getResults();
+			
+			// update relavance of template proposals that match with a keyword
+			JavaCompletionProposal[] keyWordResults= collector.getKeywordCompletions();
+			for (int i= 0; i < keyWordResults.length; i++) {
+				String keyword= keyWordResults[i].getReplacementString();
+				for (int k= 0; k < templateResults.length; k++) {
+					TemplateProposal curr= templateResults[k];
+					if (keyword.equals(curr.getTemplateName())) {
+						curr.setRelevance(keyWordResults[i].getRelevance());
+					}
+				}
+			}
 	
 			// concatenate arrays
 			IJavaCompletionProposal[] total= new IJavaCompletionProposal[results.length + templateResults.length];

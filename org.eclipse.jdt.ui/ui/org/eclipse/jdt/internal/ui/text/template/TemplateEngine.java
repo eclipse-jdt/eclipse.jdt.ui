@@ -25,7 +25,6 @@ import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 
 public class TemplateEngine {
@@ -56,8 +55,8 @@ public class TemplateEngine {
 	/**
 	 * Returns the array of matching templates.
 	 */
-	public IJavaCompletionProposal[] getResults() {
-		return (IJavaCompletionProposal[]) fProposals.toArray(new IJavaCompletionProposal[fProposals.size()]);
+	public TemplateProposal[] getResults() {
+		return (TemplateProposal[]) fProposals.toArray(new TemplateProposal[fProposals.size()]);
 	}
 
 	/**
