@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 
 	public RenameSourceFolderChange(IPackageFragmentRoot sourceFolder, String newName) throws JavaModelException {
-		this(sourceFolder.getCorrespondingResource().getFullPath(), sourceFolder.getElementName(), newName);
+		this(sourceFolder.getPath(), sourceFolder.getElementName(), newName);
 		Assert.isTrue(!sourceFolder.isReadOnly(), RefactoringCoreMessages.getString("RenameSourceFolderChange.assert.readonly"));  //$NON-NLS-1$
 		Assert.isTrue(!sourceFolder.isArchive(), RefactoringCoreMessages.getString("RenameSourceFolderChange.assert.archive"));  //$NON-NLS-1$
 	}

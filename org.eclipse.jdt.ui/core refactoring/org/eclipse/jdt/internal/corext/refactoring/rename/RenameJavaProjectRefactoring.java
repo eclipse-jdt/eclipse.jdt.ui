@@ -33,7 +33,7 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 	}
 	
 	public Object getNewElement() throws JavaModelException{
-		IPath newPath= fProject.getCorrespondingResource().getFullPath().removeLastSegments(1).append(getNewName());
+		IPath newPath= fProject.getPath().removeLastSegments(1).append(getNewName());
 		return ResourcesPlugin.getWorkspace().getRoot().findMember(newPath);
 	}
 	
@@ -145,7 +145,7 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 	}
 	
 	private boolean isReadOnly() throws JavaModelException{
-		return fProject.getCorrespondingResource().isReadOnly();
+		return fProject.getResource().isReadOnly();
 	}
 	
 	private boolean projectNameAlreadyExists(String newName){

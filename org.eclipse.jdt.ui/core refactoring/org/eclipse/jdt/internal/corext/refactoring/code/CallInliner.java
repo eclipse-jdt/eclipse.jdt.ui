@@ -407,7 +407,7 @@ public class CallInliner {
 	}
 
 	private static IFile getFile(ICompilationUnit cu) throws CoreException {
-		return (IFile)WorkingCopyUtil.getOriginal(cu).getCorrespondingResource();
+		return (IFile)WorkingCopyUtil.getOriginal(cu).getResource();
 	}
 	
 	private List collectUsedNames() {

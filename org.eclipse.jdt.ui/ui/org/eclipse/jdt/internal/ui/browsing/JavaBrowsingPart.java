@@ -445,10 +445,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	
 	private void addOpenNewWindowAction(IMenuManager menu, Object element) {
 		if (element instanceof IJavaElement) {
-			try {
-				element= ((IJavaElement)element).getCorrespondingResource();
-			} catch(JavaModelException e) {
-			}
+			element= ((IJavaElement)element).getResource();
 		}
 		if (!(element instanceof IContainer))
 			return;

@@ -378,7 +378,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			TextBuffer buffer= null;
 			try {
 				// This is cheap since the compilation unit is already open in a editor.
-				buffer= TextBuffer.create((IFile)WorkingCopyUtil.getOriginal(fCUnit).getCorrespondingResource());
+				buffer= TextBuffer.create((IFile)WorkingCopyUtil.getOriginal(fCUnit).getResource());
 				String delimiter= buffer.getLineDelimiter(buffer.getLineOfOffset(method.getStartPosition()));
 				// Inserting the new method
 				result.addTextEdit(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName), //$NON-NLS-1$

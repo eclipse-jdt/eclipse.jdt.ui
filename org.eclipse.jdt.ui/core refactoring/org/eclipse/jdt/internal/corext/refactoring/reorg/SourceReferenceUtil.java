@@ -29,8 +29,8 @@ public class SourceReferenceUtil {
 	public static IFile getFile(ISourceReference ref) throws JavaModelException{
 		ICompilationUnit unit= getCompilationUnit(ref);
 		if (! unit.isWorkingCopy()) 
-			return (IFile)unit.getCorrespondingResource();
-		return (IFile)unit.getOriginalElement().getCorrespondingResource();
+			return (IFile)unit.getResource();
+		return (IFile)unit.getOriginalElement().getResource();
 	}
 	
 	public static ICompilationUnit getCompilationUnit(ISourceReference o){

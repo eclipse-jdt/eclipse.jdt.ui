@@ -25,7 +25,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	private boolean fUpdateReferences;
 	
 	public RenameJavaProjectChange(IJavaProject project, String newName, boolean updateReferences) throws JavaModelException {
-		this(project.getCorrespondingResource().getFullPath(), project.getElementName(), newName);
+		this(project.getPath(), project.getElementName(), newName);
 		Assert.isTrue(!project.isReadOnly(), RefactoringCoreMessages.getString("RenameJavaProjectChange.assert.read_only"));  //$NON-NLS-1$
 		
 		fUpdateReferences= updateReferences;

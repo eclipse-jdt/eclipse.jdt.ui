@@ -268,7 +268,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		for (int i= 0; i < elements.length; i++) {
 			try {
 				if (elements[i] instanceof ICompilationUnit) {
-					resources.add(elements[i].getCorrespondingResource());
+					resources.add(elements[i].getResource());
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);

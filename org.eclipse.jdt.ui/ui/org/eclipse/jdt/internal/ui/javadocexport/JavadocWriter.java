@@ -71,11 +71,9 @@ public class JavadocWriter {
 			try {
 				fProjects= (IJavaProject[]) store.getJavaProjects().toArray(new IJavaProject[store.getJavaProjects().size()]);
 				if(fProjects.length!= 1) {
-					project.setAttribute("name", fProjects[0].getCorrespondingResource().getName()); //$NON-NLS-1$
+					project.setAttribute("name", fProjects[0].getElementName()); //$NON-NLS-1$
 				} else project.setAttribute("name", "project_name"); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch(DOMException e) {
-				project.setAttribute("name", "project_name"); //$NON-NLS-1$ //$NON-NLS-2$
-			} catch(JavaModelException e) {
 				project.setAttribute("name", "project_name"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			project.setAttribute("default", "javadoc"); //$NON-NLS-1$ //$NON-NLS-2$

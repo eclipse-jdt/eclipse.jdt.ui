@@ -234,7 +234,7 @@ public class DeleteRefactoring extends Refactoring {
 	private static IResource getResourceToDelete(IJavaElement element) throws JavaModelException {
 		if (!element.exists())
 			return null;
-		return element.getCorrespondingResource();
+		return element.getResource();
 	}
 	
 	private IChange createDeleteChange(IResource res) throws JavaModelException {
@@ -346,15 +346,11 @@ public class DeleteRefactoring extends Refactoring {
 	}
 	
 	private static boolean canDelete(IJavaElement element){
-		try {
-			IResource res= element.getCorrespondingResource();
-			if (res == null)
-				return false;
-			if (!res.getProject().equals(element.getJavaProject().getProject()))
-				return false;
-		} catch (JavaModelException e) {
+		IResource res= element.getResource();
+		if (res == null)
 			return false;
-		}
+		if (!res.getProject().equals(element.getJavaProject().getProject()))
+			return false;
 		IJavaElement parent= element.getParent();
 		return parent == null || !parent.isReadOnly();
 	}

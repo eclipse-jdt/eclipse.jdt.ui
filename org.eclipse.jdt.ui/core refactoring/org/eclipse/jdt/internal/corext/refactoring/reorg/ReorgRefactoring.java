@@ -264,7 +264,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 	
 	static IContainer getDestinationForResources(Object dest) throws JavaModelException{
 		if (dest instanceof IJavaElement) 
-			return getDestinationForResources(((IJavaElement)dest).getCorrespondingResource());
+			return getDestinationForResources(((IJavaElement)dest).getResource());
 
 		if (dest instanceof IResource)
 			return getDestinationForResources((IResource)dest);
@@ -401,7 +401,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 			for (Iterator iter= elements.iterator(); iter.hasNext();) {
 				Object element= (Object) iter.next();
 				if (!(element instanceof IPackageFragment))
-					return destinationIsParent(elements, dest.getCorrespondingResource());
+					return destinationIsParent(elements, dest.getResource());
 				IPackageFragment pack= (IPackageFragment) element;	
 				if (pack.getParent().equals(dest))
 					return true;
@@ -410,11 +410,11 @@ public abstract class ReorgRefactoring extends Refactoring {
 		} else if (dest.getElementType() == IJavaElement.JAVA_PROJECT) {
 				IPackageFragmentRoot root= getPackageFragmentRoot((IJavaProject)dest);
 				if (root == null)
-					return destinationIsParent(elements, dest.getCorrespondingResource());
+					return destinationIsParent(elements, dest.getResource());
 				else
 					return destinationIsParent(elements, root);	
 		} else 
-			return destinationIsParent(elements, dest.getCorrespondingResource());
+			return destinationIsParent(elements, dest.getResource());
 	}
 	
 	/**

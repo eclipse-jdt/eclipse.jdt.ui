@@ -221,7 +221,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 				result.addWarning(message);
 			}	
 				
-			if (fPackage.getCorrespondingResource().isReadOnly()){
+			if (fPackage.getResource().isReadOnly()){
 				String message= RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.resource_read_only", //$NON-NLS-1$
 									fPackage.getElementName());
 				result.addWarning(message);

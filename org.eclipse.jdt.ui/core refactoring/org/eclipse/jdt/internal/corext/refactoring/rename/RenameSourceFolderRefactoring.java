@@ -108,7 +108,7 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 		if (! newName.trim().equals(newName))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameSourceFolderRefactoring.blank")); //$NON-NLS-1$
 		
-		IContainer c= 	fSourceFolder.getCorrespondingResource().getParent();
+		IContainer c= 	fSourceFolder.getResource().getParent();
 		if (! c.getFullPath().isValidSegment(newName))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameSourceFolderRefactoring.invalid_name")); //$NON-NLS-1$
 		
@@ -130,8 +130,8 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 		return result;		
 	}
 	
-	private String createNewPath(String newName) throws JavaModelException {
-		return fSourceFolder.getCorrespondingResource().getFullPath().removeLastSegments(1).append(newName).toString();
+	private String createNewPath(String newName) {
+		return fSourceFolder.getPath().removeLastSegments(1).append(newName).toString();
 	}
 	
 	/* non java-doc
@@ -154,7 +154,7 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 	private boolean isReadOnly() throws JavaModelException{
 		if (Checks.isClasspathDelete(fSourceFolder))
 			return false;
-		return fSourceFolder.getCorrespondingResource().isReadOnly();
+		return fSourceFolder.getResource().isReadOnly();
 	}
 	
 	//-- changes

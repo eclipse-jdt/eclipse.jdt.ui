@@ -481,7 +481,7 @@ public class Checks {
 		if (element instanceof IJavaElement) {
 			if ((element instanceof IPackageFragmentRoot) && isClasspathDelete((IPackageFragmentRoot)element)) 
 				return false;
-			return isReadOnly(((IJavaElement)element).getCorrespondingResource());
+			return isReadOnly(((IJavaElement)element).getResource());
 		}
 		
 		Assert.isTrue(false, "not expected to get here");	 //$NON-NLS-1$

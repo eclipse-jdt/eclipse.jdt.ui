@@ -74,7 +74,7 @@ public class ReorgUtils {
 					&& isClasspathDelete((IPackageFragmentRoot) element)) {
 					return false;
 				}
-				element = ((IJavaElement) element).getCorrespondingResource();
+				element = ((IJavaElement) element).getResource();
 			} catch (JavaModelException e) {
 				// we catch this, we're only interested in knowing
 				// whether to pop up the read-only dialog.

@@ -256,8 +256,8 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	
 	private IFile getFile() throws JavaModelException {
 		if (fCUnit.isWorkingCopy())
-			return (IFile)fCUnit.getOriginalElement().getCorrespondingResource();
+			return (IFile)fCUnit.getOriginalElement().getResource();
 		else
-			return (IFile)fCUnit.getCorrespondingResource();
+			return (IFile)fCUnit.getResource();
 	}
 }

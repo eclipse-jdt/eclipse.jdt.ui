@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 public class RenamePackageChange extends AbstractJavaElementRenameChange {
 
 	public RenamePackageChange(IPackageFragment pack, String newName) throws JavaModelException{
-		this(pack.getCorrespondingResource().getFullPath(), pack.getElementName(), newName);
+		this(pack.getPath(), pack.getElementName(), newName);
 		Assert.isTrue(!pack.isReadOnly(), RefactoringCoreMessages.getString("RenamePackageChange.assert.read_only")); //$NON-NLS-1$
 	}
 	

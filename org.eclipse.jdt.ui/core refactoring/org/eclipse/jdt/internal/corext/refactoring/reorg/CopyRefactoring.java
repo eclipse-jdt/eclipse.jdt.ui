@@ -181,7 +181,7 @@ public class CopyRefactoring extends ReorgRefactoring {
 		} else {
 			if (root.getResource() instanceof IContainer){
 				IContainer dest= (IContainer)root.getResource();
-				IResource res= pack.getCorrespondingResource();
+				IResource res= pack.getResource();
 				INewNameQuery nameQuery= fCopyQueries.createNewResourceNameQuery(res);
 				return new CopyResourceChange(res, dest, nameQuery);
 			}else

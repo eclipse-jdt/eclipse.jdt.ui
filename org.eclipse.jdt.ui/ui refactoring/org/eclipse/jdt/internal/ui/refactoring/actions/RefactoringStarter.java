@@ -131,7 +131,7 @@ public class RefactoringStarter {
 		if (element instanceof IResource)
 			return ((IResource)element).isReadOnly();
 		if (element instanceof IJavaProject)	
-			return ((IJavaProject)element).getCorrespondingResource().isReadOnly();
+			return ((IJavaProject)element).getProject().isReadOnly();
 		if (element instanceof IPackageFragmentRoot)
 			return isReadOnly((IPackageFragmentRoot)element);
 		Assert.isTrue(false);
@@ -141,7 +141,7 @@ public class RefactoringStarter {
 	private boolean isReadOnly(IPackageFragmentRoot root) throws JavaModelException{
 		if (Checks.isClasspathDelete(root))
 			return false;
-		return root.getCorrespondingResource().isReadOnly();
+		return root.getResource().isReadOnly();
 	}
 	
 	private boolean canActivate(boolean mustSaveEditors) {
