@@ -34,6 +34,7 @@ public class JavaElementContainmentAdapter implements IContainmentAdapter {
 		IJavaElement jElement= null;
 		if (element instanceof IJavaElement) {
 			jElement= (IJavaElement)element;	
+			resource= jElement.getResource(); 
 		} else {
 			if (element instanceof IAdaptable) {
 				resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
