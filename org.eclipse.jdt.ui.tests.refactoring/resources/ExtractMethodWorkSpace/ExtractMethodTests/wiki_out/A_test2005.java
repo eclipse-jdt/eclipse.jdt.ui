@@ -12,7 +12,7 @@ public class A_test2005 {
 		}
 	}
 
-	protected static void extracted() throws java.lang.ArithmeticException {
+	protected static void extracted() throws ArithmeticException {
 		
 		fun();
 		

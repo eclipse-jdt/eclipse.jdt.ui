@@ -315,6 +315,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 			}
 		}
 		super.setVisible(visible);
+		fTreeViewer.getControl().setFocus();
 	}
 	
 	private ICheckStateListener createCheckStateListener() {

@@ -43,5 +43,45 @@ public abstract class AbstractCUTestCase extends TestCase {
 	protected ICompilationUnit createCU(IPackageFragment pack, String name, InputStream contents) throws Exception {
 		return createCU(pack, name, getFileContents(contents));
 	}
+
+	//--- creating a compilation unit from a resource folder relative to a plugin ----------------------------------
+	
+	protected abstract InputStream getFileInputStream(String fileName) throws IOException;
+
+	protected String getResourceLocation() {
+		return "";
+	}
+
+	protected ICompilationUnit createCU(IPackageFragment pack, String name) throws Exception {
+		name= adaptName(name);
+		return createCU(pack, name, getFileInputStream(getFilePath(pack, name)));
+	}
+	
+	protected String adaptName(String name) {
+		return name + ".java";
+	}
+	
+	protected String getProofedContent(String folder, String name) throws Exception {
+		name= adaptName(name);
+		return getFileContents(getFileInputStream(getFilePath(folder, name)));
+	}
+	
+	private String getFilePath(String path, String name) {
+		return getResourceLocation() + path + "/" + name;
+	}
+	
+	private String getFilePath(IPackageFragment pack, String name) {
+		return getFilePath(pack.getElementName(), name);		
+	}
+	
+	//---- helper to compare two file without considering the package statement
+	
+	protected static boolean compareSource(String refactored, String proofed) {
+		int index= refactored.indexOf(';');
+		refactored= refactored.substring(index);
+		index= proofed.indexOf(';');
+		proofed= proofed.substring(index);
+		return refactored.equals(proofed);
+	}		
 }
 

@@ -4,9 +4,6 @@
  */
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -22,13 +19,11 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-import org.eclipse.jdt.testplugin.AbstractCUTestCase;
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextBufferChangeCreator;
 
-public class ExtractMethodTests extends AbstractCUTestCase {
+public class ExtractMethodTests extends AbstractSelectionTestCase {
 
 	public static final String SQUARE_BRACKET_OPEN= "/*[*/";
 	public static final int    SQUARE_BRACKET_OPEN_LENGTH= SQUARE_BRACKET_OPEN.length();
@@ -58,68 +53,12 @@ public class ExtractMethodTests extends AbstractCUTestCase {
 		return "ExtractMethodWorkSpace/ExtractMethodTests/";
 	}
 	
-	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, String id) throws Exception {
-		return createCU(pack, createCUName(id), getFileContents(pack, id));
-	}
-	
-	private String getTestFileName(String packageName, String id) {
-		String result= getResourceLocation() + packageName + "/" + id + "_" + getName() + ".java";
-		return result;
-	}
-	
-	private String getFileContents(IPackageFragment pack, String id) throws IOException {
-		return getFileContents(getFileInputStream(getTestFileName(pack.getElementName(), id)));
-	}
-	
-	private InputStream getFileInputStream(String fileName) throws IOException {
-		return RefactoringTestPlugin.getDefault().getTestResourceStream(fileName);
+	protected String adaptName(String name) {
+		return name + "_" + getName() + ".java";
 	}	
 	
-	private String createCUName(String id) {
-		return id + "_" + getName() + ".java";
-	}
-
-	protected static int[] getSelection(String source) {
-		int start= -1;
-		int end= -1;
-		int includingStart= source.indexOf(SQUARE_BRACKET_OPEN);
-		int excludingStart= source.indexOf(SQUARE_BRACKET_CLOSE);
-		int includingEnd= source.lastIndexOf(SQUARE_BRACKET_CLOSE);
-		int excludingEnd= source.lastIndexOf(SQUARE_BRACKET_OPEN);
-
-		if (includingStart > excludingStart && excludingStart != -1) {
-			includingStart= -1;
-		} else if (excludingStart > includingStart && includingStart != -1) {
-			excludingStart= -1;
-		}
-		
-		if (includingEnd < excludingEnd) {
-			includingEnd= -1;
-		} else if (excludingEnd < includingEnd) {
-			excludingEnd= -1;
-		}
-		
-		if (includingStart != -1) {
-			start= includingStart;
-		} else {
-			start= excludingStart + SQUARE_BRACKET_CLOSE_LENGTH;
-		}
-		
-		if (excludingEnd != -1) {
-			end= excludingEnd;
-		} else {
-			end= includingEnd + SQUARE_BRACKET_CLOSE_LENGTH;
-		}
-		
-		assertTrue("Selection invalid", start >= 0 && end >= 0 && end >= start);
-		
-		int[] result= new int[] { start, end - start }; 
-		// System.out.println("|"+ source.substring(result[0], result[0] + result[1]) + "|");
-		return result;
-	}
-	
 	protected void selectionTest(int start, int length) throws Exception{
-		ICompilationUnit unit= createCUfromTestFile(getSelectionPackage(), "A");
+		ICompilationUnit unit= createCU(getSelectionPackage(), "A");
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
 		assertEquals(start, selection[0]);
@@ -132,12 +71,12 @@ public class ExtractMethodTests extends AbstractCUTestCase {
 	
 	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
 		IProgressMonitor pm= new NullProgressMonitor();
-		ICompilationUnit unit= createCUfromTestFile(packageFragment, id);
+		ICompilationUnit unit= createCU(packageFragment, id);
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
 		ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(
 			unit, selection[0], selection[1],
-			true, 4);
+			true, 4, JavaPreferencesSettings.getCodeGenerationSettings());
 		refactoring.setMethodName("extracted");
 		RefactoringStatus status= refactoring.checkPreconditions(pm);
 		switch (mode) {
@@ -159,20 +98,10 @@ public class ExtractMethodTests extends AbstractCUTestCase {
 				change.performed();
 				assertNotNull(change.getUndoChange());
 				source= unit.getSource();
-				String out= getFileContents(getFileInputStream(getTestFileName(outputFolder, id)));
+				String out= getProofedContent(outputFolder, id);
 				assertTrue(compareSource(source, out));
 				break;		
 		}
-	}
-	
-	private boolean compareSource(String refactored, String proofed) {
-		int index= refactored.indexOf(';');
-		refactored= refactored.substring(index);
-		index= proofed.indexOf(';');
-		proofed= proofed.substring(index);
-		// System.out.println(refactored);
-		// System.out.println(proofed);
-		return refactored.equals(proofed);
 	}
 	
 	protected void invalidSelectionTest() throws Exception {

@@ -24,8 +24,6 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 		super(name);
 	}
 
-	protected abstract String getResourceLocation();
-			
 	protected int[] getSelection(String source) {
 		int start= -1;
 		int end= -1;
@@ -65,24 +63,7 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 		return result;
 	}
 	
-	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, String id) throws Exception {
-		return createCU(pack, createCUName(id), getFileContents(pack, id));
-	}
-	
-	private String getTestFileName(String packageName, String id) {
-		String result= getResourceLocation() + packageName + "/" + id + "_" + getName() + ".java";
-		return result;
-	}
-	
-	private String getFileContents(IPackageFragment pack, String id) throws IOException {
-		return getFileContents(getFileInputStream(getTestFileName(pack.getElementName(), id)));
-	}
-	
-	private InputStream getFileInputStream(String fileName) throws IOException {
+	protected InputStream getFileInputStream(String fileName) throws IOException {
 		return RefactoringTestPlugin.getDefault().getTestResourceStream(fileName);
 	}
-	
-	private String createCUName(String id) {
-		return id + "_" + getName() + ".java";
-	}	
 }

@@ -43,8 +43,12 @@ public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 		return "SelectionAnalyzerWorkSpace/SelectionAnalyzerTests/";
 	}
 	
+	protected String adaptName(String name) {
+		return name + "_" + getName() + ".java";
+	}	
+	
 	protected void selectionTest(int start, int length) throws Exception{
-		ICompilationUnit unit= createCUfromTestFile(getSelectionPackage(), "A");
+		ICompilationUnit unit= createCU(getSelectionPackage(), "A");
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
 		assertEquals(start, selection[0]);
@@ -57,7 +61,7 @@ public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 	
 	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
 		IProgressMonitor pm= new NullProgressMonitor();
-		ICompilationUnit unit= createCUfromTestFile(packageFragment, id);
+		ICompilationUnit unit= createCU(packageFragment, id);
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(unit.getBuffer(), selection[0], selection[1]);
