@@ -159,19 +159,6 @@ public class JavaContext extends CompilationUnitContext {
 		try {
 			IDocument document= getDocument();
 
-			if (getCompletionLength() == 0) {
-
-				int start= getCompletionOffset();		
-				while ((start != 0) && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
-					start--;
-					
-				if ((start != 0) && Character.isUnicodeIdentifierStart(document.getChar(start - 1)))
-					start--;
-		
-				return start;
-			
-			} 
-			
 			int start= getCompletionOffset();
 			int end= getCompletionOffset() + getCompletionLength();
 			

@@ -97,7 +97,7 @@ public class JavaFormatter {
 			if (context instanceof DocumentTemplateContext) {
 				DocumentTemplateContext dtc= (DocumentTemplateContext) context;
 				if (dtc.getStart() == dtc.getCompletionOffset())
-					if (dtc.getDocument().get(dtc.getStart(), dtc.getEnd() - dtc.getEnd()).trim().length() == 0)
+					if (dtc.getDocument().get(dtc.getStart(), dtc.getEnd() - dtc.getStart()).trim().length() == 0)
 						return;
 			}
 			
