@@ -405,7 +405,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 				
 				final IJavaElement je= findSelectedJavaElement(part, selection);
 
-				if (!isIgnoringEqualInput() && fCurrentViewInput != null && fCurrentViewInput.equals(je))
+				if (isIgnoringEqualInput() && fCurrentViewInput != null && fCurrentViewInput.equals(je))
 					return;
 
 				// The actual computation		

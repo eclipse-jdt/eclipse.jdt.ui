@@ -399,9 +399,10 @@ public class JavadocView extends AbstractInfoView {
 	}
 
 	/*
-	 * @see AbstractInfoView#isUpdatingIfSameInput() 
+	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#isIgnoringEqualInput()
+	 * @since 3.0
 	 */
-	protected boolean isIngoringEqualInput() {
+	protected boolean isIgnoringEqualInput() {
 		return false;
 	}
 
