@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -28,7 +29,10 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -62,14 +66,20 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 	 * @see IActionDelegate#run(IAction)
 	 */
 	public void run(IAction action) {
-		List packages= getPackageFragments(getSelection());
-		if (packages == null || packages.isEmpty())
+		List elements= getSelectedElementList(getSelection());
+		if (elements == null || elements.isEmpty())
 			return;
 		
 		try{
 			List l= new ArrayList();	
-			for (Iterator iter= packages.iterator(); iter.hasNext();) {
-				l.addAll(analyze((IPackageFragment) iter.next()));
+			for (Iterator iter= elements.iterator(); iter.hasNext();) {
+				IJavaElement element= (IJavaElement) iter.next();
+				if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
+					l.addAll(analyze((IPackageFragment) element));
+				else if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT)
+					l.addAll(analyze((IPackageFragmentRoot) element));
+				 if (element.getElementType() == IJavaElement.JAVA_PROJECT)
+					l.addAll(analyze((IJavaProject) element));
 			}
 			showResults(l);
 		}catch(JavaModelException e) {
@@ -78,7 +88,10 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 	}
 	
 	private void showResults(List l){
-		new NonNLSListDialog(l, countStrings(l)).open();
+		if (l.isEmpty())
+			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), "Externalize strings", "No strings to externalize were found");
+		else	
+			new NonNLSListDialog(l, countStrings(l)).open();
 	}
 	
 	/*
@@ -94,6 +107,36 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 		for (int i= 0; i < cus.length; i++)
 			l.add(analyze(cus[i]));
 		return l;					
+	}
+
+	/*
+	 * returns List of Strings
+	 */	
+	private List analyze(IPackageFragmentRoot sourceFolder) throws JavaModelException{
+		IJavaElement[] children= sourceFolder.getChildren();
+		List result= new ArrayList();
+		for (int i= 0; i < children.length; i++) {
+			IJavaElement iJavaElement= children[i];
+			if (iJavaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT){
+				IPackageFragment pack= (IPackageFragment)iJavaElement;
+				if (! pack.isReadOnly())
+					result.addAll(analyze(pack));
+			}	
+		}
+		return result;
+	}
+	
+	/*
+	 * returns List of Strings
+	 */
+	private List analyze(IJavaProject project) throws JavaModelException{
+		IPackageFragment[] packs= project.getPackageFragments();
+		List result= new ArrayList();
+		for (int i= 0; i < packs.length; i++) {
+			if (! packs[i].isReadOnly())
+				result.addAll(analyze(packs[i]));
+		}
+		return result;		
 	}
 	
 	/*
@@ -155,9 +198,10 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 	}
 	
 	/**
-	 * returns Iterator over IPackageFragments
+	 * returns <code>List</code> of <code>IPackageFragments</code>,  <code>IPackageFragmentRoots</code> or 
+	 * <code>IJavaProjects</code> (all entries are of the same kind)
 	 */
-	private static List getPackageFragments(IStructuredSelection selection) {
+	private static List getSelectedElementList(IStructuredSelection selection) {
 		if (selection == null)
 			return null;
 			
@@ -203,7 +247,7 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 		}
 
 		protected Point getInitialSize() {
-			return getShell().computeSize(400, SWT.DEFAULT, true);
+			return getShell().computeSize(450, SWT.DEFAULT, true);
 		}
 
 		protected Control createDialogArea(Composite parent) {
