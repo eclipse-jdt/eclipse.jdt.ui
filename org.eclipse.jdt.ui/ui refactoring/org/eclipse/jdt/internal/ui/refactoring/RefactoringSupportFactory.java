@@ -17,6 +17,8 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -93,8 +95,15 @@ public class RefactoringSupportFactory {
 			if (page == null)
 				return;
 			List parts = new ArrayList();
-			parts.addAll(Arrays.asList(page.getViews()));
-			parts.addAll(Arrays.asList(page.getEditors()));
+			IViewReference vrefs[]= page.getViewReferences();
+			for(int i= 0; i < vrefs.length; i++) {
+				parts.add(vrefs[i].getPart(false));
+			}
+
+			IEditorReference refs[]= page.getEditorReferences();
+			for(int i= 0; i < refs.length; i++) {
+				parts.add(refs[i].getPart(false));
+			}
 			
 			final ISelection selection = new StructuredSelection(newElement);
 		

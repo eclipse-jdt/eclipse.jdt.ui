@@ -121,18 +121,6 @@ public class SearchUtil extends JavaModelUtil {
 
 	// --------------- Util methods needed for working copies ---------------
 
-	static IWorkingCopy[] getWorkingCopies() {
-		IWorkingCopyManager wcManager= JavaPlugin.getDefault().getWorkingCopyManager();
-		IEditorPart[] editorParts= getEditors();
-		ArrayList workingCopies= new ArrayList(editorParts.length);
-		for (int i= 0; i < editorParts.length; i++) {
-			IWorkingCopy workingCopy= wcManager.getWorkingCopy(editorParts[i].getEditorInput());
-			if (workingCopy != null)
-				workingCopies.add(workingCopy);
-		}
-		return (IWorkingCopy[])workingCopies.toArray(new IWorkingCopy[workingCopies.size()]);
-	}
-
 	/**
 	 * Returns an array of all editors. If the identical content is presented in
 	 * more than one editor, only one of those editor parts is part of the result.
@@ -147,14 +135,9 @@ public class SearchUtil extends JavaModelUtil {
 		for (int i= 0; i < windows.length; i++) {
 			IWorkbenchPage[] pages= windows[i].getPages();
 			for (int x= 0; x < pages.length; x++) {
-				IEditorPart[] editors= pages[x].getEditors();
+				IEditorPart[] editors= pages[x].getDirtyEditors();
 				for (int z= 0; z < editors.length; z++) {
-					IEditorPart editor= editors[z];
-					IEditorInput input= editor.getEditorInput();
-					if (!inputs.contains(input)) {
-						inputs.add(input);
-						result.add(editor);
-					}
+					result.add(editors[z]);
 				}
 			}
 		}

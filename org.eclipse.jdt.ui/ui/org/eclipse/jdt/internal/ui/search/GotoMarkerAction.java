@@ -115,25 +115,18 @@ public class GotoMarkerAction extends Action {
 		}
 	}
 
+	
 	private void showInEditor(IMarker marker, IWorkbenchPage page, IEditorInput input, String editorId) {
-		IEditorPart editor= null;
-		IEditorPart[] editorParts= page.getEditors();
-		for (int i= 0; i < editorParts.length; i++) {
-			IEditorPart part= editorParts[i];
-			if (input.equals(part.getEditorInput())) {
-				editor= part;
-				break;
-			}
-		}
+		IEditorPart editor= page.findEditor(input);
 		if (editor == null) {
 			if (fEditor != null && !fEditor.isDirty())
-					page.closeEditor(fEditor, false);
-			try {
-				editor= page.openEditor(input, editorId, false);
-			} catch (PartInitException ex) {
-				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
-				return;
-			}
+				page.closeEditor(fEditor, false);
+				try {
+					editor= page.openEditor(input, editorId, false);
+				} catch (PartInitException ex) {
+					ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
+					return;
+				}
 		} else {
 			page.bringToTop(editor);
 		}

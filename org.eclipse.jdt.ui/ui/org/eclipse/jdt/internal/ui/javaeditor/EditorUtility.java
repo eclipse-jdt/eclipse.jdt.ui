@@ -73,11 +73,7 @@ public class EditorUtility {
 		if (input != null) {
 			IWorkbenchPage p= JavaPlugin.getDefault().getActivePage();
 			if (p != null) {
-				IEditorPart[] editors= p.getEditors();
-				for (int i= 0; i < editors.length; i++) {
-					if (input.equals(editors[i].getEditorInput()))
-						return editors[i];
-				}
+				return p.findEditor(input);
 			}
 		}
 		

@@ -74,6 +74,7 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
@@ -555,30 +556,12 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		Object element= null;
 
 		if (selection.size() == 1) {
-			if (obj instanceof IJavaElement) {
-				IJavaElement cu= ((IJavaElement)obj).getAncestor(IJavaElement.COMPILATION_UNIT);
-				if (cu != null)
-					element= getResourceFor(cu);
-				if (element == null)
-					element= ((IJavaElement)obj).getAncestor(IJavaElement.CLASS_FILE);
-			}
-			else if (obj instanceof IFile)
-				element= obj;
-				
-			if (element == null)
-				return;
-
-			IWorkbenchPage page= getSite().getPage();
-			IEditorPart editorArray[]= page.getEditors();
-			for (int i= 0; i < editorArray.length; ++i) {
-				IEditorPart editor= editorArray[i];
-				Object input= getElementOfInput(editor.getEditorInput());					
-				if (input != null && input.equals(element)) {
-					page.bringToTop(editor);
-					if (obj instanceof IJavaElement) 
-						EditorUtility.revealInEditor(editor, (IJavaElement) obj);
-					return;
-				}
+			IEditorPart part= EditorUtility.isOpenInEditor(obj);
+			if (part != null) {
+				IWorkbenchPage page= getSite().getPage();
+				page.bringToTop(part);
+				if (obj instanceof IJavaElement) 
+					EditorUtility.revealInEditor(part, (IJavaElement) obj);
 			}
 		}
 	}
