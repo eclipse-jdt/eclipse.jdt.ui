@@ -75,7 +75,6 @@ public class RefactorActionGroup extends ActionGroup {
 	public static final String GROUP_CODING= "codingGroup"; //$NON-NLS-1$
 
 	private IWorkbenchSite fSite;
-	private boolean fIsEditorOwner;
 	private String fGroupName= IContextMenuConstants.GROUP_REORGANIZE;
 
  	private SelectionDispatchAction fMoveAction;
@@ -125,7 +124,6 @@ public class RefactorActionGroup extends ActionGroup {
 	 */
 	public RefactorActionGroup(CompilationUnitEditor editor, String groupName) {
 		fSite= editor.getEditorSite();
-		fIsEditorOwner= true;
 		fGroupName= groupName;
 		ISelectionProvider provider= editor.getSelectionProvider();
 		ISelection selection= provider.getSelection();
@@ -208,7 +206,6 @@ public class RefactorActionGroup extends ActionGroup {
 
 	private RefactorActionGroup(IWorkbenchSite site) {
 		fSite= site;
-		fIsEditorOwner= false;
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
 		
