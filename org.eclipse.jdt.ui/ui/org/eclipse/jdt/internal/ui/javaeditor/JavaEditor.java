@@ -458,7 +458,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				else
 					viewer.invalidateTextPresentation();
 
-				// remove underline				
 				if (viewer instanceof ITextViewerExtension3) {
 					ITextViewerExtension3 extension= (ITextViewerExtension3) viewer;
 					offset= extension.modelOffset2WidgetOffset(offset);
@@ -466,8 +465,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 					offset -= viewer.getVisibleRegion().getOffset();
 				}
 				
-				StyledText text= viewer.getTextWidget();
 				try {
+					StyledText text= viewer.getTextWidget();
 					text.redrawRange(offset, length, true);
 				} catch (IllegalArgumentException x) {
 					JavaPlugin.log(x);
@@ -600,7 +599,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			StyleRange styleRange= new StyleRange(offset, length, foregroundColor, backgroundColor, fontStyle);
 			text.setStyleRange(styleRange);
 
-			// underline
 			text.redrawRange(offset, length, true);
 
 			fActiveRegion= region;
