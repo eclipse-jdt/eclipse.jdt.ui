@@ -24,7 +24,7 @@ public class JspSearchEngine {
 		
 		System.out.println("JspSearchEngine.search: " + query);
 									
-		JspCorePlugin.getDefault().search(
+		JspUIPlugin.getDefault().search(
 			query,
 			new ISearchResultCollector() {
 				public void accept(IResource resource, int start, int length) throws CoreException {

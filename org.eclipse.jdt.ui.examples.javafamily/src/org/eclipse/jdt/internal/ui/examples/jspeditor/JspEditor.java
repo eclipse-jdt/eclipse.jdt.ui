@@ -32,6 +32,13 @@ public class JspEditor extends TextEditor {
 		super();
 		setSourceViewerConfiguration(new JspSourceViewerConfiguration(this));
 		setDocumentProvider(new FileDocumentProvider());
+		
+		/*
+		 * FIXME:
+		 * This would be the right thing to do. Currently
+		 * we share the preferences with the text editor.
+		 */
+//		setPreferenceStore(JspUIPlugin.getDefault().getPreferenceStore());
 	}
 
 	/*

@@ -27,7 +27,7 @@ import org.eclipse.jsp.copied_from_jdtcore.SourceIndexerRequestor;
 
 public class JspJavaSourceIndexer extends SourceIndexer {
 	
-	private static final String[] JSP_FILE_TYPES= new String[] { JspCorePlugin.JSP_TYPE }; //$NON-NLS-1$
+	private static final String[] JSP_FILE_TYPES= new String[] { JspUIPlugin.JSP_TYPE }; //$NON-NLS-1$
 	
 	JspJavaSourceIndexer(IFile resourceFile) {
 		super(resourceFile);

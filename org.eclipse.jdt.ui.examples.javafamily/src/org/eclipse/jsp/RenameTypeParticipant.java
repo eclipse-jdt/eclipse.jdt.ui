@@ -88,7 +88,7 @@ public class RenameTypeParticipant extends RenameParticipant {
 				change.addTextEdit("Update type reference", SimpleTextEdit.createReplace(start, length, newName));
 			}
 		};
-		JspCorePlugin.getDefault().search(new JspTypeQuery(fType), collector, pm);
+		JspUIPlugin.getDefault().search(new JspTypeQuery(fType), collector, pm);
 		
 		CompositeChange result= new CompositeChange("JSP updates");
 		for (Iterator iter= changes.values().iterator(); iter.hasNext();) {

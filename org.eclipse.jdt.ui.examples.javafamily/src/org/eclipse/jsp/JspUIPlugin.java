@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jsp;
 
+import org.eclipse.core.indexsearch.IIndexQuery;
+import org.eclipse.core.indexsearch.ISearchResultCollector;
+import org.eclipse.core.indexsearch.SearchEngine;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -21,32 +24,35 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Plugin;
-import org.eclipse.core.indexsearch.*;
-import org.eclipse.core.indexsearch.SearchEngine;
-import org.eclipse.jdt.internal.core.JavaModelManager;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.ui.IStartup;
+import org.eclipse.ui.editors.text.TextEditorPreferenceConstants;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
+
+import org.eclipse.jdt.internal.core.JavaModelManager;
 
 /**
  */
-public class JspCorePlugin extends Plugin implements IResourceChangeListener, IStartup {
+public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeListener, IStartup {
 		
-	public static final String JSP_TYPE= "jsp";
+	public static final String JSP_TYPE= "jsp"; //$NON-NLS-1$
 	
-	private static JspCorePlugin fgDefault;
+	private static JspUIPlugin fgDefault;
 	
 	private SearchEngine fSearchEngine;
 	
 	/**
 	 * @param descriptor
 	 */
-	public JspCorePlugin(IPluginDescriptor descriptor) {
+	public JspUIPlugin(IPluginDescriptor descriptor) {
 		super(descriptor);
 		fgDefault= this;
 		fSearchEngine= SearchEngine.getSearchEngine();
 	}
 	
-	public static JspCorePlugin getDefault() {
+	public static JspUIPlugin getDefault() {
 		return fgDefault;
 	}
 
@@ -59,7 +65,7 @@ public class JspCorePlugin extends Plugin implements IResourceChangeListener, IS
 	 * @see org.eclipse.core.runtime.Plugin#startup()
 	 */
 	public void startup() {
-		System.out.println("JspCorePlugin: startup");
+		System.out.println("JspUIPlugin: startup");
 		
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		
@@ -145,9 +151,13 @@ public class JspCorePlugin extends Plugin implements IResourceChangeListener, IS
 	public static void triggerLoad() {
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.ui.IStartup#earlyStartup()
 	 */
 	public void earlyStartup() {
+	}
+
+	protected void initializeDefaultPreferences(IPreferenceStore prefs) {
+		TextEditorPreferenceConstants.initializeDefaultValues(prefs);
 	}
 }

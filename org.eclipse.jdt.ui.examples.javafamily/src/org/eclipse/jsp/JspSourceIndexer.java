@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.core.index.IIndexerOutput;
 
 public class JspSourceIndexer implements IIndexer {
 	
-	private static final String[] JSP_FILE_TYPES= new String[] { JspCorePlugin.JSP_TYPE }; //$NON-NLS-1$
+	private static final String[] JSP_FILE_TYPES= new String[] { JspUIPlugin.JSP_TYPE }; //$NON-NLS-1$
 
 	private IIndexerOutput fOutput;
 			

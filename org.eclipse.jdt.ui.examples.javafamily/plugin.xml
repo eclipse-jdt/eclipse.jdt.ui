@@ -4,7 +4,7 @@
 	name="%pluginName"
 	version="3.0.0"
 	provider-name="%providerName"
-	class="org.eclipse.jsp.JspCorePlugin">
+	class="org.eclipse.jsp.JspUIPlugin">
 
 	<runtime>
 		<library name="jsp.jar"/>
