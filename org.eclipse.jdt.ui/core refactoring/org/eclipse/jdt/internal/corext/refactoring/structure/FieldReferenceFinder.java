@@ -139,10 +139,6 @@ class FieldReferenceFinder extends GenericVisitor{
 	}
 
 	private int getSourceEnd(AstNode node) {
-		if (node instanceof QualifiedNameReference){
-			QualifiedNameReference qnr= (QualifiedNameReference)node;
-			
-		}
 		return ASTUtil.getSourceEnd(node);
 	}
 
