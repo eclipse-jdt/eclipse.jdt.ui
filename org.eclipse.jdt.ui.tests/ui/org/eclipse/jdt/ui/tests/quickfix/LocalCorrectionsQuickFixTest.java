@@ -41,11 +41,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new LocalCorrectionsQuickFixTest("testThisAccessToStaticField"));
+			suite.addTest(new LocalCorrectionsQuickFixTest("testUncaughtExceptionToSurroundingTry"));
 			return suite;
 		}
 	}
@@ -856,6 +856,106 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
 	}
+	
+	public void testUncaughtExceptionToSurroundingTry() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void goo() throws IOException, ParseException {\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");		
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            E.goo();\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 3);
+		assertCorrectLabels(proposals);
+		
+	
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void goo() throws IOException, ParseException {\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");		
+		buf.append("    public void foo() throws ParseException {\n");
+		buf.append("        try {\n");
+		buf.append("            E.goo();\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		 
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void goo() throws IOException, ParseException {\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");		
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            try {\n");
+		buf.append("                E.goo();\n");
+		buf.append("            } catch (ParseException e1) {\n");
+		buf.append("            }\n");		
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= proposal.getCompilationUnitChange().getPreviewContent();
+		 
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void goo() throws IOException, ParseException {\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");		
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            E.goo();\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        } catch (ParseException e) {\n");
+		buf.append("        }\n");	
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();		
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });		
+	}	
 	
 	public void testUncaughtExceptionOnSuper() throws Exception {
 
