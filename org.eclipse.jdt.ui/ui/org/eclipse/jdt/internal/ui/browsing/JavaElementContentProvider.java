@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.IBasicPropertyConstants;
@@ -437,7 +438,11 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 		if (ctrl != null && !ctrl.isDisposed()) {
 			fBrowsingPart.setProcessSelectionEvents(false);
 			try {
-				ctrl.getDisplay().syncExec(r); 
+				Display currentDisplay= ctrl.getDisplay().getCurrent();
+				if (currentDisplay != null && currentDisplay.equals(ctrl.getDisplay()))
+					ctrl.getDisplay().syncExec(r);
+				else				
+					ctrl.getDisplay().asyncExec(r);
 			} finally {
 				fBrowsingPart.setProcessSelectionEvents(true);
 			}

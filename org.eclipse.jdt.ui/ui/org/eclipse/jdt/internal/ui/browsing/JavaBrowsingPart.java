@@ -63,6 +63,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
@@ -84,6 +85,7 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
@@ -95,6 +97,7 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
@@ -102,6 +105,7 @@ import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
+
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
@@ -421,7 +425,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		IPropertyChangeListener titleUpdater= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				String property= event.getProperty();
-				if (IWorkingSet.CHANGE_WORKING_SET_NAME_CHANGE.equals(property))
+				if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property))
 					updateTitle();
 			}
 		};
@@ -733,9 +737,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				if (!fProcessSelectionEvents)
 					return;
 
+				IWorkbenchPage page= getSite().getPage();
+				if (page == null)
+					return;
+
 				if (JavaBrowsingPreferencePage.openEditorOnSingleClick())
-					new ShowInEditorAction().run(event.getSelection(), getSite().getPage());
-				else if (JavaBrowsingPart.this.equals(getSite().getPage().getActivePart()))
+					new ShowInEditorAction().run(event.getSelection(), page);
+				else if (page.equals(JavaPlugin.getActivePage()) && JavaBrowsingPart.this.equals(page.getActivePart()))
 					linkToEditor((IStructuredSelection)event.getSelection());
 			}
 		});
