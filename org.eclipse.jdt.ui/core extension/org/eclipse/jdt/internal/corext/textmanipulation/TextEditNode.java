@@ -95,7 +95,7 @@ import org.eclipse.jdt.internal.core.Assert;
 			int eventLength= event.getLength();
 			int eventEnd = eventOffset + eventLength - 1;
 			// "Edit changes text that lies outside its defined range"
-			Assert.isTrue(range.fOffset <= eventOffset && eventEnd <= range.getEnd());
+			Assert.isTrue(range.fOffset <= eventOffset && eventEnd <= range.getInclusiveEnd());
 		}
 		protected boolean updateActive(int delta) {
 			TextRange targetRange= getTargetRange();
@@ -355,7 +355,7 @@ import org.eclipse.jdt.internal.core.Assert;
 		int eventLength= event.getLength();
 		int eventEnd = eventOffset + eventLength - 1;
 		// "Edit changes text that lies outside its defined range"
-		Assert.isTrue(range.fOffset <= eventOffset && eventEnd <= range.getEnd());
+		Assert.isTrue(range.fOffset <= eventOffset && eventEnd <= range.getInclusiveEnd());
 	}
 	
 	protected TextRange getTextRange() {

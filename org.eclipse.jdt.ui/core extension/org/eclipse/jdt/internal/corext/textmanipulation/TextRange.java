@@ -34,6 +34,14 @@ public final class TextRange {
 		Assert.isTrue(fLength >= 0);
 	}
 	
+	public static TextRange createFromStartAndInclusiveEnd(int start, int end) {
+		return new TextRange(start, end - start + 1);
+	}
+	
+	public static TextRange createFromStartAndExclusiveEnd(int start, int end) {
+		return new TextRange(start, end - start);
+	}
+	
 	/**
 	 * Creates a new range from the given source range.
 	 * 
@@ -62,13 +70,23 @@ public final class TextRange {
 	}
 	
 	/**
-	 * Returns the end position of this range. This position is covered
-	 * by this range.
+	 * Returns the inclusive end position of this range. That means that the end position
+	 * denotes the last character of this range.
 	 * 
-	 * @return the end position
+	 * @return the inclusive end position
 	 */
-	public int getEnd() {
+	public int getInclusiveEnd() {
 		return fOffset + fLength - 1;
+	}
+	
+	/**
+	 * Returns the exclusive end position of this range. That means that the end position
+	 * denotes the first character after this range.
+	 * 
+	 * @return the exclusive end position
+	 */
+	public int getExclusiveEnd() {
+		return fOffset + fLength;
 	}
 	
 	/**

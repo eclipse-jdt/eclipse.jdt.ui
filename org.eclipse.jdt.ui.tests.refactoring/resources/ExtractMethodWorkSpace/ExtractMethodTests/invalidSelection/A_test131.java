@@ -3,7 +3,8 @@ package invalidSelection;
 public class A_test131 {
 	public void foo() {
 		
-		/*]*/class Inner {
+		/*]*/foo();
+		class Inner {
 		}
 		foo();/*[*/
 		

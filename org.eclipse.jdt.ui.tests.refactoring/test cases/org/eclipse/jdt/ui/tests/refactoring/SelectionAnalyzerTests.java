@@ -303,8 +303,8 @@ public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 	
 	//---- Try / catch / finally
 	
-	public void test100_() throws Exception {
-		validSelectionTest();
+	public void test100() throws Exception {
+		invalidSelectionTest();
 	}
 	
 	public void test101() throws Exception {
@@ -315,8 +315,8 @@ public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 		invalidSelectionTest();
 	}
 	
-	public void test103_() throws Exception {
-		validSelectionTest();
+	public void test103() throws Exception {
+		invalidSelectionTest();
 	}
 	
 	public void test104() throws Exception {
@@ -327,8 +327,8 @@ public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 		invalidSelectionTest();
 	}
 	
-	public void test106_() throws Exception {
-		validSelectionTest();
+	public void test106() throws Exception {
+		invalidSelectionTest();
 	}
 	
 	public void test107() throws Exception {
@@ -387,8 +387,8 @@ public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 		validSelectionTest();
 	}
 	
-	public void test131_() throws Exception {
-		validSelectionTest();
+	public void test131() throws Exception {
+		invalidSelectionTest();
 	}
 	
 	//---- invalid return statement selection

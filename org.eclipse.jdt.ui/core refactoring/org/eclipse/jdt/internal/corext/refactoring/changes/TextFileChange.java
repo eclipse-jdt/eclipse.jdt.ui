@@ -84,6 +84,7 @@ public class TextFileChange extends TextChange  {
 	private IFile fFile;
 	private TextBuffer fAcquiredTextBuffer;
 	private int fAcquireCounter;
+	private boolean fSave= true;
 
 	/**
 	 * Creates a new <code>TextFileChange</code> for the given file.
@@ -95,6 +96,16 @@ public class TextFileChange extends TextChange  {
 		super(name);
 		fFile= file;
 		Assert.isNotNull(fFile);
+	}
+	
+	/**
+	 * Sets the save state. If set to <code>true</code> the change will save the
+	 * content of the file back to disk.
+	 * 
+	 * @param save whether or not the changes should be saved to disk
+	 */
+	public void setSave(boolean save) {
+		fSave= save;
 	}
 		
 	/* non java-doc
@@ -149,8 +160,10 @@ public class TextFileChange extends TextChange  {
 			acquireTextBuffer();
 			pm.beginTask("", 10);
 			super.perform(context, new SubProgressMonitor(pm, 8));
-			TextBuffer.aboutToChange(fAcquiredTextBuffer);
-			TextBuffer.save(fAcquiredTextBuffer, new SubProgressMonitor(pm, 2));
+			if (fSave) {
+				TextBuffer.aboutToChange(fAcquiredTextBuffer);
+				TextBuffer.save(fAcquiredTextBuffer, new SubProgressMonitor(pm, 2));
+			}
 		} catch (Exception e) {
 			handleException(context, e);
 		} finally {
@@ -166,7 +179,8 @@ public class TextFileChange extends TextChange  {
 		// the pointer is <code>null</code>
 		if (fAcquiredTextBuffer != null) {
 			try {
-				TextBuffer.changed(fAcquiredTextBuffer);
+				if (fSave)
+					TextBuffer.changed(fAcquiredTextBuffer);
 			} catch (CoreException e) {
 				Assert.isTrue(false, "Should not happen since the buffer is acquired through a text buffer manager");	
 			} finally {

@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.TreeItem;
@@ -18,7 +19,7 @@ import org.eclipse.jface.viewers.TreeExpansionEvent;
 public class ChangeElementTreeViewer extends CheckboxTreeViewer {
 	
 	public ChangeElementTreeViewer(Composite parent) {
-		super(parent);
+		super(parent, SWT.BORDER | SWT.FLAT);
 		addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event){
 				ChangeElement element= (ChangeElement)event.getElement();

@@ -185,7 +185,7 @@ public abstract class RefactoringAction extends Action {
 		return ! mustSaveEditors || areAllEditorsSaved();
 	}
 	
-	private static void openErrorDialog(String dialogTitle, RefactoringStatus status) {
+	public static void openErrorDialog(String dialogTitle, RefactoringStatus status) {
 		if (status.getEntries().size() == 1)
 			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), dialogTitle, status.getFirstMessage(RefactoringStatus.FATAL));
 		else

@@ -77,7 +77,7 @@ public class ComparePreviewer extends CompareViewerSwitchingPane implements IPre
 	private CompareConfiguration fCompareConfiguration;
 	
 	public ComparePreviewer(Composite parent) {
-		super(parent, SWT.BORDER, true);
+		super(parent, SWT.BORDER | SWT.FLAT, true);
 		fCompareConfiguration= new CompareConfiguration();
 		fCompareConfiguration.setLeftEditable(false);
 		fCompareConfiguration.setLeftLabel("Original Source");

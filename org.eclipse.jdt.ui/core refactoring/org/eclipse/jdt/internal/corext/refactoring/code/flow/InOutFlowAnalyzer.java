@@ -6,13 +6,11 @@ package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
 import java.util.Iterator;
 import java.util.List;
-import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.Assignment;
+
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
-import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 
 public class InOutFlowAnalyzer extends FlowAnalyzer {
@@ -24,12 +22,15 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
 		fSelection= selection;
 	}
 	
-	public FlowInfo analyse(List selectedNodes, BlockScope scope) {
+	public FlowInfo analyse(AstNode[] selectedNodes, BlockScope scope) {
 		FlowContext context= getFlowContext();
 		GenericSequentialFlowInfo result= createSequential();
-		for (Iterator iter= selectedNodes.iterator(); iter.hasNext(); ) {
-			AstNode node= (AstNode)iter.next();
-			node.traverse(this, scope);
+		for (int i= 0; i < selectedNodes.length; i++) {
+			AstNode node= selectedNodes[i];
+			if (scope instanceof MethodScope)
+				node.traverse(this, (MethodScope)scope);
+			else
+				node.traverse(this, scope);
 			result.merge(getFlowInfo(node), context);
 		}
 		return result;

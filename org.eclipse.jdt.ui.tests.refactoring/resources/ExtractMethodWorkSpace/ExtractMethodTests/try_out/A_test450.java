@@ -1,5 +1,7 @@
 package try_out;
 
+import java.io.IOException;
+
 public class A_test450 {
 	public void foo() {
 		try {
@@ -8,7 +10,7 @@ public class A_test450 {
 		}
 	}
 
-	protected void extracted() throws java.io.IOException {
+	protected void extracted() throws IOException {
 		g();
 	}
 	

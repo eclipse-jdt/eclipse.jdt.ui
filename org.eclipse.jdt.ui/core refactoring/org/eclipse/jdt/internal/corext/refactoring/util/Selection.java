@@ -78,7 +78,7 @@ public class Selection {
 	 * @see #SELECTED
 	 * @see #AFTER
 	 */
-	public int getSelectionMode(AstNode node) {
+	public int getVisitSelectionMode(AstNode node) {
 		int nodeStart= ASTUtil.getSourceStart(node);
 		int nodeEnd= ASTUtil.getSourceEnd(node);
 		if (nodeEnd < start)
@@ -86,6 +86,18 @@ public class Selection {
 		else if (covers(nodeStart, nodeEnd))
 			return SELECTED;
 		else if (end < nodeStart)
+			return AFTER;
+		return INTERSECTS;
+	}
+	
+	public int getEndVisitSelectionMode(AstNode node) {
+		int nodeStart= ASTUtil.getSourceStart(node);
+		int nodeEnd= ASTUtil.getSourceEnd(node);
+		if (nodeEnd < start)
+			return BEFORE;
+		else if (covers(nodeStart, nodeEnd))
+			return SELECTED;
+		else if (nodeEnd >= end)
 			return AFTER;
 		return INTERSECTS;
 	}

@@ -160,8 +160,8 @@ public class TextBuffer {
 	}
 	
 	/**
-	 * Returns a description of the specified line. The line is described by its
-	 * offset and its length excluding the line's delimiter. Returns <code>null</code>
+	 * Returns a region of the specified line. The region contains  the offset and the 
+	 * length of the line excluding the line's delimiter. Returns <code>null</code> 
 	 * if the line doesn't exist.
 	 *
 	 * @param line the line of interest
@@ -177,11 +177,13 @@ public class TextBuffer {
 	}
 	
 	/**
-	 * Returns the line number that contains the given position. If there isn't any
-	 * line containing the position, -1 is returned.
+	 * Returns a line region of the specified offset.  The region contains the offset and 
+	 * the length of the line excluding the line's delimiter. Returns <code>null</code> 
+	 * if the line doesn't exist.
 	 *
-	 * @return the line number that contains the given offset or -1 if such line
-	 *  doesn't exist
+	 * @param offset an offset into a line
+	 * @return a line description or <code>null</code> if the given line doesn't
+	 *  exist
 	 */ 
 	public TextRegion getLineInformationOfOffset(int offset) {
 		try {

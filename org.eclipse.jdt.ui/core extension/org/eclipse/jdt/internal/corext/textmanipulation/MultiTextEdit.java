@@ -22,20 +22,15 @@ public class MultiTextEdit {
 		fChildren= new ArrayList(3);
 	}
 
-	private MultiTextEdit(List children) throws CoreException {
+	protected MultiTextEdit(List children) throws CoreException {
 		fChildren= new ArrayList(children.size());
 		for (Iterator iter= children.iterator(); iter.hasNext();) {
 			fChildren.add(((TextEdit)iter.next()).copy());
 		}
 	}
 	
-	/**
-	 * Returns the children managed by this text edit collection.
-	 * 
-	 * @return the children of this composite text edit
-	 */
-	public TextEdit[] getChildren() {
-		return (TextEdit[]) fChildren.toArray(new TextEdit[fChildren.size()]);
+	protected List getChildren() {
+		return fChildren;
 	}
 	
 	/**
@@ -43,8 +38,9 @@ public class MultiTextEdit {
 	 * 
 	 * @param edit the multi text edit to be added.
 	 */
-	public void addAll(MultiTextEdit edit) {
-		fChildren.addAll(edit.fChildren);
+	public void add(MultiTextEdit edit) {
+		Assert.isNotNull(edit);
+		fChildren.add(edit);
 	}
 	
 	/**
@@ -55,6 +51,35 @@ public class MultiTextEdit {
 	public void add(TextEdit edit) {
 		Assert.isNotNull(edit);
 		fChildren.add(edit);
+	}
+	
+	/**
+	 * Returns the children managed by this text edit collection.
+	 * 
+	 * @return the children of this composite text edit
+	 */
+	public Iterator iterator() {
+		return fChildren.iterator();
+	}
+
+	/**
+	 * Connects this text edit to the given <code>TextBufferEditor</code>. 
+	 * Note that this method <b>should only be called</b> by a <code>
+	 * TextBufferEditor</code>.
+	 *<p>
+	 * This default implementation does nothing. Subclasses may override
+	 * if needed.
+	 *  
+	 * @param editor the text buffer editor this text edit has been added to
+	 */
+	public void connect(TextBufferEditor editor) throws CoreException {
+		for (Iterator iter= fChildren.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (element instanceof TextEdit)
+				editor.add((TextEdit)element);
+			else
+				editor.add((MultiTextEdit)element);
+		}
 	}
 	
 	/**
@@ -84,11 +109,11 @@ public class MultiTextEdit {
 			return new TextRange(0,0);
 		TextRange range= ((TextEdit)fChildren.get(0)).getTextRange();
 		int start= range.getOffset();
-		int end= range.getEnd();
+		int end= range.getInclusiveEnd();
 		for (int i= 1; i < size; i++) {
 			range= ((TextEdit)fChildren.get(i)).getTextRange();
 			start= Math.min(start, range.getOffset());
-			end= Math.max(end, range.getEnd());
+			end= Math.max(end, range.getInclusiveEnd());
 		}
 		return new TextRange(start, end - start + 1);
 	}

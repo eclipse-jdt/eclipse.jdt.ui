@@ -7,8 +7,22 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.eclipse.jface.text.ITextSelection;
+
+import org.eclipse.jface.text.TextSelection;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
+import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
 public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 
@@ -16,6 +30,10 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 	private static final int    SQUARE_BRACKET_OPEN_LENGTH= SQUARE_BRACKET_OPEN.length();
 	private static final String SQUARE_BRACKET_CLOSE=   "/*]*/";
 	private static final int    SQUARE_BRACKET_CLOSE_LENGTH= SQUARE_BRACKET_CLOSE.length();
+	
+	protected static final int VALID_SELECTION=     1;
+	protected static final int INVALID_SELECTION=   2;
+	protected static final int COMPARE_WITH_OUTPUT= 3;
 	
 	public AbstractSelectionTestCase(String name) {
 		super(name);
@@ -60,7 +78,39 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 		return result;
 	}
 	
+	protected ITextSelection getTextSelection(String source) {
+		int[] s= getSelection(source);
+		return new TextSelection(s[0], s[1]);
+	}
+	
 	protected InputStream getFileInputStream(String fileName) throws IOException {
 		return RefactoringTestPlugin.getDefault().getTestResourceStream(fileName);
 	}
+	
+	protected void performTest(ICompilationUnit unit, Refactoring refactoring, int mode, String out) throws Exception {
+		IProgressMonitor pm= new NullProgressMonitor();
+		RefactoringStatus status= refactoring.checkPreconditions(pm);
+		switch (mode) {
+			case VALID_SELECTION:
+				// System.out.println(status);
+				assertTrue(status.isOK());
+				break;
+			case INVALID_SELECTION:
+				// System.out.println(status);
+				assertTrue(!status.isOK());
+				break;
+			case COMPARE_WITH_OUTPUT:
+				assertTrue(!status.hasFatalError());
+				IChange change= refactoring.createChange(pm);
+				assertNotNull(change);
+				ChangeContext context= new ChangeContext(new TestExceptionHandler());
+				change.aboutToPerform(context, new NullProgressMonitor());
+				change.perform(context, pm);
+				change.performed();
+				assertNotNull(change.getUndoChange());
+				String source= unit.getSource();
+				assertTrue(compareSource(source, out));
+				break;		
+		}
+	}	
 }

@@ -230,7 +230,7 @@ public abstract class TextChange extends AbstractTextChange {
 		TextRange range= change.getTextRange();
 		int startLine= Math.max(buffer.getLineOfOffset(range.getOffset()) - surroundingLines, 0);
 		int endLine= Math.min(
-			buffer.getLineOfOffset(range.getEnd()) + surroundingLines,
+			buffer.getLineOfOffset(range.getInclusiveEnd()) + surroundingLines,
 			buffer.getNumberOfLines());
 		int offset= buffer.getLineInformation(startLine).getOffset();
 		TextRegion region= buffer.getLineInformation(endLine);

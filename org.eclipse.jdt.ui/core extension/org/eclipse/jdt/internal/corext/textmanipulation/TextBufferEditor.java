@@ -91,10 +91,7 @@ public class TextBufferEditor {
 	 */
 	public void add(MultiTextEdit edit) throws CoreException {
 		Assert.isTrue(fMode == UNDEFINED || fMode == REDO);
-		TextEdit[] children= edit.getChildren();
-		for (int i= 0; i < children.length; i++) {
-			internalAdd(children[i]);
-		}
+		edit.connect(this);
 		fMode= REDO;
 	}
 

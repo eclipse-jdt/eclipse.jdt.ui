@@ -12,20 +12,10 @@ import java.util.Stack;
 import org.eclipse.jdt.internal.compiler.IAbstractSyntaxTreeVisitor;
 import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.*;
-import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
-import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.BaseTypes;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
-import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
-import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
-import org.eclipse.jdt.internal.compiler.lookup.Scope;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
+import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.problem.ProblemHandler;
 import org.eclipse.jdt.internal.compiler.util.CharOperation;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AstNodeData;
 import org.eclipse.jdt.internal.corext.refactoring.ExtendedBuffer;
@@ -57,7 +47,7 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 	private AstNodeData fNodeData= new AstNodeData();
 	
 	// The buffer containing the source code.
-	private ExtendedBuffer fBuffer;
+	protected ExtendedBuffer fBuffer;
 	
 	// Selection state.
 	protected Selection fSelection;
@@ -80,10 +70,6 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 	private AstNode fFirstSelectedNode;
 	private boolean fNeedsSemicolon;
 	
-	// Helper-Analyzer
-	protected LocalTypeAnalyzer fLocalTypeAnalyzer;
-	protected ExceptionAnalyzer fExceptionAnalyzer;
-	
 	// Type binding of the selected expression
 	protected TypeBinding fExpressionTypeBinding;
 	protected boolean fExpressionIsPartOfOperator;
@@ -96,12 +82,10 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 	private static final int BREAK_LENGTH= "break".length(); //$NON-NLS-1$
 	private static final int CONTINUE_LENGTH= "continue".length(); //$NON-NLS-1$
 	 
-	public StatementAnalyzer(ExtendedBuffer buffer, int start, int length, boolean asymetricAssignment, ImportEdit edit) {
+	public StatementAnalyzer(ExtendedBuffer buffer, int start, int length) {
 		fBuffer= buffer;
 		Assert.isTrue(fBuffer != null);
 		fSelection= Selection.createFromStartLength(start, length);
-		fLocalTypeAnalyzer= new LocalTypeAnalyzer();
-		fExceptionAnalyzer= new ExceptionAnalyzer(this, edit);
 	}
 
 
@@ -131,9 +115,6 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 			fStatus.addFatalError(RefactoringCoreMessages.getString("StatementAnalyzer.only_method_body")); //$NON-NLS-1$
 		}
 		status.merge(fStatus);
-		if (!status.hasFatalError()) {
-			fLocalTypeAnalyzer.checkActivation(status);
-		}
 	}
 	
 	private void checkSelection() {
@@ -179,20 +160,6 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 	 */
 	public Scope getEnclosingScope() {
 		return fEnclosingScope;
-	}
-	
-	/**
-	 * Checks, if the current method visited by this visitor is the method enclosing the
-	 * selection. If this is the case, the method returns <code>true</code>, otherwise 
-	 * <code>false</code> is returned.
-	 * 
-	 * @return <code>true<code> if <code>fMethodStack.peek() == getEnclosingMethod</code> 
-	 *  otherwise <code>false</code>.
-	 */
-	public boolean processesEnclosingMethod() {
-		if (fMethodStack.isEmpty())
-			return false;
-		return getEnclosingMethod() == fMethodStack.peek();
 	}
 	
 	/**
@@ -424,14 +391,6 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 		// Do a reset even if we are in BEFORE mode. We can extract a method defined
 		// inside a method.
 		if (!fCompileErrorFound && enclosed && (fMode == UNDEFINED || fMode == BEFORE)) {
-			if (fMode == UNDEFINED) {
-				CommentAnalyzer commentAnalyzer= new CommentAnalyzer();
-				fStatus.merge(commentAnalyzer.check(fSelection, fBuffer.getCharacters(),
-					node.declarationSourceStart, node.declarationSourceEnd));
-				if (fStatus.hasFatalError())
-					return false;				
-			}
-			fExceptionAnalyzer.visitAbstractMethodDeclaration(node, scope);
 			reset();
 			fEnclosingMethod= node;
 			fMode= BEFORE;
@@ -455,15 +414,8 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 		if (!checkLocalTypeDeclaration(declaration))
 			return false;
 		
-		boolean result= visitRange(declaration.declarationSourceStart, declaration.declarationSourceEnd,
+		return visitRange(declaration.declarationSourceStart, declaration.declarationSourceEnd,
 			declaration, scope);
-		fLocalTypeAnalyzer.visitLocalTypeDeclaration(declaration, scope, fMode);
-		return result;
-	}
-	
-	private boolean handleTypeReference(TypeReference reference, BlockScope scope) {
-		fLocalTypeAnalyzer.visitTypeReference(reference, scope, fMode);
-		return false;
 	}
 	
 	private boolean visitImplicitBranchTarget(Statement statement, BlockScope scope) {
@@ -797,7 +749,7 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 	}
 
 	public boolean visit(ArrayTypeReference arrayTypeReference, BlockScope scope) {
-		return handleTypeReference(arrayTypeReference, scope);
+		return visitNode(arrayTypeReference, scope);
 	}
 
 	public void endVisit(ArrayTypeReference arrayTypeReference, BlockScope scope) {
@@ -805,7 +757,7 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 	}
 
 	public boolean visit(ArrayQualifiedTypeReference arrayQualifiedTypeReference, BlockScope scope) {
-		return handleTypeReference(arrayQualifiedTypeReference, scope);
+		return visitNode(arrayQualifiedTypeReference, scope);
 	}
 
 	public void endVisit(ArrayQualifiedTypeReference arrayQualifiedTypeReference, BlockScope scope) {
@@ -813,7 +765,7 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 	}
 
 	public boolean visit(SingleTypeReference singleTypeReference, BlockScope scope) {
-		return handleTypeReference(singleTypeReference, scope);
+		return visitNode(singleTypeReference, scope);
 	}
 
 	public void endVisit(SingleTypeReference singleTypeReference, BlockScope scope) {
@@ -821,7 +773,7 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 	}
 
 	public boolean visit(QualifiedTypeReference qualifiedTypeReference, BlockScope scope) {
-		return handleTypeReference(qualifiedTypeReference, scope);
+		return visitNode(qualifiedTypeReference, scope);
 	}
 
 	public void endVisit(QualifiedTypeReference qualifiedTypeReference, BlockScope scope) {
@@ -851,11 +803,7 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 	}
 
 	public boolean visit(SingleNameReference singleNameReference, BlockScope scope) {
-		boolean result= visitNode(singleNameReference, scope);
-		if (result) {
-			fLocalTypeAnalyzer.visit(singleNameReference, scope, fMode);
-		}	
-		return result;
+		return visitNode(singleNameReference, scope);
 	}
 
 	public void endVisit(SingleNameReference singleNameReference, BlockScope scope) {
@@ -1236,7 +1184,6 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 			return false;
 		if (messageSend.binding.returnType != BaseTypeBinding.VoidBinding)
 			trackExpressionTypeBinding(messageSend, messageSend.binding.returnType, scope);
-		fExceptionAnalyzer.visit(messageSend, scope, fMode);
 		return true;
 	}
 
@@ -1358,7 +1305,6 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 	public boolean visit(ThrowStatement throwStatement, BlockScope scope) {
 		if (!visitNode(throwStatement, scope))
 			return false;
-		fExceptionAnalyzer.visit(throwStatement, scope, fMode);
 		return true;
 	}
 
@@ -1381,16 +1327,11 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 		if (!visitNode(tryStatement, scope))
 			return false;
 			
-		fExceptionAnalyzer.visit(tryStatement, scope, fMode);
-		
 		return true;
 	}
 
 	public void endVisit(TryStatement tryStatement, BlockScope scope) {
 		endVisitNode(tryStatement, scope);
-		if (tryStatement.catchArguments != null)
-			fExceptionAnalyzer.visitCatchArguments(tryStatement.catchArguments, scope, fMode);
-		fExceptionAnalyzer.endVisit(tryStatement, scope, fMode);
 		switch (fMode) {
 			case SELECTED:
 				fNeedsSemicolon= false;

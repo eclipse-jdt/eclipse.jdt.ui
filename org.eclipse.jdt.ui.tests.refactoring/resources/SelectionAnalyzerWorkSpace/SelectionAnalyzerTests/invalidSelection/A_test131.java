@@ -1,6 +1,6 @@
-package validSelection;
+package invalidSelection;
 
-public class A_test131_ {
+public class A_test131 {
 	public void foo() {
 		
 		/*]*/class Inner {

@@ -18,6 +18,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.env.IConstants;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -31,12 +32,14 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ASTParentTrackingAdapter;
+import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
+import org.eclipse.jdt.internal.corext.util.Bindings;
 
 /**
  * Extracts a method in a compilation unit based on a text selection range.
@@ -55,7 +58,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private int fSelectionEnd;
 	private String fAssignment;
 	private int fTabWidth;
-	private boolean fCallOnDecalrationLine= true;
+	private boolean fCallOnDeclarationLine= true;
 	
 	private ExtractMethodAnalyzer fAnalyzer;
 	private ExtendedBuffer fBuffer;
@@ -173,10 +176,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 			pm.done();
 		}
 	}
-
-
+	
 	private IAbstractSyntaxTreeVisitor createVisitor() {
-		fAnalyzer= new ExtractMethodAnalyzer(fBuffer, fSelectionStart, fSelectionLength, true, fImportEdit);
+		fAnalyzer= new ExtractMethodAnalyzer(fBuffer, Selection.createFromStartLength(fSelectionStart, fSelectionLength));
 		ASTParentTrackingAdapter result= new ASTParentTrackingAdapter(fAnalyzer);
 		fAnalyzer.setParentTracker(result);
 		return result;
@@ -249,6 +251,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (fMethodName == null)
 			return null;
 		
+		fAnalyzer.aboutToCreateChange();
 		AbstractMethodDeclaration method= fAnalyzer.getEnclosingMethod();
 		String sourceMethodName= new String(method.selector);
 		
@@ -261,12 +264,18 @@ public class ExtractMethodRefactoring extends Refactoring {
 			throw new JavaModelException(e);
 		}
 		
-		if (!fImportEdit.isEmpty())
-			result.addTextEdit("Organize Imports", fImportEdit);
-		
 		final int methodStart= method.declarationSourceStart;
 		final int methodEnd= method.declarationSourceEnd;			
 		final int insertPosition= methodEnd + 1;
+
+		TypeBinding[] exceptions=	fAnalyzer.getExceptions();
+		for (int i= 0; i < exceptions.length; i++) {
+			TypeBinding exception= exceptions[i];
+			fImportEdit.addImport(Bindings.makeFullyQualifiedName(exception.qualifiedPackageName(), exception.qualifiedSourceName()));
+		}
+	
+		if (!fImportEdit.isEmpty())
+			result.addTextEdit("Organize Imports", fImportEdit);
 		
 		// Inserting the new method
 		result.addTextEdit(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName), //$NON-NLS-1$
@@ -541,7 +550,16 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 	
 	private void appendThrownExceptions(StringBuffer buffer) {
-		buffer.append(fAnalyzer.fExceptionAnalyzer.getThrowSignature());
+		TypeBinding[] exceptions= fAnalyzer.getExceptions();
+		if (exceptions.length == 0)
+			return;
+		buffer.append(" throws "); //$NON-NLS-1$
+		for (int i= 0; i < exceptions.length; i++) {
+			TypeBinding exception= exceptions[i];
+			if (i > 0)
+				buffer.append(", "); //$NON-NLS-1$
+			buffer.append(exception.sourceName());
+		}
 	}
 	
 	private void appendLocalDeclaration(StringBuffer buffer, LocalVariableBinding local) {

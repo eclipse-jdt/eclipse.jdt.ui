@@ -32,10 +32,6 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 
 	private static ExtractMethodTestSetup fgTestSetup;
 	
-	private static final int VALID_SELECTION=     1;
-	private static final int INVALID_SELECTION=   2;
-	private static final int COMPARE_WITH_OUTPUT= 3;
-	
 	public ExtractMethodTests(String name) {
 		super(name);
 	}
@@ -70,7 +66,6 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
  	}
 	
 	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
-		IProgressMonitor pm= new NullProgressMonitor();
 		ICompilationUnit unit= createCU(packageFragment, id);
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
@@ -78,31 +73,14 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 			unit, selection[0], selection[1],
 			true, 4, JavaPreferencesSettings.getCodeGenerationSettings());
 		refactoring.setMethodName("extracted");
-		RefactoringStatus status= refactoring.checkPreconditions(pm);
+		String out= null;
 		switch (mode) {
-			case VALID_SELECTION:
-				// System.out.println(status);
-				assertTrue(status.isOK());
-				break;
-			case INVALID_SELECTION:
-				// System.out.println(status);
-				assertTrue(!status.isOK());
-				break;
 			case COMPARE_WITH_OUTPUT:
-				assertTrue(!status.hasFatalError());
-				IChange change= refactoring.createChange(pm);
-				assertNotNull(change);
-				ChangeContext context= new ChangeContext(new TestExceptionHandler());
-				change.aboutToPerform(context, new NullProgressMonitor());
-				change.perform(context, pm);
-				change.performed();
-				assertNotNull(change.getUndoChange());
-				source= unit.getSource();
-				String out= getProofedContent(outputFolder, id);
-				assertTrue(compareSource(source, out));
+				out= getProofedContent(outputFolder, id);
 				break;		
 		}
-	}
+		performTest(unit, refactoring, mode, out);
+	}	
 	
 	protected void invalidSelectionTest() throws Exception {
 		performTest(fgTestSetup.getInvalidSelectionPackage(), "A", INVALID_SELECTION, null);
@@ -497,8 +475,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test151() throws Exception {
-		System.out.println("\n151 disabled since it fails. See 1GE2LO2");
-		// invalidSelectionTest();
+		invalidSelectionTest();
 	}
 	
 	public void test152() throws Exception {
@@ -520,8 +497,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	//----- local declarations
 	
 	public void test170() throws Exception {
-		System.out.println("\n170 disabled since it fails. See 1GF089K");
-		// invalidSelectionTest();
+		invalidSelectionTest();
 	}
 	
 	public void test171() throws Exception {
@@ -797,13 +773,11 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	//---- Synchronized statement
 	
 	public void test350() throws Exception {
-		System.out.println("\n350 disabled since it fails. See 1GIRHRP");
-		// validSelectionTest();
+		validSelectionTest();
 	}
 	
 	public void test351() throws Exception {
-		System.out.println("\n351 disabled since it fails. See 1GIRHRP");
-		// validSelectionTest();
+		validSelectionTest();
 	}
 	
 	public void test352() throws Exception {
@@ -837,13 +811,11 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}	
 	
 	public void test404() throws Exception {
-		System.out.println("\n404 disabled since it fails. See 1GF089K");
-		// semicolonTest();
+		semicolonTest();
 	}	
 	
 	public void test405() throws Exception {
-		System.out.println("\n405 disabled since it fails. See 1GF089K");
-		// semicolonTest();
+		semicolonTest();
 	}	
 	
 	public void test406() throws Exception {
@@ -859,8 +831,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}	
 	
 	public void test409() throws Exception {
-		System.out.println("\n409 disabled since it fails. See 1GIRHRP");
-		// semicolonTest();
+		semicolonTest();
 	}	
 	
 	//---- Test Try / catch block
@@ -902,8 +873,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test459() throws Exception {
-		System.out.println("\n459 disabled since it fails. See 1GIRQFW");
-		// tryTest();
+		tryTest();
 	}
 	
 	public void test460() throws Exception {
@@ -969,8 +939,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test514() throws Exception {
-		System.out.println("\n514 disabled since it fails. See 1GITCCY");
-		// localsTest();
+		localsTest();
 	}
 	
 	public void test515() throws Exception {
@@ -1035,8 +1004,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test537() throws Exception {
-		System.out.println("\n537 disabled since it fails. See 1GIRQFW");
-		// localsTest();
+		localsTest();
 	}
 	
 	public void test538() throws Exception {
@@ -1212,6 +1180,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 
 	public void test653() throws Exception {
+		nestedTest();
+	}
+	
+	public void test654() throws Exception {
 		nestedTest();
 	}
 	

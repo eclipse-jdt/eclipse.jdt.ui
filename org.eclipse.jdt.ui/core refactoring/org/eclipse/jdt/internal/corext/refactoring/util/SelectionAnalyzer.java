@@ -787,16 +787,18 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	}
 
 	public void endVisit(SwitchStatement node, BlockScope scope) {
-		switch (fSelection.getSelectionMode(node)) {
+		switch (fSelection.getEndVisitSelectionMode(node)) {
 			case Selection.SELECTED:
 				fNeedsSemicolon= false;
 				break;
 			case Selection.AFTER:
-				for (Iterator iter= fSelectedNodes.iterator(); iter.hasNext(); ) {
-					AstNode topNode= (AstNode)iter.next();
-					if (topNode == node.defaultCase || contains(node.cases, topNode)) {
-						invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.switch_statement")); //$NON-NLS-1$
-						break;
+				if (fSelectedNodes != null) {
+					for (Iterator iter= fSelectedNodes.iterator(); iter.hasNext(); ) {
+						AstNode topNode= (AstNode)iter.next();
+						if (topNode == node.defaultCase || contains(node.cases, topNode)) {
+							invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.switch_statement")); //$NON-NLS-1$
+							break;
+						}
 					}
 				}
 				break;
@@ -808,7 +810,7 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	}
 
 	public void endVisit(SynchronizedStatement node, BlockScope scope) {
-		if (fSelection.getSelectionMode(node) == Selection.SELECTED) {
+		if (fSelection.getEndVisitSelectionMode(node) == Selection.SELECTED) {
 			fNeedsSemicolon= false;
 			if (fFirstSelectedNode == node.block) {
 				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.synchronized_statement")); //$NON-NLS-1$
@@ -832,7 +834,7 @@ public class SelectionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
 	}
 
 	public void endVisit(TryStatement node, BlockScope scope) {
-		switch (fSelection.getSelectionMode(node)) {
+		switch (fSelection.getEndVisitSelectionMode(node)) {
 			case Selection.SELECTED:
 				fNeedsSemicolon= false;
 				break;

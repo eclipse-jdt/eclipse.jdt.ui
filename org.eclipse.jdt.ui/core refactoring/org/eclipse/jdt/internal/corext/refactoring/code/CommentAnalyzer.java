@@ -18,6 +18,13 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public class CommentAnalyzer {
 	
+	private CommentAnalyzer() {
+	}
+	
+	public static RefactoringStatus perform(Selection selection, char[] source, int start, int end) {
+		return (new CommentAnalyzer()).check(selection, source, start, end);
+	}
+	
 	public RefactoringStatus check(Selection selection, char[] source, int start, int end) {
 		RefactoringStatus result= new RefactoringStatus();
 		
@@ -33,11 +40,11 @@ public class CommentAnalyzer {
 					case Scanner.TokenNameCOMMENT_LINE:
 					case Scanner.TokenNameCOMMENT_BLOCK:
 					case Scanner.TokenNameCOMMENT_JAVADOC:
-						if (enclosesPosition(scanner, selection.start)) {
+						if (checkStart(scanner, selection.start)) {
 							result.addFatalError(RefactoringCoreMessages.getString("CommentAnalyzer.starts_inside_comment")); //$NON-NLS-1$
 							break loop;
 						}
-						if (enclosesPosition(scanner, selection.end)) {
+						if (checkEnd(scanner, selection.end)) {
 							result.addFatalError(RefactoringCoreMessages.getString("CommentAnalyzer.ends_inside_comment")); //$NON-NLS-1$
 							break loop;
 						}
@@ -50,7 +57,11 @@ public class CommentAnalyzer {
 		return result;
 	}
 	
-	private boolean enclosesPosition(Scanner scanner, int position) {
-		return scanner.startPosition < position && position < scanner.currentPosition - 1;
+	private boolean checkStart(Scanner scanner, int position) {
+		return scanner.startPosition < position && position < scanner.currentPosition;
+	}
+
+	private boolean checkEnd(Scanner scanner, int position) {
+		return scanner.startPosition <= position && position < scanner.currentPosition - 1;
 	}
 }

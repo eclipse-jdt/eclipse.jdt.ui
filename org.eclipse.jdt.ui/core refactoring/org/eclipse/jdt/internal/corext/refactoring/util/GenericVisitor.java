@@ -4,7 +4,9 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
+import java.util.ArrayList;
 import java.util.List;
+
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.compiler.IAbstractSyntaxTreeVisitor;
@@ -20,15 +22,21 @@ import org.eclipse.jdt.internal.corext.refactoring.Assert;
 public class GenericVisitor implements IAbstractSyntaxTreeVisitor, IParentProvider {
 
 	private IParentTracker fParentTracker;
-	private CompilationUnitDeclaration fRoot;
+	/* not working see http://dev.eclipse.org/bugs/show_bug.cgi?id=7106
+	private LocalDeclaration fLastLocalDeclaration;
+	private List fMultiLocalDeclarations;
+	private MultiLocalDeclaration fLastMultiLocalDeclaration;
+	*/
+	
+	protected GenericVisitor() {
+		/* not working http://dev.eclipse.org/bugs/show_bug.cgi?id=7106
+		fMultiLocalDeclarations= new ArrayList(3);
+		*/
+	} 
 	
 	public void setParentTracker(IParentTracker tracker) {
 		fParentTracker= tracker;
 		Assert.isNotNull(fParentTracker);
-	}
-
-	public CompilationUnitDeclaration getRoot() {
-		return fRoot;
 	}
 
 	protected AstNode internalGetParent() {
@@ -54,11 +62,11 @@ public class GenericVisitor implements IAbstractSyntaxTreeVisitor, IParentProvid
 
 	//---- Helpers ----------------------------------------------------------------
 	
-	private boolean visitNode(AstNode node, Scope scope) {
+	protected boolean visitNode(AstNode node, Scope scope) {
 		return visitRange(node.sourceStart, node.sourceEnd, node, scope);
 	}
 
-	private void endVisitNode(AstNode node, Scope scope) {
+	protected void endVisitNode(AstNode node, Scope scope) {
 		endVisitRange(node.sourceStart, node.sourceEnd, node, scope);
 	}
 	
@@ -96,7 +104,6 @@ public class GenericVisitor implements IAbstractSyntaxTreeVisitor, IParentProvid
 	//---- Compilation Unit -------------------------------------------------------
 	
 	public boolean visit(CompilationUnitDeclaration node, CompilationUnitScope scope) {
-		fRoot= node;
 		return visitNode(node, scope);
 	}
 	
@@ -231,6 +238,17 @@ public class GenericVisitor implements IAbstractSyntaxTreeVisitor, IParentProvid
 	}
 	
 	public boolean visit(LocalDeclaration node, BlockScope scope) {
+		/* not working http://dev.eclipse.org/bugs/show_bug.cgi?id=7106
+		if (fLastLocalDeclaration != null && fLastLocalDeclaration.declarationSourceStart == node.declarationSourceStart) {
+			if (fLastMultiLocalDeclaration == null) {
+				fLastMultiLocalDeclaration= new MultiLocalDeclaration();
+				fMultiLocalDeclarations.add(fLastMultiLocalDeclaration);
+			}
+			fLastMultiLocalDeclaration.add(node);
+		}
+		fLastLocalDeclaration= node;
+		fLastMultiLocalDeclaration= null;
+		*/
 		return visitAbstractVariableDeclaration(node, scope);
 	}
 
@@ -649,6 +667,8 @@ public class GenericVisitor implements IAbstractSyntaxTreeVisitor, IParentProvid
 	}
 
 	public boolean visit(SwitchStatement node, BlockScope scope) {
+		// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=7000
+		node.sourceEnd++;
 		return visitNode(node, scope);
 	}
 
@@ -681,6 +701,8 @@ public class GenericVisitor implements IAbstractSyntaxTreeVisitor, IParentProvid
 	}
 
 	public boolean visit(TryStatement node, BlockScope scope) {
+		// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=7000
+		node.sourceEnd++;
 		return visitNode(node, scope);
 	}
 
