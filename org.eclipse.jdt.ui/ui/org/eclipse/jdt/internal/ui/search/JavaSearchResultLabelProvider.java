@@ -49,7 +49,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 		IJavaElement javaElement= getJavaElement(o);
 		if (javaElement == null)
 			return null;
-		return fLabelProvider.getImage((IJavaElement)javaElement);
+		return fLabelProvider.getImage(javaElement);
 	}
 
 	private IJavaElement getJavaElement(Object o) {
@@ -63,14 +63,55 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 	
 	private IJavaElement getJavaElement(IMarker marker) {
 		if (fLastMarker != marker) {
+			String handle;
 			try {
-				fLastJavaElement= JavaCore.create((String)marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));
+				handle= (String)marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID);
 			} catch (CoreException ex) {
-				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.createJavaElement.title"), SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-2$ //$NON-NLS-1$
-				fLastJavaElement= null;
+				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.javaElementAccess.title"), SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
+				handle= null;
 			}
+			
+			if (handle != null)	
+				fLastJavaElement= JavaCore.create(handle);
+			else
+				fLastJavaElement= null;
+			
+			// FIXME: This is a dirty fix for 1GCE1EI: ITPJUI:WINNT - Can't handle rename of resource
+			if (handle != null && fLastJavaElement != null) {
+				org.eclipse.core.resources.IResource resource= null;
+				try {
+					resource= fLastJavaElement.getUnderlyingResource();
+				} catch (org.eclipse.jdt.core.JavaModelException ex) {
+					// resource= null;
+				}
+				String resourceName= ""; //$NON-NLS-1$
+				if (marker.getResource() != null)
+					resourceName= marker.getResource().getName();
+				if (resource == null && !handleContainsWrongCU(handle, resourceName)) {
+				 	handle= computeFixedHandle(handle, resourceName);
+				 	fLastJavaElement= JavaCore.create(handle);
+				}
+			}
+			// END OF FIX
+
 			fLastMarker= marker;
 		}
 		return fLastJavaElement;
+	}
+	
+	private boolean handleContainsWrongCU(String handle, String resourceName) {
+		int start= handle.indexOf('{');
+		int end= handle.indexOf(".java"); //$NON-NLS-1$
+		if (start >= end)
+			return false;
+		String name= handle.substring(start + 1, end + 5);
+		return name.equals(resourceName);
+	}
+	
+	private String computeFixedHandle(String handle, String resourceName) {
+		int start= handle.indexOf('{');
+		int end= handle.indexOf(".java"); //$NON-NLS-1$
+		handle= handle.substring(0, start + 1) + resourceName + handle.substring(end + 5);
+		return handle;
 	}
 }
