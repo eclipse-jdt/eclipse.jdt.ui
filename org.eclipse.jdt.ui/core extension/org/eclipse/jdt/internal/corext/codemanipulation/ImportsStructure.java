@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 /**
  * Created on a Compilation unit, the ImportsStructure allows to add
@@ -382,6 +383,9 @@ public class ImportsStructure implements IImportsStructure {
 		String mainTypeName= JavaModelUtil.concatenateName(packageName, Signature.getQualifier(cu.getElementName()));
 		return qualifier.equals(mainTypeName);
 	}
+	
+	
+	
 
 	/**
 	 * Adds a new import declaration that is sorted in the structure using
@@ -393,13 +397,9 @@ public class ImportsStructure implements IImportsStructure {
 	 * to a conflict. 
 	 */
 	public String addImport(ITypeBinding binding) {
-		// TODO review: I think this should not be here
-		if (binding.isAnonymous()) {
-			ITypeBinding[] interfaces= binding.getInterfaces();
-			if (interfaces.length >= 1)
-				binding= interfaces[0];
-			else
-			 	binding= binding.getSuperclass();
+		binding= ASTResolving.normalizeTypeBinding(binding);
+		if (binding == null) {
+			return ""; //$NON-NLS-1$
 		}
 		String qualifiedName= binding.getQualifiedName();
 		if (qualifiedName.length() > 0) {
@@ -407,7 +407,7 @@ public class ImportsStructure implements IImportsStructure {
 		}
 		return binding.getName();
 	}
-	
+		
 	/**
 	 * Adds a new import declaration that is sorted in the structure using
 	 * a best match algorithm. If an import already exists, the import is
@@ -522,6 +522,10 @@ public class ImportsStructure implements IImportsStructure {
 	 * Removes an import from the structure.
 	 */
 	public boolean removeImport(ITypeBinding binding) {
+		binding= ASTResolving.normalizeTypeBinding(binding);
+		if (binding == null) {
+			return false;
+		}		
 		String qualifiedName= binding.getQualifiedName();
 		if (qualifiedName.length() > 0) {
 			return removeImport(qualifiedName);
