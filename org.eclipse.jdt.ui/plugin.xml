@@ -842,14 +842,6 @@
                tooltip="%OpenClassWizardAction.tooltip">
          </action>
          <action
-               label="%OpenSnippetWizardAction.label"
-               icon="icons/full/ctool16/newsbook_wiz.gif"
-               tooltip="%OpenSnippetWizardAction.tooltip"
-               class="org.eclipse.jdt.internal.ui.wizards.OpenSnippetWizardAction"
-               toolbarPath="Normal/JavaWizards"
-               id="org.eclipse.jdt.ui.actions.OpenSnippetWizard">
-         </action>
-         <action
                label="%OpenPackageWizardAction.label"
                icon="icons/full/ctool16/newpack_wiz.gif"
                tooltip="%OpenPackageWizardAction.tooltip"
