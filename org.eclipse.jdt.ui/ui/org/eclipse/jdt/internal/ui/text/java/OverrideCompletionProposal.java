@@ -14,6 +14,7 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
@@ -22,11 +23,14 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -39,10 +43,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -64,6 +66,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 		Assert.isNotNull(jproject);
 		Assert.isNotNull(methodName);
 		Assert.isNotNull(paramTypes);
+		Assert.isNotNull(cu);
 
 		fParamTypes= paramTypes;
 		fMethodName= methodName;
@@ -86,54 +89,56 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 	 * @see JavaTypeCompletionProposal#updateReplacementString(IDocument,char,int,ImportsStructure)
 	 */
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure structure) throws CoreException, BadLocationException {
-		IType type= null;
-		if (structure != null) {
-			ICompilationUnit unit= structure.getCompilationUnit();
-			JavaModelUtil.reconcile(unit);
-			IJavaElement element= unit.getElementAt(offset);
-			if (element != null)
-				type= (IType) element.getAncestor(IJavaElement.TYPE);
-		}
-		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
-		CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
+		Assert.isNotNull(structure);
+		final ASTParser parser= ASTParser.newParser(AST.JLS3);
+		parser.setResolveBindings(true);
+		parser.setSource(structure.getCompilationUnit());
+		parser.setProject(structure.getCompilationUnit().getJavaProject());
+		final CompilationUnit unit= (CompilationUnit) parser.createAST(new NullProgressMonitor());
 		ITypeBinding binding= null;
-		final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), AbstractTypeDeclaration.class);
-		if (declaration != null) {
+		ChildListPropertyDescriptor descriptor= null;
+		ASTNode node= NodeFinder.perform(unit, offset, 0);
+		if (node instanceof AnonymousClassDeclaration) {
+			binding= ((ClassInstanceCreation) node.getParent()).resolveTypeBinding();
+			descriptor= AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY;
+		} else if (node instanceof AbstractTypeDeclaration) {
+			final AbstractTypeDeclaration declaration= ((AbstractTypeDeclaration) node);
+			descriptor= declaration.getBodyDeclarationsProperty();
 			binding= declaration.resolveBinding();
-			if (binding != null) {
-				ASTRewrite rewrite= ASTRewrite.create(unit.getAST());
-				IMethodBinding[] bindings= StubUtility2.getOverridableMethods(binding, true);
-				if (bindings != null && bindings.length > 0) {
-					IMethodBinding methodBinding= Bindings.findMethodInHierarchy(binding, fMethodName, fParamTypes);
-					if (methodBinding != null) {
-						CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);
-						ListRewrite rewriter= rewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
-						String key= methodBinding.getKey();
-						MethodDeclaration stub= null;
-						for (int index= 0; index < bindings.length; index++) {
-							if (key.equals(bindings[index].getKey())) {
-								stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, structure, unit.getAST(), bindings[index], binding.getName(), settings, fAnnotations && JavaModelUtil.is50OrHigher(fJavaProject));
-								if (stub != null)
-									rewriter.insertFirst(stub, null);
-								break;
-							}
+		}
+		if (binding != null) {
+			ASTRewrite rewrite= ASTRewrite.create(unit.getAST());
+			IMethodBinding[] bindings= StubUtility2.getOverridableMethods(binding, true);
+			if (bindings != null && bindings.length > 0) {
+				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(binding, fMethodName, fParamTypes);
+				if (methodBinding != null) {
+					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);
+					ListRewrite rewriter= rewrite.getListRewrite(node, descriptor);
+					String key= methodBinding.getKey();
+					MethodDeclaration stub= null;
+					for (int index= 0; index < bindings.length; index++) {
+						if (key.equals(bindings[index].getKey())) {
+							stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, structure, unit.getAST(), bindings[index], binding.getName(), settings, fAnnotations && JavaModelUtil.is50OrHigher(fJavaProject));
+							if (stub != null)
+								rewriter.insertFirst(stub, null);
+							break;
 						}
-						if (stub != null) {
-							IDocument contents= new Document(fCompilationUnit.getBuffer().getContents());
-							IRegion region= contents.getLineInformationOfOffset(getReplacementOffset());
-							ITrackedNodePosition position= rewrite.track(stub);
-							String indent= Strings.getIndentString(contents.get(region.getOffset(), region.getLength()), settings.tabWidth);
-							try {
-								rewrite.rewriteAST(contents, fJavaProject.getOptions(true)).apply(contents, TextEdit.UPDATE_REGIONS);
-							} catch (MalformedTreeException exception) {
-								JavaPlugin.log(exception);
-							} catch (IllegalArgumentException exception) {
-								JavaPlugin.log(exception);
-							} catch (BadLocationException exception) {
-								JavaPlugin.log(exception);
-							}
-							setReplacementString(Strings.changeIndent(Strings.trimIndentation(contents.get(position.getStartPosition(), position.getLength()), settings.tabWidth, false), 0, settings.tabWidth, indent, StubUtility.getLineDelimiterFor(contents)));
+					}
+					if (stub != null) {
+						IDocument contents= new Document(fCompilationUnit.getBuffer().getContents());
+						IRegion region= contents.getLineInformationOfOffset(getReplacementOffset());
+						ITrackedNodePosition position= rewrite.track(stub);
+						String indent= Strings.getIndentString(contents.get(region.getOffset(), region.getLength()), settings.tabWidth);
+						try {
+							rewrite.rewriteAST(contents, fJavaProject.getOptions(true)).apply(contents, TextEdit.UPDATE_REGIONS);
+						} catch (MalformedTreeException exception) {
+							JavaPlugin.log(exception);
+						} catch (IllegalArgumentException exception) {
+							JavaPlugin.log(exception);
+						} catch (BadLocationException exception) {
+							JavaPlugin.log(exception);
 						}
+						setReplacementString(Strings.changeIndent(Strings.trimIndentation(contents.get(position.getStartPosition(), position.getLength()), settings.tabWidth, false), 0, settings.tabWidth, indent, StubUtility.getLineDelimiterFor(contents)));
 					}
 				}
 			}

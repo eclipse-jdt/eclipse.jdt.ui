@@ -17,6 +17,7 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -34,6 +35,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -51,7 +53,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -70,13 +71,15 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		super(constructorCompletion, cu, start, length, null, displayName, relevance);
 		Assert.isNotNull(declaringTypeName);
 		Assert.isNotNull(jproject);
+		Assert.isNotNull(cu);
 
 		fDeclaringType= getDeclaringType(jproject, declaringTypeName);
 		setImage(getImageForType(fDeclaringType));
 		setCursorPosition(constructorCompletion.indexOf('(') + 1);
 	}
 
-	private boolean createStubs(StringBuffer buf, ImportsStructure imports) throws CoreException {
+	private boolean createStubs(StringBuffer buf, ImportsStructure structure) throws CoreException {
+		Assert.isNotNull(structure);
 		if (fDeclaringType == null)
 			return true;
 		ICompilationUnit workingCopy= null;
@@ -102,8 +105,11 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			buffer.append("{\n\n}"); //$NON-NLS-1$
 			workingCopy.getBuffer().setContents(buffer.toString());
 			JavaModelUtil.reconcile(workingCopy);
-			RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
-			CompilationUnit unit= parser.parse(workingCopy, true);
+			final ASTParser parser= ASTParser.newParser(AST.JLS3);
+			parser.setResolveBindings(true);
+			parser.setSource(workingCopy);
+			parser.setProject(workingCopy.getJavaProject());
+			final CompilationUnit unit= (CompilationUnit) parser.createAST(new NullProgressMonitor());
 			IType dummyType= workingCopy.getType(dummyName);
 			ITypeBinding binding= null;
 			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, dummyType.getNameRange()), AbstractTypeDeclaration.class);
@@ -154,7 +160,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 						key= keys[index];
 						for (int offset= 0; offset < bindings.length; offset++) {
 							if (key.equals(bindings[offset].getKey())) {
-								stub= StubUtility2.createImplementationStub(workingCopy, rewrite, imports, unit.getAST(), bindings[offset], binding.getName(), settings, annotations);
+								stub= StubUtility2.createImplementationStub(workingCopy, rewrite, structure, unit.getAST(), bindings[offset], binding.getName(), settings, annotations);
 								if (stub != null)
 									rewriter.insertFirst(stub, null);
 								break;

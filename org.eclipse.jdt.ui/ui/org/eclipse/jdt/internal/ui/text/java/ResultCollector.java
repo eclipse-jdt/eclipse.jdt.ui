@@ -143,7 +143,7 @@ public class ResultCollector extends CompletionRequestor {
 	protected void internalAcceptAnonymousType(char[] superTypePackageName, char[] superTypeName, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames,
 			char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
 
-		if (TypeFilter.isFiltered(superTypePackageName, superTypeName)) {
+		if (fCompilationUnit == null || TypeFilter.isFiltered(superTypePackageName, superTypeName)) {
 			return;
 		}
 		
@@ -350,6 +350,8 @@ public class ResultCollector extends CompletionRequestor {
 	 * @see ICodeCompletionRequestor#acceptMethodDeclaration
 	 */
 	protected void internalAcceptMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int start, int end, int relevance) {
+		if (fCompilationUnit == null)
+			return;
 		StringBuffer displayString= getMethodDisplayString(null, name, parameterTypeNames, parameterNames, returnTypeName);
 		displayString.append(" - "); //$NON-NLS-1$
 		displayString.append(JavaTextMessages.getFormattedString("ResultCollector.overridingmethod", new String(declaringTypeName))); //$NON-NLS-1$
