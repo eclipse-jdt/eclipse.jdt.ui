@@ -463,7 +463,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 
 
 	private void updatePreview() {
-		fPreviewDocument.set(CodeFormatter.format(fPreviewText, 0, fWorkingValues));
+		fPreviewDocument.set(new CodeFormatter(fWorkingValues).format(fPreviewText));
 	}	
 	
 	private void updateControls() {
