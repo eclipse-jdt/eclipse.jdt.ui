@@ -136,7 +136,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
@@ -252,24 +251,25 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			if (sourceViewer == null)
 				return;
 				
-			StyledText text= sourceViewer.getTextWidget();
-			if (text == null || text.isDisposed())
-				return;
-
 			sourceViewer.removeTextInputListener(this);
-
+			
 			IDocument document= sourceViewer.getDocument();
 			if (document != null)
 				document.removeDocumentListener(this);
+			
+			IPreferenceStore preferenceStore= getPreferenceStore();
+			if (preferenceStore != null)
+				preferenceStore.removePropertyChangeListener(this);
+			
+			StyledText text= sourceViewer.getTextWidget();
+			if (text == null || text.isDisposed())
+				return;
 				
 			text.removeKeyListener(this);
 			text.removeMouseListener(this);
 			text.removeMouseMoveListener(this);
 			text.removeFocusListener(this);
 			text.removePaintListener(this);
-			
-			IPreferenceStore preferenceStore= getPreferenceStore();
-			preferenceStore.removePropertyChangeListener(this);
 			
 			if (fColor != null) {
 				fColor.dispose();
@@ -929,7 +929,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		setRangeIndicator(new DefaultRangeIndicator());
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		
-		if (JavaEditorPreferencePage.synchronizeOutlineOnCursorMove())
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE))
 			fUpdater= new OutlinePageSelectionUpdater();
 	}
 	
@@ -1649,10 +1649,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 */
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
-
-		ISourceViewer sourceViewer= getSourceViewer();
-		SourceViewerConfiguration sourceViewerConfiguration= getSourceViewerConfiguration();
-
+		
 		IInformationControlCreator informationControlCreator= new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
 				boolean cutDown= false;
@@ -1663,7 +1660,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 
 		fInformationPresenter= new InformationPresenter(informationControlCreator);
 		fInformationPresenter.setSizeConstraints(60, 10, true, true);		
-		fInformationPresenter.install(sourceViewer);
+		fInformationPresenter.install(getSourceViewer());
  	}
 
 }
