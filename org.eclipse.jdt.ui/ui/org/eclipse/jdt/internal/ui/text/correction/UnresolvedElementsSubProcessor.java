@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+  *     Renaud Waldura &lt;renaud+eclipse@waldura.com&gt; - New class/interface with wizard
+ ******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
@@ -196,10 +207,16 @@ public class UnresolvedElementsSubProcessor {
 					String[] superTypes= (problemPos.getId() != IProblem.ExceptionTypeNotFound) ? null : new String[] { "java.lang.Exception" }; //$NON-NLS-1$
 					String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createclass.description", typeName); //$NON-NLS-1$
 					proposals.add(new NewCUCompletionProposal(label, addedCU, true, superTypes, 0));
+                    
+                    String wizardLabel= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createclassusingwizard.description", typeName); //$NON-NLS-1$
+                    proposals.add(new NewCUCompletionUsingWizardProposal(wizardLabel, typeName, pack, true, 0));
 				}
 				if ((kind & SimilarElementsRequestor.INTERFACES) != 0) {
 					String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createinterface.description", typeName); //$NON-NLS-1$
 					proposals.add(new NewCUCompletionProposal(label, addedCU, false, null, 0));
+                    
+                    String wizardLabel= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createinterfaceusingwizard.description", typeName); //$NON-NLS-1$
+                    proposals.add(new NewCUCompletionUsingWizardProposal(wizardLabel, typeName, pack, true, 0));
 				}				
 			}
 		}
