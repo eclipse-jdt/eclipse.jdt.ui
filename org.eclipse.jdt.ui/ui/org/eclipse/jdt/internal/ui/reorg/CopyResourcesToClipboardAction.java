@@ -51,7 +51,7 @@ public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 	public void run(IStructuredSelection selection) {
 		IResource[] resources= getSelectedResources(selection);
 		try{
-			getClipboard().setContents(
+			fClipboard.setContents(
 				new Object[] { 
 						resources, 
 						getFileLocations(resources), 
@@ -187,11 +187,11 @@ public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 	}
 
 	private static String getName(IResource resource, ILabelProvider labelProvider){
-		IJavaElement javeElement= JavaCore.create(resource);
-		if (javeElement == null)
+		IJavaElement javaElement= JavaCore.create(resource);
+		if (javaElement == null)
 			return labelProvider.getText(resource);	
 		else
-			return labelProvider.getText(javeElement);
+			return labelProvider.getText(javaElement);
 	}
 	
 	private static String[] getFileLocations(IResource[] resources) {
@@ -200,9 +200,5 @@ public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 			fileLocations[i]= resources[i].getLocation().toOSString();
 		}
 		return fileLocations;
-	}
-
-	private Clipboard getClipboard() {
-		return fClipboard;
 	}
 }
