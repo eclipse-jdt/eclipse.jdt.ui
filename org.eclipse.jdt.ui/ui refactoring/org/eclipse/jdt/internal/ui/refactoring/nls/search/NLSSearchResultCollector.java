@@ -188,25 +188,17 @@ class NLSSearchResultCollector implements IJavaSearchResultCollector {
 			source= source.substring(searchStart);
 			if (source.charAt(0) != '.' || Character.isWhitespace(source.charAt(0)))
 				return null;
-			int i= source.indexOf(')');
-			int j= source.indexOf(',');
 			int firstBraket= source.indexOf('(');
-			int searchEnd= -1;
-			if (i == -1)
-				searchEnd= j;
-			else if (j == -1)
-				searchEnd= i;
-			else
-				searchEnd= Math.min(i, j);
+
+			int searchEnd= source.indexOf(')');
 			if (searchEnd == -1 || firstBraket == -1 || searchEnd <= firstBraket)
 				return null;
-			source= source.substring(firstBraket, searchEnd);
-			matchStart += firstBraket;
+
 			int firstQuote= source.indexOf('"');
 			matchStart += firstQuote + 1;
-			int secondQuote= source.lastIndexOf('"');
+			int secondQuote= source.indexOf('"', firstQuote + 1);
 
-			if (secondQuote <= firstQuote)
+			if (secondQuote == -1 || secondQuote <= firstQuote)
 				return null;
 
 			keyPosition.setOffset(matchStart);
