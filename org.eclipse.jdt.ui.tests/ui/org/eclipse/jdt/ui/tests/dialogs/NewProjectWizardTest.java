@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.buildpath.AddLibraryOperation;
 import org.eclipse.jdt.internal.corext.buildpath.AddToClasspathOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
@@ -59,6 +60,7 @@ import org.eclipse.jdt.internal.corext.buildpath.UnincludeOperation;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
@@ -386,6 +388,25 @@ public class NewProjectWizardTest extends TestCase {
         validateClasspath();
     }
     
+    public void testAddJREToCP() throws InvocationTargetException, InterruptedException, CoreException {
+        IClasspathEntry[] entries= fProject.getRawClasspath();
+        IClasspathEntry entry= null;
+        for(int i= 0; i < entries.length; i++) {
+            if(entries[i].getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+                entry= entries[i];
+                break;
+            }
+        }
+        assertTrue(entry != null);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(entry.getPath(), fProject, IClasspathEntry.CPE_CONTAINER) == null);
+        testRemoveJREFromCP();
+        ClassPathContainer container= (ClassPathContainer)executeOperation(IClasspathInformationProvider.ADD_LIB_TO_BP, entry, null, null, null, null);
+        assertTrue(container.getClasspathEntry().equals(entry));
+        assertFalse(ClasspathModifier.getClasspathEntryFor(entry.getPath(), fProject, IClasspathEntry.CPE_CONTAINER) == null);
+        
+        validateClasspath();
+    }
+    
     public void testRemoveFromCP() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
         // add folder
         int before= fProject.getRawClasspath().length;
@@ -568,6 +589,26 @@ public class NewProjectWizardTest extends TestCase {
         assertTrue(zipFile.getFileExtension().equals("zip"));
         assertTrue(ClasspathModifier.isArchive(zipFile, fProject));
         assertTrue(ClasspathModifier.getClasspathEntryFor(zipFile.getFullPath(), fProject, IClasspathEntry.CPE_LIBRARY) == null);
+        
+        validateClasspath();
+    }
+    
+    public void testRemoveJREFromCP() throws InvocationTargetException, InterruptedException, CoreException {
+        IClasspathEntry[] entries= fProject.getRawClasspath();
+        IClasspathEntry entry= null;
+        for(int i= 0; i < entries.length; i++) {
+            if(entries[i].getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+                entry= entries[i];
+                break;
+            }
+        }
+        assertTrue(entry != null);
+        assertFalse(ClasspathModifier.getClasspathEntryFor(entry.getPath(), fProject, IClasspathEntry.CPE_CONTAINER) == null);
+        
+        ClassPathContainer container= new ClassPathContainer(fProject, entry);
+        IJavaProject project= (IJavaProject) executeOperation(IClasspathInformationProvider.REMOVE_FROM_BP, container, null, null, null, null);
+        assertTrue(project.equals(fProject));
+        assertTrue(ClasspathModifier.getClasspathEntryFor(entry.getPath(), fProject, IClasspathEntry.CPE_CONTAINER) == null);
         
         validateClasspath();
     }
@@ -1032,8 +1073,13 @@ public class NewProjectWizardTest extends TestCase {
             }
 
             public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {
-                // TODO Auto-generated method stub
-                return null;
+                return new IAddLibrariesQuery() {
+
+                    public IClasspathEntry[] doQuery(IJavaProject project, IClasspathEntry[] entries) {
+                        return new IClasspathEntry[] {(IClasspathEntry)selection};
+                    }
+                    
+                };
             }
 
             public void deleteCreatedResources() {
@@ -1055,6 +1101,7 @@ public class NewProjectWizardTest extends TestCase {
             case IClasspathInformationProvider.EDIT_OUTPUT: op= new EditOutputFolderOperation(null, provider); break;
             case IClasspathInformationProvider.RESET: op= new ResetOperation(null, provider); break;
             case IClasspathInformationProvider.CREATE_OUTPUT: op= new CreateOutputFolderOperation(null, provider); break;
+            case IClasspathInformationProvider.ADD_LIB_TO_BP: op= new AddLibraryOperation(null, provider); break;
         }
         
         op.run(null);

@@ -543,6 +543,11 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
       
         validateClasspath();
     }
+    
+    public void testAddJREToCP() throws InvocationTargetException, InterruptedException, CoreException {
+        super.testAddJREToCP();
+        testProjectIsOnClasspath(true);
+    }
       
     public void testAddIncludedPackageToCP() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
         // ... and remove project as root
@@ -692,9 +697,14 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
         testProjectIsOnClasspath(false);
     }
     
+    public void testRemoveJREFromCP() throws InvocationTargetException, InterruptedException, CoreException {
+        super.testRemoveJREFromCP();
+        testProjectIsOnClasspath(true);
+    }
+    
     // Test include, exclude, uninclude, unexclude, ...
     
-    // Note that include and exclude does not have any impact wheter
+    // Note that include and exclude does not have any impact whether
     // the project is on the classpath or not as long as the included/excluded
     // element was not a direct child of the project!
     // So the default testing is done by the super class while we have to
@@ -1114,7 +1124,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
     }
     
     // Test file manipulations (include, exclude, ...)
-    // Note that include and exclude does not have any impact wheter
+    // Note that include and exclude does not have any impact whether
     // the project is on the classpath or not as long as the included/excluded
     // element was not a direct child of the project!
     // So the default testing is done by the super class while we have to
