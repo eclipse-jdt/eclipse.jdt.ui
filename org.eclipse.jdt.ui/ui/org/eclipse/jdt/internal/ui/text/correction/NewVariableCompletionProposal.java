@@ -18,24 +18,21 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-public class NewMethodCompletionProposal extends CUCorrectionProposal {
+public class NewVariableCompletionProposal extends CUCorrectionProposal {
 
 	private IType fParentType;
 
-	private String fMethodName;
-	private String[] fParamTypes;
+	private String fVariableName;
 
-	public NewMethodCompletionProposal(IType type, ProblemPosition problemPos, String label, String methodName, String[] paramTypes) throws CoreException {
+	public NewVariableCompletionProposal(IType type, ProblemPosition problemPos, String label, String variableName) throws CoreException {
 		super(label, problemPos);
 		
 		fParentType= type;
-		fMethodName= methodName;
-		fParamTypes= paramTypes;
+		fVariableName= variableName;
 	}
 
 	/*
@@ -51,13 +48,8 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 
 		String content= generateStub(importEdit);
 		
-		int insertPos= MemberEdit.ADD_AT_END;
+		int insertPos= MemberEdit.ADD_AT_BEGINNING;
 		IJavaElement anchor= fParentType;
-		IJavaElement elem= cu.getElementAt(problemPos.getOffset());
-		if (elem.getElementType() == IJavaElement.METHOD) {
-			anchor= elem;
-			insertPos= MemberEdit.INSERT_AFTER;
-		}
 		
 		MemberEdit memberEdit= new MemberEdit(anchor, insertPos, new String[] { content }, settings.tabWidth);
 		memberEdit.setUseFormatter(true);
@@ -65,32 +57,15 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 		if (!importEdit.isEmpty()) {
 			changeElement.addTextEdit("Add imports", importEdit);
 		}
-		changeElement.addTextEdit("Add method", memberEdit);
+		changeElement.addTextEdit("Add field", memberEdit);
 	}
 	
 	
 	private String generateStub(ImportEdit importEdit) {
 		StringBuffer buf= new StringBuffer();
-		buf.append("private void ");
-		buf.append(fMethodName);
-		buf.append("(");
-		if (fParamTypes.length > 0) {
-			String[] paramNames= new NameProposer().proposeParameterNames(fParamTypes);
-			for (int i= 0; i < fParamTypes.length; i++) {
-				if (i > 0) {
-					buf.append(", ");
-				}
-				String curr= fParamTypes[i];
-				if (curr.indexOf('.') != -1) {
-					importEdit.addImport(curr);
-					curr= Signature.getSimpleName(curr);
-				}
-				buf.append(curr);
-				buf.append(" ");
-				buf.append(paramNames[i]);
-			}
-		}
-		buf.append(") {\n}\n");
+		buf.append("private Object ");
+		buf.append(fVariableName);
+		buf.append(";\n");
 		return buf.toString();
 	}
 		

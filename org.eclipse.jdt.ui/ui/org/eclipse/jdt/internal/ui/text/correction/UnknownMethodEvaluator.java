@@ -23,10 +23,10 @@ public class UnknownMethodEvaluator {
 		private int fNumberOfArguments;
 		private HashSet fResult;
 		
-		public SimilarMethodsRequestor(String methodName, int numberOfArguments, HashSet result) {
+		public SimilarMethodsRequestor(String methodName, int numberOfArguments) {
 			fMethodName= methodName;
 			fNumberOfArguments= numberOfArguments;
-			fResult= result;
+			fResult= new HashSet();
 		}
 		
 		/*
@@ -41,6 +41,14 @@ public class UnknownMethodEvaluator {
 				}
 			}
 		}
+		/**
+		 * Gets the result.
+		 * @return Returns a HashSet
+		 */
+		public HashSet getResult() {
+			return fResult;
+		}
+
 	}
 	
 	
@@ -57,9 +65,11 @@ public class UnknownMethodEvaluator {
 		String[] arguments= getArguments(args[2]);
 		int nArguments= arguments.length;
 		
-		HashSet result= new HashSet();
-		SimilarMethodsRequestor requestor= new SimilarMethodsRequestor(methodName, nArguments, result);
+		
+		SimilarMethodsRequestor requestor= new SimilarMethodsRequestor(methodName, nArguments);
 		cu.codeComplete(problemPos.getOffset(), requestor);
+		
+		HashSet result= requestor.getResult();
 		
 		Iterator iter= result.iterator();
 		while (iter.hasNext()) {
