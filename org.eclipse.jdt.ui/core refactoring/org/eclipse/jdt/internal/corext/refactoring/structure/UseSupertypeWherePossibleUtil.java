@@ -529,10 +529,7 @@ class UseSupertypeWherePossibleUtil {
 			IType type= JavaModelUtil.findType(fInputClass.getJavaProject(), Signature.toString(method.getParameterTypes()[argumentIndex]));
 			if (type == null)
 				return false;
-			type= (IType)WorkingCopyUtil.getWorkingCopyIfExists(type);	
-			if (fSuperTypeToUse.equals(type) || fSuperTypeSet.contains(type))
-				return true;
-			return false;
+			return isTypeOkToUseAsSuperType(type);
 		}	
 		MethodDeclaration methodDeclarationNode= getMethodDeclarationNode(method);
 		if (method == null)
@@ -876,14 +873,8 @@ class UseSupertypeWherePossibleUtil {
 				if (method == null)
 					return true;
 				IType paramType= getMethodParameterType(method, argumentIndex);
-				paramType= (IType)WorkingCopyUtil.getWorkingCopyIfExists(paramType);
-				
-				if (! fSuperTypeSet.contains(paramType) && ! paramType.equals(fInputClass)){
-					if (fSuperTypeToUse == null)
-						return true;
-					if (! fSuperTypeToUse.equals(paramType))
-						return true;
-				}
+				if (! isTypeOkToUseAsSuperType(paramType))
+					return true;
 			}
 		}
 		if (unparenthesizedParent instanceof Assignment){
@@ -892,9 +883,8 @@ class UseSupertypeWherePossibleUtil {
 				IType type= findType(assign.getLeftHandSide().resolveTypeBinding());
 				if (type == null)
 					return true;
-				type= (IType)WorkingCopyUtil.getWorkingCopyIfExists(type);	
-				if (!type.equals(fInputClass) && ! fSuperTypeSet.contains(type))	
-					return true;
+				if (! isTypeOkToUseAsSuperType(type))
+					return true;	
 			}	
 		}
 		if (unparenthesizedParent instanceof VariableDeclaration){
@@ -903,14 +893,24 @@ class UseSupertypeWherePossibleUtil {
 				IType type= findType(vd.getName().resolveTypeBinding());
 				if (type == null)
 					return true;
-				type= (IType)WorkingCopyUtil.getWorkingCopyIfExists(type);	
-				if (!type.equals(fInputClass) && ! fSuperTypeSet.contains(type))	
+				if (! isTypeOkToUseAsSuperType(type))
 					return true;
 			}
 		}
 		return false;
 	}
 
+	private boolean isTypeOkToUseAsSuperType(IType type) throws JavaModelException{
+		type= (IType)WorkingCopyUtil.getWorkingCopyIfExists(type);
+		if (type.equals(fInputClass))
+			return true;
+		if (fSuperTypeToUse != null && fSuperTypeToUse.equals(type))
+			return true;	
+		if ( fSuperTypeSet.contains(type))
+			return true;
+		return false;
+	}
+	
 	//maybe generally useful
 	private static IType getMethodParameterType(IMethod method, int parameterIndex) throws JavaModelException{
 		Assert.isTrue(parameterIndex >=0);
