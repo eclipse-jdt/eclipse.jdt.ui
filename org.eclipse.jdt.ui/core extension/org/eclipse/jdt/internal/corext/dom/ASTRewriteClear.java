@@ -351,7 +351,9 @@ public class ASTRewriteClear extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#postVisit(org.eclipse.jdt.core.dom.ASTNode)
 	 */
 	public void postVisit(ASTNode node) {
-		Assert.isTrue(!fRewrite.isInserted(node), "Inserted node not removed " + node + ", parent: " + node.getParent());
+		if (fRewrite.isInserted(node)) {
+			Assert.isTrue(false, "Inserted node not removed " + node + ", parent: " + node.getParent());
+		}
 		fRewrite.clearMark(node);
 	}
 
