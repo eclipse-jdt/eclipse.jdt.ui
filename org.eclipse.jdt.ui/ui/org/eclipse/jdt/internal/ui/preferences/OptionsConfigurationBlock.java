@@ -150,8 +150,9 @@ public abstract class OptionsConfigurationBlock {
 		
 	protected void setOptions(Map map) {
 		if (fProject != null) {
+			Map oldOptions= fProject.getOptions(false);
 			fProject.setOptions(map);
-			firePropertyChangeEvents(fProject.getOptions(false), map);
+			firePropertyChangeEvents(oldOptions, map);
 		} else {
 			JavaCore.setOptions((Hashtable) map);
 		}	
