@@ -143,8 +143,8 @@ public class RemoteTestRunner implements TestListener {
 		// force static initialization of BaseTestRunner 
 		// by creating a junit.textui.TestRunner and free
 		// it immediately.
-		//junit.runner.BaseTestRunner runner= new junit.textui.TestRunner();
-		//runner= null;
+		junit.runner.BaseTestRunner runner= new junit.textui.TestRunner();
+		runner= null;
 		
 		RemoteTestRunner testRunServer= new RemoteTestRunner();
 		testRunServer.init(args);
@@ -301,7 +301,10 @@ public class RemoteTestRunner implements TestListener {
 		// instantiate all tests
 		Test[] suites= new Test[testClassNames.length];
 		for (int i= 0; i < suites.length; i++) {
-			suites[i]= getTest(testClassNames[i]);
+			Test test= getTest(testClassNames[i]);
+			if (test == null)
+				return;
+			suites[i]= test;
 		}
 		
 		// count all testMethods and inform ITestRunListeners		
