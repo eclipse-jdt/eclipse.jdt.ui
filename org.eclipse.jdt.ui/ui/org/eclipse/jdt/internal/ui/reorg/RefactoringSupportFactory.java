@@ -4,11 +4,24 @@
  */
 package org.eclipse.jdt.internal.ui.reorg;
 
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.Assert;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -20,6 +33,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldRefactoring;
@@ -31,7 +45,9 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameSourceFolderRefa
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
@@ -59,9 +75,50 @@ public class RefactoringSupportFactory {
 				starter.activate((Refactoring)fRefactoring, wizard, "Rename", true);
 			else	
 				starter.activate(fRefactoring, "Rename", getNameEntryMessage(), false, element);
+				
+			selectAndReveal(fRefactoring.getNewElement());
 			fRefactoring= null;
 		}
 		
+		/**
+		 * Checks all parts in the active page, to see if they implement <code>ISetSelectionTarget</code>,
+		 * either directly or as an adapter.  If so, tells the target to select and reveal
+		 * the given newly-added element.
+		 *
+		 * @see ISetSelectionTarget
+		 */
+		private static void selectAndReveal(Object newElement) {
+			IWorkbenchWindow dw = JavaPlugin.getActiveWorkbenchWindow();
+			if (dw ==  null)
+				return;
+			IWorkbenchPage page = dw.getActivePage();
+			if (page == null)
+				return;
+			List parts = new ArrayList();
+			parts.addAll(Arrays.asList(page.getViews()));
+			parts.addAll(Arrays.asList(page.getEditors()));
+			
+			final ISelection selection = new StructuredSelection(newElement);
+		
+			for (Iterator i = parts.iterator(); i.hasNext();) {
+				final IWorkbenchPart part = (IWorkbenchPart) i.next();
+				ISetSelectionTarget target = null;
+				if (part instanceof ISetSelectionTarget) {
+					target = (ISetSelectionTarget) part;
+				}
+				else {
+					target = (ISetSelectionTarget) part.getAdapter(ISetSelectionTarget.class);
+				}
+				if (target != null) {
+					final ISetSelectionTarget finalTarget = target;
+					JavaPlugin.getActiveWorkbenchShell().getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							finalTarget.selectReveal(selection);
+						}
+					});
+				}
+			}
+		}
 		abstract IRenameRefactoring createRefactoring(Object element) throws JavaModelException;
 
 		RefactoringWizard createWizard(IRenameRefactoring ref){
