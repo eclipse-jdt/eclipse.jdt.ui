@@ -10,8 +10,6 @@ import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -20,7 +18,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -149,20 +146,6 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 	 */
 	private IType findType(IJavaProject javaProject, String mainTypeName) throws JavaModelException {
 		return javaProject.findType(mainTypeName);
-	}
-	
-	/**
-	 * Convenience method to get the java model.
-	 */
-	private IJavaModel getJavaModel() {
-		return JavaCore.create(getWorkspaceRoot());
-	}
-
-	/**
-	 * Convenience method to get the workspace root.
-	 */
-	private IWorkspaceRoot getWorkspaceRoot() {
-		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 	
 	/**

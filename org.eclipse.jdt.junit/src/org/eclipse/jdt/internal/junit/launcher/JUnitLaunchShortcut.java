@@ -19,13 +19,10 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.debug.ui.JavaUISourceLocator;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -57,15 +54,6 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		} 
 	}
 	
-	private IJavaElement elementAtOffset(JavaEditor editor) {
-		try {
-			return SelectionConverter.getElementAtOffset(editor);
-		} catch(JavaModelException e) {
-		}
-		return null;
-	}
-
-
 	/**
 	 * @see ILaunchShortcut#launch(ISelection, String)
 	 */

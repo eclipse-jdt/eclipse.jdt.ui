@@ -20,8 +20,6 @@ public class PixelConverter {
 		gc.dispose();
 	}
 	
-	private FontMetrics fgFontMetrics;
-		
 	/**
 	 * @see DialogPage#convertHeightInCharsToPixels
 	 */

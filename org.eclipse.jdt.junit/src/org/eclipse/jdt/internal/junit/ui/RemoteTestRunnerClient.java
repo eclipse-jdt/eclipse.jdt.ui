@@ -58,17 +58,9 @@ public class RemoteTestRunnerClient {
 	 */
 	private boolean fInReadRerunTrace= false;
 	/**
-	 * The currently received failed message
-	 */
-	private boolean fInFailedMessage= false;
-	/**
 	 * The failed test that is currently reported from the RemoteTestRunner
 	 */
 	private String fFailedTest;
-	/**
-	 * The failed message that is currently reported from the RemoteTestRunner
-	 */
-	private String fFailedMessage;
 	/**
 	 * The failed trace that is currently reported from the RemoteTestRunner
 	 */
@@ -296,12 +288,10 @@ public class RemoteTestRunnerClient {
 
 	private void notifyTestTreeEntry(final String treeEntry) {
 		for (int i= 0; i < fListeners.length; i++) {
-			final ITestRunListener listener= fListeners[i];
-			Platform.run(new ListenerSafeRunnable() { 
-				public void run() {
-					listener.testTreeEntry(treeEntry);
-				}
-			});
+			if (fListeners[i] instanceof ITestRunListener2) {
+				ITestRunListener2 listener= (ITestRunListener2)fListeners[i];
+				listener.testTreeEntry(treeEntry);
+			}
 		}
 	}
 

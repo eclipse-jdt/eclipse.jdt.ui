@@ -76,7 +76,6 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	private Button fKeepRunning;
 	
 	// Test class UI widgets
-	private Label fTestLabel;
 	private Text fTestText;
 	private Button fSearchButton;
 	private final Image fTestIcon= createImage("obj16/test.gif"); //$NON-NLS-1$

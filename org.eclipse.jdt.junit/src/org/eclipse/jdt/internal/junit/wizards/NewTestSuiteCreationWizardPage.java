@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
@@ -284,8 +285,6 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 
 	public static class ClassesInSuitContentProvider implements IStructuredContentProvider {
 			
-		private Object[] fTypes;
-			
 		public ClassesInSuitContentProvider() {
 			super();
 		}
@@ -458,7 +457,9 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			monitor.done();
 			fUpdatedExistingClassButton= true;
 		} catch (JavaModelException e) {
-			JUnitPlugin.log(e);
+			String title= WizardMessages.getString("NewTestSuiteWizPage.error_tile"); //$NON-NLS-1$
+			String message= WizardMessages.getString("NewTestSuiteWizPage.error_message"); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), title, message);
 		}
 	}
 

@@ -95,8 +95,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	private String fTestClassTextInitialValue;
 
 	private IMethod[] fTestMethods;
-	private IType fCreatedType;
-
 	private boolean fFirstTime;  
 
 	public NewTestCaseCreationWizardPage() {

@@ -19,7 +19,9 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.*;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 
@@ -76,7 +78,7 @@ import org.eclipse.jdt.junit.ITestRunListener;
 /**
  * A ViewPart that shows the results of a test run.
  */
-public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IPropertyChangeListener {
+public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, IPropertyChangeListener {
 
 	public static final String NAME= "org.eclipse.jdt.junit.ResultView"; //$NON-NLS-1$
  	/**

@@ -109,7 +109,8 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 
 	protected void postCreatingType() {
 		IType newClass= fPage.getCreatedType();
-		
+		if (newClass == null)
+			return;
 		ICompilationUnit cu= newClass.getCompilationUnit();
 		if (cu.isWorkingCopy()) {
 			cu= (ICompilationUnit) cu.getOriginalElement();
