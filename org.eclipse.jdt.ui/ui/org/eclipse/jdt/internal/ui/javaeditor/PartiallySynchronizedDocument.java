@@ -11,7 +11,9 @@ Contributors:
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.Position;
 
 
 /**
@@ -66,5 +68,26 @@ public class PartiallySynchronizedDocument extends Document {
 	 */
 	synchronized public void set(String text) {
 		super.set(text);
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.AbstractDocument#addPosition(java.lang.String, org.eclipse.jface.text.Position)
+	 */
+	synchronized public void addPosition(String category, Position position) throws BadLocationException, BadPositionCategoryException {
+		super.addPosition(category, position);
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.AbstractDocument#removePosition(java.lang.String, org.eclipse.jface.text.Position)
+	 */
+	synchronized public void removePosition(String category, Position position) throws BadPositionCategoryException {
+		super.removePosition(category, position);
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.AbstractDocument#getPositions(java.lang.String)
+	 */
+	synchronized public Position[] getPositions(String category) throws BadPositionCategoryException {
+		return super.getPositions(category);
 	}
 }
