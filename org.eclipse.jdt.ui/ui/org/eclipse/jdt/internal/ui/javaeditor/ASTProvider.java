@@ -179,6 +179,8 @@ public final class ASTProvider {
 		 * @see org.eclipse.ui.IPartListener2#partInputChanged(org.eclipse.ui.IWorkbenchPartReference)
 		 */
 		public void partInputChanged(IWorkbenchPartReference ref) {
+			if (isJavaEditor(ref) && isActiveEditor(ref))
+				activeJavaEditorChanged(ref.getPart(true));
 		}
 
 		/*
