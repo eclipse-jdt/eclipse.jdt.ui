@@ -10,6 +10,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 /**
@@ -31,14 +32,12 @@ public class MethodsViewerFilter extends ViewerFilter {
 	public final void addFilter(int filter) {
 		fFilterProperties |= filter;
 	}
-
 	/**
 	 * Modifies filter and remove a property to filter for
 	 */	
 	public final void removeFilter(int filter) {
 		fFilterProperties &= (-1 ^ filter);
 	}
-
 	/**
 	 * Tests if a property is filtered
 	 */		
@@ -52,7 +51,6 @@ public class MethodsViewerFilter extends ViewerFilter {
 	public boolean isFilterProperty(Object element, Object property) {
 		return false;
 	}
-
 	/*
 	 * @see ViewerFilter@select
 	 */		
@@ -68,15 +66,18 @@ public class MethodsViewerFilter extends ViewerFilter {
 					(hasFilter(FILTER_STATIC) || "<clinit>".equals(member.getElementName()))) { //$NON-NLS-1$
 					return false;
 				}
-				if (!Flags.isPublic(flags) && !member.getDeclaringType().isInterface()) {
+				if (!Flags.isPublic(flags) && !isMemberInInterface(member)) {
 					return !hasFilter(FILTER_NONPUBLIC);
 				}
-				return true;	
 			}			
 		} catch (JavaModelException e) {
 			// ignore
 		}
 		return true;
+	}
+	
+	private boolean isMemberInInterface(IMember member) throws JavaModelException {
+		IType parent= member.getDeclaringType();
+		return parent != null && parent.isInterface();
 	}		
-
 }
