@@ -108,6 +108,22 @@ public class JdtActionConstants {
 	public static final String UNCOMMENT= "org.eclipse.jdt.ui.actions.Uncomment"; //$NON-NLS-1$
 	
 	/**
+	 * Source menu: name of standard Comment global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.AddBlockComment"</code>).
+	 * 
+	 * @since 3.0
+	 */
+	public static final String ADD_BLOCK_COMMENT= "org.eclipse.jdt.ui.actions.AddBlockComment"; //$NON-NLS-1$
+	
+	/**
+	 * Source menu: name of standard Uncomment global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.RemoveBlockComment"</code>).
+	 * 
+	 * @since 3.0
+	 */
+	public static final String REMOVE_BLOCK_COMMENT= "org.eclipse.jdt.ui.actions.RemoveBlockComment"; //$NON-NLS-1$
+	
+	/**
 	 * Source menu: name of standard Shift Rightl action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ShiftRight"</code>).
 	 */

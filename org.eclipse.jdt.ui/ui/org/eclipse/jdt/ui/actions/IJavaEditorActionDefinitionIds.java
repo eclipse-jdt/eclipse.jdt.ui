@@ -132,6 +132,21 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 */
 	public static final String UNCOMMENT= "org.eclipse.jdt.ui.edit.text.java.uncomment"; //$NON-NLS-1$
 	
+
+	/**
+	 * Action definition ID of the source -> add block comment action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.add.block.comment"</code>).
+	 * @since 3.0
+	 */
+	public static final String ADD_BLOCK_COMMENT= "org.eclipse.jdt.ui.edit.text.java.add.block.comment"; //$NON-NLS-1$
+
+	/**
+	 * Action definition ID of the source -> remove block comment action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.remove.block.comment"</code>).
+	 * @since 3.0
+	 */
+	public static final String REMOVE_BLOCK_COMMENT= "org.eclipse.jdt.ui.edit.text.java.remove.block.comment"; //$NON-NLS-1$
+	
 	/**
 	 * Action definition ID of the source -> format action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.format"</code>).
