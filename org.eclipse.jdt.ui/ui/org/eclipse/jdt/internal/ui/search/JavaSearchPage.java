@@ -78,7 +78,6 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
 public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSearchConstants {
 	
@@ -430,33 +429,36 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		initializeDialogUnits(parent);
 		readConfiguration();
 		
-		GridData gd;
 		Composite result= new Composite(parent, SWT.NONE);
+		
 		GridLayout layout= new GridLayout(2, false);
 		layout.horizontalSpacing= 10;
 		result.setLayout(layout);
-		result.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		RowLayouter layouter= new RowLayouter(layout.numColumns);
-		gd= new GridData();
-		gd.horizontalAlignment= GridData.FILL;
-		gd.verticalAlignment= GridData.VERTICAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_FILL;
-	
-		layouter.setDefaultGridData(gd, 0);
-		layouter.setDefaultGridData(gd, 1);
-		layouter.setDefaultSpan();
-
-		layouter.perform(createExpression(result));
+		Control expressionComposite= createExpression(result);
+		expressionComposite.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false, 2, 1));
+		
+		Label separator= new Label(result, SWT.NONE);
+		separator.setVisible(false);
+		GridData data= new GridData(GridData.FILL, GridData.FILL, false, false, 2, 1);
+		data.heightHint= convertHeightInCharsToPixels(1) / 3;
+		separator.setLayoutData(data);
+		
 		Control searchFor= createSearchFor(result);
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.verticalAlignment= GridData.FILL;
-		searchFor.setLayoutData(gd);
+		searchFor.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
 
 		Control limitTo= createLimitTo(result);
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.verticalAlignment= GridData.FILL;
-		limitTo.setLayoutData(gd);
+		limitTo.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
 
+		fSearchJRE= new Button(result, SWT.CHECK);
+		fSearchJRE.setText(SearchMessages.getString("SearchPage.searchJRE.label")); //$NON-NLS-1$
+		fSearchJRE.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				setSearchJRE(fSearchJRE.getSelection());
+			}
+		});
+		fSearchJRE.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
+		
 		//createParticipants(result);
 		
 		SelectionAdapter javaElementInitializer= new SelectionAdapter() {
@@ -480,17 +482,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 		Dialog.applyDialogFont(result);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(result, IJavaHelpContextIds.JAVA_SEARCH_PAGE);	
-	}
-
-	private Control createSearchJRE(Composite result) {
-		fSearchJRE= new Button(result, SWT.CHECK);
-		fSearchJRE.setText(SearchMessages.getString("SearchPage.searchJRE.label")); //$NON-NLS-1$
-		fSearchJRE.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				setSearchJRE(fSearchJRE.getSelection());
-			}
-		});
-		return fSearchJRE;
 	}
 	
 	public static boolean getSearchJRE() {
@@ -526,19 +517,14 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	private Control createExpression(Composite parent) {
 		Composite result= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout(2, false);
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
 		result.setLayout(layout);
-		GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
-		gd.horizontalSpan= 2;
-		gd.horizontalIndent= 0;
-		result.setLayoutData(gd);
 
 		// Pattern text + info
 		Label label= new Label(result, SWT.LEFT);
 		label.setText(SearchMessages.getString("SearchPage.expression.label")); //$NON-NLS-1$
-		gd= new GridData(GridData.BEGINNING);
-		gd.horizontalSpan= 2;
-//		gd.horizontalIndent= -gd.horizontalIndent;
-		label.setLayoutData(gd);
+		label.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false, false, 2, 1));
 
 		// Pattern combo
 		fPattern= new Combo(result, SWT.SINGLE | SWT.BORDER);
@@ -555,29 +541,25 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 			}
 		});
-		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
-		// limit preferred size 
-		gd.widthHint= convertWidthInCharsToPixels(50);
-		gd.horizontalIndent= -gd.horizontalIndent;
-		fPattern.setLayoutData(gd);
-
+		GridData data= new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1);
+		data.widthHint= convertWidthInCharsToPixels(50);
+		fPattern.setLayoutData(data);
 
 		// Ignore case checkbox		
 		fCaseSensitive= new Button(result, SWT.CHECK);
 		fCaseSensitive.setText(SearchMessages.getString("SearchPage.expression.caseSensitive")); //$NON-NLS-1$
-		gd= new GridData();
-		fCaseSensitive.setLayoutData(gd);
 		fCaseSensitive.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				fIsCaseSensitive= fCaseSensitive.getSelection();
 			}
 		});
+		fCaseSensitive.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false, false, 1, 1));
 		
 		return result;
 	}
 	
 	final void updateOKStatus() {
-		boolean isValid= getContainer().hasValidScope() && isValidSearchPattern();
+		boolean isValid= isValidSearchPattern();
 		getContainer().setPerformActionEnabled(isValid);
 	}
 	
@@ -647,23 +629,21 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	private Control createSearchFor(Composite parent) {
 		Group result= new Group(parent, SWT.NONE);
 		result.setText(SearchMessages.getString("SearchPage.searchFor.label")); //$NON-NLS-1$
-		GridLayout layout= new GridLayout();
-		layout.numColumns= 3;
-		result.setLayout(layout);
+		result.setLayout(new GridLayout(2, true));
 
 		fSearchFor= new Button[fSearchForText.length];
 		for (int i= 0; i < fSearchForText.length; i++) {
 			Button button= new Button(result, SWT.RADIO);
 			button.setText(fSearchForText[i]);
 			button.setSelection(i == TYPE);
+			button.setLayoutData(new GridData());
 			fSearchFor[i]= button;
 		}
 
 		// Fill with dummy radio buttons
-		Button filler= new Button(result, SWT.RADIO);
+		Label filler= new Label(result, SWT.NONE);
 		filler.setVisible(false);
-		filler= new Button(result, SWT.RADIO);
-		filler.setVisible(false);
+		filler.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
 
 		return result;		
 	}
@@ -671,9 +651,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	private Control createLimitTo(Composite parent) {
 		Group result= new Group(parent, SWT.NONE);
 		result.setText(SearchMessages.getString("SearchPage.limitTo.label")); //$NON-NLS-1$
-		GridLayout layout= new GridLayout();
-		layout.numColumns= 2;
-		result.setLayout(layout);
+		result.setLayout(new GridLayout(2, true));
 		
 		SelectionAdapter listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -688,9 +666,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			fLimitTo[i]= button;
 			button.setSelection(i == REFERENCES);
 			button.addSelectionListener(listener);
+			button.setLayoutData(new GridData());
 		}
 		
-		createSearchJRE(result);
 		return result;		
 	}	
 	
