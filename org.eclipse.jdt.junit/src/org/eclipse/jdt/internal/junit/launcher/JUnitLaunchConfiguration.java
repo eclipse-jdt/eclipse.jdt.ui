@@ -9,7 +9,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Vector;
 
@@ -24,6 +23,7 @@ import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.launching.ExecutionArguments;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
 
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -39,9 +39,17 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 	 */
 	protected VMRunnerConfiguration createVMRunner(ILaunchConfiguration configuration, IType[] testTypes, int port, String runMode) throws CoreException {
 		String[] classPath= createClassPath(configuration);	
+		String progArgs= getProgramArguments(configuration);
 		VMRunnerConfiguration vmConfig= new VMRunnerConfiguration("org.eclipse.jdt.internal.junit.runner.RemoteTestRunner", classPath); //$NON-NLS-1$
-	
+
+		// insert the program arguments
 		Vector argv= new Vector(10);
+		ExecutionArguments execArgs = new ExecutionArguments("", progArgs); //$NON-NLS-1$
+		String[] pa= execArgs.getProgramArgumentsArray();
+		for (int i= 0; i < pa.length; i++) {
+			argv.add(pa[i]);
+		}
+
 		argv.add("-port"); //$NON-NLS-1$
 		argv.add(Integer.toString(port));
 		//argv("-debugging");
@@ -86,28 +94,34 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 			throw new CoreException(new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID, IStatus.ERROR, "", e));
 		}
 	}
-
 	
 	private String[] createClassPath(ILaunchConfiguration configuration) throws CoreException {
 		URL url= JUnitPlugin.getDefault().getDescriptor().getInstallURL();
 		String[] cp= getClasspath(configuration);
-		boolean inDevelopmentMode= BootLoader.inDevelopmentMode();
-
-		String[] classPath= new String[cp.length + 1];
-		System.arraycopy(cp, 0, classPath, 1, cp.length);
+		String[] classPath= null;
+		
 		try {
-			if (inDevelopmentMode) {
+			if (BootLoader.inDevelopmentMode()) {
 				// assumption is that the output folder is called bin!
+				classPath= new String[cp.length + 2];
+				System.arraycopy(cp, 0, classPath, 2, cp.length);
 				classPath[0]= Platform.asLocalURL(new URL(url, "bin")).getFile(); //$NON-NLS-1$
+				classPath[1]= Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile(); //$NON-NLS-1$
 			}
 			else {
+				classPath= new String[cp.length + 1];
+				System.arraycopy(cp, 0, classPath, 1, cp.length);
 				classPath[0]= Platform.asLocalURL(new URL(url, "junitsupport.jar")).getFile(); //$NON-NLS-1$
 			}
-		} catch (MalformedURLException e) {
-			JUnitPlugin.log(e); // TO DO abort run and inform user
 		} catch (IOException e) {
-			JUnitPlugin.log(e); // TO DO abort run and inform user
+			JUnitPlugin.log(e); // TODO abort run and inform user
 		}
 		return classPath;
 	}	
+	
+	
+	
+	
+	
+		
 }

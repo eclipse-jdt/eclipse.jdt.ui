@@ -112,8 +112,12 @@ class FailureRunView implements ITestRunView, IMenuListener {
 
 	public void menuAboutToShow(IMenuManager manager){
 		if (fTable.getSelectionCount() > 0) {
-			manager.add(new OpenTestAction(fRunnerViewPart, getClassName(), getMethodName()));
-			manager.add(new RerunAction(fRunnerViewPart, getClassName(), getMethodName()));
+			String className= getClassName();
+			String methodName= getMethodName();
+			if (className != null) {
+				manager.add(new OpenTestAction(fRunnerViewPart, className, methodName));
+				manager.add(new RerunAction(fRunnerViewPart, className, methodName));
+			}
 		}
 	}		
 	

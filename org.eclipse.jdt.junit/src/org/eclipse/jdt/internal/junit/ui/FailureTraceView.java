@@ -30,6 +30,7 @@ import org.eclipse.jface.action.MenuManager;
  * A view that shows a stack trace of a failed test.
  */
 class FailureTraceView implements IMenuListener {
+	private static final String FRAME_PREFIX= "at ";
 	private Table fTable;
 	private TestRunnerViewPart fTestRunner;
 	private String fInputTrace;
@@ -91,10 +92,10 @@ class FailureTraceView implements IMenuListener {
 
 	private Action createOpenEditorAction(String traceLine) {
 		try { 
-			// TO DO works for JDK stack trace only
+			//TODO: works for JDK stack trace only
 			String testName= traceLine;
-			testName= testName.substring(testName.indexOf("at ")); //$NON-NLS-1$
-			testName= testName.substring(3, testName.indexOf('(')).trim();
+			testName= testName.substring(testName.indexOf(FRAME_PREFIX)); //$NON-NLS-1$
+			testName= testName.substring(FRAME_PREFIX.length(), testName.indexOf('(')).trim();
 			testName= testName.substring(0, testName.lastIndexOf('.'));
 			
 			String lineNumber= traceLine;

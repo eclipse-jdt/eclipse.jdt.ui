@@ -27,4 +27,7 @@ public interface IJUnitHelpContextIds {
 	public static final String NEW_TESTCASE_WIZARD_PAGE= PREFIX + "new_testcase_wizard_page_context"; //$NON-NLS-1$
 	public static final String NEW_TESTCASE_WIZARD_PAGE2= PREFIX + "new_testcase_wizard_page2_context"; //$NON-NLS-1$
 	public static final String NEW_TESTSUITE_WIZARD_PAGE= PREFIX + "new_testsuite_wizard_page2_context"; //$NON-NLS-1$
+	
+	// Dialogs
+	public static final String TEST_SELECTION_DIALOG= PREFIX + "test_selection_context"; //$NON-NLS-1$
 }

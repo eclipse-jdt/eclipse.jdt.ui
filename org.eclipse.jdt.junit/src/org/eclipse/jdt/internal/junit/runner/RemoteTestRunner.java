@@ -141,10 +141,6 @@ public class RemoteTestRunner implements TestListener {
      * </pre>
      */
 	public static void main(String[] args) {
-		// hack to pass the AllTests of JUnit
-		// force static initialization of BaseTestRunner 
-		// by creating a junit.textui.TestRunner and free
-		// it immediately.		
 		RemoteTestRunner testRunServer= new RemoteTestRunner();
 		testRunServer.init(args);
 		testRunServer.run();
@@ -227,6 +223,12 @@ public class RemoteTestRunner implements TestListener {
 		}
 		finally {
 			br.close();
+		}
+		if (fDebugMode) {
+			System.out.println("Tests:");
+			for (int i= 0; i < fTestClassNames.length; i++) {
+				System.out.println("    "+fTestClassNames[i]);
+			}
 		}
 	}
 
@@ -329,6 +331,7 @@ public class RemoteTestRunner implements TestListener {
 	private void runTests(String[] testClassNames) {
 		// instantiate all tests
 		Test[] suites= new Test[testClassNames.length];
+		
 		for (int i= 0; i < suites.length; i++) {
 			Test test= getTest(testClassNames[i]);
 			suites[i]= test;
@@ -345,13 +348,12 @@ public class RemoteTestRunner implements TestListener {
 		
 		long startTime= System.currentTimeMillis();
 		if (fDebugMode)
-			System.out.println("start send tree"); //$NON-NLS-1$
+			System.out.print("start send tree..."); //$NON-NLS-1$
 		for (int i= 0; i < suites.length; i++) {
 			sendTree(suites[i]);
 		}
-		
 		if (fDebugMode)
-			System.out.println("done send tree"+(System.currentTimeMillis()-startTime)); //$NON-NLS-1$
+			System.out.println("done send tree - time(ms): "+(System.currentTimeMillis()-startTime)); //$NON-NLS-1$
 
 		long testStartTime= System.currentTimeMillis();
 		for (int i= 0; i < suites.length; i++) {

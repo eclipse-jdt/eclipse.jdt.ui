@@ -50,6 +50,14 @@
                 visible="false" 
                 relationship="stack"/> 
         </perspectiveExtension> 
+        <perspectiveExtension 
+			targetID="org.eclipse.jdt.ui.JavaPerspective">
+			<actionSet id="org.eclipse.jdt.junit.JUnitActionSet"/>
+		</perspectiveExtension>
+		<perspectiveExtension 
+			targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+			<actionSet id="org.eclipse.jdt.junit.JUnitActionSet"/>
+		</perspectiveExtension>
     </extension> 
 
 	<extension
@@ -136,8 +144,23 @@
 				class="org.eclipse.jdt.internal.junit.wizards.UpdateTestSuite">
 			</action>
 		</objectContribution>
-	
 	</extension>
+
+   <extension point="org.eclipse.ui.actionSets">
+		<actionSet
+            label="JUnit"
+            visible="false"
+            id="org.eclipse.jdt.junit.JUnitActionSet">
+			<action
+				label="Test..."
+				tooltip="Go to Test Referring to Selection"
+				class="org.eclipse.jdt.internal.junit.ui.GotoReferencedTestAction"
+				menubarPath="navigate/goTo/"
+				id="junit.actions.GotoTestAction">
+			</action>
+		</actionSet>
+   </extension>	
+	
 	
 	<extension id="junit_task" point="org.eclipse.core.resources.markers" name="%Task.name">
 		<super type="org.eclipse.core.resources.taskmarker"/>

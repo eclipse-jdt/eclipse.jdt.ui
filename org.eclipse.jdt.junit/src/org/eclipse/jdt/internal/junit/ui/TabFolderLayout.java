@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Layout;
 
 /**
  * Layout that fixes an SWT limitation on Motif
+ * TODO: check whether this is still required
  */
 public class TabFolderLayout extends Layout {
 	
