@@ -21,62 +21,46 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.IWorkbenchPropertyPage;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
 /**
- * Property page used to configure project specific compiler settings
+ * Base for project property and preference pages
  */
 public abstract class PropertyAndPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IWorkbenchPropertyPage {
 	
 	private Control fConfigurationBlockControl;
 	private ControlEnableState fBlockEnableState;
-	private SelectionButtonDialogField fUseWorkspaceSettings;
-	private SelectionButtonDialogField fChangeWorkspaceSettings;
+	//private SelectionButtonDialogField fUseWorkspaceSettings;
+	private Hyperlink fChangeWorkspaceSettings;
 	private SelectionButtonDialogField fUseProjectSettings;
 	private IStatus fBlockStatus;
-
 	
 	private IJavaProject fProject; // project or null
 	
-
 	public PropertyAndPreferencePage() {
 		fBlockStatus= new StatusInfo();
 		fBlockEnableState= null;
 		fProject= null;
-		
-		IDialogFieldListener listener= new IDialogFieldListener() {
-			public void dialogFieldChanged(DialogField field) {
-				doDialogFieldChanged(field);
-			}
-		};
-		
-		fUseWorkspaceSettings= new SelectionButtonDialogField(SWT.RADIO);
-		fUseWorkspaceSettings.setDialogFieldListener(listener);
-		fUseWorkspaceSettings.setLabelText(PreferencesMessages.getString("PropertyAndPreferencePage.useworkspacesettings.label")); //$NON-NLS-1$
-
-		fChangeWorkspaceSettings= new SelectionButtonDialogField(SWT.PUSH);
-		fChangeWorkspaceSettings.setLabelText(PreferencesMessages.getString("PropertyAndPreferencePage.useworkspacesettings.change")); //$NON-NLS-1$
-		fChangeWorkspaceSettings.setDialogFieldListener(listener);
-	
-		fUseWorkspaceSettings.attachDialogField(fChangeWorkspaceSettings);
-
-		fUseProjectSettings= new SelectionButtonDialogField(SWT.RADIO);
-		fUseProjectSettings.setDialogFieldListener(listener);
-		fUseProjectSettings.setLabelText(PreferencesMessages.getString("PropertyAndPreferencePage.useprojectsettings.label")); //$NON-NLS-1$
 	}
 
 	protected abstract Control createPreferenceContent(Composite composite);
@@ -95,16 +79,52 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		composite.setLayout(layout);
 		
 		if (isProjectPreferencePage()) {
-			fUseWorkspaceSettings.doFillIntoGrid(composite, 1);
-			LayoutUtil.setHorizontalGrabbing(fUseWorkspaceSettings.getSelectionButton(null));
+			IDialogFieldListener listener= new IDialogFieldListener() {
+				public void dialogFieldChanged(DialogField field) {
+					doProjectWorkspaceStateChanged();
+				}
+			};
 			
-			fChangeWorkspaceSettings.doFillIntoGrid(composite, 1);
+//			fUseWorkspaceSettings= new SelectionButtonDialogField(SWT.RADIO);
+//			fUseWorkspaceSettings.setDialogFieldListener(listener);
+//			fUseWorkspaceSettings.setLabelText(PreferencesMessages.getString("PropertyAndPreferencePage.useworkspacesettings.label")); //$NON-NLS-1$
+//			
+//			fUseWorkspaceSettings.doFillIntoGrid(composite, 1);
+//			LayoutUtil.setHorizontalGrabbing(fUseWorkspaceSettings.getSelectionButton(null));
 			
-			fUseProjectSettings.doFillIntoGrid(composite, 2);
+			fUseProjectSettings= new SelectionButtonDialogField(SWT.CHECK);
+			fUseProjectSettings.setDialogFieldListener(listener);
+			fUseProjectSettings.setLabelText(PreferencesMessages.getString("PropertyAndPreferencePage.useprojectsettings.label")); //$NON-NLS-1$
+			fUseProjectSettings.doFillIntoGrid(composite, 1);
+			LayoutUtil.setHorizontalGrabbing(fUseProjectSettings.getSelectionButton(null));
+			
+			fChangeWorkspaceSettings= new Hyperlink(composite, SWT.NONE);
+			fChangeWorkspaceSettings.setText(PreferencesMessages.getString("PropertyAndPreferencePage.useworkspacesettings.change")); //$NON-NLS-1$
+			fChangeWorkspaceSettings.setLayoutData(new GridData());
+			fChangeWorkspaceSettings.setUnderlined(true);
+			fChangeWorkspaceSettings.setForeground(JFaceResources.getColorRegistry().get(JFacePreferences.HYPERLINK_COLOR));
+			
+			fChangeWorkspaceSettings.addHyperlinkListener(new HyperlinkAdapter() {
+				public void linkActivated(HyperlinkEvent e) {
+					openWorkspacePreferences();
+				}
+				
+				public void linkEntered(HyperlinkEvent e) {
+					fChangeWorkspaceSettings.setForeground(JFaceResources.getColorRegistry().get(JFacePreferences.ACTIVE_HYPERLINK_COLOR));
+				}
+				
+				public void linkExited(HyperlinkEvent e) {
+					fChangeWorkspaceSettings.setForeground(JFaceResources.getColorRegistry().get(JFacePreferences.HYPERLINK_COLOR));
+				}
+				
+			});
+			
+
 		}
 			
-		GridData data= new GridData(GridData.FILL, GridData.FILL, !isProjectPreferencePage(), false);
+		GridData data= new GridData(GridData.FILL, GridData.FILL, !isProjectPreferencePage(), true);
 		data.horizontalSpan= 2;
+		data.heightHint= 0;
 		
 		fConfigurationBlockControl= createPreferenceContent(composite);
 		fConfigurationBlockControl.setLayoutData(data);
@@ -113,7 +133,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 			boolean useProjectSettings= hasProjectSpecificOptions();
 			
 			fUseProjectSettings.setSelection(useProjectSettings);
-			fUseWorkspaceSettings.setSelection(!useProjectSettings);
+			//fUseWorkspaceSettings.setSelection(!useProjectSettings);
 			
 			doProjectWorkspaceStateChanged();
 		}
@@ -123,7 +143,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	}
 	
 	protected boolean useProjectSettings() {
-		return fUseProjectSettings.isSelected();
+		return isProjectPreferencePage() && fUseProjectSettings != null && fUseProjectSettings.isSelected();
 	}
 	
 	protected boolean isProjectPreferencePage() {
@@ -136,22 +156,28 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	
 	protected abstract void openWorkspacePreferences();
 	
-	private void doDialogFieldChanged(DialogField field) {
-		if (field == fChangeWorkspaceSettings) {
-			openWorkspacePreferences();
-		} else {
-			doProjectWorkspaceStateChanged();
-		}
-	}	
-	
 	private void doProjectWorkspaceStateChanged() {
 		enablePreferenceContent(useProjectSettings());
+		fChangeWorkspaceSettings.setVisible(!useProjectSettings());
 		doStatusChanged();
 	}
 
 	protected void setPreferenceContentStatus(IStatus status) {
 		fBlockStatus= status;
 		doStatusChanged();
+	}
+	
+	/**
+	 * Returns a new status change listener that calls {@link #setPreferenceContentStatus(IStatus)}
+	 * when the status has changed
+	 * @return The new listener
+	 */
+	protected IStatusChangeListener getNewStatusChangedListener() {
+		return new IStatusChangeListener() {
+			public void statusChanged(IStatus status) {
+				setPreferenceContentStatus(status);
+			}
+		};		
 	}
 	
 	protected IStatus getPreferenceContentStatus() {
@@ -185,7 +211,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	protected void performDefaults() {
 		if (useProjectSettings()) {
 			fUseProjectSettings.setSelection(false);
-			fUseWorkspaceSettings.setSelection(true);
+			//fUseWorkspaceSettings.setSelection(true);
 		}
 		super.performDefaults();
 	}

@@ -31,8 +31,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -66,11 +64,8 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 	}
 	
 	private class TodoTaskLabelProvider extends LabelProvider implements ITableLabelProvider, IFontProvider {
-	
-		private Font fBold;
 
 		public TodoTaskLabelProvider() {
-			fBold= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry().getBold(JFaceResources.DIALOG_FONT);
 		}
 		
 		/* (non-Javadoc)
@@ -121,7 +116,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		 */
 		public Font getFont(Object element) {
 			if (isDefaultTask((TodoTask) element)) {
-				return fBold;
+				return JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT);
 			}
 			return null;
 		}

@@ -33,6 +33,7 @@
       <import plugin="org.eclipse.core.runtime.compatibility"/>
       <import plugin="org.eclipse.ltk.core.refactoring"/>
       <import plugin="org.eclipse.ltk.ui.refactoring"/>
+      <import plugin="org.eclipse.ui.forms"/>
    </requires>
 
 
@@ -464,6 +465,88 @@
                value="org.eclipse.jdt.core.javanature">
          </filter>
       </page>
+      <!-- wait for hierarchical property pages
+      <page
+            objectClass="org.eclipse.core.resources.IProject"
+            name="%compliancePageName"
+            class="org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+      <page
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            name="%compliancePageName"
+            class="org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+      <page
+            objectClass="org.eclipse.core.resources.IProject"
+            name="%problemSeveritiesPageName"
+            class="org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.ProblemSeveritiesPropertyPage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+      <page
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            name="%problemSeveritiesPageName"
+            class="org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.ProblemSeveritiesPropertyPage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+      <page
+            objectClass="org.eclipse.core.resources.IProject"
+            name="%javadocProblemsPageName"
+            class="org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.JavadocProblemsPreferencePage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+      <page
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            name="%javadocProblemsPageName"
+            class="org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.JavadocProblemsPreferencePage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+      <page
+            objectClass="org.eclipse.core.resources.IProject"
+            name="%builderPageName"
+            class="org.eclipse.jdt.internal.ui.preferences.JavaBuildPreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.JavaBuildPreferencePage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+      <page
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            name="%builderPageName"
+            class="org.eclipse.jdt.internal.ui.preferences.JavaBuildPreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.JavaBuildPreferencePage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+      -->
       <page
             objectClass="org.eclipse.core.resources.IProject"
             name="%todoPageName"
@@ -924,15 +1007,34 @@
             class="org.eclipse.jdt.internal.ui.preferences.PropertiesFileEditorPreferencePage"
             id="org.eclipse.jdt.ui.preferences.PropertiesFileEditorPreferencePage">
       </page>
+      
       <page
-            name="%compilerOptionsPrefName"
+            name="%compliancePrefName"
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.CompilerPreferencePage"
-            id="org.eclipse.jdt.ui.preferences.CompilerPreferencePage">
+            class="org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage"
+            id="org.eclipse.jdt.ui.preferences.CompliancePreferencePage">
+      </page>
+      <page
+            name="%problemSeveritiesPrefName"
+            category="org.eclipse.jdt.ui.preferences.CompliancePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage">
+      </page>
+            <page
+            name="%javadocProblemsPrefName"
+            category="org.eclipse.jdt.ui.preferences.CompliancePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.JavadocProblemsPreferencePage">
+      </page>
+      <page
+            name="%javaBuildPrefName"
+            category="org.eclipse.jdt.ui.preferences.CompliancePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.JavaBuildPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.JavaBuildPreferencePage">
       </page>
       <page
             name="%todoTaskPrefName"
-            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
+            category="org.eclipse.jdt.ui.preferences.CompliancePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.TodoTaskPreferencePage"
             id="org.eclipse.jdt.ui.preferences.TodoTaskPreferencePage">
       </page>

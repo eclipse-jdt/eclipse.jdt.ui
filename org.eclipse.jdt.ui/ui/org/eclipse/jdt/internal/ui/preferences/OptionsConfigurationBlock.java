@@ -46,6 +46,11 @@ import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.JFaceResources;
+
+import org.eclipse.ui.forms.events.ExpansionAdapter;
+import org.eclipse.ui.forms.events.ExpansionEvent;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -125,7 +130,7 @@ public abstract class OptionsConfigurationBlock {
 		fTextBoxes= new ArrayList(2);
 		fLabels= new HashMap();
 	}
-	
+		
 	private void testIfOptionsComplete(Map workingValues, String[] allKeys) {
 		for (int i= 0; i < allKeys.length; i++) {
 			if (workingValues.get(allKeys[i]) == null) {
@@ -222,6 +227,8 @@ public abstract class OptionsConfigurationBlock {
 		checkBox.setLayoutData(gd);
 		checkBox.addSelectionListener(getSelectionListener());
 		
+		adapt(checkBox);
+		
 		String currValue= (String)fWorkingValues.get(key);
 		checkBox.setSelection(data.getSelection(currValue) == 0);
 		
@@ -231,36 +238,22 @@ public abstract class OptionsConfigurationBlock {
 	}
 	
 	protected Combo addComboBox(Composite parent, String label, String key, String[] values, String[] valueLabels, int indent) {
-		ControlData data= new ControlData(key, values);
-		
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		GridData gd= new GridData(GridData.FILL, GridData.CENTER, true, false, 2, 1);
 		gd.horizontalIndent= indent;
 				
 		Label labelControl= new Label(parent, SWT.LEFT | SWT.WRAP);
 		labelControl.setText(label);
 		labelControl.setLayoutData(gd);
-		
-		Combo comboBox= new Combo(parent, SWT.READ_ONLY);
-		comboBox.setItems(valueLabels);
-		comboBox.setData(data);
+				
+		Combo comboBox= newComboControl(parent, key, values, valueLabels);
 		comboBox.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-		comboBox.addSelectionListener(getSelectionListener());
-		
+
 		fLabels.put(comboBox, labelControl);
 		
-		Label placeHolder= new Label(parent, SWT.NONE);
-		placeHolder.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
-		String currValue= (String)fWorkingValues.get(key);	
-		comboBox.select(data.getSelection(currValue));
-		
-		fComboBoxes.add(comboBox);
 		return comboBox;
 	}
 	
-	protected void addInversedComboBox(Composite parent, String label, String key, String[] values, String[] valueLabels, int indent) {
-		ControlData data= new ControlData(key, values);
-		
+	protected Combo addInversedComboBox(Composite parent, String label, String key, String[] values, String[] valueLabels, int indent) {
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= indent;
 		gd.horizontalSpan= 3;
@@ -273,24 +266,34 @@ public abstract class OptionsConfigurationBlock {
 		composite.setLayout(layout);
 		composite.setLayoutData(gd);
 		
-		Combo comboBox= new Combo(composite, SWT.READ_ONLY);
-		comboBox.setItems(valueLabels);
-		comboBox.setData(data);
+		Combo comboBox= newComboControl(composite, key, values, valueLabels);
 		comboBox.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-		comboBox.addSelectionListener(getSelectionListener());
 		
 		Label labelControl= new Label(composite, SWT.LEFT | SWT.WRAP);
 		labelControl.setText(label);
 		labelControl.setLayoutData(new GridData());
 		
 		fLabels.put(comboBox, labelControl);
+		return comboBox;
+	}
+	
+	protected Combo newComboControl(Composite composite, String key, String[] values, String[] valueLabels) {
+		ControlData data= new ControlData(key, values);
+		
+		Combo comboBox= new Combo(composite, SWT.READ_ONLY);
+		comboBox.setItems(valueLabels);
+		comboBox.setData(data);
+		comboBox.addSelectionListener(getSelectionListener());
+			
+		adapt(comboBox);
 		
 		String currValue= (String)fWorkingValues.get(key);	
 		comboBox.select(data.getSelection(currValue));
 		
 		fComboBoxes.add(comboBox);
+		return comboBox;
 	}
-	
+
 	protected Text addTextField(Composite parent, String label, String key, int indent, int widthHint) {	
 		Label labelControl= new Label(parent, SWT.NONE);
 		labelControl.setText(label);
@@ -299,6 +302,8 @@ public abstract class OptionsConfigurationBlock {
 		Text textBox= new Text(parent, SWT.BORDER | SWT.SINGLE);
 		textBox.setData(key);
 		textBox.setLayoutData(new GridData());
+		
+		adapt(textBox);
 		
 		fLabels.put(textBox, labelControl);
 		
@@ -318,7 +323,53 @@ public abstract class OptionsConfigurationBlock {
 
 		fTextBoxes.add(textBox);
 		return textBox;
-	}	
+	}
+	
+	protected ScrolledPageContent getParentScrolledComposite(Control control) {
+		Control parent= control.getParent();
+		while (!(parent instanceof ScrolledPageContent)) {
+			parent= parent.getParent();
+		}
+		if (parent instanceof ScrolledPageContent) {
+			return (ScrolledPageContent) parent;
+		}
+		return null;
+	}
+	
+	private void adapt(Control control) {
+		ScrolledPageContent parentScrolledComposite= getParentScrolledComposite(control);
+		if (parentScrolledComposite != null) {
+			parentScrolledComposite.adaptChild(control);
+		}
+	}
+	
+	protected ExpandableComposite createStyleSection(Composite parent, String label, int nColumns) {
+		final ExpandableComposite excomposite= new ExpandableComposite(parent, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
+		excomposite.setText(label);
+		excomposite.setExpanded(true);
+		excomposite.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, nColumns, 1));
+		excomposite.addExpansionListener(new ExpansionAdapter() {
+			public void expansionStateChanged(ExpansionEvent e) {
+				updateSectionStyle((ExpandableComposite) e.getSource());
+				ScrolledPageContent parentScrolledComposite= getParentScrolledComposite(excomposite);
+				if (parentScrolledComposite != null) {
+					parentScrolledComposite.reflow(true);
+				}
+			}
+		});
+		
+		updateSectionStyle(excomposite);
+		return excomposite;
+	}
+	
+	protected void updateSectionStyle(ExpandableComposite excomposite) {
+		if (excomposite.isExpanded()) {
+			excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
+		} else {
+			excomposite.setFont(JFaceResources.getFontRegistry().get(JFaceResources.DIALOG_FONT));
+		}
+	}
+	
 
 	protected SelectionListener getSelectionListener() {
 		if (fSelectionListener == null) {
@@ -412,7 +463,6 @@ public abstract class OptionsConfigurationBlock {
 			}
 		}
 		
-		
 		if (hasChanges) {
 			boolean doBuild= false;
 			String[] strings= getFullBuildDialogStrings(fProject == null);
@@ -479,6 +529,9 @@ public abstract class OptionsConfigurationBlock {
 		fWorkingValues= getDefaultOptions();
 		updateControls();
 		validateSettings(null, null, null);
+	}
+	
+	public void dispose() {
 	}
 	
 	protected void updateControls() {

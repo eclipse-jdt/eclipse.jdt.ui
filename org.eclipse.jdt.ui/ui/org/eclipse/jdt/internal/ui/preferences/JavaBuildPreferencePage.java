@@ -23,25 +23,25 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Page used to configure both workspace and project specific compiler settings
  */
-public class CompilerPreferencePage extends PropertyAndPreferencePage {
+public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 
-	public static final String ID= "org.eclipse.jdt.ui.preferences.CompilerPreferencePage"; //$NON-NLS-1$
+	public static final String ID= "org.eclipse.jdt.ui.preferences.JavaBuildPreferencePage"; //$NON-NLS-1$
 
-	private CompilerConfigurationBlock fConfigurationBlock;
+	private JavaBuildConfigurationBlock fConfigurationBlock;
 
-	public CompilerPreferencePage() {
+	public JavaBuildPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(PreferencesMessages.getString("CompliancePreferencePage.description")); //$NON-NLS-1$
+		setDescription(PreferencesMessages.getString("JavaBuildPreferencePage.description")); //$NON-NLS-1$
 		
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.getString("CompliancePreferencePage.title"));		 //$NON-NLS-1$
+		setTitle(PreferencesMessages.getString("JavaBuildPreferencePage.title"));		 //$NON-NLS-1$
 	}
 
 	/*
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
-		fConfigurationBlock= new CompilerConfigurationBlock(getNewStatusChangedListener(), getProject());
+		fConfigurationBlock= new JavaBuildConfigurationBlock(getNewStatusChangedListener(), getProject());
 		
 		super.createControl(parent);
 		if (isProjectPreferencePage()) {
@@ -60,7 +60,7 @@ public class CompilerPreferencePage extends PropertyAndPreferencePage {
 	}
 	
 	protected void openWorkspacePreferences() {
-		CompilerPreferencePage page= new CompilerPreferencePage();
+		JavaBuildPreferencePage page= new JavaBuildPreferencePage();
 		PreferencePageSupport.showPreferencePage(getShell(), ID, page);
 	}
 	

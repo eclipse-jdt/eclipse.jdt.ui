@@ -15,24 +15,21 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.preference.PreferencePage;
-
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /*
- * The page to configure the code formatter options.
+ * The page to configure the naming style options.
  */
-public class CodeStylePreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IStatusChangeListener {
+public class CodeStylePreferencePage extends PropertyAndPreferencePage implements IWorkbenchPreferencePage {
 
-	private NameConventionConfigurationBlock fNamesConfigurationBlock;
+	public static final String ID= "org.eclipse.jdt.ui.preferences.CodeStylePreferencePage"; //$NON-NLS-1$
+
+	private NameConventionConfigurationBlock fConfigurationBlock;
 
 	public CodeStylePreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
@@ -40,66 +37,65 @@ public class CodeStylePreferencePage extends PreferencePage implements IWorkbenc
 		
 		// only used when page is shown programatically
 		setTitle(PreferencesMessages.getString("CodeStylePreferencePage.title"));		 //$NON-NLS-1$
-		
-		fNamesConfigurationBlock= new NameConventionConfigurationBlock(this, null);
 	}
 
 	/*
-	 * @see IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
-	 */	
-	public void init(IWorkbench workbench) {
-	}
-
-	/*
-	 * @see PreferencePage#createControl(Composite)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
+		IStatusChangeListener listener= new IStatusChangeListener() {
+			public void statusChanged(IStatus status) {
+				setPreferenceContentStatus(status);
+			}
+		};		
+		fConfigurationBlock= new NameConventionConfigurationBlock(listener, getProject());
+		
 		super.createControl(parent);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.CODE_MANIPULATION_PREFERENCE_PAGE);
-	}	
+	}
 
-	/*
-	 * @see PreferencePage#createContents(Composite)
-	 */
-	protected Control createContents(Composite parent) {
-		Control control= fNamesConfigurationBlock.createContents(parent);
+	protected Control createPreferenceContent(Composite composite) {
+		return fConfigurationBlock.createContents(composite);
+	}
 	
-		Dialog.applyDialogFont(control);
-		return control;
+	protected boolean hasProjectSpecificOptions() {
+		return fConfigurationBlock.hasProjectSpecificOptions();
+	}
+	
+	protected void openWorkspacePreferences() {
+		CodeStylePreferencePage page= new CodeStylePreferencePage();
+		PreferencePageSupport.showPreferencePage(getShell(), ID, page);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
+	 */
+	public void dispose() {
+		fConfigurationBlock.dispose();
+		super.dispose();
+	}
+	
+	/*
+	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
+	 */
+	protected void performDefaults() {
+		super.performDefaults();
+		if (fConfigurationBlock != null) {
+			fConfigurationBlock.performDefaults();
+		}
 	}
 
 	/*
-	 * @see IPreferencePage#performOk()
+	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		if (!fNamesConfigurationBlock.performOk(true)) {
+		boolean enabled= !isProjectPreferencePage() || useProjectSettings();
+		if (fConfigurationBlock != null && !fConfigurationBlock.performOk(enabled)) {
 			return false;
-		}
+		}	
 		return super.performOk();
 	}
 	
-	/*
-	 * @see PreferencePage#performDefaults()
-	 */
-	protected void performDefaults() {
-		fNamesConfigurationBlock.performDefaults();
-		super.performDefaults();
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener#statusChanged(org.eclipse.core.runtime.IStatus)
-	 */
-	public void statusChanged(IStatus status) {
-		setValid(!status.matches(IStatus.ERROR));
-		StatusUtil.applyToStatusLine(this, status);		
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.IPreferencePage#performCancel()
-	 */
-	public boolean performCancel() {
-		return super.performCancel();
-	}
 
 }
 

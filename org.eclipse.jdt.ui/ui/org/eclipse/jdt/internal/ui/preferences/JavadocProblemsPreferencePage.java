@@ -23,25 +23,25 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Page used to configure both workspace and project specific compiler settings
  */
-public class CompilerPreferencePage extends PropertyAndPreferencePage {
+public class JavadocProblemsPreferencePage extends PropertyAndPreferencePage {
 
-	public static final String ID= "org.eclipse.jdt.ui.preferences.CompilerPreferencePage"; //$NON-NLS-1$
+	public static final String ID= "org.eclipse.jdt.ui.preferences.JavadocProblemsPreferencePage"; //$NON-NLS-1$
 
-	private CompilerConfigurationBlock fConfigurationBlock;
+	private JavadocProblemsConfigurationBlock fConfigurationBlock;
 
-	public CompilerPreferencePage() {
+	public JavadocProblemsPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(PreferencesMessages.getString("CompliancePreferencePage.description")); //$NON-NLS-1$
+		//setDescription(PreferencesMessages.getString("JavadocProblemsPreferencePage.description")); //$NON-NLS-1$
 		
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.getString("CompliancePreferencePage.title"));		 //$NON-NLS-1$
+		setTitle(PreferencesMessages.getString("JavadocProblemsPreferencePage.title"));		 //$NON-NLS-1$
 	}
 
 	/*
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
-		fConfigurationBlock= new CompilerConfigurationBlock(getNewStatusChangedListener(), getProject());
+		fConfigurationBlock= new JavadocProblemsConfigurationBlock(getNewStatusChangedListener(), getProject());
 		
 		super.createControl(parent);
 		if (isProjectPreferencePage()) {
@@ -60,7 +60,7 @@ public class CompilerPreferencePage extends PropertyAndPreferencePage {
 	}
 	
 	protected void openWorkspacePreferences() {
-		CompilerPreferencePage page= new CompilerPreferencePage();
+		JavadocProblemsPreferencePage page= new JavadocProblemsPreferencePage();
 		PreferencePageSupport.showPreferencePage(getShell(), ID, page);
 	}
 	
@@ -68,7 +68,9 @@ public class CompilerPreferencePage extends PropertyAndPreferencePage {
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
 	public void dispose() {
-		fConfigurationBlock.dispose();
+		if (fConfigurationBlock != null) {
+			fConfigurationBlock.dispose();
+		}
 		super.dispose();
 	}
 	

@@ -102,4 +102,12 @@ public class SpellingPreferencePage extends PreferencePage implements IWorkbench
 
 		StatusUtil.applyToStatusLine(this, status);
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
+	 */
+	public void dispose() {
+		fBlock.dispose();
+		super.dispose();
+	}
 }
