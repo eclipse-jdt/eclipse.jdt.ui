@@ -281,7 +281,7 @@ public class CodeTemplateBlock {
 		viewer.getTextWidget().setFont(font);
 		
 		Control control= viewer.getControl();
-		data= new GridData(GridData.FILL_BOTH);
+		data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
 		data.horizontalSpan= nColumns;
 		data.heightHint= fPixelConverter.convertHeightInCharsToPixels(5);
 		control.setLayoutData(data);
