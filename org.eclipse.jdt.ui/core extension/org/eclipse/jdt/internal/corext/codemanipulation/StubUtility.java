@@ -255,7 +255,7 @@ public class StubUtility {
 		if (template == null) {
 			return bodyStatement;
 		}
-		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter, 0);
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, destTypeName);
 		context.setVariable(CodeTemplateContextType.BODY_STATEMENT, bodyStatement);
@@ -278,7 +278,7 @@ public class StubUtility {
 		if (template == null) {
 			return null;
 		}
-		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter, 0);
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, destTypeName);
 		context.setVariable(CodeTemplateContextType.FIELD, fieldName);
@@ -299,7 +299,7 @@ public class StubUtility {
 		if (template == null) {
 			return null;
 		}
-		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter, 0);
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, destTypeName);
 		context.setVariable(CodeTemplateContextType.FIELD, fieldName);
@@ -318,7 +318,7 @@ public class StubUtility {
 	public static String getCatchBodyContent(ICompilationUnit cu, String exceptionType, String variableName, String lineDelimiter) throws CoreException {
 		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.CATCHBLOCK);
 		if (template != null) {
-			CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), lineDelimiter, 0);
+			CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), lineDelimiter);
 			context.setVariable(CodeTemplateContextType.EXCEPTION_TYPE, exceptionType);
 			context.setVariable(CodeTemplateContextType.EXCEPTION_VAR, variableName); //$NON-NLS-1$
 			TemplateBuffer buffer= context.evaluate(template);
@@ -345,7 +345,7 @@ public class StubUtility {
 		}
 		
 		IJavaProject project= cu.getJavaProject();
-		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter, 0);
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter);
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.PACKAGE_DECLARATION, packDecl);
 		context.setVariable(CodeTemplateContextType.TYPE_COMMENT, typeComment != null ? typeComment : ""); //$NON-NLS-1$
@@ -369,7 +369,7 @@ public class StubUtility {
 		if (template == null) {
 			return null;
 		}
-		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), lineDelim, 0);
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), lineDelim);
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, Signature.getQualifier(typeQualifiedName));
 		context.setVariable(CodeTemplateContextType.TYPENAME, Signature.getSimpleName(typeQualifiedName));
@@ -458,7 +458,7 @@ public class StubUtility {
 		if (template == null) {
 			return null;
 		}		
-		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), lineDelimiter, 0);
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), lineDelimiter);
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, typeName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, methodName);
@@ -538,7 +538,7 @@ public class StubUtility {
 		if (template == null) {
 			return null;
 		}		
-		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), String.valueOf('\n'), 0);
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), cu.getJavaProject(), String.valueOf('\n'));
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, typeName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, decl.getName().getIdentifier());

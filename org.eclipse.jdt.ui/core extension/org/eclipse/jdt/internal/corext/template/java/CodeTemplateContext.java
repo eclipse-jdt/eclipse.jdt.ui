@@ -14,6 +14,10 @@ import java.util.Iterator;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DefaultLineTracker;
+import org.eclipse.jface.text.ILineTracker;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 
@@ -30,13 +34,11 @@ import org.eclipse.jdt.internal.corext.template.TemplateVariable;
 public class CodeTemplateContext extends TemplateContext {
 	
 	private String fLineDelimiter;
-	private int fInitialIndentLevel;
 	private IJavaProject fProject;
 
-	public CodeTemplateContext(String contextTypeName, IJavaProject project, String lineDelim, int initialIndentLevel) {
+	public CodeTemplateContext(String contextTypeName, IJavaProject project, String lineDelim) {
 		super(ContextTypeRegistry.getInstance().getContextType(contextTypeName));
 		fLineDelimiter= lineDelim;
-		fInitialIndentLevel= initialIndentLevel;
 		fProject= project;
 	}
 
@@ -59,14 +61,44 @@ public class CodeTemplateContext extends TemplateContext {
 
 		if (!canEvaluate(template))
 			return null;
+			
+		String pattern= changeLineDelimiter(template.getPattern(), fLineDelimiter);
 		
 		TemplateTranslator translator= new TemplateTranslator();
-		TemplateBuffer buffer= translator.translate(template.getPattern());
+		TemplateBuffer buffer= translator.translate(pattern);
 		if (buffer == null)
 			return null;
 		getContextType().edit(buffer, this);
+
 		return buffer;
 	}
+	
+	private static String changeLineDelimiter(String code, String lineDelim) {
+		try {
+			ILineTracker tracker= new DefaultLineTracker();
+			tracker.set(code);
+			int nLines= tracker.getNumberOfLines();
+			if (nLines == 1) {
+				return code;
+			}
+			
+			StringBuffer buf= new StringBuffer();
+			for (int i= 0; i < nLines; i++) {
+				if (i != 0) {
+					buf.append(lineDelim);
+				}
+				
+				int start= tracker.getLineOffset(i);
+				int end= start + tracker.getLineLength(i);
+				String line= code.substring(start, end);
+				buf.append(line);
+			}
+			return buf.toString();
+		} catch (BadLocationException e) {
+			// can not happen
+			return code;
+		}
+	}		
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.template.TemplateContext#canEvaluate(org.eclipse.jdt.internal.corext.template.Template)
