@@ -30,7 +30,7 @@ public interface IQuickFixProcessor {
 	 * 
 	 * @param unit the compilation unit
 	 * @param problemId the problem Id
-	 * @return <code>true</code> if the processor has proposals for the given problem
+	 * @return Returns <code>true</code> if the processor has proposals for the given problem
 	 */
 	boolean hasCorrections(ICompilationUnit unit, int problemId);
 	
@@ -38,9 +38,9 @@ public interface IQuickFixProcessor {
 	 * Collects corrections or code manipulations for the given context
 	 * @param context Defines current compilation unit, position and a shared AST.
 	 * @param locations Problems are the current location.
-	 * @return the corrections applicable at the location or <code>null</code> if no proposals
+	 * @return Returns the corrections applicable at the location or <code>null</code> if no proposals
 	 * 			can be offered.
-	 * @throws CoreException if this operation fails
+	 * @throws CoreException CoreException can be thrown if the operation fails
 	 */
 	IJavaCompletionProposal[] getCorrections(IInvocationContext context, IProblemLocation[] locations) throws CoreException;
 	

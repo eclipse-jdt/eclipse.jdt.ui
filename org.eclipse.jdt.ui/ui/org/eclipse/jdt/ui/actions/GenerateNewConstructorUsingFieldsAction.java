@@ -88,6 +88,23 @@ import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
+/**
+ * Creates constructors for a type based on existing fields.
+ * <p>
+ * Will open the parent compilation unit in a Java editor. Opens a dialog
+ * with a list fields from which a constructor will be generated.
+ * User is able to check or uncheck items before constructors are generated.
+ * The result is unsaved, so the user can decide if the changes are acceptable.
+ * <p>
+ * The action is applicable to structured selections containing elements
+ * of type <code>IType</code>.
+ * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
+ * @since 3.0
+ */
 public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
@@ -229,7 +246,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 					IField fld= (IField) curr;
 
 					if (i == 0) {
-						// remember the cu of the first element
+						// remember the CU of the first element
 						cu= fld.getCompilationUnit();
 						if (cu == null) {
 							return null;
@@ -399,7 +416,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			} catch (InvocationTargetException e) {
 				ExceptionHandler.handle(e, getShell(), getDialogTitle(), null);
 			} catch (InterruptedException e) {
-				// Do nothing. Operation has been canceled by user.
+				// Do nothing. Operation has been cancelled by user.
 			} finally {
 				if (target != null) {
 					target.endCompoundChange();
@@ -408,7 +425,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		}
 	}
 	
-	public static IMethod[] getSuperConstructors(IType type) throws CoreException {
+	private static IMethod[] getSuperConstructors(IType type) throws CoreException {
 		List constructorMethods= new ArrayList();
 		
 		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(null);				
