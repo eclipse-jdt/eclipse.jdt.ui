@@ -127,7 +127,11 @@ public class RefactoringSearchEngine {
 		return groupByResource(Arrays.asList(matches));	
 	}
 	
-	private static SearchResultGroup[] groupByResource(List matchList) {
+	/**
+	 * @param matchList a List of SearchMatch
+	 * @return a SearchResultGroup[], sorted by SearchMatch#getResource()
+	 */
+	public static SearchResultGroup[] groupByResource(List matchList) {
 		Map grouped= new HashMap();
 		for (Iterator iter= matchList.iterator(); iter.hasNext();) {
 			SearchMatch searchMatch= (SearchMatch) iter.next();
