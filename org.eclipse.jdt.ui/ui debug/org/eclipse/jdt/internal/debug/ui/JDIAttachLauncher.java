@@ -93,7 +93,11 @@ public class JDIAttachLauncher implements ILauncherDelegate {
 		JDIAttachLauncherWizard w= new JDIAttachLauncherWizard();
 		w.init(launcher, ILaunchManager.DEBUG_MODE, ss);
 		WizardDialog wd= new WizardDialog(JavaPlugin.getActiveWorkbenchWindow().getShell(), w);
-		return wd.open() == wd.OK;
+		wd.open();
+		// Return that this launch was successful, since we can't tell
+		// if the attach succeeded. If the attach fails, doLaunch()
+		// should generate user notification
+		return true;
 	}
 
 	protected void setPort(String port) {
