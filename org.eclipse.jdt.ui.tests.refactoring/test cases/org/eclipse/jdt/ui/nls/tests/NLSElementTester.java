@@ -3,7 +3,8 @@ package org.eclipse.jdt.ui.nls.tests;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.eclipse.jdt.internal.core.refactoring.nls.NLSElement;
+
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 
 public class NLSElementTester extends TestCase{
 	

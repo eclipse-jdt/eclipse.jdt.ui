@@ -1,13 +1,14 @@
 package org.eclipse.jdt.ui.nls.tests;
 
 import java.util.List;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import junit.textui.TestRunner;
-import org.eclipse.jdt.internal.core.refactoring.nls.NLSElement;
-import org.eclipse.jdt.internal.core.refactoring.nls.NLSLine;
-import org.eclipse.jdt.internal.core.refactoring.nls.NLSScanner;
+
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 
 public class NLSScannerTester extends TestCase {
 
