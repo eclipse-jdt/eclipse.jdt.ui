@@ -354,7 +354,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 
 	// Cannot move method if there's no new potential receiver (because of null bindings here)
 	public void testFail12() throws Exception {
-//		printTestDisabledMessage("bug 39910");
+//		printTestDisabledMessage("bug 39871");
 		failHelper1(new String[] {"p1.A"}, "p1.A", 5, 10, 5, 16, PARAMETER, "b", true, true, RefactoringStatusCodes.NO_NEW_RECEIVERS);	
 	}
 
