@@ -50,15 +50,21 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 	}
 	
 	/**
-	 * Returns the compilation unit if one is associated with this context, <code>null</code> otherwise.
+	 * Returns the compilation unit if one is associated with this context,
+	 * <code>null</code> otherwise.
+	 * 
+	 * @return the compilation unit of this context or <code>null</code>
 	 */
 	public final ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
 
 	/**
-	 * Returns the enclosing element of a particular element type, <code>null</code>
-	 * if no enclosing element of that type exists.
+	 * Returns the enclosing element of a particular element type,
+	 * <code>null</code> if no enclosing element of that type exists.
+	 * 
+	 * @param elementType the element type
+	 * @return the enclosing element of the given type or <code>null</code>
 	 */
 	public IJavaElement findEnclosingElement(int elementType) {
 		if (fCompilationUnit == null)
@@ -78,15 +84,19 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 	}
 
 	/**
-	 * Forces evaluation.
+	 * Sets whether evaluation is forced or not.
+	 * 
+	 * @param evaluate <code>true</code> in order to force evaluation,
+	 *            <code>false</code> otherwise
 	 */
 	public void setForceEvaluation(boolean evaluate) {
 		fForceEvaluation= evaluate;	
 	}
 	
 	/**
-	 * Returns the multivariable guess - state
-	 * @return
+	 * Returns the multi-variable guess.
+	 * 
+	 * @return the multi-variable guess
 	 */
 	public MultiVariableGuess getMultiVariableGuess() {
 		return fMultiVariableGuess;

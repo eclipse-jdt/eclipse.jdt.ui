@@ -97,6 +97,9 @@ class CompilationUnitCompletion extends CompletionRequestorAdapter {
 
 	/**
 	 * Tests if the code completion process produced errors.
+	 * 
+	 * @return <code>true</code> if there are errors, <code>false</code>
+	 *         otherwise
 	 */
 	public boolean hasErrors() {
 		return fError;
