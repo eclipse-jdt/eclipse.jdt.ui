@@ -33,7 +33,7 @@ public class GotoAnnotationAction extends TextEditorAction {
 	
 	public void run() {
 		JavaEditor e= (JavaEditor) getTextEditor();
-		e.gotoError(fForward);
+		e.gotoAnnotation(fForward);
 	}
 	
 	public void setEditor(ITextEditor editor) {

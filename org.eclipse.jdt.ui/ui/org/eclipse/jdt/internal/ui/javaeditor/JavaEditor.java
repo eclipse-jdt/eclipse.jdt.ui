@@ -22,6 +22,7 @@ import java.util.StringTokenizer;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.swt.SWT;
@@ -57,6 +58,15 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.IPostSelectionProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -98,15 +108,6 @@ import org.eclipse.jface.text.source.LineNumberChangeRulerColumn;
 import org.eclipse.jface.text.source.LineNumberRulerColumn;
 import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.IPostSelectionProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
@@ -122,9 +123,13 @@ import org.eclipse.ui.editors.quickdiff.IQuickDiffProviderImplementation;
 import org.eclipse.ui.editors.text.DefaultEncodingSupport;
 import org.eclipse.ui.editors.text.IEncodingSupport;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.internal.editors.quickdiff.DocumentLineDiffer;
+import org.eclipse.ui.internal.editors.quickdiff.ReferenceProviderDescriptor;
+import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.AddTaskAction;
+import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -132,6 +137,7 @@ import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
+import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.StatusTextEditor;
@@ -141,9 +147,7 @@ import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.tasklist.TaskList;
 
-import org.eclipse.ui.internal.editors.quickdiff.DocumentLineDiffer;
-import org.eclipse.ui.internal.editors.quickdiff.ReferenceProviderDescriptor;
-import org.eclipse.ui.internal.editors.text.EditorsPlugin;
+import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
@@ -182,9 +186,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNe
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 
@@ -1215,6 +1219,11 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	private MouseClickListener fMouseListener;
 	/** The information presenter. */
 	private InformationPresenter fInformationPresenter;
+	/**
+	 * The annotation preferences.
+	 * @since 3.0
+	 */
+	private MarkerAnnotationPreferences fAnnotationPreferences;
 	/** The annotation access */
 	protected IAnnotationAccess fAnnotationAccess= new AnnotationAccess();
 	/** The source viewer decoration support */
@@ -1259,6 +1268,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 */
 	public JavaEditor() {
 		super();
+		fAnnotationPreferences= new MarkerAnnotationPreferences();
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools, this));
 		setRangeIndicator(new DefaultRangeIndicator());
@@ -2507,6 +2517,10 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	protected void configureSourceViewerDecorationSupport() {
 	
 		fSourceViewerDecorationSupport.setCharacterPairMatcher(fBracketMatcher);
+
+		Iterator e= fAnnotationPreferences.getAnnotationPreferences().iterator();
+		while (e.hasNext())
+			fSourceViewerDecorationSupport.setAnnotationPreference((AnnotationPreference) e.next());
 				
 		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.UNKNOWN, UNKNOWN_INDICATION_COLOR, UNKNOWN_INDICATION, UNKNOWN_INDICATION_IN_OVERVIEW_RULER, 0);
 		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.BOOKMARK, BOOKMARK_INDICATION_COLOR, BOOKMARK_INDICATION, BOOKMARK_INDICATION_IN_OVERVIEW_RULER, 1);
@@ -2640,23 +2654,27 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	}
 
 	/**
-	 * Jumps to the error next according to the given direction.
+	 * Jumps to the next enabled annotation according to the given direction.
+	 * An annotation type is enabled if it is configured to be in the
+	 * Next/Previous tool bar drop down menu and if it is checked.
 	 */
-	public void gotoError(boolean forward) {
+	public void gotoAnnotation(boolean forward) {
 		
 		ISelectionProvider provider= getSelectionProvider();
 		
 		ITextSelection s= (ITextSelection) provider.getSelection();
-		Position errorPosition= new Position(0, 0);
-		IJavaAnnotation nextError= getNextError(s.getOffset(), forward, errorPosition);
+		Position annotationPosition= new Position(0, 0);
+		IJavaAnnotation nextAnnotation= getNextAnnotation(s.getOffset(), forward, annotationPosition);
 		
-		if (nextError != null) {
+		setStatusLineErrorMessage(null);
+
+		if (nextAnnotation != null) {
 			
 			IMarker marker= null;
-			if (nextError instanceof MarkerAnnotation)
-				marker= ((MarkerAnnotation) nextError).getMarker();
+			if (nextAnnotation instanceof MarkerAnnotation)
+				marker= ((MarkerAnnotation) nextAnnotation).getMarker();
 			else {
-				Iterator e= nextError.getOverlaidIterator();
+				Iterator e= nextAnnotation.getOverlaidIterator();
 				if (e != null) {
 					while (e.hasNext()) {
 						Object o= e.next();
@@ -2677,20 +2695,16 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				}
 			}
 			
-			selectAndReveal(errorPosition.getOffset(), errorPosition.getLength());
-			setStatusLineErrorMessage(nextError.getMessage());
-			
-		} else {
-			
-			setStatusLineErrorMessage(null);
-			
+			selectAndReveal(annotationPosition.getOffset(), annotationPosition.getLength());
+			if (nextAnnotation.isProblem())
+				setStatusLineErrorMessage(nextAnnotation.getMessage());
 		}
 	}
 
-	private IJavaAnnotation getNextError(int offset, boolean forward, Position errorPosition) {
+	private IJavaAnnotation getNextAnnotation(int offset, boolean forward, Position annotationPosition) {
 		
-		IJavaAnnotation nextError= null;
-		Position nextErrorPosition= null;
+		IJavaAnnotation nextAnnotation= null;
+		Position nextAnnotationPosition= null;
 		
 		IDocument document= getDocumentProvider().getDocument(getEditorInput());
 		int endOfDocument= document.getLength(); 
@@ -2701,7 +2715,44 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		while (e.hasNext()) {
 			
 			IJavaAnnotation a= (IJavaAnnotation) e.next();
-			if (a.hasOverlay() || !a.isProblem())
+			
+			// Map Java AnnotationType to workbench texteditor's annotation type
+			// XXX: This can be removed once Java plug-in uses workbench texteditor's type
+			String type= null;
+			int severity= IMarker.SEVERITY_INFO;				
+			if (a.getAnnotationType() == AnnotationType.BOOKMARK) {
+				type= IMarker.BOOKMARK;
+			} else if (a.getAnnotationType() == AnnotationType.SEARCH) {
+				type= SearchUI.SEARCH_MARKER;
+			} else if (a.getAnnotationType() == AnnotationType.TASK) {
+				type= IMarker.TASK;
+			} else if (a.getAnnotationType() == AnnotationType.WARNING) {
+				type= IMarker.PROBLEM;
+				severity= IMarker.SEVERITY_WARNING;
+			} else if (a.getAnnotationType() == AnnotationType.ERROR) {
+				type= IMarker.PROBLEM;
+				severity= IMarker.SEVERITY_ERROR;
+			}				
+
+			Preferences workbenchTextEditorPrefStore= Platform.getPlugin("org.eclipse.ui.workbench.texteditor").getPluginPreferences(); //$NON-NLS-1$
+			Iterator iter= fAnnotationPreferences.getAnnotationPreferences().iterator();
+			boolean isNavigationTarget= false;
+			while (iter.hasNext()) {
+				AnnotationPreference annotationPref= (AnnotationPreference)iter.next();
+				if (annotationPref.getMarkerType().equals(type) && annotationPref.getSeverity() == severity) {
+					String key;
+					if (forward)
+						key= annotationPref.getIsGoToNextNavigationTargetKey();
+					else
+						key= annotationPref.getIsGoToPreviousNavigationTargetKey();
+					if (key != null)
+						isNavigationTarget= workbenchTextEditorPrefStore.getBoolean(key);
+					break;
+				}
+				annotationPref= null;
+			}
+			
+			if (a.hasOverlay() || !isNavigationTarget)
 				continue;
 				
 			Position p= model.getPosition((Annotation) a);
@@ -2719,20 +2770,20 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 						currentDistance= offset + endOfDocument - p.getOffset();
 				}						
 										
-				if (nextError == null || currentDistance < distance) {
+				if (nextAnnotation == null || currentDistance < distance) {
 					distance= currentDistance;
-					nextError= a;
-					nextErrorPosition= p;
+					nextAnnotation= a;
+					nextAnnotationPosition= p;
 				}
 			}
 		}
 		
-		if (nextErrorPosition != null) {
-			errorPosition.setOffset(nextErrorPosition.getOffset());
-			errorPosition.setLength(nextErrorPosition.getLength());
+		if (nextAnnotationPosition != null) {
+			annotationPosition.setOffset(nextAnnotationPosition.getOffset());
+			annotationPosition.setLength(nextAnnotationPosition.getLength());
 		}
 		
-		return nextError;
+		return nextAnnotation;
 	}
 	
 	/**
