@@ -32,6 +32,7 @@ import org.eclipse.jface.preference.PreferencePage;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
@@ -40,7 +41,6 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
  * @since 3.0
  */
 class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
-
 
 	private List fContentAssistColorList;
 	private ColorEditor fContentAssistColorEditor;
@@ -111,7 +111,7 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 	 * @return the control for the preference page
 	 */
 	public Control createControl(Composite parent) {
-		SectionManager manager= new SectionManager();
+		SectionManager manager= new SectionManager(JavaPlugin.getDefault().getPreferenceStore(), "code_assist_preferences_last_open"); //$NON-NLS-1$
 		Composite contents= manager.createSectionComposite(parent);
 		Composite composite;
 		

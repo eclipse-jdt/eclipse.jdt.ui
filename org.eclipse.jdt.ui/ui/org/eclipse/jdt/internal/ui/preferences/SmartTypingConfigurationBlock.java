@@ -71,7 +71,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 	 * @return the control for the preference page
 	 */
 	public Control createControl(Composite parent) {
-		SectionManager manager= new SectionManager();
+		SectionManager manager= new SectionManager(JavaPlugin.getDefault().getPreferenceStore(), "smart_typing_preference_dialog_last_open_section"); //$NON-NLS-1$
 		Composite control= manager.createSectionComposite(parent);
 
 		Composite composite;

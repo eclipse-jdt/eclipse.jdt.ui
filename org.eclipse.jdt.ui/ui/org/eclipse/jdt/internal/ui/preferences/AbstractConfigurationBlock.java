@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 
 import org.eclipse.jface.text.Assert;
@@ -75,6 +76,8 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	 * </pre>
 	 */
 	protected final class SectionManager {
+		/** The preference setting for keeping no section open. */
+		private static final String __NONE= "__none"; //$NON-NLS-1$
 		private Set fSections= new HashSet();
 		private boolean fIsBeingManaged= false;
 		private ExpansionAdapter fListener= new ExpansionAdapter() {
@@ -94,6 +97,11 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 					} finally {
 						fIsBeingManaged= false;
 					}
+					if (fLastOpenKey != null && fDialogSettingsStore != null)
+						fDialogSettingsStore.setValue(fLastOpenKey, source.getText());
+				} else {
+					if (!fIsBeingManaged && fLastOpenKey != null && fDialogSettingsStore != null)
+						fDialogSettingsStore.setValue(fLastOpenKey, __NONE);
 				}
 				ExpandableComposite exComp= getParentExpandableComposite(source);
 				if (exComp != null)
@@ -105,10 +113,21 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 			}
 		};
 		private Composite fBody;
+		private final String fLastOpenKey;
+		private final IPreferenceStore fDialogSettingsStore;
+		private ExpandableComposite fFirstChild= null;
 		/**
 		 * Creates a new section manager.
 		 */
 		public SectionManager() {
+			this(null, null);
+		}
+		/**
+		 * Creates a new section manager.
+		 */
+		public SectionManager(IPreferenceStore dialogSettingsStore, String lastOpenKey) {
+			fDialogSettingsStore= dialogSettingsStore;
+			fLastOpenKey= lastOpenKey;
 		}
 		private void manage(ExpandableComposite section) {
 			if (section == null)
@@ -161,8 +180,20 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		public Composite createSection(String label) {
 			Assert.isNotNull(fBody);
 			final ExpandableComposite excomposite= new ExpandableComposite(fBody, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT | ExpandableComposite.COMPACT);
+			if (fFirstChild == null)
+				fFirstChild= excomposite;
 			excomposite.setText(label);
-			excomposite.setExpanded(false);
+			String last= null;
+			if (fLastOpenKey != null && fDialogSettingsStore != null)
+				last= fDialogSettingsStore.getString(fLastOpenKey);
+			
+			if (fFirstChild == excomposite && !__NONE.equals(last) || label.equals(last)) {
+				excomposite.setExpanded(true);
+				if (fFirstChild != excomposite)
+					fFirstChild.setExpanded(false);
+			} else {
+				excomposite.setExpanded(false);
+			}
 			excomposite.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, true, false));
 			
 			updateSectionStyle(excomposite);

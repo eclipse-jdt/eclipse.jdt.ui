@@ -58,6 +58,10 @@ import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
  */
 public final class JavaEditorPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 	
+	/** preference value for "nothing expanded" (null means to expand the first) */
+	private static final String __NONE= "__none"; //$NON-NLS-1$
+	private static final String LAST_OPEN_KEY= "java_editor_preference_dialog_last_open_section"; //$NON-NLS-1$
+	
 	private OverlayPreferenceStore fOverlayStore;
 	
 	private final IPreferenceConfigurationBlock[] fConfigurationBlocks;
@@ -160,7 +164,6 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 			private ExpansionAdapter fListener= new ExpansionAdapter() {
 				public void expansionStateChanged(ExpansionEvent e) {
 					ExpandableComposite source= (ExpandableComposite) e.getSource();
-					updateSectionStyle(source);
 					if (fIsBeingManaged)
 						return;
 					if (e.getState()) {
@@ -170,10 +173,15 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 								ExpandableComposite composite= (ExpandableComposite) iter.next();
 								if (composite != source)
 									composite.setExpanded(false);
+								updateSectionStyle(composite);
 							}
 						} finally {
 							fIsBeingManaged= false;
 						}
+						JavaPlugin.getDefault().getPreferenceStore().setValue(LAST_OPEN_KEY, source.getText());
+					} else {
+						if (!fIsBeingManaged)
+							JavaPlugin.getDefault().getPreferenceStore().setValue(LAST_OPEN_KEY, __NONE);
 					}
 					
 					ScrolledPageContent parentScrolledComposite= getParentScrolledComposite(source);
@@ -195,12 +203,29 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 		Composite body= content.getBody();
 		body.setLayout(new GridLayout(nColumns, false));
 		
+		String toExpand= JavaPlugin.getDefault().getPreferenceStore().getString(LAST_OPEN_KEY);
+		boolean expanded= false;
+		ExpandableComposite first= null;
+		
 		for (int i= 0; i < fConfigurationBlocks.length; i++) {
 			ExpandableComposite excomposite= createManagedStyleSection(body, fBlockLabels[i], nColumns);
+			if (first == null)
+				first= excomposite;
+			if (fBlockLabels[i].equals(toExpand)) {
+				excomposite.setExpanded(true);
+				expanded= true;
+				updateSectionStyle(excomposite);
+			}
 			mgr.manage(excomposite);
 			Control client= fConfigurationBlocks[i].createControl(excomposite);
 			excomposite.setClient(client);
 		}
+		
+		if (!expanded && first != null && !__NONE.equals(toExpand)) {
+			first.setExpanded(true);
+			updateSectionStyle(first);
+		}
+			
 		
 		return content;
 	}
