@@ -6,6 +6,6 @@ class A{
 	private void foo(){
 		m(2, 
 			3, 
-				i);
+				3+ 1);
 	}
 }
