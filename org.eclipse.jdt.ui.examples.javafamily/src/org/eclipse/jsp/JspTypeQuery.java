@@ -69,9 +69,9 @@ public class JspTypeQuery implements IIndexQuery {
 		String s= JspIndexParser.JSP_TYPE_REF + "/" + typeName;
 
 		IQueryResult[] result= index.queryPrefix(s.toCharArray());
-		
-		for (int i= 0; i < result.length; i++)
-			pathCollector.acceptTypeReference(result[i].getPath(), typeName.toCharArray());
+		if (result != null)
+			for (int i= 0; i < result.length; i++)
+				pathCollector.acceptTypeReference(result[i].getPath(), typeName.toCharArray());
 	}
 
 	/* (non-Javadoc)
