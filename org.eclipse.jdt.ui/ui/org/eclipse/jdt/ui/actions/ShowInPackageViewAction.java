@@ -10,31 +10,30 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 /**
  * This action reveals the currently selected Java element in the 
  * package explorer. 
@@ -127,20 +126,6 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 		if (view != null) {
 			if (reveal(view, element))
 				return;
-			if (showMembers && element instanceof IMember) {
-				// Since the packages view shows working copy elements it can happen that we try to show an original element
-				// in the packages view. Fall back to working copy element
-				IMember member= (IMember)element;
-				// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=20047
-				if (!isWorkingCopyElement(member)) {
-					try {
-						element= EditorUtility.getWorkingCopy(member);
-						if (reveal(view, element))
-							return;
-					} catch (JavaModelException e) {
-					}
-				}
-			}
 			element= getVisibleParent(element);
 			if (element != null) {
 				if (reveal(view, element))
@@ -156,11 +141,12 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	}
 
 	private boolean reveal(PackageExplorerPart view, Object element) {
-		// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
 		if (element == null)
 			return false;
 		view.selectReveal(new StructuredSelection(element));
-		if (element.equals(getSelectedElement(view)))
+		IElementComparer comparer= view.getTreeViewer().getComparer();
+		Object selected= getSelectedElement(view);
+		if (comparer != null ? comparer.equals(element, selected) : element.equals(selected))
 			return true;
 		return false;
 	}
@@ -196,16 +182,6 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 		return element;
 	}
 	
-	/*
-	 * Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=20047
-	 */
-	private boolean isWorkingCopyElement(IMember member) {
-		ICompilationUnit unit= member.getCompilationUnit();
-		if (unit == null)
-			return false;
-		return unit.isWorkingCopy();
-	}
-
 	private static String getDialogTitle() {
 		return ActionMessages.getString("ShowInPackageViewAction.dialog.title"); //$NON-NLS-1$
 	}
