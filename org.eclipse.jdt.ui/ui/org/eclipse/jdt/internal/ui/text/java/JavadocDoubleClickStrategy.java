@@ -228,7 +228,8 @@ public class JavadocDoubleClickStrategy implements ITextDoubleClickStrategy {
 					end= position;
 			}
 			
-			if (start > 0 && document.getChar(start - 1) == '@' && Character.isJavaIdentifierPart(document.getChar(start))) {
+			if (start > 0 && document.getChar(start - 1) == '@' && Character.isJavaIdentifierPart(document.getChar(start))
+					&& (start == 1 || Character.isWhitespace(document.getChar(start - 2)) || document.getChar(start - 2) == '{')) {
 				// double click after @ident
 				start--;
 			} else if (end == position && end == start + 1 && end < line.getOffset() + line.getLength() && document.getChar(end) == '@') {
