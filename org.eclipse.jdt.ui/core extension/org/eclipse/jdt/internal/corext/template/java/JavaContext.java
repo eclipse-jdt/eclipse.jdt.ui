@@ -87,7 +87,7 @@ public class JavaContext extends CompilationUnitContext {
 	/**
 	 * Returns the indentation level at the position of code completion.
 	 * 
-	 * @return the indentation leven at the position of the code completion
+	 * @return the indentation level at the position of the code completion
 	 */
 	private int getIndentation() {
 		int start= getStart();
@@ -121,14 +121,12 @@ public class JavaContext extends CompilationUnitContext {
 
 		getContextType().resolve(buffer, this);
 			
-		String lineDelimiter= null;
+		String lineDelimiter= PLATFORM_LINE_DELIMITER;
 		try {
 			lineDelimiter= getDocument().getLineDelimiter(0);
 		} catch (BadLocationException e) {
+			// go on with platform line delimiter
 		}
-
-		if (lineDelimiter == null)
-			lineDelimiter= PLATFORM_LINE_DELIMITER;
 			
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		boolean useCodeFormatter= prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);			
@@ -172,22 +170,21 @@ public class JavaContext extends CompilationUnitContext {
 		
 				return start;
 			
-			} else {
-
-				int start= getCompletionOffset();
-				int end= getCompletionOffset() + getCompletionLength();
-				
-				while (start != 0 && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
-					start--;
-				
-				while (start != end && Character.isWhitespace(document.getChar(start)))
-					start++;
-				
-				if (start == end)
-					start= getCompletionOffset();	
-				
+			} 
+			
+			int start= getCompletionOffset();
+			int end= getCompletionOffset() + getCompletionLength();
+			
+			while (start != 0 && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
+				start--;
+			
+			while (start != end && Character.isWhitespace(document.getChar(start)))
+				start++;
+			
+			if (start == end)
+				start= getCompletionOffset();	
+			
 				return start;	
-			}
 
 		} catch (BadLocationException e) {
 			return super.getStart();	
@@ -241,7 +238,9 @@ public class JavaContext extends CompilationUnitContext {
 	}
 
 	/**
-	 * Returns the character before start position of completion.
+	 * Returns the character before the start position of the completion.
+	 * 
+	 * @return the character before the start position of the completion
 	 */
 	public char getCharacterBeforeStart() {
 		int start= getStart();
@@ -286,16 +285,20 @@ public class JavaContext extends CompilationUnitContext {
 	}
 
 	/**
-	 * Returns the name of a guessed local array, <code>null</code> if no local
-	 * array exists.
+	 * Returns the name of a guessed local array, <code>null</code> if no
+	 * local array exists.
+	 * 
+	 * @return the name of a guessed local array or <code>null</code>
 	 */
 	public String guessArray() {
 		return firstOrNull(guessArrays());
 	}
 	
 	/**
-	 * Returns the name of a guessed local array, <code>null</code> if no local
-	 * array exists.
+	 * Returns the name of a guessed local array, <code>null</code> if no
+	 * local array exists.
+	 * 
+	 * @return the name of a guessed local array or <code>null</code>
 	 */
 	public String[] guessArrays() {
 		CompilationUnitCompletion completion= getCompletion();
@@ -309,8 +312,10 @@ public class JavaContext extends CompilationUnitContext {
 	}
 	
 	/**
-	 * Returns the name of the type of a local array, <code>null</code> if no local
-	 * array exists.
+	 * Returns the name of the type of a local array, <code>null</code> if no
+	 * local array exists.
+	 * 
+	 * @return the type name of a local array or <code>null</code>
 	 */
 	public String guessArrayType() {
 		return firstOrNull(guessArrayTypes());
@@ -319,13 +324,14 @@ public class JavaContext extends CompilationUnitContext {
 	private String firstOrNull(String[] strings) {
 		if (strings.length > 0)
 			return strings[0];
-		else
-			return null;
+		return null;
 	}
 	
 	/**
-	 * Returns the name of the type of a local array, <code>null</code> if no local
-	 * array exists.
+	 * Returns the names of the types of the local arrays grouped based on local
+	 * variables, <code>null</code> if no local arrays exist.
+	 * 
+	 * @return the names of the types of the local arrays or <code>null</code>
 	 */
 	public String[][] guessGroupedArrayTypes() {
 		CompilationUnitCompletion completion= getCompletion();
@@ -342,8 +348,10 @@ public class JavaContext extends CompilationUnitContext {
 	}
 	
 	/**
-	 * Returns the name of the type of a local array, <code>null</code> if no local
-	 * array exists.
+	 * Returns the names of the types of the local arrays, <code>null</code>
+	 * if no local arrays exist.
+	 * 
+	 * @return the names of the types of the local arrays or <code>null</code>
 	 */
 	public String[] guessArrayTypes() {
 		CompilationUnitCompletion completion= getCompletion();
@@ -411,15 +419,19 @@ public class JavaContext extends CompilationUnitContext {
 	}
 	
 	/**
-	 * Returns a proposal for a variable name of a local array element, <code>null</code>
-	 * if no local array exists.
+	 * Returns a proposal for a variable name of a local array element,
+	 * <code>null</code> if no local array exists.
+	 * 
+	 * @return a proposal for a variable name
 	 */
 	public String guessArrayElement() {
 		return firstOrNull(guessArrayElements());
 	}
 	/**
-	 * Returns a proposal for a variable name of a local array element, <code>null</code>
-	 * if no local array exists.
+	 * Returns proposals for a variable name of a local array element,
+	 * <code>null</code> if no local array exists.
+	 * 
+	 * @return proposals for a variable name or <code>null</code>
 	 */
 	public String[] guessArrayElements() {
 		ICompilationUnit cu= getCompilationUnit();
@@ -459,8 +471,10 @@ public class JavaContext extends CompilationUnitContext {
 	}
 
 	/**
-	 * Returns a proposal for a variable name of a local array element, <code>null</code>
-	 * if no local array exists.
+	 * Returns proposals for a variable name of a local array element grouped
+	 * based on local variables, <code>null</code> if no local array exists.
+	 * 
+	 * @return proposals for a variable name or <code>null</code>
 	 */
 	public String[][] guessGroupedArrayElements() {
 		ICompilationUnit cu= getCompilationUnit();
@@ -506,8 +520,11 @@ public class JavaContext extends CompilationUnitContext {
 	}
 
 	/**
-	 * Returns an array index name. 'i', 'j', 'k' are tried until no name collision with
-	 * an existing local variable occurs. If all names collide, <code>null</code> is returned.
+	 * Returns an array index name. 'i', 'j', 'k' are tried until no name
+	 * collision with an existing local variable occurs. If all names collide,
+	 * <code>null</code> is returned.
+	 * 
+	 * @return a name for an index variable or <code>null</code>
 	 */	
 	public String getIndex() {
 		CompilationUnitCompletion completion= getCompletion();
@@ -524,8 +541,10 @@ public class JavaContext extends CompilationUnitContext {
 	}
 	
 	/**
-	 * Returns the name of a local collection, <code>null</code> if no local collection
-	 * exists.
+	 * Returns the name of a local collection, <code>null</code> if no local
+	 * collection exists.
+	 * 
+	 * @return the name for a local collection or <code>null</code>
 	 */
 	public String guessCollection() {
 		return firstOrNull(guessCollections());
@@ -533,6 +552,8 @@ public class JavaContext extends CompilationUnitContext {
 	
 	/**
 	 * Returns the names of local collections.
+	 * 
+	 * @return the names of local collection
 	 */
 	public String[] guessCollections() {
 		CompilationUnitCompletion completion= getCompletion();
@@ -554,8 +575,10 @@ public class JavaContext extends CompilationUnitContext {
 	
 
 	/**
-	 * Returns an iterator name ('iter'). If 'iter' already exists as local variable,
-	 * <code>null</code> is returned.
+	 * Returns an iterator name ('iter'). If 'iter' already exists as local
+	 * variable, <code>null</code> is returned.
+	 * 
+	 * @return an iterator name or <code>null</code>
 	 */
 	public String getIterator() {
 		CompilationUnitCompletion completion= getCompletion();		
