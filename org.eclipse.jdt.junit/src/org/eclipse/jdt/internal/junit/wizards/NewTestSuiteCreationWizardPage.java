@@ -375,7 +375,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 				IType testType= (IType) selectedClasses[i];
 				IMethod suiteMethod= testType.getMethod("suite", new String[] {}); //$NON-NLS-1$
 				if (!suiteMethod.exists()) {
-					suite.append("suite.addTest(new TestSuite("+testType.getElementName()+".class));"); //$NON-NLS-1$ //$NON-NLS-2$
+					suite.append("suite.addTestSuite("+testType.getElementName()+".class);"); //$NON-NLS-1$ //$NON-NLS-2$
 				} else {
 					suite.append("suite.addTest("+testType.getElementName()+".suite());"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
