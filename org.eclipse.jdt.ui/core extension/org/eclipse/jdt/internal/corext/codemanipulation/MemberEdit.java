@@ -156,8 +156,6 @@ public class MemberEdit extends SimpleTextEdit {
 				// find last closing '}' at end of type
 				scanner= new Scanner(true, true);	// whitespace, comments
 				scanner.setSourceBuffer(buffer.getContent(start, range.getLength()).toCharArray());
-				int emptyLines= 0;
-				boolean sawClosingBracket= false;
 				try {
 					int pos= -1;
 					int token;
