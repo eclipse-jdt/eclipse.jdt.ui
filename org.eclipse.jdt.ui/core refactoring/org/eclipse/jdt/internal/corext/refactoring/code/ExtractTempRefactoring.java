@@ -84,6 +84,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		
 		fReplaceAllOccurrences= true; //default
 		fDeclareFinal= false; //default
+		fTempName= "";
 	}
 
 	public String getName() {
@@ -230,6 +231,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		} finally{
 			pm.done();
 		}	
+	}
+	
+	public String getTempSignaturePreview() throws JavaModelException{
+		return getTempTypeName() + " " + fTempName;
 	}
 	
 	private boolean isUsedInExplicitConstructorCall() throws JavaModelException{
