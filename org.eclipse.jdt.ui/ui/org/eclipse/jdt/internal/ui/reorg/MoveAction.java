@@ -57,6 +57,15 @@ public class MoveAction extends CopyAction {
 		}
 		return true;
 	}
+	
+	protected String getActionName() {
+		return ReorgMessages.getString("moveAction.name"); //$NON-NLS-1$
+	}
+	
+	protected String getDestinationDialogMessage() {
+		return ReorgMessages.getString("moveAction.destination.label"); //$NON-NLS-1$
+	}
+	
 
 	protected void processElements(Shell activeShell, final Object destination, final List elements) {
 		Iterator iter= elements.iterator();
