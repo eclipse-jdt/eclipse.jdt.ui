@@ -9,7 +9,10 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
@@ -49,6 +52,12 @@ class FailureDetailView {
 		fStackIcon.setBackground(fDetailView.getBackground());
 		fExceptionIcon.setBackground(fDetailView.getBackground());
 		fInfoIcon.setBackground(fDetailView.getBackground());
+		
+		parent.addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				disposeIcons();
+			}
+		});
 	}
 	
 	private void setMenuListener(IMenuListener menuListener) {
@@ -59,7 +68,7 @@ class FailureDetailView {
 		fDetailView.setMenu(menu);		
 	}
 	
-	public void dispose(){
+	void disposeIcons(){
 		if (fExceptionIcon != null && !fExceptionIcon.isDisposed()) {
 			fExceptionIcon.dispose();
 		}
@@ -87,7 +96,8 @@ class FailureDetailView {
 			return;
 		}
 	
-		if(trace.trim().equals(fTrace)) return;
+		if(trace.trim().equals(fTrace)) 
+			return;
 		fTrace= trace.trim();
 		fDetailView.removeAll();
 		

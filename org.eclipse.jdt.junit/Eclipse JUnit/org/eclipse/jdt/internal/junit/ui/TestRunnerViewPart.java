@@ -72,7 +72,6 @@ import org.eclipse.jdt.internal.junit.runner.*;
 
 /**
  * A ViewPart that shows the results of a test run.
- * It listens for the test results.
  */
 public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 
@@ -101,8 +100,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	private boolean fActive= true;
 	
 	private IType fType;
-	
-	private BaseLauncher fCurrentLauncher;
+	private JUnitBaseLauncherDelegate fCurrentLauncher;
 	private boolean fInReRun;
 	
 	protected final Image fTestIcon= TestRunnerViewPart.createImage("icons/testIcon.gif", getClass());
@@ -124,7 +122,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	private class StopAction extends Action{
 		public StopAction() {
 			setText("Stop JUnit Test");
-			setToolTipText("Stop JUnit Test");
+			setToolTipText("Stop JUnit Test Run");
 			setImageDescriptor(ImageDescriptor.createFromFile(getClass(), "icons/stopIcon.gif"));
 		}
 		
@@ -142,7 +140,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		if (fInReRun) {
 			fDisplay.asyncExec(new Runnable() {				
 				public void run() {
-					if(!fActive) 
+					if(!isActive()) 
 						return;				
 					resetProgressBar(testCount);
 					fCounterPanel.setTotal(fCounterPanel.getTotal() + testCount);
@@ -158,7 +156,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		postInfo("Finished: " + TestRunnerViewPart.elapsedTimeAsString(elapsedTime) + " seconds");
 		fDisplay.asyncExec(new Runnable() {				
 			public void run() {
-				if(!fActive) 
+				if(!isActive()) 
 					return;	
 				Enumeration enum= fTestInfo.elements();
 				TestInfo testInfo= null;
@@ -218,7 +216,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 			return;
 		fDisplay.syncExec(new Runnable() {
 			public void run(){
-				if(!fActive) 
+				if(!isActive()) 
 					return;
 				fHierarchyTree.removeAll();
 				fTreeItems.removeAllElements();
@@ -231,7 +229,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 			return;
 		fDisplay.syncExec(new Runnable() {
 			public void run(){
-				if(!fActive) 
+				if(!isActive()) 
 					return;
 				int index0= treeEntry.indexOf(',');
 				int index1= treeEntry.lastIndexOf(',');
@@ -276,7 +274,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		});		
 	}
 
-	public void startTestRunListening(IType type, int port, BaseLauncher launcher) {
+	public void startTestRunListening(IType type, int port, JUnitBaseLauncherDelegate launcher) {
 		fType= type;
 		fCurrentLauncher= launcher;
 		String msg= "Launching TestRunner";
@@ -293,22 +291,18 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		IType[] testTypes= new IType[classNames.length];
 		
 		for (int i= 0; i < classNames.length; i ++) {
-			testTypes[i]= TestRunnerViewPart.getType(fType.getJavaProject(), classNames[i]);
+			testTypes[i]= getType(fType.getJavaProject(), classNames[i]);
 			removeFromInfo(classNames[i]);
 		}
 		
 		fDisplay.asyncExec(new Runnable() {
 			public void run() {
-				if (!fActive) 
+				if (!isActive()) 
 					return;	
 				fFailureView.clear();
 			}
 		});
-		try {	
-			fCurrentLauncher.redoLaunch(testTypes);
-		} catch (InvocationTargetException e) {
-			BaseLauncher.handleException("JUnit rerun error", e);
-		}
+		fCurrentLauncher.redoLaunch(testTypes);
 	}
 
 	protected void removeFromInfo(String className) {
@@ -328,21 +322,6 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	public synchronized void dispose(){
 		fActive= false;
 		stopTest();
-		if (fFailureRunView != null) {
-			fFailureRunView.dispose();
-			fFailureRunView= null;
-		}
-		if (fTestHierarchyRunView != null) {
-			fTestHierarchyRunView.dispose();
-		}
-		if (fCounterPanel != null && !fCounterPanel.isDisposed()) {
-			 fCounterPanel.dispose();
-			 fCounterPanel= null;
-		}
-		if (fFailureView != null) {
-			fFailureView.dispose();
-			fFailureView= null;
-		}
 	}
 	
 	private void start(final int total) {
@@ -361,7 +340,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	protected void aboutToStart() {
 		fDisplay.syncExec(new Runnable() {
 			public void run() {
-				if (fActive) {
+				if (isActive()) {
 					for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
 						ITestRunView v= (ITestRunView) e.nextElement();
 						v.aboutToStart();
@@ -374,7 +353,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	protected void endTest(final String testName) {
 		fDisplay.syncExec(new Runnable() {
 			public void run() {
-				if(!fActive) return;
+				if(!isActive()) 
+					return;
 				postEndTest();
 				for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
 					ITestRunView v= (ITestRunView) e.nextElement();
@@ -397,7 +377,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	protected void postInfo(final String message) {
 		fDisplay.asyncExec(new Runnable() {
 			public void run() {
-				if (!fActive) 
+				if (!isActive()) 
 					return;
 				fStatusLine.setErrorMessage(null);
 				fStatusLine.setMessage(message);
@@ -408,7 +388,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	protected void postError(final String message) {
 		fDisplay.asyncExec(new Runnable() {
 			public void run() {
-				if (!fActive) 
+				if (!isActive()) 
 					return;
 				fStatusLine.setMessage(null);
 				fStatusLine.setErrorMessage(message);
@@ -419,7 +399,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	protected void showInformation(final String info){
 		fDisplay.syncExec(new Runnable() {
 			public void run() {
-				if(fActive)
+				if(isActive())
 					fFailureView.setInformation(info);
 			}
 		});
@@ -439,8 +419,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		fTestRunViews.addElement(fTestHierarchyRunView);
 		fTestRunViews.addElement(fFailureRunView);
 		
-		tabFolder.setSelection(0);				// change always both !!
-		fActiveRunView= fFailureRunView;		//
+		tabFolder.setSelection(0);				
+		fActiveRunView= fFailureRunView;		
 				
 		tabFolder.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
@@ -484,7 +464,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	protected void reset(final int testCount) {
 		fDisplay.asyncExec(new Runnable() {
 			public void run() {
-				if (!fActive) 
+				if (!isActive()) 
 					return;
 				fCounterPanel.reset();
 				fFailureView.clear();
@@ -555,14 +535,14 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		if (testInfo == null) {
 			fDisplay.syncExec(new Runnable() {
 				public void run() {
-					if(fActive)
+					if(isActive())
 						fFailureView.showFailure("");
 				}
 			});		
 		} else {
 			fDisplay.syncExec(new Runnable() {
 				public void run() {
-					if(fActive)
+					if(isActive())
 						fFailureView.showFailure(TestRunnerViewPart.filterStack(testInfo.fTrace));
 				}
 			});	
@@ -596,8 +576,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 			fDisplay.beep();
 			return;
 		}
-		ITextEditor textEditor= TestRunnerViewPart.openInEditor(type);
-		if (textEditor == null) return;
+		ITextEditor textEditor= openInEditor(type);
+		if (textEditor == null) 
+			return;
 		
 		try {
 			IDocument document= textEditor.getDocumentProvider().getDocument(textEditor.getEditorInput());
@@ -610,7 +591,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 
 	public void goToTestMethod(String testName, String methodName){
 		try{
-			IType type= TestRunnerViewPart.getType(fType.getJavaProject(), testName);
+			IType type= getType(fType.getJavaProject(), testName);
 			if (type == null) {
 				fDisplay.beep();
 				return;
@@ -625,8 +606,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 				if (method != null && method.exists())
 					break;
 			}
-			ITextEditor textEditor= TestRunnerViewPart.openInEditor(method);
-			if (textEditor == null) return;
+			ITextEditor textEditor= openInEditor(method);
+			if (textEditor == null) 
+				return;
 			
 			ISourceRange range= method.getNameRange();
 			textEditor.selectAndReveal(range.getOffset() , range.getLength());
@@ -635,8 +617,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 			fDisplay.beep();
 			// can not goToFile
 			String msg= "Warning: could not open test: " +  testName + ":" + methodName;
-			Status status= new Status(IStatus.WARNING, JUnitPlugin.getPluginID(), IStatus.OK, msg, e);
-			JUnitPlugin.getDefault().getLog().log(status);
+			Status status= new Status(IStatus.WARNING, JUnitPlugin.getPluginId(), IStatus.OK, msg, e);
+			JUnitPlugin.log(status);
 		}
 	}
 		
@@ -698,9 +680,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		StringReader stringReader= new StringReader(stackTrace);
 		BufferedReader bufferedReader= new BufferedReader(stringReader);		
 		String line;
+		String[] patterns= JUnitPreferencePage.getFilterPatterns();
 		try {	
 			while ((line= bufferedReader.readLine()) != null) {
-				if (!filterLine(line))
+				if (!filterLine(patterns, line))
 					printWriter.println(line);
 			}
 		} catch (IOException e) {
@@ -709,8 +692,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		return stringWriter.toString();
 	}
 	
-	protected static boolean filterLine(String line) {
-		String[] patterns= JUnitPreferencePage.getFilterPatterns();
+	protected static boolean filterLine(String[] patterns, String line) {
 		for (int i= 0; i < patterns.length; i++) {
 			if (line.indexOf(patterns[i]) > 0)
 				return true;
@@ -724,9 +706,13 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		}
 		catch (Exception e) {
 			String msg= "Warning: could not load image!";
-			Status status= new Status(IStatus.WARNING, JUnitPlugin.getPluginID(), IStatus.OK, msg, e);
+			Status status= new Status(IStatus.WARNING, JUnitPlugin.getPluginId(), IStatus.OK, msg, e);
 			JUnitPlugin.getDefault().getLog().log(status);
 			return new Image(Display.getCurrent(), 1, 1);
 		}
+	}
+	
+	protected boolean isActive() {
+		return fActive && !fCounterPanel.isDisposed();
 	}
 }

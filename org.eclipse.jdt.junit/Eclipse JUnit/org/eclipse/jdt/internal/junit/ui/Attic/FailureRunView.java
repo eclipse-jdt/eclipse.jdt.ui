@@ -10,6 +10,8 @@ import java.util.Iterator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
@@ -79,8 +81,7 @@ class FailureRunView implements ITestRunView {
 		addListeners();	
 	}
 
-
-	public void dispose() {
+	void disposeIcons() {
 		if (fErrorIcon != null && !fErrorIcon.isDisposed()) {
 			fErrorIcon.dispose();
 		}
@@ -208,6 +209,13 @@ class FailureRunView implements ITestRunView {
 				activate();
 			}
 		});
+		
+		fTable.addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				disposeIcons();
+			}
+		});
+
 		fTable.addMouseListener(new MouseListener() {
 			public void mouseDoubleClick(MouseEvent e){
 				fRunViewContext.goToTestMethod(getClassName(), getMethodName());

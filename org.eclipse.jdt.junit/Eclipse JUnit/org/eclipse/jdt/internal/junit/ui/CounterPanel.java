@@ -17,9 +17,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 
 
-
 /**
- * A panel with counters for the number of Runs, Errors and Failures
+ * A panel with counters for the number of Runs, Errors and Failures.
  */
 public class CounterPanel extends Composite {
 	private Label fNumberOfErrors;
@@ -41,20 +40,26 @@ public class CounterPanel extends Composite {
 		fNumberOfRuns= createLabel("Runs: ", fRunIcon, " 0/0  ");
 		fNumberOfErrors= createLabel("Errors: ", fErrorIcon, " 0 ");
 		fNumberOfFailures= createLabel("Failures: ", fFailureIcon, " 0 ");
+
 		addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
-				fErrorIcon.dispose();
-				fFailureIcon.dispose();
-				fRunIcon.dispose();
+				disposeIcons();
 			}
 		});
 	}
 
+	void disposeIcons() {
+		fErrorIcon.dispose();
+		fFailureIcon.dispose();
+		fRunIcon.dispose();
+	}
 
 	private Label createLabel(String name, Image image, String init) {
 		Label label= new Label(this, SWT.NONE);
-		image.setBackground(label.getBackground());
-		label.setImage(image);
+		if (image != null) {
+			image.setBackground(label.getBackground());
+			label.setImage(image);
+		}
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING));
 		
 		label= new Label(this, SWT.NONE);

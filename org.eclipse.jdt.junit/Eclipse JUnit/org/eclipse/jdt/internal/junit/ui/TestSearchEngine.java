@@ -6,24 +6,20 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
 
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IFileEditorInput;
 
@@ -45,7 +41,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 /**
  * Custom Search engine for suite() methods
  */
-public class TestSearchEngine extends SearchEngine {
+public class TestSearchEngine /*extends SearchEngine*/ {
 
 	private class JUnitSearchResultCollector implements IJavaSearchResultCollector {
 		IProgressMonitor fProgressMonitor;
@@ -79,141 +75,127 @@ public class TestSearchEngine extends SearchEngine {
 		}
 	}
 	
-	public List searchMethod(IRunnableContext context, final IJavaSearchScope scope) 
-			throws InvocationTargetException {
-
+	private List searchMethod(IProgressMonitor pm, final IJavaSearchScope scope) throws JavaModelException {
 		final List typesFound= new ArrayList(200);	
-		IRunnableWithProgress runnable= new IRunnableWithProgress() {
-			public void run(IProgressMonitor pm) {
-				try {
-					searchMethod(typesFound, scope, pm);
-				} catch (CoreException e) {;
-					Status status= new Status(IStatus.ERROR, JUnitPlugin.getPluginID(), IStatus.OK, "", e);
-					JUnitPlugin.getDefault().getLog().log(status);
-					MessageDialog.openError(JUnitPlugin.getActiveShell(), "JUnit Launcher Error", e.toString());								
-				}
-			}
-		};
-		try {
-			context.run(true, true, runnable);
-		} catch (InterruptedException e) {
-			// do nothing user canceled the search process
-		}
+		searchMethod(typesFound, scope, pm);
 		return typesFound;	
 	}
 
-	private List searchMethod(final List v, IJavaSearchScope scope, final IProgressMonitor progressMonitor) throws JavaModelException, CoreException {		
+	private List searchMethod(final List v, IJavaSearchScope scope, final IProgressMonitor progressMonitor) throws JavaModelException {		
 		IJavaSearchResultCollector collector= new JUnitSearchResultCollector(v, progressMonitor);
-		ISearchPattern suitePattern= createSearchPattern("suite() Test", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, true); //$NON-NLS-1$
-		ISearchPattern testPattern= createSearchPattern("test*() void", IJavaSearchConstants.METHOD , IJavaSearchConstants.DECLARATIONS, true); //$NON-NLS-1$
-		search(ResourcesPlugin.getWorkspace(), createOrSearchPattern(suitePattern, testPattern), scope, collector); 
-		return v;
-	}
-
-	public static List findTargets(IStructuredSelection selection) throws InvocationTargetException {			
-		List v= new ArrayList(10);
-		Iterator elements= selection.iterator();
-		while(elements.hasNext()) {
-			Object o= elements.next();
-				collectTypes(v, o);
-		}
+		ISearchPattern suitePattern= SearchEngine.createSearchPattern("suite() Test", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, true); //$NON-NLS-1$
+		ISearchPattern testPattern= SearchEngine.createSearchPattern("test*() void", IJavaSearchConstants.METHOD , IJavaSearchConstants.DECLARATIONS, true); //$NON-NLS-1$
+		SearchEngine engine= new SearchEngine();
+		engine.search(ResourcesPlugin.getWorkspace(), SearchEngine.createOrSearchPattern(suitePattern, testPattern), scope, collector); 
 		return v;
 	}
 	
-	protected static void collectTypes(List v, Object scope) throws InvocationTargetException {
-		try {
-			scope= computeScope(scope);
-			while((scope instanceof IJavaElement) && !(scope instanceof ICompilationUnit) && (scope instanceof ISourceReference)) {
-				if(scope instanceof IType) {
-					if (hasSuiteMethod((IType)scope) || isTestType((IType)scope)) {
-						v.add(scope);
-						return;
+	public static IType[] findTargets(IRunnableContext context, final Object[] elements) throws InvocationTargetException, InterruptedException{
+		final Set result= new HashSet();
+	
+		if (elements.length > 0) {
+			IRunnableWithProgress runnable= new IRunnableWithProgress() {
+				public void run(IProgressMonitor pm) throws InterruptedException {
+					int nElements= elements.length;
+					pm.beginTask("Searching suites...", nElements); 
+					try {
+						for (int i= 0; i < nElements; i++) {
+							try {
+								collectTypes(elements[i], new SubProgressMonitor(pm, 1), result);
+							} catch (JavaModelException e) {
+								JUnitPlugin.log(e.getStatus());
+							}
+							if (pm.isCanceled()) {
+								throw new InterruptedException();
+							}
+						}
+					} finally {
+						pm.done();
 					}
 				}
-				scope= ((IJavaElement)scope).getParent();
-			}
-			if (scope instanceof ICompilationUnit) {
-				ICompilationUnit cu= (ICompilationUnit)scope;
-				IType[] types= cu.getAllTypes();
-				for (int i= 0; i < types.length; i++) {
-					if (hasSuiteMethod(types[i])  || isTestType(types[i]))
-						v.add(types[i]);
+			};
+			context.run(true, true, runnable);			
+		}
+		return (IType[]) result.toArray(new IType[result.size()]) ;
+	}
+
+	private static void collectTypes(Object element, IProgressMonitor pm, Set result) throws JavaModelException/*, InvocationTargetException*/ {
+		element= computeScope(element);
+		while((element instanceof IJavaElement) && !(element instanceof ICompilationUnit) && (element instanceof ISourceReference)) {
+			if(element instanceof IType) {
+				if (hasSuiteMethod((IType)element) || isTestType((IType)element)) {
+					result.add(element);
+					return;
 				}
-			} 
-			else if (scope instanceof IJavaElement) {
-				List found= searchSuiteMethods(new ProgressMonitorDialog(JUnitPlugin.getActiveShell()), (IJavaElement)scope);
-				v.addAll(found);
 			}
-		} catch (JavaModelException e) {
-			throw new InvocationTargetException(e);
+			element= ((IJavaElement)element).getParent();
+		}
+		if (element instanceof ICompilationUnit) {
+			ICompilationUnit cu= (ICompilationUnit)element;
+			IType[] types= cu.getAllTypes();
+			for (int i= 0; i < types.length; i++) {
+				if (hasSuiteMethod(types[i])  || isTestType(types[i]))
+					result.add(types[i]);
+			}
+		} 
+		else if (element instanceof IJavaElement) {
+			List found= searchSuiteMethods(pm, (IJavaElement)element);
+			result.addAll(found);
 		}
 	}
 
-	protected static Object computeScope(Object scope) throws InvocationTargetException {
-		if (scope instanceof IProcess) 
-			scope= ((IProcess)scope).getLaunch();
-		if (scope instanceof IDebugTarget)
-			scope= ((IDebugTarget)scope).getLaunch();
-		if (scope instanceof ILaunch) 
-			scope= ((ILaunch)scope).getElement();
-		if (scope instanceof IFileEditorInput)
-			scope= ((IFileEditorInput)scope).getFile();
-		if (scope instanceof IResource)
-			scope= JavaCore.create((IResource)scope);
-		if (scope instanceof IClassFile) {
-			IClassFile cf= (IClassFile)scope;
-			try {
-				scope= cf.getType();
-			} catch (JavaModelException e) {
-				throw new InvocationTargetException(e);
-			}
+	private static Object computeScope(Object element) throws JavaModelException {
+		if (element instanceof IProcess) 
+			element= ((IProcess)element).getLaunch();
+		if (element instanceof IDebugTarget)
+			element= ((IDebugTarget)element).getLaunch();
+		if (element instanceof ILaunch) 
+			element= ((ILaunch)element).getElement();
+		if (element instanceof IFileEditorInput)
+			element= ((IFileEditorInput)element).getFile();
+		if (element instanceof IResource)
+			element= JavaCore.create((IResource)element);
+		if (element instanceof IClassFile) {
+			IClassFile cf= (IClassFile)element;
+			element= cf.getType();
 		}
-		return scope;
+		return element;
 	}
 	
-	private static List searchSuiteMethods(IRunnableContext context, IJavaElement element) 
-			throws InvocationTargetException {	
-		IJavaSearchScope scope= TestSearchEngine.createJavaSearchScope(new IJavaElement[] { element });
-		return new TestSearchEngine().searchMethod(context, scope);
+	private static List searchSuiteMethods(IProgressMonitor pm, IJavaElement element) throws JavaModelException {	
+		// for backward compatibility with 1.0 
+		// use the deprecated createJavaSearchScope(IResource[] constructor)
+		//IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element });
+		IResource resource= element.getCorrespondingResource();
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IResource[] { resource });
+		TestSearchEngine searchEngine= new TestSearchEngine(); 
+		return searchEngine.searchMethod(pm, scope);
 	}
 	
-	protected static boolean hasSuiteMethod(IType type){
-		try{
-			IMethod method= type.getMethod("suite", new String[0]);
-			if (method == null || !method.exists()) 
-				return false;
-			
-			if (!Flags.isStatic(method.getFlags()) ||	
-				!Flags.isPublic(method.getFlags()) ||			
-				Flags.isAbstract(method.getDeclaringType().getFlags()) ||
-				!Flags.isPublic(method.getDeclaringType().getFlags())) 
-				return false;
-		} catch (JavaModelException e){
-			String msg= "Warning: hasSuiteMethod(IType type) failed: " + type.getElementName();
-			Status status= new Status(IStatus.WARNING, JUnitPlugin.getPluginID(), IStatus.OK, msg, e);
-			JUnitPlugin.getDefault().getLog().log(status);
+	private static boolean hasSuiteMethod(IType type) throws JavaModelException {
+		IMethod method= type.getMethod("suite", new String[0]);
+		if (method == null || !method.exists()) 
+			return false;
+		
+		if (!Flags.isStatic(method.getFlags()) ||	
+			!Flags.isPublic(method.getFlags()) ||			
+			Flags.isAbstract(method.getDeclaringType().getFlags()) ||
+			!Flags.isPublic(method.getDeclaringType().getFlags())) { 
 			return false;
 		}
 		return true;
 	}
 	
-	protected static boolean isTestType(IType type){
-		try{
-			if (Flags.isAbstract(type.getFlags())) 
-				return false;
-			if (!Flags.isPublic(type.getFlags())) 
-				return false;
-			
-			IType[] interfaces= type.newTypeHierarchy(type.getJavaProject(), null).getAllSuperInterfaces(type);
-			for (int i=0; i < interfaces.length; i++)
-				if(interfaces[i].getFullyQualifiedName().equals("junit.framework.Test"))
-					return true;
-		} catch (JavaModelException e) {
-			String msg= "Warning: isTestType(IType type) failed: " + type.getElementName();
-			Status status= new Status(IStatus.WARNING, JUnitPlugin.getPluginID(), IStatus.OK, msg, e);
-			JUnitPlugin.getDefault().getLog().log(status);
-		}				
+	private static boolean isTestType(IType type) throws JavaModelException {
+		if (Flags.isAbstract(type.getFlags())) 
+			return false;
+		if (!Flags.isPublic(type.getFlags())) 
+			return false;
+		
+		IType[] interfaces= type.newTypeHierarchy(type.getJavaProject(), null).getAllSuperInterfaces(type);
+		for (int i=0; i < interfaces.length; i++)
+			if(interfaces[i].getFullyQualifiedName().equals("junit.framework.Test"))
+				return true;
 		return false;
 	}
-
 }

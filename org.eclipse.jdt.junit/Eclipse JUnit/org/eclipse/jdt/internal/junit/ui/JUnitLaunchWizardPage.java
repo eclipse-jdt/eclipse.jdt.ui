@@ -40,7 +40,7 @@ import org.eclipse.swt.widgets.Text;
  * The main page in a <code>JUnitApplicationWizard</code>. Presents the
  * user with a list of launchable elements - from which the user must choose.  
  */
-public class ApplicationWizardPage extends WizardPage {
+public class JUnitLaunchWizardPage extends WizardPage {
 	/**
 	 * Viewer for the elements to launch
 	 */
@@ -61,7 +61,7 @@ public class ApplicationWizardPage extends WizardPage {
 	 */
 	protected Object[] fElements;
 	protected String fMode;
-	protected BaseLauncher fLauncher;
+	protected JUnitBaseLauncherDelegate fLauncher;
 
 	/**
 	 * A content provider for the elements list
@@ -83,16 +83,6 @@ public class ApplicationWizardPage extends WizardPage {
 		}
 	}
 
-
-	private class SimpleSorter extends ViewerSorter {
-		/*
-		 * @see ViewerSorter#isSorterProperty(Object, Object)
-		 */
-		public boolean isSorterProperty(Object element, Object property) {
-			return true;
-		}
-	}
-	
 	private class PatternFilter extends ViewerFilter {
 		protected StringMatcher fMatcher= null;
 
@@ -121,26 +111,14 @@ public class ApplicationWizardPage extends WizardPage {
 			return fFilteredElements;
 		}
 	}
-	
-	/**
-	 * We have to subclass the label provider in order to have a default constructor.
-	 * This is necessary because we are instantiated as an extension point.
-	 */
-	private class LauncherLabelProvider extends JavaElementLabelProvider  {
-		public LauncherLabelProvider() {
-			super(JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_QUALIFIED | 
-				JavaElementLabelProvider.SHOW_ROOT | JavaElementLabelProvider.SHOW_POST_QUALIFIED);
-		}
-	}
-
 
 	/**
 	 * Constructs a <code>JUnitApplicationWizardPage</code> with the given launcher and pre-computed children
 	 */
-	public ApplicationWizardPage(List elements, BaseLauncher launcher, String mode) {
+	public JUnitLaunchWizardPage(Object[] elements, JUnitBaseLauncherDelegate launcher, String mode) {
 		super("JUnit Test Selector");
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAVA_LAUNCH);
-		fElements= elements.toArray();
+		fElements= elements;
 		fMode= mode;
 		fLauncher= launcher;
 	}
@@ -151,10 +129,10 @@ public class ApplicationWizardPage extends WizardPage {
 	 */
 	public void createControl(Composite ancestor) {
 		Composite root= new Composite(ancestor, SWT.NONE);
-		GridLayout l= new GridLayout();
-		l.numColumns= 1;
-		l.makeColumnsEqualWidth= true;
-		root.setLayout(l);
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 1;
+		layout.makeColumnsEqualWidth= true;
+		root.setLayout(layout);
 
 		createElementsGroup(root);
 
@@ -164,9 +142,8 @@ public class ApplicationWizardPage extends WizardPage {
 		} else {
 			setDescription("Select element(s) to run.");
 		}
-
 		setPageComplete(false);
-		setTitle("Select Target");
+		setTitle("Select Launch Target");
 		setControl(root);
 	}
 
@@ -193,9 +170,11 @@ public class ApplicationWizardPage extends WizardPage {
 		gd.grabExcessVerticalSpace= true;
 		list.setLayoutData(gd);
 
+		int flags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_POST_QUALIFIED | 
+			JavaElementLabelProvider.SHOW_ROOT ;
+		fElementsList.setLabelProvider(new JavaElementLabelProvider(flags));
 		fElementsList.setContentProvider(new ElementsContentProvider());
-		fElementsList.setLabelProvider(new LauncherLabelProvider());
-		fElementsList.setSorter(new SimpleSorter());
+		fElementsList.setSorter(new ViewerSorter() {});
 
 		final PatternFilter filter= new PatternFilter();
 		fElementsList.addFilter(filter);

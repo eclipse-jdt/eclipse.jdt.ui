@@ -42,9 +42,4 @@ interface ITestRunView {
 	 * Updates the View after reRun Button has been pressed
 	 */
 	public void updateTest(String testName);
-	
-	/**
-	 * called if the TestRunnerViewPart is disposed
-	 */
-	public void dispose();	
 }

@@ -10,6 +10,8 @@ import java.util.Vector;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
@@ -72,11 +74,11 @@ class HierarchyRunView implements ITestRunView {
 		}		
 	}	
 	
-	protected Composite fTestTreePanel;
-	protected TestRunnerViewPart fRunViewContext;
+	private Composite fTestTreePanel;
+	private TestRunnerViewPart fRunViewContext;
 	private String fProjectName;
 	private String fTestName;
-	private static final String fgName= "Test Hierarchy";
+	private static final String fgName= "Hierarchy";
 	private boolean fPressed= false;
 	private Tree fTree;
 	
@@ -116,7 +118,7 @@ class HierarchyRunView implements ITestRunView {
 	}
 
 
-	public void dispose() {
+	void disposeIcons() {
 		if (fErrorIcon != null && !fErrorIcon.isDisposed()) {
 			fErrorIcon.dispose();
 		}
@@ -276,6 +278,12 @@ class HierarchyRunView implements ITestRunView {
 				activate();
 			}
 		});
+		fTree.addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				disposeIcons();
+			}
+		});
+
 		fTree.addMouseListener(new MouseListener() {
 			public void mouseDoubleClick(MouseEvent e) {
 				TestInfo testInfo= getTestInfo();

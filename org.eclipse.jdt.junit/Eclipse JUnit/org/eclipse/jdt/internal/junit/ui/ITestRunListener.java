@@ -19,6 +19,8 @@ package org.eclipse.jdt.internal.junit.ui;
 	public void testStarted(String testName);
 	public void testEnded(String testName);
 	public void testFailed(int status, String testName, String trace);	
+	
+	// Tree creation methods
 	public void testTreeStart();
 	public void testTreeEntry(String entry);
 }

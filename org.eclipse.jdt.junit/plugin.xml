@@ -42,10 +42,10 @@
       point = "org.eclipse.debug.core.launchers"> 
          <launcher 
              id = "org.eclipse.jdt.junit.launcher"
-             class = "org.eclipse.jdt.internal.junit.ui.Launcher" 
+             class = "org.eclipse.jdt.internal.junit.ui.JUnitLauncher" 
              modes = "run, debug"
   	     	 label = "%LocalLauncher.label"
-	     	 wizard = "org.eclipse.jdt.internal.junit.ui.ApplicationWizard"     
+	     	 wizard = "org.eclipse.jdt.internal.junit.ui.JUnitLaunchWizard"     
 	     	 public = "true"
 	     	 description = "%LocalLauncher.description"/>
    	</extension> 

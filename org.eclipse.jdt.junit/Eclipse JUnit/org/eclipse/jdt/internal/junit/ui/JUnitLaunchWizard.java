@@ -5,7 +5,6 @@
 package org.eclipse.jdt.internal.junit.ui;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILauncher;
@@ -16,20 +15,20 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 
 /**
- * The wizard specified by the <code>Launcher</code> launcher to
+ * The wizard specified by the <code>JUnitLauncher</code> launcher to
  * designate the elements to launch
  */
-public class ApplicationWizard extends Wizard implements ILaunchWizard {
+public class JUnitLaunchWizard extends Wizard implements ILaunchWizard {
 	protected String fMode;
 	protected ILauncher fLauncher;
-	protected List fLauncheables;
+	protected Object[] fLauncheables;
 	protected boolean fSuccess;
 
-	public ApplicationWizard() {
+	public JUnitLaunchWizard() {
 		super();
 	}
 
-	public ApplicationWizard(List launcheables) {
+	public JUnitLaunchWizard(Object[] launcheables) {
 		fLauncheables= launcheables;
 	}
 
@@ -37,7 +36,7 @@ public class ApplicationWizard extends Wizard implements ILaunchWizard {
 	 * @see Wizard#addPages
 	 */
 	public void addPages() {
-		addPage(new ApplicationWizardPage(fLauncheables, getLauncher(), fMode));
+		addPage(new JUnitLaunchWizardPage(fLauncheables, getLauncher(), fMode));
 	}
 
 	/**
@@ -47,14 +46,14 @@ public class ApplicationWizard extends Wizard implements ILaunchWizard {
 		try {
 			getContainer().run(false, false, new IRunnableWithProgress() {
 				public void run(IProgressMonitor pm) {
-					ApplicationWizardPage page= (ApplicationWizardPage) getContainer().getCurrentPage();
+					JUnitLaunchWizardPage page= (JUnitLaunchWizardPage) getContainer().getCurrentPage();
 					fSuccess= fLauncher.launch(page.getElements(), fMode);
 				}
 			});
 		} catch (InterruptedException e) {
 			// do nothing user canceled 
 		} catch (InvocationTargetException e) {
-			BaseLauncher.handleException("JUnit wizard error", e);
+			JUnitBaseLauncherDelegate.handleException("JUnit wizard error", e);
 		}
 		return fSuccess;
 	}
@@ -62,8 +61,8 @@ public class ApplicationWizard extends Wizard implements ILaunchWizard {
 	/*
 	 * @see ILauncher#getDelegate()
 	 */
-	protected BaseLauncher getLauncher() {
-		return (BaseLauncher) fLauncher.getDelegate();
+	protected JUnitBaseLauncherDelegate getLauncher() {
+		return (JUnitBaseLauncherDelegate) fLauncher.getDelegate();
 	}
 
 	/*

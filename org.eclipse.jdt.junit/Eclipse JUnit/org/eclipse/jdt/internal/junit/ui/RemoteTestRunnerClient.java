@@ -18,22 +18,22 @@ import org.eclipse.jdt.internal.junit.runner.MessageIds;
  * The client side of the RemoteTestRunner. 
  */
 public class RemoteTestRunnerClient {
-	protected ITestRunListener fListener;
+	private ITestRunListener fListener;
 	
-	protected ServerSocket fServerSocket;
-	protected Socket fSocket;
-	protected PrintWriter fWriter;
-	protected BufferedReader fBufferedReader;
+	private ServerSocket fServerSocket;
+	private Socket fSocket;
+	private PrintWriter fWriter;
+	private BufferedReader fBufferedReader;
 
 	// communication states with remote test runner
-	protected boolean fInReadTrace= false;
-	protected boolean fInFailedMessage= false;
+	private boolean fInReadTrace= false;
+	private boolean fInFailedMessage= false;
 	
-	protected String fFailedTest;
-	protected String fFailedMessage;
-	protected String fFailedTrace;
-	protected int fFailureKind;
-	protected long fElapsedTime;
+	private String fFailedTest;
+	private String fFailedMessage;
+	private String fFailedTrace;
+	private int fFailureKind;
+	private long fElapsedTime;
 	
 	/**
 	 * Reads the message stream from the RemoteTestRunner
@@ -64,16 +64,6 @@ public class RemoteTestRunnerClient {
 		}
 	}
 
-	protected Vector fListeners= new Vector();
-
-	public void addTestRunListener(ITestRunListener listener) {
-		fListeners.add(listener);
-	}
-	
-	public void removeTestRunListener(ITestRunListener listener) {
-		fListeners.remove(listener);
-	}
-	
 	public void startListening(ITestRunListener listener, int port) {
 		fListener= listener;
 		ServerConnection connection= new ServerConnection(port);
