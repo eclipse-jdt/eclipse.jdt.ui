@@ -219,6 +219,9 @@ public class PropertiesSpellingReconcileStrategy implements IReconcilingStrategy
 	 *         <code>null</code> if none could be determined
 	 */
 	private IAnnotationModel getAnnotationModel() {
-		return fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
+		IDocumentProvider documentProvider= fEditor.getDocumentProvider();
+		if (documentProvider == null)
+			return null;
+		return documentProvider.getAnnotationModel(fEditor.getEditorInput());
 	}
 }
