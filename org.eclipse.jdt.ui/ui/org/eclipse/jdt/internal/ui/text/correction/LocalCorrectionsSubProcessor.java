@@ -261,7 +261,12 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		
 		refactoring.setLeaveDirty(true);
-		if (refactoring.checkActivationBasics(astRoot, null).isOK()) {
+		ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+		parser.setSource(cu);
+		parser.setResolveBindings(true);
+		parser.setFocalPosition(selectedNode.getStartPosition());
+		CompilationUnit newRoot= (CompilationUnit) parser.createAST(null);
+		if (refactoring.checkActivationBasics(newRoot, null).isOK()) {
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.surroundwith.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			CUCorrectionProposal proposal= new CUCorrectionProposal(label, (CompilationUnitChange) refactoring.createChange(null), 4, image);
