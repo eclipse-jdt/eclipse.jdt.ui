@@ -325,6 +325,20 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 	}
 		
 	private Type evaluateVariableType(AST ast) throws CoreException {
+		if (fOriginalNode.getParent() instanceof MethodInvocation) {
+			MethodInvocation parent= (MethodInvocation) fOriginalNode.getParent();
+			if (parent.getExpression() == fOriginalNode) {
+				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(fOriginalNode.getRoot(), parent.getName().getIdentifier(), parent.arguments());
+				if (bindings.length > 0) {
+					for (int i= 0; i < bindings.length; i++) {
+						addLinkedPositionProposal(KEY_TYPE, bindings[i]);
+					}
+					String typeName= getImportRewrite().addImport(bindings[0]);
+					return ASTNodeFactory.newType(ast, typeName);
+				}
+			}
+		}
+		
 		ITypeBinding binding= ASTResolving.guessBindingForReference(fOriginalNode);
 		if (binding != null) {
 			if (isVariableAssigned()) {

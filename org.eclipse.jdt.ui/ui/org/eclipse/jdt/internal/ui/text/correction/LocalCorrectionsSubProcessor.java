@@ -641,5 +641,43 @@ public class LocalCorrectionsSubProcessor {
 		proposals.add(proposal);
 	}
 
+	public static void getInvalidOperatorProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		CompilationUnit root= context.getASTRoot();
+		AST ast= root.getAST();
+		
+		ASTNode selectedNode= problem.getCoveringNode(root);
+		if (selectedNode instanceof PrefixExpression) {
+			// !x instanceof X -> !(x instanceof X)
+			
+			PrefixExpression expression= (PrefixExpression) selectedNode;
+			if (expression.getOperator() == PrefixExpression.Operator.NOT) {
+				ASTNode parent= expression.getParent();
+				
+				switch (parent.getNodeType()) {
+					case ASTNode.INSTANCEOF_EXPRESSION:
+					case ASTNode.INFIX_EXPRESSION: {
+						ASTRewrite rewrite= ASTRewrite.create(ast);
+						rewrite.replace(selectedNode, rewrite.createMoveTarget(expression.getOperand()), null);
+						
+						ParenthesizedExpression newParentExpr= ast.newParenthesizedExpression();
+						newParentExpr.setExpression((Expression) rewrite.createMoveTarget(parent));
+						PrefixExpression newPrefixExpr= ast.newPrefixExpression();
+						newPrefixExpr.setOperand(newParentExpr);
+						newPrefixExpr.setOperator(PrefixExpression.Operator.NOT);
+						
+						rewrite.replace(parent, newPrefixExpr, null);
+						
+						String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.setparenteses.description"); //$NON-NLS-1$
+						Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+						ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image); //$NON-NLS-1$
+						proposals.add(proposal);
+					}
+					break;
+
+				}
+			}
+		}
+	}
+
 	
 }

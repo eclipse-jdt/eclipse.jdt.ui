@@ -71,6 +71,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 
 public class ASTResolving {
 	
@@ -376,6 +377,58 @@ public class ASTResolving {
 		}
 		return null;
 	}
+   	
+   	/**
+   	 *@return  Returns all types known in the AST that have a method with a given name
+   	 */
+	public static ITypeBinding[] getQualifierGuess(ASTNode searchRoot, final String selector, List arguments) {
+		final int nArgs= arguments.size();
+		final ArrayList result= new ArrayList();
+		
+		Bindings.visitAllBindings(searchRoot, new TypeBindingVisitor() {
+			private HashSet fVisitedBindings= new HashSet(100);
+			
+			public boolean visit(ITypeBinding node) {
+				if (!fVisitedBindings.add(node.getKey())) {
+					return true;
+				}
+				IMethodBinding[] methods= node.getDeclaredMethods();
+				for (int i= 0; i < methods.length; i++) {
+					IMethodBinding meth= methods[i];
+					if (meth.getName().equals(selector) && meth.getParameterTypes().length == nArgs) {
+						result.add(node);
+					}
+				}
+				return true;
+			}
+		});
+		return (ITypeBinding[]) result.toArray(new ITypeBinding[result.size()]);
+	}
+	
+	public static boolean hasQualifierGuess(ASTNode searchRoot, final String selector, List arguments) {
+		final boolean[] res= { false};
+		final int nArgs= arguments.size();
+		Bindings.visitAllBindings(searchRoot, new TypeBindingVisitor() {
+			private HashSet fVisitedBindings= new HashSet(100);
+			
+			public boolean visit(ITypeBinding node) {
+				if (!fVisitedBindings.add(node.getKey())) {
+					return true;
+				}
+				IMethodBinding[] methods= node.getDeclaredMethods();
+				for (int i= 0; i < methods.length; i++) {
+					IMethodBinding meth= methods[i];
+					if (meth.getName().equals(selector) && meth.getParameterTypes().length == nArgs) {
+						res[0]= true;
+						return false;
+					}
+				}
+				return true;
+			}
+		});
+		return res[0];
+	}
+
 	 
 	public static MethodDeclaration findParentMethodDeclaration(ASTNode node) {
 		while ((node != null) && (node.getNodeType() != ASTNode.METHOD_DECLARATION)) {

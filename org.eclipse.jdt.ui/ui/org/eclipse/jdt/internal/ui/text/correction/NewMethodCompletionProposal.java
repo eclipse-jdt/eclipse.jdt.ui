@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
@@ -50,38 +51,17 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 public class NewMethodCompletionProposal extends AbstractMethodCompletionProposal {
 
+	private static final String KEY_NAME= "name"; //$NON-NLS-1$
+	private static final String KEY_TYPE= "type"; //$NON-NLS-1$
+	
 	private List fArguments;
 		
+	//	invocationNode is MethodInvocation, ConstructorInvocation, SuperConstructorInvocation, ClassInstanceCreation, SuperMethodInvocation
 	public NewMethodCompletionProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode,  List arguments, ITypeBinding binding, int relevance, Image image) {
 		super(label, targetCU, invocationNode, binding, relevance, image);
 		fArguments= arguments;
 	}
-				
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#updateLinkedNodes(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.core.dom.MethodDeclaration, boolean)
-	 */
-	protected void updateLinkedNodes(ASTRewrite rewrite, MethodDeclaration newStub, boolean isInDifferentCU) {
-		super.updateLinkedNodes(rewrite, newStub, isInDifferentCU);
-		if (!isInDifferentCU) {
-			Name invocationName= getInvocationNameNode();
-			if (invocationName != null) {
-				addLinkedPosition(rewrite.track(invocationName), true, KEY_NAME);
-			}				
-		}
-	}
-	
-	private Name getInvocationNameNode() {
-		ASTNode node= getInvocationNode();
-		if (node instanceof MethodInvocation) {
-			return ((MethodInvocation)node).getName();
-		} else if (node instanceof SuperMethodInvocation) {
-			return ((SuperMethodInvocation)node).getName();
-		} else if (node instanceof ClassInstanceCreation) {
-			return ((ClassInstanceCreation)node).getName();
-		}		
-		return null;
-	}
-	
+					
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#evaluateModifiers(org.eclipse.jdt.core.dom.ASTNode)
 	 */
@@ -128,47 +108,95 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#getMethodName()
+	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#getNewName(org.eclipse.jdt.core.dom.rewrite.ASTRewrite)
 	 */
-	protected String getMethodName() {
+	protected SimpleName getNewName(ASTRewrite rewrite) {
 		ASTNode invocationNode= getInvocationNode();
-		
+		String name;
 		if (invocationNode instanceof MethodInvocation) {
-			return ((MethodInvocation)invocationNode).getName().getIdentifier();
+			name= ((MethodInvocation)invocationNode).getName().getIdentifier();
 		} else if (invocationNode instanceof SuperMethodInvocation) {
-			return ((SuperMethodInvocation)invocationNode).getName().getIdentifier();
+			name= ((SuperMethodInvocation)invocationNode).getName().getIdentifier();
 		} else {
-			return getSenderBinding().getName(); // name of the class
+			name= getSenderBinding().getName(); // name of the class
 		}
+		AST ast= rewrite.getAST();
+		SimpleName newNameNode= ast.newSimpleName(name);
+		addLinkedPosition(rewrite.track(newNameNode), false, KEY_NAME);
+
+		Name invocationName= getInvocationNameNode();
+		if (invocationName != null && invocationName.getAST() == ast) { // in the same CU
+			addLinkedPosition(rewrite.track(invocationName), true, KEY_NAME);
+		}	
+		return newNameNode;
+	}
+	
+	private Name getInvocationNameNode() {
+		ASTNode node= getInvocationNode();
+		if (node instanceof MethodInvocation) {
+			return ((MethodInvocation)node).getName();
+		} else if (node instanceof SuperMethodInvocation) {
+			return ((SuperMethodInvocation)node).getName();
+		} else if (node instanceof ClassInstanceCreation) {
+			return ((ClassInstanceCreation)node).getName();
+		}		
+		return null;
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#evaluateMethodType(org.eclipse.jdt.core.dom.AST)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#getNewMethodType(org.eclipse.jdt.core.dom.rewrite.ASTRewrite)
 	 */
-	protected Type evaluateMethodType(AST ast) throws CoreException {
+	protected Type getNewMethodType(ASTRewrite rewrite) throws CoreException {
 		ASTNode node= getInvocationNode();
+		AST ast= rewrite.getAST();
 		
-		ITypeBinding binding= ASTResolving.guessBindingForReference(node);
-		if (binding != null) {
-			String typeName= getImportRewrite().addImport(binding);
-			return ASTNodeFactory.newType(ast, typeName);			
-		} else {
-			ASTNode parent= node.getParent();
-			if (parent instanceof ExpressionStatement) {
-				return null;
+		Type newTypeNode= null;
+		ITypeBinding[] otherProposals= null;
+		
+		if (node.getParent() instanceof MethodInvocation) {
+			MethodInvocation parent= (MethodInvocation) node.getParent();
+			if (parent.getExpression() == node) {
+				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(node.getRoot(), parent.getName().getIdentifier(), parent.arguments());
+				if (bindings.length > 0) {
+					String typeName= getImportRewrite().addImport(bindings[0]);
+					newTypeNode= ASTNodeFactory.newType(ast, typeName);
+					otherProposals= bindings;
+				}
 			}
-			Type type= ASTResolving.guessTypeForReference(ast, node);
-			if (type != null) {
-				return type;
-			}
-			return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 		}
+		if (newTypeNode == null) {
+			ITypeBinding binding= ASTResolving.guessBindingForReference(node);
+			if (binding != null) {
+				String typeName= getImportRewrite().addImport(binding);
+				newTypeNode= ASTNodeFactory.newType(ast, typeName);			
+			} else {
+				ASTNode parent= node.getParent();
+				if (parent instanceof ExpressionStatement) {
+					return null;
+				}
+				newTypeNode= ASTResolving.guessTypeForReference(ast, node);
+				if (newTypeNode == null) {
+					newTypeNode= ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+				}
+			}
+		}
+		
+		addLinkedPosition(rewrite.track(newTypeNode), false, KEY_TYPE);
+		if (otherProposals != null) {
+			for (int i= 0; i < otherProposals.length; i++) {
+				addLinkedPositionProposal(KEY_TYPE, otherProposals[i]);
+			}
+		}
+		
+		return newTypeNode;
 	}
 	
-	/*(non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewParameters(org.eclipse.jdt.core.dom.AST, java.util.List, java.util.List)
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewParameters(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List, java.util.List)
 	 */
-	protected void addNewParameters(AST ast, ASTRewrite rewrite, List takenNames, List params) throws CoreException {
+	protected void addNewParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException {
+		AST ast= rewrite.getAST();
+		
 		List arguments= fArguments;
 
 		for (int i= 0; i < arguments.size(); i++) {
@@ -250,9 +278,10 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 	
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewExceptions(org.eclipse.jdt.core.dom.AST, java.util.List)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewExceptions(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List)
 	 */
-	protected void addNewExceptions(AST ast, ASTRewrite rewrite,List params) throws CoreException {
-	}	
+	protected void addNewExceptions(ASTRewrite rewrite, List exceptions) throws CoreException {
+	}
+
 
 }

@@ -538,7 +538,9 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo(X x) {\n");
-		buf.append("        boolean i= x.goo(1, 2.1);\n");
+		buf.append("        if (x instanceof Y) {\n");
+		buf.append("            boolean i= x.goo(1, 2.1);\n");
+		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -549,13 +551,20 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		pack1.createCompilationUnit("X.java", buf.toString(), false, null);
 		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface Y {\n");
+		buf.append("    public boolean goo(int i, double d);\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("Y.java", buf.toString(), false, null);
+		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -565,7 +574,24 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("        return false;\n");
 		buf.append("    }\n");				
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();	
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(X x) {\n");
+		buf.append("        if (x instanceof Y) {\n");
+		buf.append("            boolean i= ((Y) x).goo(1, 2.1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();		
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+
 	}
 	
 	public void testMethodInAnonymous1() throws Exception {
@@ -1084,11 +1110,11 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		NewMethodCompletionProposal proposal= (NewMethodCompletionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1096,7 +1122,22 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("    boolean goo(Class class1);\n");				
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();	
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(X x) {\n");
+		buf.append("        boolean i= ((Object) x).goo(1, 2.1);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();		
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+
 	}
 	
 	public void testParameterMismatchCast() throws Exception {

@@ -163,6 +163,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IncompatibleReturnType:
 			case IProblem.IncompatibleExceptionInThrowsClause:
 			case IProblem.NoMessageSendOnArrayType:
+			case IProblem.InvalidOperator:
 				return true;
 			default:
 				return false;
@@ -442,6 +443,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.NoMessageSendOnArrayType:
 				UnresolvedElementsSubProcessor.getArrayAccessProposals(context, problem, proposals); 
+				break;
+			case IProblem.InvalidOperator:
+				LocalCorrectionsSubProcessor.getInvalidOperatorProposals(context, problem, proposals);
 				break;
 			default:
 		}

@@ -501,7 +501,7 @@ public class UnresolvedElementsSubProcessor {
 		} while (node != null);
 	}
 	
-	public static void getMethodProposals(IInvocationContext context, IProblemLocation problem, boolean needsNewName, Collection proposals) throws CoreException {
+	public static void getMethodProposals(IInvocationContext context, IProblemLocation problem, boolean isOnlyParameterMismatch, Collection proposals) throws CoreException {
 
 		ICompilationUnit cu= context.getCompilationUnit();
 		
@@ -542,7 +542,7 @@ public class UnresolvedElementsSubProcessor {
 		for (int i= 0; i < bindings.length; i++) {
 			IMethodBinding binding= (IMethodBinding) bindings[i];
 			String curr= binding.getName();
-			if (curr.equals(methodName) && needsNewName) {
+			if (curr.equals(methodName) && isOnlyParameterMismatch) {
 				parameterMismatchs.add(binding);
 			} else if (binding.getParameterTypes().length == nArguments && NameMatcher.isSimilarName(methodName, curr)) {
 				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changemethod.description", curr); //$NON-NLS-1$
@@ -593,33 +593,68 @@ public class UnresolvedElementsSubProcessor {
 			}
 		}
 		
-		if (!isSuperInvocation) {
-			ASTNode parent= invocationNode.getParent();
-			while (parent instanceof Expression && parent.getNodeType() != ASTNode.CAST_EXPRESSION) {
-				parent= parent.getParent();
-			}
-			if (!isSuperInvocation && parent instanceof CastExpression) {
-				addMissingCastParentsProposal(cu, (CastExpression) parent, sender, nameNode, getArgumentTypes(arguments), proposals);
-			}
+		if (!isOnlyParameterMismatch && !isSuperInvocation && sender != null) {
+			addMissingCastParentsProposal(cu, (MethodInvocation) invocationNode, proposals);
 		}
-		
+
 	}
 
-	private static void addMissingCastParentsProposal(ICompilationUnit cu, CastExpression expression, Expression accessExpression, SimpleName accessSelector, ITypeBinding[] paramTypes, Collection proposals) {
+	private static void addMissingCastParentsProposal(ICompilationUnit cu, MethodInvocation invocationNode, Collection proposals) {
+		Expression sender= invocationNode.getExpression();
+		if (sender instanceof ThisExpression) {
+			return;
+		}
+		
+		ITypeBinding senderBinding= sender.resolveTypeBinding();
+		if (senderBinding == null || Modifier.isFinal(senderBinding.getModifiers())) {
+			return;
+		}
+		
+		if (sender instanceof Name && ((Name) sender).resolveBinding() instanceof ITypeBinding) {
+			return; // static access
+		}
+		
+		ASTNode parent= invocationNode.getParent();
+		while (parent instanceof Expression && parent.getNodeType() != ASTNode.CAST_EXPRESSION) {
+			parent= parent.getParent();
+		}
+		boolean hasCastProposal= false;
+		if (parent instanceof CastExpression) {
+			//	(TestCase) x.getName() -> ((TestCase) x).getName
+			hasCastProposal= useExistingParentCastProposal(cu, (CastExpression) parent, sender, invocationNode.getName(), getArgumentTypes(invocationNode.arguments()), proposals);
+		}
+		if (!hasCastProposal) {
+			// x.getName() -> ((TestCase) x).getName
+			
+			Expression target= sender;
+			while (target instanceof ParenthesizedExpression) {
+				target= ((ParenthesizedExpression) target).getExpression();
+			}
+			String label;
+			if (invocationNode.getNodeType() == ASTNode.CAST_EXPRESSION) {
+				label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.sendercast.description"); //$NON-NLS-1$
+			} else {
+				label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.changesendercast.description"); //$NON-NLS-1$
+			}
+			proposals.add(new CastCompletionProposal(label, cu, sender, null, 3));
+		}
+	}
+
+	private static boolean useExistingParentCastProposal(ICompilationUnit cu, CastExpression expression, Expression accessExpression, SimpleName accessSelector, ITypeBinding[] paramTypes, Collection proposals) {
 		ITypeBinding castType= expression.getType().resolveBinding();
 		if (castType == null) {
-			return;
+			return false;
 		}
 		if (paramTypes != null) {
 			if (Bindings.findMethodInHierarchy(castType, accessSelector.getIdentifier(), paramTypes) == null) {
-				return;
+				return false;
 			}
 		} else if (Bindings.findFieldInHierarchy(castType, accessSelector.getIdentifier()) == null) {
-			return;
+			return false;
 		}
 		ITypeBinding bindingToCast= accessExpression.resolveTypeBinding();
 		if (bindingToCast != null && !TypeRules.canCast(castType, bindingToCast)) {
-			return;
+			return false;
 		}
 		
 		IMethodBinding res= Bindings.findMethodInHierarchy(castType, accessSelector.getIdentifier(), paramTypes);
@@ -639,8 +674,10 @@ public class UnresolvedElementsSubProcessor {
 			String label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.missingcastbrackets.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 8, image);
-			proposals.add(proposal);				
+			proposals.add(proposal);
+			return true;
 		}
+		return false;
 	}
 
 	private static void addParameterMissmatchProposals(IInvocationContext context, IProblemLocation problem, List similarElements, ASTNode invocationNode, List arguments, Collection proposals) throws CoreException {

@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -34,7 +33,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -258,47 +256,16 @@ public class TypeMismatchSubProcessor {
 		}
 	}
 	
-	public static ASTRewriteCorrectionProposal createCastProposal(IInvocationContext context, String castType, Expression nodeToCast, int relevance) throws CoreException {
+	public static ASTRewriteCorrectionProposal createCastProposal(IInvocationContext context, String castType, Expression nodeToCast, int relevance) {
 		ICompilationUnit cu= context.getCompilationUnit();
-		CompilationUnit astRoot= context.getASTRoot();
-		
-		ASTRewrite rewrite= ASTRewrite.create(nodeToCast.getAST());
-		ImportRewrite imports= new ImportRewrite(cu);
 		
 		String label;
-		String simpleCastType= imports.addImport(castType);
-		
 		if (nodeToCast.getNodeType() == ASTNode.CAST_EXPRESSION) {
 			label= CorrectionMessages.getFormattedString("TypeMismatchSubProcessor.changecast.description", castType); //$NON-NLS-1$
-			CastExpression expression= (CastExpression) nodeToCast;
-			rewrite.replace(expression.getType(), rewrite.createStringPlaceholder(simpleCastType, ASTNode.SIMPLE_TYPE), null);
 		} else {
 			label= CorrectionMessages.getFormattedString("TypeMismatchSubProcessor.addcast.description", castType); //$NON-NLS-1$
-			
-			Expression expressionCopy= (Expression) rewrite.createCopyTarget(nodeToCast);
-			int nodeType= nodeToCast.getNodeType();
-			
-			if (nodeType == ASTNode.INFIX_EXPRESSION || nodeType == ASTNode.CONDITIONAL_EXPRESSION 
-				|| nodeType == ASTNode.ASSIGNMENT || nodeType == ASTNode.INSTANCEOF_EXPRESSION) {
-				// nodes have weaker precedence than cast
-				ParenthesizedExpression parenthesizedExpression= astRoot.getAST().newParenthesizedExpression();
-				parenthesizedExpression.setExpression(expressionCopy);
-				expressionCopy= parenthesizedExpression;
-			}
-			
-			Type typeCopy= (Type) rewrite.createStringPlaceholder(simpleCastType, ASTNode.SIMPLE_TYPE);
-			CastExpression castExpression= astRoot.getAST().newCastExpression();
-			castExpression.setExpression(expressionCopy);
-			castExpression.setType(typeCopy);
-			
-			rewrite.replace(nodeToCast, castExpression, null);
 		}
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, relevance, image); //$NON-NLS-1$
-		
-		proposal.setImportRewrite(imports);
-		
-		return proposal;
+		return new CastCompletionProposal(label, cu, nodeToCast, castType, relevance);
 	}
 
 	public static void addIncompatibleReturnTypeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws JavaModelException {

@@ -782,7 +782,44 @@ public class Bindings {
 		return null;
 	}				
 
+
 	
+	public static void visitAllBindings(ASTNode astRoot, TypeBindingVisitor visitor) {
+		try {
+			astRoot.accept(new AllBindingsVisitor(visitor));
+		} catch (AllBindingsVisitor.VisitCancelledException e) {
+		}
+	}
+	
+	private static class AllBindingsVisitor extends GenericVisitor {
+		private final TypeBindingVisitor fVisitor;
+		
+		private static class VisitCancelledException extends RuntimeException {
+		}
+
+		public AllBindingsVisitor(TypeBindingVisitor visitor) {
+			fVisitor= visitor;
+		}
+		
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.SimpleName)
+		 */
+		public boolean visit(SimpleName node) {
+			ITypeBinding binding= node.resolveTypeBinding();
+			if (binding != null) {
+				boolean res= fVisitor.visit(binding);
+				if (res) {
+					res= visitHierarchy(binding, fVisitor);
+				}
+				if (!res) {
+					throw new VisitCancelledException();
+				}
+			}
+			return false;
+		}
+		
+	}
 	
 
 }

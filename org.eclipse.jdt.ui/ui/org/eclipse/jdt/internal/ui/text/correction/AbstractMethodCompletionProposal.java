@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -47,10 +48,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionProposal {
 
-	protected static final String KEY_NAME= "name"; //$NON-NLS-1$
-	protected static final String KEY_TYPE= "type"; //$NON-NLS-1$
-
-	private ASTNode fNode; // MethodInvocation, ConstructorInvocation, SuperConstructorInvocation, ClassInstanceCreation, SuperMethodInvocation
+	private ASTNode fNode;
 	private ITypeBinding fSenderBinding;
 		
 	public AbstractMethodCompletionProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, ITypeBinding binding, int relevance, Image image) {
@@ -102,29 +100,22 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 				insertIndex= members.size();
 			}
 			ListRewrite listRewriter= rewrite.getListRewrite(newTypeDecl, property);
-			listRewriter.insertAt(newStub, insertIndex, null);
-
-			updateLinkedNodes(rewrite, newStub, isInDifferentCU);			
+			listRewriter.insertAt(newStub, insertIndex, null);	
 			
 			return rewrite;
 		}
 		return null;
 	}
-	
-	protected void updateLinkedNodes(ASTRewrite rewrite, MethodDeclaration newStub, boolean isInDifferentCU) {
-		addLinkedPosition(rewrite.track(newStub.getName()), false, KEY_NAME);
-		if (!newStub.isConstructor()) {
-			addLinkedPosition(rewrite.track(newStub.getReturnType()), false, KEY_TYPE);
-		}
-	}
-	
+		
 	private MethodDeclaration getStub(ASTRewrite rewrite, ASTNode targetTypeDecl) throws CoreException {
 		AST ast= targetTypeDecl.getAST();
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		
+		SimpleName newNameNode= getNewName(rewrite);
+		
 		decl.setConstructor(isConstructor());
 		decl.setModifiers(evaluateModifiers(targetTypeDecl));
-		decl.setName(ast.newSimpleName(getMethodName()));
+		decl.setName(newNameNode);
 		
 		ArrayList takenNames= new ArrayList();
 		
@@ -133,14 +124,14 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 			takenNames.add(declaredFields[i].getName());
 		}
 		
-		addNewParameters(ast, rewrite, takenNames, decl.parameters());
-		addNewExceptions(ast, rewrite, decl.thrownExceptions());
+		addNewParameters(rewrite, takenNames, decl.parameters());
+		addNewExceptions(rewrite, decl.thrownExceptions());
 	
 		Block body= null;
 
 		String bodyStatement= ""; //$NON-NLS-1$
 		if (!isConstructor()) {
-			Type returnType= evaluateMethodType(ast);
+			Type returnType= getNewMethodType(rewrite);
 			if (returnType == null) {
 				decl.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
 			} else {
@@ -154,7 +145,7 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 		}
 		if (!fSenderBinding.isInterface()) {
 			body= ast.newBlock();
-			String placeHolder= CodeGeneration.getMethodBodyContent(getCompilationUnit(), fSenderBinding.getName(), getMethodName(), isConstructor(), bodyStatement, String.valueOf('\n')); 	
+			String placeHolder= CodeGeneration.getMethodBodyContent(getCompilationUnit(), fSenderBinding.getName(), newNameNode.getIdentifier(), isConstructor(), bodyStatement, String.valueOf('\n')); 	
 			if (placeHolder != null) {
 				ASTNode todoNode= rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
 				body.statements().add(todoNode);
@@ -202,12 +193,12 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 	}
 	
 	protected abstract boolean isConstructor();
-	protected abstract void addNewParameters(AST ast, ASTRewrite rewrite, List takenNames, List params) throws CoreException;
-	protected abstract void addNewExceptions(AST ast, ASTRewrite rewrite, List exceptions) throws CoreException;
+	protected abstract void addNewParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException;
+	protected abstract void addNewExceptions(ASTRewrite rewrite, List exceptions) throws CoreException;
 
-	protected abstract String getMethodName();
+	protected abstract SimpleName getNewName(ASTRewrite rewrite);
 	protected abstract int evaluateModifiers(ASTNode targetTypeDecl);
-	protected abstract Type evaluateMethodType(AST ast) throws CoreException;
+	protected abstract Type getNewMethodType(ASTRewrite rewrite) throws CoreException;
 
 
 }

@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -40,6 +41,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  */
 public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal {
 
+	private static final String KEY_NAME= "name"; //$NON-NLS-1$
+	private static final String KEY_TYPE= "type"; //$NON-NLS-1$
+	
 	private final IMethodBinding fMethod;
 	private final String[] fParamNames;
 
@@ -60,9 +64,10 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewParameters(org.eclipse.jdt.core.dom.AST, java.util.List, java.util.List)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewParameters(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List, java.util.List)
 	 */
-	protected void addNewParameters(AST ast, ASTRewrite rewrite, List takenNames, List params) throws CoreException {
+	protected void addNewParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException {
+		AST ast= rewrite.getAST();
 		ImportRewrite importRewrite= getImportRewrite();
 		ITypeBinding[] bindings= fMethod.getParameterTypes();
 		
@@ -86,10 +91,13 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#getMethodName()
+	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#getNewName()
 	 */
-	protected String getMethodName() {
-		return fMethod.getName();
+	protected SimpleName getNewName(ASTRewrite rewrite) {
+		AST ast= rewrite.getAST();
+		SimpleName nameNode= ast.newSimpleName(fMethod.getName());
+		addLinkedPosition(rewrite.track(nameNode), false, KEY_NAME);
+		return nameNode;
 	}
 
 	/* (non-Javadoc)
@@ -104,17 +112,21 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#evaluateMethodType(org.eclipse.jdt.core.dom.AST)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#getNewMethodType(org.eclipse.jdt.core.dom.rewrite.ASTRewrite)
 	 */
-	protected Type evaluateMethodType(AST ast) throws CoreException {
+	protected Type getNewMethodType(ASTRewrite rewrite) throws CoreException {
 		String typeName= getImportRewrite().addImport(fMethod.getReturnType());
-		return ASTNodeFactory.newType(ast, typeName);
+		Type newTypeNode= ASTNodeFactory.newType(rewrite.getAST(), typeName);
+		
+		addLinkedPosition(rewrite.track(newTypeNode), false, KEY_TYPE);
+		return newTypeNode;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewExceptions(org.eclipse.jdt.core.dom.AST, java.util.List)
 	 */
-	protected void addNewExceptions(AST ast, ASTRewrite rewrite, List exceptions) throws CoreException {
+	protected void addNewExceptions(ASTRewrite rewrite, List exceptions) throws CoreException {
+		AST ast= rewrite.getAST();
 		ImportRewrite importRewrite= getImportRewrite();
 		ITypeBinding[] bindings= fMethod.getExceptionTypes();
 		for (int i= 0; i < bindings.length; i++) {
