@@ -59,7 +59,7 @@ public class RenameTempAction extends TextSelectionBasedRefactoringAction{
 		String message= "Choose a new name for the local variable.";
 		String wizardPageHelp= IJavaHelpContextIds.RENAME_TEMP_WIZARD_PAGE; 
 		String errorPageHelp= IJavaHelpContextIds.RENAME_TEMP_ERROR_WIZARD_PAGE;
-		return new RenameRefactoringWizard((RenameTempRefactoring)refactoring, getDialogTitle(), message, "HELPID", "ERRORHELPID");
+		return new RenameRefactoringWizard((RenameTempRefactoring)refactoring, getDialogTitle(), message, wizardPageHelp, errorPageHelp);
 	}
 }
 
