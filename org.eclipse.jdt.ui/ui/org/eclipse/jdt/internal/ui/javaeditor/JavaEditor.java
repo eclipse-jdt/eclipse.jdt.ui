@@ -1470,10 +1470,24 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (fFoldingRunner == this)
 				fFoldingRunner= null;
 		}
+		
 		/*
 		 * @see org.eclipse.ui.IPartListener2#partVisible(org.eclipse.ui.IWorkbenchPartReference)
 		 */
 		public void partVisible(IWorkbenchPartReference partRef) {
+			if (JavaEditor.this.equals(partRef.getPart(false))) {
+				cancel();
+				toggleFolding();
+			}
+		}
+		
+		/*
+		 * @see org.eclipse.ui.IPartListener2#partActivated(org.eclipse.ui.IWorkbenchPartReference)
+		 */
+		public void partActivated(IWorkbenchPartReference partRef) {
+			// XXX workaround https://bugs.eclipse.org/bugs/show_bug.cgi?id=85005
+			// the first editor in a stack is not visible when starting up,
+			// but will not receive a partVisible message when being activated.
 			if (JavaEditor.this.equals(partRef.getPart(false))) {
 				cancel();
 				toggleFolding();
@@ -1488,7 +1502,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 		}
 		
-		public void partActivated(IWorkbenchPartReference partRef) {}
 		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
 		public void partDeactivated(IWorkbenchPartReference partRef) {}
 		public void partOpened(IWorkbenchPartReference partRef) {}
