@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 
 /**
  * Action to add a JAR to the classpath of its parent project.
@@ -98,7 +99,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 
 	private static IFile getCandidate(IAdaptable element) throws JavaModelException {
 		IResource resource= (IResource)element.getAdapter(IResource.class);
-		if (! (resource instanceof IFile))
+		if (! (resource instanceof IFile) || ! ArchiveFileFilter.isArchivePath(resource.getFullPath()))
 			return null;
 		
 		IJavaProject project= JavaCore.create(resource.getProject());
