@@ -31,8 +31,7 @@ public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 	// Cache
 	private IMarker fLastMarker;
 	private IJavaElement fLastJavaElement;
-	private StringBuffer fBufffer= new StringBuffer(50);
-	
+
 
 	public JavaSearchResultLabelProvider() {
 		super(
@@ -63,7 +62,6 @@ public class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 		}
 		if (javaElement instanceof IImportDeclaration)
 			javaElement= ((IImportDeclaration)javaElement).getParent().getParent();
-		fBufffer.setLength(0);
 		if (!isAccurate) 
 			return super.getText(javaElement) + POTENTIAL_MATCH;
 		else
