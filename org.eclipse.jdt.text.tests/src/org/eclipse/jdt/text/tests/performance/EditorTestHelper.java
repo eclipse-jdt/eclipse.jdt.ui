@@ -171,6 +171,9 @@ public class EditorTestHelper {
 			page.closeAllEditors(false);
 	}
 	
+	/**
+	 * Runs the event queue on the current display until it is empty.
+	 */
 	public static void runEventQueue() {
 		IWorkbenchWindow window= getActiveWorkbenchWindow();
 		if (window != null)
@@ -187,11 +190,29 @@ public class EditorTestHelper {
 		}
 	}
 	
-	public static void runEventQueue(long minTime) {
-		long nextCheck= System.currentTimeMillis() + minTime;
-		while (System.currentTimeMillis() < nextCheck) {
-			runEventQueue();
-			sleep(1);
+	/**
+	 * Runs the event queue on the current display and lets it sleep until the
+	 * timeout elapses.
+	 * 
+	 * @param millis the timeout in milliseconds
+	 */
+	public static void runEventQueue(long millis) {
+		runEventQueue(getActiveDisplay(), millis);
+	}
+	
+	public static void runEventQueue(IWorkbenchPart part, long millis) {
+		runEventQueue(part.getSite().getShell(), millis);
+	}
+	
+	public static void runEventQueue(Shell shell, long millis) {
+		runEventQueue(shell.getDisplay(), millis);
+	}
+	
+	public static void runEventQueue(Display display, long minTime) {
+		if (display != null) {
+			DisplayHelper.sleep(display, minTime);
+		} else {
+			sleep((int) minTime);
 		}
 	}
 	
@@ -247,18 +268,14 @@ public class EditorTestHelper {
 	}
 	
 	public static boolean joinJobs(long minTime, long maxTime, long intervalTime) {
-		long startTime= System.currentTimeMillis() + minTime;
-		runEventQueue();
-		while (System.currentTimeMillis() < startTime)
-			runEventQueue(intervalTime);
+		runEventQueue(minTime);
 		
-		long endTime= maxTime > 0  && maxTime < Long.MAX_VALUE ? System.currentTimeMillis() + maxTime : Long.MAX_VALUE;
-		boolean calm= allJobsQuiet();
-		while (!calm && System.currentTimeMillis() < endTime) {
-			runEventQueue(intervalTime);
-			calm= allJobsQuiet();
-		}
-		return calm;
+		DisplayHelper helper= new DisplayHelper() {
+			public boolean condition() {
+				return allJobsQuiet();
+			}
+		};
+		return helper.waitForCondition(getActiveDisplay(), maxTime > 0 ? maxTime : Long.MAX_VALUE);
 	}
 	
 	public static void sleep(int intervalTime) {
@@ -307,23 +324,24 @@ public class EditorTestHelper {
 	}
 	
 	public static boolean joinReconciler(SourceViewer sourceViewer, long minTime, long maxTime, long intervalTime) {
-		if (minTime > 0)
-			runEventQueue(minTime);
+		runEventQueue(minTime);
 		
-		long endTime= maxTime > 0 && maxTime < Long.MAX_VALUE ? System.currentTimeMillis() + maxTime : Long.MAX_VALUE;
 		AbstractReconciler reconciler= getReconciler(sourceViewer);
 		if (reconciler == null)
 			return true;
-		Accessor backgroundThreadAccessor= getBackgroundThreadAccessor(reconciler);
-		Accessor javaReconcilerAccessor= null;
+		final Accessor backgroundThreadAccessor= getBackgroundThreadAccessor(reconciler);
+		final Accessor javaReconcilerAccessor;
 		if (reconciler instanceof JavaReconciler)
 			javaReconcilerAccessor= new Accessor(reconciler, JavaReconciler.class);
-		boolean isRunning= isRunning(javaReconcilerAccessor, backgroundThreadAccessor);
-		while (isRunning && System.currentTimeMillis() < endTime) {
-			runEventQueue(intervalTime);
-			isRunning= isRunning(javaReconcilerAccessor, backgroundThreadAccessor);
-		}
-		return !isRunning;
+		else
+			javaReconcilerAccessor= null;
+		
+		DisplayHelper helper= new DisplayHelper() {
+			public boolean condition() {
+				return !isRunning(javaReconcilerAccessor, backgroundThreadAccessor);
+			}
+		};
+		return helper.waitForCondition(getActiveDisplay(), maxTime > 0 ? maxTime : Long.MAX_VALUE);
 	}
 	
 	public static AbstractReconciler getReconciler(SourceViewer sourceViewer) {

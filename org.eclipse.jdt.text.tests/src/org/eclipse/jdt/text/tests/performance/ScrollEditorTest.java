@@ -147,7 +147,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 			};
 			
 			boolean timedOut= !helper.waitForCondition(display, 5000);
-			assertFalse("TopIndex: " + text.getTopIndex() + " visibleLines: " + visibleLinesInViewport + " totalLines: " + numberOfLines + " operations: " + operations, timedOut);
+			assertFalse("Never scrolled to the bottom.\nTopIndex: " + text.getTopIndex() + " visibleLines: " + visibleLinesInViewport + " totalLines: " + numberOfLines + " operations: " + operations, timedOut);
 			
 			// 3: go back home
 			SWTEventHelper.pressKeyCodeCombination(display, mode.HOME_COMBO, false);
@@ -158,7 +158,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 			};
 			
 			timedOut= !helper.waitForCondition(display, 5000);
-			assertFalse(timedOut);
+			assertFalse("Never went back to the top.", timedOut);
 		}
 	}
 }
