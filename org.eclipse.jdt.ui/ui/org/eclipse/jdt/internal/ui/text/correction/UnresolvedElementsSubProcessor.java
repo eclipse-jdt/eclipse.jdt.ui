@@ -696,25 +696,30 @@ public class UnresolvedElementsSubProcessor {
 			while (target instanceof ParenthesizedExpression) {
 				target= ((ParenthesizedExpression) target).getExpression();
 			}
-			String targetName= null;
-			if (target.getLength() <= 18) {
-				targetName= '\'' + ASTNodes.asString(target) + '\'';
-			}
+
 			String label;
-			if (invocationNode.getNodeType() == ASTNode.CAST_EXPRESSION) {
+			if (target.getNodeType() != ASTNode.CAST_EXPRESSION) {
+				String targetName= null;
+				if (target.getLength() <= 18) {
+					targetName= ASTNodes.asString(target);
+				}
 				if (targetName == null) {
 					label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.methodtargetcast.description"); //$NON-NLS-1$
 				} else {
 					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.methodtargetcast2.description", targetName); //$NON-NLS-1$
 				}
 			} else {
+				String targetName= null;
+				if (target.getLength() <= 18) {
+					targetName= ASTNodes.asString(((CastExpression)target).getExpression());
+				}
 				if (targetName == null) {
 					label= CorrectionMessages.getString("UnresolvedElementsSubProcessor.changemethodtargetcast.description"); //$NON-NLS-1$
 				} else {
 					label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changemethodtargetcast2.description", targetName); //$NON-NLS-1$
 				}
 			}
-			proposals.add(new CastCompletionProposal(label, cu, sender, null, 3));
+			proposals.add(new CastCompletionProposal(label, cu, target, null, 3));
 		}
 	}
 
