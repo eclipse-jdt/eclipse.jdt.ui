@@ -6,26 +6,47 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.Iterator;
 
+import org.eclipse.jdt.core.ICodeFormatter;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-/* package */ class ASTNode2String extends GenericVisitor {
+/* package */ class ASTFlattener extends GenericVisitor {
 
 	protected StringBuffer fResult;
 
-
-	/* package */ ASTNode2String() {
-		// no public instance
+	public ASTFlattener() {
 		fResult= new StringBuffer();
 	}
 	
-	public String generateSimple(ASTNode node) {
-		node.accept(this);
-		String res= fResult.toString();
+	/**
+	 * Returns the string accumulated in the visit.
+	 *
+	 * @return the serialized 
+	 */
+	public String getResult() {
+		// convert to a string, but lose any extra space in the string buffer by copying
+		return new String(fResult.toString());
+	}
+
+	/**
+	 * Returns the string accumulated in the visit formatted using the default formatter
+	 *
+	 * @return the serialized 
+	 */	
+	public String getFormattedResult(int initialIndentationLevel, String lineDelimiter) {
+		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
+		return formatter.format(getResult(), initialIndentationLevel, null, lineDelimiter);	
+	}
+	
+	/**
+	 * Resets this printer so that it can be used again.
+	 */
+	public void reset() {
 		fResult.setLength(0);
-		return res;			
-	}	
+	}
+	
 
 	protected boolean visitNode(ASTNode node) {
 		Assert.isTrue(false, "No implementation to flatten node: " + node.toString()); //$NON-NLS-1$
