@@ -563,7 +563,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				if (fCachedDocument.getNumberOfLines() > end + 1)
 					endOffset= fCachedDocument.getLineOffset(end + 1);
 				else if (end > start)
-					endOffset= fCachedDocument.getLineOffset(end);
+					endOffset= fCachedDocument.getLineOffset(end) + fCachedDocument.getLineLength(end);
 				else
 					return null;
 				return new Position(offset, endOffset - offset);
