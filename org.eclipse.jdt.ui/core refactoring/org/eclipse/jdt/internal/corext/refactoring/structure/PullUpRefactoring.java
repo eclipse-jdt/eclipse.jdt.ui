@@ -402,6 +402,9 @@ public class PullUpRefactoring extends Refactoring {
 		IType superType= getSuperType(new NullProgressMonitor());
 		for (int i= 0; i < accessedTypes.length; i++) {
 			IType iType= accessedTypes[i];
+			if (! iType.exists())
+				continue;
+			
 			if (! canBeAccessedFrom(iType, superType)){
 				String msg= "Type '" + iType.getFullyQualifiedName() + "' referenced in one of the pulled elements is not accessible from type '" 
 								+ superType.getFullyQualifiedName() + "'.";
@@ -421,6 +424,9 @@ public class PullUpRefactoring extends Refactoring {
 		IType superType= getSuperType(new NullProgressMonitor());
 		for (int i= 0; i < accessedFields.length; i++) {
 			IField iField= accessedFields[i];
+			if (! iField.exists())
+				continue;
+			
 			if (! canBeAccessedFrom(iField, superType) && ! pulledUpList.contains(iField) && !deletedList.contains(iField)){
 				String msg= "Field '" + iField.getElementName() + "' referenced in one of the pulled elements is not accessible from type '" 
 								+ superType.getFullyQualifiedName() + "'.";
@@ -440,6 +446,8 @@ public class PullUpRefactoring extends Refactoring {
 		IType superType= getSuperType(new NullProgressMonitor());
 		for (int i= 0; i < accessedMethods.length; i++) {
 			IMethod iMethod= accessedMethods[i];
+			if (! iMethod.exists())
+				continue;
 			if (! canBeAccessedFrom(iMethod, superType) && ! pulledUpList.contains(iMethod) && !deletedList.contains(iMethod)){
 				String msg= "Method '" + JavaElementUtil.createMethodSignature(iMethod) + "' referenced in one of the pulled elements is not accessible from type '" 
 								+ superType.getFullyQualifiedName() + "'.";
