@@ -13,7 +13,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -94,7 +93,8 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 	
 	private void performDeletion(IStructuredSelection selection, IProgressMonitor pm) throws CoreException{
 		Map mapping= SourceReferenceUtil.groupByFile(getElementsToProcess(selection)); //IFile -> List of ISourceReference (elements from that file)
-		pm.beginTask(ReorgMessages.getString("DeleteSourceReferenceAction.deleting"), 2 * mapping.keySet().size()); //$NON-NLS-1$
+        int size= mapping.keySet().size();
+		pm.beginTask(ReorgMessages.getString("DeleteSourceReferenceAction.deleting"), 3 * size); //$NON-NLS-1$
 		
 		if (areAllFilesReadOnly(mapping)){
 			String title= ReorgMessages.getString("DeleteSourceReferencesAction.title"); //$NON-NLS-1$
@@ -114,7 +114,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 			deleteAll(mapping, file, new SubProgressMonitor(pm, 1));
 		}
 		
-		ICompilationUnit[] notDeleted= deleteEmptyCus(mapping);
+		ICompilationUnit[] notDeleted= deleteEmptyCus(mapping, new SubProgressMonitor(pm, size));
 		for (int i= 0; i < notDeleted.length; i++) {
 			IFile file= (IFile)notDeleted[i].getUnderlyingResource();
 			if (isReadOnly(file))
@@ -190,7 +190,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 	/**
 	 * returns cus that have <b>not</b> been deleted
 	 */
-	private ICompilationUnit[] deleteEmptyCus(Map mapping) throws JavaModelException {
+	private ICompilationUnit[] deleteEmptyCus(Map mapping, IProgressMonitor pm) throws JavaModelException {
 		ICompilationUnit[] cusToDelete= getCusLeftEmpty(mapping);
 		if (cusToDelete.length == 0)
 			return cusToDelete;
@@ -201,10 +201,11 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 		List notDeletedCus= new ArrayList();
 		notDeletedCus.addAll(Arrays.asList(cusToDelete));	
 		
+        pm.beginTask("", cusToDelete.length);
 		for (int i= 0; i < cusToDelete.length; i++) {
 			if (isReadOnly(cusToDelete[i]) && (! isOkToDeleteReadOnly(cusToDelete[i])))
 				continue;
-			cusToDelete[i].delete(false, new NullProgressMonitor());
+			cusToDelete[i].delete(false, new SubProgressMonitor(pm, 1));
 			notDeletedCus.remove(cusToDelete[i]);
 		}	
 		return (ICompilationUnit[]) notDeletedCus.toArray(new ICompilationUnit[notDeletedCus.size()]);
