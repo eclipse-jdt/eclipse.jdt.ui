@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
 
 /**
- * Proposal to correct the incorrectly spelt word.
+ * Proposal to correct the incorrectly spelled word.
  * 
  * @since 3.0
  */

@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
 import org.eclipse.jdt.internal.ui.text.javadoc.IJavaDocTagConstants;
 
 /**
- * Quick fix processor for incorrectly spelt words.
+ * Quick fix processor for incorrectly spelled words.
  * 
  * @since 3.0
  */

@@ -88,11 +88,11 @@ public interface ISpellChecker {
 	public void ignoreWord(String word);
 
 	/**
-	 * Is the specified word correctly spelt?
+	 * Is the specified word correctly spelled?
 	 * 
 	 * @param word
 	 *                   The word to check its spelling
-	 * @return <code>true</code> iff the word is correctly spelt, <code>false</code>
+	 * @return <code>true</code> iff the word is correctly spelled, <code>false</code>
 	 *               otherwise
 	 */
 	public boolean isCorrect(String word);

@@ -21,42 +21,42 @@ import java.util.Set;
 public interface ISpellEvent {
 
 	/**
-	 * Returns the begin index of the incorrectly spelt word.
+	 * Returns the begin index of the incorrectly spelled word.
 	 * 
 	 * @return The begin index of the word
 	 */
 	public int getBegin();
 
 	/**
-	 * Returns the end index of the incorrectly spelt word.
+	 * Returns the end index of the incorrectly spelled word.
 	 * 
 	 * @return The end index of the word
 	 */
 	public int getEnd();
 
 	/**
-	 * Returns the proposals for the incorrectly spelt word.
+	 * Returns the proposals for the incorrectly spelled word.
 	 * 
 	 * @return Array of proposals for the word
 	 */
 	public Set getProposals();
 
 	/**
-	 * Returns the incorrectly spelt word.
+	 * Returns the incorrectly spelled word.
 	 * 
 	 * @return The incorrect word
 	 */
 	public String getWord();
 
 	/**
-	 * Was the incorrectly spelt word found in the dictionary?
+	 * Was the incorrectly spelled word found in the dictionary?
 	 * 
 	 * @return <code>true</code> iff the word was found, <code>false</code> otherwise
 	 */
 	public boolean isMatch();
 
 	/**
-	 * Does the incorrectly spelt word start a new sentence?
+	 * Does the incorrectly spelled word start a new sentence?
 	 * 
 	 * @return <code>true<code> iff the word starts a new sentence, <code>false</code> otherwise
 	 */

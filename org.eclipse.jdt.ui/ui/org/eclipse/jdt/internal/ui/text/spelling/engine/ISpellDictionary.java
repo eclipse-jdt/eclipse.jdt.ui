@@ -36,7 +36,7 @@ public interface ISpellDictionary {
 	public void addWord(String word);
 
 	/**
-	 * Returns the ranked word proposals for an incorrectly spelt word.
+	 * Returns the ranked word proposals for an incorrectly spelled word.
 	 * 
 	 * @param word
 	 *                   The word to retrieve the proposals for
@@ -48,11 +48,11 @@ public interface ISpellDictionary {
 	public Set getProposals(String word, boolean sentence);
 
 	/**
-	 * Is the specified word correctly spelt?
+	 * Is the specified word correctly spelled?
 	 * 
 	 * @param word
 	 *                   The word to spell-check
-	 * @return <code>true</code> iff this word is correctly spelt, <code>false</code>
+	 * @return <code>true</code> iff this word is correctly spelled, <code>false</code>
 	 *               otherwise.
 	 */
 	public boolean isCorrect(String word);
