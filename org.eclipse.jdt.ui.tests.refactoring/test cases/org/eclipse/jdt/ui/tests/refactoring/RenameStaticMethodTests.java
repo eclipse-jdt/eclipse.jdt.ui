@@ -16,6 +16,7 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 
@@ -192,5 +193,28 @@ public class RenameStaticMethodTests extends RefactoringTest {
 		assertEquals("was supposed to pass", null, performRefactoring(refactoring));
 		SourceCompareUtil.compare("invalid renaming in A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
 		SourceCompareUtil.compare("invalid renaming in B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
+	}
+
+	public void test11() throws Exception{
+//		printTestDisabledMessage("bug 40452");
+//		if (true)	return;
+		IPackageFragment packageA= getRoot().createPackageFragment("a", false, new NullProgressMonitor());
+		IPackageFragment packageB= getRoot().createPackageFragment("b", false, new NullProgressMonitor());
+		try {
+			ICompilationUnit cuA= createCUfromTestFile(packageA, "A");
+			ICompilationUnit cuB= createCUfromTestFile(packageB, "B");
+	
+			IType classA= getType(cuA, "A");
+			RenameRefactoring refactoring= new RenameRefactoring(classA.getMethod("method2", new String[0]));
+			RenameMethodProcessor processor= (RenameMethodProcessor)refactoring.getProcessor();
+			processor.setUpdateReferences(true);
+			processor.setNewElementName("fred");
+			assertEquals("was supposed to pass", null, performRefactoring(refactoring));
+			SourceCompareUtil.compare("invalid renaming in A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+			SourceCompareUtil.compare("invalid renaming in B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
+		} finally{
+			packageA.delete(true, new NullProgressMonitor());
+			packageB.delete(true, new NullProgressMonitor());
+		}
 	}
 }
