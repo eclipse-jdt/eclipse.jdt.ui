@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -23,9 +21,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
+
 import org.eclipse.jface.text.Assert;
 
 import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 
@@ -40,6 +42,8 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 public class ExtractTempWizard extends RefactoringWizard {
 
+	/* package */ static final String DIALOG_SETTING_SECTION= "ExtractTempWizard"; //$NON-NLS-1$
+	
 	public ExtractTempWizard(ExtractTempRefactoring ref) {
 		super(ref, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
 		setDefaultPageTitle(RefactoringMessages.getString("ExtractTempWizard.defaultPageTitle")); //$NON-NLS-1$
@@ -57,11 +61,15 @@ public class ExtractTempWizard extends RefactoringWizard {
 	}
 
 	private static class ExtractTempInputPage extends TextInputWizardPage {
-	
+
+		private static final String DECLARE_FINAL= "declareFinal";  //$NON-NLS-1$
+		private static final String REPLACE_ALL= "replaceOccurrences";  //$NON-NLS-1$
+		
 		private Label fLabel;
 		private final boolean fInitialValid;
 		private static final String DESCRIPTION = RefactoringMessages.getString("ExtractTempInputPage.enter_name"); //$NON-NLS-1$
 		private String[] fTempNameProposals;//$NON-NLS-1$
+		private IDialogSettings fSettings;
 		
 		public ExtractTempInputPage(String[] tempNameProposals) {
 			super(DESCRIPTION, true, tempNameProposals.length == 0 ? "" : tempNameProposals[0]); //$NON-NLS-1$
@@ -71,6 +79,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 		}
 	
 		public void createControl(Composite parent) {
+			loadSettings();
 			Composite result= new Composite(parent, SWT.NONE);
 			setControl(result);
 			GridLayout layout= new GridLayout();
@@ -99,7 +108,18 @@ public class ExtractTempWizard extends RefactoringWizard {
 			Dialog.applyDialogFont(result);
 			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.EXTRACT_TEMP_WIZARD_PAGE);		
 		}
-		
+
+		private void loadSettings() {
+			fSettings= getDialogSettings().getSection(ExtractTempWizard.DIALOG_SETTING_SECTION);
+			if (fSettings == null) {
+				fSettings= getDialogSettings().addNewSection(ExtractTempWizard.DIALOG_SETTING_SECTION);
+				fSettings.put(DECLARE_FINAL, false);
+				fSettings.put(REPLACE_ALL, true);
+			}
+			getExtractTempRefactoring().setDeclareFinal(fSettings.getBoolean(DECLARE_FINAL));
+			getExtractTempRefactoring().setReplaceAllOccurrences(fSettings.getBoolean(REPLACE_ALL));
+		}	
+
 		private void addReplaceAllCheckbox(Composite result, RowLayouter layouter) {
 			String title= RefactoringMessages.getString("ExtractTempInputPage.replace_all"); //$NON-NLS-1$
 			boolean defaultValue= getExtractTempRefactoring().replaceAllOccurrences();
@@ -107,6 +127,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 			getExtractTempRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
 			checkBox.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
+					fSettings.put(REPLACE_ALL, checkBox.getSelection());
 					getExtractTempRefactoring().setReplaceAllOccurrences(checkBox.getSelection());
 				}
 			});		
@@ -119,6 +140,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 			getExtractTempRefactoring().setDeclareFinal(checkBox.getSelection());
 			checkBox.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
+					fSettings.put(DECLARE_FINAL, checkBox.getSelection());
 					getExtractTempRefactoring().setDeclareFinal(checkBox.getSelection());
 				}
 			});		
