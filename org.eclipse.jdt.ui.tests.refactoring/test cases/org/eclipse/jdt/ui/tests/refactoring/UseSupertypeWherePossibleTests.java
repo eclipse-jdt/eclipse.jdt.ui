@@ -13,17 +13,15 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jface.text.templates.Template;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeRefactoring;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class UseSupertypeWherePossibleTests extends RefactoringTest {
 
@@ -48,17 +46,16 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		Template[] templates= JavaPlugin.getDefault().getTemplateStore().getTemplates();
-		for (int i= 0; i < templates.length; i++) {
-			if (templates[i].getName().equals("typecomment"))
-				templates[i].setPattern("/** typecomment template*/");	
-		}
-		for (int i= 0; i < templates.length; i++) {
-			if (templates[i].getName().equals("filecomment"))
-				templates[i].setPattern("/** filecomment template */");	
-		}
+		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID, 
+				"${package_declaration}" + 
+					System.getProperty("line.separator", "\n") +
+				"${"+ CodeTemplateContextType.TYPE_COMMENT+"}" + 
+				System.getProperty("line.separator", "\n") +
+				"${type_declaration}", null);
+
+			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, "/** typecomment template*/", null);
 	}
-		
+
 	private IType getClassFromTestFile(IPackageFragment pack, String className) throws Exception{
 		return getType(createCUfromTestFile(pack, className), className);
 	}
@@ -327,8 +324,7 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A", "I"}, "p.I");
 	}
 	public void test21() throws Exception{
-		printTestDisabledMessage("Enable later");
-	//	validatePassingTest("A", new String[]{"A", "I"}, "p.I");
+		validatePassingTest("A", new String[]{"A", "I"}, "p.I");
 	}
 	public void test22() throws Exception{
 		validatePassingTest("A", new String[]{"A", "I"}, "p.I");
