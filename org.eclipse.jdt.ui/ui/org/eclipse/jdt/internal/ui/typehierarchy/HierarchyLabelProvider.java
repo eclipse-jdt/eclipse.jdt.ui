@@ -62,7 +62,8 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		}		
 	}
 
-	private Color fResolvedBackground;
+	private Color fGrayedColor;
+	private Color fSpecialColor;
 	private boolean fShowDefiningType;
 	private TypeHierarchyLifeCycle fHierarchy;
 
@@ -81,7 +82,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		return fShowDefiningType;
 	}	
 			
-	private boolean isDifferentScope(IType type) {
+	protected boolean isDifferentScope(IType type) {
 		IJavaElement input= fHierarchy.getInputElement();
 		if (input == null || input.getElementType() == IJavaElement.TYPE) {
 			return false;
@@ -197,17 +198,21 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		
 		return new JavaElementImageDescriptor(desc, adornmentFlags, JavaElementImageProvider.BIG_SIZE);
 	}
-	
+		
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
 	 */
 	public Color getForeground(Object element) {
 		if (element instanceof IMethod) {
-			if (fResolvedBackground == null) {
-				Display display= Display.getCurrent();
-				fResolvedBackground= display.getSystemColor(SWT.COLOR_DARK_BLUE);
+			if (fSpecialColor == null) {
+				fSpecialColor= Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE);
 			}
-			return fResolvedBackground;
+			return fSpecialColor;
+		} else if (element instanceof IType && isDifferentScope((IType) element)) {
+			if (fGrayedColor == null) {
+				fGrayedColor= Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY);
+			}
+			return fGrayedColor;
 		}
 		return null;
 	}	

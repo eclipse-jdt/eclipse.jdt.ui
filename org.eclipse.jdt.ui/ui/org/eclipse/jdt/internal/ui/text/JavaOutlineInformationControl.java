@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.text;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
@@ -42,6 +43,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 
 	protected TreeViewer createTreeViewer(Composite parent, int style) {
 		Tree tree= new Tree(parent, SWT.SINGLE | (style & ~SWT.MULTI));
+		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
 	
 		TreeViewer treeViewer= new TreeViewer(tree);
 	

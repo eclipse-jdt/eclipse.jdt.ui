@@ -221,17 +221,17 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		fShell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
 
 		// Composite for filter text and tree
+		
 		fComposite= new Composite(fShell,SWT.RESIZE);
 		GridLayout layout= new GridLayout(1, false);
 		fComposite.setLayout(layout);
 		fComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		createFilterText(fComposite);
+		
 		fTreeViewer= createTreeViewer(fComposite, treeStyle);
 		
 		Tree tree= fTreeViewer.getTree();
-		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
-
 		tree.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e)  {
 				if (e.character == 0x1B) // ESC
@@ -333,9 +333,13 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			}
 		});
 	}
+	
+	protected Object getSelectedElement() {
+		return ((IStructuredSelection)fTreeViewer.getSelection()).getFirstElement();
+	}
 
 	private void gotoSelectedElement() {
-		Object selectedElement= ((IStructuredSelection)fTreeViewer.getSelection()).getFirstElement();
+		Object selectedElement= getSelectedElement();
 		if (selectedElement != null) {
 			try {
 				dispose();
