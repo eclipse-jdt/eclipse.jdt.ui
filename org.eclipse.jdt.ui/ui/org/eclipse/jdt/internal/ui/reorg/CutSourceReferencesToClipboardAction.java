@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -27,7 +28,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.swt.SWTError;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -38,13 +44,19 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.part.ResourceTransfer;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -57,13 +69,17 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteSourceReferenceEdit;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class CutSourceReferencesToClipboardAction extends SourceReferenceAction {
@@ -86,6 +102,11 @@ public class CutSourceReferencesToClipboardAction extends SourceReferenceAction 
 	}
 
 	public void selectionChanged(IStructuredSelection selection) {
+		if (true) {
+			setEnabled(false);//XXX for now
+			return;
+		}
+		
 		/*
 		 * cannot cut top-level types. this deltes the cu and then you cannot paste because the cu is gone. 
 		 */
@@ -433,4 +454,244 @@ public class CutSourceReferencesToClipboardAction extends SourceReferenceAction 
 			return true;	
 		}
 	}
+	
+	//TODO delete this class after reorg transition
+	private static class CopySourceReferencesToClipboardAction extends SourceReferenceAction{
+
+	private Clipboard fClipboard;
+	private SelectionDispatchAction fPasteAction;
+
+	protected CopySourceReferencesToClipboardAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction) {
+		super(site);
+		Assert.isNotNull(clipboard);
+		fClipboard= clipboard;
+		fPasteAction= pasteAction;
+	}
+
+	protected void perform(IStructuredSelection selection) throws JavaModelException {
+		copyToOSClipbard(getElementsToProcess(selection));
+	}
+	
+	private void copyToOSClipbard(ISourceReference[] refs)  throws JavaModelException {
+		try{
+			fClipboard.setContents(createClipboardInput(refs), createTransfers());
+					
+			// update the enablement of the paste action
+			// workaround since the clipboard does not suppot callbacks				
+			if (fPasteAction != null && fPasteAction.getSelection() != null)
+				fPasteAction.update(fPasteAction.getSelection());
+			
+		} catch (SWTError e){
+			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
+				throw e;
+			if (MessageDialog.openQuestion(getShell(), ReorgMessages.getString("CopyToClipboardProblemDialog.title"), ReorgMessages.getString("CopyToClipboardProblemDialog.message"))) //$NON-NLS-1$ //$NON-NLS-2$
+				copyToOSClipbard(refs);
+		}	
+	}
+		
+	private static Object[] createClipboardInput(ISourceReference[] refs) throws JavaModelException {
+		TypedSource[] typedSources= convertToTypedSourceArray(refs);
+		return new Object[] { convertToInputForTextTransfer(typedSources), typedSources, getResourcesForMainTypes(refs)};
+	}
+	private static Transfer[] createTransfers() {
+		return new Transfer[] { TextTransfer.getInstance(), TypedSourceTransfer.getInstance(), ResourceTransfer.getInstance()};
+	}
+
+	private static String convertToInputForTextTransfer(TypedSource[] typedSources) throws JavaModelException {
+		String lineDelim= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		StringBuffer buff= new StringBuffer();
+		for (int i= 0; i < typedSources.length; i++) {
+			buff.append(typedSources[i].getSource()).append(lineDelim);
+		}
+		return buff.toString();
+	}
+
+	private static TypedSource[] convertToTypedSourceArray(ISourceReference[] refs) throws JavaModelException {
+		TypedSource[] elems= new TypedSource[refs.length];
+		for (int i= 0; i < refs.length; i++) {
+			elems[i]= TypedSource.create(refs[i]);
+		}
+		return elems;
+	}
+	
+	private static IResource[] getResourcesForMainTypes(ISourceReference[] refs){
+		IType[] mainTypes= getMainTypes(refs);
+		List resources= new ArrayList();
+		for (int i= 0; i < mainTypes.length; i++) {
+			IResource resource= getResource(mainTypes[i]);
+			if (resource != null)
+				resources.add(resource);
+		}
+		return (IResource[]) resources.toArray(new IResource[resources.size()]);
+	}
+	
+	private static IType[] getMainTypes(ISourceReference[] refs){
+		List mainTypes= new ArrayList();
+		for (int i= 0; i < refs.length; i++) {
+			try {
+				if ((refs[i] instanceof IType) && JavaElementUtil.isMainType((IType)refs[i]))
+					mainTypes.add(refs[i]);
+			} catch(JavaModelException e) {
+				JavaPlugin.log(e);//cannot show dialog
+			}
+		}
+		return (IType[]) mainTypes.toArray(new IType[mainTypes.size()]);
+	}
+	
+	private static IResource getResource(IType type){
+		return ResourceUtil.getResource(type);
+	}
+
 }
+}
+abstract class SourceReferenceAction extends SelectionDispatchAction {
+
+	//workaround for bug 18311
+	private static final ISourceRange fgUnknownRange= new SourceRange(-1, 0);
+
+	protected SourceReferenceAction(IWorkbenchSite site) {
+		super(site);
+	}
+
+	protected ISourceReference[] getElementsToProcess(IStructuredSelection selection) {
+		return SourceReferenceUtil.removeAllWithParentsSelected(getSelectedElements(selection));
+	}	
+	
+	/*
+	 * @see SelectionDispatchAction#run(IStructuredSelection)
+	 */
+	public final void run(final IStructuredSelection selection) {
+		BusyIndicator.showWhile(JavaPlugin.getActiveWorkbenchShell().getDisplay(), new Runnable() {
+			public void run() {
+				try {
+					perform(selection);
+				} catch (CoreException e) {
+					ExceptionHandler.handle(e, getText(), ReorgMessages.getString("SourceReferenceAction.exception")); //$NON-NLS-1$
+				}
+			}
+		});
+	}
+	
+	protected abstract void perform(IStructuredSelection selection) throws CoreException;
+	
+	private boolean canOperateOn(IStructuredSelection selection) {
+		try{
+			if (selection.isEmpty())			
+				return false;
+			Object[] elems= selection.toArray();
+			for (int i= 0; i < elems.length; i++) {
+				Object elem= elems[i];
+				if (! canWorkOn(elem))
+					return false;
+			}
+			return true;
+		} catch (JavaModelException e){
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e);
+			return false;
+		}	
+	}
+	
+	private ISourceReference[] getSelectedElements(IStructuredSelection selection){
+		return getWorkingCopyElements(selection.toList());
+	}
+	
+	protected boolean canWorkOn(Object elem) throws JavaModelException{
+		if (elem == null)
+			return false;
+			
+		if (! (elem instanceof ISourceReference)) 
+			return false;
+			
+		if (! (elem instanceof IJavaElement)) 
+			return false;
+								
+		if (elem instanceof IClassFile) 
+			return false;
+
+		if (elem instanceof ICompilationUnit)
+			return false;
+
+		if (elem instanceof IMember){ 
+			IMember member= (IMember)elem;
+			if (member.isBinary() && (member.getSourceRange() == null || fgUnknownRange.equals(member.getSourceRange())))
+				return false;
+		}
+		
+		if (elem instanceof IMember){
+			/* feature in jdt core - initializers from class files are not binary but have no cus
+			 * see bug 37199
+			 * we just say 'no' to them
+			 */
+			IMember member= (IMember)elem;
+			if (! member.isBinary() && SourceReferenceUtil.getCompilationUnit(member) == null)
+				return false;					
+		}
+		
+		if (isDeletedFromEditor((ISourceReference)elem))
+			return false;			
+			
+		if (elem instanceof IMember) //binary excluded before
+			return true;
+
+		if (elem instanceof IImportContainer)
+			return true;
+
+		if (elem instanceof IImportDeclaration)
+			return true;
+
+		if (elem instanceof IPackageDeclaration)
+			return true;			
+		
+		//we never get here normally
+		return false;	
+	}
+
+	private static boolean isDeletedFromEditor(ISourceReference elem) throws JavaModelException{
+		if (elem instanceof IMember && ((IMember)elem).isBinary())
+			return false;
+		ICompilationUnit cu= SourceReferenceUtil.getCompilationUnit(elem);
+		ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
+		if (wc.equals(cu))
+			return false;
+		IJavaElement element= (IJavaElement)elem;
+		IJavaElement wcElement= JavaModelUtil.findInCompilationUnit(wc, element);
+		return wcElement == null || ! wcElement.exists();
+	}
+			
+	private static ISourceReference[] getWorkingCopyElements(List l) {
+		List wcList= new ArrayList(l.size());
+		for (Iterator iter= l.iterator(); iter.hasNext();) {
+			ISourceReference element= (ISourceReference) iter.next();
+			if (! (element instanceof IJavaElement)) //can this happen ?
+				wcList.add(element); 
+			ICompilationUnit cu= SourceReferenceUtil.getCompilationUnit(element);
+			if (cu == null){
+				wcList.add(element);
+			} else if (cu.isWorkingCopy()){
+				wcList.add(element);
+			} else {
+				ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
+				try {
+					IJavaElement wcElement= JavaModelUtil.findInCompilationUnit(wc, (IJavaElement)element);
+					if (wcElement != null && wcElement.exists())
+						wcList.add(wcElement);
+				} catch(JavaModelException e) {
+					JavaPlugin.log(e); //cannot show dialog here
+					//do nothing - do not add to selection (?)
+				}
+			}	
+		}
+		return (ISourceReference[]) wcList.toArray(new ISourceReference[wcList.size()]);
+	}	
+
+	/*
+	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
+	 */
+	public void selectionChanged(IStructuredSelection selection) {
+		setEnabled(canOperateOn(selection));
+	}
+
+}
+
