@@ -1,6 +1,6 @@
 package p;
 class A{
 	void m(int j){
-		m(j);
+		m(1);
 	}
 }
