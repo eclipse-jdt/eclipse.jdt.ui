@@ -59,9 +59,14 @@ public class NamePatternFilter extends ViewerFilter {
 			matchName= ((IJavaElement) element).getElementName();
 		} else if (element instanceof IAdaptable) {
 			IAdaptable adaptable= (IAdaptable) element;
-			IResource resource= (IResource) adaptable.getAdapter(IResource.class);
-			if (resource != null)
-				matchName= resource.getName();
+			IJavaElement javaElement= (IJavaElement)adaptable.getAdapter(IJavaElement.class);
+			if (javaElement != null)
+				matchName= javaElement.getElementName();
+			else {
+				IResource resource= (IResource)adaptable.getAdapter(IResource.class);
+				if (resource != null)
+					matchName= resource.getName();
+			}
 		}
 		if (matchName != null) {
 			StringMatcher[] testMatchers= getMatchers();
