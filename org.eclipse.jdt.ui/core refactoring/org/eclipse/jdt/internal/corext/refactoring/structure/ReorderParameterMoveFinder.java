@@ -81,7 +81,7 @@ class ReorderParameterMoveFinder {
 		private static ISourceRange[] createRegionsArray(MethodDeclaration methodDeclaration){
 			ISourceRange[] result= new ISourceRange[methodDeclaration.arguments.length];
 			for (int i= 0; i < result.length; i++){
-				int start= methodDeclaration.arguments[i].type.sourceStart;
+				int start= methodDeclaration.arguments[i].declarationSourceStart;
 				int length= methodDeclaration.arguments[i].sourceEnd - start + 1;
 				result[i]= new SourceRange(start, length);
 			}
