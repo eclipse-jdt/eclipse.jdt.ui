@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.nls;
 
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.ui.nls.model.NLSRefactoring;
+import org.eclipse.jdt.internal.ui.refactoring.NewPreviewWizardPage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 
 class ExternalizeWizard extends RefactoringWizard {
@@ -16,7 +17,7 @@ class ExternalizeWizard extends RefactoringWizard {
 		setWindowTitle(Messages.getString("wizard.name"));//$NON-NLS-1$
 	}
 	
-	/*
+	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
@@ -31,7 +32,15 @@ class ExternalizeWizard extends RefactoringWizard {
 		addPage(page2);
 	} 
 
-	/*
+
+	/* non java-doc
+	 * @see RefactoringWizard#addPreviewPage
+	 */ 
+	protected void addPreviewPage(){
+		addPage(new NewPreviewWizardPage());
+	}
+
+	/* non java-doc
 	 * @see RefactoringWizard#checkActivationOnOpen
 	 */ 
 	protected boolean checkActivationOnOpen() {
