@@ -188,14 +188,10 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
 		try{
-			pm.beginTask("", 15); //$NON-NLS-1$
+			pm.beginTask("", 14); //$NON-NLS-1$
 			pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking")); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkNewName());
-			pm.worked(1);
-			result.merge(checkUnsavedCus());
-			if (result.hasFatalError())
-				return result;
 			pm.worked(1);
 			result.merge(checkForNativeMethods());
 			pm.worked(1);
@@ -229,20 +225,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		fOccurrences= RefactoringSearchEngine.search(pm, createRefactoringScope(), createSearchPattern());
 		return fOccurrences;
 	}
-	
-	private RefactoringStatus checkUnsavedCus() throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		IFile[] unsavedFiles= getUnsavedFiles();
-		for (int i= 0; i < unsavedFiles.length; i++){
-			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(unsavedFiles[i]);
-			if (cu != null && cu.getParent().equals(fPackage))
-				result.addFatalError("Compilation unit \"" 
-				+ Refactoring.getResource(cu).getProjectRelativePath()
-				+ "\" must be saved before this refactoring can be performed.");
-		}
-		return result;
-	}
-	
+		
 	private RefactoringStatus checkForMainMethods() throws JavaModelException{
 		ICompilationUnit[] cus= fPackage.getCompilationUnits();
 		RefactoringStatus result= new RefactoringStatus();
@@ -301,7 +284,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	 */
 	private RefactoringStatus analyzeAffectedCompilationUnits(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		fOccurrences= Checks.excludeCompilationUnits(fOccurrences, getUnsavedFiles(), result);
+		fOccurrences= Checks.excludeCompilationUnits(fOccurrences, result);
 		if (result.hasFatalError())
 			return result;
 		

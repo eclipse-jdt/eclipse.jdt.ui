@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
@@ -30,6 +31,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -42,11 +44,21 @@ public abstract class ReorgRefactoring extends Refactoring {
 	private Object fDestination;
 	private Set fExcludedElements;
 	private static final String DEFAULT_PACKAGE= ""; //$NON-NLS-1$
+	private IFile[] fUnsavedFiles= new IFile[0];
 	
 	ReorgRefactoring(List elements){
 		fElements= elements;
 		Assert.isNotNull(elements);
 		fExcludedElements= new HashSet(0);
+	}
+	
+	public IFile[] getUnsavedFiles() {
+		return fUnsavedFiles;
+	}
+
+	public void setUnsavedFiles(IFile[] unsavedFiles) {
+		Assert.isNotNull(unsavedFiles);
+		fUnsavedFiles= unsavedFiles;
 	}
 	
 	/* non java-doc

@@ -56,7 +56,6 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	
 	public RenameFieldRefactoring(IField field){
 		Assert.isTrue(field.exists());
-		//Assert.isTrue(! field.getCompilationUnit().isWorkingCopy());
 		fField= field;
 		fUpdateReferences= true;
 		fUpdateJavaDoc= false;
@@ -290,7 +289,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	 */
 	private RefactoringStatus analyzeAffectedCompilationUnits(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		fOccurrences= Checks.excludeCompilationUnits(fOccurrences, getUnsavedFiles(), result);
+		fOccurrences= Checks.excludeCompilationUnits(fOccurrences, result);
 		if (result.hasFatalError())
 			return result;
 		

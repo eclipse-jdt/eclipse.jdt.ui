@@ -307,7 +307,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			return null;
 			
 		RefactoringStatus result= new RefactoringStatus();
-		fOccurrences= Checks.excludeCompilationUnits(fOccurrences, getUnsavedFiles(), result);
+		fOccurrences= Checks.excludeCompilationUnits(fOccurrences, result);
 		if (result.hasFatalError())
 			return result;
 		

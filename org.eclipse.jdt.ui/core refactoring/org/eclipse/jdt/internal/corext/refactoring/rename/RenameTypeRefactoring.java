@@ -557,7 +557,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	 */
 	private RefactoringStatus analyzeAffectedCompilationUnits(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		fOccurrences= Checks.excludeCompilationUnits(fOccurrences, getUnsavedFiles(), result);
+		fOccurrences= Checks.excludeCompilationUnits(fOccurrences, result);
 		if (result.hasFatalError())
 			return result;
 			

@@ -130,8 +130,6 @@ public class RenameParametersRefactoring extends Refactoring implements IMultiRe
 			result.merge(Checks.checkIfCuBroken(fMethod));
 			if (result.hasFatalError())
 				return result;
-			if (Arrays.asList(getUnsavedFiles()).contains(Refactoring.getResource(fMethod)))
-				result.addFatalError(RefactoringCoreMessages.getString("RenameParametersRefactoring.not_saved"));		 //$NON-NLS-1$
 			if (result.hasFatalError())
 				return result;	
 			pm.subTask(RefactoringCoreMessages.getString("RenameParametersRefactoring.checking")); //$NON-NLS-1$

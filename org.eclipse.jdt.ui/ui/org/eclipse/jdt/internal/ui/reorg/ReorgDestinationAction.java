@@ -128,25 +128,6 @@ abstract class ReorgDestinationAction extends ReorgAction {
 		return true;
 	}
 	
-	private static void setUnsavedFileList(ReorgRefactoring refactoring, List elements){
-		List unsavedEditors= new ArrayList(0);
-		collectUnsavedEditors(elements, unsavedEditors, new ArrayList(0));
-		List files= getFiles(unsavedEditors);
-		refactoring.setUnsavedFiles((IFile[])files.toArray(new IFile[files.size()]));
-	}
-	
-	//XX code copied from UserInputWizardPage
-	private static List getFiles(List editorParts){
-		List result= new ArrayList(editorParts.size());
-		for (Iterator iter= editorParts.iterator(); iter.hasNext(); ){
-			IEditorPart each= (IEditorPart)iter.next();
-			IEditorInput input= each.getEditorInput();
-			if (input instanceof IFileEditorInput)
-				result.add(((IFileEditorInput)input).getFile());
-		}
-		return result;
-	}
-	
  	void doReorg(ReorgRefactoring refactoring) throws JavaModelException{
 		MultiStatus status= perform(refactoring);
 		if (status.isOK()) 
@@ -155,8 +136,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 													ReorgMessages.getString("copyAction.exception.title"), //$NON-NLS-1$
 													ReorgMessages.getString("copyAction.exception.label")); //$NON-NLS-1$ 
 	}	
-	
-	
+		
 	private static boolean ensureSaved(List elements, String actionName) {
 		List unsavedEditors= new ArrayList();
 		List unsavedElements= new ArrayList();
@@ -179,6 +159,23 @@ abstract class ReorgDestinationAction extends ReorgAction {
 		} catch (InterruptedException e) {
 		}
 		return true;
+	}
+	
+	private static void setUnsavedFileList(ReorgRefactoring refactoring, List elements){
+		List unsavedEditors= new ArrayList(0);
+		collectUnsavedEditors(elements, unsavedEditors, new ArrayList(0));
+		refactoring.setUnsavedFiles(getFiles(unsavedEditors));
+	}
+
+	private static IFile[] getFiles(List editorParts){
+		List result= new ArrayList(editorParts.size());
+		for (Iterator iter= editorParts.iterator(); iter.hasNext(); ){
+			IEditorPart each= (IEditorPart)iter.next();
+			IEditorInput input= each.getEditorInput();
+			if (input instanceof IFileEditorInput)
+				result.add(((IFileEditorInput)input).getFile());
+		}
+		return (IFile[]) result.toArray(new IFile[result.size()]);
 	}
 
 	private static IRunnableWithProgress createSaveEditorOperation(final Object[] elementsToSave, final List elements, final List unsavedEditors) {

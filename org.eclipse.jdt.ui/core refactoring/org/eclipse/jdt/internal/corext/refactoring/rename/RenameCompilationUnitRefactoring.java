@@ -48,16 +48,6 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 		return result;
 	}
 
-		
-	/* non javadoc
-	 * see Refactoring#setUnsavedFileList
-	 */
-	public void setUnsavedFiles(IFile[] files){
-		super.setUnsavedFiles(files);
-		if (fRenameTypeRefactoring != null)
-			fRenameTypeRefactoring.setUnsavedFiles(files);
-	}
-		
 	/* non java-doc
 	 * @see IRenameRefactoring#setNewName(String)
 	 * @param newName 'java' must be included

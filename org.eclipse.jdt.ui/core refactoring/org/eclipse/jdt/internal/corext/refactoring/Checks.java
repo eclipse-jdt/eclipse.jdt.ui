@@ -400,20 +400,15 @@ public class Checks {
 	/**
 	 * From SearchResultGroup[] passed as the parameter
 	 * this method removes all those that correspond to a non-parsable ICompilationUnit
-	 * adn returns it as a result.
-	 * Also it removes all those that are not saved - passed as a parameter.
+	 * and returns it as a result.
 	 * Status object collect the result of checking.
 	 */	
-	public static SearchResultGroup[] excludeCompilationUnits(SearchResultGroup[] grouped, IFile[] unsavedFiles, RefactoringStatus status) throws JavaModelException{
+	public static SearchResultGroup[] excludeCompilationUnits(SearchResultGroup[] grouped, RefactoringStatus status) throws JavaModelException{
 		List result= new ArrayList();
-		List unsavedFileList= Arrays.asList(unsavedFiles);
+		//List unsavedFileList= Arrays.asList(unsavedFiles);
 		boolean wasEmpty= grouped.length == 0;
 		for (int i= 0; i < grouped.length; i++){	
 			IResource resource= grouped[i].getResource();
-			if (unsavedFileList.contains(resource)){
-				status.addError(RefactoringCoreMessages.getFormattedString("Checks.not_saved", resource.getFullPath().toString())); //$NON-NLS-1$
-				continue; //removed, go to the next one
-			}
 			IJavaElement element= JavaCore.create(resource);
 			if (! (element instanceof ICompilationUnit))
 				continue;

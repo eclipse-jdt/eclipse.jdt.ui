@@ -234,8 +234,8 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		try{
 			pm.beginTask("", 1);
 		
-			if (Arrays.asList(getUnsavedFiles()).contains(Refactoring.getResource(fCu)))
-					return RefactoringStatus.createFatalErrorStatus("Compilation unit '" + fCu.getElementName() + "'  must be saved before this refactoring.");
+//			if (Arrays.asList(getUnsavedFiles()).contains(Refactoring.getResource(fCu)))
+//					return RefactoringStatus.createFatalErrorStatus("Compilation unit '" + fCu.getElementName() + "'  must be saved before this refactoring.");
 			
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkNewName());

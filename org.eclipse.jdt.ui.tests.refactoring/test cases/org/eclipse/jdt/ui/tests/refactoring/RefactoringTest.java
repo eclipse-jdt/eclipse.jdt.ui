@@ -100,8 +100,6 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	protected final RefactoringStatus performRefactoring(IRefactoring ref) throws JavaModelException {
-		if (ref instanceof Refactoring)
-			((Refactoring)ref).setUnsavedFiles(new IFile[0]);
 		RefactoringStatus status= ref.checkPreconditions(fgNullProgressMonitor);
 		if (!status.isOK())
 			return status;

@@ -33,19 +33,8 @@ public abstract class Refactoring implements IRefactoring {
 
 	private static IUndoManager fgUndoManager= new UndoManager();
 	
-	private IFile[] fUnsavedFiles= new IFile[0];
-		
 	public static IUndoManager getUndoManager() {
 		return fgUndoManager;
-	}
-	
-	public void setUnsavedFiles(IFile[] files){
-		Assert.isNotNull(files);
-		fUnsavedFiles= files;
-	}
-	
-	protected IFile[] getUnsavedFiles(){
-		return fUnsavedFiles;
 	}
 	
 	/* non java-doc
