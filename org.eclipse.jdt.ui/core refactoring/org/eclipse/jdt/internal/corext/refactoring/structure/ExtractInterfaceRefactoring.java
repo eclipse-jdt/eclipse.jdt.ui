@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -628,12 +627,12 @@ public class ExtractInterfaceRefactoring extends Refactoring {
     }
 
 	private IMethod[] getExtractedMethods() {
-		List fields= new ArrayList();
+		List methods= new ArrayList();
 		for (int i= 0; i < fExtractedMembers.length; i++) {
 			if (fExtractedMembers[i] instanceof IMethod)
-				fields.add(fExtractedMembers[i]);
+				methods.add(fExtractedMembers[i]);
 		}
-		return (IMethod[]) fields.toArray(new IMethod[fields.size()]);
+		return (IMethod[]) methods.toArray(new IMethod[methods.size()]);
 	}
 
     private void addImportsToTypesReferencedInFieldDeclarations(StringBuffer buff) throws JavaModelException {
@@ -673,51 +672,29 @@ public class ExtractInterfaceRefactoring extends Refactoring {
     }
     
     private boolean shouldBeImported(ITypeBinding binding) {
-    	if (binding == null)
-    		return false;
-    	if (binding.isPrimitive())	
-    		return false;
-    	if (binding.isArray())	
-    		return shouldBeImported(binding.getElementType());
-    	if (binding.getPackage().isUnnamed())	
-   			return false;
-   		if (binding.getPackage().getName().equals("java.lang"))//$NON-NLS-1$
-   			return false;
+		if (binding == null)
+			return false;
+		if (binding.isPrimitive())	
+			return false;
+		if (binding.isArray())	
+			return shouldBeImported(binding.getElementType());
+		if (binding.getPackage().isUnnamed())	
+			return false;
+		if (binding.getPackage().getName().equals("java.lang"))//$NON-NLS-1$
+			return false;
 		if (binding.getPackage().getName().equals(getInputClassPackage().getElementName()))
-   			return false;
-    	return true;	
-    }
+			return false;
+		return true;	
+	}
 
 	private ITypeBinding[] getTypesUsedInExtractedMethodDeclarations() throws JavaModelException{
-		Set typesUsed= new HashSet();
-		for (int i= 0; i < fExtractedMembers.length; i++) {
-			if (fExtractedMembers[i] instanceof IMethod)
-				typesUsed.addAll(getTypesUsedInDeclaration((IMethod)fExtractedMembers[i]));
-		}
-		return (ITypeBinding[]) typesUsed.toArray(new ITypeBinding[typesUsed.size()]);
-	}
-	
-	//set of ITypeBindings
-	private Set getTypesUsedInDeclaration(IMethod iMethod) throws JavaModelException {
-		MethodDeclaration methodDeclaration= getMethodDeclarationNode(iMethod);
-		if (methodDeclaration == null)
-			return new HashSet(0);
-		Set result= new HashSet();	
-		result.add(methodDeclaration.getReturnType().resolveBinding());
-			
-		for (Iterator iter= methodDeclaration.parameters().iterator(); iter.hasNext();) {
-			result.add(((SingleVariableDeclaration) iter.next()).getType().resolveBinding()); 
-		}
-		
-		for (Iterator iter= methodDeclaration.thrownExceptions().iterator(); iter.hasNext();) {
-			result.add(((Name) iter.next()).resolveTypeBinding());
-		}
-		return result;
-	}
+		return ReferenceFinderUtil.getTypesReferencedInDeclarations(getExtractedMethods(), fASTMappingManager);
+	}	
 
 	private String createPackageDeclarationSource() {
 		return "package " + getInputClassPackage().getElementName() + ";";//$NON-NLS-2$ //$NON-NLS-1$
 	}
+
 	private CompilationUnit getAST(ICompilationUnit cu){
 		return fASTMappingManager.getAST(cu);
 	}
