@@ -44,6 +44,13 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 		return fLocals;
 	}
 	
+	public BodyDeclaration getEnclosingBodyDeclaration() {
+		ASTNode node= getFirstSelectedNode();
+		if (node == null)
+			return null;
+		return (BodyDeclaration)ASTNodes.getParent(node, BodyDeclaration.class);
+	}
+	
 	public void endVisit(CompilationUnit node) {
 		BodyDeclaration enclosingNode= null;
 		superCall: {

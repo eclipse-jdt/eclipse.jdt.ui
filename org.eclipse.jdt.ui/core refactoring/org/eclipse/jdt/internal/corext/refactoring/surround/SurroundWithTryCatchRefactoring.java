@@ -8,11 +8,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.text.ITextSelection;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -38,6 +39,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.TryCatchBlock;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -184,10 +186,13 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				Assert.isTrue(false, "Operation doesn't work for expressions. So should never happen"); //$NON-NLS-1$
 			}
 		}
+		CodeScopeBuilder.Scope root= CodeScopeBuilder.perform(fAnalyzer.getEnclosingBodyDeclaration(), fSelection);
+		CodeScopeBuilder.Scope scope= root.findScope(fSelection.getOffset(), fSelection.getLength());
+		scope.setCursor(fSelection.getOffset());
 		editor.performEdits(null);
 		CompositeCodeBlock codeBlock= new CompositeCodeBlock();
 		codeBlock.add(newLocals);
-		codeBlock.add(new TryCatchBlock(exceptions, fCUnit.getJavaProject(), new CodeBlock(editor.getTextBuffer())));
+		codeBlock.add(new TryCatchBlock(exceptions, fCUnit.getJavaProject(), scope, new CodeBlock(editor.getTextBuffer())));
 		change.addTextEdit(NN, CodeBlockEdit.createReplace(selectionStart, fSelection.getLength(), codeBlock));
 	}
 	

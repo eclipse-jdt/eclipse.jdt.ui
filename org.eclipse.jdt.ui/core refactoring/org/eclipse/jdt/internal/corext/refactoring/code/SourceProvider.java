@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
@@ -235,7 +236,7 @@ public class SourceProvider {
 		for (Iterator iter= usedCalleeNames.iterator(); iter.hasNext();) {
 			SourceAnalyzer.NameData nd= (SourceAnalyzer.NameData) iter.next();
 			if (scope.isInUse(nd.getName())) {
-				String newName= scope.createName(nd.getName());
+				String newName= scope.createName(nd.getName(), true);
 				List references= nd.references();
 				for (Iterator refs= references.iterator(); refs.hasNext();) {
 					SimpleName element= (SimpleName) refs.next();

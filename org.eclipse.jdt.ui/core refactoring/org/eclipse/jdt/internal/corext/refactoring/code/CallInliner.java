@@ -48,6 +48,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -132,7 +133,7 @@ public class CallInliner {
 	
 	private void flowAnalysis() {
 		fInvocationScope= fRootScope.findScope(fTargetNode.getStartPosition(), fTargetNode.getLength());
-		fInvocationScope.setInvovationOffset(fTargetNode.getStartPosition());
+		fInvocationScope.setCursor(fTargetNode.getStartPosition());
 		fFlowContext= new FlowContext(0, fNumberOfLocals + 1);
 		fFlowContext.setConsiderAccessMode(true);
 		fFlowContext.setComputeMode(FlowContext.ARGUMENTS);
@@ -180,7 +181,7 @@ public class CallInliner {
 			if (canInline(expression, parameter)) {
 				realArguments[i]= getContent(expression);
 			} else {
-				String name= fInvocationScope.createName(parameter.getName());
+				String name= fInvocationScope.createName(parameter.getName(), true);
 				realArguments[i]= name;
 				locals.add(createLocalDeclaration(
 					parameter.getTypeBinding(), name, 
@@ -207,14 +208,14 @@ public class CallInliner {
 				// local.
 				locals.add(createLocalDeclaration(
 					receiver.resolveTypeBinding(), 
-					fInvocationScope.createName("r"),  //$NON-NLS-1$
+					fInvocationScope.createName("r", true),  //$NON-NLS-1$
 					(Expression)fRewriter.createCopy(receiver)));
 				return;
 			case 1:
 				context.receiver= fBuffer.getContent(receiver.getStartPosition(), receiver.getLength());
 				return;
 			default:
-				String local= fInvocationScope.createName("r"); //$NON-NLS-1$
+				String local= fInvocationScope.createName("r", true); //$NON-NLS-1$
 				locals.add(createLocalDeclaration(
 					receiver.resolveTypeBinding(), 
 					local, 
@@ -255,7 +256,7 @@ public class CallInliner {
 				if (fSourceProvider.mustEvaluateReturnValue()) {
 					node= createLocalDeclaration(
 						fSourceProvider.getReturnType(), 
-						fInvocationScope.createName(fSourceProvider.getMethodName()), 
+						fInvocationScope.createName(fSourceProvider.getMethodName(), true), 
 						(Expression)fRewriter.createPlaceholder(block, ASTRewrite.EXPRESSION));
 				} else {
 					node= null;

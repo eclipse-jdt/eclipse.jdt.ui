@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.code;
+package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,13 +20,12 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 public class CodeScopeBuilder extends ASTVisitor {
 
@@ -36,7 +35,7 @@ public class CodeScopeBuilder extends ASTVisitor {
 		private int fLength;
 		private List fNames;
 		private List fChildren;
-		private int fInvocationOffset;
+		private int fCursorOffset;
 		Scope(Scope parent, int start, int length) {
 			fParent= parent;
 			fStart= start;
@@ -44,8 +43,8 @@ public class CodeScopeBuilder extends ASTVisitor {
 			if (fParent != null)	
 				fParent.addChild(this);
 		}
-		public void setInvovationOffset(int offset) {
-			fInvocationOffset= offset;
+		public void setCursor(int offset) {
+			fCursorOffset= offset;
 		}
 		private void addChild(Scope child) {
 			if (fChildren == null)
@@ -70,13 +69,14 @@ public class CodeScopeBuilder extends ASTVisitor {
 			}
 			return null;
 		}
-		public String createName(String candidate) {
+		public String createName(String candidate, boolean add) {
 			int i= 1;
 			String result= candidate;
 			while(isInUse(result)) {
 				result= candidate + i++;
 			}
-			addName(result);
+			if (add)
+				addName(result);
 			return result;
 		}
 		public boolean isInUse(String name) {
@@ -85,7 +85,7 @@ public class CodeScopeBuilder extends ASTVisitor {
 			if (fChildren != null) {
 				for (Iterator iter= fChildren.iterator(); iter.hasNext();) {
 					Scope child= (Scope) iter.next();
-					if (fInvocationOffset < child.fStart && child.isInUseDown(name)) {
+					if (fCursorOffset < child.fStart && child.isInUseDown(name)) {
 						return true;
 					}
 				}
@@ -114,23 +114,40 @@ public class CodeScopeBuilder extends ASTVisitor {
 		}
 	}
 	
-	private IMethodBinding fInvocation;
+	private IBinding fIgnoreBinding;
+	private Selection fIgnoreRange;
 	private Scope fScope;
 	private List fScopes;
 
-	public static Scope perform(BodyDeclaration node, IMethodBinding invocation) {
-		CodeScopeBuilder collector= new CodeScopeBuilder(node, invocation);
+	public static Scope perform(BodyDeclaration node, IBinding ignore) {
+		CodeScopeBuilder collector= new CodeScopeBuilder(node, ignore);
 		node.accept(collector);
 		return collector.fScope;
 	}
 
-	private CodeScopeBuilder(ASTNode node, IMethodBinding invocation) {
+	public static Scope perform(BodyDeclaration node, Selection ignore) {
+		CodeScopeBuilder collector= new CodeScopeBuilder(node, ignore);
+		node.accept(collector);
+		return collector.fScope;
+	}
+
+	private CodeScopeBuilder(ASTNode node, IBinding ignore) {
 		fScope= new Scope(null, node.getStartPosition(), node.getLength());
 		fScopes= new ArrayList();
-		fInvocation= invocation;
+		fIgnoreBinding= ignore;
+	}
+	
+	private CodeScopeBuilder(ASTNode node, Selection ignore) {
+		fScope= new Scope(null, node.getStartPosition(), node.getLength());
+		fScopes= new ArrayList();
+		fIgnoreRange= ignore;
 	}
 	
 	public boolean visit(SimpleName node) {
+		if (fIgnoreBinding != null && Bindings.equals(fIgnoreBinding, node.resolveBinding()))
+			return false;
+		if (fIgnoreRange != null && fIgnoreRange.covers(node))
+			return false;
 		fScope.addName(node.getIdentifier());
 		return false;
 	}
@@ -145,7 +162,7 @@ public class CodeScopeBuilder extends ASTVisitor {
 		Expression receiver= node.getExpression();
 		if (receiver == null) {
 			SimpleName name= node.getName();
-			if (!Bindings.equals(fInvocation, name.resolveBinding()))
+			if (fIgnoreBinding == null || !Bindings.equals(fIgnoreBinding, name.resolveBinding()))
 				node.getName().accept(this);
 		} else {
 			receiver.accept(this);

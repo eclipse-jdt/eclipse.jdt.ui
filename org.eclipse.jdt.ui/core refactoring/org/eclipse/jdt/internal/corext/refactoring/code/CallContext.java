@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 
 public class CallContext {
 
