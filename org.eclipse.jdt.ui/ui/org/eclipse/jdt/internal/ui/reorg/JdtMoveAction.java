@@ -162,13 +162,14 @@ public class JdtMoveAction extends ReorgDestinationAction {
 			fCheckbox= new Button(result, SWT.CHECK);
 			fCheckbox.setText(ReorgMessages.getString("JdtMoveAction.update_references")); //$NON-NLS-1$
 			fCheckbox.setEnabled(canUpdateReferences());
+			fCheckbox.setSelection(true);
+			
 			fCheckbox.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					updatePreviewButton();
-					fRefactoring.setUpdateReferences(fCheckbox.getEnabled() && fCheckbox.getSelection());
+					fRefactoring.setUpdateReferences(getUpdateReferences());
 				}
 			});
-			fCheckbox.setSelection(canUpdateReferences());
 			return result;
 		}
 		
@@ -182,10 +183,15 @@ public class JdtMoveAction extends ReorgDestinationAction {
 			try{
 				fRefactoring.setDestination(getFirstResult());
 				fCheckbox.setEnabled(getOkButton().getEnabled() &&  canUpdateReferences());
+				fRefactoring.setUpdateReferences(getUpdateReferences());
 				updatePreviewButton();
 			} catch (JavaModelException e){
 				ExceptionHandler.handle(e, ReorgMessages.getString("JdtMoveAction.move"), ReorgMessages.getString("JdtMoveAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 			}		
+		}
+
+		private boolean getUpdateReferences() {
+			return fCheckbox.getEnabled() && fCheckbox.getSelection();
 		}
 		
 		protected void buttonPressed(int buttonId) {
@@ -196,7 +202,7 @@ public class JdtMoveAction extends ReorgDestinationAction {
 		}
 		
 		private void updatePreviewButton(){
-			fPreview.setEnabled(fCheckbox.getEnabled() && fCheckbox.getSelection());
+			fPreview.setEnabled(getUpdateReferences());
 		}
 		
 		private boolean canUpdateReferences(){
