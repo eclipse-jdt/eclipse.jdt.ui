@@ -259,6 +259,9 @@ public class LinkedEnvironment {
 	 *        top-level environment
 	 */
 	LinkedEnvironment(LinkedEnvironment parent) {
+		// TODO debug trace the erroneous nestings.
+		Assert.isTrue(parent == null || parent.fGroups.size() > 0);
+		
 		fParentEnvironment= parent;
 		if (parent != null)
 			parent.suspend();
@@ -403,6 +406,8 @@ public class LinkedEnvironment {
 	 * @throws BadLocationException if the nesting requirement is violated
 	 */
 	private void enforceNestability(LinkedPositionGroup group) throws BadLocationException {
+		// TODO debug trace the erroneous nestings.
+		Assert.isTrue(fParentEnvironment == null || fParentEnvironment.fGroups.size() > 0);
 		if (fParentEnvironment == null)
 			return;
 
