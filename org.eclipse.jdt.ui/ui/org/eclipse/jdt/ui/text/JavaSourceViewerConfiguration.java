@@ -482,6 +482,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 */
 	public IInformationPresenter getOutlinePresenter(ISourceViewer sourceViewer, boolean doCodeResolve) {
 		InformationPresenter presenter= new InformationPresenter(getOutlinePresenterControlCreator(sourceViewer));
+		presenter.setAnchor(InformationPresenter.ANCHOR_GLOBAL);
 		IInformationProvider provider= new JavaElementProvider(getEditor(), doCodeResolve);
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
 		presenter.setInformationProvider(provider, JavaPartitionScanner.JAVA_DOC);
