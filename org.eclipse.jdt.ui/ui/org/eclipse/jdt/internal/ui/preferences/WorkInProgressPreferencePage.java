@@ -278,11 +278,6 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		group.setText(PreferencesMessages.getString(PREFIX + "quickassist.group")); //$NON-NLS-1$
 		
 		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "quickassist.option"), PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB); //$NON-NLS-1$ //$NON-NLS-2$
-
-		group= new Group(result, SWT.NONE);
-		group.setLayout(new GridLayout());
-		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		group.setText(PreferencesMessages.getString(PREFIX + "formatter")); //$NON-NLS-1$
 		
 		group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());
