@@ -138,7 +138,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 
 		preconditionResult.merge(ref.checkFinalConditions(new NullProgressMonitor()));
 
-		assertTrue("precondition was supposed to pass",preconditionResult.isOK());
+		assertTrue("precondition was supposed to pass",!preconditionResult.hasError());
 
 		performChange(ref, false);
 
