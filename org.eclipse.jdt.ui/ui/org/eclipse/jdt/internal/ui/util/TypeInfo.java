@@ -113,10 +113,9 @@ public class TypeInfo {
 		StringBuffer buf= new StringBuffer();
 		if (fPackage.length() > 0) {
 			buf.append(fPackage);
-			buf.append('.');
 		}
 		for (int i= 0; i < fEnclosingNames.length; i++) {
-			if (i > 0) {
+			if (buf.length() > 0) {
 				buf.append('.');
 			}
 			buf.append(fEnclosingNames[i]);
