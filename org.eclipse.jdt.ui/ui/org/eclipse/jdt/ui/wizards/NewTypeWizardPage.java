@@ -1580,7 +1580,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
 		String content= CodeGeneration.getCompilationUnitContent(cu, typeComment, typeContent, lineDelimiter);
 		if (content != null) {
-			ASTParser parser= ASTParser.newParser(AST.JLS2);
+			ASTParser parser= ASTParser.newParser(AST.JLS3);
 			parser.setSource(content.toCharArray());
 			CompilationUnit unit= (CompilationUnit) parser.createAST(null);
 			if ((pack.isDefaultPackage() || unit.getPackage() != null) && !unit.types().isEmpty()) {
