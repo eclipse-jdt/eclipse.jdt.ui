@@ -275,7 +275,7 @@ public class QuickFixTest extends TestCase {
 	
 	protected static final ArrayList collectAssists(IInvocationContext context, Class[] filteredTypes) throws CoreException {
 		ArrayList proposals= new ArrayList();
-		IStatus status= JavaCorrectionProcessor.collectAssists(context, null, proposals);
+		IStatus status= JavaCorrectionProcessor.collectAssists(context, new IProblemLocation[0], proposals);
 		assertStatusOk(status);
 		
 		if (!proposals.isEmpty()) {
