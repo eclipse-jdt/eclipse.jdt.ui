@@ -134,10 +134,13 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 				jelem= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
 				if (jelem == null) {
 					IResource resource= (IResource) adaptable.getAdapter(IResource.class);
-					if (resource != null) {
-						IProject proj= resource.getProject();
-						if (proj != null) {
-							jelem= JavaCore.create(proj);
+					if (resource != null && resource.getType() != IResource.ROOT) {
+						while (jelem == null && resource.getType() != IResource.PROJECT) {
+							resource= resource.getParent();
+							jelem= (IJavaElement) resource.getAdapter(IJavaElement.class);
+						}
+						if (jelem == null) {
+							jelem= JavaCore.create(resource); // java project
 						}
 					}
 				}
