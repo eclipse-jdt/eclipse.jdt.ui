@@ -217,4 +217,17 @@ public class SelectionListenerWithASTManager {
 		}
 	}
 	
+	/**
+	 * Forces a selection changed event that is sent to all listeners registered to the given editor
+	 * part. The event is sent from a background thread: this method call can return before the listeners
+	 * are informed.
+	 */
+	public void forceSelectionChange(IEditorPart part, ITextSelection selection) {
+		ISelectionService service= part.getSite().getWorkbenchWindow().getSelectionService();
+		WorkbenchWindowListener windowListener= (WorkbenchWindowListener) fListenerGroups.get(service);
+		if (windowListener != null) {
+			windowListener.selectionChanged(part, selection);
+		}
+	}
+	
 }
