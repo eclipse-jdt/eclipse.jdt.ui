@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.core.runtime.CoreException;
@@ -35,7 +36,9 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -51,6 +54,8 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  */
 public class AddUnimplementedConstructorsAction extends SelectionDispatchAction {
 
+	private CompilationUnitEditor fEditor;
+
 	/**
 	 * Creates a new <code>AddUnimplementedConstructorsAction</code>.
 	 * 
@@ -65,6 +70,19 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_UNIMPLEMENTED_CONSTRUCTORS_ACTION);
 	}
 
+	/**
+	 * Creates a new <code>AddUnimplementedConstructorsAction</code>.
+	 * <p>
+	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * </p>
+	 */
+	public AddUnimplementedConstructorsAction(CompilationUnitEditor editor) {
+		this(editor.getEditorSite());
+		fEditor= editor;
+	}
+	
+	//---- Structured Viewer -----------------------------------------------------------
+	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
@@ -77,7 +95,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		}
 		setEnabled(enabled);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
@@ -97,27 +115,59 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 				return;
 			}
 			
-			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-			AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(type, settings, false);
-			try {
-				ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
-				dialog.run(false, true, new WorkbenchRunnableAdapter(op));
-				IMethod[] res= op.getCreatedMethods();
-				if (res == null || res.length == 0) {
-					MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("AddUnimplementedConstructorsAction.error.nothing_found")); //$NON-NLS-1$
-				} else if (editor != null) {
-					EditorUtility.revealInEditor(editor, res[0]);
-				}
-			} catch (InvocationTargetException e) {
-				JavaPlugin.log(e);
-				MessageDialog.openError(shell, getDialogTitle(), e.getTargetException().getMessage());
-			} catch (InterruptedException e) {
-				// Do nothing. Operation has been canceled by user.
-			}
+			run(shell, type, editor);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 			ErrorDialog.openError(shell, getDialogTitle(), null, e.getStatus());
 		}			
+	}
+
+	//---- Java Editior --------------------------------------------------------------
+	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */
+	protected void selectionChanged(ITextSelection selection) {
+		setEnabled(fEditor != null);
+	}
+	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */
+	protected void run(ITextSelection selection) {
+		Shell shell= getShell();
+		try {
+			IType type= SelectionConverter.getTypeAtOffset(fEditor);
+			if (type != null)
+				run(shell, type, fEditor);
+			else
+				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("AddUnimplementedConstructorsAction.not_applicable")); //$NON-NLS-1$
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			ErrorDialog.openError(getShell(), getDialogTitle(), null, e.getStatus()); 			
+		}
+	}
+	
+	//---- Helpers -------------------------------------------------------------------
+	
+	private void run(Shell shell, IType type, IEditorPart editor) {
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(type, settings, false);
+		try {
+			ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
+			dialog.run(false, true, new WorkbenchRunnableAdapter(op));
+			IMethod[] res= op.getCreatedMethods();
+			if (res == null || res.length == 0) {
+				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("AddUnimplementedConstructorsAction.error.nothing_found")); //$NON-NLS-1$
+			} else if (editor != null) {
+				EditorUtility.revealInEditor(editor, res[0]);
+			}
+		} catch (InvocationTargetException e) {
+			JavaPlugin.log(e);
+			MessageDialog.openError(shell, getDialogTitle(), e.getTargetException().getMessage());
+		} catch (InterruptedException e) {
+			// Do nothing. Operation has been canceled by user.
+		}
 	}
 		
 	private IType getSelectedType(IStructuredSelection selection) throws JavaModelException {

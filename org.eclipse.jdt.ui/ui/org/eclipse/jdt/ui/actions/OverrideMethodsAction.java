@@ -85,6 +85,8 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		fEditor= editor;
 	}
 	
+	//---- Structured Viewer -----------------------------------------------------------
+	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
@@ -97,30 +99,6 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		}
 		setEnabled(enabled);
 	}	
-	
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
-	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(fEditor != null);
-	}
-	
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
-	protected void run(ITextSelection selection) {
-		Shell shell= getShell();
-		try {
-			IType type= SelectionConverter.getTypeAtOffset(fEditor);
-			if (type != null)
-				run(shell, type, fEditor);
-			else
-				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.not_applicable")); //$NON-NLS-1$
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-			ErrorDialog.openError(getShell(), getDialogTitle(), null, e.getStatus()); 			
-		}
-	}
 	
 	protected void run(IStructuredSelection selection) {
 		Shell shell= getShell();
@@ -146,6 +124,34 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		}			
 	}
 
+	//---- Java Editior --------------------------------------------------------------
+	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */
+	protected void selectionChanged(ITextSelection selection) {
+		setEnabled(fEditor != null);
+	}
+	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */
+	protected void run(ITextSelection selection) {
+		Shell shell= getShell();
+		try {
+			IType type= SelectionConverter.getTypeAtOffset(fEditor);
+			if (type != null)
+				run(shell, type, fEditor);
+			else
+				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.not_applicable")); //$NON-NLS-1$
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			ErrorDialog.openError(getShell(), getDialogTitle(), null, e.getStatus()); 			
+		}
+	}
+
+	//---- Helpers -------------------------------------------------------------------
+	
 	private void run(Shell shell, IType type, IEditorPart editor) {
 		OverrideMethodQuery selectionQuery= new OverrideMethodQuery(shell, false);
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
