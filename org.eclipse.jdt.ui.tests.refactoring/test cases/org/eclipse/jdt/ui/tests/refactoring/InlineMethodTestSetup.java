@@ -39,6 +39,7 @@ public class InlineMethodTestSetup extends TestSetup {
 	private IPackageFragment fExpression;
 	private IPackageFragment fControlStatement;
 	private IPackageFragment fReceiver;
+	private IPackageFragment fImport;
 
 	public InlineMethodTestSetup(Test test) {
 		super(test);
@@ -69,6 +70,18 @@ public class InlineMethodTestSetup extends TestSetup {
 		fExpression= fRoot.createPackageFragment("expression_in", true, null);
 		fControlStatement= fRoot.createPackageFragment("controlStatement_in", true, null);
 		fReceiver= fRoot.createPackageFragment("receiver_in", true, null);
+		fImport= fRoot.createPackageFragment("import_in", true, null);
+		
+		fImport.createCompilationUnit(
+			"Provider.java",
+			"package import_in;\n" +			"\n" +			"import import_use.List;\n" +			"import java.io.File;\n" +			"import java.util.Map;\n" +			"\n" +			"public class Provider {\n" +			"	public File useAsReturn() {\n" +			"		return null;\n" +			"	}\n" +			"	public void useInArgument(File file) {\n" +			"		file= null;\n" +			"	}\n" +			"	public void useInDecl() {\n" +			"		List list= null;\n" +			"	}\n" +			"	public void useInClassLiteral() {\n" +			"		Class clazz= File.class;\n" +			"	}\n" +			"	public void useArray() {\n" +			"		List[] lists= null;\n" +			"	}\n" +			"	public void useInLocalClass() {\n" +			"		class Local extends File implements Comparable {\n" +			"			public Local(String s) {\n" +			"				super(s);\n" +			"			}\n" +			"			public void foo(Map map) {\n" +			"			}\n" +			"			public int compareTo(Object o) {\n" +			"				return 0;\n" +			"			}\n" +			"		}\n" +			"	}\n" +			"}\n", 
+			true, null);
+			
+			IPackageFragment importUse= fRoot.createPackageFragment("import_use", true, null);
+			importUse.createCompilationUnit("List.java",
+			"package import_use;" +			"" +			"public class List {" +			"}", 
+			true, null);
+			
 	}
 
 	protected void tearDown() throws Exception {
@@ -108,4 +121,8 @@ public class InlineMethodTestSetup extends TestSetup {
 	public IPackageFragment getReceiverPackage() {
 		return fReceiver;
 	}
+	
+	public IPackageFragment getImportPackage() {
+		return fImport;
+	}	
 }

@@ -79,6 +79,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performInvalidTest();
 	}
 	
+	public void testMultiLocal() throws Exception {
+		performInvalidTest();
+	}
+	
 	public void testComplexBody() throws Exception {
 		performInvalidTest();
 	}
@@ -122,6 +126,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}	
 
 	public void testInitializer() throws Exception {
+		performSimpleTest();
+	}	
+
+	public void testSuper() throws Exception {
 		performSimpleTest();
 	}	
 
@@ -348,4 +356,34 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public void testThisExpression() throws Exception {
 		performReceiverTest();
 	}
+	
+	/************************ Import Tests ********************************/
+		
+	private void performImportTest() throws Exception {
+		performTest(fgTestSetup.getImportPackage(), getName(), COMPARE_WITH_OUTPUT, "import_out");
+	}
+		
+	public void testUseArray() throws Exception {
+		performImportTest();
+	}	
+		
+	public void testUseInArgument() throws Exception {
+		performImportTest();
+	}	
+		
+	public void testUseInClassLiteral() throws Exception {
+		performImportTest();
+	}	
+		
+	public void testUseInDecl() throws Exception {
+		performImportTest();
+	}	
+		
+	public void testUseInDeclClash() throws Exception {
+		performImportTest();
+	}	
+		
+	public void testUseInLocalClass() throws Exception {
+		performImportTest();
+	}	
 }
