@@ -26,6 +26,8 @@ import org.eclipse.jdt.internal.junit.util.SWTUtil;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -329,7 +331,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		composite.setLayoutData(data);
 
 		createStackFilterPreferences(composite);
-
+		Dialog.applyDialogFont(composite);
 		return composite;
 	}
 

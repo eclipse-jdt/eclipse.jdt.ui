@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -268,6 +269,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		//set default and focus
 		fClassToTestText.setText(fDefaultClassToTest);
 		restoreWidgetValues();
+		Dialog.applyDialogFont(composite);
 		WorkbenchHelp.setHelp(composite, IJUnitHelpContextIds.NEW_TESTCASE_WIZARD_PAGE);	
 
 	}

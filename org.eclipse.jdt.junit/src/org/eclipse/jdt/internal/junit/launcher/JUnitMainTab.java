@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -114,6 +115,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		createTestSelectionGroup(comp);
 		createTestContainerSelectionGroup(comp);
 		createKeepAliveGroup(comp);
+		Dialog.applyDialogFont(comp);
 	}
 
 	private void createTestContainerSelectionGroup(Composite comp) {

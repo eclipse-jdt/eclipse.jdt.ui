@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.launcher;
 
-
+ 
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.HashSet;

@@ -222,6 +222,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 			treeWidget.setEnabled(false);
 			buttonComposite.setEnabled(false);
 		}
+		applyDialogFont(composite);
 		return composite;
 	}
 	
