@@ -4,9 +4,10 @@
     <classpathentry kind="src" path="Java UI Tests"/>
     <classpathentry kind="src" path="Test Plugin"/>
     <classpathentry kind="src" path="Refactoring Tests"/>
-    <classpathentry kind="src" path="/org.eclipse.jdt.core"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.ui"/>
-    <classpathentry kind="lib" path="/org.eclipse.ui/workbench.jar"/>
+    <classpathentry kind="src" path="/org.eclipse.jdt.core"/>
+    <classpathentry kind="src" path="/org.eclipse.ui"/>
+    <classpathentry kind="lib" path="/org.eclipse.ui/workbench.jar"/>    
     <classpathentry kind="lib" path="/org.eclipse.help/help.jar"/>
     <classpathentry kind="lib" path="/org.eclipse.core.resources/resources.jar"/>
     <classpathentry kind="lib" path="/org.eclipse.core.runtime/runtime.jar"/>
