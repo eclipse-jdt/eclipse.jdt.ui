@@ -40,7 +40,6 @@ import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.reconciler.IReconciler;
-import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.source.IAnnotationHover;
@@ -51,18 +50,18 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
-import org.eclipse.jdt.ui.text.spelling.SpellReconcileStrategy;
 import org.eclipse.jdt.ui.text.spelling.WordCompletionProcessor;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
 import org.eclipse.jdt.internal.ui.text.JavaElementProvider;
-import org.eclipse.jdt.internal.ui.text.JavaMultiPassReconciler;
 import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
+import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.comment.JavaDocRegion;
 import org.eclipse.jdt.internal.ui.text.comment.JavaSnippetFormattingStrategy;
@@ -293,15 +292,18 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		final ITextEditor editor= getEditor();
 		if (editor != null && editor.isEditable()) {
 
-			final JavaMultiPassReconciler reconciler= new JavaMultiPassReconciler(editor);
-			final IReconcilingStrategy strategy= new SpellReconcileStrategy(editor, getConfiguredDocumentPartitioning(sourceViewer), PreferenceConstants.getPreferenceStore());
-
-			reconciler.addReconcilingStrategy(strategy, IJavaPartitions.JAVA_DOC);
-			reconciler.addReconcilingStrategy(strategy, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
-			reconciler.addReconcilingStrategy(strategy, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
-			reconciler.addReconcilingStrategy(new JavaReconcilingStrategy(editor), IDocument.DEFAULT_CONTENT_TYPE);
-
-			reconciler.setIsIncrementalReconciler(false);
+// 			--- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=51092 is to use old reconciler ---			
+			JavaReconciler reconciler= new JavaReconciler(editor, new JavaReconcilingStrategy(editor), false);
+//			final JavaMultiPassReconciler reconciler= new JavaMultiPassReconciler(editor);
+//			final IReconcilingStrategy strategy= new SpellReconcileStrategy(editor, getConfiguredDocumentPartitioning(sourceViewer), PreferenceConstants.getPreferenceStore());
+//
+//			reconciler.addReconcilingStrategy(strategy, IJavaPartitions.JAVA_DOC);
+//			reconciler.addReconcilingStrategy(strategy, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
+//			reconciler.addReconcilingStrategy(strategy, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
+//			reconciler.addReconcilingStrategy(new JavaReconcilingStrategy(editor), IDocument.DEFAULT_CONTENT_TYPE);
+//
+//			reconciler.setIsIncrementalReconciler(false);
+			
 			reconciler.setProgressMonitor(new NullProgressMonitor());
 			reconciler.setDelay(500);
 
