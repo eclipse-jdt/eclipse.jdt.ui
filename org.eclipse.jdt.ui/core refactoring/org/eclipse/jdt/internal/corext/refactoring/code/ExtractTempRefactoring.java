@@ -42,17 +42,20 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
+import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
+import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
@@ -114,9 +117,9 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	public String guessTempName() throws JavaModelException{
-		Expression selected= getSelectedExpression();
-		if (selected instanceof MethodInvocation){
-			MethodInvocation mi= (MethodInvocation)selected;
+		IExpressionFragment selected= getSelectedExpression();
+		if (selected.getAssociatedNode() instanceof MethodInvocation){
+			MethodInvocation mi= (MethodInvocation)selected.getAssociatedNode();
 			for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
 				String proposal= tryTempNamePrefix(KNOWN_METHOD_NAME_PREFIXES[i], mi.getName().getIdentifier());
 				if (proposal != null)
@@ -160,19 +163,14 @@ public class ExtractTempRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 8); //$NON-NLS-1$
+			pm.beginTask("", 7); //$NON-NLS-1$
 	
-			Expression selectedExpression= getSelectedExpression();
+			IExpressionFragment selectedExpression= getSelectedExpression();
 			
 			if (selectedExpression == null){
 				String message= RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression");//$NON-NLS-1$
 				return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCompilationUnitNode, message);
 			}	
-			pm.worked(1);
-			
-			if(selectionIncludesExtraneousText())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.extraneous_text_selected")); //$NON-NLS-1$
-
 			pm.worked(1);
 			
 			if (isUsedInExplicitConstructorCall())
@@ -183,7 +181,7 @@ public class ExtractTempRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.expression_in_method"));			 //$NON-NLS-1$
 			pm.worked(1);				
 			
-			if (selectedExpression instanceof Name && selectedExpression.getParent() instanceof ClassInstanceCreation)
+			if (selectedExpression.getAssociatedNode() instanceof Name && selectedExpression.getAssociatedNode().getParent() instanceof ClassInstanceCreation)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.name_in_new")); //$NON-NLS-1$
 			pm.worked(1);				
 			
@@ -205,36 +203,28 @@ public class ExtractTempRefactoring extends Refactoring {
 		}		
 	}
 
-	//XXX same as in ExtractConstant
-	private static boolean isJustWhitespace(int start, int end, ICompilationUnit cu) throws JavaModelException {
-		return 0 == cu.getBuffer().getText(start, end - start).trim().length();
+	private RefactoringStatus checkExpressionBinding() throws JavaModelException{
+		return checkExpressionFragmentIsRValue(getSelectedExpression());
 	}
 	
-	private boolean selectionIncludesExtraneousText() throws JavaModelException {
-		Expression selectedExpression= getSelectedExpression();
-		if(!isJustWhitespace(fSelectionStart, selectedExpression.getStartPosition(), fCu))
-			return true;
-		if(!isJustWhitespace(selectedExpression.getStartPosition() + selectedExpression.getLength(), fSelectionStart + fSelectionLength, fCu))				
-			return true;
-		return false;
-	}
-
-	private RefactoringStatus checkExpressionBinding() throws JavaModelException{
-		Expression selectedExpression= getSelectedExpression();
-		switch(Checks.checkExpressionIsRValue(selectedExpression)) {
-			case Checks.NOT_RVALUE_MISC:	return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression"));
-			case Checks.NOT_RVALUE_VOID:	return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.no_void"));
+	// !! Same as in ExtractConstantRefactoring
+	private RefactoringStatus checkExpressionFragmentIsRValue(IExpressionFragment ex) 
+		throws JavaModelException
+	{
+		switch(Checks.checkExpressionIsRValue(getSelectedExpression().getAssociatedExpression())) {
+			case Checks.NOT_RVALUE_MISC:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE);
+			case Checks.NOT_RVALUE_VOID:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractTempRefactoring.no_void"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID);
 			case Checks.IS_RVALUE:			return new RefactoringStatus();
 			default:						Assert.isTrue(false); return null;
-		}
-	}
+		}		
+	}	
 	
 	private void initializeAST() throws JavaModelException {
 		fCompilationUnitNode= AST.parseCompilationUnit(fCu, true);
 	}
 
 	private RefactoringStatus checkExpression() throws JavaModelException {
-		Expression selectedExpression= getSelectedExpression();
+		Expression selectedExpression= getSelectedExpression().getAssociatedExpression();
 			
 		if (selectedExpression instanceof NullLiteral) {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.null_literals")); //$NON-NLS-1$
@@ -289,7 +279,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	private boolean isUsedInExplicitConstructorCall() throws JavaModelException{
-		Expression selectedExpression= getSelectedExpression();
+		Expression selectedExpression= getSelectedExpression().getAssociatedExpression();
 		if (ASTNodes.getParent(selectedExpression, ConstructorInvocation.class) != null)
 			return true;
 		if (ASTNodes.getParent(selectedExpression, SuperConstructorInvocation.class) != null)
@@ -330,10 +320,16 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private TextEdit createTempDeclarationEdit() throws CoreException {
-		if (getSelectedExpression().getParent() instanceof ExpressionStatement)
+		if (shouldReplaceSelectedExpressionWithTempDeclaration())
 			return replaceSelectedExpressionWithTempDeclaration();
 		else	
 			return createAndInsertTempDeclaration();
+	}
+	
+	private boolean shouldReplaceSelectedExpressionWithTempDeclaration() throws JavaModelException {
+		IExpressionFragment selectedFragment= getSelectedExpression();
+		return    selectedFragment.getAssociatedNode().getParent() instanceof ExpressionStatement
+		        && selectedFragment.matches(ASTFragmentFactory.createFragmentForFullSubtree(selectedFragment.getAssociatedNode()));
 	}
 
 	private TextEdit createAndInsertTempDeclaration() throws JavaModelException, CoreException {
@@ -344,13 +340,22 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private TextEdit replaceSelectedExpressionWithTempDeclaration() throws CoreException {
+		/* This is used in cases where the selected expression is the full expression part of an ExpressionStatement,
+		 * in which case the expression is not replaced by a variable reference,
+		 * but, rather, its parent ExpressionStatement is replaced by the new
+		 * local variable declaration.
+		 */
+		
 		String nodeSource= fCu.getBuffer().getText(getSelectedExpression().getStartPosition(), getSelectedExpression().getLength());
 		String text= createTempDeclarationSource(nodeSource, false);
-		return SimpleTextEdit.createReplace(getSelectedExpression().getParent().getStartPosition(), getSelectedExpression().getParent().getLength(), text);
+		ASTNode parent= getSelectedExpression().getAssociatedNode().getParent();
+		Assert.isTrue(parent instanceof ExpressionStatement);
+		
+		return SimpleTextEdit.createReplace(parent.getStartPosition(), parent.getLength(), text);
 	}
 
 	private TextEdit createImportEditIfNeeded() throws JavaModelException {
-		ITypeBinding type= getSelectedExpression().resolveTypeBinding();
+		ITypeBinding type= getSelectedExpression().getAssociatedExpression().resolveTypeBinding();
 		if (type.isPrimitive())
 			return null;
 			
@@ -363,12 +368,12 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private TextEdit[] createReplaceExpressionWithTempEdits() throws JavaModelException {
-		ASTNode[] nodesToReplace= getNodesToReplace();
-		TextEdit[] result= new TextEdit[nodesToReplace.length];
-		for (int i= 0; i < nodesToReplace.length; i++) {
-			ASTNode astNode= nodesToReplace[i];
-			int offset= astNode.getStartPosition();
-			int length= astNode.getLength();
+		IASTFragment[] fragmentsToReplace= getFragmentsToReplace();
+		TextEdit[] result= new TextEdit[fragmentsToReplace.length];
+		for (int i= 0; i < fragmentsToReplace.length; i++) {
+			IASTFragment fragment= fragmentsToReplace[i];
+			int offset= fragment.getStartPosition();
+			int length= fragment.getLength();
 			result[i]= SimpleTextEdit.createReplace(offset, length, fTempName);
 		}
 		return result;
@@ -392,10 +397,10 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 			
 	private ASTNode getNodeToInsertTempDeclarationBefore() throws JavaModelException {
-		if ((! fReplaceAllOccurrences) || (getNodesToReplace().length == 1))
+		if ((! fReplaceAllOccurrences) || (getFragmentsToReplace().length == 1))
 			return getInnermostStatementInBlock(getSelectedExpression());
 		
-		ASTNode[] firstReplaceNodeParents= getParents(getFirstReplacedExpression());
+		ASTNode[] firstReplaceNodeParents= getParents(getFirstReplacedExpression().getAssociatedNode());
 		ASTNode[] commonPath= findDeepestCommonSuperNodePathForReplacedNodes();
 		Assert.isTrue(commonPath.length <= firstReplaceNodeParents.length);
 		
@@ -413,13 +418,22 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	private ASTNode[] findDeepestCommonSuperNodePathForReplacedNodes() throws JavaModelException {
-		ASTNode[] matchingNodes= getNodesToReplace();
-		ASTNode[][] matchingNodesParents= new ASTNode[matchingNodes.length][];
-		for (int i= 0; i < matchingNodes.length; i++) {
-			matchingNodesParents[i]= getParents(matchingNodes[i]);
+		ASTNode[] matchNodes= getMatchNodes();
+		
+		ASTNode[][] matchingNodesParents= new ASTNode[matchNodes.length][];
+		for (int i= 0; i < matchNodes.length; i++) {
+			matchingNodesParents[i]= getParents(matchNodes[i]);
 		}
 		List l=Arrays.asList(getLongestArrayPrefix(matchingNodesParents));
 		return (ASTNode[]) l.toArray(new ASTNode[l.size()]);
+	}
+	
+	private ASTNode[] getMatchNodes() throws JavaModelException {
+		IASTFragment[] matches= getFragmentsToReplace();
+		ASTNode[] result= new ASTNode[matches.length];
+		for(int i= 0; i < matches.length; i++)
+			result[i]= matches[i].getAssociatedNode();
+		return result;
 	}
 	
 	private static Object[] getLongestArrayPrefix(Object[][] arrays){
@@ -454,17 +468,17 @@ public class ExtractTempRefactoring extends Refactoring {
 		return prefix;
 	}
 	
-	private Expression getFirstReplacedExpression() throws JavaModelException {
+	private IExpressionFragment getFirstReplacedExpression() throws JavaModelException {
 		if (! fReplaceAllOccurrences)
 			return getSelectedExpression();
-		ASTNode[] nodesToReplace= getNodesToReplace();
+		IASTFragment[] nodesToReplace= getFragmentsToReplace();
 		Comparator comparator= new Comparator(){
 			public int compare(Object o1, Object o2){
-				return ((ASTNode)o1).getStartPosition() - ((ASTNode)o2).getStartPosition();
+				return ((IASTFragment)o1).getStartPosition() - ((IASTFragment)o2).getStartPosition();
 			}	
 		};
 		Arrays.sort(nodesToReplace, comparator);
-		return (Expression)nodesToReplace[0];
+		return (IExpressionFragment)nodesToReplace[0];
 	}
 	
 	//without the trailing indent
@@ -483,7 +497,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	private String getTempTypeName() throws JavaModelException {
-		Expression expression= getSelectedExpression();
+		Expression expression= getSelectedExpression().getAssociatedExpression();
 		String name= expression.resolveTypeBinding().getName();
 		if (! "".equals(name) || ! (expression instanceof ClassInstanceCreation)) //$NON-NLS-1$
 			return name;
@@ -521,38 +535,40 @@ public class ExtractTempRefactoring extends Refactoring {
 		}
 	}
 	
-	private Statement getInnermostStatementInBlock(ASTNode node) {
-		Block block= (Block)ASTNodes.getParent(node, Block.class);
+	private Statement getInnermostStatementInBlock(IASTFragment fragment) {
+		Block block= (Block)ASTNodes.getParent(fragment.getAssociatedNode(), Block.class);
 		if (block == null)
 			return null;
 		for (Iterator iter= block.statements().iterator(); iter.hasNext();) {
 			Statement statement= (Statement) iter.next();
-			if (ASTNodes.isParent(node, statement))
+			if (ASTNodes.isParent(fragment.getAssociatedNode(), statement))
 				return statement;
 		}
 		return null;
 	}
 	
-	private ASTNode[] getNodesToReplace() throws JavaModelException {
+	private IASTFragment[] getFragmentsToReplace() throws JavaModelException {
 		if (fReplaceAllOccurrences){
-			ASTNode[] allMatches= AstMatchingNodeFinder.findMatchingNodes(getSelectedMethodNode(), getSelectedExpression());
+			IASTFragment[] allMatches= ASTFragmentFactory.createFragmentForFullSubtree(getSelectedMethodNode())
+			                                             .getSubFragmentsMatching(getSelectedExpression());
 			return retainOnlyReplacableMatches(allMatches);
 		} else if (canReplace(getSelectedExpression()))
-			return new ASTNode[]{getSelectedExpression()};	
+			return new IASTFragment[]{getSelectedExpression()};	
 		else	
-			return new ASTNode[0];
+			return new IASTFragment[0];
 	}
 
-    private static ASTNode[] retainOnlyReplacableMatches(ASTNode[] allMatches) {
+    private static IASTFragment[] retainOnlyReplacableMatches(IASTFragment[] allMatches) {
     	List result= new ArrayList(allMatches.length);
     	for (int i= 0; i < allMatches.length; i++) {
             if (canReplace(allMatches[i]))
             	result.add(allMatches[i]);
         }
-        return (ASTNode[]) result.toArray(new ASTNode[result.size()]);
+        return (IASTFragment[]) result.toArray(new IASTFragment[result.size()]);
     }
 
-    private static boolean canReplace(ASTNode node) {
+    private static boolean canReplace(IASTFragment fragment) {
+    	ASTNode node= fragment.getAssociatedNode();
     	if (node.getParent() instanceof VariableDeclarationFragment){
     		VariableDeclarationFragment vdf= (VariableDeclarationFragment)node.getParent();
     		if (node.equals(vdf.getName()))
@@ -564,7 +580,7 @@ public class ExtractTempRefactoring extends Refactoring {
     }
 		
 	private MethodDeclaration getSelectedMethodNode() throws JavaModelException {
-		return (MethodDeclaration)ASTNodes.getParent(getSelectedExpression(), MethodDeclaration.class);
+		return (MethodDeclaration)ASTNodes.getParent(getSelectedExpression().getAssociatedNode(), MethodDeclaration.class);
 	}
 	
 	private static ASTNode[] getParents(ASTNode node){
@@ -578,13 +594,12 @@ public class ExtractTempRefactoring extends Refactoring {
 		return (ASTNode[]) parents.toArray(new ASTNode[parents.size()]);
 	}
 	
-	private Expression getSelectedExpression() throws JavaModelException {
-		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(fSelectionStart, fSelectionLength), true);
-		fCompilationUnitNode.accept(analyzer);
-		ASTNode selectedNode= analyzer.getFirstSelectedNode();
-		if (selectedNode instanceof Expression)
-			return (Expression)selectedNode;
-		else 
+	private IExpressionFragment getSelectedExpression() throws JavaModelException {
+		IASTFragment selectedFragment= ASTFragmentFactory.createFragmentForSourceRange(new SourceRange(fSelectionStart, fSelectionLength), fCompilationUnitNode, fCu);
+		
+		if (selectedFragment instanceof IExpressionFragment)
+			return (IExpressionFragment) selectedFragment;
+		else
 			return null;	
 	}
 
