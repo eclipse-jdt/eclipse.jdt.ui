@@ -647,8 +647,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 					fOtherMdfButtons.setSelection(fStaticMdfIndex, false);
 				}
 			}
-			fAccMdfButtons.enableSelectionButton(PRIVATE_INDEX, isEnclosedType && fIsClass);
-			fAccMdfButtons.enableSelectionButton(PROTECTED_INDEX, isEnclosedType && fIsClass);
+			fAccMdfButtons.enableSelectionButton(PRIVATE_INDEX, isEnclosedType);
+			fAccMdfButtons.enableSelectionButton(PROTECTED_INDEX, isEnclosedType);
 			fOtherMdfButtons.enableSelectionButton(fStaticMdfIndex, isEnclosedType);
 			fTypeNameStatus= typeNameChanged();
 			fSuperClassStatus= superClassChanged();
