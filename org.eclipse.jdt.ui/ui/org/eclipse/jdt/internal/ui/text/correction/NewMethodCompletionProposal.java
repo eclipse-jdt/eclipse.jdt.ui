@@ -120,19 +120,23 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			params.add(param);
 		}
 		
-		Block body= ast.newBlock();
-		if (!isConstructor()) {
-			Type returnType= evaluateMethodType(ast);
-			if (returnType == null) {
-				decl.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
-			} else {
-				decl.setReturnType(returnType);
-				ReturnStatement returnStatement= ast.newReturnStatement();
-				returnStatement.setExpression(ASTResolving.getInitExpression(returnType));
-				body.statements().add(returnStatement);
+		if (fSenderBinding.isInterface()) {
+			decl.setBody(null);
+		} else {
+			Block body= ast.newBlock();
+			if (!isConstructor()) {
+				Type returnType= evaluateMethodType(ast);
+				if (returnType == null) {
+					decl.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
+				} else {
+					decl.setReturnType(returnType);
+					ReturnStatement returnStatement= ast.newReturnStatement();
+					returnStatement.setExpression(ASTResolving.getInitExpression(returnType));
+					body.statements().add(returnStatement);
+				}
 			}
+			decl.setBody(body);
 		}
-		decl.setBody(body);
 
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		if (settings.createComments && !fSenderBinding.isAnonymous()) {
