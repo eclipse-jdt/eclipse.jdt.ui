@@ -38,14 +38,4 @@ public class JavaPartitions {
 				return null;
 		}
 	}
-
-	public static int getPartitionKind(String type) {
-		if (JAVA_SINGLE_LINE_COMMENT.equals(type))
-				return K_SINGLE_LINE_COMMENT;
-		if (JAVA_MULTI_LINE_COMMENT.equals(type))
-				return K_MULTI_LINE_COMMENT;
-		if (JAVA_DOC.equals(type))
-				return K_JAVA_DOC;
-		return -1;
-	}
 }
