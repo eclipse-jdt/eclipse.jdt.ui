@@ -288,17 +288,17 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
     private static void configureTableResizing(final Composite parent, final Composite buttons, final Table table, final TableColumn column1, final TableColumn column2, final TableColumn column3) {
         parent.addControlListener(new ControlAdapter() {
             public void controlResized(ControlEvent e) {
-                Rectangle area = parent.getClientArea();
-                Point preferredSize = table.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-                int width = area.width - 2 * table.getBorderWidth();
+                Rectangle area= parent.getClientArea();
+                Point preferredSize= table.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+                int width= area.width - 2 * table.getBorderWidth();
                 if (preferredSize.y > area.height) {
                     // Subtract the scrollbar width from the total column width
                     // if a vertical scrollbar will be required
                     Point vBarSize = table.getVerticalBar().getSize();
                     width -= vBarSize.x;
                 }
-                width-= buttons.getSize().x;
-                Point oldSize = table.getSize();
+                width -= buttons.getSize().x;
+                Point oldSize= table.getSize();
                 if (oldSize.x > width) {
                     // table is getting smaller so make the columns
                     // smaller first and then resize the table to
@@ -312,8 +312,8 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
                     // bigger first and then make the columns wider
                     // to match the client area width
                     table.setSize(width, area.height);
-                    column1.setWidth(width/4);
-                    column2.setWidth(width/4);
+                    column1.setWidth(width / 4);
+                    column2.setWidth(width / 4);
                     column3.setWidth(width - (column1.getWidth() + column2.getWidth()));
                  }
             }
