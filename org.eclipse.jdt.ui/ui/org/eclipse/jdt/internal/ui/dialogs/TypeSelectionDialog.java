@@ -46,6 +46,8 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 		fScope= scope;
 		Assert.isNotNull(fScope);
 		fStyle= style;
+		setUpperListLabel(JavaPlugin.getResourceString(PREFIX + "typeListLabel"));
+		setLowerListLabel(JavaPlugin.getResourceString(PREFIX + "packageListLabel"));
 	}
 	
 	/**

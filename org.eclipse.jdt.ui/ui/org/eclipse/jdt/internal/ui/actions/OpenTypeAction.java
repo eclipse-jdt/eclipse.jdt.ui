@@ -5,28 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.actions;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.viewers.ISelection;
-
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.dialogs.SelectionDialog;
-
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.action.IAction;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.ISelection;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.IWorkbenchWindowActionDelegate;import org.eclipse.ui.PartInitException;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.ui.ITypeHierarchyViewPart;import org.eclipse.jdt.ui.JavaUI;
 
 public class OpenTypeAction extends OpenJavaElementAction implements IWorkbenchWindowActionDelegate {
 	
@@ -40,15 +19,10 @@ public class OpenTypeAction extends OpenJavaElementAction implements IWorkbenchW
 	}
 
 	public void run() {
-		Shell shell= JavaPlugin.getActiveWorkbenchShell();
-		SelectionDialog dialog= null;
-		try {
-			dialog= JavaUI.createTypeDialog(shell, new ProgressMonitorDialog(shell),
-				SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES, false);
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, JavaPlugin.getResourceBundle(), ERROR_OPEN_PREFIX);
-			return;
-		}
+		Shell parent= JavaPlugin.getActiveWorkbenchShell();
+		OpenTypeSelectionDialog dialog= new OpenTypeSelectionDialog(parent, new ProgressMonitorDialog(parent), 
+			SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES, 
+			true, true);				
 	
 		dialog.setTitle(JavaPlugin.getResourceString(DIALOG_PREFIX + "title"));
 		dialog.setMessage(JavaPlugin.getResourceString(DIALOG_PREFIX + "message"));
@@ -59,7 +33,11 @@ public class OpenTypeAction extends OpenJavaElementAction implements IWorkbenchW
 		Object[] types= dialog.getResult();
 		if (types != null && types.length > 0) {
 			try {
-				open((IType) types[0]);
+				IType type= (IType)types[0];
+				open(type);
+				if (dialog.showInTypeHierarchy()) {
+					showInTypeHierarchy(type);
+				}
 			} catch (JavaModelException x) {
 				ExceptionHandler.handle(x, JavaPlugin.getResourceBundle(), ERROR_OPEN_PREFIX);
 			} catch (PartInitException x) {
@@ -68,6 +46,17 @@ public class OpenTypeAction extends OpenJavaElementAction implements IWorkbenchW
 				
 	}
 
+	private void showInTypeHierarchy(IType type) {
+		try {
+			ITypeHierarchyViewPart part= (ITypeHierarchyViewPart)JavaPlugin.getActiveWorkbenchWindow().getActivePage().showView(JavaUI.ID_TYPE_HIERARCHY);
+			if (part != null) {
+				part.setInput(type);
+			}
+		} catch (PartInitException e) {
+			ExceptionHandler.handle(e, JavaPlugin.getResourceBundle(), ERROR_OPEN_PREFIX);
+		}
+	}
+	
 	//---- IWorkbenchWindowActionDelegate ------------------------------------------------
 
 	public void run(IAction action) {

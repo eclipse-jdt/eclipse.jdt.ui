@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
@@ -38,6 +38,9 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 	private Object[] fElements;
 	private boolean fIgnoreCase;
 	private boolean fMatchEmtpyString;
+
+	private String fUpperListLabel;
+	private String fLowerListLabel;
 
 	// SWT widgets
 	private Table fUpperList;
@@ -61,6 +64,14 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 		fMatchEmtpyString= matchEmtpyString;
 	}			
 
+	public void setUpperListLabel(String label) {
+		fUpperListLabel= label;
+	}
+
+	public void setLowerListLabel(String label) {
+		fLowerListLabel= label;
+	}
+	
 	public void setElements(Object[] elements) {
 		fElements= elements;
 	}
@@ -125,6 +136,9 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 	 * @return org.eclipse.swt.widgets.List
 	 */
 	private Table createUpperList(Composite parent) {
+		if (fUpperListLabel != null)
+			(new Label(parent, SWT.NONE)).setText(fUpperListLabel);
+			
 		Table list= new Table(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		list.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event evt) {
@@ -157,6 +171,9 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 	 * @return org.eclipse.swt.widgets.List
 	 */
 	private Table createLowerList(Composite parent) {
+		if (fLowerListLabel != null)
+			(new Label(parent, SWT.NONE)).setText(fLowerListLabel);
+
 		Table list= new Table(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		list.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event evt) {
