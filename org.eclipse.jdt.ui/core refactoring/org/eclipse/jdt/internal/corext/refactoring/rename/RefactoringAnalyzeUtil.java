@@ -112,13 +112,10 @@ public class RefactoringAnalyzeUtil {
 		return ((MethodDeclaration)ASTNodes.getParent(decl, MethodDeclaration.class));
 	}
 
-	public static RefactoringStatus analyzeIntroducedCompileErrors(TextEdit[] edits, TextChange change, ICompilationUnit wc, CompilationUnit newCUNode, CompilationUnit oldCuNode) {
+	public static RefactoringStatus analyzeIntroducedCompileErrors(TextChange change, ICompilationUnit wc, CompilationUnit newCUNode, CompilationUnit oldCuNode) {
 		RefactoringStatus subResult= new RefactoringStatus();				
-		Set oldErrorMessages= getOldErrorMessages(edits[0], oldCuNode);
-		MethodDeclaration newMethod= getMethodDeclaration(edits[0], change, newCUNode);
-		if (newMethod == null)
-			return subResult;
-		Message[] newErrorMessages= ASTNodes.getMessages(newMethod, ASTNodes.INCLUDE_ALL_PARENTS);
+		Set oldErrorMessages= getOldErrorMessages(oldCuNode);
+		Message[] newErrorMessages= ASTNodes.getMessages(newCUNode, ASTNodes.INCLUDE_ALL_PARENTS);
 		for (int i= 0; i < newErrorMessages.length; i++) {
 			if (! oldErrorMessages.contains(newErrorMessages[i].getMessage())){
 				RefactoringStatusEntry.Context context= JavaSourceContext.create(wc, new SourceRange(newErrorMessages[i].getSourcePosition(),0));
@@ -132,8 +129,6 @@ public class RefactoringAnalyzeUtil {
 		Name declarationNameNode= getNameNode(getTextRange(getFirstEdit(edits), null), cuNode);
 		return getFullBindingKey((VariableDeclaration)declarationNameNode.getParent());
 	}
-
-
 
 	private static SimpleName getSimpleName(ASTNode node){
 		if (node instanceof SimpleName)
@@ -157,11 +152,8 @@ public class RefactoringAnalyzeUtil {
 			return change.getNewTextRange(edit);
 	}
 
-	private static Set getOldErrorMessages(TextEdit edit, CompilationUnit cuNode) {
-		MethodDeclaration oldMethod= getMethodDeclaration(edit, null, cuNode);
-		if (oldMethod == null)
-			return new HashSet(0);
-		Message[] oldMessages= ASTNodes.getMessages(oldMethod, ASTNodes.INCLUDE_ALL_PARENTS);
+	private static Set getOldErrorMessages(CompilationUnit cuNode) {
+		Message[] oldMessages= ASTNodes.getMessages(cuNode, ASTNodes.INCLUDE_ALL_PARENTS);
 		Set messageSet= new HashSet(oldMessages.length);
 		for (int i= 0; i < oldMessages.length; i++) {
 			messageSet.add(oldMessages[i].getMessage());
