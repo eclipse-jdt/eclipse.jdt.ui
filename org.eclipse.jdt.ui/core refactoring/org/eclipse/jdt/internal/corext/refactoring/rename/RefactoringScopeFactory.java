@@ -17,14 +17,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -72,10 +72,9 @@ public class RefactoringScopeFactory {
 				else
 					return SearchEngine.createJavaSearchScope(new IJavaElement[] { member });
 			}
-			if (!JdtFlags.isPublic(member) && !JdtFlags.isProtected(member) && member.getCompilationUnit() != null) {
-				IPackageFragment pack= (IPackageFragment) member.getCompilationUnit().getParent();
-				return SearchEngine.createJavaSearchScope(new IJavaElement[] { pack });
-			}
+			// Removed code that does some optimizations regarding package visible members. The problem is that
+			// the can be a package fragment with the same name in a different source folder or project. So we
+			// have to treat package visible members like public or protected members.
 		}
 		return create(javaElement.getJavaProject());
 	}
