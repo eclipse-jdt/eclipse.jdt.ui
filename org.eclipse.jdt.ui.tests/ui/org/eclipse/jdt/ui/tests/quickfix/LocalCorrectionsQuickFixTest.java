@@ -63,7 +63,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		store.setValue(PreferenceConstants.CODEGEN__FILE_COMMENTS, false);
 		store.setValue(PreferenceConstants.CODEGEN__JAVADOC_STUBS, false);
 		
-		CodeTemplates.getInstance().getTemplates(CodeTemplateContextType.CATCHBLOCK_NAME)[0].setPattern("");
+		CodeTemplates templates= CodeTemplates.getInstance();
+		templates.getTemplates(CodeTemplateContextType.CATCHBLOCK_NAME)[0].setPattern("");
+		templates.getTemplates(CodeTemplateContextType.CONSTRUCTORSTUB_NAME)[0].setPattern("");
+		templates.getTemplates(CodeTemplateContextType.METHODSTUB_NAME)[0].setPattern("");
+
 		
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
