@@ -13,15 +13,18 @@ package org.eclipse.jdt.internal.corext.dom;
 import java.util.ArrayList;
 
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -212,7 +215,7 @@ public class LinkedNodeFinder  {
 		
 		public BindingFinder(IBinding binding, ArrayList result) {
 			super(true);
-			fBinding= binding;
+			fBinding= getErasure(binding);
 			fResult= result;
 		}
 		
@@ -249,26 +252,34 @@ public class LinkedNodeFinder  {
 		}		
 
 		public boolean visit(AnnotationTypeDeclaration node) {
-			if (fBinding.getKind() == IBinding.METHOD) {
-				IMethodBinding binding= (IMethodBinding) fBinding;
-				if (binding.isConstructor() && binding.getDeclaringClass() == node.resolveBinding()) {
-					fResult.add(node.getName());
-				}
-			}
+			// annotation types can not have a constructor
 			return true;
 		}		
 
 		public boolean visit(SimpleName node) {
 			IBinding binding= node.resolveBinding();
+			if (binding == null || binding.getKind() != fBinding.getKind()) {
+				return false;
+			}
+			binding= getErasure(binding);
 			
 			if (fBinding == binding) {
 				fResult.add(node);
-			} else if (binding != null && binding.getKind() == fBinding.getKind() && binding.getKind() == IBinding.METHOD) {
+			} else if (binding.getKind() == IBinding.METHOD) {
 				if (isConnectedMethod((IMethodBinding) binding, (IMethodBinding) fBinding)) {
 					fResult.add(node);
 				}
 			}
 			return false;
+		}
+		
+		private static IBinding getErasure(IBinding binding) {
+			if (binding instanceof ITypeBinding) {
+				return ((ITypeBinding) binding).getErasure();
+			} else if (binding instanceof IMethodBinding) {
+				return ((IMethodBinding) binding).getErasure();
+			}
+			return binding;
 		}
 		
 		private boolean isConnectedMethod(IMethodBinding meth1, IMethodBinding meth2) {
