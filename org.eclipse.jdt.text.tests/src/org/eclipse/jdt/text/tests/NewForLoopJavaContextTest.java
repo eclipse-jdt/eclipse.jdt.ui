@@ -23,7 +23,6 @@ import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -103,7 +102,6 @@ public class NewForLoopJavaContextTest extends TestCase {
 
 	protected void tearDown() throws Exception {
 		fCU.discardWorkingCopy();
-		EditorTestHelper.closeAllEditors();
 		JavaProjectHelper.delete(fProject);
 	}
 	
