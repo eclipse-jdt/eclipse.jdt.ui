@@ -386,7 +386,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				protected void update(Widget w, IJavaElementDelta delta) {
 					
 					Item item;
-					Object element;
 					
 					IJavaElement parent= delta.getElement();
 					IJavaElementDelta[] affected= delta.getAffectedChildren();

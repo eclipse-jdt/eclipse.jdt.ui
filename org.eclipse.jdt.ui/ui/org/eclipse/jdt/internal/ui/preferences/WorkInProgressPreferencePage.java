@@ -29,6 +29,7 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 
 	public static final String PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW= "PackagesView.pkgNamePatternForPackagesView"; //$NON-NLS-1$
 	public static final String PREF_OVERRIDE_INDICATOR= "PackagesView.overrideindicator"; //$NON-NLS-1$
+	public static final String PREF_SYNC_OUTLINE_ON_CURSOR_MOVE= "JavaEditor.SyncOutlineOnCursorMove";
 
 
 	public WorkInProgressPreferencePage() {
@@ -42,6 +43,7 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 		store.setDefault(ExperimentalPreference.CODE_ASSIST_EXPERIMENTAL, false);
 		store.setDefault(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW, "");
 		store.setDefault(PREF_OVERRIDE_INDICATOR, true);
+		store.setDefault(PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, false);
 	}
 	
 	/*
@@ -77,19 +79,29 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
         );
 		addField(boolEditor);
  		
+		boolEditor= new BooleanFieldEditor(
+			PREF_SYNC_OUTLINE_ON_CURSOR_MOVE,
+			"Synchronize &outliner selection on cursor move", //$NON-NLS-1$
+			parent
+        );
+		addField(boolEditor);
 	}
 	
 	public static boolean showOverrideIndicators() {
 		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_OVERRIDE_INDICATOR);
 	}	
-
+	
 	static public boolean isCompressingPkgNameInPackagesView() {
 		return getPkgNamePatternForPackagesView().length() > 0;
 	}
-
+	
 	static public String getPkgNamePatternForPackagesView() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		return store.getString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW);
+	}
+	
+	static public boolean synchronizeOutlineOnCursorMove() {
+		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_SYNC_OUTLINE_ON_CURSOR_MOVE);
 	}
 	
 	/*
@@ -97,7 +109,6 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 	 */
 	public void init(IWorkbench workbench) {
 	}
-	
 }
 
 

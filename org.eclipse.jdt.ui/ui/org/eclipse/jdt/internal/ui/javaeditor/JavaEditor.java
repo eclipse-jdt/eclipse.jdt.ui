@@ -16,6 +16,7 @@ import org.eclipse.swt.custom.BidiSegmentListener;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -65,6 +66,7 @@ import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;
 import org.eclipse.jdt.internal.ui.actions.OpenSuperImplementationAction;
 import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
@@ -76,11 +78,51 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
  */
 public abstract class JavaEditor extends AbstractTextEditor implements ISelectionChangedListener {
 		
+	/**
+	 * "Smart" runnable for updating the outline page's selection.
+	 */
+	class OutlinePageSelectionUpdater implements Runnable {
+		
+		/** Has the runnable already been posted? */
+		private boolean fPosted= false;
+		
+		public OutlinePageSelectionUpdater() {
+		}
+		
+		/*
+		 * @see Runnable#run()
+		 */
+		public void run() {
+			synchronizeOutlinePageSelection();
+			fPosted= false;
+		}
+		
+		/**
+		 * Posts this runnable into the event queue.
+		 */
+		public void post() {
+			if (fPosted)
+				return;
+				
+			Shell shell= getSite().getShell();
+			if (shell != null & !shell.isDisposed()) {
+				fPosted= true;
+				shell.getDisplay().asyncExec(this);
+			}
+		}
+	};
+	
+	
 	/** The outline page */
 	protected JavaOutlinePage fOutlinePage;
 	
 	/** Outliner context menu Id */
-	protected String fOutlinerContextMenuId;	
+	protected String fOutlinerContextMenuId;
+	
+	/** The outline page selection updater */
+	private OutlinePageSelectionUpdater fUpdater;
+	
+	
 		
 	/**
 	 * Returns the most narrow java element including the given offset
@@ -107,6 +149,9 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools, this));
 		setRangeIndicator(new DefaultRangeIndicator());
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
+		
+		if (WorkInProgressPreferencePage.synchronizeOutlineOnCursorMove())
+			fUpdater= new OutlinePageSelectionUpdater();
 	}
 	
 	/**
@@ -149,10 +194,23 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		addGroup(menu, ITextEditorActionConstants.GROUP_EDIT, IContextMenuConstants.GROUP_NEW);
 		
 		new JavaSearchGroup(false).fill(menu, ITextEditorActionConstants.GROUP_FIND, isTextSelectionEmpty());
-		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "ShowJavaDoc");
+
+		/*
+		 * http://dev.eclipse.org/bugs/show_bug.cgi?id=8735
+		 * Removed duplicates of Edit menu entries to shorten context menu.
+		 * Will be reworked for overal context menu reorganization.
+		 */
+//		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "ShowJavaDoc");
+		
 		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "ShowInPackageView");
 		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "OpenSuperImplementation");
-		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "OpenExternalJavadoc");
+		
+		/*
+		 * http://dev.eclipse.org/bugs/show_bug.cgi?id=8735
+		 * Removed duplicates of Edit menu entries to shorten context menu.
+		 * Will be reworked for overal context menu reorganization.
+		 */
+//		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "OpenExternalJavadoc");
 	}			
 	
 	/**
@@ -179,6 +237,26 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 			resetHighlightRange();
 		}
 	}
+	
+	/**
+	 * Synchronizes the outliner selection with the actual cursor
+	 * position in the editor.
+	 */
+	public void synchronizeOutlinePageSelection() {
+		
+		ISourceViewer sourceViewer= getSourceViewer();
+		if (sourceViewer == null)
+			return;
+			
+		StyledText styledText= sourceViewer.getTextWidget();
+		int offset= sourceViewer.getVisibleRegion().getOffset();
+		int caret= offset + styledText.getCaretOffset();
+		
+		IJavaElement element= getElementAt(caret);
+		if (element instanceof ISourceReference)
+			fOutlinePage.select((ISourceReference) element);
+	}
+	
 	
 	/*
 	 * Get the desktop's StatusLineManager
@@ -473,5 +551,14 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 				}
 		}
 		return null;
+	}
+	
+	/*
+	 * @see AbstractTextEditor#handleCursorPositionChanged()
+	 */
+	protected void handleCursorPositionChanged() {
+		super.handleCursorPositionChanged();
+		if (fUpdater != null)
+			fUpdater.post();
 	}
 }

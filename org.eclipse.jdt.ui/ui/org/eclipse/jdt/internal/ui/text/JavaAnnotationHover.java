@@ -22,11 +22,14 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 
-
+/**
+ * Determines all markers for the given line and collects, concatenates, and formates
+ * their messages.
+ */
 public class JavaAnnotationHover implements IAnnotationHover {
 	
 	/**
-	 * Returns the distance to the ruler line.
+	 * Returns the distance to the ruler line. 
 	 */
 	protected int compareRulerLine(Position position, IDocument document, int line) {
 		
@@ -45,20 +48,17 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	}
 	
 	/**
-	 * Selects one marker from the two lists.
+	 * Selects a set of markers from the two lists. By default, it just returns
+	 * the set of exact matches.
 	 */
-	protected IMarker select(List firstChoice, List secondChoice) {
-		if (!firstChoice.isEmpty())
-			return (IMarker) firstChoice.get(0);
-		if (!secondChoice.isEmpty())
-			return (IMarker) secondChoice.get(0);
-		return null;
+	protected List select(List exactMatch, List including) {
+		return exactMatch;
 	}
-		
+	
 	/**
 	 * Returns one marker which includes the ruler's line of activity.
 	 */
-	protected IMarker getMarker(ISourceViewer viewer, int line) {
+	protected List getMarkersForLine(ISourceViewer viewer, int line) {
 		
 		IDocument document= viewer.getDocument();
 		IAnnotationModel model= viewer.getAnnotationModel();
@@ -85,9 +85,7 @@ public class JavaAnnotationHover implements IAnnotationHover {
 			}
 		}
 		
-		// don't accept including because of "1GEUOZ9: ITPJUI:ALL - Confusing UI for multiline Bookmarks and Tasks"
-		// return select(exact, including);
-		return select(exact, exact);
+		return select(exact, including);
 	}
 
 		
@@ -95,22 +93,65 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	 * @see IVerticalRulerHover#getHoverInfo(ISourceViewer, int)
 	 */
 	public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {
-		IMarker marker= getMarker(sourceViewer, lineNumber);
-		if (marker != null) {
-			String text= marker.getAttribute(IMarker.MESSAGE, (String) null);
-			if (text != null)
-				return formatHoverText(text);
+		List markers= getMarkersForLine(sourceViewer, lineNumber);
+		if (markers != null) {
+			
+			if (markers.size() == 1) {
+				
+				// optimization
+				IMarker marker= (IMarker) markers.get(0);
+				String message= marker.getAttribute(IMarker.MESSAGE, (String) null);
+				if (message != null && message.trim().length() > 0)
+					return formatSingleMessage(message);
+					
+			} else {
+					
+				List messages= new ArrayList();
+				
+				Iterator e= markers.iterator();
+				while (e.hasNext()) {
+					IMarker marker= (IMarker) e.next();
+					String message= marker.getAttribute(IMarker.MESSAGE, (String) null);
+					if (message != null && message.trim().length() > 0)
+						messages.add(message.trim());
+				}
+				
+				if (messages.size() == 1)
+					return formatSingleMessage((String) messages.get(0));
+					
+				if (messages.size() > 1)
+					return formatMultipleMessages(messages);
+			}
 		}
+		
 		return null;
 	}
 	
 	/*
-	 * Formats the message of this hover to fit onto the screen.
+	 * Formats a message as HTML text.
 	 */
-	private String formatHoverText(String text) {
+	private String formatSingleMessage(String message) {
 		StringBuffer buffer= new StringBuffer();
 		HTMLPrinter.addPageProlog(buffer);
-		HTMLPrinter.addParagraph(buffer, text);
+		HTMLPrinter.addParagraph(buffer, message);
+		HTMLPrinter.addPageEpilog(buffer);
+		return buffer.toString();
+	}
+	
+	/*
+	 * Formats several message as HTML text.
+	 */
+	private String formatMultipleMessages(List messages) {
+		StringBuffer buffer= new StringBuffer();
+		HTMLPrinter.addPageProlog(buffer);
+		HTMLPrinter.addParagraph(buffer, "Multiple markers at this line.");
+		
+		HTMLPrinter.startBulletList(buffer);
+		Iterator e= messages.iterator();
+		while (e.hasNext())
+			HTMLPrinter.addBullet(buffer, (String) e.next());
+		HTMLPrinter.endBulletList(buffer);	
+		
 		HTMLPrinter.addPageEpilog(buffer);
 		return buffer.toString();
 	}
