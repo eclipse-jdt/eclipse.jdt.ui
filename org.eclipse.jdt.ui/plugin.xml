@@ -1201,7 +1201,16 @@
                id="LaunchJavadocWizard">
          </action>
       </objectContribution>
-   </extension>  
+   </extension> 
+      <extension
+         point="org.eclipse.debug.ui.consoleLineTrackers">
+      <consoleLineTracker
+            class="org.eclipse.jdt.internal.ui.javadocexport.JavadocConsoleLineTracker"
+            processType="org.eclipse.jdt.ui.javadocProcess"
+            id="org.eclipse.jdt.ui.javadocexport.JavadocConsoleLineTracker">
+      </consoleLineTracker>
+   </extension>
+   
 
 <!-- NLS Search Page                                                             -->
 <!-- =========================================================================== -->

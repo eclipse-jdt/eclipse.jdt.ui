@@ -105,6 +105,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	private IWorkspaceRoot fRoot;
 
 	private IFile fXmlJavadocFile;
+	
+	private static final String ID_JAVADOC_PROCESS_TYPE= "org.eclipse.jdt.ui.javadocProcess"; //$NON-NLS-1$
 
 	//private ILaunchConfiguration fConfig;
 
@@ -286,6 +288,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 					ILaunch newLaunch= new Launch(wc, ILaunchManager.RUN_MODE, null);
 					IProcess iprocess= DebugPlugin.newProcess(newLaunch, process, JavadocExportMessages.getString("JavadocWizard.javadocprocess.label")); //$NON-NLS-1$
 					iprocess.setAttribute(IProcess.ATTR_CMDLINE, buf.toString());
+					iprocess.setAttribute(IProcess.ATTR_PROCESS_TYPE, ID_JAVADOC_PROCESS_TYPE);
 
 					DebugPlugin.getDefault().getLaunchManager().addLaunch(newLaunch);
 
