@@ -355,48 +355,53 @@ private class SourceAttachmentForm implements IPropertyChangeListener {
 		final IPackageFragmentRoot root= getPackageFragmentRoot(fFile);
 
 		if (root != null) {
+			
+			if (!root.isArchive()) {
+				createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSource", fFile.getElementName())); //$NON-NLS-1$
 
-			try {
-				Button button;
+			} else {
+				try {
+					Button button;
 
-				IPath path= root.getSourceAttachmentPath();			
-				if (path == null) {			
-					createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSourceAttachment", root.getElementName())); //$NON-NLS-1$
-					createLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.message.pressButtonToAttach")); //$NON-NLS-1$
-					createLabel(composite, null);
+					IPath path= root.getSourceAttachmentPath();			
+					if (path == null) {			
+						createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSourceAttachment", root.getElementName())); //$NON-NLS-1$
+						createLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.message.pressButtonToAttach")); //$NON-NLS-1$
+						createLabel(composite, null);
 
-					button= createButton(composite, JavaEditorMessages.getString("SourceAttachmentForm.button.attachSource"));		
+						button= createButton(composite, JavaEditorMessages.getString("SourceAttachmentForm.button.attachSource"));		
 
-				} else {
-					createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSource", fFile.getElementName())); //$NON-NLS-1$
-					createLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.message.pressButtonToChange")); //$NON-NLS-1$
-					createLabel(composite, null);
+					} else {
+						createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSourceInAttachment", fFile.getElementName())); //$NON-NLS-1$
+						createLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.message.pressButtonToChange")); //$NON-NLS-1$
+						createLabel(composite, null);
 
-					button= createButton(composite, JavaEditorMessages.getString("SourceAttachmentForm.button.changeAttachedSource")); //$NON-NLS-1$
-				}
-
-				button.setEnabled(false); // XXX depending on 15423
-				button.addSelectionListener(new SelectionListener() {
-					public void widgetSelected(SelectionEvent event) {				
-						try {
-							SourceAttachmentDialog dialog= new SourceAttachmentDialog(fScrolledComposite.getShell(), root);
-							if (dialog.open() == SourceAttachmentDialog.OK)
-								verifyInput(getEditorInput());
-
-						} catch (CoreException e) {
-							String title= JavaEditorMessages.getString("SourceAttachmentForm.error.title"); //$NON-NLS-1$
-							String message= JavaEditorMessages.getString("SourceAttachmentForm.error.message"); //$NON-NLS-1$
-							ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);				
-						}
+						button= createButton(composite, JavaEditorMessages.getString("SourceAttachmentForm.button.changeAttachedSource")); //$NON-NLS-1$
 					}
 
-					public void widgetDefaultSelected(SelectionEvent e) {}
-				});
+					button.setEnabled(false); // XXX depending on 15423
+					button.addSelectionListener(new SelectionListener() {
+						public void widgetSelected(SelectionEvent event) {				
+							try {
+								SourceAttachmentDialog dialog= new SourceAttachmentDialog(fScrolledComposite.getShell(), root);
+								if (dialog.open() == SourceAttachmentDialog.OK)
+									verifyInput(getEditorInput());
 
-			} catch (JavaModelException e) {
-				String title= JavaEditorMessages.getString("SourceAttachmentForm.error.title"); //$NON-NLS-1$
-				String message= JavaEditorMessages.getString("SourceAttachmentForm.error.message"); //$NON-NLS-1$
-				ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);				
+							} catch (CoreException e) {
+								String title= JavaEditorMessages.getString("SourceAttachmentForm.error.title"); //$NON-NLS-1$
+								String message= JavaEditorMessages.getString("SourceAttachmentForm.error.message"); //$NON-NLS-1$
+								ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);				
+							}
+						}
+
+						public void widgetDefaultSelected(SelectionEvent e) {}
+					});
+
+				} catch (JavaModelException e) {
+					String title= JavaEditorMessages.getString("SourceAttachmentForm.error.title"); //$NON-NLS-1$
+					String message= JavaEditorMessages.getString("SourceAttachmentForm.error.message"); //$NON-NLS-1$
+					ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);				
+				}
 			}
 		}
 
