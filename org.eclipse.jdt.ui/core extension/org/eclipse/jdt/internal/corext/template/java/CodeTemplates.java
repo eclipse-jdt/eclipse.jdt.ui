@@ -57,12 +57,12 @@ public class CodeTemplates extends org.eclipse.jdt.internal.corext.template.java
 	private void create() {
 		
 		try {
-			addFromStream(getDefaultsAsStream(), false, true, fgResourceBundle);
+//			addFromStream(getDefaultsAsStream(), false, true, fgResourceBundle);
 			File templateFile= getTemplateFile();
 			if (templateFile.exists()) {
 				addFromFile(templateFile, false, fgResourceBundle);
 			}
-			saveToFile(templateFile);
+//			saveToFile(templateFile);
 
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
