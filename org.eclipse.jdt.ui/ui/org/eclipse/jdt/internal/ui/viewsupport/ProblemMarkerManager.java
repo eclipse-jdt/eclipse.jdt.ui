@@ -31,8 +31,6 @@ import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
 import org.eclipse.jface.util.ListenerList;
 
-import org.eclipse.jdt.core.JavaCore;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitAnnotationModelEvent;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -58,14 +56,9 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 		public boolean visit(IResourceDelta delta) throws CoreException {
 			IResource res= delta.getResource();
 			if (res instanceof IProject && delta.getKind() == IResourceDelta.CHANGED) {
-				try {
-					IProject project= (IProject) res;
-					if (!project.isAccessible() || !project.hasNature(JavaCore.NATURE_ID)) {
-						// only track open Java projects
-						return false;
-					}
-				} catch (CoreException e) {
-					JavaPlugin.log(e);
+				IProject project= (IProject) res;
+				if (!project.isAccessible()) {
+					// only track open Java projects
 					return false;
 				}
 			}
