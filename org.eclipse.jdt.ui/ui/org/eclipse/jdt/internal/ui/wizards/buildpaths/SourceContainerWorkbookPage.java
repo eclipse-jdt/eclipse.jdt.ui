@@ -515,9 +515,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			}
 		}
 	}
-	
-	
-			
 			
 	private CPListElement[] openSourceContainerDialog(CPListElement existing) {
 		
