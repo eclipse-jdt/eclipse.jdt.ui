@@ -20,7 +20,7 @@ public class JavaTaskListAdapter implements ITaskListResourceAdapter {
 		try {
 			IResource resource= java.getCorrespondingResource();
 			if (resource != null)
-				return resource;
+				return resource; 
 
 			ICompilationUnit cu= (ICompilationUnit) JavaModelUtil.findElementOfKind(
 												java, IJavaElement.COMPILATION_UNIT);
@@ -32,8 +32,6 @@ public class JavaTaskListAdapter implements ITaskListResourceAdapter {
 		} catch (JavaModelException e) {
 		}
 		return null;
-	}
-
-
+	 }
 }
 
