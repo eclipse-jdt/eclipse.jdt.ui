@@ -25,8 +25,9 @@ public class ProfileVersioner {
 	public static final int VERSION_1= 1; // < 20040113 (incl. M6)
 	public static final int VERSION_2= 2; // before renaming almost all
 	public static final int VERSION_3= 3; // after renaming almost all
+	public static final int VERSION_4= 4; 
 	
-	public static final int CURRENT_VERSION= 3;
+	public static final int CURRENT_VERSION= 4;
 	
 	public static void updateAndComplete(CustomProfile profile) {
 		final Map oldSettings= profile.getSettings();
@@ -40,6 +41,8 @@ public class ProfileVersioner {
 		case VERSION_2:
 			version2to3(oldSettings);
 			
+		case VERSION_3:
+			version3to4(oldSettings);
 		default:
 			for (final Iterator iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
 				final String key= (String)iter.next();
@@ -454,6 +457,26 @@ public class ProfileVersioner {
 			DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_SWITCH);
 		
 	}
+	
+	
+	private static void version3to4(Map oldSettings) {
+		checkAndReplace(oldSettings, 
+			"org.eclipse.jdt.core.align_type_members_on_columns", //$NON-NLS-1$
+			DefaultCodeFormatterConstants.FORMATTER_ALIGN_TYPE_MEMBERS_ON_COLUMNS);
+		
+		checkAndReplace(oldSettings, 
+			"org.eclipse.jdt.core.formatter.insert_space_after_comma__in_superinterfaces", //$NON-NLS-1$
+			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_SUPERINTERFACES);
+
+		checkAndReplace(oldSettings,
+			"org.eclipse.jdt.core.formatter.insert_space_before_comma__in_superinterfaces", //$NON-NLS-1$
+			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_SUPERINTERFACES);
+
+		checkAndReplace(oldSettings, 
+			"org.eclipse.jdt.core.formatter.insert_space_between_empty_arguments_in_method_invocation", //$NON-NLS-1$
+			DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_INVOCATION);
+	}
+	
 	
 	/* old format constant values */
 

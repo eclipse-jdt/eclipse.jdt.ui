@@ -12,6 +12,9 @@ package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import java.util.Map;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
@@ -45,6 +48,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
@@ -182,7 +186,13 @@ public class JavaPreview {
 				final IContentFormatterExtension2 extension = (IContentFormatterExtension2) formatter;
 				context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, fWorkingValues);
 				context.setProperty(FormattingContextProperties.CONTEXT_DOCUMENT, Boolean.valueOf(true));
-				extension.format(fPreviewDocument, context);
+				try {
+					extension.format(fPreviewDocument, context);
+				} catch (Exception e) {
+					final IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, 
+						FormatterMessages.getString("JavaPreview.formatter_exception"), e); //$NON-NLS-1$
+					JavaPlugin.log(status);
+				}
 			} else
 				formatter.format(fPreviewDocument, new Region(0, fPreviewDocument.getLength()));
 		} finally {

@@ -24,7 +24,10 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 	private final static String fPreview=
 	createPreviewHeader(FormatterMessages.getString("BlankLinesTabPage.preview.header")) + //$NON-NLS-1$
 	"package foo.bar.baz;" + //$NON-NLS-1$
-	"import java.util.List;" + //$NON-NLS-1$
+	"import java.util.List;\n" + //$NON-NLS-1$
+	"// Between here...\n" + //$NON-NLS-1$
+	"\n\n\n\n\n\n\n\n\n\n" + //$NON-NLS-1$
+	"// ...and here are 10 blank lines\n" + //$NON-NLS-1$
 	"import java.util.Vector;" + //$NON-NLS-1$
 	"public class Another {}" + //$NON-NLS-1$
 	"public class Example {" + //$NON-NLS-1$
@@ -90,8 +93,6 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_method_decls", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD); //$NON-NLS-1$
 		createBlankLineTextField(group, "BlankLinesTabPage.class.option.at_beginning_of_method_body", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AT_BEGINNING_OF_METHOD_BODY); //$NON-NLS-1$
 
-		createLabel(NUM_COLUMNS, composite,""); //$NON-NLS-1$
-		
 		group= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("BlankLinesTabPage.blank_lines.group.title")); //$NON-NLS-1$
 		createBlankLineTextField(group, "BlankLinesTabPage.blank_lines.option.empty_lines_to_preserve", DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE); //$NON-NLS-1$
 		return composite;

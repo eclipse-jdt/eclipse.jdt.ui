@@ -19,6 +19,9 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -121,16 +124,34 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 				fOptionsGroup.setText(""); //$NON-NLS-1$
 			}
 			fJavaPreview.setPreviewText(category.previewText);
+
+
+
 			doUpdatePreview();
 			
-			final boolean enabled= fWorkingValues.containsKey(category.key);
+			final String value= (String)fWorkingValues.get(category.key);
+			final boolean enabled= value != null;
 			fOptionsGroup.setVisible(enabled);
+			
 			if (enabled) {
-				fForceSplit.setSelection(DefaultCodeFormatterConstants.getForceWrapping(fWorkingValues, category.key));
-				fIndentStyleCombo.setText(INDENT_NAMES[DefaultCodeFormatterConstants.getIndentStyle(fWorkingValues, category.key)]);
-				final int splitStyle= DefaultCodeFormatterConstants.getWrappingStyle(fWorkingValues, category.key);
-				fSplitStyleCombo.setText(SPLIT_NAMES[splitStyle]);
-				updateControls(splitStyle);
+				
+				int wrappingStyle;
+				int indentStyle;
+				boolean forceWrapping;
+
+				try {
+					forceWrapping= DefaultCodeFormatterConstants.getForceWrapping(value);
+					indentStyle= DefaultCodeFormatterConstants.getIndentStyle(value);
+					wrappingStyle= DefaultCodeFormatterConstants.getWrappingStyle(value);
+				} catch (IllegalArgumentException e) {
+					forceWrapping= false;
+					indentStyle= DefaultCodeFormatterConstants.INDENT_DEFAULT;
+					wrappingStyle= DefaultCodeFormatterConstants.WRAP_NO_SPLIT;
+				}
+				fForceSplit.setSelection(forceWrapping);
+				fIndentStyleCombo.setText(INDENT_NAMES[indentStyle]);
+				fWrappingStyleCombo.setText(WRAPPING_NAMES[wrappingStyle]);
+				updateControls(wrappingStyle);
 			}
 		}
 		
@@ -156,7 +177,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	};
 	
 	
-	protected final static String[] SPLIT_NAMES = { 
+	protected final static String[] WRAPPING_NAMES = { 
 	    FormatterMessages.getString("LineWrappingTabPage.splitting.do_not_split"), //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.splitting.wrap_when_necessary"), // COMPACT_SPLIT //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.splitting.always_wrap_first_others_when_necessary"), // COMPACT_FIRST_BREAK_SPLIT  //$NON-NLS-1$
@@ -290,7 +311,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	protected final IDialogSettings fDialogSettings;	
 	
 	protected TreeViewer fCategoriesViewer;
-	protected Combo fSplitStyleCombo;
+	protected Combo fWrappingStyleCombo;
 	protected Label fIndentStyleLabel;
 	protected Combo fIndentStyleCombo;
 	protected Button fForceSplit;
@@ -440,9 +461,9 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		createLabel(numColumns, fOptionsGroup, FormatterMessages.getString("LineWrappingTabPage.wrapping_policy.label.text")); //$NON-NLS-1$
 	
 		// combo SplitStyleCombo
-		fSplitStyleCombo= new Combo(fOptionsGroup, SWT.SINGLE | SWT.READ_ONLY);
-		fSplitStyleCombo.setItems(SPLIT_NAMES);
-		fSplitStyleCombo.setLayoutData(createGridData(numColumns ));
+		fWrappingStyleCombo= new Combo(fOptionsGroup, SWT.SINGLE | SWT.READ_ONLY);
+		fWrappingStyleCombo.setItems(WRAPPING_NAMES);
+		fWrappingStyleCombo.setLayoutData(createGridData(numColumns ));
 		
 		// label "Select indentation style:"
 		fIndentStyleLabel= createLabel(numColumns, fOptionsGroup, FormatterMessages.getString("LineWrappingTabPage.indentation_policy.label.text")); //$NON-NLS-1$
@@ -504,16 +525,16 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 				indentStyleChanged(((Combo)e.widget).getSelectionIndex());
 			}
 		});
-		fSplitStyleCombo.addSelectionListener( new SelectionAdapter() {
+		fWrappingStyleCombo.addSelectionListener( new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				splitStyleChanged(((Combo)e.widget).getSelectionIndex());
+				wrappingStyleChanged(((Combo)e.widget).getSelectionIndex());
 			}
 		});
 		
 		fCategoryListener.restoreSelection();
 		
 		fDefaultFocusManager.add(fCategoriesViewer.getControl());
-		fDefaultFocusManager.add(fSplitStyleCombo);
+		fDefaultFocusManager.add(fWrappingStyleCombo);
 		fDefaultFocusManager.add(fIndentStyleCombo);
 		fDefaultFocusManager.add(fForceSplit);
 	}
@@ -527,23 +548,53 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 
 	
 	protected void forceSplitChanged(boolean forceSplit) {
-		DefaultCodeFormatterConstants.setForceWrapping(fWorkingValues, fCurrentKey, forceSplit);
-		doUpdatePreview();
+		String value;
+		try {
+			value= (String)fWorkingValues.get(fCurrentKey);
+			value= DefaultCodeFormatterConstants.setForceWrapping(value, forceSplit);
+			fWorkingValues.put(fCurrentKey, value); 
+		} catch (Exception e) {
+			fWorkingValues.put(fCurrentKey, DefaultCodeFormatterConstants.createAlignmentValue(forceSplit, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, DefaultCodeFormatterConstants.INDENT_DEFAULT));
+			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, 
+				FormatterMessages.getFormattedString("LineWrappingTabPage.error.invalid_value", fCurrentKey), e)); //$NON-NLS-1$
+		} finally {
+			doUpdatePreview();
+		}
 	}
 	
-	protected void splitStyleChanged(int splitStyle) {
-	    DefaultCodeFormatterConstants.setWrappingStyle(fWorkingValues, fCurrentKey, splitStyle);
-		updateControls(splitStyle);
-		doUpdatePreview();
+	protected void wrappingStyleChanged(int wrappingStyle) {
+		String value;
+		try {
+			value= (String)fWorkingValues.get(fCurrentKey);
+			value= DefaultCodeFormatterConstants.setWrappingStyle(value, wrappingStyle);
+			fWorkingValues.put(fCurrentKey, value);
+		} catch (Exception e) {
+			fWorkingValues.put(fCurrentKey, DefaultCodeFormatterConstants.createAlignmentValue(false, wrappingStyle, DefaultCodeFormatterConstants.INDENT_DEFAULT));
+			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, 
+				FormatterMessages.getFormattedString("LineWrappingTabPage.error.invalid_value", fCurrentKey), e)); //$NON-NLS-1$
+		} finally {
+			updateControls(wrappingStyle);
+			doUpdatePreview();
+		}
 	}
 	
 	protected void indentStyleChanged(int indentStyle) {
-		DefaultCodeFormatterConstants.setIndentStyle(fWorkingValues, fCurrentKey, indentStyle);
-		doUpdatePreview();
+		String value;
+		try {
+			value= (String)fWorkingValues.get(fCurrentKey);
+			value= DefaultCodeFormatterConstants.setIndentStyle(value, indentStyle);
+			fWorkingValues.put(fCurrentKey, value);
+		} catch (Exception e) {
+			fWorkingValues.put(fCurrentKey, DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, indentStyle));
+			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, 
+				FormatterMessages.getFormattedString("LineWrappingTabPage.error.invalid_value", fCurrentKey), e)); //$NON-NLS-1$
+		} finally {
+			doUpdatePreview();
+		}
 	}
 	
-	protected void updateControls(int splitStyle) {
-	    boolean doSplit= splitStyle != DefaultCodeFormatterConstants.WRAP_NO_SPLIT;
+	protected void updateControls(int wrappingStyle) {
+	    boolean doSplit= wrappingStyle != DefaultCodeFormatterConstants.WRAP_NO_SPLIT;
 	    fIndentStyleLabel.setEnabled(doSplit);
 	    fIndentStyleCombo.setEnabled(doSplit);
 	    fForceSplit.setEnabled(doSplit);

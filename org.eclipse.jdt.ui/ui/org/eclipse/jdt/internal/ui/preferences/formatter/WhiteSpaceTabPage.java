@@ -124,7 +124,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 				fOptionsViewer.setInput(selected.options);
 				
 				for (int i = 0; i < selected.options.length; i++) {
-					final boolean checked= fWorkingValues.get(selected.options[i].key).equals(JavaCore.INSERT);
+					final boolean checked= JavaCore.INSERT.equals(fWorkingValues.get(selected.options[i].key));
 					fOptionsViewer.setChecked(selected.options[i], checked);
 				}
 			} else {
