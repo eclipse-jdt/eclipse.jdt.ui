@@ -12,6 +12,7 @@ import org.eclipse.jface.text.information.IInformationProvider;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -86,13 +87,16 @@ public class JavaInformationProvider implements IInformationProvider {
 		IWorkbenchPage page= window.getActivePage();
 		if (page != null) {
 			
-			String newPerspective= page.getPerspective().getId();
-			
-			if (fCurrentPerspective == null || fCurrentPerspective != newPerspective) {
-				fCurrentPerspective= newPerspective;
-	
-				fImplementation= new JavaTypeHover();
-				fImplementation.setEditor(fEditor);
+			IPerspectiveDescriptor perspective= page.getPerspective();
+			if (perspective != null)  {
+				String perspectiveId= perspective.getId();
+				
+				if (fCurrentPerspective == null || fCurrentPerspective != perspectiveId) {
+					fCurrentPerspective= perspectiveId;
+		
+					fImplementation= new JavaTypeHover();
+					fImplementation.setEditor(fEditor);
+				}
 			}
 		}
 	}
