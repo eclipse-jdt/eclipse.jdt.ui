@@ -11,6 +11,11 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.Performance;
+
+import org.eclipse.jface.text.BadLocationException;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -28,5 +33,10 @@ public class TextNonInitialTypingTest extends NonInitialTypingTest {
 
 	protected String getEditorId() {
 		return "org.eclipse.ui.DefaultTextEditor";
+	}
+	
+	public void testTypeAMethod() throws BadLocationException {
+		Performance.getDefault().tagAsGlobalSummary(fMeter, "Typing speed in text editor", Dimension.ELAPSED_PROCESS); 
+		super.testTypeAMethod();
 	}
 }

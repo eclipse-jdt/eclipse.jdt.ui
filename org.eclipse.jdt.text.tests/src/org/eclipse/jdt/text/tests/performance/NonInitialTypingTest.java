@@ -43,7 +43,7 @@ public abstract class NonInitialTypingTest extends TestCase {
 
 	private ITextEditor fEditor;
 	
-	private PerformanceMeter fMeter;
+	protected PerformanceMeter fMeter;
 
 	private KeyboardProbe fKeyboardProbe;
 
