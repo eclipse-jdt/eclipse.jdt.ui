@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.text.edits.TextEditGroup;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -382,7 +381,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				if (binding != null && !map.containsKey(binding.getKey()))
 					map.put(binding.getKey(), binding);
 			}
-			if (!Flags.isStatic(type.getFlags()) && type.getDeclaringType() != null)
+			if (/*!Flags.isStatic(type.getFlags()) && */type.getDeclaringType() != null)
 				addTypeParameters(declaring, type.getDeclaringType(), map);
 		}
 	}
@@ -1074,7 +1073,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		try {
 			monitor.beginTask("", 2); //$NON-NLS-1$
 			final String separator= getLineSeperator();
-			final String block= getAlignedSourceBlock(fNewSourceOfInputType);
+			final String block= getAlignedSourceBlock(unit, fNewSourceOfInputType);
 			String content= CodeGeneration.getCompilationUnitContent(unit, null, block, separator);
 			if (content == null || block.startsWith("/*") || block.startsWith("//")) {  //$NON-NLS-1$//$NON-NLS-2$
 				final StringBuffer buffer= new StringBuffer();
@@ -1124,10 +1123,10 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return false;
 	}
 
-	private String getAlignedSourceBlock(final String block) {
+	private String getAlignedSourceBlock(final ICompilationUnit unit, final String block) {
 		Assert.isNotNull(block);
 		final String[] lines= Strings.convertIntoLines(block);
-		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
+		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(unit.getJavaProject()), false);
 		return Strings.concatenate(lines, getLineSeperator());
 	}
 
