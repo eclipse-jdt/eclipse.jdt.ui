@@ -52,7 +52,7 @@ public class WordCorrectionProposal implements IJavaCompletionProposal, IHtmlTag
 
 				if (string.charAt(offset) == HTML_ENTITY_CHARACTERS[index]) {
 
-					buffer.replace(offset, offset + 1, string.valueOf(HTML_ENTITY_CODES[index]));
+					buffer.replace(offset, offset + 1, String.valueOf(HTML_ENTITY_CODES[index]));
 					break;
 				}
 			}
