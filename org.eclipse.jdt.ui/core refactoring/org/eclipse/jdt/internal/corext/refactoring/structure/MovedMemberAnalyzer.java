@@ -110,7 +110,9 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 				rewrite(node, fSource);
 			
 		} else if (isTargetAccess(binding)) {
-			fCuRewrite.getOldRewrite().remove(node.getExpression(), null);
+			if (node.getExpression() != null) {
+				fCuRewrite.getOldRewrite().remove(node.getExpression(), null);
+			}
 		}	
 		return super.visit(node);
 	}
