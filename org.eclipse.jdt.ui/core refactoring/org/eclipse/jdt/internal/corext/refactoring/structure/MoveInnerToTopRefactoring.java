@@ -698,7 +698,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		for (int index= 0; index < simpleNames.length; index++) {
 			simpleName= simpleNames[index];
 			binding= simpleName.resolveBinding();
-			if (binding != null && binding instanceof IVariableBinding) {
+			if (binding != null && binding instanceof IVariableBinding && !(simpleName.getParent() instanceof FieldAccess)) {
 				variable= (IVariableBinding) binding;
 				modifyFieldVisibility(targetRewrite, handledFields, variable, status);
 				final FieldAccess access= simpleName.getAST().newFieldAccess();
@@ -1341,7 +1341,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			}
 			return super.visit(node);
 		}
-		
+
 		public boolean visit(FieldAccess node) {
 			final ITypeBinding declaring= MoveInnerToTopRefactoring.getDeclaringTypeBinding(node);
 			if (declaring != null) { 
