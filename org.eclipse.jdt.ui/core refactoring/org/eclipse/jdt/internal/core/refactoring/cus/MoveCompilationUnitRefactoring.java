@@ -597,7 +597,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		String lineDelimiter= org.eclipse.jdt.internal.ui.codemanipulation.StubUtility.getLineDelimiterUsed(cu);
 		String newImportText= lineDelimiter + "import " + pack.getElementName() + ".*;" + lineDelimiter; //$NON-NLS-2$ //$NON-NLS-1$
 		// End 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
-		change.addInsert(RefactoringCoreMessages.getString("MoveCompilationUnitRefactoring.add_import") + pack.getElementName(), start + 1, newImportText); //$NON-NLS-1$
+		change.addInsert(RefactoringCoreMessages.getFormattedString("MoveCompilationUnitRefactoring.add_import", pack.getElementName()), start + 1, newImportText); //$NON-NLS-1$
 		return true;
 	}
 	

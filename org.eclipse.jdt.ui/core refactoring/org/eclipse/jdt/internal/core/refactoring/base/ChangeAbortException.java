@@ -49,7 +49,7 @@ public class ChangeAbortException extends RuntimeException {
 			super.printStackTrace(output);
 			
 			if (fThrowable != null) {
-				output.print(RefactoringCoreMessages.getString("ChangeAbortException.wrapped") + " ChangeAbortException: "); //$NON-NLS-2$ //$NON-NLS-1$
+				output.print(RefactoringCoreMessages.getFormattedString("ChangeAbortException.wrapped", "ChangeAbortException: ")); //$NON-NLS-2$ //$NON-NLS-1$
 				fThrowable.printStackTrace(output);
 			}
 		}
@@ -65,7 +65,7 @@ public class ChangeAbortException extends RuntimeException {
 			super.printStackTrace(output);
 			
 			if (fThrowable != null) {
-				output.print(RefactoringCoreMessages.getString("ChangeAbortException.wrapped") + " ChangeAbortException: "); //$NON-NLS-2$ //$NON-NLS-1$
+				output.print(RefactoringCoreMessages.getFormattedString("ChangeAbortException.wrapped", "ChangeAbortException: ")); //$NON-NLS-2$ //$NON-NLS-1$
 				fThrowable.printStackTrace(output);
 			}
 		}

@@ -127,13 +127,13 @@ public abstract class Refactoring implements IRefactoring {
 	protected static RefactoringStatus checkAvailability(IJavaElement javaElement) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		if (! javaElement.exists())
-			result.addFatalError(javaElement.getElementName() + RefactoringCoreMessages.getString("Refactoring.not_in_model")); //$NON-NLS-1$
+			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.not_in_model", javaElement.getElementName())); //$NON-NLS-1$
 		if (javaElement.isReadOnly())
-			result.addFatalError(javaElement.getElementName() + RefactoringCoreMessages.getString("Refactoring.read_only"));	 //$NON-NLS-1$
+			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.read_only", javaElement.getElementName()));	 //$NON-NLS-1$
 		if (! javaElement.isStructureKnown())
-			result.addFatalError(javaElement.getElementName() + RefactoringCoreMessages.getString("Refactoring.unknown_structure"));	 //$NON-NLS-1$
+			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.unknown_structure", javaElement.getElementName()));	 //$NON-NLS-1$
 		if (javaElement instanceof IMember && ((IMember)javaElement).isBinary())
-			result.addFatalError(javaElement.getElementName() + RefactoringCoreMessages.getString("Refactoring.binary")); //$NON-NLS-1$
+			result.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.binary", javaElement.getElementName())); //$NON-NLS-1$
 		return result;
 	}
 	

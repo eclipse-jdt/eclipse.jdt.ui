@@ -151,7 +151,7 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 		for (int i= 0; i < sorted.length; i++){
 			if (sorted[i].equals(last)){
 				RefactoringStatus result= new RefactoringStatus();
-				result.addError(RefactoringCoreMessages.getString("RenameParametersRefactoring.duplicate_name") + last); //$NON-NLS-1$
+				result.addError(RefactoringCoreMessages.getFormattedString("RenameParametersRefactoring.duplicate_name", last)); //$NON-NLS-1$
 				return result;
 			}
 			last= sorted[i];

@@ -51,7 +51,7 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 			//XXX: should log the exception
 			String msg= e.getMessage() == null ? "": e.getMessage(); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
-			result.addFatalError(RefactoringMessages.getString("RenameRefactoringWizard.internal_error") + msg); //$NON-NLS-1$
+			result.addFatalError(RefactoringMessages.getFormattedString("RenameRefactoringWizard.internal_error", msg)); //$NON-NLS-1$
 			return result;
 		}	
 	}

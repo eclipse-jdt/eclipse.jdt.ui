@@ -467,7 +467,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			List l= (List)iter.next();
 			IResource resource= ((SearchResult)l.get(0)).getResource();
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(resource);
-			ITextBufferChange change= fTextBufferChangeCreator.create(RefactoringCoreMessages.getString("RenameTypeRefactoring.update_references_to") + getType().getFullyQualifiedName(), cu ); //$NON-NLS-1$
+			ITextBufferChange change= fTextBufferChangeCreator.create(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.update_references_to", getType().getFullyQualifiedName()), cu ); //$NON-NLS-1$
 			for (Iterator subIter= l.iterator(); subIter.hasNext();){
 				change.addSimpleTextChange(createTextChange((SearchResult)subIter.next()));
 			}

@@ -281,7 +281,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	private void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
 		for (Iterator iter= fOccurrences.iterator(); iter.hasNext();){
 			List l= (List)iter.next();
-			ITextBufferChange change= fTextBufferChangeCreator.create(RefactoringCoreMessages.getString("RenamePackageRefactoring.update_references_to") + fPackage.getElementName(), (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource())); //$NON-NLS-1$
+			ITextBufferChange change= fTextBufferChangeCreator.create(RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.update_references_to", fPackage.getElementName()), (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource())); //$NON-NLS-1$
 			for (Iterator subIter= l.iterator(); subIter.hasNext();){
 				change.addSimpleTextChange(createTextChange((SearchResult)subIter.next()));
 			}

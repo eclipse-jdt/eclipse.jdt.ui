@@ -217,7 +217,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		final int insertPosition= methodEnd + 1;
 		
 		// Inserting the new method
-		result.addSimpleTextChange(new SimpleReplaceTextChange(RefactoringCoreMessages.getString("ExtractMethodRefactoring.add_method") + fMethodName, insertPosition) { //$NON-NLS-1$
+		result.addSimpleTextChange(new SimpleReplaceTextChange(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName), insertPosition) { //$NON-NLS-1$
 			public SimpleTextChange[] adjust(ITextBuffer buffer) {
 				int startLine= buffer.getLineOfOffset(methodStart);
 				int endLine= buffer.getLineOfOffset(methodEnd);
@@ -229,7 +229,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		});
 		
 		// Replacing the old statements with the new method call.
-		result.addSimpleTextChange(new SimpleReplaceTextChange(RefactoringCoreMessages.getString("ExtractMethodRefactoring.substitute_with_call") + fMethodName, fSelectionStart, fSelectionLength, null) { //$NON-NLS-1$
+		result.addSimpleTextChange(new SimpleReplaceTextChange(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName), fSelectionStart, fSelectionLength, null) { //$NON-NLS-1$
 			public SimpleTextChange[] adjust(ITextBuffer buffer) {
 				String delimiter= buffer.getLineDelimiter(buffer.getLineOfOffset(methodStart));
 				setText(computeCall(buffer, delimiter));

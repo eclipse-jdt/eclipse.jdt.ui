@@ -40,7 +40,7 @@ public abstract class UndoManagerAction extends JavaUIAction {
 		if (fPreflightStatus.hasError()) {
 			String name= getName();
 			MultiStatus status = createMultiStatus(name);
-			String message= name + RefactoringMessages.getString("UndoManagerAction.cannot_be_executed"); //$NON-NLS-1$
+			String message= RefactoringMessages.getFormattedString("UndoManagerAction.cannot_be_executed", name); //$NON-NLS-1$
 			ErrorDialog error= new ErrorDialog(parent, name, message, status, IStatus.ERROR) {
 				public void create() {
 					super.create();

@@ -255,7 +255,7 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 		List grouped= getOccurrences(null);
 		for (Iterator iter= grouped.iterator(); iter.hasNext();){
 			List l= (List)iter.next();
-			ITextBufferChange change= getChangeCreator().create(RefactoringCoreMessages.getString("RenameFieldRefactoring.update_references_to") + getField().getElementName(), (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource())); //$NON-NLS-1$
+			ITextBufferChange change= getChangeCreator().create(RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.update_references_to", getField().getElementName()), (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource())); //$NON-NLS-1$
 			for (Iterator subIter= l.iterator(); subIter.hasNext();){
 				change.addSimpleTextChange(createTextChange((SearchResult)subIter.next()));
 			}

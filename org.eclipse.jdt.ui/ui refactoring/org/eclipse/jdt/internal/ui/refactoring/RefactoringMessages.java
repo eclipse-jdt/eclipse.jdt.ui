@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.text.MessageFormat;
 
 public class RefactoringMessages {
 
@@ -22,5 +23,13 @@ public class RefactoringMessages {
 		} catch (MissingResourceException e) {
 			return "!" + key + "!";//$NON-NLS-2$ //$NON-NLS-1$
 		}
+	}
+	
+	public static String getFormattedString(String key, String arg) {
+		try{
+			return MessageFormat.format(fgResourceBundle.getString(key), new String[] { arg });
+		} catch (MissingResourceException e) {
+			return "!" + key + "!";//$NON-NLS-2$ //$NON-NLS-1$
+		}	
 	}
 }

@@ -362,14 +362,14 @@ public class Checks {
 			List searchResults= (List)iter.next();
 			IResource resource= ((SearchResult)searchResults.get(0)).getResource();
 			if (unsavedFiles.contains(resource)){
-				result.addError("\"" + resource.getFullPath() + RefactoringCoreMessages.getString("Checks.not_saved")); //$NON-NLS-2$ //$NON-NLS-1$
+				result.addError(RefactoringCoreMessages.getFormattedString("Checks.not_saved", resource.getFullPath().toString())); //$NON-NLS-1$
 				iter.remove();
 				continue; //removed, go to the next one
 			}
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(resource);
 			if (! cu.isStructureKnown()){
 				String path= AbstractRefactoringASTAnalyzer.getFullPath(cu);
-				result.addError("\"" + path + RefactoringCoreMessages.getString("Checks.cannot_be_parsed")); //$NON-NLS-2$ //$NON-NLS-1$
+				result.addError(RefactoringCoreMessages.getFormattedString("Checks.cannot_be_parsed", path)); //$NON-NLS-1$
 				iter.remove();
 			}	
 		}

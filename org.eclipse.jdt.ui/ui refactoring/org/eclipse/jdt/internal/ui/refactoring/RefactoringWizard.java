@@ -5,7 +5,8 @@
 
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.lang.reflect.InvocationTargetException;import org.eclipse.jface.operation.IRunnableContext;import org.eclipse.jface.util.Assert;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.jface.wizard.Wizard;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.internal.core.refactoring.base.ChangeAbortException;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;import org.eclipse.jdt.internal.ui.refactoring.changes.ChangeExceptionHandler;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import java.lang.reflect.InvocationTargetException;
+import org.eclipse.jface.operation.IRunnableContext;import org.eclipse.jface.util.Assert;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.jface.wizard.Wizard;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.internal.core.refactoring.base.ChangeAbortException;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;import org.eclipse.jdt.internal.ui.refactoring.changes.ChangeExceptionHandler;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class RefactoringWizard extends Wizard {
 
 	private String fPageTitle;
@@ -242,7 +243,12 @@ public class RefactoringWizard extends Wizard {
 			RefactoringStatus status= null;
 			if (exception != null) {
 				status= new RefactoringStatus();
-				status.addFatalError(exception.getMessage() != null ? exception.getMessage() + RefactoringMessages.getString("RefactoringWizard.see_log") : RefactoringMessages.getString("RefactoringWizard.Internal_error")); //$NON-NLS-2$ //$NON-NLS-1$
+				String msg= exception.getMessage();
+				if (msg != null) {
+					status.addFatalError(RefactoringMessages.getFormattedString("RefactoringWizard.see_log", msg)); //$NON-NLS-1$
+				} else {
+					status.addFatalError(RefactoringMessages.getString("RefactoringWizard.Internal_error")); //$NON-NLS-1$
+				}
 				JavaPlugin.log(exception);
 			} else {
 				status= op.getStatus();

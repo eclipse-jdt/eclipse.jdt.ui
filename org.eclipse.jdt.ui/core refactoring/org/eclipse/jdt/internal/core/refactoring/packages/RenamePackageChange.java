@@ -59,7 +59,7 @@ public class RenamePackageChange extends AbstractRenameChange {
 					
 				pm.beginTask("", units.length); //$NON-NLS-1$
 				for (int i= 0; i < units.length; i++) {
-					pm.subTask(RefactoringCoreMessages.getString("RenamePackageChange.checking_change") + element.getElementName()); //$NON-NLS-1$
+					pm.subTask(RefactoringCoreMessages.getFormattedString("RenamePackageChange.checking_change", element.getElementName())); //$NON-NLS-1$
 					checkIfResourceIsUnsaved(units[i], result, context);
 					pm.worked(1);
 				}

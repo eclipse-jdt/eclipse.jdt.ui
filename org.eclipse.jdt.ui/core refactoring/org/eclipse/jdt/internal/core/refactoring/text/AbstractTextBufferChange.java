@@ -145,7 +145,7 @@ public abstract class AbstractTextBufferChange extends Change implements ITextBu
 	 */
 	public String getName(){
 		if (fIsUndoChange)
-			return RefactoringCoreMessages.getString("AbstractTextBufferChange.undo") + fName; //$NON-NLS-1$
+			return RefactoringCoreMessages.getFormattedString("AbstractTextBufferChange.undo", fName); //$NON-NLS-1$
 		else	
 			return fName;
 	}

@@ -150,9 +150,9 @@ public abstract class SimpleTextChange extends Change implements ITextChange {
 	 * Method declared in IChange.
 	 */
 	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
-		Assert.isTrue(false, "SimpleTextChange"  //$NON-NLS-1$
-		+ RefactoringCoreMessages.getString("SimpleTextChange.assert.only_from")  //$NON-NLS-1$
-		+ " AbstractTextBufferChange"); //$NON-NLS-1$
+		Assert.isTrue(false,
+			RefactoringCoreMessages.getFormattedString("SimpleTextChange.assert.only_from",  //$NON-NLS-1$
+				new String[] {"SimpleTextChange", "AbstractTextBufferChange"})); //$NON-NLS-1$ //$NON-NLS-2$
 		return null;
 	}
 	
@@ -160,9 +160,9 @@ public abstract class SimpleTextChange extends Change implements ITextChange {
 	 * Method declared in IChange.
 	 */
 	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException {
-		Assert.isTrue(false, "SimpleTextChange"  //$NON-NLS-1$
-		+ RefactoringCoreMessages.getString("SimpleTextChange.assert.only_from")  //$NON-NLS-1$
-		+ " AbstractTextBufferChange"); //$NON-NLS-1$
+		Assert.isTrue(false,
+			RefactoringCoreMessages.getFormattedString("SimpleTextChange.assert.only_from",  //$NON-NLS-1$
+				new String[] {"SimpleTextChange", "AbstractTextBufferChange"})); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 		
@@ -170,18 +170,18 @@ public abstract class SimpleTextChange extends Change implements ITextChange {
 	 * Method declared in IChange.
 	 */
 	public void performed() {
-		Assert.isTrue(false, "SimpleTextChange"  //$NON-NLS-1$
-		+ RefactoringCoreMessages.getString("SimpleTextChange.assert.only_from")  //$NON-NLS-1$
-		+ " AbstractTextBufferChange"); //$NON-NLS-1$
+		Assert.isTrue(false,
+			RefactoringCoreMessages.getFormattedString("SimpleTextChange.assert.only_from",  //$NON-NLS-1$
+				new String[] {"SimpleTextChange", "AbstractTextBufferChange"})); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/* (Non-Javadoc)
 	 * Method declared in IChange.
 	 */
 	public IChange getUndoChange() {
-		Assert.isTrue(false, "SimpleTextChange"  //$NON-NLS-1$
-		+ RefactoringCoreMessages.getString("SimpleTextChange.assert.only_from")  //$NON-NLS-1$
-		+ " AbstractTextBufferChange"); //$NON-NLS-1$
+		Assert.isTrue(false,
+			RefactoringCoreMessages.getFormattedString("SimpleTextChange.assert.only_from",  //$NON-NLS-1$
+				new String[] {"SimpleTextChange", "AbstractTextBufferChange"})); //$NON-NLS-1$ //$NON-NLS-2$
 		return null;
 	}	
 }
