@@ -714,11 +714,72 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return false;
 	}
 
-	/* (non-Javadoc)
+	/** (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ArrayCreation)
 	 */
 	public boolean visit(ArrayCreation node) {
-		return super.visit(node);
+		ArrayType arrayType= node.getType();
+		int nOldBrackets= arrayType.getDimensions(); // number of total brackets
+		int nNewBrackets= nOldBrackets;
+		if (isReplaced(arrayType)) { // changed arraytype can have different dimension or type name
+			ArrayType replacingType= (ArrayType) getReplacingNode(arrayType);
+			Type newElementType= replacingType.getElementType();
+			Type oldElementType= arrayType.getElementType();
+			if (!newElementType.equals(oldElementType)) {
+				replaceNode(oldElementType, newElementType);
+			}
+			nNewBrackets= replacingType.getDimensions();
+		}
+		List dimExpressions= node.dimensions(); // dimension node with expressions
+		try {
+			// offset on first opening brace
+			int offset= ASTResolving.getPositionBefore(getScanner(arrayType.getStartPosition()), ITerminalSymbols.TokenNameLBRACKET);
+			for (int i= 0; i < dimExpressions.size(); i++) {
+				ASTNode elem = (ASTNode) dimExpressions.get(i);
+				if (isInserted(elem)) { // insert new dimension
+					addInsert(offset, "[", "Left bracket");
+					addGenerated(offset, 0, elem, 0, false);
+					addInsert(offset, "]", "Right bracket");
+					nNewBrackets--;
+				} else {
+					int elemEnd= elem.getStartPosition() + elem.getLength();
+					int endPos= ASTResolving.getPositionAfter(getScanner(elemEnd), ITerminalSymbols.TokenNameRBRACKET);
+					if (isReplaced(elem)) {
+						ASTNode replacing= getReplacingNode(elem);
+						if (replacing == null) { // remove includes open and closing brace
+							addDelete(offset, endPos - offset, "Remove dimension");
+						} else {
+							replaceNode(elem, replacing);
+							nNewBrackets--;
+						}
+					} else {
+						elem.accept(this);
+						nNewBrackets--;
+					}
+					offset= endPos;
+					nOldBrackets--;
+				}
+			}
+			if (nOldBrackets < nNewBrackets) {
+				for (int i= nOldBrackets; i < nNewBrackets; i++) {
+					addInsert(offset, "[]", "Empty bracket");
+				}
+			} else if (nOldBrackets > nNewBrackets) {
+				IScanner scanner= getScanner(offset);
+				for (int i= nNewBrackets; i < nOldBrackets; i++) {
+					ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameRBRACKET);
+				}
+				addDelete(offset, scanner.getCurrentTokenEndPosition() + 1 - offset, "Remove brackets");
+			}
+			
+			ArrayInitializer initializer= node.getInitializer();
+			if (initializer != null) {
+				rewriteNode(initializer, node.getStartPosition() + node.getLength());
+			}
+		} catch (InvalidInputException e) {
+			JavaPlugin.log(e);
+		}		
+		return false;
 	}
 
 	/* (non-Javadoc)

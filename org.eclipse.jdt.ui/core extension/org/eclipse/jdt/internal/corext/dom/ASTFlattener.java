@@ -153,7 +153,9 @@ import org.eclipse.jdt.internal.corext.Assert;
 		for (Iterator it = node.expressions().iterator(); it.hasNext(); ) {
 			Expression e = (Expression) it.next();
 			e.accept(this);
-			fResult.append(",");//$NON-NLS-1$
+			if (it.hasNext()) {
+				fResult.append(",");//$NON-NLS-1$
+			}
 		}
 		fResult.append("}");//$NON-NLS-1$
 		return false;
