@@ -201,7 +201,7 @@ public class EditorUtility {
 		return null;
 	}	
 	
-	public static boolean isDuplicateBreakpoint(String modelId, String markerType, IType containingType, int lineNumber) throws CoreException {
+	public static boolean isDuplicateLineBreakpoint(String modelId, String markerType, IType containingType, int lineNumber) throws CoreException {
 		IBreakpointManager m= DebugPlugin.getDefault().getBreakpointManager();
 		IMarker[] bps= m.getBreakpoints(modelId);
 		for (int i = 0; i < bps.length; i++) {

@@ -63,7 +63,7 @@ public class AddBreakpointAction extends AddMarkerAction {
 						}
 					}
 					if (type != null) {
-						if (!EditorUtility.isDuplicateBreakpoint(JDIDebugModel.getPluginIdentifier(), IJavaDebugConstants.JAVA_LINE_BREAKPOINT, type, lineNumber)) {
+						if (!EditorUtility.isDuplicateLineBreakpoint(JDIDebugModel.getPluginIdentifier(), IJavaDebugConstants.JAVA_LINE_BREAKPOINT, type, lineNumber)) {
 							IMarker breakpoint = JDIDebugModel.createLineBreakpoint(type, lineNumber, line.getOffset(), line.getOffset() + line.getLength(), 0);
 							DebugPlugin.getDefault().getBreakpointManager().addBreakpoint(breakpoint);
 						}
