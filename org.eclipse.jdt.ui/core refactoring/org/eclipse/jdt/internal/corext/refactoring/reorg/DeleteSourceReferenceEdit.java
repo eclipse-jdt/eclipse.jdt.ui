@@ -9,22 +9,27 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 public final class DeleteSourceReferenceEdit extends SimpleTextEdit {
 
 	private ISourceReference fSourceReference;
 	private ICompilationUnit fCu;
+	private String fContent;
 	
 	public DeleteSourceReferenceEdit(ISourceReference sr, ICompilationUnit unit){
 		Assert.isNotNull(sr);
 		fSourceReference= sr;
 		Assert.isNotNull(unit);
 		fCu= unit;
+	}
+
+	public final String getContent() {
+		return fContent;
 	}
 
 	/* non Java-doc
@@ -56,5 +61,12 @@ public final class DeleteSourceReferenceEdit extends SimpleTextEdit {
 		setTextRange(new TextRange(range));
 		super.connect(buffer);
 	}
+	
+	public void perform(TextBuffer buffer) throws CoreException {
+		TextRange range= getTextRange();
+		fContent= buffer.getContent(range.getOffset(), range.getLength());
+		super.perform(buffer);
+	}
+	
 }
 
