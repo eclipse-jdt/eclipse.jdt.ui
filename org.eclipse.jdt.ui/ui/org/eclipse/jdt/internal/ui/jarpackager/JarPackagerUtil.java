@@ -35,14 +35,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
-
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Utility for the Jar packager

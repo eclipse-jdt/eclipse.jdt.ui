@@ -146,11 +146,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 			if (element != null) {
 				if (reveal(view, element))
 					return;
-				IResource resource= null;
-				try {
-					resource= element.getCorrespondingResource();
-				} catch (JavaModelException e) {
-				}
+				IResource resource= element.getResource();
 				if (resource != null) {
 					if (reveal(view, resource))
 						return;

@@ -54,7 +54,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaRuntime;
@@ -266,12 +265,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 		ArrayList resources= new ArrayList();
 		for (int i= 0; i < elements.length; i++) {
-			try {
-				if (elements[i] instanceof ICompilationUnit) {
-					resources.add(elements[i].getResource());
-				}
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+			if (elements[i] instanceof ICompilationUnit) {
+				resources.add(elements[i].getResource());
 			}
 		}
 
