@@ -29,9 +29,9 @@ public abstract class SimpleTypeConstraint implements ITypeConstraint {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	public boolean equals(Object obj) {
-		if (!(obj instanceof EqualsConstraint))
+		if (!(obj instanceof SimpleTypeConstraint))
 			return false;
-		EqualsConstraint other= (EqualsConstraint)obj;
+		SimpleTypeConstraint other= (SimpleTypeConstraint)obj;
 		return getLeft().equals(other.getLeft()) && getRight().equals(other.getRight());
 	}
 
