@@ -312,12 +312,8 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 					
 				textWidget.setRedraw(false);
 				
-				/*
-				 * Use <code>false</code> to avoid multiple
-				 * selection changed events.
-				 */
-				setHighlightRange(offset, length, false);
-					
+				setHighlightRange(offset, length, moveCursor);
+
 				if (!moveCursor)
 					return;
 											
@@ -349,10 +345,6 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 				if (offset > -1 && length > 0) {
 					sourceViewer.revealRange(offset, length);
 					sourceViewer.setSelectedRange(offset, length);
-				} else {
-					offset= range.getOffset();
-					sourceViewer.setSelectedRange(offset, 0);
-					sourceViewer.revealRange(offset, range.getLength());
 				}
 				
 			} catch (JavaModelException x) {
