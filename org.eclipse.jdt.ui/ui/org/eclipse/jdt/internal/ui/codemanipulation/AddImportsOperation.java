@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
  * Add imports to a compilation unit.
@@ -58,8 +59,7 @@ public class AddImportsOperation extends WorkspaceModifyOperation {
 				IJavaElement imp= fImports[i];
 				if (imp instanceof IType) {
 					IType type= (IType)imp;
-					String packageName= type.getPackageFragment().getElementName();
-					impStructure.addImport(packageName, type.getElementName());
+					impStructure.addImport(JavaModelUtil.getTypeContainerName(type), type.getElementName());
 				} else if (imp instanceof IPackageFragment) {
 					String packageName= ((IPackageFragment)imp).getElementName();
 					impStructure.addImport(packageName, "*"); //$NON-NLS-1$

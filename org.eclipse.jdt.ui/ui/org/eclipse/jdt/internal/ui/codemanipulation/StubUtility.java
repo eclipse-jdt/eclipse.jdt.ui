@@ -81,19 +81,7 @@ public class StubUtility {
 		if (!method.isConstructor()) {
 			// java doc
 			if (addSeeTag) {
-				// create a @see link 
-				buf.append("\t/**\n\t"); //$NON-NLS-1$
-				buf.append(" * @see "); buf.append(declaringtype.getElementName()); buf.append('#'); //$NON-NLS-1$
-				buf.append(method.getElementName());
-				buf.append('(');
-				for (int i= 0; i <= lastParam; i++) {
-					buf.append(Signature.getSimpleName(Signature.toString(paramTypes[i])));
-					if (i < lastParam) {
-						buf.append(", "); //$NON-NLS-1$
-					}
-				}
-				buf.append(")\n\t"); //$NON-NLS-1$
-				buf.append(" */\n\t"); //$NON-NLS-1$
+				genJavaDocSeeTag(declaringtype.getElementName(), method.getElementName(), paramTypes, buf);
 			} else {
 				// generate a default java doc comment
 				String desc= "Method " + method.getElementName(); //$NON-NLS-1$
@@ -220,21 +208,42 @@ public class StubUtility {
 	 * Generates a default JavaDoc comment stub for a method.
 	 */
 	public static void genJavaDocStub(String descr, String[] paramNames, String retTypeSig, String[] excTypeSigs, StringBuffer buf) {
-		buf.append("\t/**\n"); //$NON-NLS-1$
-		buf.append("\t * "); buf.append(descr); buf.append(".\n"); //$NON-NLS-2$ //$NON-NLS-1$
+		buf.append("/**\n"); //$NON-NLS-1$
+		buf.append(" * "); buf.append(descr); buf.append(".\n"); //$NON-NLS-2$ //$NON-NLS-1$
 		for (int i= 0; i < paramNames.length; i++) {
-			buf.append("\t * @param "); buf.append(paramNames[i]); buf.append('\n'); //$NON-NLS-1$
+			buf.append(" * @param "); buf.append(paramNames[i]); buf.append('\n'); //$NON-NLS-1$
 		}
 		if (retTypeSig != null && !retTypeSig.equals(Signature.SIG_VOID)) {
 			String simpleName= Signature.getSimpleName(Signature.toString(retTypeSig));
-			buf.append("\t * @return "); buf.append(simpleName); buf.append('\n'); //$NON-NLS-1$
+			buf.append(" * @return "); buf.append(simpleName); buf.append('\n'); //$NON-NLS-1$
 		}
 		for (int i= 0; i < excTypeSigs.length; i++) {
 			String simpleName= Signature.getSimpleName(Signature.toString(excTypeSigs[i]));
-			buf.append("\t * @throws "); buf.append(simpleName); buf.append('\n'); //$NON-NLS-1$
+			buf.append(" * @throws "); buf.append(simpleName); buf.append('\n'); //$NON-NLS-1$
 		}		
-		buf.append("\t */\n"); //$NON-NLS-1$
+		buf.append(" */\n"); //$NON-NLS-1$
 	}
+	
+	/**
+	 * Generates a '@see' tag to the defined method.
+	 */
+	public static void genJavaDocSeeTag(String declaringTypeName, String methodName, String[] paramTypes, StringBuffer buf) {
+		// create a @see link 
+		buf.append("/*\n"); //$NON-NLS-1$
+		buf.append(" * @see "); //$NON-NLS-1$
+		buf.append(declaringTypeName);
+		buf.append('#'); 
+		buf.append(methodName);
+		buf.append('(');
+		for (int i= 0; i < paramTypes.length; i++) {
+			if (i > 0) {
+				buf.append(", "); //$NON-NLS-1$
+			}
+			buf.append(Signature.getSimpleName(Signature.toString(paramTypes[i])));
+		}
+		buf.append(")\n"); //$NON-NLS-1$
+		buf.append(" */\n"); //$NON-NLS-1$
+	}	
 
 	/**
 	 * Finds a method in a list of methods.

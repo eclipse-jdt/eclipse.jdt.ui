@@ -17,7 +17,7 @@ public class GenerateGroup extends ContextMenuGroup {
 	
 	private AddUnimplementedMethodsAction fAddUnimplementedMethods;
 	private AddGetterSetterAction fAddGetterSetter;
-	
+	private AddJavaDocStubAction fAddJavaDocStub;
 	
 	public void fill(IMenuManager manager, GroupContext context) {
 
@@ -28,12 +28,17 @@ public class GenerateGroup extends ContextMenuGroup {
 		
 		if (fAddGetterSetter.canActionBeAdded())
 			manager.appendToGroup(GROUP_NAME, fAddGetterSetter);
+			
+		if (fAddJavaDocStub.canActionBeAdded())
+			manager.appendToGroup(GROUP_NAME, fAddJavaDocStub);
+		
 	}
 	
 	private void createActions(ISelectionProvider provider) {
 		if (fAddUnimplementedMethods == null) {
 			fAddUnimplementedMethods= new AddUnimplementedMethodsAction(provider);
 			fAddGetterSetter= new AddGetterSetterAction(provider);
+			fAddJavaDocStub= new AddJavaDocStubAction(provider);
 		}
 	}
 }

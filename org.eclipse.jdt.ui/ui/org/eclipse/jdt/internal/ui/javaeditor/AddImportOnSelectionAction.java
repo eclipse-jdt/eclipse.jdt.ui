@@ -45,7 +45,9 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.codemanipulation.AddImportsOperation;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
+import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 import org.eclipse.jdt.internal.ui.util.TypeInfoRequestor;
 
 public class AddImportOnSelectionAction extends Action implements IUpdate {
@@ -104,16 +106,24 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					int len= selStart - nameStart + selection.getLength();
 					
 					String name= doc.get(nameStart, len).trim();
-					String typeName= Signature.getSimpleName(name);
-					String packName= Signature.getQualifier(name);
+					String simpleName= Signature.getSimpleName(name);
+					String containerName= Signature.getQualifier(name);
 					
-					IType[] types= findAllTypes(typeName, cu.getJavaProject(), null);
-					IType chosen= selectResult(types, packName, getShell());
+					IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IResource[] { cu.getJavaProject().getProject() });
+					
+					TypeInfo[] types= findAllTypes(simpleName, searchScope, null);
+					TypeInfo chosen= selectResult(types, containerName, getShell());
 					if (chosen == null) {
 						return;
 					}
+					IType type= chosen.resolveType(searchScope);
+					if (type == null) {
+						JavaPlugin.logErrorMessage("AddImportOnSelectionAction: Failed to resolve TypeRef: " + chosen.toString());
+						MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), JavaEditorMessages.getString("AddImportOnSelection.error.notresolved.message")); //$NON-NLS-1$ //$NON-NLS-2$
+						return;
+					}
 					removeQualification(doc, nameStart, chosen);
-					AddImportsOperation op= new AddImportsOperation(cu, new IJavaElement[] { chosen }, false);
+					AddImportsOperation op= new AddImportsOperation(cu, new IJavaElement[] { type }, false);
 					ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
 					try {
 						dialog.run(false, true, op);
@@ -150,32 +160,30 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		return pos;
 	}	
 	
-	private void removeQualification(IDocument doc, int nameStart, IType type) throws BadLocationException {
-		String packName= type.getPackageFragment().getElementName();
-		int packLen= packName.length();
-		if (packLen > 0) {
-			for (int k= 0; k < packLen; k++) {
-				if (doc.getChar(nameStart + k) != packName.charAt(k)) {
+	private void removeQualification(IDocument doc, int nameStart, TypeInfo typeInfo) throws BadLocationException {
+		String containerName= typeInfo.getTypeContainerName();
+		int containerLen= containerName.length();
+		if (containerLen > 0) {
+			for (int k= 0; k < containerLen; k++) {
+				if (doc.getChar(nameStart + k) != containerName.charAt(k)) {
 					return;
 				}
 			}
-			doc.replace(nameStart, packLen + 1, ""); //$NON-NLS-1$
+			doc.replace(nameStart, containerLen + 1, ""); //$NON-NLS-1$
 		}
 	}	
 
 	/**
 	 * Finds a type by the simple name.
 	 */
-	private static IType[] findAllTypes(String simpleTypeName, IJavaProject jproject, IProgressMonitor monitor) throws JavaModelException, CoreException {
+	private static TypeInfo[] findAllTypes(String simpleTypeName, IJavaSearchScope searchScope, IProgressMonitor monitor) throws CoreException {
 		SearchEngine searchEngine= new SearchEngine();
-		IProject project= jproject.getProject();
-		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IResource[] { project });
-
+		
 		ArrayList typeRefsFound= new ArrayList(10);
 		ITypeNameRequestor requestor= new TypeInfoRequestor(typeRefsFound);
 
 		searchEngine.searchAllTypeNames(
-			project.getWorkspace(), 
+			JavaPlugin.getWorkspace(), 
 			null, 
 			simpleTypeName.toCharArray(), 
 			IJavaSearchConstants.EXACT_MATCH, 
@@ -186,13 +194,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
 			monitor);
 			
-		int nTypesFound= typeRefsFound.size();
-		IType[] res= new IType[nTypesFound];
-		for (int i= 0; i < nTypesFound; i++) {
-			TypeInfo ref= (TypeInfo) typeRefsFound.get(i);
-			res[i]= ref.resolveType(searchScope);
-		}
-		return res;
+		return (TypeInfo[]) typeRefsFound.toArray(new TypeInfo[typeRefsFound.size()]);
 	}
 	
 	private Shell getShell() {
@@ -200,7 +202,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	}
 		
 						
-	private IType selectResult(IType[] results, String packName, Shell shell) {
+	private TypeInfo selectResult(TypeInfo[] results, String containerName, Shell shell) {
 		int nResults= results.length;
 		
 		if (nResults == 0) {
@@ -209,21 +211,20 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			return results[0];
 		}
 		
-		if (packName.length() != 0) {
-			for (int i= 0; i < results.length; i++) {
-				IType curr= (IType) results[i];
-				if (packName.equals(curr.getPackageFragment().getElementName())) {
+		if (containerName.length() != 0) {
+			for (int i= 0; i < nResults; i++) {
+				TypeInfo curr= (TypeInfo) results[i];
+				if (containerName.equals(curr.getTypeContainerName())) {
 					return curr;
 				}
 			}
 		}		
-		int flags= (JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(flags));
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED));
 		dialog.setTitle(JavaEditorMessages.getString("AddImportOnSelection.dialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JavaEditorMessages.getString("AddImportOnSelection.dialog.message")); //$NON-NLS-1$
 		dialog.setElements(results);
 		if (dialog.open() == dialog.OK) {
-			return (IType) dialog.getFirstResult();
+			return (TypeInfo) dialog.getFirstResult();
 		}
 		return null;
 	}

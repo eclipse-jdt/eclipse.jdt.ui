@@ -35,8 +35,6 @@ import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 
-
-
 public class OrganizeImportsAction extends Action {
 	
 	private ITextEditor fEditor;
@@ -44,6 +42,7 @@ public class OrganizeImportsAction extends Action {
 	public OrganizeImportsAction() {
 		this(null);
 	}
+	
 	public OrganizeImportsAction(ITextEditor editor) {
 		super(JavaEditorMessages.getString("OrganizeImportsAction.label")); //$NON-NLS-1$
 		setToolTipText(JavaEditorMessages.getString("OrganizeImportsAction.tooltip")); //$NON-NLS-1$
@@ -52,6 +51,7 @@ public class OrganizeImportsAction extends Action {
 		setContentEditor(editor);
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ORGANIZE_IMPORTS_ACTION });					
 	}
+	
 	public static boolean canActionBeAdded(ISelection selection) {
 		if (selection instanceof IStructuredSelection && !selection.isEmpty()) {
 			List elements= ((IStructuredSelection)selection).toList();
@@ -61,6 +61,7 @@ public class OrganizeImportsAction extends Action {
 		}
 		return false;
 	}
+	
 	/**
 	 * @see IAction#actionPerformed
 	 */

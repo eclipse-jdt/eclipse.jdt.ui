@@ -69,10 +69,10 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 						return fieldname.substring(1);
 					}
 					if (firstLetter == '_') {
-						return "" + Character.toUpperCase(secondLetter) + fieldname.substring(2); //$NON-NLS-1$
+						return String.valueOf(Character.toUpperCase(secondLetter)) + fieldname.substring(2);
 					}
 				}
-				return "" + Character.toUpperCase(firstLetter) + fieldname.substring(1); //$NON-NLS-1$
+				return String.valueOf(Character.toUpperCase(firstLetter)) + fieldname.substring(1);
 			}
 		}
 		return fieldname;
@@ -95,10 +95,10 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 	 * @see WorkbenchModifyOperation#execute
 	 */
 	public void execute(IProgressMonitor monitor) throws CoreException, InterruptedException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}
 		try {			
-			if (monitor == null) {
-				monitor= new NullProgressMonitor();
-			}
 			int nFields= fFields.length;			
 			monitor.beginTask(CodeManipulationMessages.getString("AddGetterSetterOperation.description"), nFields); //$NON-NLS-1$
 			

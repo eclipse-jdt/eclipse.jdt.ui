@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -350,6 +351,28 @@ public class JavaModelUtil {
 		}
 		return null;
 	}
+	
+	/**
+	 * Finds a method in a type's hierarchy. The search is top down, so this
+	 * returns the declaration of the method.
+	 * This searches for a method with a name and signature. Parameter types are only
+	 * compared by the simple name, no resolving for the fully qualified type name is done.
+	 * Constructors are only compared by parameters, not the name.
+	 * @param name The name of the method to find
+	 * @param paramTypes The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
+	 * @param isConstructor If the method is a constructor
+	 * @return The first method found or null, if nothing found
+	 */
+	public static IMethod findMethodInHierarchy(ITypeHierarchy hierarchy, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
+		IType[] superTypes= hierarchy.getAllSupertypes(hierarchy.getType());
+		for (int i= superTypes.length - 1; i >= 0; i--) {
+			IMethod found= findMethod(name, paramTypes, isConstructor, superTypes[i]);
+			if (found != null) {
+				return found;
+			}
+		}
+		return null;
+	}			
 	
 	/**
 	 * Tests if a method equals to teh give signature.

@@ -93,7 +93,6 @@ public class NewGroup extends ContextMenuGroup {
 		fNewPackageRootAction.setToolTipText(NewWizardMessages.getString("NewGroup.wizards_add_packageroot.tooltip")); //$NON-NLS-1$
 		fNewPackageRootAction.setDescription(NewWizardMessages.getString("NewGroup.wizards_add_packageroot.description")); //$NON-NLS-1$
 			
-		// find out if the new project wizard is registered in the registry
 		label= NewWizardMessages.getString("NewGroup.wizards_add_project.label"); //$NON-NLS-1$
 		acceptedTypes= new Class[] { IJavaModel.class };
 		fNewProjectAction= new OpenProjectWizardAction(label, acceptedTypes);

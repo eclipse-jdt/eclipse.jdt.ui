@@ -111,7 +111,7 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 						}
 					}			 	
 					
-					IMethod inheritedMethod= findInHierarchy(typeHierarchy, curr);
+					IMethod inheritedMethod= JavaModelUtil.findMethodInHierarchy(typeHierarchy, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
 					if (inheritedMethod == null) {
 						// create method without super call
 						content= StubUtility.genStub(fType, curr, false, false, imports);
@@ -161,21 +161,6 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 		}		
 	}
 	
-	/**
-	 * Finds a method in a type's hierarchy.
-	 * @return The first found method or null, if nothing found
-	 */
-	private static IMethod findInHierarchy(ITypeHierarchy hierarchy, IMethod method) throws JavaModelException {
-		IType curr= hierarchy.getSuperclass(hierarchy.getType());
-		while (curr != null) {
-			IMethod found= JavaModelUtil.findMethod(method.getElementName(), method.getParameterTypes(), method.isConstructor(), curr);
-			if (found != null) {
-				return found;
-			}
-			curr= hierarchy.getSuperclass(curr);
-		}
-		return null;
-	}	
 	
 	public IMethod[] getCreatedMethods() {
 		return fCreatedMethods;
