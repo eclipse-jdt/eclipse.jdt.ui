@@ -149,7 +149,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			}
 			return result;
 		}
-		private static IFile getFile(ICompilationUnit cu) throws CoreException {
+		private static IFile getFile(ICompilationUnit cu) {
 			return (IFile)WorkingCopyUtil.getOriginal(cu).getResource();
 		}
 	}
@@ -322,7 +322,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		return false;
 	}
 	
-	private RefactoringStatus checkDeclaringType() throws JavaModelException{
+	private RefactoringStatus checkDeclaringType(){
 		IType declaringType= getDeclaringType();
 				
 		if (JavaModelUtil.getFullyQualifiedName(declaringType).equals("java.lang.Object")) //$NON-NLS-1$
@@ -443,7 +443,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < fMembersToMove.length; i++) {
 			if (! canMoveToInterface(fMembersToMove[i])) {
-				String message= RefactoringCoreMessages.getString("MoveMembersRefactoring.only_public_static_final"); //$NON-NLS-1$
+				String message= RefactoringCoreMessages.getString("MoveMembersRefactoring.only_public_static"); //$NON-NLS-1$
 				result.addError(message, JavaStatusContext.create(fMembersToMove[i]));
 			}
 		}
@@ -451,13 +451,20 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	}
 
 	private boolean canMoveToInterface(IMember member) throws JavaModelException {
-		if (member.getElementType() != IJavaElement.FIELD)
-			return false;
 		int flags= member.getFlags();
-		if (! (Flags.isPublic(flags) && Flags.isStatic(flags) && Flags.isFinal(flags)))
-			return false;
-		VariableDeclarationFragment declaration= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) member, fSource.root);
-		return declaration.getInitializer() != null;
+		switch (member.getElementType()) {
+			case IJavaElement.FIELD :
+				if (! (Flags.isPublic(flags) && Flags.isStatic(flags) && Flags.isFinal(flags)))
+					return false;
+				VariableDeclarationFragment declaration= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) member, fSource.root);
+				return declaration.getInitializer() != null;
+
+			case IJavaElement.TYPE :
+				return (Flags.isPublic(flags) && Flags.isStatic(flags));
+				
+			default :
+				return false;
+		}
 	}
 
 	private static boolean canDeclareStaticMembers(IType type) throws JavaModelException {
@@ -589,7 +596,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			SearchResult[] searchResults= references[i].getSearchResults();
 			for (int k= 0; k < searchResults.length; k++) {
 				SearchResult searchResult= searchResults[k];
-				IJavaElement element= WorkingCopyUtil.getWorkingCopyIfExists(searchResult.getEnclosingElement());
+				IJavaElement element= searchResult.getEnclosingElement();
 				IType type= (IType) element.getAncestor(IJavaElement.TYPE);
 				if (type != null //reference can e.g. be an import declaration
 						&& ! blindAccessorTypes.contains(type)
@@ -837,10 +844,18 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			MovedMemberAnalyzer analyzer= new MovedMemberAnalyzer(fSource, fMemberBindings, fSourceBinding, target);
 			declaration.accept(analyzer);
 			if (getDeclaringType().isInterface() && ! fDestinationType.isInterface()) {
-				FieldDeclaration fieldDecl= (FieldDeclaration) declaration;
-				int psfModifiers= Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
-				if ((fieldDecl.getModifiers() & psfModifiers) != psfModifiers) {
-					fSource.rewriter.markAsReplaced(fieldDecl, ASTNodeConstants.MODIFIERS, new Integer(psfModifiers), null);
+				if (declaration instanceof FieldDeclaration) {
+					FieldDeclaration fieldDecl= (FieldDeclaration) declaration;
+					int psfModifiers= Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
+					if ((fieldDecl.getModifiers() & psfModifiers) != psfModifiers)
+						fSource.rewriter.markAsReplaced(fieldDecl, ASTNodeConstants.MODIFIERS, new Integer(psfModifiers), null);
+				} else if (declaration instanceof TypeDeclaration) {
+					TypeDeclaration typeDecl= (TypeDeclaration) declaration;
+					int psModifiers= Modifier.PUBLIC | Modifier.STATIC;
+					if ((typeDecl.getModifiers() & psModifiers) != psModifiers) {
+						Integer newModifiers= new Integer((typeDecl.getModifiers() | psModifiers));
+						fSource.rewriter.markAsReplaced(typeDecl, ASTNodeConstants.MODIFIERS, newModifiers, null);
+					}
 				}
 			}
 			TextEditGroup group= new TextEditGroup("moved member declaration");
