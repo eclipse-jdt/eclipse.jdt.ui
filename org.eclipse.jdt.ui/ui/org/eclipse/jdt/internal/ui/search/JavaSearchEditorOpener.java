@@ -43,13 +43,17 @@ import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
 public class JavaSearchEditorOpener {
 	private IEditorPart fEditor;
 
-	public IEditorPart open(Match match) throws PartInitException, JavaModelException {
+	public IEditorPart openElement(Object element) throws PartInitException, JavaModelException {
 		IWorkbenchPage wbPage= JavaPlugin.getActivePage();
-		Object element= getElementToOpen(match);
 		if (NewSearchUI.reuseEditor())
 			return showWithReuse(element, wbPage);
 		else
 			return showWithoutReuse(element, wbPage);
+	}
+		
+	public IEditorPart openMatch(Match match) throws PartInitException, JavaModelException {
+		Object element= getElementToOpen(match);
+		return openElement(element);
 	}
 
 	protected Object getElementToOpen(Match match) {

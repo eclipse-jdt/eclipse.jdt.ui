@@ -85,6 +85,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
@@ -205,7 +206,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	public void showMatch(Match match, int offset, int length, boolean activate) throws PartInitException {
 		IEditorPart editor;
 		try {
-			editor= fEditorOpener.open(match);
+			editor= fEditorOpener.openMatch(match);
 		} catch (JavaModelException e) {
 			throw new PartInitException(e.getStatus());
 		}
@@ -806,7 +807,11 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 				firstElement instanceof IClassFile || 
 				firstElement instanceof IMember) {
 			if (getDisplayedMatchCount(firstElement) == 0) {
-				fActionGroup.handleOpen(event);
+				try {
+					fEditorOpener.openElement(firstElement);
+				} catch (CoreException e) {
+					ExceptionHandler.handle(e, getSite().getShell(), SearchMessages.getString("JavaSearchResultPage.open_editor.error.title"), SearchMessages.getString("JavaSearchResultPage.open_editor.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
+				}
 				return;
 			}
 		}

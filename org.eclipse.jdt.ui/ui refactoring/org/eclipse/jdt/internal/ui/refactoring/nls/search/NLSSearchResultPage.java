@@ -40,7 +40,7 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 	 */
 	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
 		try {
-			IEditorPart editor= fEditorOpener.open(match);
+			IEditorPart editor= fEditorOpener.openMatch(match);
 			if (editor != null && activate)
 				editor.getEditorSite().getPage().activate(editor);
 			if (editor instanceof ITextEditor) {
