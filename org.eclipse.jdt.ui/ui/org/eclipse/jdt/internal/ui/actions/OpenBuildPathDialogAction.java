@@ -28,6 +28,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.dialogs.BuildPathDialog;
@@ -56,8 +57,11 @@ public class OpenBuildPathDialogAction implements IWorkbenchWindowActionDelegate
 			if (s.size() == 1) {
 				Object element= s.getFirstElement();
 				if (element instanceof IJavaElement) {
-					fProject= (IJavaProject)((IJavaElement)element).getAncestor(IJavaElement.JAVA_PROJECT);
-					enable= fProject != null;
+					IJavaElement jElement= (IJavaElement)element;
+					if (!isInArchive(jElement)) {
+						fProject= (IJavaProject)((IJavaElement)element).getAncestor(IJavaElement.JAVA_PROJECT);
+						enable= fProject != null;
+					}
 				} else if (element instanceof IAdaptable) {
 					IResource resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
 					if (resource != null) {
@@ -86,5 +90,14 @@ public class OpenBuildPathDialogAction implements IWorkbenchWindowActionDelegate
 			}
 		}
 		action.setEnabled(enable);
+	}
+	
+	private boolean isInArchive(IJavaElement element) {
+		if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT)
+			return false;
+		IPackageFragmentRoot root= (IPackageFragmentRoot)element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+		if (root == null)
+			return false;
+		return root.isArchive();
 	}
 }
