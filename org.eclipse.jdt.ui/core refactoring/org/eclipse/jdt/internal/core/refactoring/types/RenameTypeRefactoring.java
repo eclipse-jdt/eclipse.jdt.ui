@@ -246,8 +246,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 				if (typeDeclaration.methods != null){
 					for (int i=0; i < typeDeclaration.methods.length; i++){
 						if (typeDeclaration.methods[i].isNative())
-							result.addWarning(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.local_type_native",  //$NON-NLS-1$
-																				new String[]{type.getElementName(), "UnsatisfiedLinkError"})); //$NON-NLS-1$
+							result.addWarning(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.local_type_native", type.getElementName()));  //$NON-NLS-1$
 					}	
 				}	
 				return true;
@@ -262,8 +261,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 				if (typeDeclaration.methods != null){
 					for (int i=0; i < typeDeclaration.methods.length; i++){
 						if (typeDeclaration.methods[i].isNative())
-							result.addWarning(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed_type_native",  //$NON-NLS-1$
-																				new String[]{type.getElementName(), "UnsatisfiedLinkError"})); //$NON-NLS-1$
+							result.addWarning(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed_type_native", type.getElementName())); //$NON-NLS-1$
 							
 					}	
 				}	

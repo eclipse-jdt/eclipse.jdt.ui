@@ -102,10 +102,10 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 		RefactoringStatus result= new RefactoringStatus();
 		ICompilationUnit cu= getCu();
 		if (! cu.exists())
-			result.addFatalError(cu.getElementName() + RefactoringCoreMessages.getString("RenameCompilationUnitRefactoring.not_in_model")); //$NON-NLS-1$
+			result.addFatalError(RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.not_in_model", cu.getElementName())); //$NON-NLS-1$
 		
 		if (cu.isReadOnly())
-			result.addFatalError(cu.getElementName() + RefactoringCoreMessages.getString("RenameCompilationUnitRefactoring.read_only"));	 //$NON-NLS-1$
+			result.addFatalError(RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.read_only", cu.getElementName()));	 //$NON-NLS-1$
 		
 		if (mustCancelRenamingType())
 			fWillRenameType= false;
@@ -124,7 +124,7 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 		
 		if (mustCancelRenamingType()){
 			Assert.isTrue(! fWillRenameType);
-			result.addError(getCu().getElementName() + RefactoringCoreMessages.getString("RenameCompilationUnitRefactoring.not_parsed")); //$NON-NLS-1$
+			result.addError(RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.not_parsed", getCu().getElementName())); //$NON-NLS-1$
 		}	
 		 
 		// we purposely do not check activation of the renameTypeRefactoring here. 
@@ -146,9 +146,9 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 			RefactoringStatus result2= new RefactoringStatus();
 			result2.merge(Checks.checkCompilationUnitNewName(getCu(), fNewName));
 			if (result2.hasFatalError())
-				result1.addError(getCu().getElementName() + RefactoringCoreMessages.getString("RenameCompilationUnitRefactoring.not_parsed_1")); //$NON-NLS-1$
+				result1.addError(RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.not_parsed_1", getCu().getElementName())); //$NON-NLS-1$
 			else 
-				result1.addError(getCu().getElementName() + RefactoringCoreMessages.getString("RenameCompilationUnitRefactoring.not_parsed")); //$NON-NLS-1$
+				result1.addError(RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.not_parsed", getCu().getElementName())); //$NON-NLS-1$
 			result1.merge(result2);			
 		}	
 		

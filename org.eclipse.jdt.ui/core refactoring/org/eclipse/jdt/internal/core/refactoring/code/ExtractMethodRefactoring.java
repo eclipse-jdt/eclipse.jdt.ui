@@ -56,8 +56,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private String fMethodName;
 	private int fMethodFlags= IConstants.AccProtected;
 	
-	private static final String DEFAULT_VISIBILITY= "default"; //$NON-NLS-1$
-	
 	/* (non-Javadoc)
 	 * Method declared in IRefactoring
 	 */
@@ -256,11 +254,11 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 * @return the signature of the extracted method
 	 */
 	public String getSignature(String name) {
-		String s= ""; //$NON-NLS-1$
-		if (!DEFAULT_VISIBILITY.equals(fVisibility))
-			s= fVisibility;
+		String s= fVisibility;
+		if (s.length() > 0)
+			s= s + " "; //$NON-NLS-1$
 			
-		return s + " " + fStatementAnalyzer.getSignature(name); //$NON-NLS-1$
+		return s + fStatementAnalyzer.getSignature(name); 
 	}
 	
 	//---- Helper methods ------------------------------------------------------------------------

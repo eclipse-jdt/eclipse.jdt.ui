@@ -933,7 +933,7 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
 				fStatus.addFatalError(fPotentialReturnMessage);
 				fPotentialReturnMessage= null;
 			}
-			String message= RefactoringCoreMessages.getString("StatementAnalyzer.return_statement") + getLineNumber(returnStatement) + "."; //$NON-NLS-2$ //$NON-NLS-1$
+			String message= RefactoringCoreMessages.getFormattedString("StatementAnalyzer.return_statement", Integer.toString(getLineNumber(returnStatement))); //$NON-NLS-1$
 			if (fParentOfFirstSelectedStatment != getParent()) {
 				fStatus.addFatalError(message);
 			} else {

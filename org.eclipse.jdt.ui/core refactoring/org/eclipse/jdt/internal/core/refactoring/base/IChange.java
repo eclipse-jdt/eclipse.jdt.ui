@@ -60,7 +60,7 @@ public interface IChange {
 	/**
 	 * The change has been performed. Clients must ensure that this method is called after all
 	 * resource deltas emitted by calling <code>perform</code> are processed. This method must
-	 * be called even if the perform has thrown an runtime exception.
+	 * be called even if the perform has thrown a runtime exception.
 	 * @see aboutToPerform()
 	 */
 	public void performed(); 

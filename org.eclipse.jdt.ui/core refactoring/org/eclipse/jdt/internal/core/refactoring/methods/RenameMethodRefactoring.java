@@ -3,16 +3,16 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.core.refactoring.methods;
-
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
-
+
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
@@ -161,10 +161,10 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 		else return (JavaModelUtility.isMainMethod(method));
 	}
 	
-	private String computeErrorMessage(IMethod method, String suffix){
-		return RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.computed_error_msg", //$NON-NLS-1$
-															new String[]{method.getElementName(), method.getDeclaringType().getFullyQualifiedName()})
-				+ suffix;											
+	private String computeErrorMessage(IMethod method, String key){
+		return RefactoringCoreMessages.getFormattedString(
+			key,
+			new String[]{method.getElementName(), method.getDeclaringType().getFullyQualifiedName()});
 	}
 	
 	private RefactoringStatus checkRelatedMethods(IProgressMonitor pm) throws JavaModelException{
@@ -173,15 +173,15 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 		while (methods.hasNext()){
 			IMethod method= (IMethod)methods.next();
 			if (! method.exists()){
-				result.addFatalError(computeErrorMessage(method, RefactoringCoreMessages.getString("RenameMethodRefactoring.not_in_model."))); //$NON-NLS-1$
+				result.addFatalError(computeErrorMessage(method, "RenameMethodRefactoring.not_in_mode")); //$NON-NLS-1$
 				continue;
 			}	
 			if (method.isBinary())
-				result.addFatalError(computeErrorMessage(method, RefactoringCoreMessages.getString("RenameMethodRefactoring.no_binary"))); //$NON-NLS-1$
+				result.addFatalError(computeErrorMessage(method, "RenameMethodRefactoring.no_binary")); //$NON-NLS-1$
 			if (method.isReadOnly())
-				result.addFatalError(computeErrorMessage(method, RefactoringCoreMessages.getString("RenameMethodRefactoring.no_read_only"))); //$NON-NLS-1$
+				result.addFatalError(computeErrorMessage(method, "RenameMethodRefactoring.no_read_only")); //$NON-NLS-1$
 			if (Flags.isNative(method.getFlags()))
-				result.addError(computeErrorMessage(method, RefactoringCoreMessages.getString("RenameMethodRefactoring.no_native_1"))); //$NON-NLS-1$
+				result.addError(computeErrorMessage(method, "RenameMethodRefactoring.no_native_1")); //$NON-NLS-1$
 			}
 		return result;	
 	}
