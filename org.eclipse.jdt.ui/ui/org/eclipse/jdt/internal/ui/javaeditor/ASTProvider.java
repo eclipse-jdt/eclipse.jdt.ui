@@ -494,7 +494,7 @@ public final class ASTProvider {
 			ast= createAST(je, progressMonitor);
 			if (progressMonitor != null && progressMonitor.isCanceled())
 				ast= null;
-			else if (DEBUG)
+			else if (DEBUG && ast != null)
 				System.err.println(getThreadName() + " - " + DEBUG_PREFIX + "created AST for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 		} finally {
 			if (isActiveElement)
