@@ -93,7 +93,7 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Runs the operation.
-	 * @throws OperationCanceledException Runtime error thrown when operation is canceled.
+	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
 	 */	
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		if (monitor == null) {

@@ -553,7 +553,7 @@ public final class ImportsStructure implements IImportsStructure {
 	 * a best match algorithm. If an import already exists, the import is
 	 * not added.
 	 * @param qualifiedTypeName The fully qualified name of the type to import
-	 * @return Returns either the simple type name if the import was succesful or else the qualified type name
+	 * @return Returns either the simple type name if the import was successful or else the qualified type name
 	 */
 	public String addImport(String qualifiedTypeName) {
 		int angleBracketOffset= qualifiedTypeName.indexOf('<');
@@ -584,7 +584,7 @@ public final class ImportsStructure implements IImportsStructure {
 	 * a best match algorithm. If an import already exists, the import is
 	 * not added.
 	 * @param declaringTypeName The qualified name of the static's member declaring type
-	 * @return Returns either the simple type name if the import was succesful or else the qualified type name
+	 * @return Returns either the simple type name if the import was successful or else the qualified type name
 	 */
 	public String addStaticImport(String declaringTypeName, String simpleName, boolean isField) {
 		String containerName= Signature.getQualifier(declaringTypeName);
@@ -853,7 +853,7 @@ public final class ImportsStructure implements IImportsStructure {
 				if (!status.isOK()) {
 					throw new ValidateEditException(status);
 				}
-				edit.apply(document); // apply after file is commitable
+				edit.apply(document); // apply after file is committable
 				
 				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 				bufferManager.getTextFileBuffer(file.getFullPath()).commit(monitor, true);
