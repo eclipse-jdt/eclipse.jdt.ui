@@ -27,7 +27,6 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 	
 	private StyledText fTextWidget;
 	private Color fHighlightColor;
-	private int fLineNumber;
 	private int[] fLine= { -1, -1 };
 	private boolean fIsActive= false;
 	
@@ -60,25 +59,42 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 	
 	private void updateHighlightLine() {
 		StyledTextContent content= fTextWidget.getContent();
-		fLineNumber= content.getLineAtOffset(fTextWidget.getCaretOffset());
 		
-		fLine[0]= content.getOffsetAtLine(fLineNumber);
+		int offset= fTextWidget.getCaretOffset();
+		int length= content.getCharCount();
+		if (offset > length)
+			offset= length;
+		
+		int lineNumber= content.getLineAtOffset(offset);
+		fLine[0]= content.getOffsetAtLine(lineNumber);
 			
 		try {
-			fLine[1]= content.getOffsetAtLine(fLineNumber + 1) - fLine[0];
+			fLine[1]= content.getOffsetAtLine(lineNumber + 1);
 		} catch (IllegalArgumentException x) {
 			fLine[1]= -1;
 		}
 	}
 	
+	private void clearHighlightLine() {
+		int length= fTextWidget.getCharCount();
+		
+		if (fLine[0] <= length) {
+			if (fLine[1] > length) 
+				fLine[1]= -1;
+			drawHighlightLine();
+		}		
+	}
+	
 	private void drawHighlightLine() {
-		if (fLine[1] == -1 || (fLineNumber + 1) == fTextWidget.getLineCount()) {
+		if (fLine[1] == -1) {
+			
 			Point upperLeft= fTextWidget.getLocationAtOffset(fLine[0]);
 			int width= fTextWidget.getClientArea().width;
 			int height= fTextWidget.getLineHeight();			
 			fTextWidget.redraw(upperLeft.x, upperLeft.y, width, height, false);
+			
 		} else {
-			fTextWidget.redrawRange(fLine[0], fLine[1], true);
+			fTextWidget.redrawRange(fLine[0], fLine[1] - fLine[0], true);
 		}
 	}
 	
@@ -109,7 +125,7 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 			fIsActive= true;
 			fTextWidget.addLineBackgroundListener(this);
 		} else if (fLine[0] != -1) {
-			drawHighlightLine();
+			clearHighlightLine();
 		}
 		
 		updateHighlightLine();
