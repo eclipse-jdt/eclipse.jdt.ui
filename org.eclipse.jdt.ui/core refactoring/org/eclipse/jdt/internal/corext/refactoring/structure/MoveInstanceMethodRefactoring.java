@@ -58,7 +58,9 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 	private InstanceMethodMover fMover;
 	
 	public static boolean isAvailable(IMethod method) throws JavaModelException {
-		return method.exists() && !method.isConstructor() && !method.isBinary() && method.getCompilationUnit() != null && !JdtFlags.isStatic(method);
+		return method.exists() && !method.isConstructor() && !method.isBinary()
+				&& method.getCompilationUnit() != null && !JdtFlags.isStatic(method)
+				&& !method.getDeclaringType().isLocal();
 	}
 
 	public static MoveInstanceMethodRefactoring create(IMethod method, CodeGenerationSettings codeGenerationSettings) throws JavaModelException {		

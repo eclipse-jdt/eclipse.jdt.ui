@@ -14,18 +14,22 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring.INewReceiver;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class MoveInstanceMethodTests extends RefactoringTest {
@@ -155,9 +159,14 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	private void failHelper1(String[] cuQNames, String selectionCuQName, int startLine, int startColumn, int endLine, int endColumn, int newReceiverType, String newReceiverName, boolean inlineDelegator, boolean removeDelegator, int errorCode) throws Exception {
 		int selectionCuIndex= firstIndexOf(selectionCuQName, cuQNames);
 		Assert.isTrue(selectionCuIndex != -1, "parameter selectionCuQName must match some String in cuQNames.");
-		failHelper1(cuQNames, selectionCuIndex, startLine, startColumn, endLine, endColumn, newReceiverType, newReceiverName, null, inlineDelegator, removeDelegator, errorCode);
+		failHelper1(cuQNames, selectionCuIndex, startLine, startColumn, endLine, endColumn, newReceiverType, newReceiverName, null, null, inlineDelegator, removeDelegator, errorCode);
 	}
-	private void failHelper1(String[] cuQNames, int selectionCuIndex, int startLine, int startColumn, int endLine, int endColumn, int newReceiverType, String newReceiverName, String newMethodName, boolean inlineDelegator, boolean removeDelegator, int errorCode) throws Exception {
+	private void failHelper2(String[] cuQNames, String selectionCuQName, int startLine, int startColumn, int endLine, int endColumn, int newReceiverType, String newReceiverName, String originalReceiverParameterName, boolean inlineDelegator, boolean removeDelegator, int errorCode) throws Exception {
+		int selectionCuIndex= firstIndexOf(selectionCuQName, cuQNames);
+		Assert.isTrue(selectionCuIndex != -1, "parameter selectionCuQName must match some String in cuQNames.");
+		failHelper1(cuQNames, selectionCuIndex, startLine, startColumn, endLine, endColumn, newReceiverType, newReceiverName, null, originalReceiverParameterName, inlineDelegator, removeDelegator, errorCode);
+	}
+	private void failHelper1(String[] cuQNames, int selectionCuIndex, int startLine, int startColumn, int endLine, int endColumn, int newReceiverType, String newReceiverName, String newMethodName, String originalReceiverParameterName, boolean inlineDelegator, boolean removeDelegator, int errorCode) throws Exception {
 		Assert.isTrue(0 <= selectionCuIndex && selectionCuIndex < cuQNames.length);
 
 		toSucceed= false;
@@ -181,6 +190,8 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 			} else {
 				chooseNewReceiver(ref, newReceiverType, newReceiverName);
 	
+				if (originalReceiverParameterName != null)
+					ref.setOriginalReceiverParameterName(originalReceiverParameterName);
 				ref.setRemoveDelegator(removeDelegator);			
 				ref.setInlineDelegator(inlineDelegator);
 				if(newMethodName != null)
@@ -395,7 +406,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	
 	// Cannot move method - parameter name conflict
 	public void testFail11() throws Exception {
-		failHelper1(new String[] {"p1.A", "p2.B"}, "p1.A", 7, 17, 7, 20, PARAMETER, "b", true, true, RefactoringStatusCodes.PARAM_NAME_ALREADY_USED);	
+		failHelper2(new String[] {"p1.A", "p2.B"}, "p1.A", 7, 17, 7, 20, PARAMETER, "b", "a", true, true, RefactoringStatusCodes.PARAM_NAME_ALREADY_USED);	
 	}
 
 	// Cannot move method if there's no new potential receiver (because of null bindings here)

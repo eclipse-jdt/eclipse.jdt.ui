@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -77,6 +79,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -677,7 +680,7 @@ class InstanceMethodMover {
 				} else if (parent instanceof FieldAccess) {
 					FieldAccess fieldAccess= (FieldAccess) parent;
 					if (fieldAccess.getExpression() instanceof ThisExpression) {
-						Assert.isTrue(expression.equals(fieldAccess.getName()), "expression should syntactically be substitutable by \"this\"");
+						Assert.isTrue(expression.equals(fieldAccess.getName()), "expression should syntactically be substitutable by \"this\""); //$NON-NLS-1$
 						replaceExpressionWithSelfReference(fieldAccess); //recursion
 					} else {
 						Assert.isTrue(expression.equals(fieldAccess.getExpression()), "expression should be an expression for which, syntactically, \"this\" could by substituted, so not the field name in a field access."); //$NON-NLS-1$
@@ -1785,41 +1788,50 @@ class InstanceMethodMover {
 		fInlineDelegator= true;  //default
 		fRemoveDelegator= true;  //default
 		fNewMethodName= fMethodToMove.getName();  //default;
-		fOriginalReceiverParameterName= getTypeBasedVariableName(fMethodToMove.getDeclaringClass());  //default
+		fOriginalReceiverParameterName= guessOriginalReceiverParameterName();  //default
 	}
 
-	private static String getTypeBasedVariableName(ITypeBinding type) {
-		Assert.isNotNull(type);
-		String typeName= type.getName();
-		Assert.isTrue(typeName.length() != 0);
+	private String guessOriginalReceiverParameterName() {
+		ITypeBinding type= fMethodToMove.getDeclaringClass();
+		String typeName= getQualifiedName(type);
+		if (typeName.length() == 0)
+			return ""; //$NON-NLS-1$
+		String[] candidates= NamingConventions.suggestArgumentNames(fMethodToMove.getProject(),
+				"", typeName, type.getDimensions(), getExcludedParameterNames()); //$NON-NLS-1$
+		if (candidates.length > 0)
+			return candidates[0];
+		return ""; //$NON-NLS-1$
+	}
+
+	private static String getQualifiedName(ITypeBinding typeBinding) {
+		if (typeBinding.isAnonymous())
+			return getQualifiedName(typeBinding.getSuperclass());
+		if (! typeBinding.isArray())
+			return typeBinding.getQualifiedName();
+		else
+			return typeBinding.getElementType().getQualifiedName();
+	}
+
+	private String[] getExcludedParameterNames() {
+		ArrayList names= new ArrayList();
+		MethodDeclaration methodDeclaration= fMethodToMove.getMethodDeclaration();
 		
-		int uppercasePrefixEnd= getUppercasePrefixEndExclusive(typeName);
-		return prefixToLowercase(typeName, uppercasePrefixEnd);
+		List params= methodDeclaration.parameters();
+		for (int i= 0; i < params.size(); i++) {
+			names.add(((SingleVariableDeclaration) params.get(i)).getName().getIdentifier());
+		}
+		
+		Block body= methodDeclaration.getBody();
+		if (body != null) { //protect from abstract methods (not checked up to here)
+			IBinding[] variableBindings= new ScopeAnalyzer(((CompilationUnit) methodDeclaration.getRoot())).
+					getDeclarationsAfter(body.getStartPosition(), ScopeAnalyzer.VARIABLES);
+			for (int i= 0; i < variableBindings.length; i++) {
+				names.add(variableBindings[i].getName());
+			}
+		}
+		return (String[]) names.toArray(new String[names.size()]);
 	}
-	
-	private static int getUppercasePrefixEndExclusive(String string) {
-		int i= 0;
-		while(i < string.length() && Character.isUpperCase(string.charAt(i)))
-			i++;
-		return i;
-	}
-	
-	private static String prefixToLowercase(String string, int prefixEndExclusive) {
-		String prefix= toLowercase(string.substring(0, prefixEndExclusive));
-		String suffix= prefixEndExclusive == string.length() ?
-		                   "" //$NON-NLS-1$
-		                   :
-		                   string.substring(prefixEndExclusive);
-		return prefix + suffix;		                   
-	}
-	
-	private static String toLowercase(String string) {
-		String result= ""; //$NON-NLS-1$
-		for(int i= 0; i < string.length(); i++)
-			result += Character.toLowerCase(string.charAt(i));
-		return result;
-	}
-	
+
 	public INewReceiver[] getPossibleNewReceivers() {
 		return fMethodToMove.getPossibleNewReceivers();
 	}
