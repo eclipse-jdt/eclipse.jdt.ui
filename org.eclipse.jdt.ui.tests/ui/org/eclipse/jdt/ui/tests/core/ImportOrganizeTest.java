@@ -1420,7 +1420,49 @@ public class ImportOrganizeTest extends CoreTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
-	
+	public void testVisibility_bug79174() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("public interface A<X> {\n");
+		buf.append("	public interface AX<Y> {\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= sourceFolder.createPackageFragment("pack2", false, null);
+
+		buf= new StringBuffer();
+		buf.append("package pack2;\n");
+		buf.append("\n");
+		buf.append("import pack1.A;\n");
+		buf.append("import pack1.AX;\n");
+		buf.append("public class B implements A<String> {\n");
+		buf.append("	public void foo(AX<String> a) {\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("B.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("testVisibility_bug79174", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack2;\n");
+		buf.append("\n");
+		buf.append("import pack1.A;\n");
+		buf.append("public class B implements A<String> {\n");
+		buf.append("	public void foo(AX<String> a) {\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
 	
 	public void test5() throws Exception {
 	

@@ -152,7 +152,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			if (typeBinding.isMember()) {
 				IBinding[] visibleTypes= fAnalyzer.getDeclarationsInScope(ref, ScopeAnalyzer.TYPES);
 				for (int i= 0; i < visibleTypes.length; i++) {
-					if (visibleTypes[i] == typeBinding) {
+					ITypeBinding curr= ((ITypeBinding) visibleTypes[i]).getTypeDeclaration();
+					if (curr == typeBinding) {
 						return false;
 					}
 				}
@@ -180,9 +181,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						if (typeBinding.isArray()) {
 							typeBinding= typeBinding.getElementType();
 						}
-						if (typeBinding.isParameterizedType()) {
-							typeBinding= typeBinding.getErasure();
-						}
+						typeBinding= typeBinding.getTypeDeclaration();
+
 						if (needsImport(typeBinding, ref)) {
 							fImpStructure.addImport(typeBinding);
 							fImportsAdded.add(typeName);
@@ -362,15 +362,17 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 			fImportsStructure.create(fDoSave, new SubProgressMonitor(monitor, 1));
 			
-			determineImportDifferences(fImportsStructure.getCreatedImports(), oldSingleImports, oldDemandImports);
+			determineImportDifferences(fImportsStructure, oldSingleImports, oldDemandImports);
 			processor= null;
 		} finally {
 			monitor.done();
 		}
 	}
 	
-	private void determineImportDifferences(String[] imports, Set oldSingleImports, Set oldDemandImports) {
-  		ArrayList importsAdded= new ArrayList(Arrays.asList(imports));
+	private void determineImportDifferences(ImportsStructure importsStructure, Set oldSingleImports, Set oldDemandImports) {
+  		ArrayList importsAdded= new ArrayList();
+  		importsAdded.addAll(Arrays.asList(importsStructure.getCreatedImports()));
+  		importsAdded.addAll(Arrays.asList(importsStructure.getCreatedStaticImports()));
 		
 		Object[] content= oldSingleImports.toArray();
 	    for (int i= 0; i < content.length; i++) {
