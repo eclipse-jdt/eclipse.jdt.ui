@@ -74,11 +74,7 @@ class JdtDeleteResourceAction extends ReorgAction {
 			return;
 		}	
 	}
-	
-	private boolean hasOnlyProjects(){
-		return (! getStructuredSelection().isEmpty() && getStructuredSelection().size() == getProjects().size());
-	}
-	
+		
 	private void deleteProjects(){
 		DeleteResourceAction action= new DeleteResourceAction(JavaPlugin.getActiveWorkbenchShell());
 		action.selectionChanged(getStructuredSelection());
@@ -110,28 +106,10 @@ class JdtDeleteResourceAction extends ReorgAction {
 	}
 	
 	private boolean confirmDelete() {
-		Assert.isTrue(getProjects().isEmpty());
+		Assert.isTrue(getSelectedProjects().isEmpty());
 		String title= ReorgMessages.getString("deleteAction.confirm.title"); //$NON-NLS-1$
 		String label= ReorgMessages.getString("deleteAction.confirm.message"); //$NON-NLS-1$
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		return MessageDialog.openConfirm(parent, title, label);
 	}
-	
-	private List getProjects() {
-		List result= new ArrayList(getStructuredSelection().size());
-		for(Iterator iter= getStructuredSelection().iterator(); iter.hasNext(); ) {
-			Object element= iter.next();
-			if (element instanceof IJavaProject) {
-				try {
-					result.add(((IJavaProject)element).getUnderlyingResource());
-				} catch (JavaModelException e) {
-					if (!e.isDoesNotExist()) {
-						//do not show error dialogs in a loop
-						JavaPlugin.log(e);
-					}
-				}
-			}
-		}
-		return result;
-	}	
 }

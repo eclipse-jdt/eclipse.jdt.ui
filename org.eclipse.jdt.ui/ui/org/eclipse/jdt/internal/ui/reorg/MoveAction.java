@@ -26,8 +26,11 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
+import org.eclipse.ui.actions.MoveProjectAction;
+import org.eclipse.ui.actions.MoveResourceAction;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.jdt.core.JavaModelException;
@@ -161,6 +164,27 @@ public class MoveAction extends ReorgDestinationAction {
 	}
 	
 	/* non java-doc
+	 * @see IRefactoringAction#canOperateOn(IStructuredSelection)
+	 */
+	public boolean canOperateOn(IStructuredSelection selection) {
+		if (hasOnlyProjects())
+			return selection.size() == 1;
+		else
+			return super.canOperateOn(selection);
+	}
+	
+	/*
+	 * @see Action#run()
+	 */
+	public void run() {
+		if (hasOnlyProjects()){
+			moveProject();
+		}	else {
+			super.run();
+		}
+	}
+	
+	/* non java-doc
 	 * @see ReorgDestinationAction#doReorg(ReorgRefactoring) 
 	 */
 	void doReorg(ReorgRefactoring refactoring) throws JavaModelException{
@@ -171,6 +195,12 @@ public class MoveAction extends ReorgDestinationAction {
 		//XX incorrect help
 		RefactoringWizard wizard= new RefactoringWizard(refactoring, "Move", IJavaHelpContextIds.MOVE_CU_ERROR_WIZARD_PAGE);
 		new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard).open();	
+	}
+	
+	private void moveProject(){
+		MoveProjectAction action= new MoveProjectAction(JavaPlugin.getActiveWorkbenchShell());
+		action.selectionChanged(getStructuredSelection());
+		action.run();
 	}
 	
 	//--- static inner classes

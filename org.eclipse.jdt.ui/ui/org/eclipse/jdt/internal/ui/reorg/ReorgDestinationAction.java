@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -72,6 +73,9 @@ abstract class ReorgDestinationAction extends ReorgAction {
 		super(name, provider);
 	}
 
+	/*
+	 * @see Action#run()
+	 */
 	public void run() {
 		List elements= getStructuredSelection().toList();
 		if (!ensureSaved(elements, getActionName()))

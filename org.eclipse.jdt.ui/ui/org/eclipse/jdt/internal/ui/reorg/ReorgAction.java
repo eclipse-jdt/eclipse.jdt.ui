@@ -5,6 +5,9 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.MultiStatus;
@@ -12,7 +15,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -36,6 +41,28 @@ public abstract class ReorgAction extends RefactoringAction {
 	public ReorgAction(String name, ISelectionProvider p) {
 		super(name, p);
 	}
+	
+	protected boolean hasOnlyProjects(){
+		return (! getStructuredSelection().isEmpty() && getStructuredSelection().size() == getSelectedProjects().size());
+	}
+	
+	List getSelectedProjects() {
+		List result= new ArrayList(getStructuredSelection().size());
+		for(Iterator iter= getStructuredSelection().iterator(); iter.hasNext(); ) {
+			Object element= iter.next();
+			if (element instanceof IJavaProject) {
+				try {
+					result.add(((IJavaProject)element).getUnderlyingResource());
+				} catch (JavaModelException e) {
+					if (!e.isDoesNotExist()) {
+						//do not show error dialogs in a loop
+						JavaPlugin.log(e);
+					}
+				}
+			}
+		}
+		return result;
+	}	
 	
 	static boolean canActivate(Refactoring ref){
 		try {
@@ -63,5 +90,5 @@ public abstract class ReorgAction extends RefactoringAction {
 			//fall thru
 		}
 		return handler.getStatus();
-	}	
+	}		
 }
