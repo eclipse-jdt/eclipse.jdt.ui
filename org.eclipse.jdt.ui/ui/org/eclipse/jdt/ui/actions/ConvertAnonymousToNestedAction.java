@@ -84,8 +84,6 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 	}
 	
 	private boolean checkEnabled(ITextSelection selection) {
-		if (true)
-			return false;
 		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
 	}
 	
