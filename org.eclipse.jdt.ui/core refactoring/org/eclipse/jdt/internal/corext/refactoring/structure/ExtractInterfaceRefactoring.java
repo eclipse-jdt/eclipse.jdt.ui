@@ -113,8 +113,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return new ExtractInterfaceRefactoring(type, codeGenerationSettings);
 	}
 	
-	public static boolean isAvailable(IType type) throws JavaModelException{
-		if (! Checks.isAvailable(type) || type.isLocal() || type.isAnonymous())
+	public static boolean isAvailable(IType type) throws JavaModelException {
+		if (! Checks.isAvailable(type))
 			return false;
 
 		//for now
