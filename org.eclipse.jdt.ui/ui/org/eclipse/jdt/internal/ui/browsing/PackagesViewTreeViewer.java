@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
@@ -84,6 +85,34 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 			}
 		}
 		return list.toArray();
+	}
+	
+	
+	/*
+	 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object[])
+	 * @since 3.0
+	 */
+	protected Object[] filter(Object[] elements) {
+		ViewerFilter[] filters= getFilters();
+		if (filters == null || filters.length == 0)
+			return elements;
+		
+		ArrayList filtered= new ArrayList(elements.length);
+		Object root= getRoot();
+		for (int i= 0; i < elements.length; i++) {
+			boolean add= true;
+			if (!isEssential(elements[i])) {
+				for (int j = 0; j < filters.length; j++) {
+					add= filters[j].select(this, root,
+						elements[i]);
+					if (!add)
+						break;
+				}
+			}
+			if (add)
+				filtered.add(elements[i]);
+		}
+		return filtered.toArray();
 	}
 	
 	/*
