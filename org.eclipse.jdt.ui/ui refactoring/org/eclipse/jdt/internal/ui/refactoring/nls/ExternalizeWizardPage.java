@@ -355,7 +355,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		l1.setImage(getNLSImage(NLSSubstitution.TRANSLATE));
 		l1.setLayoutData(new GridData());
 		fTranslateLabel= new Label(labelComposite, SWT.NONE);
-		GridData gdata= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.GRAB_HORIZONTAL);
+		GridData gdata= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
 		gdata.widthHint= 100;
 		fTranslateLabel.setLayoutData(gdata);
 		
@@ -363,7 +363,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		l2.setImage(getNLSImage(NLSSubstitution.NEVER_TRANSLATE));
 		l2.setLayoutData(new GridData());
 		fNoTranslateLabel= new Label(labelComposite, SWT.NONE);
-		gdata= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.GRAB_HORIZONTAL);
+		gdata= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
 		gdata.widthHint= 100;
 		fNoTranslateLabel.setLayoutData(gdata);
 
@@ -371,7 +371,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		l3.setImage(getNLSImage(NLSSubstitution.SKIP));
 		l3.setLayoutData(new GridData());
 		fSkipLabel= new Label(labelComposite, SWT.NONE);
-		gdata= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.GRAB_HORIZONTAL);
+		gdata= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
 		gdata.widthHint= 100;
 		fSkipLabel.setLayoutData(gdata);
 		
@@ -380,24 +380,22 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	
 	private void createTableComposite(Composite parent) {
 		Composite comp= new Composite(parent, SWT.NONE);
-		GridLayout gl= new GridLayout();
-		gl.numColumns= 2;
-		
 		comp.setLayoutData(new GridData(GridData.FILL_BOTH));
-
-		comp.setLayout(gl);
+		comp.setLayout(new GridLayout());
+		
+		Label l= new Label(comp, SWT.NONE);
+		l.setText(NLSUIMessages.getString("wizardPage.strings_to_externalize")); //$NON-NLS-1$
+		l.setLayoutData(new GridData());
+		
 		createTable(comp);
-		createButtonComposite(comp);
 	}
 	
 	private void createTable(Composite parent){
 		Composite c= new Composite(parent, SWT.NONE);
-		c.setLayout(new GridLayout());
+		GridLayout gl= new GridLayout();
+		gl.numColumns= 2;
+		c.setLayout(gl);
 		c.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
-		Label l= new Label(c, SWT.NONE);
-		l.setText(NLSUIMessages.getString("wizardPage.strings_to_externalize")); //$NON-NLS-1$
-		l.setLayoutData(new GridData());
 		
 		fTable= new Table(c, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION | SWT.HIDE_SELECTION | SWT.BORDER);
 		fTable.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -420,6 +418,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			tc.setResizable(columnLayoutData[i].resizable);
 			tc.setText(fgTitles[i]);
 		}
+		
+		createButtonComposite(c);	
 	}
 	
 	private void createButtonComposite(Composite parent){
