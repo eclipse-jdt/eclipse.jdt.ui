@@ -226,7 +226,7 @@ public class PushDownRefactoring extends Refactoring {
 	private IType[] fTypesReferencedInPushedDownMembers;
 	
 	private PushDownRefactoring(IMember[] members, CodeGenerationSettings preferenceSettings){
-		Assert.isTrue(members.length > 0);
+		Assert.isNotNull(members);
 		Assert.isNotNull(preferenceSettings);
 		fSelectedMembers= (IMember[])SourceReferenceUtil.sortByOffset(members);
 		fImportEditManager= new ImportEditManager(preferenceSettings);
@@ -235,16 +235,35 @@ public class PushDownRefactoring extends Refactoring {
 	public static PushDownRefactoring create(IMember[] members, CodeGenerationSettings preferenceSettings) throws JavaModelException{
 		if (! isAvailable(members))
 			return null;
+		if (isOneTypeWithPushableMembers(members)) {
+			PushDownRefactoring result= new PushDownRefactoring(new IMember[0], preferenceSettings);
+			result.fCachedDeclaringClass= getSingleTopLevelType(members);
+			return result;
+		}
 		return new PushDownRefactoring(members, preferenceSettings);
 	}
 	
 	public static boolean isAvailable(IMember[] members) throws JavaModelException{
+		if (isOneTypeWithPushableMembers(members))
+			return true;
+
 		return 	members != null &&
 				members.length != 0 &&
 				areAllPushable(members) &&
 				haveCommonDeclaringType(members);
 	}
 	
+	private static boolean isOneTypeWithPushableMembers(IMember[] members) throws JavaModelException {
+		IType singleTopLevelType= getSingleTopLevelType(members);
+		return (singleTopLevelType != null && getPushableMembers(singleTopLevelType).length != 0);
+	}
+	
+	private static IType getSingleTopLevelType(IMember[] members) {
+		if (members != null && members.length == 1 && Checks.isTopLevelType(members[0]))
+			return (IType)members[0];
+		return null;
+	}
+		
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
@@ -357,18 +376,26 @@ public class PushDownRefactoring extends Refactoring {
 	}
 
 	private static MemberActionInfo[] createInfosForAllPushableFieldsAndMethods(IType type) throws JavaModelException {
-		IMethod[] methods= type.getMethods();
-		IField[] fields= type.getFields();
-		List result= new ArrayList(methods.length + fields.length);
-		for (int i= 0; i < methods.length; i++) {
-			if (isPushable(methods[i]))
-				result.add(MemberActionInfo.create(methods[i]));
-		}
-		for (int i= 0; i < fields.length; i++) {
-			if (isPushable(fields[i]))
-				result.add(MemberActionInfo.create(fields[i]));
+		List result= new ArrayList();
+		IMember[] pushableMembers= getPushableMembers(type);
+		for (int i= 0; i < pushableMembers.length; i++) {
+			result.add(MemberActionInfo.create(pushableMembers[i]));
 		}
 		return (MemberActionInfo[]) result.toArray(new MemberActionInfo[result.size()]);
+	}
+
+	private static IMember[] getPushableMembers(IType type) throws JavaModelException {
+		List list= new ArrayList(3);
+		addAllPushable(type.getFields(), list);
+		addAllPushable(type.getMethods(), list);
+		return (IMember[]) list.toArray(new IMember[list.size()]);
+	}
+
+	private static void addAllPushable(IMember[] members, List list) throws JavaModelException{
+		for (int i= 0; i < members.length; i++) {
+			if (isPushable(members[i]))
+				list.add(members[i]);
+		}	
 	}
 
 	private static boolean isPushable(IMember member) throws JavaModelException {
@@ -793,7 +820,7 @@ public class PushDownRefactoring extends Refactoring {
 	private void addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, ASTRewrite rewrite) throws CoreException {
 		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
 		TextEdit resultingEdits= new MultiTextEdit();
-		rewrite.rewriteNode(textBuffer, resultingEdits, null);
+		rewrite.rewriteNode(textBuffer, resultingEdits);
 
 		TextChange textChange= manager.get(cu);
 		if (fImportEditManager.hasImportEditFor(cu))
