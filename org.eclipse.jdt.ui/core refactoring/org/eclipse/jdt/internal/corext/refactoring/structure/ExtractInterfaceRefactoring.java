@@ -254,11 +254,11 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		}
 	}
 
-	private IFile[] getAllFilesToModify() throws CoreException{
+	private IFile[] getAllFilesToModify(){
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
 	
-	private RefactoringStatus validateModifiesFiles() throws CoreException{
+	private RefactoringStatus validateModifiesFiles(){
 		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 
@@ -582,7 +582,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			return iMethod.getSourceRange().getLength() - methodDeclaration.getBody().getLength() - preDeclarationSourceLength;
 	}
 
-	private IField[] getExtractedFields(ICompilationUnit cu) throws JavaModelException {
+	private IField[] getExtractedFields(ICompilationUnit cu){
 		List fields= new ArrayList();
 		for (int i= 0; i < fExtractedMembers.length; i++) {
 			if (fExtractedMembers[i] instanceof IField){
@@ -594,7 +594,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return (IField[]) fields.toArray(new IField[fields.size()]);
 	}
 
-	private IMethod[] getExtractedMethods(ICompilationUnit cu) throws JavaModelException {
+	private IMethod[] getExtractedMethods(ICompilationUnit cu){
 		List methods= new ArrayList();
 		for (int i= 0; i < fExtractedMembers.length; i++) {
 			if (fExtractedMembers[i] instanceof IMethod){

@@ -290,7 +290,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return RefactoringStatus.createErrorStatus(message);
 	}
 
-	private RefactoringStatus checkConstructorParameterNames() throws JavaModelException{
+	private RefactoringStatus checkConstructorParameterNames(){
 		RefactoringStatus result= new RefactoringStatus();
 		CompilationUnit cuNode= AST.parseCompilationUnit(getInputTypeCu(), false);
 		TypeDeclaration type= findTypeDeclaration(fType, cuNode);
@@ -529,7 +529,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	//Map<ICompilationUnit, SearchResult[]>
-	private static Map createSearchResultMapping(SearchResultGroup[] groups) throws JavaModelException {
+	private static Map createSearchResultMapping(SearchResultGroup[] groups){
 		Map result= new HashMap();
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
@@ -566,7 +566,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return resultingEdit;
 	}
 
-	private void modifyAccessesToMembersFromEnclosingInstance(TypeDeclaration typeDeclaration, ASTRewrite rewrite) throws CoreException {
+	private void modifyAccessesToMembersFromEnclosingInstance(TypeDeclaration typeDeclaration, ASTRewrite rewrite) {
 		MemberAccessNodeCollector collector= new MemberAccessNodeCollector(getEnclosingType());
 		typeDeclaration.accept(collector);
 		modifyAccessToMethodsFromEnclosingInstance(rewrite, collector.getMethodInvocations(), typeDeclaration);
@@ -574,7 +574,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		modifyAccessToFieldsFromEnclosingInstance(rewrite, collector.getSimpleFieldNames(), typeDeclaration);
 	}
 	
-	private void modifyAccessToFieldsFromEnclosingInstance(ASTRewrite rewrite, SimpleName[] simpleNames, TypeDeclaration inputType) throws JavaModelException {
+	private void modifyAccessToFieldsFromEnclosingInstance(ASTRewrite rewrite, SimpleName[] simpleNames, TypeDeclaration inputType) {
 		for (int i= 0; i < simpleNames.length; i++) {
 			SimpleName simpleName= simpleNames[i];
 			IBinding vb= simpleName.resolveBinding();
@@ -588,7 +588,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		}
 	}
 
-	private void modifyAccessToFieldsFromEnclosingInstance(ASTRewrite rewrite, FieldAccess[] fieldAccesses, TypeDeclaration inputType) throws JavaModelException {
+	private void modifyAccessToFieldsFromEnclosingInstance(ASTRewrite rewrite, FieldAccess[] fieldAccesses, TypeDeclaration inputType) {
 		for (int i= 0; i < fieldAccesses.length; i++) {
 			FieldAccess fieldAccess= fieldAccesses[i];
 			Assert.isNotNull(fieldAccess.getExpression());
@@ -603,7 +603,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		}
 	}
 
-	private void modifyAccessToMethodsFromEnclosingInstance(ASTRewrite rewrite, MethodInvocation[] methodInvocations, TypeDeclaration inputType) throws CoreException {
+	private void modifyAccessToMethodsFromEnclosingInstance(ASTRewrite rewrite, MethodInvocation[] methodInvocations, TypeDeclaration inputType) {
 		for (int i= 0; i < methodInvocations.length; i++) {
 			MethodInvocation methodInvocation= methodInvocations[i];
 			IMethodBinding mb= methodInvocation.resolveMethodBinding();
@@ -627,7 +627,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return Modifier.isStatic(binding.getModifiers());
 	}
 
-	private Expression createAccessExpressionToEnclosingInstanceFieldText(ASTNode node, IBinding binding, TypeDeclaration inputType) throws JavaModelException {
+	private Expression createAccessExpressionToEnclosingInstanceFieldText(ASTNode node, IBinding binding, TypeDeclaration inputType) {
 		if (isStatic(binding))
 			return getNameOfTypeOfEnclosingInstanceField(node.getAST());
 		else if (isInTypeNestedInInputType(node, inputType))
@@ -636,19 +636,19 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			return createReadAccessExpressionForEnclosingInstance(node.getAST());
 	}
 
-	private boolean isInTypeNestedInInputType(ASTNode node, TypeDeclaration inputType) throws JavaModelException{
+	private boolean isInTypeNestedInInputType(ASTNode node, TypeDeclaration inputType){
 		return (isInAnonymousTypeInsideInputType(node, inputType) ||
 				isInLocalTypeInsideInputType(node, inputType) ||
 				isInNonStaticMemberTypeInsideInputType(node, inputType));
 	}
 	
 
-	private boolean isInLocalTypeInsideInputType(ASTNode node, TypeDeclaration inputType) throws JavaModelException {
+	private boolean isInLocalTypeInsideInputType(ASTNode node, TypeDeclaration inputType) {
 		TypeDeclarationStatement localType= (TypeDeclarationStatement)ASTNodes.getParent(node, TypeDeclarationStatement.class);
 		return localType != null && ASTNodes.isParent(localType, inputType);
 	}
 
-	private boolean isInNonStaticMemberTypeInsideInputType(ASTNode node, TypeDeclaration inputType) throws JavaModelException {
+	private boolean isInNonStaticMemberTypeInsideInputType(ASTNode node, TypeDeclaration inputType) {
 		TypeDeclaration nested= (TypeDeclaration)ASTNodes.getParent(node, TypeDeclaration.class);
 		return nested != null && 
 				! inputType.equals(nested) && 
@@ -656,7 +656,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				ASTNodes.isParent(nested, inputType);
 	}
 
-	private boolean isInAnonymousTypeInsideInputType(ASTNode node, TypeDeclaration inputType)throws JavaModelException {
+	private boolean isInAnonymousTypeInsideInputType(ASTNode node, TypeDeclaration inputType) {
 		AnonymousClassDeclaration anon= (AnonymousClassDeclaration)ASTNodes.getParent(node, AnonymousClassDeclaration.class);
 		return anon != null && ASTNodes.isParent(anon, inputType);
 	}
@@ -743,7 +743,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return new String[]{getTypeOfEnclosingInstanceField()};
 	}
 
-	private void addEnclosingInstanceDeclaration(TypeDeclaration type, ASTRewrite rewrite) throws JavaModelException{
+	private void addEnclosingInstanceDeclaration(TypeDeclaration type, ASTRewrite rewrite){
 		VariableDeclarationFragment fragment= type.getAST().newVariableDeclarationFragment();
 		fragment.setName(type.getAST().newSimpleName(fEnclosingInstanceFieldName));
 		FieldDeclaration newField= type.getAST().newFieldDeclaration(fragment);
@@ -875,17 +875,17 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		is.create(false, pm);
 	}
 
-	private String createTypeSource() throws CoreException {
+	private String createTypeSource() {
 		return alignSourceBlock(fNewSourceOfInputType);
 	}
 	
-	private String alignSourceBlock(String typeCodeBlock) throws CoreException {
+	private String alignSourceBlock(String typeCodeBlock) {
 		String[] lines= Strings.convertIntoLines(typeCodeBlock);
 		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
 		return Strings.concatenate(lines, getLineSeperator());
 	}
 
-	private IPath createPathForNewCu() throws JavaModelException {
+	private IPath createPathForNewCu() {
 		return ResourceUtil.getFile(getInputTypeCu()).getFullPath().removeLastSegments(1).append(getNameForNewCu());
 	}
 
@@ -901,11 +901,11 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		}
 	}
 
-	private IFile[] getAllFilesToModify() throws CoreException{
+	private IFile[] getAllFilesToModify(){
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
 	
-	private RefactoringStatus validateModifiesFiles() throws CoreException{
+	private RefactoringStatus validateModifiesFiles(){
 		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 
