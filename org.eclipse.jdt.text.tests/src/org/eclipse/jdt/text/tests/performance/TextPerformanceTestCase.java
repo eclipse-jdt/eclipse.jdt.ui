@@ -33,6 +33,9 @@ import junit.framework.TestCase;
  * @since 3.1
  */
 public class TextPerformanceTestCase extends TestCase {
+	
+	private static final boolean DEBUG= false;
+
 
 	/** containing plug-in id */
 	private static final String PLUGIN_ID= JdtTextTestPlugin.PLUGIN_ID;
@@ -91,8 +94,8 @@ public class TextPerformanceTestCase extends TestCase {
 	 */
 	protected void setUp() throws Exception {
 		super.setUp();
-		// FIXME: only added for temporary debugging purpose
-		System.out.println(getClass().getName() + "." + getName() + ": " + System.currentTimeMillis());
+		if (DEBUG)
+			System.out.println(getClass().getName() + "." + getName() + ": " + System.currentTimeMillis());
 	}
 	
 	/*
@@ -104,8 +107,8 @@ public class TextPerformanceTestCase extends TestCase {
 			for (Iterator iter= fPerformanceMeters.iterator(); iter.hasNext();)
 				((PerformanceMeter) iter.next()).dispose();
 
-		// FIXME: only added for temporary debugging purpose
-		System.out.println("    teared down: " + System.currentTimeMillis());
+		if (DEBUG)
+			System.out.println("    teared down: " + System.currentTimeMillis());
 	}
 	
 	/**

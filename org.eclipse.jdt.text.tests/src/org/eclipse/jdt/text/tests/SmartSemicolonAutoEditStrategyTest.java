@@ -97,8 +97,10 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 	}
 	
 	public void testGoToExisting() throws BadLocationException {
-		System.out.println("testGoToExisting disabled - unwanted functionality");
-		if (true) return;
+		if (true) {
+			System.out.println("testGoToExisting disabled - unwanted functionality");
+			return;
+		}
 		fDocument.set("public void; foobar()");
 		verifySemicolonPosition(5, 11);
 	}
@@ -119,8 +121,10 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 	}
 	
 	public void testWithExistingAtInsertPosition() throws BadLocationException {
-		System.out.println("testWithExistingAtInsertPosition disabled - existing characters handled by framework");
-		if (true) return;
+		if (true) {
+			System.out.println("testWithExistingAtInsertPosition disabled - existing characters handled by framework");
+			return;
+		}
 		fDocument.set("public void foobar(); // comment\r\n");
 		verifySemicolonPosition(12, 12);
 	}

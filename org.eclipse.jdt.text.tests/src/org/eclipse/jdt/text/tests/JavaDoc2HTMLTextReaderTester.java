@@ -31,7 +31,8 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 
 public class JavaDoc2HTMLTextReaderTester extends TestCase {
 
-	private boolean isVerbose= false;
+	private static final boolean DEBUG= false;
+	
 	
 	public JavaDoc2HTMLTextReaderTester(String name) {
 		super(name);
@@ -48,7 +49,7 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 	
 	private void verify(String string, String expected){
 		String result = getTransformedJavaDoc(string);
-		if (isVerbose)
+		if (DEBUG)
 			System.out.println("result:" + result); //$NON-NLS-1$
 		assertEquals(expected, result);
 	}

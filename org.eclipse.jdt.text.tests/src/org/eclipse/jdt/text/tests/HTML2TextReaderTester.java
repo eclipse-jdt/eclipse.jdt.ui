@@ -22,7 +22,8 @@ import org.eclipse.jdt.internal.ui.text.HTML2TextReader;
 
 public class HTML2TextReaderTester extends TestCase {
 
-	private boolean isVerbose= false;
+	private static final boolean DEBUG= false;
+	
 	private static final String LD= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	public HTML2TextReaderTester(String name) {
@@ -37,7 +38,7 @@ public class HTML2TextReaderTester extends TestCase {
 		Reader reader= new StringReader(input);
 		HTML2TextReader htmlReader= new HTML2TextReader(reader, null);
 		String result= htmlReader.getString();
-		if (isVerbose)
+		if (DEBUG)
 			System.out.println("<"+ result +"/>");
 		assertEquals(expectedOutput, result);		
 	}
