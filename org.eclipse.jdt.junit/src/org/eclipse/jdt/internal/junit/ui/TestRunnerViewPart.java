@@ -777,7 +777,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		IActionBars actionBars= getViewSite().getActionBars();
 		IToolBarManager toolBar= actionBars.getToolBarManager();
 		fRerunLastTestAction= new RerunLastAction();
-		fRerunLastTestAction.setActionDefinitionId("org.eclipse.jdt.junit.reruntest");
+		fRerunLastTestAction.setActionDefinitionId("org.eclipse.jdt.junit.reruntest"); //$NON-NLS-1$
 		toolBar.add(new StopAction());
 		toolBar.add(fRerunLastTestAction);
 
