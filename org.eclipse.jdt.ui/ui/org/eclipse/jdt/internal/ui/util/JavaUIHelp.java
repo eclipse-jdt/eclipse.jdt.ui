@@ -25,9 +25,10 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 
-import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPart;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -46,14 +47,16 @@ public class JavaUIHelp {
 		text.addHelpListener(listener);
 	}
 	
-	public static IContextProvider getHelpContextProvider(IViewPart part, String contextId) {
-		ISelection selection= part.getViewSite().getSelectionProvider().getSelection();
-		if (!(selection instanceof StructuredSelection)) 
-			return null;
-		Object[] elements= ((StructuredSelection)selection).toArray();
-		if (elements.length == 0)
-			return null;
-		return new JavaViewerContextProvider(contextId, elements);
+	public static IContextProvider getHelpContextProvider(IWorkbenchPart part, String contextId) {
+		IStructuredSelection selection;
+		try {
+			selection= SelectionConverter.getStructuredSelection(part);
+		} catch (JavaModelException ex) {
+			JavaPlugin.log(ex);
+			selection= StructuredSelection.EMPTY;
+		}
+		Object[] elements= selection.toArray();
+		return new JavaUIHelpContextProvider(contextId, elements);
 	}
 
 	private static class JavaUIHelpListener implements HelpListener {
@@ -97,10 +100,10 @@ public class JavaUIHelp {
 		}
 	}
 
-	private static class JavaViewerContextProvider implements IContextProvider {
+	private static class JavaUIHelpContextProvider implements IContextProvider {
 		private String fId;
 		private Object[] fSelected;
-		public JavaViewerContextProvider(String id, Object[] selected) {
+		public JavaUIHelpContextProvider(String id, Object[] selected) {
 			fId= id;
 			fSelected= selected;
 		}

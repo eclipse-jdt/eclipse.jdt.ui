@@ -97,11 +97,13 @@ public class JavadocHelpContext implements IContext {
 		for (int i= 0; i < elements.length; i++) {
 			if (elements[i] instanceof IJavaElement) {
 				IJavaElement element= (IJavaElement) elements[i];
-				if (fText == null) {
-					fText= retrieveText(element);
-				} else {
-					fText= ""; // no doc on multiple selection //$NON-NLS-1$
-				}					
+				
+				// Looks ugly in new Help view
+//				if (fText == null) {
+//					fText= retrieveText(element);
+//				} else {
+//					fText= ""; // no doc on multiple selection //$NON-NLS-1$
+//				}					
 				
 				URL url= JavaUI.getJavadocLocation(element, true);
 				if (url == null || doesNotExist(url)) {
