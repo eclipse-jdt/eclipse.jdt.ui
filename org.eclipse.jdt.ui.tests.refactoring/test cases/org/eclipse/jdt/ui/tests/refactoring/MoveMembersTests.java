@@ -281,6 +281,18 @@ public class MoveMembersTests extends RefactoringTest {
 		fieldMethodHelper_passingTest(new String[0], new String[]{"m", "n"}, new String[][]{new String[0], new String[0]});
 	}
 	
+	public void test29() throws Exception{ //test for bug 41691
+		fieldMethodHelper_passingTest(new String[0], new String[]{"m"}, new String[][]{new String[0]});
+	}
+
+	public void test30() throws Exception{ //test for bug 41691
+		fieldMethodHelper_passingTest(new String[]{"id"}, new String[0], new String[0][0]);
+	}
+
+	public void test31() throws Exception{ //test for bug 41691
+		fieldMethodHelper_passingTest(new String[]{"odd"}, new String[0], new String[0][0]);
+	}
+
 	//---
 	public void testFail0() throws Exception{
 		fieldMethodHelper_failingTest(new String[0], 
