@@ -65,11 +65,11 @@ public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 		RefactoringStatus status= analyzer.getStatus();
 		switch (mode) {
 			case VALID_SELECTION:
-				System.out.println(status);
+				//System.out.println(status);
 				assertTrue(status.isOK());
 				break;
 			case INVALID_SELECTION:
-				System.out.println(status);
+				//System.out.println(status);
 				assertTrue(!status.isOK());
 				break;
 		}
@@ -159,8 +159,8 @@ public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 		invalidSelectionTest();
 	}
 	
-	public void test041() throws Exception {
-		invalidSelectionTest();
+	public void test041_() throws Exception {
+		validSelectionTest();
 	}
 	
 	public void test042() throws Exception {
@@ -187,8 +187,8 @@ public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 		invalidSelectionTest();
 	}
 	
-	public void test048() throws Exception {
-		invalidSelectionTest();
+	public void test048_() throws Exception {
+		validSelectionTest();
 	}
 	
 	//---- While
@@ -243,8 +243,8 @@ public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 	
 	//---- if then else
 	
-	public void test080() throws Exception {
-		invalidSelectionTest();
+	public void test080_() throws Exception {
+		validSelectionTest();
 	}
 	
 	public void test081() throws Exception {
@@ -269,38 +269,38 @@ public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 	
 	//---- Break
 	
-	public void test090() throws Exception {
-		invalidSelectionTest();
+	public void test090_() throws Exception {
+		validSelectionTest();
 	}
 	
-	public void test091() throws Exception {
-		invalidSelectionTest();
+	public void test091_() throws Exception {
+		validSelectionTest();
 	}
 	
-	public void test092() throws Exception {
-		invalidSelectionTest();
+	public void test092_() throws Exception {
+		validSelectionTest();
 	}
 	
-	public void test093() throws Exception {
-		invalidSelectionTest();
+	public void test093_() throws Exception {
+		validSelectionTest();
 	}
 	
-	public void test094() throws Exception {
-		invalidSelectionTest();
+	public void test094_() throws Exception {
+		validSelectionTest();
 	}
 	
-	public void test095() throws Exception {
-		invalidSelectionTest();
+	public void test095_() throws Exception {
+		validSelectionTest();
 	}
 	
-	public void test096() throws Exception {
-		invalidSelectionTest();
+	public void test096_() throws Exception {
+		validSelectionTest();
 	}
 	
 	//---- Try / catch / finally
 	
-	public void test100() throws Exception {
-		invalidSelectionTest();
+	public void test100_() throws Exception {
+		validSelectionTest();
 	}
 	
 	public void test101() throws Exception {
@@ -311,8 +311,8 @@ public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 		invalidSelectionTest();
 	}
 	
-	public void test103() throws Exception {
-		invalidSelectionTest();
+	public void test103_() throws Exception {
+		validSelectionTest();
 	}
 	
 	public void test104() throws Exception {
@@ -323,8 +323,8 @@ public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 		invalidSelectionTest();
 	}
 	
-	public void test106() throws Exception {
-		invalidSelectionTest();
+	public void test106_() throws Exception {
+		validSelectionTest();
 	}
 	
 	public void test107() throws Exception {
@@ -369,18 +369,18 @@ public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 		invalidSelectionTest();
 	}
 	
-	public void test121() throws Exception {
-		invalidSelectionTest();
+	public void test121_() throws Exception {
+		validSelectionTest();
 	}
 	
-	public void test122() throws Exception {
-		invalidSelectionTest();
+	public void test122_() throws Exception {
+		validSelectionTest();
 	}
 	
 	//---- invalid local type selection
 	
-	public void test130() throws Exception {
-		invalidSelectionTest();
+	public void test130_() throws Exception {
+		validSelectionTest();
 	}
 	
 	public void test131() throws Exception {
@@ -389,44 +389,44 @@ public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 	
 	//---- invalid return statement selection
 	
-	public void test140() throws Exception {
-		invalidSelectionTest();
+	public void test140_() throws Exception {
+		validSelectionTest();
 	}
 	
-	public void test141() throws Exception {
-		invalidSelectionTest();
+	public void test141_() throws Exception {
+		validSelectionTest();
 	}
 	
-	public void test142() throws Exception {
-		invalidSelectionTest();
+	public void test142_() throws Exception {
+		validSelectionTest();
 	}
 	
-	public void test143() throws Exception {
-		invalidSelectionTest();
+	public void test143_() throws Exception {
+		validSelectionTest();
 	}
 	
-	public void test144() throws Exception {
-		invalidSelectionTest();
+	public void test144_() throws Exception {
+		validSelectionTest();
 	}
 	
-	public void test145() throws Exception {
-		invalidSelectionTest();
+	public void test145_() throws Exception {
+		validSelectionTest();
 	}
 	
-	public void test146() throws Exception {
-		invalidSelectionTest();
+	public void test146_() throws Exception {
+		validSelectionTest();
 	}
 	
-	public void test147() throws Exception {
-		invalidSelectionTest();
+	public void test147_() throws Exception {
+		validSelectionTest();
 	}
 	
-	public void test148() throws Exception {
-		invalidSelectionTest();
+	public void test148_() throws Exception {
+		validSelectionTest();
 	}
 	
-	public void test149() throws Exception {
-		invalidSelectionTest();
+	public void test149_() throws Exception {
+		validSelectionTest();
 	}
 	
 	//---- Synchronized statement
@@ -479,18 +479,18 @@ public class SelectionAnalyzerTests extends AbstractSelectionTestCase {
 
 	//---- Constructor
 	
-	public void test180() throws Exception {
-		invalidSelectionTest();
+	public void test180_() throws Exception {
+		validSelectionTest();
 	}
 	
-	public void test181() throws Exception {
-		invalidSelectionTest();
+	public void test181_() throws Exception {
+		validSelectionTest();
 	}
 	
 	//---- More return statement handling
 	
-	public void test190() throws Exception {
-		invalidSelectionTest();
+	public void test190_() throws Exception {
+		validSelectionTest();
 	}
 	
 	//====================================================================================
