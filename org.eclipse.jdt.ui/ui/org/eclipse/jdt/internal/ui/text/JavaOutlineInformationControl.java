@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
@@ -65,6 +62,7 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
+import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -92,11 +90,12 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 	 * @since 2.0
 	 */
 	private static class NamePatternFilter extends ViewerFilter {
-		private Matcher fMatcher;
+		private String fPattern;
+		private StringMatcher fMatcher;
 		private ILabelProvider fLabelProvider;
 		private Viewer fViewer;
 
-		private Matcher getMatcher() {
+		private StringMatcher getMatcher() {
 			return fMatcher;
 		}
 
@@ -116,7 +115,7 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 			else if (element instanceof IJavaElement)
 				matchName= ((IJavaElement) element).getElementName();
 
-			if (matchName != null && fMatcher.reset(matchName).matches())
+			if (matchName != null && fMatcher.match(matchName))
 				return true;
 
 			return hasUnfilteredChild(viewer, element);
@@ -161,76 +160,13 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 		 * </p>
 		 */
 		public void setPattern(String pattern) {
-			if (pattern == null) {
+			fPattern= pattern;
+			if (fPattern == null) {
 				fMatcher= null;
 				return;
 			}
 			boolean ignoreCase= pattern.toLowerCase().equals(pattern);
-			pattern= asRegEx(pattern);
-			if (ignoreCase)
-				fMatcher= Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(""); //$NON-NLS-1$
-			else
-				fMatcher= Pattern.compile(pattern).matcher(""); //$NON-NLS-1$
-		}
-
-		/*
-		 * Converts '*' and '?' to regEx variables.
-		 */
-		private String asRegEx(String pattern) {
-			
-			StringBuffer out= new StringBuffer(pattern.length());
-			
-			boolean escaped= false;
-			boolean quoting= false;
-		
-			int i= 0;
-			while (i < pattern.length()) {
-				char ch= pattern.charAt(i++);
-		
-				if (ch == '*' && !escaped) {
-					if (quoting) {
-						out.append("\\E"); //$NON-NLS-1$
-						quoting= false;
-					}
-					out.append(".*"); //$NON-NLS-1$
-					escaped= false;
-					continue;
-				} else if (ch == '?' && !escaped) {
-					if (quoting) {
-						out.append("\\E"); //$NON-NLS-1$
-						quoting= false;
-					}
-					out.append("."); //$NON-NLS-1$
-					escaped= false;
-					continue;
-				} else if (ch == '\\' && !escaped) {
-					escaped= true;
-					continue;								
-		
-				} else if (ch == '\\' && escaped) {
-					escaped= false;
-					if (quoting) {
-						out.append("\\E"); //$NON-NLS-1$
-						quoting= false;
-					}
-					out.append("\\\\"); //$NON-NLS-1$
-					continue;								
-				}
-		
-				if (!quoting) {
-					out.append("\\Q"); //$NON-NLS-1$
-					quoting= true;
-				}
-				if (escaped && ch != '*' && ch != '?' && ch != '\\')
-					out.append('\\');
-				out.append(ch);
-				escaped= ch == '\\';
-		
-			}
-			if (quoting)
-				out.append("\\E"); //$NON-NLS-1$
-			
-			return out.toString();
+			fMatcher= new StringMatcher(pattern, ignoreCase, false);
 		}
 	}
 
@@ -314,7 +250,7 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 	/** The control height constraint */
 	private int fMaxHeight= -1;
 
-	private Matcher fStringMatcher;
+	private StringMatcher fStringMatcher;
 
 
 	/**
@@ -515,7 +451,7 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 			
 			if (element != null) {
 				String label= labelProvider.getText(element);
-				if (fStringMatcher.reset(label).matches())
+				if (fStringMatcher.match(label))
 					return element;
 			}
 
