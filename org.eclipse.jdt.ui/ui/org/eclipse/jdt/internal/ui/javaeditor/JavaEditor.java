@@ -3126,7 +3126,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			
 			fProjectionModelUpdater= new JavaProjectionModelUpdater();
 			fProjectionModelUpdater.install(this, projectionViewer);		
-			fProjectionModelUpdater.initialize();
 		}
 		
 		IInformationControlCreator informationControlCreator= new IInformationControlCreator() {
