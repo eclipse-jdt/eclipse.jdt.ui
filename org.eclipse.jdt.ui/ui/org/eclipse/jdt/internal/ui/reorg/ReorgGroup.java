@@ -4,19 +4,14 @@
  */
 package org.eclipse.jdt.internal.ui.reorg;
 
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.core.refactoring.rename.RenameJavaProjectRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.viewers.ISelectionProvider;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
-import org.eclipse.jdt.internal.ui.refactoring.actions.OpenRefactoringWizardAction;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 public class ReorgGroup extends ContextMenuGroup {
 	private static final String GROUP_NAME= IContextMenuConstants.GROUP_REORGANIZE;
