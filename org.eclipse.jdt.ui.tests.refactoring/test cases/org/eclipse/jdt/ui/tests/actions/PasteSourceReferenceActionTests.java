@@ -47,18 +47,18 @@ public class PasteSourceReferenceActionTests extends RefactoringTest {
 		
 		IType typeA= cuA.getType("A");
 		ISelectionProvider provider= new FakeSelectionProvider(new IType[]{typeA});
-		StructuredSelectionProvider ssp= StructuredSelectionProvider.createFrom(provider);
+		//StructuredSelectionProvider ssp= StructuredSelectionProvider.createFrom(provider);
 		
-		CopySourceReferencesToClipboardAction copyAction= new CopySourceReferencesToClipboardAction(ssp);
+		CopySourceReferencesToClipboardAction copyAction= new CopySourceReferencesToClipboardAction(provider);
 		copyAction.update();
 		assertTrue("copy enabled", copyAction.isEnabled());
 		copyAction.run();
 
 		IType typeB= cuB.getType("B");
 		provider= new FakeSelectionProvider(new IType[]{typeB});
-		ssp= StructuredSelectionProvider.createFrom(provider);
+		//ssp= StructuredSelectionProvider.createFrom(provider);
 		
-		PasteSourceReferencesAction pasteAction= new PasteSourceReferencesAction(ssp);
+		PasteSourceReferencesAction pasteAction= new PasteSourceReferencesAction(provider);
 		pasteAction.update();
 		assertTrue("paste enabled", pasteAction.isEnabled());
 		pasteAction.run();
