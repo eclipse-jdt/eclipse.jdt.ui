@@ -57,18 +57,21 @@ public class RefactoringStatus {
 
 	/** 
 	 * Status severity constant (value 2) indicating this status represents a warning.
+	 * This is used when the refactoring might cause confusion such as unintended overloading.
 	 * @see #getSeverity
 	 */
 	public static final int WARNING= 2;
 
 	/** 
 	 * Status severity constant (value 3) indicating this status represents an error.
+	 * This is used when the refactoring will introduce compilation errors if executed.
 	 * @see #getSeverity
 	 */
 	public static final int ERROR= 3;
 
 	/** 
 	 * Status severity constant (value 4) indicating this status represents a fatal error.
+	 * This is used when the refactoring can't be executed.
 	 * @see #getSeverity
 	 */
 	public static final int FATAL= 4;

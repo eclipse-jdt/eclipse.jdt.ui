@@ -64,7 +64,7 @@ public abstract class Refactoring implements IAdaptable {
 	 * executed.
 	 * <p>
 	 * The refactoring is considered as not being executable if the returned status
-	 * as the severity <code>RefactoringStatus#FATAL</code>.
+	 * has the severity <code>RefactoringStatus#FATAL</code>.
 	 * 
 	 * @param pm a progress monitor to report progress. Although availability checks 
 	 *  are supposed to execute fast, there can be certain situations where progress
@@ -81,10 +81,12 @@ public abstract class Refactoring implements IAdaptable {
 	 * necessary to perform the refactoring this method is called to check the remaining preconditions.
 	 * Typically, this is used in the ui after the user has pressed 'next' on the last user input page.
 	 * This method is always called after <code>checkActivation</code> and only if the status returned by
-	 * <code>checkActivation</code> <code>isOK</code>.
+	 * <code>checkActivation</code> is not <code>RefactoringStatus#FATAL</code>.
+	 * May be called more than once.
 	 * Must not return <code>null</code>.
+	 * 
 	 * @see #checkActivation
-	 * @see RefactoringStatus#isOK
+	 * @see RefactoringStatus#FATAL
 	 */ 		
 	public abstract RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException;
 	
