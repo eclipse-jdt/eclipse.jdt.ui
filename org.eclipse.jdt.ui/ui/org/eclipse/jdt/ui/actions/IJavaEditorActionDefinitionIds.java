@@ -395,6 +395,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String USE_SUPERTYPE= "org.eclipse.jdt.ui.edit.text.java.use.supertype"; //$NON-NLS-1$
 
 	/**
+	 * Action definition ID of the refactor -> infer generic type arguments action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.infer.type.arguments"</code>).
+	 * 
+	 * @since 3.1
+	 */
+	public static final String INFER_TYPE_ARGUMENTS_ACTION= "org.eclipse.jdt.ui.edit.text.java.infer.type.arguments"; //$NON-NLS-1$
+
+	/**
 	 * Action definition ID of the refactor -> promote local variable action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.promote.local.variable"</code>).
 	 * 

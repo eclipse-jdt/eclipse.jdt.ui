@@ -379,6 +379,14 @@ public class JdtActionConstants {
 	public static final String USE_SUPERTYPE= "org.eclipse.jdt.ui.actions.UseSupertype"; //$NON-NLS-1$
 
 	/**
+	 * Refactor menu: name of standard Infer Generic Type Arguemnts global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.InferTypeArguments"</code>).
+	 * 
+	 * @since 3.1
+	 */
+	public static final String INFER_TYPE_ARGUMENTS= "org.eclipse.jdt.ui.actions.InferTypeArguments"; //$NON-NLS-1$
+
+	/**
 	 * Refactor menu: name of standard global action to convert a local
 	 * variable to a field (value <code>"org.eclipse.jdt.ui.actions.ConvertLocalToField"</code>).
 	 * 

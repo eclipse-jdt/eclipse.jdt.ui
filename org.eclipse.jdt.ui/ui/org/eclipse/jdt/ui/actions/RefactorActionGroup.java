@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jdt.core.IJavaElement;
-
 import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.widgets.Menu;
@@ -26,11 +24,12 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IKeyBindingService;
@@ -40,19 +39,18 @@ import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 
+import org.eclipse.jdt.core.IJavaElement;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
-import org.eclipse.jdt.internal.ui.actions.InferTypeArgumentsAction;
 import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
  * Action group that adds refactor actions (for example 'Rename', 'Move')
@@ -112,7 +110,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fExtractInterfaceAction;
 	private SelectionDispatchAction fChangeTypeAction;
 	private SelectionDispatchAction fUseSupertypeAction;
-	private SelectionDispatchAction fInferTypeArguments;
+	private SelectionDispatchAction fInferTypeArgumentsAction;
 	
 	private SelectionDispatchAction fInlineAction;
 	private SelectionDispatchAction fExtractMethodAction;
@@ -240,11 +238,11 @@ public class RefactorActionGroup extends ActionGroup {
 		editor.setAction("UseSupertype", fUseSupertypeAction); //$NON-NLS-1$
 		fEditorActions.add(fUseSupertypeAction);
 		
-		fInferTypeArguments= new InferTypeArgumentsAction(editor);
-//		fInferTypeArguments.setActionDefinitionId(INFER_TYPE_ARGUMENTS_ACTION);
-		fInferTypeArguments.update(selection);
-		editor.setAction("InferTypeArguments", fInferTypeArguments); //$NON-NLS-1$
-		fEditorActions.add(fInferTypeArguments);
+		fInferTypeArgumentsAction= new InferTypeArgumentsAction(editor);
+		fInferTypeArgumentsAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INFER_TYPE_ARGUMENTS_ACTION);
+		fInferTypeArgumentsAction.update(selection);
+		editor.setAction("InferTypeArguments", fInferTypeArgumentsAction); //$NON-NLS-1$
+		fEditorActions.add(fInferTypeArgumentsAction);
 		
 		fInlineAction= new InlineAction(editor);
 		fInlineAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE);
@@ -344,9 +342,9 @@ public class RefactorActionGroup extends ActionGroup {
 		fUseSupertypeAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.USE_SUPERTYPE);
 		initAction(fUseSupertypeAction, provider, selection);
 		
-		fInferTypeArguments= new InferTypeArgumentsAction(fSite);
-//		fInferTypeArguments.setActionDefinitionId(INFER_TYPE_ARGUMENTS_ACTION);
-		initAction(fInferTypeArguments, provider, selection);
+		fInferTypeArgumentsAction= new InferTypeArgumentsAction(fSite);
+		fInferTypeArgumentsAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INFER_TYPE_ARGUMENTS_ACTION);
+		initAction(fInferTypeArgumentsAction, provider, selection);
 		
 		fInlineAction= new InlineAction(fSite);
 		fInlineAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE);
@@ -393,7 +391,7 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.CHANGE_TYPE, fChangeTypeAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_NESTED_TO_TOP, fConvertNestedToTopAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.USE_SUPERTYPE, fUseSupertypeAction);
-//TODO		actionBars.setGlobalActionHandler(JdtActionConstants.INFER_TYPE_ARGUMENTS, fInferTypeArguments);
+		actionBars.setGlobalActionHandler(JdtActionConstants.INFER_TYPE_ARGUMENTS, fInferTypeArgumentsAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_LOCAL_TO_FIELD, fConvertLocalToFieldAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_ANONYMOUS_TO_NESTED, fConvertAnonymousToNestedAction);
 	}
@@ -437,6 +435,7 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fChangeTypeAction, provider);
 		disposeAction(fConvertNestedToTopAction, provider);
 		disposeAction(fUseSupertypeAction, provider);
+		disposeAction(fInferTypeArgumentsAction, provider);
 		disposeAction(fConvertLocalToFieldAction, provider);
 		disposeAction(fConvertAnonymousToNestedAction, provider);
 		if (fQuickAccessAction != null && fKeyBindingService != null) {
@@ -487,9 +486,7 @@ public class RefactorActionGroup extends ActionGroup {
 		added+= addAction(refactorSubmenu, fExtractInterfaceAction);
 		added+= addAction(refactorSubmenu, fChangeTypeAction);
 		added+= addAction(refactorSubmenu, fUseSupertypeAction);
-		if (isInferTypeArgumentsRefactoringEnabled()) {
-			added+= addAction(refactorSubmenu, fInferTypeArguments);
-		}
+		added+= addAction(refactorSubmenu, fInferTypeArgumentsAction);
 		refactorSubmenu.add(new Separator(GROUP_CODING));
 		added+= addAction(refactorSubmenu, fInlineAction);
 		added+= addAction(refactorSubmenu, fExtractMethodAction);
@@ -571,9 +568,5 @@ public class RefactorActionGroup extends ActionGroup {
 		} else {
 			fillRefactorMenu(menu);
 		}
-	}
-	
-	private boolean isInferTypeArgumentsRefactoringEnabled() {
-		return PreferenceConstants.getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_AUGMENT_RAW);
 	}
 }

@@ -31,10 +31,12 @@ import org.eclipse.ui.PlatformUI;
 
 /**
  * Preference page for work in progress.
+ * 
+ * Currently not used. Left here to allow easy reactivation (in plugin.xml).
  */
 public class WorkInProgressPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String PREF_AUGMENT_RAW= "org.eclipse.jdt.ui.enable.augment.raw.container.clients"; //$NON-NLS-1$
+//	public static final String PREF_AUGMENT_RAW= "org.eclipse.jdt.ui.enable.augment.raw.container.clients"; //$NON-NLS-1$
 	
 	private List fCheckBoxes;
 	private List fRadioButtons;
@@ -50,19 +52,19 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		fTextControls= new ArrayList();
 	}
 
-	private Button addCheckBox(Composite parent, String label, String key) { 
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		
-		Button button= new Button(parent, SWT.CHECK);
-		button.setText(label);
-		button.setData(key);
-		button.setLayoutData(gd);
-
-		button.setSelection(getPreferenceStore().getBoolean(key));
-		
-		fCheckBoxes.add(button);
-		return button;
-	}
+//	private Button addCheckBox(Composite parent, String label, String key) { 
+//		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+//		
+//		Button button= new Button(parent, SWT.CHECK);
+//		button.setText(label);
+//		button.setData(key);
+//		button.setLayoutData(gd);
+//
+//		button.setSelection(getPreferenceStore().getBoolean(key));
+//		
+//		fCheckBoxes.add(button);
+//		return button;
+//	}
 	
 	/*
 	 * @see PreferencePage#createControl(Composite)
@@ -83,7 +85,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		//layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
 		result.setLayout(layout);
 
-		addCheckBox(result, PreferencesMessages.getString("WorkInProgressPreferencePage.enable.augment.raw"), PREF_AUGMENT_RAW); //$NON-NLS-1$
+//		addCheckBox(result, PreferencesMessages.getString("WorkInProgressPreferencePage.enable.augment.raw"), PREF_AUGMENT_RAW); //$NON-NLS-1$
 		
 		applyDialogFont(result);
 		return result;
@@ -162,6 +164,6 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 	}
 
 	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(PREF_AUGMENT_RAW, false);
+//		store.setDefault(PREF_AUGMENT_RAW, false);
 	}
 }

@@ -1193,6 +1193,7 @@
 <!-- =========================================================================== -->
 <!-- Work in Progress                                                            -->
 <!-- =========================================================================== -->
+<!--
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
@@ -1202,6 +1203,7 @@
             id="org.eclipse.jdt.ui.preferences.WorkInProgressPreferencePage">
       </page>
    </extension>
+-->
 <!-- =========================================================================== -->
 <!-- END Work in Progress                                                        -->
 <!-- =========================================================================== -->
@@ -1903,6 +1905,13 @@
                id="org.eclipse.jdt.ui.actions.Rename">
          </action>
 <!-- type group  -->
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.infer.type.arguments"
+               label="%Refactoring.inferTypeArgumentsAction.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/typeGroup"
+               id="org.eclipse.jdt.ui.actions.InferTypeArguments">
+         </action>
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.use.supertype"
                label="%Refactoring.useSupertypeAction.label"
@@ -2631,7 +2640,7 @@
             id="org.eclipse.jdt.internal.ui.HistoryWorkingSet">
       </workingSet>
       <workingSet
-            name="%OthersWorkingSetWizardPage"
+            name="%OthersWorkingSetWizardPage.name"
             icon="icons/full/obj16/jworkingSet_obj.gif"
             updaterClass="org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater"
             id="org.eclipse.jdt.internal.ui.OthersWorkingSet">
@@ -3581,6 +3590,18 @@
             string=""
             scope="org.eclipse.ui.globalScope"
             command="org.eclipse.jdt.ui.edit.text.java.use.supertype"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <command
+            name="%ActionDefinition.inferTypeArguments.name"
+            description="%ActionDefinition.inferTypeArguments.description"
+            category="org.eclipse.jdt.ui.category.refactoring"
+            id="org.eclipse.jdt.ui.edit.text.java.infer.type.arguments">
+      </command>
+      <keyBinding
+            string=""
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.edit.text.java.infer.type.arguments"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       <command
