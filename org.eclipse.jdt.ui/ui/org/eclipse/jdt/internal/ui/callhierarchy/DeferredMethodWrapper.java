@@ -158,6 +158,8 @@ class DeferredMethodWrapper implements IDeferredWorkbenchAdapter {
      * @see java.lang.Object#equals(java.lang.Object)
      */
     public boolean equals(Object obj) {
+        //TODO: not symmetric: doesn't obey contract of Object#equals(Object).
+        //This class should probably be merged into MethodWrapper.
         return fMethodWrapper.equals(obj);
     }
 

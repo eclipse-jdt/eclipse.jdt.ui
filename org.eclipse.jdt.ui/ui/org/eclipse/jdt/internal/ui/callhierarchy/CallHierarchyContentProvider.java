@@ -159,7 +159,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
     public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
         cancelJobs();
         if (viewer instanceof AbstractTreeViewer) {
-            fManager = new DeferredTreeContentManager(this, (AbstractTreeViewer) viewer);
+            fManager = new DeferredTreeContentManager(this, (AbstractTreeViewer) viewer, fPart.getSite());
         }
     }
 
