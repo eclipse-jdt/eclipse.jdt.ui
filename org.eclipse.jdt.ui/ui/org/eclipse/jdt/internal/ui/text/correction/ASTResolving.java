@@ -548,7 +548,7 @@ public class ASTResolving {
 	}
 	
 	public static String getFullName(Name name) {
-		return ASTNodes.asString(name);
+		return name.getFullyQualifiedName();
 	}
 	
 	public static ICompilationUnit findCompilationUnitForBinding(ICompilationUnit cu, CompilationUnit astRoot, ITypeBinding binding) throws JavaModelException {
