@@ -14,9 +14,14 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationExtension;
+
+import org.eclipse.jdt.core.CompletionProposal;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -24,6 +29,10 @@ import org.eclipse.jface.text.contentassist.IContextInformationExtension;
  */
 public final class ProposalContextInformation implements IContextInformation, IContextInformationExtension {
 	
+	private final CompletionProposal fProposal;
+	
+	/* lazy cache */
+	private ProposalLabelProvider fLabelProvider;
 	private String fContextDisplayString;
 	private String fInformationDisplayString;
 	private Image fImage;
@@ -32,43 +41,19 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	/**
 	 * Creates a new context information.
 	 */
-	public ProposalContextInformation() {
+	public ProposalContextInformation(CompletionProposal proposal) {
+		fProposal= proposal;
 	}
 	
-	/**
-	 * @param image the image to display when presenting the context information
-	 */
-	public void setImage(Image image) {
-		fImage= image;
-	}
-	
-	/**
-	 * @param contextDisplayString the string to be used when presenting the context
-	 *		may not be <code>null</code>
-	 */
-	public void setContextDisplayString(String contextDisplayString) {
-		Assert.isNotNull(contextDisplayString);
-		fContextDisplayString= contextDisplayString;
-	}
-	
-	/**
-	 * @param informationDisplayString the string to be displayed when presenting the context information,
-	 *		may not be <code>null</code>
-	 */
-	public void setInformationDisplayString(String informationDisplayString) {
-		Assert.isNotNull(informationDisplayString);
-		fInformationDisplayString= informationDisplayString;
-	}		
-
 	/*
 	 * @see IContextInformation#equals
 	 */
 	public boolean equals(Object object) {
 		if (object instanceof IContextInformation) {
 			IContextInformation contextInformation= (IContextInformation) object;
-			boolean equals= fInformationDisplayString.equalsIgnoreCase(contextInformation.getInformationDisplayString());
-			if (fContextDisplayString != null) 
-				equals= equals && fContextDisplayString.equalsIgnoreCase(contextInformation.getContextDisplayString());
+			boolean equals= getInformationDisplayString().equalsIgnoreCase(contextInformation.getInformationDisplayString());
+			if (getContextDisplayString() != null) 
+				equals= equals && getContextDisplayString().equalsIgnoreCase(contextInformation.getContextDisplayString());
 			return equals;
 		}
 		return false;
@@ -78,6 +63,9 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	 * @see IContextInformation#getInformationDisplayString()
 	 */
 	public String getInformationDisplayString() {
+		if (fInformationDisplayString == null) {
+			fInformationDisplayString= getLabelProvider().createUnboundedParameterList(fProposal);
+		}
 		return fInformationDisplayString;
 	}
 	
@@ -85,6 +73,11 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	 * @see IContextInformation#getImage()
 	 */
 	public Image getImage() {
+		if (fImage == null) {
+			ImageDescriptor descriptor= getLabelProvider().createImageDescriptor(fProposal);
+			if (descriptor != null)
+				fImage= JavaPlugin.getImageDescriptorRegistry().get(descriptor);
+		}
 		return fImage;
 	}
 	
@@ -92,9 +85,10 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	 * @see IContextInformation#getContextDisplayString()
 	 */
 	public String getContextDisplayString() {
-		if (fContextDisplayString != null)
-			return fContextDisplayString;
-		return fInformationDisplayString;
+		if (fContextDisplayString == null) {
+			fContextDisplayString= getLabelProvider().createMethodProposalLabel(fProposal);
+		}
+		return fContextDisplayString;
 	}
 	
 	/*
@@ -106,5 +100,11 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	
 	public void setContextInformationPosition(int position) {
 		fPosition= position;
+	}
+	
+	private ProposalLabelProvider getLabelProvider() {
+		if (fLabelProvider == null)
+			fLabelProvider= new ProposalLabelProvider();
+		return fLabelProvider;
 	}
 }

@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.swt.SWT;
@@ -136,6 +137,7 @@ import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
  * Java specific text editor.
  */
 public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilingListener {
+	private static final boolean CODE_ASSIST_DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ResultCollector"));  //$NON-NLS-1$//$NON-NLS-2$
 
 	/** 
 	 * Text operation code for requesting correction assist to show correction
@@ -177,7 +179,12 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			
 			switch (operation) {
 				case CONTENTASSIST_PROPOSALS:
+					long time= CODE_ASSIST_DEBUG ? System.currentTimeMillis() : 0;
 					String msg= fContentAssistant.showPossibleCompletions();
+					if (CODE_ASSIST_DEBUG) {
+						long delta= System.currentTimeMillis() - time;
+						System.err.println("Code Assist (total): " + delta); //$NON-NLS-1$
+					}
 					setStatusLineErrorMessage(msg);
 					return;
 				case CORRECTIONASSIST_PROPOSALS:

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
+import java.util.Arrays;
+
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -148,14 +150,19 @@ public final class SignatureUtil {
 		if (signature[0] == Signature.C_STAR)
 			return NULL_TYPE_SIGNATURE_ARRAY;
 		
+		if (signature[0] == Signature.C_EXTENDS)
+			return NULL_TYPE_SIGNATURE_ARRAY;
+		
+		char[][] typeArguments= Signature.getTypeArguments(signature);
+		for (int i= 0; i < typeArguments.length; i++)
+			if (Arrays.equals(typeArguments[i], NULL_TYPE_SIGNATURE_ARRAY))
+				return NULL_TYPE_SIGNATURE_ARRAY;
+		
 		if (signature[0] == Signature.C_SUPER) {
 			char[] type= new char[signature.length - 1];
 			System.arraycopy(signature, 1, type, 0, signature.length - 1);
 			return type;
 		}
-		
-		if (signature[0] == Signature.C_EXTENDS)
-			return NULL_TYPE_SIGNATURE_ARRAY;
 		
 		return signature;
 	}
@@ -255,7 +262,8 @@ public final class SignatureUtil {
 
 	/**
 	 * TODO this is a temporary workaround for
-	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=83600
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=83600 and
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=85293
 	 * 
 	 * @param signature the method signature to convert
 	 * @return the fixed signature
@@ -266,22 +274,67 @@ public final class SignatureUtil {
 		
 		StringBuffer sig= new StringBuffer();
 		sig.append(signature);
-		do {
-			int pos= sig.indexOf("++"); //$NON-NLS-1$
-			if (pos == -1)
-				pos= sig.indexOf("+*"); //$NON-NLS-1$
-			if (pos == -1)
-				pos= sig.indexOf("+-"); //$NON-NLS-1$
-			if (pos == -1)
-				pos= sig.indexOf("-+"); //$NON-NLS-1$
-			if (pos == -1)
-				pos= sig.indexOf("--"); //$NON-NLS-1$
-			if (pos == -1)
-				pos= sig.indexOf("-*"); //$NON-NLS-1$
-			if (pos == -1)
-				break;
-			sig.deleteCharAt(pos);
-		} while (true);
+		
+		int p= 0;
+		while (p < sig.length() - 1) {
+			switch (sig.charAt(p)) {
+				case Signature.C_EXTENDS:
+					switch (sig.charAt(p + 1)) {
+						case Signature.C_EXTENDS:
+							sig.replace(p, typeEnd(signature, p), NULL_TYPE_SIGNATURE);
+							p+= NULL_TYPE_SIGNATURE_ARRAY.length;
+							break;
+						case Signature.C_SUPER:
+							sig.deleteCharAt(p + 1);
+							break;
+						case Signature.C_STAR:
+							sig.replace(p, p + 2, NULL_TYPE_SIGNATURE);
+							p+= NULL_TYPE_SIGNATURE_ARRAY.length;
+							break;
+						default:
+							p++;
+							break;
+					}
+					break;
+				case Signature.C_SUPER:
+					switch (sig.charAt(p + 1)) {
+						case Signature.C_EXTENDS:
+							sig.replace(p, typeEnd(signature, p), "*"); //$NON-NLS-1$
+							p++;
+							break;
+						case Signature.C_SUPER:
+						case Signature.C_STAR:
+							sig.deleteCharAt(p);
+							break;
+						default:
+							p++;
+							break;
+					}
+					break;
+				default:
+					p++;
+			}
+		}
 		return sig.toString().toCharArray();
+	}
+
+	private static int typeEnd(char[] signature, int pos) {
+		int depth= 0;
+		while (pos < signature.length) {
+			switch (signature[pos]) {
+				case Signature.C_GENERIC_START:
+					depth++;
+					break;
+				case Signature.C_GENERIC_END:
+					depth--;
+					break;
+				case Signature.C_SEMICOLON:
+					if (depth == 0)
+						return pos + 1;
+					break;
+			}
+			pos++;
+		}
+		return pos + 1;
 	}
 }

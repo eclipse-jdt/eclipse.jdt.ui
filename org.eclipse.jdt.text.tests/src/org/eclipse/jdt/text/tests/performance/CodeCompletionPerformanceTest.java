@@ -272,8 +272,6 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 	private void applyProposal(JavaCompletionProposal proposal, String completion) {
 		IDocument doc= new Document(fContents);
 		proposal.apply(doc);
-		int offset= fContents.indexOf("//here");
-		String result= fContents.substring(0, offset) + completion + fContents.substring(offset);
 	}
 
 }

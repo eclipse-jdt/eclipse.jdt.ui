@@ -30,6 +30,7 @@ import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -49,16 +50,13 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 public class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 
 	private IRegion fSelectedRegion; // initialized by apply()
-	private final char[] fSignature;
-		
-	/**
-	 * Creates a template proposal with a template and its context.
-	 */		
-	public GenericJavaTypeProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image,
-	    String displayString, ITextViewer viewer, int relevance, char[] signature, String typeName, String packageName)
-	{
-		super(replacementString, cu, replacementOffset, replacementLength, image, displayString, relevance, typeName, packageName, viewer);
-		fSignature= signature;
+//	private final CompletionContext fContext;
+	private final CompletionProposal fProposal;
+
+	public GenericJavaTypeProposal(CompletionProposal typeProposal, int offset, int length, ICompilationUnit cu, Image image, String displayString, ITextViewer viewer) {
+		super(String.valueOf(typeProposal.getCompletion()), cu, offset, length, image, displayString, typeProposal.getRelevance(), String.valueOf(Signature.getSignatureSimpleName(typeProposal.getSignature())), String.valueOf(Signature.getSignatureQualifier(typeProposal.getSignature())), viewer);
+		fProposal= typeProposal;
+//		fContext= context;
 	}
 
 	/*
@@ -66,13 +64,37 @@ public class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
 		
-		char[][] typeArguments= Signature.getTypeArguments(fSignature);
+		char[] signature= fProposal.getSignature();
+		char[][] typeArguments= Signature.getTypeArguments(signature);
 		char[][] typeArgumentNames= null;
 		
+//		final Map bindings= new HashMap();
+//		fContext.getExpectedTypesKeys();
+//		if (expectedTypesKeys != null && expectedTypesKeys.length > 0) {
+//			final String[] keys= new String[expectedTypesKeys.length];
+//			for (int i= 0; i < keys.length; i++) {
+//				keys[i]= String.valueOf(expectedTypesKeys[i]);
+//			}
+//			
+//			final ASTParser parser= ASTParser.newParser(AST.JLS3);
+//			parser.setProject(fCompilationUnit.getJavaProject());
+//			parser.setResolveBindings(true);
+//			
+//			ASTRequestor requestor= new ASTRequestor() {
+//
+//				public void acceptBinding(String bindingKey,IBinding binding) {
+//					bindings.put(bindingKey, binding);
+//				}
+//			};
+//			parser.createASTs(new ICompilationUnit[0], keys, requestor, null);
+//		}
+//		
+		
+		// TODO add context awareness
 		if (typeArguments.length == 0) {
 			// check for binary types which are not reported as parameterized
 			if (fCompilationUnit != null) {
-				String fullType= SignatureUtil.stripSignatureToFQN(String.valueOf(fSignature));
+				String fullType= SignatureUtil.stripSignatureToFQN(String.valueOf(signature));
 				try {
 					IType type= fCompilationUnit.getJavaProject().findType(fullType);
 					if (type != null) {

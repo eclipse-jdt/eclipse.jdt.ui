@@ -59,10 +59,6 @@ public class ProposalInfo {
 		this(jproject, packName, typeQualifiedName, null, null, null, false);
 	}
 
-	public ProposalInfo(IJavaProject jproject, char[] packName, char[] typeQualifiedName, char[] fieldName) {
-		this(jproject, packName, typeQualifiedName, fieldName, null, null, false);
-	}	
-	
 	private String getParameterSignature(int index) {
 		StringBuffer buf= new StringBuffer();
 		char[] pack= fParameterPackages[index];

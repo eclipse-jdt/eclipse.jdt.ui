@@ -11,12 +11,8 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
  
-import java.io.IOException;
-import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.eclipse.jface.text.Assert;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IJavaProject;
@@ -29,31 +25,14 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 
-import org.eclipse.jdt.ui.JavadocContentAccess;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
-
 
 /**
  * Proposal info that computes the javadoc lazily when it is queried.
- * <p>
- * TODO this class only subclasses ProposalInfo to be compatible - it does not
- * use any thing from it.
- * </p>
  * 
  * @since 3.1
  */
-public final class MethodProposalInfo extends ProposalInfo {
+public final class MethodProposalInfo extends MemberProposalInfo {
 	
-	/* configuration */
-	private final IJavaProject fJavaProject;
-	private final CompletionProposal fProposal;
-	
-	/* cache filled lazily */
-	private boolean fMemberResolved= false;
-	private IMember fMember= null;
-
 	/**
 	 * Creates a new proposal info.
 	 * 
@@ -61,46 +40,9 @@ public final class MethodProposalInfo extends ProposalInfo {
 	 * @param proposal the proposal to generate information for
 	 */
 	public MethodProposalInfo(IJavaProject project, CompletionProposal proposal) {
-		super(null);
-		Assert.isNotNull(project);
-		Assert.isNotNull(proposal);
-		fJavaProject= project;
-		fProposal= proposal;
+		super(project, proposal);
 	}
 	
-	/**
-	 * Gets the text for this proposal info formatted as HTML, or
-	 * <code>null</code> if no text is available.
-	 * 
-	 * @return the additional info text
-	 */	
-	public String getInfo() {
-		try {
-			return extractJavadoc(getMember());
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		} catch (IOException e) {
-			JavaPlugin.log(e);
-		}
-		return null;
-	}
-
-	/**
-	 * Returns the member for described by the receiver, resolving the
-	 * corresponding type and member if necessary.
-	 * 
-	 * @return the member described by the receiver
-	 * @throws JavaModelException if accessing the java model fails
-	 */
-	protected final IMember getMember() throws JavaModelException {
-		if (!fMemberResolved) {
-			fMemberResolved= true;
-			fMember= resolveMember();
-		}
-		
-		return fMember;
-	}
-
 	/**
 	 * Resolves the member described by the receiver and returns it if found.
 	 * Returns <code>null</code> if no corresponding member can be found.
@@ -108,7 +50,7 @@ public final class MethodProposalInfo extends ProposalInfo {
 	 * @return the resolved member or <code>null</code> if none is found
 	 * @throws JavaModelException if accessing the java model fails
 	 */
-	protected final IMember resolveMember() throws JavaModelException {
+	protected IMember resolveMember() throws JavaModelException {
 		char[] declarationSignature= fProposal.getDeclarationSignature();
 		String typeName;
 		// for synthetic methods on arrays, declaration signatures may be null
@@ -124,31 +66,11 @@ public final class MethodProposalInfo extends ProposalInfo {
 			for (int i= 0; i < parameters.length; i++) {
 				parameters[i]= SignatureUtil.getLowerBound(parameters[i]);
 			}
-			boolean isConstructor= false;
+			boolean isConstructor= Signature.getReturnType(fProposal.getSignature()).length == 0;
 			
 			return findMethod(name, parameters, isConstructor, type);
 		}
 		
-		return null;
-	}
-	
-	/**
-	 * Extracts the javadoc for the given <code>IMember</code> and returns it
-	 * as HTML.
-	 * 
-	 * @param member the member to get the documentation for
-	 * @return the javadoc for <code>member</code> or <code>null</code> if
-	 *         it is not available
-	 * @throws JavaModelException if accessing the javadoc fails
-	 * @throws IOException if reading the javadoc fails
-	 */
-	protected final String extractJavadoc(IMember member) throws JavaModelException, IOException {
-		if (member != null) {
-			Reader reader= JavadocContentAccess.getContentReader(member, true);
-			if (reader != null) {
-				return new JavaDoc2HTMLTextReader(reader).getString();
-			}
-		}
 		return null;
 	}
 	

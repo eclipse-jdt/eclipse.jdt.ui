@@ -13,12 +13,12 @@ package org.eclipse.jdt.internal.ui.text.java;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -27,53 +27,66 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class ExperimentalResultCollector extends ResultCollector {
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.ResultCollector#createMethodCallCompletion(org.eclipse.jdt.core.CompletionProposal, java.lang.String)
-	 */
-	protected JavaCompletionProposal createMethodCallCompletion(CompletionProposal methodProposal, String parameterList) {
-		char[] completion= methodProposal.getCompletion();
+	protected IJavaCompletionProposal createMethodReferenceProposal(CompletionProposal methodProposal) {
+		String completion= String.valueOf(methodProposal.getCompletion());
 		// super class' behavior if this is not a normal completion or has no
 		// parameters
-		if ((completion.length == 0) || ((completion.length == 1) && completion[0] == ')') || parameterList.length() == 0)
-			return super.createMethodCallCompletion(methodProposal, parameterList);
+		if ((completion.length() == 0) || ((completion.length() == 1) && completion.charAt(0) == ')') || Signature.getParameterCount(methodProposal.getSignature()) == 0)
+			return super.createMethodReferenceProposal(methodProposal);
 
-		ImageDescriptor descriptor= createMethodImageDescriptor(methodProposal.getFlags());
-		Image image= getImage(descriptor);
-		String displayName= createMethodDisplayString(methodProposal, parameterList).toString();
+		Image image= getImage(getLabelProvider().createImageDescriptor(methodProposal));
+		String displayName= getLabelProvider().createLabel(methodProposal);
 		int start= methodProposal.getReplaceStart();
 		int end= methodProposal.getReplaceEnd();
 		int relevance= methodProposal.getRelevance();
 		String name= String.valueOf(methodProposal.getName());
+		
+		
 		char[] signature= methodProposal.getSignature();
 		char[][] parameterNames= methodProposal.findParameterNames(null);
 
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+		JavaCompletionProposal proposal;
 		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS))
-			return new ParameterGuessingProposal(name, signature, start, end - start, image, displayName, getTextViewer(), relevance, parameterNames, getCodeAssistOffset(), getCompilationUnit());
+			proposal= new ParameterGuessingProposal(name, signature, start, end - start, image, displayName, getTextViewer(), relevance, parameterNames, getCodeAssistOffset(), getCompilationUnit());
+		else
+			proposal= new ExperimentalProposal(name, signature, parameterNames, start, end - start, image, displayName, getTextViewer(), relevance);
+
+		proposal.setProposalInfo(new MethodProposalInfo(getJavaProject(), methodProposal));
+
+		char[] completionName= methodProposal.getCompletion();
+		ProposalContextInformation contextInformation= createContextInformation(methodProposal);
+		proposal.setContextInformation(contextInformation);
+		proposal.setTriggerCharacters(METHOD_WITH_ARGUMENTS_TRIGGERS);
 		
-		ExperimentalProposal experimental= new ExperimentalProposal(name, signature, parameterNames, start, end - start, image, displayName, getTextViewer(), relevance);
-		return experimental;
+		if (completionName.length > 0) {
+			// set the cursor before the closing bracket
+			proposal.setCursorPosition(completionName.length - 1);
+		}
+		return proposal;
 	}
 	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.ResultCollector#createTypeCompletion(org.eclipse.jdt.core.CompletionProposal)
 	 */
-	protected JavaCompletionProposal createTypeCompletion(CompletionProposal typeProposal) {
+	protected IJavaCompletionProposal createTypeProposal(CompletionProposal typeProposal) {
 		if (!proposeGenerics())
-			return super.createTypeCompletion(typeProposal);
-		
-		char[] signature= typeProposal.getSignature();
-		char[] packageName= Signature.getSignatureQualifier(signature); 
-		char[] typeName= Signature.getSignatureSimpleName(signature);
-		char[] completion= typeProposal.getCompletion();
+			return super.createTypeProposal(typeProposal);
 
-		JavaCompletionProposal proposal= super.createTypeCompletion(typeProposal);
+		String completion= String.valueOf(typeProposal.getCompletion());
 		// don't add parameters for import-completions
-		if (completion.length > 0 && completion[completion.length - 1] == ';')
-			return proposal;
+		if (completion.length() > 0 && completion.endsWith(";")) //$NON-NLS-1$
+			return super.createTypeProposal(typeProposal);
+
+		int start= typeProposal.getReplaceStart();
+		int length= getLength(start, typeProposal.getReplaceEnd());
+		Image image= getImage(getLabelProvider().createImageDescriptor(typeProposal));
+		String label= getLabelProvider().createLabel(typeProposal);
 		
-		JavaCompletionProposal newProposal= new GenericJavaTypeProposal(proposal.getReplacementString(), getCompilationUnit(), typeProposal.getReplaceStart(), typeProposal.getReplaceEnd() - typeProposal.getReplaceStart(), proposal.getImage(), proposal.getDisplayString(), getTextViewer(), proposal.getRelevance(), typeProposal.getSignature(), String.valueOf(typeName), String.valueOf(packageName));
-		newProposal.setProposalInfo(proposal.getProposalInfo());
+		JavaCompletionProposal newProposal= new GenericJavaTypeProposal(typeProposal, start, length, getCompilationUnit(), image, label, getTextViewer());
+		newProposal.setProposalInfo(new TypeProposalInfo(getJavaProject(), typeProposal));
+		
+		newProposal.setTriggerCharacters(TYPE_TRIGGERS);
 		return newProposal;
 	}
 }

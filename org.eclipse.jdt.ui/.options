@@ -15,3 +15,6 @@ org.eclipse.jdt.ui/debug/checkCoreBindingIsEqualTo=false
 
 # verify jdt.core API for IBinding#getJavaElement()
 org.eclipse.jdt.ui/debug/checkCoreBindingGetJavaElement=false
+
+# timing output for code assist
+org.eclipse.jdt.ui/debug/ResultCollector=false
