@@ -80,6 +80,8 @@ public class ExtractTempRefactoring extends Refactoring {
 	private boolean fDeclareFinal;
 	private String fTempName;
 	private CompilationUnit fCompilationUnitNode;
+	
+	private IExpressionFragment fSelectedExpression; //cache
 
 	public ExtractTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
 		Assert.isTrue(selectionStart >= 0);
@@ -597,12 +599,14 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	private IExpressionFragment getSelectedExpression() throws JavaModelException {
+		if (fSelectedExpression != null)
+			return fSelectedExpression;
 		IASTFragment selectedFragment= ASTFragmentFactory.createFragmentForSourceRange(new SourceRange(fSelectionStart, fSelectionLength), fCompilationUnitNode, fCu);
 		
 		if (selectedFragment instanceof IExpressionFragment)
-			return (IExpressionFragment) selectedFragment;
-		else
-			return null;	
+			fSelectedExpression= (IExpressionFragment) selectedFragment;
+
+		return fSelectedExpression;
 	}
 
 	private IFile getFile() throws JavaModelException {
