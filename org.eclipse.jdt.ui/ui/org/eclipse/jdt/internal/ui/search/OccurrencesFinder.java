@@ -180,7 +180,7 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 	}
 
 	public boolean visit(VariableDeclarationFragment node) {
-		if (node.getParent().getNodeType() == ASTNode.FIELD_DECLARATION)
+		if (node.getParent().getNodeType() == ASTNode.FIELD_DECLARATION || node.getInitializer() != null)
 			match(node.getName(), fWriteUsages, node.resolveBinding());
 		return super.visit(node);
 	}
