@@ -32,6 +32,6 @@ public class JavaDocumentSetupParticipant  implements IDocumentSetupParticipant 
 	 */
 	public void setup(IDocument document) {
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-		tools.setupDocument(document, IJavaPartitions.JAVA_PARTITIONING);
+		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 	}
 }

@@ -1095,7 +1095,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	protected void setupDocument(Object element, IDocument document) {
 		if (document != null) {
 			JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-			tools.setupDocument(document, IJavaPartitions.JAVA_PARTITIONING);
+			tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 		}
 	}
 	

@@ -281,7 +281,7 @@ public class CodeTemplateBlock {
 		SourceViewer viewer= new SourceViewer(parent, null, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		IDocument document= new Document();
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-		tools.setupDocument(document);
+		tools.setupJavaDocumentPartitioner(document);
 		viewer.configure(new JavaSourceViewerConfiguration(tools, null));
 		viewer.setEditable(false);
 		viewer.setDocument(document);
