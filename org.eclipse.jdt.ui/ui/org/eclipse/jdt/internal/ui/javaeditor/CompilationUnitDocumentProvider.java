@@ -395,6 +395,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			private List fGeneratedAnnotations;
 			private IProgressMonitor fProgressMonitor;
 			private boolean fIsActive= false;
+			private boolean fIsHandlingTemporaryProblems;	
 			
 			private ReverseMap fReverseMap= new ReverseMap();
 			private List fPreviouslyOverlaid= null; 
@@ -475,7 +476,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			 * @see IProblemRequestor#acceptProblem(IProblem)
 			 */
 			public void acceptProblem(IProblem problem) {
-				if (fIsActive) {
+				if (fIsHandlingTemporaryProblems) {
 					ProblemRequestorState state= (ProblemRequestorState) fProblemRequestorState.get();
 					if (state != null)
 						state.fReportedProblems.add(problem);
@@ -508,7 +509,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 					fProblemRequestorState.set(null);
 				}
 				
-				if (stateCount == 0 && fIsActive)
+				if (stateCount == 0 && fIsHandlingTemporaryProblems)
 					reportProblems(state.fReportedProblems);
 			}
 			
@@ -629,7 +630,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			 * @see IProblemRequestor#isActive()
 			 */
 			public boolean isActive() {
-				return true;
+				return fIsActive;
 			}
 			
 			/*
@@ -643,13 +644,22 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			 * @see IProblemRequestorExtension#setIsActive(boolean)
 			 */
 			public void setIsActive(boolean isActive) {
-				if (fIsActive != isActive) {
-					fIsActive= isActive;
-					if (fIsActive)
+				fIsActive= isActive;
+			}
+			
+			/*
+			 * @see IProblemRequestorExtension#setIsHandlingTemporaryProblems(boolean)
+			 * @since 3.1
+			 */
+			public void setIsHandlingTemporaryProblems(boolean enable) {
+				if (fIsHandlingTemporaryProblems != enable) {
+					fIsHandlingTemporaryProblems= enable;
+					if (fIsHandlingTemporaryProblems)
 						startCollectingProblems();
 					else
 						stopCollectingProblems();
 				}
+				
 			}
 			
 			private Object getAnnotations(Position position) {
@@ -764,8 +774,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	/** Internal property changed listener */
 	private IPropertyChangeListener fPropertyListener;
 	/** Annotation model listener added to all created CU annotation models */
-	private GlobalAnnotationModelListener fGlobalAnnotationModelListener;	
-	
+	private GlobalAnnotationModelListener fGlobalAnnotationModelListener;
+
+
 	/**
 	 * Constructor
 	 */
@@ -831,6 +842,11 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		setUpSynchronization(cuInfo);
 			
 		IProblemRequestor requestor= cuInfo.fModel instanceof IProblemRequestor ? (IProblemRequestor) cuInfo.fModel : null;
+		if (requestor instanceof IProblemRequestorExtension) {
+			IProblemRequestorExtension extension= (IProblemRequestorExtension) requestor;
+			extension.setIsActive(false);
+			extension.setIsHandlingTemporaryProblems(isHandlingTemporaryProblems());
+		}
 
 		original.becomeWorkingCopy(requestor, getProgressMonitor());
 		cuInfo.fCopy= original;
@@ -842,11 +858,6 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		
 		if (cuInfo.fModel != null)
 			cuInfo.fModel.addAnnotationModelListener(fGlobalAnnotationModelListener);
-		
-		if (requestor instanceof IProblemRequestorExtension) {
-			IProblemRequestorExtension extension= (IProblemRequestorExtension) requestor;
-			extension.setIsActive(isHandlingTemporaryProblems());
-		}
 		
 		return cuInfo;
 	}
@@ -973,19 +984,19 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		return store.getBoolean(HANDLE_TEMPORARY_PROBLEMS);
 	} 
 	
-	/**
-	 * Switches the state of problem acceptance according to the value in the preference store.
-	 */
-	protected void enableHandlingTemporaryProblems() {
-		boolean enable= isHandlingTemporaryProblems();
-		for (Iterator iter= getFileInfosIterator(); iter.hasNext();) {
-			FileInfo info= (FileInfo) iter.next();
-			if (info.fModel instanceof IProblemRequestorExtension) {
-				IProblemRequestorExtension  extension= (IProblemRequestorExtension) info.fModel;
-				extension.setIsActive(enable);
+		/**
+		 * Switches the state of problem acceptance according to the value in the preference store.
+		 */
+		protected void enableHandlingTemporaryProblems() {
+			boolean enable= isHandlingTemporaryProblems();
+			for (Iterator iter= getFileInfosIterator(); iter.hasNext();) {
+				FileInfo info= (FileInfo) iter.next();
+				if (info.fModel instanceof IProblemRequestorExtension) {
+					IProblemRequestorExtension  extension= (IProblemRequestorExtension) info.fModel;
+					extension.setIsHandlingTemporaryProblems(enable);
+				}
 			}
 		}
-	}
 	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider#setSavePolicy(org.eclipse.jdt.internal.ui.javaeditor.ISavePolicy)

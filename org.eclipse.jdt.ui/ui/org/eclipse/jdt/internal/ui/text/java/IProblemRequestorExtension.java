@@ -48,4 +48,12 @@ public interface IProblemRequestorExtension {
 	 * @since 3.0
 	 */
 	void endReportingSequence();
+
+	/**
+	 * Tells the problem requestor to handle temporary problems.
+	 * 
+	 * @param enable <code>true</code> if temporary problems are handled 
+	 * @since 3.1
+	 */
+	void setIsHandlingTemporaryProblems(boolean enable);
 }

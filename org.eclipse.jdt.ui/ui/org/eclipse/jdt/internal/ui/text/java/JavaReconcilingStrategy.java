@@ -78,8 +78,10 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 					
 					/* fix for missing cancel flag communication */
 					IProblemRequestorExtension extension= getProblemRequestorExtension();
-					if (extension != null)
+					if (extension != null) {
 						extension.setProgressMonitor(fProgressMonitor);
+						extension.setIsActive(true);
+					}
 					
 					try {
 						// reconcile
@@ -96,12 +98,13 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 					} catch (OperationCanceledException ex) {
 						Assert.isTrue(fProgressMonitor == null || fProgressMonitor.isCanceled());
 						ast= null;
+					} finally {
+						/* fix for missing cancel flag communication */
+						if (extension != null) {
+							extension.setProgressMonitor(null);
+							extension.setIsActive(false);
+						}
 					}
-					
-					/* fix for missing cancel flag communication */
-					if (extension != null)
-						extension.setProgressMonitor(null);
-					
 					
 				} catch (JavaModelException x) {
 					// swallow exception
