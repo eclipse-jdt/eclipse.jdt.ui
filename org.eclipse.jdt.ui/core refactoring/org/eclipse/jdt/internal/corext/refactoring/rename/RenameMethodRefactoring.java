@@ -396,7 +396,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			TextChange change= new CompilationUnitChange(cu.getElementName(), cu);
 			SearchResult[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
-				String editName= RefactoringCoreMessages.getString("RenameMethodRefactoring.update_reference");
+				String editName= "Update method occurrence";
 				change.addTextEdit(editName, createTextChange(results[j]));
 			}
 			builder.add(change);
@@ -412,7 +412,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	}
 	
 	void addDeclarationUpdate(TextChange change) throws JavaModelException{
-		change.addTextEdit("declaration update", SimpleTextEdit.createReplace(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), fNewName)); 
+		change.addTextEdit("Update method declaration", SimpleTextEdit.createReplace(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), fNewName)); 
 	}
 	
 	TextEdit createTextChange(SearchResult searchResult) {

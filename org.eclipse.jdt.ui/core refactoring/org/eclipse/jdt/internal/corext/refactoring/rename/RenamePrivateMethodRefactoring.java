@@ -111,7 +111,7 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 			if (grouped.length != 0){
 				SearchResult[] results= grouped[0].getSearchResults();
 				for (int i= 0; i < results.length; i++){
-					String editName= RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.rename_method");
+					String editName= "Update method reference";
 					change.addTextEdit(editName , createTextChange(results[i]));
 				}
 		}	
