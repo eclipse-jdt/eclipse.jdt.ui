@@ -108,10 +108,9 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 		if (!fIsActive) {
 			fIsActive= true;
 			fTextWidget.addLineBackgroundListener(this);
-		}
-		
-		if (fLine[0] != -1 || fLine[1] != -1)
+		} else if (fLine[0] != -1) {
 			drawHighlightLine();
+		}
 		
 		updateHighlightLine();
 		
