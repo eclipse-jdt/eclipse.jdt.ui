@@ -484,9 +484,6 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		return status;
 	}		
 
-	
-	
-
 	/*
 	 * Update the compliance controls' enable state
 	 */		
