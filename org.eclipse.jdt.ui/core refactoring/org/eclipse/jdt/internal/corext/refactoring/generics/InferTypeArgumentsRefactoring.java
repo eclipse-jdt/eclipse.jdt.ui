@@ -128,7 +128,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 				parser.setProject(project);
 				parser.createASTs(cus, new String[0], new ASTRequestor() {
 
-					public void acceptAST(CompilationUnit ast, ICompilationUnit source) {
+					public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
 						pm.subTask(source.getElementName());
 						ast.setProperty(RefactoringASTParser.SOURCE_PROPERTY, source);
 						ast.accept(unitCollector);
@@ -136,7 +136,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 						fTCModel.newCu();
 					}
 
-					public void acceptBinding(IBinding binding, String bindingKey) {
+					public void acceptBinding(String bindingKey, IBinding binding) {
 						//do nothing
 					}
 				}, new SubProgressMonitor(pm, 1));
