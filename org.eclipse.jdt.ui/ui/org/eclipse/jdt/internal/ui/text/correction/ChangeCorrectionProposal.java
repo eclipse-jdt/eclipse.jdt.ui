@@ -54,11 +54,12 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 		Change change= null;
 		try {
 			change= getChange();
-			
-			ChangeContext context= new ChangeContext(new AbortChangeExceptionHandler());
-			change.aboutToPerform(context, new NullProgressMonitor());
-			change.perform(context, new NullProgressMonitor());
-		} catch(ChangeAbortException e) {
+			if (change != null) {
+				ChangeContext context= new ChangeContext(new AbortChangeExceptionHandler());
+				change.aboutToPerform(context, new NullProgressMonitor());
+				change.perform(context, new NullProgressMonitor());
+			}
+		} catch (ChangeAbortException e) {
 			JavaPlugin.log(e);
 		} catch(CoreException e) {
 			JavaPlugin.log(e);
