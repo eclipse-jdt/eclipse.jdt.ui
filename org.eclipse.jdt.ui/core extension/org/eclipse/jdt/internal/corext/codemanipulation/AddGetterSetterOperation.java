@@ -126,7 +126,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			
 			boolean isStatic= Flags.isStatic(field.getFlags());
 			boolean isFinal= Flags.isFinal(field.getFlags());
-			boolean isBoolean=	field.getTypeSignature() == Signature.SIG_BOOLEAN;
+			boolean isBoolean=	field.getTypeSignature().equals(Signature.SIG_BOOLEAN);
 			
 			String typeName= Signature.toString(field.getTypeSignature());
 			
