@@ -204,8 +204,8 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		TestRunInfo testInfo= fTestRunnerPart.getTestInfo(testId);
 			
 		updateItem(treeItem, testInfo);
-			
-		//if (testInfo.getTrace() != null)
+		
+		if (fTestRunnerPart.isAutoScroll())
 			fTree.showItem(treeItem);
 	}
 

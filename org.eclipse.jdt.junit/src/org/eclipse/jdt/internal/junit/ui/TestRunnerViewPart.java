@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -100,6 +101,11 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	 */
 	private int fTestCount;
 	/**
+	 * Whether the output scrolls and reveals tests as they are executed.
+	 */
+	private boolean fAutoScroll = true;
+
+	/**
 	 * Map storing TestInfos for each executed test keyed by
 	 * the test name.
 	 */
@@ -141,12 +147,13 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	 * The launcher that has started the test
 	 */
 	private String fLaunchMode;
-	private ILaunch fLastLaunch= null;
+	private ILaunch fLastLaunch;
 	
 	/**
 	 * Actions
 	 */
 	private Action fRerunLastTestAction;
+	private ScrollLockAction fScrollLockAction;
 	
 	/**
 	 * The client side of the remote test runner
@@ -159,8 +166,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	final Image fTestRunOKDirtyIcon= TestRunnerViewPart.createImage("cview16/junitsuccq.gif"); //$NON-NLS-1$
 	final Image fTestRunFailDirtyIcon= TestRunnerViewPart.createImage("cview16/juniterrq.gif"); //$NON-NLS-1$
 	
-	Image fOriginalViewImage= null;
-	IElementChangedListener fDirtyListener= null;
+	Image fOriginalViewImage;
+	IElementChangedListener fDirtyListener;
 	
 	
 	private class StopAction extends Action{
@@ -270,6 +277,14 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		}
 	}
 
+	public void setAutoScroll(boolean scroll) {
+		fAutoScroll = scroll;
+	}
+	
+	public boolean isAutoScroll() {
+		return fAutoScroll;
+	}	
+
 	/*
 	 * @see ITestRunListener#testRunStarted(testCount)
 	 */
@@ -301,7 +316,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 			public void run() {
 				if(isDisposed()) 
 					return;	
-				if (fFirstFailure != null) {
+				if (fFirstFailure != null && fAutoScroll) {
 					fActiveRunView.setSelectedTest(fFirstFailure.getTestId());
 					handleTestSelected(fFirstFailure.getTestId());
 				}
@@ -783,20 +798,13 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		gridLayout.marginWidth= 0;
 		parent.setLayout(gridLayout);
 
-		IActionBars actionBars= getViewSite().getActionBars();
-		IToolBarManager toolBar= actionBars.getToolBarManager();
-		fRerunLastTestAction= new RerunLastAction();
-		fRerunLastTestAction.setActionDefinitionId("org.eclipse.jdt.junit.reruntest"); //$NON-NLS-1$
-		toolBar.add(new StopAction());
-		toolBar.add(fRerunLastTestAction);
-
-		actionBars.updateActionBars();
+		configureToolBar();
 		
 		Composite counterPanel= createProgressCountPanel(parent);
 		counterPanel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		SashForm sashForm= createSashForm(parent);
 		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
-		actionBars.setGlobalActionHandler(
+		getViewSite().getActionBars().setGlobalActionHandler(
 			IWorkbenchActionConstants.COPY,
 			new CopyTraceAction(fFailureView, fClipboard));
 
@@ -804,6 +812,20 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		fOriginalViewImage= getTitleImage();
 		fProgressImages= new ProgressImages();
 		WorkbenchHelp.setHelp(parent, IJUnitHelpContextIds.RESULTS_VIEW);
+	}
+
+	private void configureToolBar() {
+		IActionBars actionBars= getViewSite().getActionBars();
+		IToolBarManager toolBar= actionBars.getToolBarManager();
+		fRerunLastTestAction= new RerunLastAction();
+		fScrollLockAction= new ScrollLockAction(this);
+		toolBar.add(new StopAction());
+		toolBar.add(new Separator());
+		toolBar.add(fRerunLastTestAction);
+		toolBar.add(fScrollLockAction);
+		fScrollLockAction.setChecked(!fAutoScroll);
+
+		actionBars.updateActionBars();
 	}
 
 	private IStatusLineManager getStatusLine() {
