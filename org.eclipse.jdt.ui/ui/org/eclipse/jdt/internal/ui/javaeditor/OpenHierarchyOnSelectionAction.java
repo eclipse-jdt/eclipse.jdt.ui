@@ -29,6 +29,8 @@ import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
  * This action opens a java editor on the element represented by text selection of
  * the connected java source editor. In addition, if the element is a type, it also 
  * opens shows the element in the type hierarchy viewer.
+ * 
+ * @deprecated Use action from package org.eclipse.jdt.ui.actions
  */
 public class OpenHierarchyOnSelectionAction extends OpenOnSelectionAction {
 	

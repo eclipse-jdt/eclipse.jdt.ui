@@ -18,6 +18,8 @@ import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 /**
  * An action to open a type hierarchy either in its own perspective or
  * in the type hierarchy view part of the current perspective.
+ * 
+ * @deprecated Use action from package org.eclipse.jdt.ui.actions
  */
 public class OpenHierarchyAction extends Action {
 

@@ -36,6 +36,8 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  * Create Java Doc Stubs for selected members
  * Always forces the he field to be in an open editor. The result is unsaved,
  * so the user can decide if he wnats to accept the changes
+ * 
+ * @deprecated Use action from package org.eclipse.jdt.ui.actions
  */
 public class AddJavaDocStubAction extends Action {
 

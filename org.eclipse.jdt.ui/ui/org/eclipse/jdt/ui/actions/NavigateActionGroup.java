@@ -87,7 +87,7 @@ public class NavigateActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		IMenuManager navigateMenu= new MenuManager(ActionMessages.getString("NavigateMenu.label")); //$NON-NLS-1$
+		IMenuManager navigateMenu= new MenuManager(ActionMessages.getString("NavigateMenu.label"), JdtActionConstants.NAVIGATE_MENU); //$NON-NLS-1$
 		fOpenViewActionGroup.setNavigateMenu(navigateMenu);
 		fShowActionGroup.setNavigateMenu(navigateMenu);
 		

@@ -36,6 +36,8 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 /**
  * Evaluates constructors needed.
  * Will open an editor for the type. Changes are unsaved.
+ * 
+ * @deprecated Use action from package org.eclipse.jdt.ui.actions
  */
 public class AddUnimplementedConstructorsAction extends Action {
 

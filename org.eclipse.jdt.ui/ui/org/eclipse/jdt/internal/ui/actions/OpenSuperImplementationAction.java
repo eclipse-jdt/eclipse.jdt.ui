@@ -33,6 +33,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
  * On a selected method; opens the implementation in the super type (if existing)
+ * 
+ * @deprecated Use action from package org.eclipse.jdt.ui.actions
  */
 public class OpenSuperImplementationAction extends Action implements IUpdate, IObjectActionDelegate {
 

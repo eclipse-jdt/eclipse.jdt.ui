@@ -37,6 +37,8 @@ import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 /**
  * Evaluates unimplemented methods of a type.
  * Will open an editor for the type. Changes are unsaved.
+ * 
+ * @deprecated Use action org.eclipse.jdt.ui.actions.OverrideMethodsAction
  */
 public class AddUnimplementedMethodsAction extends Action {
 

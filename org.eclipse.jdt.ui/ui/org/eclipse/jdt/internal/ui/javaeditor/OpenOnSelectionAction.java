@@ -36,6 +36,8 @@ import org.eclipse.jdt.internal.ui.actions.AbstractOpenJavaElementAction;
 /**
  * This action opens a java editor on the element represented by text selection of
  * the connected java source viewer.
+ * 
+ * @deprecated Use action from package org.eclipse.jdt.ui.actions
  */
 public class OpenOnSelectionAction extends AbstractOpenJavaElementAction {
 	

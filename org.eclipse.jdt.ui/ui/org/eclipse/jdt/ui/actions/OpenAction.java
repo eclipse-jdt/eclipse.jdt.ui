@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * This action opens a java editor on the element represented by either
+ * This action opens a java editor on an element represented by either
  * <ul>
  * 	<li>a text selection inside a Java editor, or </li>
  * 	<li>a structured selection of a view part showing Java elements</li>

@@ -30,6 +30,17 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.sef.SelfEncapsulateFieldWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+/**
+ * Action to run the self encapsulate field refactoring. The action works
+ * for both view parts that present Java elements and compilation unit
+ * editors. 
+ * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
+ * @since 2.0
+ */
 public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	
 	private CompilationUnitEditor fEditor;

@@ -33,6 +33,8 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 
 /**
  * On a selected member; opens the Javadoc in an external browser (if existing)
+ * 
+ * @deprecated Use action from package org.eclipse.jdt.ui.actions
  */
 public class ShowInPackageViewAction extends Action implements IUpdate, IObjectActionDelegate {
 	private StructuredSelectionProvider fSelectionProvider;

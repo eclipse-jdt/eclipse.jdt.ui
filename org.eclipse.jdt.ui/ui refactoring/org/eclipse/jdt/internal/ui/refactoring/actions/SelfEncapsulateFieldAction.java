@@ -20,6 +20,9 @@ import org.eclipse.jdt.internal.ui.refactoring.sef.SelfEncapsulateFieldWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
+/**
+ * @deprecated Use class from package org.eclipse.jdt.ui.actions
+ */
 public class SelfEncapsulateFieldAction extends RefactoringAction {
 
 	public SelfEncapsulateFieldAction(StructuredSelectionProvider provider) {

@@ -32,6 +32,8 @@ import org.eclipse.ui.actions.SelectionProviderAction;
 /**
  * Open a resource (ClassFile, CompilationUnit, or ordinary resource) 
  * from the PackageViewer
+ * 
+ * @deprecated Use action org.eclipse.jdt.ui.actions.OpenAction
  */
 public class OpenResourceAction extends SelectionProviderAction implements ISelectionChangedListener {	
 	

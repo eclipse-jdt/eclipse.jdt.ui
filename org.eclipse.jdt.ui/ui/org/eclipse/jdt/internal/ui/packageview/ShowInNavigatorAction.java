@@ -33,6 +33,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Show the current selection in the Navigator view 
+ * 
+ * @deprecated Use action from package org.eclipse.jdt.ui.actions
  */
 public class ShowInNavigatorAction extends SelectionProviderAction {
 	

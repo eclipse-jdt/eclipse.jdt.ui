@@ -45,6 +45,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  * Will open the parent compilation unit in the editor.
  * The result is unsaved, so the user can decide if the
  * changes are acceptable.
+ * 
+ * @deprecated Use action from package org.eclipse.jdt.ui.actions
  */
 public class AddGetterSetterAction extends Action {
 
