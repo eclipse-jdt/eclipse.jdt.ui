@@ -33,7 +33,7 @@ public class ParameterTypeVariable extends ConstraintVariable {
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		return "[Parameter(" + fParameterIndex + "," + Bindings.asString(fMethodBinding) + ")]";
+		return "[Parameter(" + fParameterIndex + "," + Bindings.asString(fMethodBinding) + ")]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	/* (non-Javadoc)

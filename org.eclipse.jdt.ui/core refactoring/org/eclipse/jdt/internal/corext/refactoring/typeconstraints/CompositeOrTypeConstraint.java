@@ -60,7 +60,7 @@ public class CompositeOrTypeConstraint implements ITypeConstraint{
 		for (int i= 0; i < fConstraints.length; i++) {
 			ITypeConstraint constraint= fConstraints[i];
 			if (i > 0)
-				buff.append(" or ");			
+				buff.append(" or ");			 //$NON-NLS-1$
 			buff.append(constraint.toResolvedString());
 		}
 		return buff.toString();
@@ -81,7 +81,7 @@ public class CompositeOrTypeConstraint implements ITypeConstraint{
 		for (int i= 0; i < fConstraints.length; i++) {
 			ITypeConstraint constraint= fConstraints[i];
 			if (i > 0)
-				buff.append(" or ");			
+				buff.append(" or ");			 //$NON-NLS-1$
 			buff.append(constraint.toString());
 		}
 		return buff.toString();
