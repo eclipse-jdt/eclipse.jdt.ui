@@ -76,7 +76,8 @@ public class StubUtility {
 			} else {			
 				// java doc
 				if (settings.methodOverwrites) {
-					genJavaDocSeeTag(declaringtype.getElementName(), method.getElementName(), paramTypes, settings.createNonJavadocComments, buf);
+					boolean isDeprecated= Flags.isDeprecated(method.getFlags());
+					genJavaDocSeeTag(declaringtype.getElementName(), method.getElementName(), paramTypes, settings.createNonJavadocComments, isDeprecated, buf);
 				} else {
 					// generate a default java doc comment
 					String desc= "Method " + method.getElementName(); //$NON-NLS-1$
@@ -224,7 +225,7 @@ public class StubUtility {
 	/**
 	 * Generates a '@see' tag to the defined method.
 	 */
-	public static void genJavaDocSeeTag(String declaringTypeName, String methodName, String[] paramTypes, boolean nonJavaDocComment, StringBuffer buf) {
+	public static void genJavaDocSeeTag(String declaringTypeName, String methodName, String[] paramTypes, boolean nonJavaDocComment, boolean isDeprecated, StringBuffer buf) {
 		// create a @see link
 		buf.append("/*");
 		if (!nonJavaDocComment) {
@@ -242,6 +243,9 @@ public class StubUtility {
 			buf.append(Signature.getSimpleName(Signature.toString(paramTypes[i])));
 		}
 		buf.append(")\n"); //$NON-NLS-1$
+		if (isDeprecated) {
+			buf.append(" * @deprecated\n");
+		}
 		buf.append(" */\n"); //$NON-NLS-1$
 	}	
 

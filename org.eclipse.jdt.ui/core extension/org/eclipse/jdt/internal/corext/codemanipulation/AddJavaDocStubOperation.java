@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -61,7 +62,8 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		IMethod inheritedMethod= JavaModelUtil.findMethodDeclarationInHierarchy(fLastTypeHierarchy, declaringType, meth.getElementName(), meth.getParameterTypes(), meth.isConstructor());
 		if (inheritedMethod != null) {
 			boolean nonJavaDocComments= fSettings.createNonJavadocComments;
-			StubUtility.genJavaDocSeeTag(inheritedMethod.getDeclaringType().getElementName(), inheritedMethod.getElementName(), inheritedMethod.getParameterTypes(), nonJavaDocComments, buf);
+			boolean isDeprecated= Flags.isDeprecated(inheritedMethod.getFlags());
+			StubUtility.genJavaDocSeeTag(inheritedMethod.getDeclaringType().getElementName(), inheritedMethod.getElementName(), inheritedMethod.getParameterTypes(), nonJavaDocComments, isDeprecated, buf);
 		} else {
 			String desc= "Method " + meth.getElementName();
 			StubUtility.genJavaDocStub(desc, meth.getParameterNames(), meth.getReturnType(), meth.getExceptionTypes(), buf);
