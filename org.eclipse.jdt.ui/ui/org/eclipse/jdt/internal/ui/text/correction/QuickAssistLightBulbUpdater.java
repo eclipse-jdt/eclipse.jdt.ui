@@ -262,9 +262,11 @@ public class QuickAssistLightBulbUpdater {
 			while (iter.hasNext()) {
 				IJavaAnnotation annot= (IJavaAnnotation) iter.next();
 				Position pos= model.getPosition((Annotation) annot);
-				int startLine= document.getLineOfOffset(pos.getOffset());
-				if (startLine == currLine && JavaCorrectionProcessor.hasCorrections(annot)) {
-					return true;
+				if (pos != null) {
+					int startLine= document.getLineOfOffset(pos.getOffset());
+					if (startLine == currLine && JavaCorrectionProcessor.hasCorrections(annot)) {
+						return true;
+					}
 				}
 			}
 		} catch (BadLocationException e) {
