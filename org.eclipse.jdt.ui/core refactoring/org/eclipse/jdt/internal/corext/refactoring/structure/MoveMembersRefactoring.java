@@ -600,7 +600,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	private static ISourceRange[] findMemberReferences(int memberType, SearchResultGroup searchResultGroup) throws JavaModelException {
 		Assert.isTrue(memberType == IJavaElement.METHOD || memberType == IJavaElement.FIELD);
 		if (memberType == IJavaElement.METHOD)
-			return MessageSendFinder.findMessageSendRanges(searchResultGroup);
+			return MethodInvocationFinder.findMessageSendRanges(searchResultGroup);
 		else
 			return FieldReferenceFinder.findFieldReferenceRanges(searchResultGroup);
 	}
@@ -643,7 +643,7 @@ public class MoveMembersRefactoring extends Refactoring {
 			addImportTo(method.getDeclaringType(), cu);
 			String newSource= method.getDeclaringType().getElementName() + "." + method.getElementName();
 			SearchResult[] searchResults= findReferencesInMember(member, method, new SubProgressMonitor(pm, 1));
-			ISourceRange[] ranges= MessageSendFinder.findMessageSendRanges(searchResults, cu);
+			ISourceRange[] ranges= MethodInvocationFinder.findMessageSendRanges(searchResults, cu);
 			putAllToMap(result, newSource, ranges);
 		}
 		return result;
