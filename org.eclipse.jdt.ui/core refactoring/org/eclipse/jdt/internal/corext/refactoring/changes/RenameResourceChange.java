@@ -85,8 +85,9 @@ public class RenameResourceChange extends JDTChange {
 	}
 
 	public String getName() {
-		return RefactoringCoreMessages.getFormattedString("RenameResourceChange.name", new String[]{fResourcePath.toString(),
-				fNewName});//$NON-NLS-1$
+		return RefactoringCoreMessages.getFormattedString(
+			"RenameResourceChange.name", new String[]{fResourcePath.toString(), //$NON-NLS-1$
+			fNewName});
 	}
 
 	public Object getModifiedElement() {

@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
@@ -659,8 +660,14 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		result.addAll(fChangeManager.getAllChanges());
 		if (fQualifiedNameSearchResult != null)
 			result.addAll(fQualifiedNameSearchResult.getAllChanges());
-		if (willRenameCU())
-			result.add(new RenameResourceChange(ResourceUtil.getResource(fType), getNewElementName() + ".java")); //$NON-NLS-1$
+		if (willRenameCU()) {
+			IResource resource= ResourceUtil.getResource(fType);
+			if (resource != null && resource.isLinked()) {
+				result.add(new RenameResourceChange(ResourceUtil.getResource(fType), getNewElementName() + ".java")); //$NON-NLS-1$)
+			} else {
+				result.add(new RenameCompilationUnitChange(fType.getCompilationUnit(), getNewElementName() + ".java")); //$NON-NLS-1$
+			}
+		}
 		pm.worked(1);	
 		return result;	
 	}
