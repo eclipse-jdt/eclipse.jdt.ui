@@ -114,6 +114,23 @@ public class ResultCollector extends CompletionRequestor {
 		fKeywords.clear();
 		fSuggestedMethodNames.clear();
 	}
+	
+	/**
+	 * Creates a new instance ready to collect
+	 * 
+	 * @param project the project that the result collector will operate on
+	 */
+	public ResultCollector(IJavaProject project) {
+		fJavaProject= project;
+		fCompilationUnit= null;
+
+		fUserReplacementLength= -1;
+		fLastProblem= null;
+
+		fJavaProposals.clear();
+		fKeywords.clear();
+		fSuggestedMethodNames.clear();
+	}	
 
 	/**
 	 * @inheritDoc
