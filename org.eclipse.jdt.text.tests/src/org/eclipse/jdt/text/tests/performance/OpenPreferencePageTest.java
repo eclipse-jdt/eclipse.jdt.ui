@@ -116,12 +116,4 @@ public class OpenPreferencePageTest extends TestCase {
 		}
 		return null;
 	}
-
-	private synchronized void sleep(int time) {
-		try {
-			wait(time);
-		} catch (InterruptedException e) {
-		}
-	}
-
 }
