@@ -73,11 +73,29 @@ public class NLSHolder {
 				NLSElement element= elements[j];
 				if (element.hasTag()) //don't show nls'ed stuff
 					continue;
-				element.setValue(unwindEscapeChars(element.getValue()));
+				element.setValue(createModifiedValue(element.getValue()));
 				result.add(new NLSSubstitution(createKey(element, counter++), element, NLSSubstitution.DEFAULT));
 			}
 		}
 		return (NLSSubstitution[]) result.toArray(new NLSSubstitution[result.size()]);
+	}
+	
+	private static String createModifiedValue(String rawValue){
+		String modifiedValue= NLSRefactoring.removeQuotes(rawValue);
+		
+		modifiedValue= removeTrailingDots(modifiedValue);
+		modifiedValue= unwindEscapeChars(modifiedValue);
+		
+		return "\"" + modifiedValue + "\"";
+	}
+	
+	private static String removeTrailingDots(String s){
+		String dot= ".";
+		String subString= s;
+		while (subString.endsWith(dot)){
+			subString= s.substring(0, subString.lastIndexOf(dot));
+		}
+		return subString;
 	}
 	
 	private static String unwindEscapeChars(String s){
