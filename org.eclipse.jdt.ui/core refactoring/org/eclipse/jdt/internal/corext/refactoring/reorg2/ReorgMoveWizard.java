@@ -162,8 +162,18 @@ public class ReorgMoveWizard extends RefactoringWizard{
 		}
 		
 		public void createControl(Composite parent) {
-			super.createControl(parent);
-			Composite result= (Composite)super.getControl();
+			Composite result;
+			
+			if (! getMoveRefactoring().hasDestinationSet()) {
+				super.createControl(parent);
+				result= (Composite)super.getControl();
+			} else  {
+				initializeDialogUnits(parent);
+				result= new Composite(parent, SWT.NONE);
+				setControl(result);
+				result.setLayout(new GridLayout());
+				Dialog.applyDialogFont(result);
+			}
 			addUpdateReferenceComponent(result);
 			addUpdateQualifiedNameComponent(result, ((GridLayout)result.getLayout()).marginWidth);
 			setControl(result);
