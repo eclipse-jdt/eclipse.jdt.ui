@@ -128,6 +128,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private List fExceptionInfos;
 	private TextChangeManager fChangeManager;
 	private IMethod fMethod;
+	private IMethod fTopMethod;
 	private IMethod[] fRippleMethods;
 	private SearchResultGroup[] fOccurrences;
 	private ReturnTypeInfo fReturnTypeInfo;
@@ -141,6 +142,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private int fOldVarargIndex; // initialized in checkVarargs()
 
 	private BodyUpdater fBodyUpdater;
+
 	
 	private ChangeSignatureRefactoring(IMethod method) throws JavaModelException{
 		Assert.isNotNull(method);
@@ -264,9 +266,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	 * @see JdtFlags
 	 */	
 	public int[] getAvailableVisibilities() throws JavaModelException{
-		if (fMethod.getDeclaringType().isInterface())
+		if (fTopMethod.getDeclaringType().isInterface())
 			return new int[]{Modifier.PUBLIC};
-		else if (fMethod.getDeclaringType().isEnum() && fMethod.isConstructor())
+		else if (fTopMethod.getDeclaringType().isEnum() && fTopMethod.isConstructor())
 			return new int[]{	Modifier.NONE,
 								Modifier.PRIVATE};
 		else
@@ -666,20 +668,18 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			}
 			fMethod= orig;
 			
-			if (MethodChecks.isVirtual(fMethod) && !fMethod.getDeclaringType().isInterface()){
-				result.merge(MethodChecks.checkIfComesFromInterface(getMethod(), new SubProgressMonitor(pm, 1)));
-				if (result.hasFatalError())
-					return result;	
-				
-				result.merge(MethodChecks.checkIfOverridesAnother(getMethod(), new SubProgressMonitor(pm, 1)));
-				if (result.hasFatalError())
-					return result;			
-			} 
-			if (fMethod.getDeclaringType().isInterface()){
-				result.merge(MethodChecks.checkIfOverridesAnother(getMethod(), new SubProgressMonitor(pm, 1)));
-				if (result.hasFatalError())
-					return result;
+			if (fMethod.getDeclaringType().isInterface()) {
+				fTopMethod= MethodChecks.overridesAnotherMethod(fMethod, new SubProgressMonitor(pm, 2));
+			} else if (MethodChecks.isVirtual(fMethod)){
+				fTopMethod= MethodChecks.isDeclaredInInterface(fMethod, new SubProgressMonitor(pm, 1));
+				if (fTopMethod == null)
+					fTopMethod= MethodChecks.overridesAnotherMethod(fMethod, new SubProgressMonitor(pm, 1));
+				else
+					pm.worked(1);
 			}
+			if (fTopMethod == null)
+				fTopMethod= fMethod;
+			
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 			
@@ -785,86 +785,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private void clearManagers() {
 		fChangeManager= null;
 	}
-
-//	private RefactoringStatus resolveTypesWithoutBindings(IProgressMonitor pm) throws CoreException {
-//		RefactoringStatus result= new RefactoringStatus();
-//		List notDeletedParams= getNotDeletedInfos();
-//		pm.beginTask("", notDeletedParams.size() + 1); //$NON-NLS-1$
-//		for (Iterator iter= notDeletedParams.iterator(); iter.hasNext();) {
-//			ParameterInfo info= (ParameterInfo) iter.next();
-//			if (info.getNewTypeBinding() != null)
-//				continue;
-//			if (! info.isTypeNameChanged() && ! info.isAdded())
-//				continue;
-//			String typeName= getElementTypeName(info.getNewTypeName());
-//			if (isPrimitiveTypeName(typeName))
-//				continue;
-//			String qualifiedTypeName= resolveType(typeName, result, new SubProgressMonitor(pm, 1));
-//			info.setNewTypeName(getFullTypeName(info.getNewTypeName(), qualifiedTypeName));
-//		}
-//		if (! isReturnTypeSameAsInitial() && fReturnTypeInfo.getNewTypeBinding() == null) {
-//			String typeName= getElementTypeName(fReturnTypeInfo.getNewTypeName());
-//			if (! isPrimitiveTypeName(typeName)) {
-//				String qualifiedTypeName= resolveType(typeName, result, new SubProgressMonitor(pm, 1));
-//				fReturnTypeInfo.setNewTypeName(getFullTypeName(fReturnTypeInfo.getNewTypeName(), qualifiedTypeName));
-//			}
-//		}
-//		pm.done();
-//		return result;
-//	}
-//	
-//	private String resolveType(String elementTypeName, RefactoringStatus status, IProgressMonitor pm) throws CoreException {
-//		String[][] fqns= getMethod().getDeclaringType().resolveType(elementTypeName);
-//		if (fqns != null) {
-//			if (fqns.length == 1) {
-//				return JavaModelUtil.concatenateName(fqns[0][0], fqns[0][1]);
-//			} else if (fqns.length > 1){
-//				String[] keys= {elementTypeName, String.valueOf(fqns.length)};
-//				String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.ambiguous", keys); //$NON-NLS-1$
-//				status.addError(msg);
-//				return elementTypeName;
-//			}
-//		}
-//		
-//		List typeRefsFound= findTypeInfos(elementTypeName, pm);
-//		if (typeRefsFound.size() == 0){
-//			String[] keys= {elementTypeName};
-//			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.not_unique", keys); //$NON-NLS-1$
-//			status.addError(msg);
-//			return elementTypeName;
-//		} else if (typeRefsFound.size() == 1){
-//			TypeInfo typeInfo= (TypeInfo) typeRefsFound.get(0);
-//			return typeInfo.getFullyQualifiedName();
-//		} else {
-//			Assert.isTrue(typeRefsFound.size() > 1);
-//			String[] keys= {elementTypeName, String.valueOf(typeRefsFound.size())};
-//			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.ambiguous", keys); //$NON-NLS-1$
-//			status.addError(msg);
-//			return elementTypeName;
-//		}
-//	}
-//
-//	private String getFullTypeName(String typeName, String qualifiedName) {
-//		int dimStart= typeName.indexOf('[');
-//		if (dimStart != -1)
-//			return qualifiedName + typeName.substring(dimStart);
-//		return qualifiedName;
-//	}
-//
-//	private List findTypeInfos(String typeName, IProgressMonitor pm) throws JavaModelException {
-//		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaProject[]{getMethod().getJavaProject()}, true);
-//		IPackageFragment currPackage= getMethod().getDeclaringType().getPackageFragment();
-//		TypeInfo[] infos= AllTypesCache.getTypesForName(typeName, scope, pm);
-//		List typeRefsFound= new ArrayList();
-//		for (int i= 0; i < infos.length; i++) {
-//			TypeInfo curr= infos[i];
-//			IType type= curr.resolveType(scope);
-//			if (type != null && JavaModelUtil.isVisible(type, currPackage)) {
-//				typeRefsFound.add(curr);
-//			}
-//		}
-//		return typeRefsFound;
-//	}
 	
 	private static boolean isPrimitiveTypeName(String typeName){
 		return PrimitiveType.toCode(typeName) != null;

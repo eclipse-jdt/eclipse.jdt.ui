@@ -25,12 +25,12 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.contentassist.SubjectControlContentAssistant;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ICellEditorListener;
 import org.eclipse.jface.viewers.ICellModifier;
@@ -45,6 +46,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITableFontProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -61,6 +63,7 @@ import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.VariableNamesProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
@@ -68,7 +71,29 @@ import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
  * A special control to edit and reorder method parameters.
  */
 public class ChangeParametersControl extends Composite {
-
+	
+	public static class Mode {
+		private final String fName;
+		private Mode(String name) {
+			fName= name;
+		}
+		public static final Mode EXTRACT_METHOD= new Mode("EXTRACT_METHOD"); //$NON-NLS-1$
+		public static final Mode CHANGE_METHOD_SIGNATURE= new Mode("CHANGE_METHOD_SIGNATURE"); //$NON-NLS-1$
+		public static final Mode INTRODUCE_PARAMETER= new Mode("INTRODUCE_PARAMETER"); //$NON-NLS-1$
+		public String toString() {
+			return fName;
+		}
+		public boolean canChangeTypes() {
+			return this == CHANGE_METHOD_SIGNATURE;
+		}
+		public boolean canAddParameters() {
+			return this == Mode.CHANGE_METHOD_SIGNATURE;
+		}
+		public boolean canChangeDefault() {
+			return this == Mode.CHANGE_METHOD_SIGNATURE;
+		}
+	}
+	
 	private static class ParameterInfoContentProvider implements IStructuredContentProvider {
 		public Object[] getElements(Object inputElement) {
 			return removeMarkedAsDeleted((List) inputElement);
@@ -90,36 +115,42 @@ public class ChangeParametersControl extends Composite {
 		}
 	}
 
-	private static class ParameterInfoLabelProvider extends LabelProvider implements ITableLabelProvider {
+	private static class ParameterInfoLabelProvider extends LabelProvider implements ITableLabelProvider, ITableFontProvider {
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
 		}
 		public String getColumnText(Object element, int columnIndex) {
 			ParameterInfo info= (ParameterInfo) element;
-			if (columnIndex == TYPE_PROP) {
-				return info.getNewTypeName();
+			switch (columnIndex) {
+				case TYPE_PROP:
+					return info.getNewTypeName();
+				case NEWNAME_PROP:
+					return info.getNewName();
+				case DEFAULT_PROP:
+				    if (info.isAdded())
+				        return info.getDefaultValue();
+				    else
+				        return "-"; //$NON-NLS-1$
+				default:
+					throw new IllegalArgumentException(columnIndex + ": " + element); //$NON-NLS-1$
 			}
-			if (columnIndex == NEWNAME_PROP) {
-				return info.getNewName();
-			}
-			if (columnIndex == DEFAULT_PROP) {
-			    if (info.isAdded())
-			        return info.getDefaultValue();
-			    else
-			        return "-"; //$NON-NLS-1$
-			}
-			Assert.isTrue(false);
-			return ""; //$NON-NLS-1$
 		}
+		public Font getFont(Object element, int columnIndex) {
+			ParameterInfo info= (ParameterInfo) element;
+			if (info.isAdded())
+				return JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT);
+			else
+				return null;
+		}		
 	}
 
 	private class ParametersCellModifier implements ICellModifier {
 		public boolean canModify(Object element, String property) {
 			Assert.isTrue(element instanceof ParameterInfo);
 			if (property.equals(PROPERTIES[TYPE_PROP]))
-				return ChangeParametersControl.this.fCanChangeTypesOfOldParameters;
+				return fMode.canChangeTypes();
 			else if (property.equals(PROPERTIES[NEWNAME_PROP]))
-				return ChangeParametersControl.this.fCanChangeParameterNames;
+				return true;
 			else if (property.equals(PROPERTIES[DEFAULT_PROP]))
 				return (((ParameterInfo)element).isAdded());
 			Assert.isTrue(false);
@@ -169,39 +200,43 @@ public class ChangeParametersControl extends Composite {
 
 	private static final int ROW_COUNT= 7;
 
-	private final boolean fCanChangeParameterNames;
-	private final boolean fCanChangeTypesOfOldParameters;
-	private final boolean fCanAddParameters;
+	private final Mode fMode;
 	private final IParameterListChangeListener fListener;
+	private List fParameterInfos;
+	private final StubTypeContext fTypeContext;
+	private final String[] fParamNameProposals;
+	private ContentAssistHandler fNameContentAssistHandler;
 
+	private TableViewer fTableViewer;
 	private Button fUpButton;
 	private Button fDownButton;
-	private TableViewer fTableViewer;
 	private Button fEditButton;
 	private Button fAddButton;
 	private Button fRemoveButton;
-	private List fParameterInfos;
-	private StubTypeContext fTypeContext;
 
-	/**
-	 * @param label the label before the table or <code>null</code>
-	 */
-	public ChangeParametersControl(Composite parent, int style, String label, IParameterListChangeListener listener, boolean canChangeParameterNames, boolean canChangeTypesOfOldParameters, boolean canAddParameters) {
-		this(parent, style, label, listener, canChangeParameterNames, canChangeTypesOfOldParameters, canAddParameters, null);
+	public ChangeParametersControl(Composite parent, int style, String label, IParameterListChangeListener listener, Mode mode, StubTypeContext typeContext) {
+		this(parent, style, label, listener, mode, typeContext, new String[0]);
+	}
+	
+	public ChangeParametersControl(Composite parent, int style, String label, IParameterListChangeListener listener, Mode mode) {
+		this(parent, style, label, listener, mode, null, new String[0]);
+	}
+	
+	public ChangeParametersControl(Composite parent, int style, String label, IParameterListChangeListener listener, Mode mode, String[] paramNameProposals) {
+		this(parent, style, label, listener, mode, null, paramNameProposals);
 	}
 	
 	/**
 	 * @param label the label before the table or <code>null</code>
 	 * @param typeContext the package in which to complete types
 	 */
-	public ChangeParametersControl(Composite parent, int style, String label, IParameterListChangeListener listener, boolean canChangeParameterNames, boolean canChangeTypesOfOldParameters, boolean canAddParameters, StubTypeContext typeContext) {
+	private ChangeParametersControl(Composite parent, int style, String label, IParameterListChangeListener listener, Mode mode, StubTypeContext typeContext, String[] paramNameProposals) {
 		super(parent, style);
 		Assert.isNotNull(listener);
 		fListener= listener;
-		fCanChangeParameterNames= canChangeParameterNames;
-		fCanChangeTypesOfOldParameters= canChangeTypesOfOldParameters;
-		fCanAddParameters= canAddParameters;
+		fMode= mode;
 		fTypeContext= typeContext;
+		fParamNameProposals= paramNameProposals;
 
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
@@ -221,12 +256,26 @@ public class ChangeParametersControl extends Composite {
 		createButtonComposite(this);
 	}
 
+
 	public void setInput(List parameterInfos) {
 		Assert.isNotNull(parameterInfos);
 		fParameterInfos= parameterInfos;
 		fTableViewer.setInput(fParameterInfos);
 		if (fParameterInfos.size() > 0)
 			fTableViewer.setSelection(new StructuredSelection(fParameterInfos.get(0)));
+	}
+	
+	public void editLastParameter() {
+		fTableViewer.getControl().setFocus();
+		for (int i= fParameterInfos.size() - 1; i >= 0; i--) {
+			ParameterInfo info= (ParameterInfo) fParameterInfos.get(i);
+			if (! info.isDeleted()) {
+				fTableViewer.setSelection(new StructuredSelection(info), true);
+				updateButtonsEnabledState();
+				editColumnOrNextPossible(NEWNAME_PROP);
+				return;	
+			}
+		}
 	}
 
 	// ---- Parameter table -----------------------------------------------------------------------------------
@@ -247,7 +296,7 @@ public class ChangeParametersControl extends Composite {
 		tc.setResizable(true);
 		tc.setText(RefactoringMessages.getString("ChangeParametersControl.table.name")); //$NON-NLS-1$
 
-		if (fCanAddParameters){
+		if (fMode.canChangeDefault()){
 			tc= new TableColumn(table, SWT.NONE, DEFAULT_PROP);
 			tc.setResizable(true);
 			tc.setText(RefactoringMessages.getString("ChangeParametersControl.table.defaultValue")); //$NON-NLS-1$
@@ -285,21 +334,16 @@ public class ChangeParametersControl extends Composite {
 			}
 		});
 
-		if (canEditTableCells()){
-			addCellEditors();
-		}	
+		addCellEditors();
 	}
 
-    private boolean canEditTableCells() {
-        return fCanChangeParameterNames || fCanChangeTypesOfOldParameters;
-    }
-	
 	private void editColumnOrNextPossible(int column){
 		ParameterInfo[]	selected= getSelectedElements();
 		if (selected.length != 1)
 			return;
 		int nextColumn= column;
 		do {
+			updateNameContentAssistHandler(selected[0], nextColumn);
 			fTableViewer.editElement(selected[0], nextColumn);
 			if (fTableViewer.isCellEditorActive())
 				return;
@@ -313,6 +357,7 @@ public class ChangeParametersControl extends Composite {
 			return;
 		int prevColumn= column;
 		do {
+			updateNameContentAssistHandler(selected[0], prevColumn);
 			fTableViewer.editElement(selected[0], prevColumn);
 			if (fTableViewer.isCellEditorActive())
 			    return;
@@ -320,6 +365,12 @@ public class ChangeParametersControl extends Composite {
 		} while (prevColumn != column);
 	}
 	
+	private void updateNameContentAssistHandler(ParameterInfo info, int newColumn) {
+		if (newColumn == NEWNAME_PROP && fNameContentAssistHandler != null) {
+			fNameContentAssistHandler.setEnabled(info.isAdded());
+		}
+	}
+
 	private int nextColumn(int column) {
 		return (column >= getTable().getColumnCount() - 1) ? 0 : column + 1;
 	}
@@ -329,7 +380,7 @@ public class ChangeParametersControl extends Composite {
 	}
 	
 	private void addColumnLayoutData(TableLayoutComposite layouter) {
-		if (fCanAddParameters){
+		if (fMode.canChangeDefault()){
 			layouter.addColumnData(new ColumnWeightData(33, true));
 			layouter.addColumnData(new ColumnWeightData(33, true));
 			layouter.addColumnData(new ColumnWeightData(34, true));
@@ -361,13 +412,12 @@ public class ChangeParametersControl extends Composite {
 		gl.marginWidth= 0;
 		buttonComposite.setLayout(gl);
 
-		if(fCanAddParameters)
+		if (fMode.canAddParameters())
 			fAddButton= createAddButton(buttonComposite);	
 
-		if (fCanChangeParameterNames)
-			fEditButton= createEditButton(buttonComposite);
+		fEditButton= createEditButton(buttonComposite);
 		
-		if(fCanAddParameters)
+		if (fMode.canAddParameters())
 			fRemoveButton= createRemoveButton(buttonComposite);	
 		
 		if (buttonComposite.getChildren().length != 0)
@@ -424,7 +474,7 @@ public class ChangeParametersControl extends Composite {
 					ParameterInfo[] selected= getSelectedElements();
 					Assert.isTrue(selected.length == 1);
 					ParameterInfo parameterInfo= selected[0];
-					ParameterEditDialog dialog= new ParameterEditDialog(getShell(), parameterInfo, fCanChangeTypesOfOldParameters, fTypeContext);
+					ParameterEditDialog dialog= new ParameterEditDialog(getShell(), parameterInfo, fMode.canChangeTypes(), fMode.canChangeDefault(), fTypeContext);
 					dialog.open();
 					fListener.parameterChanged(parameterInfo);
 					fTableViewer.update(parameterInfo, PROPERTIES);
@@ -568,6 +618,9 @@ public class ChangeParametersControl extends Composite {
 					}
 				});
 			}
+			public Text getText() {
+				return text;
+			}
 		}
 		
 		final UnfocusableTextCellEditor editors[]= new UnfocusableTextCellEditor[PROPERTIES.length];
@@ -576,8 +629,14 @@ public class ChangeParametersControl extends Composite {
 		editors[NEWNAME_PROP]= new UnfocusableTextCellEditor(getTable());
 		editors[DEFAULT_PROP]= new UnfocusableTextCellEditor(getTable());
 		
-		SubjectControlContentAssistant assistant= installParameterTypeContentAssist(editors[TYPE_PROP].getControl());
-		editors[TYPE_PROP].setContentAssistant(assistant, TYPE_PROP);
+		if (fMode.canChangeTypes()) {
+			SubjectControlContentAssistant assistant= installParameterTypeContentAssist(editors[TYPE_PROP].getText());
+			editors[TYPE_PROP].setContentAssistant(assistant, TYPE_PROP);
+		}
+		if (fParamNameProposals.length > 0) {
+			SubjectControlContentAssistant assistant= installParameterNameContentAssist(editors[NEWNAME_PROP].getText());
+			editors[NEWNAME_PROP].setContentAssistant(assistant, NEWNAME_PROP);
+		}
 		
 		for (int i = 0; i < editors.length; i++) {
 			final int editorColumn= i;
@@ -675,10 +734,7 @@ public class ChangeParametersControl extends Composite {
 		fTableViewer.setCellModifier(new ParametersCellModifier());
 	}
 
-	private SubjectControlContentAssistant installParameterTypeContentAssist(Control control) {
-		if (! (control instanceof Text))
-			return null;
-		Text text= (Text) control;
+	private SubjectControlContentAssistant installParameterTypeContentAssist(Text text) {
 		JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(true, false);
 		if (fTypeContext == null)
 			processor.setCompletionContext(null, null, null);
@@ -686,6 +742,13 @@ public class ChangeParametersControl extends Composite {
 			processor.setCompletionContext(fTypeContext.getCuHandle(), fTypeContext.getBeforeString(), fTypeContext.getAfterString());
 		SubjectControlContentAssistant contentAssistant= ControlContentAssistHelper.createJavaContentAssistant(processor);
 		ContentAssistHandler.createHandlerForText(text, contentAssistant);
+		return contentAssistant;
+	}
+
+	private SubjectControlContentAssistant installParameterNameContentAssist(Text text) {
+		VariableNamesProcessor processor= new VariableNamesProcessor(fParamNameProposals);
+		SubjectControlContentAssistant contentAssistant= ControlContentAssistHelper.createJavaContentAssistant(processor);
+		fNameContentAssistHandler= ContentAssistHandler.createHandlerForText(text, contentAssistant);
 		return contentAssistant;
 	}
 
@@ -728,13 +791,13 @@ public class ChangeParametersControl extends Composite {
 	}
 
 	private boolean canMove(boolean up) {
-		List notDeleted= getNotDeletedInfos();
-		if (notDeleted == null || notDeleted.size() == 0)
+		int notDeletedInfosCount= getNotDeletedInfosCount();
+		if (notDeletedInfosCount == 0)
 			return false;
 		int[] indc= getTable().getSelectionIndices();
 		if (indc.length == 0)
 			return false;
-		int invalid= up ? 0 : notDeleted.size() - 1;
+		int invalid= up ? 0 : notDeletedInfosCount - 1;
 		for (int i= 0; i < indc.length; i++) {
 			if (indc[i] == invalid)
 				return false;
@@ -742,14 +805,14 @@ public class ChangeParametersControl extends Composite {
 		return true;
 	}
 	
-	private List getNotDeletedInfos(){
-		if (fParameterInfos == null)
-			return null;
-		List result= new ArrayList(fParameterInfos.size());
+	private int getNotDeletedInfosCount(){
+		if (fParameterInfos == null) // during initialization
+			return 0;
+		int result= 0;
 		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
 			ParameterInfo info= (ParameterInfo) iter.next();
 			if (! info.isDeleted())
-				result.add(info);
+				result++;
 		}
 		return result;
 	}

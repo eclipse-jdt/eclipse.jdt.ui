@@ -272,7 +272,7 @@ public class RippleMethodFinder2 {
 	}
 	
 	//adapted from JavaModelUtil:
-	public static String getResolvedType(String refTypeSig, IType declaringType) throws JavaModelException {
+	private static String getResolvedType(String refTypeSig, IType declaringType) throws JavaModelException {
 		int arrayCount= Signature.getArrayCount(refTypeSig);
 		char type= refTypeSig.charAt(arrayCount);
 		if (type == Signature.C_UNRESOLVED) {

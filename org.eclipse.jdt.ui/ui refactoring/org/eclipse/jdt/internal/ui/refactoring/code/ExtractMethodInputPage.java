@@ -173,7 +173,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 				public void parameterAdded(ParameterInfo parameter) {
 					updatePreview(getText());
 				}
-			}, true, false, false);
+			}, ChangeParametersControl.Mode.EXTRACT_METHOD);
 			gd= new GridData(GridData.FILL_BOTH);
 			gd.horizontalSpan= 2;
 			cp.setLayoutData(gd);

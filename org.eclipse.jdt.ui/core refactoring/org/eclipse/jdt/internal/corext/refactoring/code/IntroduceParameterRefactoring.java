@@ -162,7 +162,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			initializeExcludedParameterNames(cuRewrite);
 			
 			fParameter= ParameterInfo.createInfoForAddedParameter();
-			fParameter.setNewName(""); //$NON-NLS-1$
+			fParameter.setNewName(guessedParameterName());
 			ITypeBinding typeBinding= fSelectedExpression.resolveTypeBinding();
 			fParameter.setNewTypeBinding(typeBinding);
 			fParameter.setNewTypeName(typeBinding.getName());
@@ -299,6 +299,13 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		}		
 	}	
 
+	public List getParameterInfos() {
+		return fChangeSignatureRefactoring.getParameterInfos();
+	}
+	
+	public String getMethodSignaturePreview() throws JavaModelException {
+		return fChangeSignatureRefactoring.getMethodSignaturePreview();
+	}
 	
 //--- Input setting/validation
 
@@ -314,7 +321,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	public String guessedParameterName() {
 		String[] proposals= guessParameterNames();
 		if (proposals.length == 0)
-			return fParameter.getNewName();
+			return ""; //$NON-NLS-1$
 		else
 			return proposals[0];
 	}
@@ -387,30 +394,20 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	}
 	
 	public RefactoringStatus validateInput() {
-		RefactoringStatus status= checkExcludedParameterNames();
-		if (! status.isOK())
-			return status;
-		else
-			return Checks.checkTempName(fParameter.getNewName());
+		return fChangeSignatureRefactoring.checkSignature();
 	}
 	
 	private RefactoringStatus checkExcludedParameterNames() {
-		for (int i= 0; i < fExcludedParameterNames.length; i++) {
-			if (fParameter.getNewName().equals(fExcludedParameterNames[i]))
-			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.duplicate_name")); //$NON-NLS-1$
-		}
+//		for (int i= 0; i < fExcludedParameterNames.length; i++) {
+//			if (fParameter.getNewName().equals(fExcludedParameterNames[i]))
+//			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.duplicate_name")); //$NON-NLS-1$
+//		}
 		return new RefactoringStatus();
 	}
 	
 //--- checkInput
 	
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-		RefactoringStatus result= checkExcludedParameterNames();
-		if (result.hasFatalError())
-			return result;
-
-		// TODO: check for name clashes in ripple methods, ...
-		
 		return fChangeSignatureRefactoring.checkFinalConditions(pm);
 		
 	}

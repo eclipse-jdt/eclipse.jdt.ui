@@ -39,21 +39,23 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionP
 
 public class ParameterEditDialog extends StatusDialog {
 	
-	private ParameterInfo fParameter;
-	private boolean fEditType;
+	private final ParameterInfo fParameter;
+	private final boolean fEditType;
+	private final boolean fEditDefault;
+	private final StubTypeContext fContext;
 	private Text fType;
 	private Text fName;
 	private Text fDefaultValue;
-	private StubTypeContext fContext;
 	
 	/**
 	 * @param context the <code>IPackageFragment</code> for type ContentAssist.
 	 * Can be <code>null</code> if <code>canEditType</code> is <code>false</code>.
 	 */
-	public ParameterEditDialog(Shell parentShell, ParameterInfo parameter, boolean canEditType, StubTypeContext context) {
+	public ParameterEditDialog(Shell parentShell, ParameterInfo parameter, boolean canEditType, boolean canEditDefault, StubTypeContext context) {
 		super(parentShell);
 		fParameter= parameter;
 		fEditType= canEditType;
+		fEditDefault= canEditDefault;
 		fContext= context;
 	}
 	
@@ -112,7 +114,7 @@ public class ParameterEditDialog extends StatusDialog {
 				}
 			});
 
-		if (fParameter.isAdded()) {
+		if (fEditDefault && fParameter.isAdded()) {
 			label= new Label(result, SWT.NONE);
 			label.setText(RefactoringMessages.getString("ParameterEditDialog.defaultValue")); //$NON-NLS-1$
 			fDefaultValue= new Text(result, SWT.BORDER);

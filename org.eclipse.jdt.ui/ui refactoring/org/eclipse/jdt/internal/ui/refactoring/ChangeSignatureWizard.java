@@ -261,7 +261,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 				public void parameterAdded(ParameterInfo parameter) {
 					update(true);
 				}
-			}, true, true, true, getChangeMethodSignatureRefactoring().getStubTypeContext());
+			}, ChangeParametersControl.Mode.CHANGE_METHOD_SIGNATURE, getChangeMethodSignatureRefactoring().getStubTypeContext());
 			cp.setLayoutData(new GridData(GridData.FILL_BOTH));
 			cp.setInput(getChangeMethodSignatureRefactoring().getParameterInfos());
 			return cp;

@@ -11,27 +11,38 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.JFaceResources;
+
 import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.text.Document;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefactoring;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
-import org.eclipse.jdt.internal.ui.refactoring.contentassist.VariableNamesProcessor;
-
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefactoring;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 public class IntroduceParameterWizard extends RefactoringWizard {
 
@@ -56,12 +67,16 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 		private static final String DESCRIPTION = RefactoringMessages.getString("IntroduceParameterInputPage.description"); //$NON-NLS-1$
 		public static final String PAGE_NAME= "IntroduceParameterInputPage";//$NON-NLS-1$
 		private String[] fParamNameProposals;
+		
+		private JavaSourceViewer fSignaturePreview;
+		private Document fSignaturePreviewDocument;
     
 		public IntroduceParameterInputPage(String[] tempNameProposals) {
 			super(PAGE_NAME);
 			setDescription(DESCRIPTION);
 			Assert.isNotNull(tempNameProposals);
 			fParamNameProposals= tempNameProposals; //$NON-NLS-1$
+			fSignaturePreviewDocument= new Document();
 		}
 
 		private IntroduceParameterRefactoring getIntroduceParameterRefactoring(){
@@ -72,41 +87,91 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			Composite result= new Composite(parent, SWT.NONE);
 			setControl(result);
 			GridLayout layout= new GridLayout();
-			layout.numColumns= 2;
-			layout.verticalSpacing= 8;
 			result.setLayout(layout);
 			
-			Text textField= addParameterNameField(result);
-			textField.setText(fParamNameProposals.length == 0 ? "" : fParamNameProposals[0]); //$NON-NLS-1$
-			textField.selectAll();
-			textField.setFocus();
-			ControlContentAssistHelper.createTextContentAssistant(textField, new VariableNamesProcessor(fParamNameProposals));
-
-			updateStatus();
+			createParameterTableControl(result);
+			createSignaturePreview(result);
+			
+			update(false);
 			Dialog.applyDialogFont(result);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INTRODUCE_PARAMETER_WIZARD_PAGE);
 		}
 
-		private Text addParameterNameField(Composite parent) {
-			Label nameLabel= new Label(parent, SWT.NONE);
-			nameLabel.setText(RefactoringMessages.getString("IntroduceParameterInputPage.parameter_name")); //$NON-NLS-1$
-			nameLabel.setLayoutData(new GridData());
-        
-			final Text parameterNameField= new Text(parent, SWT.BORDER | SWT.SINGLE);
-			parameterNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			parameterNameField.addModifyListener(new ModifyListener(){
-				public void modifyText(ModifyEvent e) {
-					getIntroduceParameterRefactoring().setParameterName(parameterNameField.getText());
-					updateStatus();
+		private ChangeParametersControl createParameterTableControl(Composite composite) {
+			String labelText= RefactoringMessages.getString("IntroduceParameterWizard.parameters"); //$NON-NLS-1$
+			ChangeParametersControl cp= new ChangeParametersControl(composite, SWT.NONE, labelText, new IParameterListChangeListener() {
+				public void parameterChanged(ParameterInfo parameter) {
+					update(true);
 				}
-			});
-			return parameterNameField;
+				public void parameterListChanged() {
+					update(true);
+				}
+				public void parameterAdded(ParameterInfo parameter) {
+					update(true);
+				}
+			}, ChangeParametersControl.Mode.INTRODUCE_PARAMETER, fParamNameProposals);
+			cp.setLayoutData(new GridData(GridData.FILL_BOTH));
+			cp.setInput(getIntroduceParameterRefactoring().getParameterInfos());
+			cp.editLastParameter();
+			return cp;
 		}
 	
-		private void updateStatus() {
-			setPageComplete(getIntroduceParameterRefactoring().validateInput());
+		private void createSignaturePreview(Composite composite) {
+			Label previewLabel= new Label(composite, SWT.NONE);
+			previewLabel.setText(RefactoringMessages.getString("ChangeSignatureInputPage.method_Signature_Preview")); //$NON-NLS-1$
+			
+//			//XXX: use ViewForm to draw a flat border. Beware of common problems with wrapping layouts
+//			//inside GridLayout. GridData must be constrained to force wrapping. See bug 9866 et al.
+//			ViewForm border= new ViewForm(composite, SWT.BORDER | SWT.FLAT);
+			
+			IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
+			fSignaturePreview= new JavaSourceViewer(composite, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.WRAP /*| SWT.BORDER*/, store);
+			fSignaturePreview.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, null));
+			fSignaturePreview.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
+			fSignaturePreview.getTextWidget().setBackground(composite.getBackground());
+			fSignaturePreview.setDocument(fSignaturePreviewDocument);
+			fSignaturePreview.setEditable(false);
+			
+			//Layouting problems with wrapped text: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=9866
+			Control signaturePreviewControl= fSignaturePreview.getControl();
+			PixelConverter pixelConverter= new PixelConverter(signaturePreviewControl);
+			GridData gdata= new GridData(GridData.FILL_BOTH);
+			gdata.widthHint= pixelConverter.convertWidthInCharsToPixels(50);
+			gdata.heightHint= pixelConverter.convertHeightInCharsToPixels(2);
+			signaturePreviewControl.setLayoutData(gdata);
+			
+//			//XXX must force JavaSourceViewer text widget to wrap:
+//			border.setContent(signaturePreviewControl);
+//			GridData borderData= new GridData(GridData.FILL_BOTH);
+//			borderData.widthHint= gdata.widthHint;
+//			borderData.heightHint= gdata.heightHint;
+//			border.setLayoutData(borderData);
 		}
-	
+		
+		private void update(boolean displayErrorMessage){
+			updateStatus(displayErrorMessage);
+			updateSignaturePreview();
+		}
+
+		private void updateStatus(boolean displayErrorMessage) {
+			RefactoringStatus nameCheck= getIntroduceParameterRefactoring().validateInput();
+			if (displayErrorMessage) {
+				setPageComplete(nameCheck);
+			} else {
+				setErrorMessage(null);	
+				setPageComplete(true);
+			}
+		}
+
+		private void updateSignaturePreview() {
+			try{
+				int top= fSignaturePreview.getTextWidget().getTopPixel();
+				fSignaturePreviewDocument.set(getIntroduceParameterRefactoring().getMethodSignaturePreview()); //$NON-NLS-1$
+				fSignaturePreview.getTextWidget().setTopPixel(top);
+			} catch (JavaModelException e){
+				ExceptionHandler.handle(e, RefactoringMessages.getString("ChangeSignatureRefactoring.modify_Parameters"), RefactoringMessages.getString("ChangeSignatureInputPage.exception")); //$NON-NLS-2$ //$NON-NLS-1$
+			}	
+		}
 	
 	}
 }
