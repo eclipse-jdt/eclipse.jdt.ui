@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
@@ -57,18 +56,12 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 
 	private InstanceMethodMover fMover;
 	
-	public static boolean isAvailable(IMethod method, CodeGenerationSettings codeGenerationSettings) throws JavaModelException {
-		if (! method.exists() || method.isBinary() || method.getCompilationUnit() == null || JdtFlags.isStatic(method))
-			return false;
-		//this refactoring is invoked polymophically - so we need to check more here
-		MoveInstanceMethodRefactoring instance= new MoveInstanceMethodRefactoring(method.getCompilationUnit(), method.getNameRange().getOffset(), method.getNameRange().getLength(), codeGenerationSettings);
-		if (instance.checkActivation(new NullProgressMonitor()).hasFatalError())
-			return false;
-		return true;
+	public static boolean isAvailable(IMethod method) throws JavaModelException {
+		return method.exists() && !method.isConstructor() && !method.isBinary() && method.getCompilationUnit() != null && !JdtFlags.isStatic(method);
 	}
 
 	public static MoveInstanceMethodRefactoring create(IMethod method, CodeGenerationSettings codeGenerationSettings) throws JavaModelException {		
-		if (! isAvailable(method, codeGenerationSettings))	
+		if (! isAvailable(method))	
 			return null;
 		return new MoveInstanceMethodRefactoring(method.getCompilationUnit(), method.getNameRange().getOffset(), method.getNameRange().getLength(), codeGenerationSettings);
 	}
