@@ -10,7 +10,7 @@ public class VariableSelectionBlock {
 	private CLabel fFullPath;
 	
 	private IStatus fVariableStatus;
-	private IStatus fExistsStatus;
+	private IStatus fExistsStatus;	private IStatus fExtensionStatus;
 	
 	private String fVariable;
 	private IStatusChangeListener fContext;
@@ -64,8 +64,7 @@ public class VariableSelectionBlock {
 			IPath entryPath= JavaCore.getClasspathVariable(fVariable);
 			if (entryPath != null) {
 				return entryPath.append(fExtensionField.getText());
-			}
-		}
+			}		}
 		return null;
 	}	
 		
@@ -124,11 +123,11 @@ public class VariableSelectionBlock {
 	private void doFieldUpdated(DialogField field) {
 		if (field == fVariableField) {
 			fVariableStatus= variableUpdated();
-		}
+		} else if (field == fExtensionField) {			fExtensionStatus= extensionUpdated();		}
 		fExistsStatus= getExistsStatus();
 		updateFullTextField();
 		
-		fContext.statusChanged(StatusUtil.getMoreSevere(fVariableStatus, fExistsStatus));
+		fContext.statusChanged(StatusUtil.getMostSevere(new IStatus[] { fVariableStatus, fExtensionStatus, fExistsStatus }));
 	}		
 	
 	private IStatus variableUpdated() {
@@ -149,7 +148,7 @@ public class VariableSelectionBlock {
 		}
 		fExtensionField.enableButton(fVariable != null);
 		return status;
-	}	
+	}		private IStatus extensionUpdated() {		StatusInfo status= new StatusInfo();		String extension= fExtensionField.getText();		if (extension.length() > 0 && !Path.ROOT.isValidPath(extension)) {			status.setError(NewWizardMessages.getString("VariableSelectionBlock.error.invalidextension")); //$NON-NLS-1$		}		return status;	}
 		
 	private IStatus getExistsStatus() {
 		StatusInfo status= new StatusInfo();
