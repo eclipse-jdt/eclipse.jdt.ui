@@ -86,7 +86,7 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 			computeResourceModifications(), natures, shared);
 	}
 	
-	private ResourceModifications computeResourceModifications() throws CoreException {
+	private ResourceModifications computeResourceModifications() {
 		ResourceModifications result= new ResourceModifications();
 		result.setRename(fProject.getProject(), new RenameArguments(getNewElementName(), getUpdateReferences()));
 		return result;		
@@ -147,7 +147,7 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 		}	
 	}
 	
-	private boolean isReadOnly() throws CoreException {
+	private boolean isReadOnly() {
 		return fProject.getResource().isReadOnly();
 	}
 	

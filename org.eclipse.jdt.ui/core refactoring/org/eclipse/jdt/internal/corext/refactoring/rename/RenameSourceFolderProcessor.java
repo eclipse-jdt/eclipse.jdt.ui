@@ -96,7 +96,7 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 			computeResourceModifications(), natures, shared);
 	}
 	
-	private ResourceModifications computeResourceModifications() throws CoreException {
+	private ResourceModifications computeResourceModifications() {
 		ResourceModifications result= new ResourceModifications();
 		result.setRename(fSourceFolder.getResource(), new RenameArguments(getNewElementName(), getUpdateReferences()));
 		return result;		
