@@ -18,8 +18,11 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.corext.template.CodeTemplates;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionContext;
@@ -61,6 +64,8 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 				
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
+		
+		CodeTemplates.getInstance().getTemplates(CodeTemplateContextType.NEWTYPE_NAME)[0].setPattern("");
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
