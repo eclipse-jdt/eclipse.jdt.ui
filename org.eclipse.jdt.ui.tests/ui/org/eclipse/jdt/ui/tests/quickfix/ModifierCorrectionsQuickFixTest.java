@@ -1070,7 +1070,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("            }\n");
 		buf.append("        };\n");
 		buf.append("    }\n");
-		buf.append("    protected void foo() {\n");
+		buf.append("    void foo() {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
@@ -1122,7 +1122,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("            }\n");
 		buf.append("        };\n");
 		buf.append("    }\n");
-		buf.append("    protected E() {\n");
+		buf.append("    E() {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
@@ -1174,7 +1174,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("            }\n");
 		buf.append("        };\n");
 		buf.append("    }\n");
-		buf.append("    protected int fCount; {\n");
+		buf.append("    int fCount; {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
@@ -1226,7 +1226,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("            }\n");
 		buf.append("        };\n");
 		buf.append("    }\n");
-		buf.append("    protected int fCount; {\n");
+		buf.append("    int fCount; {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());

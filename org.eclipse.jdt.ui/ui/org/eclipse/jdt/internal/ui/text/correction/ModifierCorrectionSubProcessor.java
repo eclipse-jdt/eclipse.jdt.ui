@@ -93,9 +93,8 @@ public class ModifierCorrectionSubProcessor {
 				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertononstatic.description", name); //$NON-NLS-1$
 				excludedModifiers= Modifier.STATIC;
 			} else if (kind == TO_NON_PRIVATE) {			
-				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertoprotected.description", name); //$NON-NLS-1$
+				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertodefault.description", name); //$NON-NLS-1$
 				excludedModifiers= Modifier.PRIVATE;
-				includedModifiers= Modifier.PROTECTED;
 			} else {
 				return;
 			}
