@@ -60,7 +60,7 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 				// Delete source
 				if (!fSource.getTextRange().isDeleted()) {
 					fMode= DELETE;
-					buffer.replace(fSource.getTextRange(), "");
+					buffer.replace(fSource.getTextRange(), ""); //$NON-NLS-1$
 				}
 			} finally {
 				fMode= UNDEFINED;
@@ -126,8 +126,12 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 		IStatus s= super.checkEdit(bufferLength);
 		if (!s.isOK())
 			return s;
-		if (fSource == null || fSource.getTargetEdit() != this || getTextRange().getLength() != 0)
-			createErrorStatus("Incorrect MoveTargetEdit");
+		if (fSource == null)
+			return createErrorStatus(TextManipulationMessages.getString("MoveTargetEdit.no_source")); //$NON-NLS-1$
+		if (fSource.getTargetEdit() != this)
+			return createErrorStatus(TextManipulationMessages.getString("MoveTargetEdit.different_target")); //$NON-NLS-1$
+		if (getTextRange().getLength() != 0)
+			return createErrorStatus(TextManipulationMessages.getString("MoveTargetEdit.length")); //$NON-NLS-1$
 		return createOKStatus();
 	}
 	

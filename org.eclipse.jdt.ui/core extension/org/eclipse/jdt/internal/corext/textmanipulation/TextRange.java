@@ -156,15 +156,15 @@ public final class TextRange {
 	 */
 	public String toString() {
 		if (isDeleted())
-			return "[deleted]";
+			return "[deleted]"; //$NON-NLS-1$
 		if (isUndefined())
-			return "[undefined]";
+			return "[undefined]"; //$NON-NLS-1$
 		StringBuffer buffer= new StringBuffer();
-		buffer.append("[");
+		buffer.append("["); //$NON-NLS-1$
 		buffer.append(fOffset);
-		buffer.append(",");
+		buffer.append(","); //$NON-NLS-1$
 		buffer.append(fLength);
-		buffer.append("]");
+		buffer.append("]"); //$NON-NLS-1$
 		return buffer.toString();
 	}
 

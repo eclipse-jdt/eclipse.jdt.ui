@@ -43,7 +43,7 @@ public class CopyTargetEdit extends AbstractTransferEdit {
 	 * @see TextEdit#copy
 	 */	
 	protected TextEdit copy0(TextEditCopier copier) {
-		Assert.isTrue(CopyTargetEdit.class == getClass(), "Subclasses must reimplement copy0");
+		Assert.isTrue(CopyTargetEdit.class == getClass(), "Subclasses must reimplement copy0"); //$NON-NLS-1$
 		return new CopyTargetEdit(getTextRange().copy());
 	}
 
@@ -78,8 +78,12 @@ public class CopyTargetEdit extends AbstractTransferEdit {
 		IStatus s= super.checkEdit(bufferLength);
 		if (!s.isOK())
 			return s;
-		if (fSource == null || fSource.getTargetEdit() != this || getTextRange().getLength() != 0)
-			return createErrorStatus("Incorrect CopyTargetEdit");
+		if (fSource == null)
+			return createErrorStatus(TextManipulationMessages.getString("CopyTargetEdit.no_source")); //$NON-NLS-1$
+		if (fSource.getTargetEdit() != this)
+			return createErrorStatus(TextManipulationMessages.getString("CopyTargetEdit.different_target")); //$NON-NLS-1$
+		if (getTextRange().getLength() != 0)
+			return createErrorStatus(TextManipulationMessages.getString("CopyTargetEdit.length")); //$NON-NLS-1$
 		return createOKStatus();
 	}
 	

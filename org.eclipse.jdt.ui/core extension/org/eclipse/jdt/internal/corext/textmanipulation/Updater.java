@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 		try {
 			currentText= event.getDocument().get(offset, currentLength);
 		} catch (BadLocationException e) {
-			Assert.isTrue(false, "Can't happen");
+			Assert.isTrue(false, "Can't happen"); //$NON-NLS-1$
 		}
 
 		String newText= event.getText();

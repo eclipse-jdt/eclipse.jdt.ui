@@ -288,7 +288,7 @@ public abstract class TextEdit {
 		if (index != -1) {
 			name= name.substring(index + 1);
 		}
-		return "{" + name + "} " + getTextRange().toString();
+		return "{" + name + "} " + getTextRange().toString(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	public static TextRange getTextRange(List edits) {
@@ -423,11 +423,11 @@ public abstract class TextEdit {
 	/* package */ IStatus checkEdit(int bufferLength) {
 		TextRange range= getTextRange();
 		if (range.getExclusiveEnd() > bufferLength)
-			return createErrorStatus("Offset greater than buffer length");
+			return createErrorStatus(TextManipulationMessages.getString("TextEdit.offset_greater")); //$NON-NLS-1$
 		boolean isInsertionPoint= range.isInsertionPoint();
 		TextRange cRange= getChildrenTextRange();
 		if (!cRange.isUndefined() && (cRange.getOffset() < range.getOffset() || cRange.getExclusiveEnd() > range.getExclusiveEnd())) {
-			return createErrorStatus("Range of child edit lies outside of parent edit");
+			return createErrorStatus(TextManipulationMessages.getString("TextEdit.range_outside")); //$NON-NLS-1$
 		}
 		TextRange last= null;
 		if (fChildren != null) {
@@ -436,7 +436,7 @@ public abstract class TextEdit {
 				TextRange eRange= element.getTextRange();
 				
 				if (!(isInsertionPoint && eRange.isInsertionPoint()) && last != null && last.getInclusiveEnd() >= eRange.getOffset()) {
-					return createErrorStatus("Overlapping text edits");
+					return createErrorStatus(TextManipulationMessages.getString("TextEdit.overlapping")); //$NON-NLS-1$
 				}
 				IStatus s= element.checkEdit(bufferLength);
 				if (!s.isOK())
@@ -452,7 +452,7 @@ public abstract class TextEdit {
 	}
 	
 	protected static IStatus createOKStatus() {
-		return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "Text edit is valid", null);
+		return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, TextManipulationMessages.getString("TextEdit.is_valid"), null); //$NON-NLS-1$
 	}
 	
 	//---- Edit processing --------------------------------------------------------------------------------
@@ -473,7 +473,7 @@ public abstract class TextEdit {
 	
 	/* package */ void execute(TextBuffer buffer, Updater updater, IProgressMonitor pm) throws CoreException {
 		List children= getChildren();
-		pm.beginTask("", children != null ? children.size() + 1 : 1);
+		pm.beginTask("", children != null ? children.size() + 1 : 1); //$NON-NLS-1$
 		if (children != null) {
 			for (int i= children.size() - 1; i >= 0; i--) {
 				((TextEdit)children.get(i)).execute(buffer, updater, new SubProgressMonitor(pm, 1));

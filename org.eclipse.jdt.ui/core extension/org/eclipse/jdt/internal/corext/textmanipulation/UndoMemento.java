@@ -31,7 +31,7 @@ public final class UndoMemento {
 	}
 	
 	/* package */ void execute(TextBuffer buffer, IProgressMonitor pm) throws CoreException {
-		pm.beginTask("", fEdits.size());
+		pm.beginTask("", fEdits.size()); //$NON-NLS-1$
 		for (int i= fEdits.size() - 1; i >= 0; i--) {
 			((TextEdit)fEdits.get(i)).perform(buffer);
 			pm.worked(1);
@@ -39,7 +39,7 @@ public final class UndoMemento {
 	}
 	
 	/* package */ void executed(IProgressMonitor pm) {
-		pm.beginTask("", fEdits.size());
+		pm.beginTask("", fEdits.size()); //$NON-NLS-1$
 		for (int i= fEdits.size() - 1; i >= 0; i--) {
 			((TextEdit)fEdits.get(i)).performed();
 			pm.worked(1);
@@ -47,7 +47,7 @@ public final class UndoMemento {
 	}
 	
 	/* package */ IStatus checkEdits(int bufferLength) {
-		return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "Undo memento is valid", null);
+		return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, TextManipulationMessages.getString("UndoMemento.is_valid"), null); //$NON-NLS-1$
 	}
 }
 

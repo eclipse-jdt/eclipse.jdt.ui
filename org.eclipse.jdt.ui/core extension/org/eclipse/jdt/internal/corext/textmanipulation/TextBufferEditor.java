@@ -156,13 +156,13 @@ public class TextBufferEditor {
 	private UndoMemento executeDo(IProgressMonitor pm) throws CoreException {
 		Updater updater= null;
 		try {
-			pm.beginTask("", 5);
+			pm.beginTask("", 5); //$NON-NLS-1$
 			updater= Updater.createDoUpdater();
 			fBuffer.registerUpdater(updater);
 			fRoot.execute(fBuffer, updater, new SubProgressMonitor(pm, 4));
 			List executed= updater.getProcessedEdits();
 			SubProgressMonitor sm= new SubProgressMonitor(pm, 1);
-			sm.beginTask("", executed.size());
+			sm.beginTask("", executed.size()); //$NON-NLS-1$
 			for (int i= executed.size() - 1; i >= 0; i--) {
 				((TextEdit)executed.get(i)).performed();
 				sm.worked(1);
@@ -177,7 +177,7 @@ public class TextBufferEditor {
 	private UndoMemento executeUndo(IProgressMonitor pm) throws CoreException {
 		Updater updater= null;
 		try {
-			pm.beginTask("", 5);
+			pm.beginTask("", 5); //$NON-NLS-1$
 			updater= Updater.createUndoUpdater();
 			fBuffer.registerUpdater(updater);
 			fUndoMemento.execute(fBuffer, new SubProgressMonitor(pm, 4));

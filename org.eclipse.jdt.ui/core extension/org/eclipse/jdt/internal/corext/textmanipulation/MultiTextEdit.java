@@ -37,7 +37,7 @@ public class MultiTextEdit extends TextEdit {
 	 * @see TextEdit#copy
 	 */	
 	protected TextEdit copy0(TextEditCopier copier) {
-		Assert.isTrue(MultiTextEdit.class == getClass(), "Subclasses must reimplement copy0");
+		Assert.isTrue(MultiTextEdit.class == getClass(), "Subclasses must reimplement copy0"); //$NON-NLS-1$
 		return new MultiTextEdit();
 	}
 

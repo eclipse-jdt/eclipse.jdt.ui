@@ -101,11 +101,11 @@ public class SimpleTextEdit extends TextEdit {
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		return super.toString() + " <<" + fText;
+		return super.toString() + " <<" + fText; //$NON-NLS-1$
 	}
 	
 	protected TextEdit copy0(TextEditCopier copier) {
-		Assert.isTrue(SimpleTextEdit.class == getClass(), "Subclasses must reimplement copy0");
+		Assert.isTrue(SimpleTextEdit.class == getClass(), "Subclasses must reimplement copy0"); //$NON-NLS-1$
 		return new SimpleTextEdit(getTextRange().copy(), getText());
 	}		
 	

@@ -106,8 +106,10 @@ public class CopySourceEdit extends AbstractTransferEdit {
 		IStatus s= super.checkEdit(bufferLength);
 		if (!s.isOK())
 			return s;
-		if (fTarget == null || fTarget.getSourceEdit() != this)
-			return createErrorStatus("Incorrect CopySourceEdit");
+		if (fTarget == null)
+			return createErrorStatus(TextManipulationMessages.getString("CopySourceEdit.no_target")); //$NON-NLS-1$
+		if (fTarget.getSourceEdit() != this)
+			return createErrorStatus(TextManipulationMessages.getString("CopySourceEdit.different_source")); //$NON-NLS-1$
 		return createOKStatus();
 	}
 	
