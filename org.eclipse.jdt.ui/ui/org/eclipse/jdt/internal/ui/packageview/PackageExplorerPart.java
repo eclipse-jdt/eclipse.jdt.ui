@@ -41,17 +41,20 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeViewerListener;
+import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
@@ -293,7 +296,13 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		fViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
-				handleDoubleClick(event);
+				fActionSet.handleDoubleClick(event);
+			}
+		});
+		
+		fViewer.addOpenListener(new IOpenListener() {
+			public void open(OpenEvent event) {
+				fActionSet.handleOpen(event);
 			}
 		});
 
@@ -481,14 +490,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	}
 
 	/**
-	 * Handles double clicks in viewer.
-	 * Opens editor if file double-clicked.
-	 */
-	private void handleDoubleClick(DoubleClickEvent event) {
-		fActionSet.handleDoubleClick(event);
-	}
-
-	/**
 	 * Handles selection changed in viewer.
 	 * Updates global actions.
 	 * Links to editor (if option enabled)
@@ -496,6 +497,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private void handleSelectionChanged(SelectionChangedEvent event) {
 		IStructuredSelection selection= (IStructuredSelection) event.getSelection();
 		fActionSet.handleSelectionChanged(event);
+		// if (OpenStrategy.getOpenMethod() != OpenStrategy.SINGLE_CLICK)
 		linkToEditor(selection);
 	}
 

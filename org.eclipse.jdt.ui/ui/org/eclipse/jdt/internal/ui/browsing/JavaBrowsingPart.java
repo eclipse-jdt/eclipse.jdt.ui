@@ -43,10 +43,12 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -132,6 +134,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	
 	// Actions
 	private WorkingSetFilterActionGroup fWorkingSetFilterActionGroup;
+	private OpenEditorActionGroup fOpenEditorGroup;
 	private CCPActionGroup fCCPActionGroup;
 	private BuildActionGroup fBuildActionGroup;
 	protected CompositeActionGroup fActionGroups;
@@ -409,7 +412,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	protected void createActions() {		
 		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
-				new OpenEditorActionGroup(this), 
+				fOpenEditorGroup= new OpenEditorActionGroup(this), 
 				new OpenViewActionGroup(this), 
 				new ShowActionGroup(this), 
 				fCCPActionGroup= new CCPActionGroup(this), 
@@ -742,18 +745,16 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 					return;
 
 				if (page.equals(JavaPlugin.getActivePage()) && JavaBrowsingPart.this.equals(page.getActivePart())) {
-					if (JavaBrowsingPreferencePage.openEditorOnSingleClick())
-						new ShowInEditorAction().run(event.getSelection(), page);
-					else
-						linkToEditor((IStructuredSelection)event.getSelection());
+					linkToEditor((IStructuredSelection)event.getSelection());
 				}
 			}
 		});
 
-		fViewer.addDoubleClickListener(new IDoubleClickListener() {
-			public void doubleClick(DoubleClickEvent event) {
-				if (fProcessSelectionEvents && !JavaBrowsingPreferencePage.openEditorOnSingleClick())
-					new ShowInEditorAction().run(event.getSelection(), getSite().getPage());
+		fViewer.addOpenListener(new IOpenListener() {
+			public void open(OpenEvent event) {
+				IAction open= fOpenEditorGroup.getOpenAction();
+				if (open.isEnabled())
+					open.run();
 			}
 		});
 	}

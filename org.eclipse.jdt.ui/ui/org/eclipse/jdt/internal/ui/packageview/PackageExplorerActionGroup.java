@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 
@@ -290,14 +291,9 @@ public class PackageExplorerActionGroup extends CompositeActionGroup implements 
 			new OpenInNewWindowAction(fPart.getSite().getWorkbenchWindow(), (IContainer)element));
 	}
 
-	//---- Key board handling ------------------------------------------------------------
+	//---- Key board and mouse handling ------------------------------------------------------------
 
 	/* package*/ void handleDoubleClick(DoubleClickEvent event) {
-		OpenAction openAction= fNavigateActionGroup.getOpenAction();
-		if (openAction != null && openAction.isEnabled()) {
-			openAction.run();
-			return;
-		}
 		TreeViewer viewer= fPart.getViewer();
 		Object element= ((IStructuredSelection)event.getSelection()).getFirstElement();
 		if (viewer.isExpandable(element)) {
@@ -311,6 +307,14 @@ public class PackageExplorerActionGroup extends CompositeActionGroup implements 
 			} else {
 				viewer.setExpandedState(element, !viewer.getExpandedState(element));
 			}
+		}
+	}
+	
+	/* package */ void handleOpen(OpenEvent event) {
+		OpenAction openAction= fNavigateActionGroup.getOpenAction();
+		if (openAction != null && openAction.isEnabled()) {
+			openAction.run();
+			return;
 		}
 	}
 	

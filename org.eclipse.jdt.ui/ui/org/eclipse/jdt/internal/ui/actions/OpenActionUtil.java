@@ -42,7 +42,14 @@ public class OpenActionUtil {
 	 * Opens the editor on the given element and subsequently selects it.
 	 */
 	public static void open(Object element) throws JavaModelException, PartInitException {
-		IEditorPart part= EditorUtility.openInEditor(element);
+		open(element, true);
+	}
+	
+	/**
+	 * Opens the editor on the given element and subsequently selects it.
+	 */
+	public static void open(Object element, boolean activate) throws JavaModelException, PartInitException {
+		IEditorPart part= EditorUtility.openInEditor(element, activate);
 		if (element instanceof IJavaElement)
 			EditorUtility.revealInEditor(part, (IJavaElement)element);
 	}

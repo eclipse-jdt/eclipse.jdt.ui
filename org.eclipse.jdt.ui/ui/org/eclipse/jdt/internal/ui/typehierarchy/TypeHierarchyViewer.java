@@ -18,6 +18,8 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IOpenListener;
+import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.IWorkbenchPart;
@@ -66,8 +68,8 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 		});
 		
 		fOpen= new OpenAction(part.getSite());
-		addDoubleClickListener(new IDoubleClickListener() {
-			public void doubleClick(DoubleClickEvent event) {
+		addOpenListener(new IOpenListener() {
+			public void open(OpenEvent event) {
 				fOpen.run();
 			}
 		});

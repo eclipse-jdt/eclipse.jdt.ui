@@ -30,7 +30,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class JavaBrowsingPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
 	public static final String LINK_VIEW_TO_EDITOR= "org.eclipse.jdt.ui.browsing.linktoeditor"; //$NON-NLS-1$
-	public static final String OPEN_EDITOR_ON_SINGLE_CLICK= "org.eclipse.jdt.ui.browsing.openEditorOnSinglClick"; //$NON-NLS-1$
 	public static final String STACK_VERTICALLY= "org.eclipse.jdt.ui.browsing.stackVertically"; //$NON-NLS-1$
 
 
@@ -43,19 +42,12 @@ public class JavaBrowsingPreferencePage extends FieldEditorPreferencePage implem
 
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(LINK_VIEW_TO_EDITOR, true);
-		store.setDefault(OPEN_EDITOR_ON_SINGLE_CLICK, true);
 		store.setDefault(STACK_VERTICALLY, false);
 	}
 
 	public static boolean linkViewSelectionToEditor() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		return store.getBoolean(LINK_VIEW_TO_EDITOR);
-	}
-
-
-	public static boolean openEditorOnSingleClick() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(OPEN_EDITOR_ON_SINGLE_CLICK);
 	}
 
 	public static boolean stackHorizontal() {
@@ -77,13 +69,6 @@ public class JavaBrowsingPreferencePage extends FieldEditorPreferencePage implem
 		BooleanFieldEditor boolEditor= new BooleanFieldEditor(
 			LINK_VIEW_TO_EDITOR,
 			JavaBrowsingMessages.getString("JavaBrowsingPreferencePage.linkViewToEditor"), //$NON-NLS-1$
-			parent
-        );
-		addField(boolEditor);
-
-		boolEditor= new BooleanFieldEditor(
-			OPEN_EDITOR_ON_SINGLE_CLICK,
-			JavaBrowsingMessages.getString("JavaBrowsingPreferencePage.openEditorOnSingleClick"), //$NON-NLS-1$
 			parent
         );
 		addField(boolEditor);

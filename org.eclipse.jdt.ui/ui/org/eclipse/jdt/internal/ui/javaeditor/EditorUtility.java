@@ -105,7 +105,7 @@ public class EditorUtility {
 		IEditorInput input= getEditorInput(inputElement);
 		if (input instanceof IFileEditorInput) {
 			IFileEditorInput fileInput= (IFileEditorInput) input;
-			return openInEditor(fileInput.getFile());
+			return openInEditor(fileInput.getFile(), activate);
 		}
 		
 		if (input != null)
@@ -123,12 +123,13 @@ public class EditorUtility {
 		}
 	}
 	
-	private static IEditorPart openInEditor(IFile file) throws PartInitException {
+	private static IEditorPart openInEditor(IFile file, boolean activate) throws PartInitException {
 		if (file != null) {
 			IWorkbenchPage p= JavaPlugin.getDefault().getActivePage();
 			if (p != null) {
-				IEditorPart e= p.openEditor(file);
-				p.activate(e);
+				IEditorPart e= p.openEditor(file, null, activate);
+				// if (activate)
+				// 	p.activate(e);
 				return e;
 			}
 		}

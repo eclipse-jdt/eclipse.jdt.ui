@@ -15,6 +15,7 @@ import java.util.Iterator;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.core.resources.IResource;
@@ -149,7 +150,8 @@ public class OpenAction extends SelectionDispatchAction {
 			Object element= elements[i];
 			try {
 				element= getElementToOpen(element);
-				OpenActionUtil.open(element);
+				boolean activateOnOpen= fEditor != null ? true :  OpenStrategy.activateOnOpen();
+				OpenActionUtil.open(element, activateOnOpen);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
 					JavaStatusConstants.INTERNAL_ERROR, ActionMessages.getString("OpenAction.error.message"), e)); //$NON-NLS-1$
