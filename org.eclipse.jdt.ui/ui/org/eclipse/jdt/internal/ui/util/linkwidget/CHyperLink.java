@@ -46,7 +46,7 @@ public class CHyperLink extends Canvas {
 	 * - The link is armed on mouseDown and unarmed when the mouse is released
 	 * - The link has mouse-focus if the mouse cursor is withing the control
 	 * 
-	 * If the link is both armed and has focus, it is draw in a different color. In that
+	 * If the link is both armed and has focus, it is drawn in a different color. In that
 	 * state, selection occurs when the mouse button is released.
 	 */
 	private boolean fArmed;
