@@ -130,7 +130,7 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 	}
 	
 	private void openTypeSelectionDialog(){
-		int elementKinds= IJavaSearchConstants.CLASS;
+		int elementKinds= IJavaSearchConstants.CLASS | IJavaSearchConstants.INTERFACE;
 		IJavaSearchScope scope= createWorkspaceSourceScope();
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), elementKinds, scope);
 		dialog.setTitle("Choose Type");
@@ -138,11 +138,18 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 		dialog.setUpperListLabel("&Matching types:");
 		dialog.setLowerListLabel("&Qualifier:");
 		dialog.setMatchEmptyString(false);
-		dialog.setFilter(fTextField.getText());
+		dialog.setFilter(createInitialFilter());
 		if (dialog.open() == Dialog.CANCEL)
 			return;
 		IType firstResult= (IType)dialog.getFirstResult();
 		fTextField.setText(firstResult.getFullyQualifiedName());	
+	}
+
+	private String createInitialFilter() {
+		if (! fTextField.getText().trim().equals(""))
+			return fTextField.getText();
+		else
+			return "A";	
 	}
 	
 	private MoveMembersRefactoring getMoveRefactoring(){
