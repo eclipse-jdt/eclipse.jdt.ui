@@ -164,10 +164,10 @@ public class MoveMembersRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus("Destination type \'" + fDestinationTypeName + "\' not be found.");
 		
 		if (! fDestinationType.exists())
-			return RefactoringStatus.createFatalErrorStatus("Destination type \'" + fDestinationType.getFullyQualifiedName() + "\' does not exist.");
+			return RefactoringStatus.createFatalErrorStatus("Destination type \'" + JavaElementUtil.createSignature(fDestinationType) + "\' does not exist.");
 			
 		if (fDestinationType.isBinary())	
-			return RefactoringStatus.createFatalErrorStatus("Destination type \'" + fDestinationType.getFullyQualifiedName() + "\' is binary.");
+			return RefactoringStatus.createFatalErrorStatus("Destination type \'" + JavaElementUtil.createSignature(fDestinationType) + "\' is binary.");
 
 		if (fDestinationType.isInterface() && ! getDeclaringType().isInterface())
 			return RefactoringStatus.createFatalErrorStatus("Currently, only fileds declared in an interface can be moved to another interface.");
@@ -178,7 +178,7 @@ public class MoveMembersRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();				
 		
 		if (! canDeclareStaticMembers(fDestinationType))	
-			result.addError("Static members cannot be declared in the destination type \'" + fDestinationType.getFullyQualifiedName() + "\'.");
+			result.addError("Static members cannot be declared in the destination type \'" + JavaElementUtil.createSignature(fDestinationType) + "\'.");
 				
 		return result;	
 	}
