@@ -4,18 +4,17 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ControlAdapter;
-import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
 
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -25,6 +24,8 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -33,18 +34,22 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
 import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
@@ -330,8 +335,49 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		super.disassociate(item);	
 	}
 
-
-
-
+	/*
+	 * @see StructuredViewer#handleInvalidSelection(ISelection, ISelection)
+	 */
+	protected void handleInvalidSelection(ISelection invalidSelection, ISelection newSelection) {
+		// on change of input, try to keep selected methods stable by selecting a method with the same
+		// signature: See #5466
+		List oldSelections= SelectionUtil.toList(invalidSelection);
+		List newSelections= SelectionUtil.toList(newSelection);
+		if (!oldSelections.isEmpty()) {
+			ArrayList newSelectionElements= new ArrayList(newSelections);
+			try {
+				Object[] currElements= getFilteredChildren(getInput());
+				for (int i= 0; i < oldSelections.size(); i++) {
+					Object curr= oldSelections.get(i);
+					if (curr instanceof IMethod && !newSelections.contains(curr)) {
+						IMethod method= (IMethod) curr;
+						IMethod similar= findSimilarMethod(method, currElements);
+						if (similar != null) {
+							newSelectionElements.add(similar);
+						}
+					}
+				}
+				newSelection= new StructuredSelection(newSelectionElements);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+		}
+		setSelection(newSelection);
+		updateSelection(newSelection);
+	}
+	
+	private IMethod findSimilarMethod(IMethod meth, Object[] elements) throws JavaModelException {
+		String name= meth.getElementName();
+		String[] paramTypes= meth.getParameterTypes();
+		boolean isConstructor= meth.isConstructor();
+		
+		for (int i= 0; i < elements.length; i++) {
+			Object curr= elements[i];
+			if (curr instanceof IMethod && JavaModelUtil.isSameMethodSignature(name, paramTypes, isConstructor, (IMethod) curr)) {
+				return (IMethod) curr;
+			}
+		}
+		return null;
+	}
 
 }
