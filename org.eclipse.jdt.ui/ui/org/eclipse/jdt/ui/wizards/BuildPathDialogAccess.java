@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -36,7 +37,6 @@ import org.eclipse.ui.views.navigator.ResourceSorter;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -51,14 +51,16 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.NewVariableEntryDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentDialog;
 
 /**
- * Access point for dialogs dealing with the configuration of settings related
- * to the Java build path. 
- * This class provides static methods for:
+ * Class that gives access to dialogs used by the Java build path page to configure classpath entries
+ * and properties of classpath entries.
+ * Static methods are provided to show dialogs for:
  * <ul>
- *  <li> User interface for the configuration of source attachments</li>
- *  <li> User interface for the configuration of Javadoc location</li>
- *  <li> User interface for the configuration and selection of classpath variable entries</li>
- *  <li> User interface for the configuration and selection of classpath container entries</li>
+ *  <li> configuration of source attachments</li>
+ *  <li> configuration of Javadoc locations</li>
+ *  <li> configuration and selection of classpath variable entries</li>
+ *  <li> configuration and selection of classpath container entries</li>
+ *  <li> configuration and selection of JAR and external JAR entries</li>
+ *  <li> selection of class and source folders</li>
  * </ul>
  * <p>
  * This class is not intended to be instantiated or subclassed by clients.
@@ -80,12 +82,14 @@ public final class BuildPathDialogAccess {
 	 * <code>IClasspathEntry.CPE_LIBRARY</code> or <code>IClasspathEntry.CPE_VARIABLE</code>.
 	 * @return Returns the resulting classpath entry containing a potentially modified source attachment path and
 	 * source attachment root. The resulting entry can be used to replace the original entry on the classpath.
-	 * Note that the dialog does not make any changes on the passed entry not on the classpath that
+	 * Note that the dialog does not make any changes on the passed entry nor on the classpath that
 	 * contains it.
 	 */
 	public static IClasspathEntry configureSourceAttachment(Shell shell, IClasspathEntry initialEntry) {
-		Assert.isNotNull(initialEntry);
-		Assert.isTrue(initialEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY || initialEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE);
+		int entryKind= initialEntry.getEntryKind();
+		if (initialEntry == null || (entryKind != IClasspathEntry.CPE_LIBRARY && entryKind != IClasspathEntry.CPE_VARIABLE)) {
+			throw new IllegalArgumentException();
+		}
 		
 		SourceAttachmentDialog dialog=  new SourceAttachmentDialog(shell, initialEntry);
 		if (dialog.open() == Window.OK) {
@@ -96,7 +100,7 @@ public final class BuildPathDialogAccess {
 		
 	/**
 	 * Shows the UI for configuring a javadoc location. <code>null</code> is returned
-	 * if the user cancels the dialog. If OK is pressed, an array with the configured URL is
+	 * if the user cancels the dialog. If OK is pressed, an array of length 1 containing the configured URL is
 	 * returned. Note that the configured URL can be <code>null</code> when the user
 	 * wishes to have no URL location specified. The dialog does not apply any changes.
 	 * Use {@link org.eclipse.jdt.ui.JavaUI} to access and configure
@@ -110,7 +114,9 @@ public final class BuildPathDialogAccess {
 	 * wishes to have no URL location specified.
 	 */
 	public static URL[] configureJavadocLocation(Shell shell, String libraryName, URL initialURL) {
-		Assert.isNotNull(libraryName);
+		if (libraryName == null) {
+			throw new IllegalArgumentException();
+		}
 		
 		JavadocLocationDialog dialog=  new JavadocLocationDialog(shell, libraryName, initialURL);
 		if (dialog.open() == Window.OK) {
@@ -134,6 +140,10 @@ public final class BuildPathDialogAccess {
 	 * been cancelled.
 	 */
 	public static IPath configureVariableEntry(Shell shell, IPath initialEntryPath, IPath[] existingPaths) {
+		if (existingPaths == null) {
+			throw new IllegalArgumentException();
+		}
+		
 		EditVariableEntryDialog dialog= new EditVariableEntryDialog(shell, initialEntryPath, existingPaths);
 		if (dialog.open() == Window.OK) {
 			return dialog.getPath();
@@ -150,10 +160,13 @@ public final class BuildPathDialogAccess {
 	 * @param shell The parent shell for the dialog.
 	 * @param existingPaths An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
-	 * @return Returns an array of the selected variable entries or <code>null</code> if the dialog has
+	 * @return Returns an non empty array of the selected variable entries or <code>null</code> if the dialog has
 	 * been cancelled.
 	 */
 	public static IPath[] chooseVariableEntries(Shell shell, IPath[] existingPaths) {
+		if (existingPaths == null) {
+			throw new IllegalArgumentException();
+		}
 		NewVariableEntryDialog dialog= new NewVariableEntryDialog(shell);
 		if (dialog.open() == Window.OK) {
 			return dialog.getResult();
@@ -163,23 +176,24 @@ public final class BuildPathDialogAccess {
 	
 	/**
 	 * Shows the UI to configure a classpath container classpath entry. See {@link IClasspathEntry#CPE_CONTAINER} for
-	 * details about variable classpath entries.
+	 * details about container classpath entries.
 	 * The dialog returns the configured classpath entry or <code>null</code> if the dialog has
 	 * been cancelled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
-	 * @param initialEntry The initial classpath container entry 
-	 * @param project The project the entry belongs to. The project does not have to exist. 
-	 * Project can be <code>null</code>.
+	 * @param initialEntry The initial classpath container entry.
+	 * @param project The project the entry belongs to. The project does not have to exist and can also be <code>null</code>.
 	 * @param currentClasspath The class path entries currently selected to be set as the projects classpath. This can also
-	 * include the entry to be edited. The dialog uses these entries as information only; The user still can make changes after the
-	 * the classpath container dialog has been closed or decide to cancel the operation. See {@link IClasspathContainerPageExtension} for
+	 * include the entry to be edited. The dialog uses these entries as information only (e.g. to avoid duplicate entries); The user still can make changes after the
+	 * the classpath container dialog has been closed. See {@link IClasspathContainerPageExtension} for
 	 * more information.
 	 * @return Returns the configured classpath container entry or <code>null</code> if the dialog has
 	 * been cancelled by the user
 	 */
 	public static IClasspathEntry configureContainerEntry(Shell shell, IClasspathEntry initialEntry, IJavaProject project, IClasspathEntry[] currentClasspath) {
-		Assert.isNotNull(initialEntry);
+		if (initialEntry == null || currentClasspath == null) {
+			throw new IllegalArgumentException();
+		}
 		
 		ClasspathContainerWizard wizard= new ClasspathContainerWizard(initialEntry, project, currentClasspath);
 		if (ClasspathContainerWizard.openWizard(shell, wizard) == Window.OK) {
@@ -193,21 +207,25 @@ public final class BuildPathDialogAccess {
 	
 	/**
 	 * Shows the UI to choose new classpath container classpath entries. See {@link IClasspathEntry#CPE_CONTAINER} for
-	 * details about variable classpath entries.
+	 * details about container classpath entries.
 	 * The dialog returns the selected classpath entries or <code>null</code> if the dialog has
 	 * been cancelled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
-	 * @param project The project the entry belongs to. The project does not have to exist. 
-	 * Project can be <code>null</code>.
+	 * @param project The project the entry belongs to. The project does not have to exist and
+	 * can also be <code>null</code>.
 	 * @param currentClasspath The class path entries currently selected to be set as the projects classpath. This can also
 	 * include the entry to be edited. The dialog uses these entries as information only; The user still can make changes after the
-	 * the classpath container dialog has been closed or decide to cancel the operation. See {@link IClasspathContainerPageExtension} for
+	 * the classpath container dialog has been closed. See {@link IClasspathContainerPageExtension} for
 	 * more information.
-	 * @return Returns the selected classpath container entry or <code>null</code> if the dialog has
+	 * @return Returns the selected classpath container entries or <code>null</code> if the dialog has
 	 * been cancelled by the user
 	 */
 	public static IClasspathEntry[] chooseContainerEntries(Shell shell, IJavaProject project, IClasspathEntry[] currentClasspath) {
+		if (currentClasspath == null) {
+			throw new IllegalArgumentException();
+		}
+		
 		ClasspathContainerWizard wizard= new ClasspathContainerWizard((IClasspathEntry) null, project, currentClasspath);
 		if (ClasspathContainerWizard.openWizard(shell, wizard) == Window.OK) {
 			return wizard.getNewEntries();
@@ -218,25 +236,26 @@ public final class BuildPathDialogAccess {
 	
 	/**
 	 * Shows the UI to configure a JAR or ZIP archive located in the workspace.
-	 * The dialog returns the configured or <code>null</code> if the dialog has
+	 * The dialog returns the configured classpath entry path or <code>null</code> if the dialog has
 	 * been cancelled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
 	 * @param initialEntry The path of the initial archive entry 
-	 * @param project The project the entry belongs to. The project has to exist. 
 	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
 	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
 	 * been cancelled by the user
 	 */
-	public static IPath configureJAREntry(Shell shell, IJavaProject project, IPath initialEntry, IPath[] usedEntries) {
-		Assert.isNotNull(initialEntry);
+	public static IPath configureJAREntry(Shell shell, IPath initialEntry, IPath[] usedEntries) {
+		if (initialEntry == null || usedEntries == null) {
+			throw new IllegalArgumentException();
+		}
 		
 		Class[] acceptedClasses= new Class[] { IFile.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
 		
 		ArrayList usedJars= new ArrayList(usedEntries.length);
-		IWorkspaceRoot root= project.getProject().getWorkspace().getRoot();
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		for (int i= 0; i < usedEntries.length; i++) {
 			IPath curr= usedEntries[i];
 			if (!curr.equals(initialEntry)) {
@@ -271,23 +290,29 @@ public final class BuildPathDialogAccess {
 	 * been cancelled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
-	 * @param project The project the entry belongs to. The project has to exist. 
+	 * @param initialSelection The path of the element (container or archive) to initially select or <code>null</code> to not select an entry. 
 	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
 	 * @return Returns the new classpath container entry paths or <code>null</code> if the dialog has
 	 * been cancelled by the user
 	 */
-	public static IPath[] chooseJAREntries(Shell shell, IJavaProject project, IPath[] usedEntries) {
+	public static IPath[] chooseJAREntries(Shell shell, IPath initialSelection, IPath[] usedEntries) {
+		if (usedEntries == null) {
+			throw new IllegalArgumentException();
+		}
+		
 		Class[] acceptedClasses= new Class[] { IFile.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
 		ArrayList usedJars= new ArrayList(usedEntries.length);
-		IWorkspaceRoot root= project.getProject().getWorkspace().getRoot();
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		for (int i= 0; i < usedEntries.length; i++) {
 			IResource resource= root.findMember(usedEntries[i]);
 			if (resource instanceof IFile) {
 				usedJars.add(resource);
 			}
 		}
+		IResource focus= initialSelection != null ? root.findMember(initialSelection) : null;
+		
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(shell, new WorkbenchLabelProvider(), new WorkbenchContentProvider());
 		dialog.setValidator(validator);
 		dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.JARArchiveDialog.new.title")); //$NON-NLS-1$
@@ -295,7 +320,7 @@ public final class BuildPathDialogAccess {
 		dialog.addFilter(new ArchiveFileFilter(usedJars, true));
 		dialog.setInput(root);
 		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
-		dialog.setInitialSelection(project.getProject());
+		dialog.setInitialSelection(focus);
 
 		if (dialog.open() == Window.OK) {
 			Object[] elements= dialog.getResult();
@@ -320,7 +345,9 @@ public final class BuildPathDialogAccess {
 	 * been cancelled by the user
 	 */
 	public static IPath configureExternalJAREntry(Shell shell, IPath initialEntry) {
-		Assert.isNotNull(initialEntry);
+		if (initialEntry == null) {
+			throw new IllegalArgumentException();
+		}
 		
 		String lastUsedPath= initialEntry.removeLastSegments(1).toOSString();
 		
@@ -343,7 +370,7 @@ public final class BuildPathDialogAccess {
 	
 	/**
 	 * Shows the UI to select new external JAR or ZIP archive entries.
-	 * The dialog returns the selected entries or <code>null</code> if the dialog has
+	 * The dialog returns the selected entry paths or <code>null</code> if the dialog has
 	 * been cancelled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
@@ -379,46 +406,52 @@ public final class BuildPathDialogAccess {
 		
 	/**
 	 * Shows the UI to select new class folders.
-	 * The dialog returns the configured or <code>null</code> if the dialog has
+	 * The dialog returns the selected classpath entry paths or <code>null</code> if the dialog has
 	 * been cancelled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
-	 * @param project The project the entry belongs to. The project has to exist. 
+	 * @param initialSelection The path of the element to initially select or <code>null</code>.
 	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
 	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
 	 * been cancelled by the user
 	 */
-	public static IPath[] chooseClassFolderEntries(Shell shell, IJavaProject project, IPath[] usedEntries) {
+	public static IPath[] chooseClassFolderEntries(Shell shell, IPath initialSelection, IPath[] usedEntries) {
+		if (usedEntries == null) {
+			throw new IllegalArgumentException();
+		}
 		String title= NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.edit.title"); //$NON-NLS-1$
 		String message= NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.edit.description"); //$NON-NLS-1$
-		return internalChooseFolderEntry(shell, project, usedEntries, title, message);
+		return internalChooseFolderEntry(shell, initialSelection, usedEntries, title, message);
 	}
 	
 	/**
 	 * Shows the UI to select new source folders.
-	 * The dialog returns the configured or <code>null</code> if the dialog has
+	 * The dialog returns the selected classpath entry paths or <code>null</code> if the dialog has
 	 * been cancelled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
-	 * @param project The project the entry belongs to. The project has to exist. 
+	 * @param initialSelection The path of the element to initially select or <code>null</code>
 	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
 	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
 	 * been cancelled by the user
 	 */
-	public static IPath[] chooseSourceFolderEntries(Shell shell, IJavaProject project, IPath[] usedEntries) {
+	public static IPath[] chooseSourceFolderEntries(Shell shell, IPath initialSelection, IPath[] usedEntries) {
+		if (usedEntries == null) {
+			throw new IllegalArgumentException();
+		}
 		String title= NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.edit.title"); //$NON-NLS-1$
 		String message= NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.edit.description"); //$NON-NLS-1$
-		return internalChooseFolderEntry(shell, project, usedEntries, title, message);
+		return internalChooseFolderEntry(shell, initialSelection, usedEntries, title, message);
 	}
 	
 		
-	private static IPath[] internalChooseFolderEntry(Shell shell, IJavaProject project, IPath[] usedEntries, String title, String message) {	
+	private static IPath[] internalChooseFolderEntry(Shell shell, IPath initialSelection, IPath[] usedEntries, String title, String message) {	
 		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
 
 		ArrayList usedContainers= new ArrayList(usedEntries.length);
-		IWorkspaceRoot root= project.getProject().getWorkspace().getRoot();
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		for (int i= 0; i < usedEntries.length; i++) {
 			IResource resource= root.findMember(usedEntries[i]);
 			if (resource instanceof IContainer) {
@@ -426,6 +459,7 @@ public final class BuildPathDialogAccess {
 			}
 		}
 		
+		IResource focus= initialSelection != null ? root.findMember(initialSelection) : null;
 		Object[] used= usedContainers.toArray();
 		
 		MultipleFolderSelectionDialog dialog= new MultipleFolderSelectionDialog(shell, new WorkbenchLabelProvider(), new WorkbenchContentProvider());
@@ -434,7 +468,7 @@ public final class BuildPathDialogAccess {
 		dialog.setMessage(message); 
 		dialog.addFilter(new TypedViewerFilter(acceptedClasses, used));
 		dialog.setInput(root);
-		dialog.setInitialFocus(project.getProject());
+		dialog.setInitialFocus(focus);
 		
 		if (dialog.open() == Window.OK) {
 			Object[] elements= dialog.getResult();

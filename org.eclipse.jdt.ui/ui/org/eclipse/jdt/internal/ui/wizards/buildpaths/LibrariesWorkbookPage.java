@@ -481,7 +481,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			
 	private CPListElement[] openClassFolderDialog(CPListElement existing) {
 		if (existing == null) {
-			IPath[] selected= BuildPathDialogAccess.chooseClassFolderEntries(getShell(), fCurrJProject, getUsedContainers(existing));
+			IPath[] selected= BuildPathDialogAccess.chooseClassFolderEntries(getShell(), fCurrJProject.getPath(), getUsedContainers(existing));
 			if (selected != null) {
 				ArrayList res= new ArrayList();
 				for (int i= 0; i < selected.length; i++) {
@@ -501,7 +501,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private CPListElement[] openJarFileDialog(CPListElement existing) {
 		if (existing == null) {
-			IPath[] selected= BuildPathDialogAccess.chooseJAREntries(getShell(), fCurrJProject, getUsedContainers(existing));
+			IPath[] selected= BuildPathDialogAccess.chooseJAREntries(getShell(), fCurrJProject.getPath(), getUsedContainers(existing));
 			if (selected != null) {
 				ArrayList res= new ArrayList();
 				
@@ -515,7 +515,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				return (CPListElement[]) res.toArray(new CPListElement[res.size()]);
 			}
 		} else {
-			IPath configured= BuildPathDialogAccess.configureJAREntry(getShell(), fCurrJProject, existing.getPath(), getUsedJARFiles(existing));
+			IPath configured= BuildPathDialogAccess.configureJAREntry(getShell(), existing.getPath(), getUsedJARFiles(existing));
 			if (configured != null) {
 				IResource resource= fWorkspaceRoot.findMember(configured);
 				if (resource instanceof IFile) {
