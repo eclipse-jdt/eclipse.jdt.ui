@@ -53,9 +53,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
+import org.eclipse.jdt.internal.ui.text.JavaElementProvider;
+import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
@@ -429,6 +432,16 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 			}
 		};
 	}
+
+	private IInformationControlCreator getOutlinePresenterControlCreator(ISourceViewer sourceViewer) {
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				int shellStyle= SWT.RESIZE;
+				int treeStyle= SWT.V_SCROLL | SWT.H_SCROLL;
+				return new JavaOutlineInformationControl(parent, shellStyle, treeStyle);
+			}
+		};
+	}
 	
 	/*
 	 * @see SourceViewerConfiguration#getInformationPresenter(ISourceViewer)
@@ -440,6 +453,23 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
 		presenter.setInformationProvider(provider, JavaPartitionScanner.JAVA_DOC);
 		presenter.setSizeConstraints(60, 10, true, true);		
+		return presenter;
+	}
+
+	/**
+	 * Returns the outline presenter which will determine and shown
+	 * information requested for the current cursor position.
+	 *
+	 * @param sourceViewer the source viewer to be configured by this configuration
+	 * @return an information presenter
+	 * @since 2.1
+	 */
+	public IInformationPresenter getOutlinePresenter(ISourceViewer sourceViewer, boolean doCodeResolve) {
+		InformationPresenter presenter= new InformationPresenter(getOutlinePresenterControlCreator(sourceViewer));
+		IInformationProvider provider= new JavaElementProvider(getEditor(), doCodeResolve);
+		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
+		presenter.setInformationProvider(provider, JavaPartitionScanner.JAVA_DOC);
+		presenter.setSizeConstraints(30, 20, true, false);
 		return presenter;
 	}
 }

@@ -36,10 +36,12 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 
@@ -128,12 +130,13 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	private RetargetTextEditorAction fGotoNextMemberAction;	
 	private RetargetTextEditorAction fGotoPreviousMemberAction;	
 	private RetargetTextEditorAction fGotoMatchingBracket;	
-	
+	private RetargetTextEditorAction fShowOutline;
+	private RetargetTextEditorAction fOpenStructure;
+		
 	protected TogglePresentationAction fTogglePresentation;
 	protected ToggleTextHoverAction fToggleTextHover;
 	protected GotoErrorAction fPreviousError;
 	protected GotoErrorAction fNextError;
-	
 	
 	public CompilationUnitEditorActionContributor() {
 		super();
@@ -181,6 +184,11 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fGotoPreviousMemberAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
 		fGotoMatchingBracket= new RetargetTextEditorAction(b, "GotoMatchingBracket."); //$NON-NLS-1$
 		fGotoMatchingBracket.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
+
+		fShowOutline= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShowOutline."); //$NON-NLS-1$
+		fShowOutline.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
+		fOpenStructure= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "OpenStructure."); //$NON-NLS-1$
+		fOpenStructure.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE);
 		
 		// actions that are "contributed" to editors, they are consider belonging to the active editor
 		fTogglePresentation= new TogglePresentationAction();
@@ -221,6 +229,12 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGotoPreviousMemberAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGotoNextMemberAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGotoMatchingBracket);
+
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fShowOutline);
+		}
+		IMenuManager navigateMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_NAVIGATE);
+		if (navigateMenu != null) {
+			navigateMenu.appendToGroup("open.ext", fOpenStructure); //$NON-NLS-1$
 		}
 	}
 	
@@ -256,6 +270,8 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fGotoNextMemberAction.setAction(getAction(textEditor, GoToNextPreviousMemberAction.NEXT_MEMBER));
 		fGotoPreviousMemberAction.setAction(getAction(textEditor, GoToNextPreviousMemberAction.PREVIOUS_MEMBER));
 		fGotoMatchingBracket.setAction(getAction(textEditor, GotoMatchingBracketAction.GOTO_MATCHING_BRACKET));
+		fShowOutline.setAction(getAction(textEditor, "ShowOutline")); //$NON-NLS-1$
+		fOpenStructure.setAction(getAction(textEditor, "OpenStructure")); //$NON-NLS-1$
 
 		IActionBars bars= getActionBars();		
 		
