@@ -23,7 +23,7 @@ import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.eclipse.ui.part.Page;
-import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
@@ -118,7 +118,7 @@ public class OpenViewActionGroup extends ActionGroup {
         fOpenCallHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_CALL_HIERARCHY);
 
         fOpenPropertiesDialog= new PropertyDialogAction(site.getShell(), site.getSelectionProvider());
-        fOpenPropertiesDialog.setActionDefinitionId(ITextEditorActionDefinitionIds.PROPERTIES);
+        fOpenPropertiesDialog.setActionDefinitionId(IWorkbenchActionDefinitionIds.PROPERTIES);
 		
         initialize(site);
 	}
