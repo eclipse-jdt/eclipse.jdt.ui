@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *     jens.lukowski@gmx.de - contributed code to convert prefix and postfix 
  *       expressions into a combination of setter and getter calls.
+ *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
+ *       bug Encapuslate field can fail when two variables in one variable declaration (see
+ *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=51540).
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.sef;
 
@@ -393,24 +396,18 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			} 
 		}
 	}
-	
+
 	private List addGetterSetterChanges(CompilationUnit root, ASTRewrite rewriter) throws CoreException {
 		List result= new ArrayList(2);
 		AST ast= root.getAST();
+		FieldDeclaration decl= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, ASTNode.FIELD_DECLARATION);
 		if (!JdtFlags.isPrivate(fField)) {
-			FieldDeclaration decl= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
-			int newModifiers= ASTNodes.changeVisibility(decl.getModifiers(), Modifier.PRIVATE);
-
-			TextEditGroup description= new TextEditGroup(
-				RefactoringCoreMessages.getString("SelfEncapsulateField.change_visibility")); //$NON-NLS-1$
-			result.add(description);
-			rewriter.set(decl, FieldDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), description);
+			result.add(makeDeclarationPrivate(rewriter, decl));
 		}
 		
-		TypeDeclaration type= (TypeDeclaration)ASTNodes.getParent(fFieldDeclaration, TypeDeclaration.class);
 		int position= 0;
 		int numberOfMethods= 0;
-		List members= type.bodyDeclarations();
+		List members= ASTNodes.getBodyDeclarations(decl.getParent());
 		for (Iterator iter= members.iterator(); iter.hasNext();) {
 			BodyDeclaration element= (BodyDeclaration)iter.next();
 			if (element.getNodeType() == ASTNode.METHOD_DECLARATION) {
@@ -434,6 +431,27 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		result.add(description);
 		members.add(position, createGetterMethod(ast, rewriter, description));
 		return result;
+	}
+
+	private TextEditGroup makeDeclarationPrivate(ASTRewrite rewriter, FieldDeclaration decl) {
+		AST ast= rewriter.getAST();
+		TextEditGroup description= new TextEditGroup(RefactoringCoreMessages
+			.getString("SelfEncapsulateField.change_visibility")); //$NON-NLS-1$
+		
+		if (decl.fragments().size() > 1) {
+			rewriter.markAsRemoved(fFieldDeclaration, description);
+			List bodyDeclarations= ASTNodes.getBodyDeclarations(decl.getParent());
+			int index= bodyDeclarations.indexOf(decl);
+			VariableDeclarationFragment newField= (VariableDeclarationFragment)rewriter.createCopy(fFieldDeclaration);
+			decl= ast.newFieldDeclaration(newField);
+			decl.setModifiers(Modifier.PRIVATE);
+			bodyDeclarations.add(index + 1, decl);
+			rewriter.markAsInserted(decl, description);
+		} else {
+			int newModifiers= ASTNodes.changeVisibility(decl.getModifiers(), Modifier.PRIVATE);
+			rewriter.set(decl, FieldDeclaration.MODIFIERS_PROPERTY, new Integer(newModifiers), description);
+		}
+		return description;
 	}
 
 	private MethodDeclaration createSetterMethod(AST ast, ASTRewrite rewriter, TextEditGroup description) throws JavaModelException {

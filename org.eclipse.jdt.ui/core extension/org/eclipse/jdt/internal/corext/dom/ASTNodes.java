@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,9 @@
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
  *       bug "inline method - doesn't handle implicit cast" (see
  *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
+ *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
+ *       bug Encapuslate field can fail when two variables in one variable declaration (see
+ *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=51540).
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
@@ -315,6 +318,19 @@ public class ASTNodes {
 				return Modifier.isStatic(((Initializer)declaration).getModifiers());
 			}
 		return false;
+	}
+	
+	public static List getBodyDeclarations(ASTNode node) {
+		if (node instanceof AbstractTypeDeclaration) {
+			return ((AbstractTypeDeclaration)node).bodyDeclarations();
+		} else if (node instanceof AnonymousClassDeclaration) {
+			return ((AnonymousClassDeclaration)node).bodyDeclarations();
+		} else if (node instanceof EnumConstantDeclaration) {
+			return ((EnumConstantDeclaration)node).bodyDeclarations();
+		}
+		// should not happen.
+		Assert.isTrue(false); 
+		return null;
 	}
 	
 	public static String getTypeName(Type type) {

@@ -7,6 +7,9 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
+ *       bug Encapuslate field can fail when two variables in one variable declaration (see
+ *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=51540).
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -157,6 +160,10 @@ public class SefTests extends AbstractSelectionTestCase {
 	}
 	
 	public void testFinal() throws Exception {
+		baseTest("field");
+	}
+	
+	public void testTwoFragments() throws Exception {
 		baseTest("field");
 	}
 	
