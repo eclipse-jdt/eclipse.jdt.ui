@@ -20,14 +20,19 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 
-	protected PasteResourcesFromClipboardAction(IWorkbenchSite site) {
+	private Clipboard fClipboard;
+
+	protected PasteResourcesFromClipboardAction(IWorkbenchSite site, Clipboard clipboard) {
 		super(site);
+		Assert.isNotNull(clipboard);
+		fClipboard= clipboard;
 	}
 	
 	protected void selectionChanged(IStructuredSelection selection) {
@@ -98,10 +103,7 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 	}
 	
 	private Clipboard getClipboard() {
-		if (getShell() != null)
-			return new Clipboard(getShell().getDisplay());
-		else
-			return new Clipboard(SWTUtil.getStandardDisplay());	
+		return fClipboard;
 	}
 	
 	private IResource[] getClipboardResources() {

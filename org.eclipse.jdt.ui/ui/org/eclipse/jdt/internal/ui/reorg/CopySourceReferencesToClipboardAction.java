@@ -19,25 +19,30 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CopySourceReferencesToClipboardAction extends SourceReferenceAction{
 
-	protected CopySourceReferencesToClipboardAction(IWorkbenchSite site) {
+	private Clipboard fClipboard;
+
+	protected CopySourceReferencesToClipboardAction(IWorkbenchSite site, Clipboard clipboard) {
 		super(site);
+		Assert.isNotNull(clipboard);
+		fClipboard= clipboard;
 	}
 
 	protected void perform(IStructuredSelection selection) throws JavaModelException {
 			copyToOSClipbard(getElementsToProcess(selection));
 	}
 
-	private static Clipboard getSystemClipboard() {
-		return new Clipboard(JavaPlugin.getActiveWorkbenchShell().getDisplay());
+	private Clipboard getSystemClipboard() {
+		return fClipboard;
 	}
 	
-	private static void copyToOSClipbard(ISourceReference[] refs)  throws JavaModelException {
+	private void copyToOSClipbard(ISourceReference[] refs)  throws JavaModelException {
 		getSystemClipboard().setContents(createClipboardInput(refs), createTransfers());
 	}
 		

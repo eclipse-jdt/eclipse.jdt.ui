@@ -29,13 +29,18 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
+
 public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 
 	private static final String fgLineDelim= System.getProperty("line.separator"); //$NON-NLS-1$
+	private Clipboard fClipboard;
 	
-	protected CopyResourcesToClipboardAction(IWorkbenchSite site) {
+	protected CopyResourcesToClipboardAction(IWorkbenchSite site, Clipboard clipboard) {
 		super(site);
+		Assert.isNotNull(clipboard);
 		setText(ReorgMessages.getString("CopyResourcesToClipboardAction.copy"));//$NON-NLS-1$
+		fClipboard= clipboard;
 	}
 
 	protected void selectionChanged(IStructuredSelection selection) {
@@ -184,7 +189,7 @@ public class CopyResourcesToClipboardAction extends SelectionDispatchAction {
 		return fileLocations;
 	}
 
-	private static Clipboard getClipboard() {
-		return new Clipboard(JavaPlugin.getActiveWorkbenchShell().getDisplay());
+	private Clipboard getClipboard() {
+		return fClipboard;
 	}
 }

@@ -35,12 +35,15 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public class PasteSourceReferencesFromClipboardAction	extends SelectionDispatchAction {
+public class PasteSourceReferencesFromClipboardAction extends SelectionDispatchAction {
 
-	protected PasteSourceReferencesFromClipboardAction(IWorkbenchSite site) {
+	private Clipboard fClipboard;
+
+	protected PasteSourceReferencesFromClipboardAction(IWorkbenchSite site, Clipboard clipboard) {
 		super(site);
+		fClipboard= clipboard; //can be null
 	}
-
+	
 	protected void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canOperateOn(selection));
 	}
@@ -110,8 +113,10 @@ public class PasteSourceReferencesFromClipboardAction	extends SelectionDispatchA
 	}
 
 	protected TypedSource[] getContentsToPaste(){
-		Clipboard clipboard= new Clipboard(JavaPlugin.getActiveWorkbenchShell().getDisplay());
-		return (TypedSource[])clipboard.getContents(TypedSourceTransfer.getInstance());
+		if (fClipboard == null)
+			return new TypedSource[0];
+		else	
+			return (TypedSource[])fClipboard.getContents(TypedSourceTransfer.getInstance());
 	}
 	
 	private  boolean canPaste(ISourceReference ref, TypedSource[] elements){
