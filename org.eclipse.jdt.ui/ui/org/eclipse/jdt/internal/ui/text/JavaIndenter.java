@@ -313,8 +313,10 @@ public class JavaIndenter {
 		if (matchBrace) {
 			if (!skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE))
 				fPosition= position;
-			else
+			else {
 				indentBlockLess= false;
+				hasBrace= true;
+			}
 		}
 		
 		nextToken();
