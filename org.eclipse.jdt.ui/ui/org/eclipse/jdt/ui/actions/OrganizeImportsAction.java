@@ -9,6 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.MultiStatus;
@@ -21,7 +22,6 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -183,11 +183,11 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			final MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, Status.OK, message, null);
 			
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
-			dialog.run(false, true, new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+			dialog.run(false, true, new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {
+				public void run(IProgressMonitor monitor) {
 					doRunOnMultiple(cus, status, doResolve, monitor);
 				}
-			});
+			}));
 			if (!status.isOK()) {
 				String title= ActionMessages.getString("OrganizeImportsAction.multi.status.title"); //$NON-NLS-1$
 				ProblemDialog.open(getShell(), title, null, status);
@@ -200,11 +200,11 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		
 	}
 	
-	private void doRunOnMultiple(ICompilationUnit[] cus, MultiStatus status, boolean doResolve, IProgressMonitor monitor) throws InterruptedException {
+	private void doRunOnMultiple(ICompilationUnit[] cus, MultiStatus status, boolean doResolve, IProgressMonitor monitor) throws OperationCanceledException {
 	
 		final class OrganizeImportError extends Error {
 		}
-
+	
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}	
@@ -244,8 +244,6 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					JavaPlugin.log(e);
 					String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unexpected", e.getMessage()); //$NON-NLS-1$
 					status.add(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, message, null));					
-				} catch (OperationCanceledException e) {
-					throw new InterruptedException();
 				}
 			}
 		} finally {
