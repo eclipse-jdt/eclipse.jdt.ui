@@ -106,12 +106,16 @@ public class RefactoringSupportFactory {
 			List parts = new ArrayList();
 			IViewReference vrefs[]= page.getViewReferences();
 			for(int i= 0; i < vrefs.length; i++) {
-				parts.add(vrefs[i].getPart(false));
+				IWorkbenchPart p= vrefs[i].getPart(false);
+				if (p != null)
+					parts.add(p);
 			}
 
 			IEditorReference refs[]= page.getEditorReferences();
 			for(int i= 0; i < refs.length; i++) {
-				parts.add(refs[i].getPart(false));
+				IWorkbenchPart p= refs[i].getPart(false);
+				if (p != null)
+					parts.add(p);
 			}
 			
 			final ISelection selection = new StructuredSelection(newElement);
