@@ -143,7 +143,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 	public void fillActionBars(IActionBars actionBars) {
 		contributeToToolBar(actionBars.getToolBarManager());
 		contributeToMenu(actionBars.getMenuManager());
-	};
+	}
 	
 	/**
 	 * Adds the filter actions to the tool bar

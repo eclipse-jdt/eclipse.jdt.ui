@@ -523,7 +523,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			fBufferedEnd= fEnd;
 			return fStart + word.length();
 		}	
-	};
+	}
 	
 	/**
 	 * Formats a paragraph, using break iterator.  

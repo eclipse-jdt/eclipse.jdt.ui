@@ -79,7 +79,7 @@ public class SourceView extends AbstractInfoView {
 			if (SYMBOLIC_FONT_NAME.equals(property))
 				setViewerFont();
 		}
-	};
+	}
 
 
 	/** This view's source viewer */
@@ -166,7 +166,7 @@ public class SourceView extends AbstractInfoView {
 	 * @return the offest in the unclipped document or <code>-1</code> if the offset cannot be computed
 	 */
 	private int getOffsetInUnclippedDocument(ITextSelection textSelection) {
-		IDocument unclippedDocument= null;;
+		IDocument unclippedDocument= null;
 		try {
 			unclippedDocument= new Document(((ISourceReference)fCurrentInput).getSource());
 		} catch (JavaModelException e) {

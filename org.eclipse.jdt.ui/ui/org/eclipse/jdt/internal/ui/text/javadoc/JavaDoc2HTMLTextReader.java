@@ -39,7 +39,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 			fTag= tag;
 			fContent= content;
 		}
-	};
+	}
 	
 	private static final String[] TAGS= new String[] {
 		"@author", 		//$NON-NLS-1$
