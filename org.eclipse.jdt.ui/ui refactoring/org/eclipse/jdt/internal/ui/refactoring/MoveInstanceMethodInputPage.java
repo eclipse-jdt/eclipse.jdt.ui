@@ -13,21 +13,32 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
@@ -35,6 +46,69 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodR
 
 class MoveInstanceMethodInputPage extends UserInputWizardPage {
 
+	private static final class NewReceiverLabelProvider extends LabelProvider implements ITableLabelProvider {
+		
+		private final MoveInstanceMethodRefactoring fRefactoring;
+		NewReceiverLabelProvider(MoveInstanceMethodRefactoring refactoring){
+			fRefactoring= refactoring;
+		}
+		private final ILabelProvider fJavaElementLabelProvider= new JavaElementLabelProvider();
+
+		/*
+		 * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
+		 */
+		public void dispose() {
+			super.dispose();
+			fJavaElementLabelProvider.dispose();
+		}
+		/*
+		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
+		 */
+		public Image getColumnImage(Object element, int columnIndex) {
+			INewReceiver newReceiver= (INewReceiver)element;
+			switch (columnIndex) {
+				case 0 :
+					if (newReceiver.isParameter())
+						return JavaPlugin.getImageDescriptorRegistry().get(JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE);
+					Assert.isTrue(newReceiver.isField());
+					IField field= getField(newReceiver);
+					if (field == null)
+						return null;
+					return fJavaElementLabelProvider.getImage(field);
+				case 1 : return null;
+				default :
+					Assert.isTrue(false);
+					return null;
+			}
+		}
+		
+		private IField getField(INewReceiver newReceiver) {
+			if (! (newReceiver.getBinding() instanceof IVariableBinding))
+				return null;
+			try {
+				return Binding2JavaModel.find((IVariableBinding)newReceiver.getBinding(), fRefactoring.getSourceCU().getJavaProject());
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+				return null;
+			}
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
+		 */
+		public String getColumnText(Object element, int columnIndex) {
+			INewReceiver newReceiver= (INewReceiver)element;
+			switch (columnIndex) {
+				case 0 :
+					return newReceiver.getName();
+				case 1 :
+					return Bindings.getFullyQualifiedName(newReceiver.getType());
+				default :
+					Assert.isTrue(false);
+					return null;
+			}
+		}
+	}
 	private static final String PAGE_NAME= "MOVE_INSTANCE_METHOD_INPUT_PAGE"; 
 	private static final int ROW_COUNT= 7;
 	
@@ -97,7 +171,7 @@ class MoveInstanceMethodInputPage extends UserInputWizardPage {
 		TableLayoutComposite layouter= new TableLayoutComposite(result, SWT.NULL);
 		addColumnLayoutData(layouter);
 
-		Table table= new Table(layouter, SWT.SINGLE | SWT.BORDER);
+		Table table= new Table(layouter, SWT.SINGLE | SWT.BORDER | SWT.FULL_SELECTION);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(false);		
 
@@ -109,17 +183,14 @@ class MoveInstanceMethodInputPage extends UserInputWizardPage {
 		column1.setText("Type Name");
 		column1.setResizable(true);
 		 
-		TableColumn column2= new TableColumn(table, SWT.NONE);
-		column2.setText("Parameter / Field");
-		column2.setResizable(true);
-
 		TableViewer viewer= new TableViewer(table);
-		viewer.setContentProvider(new StaticObjectArrayContentProvider());
-		viewer.setLabelProvider(createReceiverArrayLabelProvider());
+		viewer.setContentProvider(new ArrayContentProvider());
+		viewer.setLabelProvider(new NewReceiverLabelProvider(getMoveRefactoring()));
 		INewReceiver[] possibleNewReceivers= getMoveRefactoring().getPossibleNewReceivers();
 		Assert.isTrue(possibleNewReceivers.length > 0);
 		viewer.setInput(possibleNewReceivers);
 		INewReceiver chosen= possibleNewReceivers[0];
+		viewer.getControl().setFocus();
 		viewer.setSelection(new StructuredSelection(new Object[]{chosen}));
 		getMoveRefactoring().chooseNewReceiver(chosen);
 		
@@ -140,48 +211,10 @@ class MoveInstanceMethodInputPage extends UserInputWizardPage {
 	}
 	
 	private void addColumnLayoutData(TableLayoutComposite layouter) {
-		layouter.addColumnData(new ColumnWeightData(33, true));
-		layouter.addColumnData(new ColumnWeightData(33, true));
-		layouter.addColumnData(new ColumnWeightData(34, true));
+		layouter.addColumnData(new ColumnWeightData(40, true));
+		layouter.addColumnData(new ColumnWeightData(60, true));
 	}
 	
-	private  ITableLabelProvider createReceiverArrayLabelProvider() {
-		return new ITableLabelProvider(){
-			public void dispose() {
-			}
-			public boolean isLabelProperty(Object element, String property) {
-				return true;
-			}
-			public void addListener(ILabelProviderListener listener) {
-			}
-			public void removeListener(ILabelProviderListener listener) {
-			}
-
-			public Image getColumnImage(Object element, int columnIndex) {
-				return null;
-			}
-			public String getColumnText(Object element, int columnIndex) {
-				INewReceiver newReceiver= (INewReceiver)element;
-				switch (columnIndex) {
-					case 0 :
-						return newReceiver.getName();
-					case 1 :
-						return Bindings.getFullyQualifiedName(newReceiver.getType());
-					case 2 :
-						return newReceiver.isParameter() ? "parameter": "field" ;
-					default :
-						Assert.isTrue(false);
-						return null;
-				}
-			}
-		};
-	}
-	
-	private String[] createReceiverText(INewReceiver newReceiver) {
-		String paramStr= newReceiver.isParameter() ? "parameter": "field" ;
-		return new String[]{newReceiver.getName(), newReceiver.getType().getName(), paramStr};
-	}
-
 	private MoveInstanceMethodRefactoring getMoveRefactoring(){
 		return (MoveInstanceMethodRefactoring)getRefactoring();
 	}	
