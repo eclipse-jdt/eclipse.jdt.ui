@@ -1,6 +1,6 @@
 package p;
 /** typecomment template*/
 interface I {
-	I getFoo();
-	void foo(I foo);
+	public abstract I getFoo();
+	public abstract void foo(I foo);
 }

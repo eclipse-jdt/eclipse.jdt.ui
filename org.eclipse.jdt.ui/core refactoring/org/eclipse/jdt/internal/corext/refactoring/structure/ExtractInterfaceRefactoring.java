@@ -72,6 +72,7 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class ExtractInterfaceRefactoring extends Refactoring {
 
+	private static final String INTERFACE_METHOD_MODIFIERS = "public abstract "; //$NON-NLS-1$
 	private final CodeGenerationSettings fCodeGenerationSettings;
 	private final ASTNodeMappingManager fASTMappingManager;
 	private IType fInputType;
@@ -439,8 +440,13 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private String createExtractedInterfaceCUSource(ICompilationUnit newCu, IProgressMonitor pm) throws CoreException {
-		String template= StubUtility.getTypeComment(newCu, fNewInterfaceName, "");//$NON-NLS-1$
-		newCu.getBuffer().setContents(StubUtility.getCompilationUnitContent(newCu, template, createInterfaceSource(), getLineSeperator()));
+		String typeComment= StubUtility.getTypeComment(newCu, fNewInterfaceName, "");//$NON-NLS-1$
+		if (typeComment == null)
+			typeComment= ""; //$NON-NLS-1$
+		String compilationUnitContent = StubUtility.getCompilationUnitContent(newCu, typeComment, createInterfaceSource(), getLineSeperator());
+		if (compilationUnitContent == null)
+			compilationUnitContent= ""; //$NON-NLS-1$
+		newCu.getBuffer().setContents(compilationUnitContent);
 		addImportsToNewCu(newCu, pm);
 		return newCu.getSource();
 	}
@@ -530,13 +536,15 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		if (fInputType.isClass()){
 			int methodDeclarationOffset= methodDeclaration.getReturnType().getStartPosition();
 			int length= getMethodDeclarationLength(iMethod, methodDeclaration);
-			StringBuffer methodDeclarationSource= new StringBuffer(iMethod.getCompilationUnit().getBuffer().getText(methodDeclarationOffset, length));
+			StringBuffer methodDeclarationSource= new StringBuffer();
+			methodDeclarationSource.append(INTERFACE_METHOD_MODIFIERS);//$NON-NLS-1$
+			methodDeclarationSource.append(iMethod.getCompilationUnit().getBuffer().getText(methodDeclarationOffset, length));
 			
 			if (methodDeclaration.getBody() != null)
 				methodDeclarationSource.append(";"); //$NON-NLS-1$
 			
 			if (fUpdatedTypeReferenceNodes != null)
-		        replaceReferencesInMethodDeclaration(methodDeclaration, methodDeclarationOffset, methodDeclarationSource);
+		        replaceReferencesInMethodDeclaration(methodDeclaration, methodDeclarationOffset - INTERFACE_METHOD_MODIFIERS.length(), methodDeclarationSource);
 			return methodDeclarationSource.toString();		
 		} else {
 			StringBuffer source= new StringBuffer(SourceRangeComputer.computeSource(iMethod));

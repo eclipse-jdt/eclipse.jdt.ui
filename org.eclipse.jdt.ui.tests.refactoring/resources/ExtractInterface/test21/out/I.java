@@ -1,5 +1,5 @@
 package p;
 /** typecomment template*/
 interface I {
-	void m();
+	public abstract public abstract void m();
 }
