@@ -413,7 +413,7 @@ public class JavadocConfigurationBlock {
 			
 			ILabelProvider lp= new ZipDialogLabelProvider(provider);
 			ZipDialogContentProvider cp= new ZipDialogContentProvider(provider);
-			ViewerSorter sorter= new ViewerSorter() {};
+			ViewerSorter sorter= new ViewerSorter();
 						
 			ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(fShell, lp, cp);
 			dialog.setAllowMultiple(false);
