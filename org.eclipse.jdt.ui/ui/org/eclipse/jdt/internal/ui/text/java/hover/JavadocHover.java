@@ -46,8 +46,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			for (int i= 0; i < result.length; i++) {
 				HTMLPrinter.startBulletList(buffer);
 				IJavaElement curr= result[i];
-				if (curr instanceof IMember)
-					HTMLPrinter.addBullet(buffer, getInfoText((IMember) curr));
+				if (curr instanceof IMember || curr.getElementType() == IJavaElement.LOCAL_VARIABLE)
+					HTMLPrinter.addBullet(buffer, getInfoText(curr));
 				HTMLPrinter.endBulletList(buffer);
 			}
 			
@@ -66,7 +66,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				if (reader != null) {
 					HTMLPrinter.addParagraph(buffer, new JavaDoc2HTMLTextReader(reader));
 				}
-			}
+			} else if (curr.getElementType() == IJavaElement.LOCAL_VARIABLE)
+				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr));
 		}
 		
 		if (buffer.length() > 0) {
@@ -78,7 +79,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		return null;
 	}
 
-	private String getInfoText(IMember member) {
+	private String getInfoText(IJavaElement member) {
 		return JavaElementLabels.getElementLabel(member, LABEL_FLAGS);
 	}
 }
