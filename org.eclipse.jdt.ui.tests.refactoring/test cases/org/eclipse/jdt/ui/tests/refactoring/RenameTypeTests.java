@@ -933,6 +933,11 @@ public class RenameTypeTests extends RefactoringTest {
 		//printTestDisabledMessage("bug#16751");
 		helper2("A", "B");
 	}
+
+	public void test59() throws Exception {
+		printTestDisabledMessage("bug#22938");
+//		helper2("A", "B");
+	}
 		
 	public void test5() throws Exception { 
 		helper2("A", "B");		
