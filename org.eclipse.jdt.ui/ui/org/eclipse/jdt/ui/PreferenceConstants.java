@@ -2438,6 +2438,14 @@ public class PreferenceConstants {
 	 * </p>
 	 */
 	public static final String REFACTOR_SAVE_ALL_EDITORS= "Refactoring.savealleditors"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that controls a reduced search menu is used in the java editors.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public static final String SEARCH_USE_REDUCED_MENU= "Search.usereducemenu"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if the Java Browsing views are linked to the active editor.
@@ -2590,6 +2598,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.LINK_BROWSING_TYPES_TO_EDITOR, true);
 		store.setDefault(PreferenceConstants.LINK_BROWSING_MEMBERS_TO_EDITOR, true);
 
+		store.setDefault(PreferenceConstants.SEARCH_USE_REDUCED_MENU, true);
 		// AppearancePreferencePage
 		store.setDefault(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE, false);

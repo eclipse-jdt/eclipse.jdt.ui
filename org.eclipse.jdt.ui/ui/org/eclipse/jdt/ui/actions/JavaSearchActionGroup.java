@@ -10,13 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.jface.util.Assert;
+import org.eclipse.jdt.internal.ui.actions.FindExceptionOccurrences;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.search.SearchMessages;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-
+import org.eclipse.jface.util.Assert;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
@@ -24,14 +28,6 @@ import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
-
-import org.eclipse.jdt.internal.ui.actions.FindExceptionOccurrences;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
-import org.eclipse.jdt.internal.ui.search.SearchMessages;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
  * Action group that adds the Java search actions to a context menu and
@@ -140,7 +136,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
 		
-		if(PreferenceConstants.getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_SEARCH_MENU)) {
+		if(PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SEARCH_USE_REDUCED_MENU)) {
 			fReferencesGroup.fillContextMenu(menu);
 			fDeclarationsGroup.fillContextMenu(menu);
 

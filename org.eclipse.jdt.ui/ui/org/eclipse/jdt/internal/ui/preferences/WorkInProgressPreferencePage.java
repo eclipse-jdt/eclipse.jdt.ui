@@ -13,27 +13,22 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferencePage;
-
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Preference page for work in progress.
@@ -41,7 +36,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class WorkInProgressPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	public static final String PREF_FORMATTER= "use_new_formatter"; //$NON-NLS-1$
-	public static final String PREF_SEARCH_MENU= "small_search_menu"; //$NON-NLS-1$
 	
 	private static final String PREF_BROWSER_WIDGET_IN_JAVADOC_VIEW= "org.eclipse.jdt.ui.browserWidgetInJavadocView"; //$NON-NLS-1$
 		// PreferenceConstants.APPEARANCE_BROWSER_WIDGET_IN_JAVADOC_VIEW;
@@ -94,12 +88,6 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		result.setLayout(layout);
 
 		addCheckBox(result, PreferencesMessages.getString("WorkInProgress.browserWidgetInJavadocView"), PREF_BROWSER_WIDGET_IN_JAVADOC_VIEW); //$NON-NLS-1$
-		Group group= new Group(result, SWT.NONE);
-		group.setLayout(new GridLayout());
-		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		group.setText(PreferencesMessages.getString("WorkInProgress.search")); //$NON-NLS-1$
-		
-		addCheckBox(group, PreferencesMessages.getString("WorkInProgress.search.small_menu"), PREF_SEARCH_MENU); //$NON-NLS-1$
 		
 		applyDialogFont(result);
 		return result;
@@ -185,7 +173,6 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		store.setDefault(PreferenceConstants.EDITOR_SMART_OPENING_BRACE, false);
 		
 		store.setDefault(PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB, false);
-		store.setDefault(PREF_SEARCH_MENU, true);
 		
 		store.setDefault(PREF_BROWSER_WIDGET_IN_JAVADOC_VIEW, false);
 	}

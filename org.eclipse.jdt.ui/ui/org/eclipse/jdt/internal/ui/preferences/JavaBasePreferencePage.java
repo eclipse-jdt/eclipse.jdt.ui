@@ -153,6 +153,13 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 			PreferencesMessages.getString("JavaBasePreferencePage.refactoring.auto_save"), //$NON-NLS-1$
 			RefactoringSavePreferences.PREF_SAVE_ALL_EDITORS);
 
+		Group group= new Group(result, SWT.NONE);
+		group.setLayout(new GridLayout());
+		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		group.setText(PreferencesMessages.getString("JavaBasePreferencePage.search")); //$NON-NLS-1$
+		
+		addCheckBox(group, PreferencesMessages.getString("JavaBasePreferencePage.search.small_menu"), PreferenceConstants.SEARCH_USE_REDUCED_MENU); //$NON-NLS-1$
+
 		Dialog.applyDialogFont(result);
 		return result;
 	}
