@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -41,7 +40,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
@@ -52,8 +50,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.TagElement;
-import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -77,10 +73,10 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -402,7 +398,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		//TODO (47547): for constructors, must update implicit super(..) calls in some subclasses' constructors 
 		replaceSelectedExpression();		
 		addParameter();
-		addJavadoc();
+		JavadocUtil.addParamJavadoc(fParameterName, fMethodDeclaration, fSource.getASTRewrite(), fSource.getCu().getJavaProject());
 	}
 	
 	private void replaceSelectedExpression() {
@@ -424,55 +420,6 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		parameters.insertLast(param, fSource.createGroupDescription(description));
 	}
 
-	/**
-	 * @return method has javadoc && (method had no parameter before || there is already an @param tag)
-	 */
-	private boolean shouldAddParamJavadoc() {
-		Javadoc javadoc= fMethodDeclaration.getJavadoc();
-		if (javadoc == null)
-			return false;
-		if (fMethodDeclaration.parameters().size() == 0)
-			return true;
-		List tags= javadoc.tags();
-		for (Iterator iter= tags.iterator(); iter.hasNext();) {
-			TagElement element= (TagElement) iter.next();
-			if (TagElement.TAG_PARAM.equals(element.getTagName()))
-				return true;
-		}
-		return false;
-	}
-
-	private void addJavadoc() {
-		if (! shouldAddParamJavadoc())
-			return;
-		
-		ListRewrite tagsRewrite= fSource.getASTRewrite().getListRewrite(fMethodDeclaration.getJavadoc(), Javadoc.TAGS_PROPERTY);
-		HashSet leadingNames= new HashSet();
-		for (Iterator iter= fMethodDeclaration.parameters().iterator(); iter.hasNext();) {
-			SingleVariableDeclaration curr= (SingleVariableDeclaration) iter.next();
-			leadingNames.add(curr.getName().getIdentifier());
-		}
-		JavadocTagsSubProcessor.insertTag(tagsRewrite, createParamTag(fParameterName), leadingNames);
-	}
-	
-	//TODO: is a copy of ChangeSignatureRefactoring.DeclarationUpdate#createParamTag(..)
-	private TagElement createParamTag(String name) {
-		AST ast= fSource.getASTRewrite().getAST();
-		TagElement paramNode= ast.newTagElement();
-		paramNode.setTagName(TagElement.TAG_PARAM);
-
-		SimpleName simpleName= ast.newSimpleName(name);
-		paramNode.fragments().add(simpleName);
-
-		TextElement textElement= ast.newTextElement();
-		String text= StubUtility.getTodoTaskTag(fSourceCU.getJavaProject());
-		if (text != null)
-			textElement.setText(text); //TODO: use template with {@todo} ...
-		paramNode.fragments().add(textElement);
-		
-		return paramNode;
-	}
-	
 	private RefactoringStatus changeReferences(SubProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		fAffectedCUs= findAffectedCompilationUnits(new SubProgressMonitor(pm, 1));

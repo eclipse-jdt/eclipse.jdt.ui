@@ -4,7 +4,7 @@ class I{
 	private final A a;
 
 	/**
-	 * @param A
+	 * @param a
 	 */
 	I(A a) {
 		this.a= a;

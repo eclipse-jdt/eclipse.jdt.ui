@@ -97,6 +97,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactor
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -1598,7 +1599,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 						if (info.isAdded()) {
 							if (! isTopOfRipple)
 								continue;
-							TagElement paramNode= createParamTag(newName);
+							TagElement paramNode= JavadocUtil.createParamTag(newName, fCuRewrite.getRoot().getAST(), fCuRewrite.getCu().getJavaProject());
 							insertTag(paramNode, previousTag, tagsRewrite);
 							previousTag= paramNode;
 						} else {
@@ -1693,22 +1694,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			returnNode.fragments().add(textElement);
 			
 			return returnNode;
-		}
-
-		private TagElement createParamTag(String name) {
-			TagElement paramNode= getASTRewrite().getAST().newTagElement();
-			paramNode.setTagName(TagElement.TAG_PARAM);
-
-			SimpleName simpleName= getASTRewrite().getAST().newSimpleName(name);
-			paramNode.fragments().add(simpleName);
-
-			TextElement textElement= getASTRewrite().getAST().newTextElement();
-			String text= StubUtility.getTodoTaskTag(fCuRewrite.getCu().getJavaProject());
-			if (text != null)
-				textElement.setText(text); //TODO: use template with {@todo} ...
-			paramNode.fragments().add(textElement);
-			
-			return paramNode;
 		}
 
 		private TagElement createExceptionTag(String simpleName) {

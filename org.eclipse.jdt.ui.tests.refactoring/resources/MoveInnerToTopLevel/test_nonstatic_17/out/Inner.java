@@ -2,7 +2,7 @@ package p;
 class Inner{
 	private A a;
 	/**
-	 * @param A
+	 * @param a
 	 */
 	Inner(A a) {
 		this.a= a;

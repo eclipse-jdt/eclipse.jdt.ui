@@ -101,6 +101,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibili
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -709,13 +710,16 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 	private void addParameterToConstructor(OldASTRewrite rewrite, MethodDeclaration declaration) throws JavaModelException {
 		AST ast= declaration.getAST();
+		String newParamName= getNameForEnclosingInstanceConstructorParameter();
+		
 		SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
 		Type paramType= getTypeOfEnclosingInstanceField(ast);
-		SimpleName paramName= ast.newSimpleName(getNameForEnclosingInstanceConstructorParameter());
+		SimpleName paramName= ast.newSimpleName(newParamName);
 		param.setType(paramType);
 		param.setName(paramName);
 		declaration.parameters().add(0, param);
 		rewrite.markAsInserted(param);
+		JavadocUtil.addParamJavadoc(newParamName, declaration, rewrite, fType.getJavaProject());
 	}
 
 	private void createConstructor(TypeDeclaration declaration, OldASTRewrite rewrite) throws CoreException {
@@ -747,7 +751,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private String[] getNewConstructorParameterNames() {
 		if (! fCreateInstanceField)
 			return new String[0];
-		return new String[]{getTypeOfEnclosingInstanceField()};
+		return new String[]{fEnclosingInstanceFieldName};
 	}
 
 	private void addEnclosingInstanceDeclaration(TypeDeclaration type, OldASTRewrite rewrite){
