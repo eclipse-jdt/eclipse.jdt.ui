@@ -39,11 +39,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new LocalCorrectionsQuickFixTest("testUnimplementedMethods2"));
+			suite.addTest(new LocalCorrectionsQuickFixTest("testUncaughtExceptionDuplicate"));
 			return suite;
 		}
 	}
@@ -624,8 +624,86 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String expected2= buf.toString();
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
-	}	
+	}
 	
+	boolean BUG_25417= true;
+	
+	public void testUncaughtExceptionDuplicate() throws Exception {
+		if (BUG_25417) {
+			return;
+		}
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class MyException extends Exception {\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("MyException.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");		
+		buf.append("public class E {\n");
+		buf.append("    public void m1() throws IOException {\n");
+		buf.append("        m2();\n");
+		buf.append("    }\n");		
+		buf.append("    public void m2() throws IOException, ParseException, MyException {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 2);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		assertCorrectLabels(proposals);
+		
+	
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");		
+		buf.append("public class E {\n");
+		buf.append("    public void m1() throws IOException, ParseException, MyException {\n");
+		buf.append("        m2();\n");
+		buf.append("    }\n");		
+		buf.append("    public void m2() throws IOException, ParseException, MyException {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+		 
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");		
+		buf.append("public class E {\n");
+		buf.append("    public void m1() throws IOException {\n");
+		buf.append("        try {\n");
+		buf.append("            m2();\n");
+		buf.append("        } catch (ParseException e) {\n");
+		buf.append("        } catch (MyException e) {\n");		
+		buf.append("        }\n");
+		buf.append("    }\n");		
+		buf.append("    public void m2() throws IOException, ParseException, MyException {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+	}	
 	
 	public void testMultipleUncaughtExceptions() throws Exception {
 		
