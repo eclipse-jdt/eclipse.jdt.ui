@@ -128,8 +128,7 @@ public class TestRunnerViewPart
 	private RemoteTestRunnerClient fTestRunnerClient;
 
 	protected final Image fHierarchyIcon= TestRunnerViewPart.createImage("icons/hierarchy.gif", getClass());
-	protected final Image fStackViewIcon= TestRunnerViewPart.createImage("icons/stckframe_obj.gif", getClass());
-	//$NON-NLS-1$
+	protected final Image fStackViewIcon= TestRunnerViewPart.createImage("icons/stckframe_obj.gif", getClass());//$NON-NLS-1$
 	protected Image fOriginalViewImage = null;
 
 	private class StopAction extends Action{
@@ -355,9 +354,7 @@ public class TestRunnerViewPart
 	public void startTestRunListening(IType type, int port, ILaunch launch) {
 		fTestType= type;
 		fLaunchMode= launch.getLaunchMode();
-		String msg= JUnitMessages.getString("TestRunnerViewPart.message.launching"); //$NON-NLS-1$
-		showInformation(msg);
-		postInfo(msg);
+		aboutToLaunch();
 		
 		if (fTestRunnerClient != null) {
 			stopTest();
@@ -368,6 +365,14 @@ public class TestRunnerViewPart
 		String title= JUnitMessages.getFormattedString("TestRunnerViewPart.title", fTestType.getElementName()); //$NON-NLS-1$
 		setTitle(title);
 		setTitleToolTip(fTestType.getFullyQualifiedName());
+	}
+
+	private void aboutToLaunch() {
+		String msg= JUnitMessages.getString("TestRunnerViewPart.message.launching"); //$NON-NLS-1$
+		showInformation(msg);
+		postInfo(msg);
+		fProgressImage= fOriginalViewImage;
+		firePropertyChange(IWorkbenchPart.PROP_TITLE);
 	}
 
 	public void rerunTest(String className, String testName) {
