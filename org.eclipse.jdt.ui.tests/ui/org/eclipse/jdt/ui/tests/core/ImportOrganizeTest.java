@@ -33,6 +33,7 @@ public class ImportOrganizeTest extends TestCase {
 	private static final Class THIS= ImportOrganizeTest.class;
 	
 	private IJavaProject fJProject1;
+	private IPackageFragmentRoot fSourceFolder;
 
 	public ImportOrganizeTest(String name) {
 		super(name);
@@ -44,7 +45,9 @@ public class ImportOrganizeTest extends TestCase {
 
 
 	public static Test suite() {
-		return new TestSuite(THIS);
+		TestSuite suite= new TestSuite();
+		suite.addTest(new ImportOrganizeTest("test5"));
+		return suite;
 	}
 
 
@@ -56,7 +59,7 @@ public class ImportOrganizeTest extends TestCase {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 		ZipFile zipfile= new ZipFile(junitSrcArchive);
-		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
+		fSourceFolder= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
 	}
 
 
@@ -115,7 +118,7 @@ public class ImportOrganizeTest extends TestCase {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("BaseTestRunner", new String[] { "junit.framework.TestListener" }, new int[] { 2 });
 		
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, query);
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		assertImports(cu, new String[] {
@@ -144,7 +147,7 @@ public class ImportOrganizeTest extends TestCase {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("LoadingTestCollector", new String[] { }, new int[] { });
 		
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, query);
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		assertImports(cu, new String[] {
@@ -163,7 +166,7 @@ public class ImportOrganizeTest extends TestCase {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("TestCaseClassLoader", new String[] { }, new int[] { });
 		
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 3, false, true, query);
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 3, false, true, true, query);
 		op.run(null);
 		
 		assertImports(cu, new String[] {
@@ -182,7 +185,7 @@ public class ImportOrganizeTest extends TestCase {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("TestRunner", new String[] {}, new int[] {});
 		
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, query);
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		assertImports(cu, new String[] {
@@ -199,5 +202,53 @@ public class ImportOrganizeTest extends TestCase {
 			"junit.runner.Version"
 		});		
 	}
+	
+	public void test51() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		for (int ch= 'A'; ch < 'M'; ch++) {
+			String name= String.valueOf((char) ch);
+			ICompilationUnit cu= pack.getCompilationUnit(name + ".java");
+			String content= "public class " + name + " {}";
+			cu.createType(content, null, false, null);
+		}
+		for (int ch= 'A'; ch < 'M'; ch++) {
+			String name= "I" + String.valueOf((char) ch);
+			ICompilationUnit cu= pack.getCompilationUnit(name + ".java");
+			String content= "public interface " + name + " {}";
+			cu.createType(content, null, false, null);
+		}		
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("public class ImportTest extends A implements IA, IB {\n");
+		buf.append("  private B fB;\n");
+		buf.append("  private Object fObj= new C();\n");
+		buf.append("  public IB foo(IC c, ID d) {\n");
+		buf.append("   Object local= (D) fObj;\n");
+		buf.append("   if (local instanceof E) {};\n");
+		buf.append("   return null;\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		
+		pack= fSourceFolder.createPackageFragment("other", false, null);
+		ICompilationUnit cu= pack.getCompilationUnit("ImportTest.java");
+		cu.createType(buf.toString(), null, false, null);
 
+		String[] order= new String[0];
+		IChooseImportQuery query= createQuery("ImportTest", new String[] {}, new int[] {});
+	
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+		
+		assertImports(cu, new String[] {
+			"test.A",
+			"test.B",
+			"test.C",
+			"test.D",
+			"test.E",			
+			"test.IA",
+			"test.IB",
+			"test.IC",
+			"test.ID"
+		});		
+	}
 }
