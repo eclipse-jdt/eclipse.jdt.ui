@@ -107,33 +107,18 @@ class DeleteResourceAction extends ReorgAction {
 	}
 	
 	private boolean confirmProjets(List projects) {
-		String title = ReorgMessages.getString("deleteAction.deleteContents.title"); //$NON-NLS-1$
-		String msg;
-		if (projects.size() == 1) {
-			IProject project = (IProject)projects.get(0);
-			msg =
-				MessageFormat.format(
-					ReorgMessages.getString("deleteAction.confirmDelete1Project.message"), //$NON-NLS-1$
-					new String[] { project.getName(), project.getLocation().toOSString()});
-		} else {
-			msg =
-				MessageFormat.format(
-					ReorgMessages.getString("deleteAction.confirmDeleteNProjects.message"), //$NON-NLS-1$
-					new String[] { "" + projects.size() }); //$NON-NLS-1$
-		}
-		
-		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		MessageDialog dialog =
-			new MessageDialog(parent, title, null, // accept the default window icon
-				msg,
+			new MessageDialog(JavaPlugin.getActiveWorkbenchShell(), 
+				ReorgMessages.getString("deleteAction.deleteContents.title"),  //$NON-NLS-1$
+				null, // accept the default window icon
+				createDialogMessage(projects),
 				MessageDialog.QUESTION,
 				new String[] {
 					IDialogConstants.YES_LABEL,
 					IDialogConstants.NO_LABEL,
 					IDialogConstants.CANCEL_LABEL },
-				0);
+				0); // yes is the default
 				
-		// yes is the default
 		int code = dialog.open();
 		switch (code) {
 			case 0 : // YES
@@ -147,6 +132,17 @@ class DeleteResourceAction extends ReorgAction {
 		}
 	}
 	
+	private static String createDialogMessage(List projects){
+		if (projects.size() == 1) {
+			IProject project = (IProject)projects.get(0);
+			return ReorgMessages.getFormattedString("deleteAction.confirmDelete1Project.message",  //$NON-NLS-1$
+																				new String[] { project.getName(), project.getLocation().toOSString()});
+		} else {
+			return ReorgMessages.getFormattedString("deleteAction.confirmDeleteNProjects.message", //$NON-NLS-1$
+																			new String[] {String.valueOf(projects.size()) });
+		}
+	}
+	
 	private static List getProjects(IStructuredSelection selection) {
 		List result= new ArrayList(selection.size());
 		for(Iterator iter= selection.iterator(); iter.hasNext(); ) {
@@ -156,7 +152,8 @@ class DeleteResourceAction extends ReorgAction {
 					result.add(((IJavaProject)element).getUnderlyingResource());
 				} catch (JavaModelException e) {
 					if (!e.isDoesNotExist()) {
-						ExceptionHandler.handle(e, ReorgMessages.getString("deleteAction.error.title"), ReorgMessages.getString("deleteAction.error.message")); //$NON-NLS-2$ //$NON-NLS-1$
+						//do not show error dialogs in a loop
+						JavaPlugin.log(e);
 					}
 				}
 			}

@@ -112,9 +112,9 @@ abstract class ReorgDestinationAction extends ReorgAction {
 	 */
 	private static  String getDuplicatedElementName(List elements){
 		String[] names= getElementNames(elements);
-		Arrays.sort(names);
 		if (names.length == 0)
 			return null;
+		Arrays.sort(names);	
 		String last= names[0];	
 		for (int i= 1; i < names.length; i++){ //non standard loop
 			if (last.equals(names[i]))
@@ -204,9 +204,10 @@ abstract class ReorgDestinationAction extends ReorgAction {
 
 	private static ListSelectionDialog createUnsavedEditorDialog(List unsavedElements) {
 		int labelFlags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_POST_QUALIFIED;
-		Shell parent= JavaPlugin.getActiveWorkbenchShell();			
+		Shell parent= JavaPlugin.getActiveWorkbenchShell();
+		String msg= ReorgMessages.getString("ReorgAction.checkSaveTargets"); //$NON-NLS-1$
 		ListSelectionDialog dialog= new ListSelectionDialog(parent, unsavedElements, new ListContentProvider(), 
-			new JavaElementLabelProvider(labelFlags), getSaveTargetsMessage());
+			new JavaElementLabelProvider(labelFlags), msg);
 		dialog.setInitialSelections(unsavedElements.toArray());
 		return dialog;
 	}
@@ -222,10 +223,6 @@ abstract class ReorgDestinationAction extends ReorgAction {
 				}
 			}
 		}
-	}
-	
-	private static String getSaveTargetsMessage() {
-		return ReorgMessages.getString("ReorgAction.checkSaveTargets"); //$NON-NLS-1$
 	}
 	
 	private static String[] getElementNames(List elements){
@@ -383,8 +380,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 			if (selection.length != 1)
 				return new StatusInfo(IStatus.ERROR, "");
 			try{	
-				boolean valid= fRefactoring.isValidDestination(selection[0]);
-				if (valid)
+				if (fRefactoring.isValidDestination(selection[0]))
 					return new StatusInfo();
 				return new StatusInfo(IStatus.ERROR, "");	
 			} catch (JavaModelException e){

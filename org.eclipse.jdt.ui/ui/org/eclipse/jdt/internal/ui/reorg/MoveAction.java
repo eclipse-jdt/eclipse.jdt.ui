@@ -146,16 +146,21 @@ public class MoveAction extends ReorgDestinationAction {
 	}
 	
 	private static boolean isOkToMoveReadOnly(ReorgRefactoring refactoring){
+		if (! hasReadOnlyElements(refactoring))
+			return true;
+		
+		return  MessageDialog.openQuestion(
+				JavaPlugin.getActiveWorkbenchShell(),
+				ReorgMessages.getString("moveAction.checkMove"),  //$NON-NLS-1$
+				ReorgMessages.getString("moveAction.error.readOnly")); //$NON-NLS-1$
+	}
+	
+	private static boolean hasReadOnlyElements(ReorgRefactoring refactoring){
 		for (Iterator iter= refactoring.getElementsToReorg().iterator(); iter.hasNext(); ){
-			Object element= iter.next();
-			if (ReorgUtils.shouldConfirmReadOnly(element)) {
-				return  MessageDialog.openQuestion(
-					JavaPlugin.getActiveWorkbenchShell(),
-					ReorgMessages.getString("moveAction.checkMove"),  //$NON-NLS-1$
-					ReorgMessages.getString("moveAction.error.readOnly")); //$NON-NLS-1$
-			}
+			if (ReorgUtils.shouldConfirmReadOnly(iter.next())) 
+				return true;
 		}
-		return true;
+		return false;
 	}
 	
 	/* non java-doc
@@ -210,14 +215,7 @@ public class MoveAction extends ReorgDestinationAction {
 			try{
 				new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell()).run(true, true, op);
 			} catch (InvocationTargetException e) {
-				Throwable t= e.getTargetException();
-				if (t instanceof CoreException)
-					throw (CoreException)t;
-				if (t instanceof Error)
-					throw (Error)t;
-				if (t instanceof RuntimeException)
-					throw (RuntimeException)t;
-				Assert.isTrue(false);//should never get here
+				ExceptionHandler.handle(e, "Move", "Unexpected exception. See log for details.");
 				return null;
 			} catch (InterruptedException e) {
 				//fall thru
