@@ -11,9 +11,9 @@
 package org.eclipse.jdt.internal.corext.text.comment;
 
 /**
- * Java partitions, these must be equal to those in {@link org.eclipse.jdt.internal.ui.text.IJavaPartitions}.
- * TODO: remove this dependency
+ * Java partitions and their mapping from comment snippet kinds.
  * 
+ * @see org.eclipse.jdt.core.formatter.CodeFormatter about comment/code snippet kinds. 
  * @since 3.1
  */
 public class JavaPartitions {
@@ -22,6 +22,7 @@ public class JavaPartitions {
 	public final static String JAVA_MULTI_LINE_COMMENT= "__java_multiline_comment"; //$NON-NLS-1$
 	public final static String JAVA_DOC= "__java_javadoc"; //$NON-NLS-1$
 
+	// TODO: move to CodeFormatter
 	public static final int K_SINGLE_LINE_COMMENT= 0x10;
 	public static final int K_MULTI_LINE_COMMENT= 0x20;
 	public static final int K_JAVA_DOC= 0x40;
