@@ -57,7 +57,7 @@ public class ImportOrganizeTest extends CoreTests {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ImportOrganizeTest("testOrganizeImportOnRange2"));
+			suite.addTest(new ImportOrganizeTest("testVisibility_bug56704"));
 			return new ProjectTestSetup(suite);
 		}	
 	}
@@ -1338,7 +1338,47 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("    SingletonStep step;\n");	
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
-	}		
+	}
+	
+	public void testVisibility_bug56704() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack2= sourceFolder.createPackageFragment("pack0", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("public class A {\n");
+		buf.append("	public class AX {\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("\n");
+		buf.append("import pack0.A.AX;\n");
+		buf.append("public class B extends A {\n");
+		buf.append("	public class BX extends AX {\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("B.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("\n");
+		buf.append("public class B extends A {\n");
+		buf.append("	public class BX extends AX {\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
 	
 	
 	public void test5() throws Exception {
