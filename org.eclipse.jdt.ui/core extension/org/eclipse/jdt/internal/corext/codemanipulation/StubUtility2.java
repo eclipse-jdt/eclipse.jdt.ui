@@ -631,6 +631,9 @@ public final class StubUtility2 {
 	public static IBinding[][] getDelegatableMethods(ITypeBinding binding) {
 		final List tuples= new ArrayList();
 		final List methods= new ArrayList();
+		IMethodBinding[] typeMethods= binding.getDeclaredMethods();
+		for (int index= 0; index < typeMethods.length; index++)
+			methods.add(typeMethods[index]);
 		IVariableBinding[] typeFields= binding.getDeclaredFields();
 		for (int index= 0; index < typeFields.length; index++) {
 			IVariableBinding fieldBinding= typeFields[index];
