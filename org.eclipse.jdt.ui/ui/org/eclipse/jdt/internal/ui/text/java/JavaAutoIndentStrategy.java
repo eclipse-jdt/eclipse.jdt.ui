@@ -201,7 +201,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	}
 	
 	private String getOneIndentLevel() {
-		return CodeFormatterUtil.createIndentString(1);
+		return String.valueOf('\t');
 	}	
 	
 	/**
