@@ -1764,7 +1764,19 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			image);
 		// prepare new variable identifier
 		final String oldIdentifier= coveringName.getIdentifier();
-		final String newIdentifier= CorrectionMessages.getFormattedString("AdvancedQuickAssistProcessor.negatedVariableName", Character.toUpperCase(oldIdentifier.charAt(0)) + oldIdentifier.substring(1)); //$NON-NLS-1$
+		final String notString = CorrectionMessages.getFormattedString("AdvancedQuickAssistProcessor.negatedVariableName", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		final String newIdentifier;
+		if (oldIdentifier.startsWith(notString)) {
+			int notLength= notString.length();
+			if (oldIdentifier.length() > notLength) {
+				newIdentifier= Character.toLowerCase(oldIdentifier.charAt(notLength)) + oldIdentifier.substring(notLength + 1);
+			} else {
+				newIdentifier= oldIdentifier;
+			}
+		} else {
+			newIdentifier= CorrectionMessages.getFormattedString("AdvancedQuickAssistProcessor.negatedVariableName", Character.toUpperCase(oldIdentifier.charAt(0)) + oldIdentifier.substring(1)); //$NON-NLS-1$
+		}
+		//
 		proposal.addLinkedPositionProposal(KEY_NAME, newIdentifier, null);
 		proposal.addLinkedPositionProposal(KEY_NAME, oldIdentifier, null);
 		// iterate over linked nodes and replace variable references with negated reference
@@ -1967,6 +1979,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (coveredNodes.isEmpty()) {
 			return false;
 		}
+		// check that we have more than one covered statement
+		if (coveredNodes.size() < 2) {
+			return false;
+		}
 		// check that all selected nodes are 'if' statements with only 'then' statement
 		for (Iterator I= coveredNodes.iterator(); I.hasNext();) {
 			ASTNode node= (ASTNode) I.next();
@@ -1997,10 +2013,13 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			newIfStatement.setExpression((Expression) rewrite.createMoveTarget(ifStatement.getExpression()));
 			// prepare 'then' statement and convert into block if needed
 			Statement thenStatement= (Statement) rewrite.createMoveTarget(ifStatement.getThenStatement());
-			if (!(thenStatement instanceof Block)) {
-				Block thenBlock= ast.newBlock();
-				thenBlock.statements().add(thenStatement);
-				thenStatement= thenBlock;
+			if (thenStatement instanceof IfStatement) {
+				IfStatement ifBodyStatement= (IfStatement) thenStatement;
+				if (ifBodyStatement.getElseStatement() == null) {
+					Block thenBlock= ast.newBlock();
+					thenBlock.statements().add(thenStatement);
+					thenStatement= thenBlock;
+				}
 			}
 			newIfStatement.setThenStatement(thenStatement);
 			//
@@ -2038,17 +2057,23 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		IfStatement firstIfStatement= null;
 		IfStatement currentIfStatement= null;
 		Block currentBlock= null;
+		boolean hasStopAsLastExecutableStatement = false;
 		Block defaultBlock= null;
 		InfixExpression currentCondition= null;
 		boolean defaultFound= false;
+		int caseCount = 0;
 		//
 		for (Iterator I= switchStatement.statements().iterator(); I.hasNext();) {
 			Statement statement= (Statement) I.next();
 			if (statement instanceof SwitchCase) {
 				SwitchCase switchCase= (SwitchCase) statement;
+				caseCount++;
 				// special case: passthrough
 				if (currentBlock != null) {
-					return false;
+					if (!hasStopAsLastExecutableStatement) {
+						return false;
+					}
+					currentBlock= null;
 				}
 				// for 'default' we just will not create condition
 				if (switchCase.isDefault()) {
@@ -2079,6 +2104,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			} else if (statement instanceof BreakStatement) {
 				currentBlock= null;
 			} else {
+				// ensure that current block exists as 'then' statement of 'if' 
 				if (currentBlock == null) {
 					defaultFound= false;
 					if (currentCondition != null) {
@@ -2102,7 +2128,12 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 						// delay adding of default block
 					}
 				}
-				currentBlock.statements().add(rewrite.createCopyTarget(statement));
+				// add current statement in currect block
+				{
+					hasStopAsLastExecutableStatement = hasStopAsLastExecutableStatement(statement);
+					Statement copyStatement= copyStatementExceptBreak(ast, rewrite, statement);
+					currentBlock.statements().add(copyStatement);
+				}
 			}
 		}
 		// check, may be we have delayed default block
@@ -2111,10 +2142,16 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		// replace 'switch' with single if-else-if statement
 		rewrite.replace(switchStatement, firstIfStatement, null);
-		// add correction proposal
+		// prepare label, specially for Daniel :-)
 		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.convertSwitchToIf"); //$NON-NLS-1$
+
+		// add correction proposal
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label,
+			context.getCompilationUnit(),
+			rewrite,
+			1,
+			image);
 		resultingCollections.add(proposal);
 		return true;
 	}
@@ -2132,5 +2169,31 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		condition.setRightOperand(rightExpression);
 		//
 		return condition;
+	}
+	private static boolean hasStopAsLastExecutableStatement(Statement lastStatement) {
+		if ((lastStatement instanceof ReturnStatement) || (lastStatement instanceof BreakStatement)) {
+			return true;
+		}
+		if (lastStatement instanceof Block) {
+			Block block= (Block)lastStatement;
+			lastStatement = (Statement) block.statements().get(block.statements().size() - 1);
+			return hasStopAsLastExecutableStatement(lastStatement);
+		}
+		return false;
+	}
+	private static Statement copyStatementExceptBreak(AST ast, ASTRewrite rewrite, Statement source) {
+		if (source instanceof Block) {
+			Block block= (Block) source;
+			Block newBlock= ast.newBlock();
+			for (Iterator I= block.statements().iterator(); I.hasNext();) {
+				Statement statement= (Statement) I.next();
+				if (statement instanceof BreakStatement) {
+					continue;
+				}
+				newBlock.statements().add(copyStatementExceptBreak(ast, rewrite, statement));
+			}
+			return newBlock;
+		}
+		return (Statement) rewrite.createMoveTarget(source);
 	}
 }
