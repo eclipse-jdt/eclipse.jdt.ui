@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.NullLiteral;
 import org.eclipse.jdt.internal.compiler.ast.Reference;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
+import org.eclipse.jdt.internal.compiler.ast.StringLiteral;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -192,6 +193,8 @@ public class ExtractTempRefactoring extends Refactoring {
 		AstNode node= nodes[0];
 		if (node instanceof NullLiteral) {
 			return RefactoringStatus.createFatalErrorStatus("Cannot extract the single keyword null.");
+		} if (node instanceof StringLiteral) {
+			return RefactoringStatus.createFatalErrorStatus("Currently no support to extract a single string literal.");
 		} else if (node instanceof ArrayInitializer) {
 			return RefactoringStatus.createFatalErrorStatus("Currently no support to extract an array initializer.");
 		} else if (node instanceof TypeReference) {
