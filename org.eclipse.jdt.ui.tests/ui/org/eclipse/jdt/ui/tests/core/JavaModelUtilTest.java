@@ -14,6 +14,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -53,6 +56,13 @@ public class JavaModelUtilTest extends TestCase {
 
 
 	protected void setUp() throws Exception {
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		assertNotNull(workspace);
+		IWorkspaceDescription workspaceDesc= workspace.getDescription();
+		
+		if (workspaceDesc.isAutoBuilding())
+			JavaProjectHelper.setAutoBuilding(false);
+		
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
 
