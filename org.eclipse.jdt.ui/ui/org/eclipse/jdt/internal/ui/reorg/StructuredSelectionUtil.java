@@ -12,21 +12,27 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 class StructuredSelectionUtil {
 	
+	private static final IResource[] EMPTY= new IResource[0];
+	
 	private StructuredSelectionUtil(){
 	}
 	
 	static boolean hasNonResources(IStructuredSelection ss) {
-		return getResources(ss).length != ss.size();
+		for (Iterator iter= ss.iterator(); iter.hasNext();) {
+			if (ResourceUtil.getResource(iter.next()) == null)
+				return true;	
+		}
+		return false;
 	}
 
 	static IResource[] getResources(IStructuredSelection ss){
+		if (ss == null || ss.isEmpty())
+			return EMPTY;
 		List selectedResources= getResourceList(ss);
 		return ((IResource[]) selectedResources.toArray(new IResource[selectedResources.size()]));		
 	}
 
 	private static List getResourceList(IStructuredSelection ss) {
-		if (ss == null)
-			return new ArrayList(0);
 		List result= new ArrayList(0);
 		for (Iterator iter= ss.iterator(); iter.hasNext();) {
 			IResource resource= ResourceUtil.getResource(iter.next());
