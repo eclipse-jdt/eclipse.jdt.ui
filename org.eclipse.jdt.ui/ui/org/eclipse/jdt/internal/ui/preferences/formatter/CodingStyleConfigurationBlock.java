@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -39,6 +41,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -69,7 +72,7 @@ public class CodingStyleConfigurationBlock {
 			case ProfileManager.SETTINGS_CHANGED_EVENT:
 				try {
 					fProfileStore.writeProfiles(fProfileManager.getSortedProfiles());
-				} catch (Exception x) {
+				} catch (CoreException x) {
 					JavaPlugin.log(x);
 				}
 			}
@@ -211,10 +214,10 @@ public class CodingStyleConfigurationBlock {
 			profiles.add(fProfileManager.getSelected());
 			try {
 				ProfileStore.writeProfilesToFile(profiles, file);
-			} catch (Exception x) {
+			} catch (CoreException e) {
 				final String title= FormatterMessages.getString("CodingStyleConfigurationBlock.save_profile.error.title"); //$NON-NLS-1$
 				final String message= FormatterMessages.getString("CodingStyleConfigurationBlock.save_profile.error.message"); //$NON-NLS-1$
-				MessageDialog.openError(fComposite.getShell(), title, message);
+				ExceptionHandler.handle(e, fComposite.getShell(), title, message);
 			}
 		}
 		
@@ -235,10 +238,10 @@ public class CodingStyleConfigurationBlock {
 			Collection profiles= null;
 			try {
 				profiles= ProfileStore.readProfilesFromFile(file);
-			} catch (Exception e) {
+			} catch (CoreException e) {
 				final String title= FormatterMessages.getString("CodingStyleConfigurationBlock.load_profile.error.title"); //$NON-NLS-1$
 				final String message= FormatterMessages.getString("CodingStyleConfigurationBlock.load_profile.error.message"); //$NON-NLS-1$
-				MessageDialog.openError(fComposite.getShell(), title, message);
+				ExceptionHandler.handle(e, fComposite.getShell(), title, message);
 			}
 			if (profiles == null || profiles.isEmpty())
 				return;
@@ -301,13 +304,6 @@ public class CodingStyleConfigurationBlock {
 	
 
 	/**
-	 * The name of the store file.
-	 */
-	protected final static String STORE_FILE= "code_formatter_profiles.xml"; //$NON-NLS-1$
-	
-	
-
-	/**
 	 * The GUI controls
 	 */
 	protected Composite fComposite;
@@ -343,13 +339,13 @@ public class CodingStyleConfigurationBlock {
 	 */
 	public CodingStyleConfigurationBlock() {
 
-		fProfileStore= new ProfileStore(getStoreFile());
+		fProfileStore= new ProfileStore();
 		
 		List profiles= null;
 
 		try {
 		    profiles= fProfileStore.readProfiles();
-		} catch (Exception e) {
+		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}
 		
@@ -481,11 +477,5 @@ public class CodingStyleConfigurationBlock {
 		}
 	}
 	
-	/**
-	 * Get a <code>File</code> object representing the internal store file.
-	 */
-	protected static File getStoreFile() {
-		return JavaPlugin.getDefault().getStateLocation().append(STORE_FILE).toFile();
-	}
 
 }

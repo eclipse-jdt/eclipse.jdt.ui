@@ -377,7 +377,7 @@ public abstract class ModifyDialogTabPage {
 		    
 		    try {
 		        number= Integer.parseInt(trimInput);
-		    } catch (Exception x) {
+		    } catch (NumberFormatException x) {
 		        return false;
 		    }
 		    
