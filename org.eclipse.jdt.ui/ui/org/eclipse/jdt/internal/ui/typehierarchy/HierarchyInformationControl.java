@@ -27,14 +27,15 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
@@ -62,11 +63,22 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			}
 			IMethod[] methods= type.findMethods(fFocus);
 			if (methods != null && methods.length > 0) {
-				return false;
+				try {
+					// check visibility
+					IPackageFragment pack= (IPackageFragment) fFocus.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+					for (int i= 0; i < methods.length; i++) {
+						IMethod curr= methods[i];
+						if (Flags.isProtected(curr.getFlags()) || JavaModelUtil.isVisible(curr, pack)) {
+							return false;
+						}
+					}
+				} catch (JavaModelException e) {
+					// ignore
+					JavaPlugin.log(e);
+				}
 			}
 			return true;			
-		}
-			
+		}	
 	}
 	
 
@@ -160,19 +172,12 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 					input= ((IClassFile) elem).getType();
 					break;
 				case IJavaElement.METHOD :
-					IMethod curr= (IMethod) elem;
-					if (!curr.isConstructor()) {
-						IType declaring= curr.getDeclaringType();
-						ITypeHierarchy hierarchy= declaring.newSupertypeHierarchy(null);
-						IMethod method= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, declaring, curr.getElementName(), curr.getParameterTypes(), false);
-						if (method != null) {
-							input= method.getDeclaringType();
-							locked= method;
-						} else {
-							locked= curr;
-							input= declaring;
-						}
+					IMethod method= (IMethod) elem;
+					if (!method.isConstructor()) {
+						locked= method;				
 					}
+					input= method.getDeclaringType();
+					break;
 				case IJavaElement.FIELD :
 				case IJavaElement.INITIALIZER :
 					input= ((IMember) elem).getDeclaringType();
