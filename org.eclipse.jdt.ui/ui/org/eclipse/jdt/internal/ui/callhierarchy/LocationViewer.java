@@ -33,7 +33,7 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 
-public class LocationViewer extends TableViewer {
+class LocationViewer extends TableViewer {
     private final String columnHeaders[] = {
         CallHierarchyMessages.getString("LocationViewer.ColumnIcon.header"),//$NON-NLS-1$
         CallHierarchyMessages.getString("LocationViewer.ColumnLine.header"),//$NON-NLS-1$
@@ -45,7 +45,7 @@ public class LocationViewer extends TableViewer {
         new ColumnWeightData(300)};
     
 
-    public LocationViewer(Composite parent) {
+    LocationViewer(Composite parent) {
         super(createTable(parent));
 
         setContentProvider(new ArrayContentProvider());
@@ -86,5 +86,12 @@ public class LocationViewer extends TableViewer {
         Menu menu= menuMgr.createContextMenu(getControl());
         getControl().setMenu(menu);
         viewSite.registerContextMenu(popupId, menuMgr, this);
+    }
+
+    /**
+     * 
+     */
+    void clearViewer() {
+        setInput(""); //$NON-NLS-1$
     }
 }

@@ -12,8 +12,7 @@
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
 public class TreeRoot {
-    public static final Object EMPTY_ROOT = new Integer(42);
-    public static final TreeRoot EMPTY_TREE = new TreeRoot(EMPTY_ROOT);
+    public static final Object EMPTY_ROOT = new Object();
     private Object fRoot;
 
     /**

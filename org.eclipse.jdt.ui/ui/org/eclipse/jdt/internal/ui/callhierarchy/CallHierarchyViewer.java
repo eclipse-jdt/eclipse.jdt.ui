@@ -60,7 +60,7 @@ class CallHierarchyViewer extends TreeViewer {
             }
         });
 
-        setInput(TreeRoot.EMPTY_TREE);
+        clearViewer();
     }
 
     /**
@@ -118,5 +118,12 @@ class CallHierarchyViewer extends TreeViewer {
         Menu menu= menuMgr.createContextMenu(getTree());
         getTree().setMenu(menu);
         viewSite.registerContextMenu(popupId, menuMgr, this);
+    }
+
+    /**
+     * 
+     */
+    void clearViewer() {
+        setInput(TreeRoot.EMPTY_ROOT);
     }
 }

@@ -883,7 +883,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         if (methodWrapper != null && methodWrapper.getMethodCall().hasCallLocations()) {
             fLocationViewer.setInput(methodWrapper.getMethodCall().getCallLocations());
         } else {
-            fLocationViewer.setInput(""); //$NON-NLS-1$
+            fLocationViewer.clearViewer();
         }
     }
 
@@ -904,9 +904,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      */
     private void updateView() {
         if ((fShownMethod != null)) {
+            clearView();
             showPage(PAGE_VIEWER);
-            updateLocationsView(null);
-
+            
             CallHierarchy.getDefault().setSearchScope(getSearchScope());
 
             if (fCurrentCallMode == CALL_MODE_CALLERS) {
@@ -919,6 +919,14 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         }
     }
 
+    /**
+     * Clears both the tree view and the location list.
+     */
+    private void clearView() {
+        fLocationViewer.clearViewer();
+        fCallHierarchyViewer.clearViewer();
+    }
+    
     static CallHierarchyViewPart findAndShowCallersView(IWorkbenchPartSite site) {
         IWorkbenchPage workbenchPage = site.getPage();
         CallHierarchyViewPart callersView = null;
