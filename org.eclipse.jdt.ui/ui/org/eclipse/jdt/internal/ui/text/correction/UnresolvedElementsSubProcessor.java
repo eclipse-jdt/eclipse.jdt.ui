@@ -742,7 +742,7 @@ public class UnresolvedElementsSubProcessor {
 					}
 					proposals.add(new NewMethodCompletionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, 5, image));
 				}
-				if (senderDeclBinding.isAnonymous() && cu.equals(targetCU) && sender == null && Bindings.findMethodInHierarchy(senderDeclBinding, methodName, null) == null) { // no covering method
+				if (senderDeclBinding.isAnonymous() && cu.equals(targetCU) && sender == null && Bindings.findMethodInHierarchy(senderDeclBinding, methodName, (ITypeBinding[]) null) == null) { // no covering method
 					ASTNode anonymDecl= astRoot.findDeclaringNode(senderDeclBinding);
 					if (anonymDecl != null) {
 						senderDeclBinding= Bindings.getBindingOfParentType(anonymDecl.getParent());

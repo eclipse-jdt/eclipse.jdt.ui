@@ -31,13 +31,26 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.core.dom.*;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class Bindings {
 	
@@ -339,6 +352,30 @@ public class Bindings {
 	}
 	
 	/**
+	 * Finds the method specified by <code>methodName<code> and </code>parameters</code> in
+	 * the given <code>type</code>. Returns <code>null</code> if no such method exits.
+	 * @param type The type to search the method in
+	 * @param methodName The name of the method to find
+	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
+	 * @return the method binding representing the method
+	 */
+	public static IMethodBinding findMethodInType(ITypeBinding type, String methodName, String[] parameters) {
+		if (type.isPrimitive())
+			return null;
+		IMethodBinding[] methods= type.getDeclaredMethods();
+		for (int i= 0; i < methods.length; i++) {
+			if (parameters == null) {
+				if (methodName.equals(methods[i].getName()))
+					return methods[i];
+			} else {
+				if (isEqualMethod(methods[i], methodName, parameters))
+					return methods[i];
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * Finds the method in the given <code>type</code> that is overrideen by the specified <code>method<code> . Returns <code>null</code> if no such method exits.
 	 * @param type The type to search the method in
 	 * @param method The specified method that would override the result
@@ -398,6 +435,36 @@ public class Bindings {
 	 * @return the method binding representing the method
 	 */
 	public static IMethodBinding findMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding parameters[]) {
+		IMethodBinding method= findMethodInType(type, methodName, parameters);
+		if (method != null)
+			return method;
+		ITypeBinding superClass= type.getSuperclass();
+		if (superClass != null) {
+			method= findMethodInHierarchy(superClass, methodName, parameters);
+			if (method != null)
+				return method;			
+		}
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			method= findMethodInHierarchy(interfaces[i], methodName, parameters);
+			if (method != null)
+				return method;
+		}
+		return null;
+	}
+
+
+	/**
+	 * Finds the method specified by <code>methodName</code> and </code>parameters</code> in
+	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
+	 * exists. If the method is defined in more than one super type only the first match is 
+	 * returned. First the super class is examined and than the implemented interfaces.
+	 * @param type The type to search the method in
+	 * @param methodName The name of the method to find
+	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
+	 * @return the method binding representing the method
+	 */
+	public static IMethodBinding findMethodInHierarchy(ITypeBinding type, String methodName, String parameters[]) {
 		IMethodBinding method= findMethodInType(type, methodName, parameters);
 		if (method != null)
 			return method;
@@ -621,7 +688,21 @@ public class Bindings {
 		if (methodParameters.length != parameters.length)
 			return false;
 		for (int i= 0; i < parameters.length; i++) {
-			if (parameters[i].getErasure() != methodParameters[i].getErasure())
+			if (parameters[i].getGenericType() != methodParameters[i].getGenericType())
+				return false;
+		}
+		return true;
+	}
+
+	public static boolean isEqualMethod(IMethodBinding method, String methodName, String[] parameters) {
+		if (!method.getName().equals(methodName))
+			return false;
+			
+		ITypeBinding[] methodParameters= method.getParameterTypes();
+		if (methodParameters.length != parameters.length)
+			return false;
+		for (int i= 0; i < parameters.length; i++) {
+			if (parameters[i].equals(methodParameters[i].getGenericType().getQualifiedName()))
 				return false;
 		}
 		return true;
