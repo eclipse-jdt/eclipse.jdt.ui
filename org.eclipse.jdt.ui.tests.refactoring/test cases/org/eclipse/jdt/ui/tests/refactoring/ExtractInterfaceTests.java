@@ -703,7 +703,22 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		String[] fieldNames= null;
 		validatePassingTest("A", new String[]{"A"}, "Bag", true, names, signatures, fieldNames);
 	}
-    
+
+	
+	public void testConditional1() throws Exception {
+		String[] names= new String[]{};
+		String[][] signatures= {{}};
+		String[] fieldNames= null;
+		validatePassingTest("X", new String[]{"A", "X"}, "I", true, names, signatures, fieldNames);			
+	}
+	
+	public void testConditional2() throws Exception {
+		String[] names= new String[]{ "dot" };
+		String[][] signatures= {new String[]{"QX;"}};
+		String[] fieldNames= null;
+		validatePassingTest("X", new String[]{"A", "X"}, "I", true, names, signatures, fieldNames);			
+	}
+	
     public void testConstant80() throws Exception{
         String[] names= null;
         String[][] signatures= null;
