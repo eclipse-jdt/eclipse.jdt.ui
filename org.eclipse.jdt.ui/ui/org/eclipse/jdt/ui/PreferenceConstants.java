@@ -244,7 +244,7 @@ public class PreferenceConstants {
 	/**
 	 * Enable / Disable showing the correction indicator. Boolean value.
 	 */
-	public final static String EDITOR_CORRECTION_INDICATION= WorkInProgressPreferencePage.PREF_SHOW_TEMP_PROBLEMS;
+	public final static String EDITOR_CORRECTION_INDICATION= JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS;
 
 	/**
 	 * Enable / Disable evaluating temporary problems. Boolean value.

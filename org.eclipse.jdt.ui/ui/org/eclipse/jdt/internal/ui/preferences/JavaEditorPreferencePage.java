@@ -77,7 +77,8 @@ import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 public class JavaEditorPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 	
 	public static final String BOLD= "_bold"; //$NON-NLS-1$
-	
+	public static final String PREF_SHOW_TEMP_PROBLEMS= "JavaEditor.ShowTemporaryProblem"; //$NON-NLS-1$
+		
 	public final OverlayPreferenceStore.OverlayKey[] fKeys= new OverlayPreferenceStore.OverlayKey[] {
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND),
@@ -131,7 +132,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, CompilationUnitEditor.PROBLEM_INDICATION_COLOR),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.PROBLEM_INDICATION),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, WorkInProgressPreferencePage.PREF_SHOW_TEMP_PROBLEMS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS),
 		
@@ -273,7 +274,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		PreferenceConverter.setDefault(store, AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE, new RGB(185, 176 , 180));
 		
 		store.setDefault(CompilationUnitEditor.PROBLEM_INDICATION, true);
-		store.setDefault(WorkInProgressPreferencePage.PREF_SHOW_TEMP_PROBLEMS, false);
+		store.setDefault(JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, false);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.PROBLEM_INDICATION_COLOR, new RGB(255, 0 , 128));
 		
 		store.setDefault(CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS, true);
@@ -623,7 +624,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.PROBLEM_INDICATION, 0);
 
 		label= "&Indicate problems solvable with Quick Fix in vertical ruler";
-		addCheckBox(behaviorComposite, label, WorkInProgressPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
+		addCheckBox(behaviorComposite, label, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showOverviewRuler"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.OVERVIEW_RULER, 0);
@@ -1029,6 +1030,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);
 	}
+
+	public static boolean showTempProblems() {
+		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS);
+	}
+
 }
 
 

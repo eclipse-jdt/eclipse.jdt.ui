@@ -74,6 +74,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
@@ -124,7 +125,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				if (fgImage == null)
 					fgImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
 				
-				if (WorkInProgressPreferencePage.showTempProblems() && JavaCorrectionProcessor.hasCorrections(fProblem.getID()))
+				if (JavaEditorPreferencePage.showTempProblems() && JavaCorrectionProcessor.hasCorrections(fProblem.getID()))
 					fImage= fgImage;
 			}
 						
