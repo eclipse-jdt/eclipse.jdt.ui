@@ -1,13 +1,11 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
-import java.util.Iterator;
-import java.util.Map;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.dnd.Clipboard;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -34,10 +32,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class PasteSourceReferencesAction extends RefactoringAction {
 
-	/**
-	 * Constructor for PasteSourceReferencesAction.
-	 * @param provider
-	 */
 	public PasteSourceReferencesAction(ISelectionProvider provider) {
 		super("&Paste", provider);
 	}
@@ -47,7 +41,7 @@ public class PasteSourceReferencesAction extends RefactoringAction {
 	 */
 	public boolean canOperateOn(IStructuredSelection selection) {
 		try{
-			if (SourceReferenceClipboard.isEmpty())
+			if (! isAnythingInInterestingClipboard())
 				return false;
 				
 			if (selection.size() != 1)
@@ -86,7 +80,42 @@ public class PasteSourceReferencesAction extends RefactoringAction {
 		}		
 	}
 	
-	private static boolean canPaste(ISourceReference ref, Map elements){
+	private static Clipboard getClipboard(){
+		return new Clipboard(JavaPlugin.getActiveWorkbenchShell().getDisplay());
+	}
+	
+	private static boolean isAnythingInInterestingClipboard(){
+		IJavaElement[] elems= (IJavaElement[])getClipboard().getContents(JavaElementTransfer.getInstance());
+		if (elems == null)
+			return false;
+		for (int i= 0; i < elems.length; i++) {
+			if (! isSourceReference(elems[i]))
+				return false;
+		}
+		return true;
+	}
+	
+	private static boolean isSourceReference(IJavaElement je){
+		if (! (je instanceof ISourceReference))
+			return false;
+		if (je instanceof IClassFile)
+			return false;
+		if (je instanceof ICompilationUnit)
+			return false;					
+		return true;		
+	}
+	
+	private static ISourceReference[] getClipboardContents(){
+		Assert.isTrue(isAnythingInInterestingClipboard());
+		IJavaElement[] elems= (IJavaElement[])getClipboard().getContents(JavaElementTransfer.getInstance());
+		ISourceReference[] result= new ISourceReference[elems.length];
+		for (int i= 0; i < elems.length; i++) {
+			result[i]= (ISourceReference)elems[i]; //checked before
+		}
+		return result;
+	}
+	
+	private static boolean canPaste(ISourceReference ref, ISourceReference[] elements){
 		if (canPasteIn(ref, elements))
 			return true;
 		if (canPasteAfter(ref, elements))
@@ -120,20 +149,20 @@ public class PasteSourceReferencesAction extends RefactoringAction {
 			else
 				paste(MemberEdit.ADD_AT_BEGINNING, selected);	
 		}	else if (canPasteAfter(selected, getClipboardContents()))
-				paste(MemberEdit.INSERT_AFTER, selected);
+			paste(MemberEdit.INSERT_AFTER, selected);
 		else	
-				Assert.isTrue(false);//should be checked already (on activation)	
+			Assert.isTrue(false);//should be checked already (on activation)	
 	}
 	
 	private static void paste(int style, ISourceReference selected) throws CoreException{
 		TextBuffer tb= TextBuffer.acquire(SourceReferenceUtil.getFile(selected));
 		TextBufferEditor tbe= new TextBufferEditor(tb);
-		Map elems= getClipboardContents();
+		ISourceReference[] elems= getClipboardContents();
 		
 		IJavaElement element= (IJavaElement)selected;
 		int tabWidth= CodeFormatterPreferencePage.getTabSize();
-		for (Iterator iter= elems.keySet().iterator(); iter.hasNext();) {
-			String[] source= new String[]{(String) iter.next()};
+		for (int i= 0; i < elems.length; i++) {
+			String[] source= new String[]{SourceReferenceSourceRangeComputer.computeSource(elems[i])};
 			tbe.addTextEdit(new MemberEdit(element, style, source, tabWidth));
 		}
 		if (! tbe.canPerformEdits())
@@ -146,11 +175,11 @@ public class PasteSourceReferencesAction extends RefactoringAction {
 	private static void pasteInCompilationUnit(ICompilationUnit unit) throws CoreException{
 		TextBuffer tb= TextBuffer.acquire(SourceReferenceUtil.getFile(unit));
 		TextBufferEditor tbe= new TextBufferEditor(tb);
-		Map elems= getClipboardContents();
+		ISourceReference[] elems= getClipboardContents();
 		
-		for (Iterator iter= elems.keySet().iterator(); iter.hasNext();) {
-			String source= (String) iter.next();
-			int type= ((Integer)elems.get(source)).intValue();
+		for (int i= 0; i < elems.length; i++) {
+			String source= SourceReferenceSourceRangeComputer.computeSource(elems[i]);
+			int type= ((IJavaElement)elems[i]).getElementType();
 			tbe.addTextEdit(new PasteInCompilationUnitEdit(source, type, unit));
 		}
 		if (! tbe.canPerformEdits())
@@ -160,12 +189,7 @@ public class PasteSourceReferencesAction extends RefactoringAction {
 		TextBuffer.release(tb);		
 	}
 	
-	private static Map getClipboardContents(){
-		Assert.isTrue(! SourceReferenceClipboard.isEmpty());
-		return SourceReferenceClipboard.getContents();
-	}
-	
-	private static boolean canPasteAfter(ISourceReference ref, Map elements){
+	private static boolean canPasteAfter(ISourceReference ref, ISourceReference[] elements){
 		if (ref instanceof ICompilationUnit)
 			return false;
 		if (ref instanceof IImportContainer)
@@ -184,17 +208,20 @@ public class PasteSourceReferencesAction extends RefactoringAction {
 		return false;
 	}
 	
-	private static boolean canPasteAfterType(Map elems){
+	private static boolean canPasteAfterType(ISourceReference[] elems){
 		return areAllValuesOfType(elems, IJavaElement.TYPE);
 	}
 
-	private static boolean canPasteAtTopLevel(Map elems){
-		for (Iterator iter= elems.values().iterator(); iter.hasNext();) {
-			Integer type= (Integer) iter.next();
-			if (! canPasteAfterImportContainerOrDeclaration(type.intValue()))
+	private static boolean canPasteAtTopLevel(ISourceReference[] elements){
+		for (int i= 0; i < elements.length; i++) {
+			if (! canPasteAfterImportContainerOrDeclaration(getElementType(elements[i])))
 				return false;
 		}
 		return true;
+	}
+	
+	private static int getElementType(ISourceReference ref){
+		return ((IJavaElement)ref).getElementType();
 	}
 	
 	private static boolean canPasteAfterImportContainerOrDeclaration(int type){
@@ -207,11 +234,11 @@ public class PasteSourceReferencesAction extends RefactoringAction {
 		return false;
 	}
 
-	private static boolean canPasteAfterMember(Map elems){
+	private static boolean canPasteAfterMember(ISourceReference[] elems){
 		return areAllMembers(elems);
 	}
 	
-	private static boolean canPasteIn(ISourceReference ref, Map elements){
+	private static boolean canPasteIn(ISourceReference ref, ISourceReference[] elements){
 		if (ref instanceof IImportContainer)
 			return canPasteInImportContainer(elements);	
 		if (ref instanceof IType)
@@ -222,18 +249,17 @@ public class PasteSourceReferencesAction extends RefactoringAction {
 		return false;	
 	}
 	
-	private static boolean canPasteInImportContainer(Map elements){
+	private static boolean canPasteInImportContainer(ISourceReference[] elements){
 		return areAllValuesOfType(elements, IJavaElement.IMPORT_DECLARATION);
 	}
 	
-	private static boolean canPasteInType(Map elements){
+	private static boolean canPasteInType(ISourceReference[] elements){
 		return areAllMembers(elements);
 	}
 		
-	private static boolean canPasteInCompilationUnit(Map elements){
-		for (Iterator iter= elements.values().iterator(); iter.hasNext();) {
-			Integer type= (Integer) iter.next();
-			if (! canPasteInCompilationUnit(type.intValue()))
+	private static boolean canPasteInCompilationUnit(ISourceReference[] elements){
+		for (int i= 0; i < elements.length; i++) {
+			if (! canPasteInCompilationUnit(getElementType(elements[i])))
 				return false;
 		}
 		return true;
@@ -253,34 +279,19 @@ public class PasteSourceReferencesAction extends RefactoringAction {
 	
 	//--- helpers
 	
-	private static boolean areAllValuesOfType(Map elements, int type){
-		for (Iterator iter= elements.values().iterator(); iter.hasNext();) {
-			Integer value= (Integer)iter.next();
-			if (value.intValue() != type)
-				return false;		
+	private static boolean areAllValuesOfType(ISourceReference[] elements, int type){
+		for (int i= 0; i < elements.length; i++) {
+			if (getElementType(elements[i]) != type)
+				return false;
 		}
 		return true;
 	}
 	
-	private static boolean areAllMembers(Map elements){
-		for (Iterator iter= elements.values().iterator(); iter.hasNext();) {
-			Integer type= (Integer) iter.next();
-			if (! isMember(type.intValue()))
-				return false;	
+	private static boolean areAllMembers(ISourceReference[] elements){
+		for (int i= 0; i < elements.length; i++) {
+			if (! (elements[i] instanceof IMember))
+				return false;
 		}
 		return true;
 	}
-		
-	private static boolean isMember(int type){
-		if (type == IJavaElement.FIELD)
-			return true;
-		if (type == IJavaElement.INITIALIZER)
-			return true;
-		if (type == IJavaElement.METHOD)
-			return true;
-		if (type == IJavaElement.TYPE)
-			return true;
-		return false;		
-	}
-	
 };

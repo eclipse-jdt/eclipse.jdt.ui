@@ -7,6 +7,7 @@ import org.eclipse.swt.dnd.Transfer;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -35,26 +36,33 @@ public class CopySourceReferencesToClipboardAction extends SourceReferenceAction
 	}
 	
 	static void perform(ISourceReference[] elements) throws JavaModelException {
-		ISourceReference[] childrenRemoved= SourceReferenceUtil.removeAllWithParentsSelected(elements);
-		SourceReferenceClipboard.setContent(childrenRemoved);
-		copyToOSClipbard(convertToInputForOSClipboard(childrenRemoved));
+		copyToOSClipbard(SourceReferenceUtil.removeAllWithParentsSelected(elements));
 	}
 		
-	private static String convertToInputForOSClipboard(ISourceReference[] elems)  throws JavaModelException {
+	private static String convertToInputForOSClipboard(ISourceReference[] elems) throws JavaModelException {
 		String lineDelim= System.getProperty("line.separator", "\n"); //$NON-NLS-1$
 		StringBuffer buff= new StringBuffer();
 		for (int i= 0; i < elems.length; i++) {
-			ISourceReference elem= elems[i];
-			buff.append(SourceReferenceSourceRangeComputer.computeSource(elem));
+			buff.append(elems[i].getSource());
 			if (i != elems.length)
 				buff.append(lineDelim);
 		}
 		return buff.toString();
 	}
 
-	private static void copyToOSClipbard(String str) {
+	private static IJavaElement[] convertToJavaElementArray(ISourceReference[] refs){
+		IJavaElement[] elems= new IJavaElement[refs.length];
+		for (int i= 0; i < refs.length; i++) {
+			elems[i]= (IJavaElement)refs[i];
+		}
+		return elems;
+	}
+	
+	private static void copyToOSClipbard(ISourceReference[] refs)  throws JavaModelException {
 		Clipboard clipboard = new Clipboard(JavaPlugin.getActiveWorkbenchShell().getDisplay());
-		clipboard.setContents(new String[] { str }, new Transfer[] { TextTransfer.getInstance()});
+		Object[] data= new Object[] { convertToInputForOSClipboard(refs), convertToJavaElementArray(refs)};
+		Transfer[] transfers= new Transfer[] { TextTransfer.getInstance(), JavaElementTransfer.getInstance()};
+		clipboard.setContents(data, transfers);
 	}
 }
 

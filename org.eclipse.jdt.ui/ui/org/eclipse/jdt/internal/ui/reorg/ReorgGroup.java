@@ -22,10 +22,9 @@ public class ReorgGroup extends ContextMenuGroup {
 		createActions(context.getSelectionProvider());
 		
 		for (int i= 0; i < fActions.length; i++) {
-			RefactoringAction action= fActions[i];
-			action.update();
-			if (action.isEnabled())
-				manager.appendToGroup(GROUP_NAME, action);
+			fActions[i].update();
+			if (fActions[i].isEnabled())
+				manager.appendToGroup(GROUP_NAME, fActions[i]);
 		}
 	}
 	
