@@ -185,6 +185,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fShowInTextCheckBox;
 	private Button fHighlightInTextCheckBox;
 	private Button fShowInOverviewRulerCheckBox;
+	private Button fShowInVerticalRulerCheckBox;
 	private Text fBrowserLikeLinksKeyModifierText;
 	private Button fBrowserLikeLinksCheckBox;
 	private StatusInfo fBrowserLikeLinksKeyModifierStatus;
@@ -333,6 +334,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			if (info.getHighlightPreferenceKey() != null)
 				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getHighlightPreferenceKey()));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getOverviewRulerPreferenceKey()));
+			if (info.getVerticalRulerPreferenceKey() != null)
+				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, info.getVerticalRulerPreferenceKey()));
 		}
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
 		overlayKeys.toArray(keys);
@@ -393,6 +396,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		} else
 			fHighlightInTextCheckBox.setEnabled(false);
 		
+		key= fAnnotationColorListModel[i][5];
+		if (key != null) {
+			fShowInVerticalRulerCheckBox.setSelection(fOverlayStore.getBoolean(key));
+			fShowInVerticalRulerCheckBox.setEnabled(true);
+		} else {
+			fShowInVerticalRulerCheckBox.setSelection(true);
+			fShowInVerticalRulerCheckBox.setEnabled(false);
+		}
 	}
 	
 	private Control createSyntaxPage(Composite parent) {
@@ -714,6 +725,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
         gd.horizontalSpan= 2;
 		fShowInOverviewRulerCheckBox.setLayoutData(gd);
 		
+		fShowInVerticalRulerCheckBox= new Button(optionsComposite, SWT.CHECK);
+		fShowInVerticalRulerCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.annotations.showInVerticalRuler")); //$NON-NLS-1$
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalAlignment= GridData.BEGINNING;
+		gd.horizontalSpan= 2;
+		fShowInVerticalRulerCheckBox.setLayoutData(gd);
+		
 		label= new Label(optionsComposite, SWT.LEFT);
 		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.annotations.color")); //$NON-NLS-1$
 		gd= new GridData();
@@ -772,6 +790,18 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			}
 		});
 		
+		fShowInVerticalRulerCheckBox.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			
+			public void widgetSelected(SelectionEvent e) {
+				int i= fAnnotationList.getSelectionIndex();
+				String key= fAnnotationColorListModel[i][5];
+				fOverlayStore.setValue(key, fShowInVerticalRulerCheckBox.getSelection());
+			}
+		});
+		
 		foregroundColorButton.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
@@ -792,7 +822,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		Iterator e= preferences.getAnnotationPreferences().iterator();
 		while (e.hasNext()) {
 			AnnotationPreference info= (AnnotationPreference) e.next();
-			listModelItems.add(new String[] { info.getPreferenceLabel(), info.getColorPreferenceKey(), info.getTextPreferenceKey(), info.getOverviewRulerPreferenceKey(), info.getHighlightPreferenceKey()});
+			listModelItems.add(new String[] { info.getPreferenceLabel(), info.getColorPreferenceKey(), info.getTextPreferenceKey(), info.getOverviewRulerPreferenceKey(), info.getHighlightPreferenceKey(), info.getVerticalRulerPreferenceKey()});
 		}
 		String[][] items= new String[listModelItems.size()][];
 		listModelItems.toArray(items);
