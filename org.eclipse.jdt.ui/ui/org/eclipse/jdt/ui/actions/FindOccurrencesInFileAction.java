@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -135,16 +137,17 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 			ISourceRange range= member.getNameRange();
 			String result= engine.run(range.getOffset(), range.getLength());
 			if (result != null)
-				showMessage(fActionBars, result);
+				showMessage(getShell(), fActionBars, result);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
 	}
 	
-	private static void showMessage(IActionBars actionBars, String msg) {
+	private static void showMessage(Shell shell, IActionBars actionBars, String msg) {
 		IStatusLineManager statusLine= actionBars.getStatusLineManager();
 		if (statusLine != null)
-			statusLine.setMessage(msg);	
+			statusLine.setMessage(msg);
+		shell.getDisplay().beep();
 	}
 	
 	//---- Text Selection ----------------------------------------------------------------------
@@ -164,7 +167,7 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		try {
 			String result= engine.run(ts.getOffset(), ts.getLength());
 			if (result != null)
-				showMessage(fEditor, result);
+				showMessage(getShell(), fEditor, result);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
@@ -177,9 +180,10 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		return  JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editor.getEditorInput());
 	} 
 		
-	private static void showMessage(JavaEditor editor, String msg) {
+	private static void showMessage(Shell shell, JavaEditor editor, String msg) {
 		IEditorStatusLine statusLine= (IEditorStatusLine) editor.getAdapter(IEditorStatusLine.class);
 		if (statusLine != null) 
 			statusLine.setMessage(true, msg, null); 
+		shell.getDisplay().beep();
 	}
 }
