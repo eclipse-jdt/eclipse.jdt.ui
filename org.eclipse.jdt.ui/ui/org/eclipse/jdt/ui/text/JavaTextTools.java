@@ -221,13 +221,13 @@ public class JavaTextTools {
 	protected void adaptToPreferenceChange(PropertyChangeEvent event) {
 		if (fCodeScanner.affectsBehavior(event))
 			fCodeScanner.adaptToPreferenceChange(event);
-		else if (fMultilineCommentScanner.affectsBehavior(event))
+		if (fMultilineCommentScanner.affectsBehavior(event))
 			fMultilineCommentScanner.adaptToPreferenceChange(event);
-		else if (fSinglelineCommentScanner.affectsBehavior(event))
+		if (fSinglelineCommentScanner.affectsBehavior(event))
 			fSinglelineCommentScanner.adaptToPreferenceChange(event);
-		else if (fStringScanner.affectsBehavior(event))
+		if (fStringScanner.affectsBehavior(event))
 			fStringScanner.adaptToPreferenceChange(event);
-		else if (fJavaDocScanner.affectsBehavior(event))
+		if (fJavaDocScanner.affectsBehavior(event))
 			fJavaDocScanner.adaptToPreferenceChange(event);
 	}
 }

@@ -131,9 +131,8 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 				
 		List rules= new ArrayList();		
 		
-		// Add rule for strings and character constants.
+		// Add rule for character constants.
 		Token token= getToken(IJavaColorConstants.JAVA_STRING);
-		rules.add(new SingleLineRule("\"", "\"", token, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
 		rules.add(new SingleLineRule("'", "'", token, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
 				
 		
@@ -193,9 +192,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	 * @see AbstractJavaScanner#affectsBehavior(PropertyChangeEvent)
 	 */	
 	public boolean affectsBehavior(PropertyChangeEvent event) {
-		return
-			event.getProperty().equals(SOURCE_VERSION) ||
-			super.affectsBehavior(event);
+		return event.getProperty().equals(SOURCE_VERSION) || super.affectsBehavior(event);
 	}
 
 	/*
