@@ -62,6 +62,9 @@ public class JavaDocTestCase extends TestCase {
 		fTestProject= JavaTestSetup.getTestProject();
 
 		IPackageFragmentRoot jdk= fTestProject.addRTJar();
+		assert("jdk not found", jdk != null);
+		
+		
 		File jdocDir= new File("M:\\JAVA\\jdk1.2\\docs\\api");
 		assert("Must be existing directory", jdocDir.isDirectory());
 		JavaDocAccess.setJavaDocLocation(jdk, jdocDir.toURL());

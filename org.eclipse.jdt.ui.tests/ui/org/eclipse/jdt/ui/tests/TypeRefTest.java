@@ -61,7 +61,8 @@ public class TypeRefTest extends TestCase {
 
 		// a junit project
 		JavaTestProject proj2= new JavaTestProject(workspaceRoot, "TestProject2", "bin");
-		proj2.addRTJar();
+		IPackageFragmentRoot jdk= proj2.addRTJar();
+		assert("jdk not found", jdk != null);
 		proj2.addSourceContainerWithImport("junit", SOURCES);
 
 		// our project

@@ -28,6 +28,10 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.LibraryLocation;
+
 
 public class JavaTestProject {
 	
@@ -243,28 +247,18 @@ public class JavaTestProject {
 	 * Try to find rt.jar
 	 */
 	private static IPath[] findRtJar() {
-		IPath javaHome= new Path(System.getProperty("java.home"));
-		IPath javaExe= javaHome.removeLastSegments(1).append("bin").append("java.exe");
-		if (javaExe.toFile().exists()) {
-			javaHome= javaHome.removeLastSegments(1);
+		IVMInstall vmInstall= JavaRuntime.getDefaultVMInstall();
+		if (vmInstall != null) {
+			LibraryLocation loc= vmInstall.getVMInstallType().getDefaultLibraryLocation(vmInstall.getInstallLocation());
+			if (loc != null) {
+				return new IPath[] {
+           			new Path(loc.getSystemLibrary().getPath()),
+            		new Path(loc.getSystemLibrarySource().getPath()),
+            		loc.getPackageRootPath()
+				};
+			}
 		}
-		
-		IPath rtJar= javaHome.append("jre").append("lib").append("rt.jar");
-		if (!rtJar.toFile().exists()) {
-			return null;
-		}
-		
-		IPath rtRoot= null;
-		IPath rtSrc= javaHome.append("src.jar");
-		if (rtSrc.toFile().exists()) {
-			rtRoot= new Path("src");
-		} else {
-			rtSrc= null;
-			rtRoot= null;
-		}
-		// System.out.println(rtJar + " " + rtSrc + " " + rtRoot);			
-		return new IPath[] { rtJar, rtSrc, rtRoot };
-	}			
-
+		return null;
+	}
 
 }

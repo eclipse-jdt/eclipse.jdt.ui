@@ -4,6 +4,7 @@
 	<reference project-name="org.eclipse.jdt.core"/>
 	<reference project-name="org.eclipse.jdt.ui"/>
 	<reference project-name="org.eclipse.ui"/>
+	<reference project-name="org.eclipse.jdt.launching"/>
 	<builder name="org.eclipse.jdt.core.javabuilder">
 	</builder>
 </project-description>

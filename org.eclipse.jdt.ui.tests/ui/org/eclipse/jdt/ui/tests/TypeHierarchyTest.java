@@ -53,7 +53,8 @@ public class TypeHierarchyTest extends TestCase {
 		IWorkspaceRoot workspaceRoot= JavaTestPlugin.getWorkspace().getRoot();
 		
 		JavaTestProject proj1= new JavaTestProject(workspaceRoot, "TestProject1", "bin");
-		proj1.addRTJar();
+		IPackageFragmentRoot jdk= proj1.addRTJar();
+		assert("jdk not found", jdk != null);
 		IPackageFragmentRoot root1= proj1.addSourceContainer("src");
 		IPackageFragment pack1= root1.createPackageFragment("pack1", true, null);
 		
