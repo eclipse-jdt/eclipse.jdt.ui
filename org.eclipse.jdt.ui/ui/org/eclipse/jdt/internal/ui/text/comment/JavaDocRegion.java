@@ -275,7 +275,7 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 				current= (CommentRange)iterator.next();
 				count= current.getLength();
 
-				if (count > 0) { // PR44035: when inside a tag, mark blank lines as well to get proper snippet formatting
+				if (count > 0 || level > 0) { // PR44035: when inside a tag, mark blank lines as well to get proper snippet formatting
 
 					token= getText(current.getOffset(), current.getLength());
 					level= current.markRange(token, tags[index], level, key, include);
