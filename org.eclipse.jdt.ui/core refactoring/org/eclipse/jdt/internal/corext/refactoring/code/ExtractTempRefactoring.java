@@ -22,7 +22,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
 import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -31,9 +30,11 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -41,8 +42,10 @@ import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -55,8 +58,8 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -84,6 +87,9 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
+/**
+ * Extract Local Variable (from selected expression inside method).
+ */
 public class ExtractTempRefactoring extends Refactoring {
 	
 	private static final String[] KNOWN_METHOD_NAME_PREFIXES= {"get", "is"}; //$NON-NLS-2$ //$NON-NLS-1$
@@ -183,7 +189,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (typeBinding.getPackage() != null)
 			return typeBinding.getPackage().getName();
 		else
-			return "";
+			return ""; //$NON-NLS-1$
 	}
 
 	private String[] getExcludedVariableNames() throws JavaModelException {
@@ -257,7 +263,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			if (selectedExpression.getAssociatedNode() instanceof Name && selectedExpression.getAssociatedNode().getParent() instanceof ClassInstanceCreation)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.name_in_new")); //$NON-NLS-1$
 			pm.worked(1);				
-			
+
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkExpression());
 			if (result.hasFatalError())
@@ -266,10 +272,13 @@ public class ExtractTempRefactoring extends Refactoring {
 			
 			result.merge(checkExpressionBinding());				
 			if (result.hasFatalError())
-				return result;
-				
-			pm.worked(1);			
-
+				return result;				
+			pm.worked(1);
+			
+			if (isReferringToLocalVariableFromFor(getSelectedExpression().getAssociatedExpression()))
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.refers_to_for_variable")); //$NON-NLS-1$
+			pm.worked(1);
+			
 			return result;
 		} finally{
 			pm.done();
@@ -307,7 +316,8 @@ public class ExtractTempRefactoring extends Refactoring {
 			if (selectedExpression.getParent() instanceof Expression)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.assignment")); //$NON-NLS-1$
 			else
-				return null;	
+				return null;
+		
 		} else if (selectedExpression instanceof ConditionalExpression) {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.single_conditional_expression")); //$NON-NLS-1$
 		} else if (selectedExpression instanceof SimpleName){
@@ -356,7 +366,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		IASTFragment[] matchingFragments= getMatchingFragments();
 		for (int i= 0; i < matchingFragments.length; i++) {
 			ASTNode node= matchingFragments[i].getAssociatedNode();
-			if (isLeftValue(node)){
+			if (isLeftValue(node) && !isReferringToLocalVariableFromFor((Expression) node)) {
 				String msg= RefactoringCoreMessages.getString("ExtractTempRefactoring.assigned_to"); //$NON-NLS-1$
 				result.addWarning(msg, JavaStatusContext.create(fCu, node));
 			}
@@ -368,7 +378,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		return getTempTypeName() + " " + fTempName; //$NON-NLS-1$
 	}
 	
-	private boolean isUsedInExplicitConstructorCall() throws JavaModelException{
+	private boolean isUsedInExplicitConstructorCall() throws JavaModelException {
 		Expression selectedExpression= getSelectedExpression().getAssociatedExpression();
 		if (ASTNodes.getParent(selectedExpression, ConstructorInvocation.class) != null)
 			return true;
@@ -376,7 +386,64 @@ public class ExtractTempRefactoring extends Refactoring {
 			return true;
 		return false;	
 	}
+		
+	private static boolean isReferringToLocalVariableFromFor(Expression expression) {
+		ASTNode current= expression;
+		ASTNode parent= current.getParent();
+		while (parent != null && !(parent instanceof BodyDeclaration)) {
+			if (parent instanceof ForStatement) {
+				ForStatement forStmt = (ForStatement) parent;
+				if (forStmt.initializers().contains(current) || forStmt.updaters().contains(current) || forStmt.getExpression() == current) {
+					List initializers= forStmt.initializers();
+					if (initializers.size() == 1 && initializers.get(0) instanceof VariableDeclarationExpression) {
+						List forInitializerVariables= getForInitializedVariables((VariableDeclarationExpression) initializers.get(0));
+						ForStatementChecker checker= new ForStatementChecker(forInitializerVariables);
+						expression.accept(checker);
+						if (checker.isReferringToForVariable())
+							return true;
+					}
+				}
+			}
+			current= parent;
+			parent= current.getParent();
+		}
+		return false;
+	}
 	
+	//return List<IVariableBinding>
+	private static List getForInitializedVariables(VariableDeclarationExpression variableDeclarations) {
+		List forInitializerVariables= new ArrayList(1);
+		for (Iterator iter= variableDeclarations.fragments().iterator(); iter.hasNext(); ) {
+			VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
+			IVariableBinding binding= fragment.resolveBinding();
+			if (binding != null)
+				forInitializerVariables.add(binding);
+		}
+		return forInitializerVariables;
+	}
+
+	private static final class ForStatementChecker extends ASTVisitor {
+		private final Collection fForInitializerVariables;
+		private boolean fReferringToForVariable= false;
+		
+		public ForStatementChecker(Collection forInitializerVariables) {
+			Assert.isNotNull(forInitializerVariables);
+			fForInitializerVariables= forInitializerVariables;
+		}
+
+		public boolean isReferringToForVariable () {
+			return fReferringToForVariable;
+		}
+
+		public boolean visit(SimpleName node) {
+			IBinding binding= node.resolveBinding();
+			if (binding != null && fForInitializerVariables.contains(binding)) {
+				fReferringToForVariable= true;
+			}
+			return false;
+		}
+	}
+
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {		
 		try{
 			pm.beginTask(RefactoringCoreMessages.getString("ExtractTempRefactoring.preview"), 3);	 //$NON-NLS-1$
@@ -683,11 +750,13 @@ public class ExtractTempRefactoring extends Refactoring {
     	if (parent instanceof ExpressionStatement)
     		return false;	
     	if (isLeftValue(node))
-			return false;	
+			return false;
+		if (isReferringToLocalVariableFromFor((Expression) node))
+			return false;
         return true;
-    }
-    
-    private static boolean isThrowableInCatchBlock(ASTNode node) {
+	}
+
+	private static boolean isThrowableInCatchBlock(ASTNode node) {
 		return (node instanceof SimpleName) 
 			 && (node.getParent() instanceof SingleVariableDeclaration)
 			 && (node.getParent().getParent() instanceof CatchClause);
