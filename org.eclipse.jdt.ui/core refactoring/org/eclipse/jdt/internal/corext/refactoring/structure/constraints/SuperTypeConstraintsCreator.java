@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -62,6 +61,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
@@ -561,16 +561,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 		final Name qualifier= node.getQualifier();
 		IBinding binding= qualifier.resolveBinding();
 		if (binding instanceof ITypeBinding) {
-			final ConstraintVariable2 variable= fModel.createTypeVariable((ITypeBinding) binding, new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(node), new ISourceRange() {
-
-				public final int getLength() {
-					return qualifier.getLength();
-				}
-
-				public final int getOffset() {
-					return qualifier.getStartPosition();
-				}
-			}));
+			final ConstraintVariable2 variable= fModel.createTypeVariable((ITypeBinding) binding, new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(node), new SourceRange(qualifier.getStartPosition(), qualifier.getLength())));
 			if (variable != null)
 				qualifier.setProperty(PROPERTY_CONSTRAINT_VARIABLE, variable);
 		}

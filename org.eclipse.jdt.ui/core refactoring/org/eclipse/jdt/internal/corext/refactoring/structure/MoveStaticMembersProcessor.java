@@ -668,14 +668,11 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 			return false;
 		int referenceStart= result.getOffset();
 		for (int i= 0; i < fMembersToMove.length; i++) {
-			if (liesWithin(fMembersToMove[i].getSourceRange(), referenceStart))
+			ISourceRange range= fMembersToMove[i].getSourceRange();
+			if (range.getOffset() <= referenceStart && range.getOffset() + range.getLength() >= referenceStart)
 				return true;
 		}
 		return false;
-	}
-
-	private static boolean liesWithin(ISourceRange range, int offset) {
-		return range.getOffset() <= offset && range.getOffset() + range.getLength() >= offset;
 	}
 
 	private RefactoringStatus checkNativeMovedMethods(IProgressMonitor pm) throws JavaModelException{

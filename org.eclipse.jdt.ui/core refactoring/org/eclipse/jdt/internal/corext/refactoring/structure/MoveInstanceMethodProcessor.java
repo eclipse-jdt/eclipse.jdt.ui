@@ -52,7 +52,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
@@ -107,6 +106,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -2012,17 +2012,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 							for (int offset= 0; offset < matches.length; offset++) {
 								match= matches[offset];
 								if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
-									final SearchMatch context= match;
-									status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.inaccurate", unit.getCorrespondingResource().getName()), JavaStatusContext.create(unit, new ISourceRange() { //$NON-NLS-1$
-
-												public final int getLength() {
-													return context.getLength();
-												}
-
-												public final int getOffset() {
-													return context.getOffset();
-												}
-											})));
+									status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.inaccurate", unit.getCorrespondingResource().getName()), JavaStatusContext.create(unit, new SourceRange(match.getOffset(), match.getLength())))); //$NON-NLS-1$
 									result= false;
 								} else if (!createInlinedMethodInvocation(rewrite, declaration, match, adjustments, target, status))
 									result= false;
@@ -2193,17 +2183,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 						for (int offset= 0; offset < matches.length; offset++) {
 							match= matches[offset];
 							if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
-								final SearchMatch context= match;
-								status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.inaccurate", unit.getCorrespondingResource().getName()), JavaStatusContext.create(unit, new ISourceRange() { //$NON-NLS-1$
-
-											public final int getLength() {
-												return context.getLength();
-											}
-
-											public final int getOffset() {
-												return context.getOffset();
-											}
-										})));
+								status.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getFormattedString("MoveInstanceMethodProcessor.inline.inaccurate", unit.getCorrespondingResource().getName()), JavaStatusContext.create(unit, new SourceRange(match.getOffset(), match.getLength())))); //$NON-NLS-1$
 							} else
 								createMethodJavadocReference(rewrite, declaration, match, target, status);
 						}

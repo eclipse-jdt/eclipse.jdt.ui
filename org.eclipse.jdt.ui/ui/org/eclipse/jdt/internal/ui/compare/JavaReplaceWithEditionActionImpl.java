@@ -29,6 +29,8 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
+import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -119,18 +121,10 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 				
 				final ISourceRange nameRange= input.getNameRange();
 				// workaround for bug in getNameRange(): for AnnotationMembers length is negative
-				ISourceRange myRange= new ISourceRange() {
-					public int getLength() {
-						int l= nameRange.getLength();
-						if (l < 0)
-							l= 1;
-						return l;
-					}
-					public int getOffset() {
-						return nameRange.getOffset();
-					}					
-				};
-				ASTNode node2= NodeFinder.perform(root, myRange);
+				int length= nameRange.getLength();
+				if (length < 0)
+					length= 1;
+				ASTNode node2= NodeFinder.perform(root, new SourceRange(nameRange.getOffset(), length));
 				ASTNode node= ASTNodes.getParent(node2, BodyDeclaration.class);
 				if (node == null)
 					node= ASTNodes.getParent(node2, AnnotationTypeDeclaration.class);
