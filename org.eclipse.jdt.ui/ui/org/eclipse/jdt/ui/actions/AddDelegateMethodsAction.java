@@ -487,37 +487,23 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			imports.create(false, null);
 		}
 
-		private String createStub(
-			IField field,
-			IMethod curr,
-			boolean addComment,
-			IMethod overridden,
-			IImportsStructure imports)
-			throws CoreException {
-			String methodName = curr.getElementName();
-			String[] paramNames = curr.getParameterNames();
-			String returnTypSig = curr.getReturnType();
+		private String createStub(IField field, IMethod curr, boolean addComment, IMethod overridden, IImportsStructure imports) throws CoreException {
+			String methodName= curr.getElementName();
+			String[] paramNames= curr.getParameterNames();
+			String returnTypSig= curr.getReturnType();
 
-			StringBuffer buf = new StringBuffer();
+			StringBuffer buf= new StringBuffer();
 			if (addComment) {
-				String comment =
-					CodeGeneration.getMethodComment(
-						fType.getCompilationUnit(),
-						fType.getElementName(),
-						methodName,
-						paramNames,
-						curr.getExceptionTypes(),
-						returnTypSig,
-						overridden,
-						String.valueOf('\n'));
+				String comment= CodeGeneration.getMethodComment(fType.getCompilationUnit(), fType.getElementName(), methodName, paramNames, curr.getExceptionTypes(), returnTypSig, overridden, String.valueOf('\n'));
 				if (comment != null) {
 					buf.append(comment);
+					buf.append('\n');
 				}
 			}
 
-			String methodDeclaration = null;
+			String methodDeclaration= null;
 			if (fType.isClass()) {
-				StringBuffer body = new StringBuffer();
+				StringBuffer body= new StringBuffer();
 				if (!Signature.SIG_VOID.equals(returnTypSig)) {
 					body.append("return "); //$NON-NLS-1$
 				}
@@ -527,13 +513,13 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					body.append(field.getElementName());
 				}
 				body.append('.').append(methodName).append('(');
-				for (int i = 0; i < paramNames.length; i++) {
+				for (int i= 0; i < paramNames.length; i++) {
 					body.append(paramNames[i]);
 					if (i < paramNames.length - 1)
 						body.append(',');
 				}
 				body.append(");"); //$NON-NLS-1$
-				methodDeclaration = body.toString();
+				methodDeclaration= body.toString();
 			}
 
 			StubUtility.genMethodDeclaration(fType.getElementName(), curr, methodDeclaration, imports, buf);
