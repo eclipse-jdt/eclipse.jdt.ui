@@ -7,13 +7,16 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PartInitException;
@@ -21,6 +24,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -35,10 +39,27 @@ import org.eclipse.jdt.internal.ui.actions.AbstractOpenJavaElementAction;
  * the connected java source viewer.
  */
 public class OpenOnSelectionAction extends AbstractOpenJavaElementAction {
+	
+	
+	class SelectionChangedListener implements ISelectionChangedListener {
+		
+		/*
+		 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
+		 */
+		public void selectionChanged(SelectionChangedEvent event) {
+			ISelection s= event.getSelection();
+			if (s instanceof ITextSelection) {
+				ITextSelection ts= (ITextSelection) s;
+				setEnabled(ts.getLength() > 0);
+			}
+		}
+	};
+	
 		
 	private String fDialogTitle;
 	private String fDialogMessage;
 	protected ITextEditor fEditor;
+	protected ISelectionChangedListener fListener= new SelectionChangedListener();
 	
 	
 	/**
@@ -71,8 +92,18 @@ public class OpenOnSelectionAction extends AbstractOpenJavaElementAction {
 	}
 	
 	public void setContentEditor(ITextEditor editor) {
+		
+		if (fEditor != null) {
+			ISelectionProvider p= fEditor.getSelectionProvider();
+			if (p != null) p.removeSelectionChangedListener(fListener);
+		}
+		
 		fEditor= editor;
-		setEnabled(editor != null);
+		
+		if (fEditor != null) {
+			ISelectionProvider p= fEditor.getSelectionProvider();
+			if (p != null) p.addSelectionChangedListener(fListener);
+		}
 	}
 	
 	protected ICodeAssist getCodeAssist() {	
@@ -94,7 +125,6 @@ public class OpenOnSelectionAction extends AbstractOpenJavaElementAction {
 		ICodeAssist resolve= getCodeAssist();
 		if (resolve != null && fEditor.getSelectionProvider() != null) {
 			ITextSelection selection= (ITextSelection) fEditor.getSelectionProvider().getSelection();
-			selection= expandToWord(selection);
 			try {
 				if (selection.getLength() > 0) {
 					IJavaElement[] result= resolve.codeSelect(selection.getOffset(), selection.getLength());
@@ -126,42 +156,5 @@ public class OpenOnSelectionAction extends AbstractOpenJavaElementAction {
 	
 	protected Shell getShell() {
 		return fEditor.getSite().getShell();
-	}
-
-	private ITextSelection expandToWord(ITextSelection selection) {
-		IDocument document= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-		if (document == null)
-			return selection;
-		
-		String text= document.get();
-		
-		int offset= selection.getOffset();
-		char c;
-
-		while (offset >= 0) {
-			c= text.charAt(offset);
-			if (!Character.isJavaIdentifierPart(c))
-				break;
-			--offset;
-		}
-
-		int start= offset;
-
-		offset= selection.getOffset() + selection.getLength();
-		int length= text.length();
-
-		while (offset < length) {
-			c= text.charAt(offset);
-			if (!Character.isJavaIdentifierPart(c))
-				break;
-			++offset;
-		}
-		
-		int end= offset;
-
-		if (start == end)
-			return new TextSelection(document, start, 0);
-		else
-			return new TextSelection(document, start + 1, end - start - 1);
-	}
+	}					
 }
