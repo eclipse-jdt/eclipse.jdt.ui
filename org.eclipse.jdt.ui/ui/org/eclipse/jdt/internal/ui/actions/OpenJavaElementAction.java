@@ -61,4 +61,10 @@ public class OpenJavaElementAction extends AbstractOpenJavaElementAction {
 			JavaPlugin.log(x);
 		}
 	}
+	
+	public boolean canActionBeAdded() {
+		ISelection selection= fSelectionProvider.getSelection();
+		return (selection instanceof IStructuredSelection) && !selection.isEmpty();
+	}		
+	
 }

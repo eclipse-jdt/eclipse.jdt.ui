@@ -143,26 +143,26 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 		return isEnabled(selection);
 	}
 
-	/**
+	/*
 	 * @see IActionDelegate#run(IAction)
 	 */
 	public void run(IAction action) {
 		run();
 	}
 
-	/**
+	/*
 	 * @see IWorkbenchWindowActionDelegate#dispose()
 	 */
 	public void dispose() {
 	}
 
-	/**
+	/*
 	 * @see IWorkbenchWindowActionDelegate#init(IWorkbenchWindow)
 	 */
 	public void init(IWorkbenchWindow window) {
 	}
 
-	/**
+	/*
 	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
 	 */
 	public void selectionChanged(IAction action, ISelection selection) {
