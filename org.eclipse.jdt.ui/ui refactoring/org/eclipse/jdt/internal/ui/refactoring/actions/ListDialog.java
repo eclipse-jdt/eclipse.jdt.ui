@@ -4,11 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
@@ -18,53 +13,82 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.jdt.internal.ui.reorg.*;
 
-class ListDialog extends Dialog {
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.TableViewer;
+
+import org.eclipse.ui.dialogs.SelectionDialog;
+
+public class ListDialog extends SelectionDialog {
+
 	private IStructuredContentProvider fContentProvider;
 	private ILabelProvider fLabelProvider;
 	private Object fInput;
-	private String fTitle;
-		
-	public ListDialog(Shell parent, Object input, String title, String message, IStructuredContentProvider sp, ILabelProvider lp) {
+	private TableViewer fTableViewer;
+	private boolean fAddCancelButton;
+	
+	public ListDialog(Shell parent) {
 		super(parent);
-		fTitle= title;
-		setShellStyle(getShellStyle() | SWT.RESIZE);
+		fAddCancelButton= false;
+	}
+
+	public void setInput(Object input) {
 		fInput= input;
+	}
+	
+	public void setContentProvider(IStructuredContentProvider sp){
 		fContentProvider= sp;
+	}
+	
+	public void setLabelProvider(ILabelProvider lp){
 		fLabelProvider= lp;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in Window.
-	 */
-	protected void configureShell(Shell shell) {
-		super.configureShell(shell);
-		if (fTitle != null)
-			shell.setText(fTitle);
+	public void setAddCancelButton(boolean addCancelButton) {
+		fAddCancelButton= addCancelButton;
+	}
+	
+	public TableViewer getTableViewer(){
+		return fTableViewer;
+	}
+			
+	public boolean hasFilters(){
+		return fTableViewer.getFilters() != null && fTableViewer.getFilters().length != 0;
+	}
+	
+	public void create() {
+		setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE);
+		super.create();
 	}
 	
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-	}
+		if (! fAddCancelButton)
+			createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+		else
+			super.createButtonsForButtonBar(parent);	
+	}	
+	
 	protected Control createDialogArea(Composite container) {
 		Composite parent= (Composite) super.createDialogArea(container);
-		TableViewer v= new TableViewer(parent);
-		v.setContentProvider(fContentProvider);
-		final Table table= v.getTable();
+		createMessageArea(parent);
+		fTableViewer= new TableViewer(parent);
+		fTableViewer.setContentProvider(fContentProvider);
+		final Table table= fTableViewer.getTable();
 		final TableColumn c= new TableColumn(table, SWT.NULL);
-		v.getTable().addControlListener(new ControlAdapter() {
+		fTableViewer.getTable().addControlListener(new ControlAdapter() {
 			public void controlResized(ControlEvent e) {
 				c.setWidth(table.getSize().x-2*table.getBorderWidth());
 			}
 		});
 
-		v.setLabelProvider(fLabelProvider);
-		v.setInput(fInput);
+		fTableViewer.setLabelProvider(fLabelProvider);
+		fTableViewer.setInput(fInput);
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		gd.heightHint= convertHeightInCharsToPixels(15);
-		gd.widthHint= convertWidthInCharsToPixels(100);
+		gd.widthHint= convertWidthInCharsToPixels(50);
 		table.setLayoutData(gd);
-		return table;
+		return parent;
 	}
 }

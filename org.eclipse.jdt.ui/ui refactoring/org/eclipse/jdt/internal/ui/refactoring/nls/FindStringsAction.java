@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
+import org.eclipse.jdt.internal.ui.refactoring.actions.*;
 
 public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 
@@ -61,14 +62,14 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 	 * @see IActionDelegate#run(IAction)
 	 */
 	public void run(IAction action) {
-		Iterator iter= getPackageFragments(getSelection());
-		if (iter == null)
+		List packages= getPackageFragments(getSelection());
+		if (packages == null || packages.isEmpty())
 			return;
 		
 		try{
 			List l= new ArrayList();	
-			while (iter.hasNext()){
-				l.addAll(analyze((IPackageFragment)iter.next()));
+			for (Iterator iter= packages.iterator(); iter.hasNext();) {
+				l.addAll(analyze((IPackageFragment) iter.next()));
 			}
 			showResults(l);
 		}catch(JavaModelException e) {
@@ -94,7 +95,6 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 			l.add(analyze(cus[i]));
 		return l;					
 	}
-	
 	
 	/*
 	 * @param List of NonNLSElements
@@ -157,11 +157,11 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 	/**
 	 * returns Iterator over IPackageFragments
 	 */
-	protected Iterator getPackageFragments(IStructuredSelection selection) {
+	private static List getPackageFragments(IStructuredSelection selection) {
 		if (selection == null)
 			return null;
 			
-		return selection.iterator();
+		return selection.toList();
 	}
 		
 	private static LabelProvider createLabelProvider(){
@@ -205,10 +205,6 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 		protected Point getInitialSize() {
 			return getShell().computeSize(400, SWT.DEFAULT, true);
 		}
-
-		protected void createButtonsForButtonBar(Composite parent) {
-			createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-		}	
 
 		protected Control createDialogArea(Composite parent) {
 			Composite result= (Composite)super.createDialogArea(parent);

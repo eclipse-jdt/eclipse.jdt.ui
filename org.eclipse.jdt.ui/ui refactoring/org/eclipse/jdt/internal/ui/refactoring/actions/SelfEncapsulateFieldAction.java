@@ -30,7 +30,7 @@ public class SelfEncapsulateFieldAction extends RefactoringAction {
 			RefactoringAction.activateRefactoringWizard(
 				refactoring, 
 				new SelfEncapsulateFieldWizard(refactoring),
-				"Self Encapsulate Field");
+				"Self Encapsulate Field", true);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, "Self Encapsulate Field", "Cannot perform refactoring. See log for more details.");
 		}

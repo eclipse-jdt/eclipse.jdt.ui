@@ -55,7 +55,7 @@ public abstract class TextSelectionBasedRefactoringAction extends Action impleme
 	public void run() {
 	try{
 			Refactoring refactoring=  createRefactoring(getCompilationUnit(), getTextSelection(),  new DocumentTextBufferChangeCreator(fEditor.getDocumentProvider()));
-			RefactoringAction.activateRefactoringWizard(refactoring, createWizard(refactoring), getDialogTitle());
+			RefactoringAction.activateRefactoringWizard(refactoring, createWizard(refactoring), getDialogTitle(), false);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, getDialogTitle(), "Unexpected exception occurred. See log for details.");
 		}	

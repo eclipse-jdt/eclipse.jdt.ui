@@ -17,27 +17,6 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 public abstract class UserInputWizardPage extends RefactoringWizardPage {
 
 	private boolean fIsLastUserPage;
-
-	private static class SaveDialog extends ListSelectionDialog {
-		public SaveDialog(Shell parent, Object input,
-				IStructuredContentProvider contentProvider,
-				ILabelProvider labelProvider,
-				String message) {
-			super(parent, input, contentProvider, labelProvider, message);
-		}
-		protected Control createDialogArea(Composite parent) {
-			Composite result= (Composite)super.createDialogArea(parent);
-			final Button check= new Button(result, SWT.CHECK);
-			check.setText(RefactoringMessages.getString("UserInputWizardPage.always_save")); //$NON-NLS-1$
-			check.setSelection(RefactoringPreferences.getSaveAllEditors());
-			check.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					RefactoringPreferences.setSaveAllEditors(check.getSelection());
-				}
-			});
-			return result;
-		}
-	}
 	
 	/**
 	 * Creates a new user input page.
@@ -63,14 +42,10 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 	 * Method declared in IWizardPage.
 	 */
 	public IWizardPage getNextPage() {
-		if (fIsLastUserPage) {
-			if (!saveOpenEditors())
-				return this;
-			else 
-				return getRefactoringWizard().computeUserInputSuccessorPage(this);
-		} else {
+		if (fIsLastUserPage) 
+			return getRefactoringWizard().computeUserInputSuccessorPage(this);
+		else
 			return super.getNextPage();
-		}
 	}
 	
 	/* (non-JavaDoc)
@@ -91,9 +66,6 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 	 * Method defined in RefactoringWizardPage
 	 */
 	protected boolean performFinish() {
-		if (fIsLastUserPage && (!saveOpenEditors()))
-			return false;
-		
 		RefactoringWizard wizard= getRefactoringWizard();
 		int threshold= RefactoringPreferences.getCheckPassedSeverity();
 		RefactoringStatus activationStatus= wizard.getActivationStatus();
@@ -154,75 +126,5 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 				return ((IEditorPart) element).getTitle();
 			}
 		};
-	}
-	
-	/**
-	 * @return null on cancel and a list of selected elements otherwise
-	 * returns an empty array if there were no editors to save.
-	 */
-	private static List getEditorsToSave(List unsavedEditors){
-		if (RefactoringPreferences.getSaveAllEditors()) //must save everything
-			return unsavedEditors;
-		if (unsavedEditors == null || unsavedEditors.isEmpty())
-			return new ArrayList(0); //as promised in the contract
-		Shell parent= JavaPlugin.getActiveWorkbenchShell();
-		String message= RefactoringMessages.getString("UserInputWizardPage.warning"); //$NON-NLS-1$
-		String title= RefactoringMessages.getString("UserInputWizardPage.select_to_save"); //$NON-NLS-1$
-		SaveDialog dialog= new SaveDialog(parent, unsavedEditors, new ListContentProvider(), createLabelProvider(), message);
-		dialog.setTitle(title);
-		dialog.setBlockOnOpen(true);
-		dialog.setInitialSelections(unsavedEditors.toArray());	
-		if (dialog.open() == ListSelectionDialog.CANCEL)
-			return null;
-		else
-			return Arrays.asList(dialog.getResult());
-	}
-	
-	//a-b
-	private static List createDifference(List a, List b){
-		List temp= new ArrayList(a); //make sure you can remove
-		if (b == null)
-			return temp;
-		temp.removeAll(b);
-		return temp;
-	}
-	
-	private static List getFiles(List editorParts){
-		List result= new ArrayList(editorParts.size());
-		for (Iterator iter= editorParts.iterator(); iter.hasNext(); ){
-			IEditorPart each= (IEditorPart)iter.next();
-			IEditorInput input= each.getEditorInput();
-			if (input instanceof IFileEditorInput)
-				result.add(((IFileEditorInput)input).getFile());
-		}
-		return result;
-	}
-		
-	/**
-	 * Save open editors to make sure the java search and AST is working correctly.
-	 * Returns <code>true</code> if saving was successful. Otherwise <code>false</code> is returned.
-	 */
-	private boolean saveOpenEditors() {
-		List unsavedEditorsList= Arrays.asList(JavaPlugin.getDirtyEditors());
-		List editorsToSave= getEditorsToSave(unsavedEditorsList);
-		List unsavedFiles= getFiles(createDifference(unsavedEditorsList, editorsToSave));
-		//XXX no the nicest place to do this
-		getRefactoring().setUnsavedFiles((IFile[])unsavedFiles.toArray(new IFile[unsavedFiles.size()]));
-		if (editorsToSave == null) //saving canceled, so unsuccesful
-			return false;
-		if (editorsToSave.isEmpty()) //nothing to do
-			return true;
-					
-		try {
-			// Save isn't cancelable.
-			//XXX: 1GCQYJK: ITPUI:WIN2000 - Invalid thread access when saving an editor
-			getContainer().run(false, false, createRunnable(editorsToSave));
-		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), RefactoringMessages.getString("UserInputWizardPage.refactoring"), RefactoringMessages.getString("UserInputWizardPage.unexpected_error")); //$NON-NLS-2$ //$NON-NLS-1$
-			return false;
-		} catch (InterruptedException e) {
-			// Can't happen. Operation isn't cancelable.
-		}
-		return true;
 	}
 }

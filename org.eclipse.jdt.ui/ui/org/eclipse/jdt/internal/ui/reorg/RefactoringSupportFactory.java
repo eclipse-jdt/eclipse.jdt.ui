@@ -53,7 +53,7 @@ public class RefactoringSupportFactory {
 		
 		public void rename(Object element) throws JavaModelException{
 			Assert.isNotNull(fRefactoring);
-			RefactoringAction.activateRefactoringWizard((Refactoring)fRefactoring, createWizard(fRefactoring), "Rename");
+			RefactoringAction.activateRefactoringWizard((Refactoring)fRefactoring, createWizard(fRefactoring), "Rename", true);
 			fRefactoring= null;
 		}
 		
