@@ -20,6 +20,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 
 public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal {
@@ -191,8 +192,8 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 	private Type evaluateVariableType(AST ast) throws CoreException {
 		ITypeBinding binding= ASTResolving.guessBindingForReference(fOriginalNode);
 		if (binding != null) {
-			addImport(binding);
-			return ASTResolving.getTypeFromTypeBinding(ast, binding);
+			String typeName= addImport(binding);
+			return ASTNodeFactory.newType(ast, typeName);			
 		}
 		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 	}

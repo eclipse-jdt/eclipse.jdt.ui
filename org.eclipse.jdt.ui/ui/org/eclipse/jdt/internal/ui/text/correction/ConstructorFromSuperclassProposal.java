@@ -36,6 +36,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -120,10 +121,9 @@ public class ConstructorFromSuperclassProposal extends ASTRewriteCorrectionPropo
 			ITypeBinding[] params= binding.getParameterTypes();
 			String[] paramNames= getArgumentNames(binding);
 			for (int i= 0; i < params.length; i++) {
-				ITypeBinding curr= params[i];
-				addImport(curr);		
+				String paramTypeName= addImport(params[i]);
 				SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-				var.setType(ASTResolving.getTypeFromTypeBinding(ast, curr));
+				var.setType(ASTNodeFactory.newType(ast, paramTypeName));				
 				var.setName(ast.newSimpleName(paramNames[i]));
 				parameters.add(var);
 			}		
@@ -131,9 +131,8 @@ public class ConstructorFromSuperclassProposal extends ASTRewriteCorrectionPropo
 			List thrownExceptions= decl.thrownExceptions();
 			ITypeBinding[] excTypes= binding.getExceptionTypes();
 			for (int i= 0; i < excTypes.length; i++) {
-				ITypeBinding curr= excTypes[i];
-				addImport(curr);
-				thrownExceptions.add(ast.newSimpleName(curr.getName())); // can only be single type, no array
+				String excTypeName= addImport(excTypes[i]);
+				thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
 			}
 		
 			SuperConstructorInvocation invocation= ast.newSuperConstructorInvocation();

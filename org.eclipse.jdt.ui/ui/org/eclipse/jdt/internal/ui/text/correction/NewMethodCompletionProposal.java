@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -232,8 +233,8 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 	private Type evaluateMethodType(AST ast) throws CoreException {
 		ITypeBinding binding= ASTResolving.guessBindingForReference(fNode);
 		if (binding != null) {
-			addImport(binding);
-			return ASTResolving.getTypeFromTypeBinding(ast, binding);
+			String typeName= addImport(binding);
+			return ASTNodeFactory.newType(ast, typeName);			
 		}
 		return null;
 	}
@@ -241,8 +242,8 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 	private Type getParameterType(AST ast, Expression elem) throws CoreException {
 		ITypeBinding binding= ASTResolving.normalizeTypeBinding(elem.resolveTypeBinding());
 		if (binding != null) {
-			addImport(binding);
-			return ASTResolving.getTypeFromTypeBinding(ast, binding);
+			String typeName= addImport(binding);
+			return ASTNodeFactory.newType(ast, typeName);
 		}
 		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 	}

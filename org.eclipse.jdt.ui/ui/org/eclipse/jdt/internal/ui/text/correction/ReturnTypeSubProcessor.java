@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -126,7 +127,13 @@ public class ReturnTypeSubProcessor {
 				MethodDeclaration methodDeclaration= (MethodDeclaration) decl;   
 				
 				ASTRewrite rewrite= new ASTRewrite(methodDeclaration);
-				Type newReturnType= ASTResolving.getTypeFromTypeBinding(astRoot.getAST(), binding);
+					
+				String label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.voidmethodreturns.description", binding.getName()); //$NON-NLS-1$	
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 2, image);
+				String returnTypeName= proposal.addImport(binding);
+
+				Type newReturnType= ASTNodeFactory.newType(astRoot.getAST(), returnTypeName);
 				
 				if (methodDeclaration.isConstructor()) {
 					MethodDeclaration modifiedNode= astRoot.getAST().newMethodDeclaration();
@@ -139,11 +146,7 @@ public class ReturnTypeSubProcessor {
 				} else {
 					rewrite.markAsReplaced(methodDeclaration.getReturnType(), newReturnType);
 				}			
-					
-				String label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.voidmethodreturns.description", binding.getName()); //$NON-NLS-1$	
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 2, image);
-				proposal.addImport(binding);
+
 				proposal.ensureNoModifications();
 				proposals.add(proposal);
 			}
@@ -176,26 +179,25 @@ public class ReturnTypeSubProcessor {
 			decl.accept(eval);
 
 			ITypeBinding typeBinding= eval.getTypeBinding(decl.getAST());
+			typeBinding= ASTResolving.normalizeTypeBinding(typeBinding);
 
 			ASTRewrite rewrite= new ASTRewrite(methodDeclaration);
 			AST ast= astRoot.getAST();
 
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 2, image); //$NON-NLS-1$
+
 			Type type;
 			String typeName;
 			if (typeBinding != null) {
-				type= ASTResolving.getTypeFromTypeBinding(ast, typeBinding);
-				typeName= typeBinding.getName();
+				typeName= proposal.addImport(typeBinding);
+				type= ASTNodeFactory.newType(ast, typeName);
 			} else {
-				type= ast.newPrimitiveType(PrimitiveType.VOID);
-				typeName= "void"; //$NON-NLS-1$
-			}	
-
-			String label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.missingreturntype.description", typeName); //$NON-NLS-1$		
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 2, image);
-			if (typeBinding != null) {
-				proposal.addImport(typeBinding);
+				typeName= "void"; //$NON-NLS-1$		
+				type= ast.newPrimitiveType(PrimitiveType.VOID);	
 			}
+			proposal.setDisplayName(CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.missingreturntype.description", typeName)); //$NON-NLS-1$		
+
 			rewrite.markAsInserted(type);
 			methodDeclaration.setReturnType(type);
 			
@@ -204,6 +206,7 @@ public class ReturnTypeSubProcessor {
 			modifiedNode.setExtraDimensions(methodDeclaration.getExtraDimensions()); // no changes
 			modifiedNode.setConstructor(false);
 			rewrite.markAsModified(methodDeclaration, modifiedNode);
+			
 			proposal.ensureNoModifications();
 			proposals.add(proposal);
 			
@@ -212,7 +215,7 @@ public class ReturnTypeSubProcessor {
 			if (parentType instanceof TypeDeclaration) {
 				String constructorName= ((TypeDeclaration) parentType).getName().getIdentifier();
 				ASTNode nameNode= methodDeclaration.getName();
-				label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.wrongconstructorname.description", constructorName); //$NON-NLS-1$		
+				String label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.wrongconstructorname.description", constructorName); //$NON-NLS-1$		
 				proposals.add(new ReplaceCorrectionProposal(label, cu, nameNode.getStartPosition(), nameNode.getLength(), constructorName, 1));
 			}			
 		}

@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -94,19 +95,16 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		decl.setName(ast.newSimpleName(binding.getName()));
 		decl.setConstructor(false);
 		
-		ITypeBinding returnTypeBinding= binding.getReturnType();
-		addImport(returnTypeBinding);
-		
-		decl.setReturnType(ASTResolving.getTypeFromTypeBinding(ast, returnTypeBinding));
+		String returnTypeName= addImport(binding.getReturnType());
+		decl.setReturnType(ASTNodeFactory.newType(ast, returnTypeName));
 		
 		List parameters= decl.parameters();
 		ITypeBinding[] params= binding.getParameterTypes();
 		String[] paramNames= getArgumentNames(binding);
 		for (int i= 0; i < params.length; i++) {
-			ITypeBinding curr= params[i];
-			addImport(curr);		
+			String paramTypeName= addImport(params[i]);
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-			var.setType(ASTResolving.getTypeFromTypeBinding(ast, curr));
+			var.setType(ASTNodeFactory.newType(ast, paramTypeName));
 			var.setName(ast.newSimpleName(paramNames[i]));
 			parameters.add(var);
 		}		
@@ -114,9 +112,8 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		List thrownExceptions= decl.thrownExceptions();
 		ITypeBinding[] excTypes= binding.getExceptionTypes();
 		for (int i= 0; i < excTypes.length; i++) {
-			ITypeBinding curr= excTypes[i];
-			addImport(curr);
-			thrownExceptions.add(ast.newSimpleName(curr.getName())); // can only be singe type, no array
+			String excTypeName= addImport(excTypes[i]);
+			thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
 		}
 		
 		Block body= ast.newBlock();

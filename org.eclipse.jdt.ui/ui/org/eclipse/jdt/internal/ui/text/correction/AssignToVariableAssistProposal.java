@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
@@ -102,11 +103,10 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		newDeclFrag.setInitializer((Expression) rewrite.createCopy(expression));
 		
 		VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
-		newDecl.setType(ASTResolving.getTypeFromTypeBinding(ast, fTypeBinding));
+		String typeName= addImport(fTypeBinding);
+		newDecl.setType(ASTNodeFactory.newType(ast, typeName));
 		
 		rewrite.markAsReplaced(fExpressionStatement, newDecl, "ID"); //$NON-NLS-1$
-		
-		addImport(fTypeBinding);
 		return rewrite;
 	}
 
@@ -126,7 +126,8 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		newDeclFrag.setName(ast.newSimpleName(varName));
 		
 		FieldDeclaration newDecl= ast.newFieldDeclaration(newDeclFrag);
-		newDecl.setType(ASTResolving.getTypeFromTypeBinding(ast, fTypeBinding));
+		String typeName= addImport(fTypeBinding);
+		newDecl.setType(ASTNodeFactory.newType(ast, typeName));
 		newDecl.setModifiers(Modifier.PRIVATE);
 		
 		Assignment assignment= ast.newAssignment();
@@ -137,7 +138,6 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		
 		decls.add(findInsertIndex(decls, fExpressionStatement.getStartPosition()), newDecl);
 		
-		addImport(fTypeBinding);
 		rewrite.markAsInserted(newDecl);
 		return rewrite;		
 	}

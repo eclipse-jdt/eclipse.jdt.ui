@@ -98,13 +98,15 @@ public class LocalCorrectionsSubProcessor {
 				}
 	
 				ASTRewrite rewrite= new ASTRewrite(methodDeclaration);
-				Type newReturnType= ASTResolving.getTypeFromTypeBinding(astRoot.getAST(), binding);
-				rewrite.markAsReplaced(methodDeclaration.getReturnType(), newReturnType);
 	
 				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changereturntype.description", binding.getName()); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 2, image);
-				proposal.addImport(binding);
+				String returnTypeName= proposal.addImport(binding);
+				
+				Type newReturnType= ASTNodeFactory.newType(astRoot.getAST(), returnTypeName);
+				rewrite.markAsReplaced(methodDeclaration.getReturnType(), newReturnType);
+				
 				proposal.ensureNoModifications();
 				proposals.add(proposal);
 			}
@@ -440,12 +442,13 @@ public class LocalCorrectionsSubProcessor {
 			}
 			if (declaringTypeBinding != null) {
 				ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
-				rewrite.markAsReplaced(qualifier, astRoot.getAST().newSimpleName(declaringTypeBinding.getName()));
 
 				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changeaccesstostaticdefining.description", declaringTypeBinding.getName()); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 2, image);
-				proposal.addImport(declaringTypeBinding);
+				String typeName= proposal.addImport(declaringTypeBinding);
+				rewrite.markAsReplaced(qualifier, ASTNodeFactory.newName(astRoot.getAST(), typeName));
+				
 				proposal.ensureNoModifications();
 
 				proposals.add(proposal);
@@ -455,12 +458,14 @@ public class LocalCorrectionsSubProcessor {
 			ITypeBinding instanceTypeBinding= ASTResolving.normalizeTypeBinding(qualifier.resolveTypeBinding());
 			if (instanceTypeBinding != null && instanceTypeBinding != declaringTypeBinding) {
 				ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
-				rewrite.markAsReplaced(qualifier, astRoot.getAST().newSimpleName(instanceTypeBinding.getName()));
 				
 				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changeaccesstostatic.description", instanceTypeBinding.getName()); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
-				proposal.addImport(instanceTypeBinding);
+				String typeName= proposal.addImport(instanceTypeBinding);
+				rewrite.markAsReplaced(qualifier, ASTNodeFactory.newName(astRoot.getAST(), typeName));
+
+				
 				proposal.ensureNoModifications();
 
 				proposals.add(proposal);
