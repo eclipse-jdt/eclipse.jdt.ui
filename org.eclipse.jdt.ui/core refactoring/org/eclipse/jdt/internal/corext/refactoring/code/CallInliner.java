@@ -137,6 +137,13 @@ public class CallInliner {
 	public RefactoringStatus initialize(MethodInvocation invocation) {
 		RefactoringStatus result= new RefactoringStatus();
 		fInvocation= invocation;
+		Expression exp= fInvocation.getExpression();
+		if (exp != null && exp.resolveTypeBinding() == null) {
+			result.addFatalError(
+				"Can't determine receiver's type.",
+				JavaSourceContext.create(fCUnit, exp));
+			return result;
+		}
 		initializeState(fSourceProvider.getNumberOfStatements());
 		int nodeType= fTargetNode.getNodeType();
 		if (nodeType == ASTNode.EXPRESSION_STATEMENT) {
@@ -171,31 +178,63 @@ public class CallInliner {
 	
 	public TextEdit perform() throws CoreException {
 		List arguments= fInvocation.arguments();
-		String[] newArgs= new String[arguments.size()];
+		String[] realArguments= new String[arguments.size()];
 		List locals= new ArrayList(3);
+		
+		computeRealArguments(arguments, locals, realArguments);
+		
+		int callType= fTargetNode.getNodeType();
+		CallContext context= new CallContext(realArguments, computeReceiver(locals), fUsedNames, callType);
+		String[] blocks= fSourceProvider.getCodeBlocks(context);
+		initializeInsertionPoint(fSourceProvider.getNumberOfStatements() + locals.size());
+		
+		addNewLocals(locals);
+		replaceCall(callType, blocks);
+		
+		MultiTextEdit result= new MultiTextEdit();
+		fRewriter.rewriteNode(fBuffer, result, null);
+		return result;
+	}
+
+	private void computeRealArguments(List arguments, List locals, String[] realArguments) {
 		for (int i= 0; i < arguments.size(); i++) {
 			Expression expression= (Expression)arguments.get(i);
 			ParameterData parameter= fSourceProvider.getParameterData(i);
 			if ((ASTNodes.isLiteral(expression) && parameter.isReadOnly()) || canInline(expression)) {
-				newArgs[i]= getContent(expression);
+				realArguments[i]= getContent(expression);
 			} else {
 				String name= proposeName(parameter.getName());
-				newArgs[i]= name;
+				realArguments[i]= name;
 				locals.add(createLocalDeclaration(
-								parameter.getTypeBinding(), name, 
-								(Expression)fRewriter.createCopy(expression)));
+					parameter.getTypeBinding(), name, 
+					(Expression)fRewriter.createCopy(expression)));
 			}
 		}
-		int callType= fTargetNode.getNodeType();
-		CallContext context= new CallContext(newArgs, fRewriter, fUsedNames, fTargetNode.getNodeType());
-		String[] blocks= fSourceProvider.getCodeBlocks(context);
-		initializeInsertionPoint(fSourceProvider.getNumberOfStatements() + locals.size());
-		// Add new locals
+	}
+
+	private String computeReceiver(List locals) {
+		Expression expression= fInvocation.getExpression();
+		if (expression == null)
+			return null;
+		if (ASTNodes.isLiteral(expression) || expression instanceof Name)
+			return ASTNodes.asString(expression);
+		String local= proposeName("t");
+		locals.add(createLocalDeclaration(
+			expression.resolveTypeBinding(), 
+			local, 
+			(Expression)fRewriter.createCopy(expression)));
+		return local;
+	}
+
+	private void addNewLocals(List locals) {
 		for (Iterator iter= locals.iterator(); iter.hasNext();) {
 			ASTNode element= (ASTNode)iter.next();
 			fRewriter.markAsInserted(element);
 			fStatements.add(fInsertionIndex++, element);
 		}
+	}
+
+	private void replaceCall(int callType, String[] blocks) {
 		// Inline empty body
 		if (blocks.length == 0) {
 			if (fNeedsStatement) {
@@ -248,9 +287,6 @@ public class CallInliner {
 				}
 			}
 		}
-		MultiTextEdit result= new MultiTextEdit();
-		fRewriter.rewriteNode(fBuffer, result, null);
-		return result;
 	}
 
 	private boolean needsParenthesis() {

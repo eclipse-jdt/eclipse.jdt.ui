@@ -13,7 +13,7 @@ import java.util.Vector;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.internal.corext.textmanipulation.NopTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
@@ -136,7 +136,7 @@ public abstract class ContextType implements ITemplateEditor {
 		for (int i= 0; i != variables.length; i++) {
 		    int[] offsets= variables[i].getOffsets();
 		    for (int j= 0; j != offsets.length; j++)
-				positions.add(new NopTextEdit(offsets[j], 0));
+				positions.add(new RangeMarker(offsets[j], 0));
 		}
 		
 		return positions;

@@ -16,15 +16,15 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 
 public class CallContext {
 
-	public String[] expressions; 
-	public ASTRewrite targetFactory; 
+	public String[] arguments;
+	public String receiver; 
 	public List usedCallerNames;
 	public int callMode;
 
-	public CallContext(String[] exp, ASTRewrite rewriter, List names, int cm) {
+	public CallContext(String[] args, String rec, List names, int cm) {
 		super();
-		expressions= exp;
-		targetFactory= rewriter;
+		arguments= args;
+		receiver= rec;
 		usedCallerNames= names;
 		callMode= cm;
 	}

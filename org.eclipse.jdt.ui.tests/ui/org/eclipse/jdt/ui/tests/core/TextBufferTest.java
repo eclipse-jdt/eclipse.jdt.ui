@@ -18,7 +18,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.CopyTargetEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.MoveSourceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.MoveTargetEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.NopTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
@@ -503,7 +503,7 @@ public class TextBufferTest extends TestCase {
 	}	
 	
 	public void testMoveUpWithParentMark() throws Exception {
-		NopTextEdit m= new NopTextEdit(2, 6);
+		RangeMarker m= new RangeMarker(2, 6);
 		MoveSourceEdit s1= new MoveSourceEdit(4, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(3, s1);
 		m.add(s1);
@@ -519,7 +519,7 @@ public class TextBufferTest extends TestCase {
 	}
 	
 	public void testMoveDownWithParentMark() throws Exception {
-		NopTextEdit m= new NopTextEdit(2, 6);
+		RangeMarker m= new RangeMarker(2, 6);
 		MoveSourceEdit s1= new MoveSourceEdit(2, 2);
 		MoveTargetEdit t1= new MoveTargetEdit(5, s1);
 		m.add(s1);

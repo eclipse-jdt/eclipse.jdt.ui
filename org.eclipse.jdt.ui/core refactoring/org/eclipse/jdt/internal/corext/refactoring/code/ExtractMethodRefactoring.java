@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.NopTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
@@ -532,7 +532,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			(String[]) newNames.toArray(new String[newNames.size()]),
 			fAnalyzer.getSelectedNodes());
 		TextBufferEditor editor= new TextBufferEditor(buffer);
-		NopTextEdit root= new NopTextEdit(fSelectionStart, fSelectionLength);
+		RangeMarker root= new RangeMarker(fSelectionStart, fSelectionLength);
 		rewriter.rewriteNode(buffer, root, null);
 		editor.add(root);
 		editor.performEdits(null);

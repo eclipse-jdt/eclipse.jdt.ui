@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.NopTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
@@ -142,7 +142,7 @@ public class SourceProvider {
 	public String[] getCodeBlocks(CallContext context) throws CoreException {
 		List result= new ArrayList(1);
 		
-		replaceParameterWithExpression(context.expressions);
+		replaceParameterWithExpression(context.arguments);
 		makeNamesUnique(context.usedCallerNames);
 		
 		List ranges= null;
@@ -165,9 +165,9 @@ public class SourceProvider {
 		fRewriter.rewriteNode(fBuffer, dummy, null);
 
 		int size= ranges.size();
-		NopTextEdit[] markers= new NopTextEdit[size];
+		RangeMarker[] markers= new RangeMarker[size];
 		for (int i= 0; i < markers.length; i++) {
-			markers[i]= new NopTextEdit((TextRange)ranges.get(i));
+			markers[i]= new RangeMarker((TextRange)ranges.get(i));
 		}
 		int split= size <= 1 ? Integer.MAX_VALUE : ((TextRange)ranges.get(0)).getExclusiveEnd();
 		TextEdit[] edits= dummy.removeAll();

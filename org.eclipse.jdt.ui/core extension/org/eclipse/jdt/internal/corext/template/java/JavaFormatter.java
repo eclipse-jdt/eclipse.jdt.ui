@@ -17,7 +17,7 @@ import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
 import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.TemplatePosition;
-import org.eclipse.jdt.internal.corext.textmanipulation.NopTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
@@ -243,7 +243,7 @@ public class JavaFormatter implements ITemplateEditor {
 		for (int i= 0; i != variables.length; i++) {
 		    int[] offsets= variables[i].getOffsets();
 		    for (int j= 0; j != offsets.length; j++)
-				positions.add(new NopTextEdit(offsets[j], 0));
+				positions.add(new RangeMarker(offsets[j], 0));
 		}
 		return positions;	    
 	}

@@ -13,32 +13,30 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
 import org.eclipse.core.runtime.CoreException;
 
 /**
- * A text edit that does nothing. A <code>NopTextEdit</code> can be used to track
- * positions when executing <code>TextEdits</code> associated with a <code>
- * TextBufferEditor</code>.
+ * A <tt>RangeMarker</tt> can be used to track positions when executing 
+ * text edits.
  */
-public final class NopTextEdit extends TextEdit {
+public final class RangeMarker extends TextEdit {
 	
 	private TextRange fTextRange;
 	
 	/**
-	 * Creates a new <code>NopTextEdit</code> for the given
+	 * Creates a new <tt>RangeMarker</tt> for the given
 	 * offset and length.
 	 * 
 	 * @param offset the starting offset this text edit is "working on"
 	 * @param length the length this text edit is "working on"
 	 */
-	public NopTextEdit(int offset, int length) {
+	public RangeMarker(int offset, int length) {
 		this(new TextRange(offset, length));
 	}
 	
 	/**
-	 * Creates a new <code>NopTextEdit</code> for the given
-	 * range.
+	 * Creates a new <tt>RangeMarker</tt> for the given range.
 	 * 
 	 * @param range the <code>TextRange</code> this text edit is "working on"
 	 */
-	public NopTextEdit(TextRange range) {
+	public RangeMarker(TextRange range) {
 		fTextRange= range;
 	}
 
@@ -59,6 +57,6 @@ public final class NopTextEdit extends TextEdit {
 	 * @see TextEdit#copy
 	 */	
 	protected TextEdit copy0(TextEditCopier copier) {
-		return new NopTextEdit(fTextRange.copy());
+		return new RangeMarker(fTextRange.copy());
 	}	
 }
