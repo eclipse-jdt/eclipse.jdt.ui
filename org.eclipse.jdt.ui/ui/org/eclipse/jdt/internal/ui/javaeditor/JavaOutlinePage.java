@@ -150,7 +150,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 									base= getMainType(cu);
 									if (base == null) {
 										if (fOutlineViewer != null)
-											fOutlineViewer.refresh(false);
+											fOutlineViewer.refresh();
 										return;
 									}
 								}
@@ -359,20 +359,20 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 							&& delta.getElement() instanceof IType
 							&& (delta.getKind() & IJavaElementDelta.ADDED) != 0)
 						{
-							refresh(false);
+							refresh();
 
 						} else {
 							Widget w= findItem(fInput);
 							if (w != null && !w.isDisposed())
 								update(w, delta);
 							if (fReorderedMembers) {
-								refresh(false);
+								refresh();
 								fReorderedMembers= false;
 						}
 						}
 					} else {
 						// just for now
-						refresh(false);
+						refresh();
 					}
 				}
 				
@@ -721,7 +721,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			private void setTopLevelTypeOnly(boolean show) {
 				fTopLevelTypeOnly= show;
 				setChecked(show);
-				fOutlineViewer.refresh(false);
+				fOutlineViewer.refresh();
 				
 				IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore(); 
 				preferenceStore.setValue("GoIntoTopLevelTypeAction.isChecked", show); //$NON-NLS-1$
@@ -826,7 +826,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	private void doPropertyChange(PropertyChangeEvent event) {
 		if (fOutlineViewer != null) {
 			if (PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER.equals(event.getProperty())) {
-				fOutlineViewer.refresh(false);
+				fOutlineViewer.refresh();
 			}
 		}
 	}	
