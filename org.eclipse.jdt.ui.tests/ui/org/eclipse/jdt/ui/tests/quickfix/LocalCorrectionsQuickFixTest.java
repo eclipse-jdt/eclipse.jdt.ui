@@ -45,7 +45,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new LocalCorrectionsQuickFixTest("testMissingConstructor"));
+			suite.addTest(new LocalCorrectionsQuickFixTest("testThisAccessToStaticField"));
 			return suite;
 		}
 	}
@@ -124,7 +124,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    public static void foo() {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		pack0.createCompilationUnit("A.java", buf.toString(), false, null);		
+		ICompilationUnit cu1= pack0.createCompilationUnit("A.java", buf.toString(), false, null);		
 		
 		buf= new StringBuffer();
 		buf.append("package pack;\n");
@@ -152,7 +152,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -181,8 +181,19 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= proposal.getCompilationUnitChange().getPreviewContent();
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();		
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
 	}	
 	
 	
@@ -244,11 +255,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -259,7 +270,23 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        E.goo();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void goo() {\n");
+		buf.append("    }\n");				
+		buf.append("    public void foo() {\n");
+		buf.append("        this.goo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
 	}
 	
 	public void testThisAccessToStaticField() throws Exception {
@@ -284,11 +311,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
-		assertNumberOf("proposals", proposals.size(), 1);
+		assertNumberOf("proposals", proposals.size(), 2);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -299,7 +326,24 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        E.fCount= 1;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int fCount;\n");
+		buf.append("\n");				
+		buf.append("    public void foo() {\n");
+		buf.append("        this.fCount= 1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+		
 	}	
 	
 	public void testCastMissingInVarDecl() throws Exception {
