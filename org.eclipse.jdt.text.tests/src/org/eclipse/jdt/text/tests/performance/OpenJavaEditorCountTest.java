@@ -31,7 +31,7 @@ public class OpenJavaEditorCountTest extends OpenEditorTest {
 
 	private static final Class THIS= OpenJavaEditorCountTest.class;
 
-	private static final String LARGE_FILE= "/org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
+	private static final String FILE= PerformanceTestSetup.TEXT_LAYOUT;
 	
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
@@ -51,6 +51,6 @@ public class OpenJavaEditorCountTest extends OpenEditorTest {
 //			AnnotationRulerColumn.class.getDeclaredMethod("doPaint1", new Class[] { GC.class }),
 //			AbstractDocument.class.getDeclaredMethod("get", new Class[] { }),
 		});
-		measureOpenInEditor(new IFile[] { ResourceTestHelper.findFile(LARGE_FILE) }, performanceMeter, false);
+		measureOpenInEditor(new IFile[] { ResourceTestHelper.findFile(FILE) }, performanceMeter, false);
 	}
 }
