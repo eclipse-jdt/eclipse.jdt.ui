@@ -792,7 +792,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	}
 
 	/**
-	 * @return the location if or <code>null</code>
+	 * @return the location or <code>null</code>
 	 */
 	private IPath getWorkspaceLocation() {
 		return ResourcesPlugin.getWorkspace().getRoot().getLocation();
