@@ -26,5 +26,23 @@
 		<copy todir="${dest}/icons">
 			<fileset dir="icons" />
 		</copy>
+		<mkdir dir="TMP" />
+		<copy todir="TMP">
+			<fileset dir="Eclipse Java UI" />
+		</copy>
+		<copy todir="TMP">
+			<fileset dir="Eclipse Java Core Refactoring" />
+		</copy>
+		<copy todir="TMP">
+			<fileset dir="Eclipse Java UI Debug" />
+		</copy>
+		<copy todir="TMP">
+			<fileset dir="Eclipse Java UI Refactoring" />
+		</copy>
+		<zip 
+			zipfile="${dest}/jdtsrc.zip"
+			basedir="TMP"
+		/>
+		<delete dir="TMP"/>
 	</target>
 </project>
