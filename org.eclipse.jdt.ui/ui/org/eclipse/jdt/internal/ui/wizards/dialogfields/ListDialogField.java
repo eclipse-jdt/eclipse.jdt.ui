@@ -193,7 +193,7 @@ public class ListDialogField extends DialogField {
 		gd.grabExcessVerticalSpace= true;
 		gd.grabColumn= 0;
 		gd.horizontalSpan= nColumns - 2;
-		gd.widthHint= SWTUtil.convertWidthInCharsToPixels(40, list);
+		gd.widthHint= SWTUtil.convertWidthInCharsToPixels(50, list);
 		gd.heightHint= SWTUtil.convertHeightInCharsToPixels(6, list);
 
 		list.setLayoutData(gd);

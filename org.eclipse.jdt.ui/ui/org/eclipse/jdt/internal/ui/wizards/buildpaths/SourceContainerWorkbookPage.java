@@ -161,7 +161,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		Control control= fFoldersList.getListControl(composite);
 		MGridData gd= new MGridData(MGridData.FILL_BOTH);
 		gd.horizontalIndent= SWTUtil.convertWidthInCharsToPixels(2, composite);
-		gd.widthHint= SWTUtil.convertWidthInCharsToPixels(75, composite);
+		gd.widthHint= SWTUtil.convertWidthInCharsToPixels(50, composite);
 		gd.heightHint= SWTUtil.convertWidthInCharsToPixels(15, composite);
 		control.setLayoutData(gd);
 		
