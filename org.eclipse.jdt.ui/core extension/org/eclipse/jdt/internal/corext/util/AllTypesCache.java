@@ -226,7 +226,7 @@ public class AllTypesCache {
 	/**
 	 * A comparator for simple type names
 	 */
-	private static Comparator fgTypeNameComparator= new Comparator() {
+	public static Comparator fgTypeNameComparator= new Comparator() {
 		public int compare(Object o1, Object o2) {
 			return ((TypeInfo)o1).getTypeName().compareTo(((TypeInfo)o2).getTypeName());
 		}
