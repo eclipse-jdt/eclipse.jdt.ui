@@ -159,6 +159,9 @@ public class DeleteRefactoring2 extends Refactoring{
 			fDeleteChange= DeleteChangeCreator.createDeleteChange(manager, fResources, fJavaElements);
 			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(manager.getAllCompilationUnits())));
 			return result;
+		} catch (OperationCanceledException e) {
+			fWasCanceled= true;
+			throw e;
 		} catch (JavaModelException e){
 			throw e;
 		} catch (CoreException e) {
@@ -409,27 +412,14 @@ public class DeleteRefactoring2 extends Refactoring{
 			IConfirmQuery query= fDeleteQueries.createYesNoQuery(queryTitle, false, IReorgQueries.DELETE_READ_ONLY_ELEMENTS);
 			String question= "The selected elements contain read-only resources. Do you still want to delete them?";
 			if (! query.confirm(question)) {
+				//empty the arrays as a safety net
 				fJavaElements= new IJavaElement[0];
 				fResources= new IResource[0];
-				fWasCanceled= true;
-				throw new OperationCanceledException();
+				throw new OperationCanceledException(); //saying 'no' to this one is like cancelling the whole operation
 			}
 		}
 	}
 	
-//	private static Object[] convertToJavaWherePossible(IResource[] readOnlyResources) {
-//		Object[] result= new Object[readOnlyResources.length];
-//		for (int i= 0; i < readOnlyResources.length; i++) {
-//			IResource res= readOnlyResources[i];
-//			IJavaElement je= JavaCore.create(res);
-//			if (je != null && je.exists())
-//				result[i]= je;
-//			else
-//				result[i]= res;
-//		}
-//		return result;
-//	}
-
 	//----------- empty CUs related method
 	private void addEmptyCusToDelete() throws JavaModelException {
 		Set cusToEmpty= getCusToEmpty();
