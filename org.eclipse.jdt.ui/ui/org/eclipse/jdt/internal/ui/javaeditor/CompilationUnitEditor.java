@@ -1304,8 +1304,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		
 		IJavaElement element= getElementAt(caret, false);
 		ISourceReference reference= getSourceReference(element, caret);
-		if (reference != null)
+		if (reference != null) {
+			fOutlinePage.removeSelectionChangedListener(fSelectionChangedListener);
 			fOutlinePage.select(reference);
+			fOutlinePage.addSelectionChangedListener(fSelectionChangedListener);
+		}
 	}
 	
 	private ISourceReference getSourceReference(IJavaElement element, int offset) {

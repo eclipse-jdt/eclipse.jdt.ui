@@ -151,7 +151,7 @@ public abstract class JavaEditor extends StatusTextEditor {
 	/** Outliner context menu Id */
 	protected String fOutlinerContextMenuId;
 	/** The selection changed listener */
-	private ISelectionChangedListener fSelectionChangedListener= new SelectionChangedListener();
+	protected ISelectionChangedListener fSelectionChangedListener= new SelectionChangedListener();
 	/** The outline page selection updater */
 	private OutlinePageSelectionUpdater fUpdater;
 	/** Indicates whether this editor should react on outline page selection changes */
@@ -300,8 +300,11 @@ public abstract class JavaEditor extends StatusTextEditor {
 		int caret= offset + styledText.getCaretOffset();
 		
 		IJavaElement element= getElementAt(caret);
-		if (element instanceof ISourceReference)
+		if (element instanceof ISourceReference) {
+			fOutlinePage.removeSelectionChangedListener(fSelectionChangedListener);
 			fOutlinePage.select((ISourceReference) element);
+			fOutlinePage.addSelectionChangedListener(fSelectionChangedListener);
+		}
 	}
 	
 	
