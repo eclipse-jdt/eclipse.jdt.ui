@@ -80,7 +80,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		fManager= manager;
 		
 		fManager.setLinkedPositionListener(this);
-		fFrameColor= viewer.getTextWidget().getDisplay().getSystemColor(SWT.COLOR_RED);				
+		fFrameColor= viewer.getTextWidget().getDisplay().getSystemColor(SWT.COLOR_RED);
 	}
 	
 	/**
@@ -296,8 +296,15 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	public void paintControl(PaintEvent event) {	
 		if (fFramePosition == null)
 			return;
+
+		IRegion region= fViewer.getVisibleRegion();
 		
-		IRegion region= fViewer.getVisibleRegion();		
+		// #6824
+		if (!includes(region, fFramePosition)) {
+		 	leave(UNINSTALL | COMMIT | DOCUMENT_CHANGED);
+		 	return;		    
+		}
+		
 		int offset= fFramePosition.getOffset() -  region.getOffset();
 		int length= fFramePosition.getLength();
 			
@@ -347,15 +354,27 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	}
 
 	private void redrawRegion() {
-		IRegion region= fViewer.getVisibleRegion();		
+		IRegion region= fViewer.getVisibleRegion();
+		
+		if (!includes(region, fFramePosition)) {
+		 	leave(UNINSTALL | COMMIT | DOCUMENT_CHANGED);
+		 	return;		    
+		}
+
 		int offset= fFramePosition.getOffset() -  region.getOffset();
 		int length= fFramePosition.getLength();
-		
+
 		fViewer.getTextWidget().redrawRange(offset, length, true);
 	}
 
 	private void selectRegion() {
 		IRegion region= fViewer.getVisibleRegion();
+
+		if (!includes(region, fFramePosition)) {
+		 	leave(UNINSTALL | COMMIT | DOCUMENT_CHANGED);
+		 	return;   
+		}
+
 		int start= fFramePosition.getOffset() - region.getOffset();
 		int end= fFramePosition.getLength() + start;	
 
@@ -364,6 +383,12 @@ public class LinkedPositionUI implements LinkedPositionListener,
 
 	private void updateCaret() {
 		IRegion region= fViewer.getVisibleRegion();		
+
+		if (!includes(region, fFramePosition)) {
+		 	leave(UNINSTALL | COMMIT | DOCUMENT_CHANGED);
+		 	return;   
+		}
+
 		int offset= fFramePosition.getOffset() + fCaretOffset - region.getOffset();
 		
 		if ((offset >= 0) && (offset <= region.getLength()))	
@@ -398,4 +423,9 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
 	}
 
+	private static boolean includes(IRegion region, Position position) {
+		return
+			position.getOffset() >= region.getOffset() &&
+			position.getOffset() + position.getLength() <= region.getOffset() + region.getLength();
+	}
 }
