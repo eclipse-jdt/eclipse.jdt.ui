@@ -42,6 +42,7 @@ public class RenameTypeTests extends RefactoringTest {
 	private static final boolean BUG_79803_core= true;
 	private static final boolean BUG_79860_core= true;
 	private static final boolean BUG_79691_core= true;
+	private static final boolean BUG_generic_search_core= true;
 	
 	public RenameTypeTests(String name) {
 		super(name);
@@ -1065,6 +1066,10 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void testGenerics1() throws Exception {
+		if (BUG_generic_search_core) {
+			printTestDisabledMessage("problems with generic search");
+			return;
+		}
 		helper2("A", "B");
 	}
 	
