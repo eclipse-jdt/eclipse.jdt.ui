@@ -293,6 +293,7 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 			treeViewer.reveal(createdFolder);
 			treeViewer.setChecked(createdFolder, true);
 			treeViewer.setSelection(new StructuredSelection(createdFolder));
+			updateOKStatus();
 		}
 	}
 	
