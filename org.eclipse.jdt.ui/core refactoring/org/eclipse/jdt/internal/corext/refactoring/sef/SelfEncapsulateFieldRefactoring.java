@@ -188,7 +188,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			if (selector.equals(name))
 				status.addFatalError(RefactoringCoreMessages.getFormattedString(
 					"SelfEncapsulateField.method_exists",
-					new String[] {Bindings.toString(method), type.getElementName()}));
+					new String[] {Bindings.asString(method), type.getElementName()}));
 		}
 	}	
 	
