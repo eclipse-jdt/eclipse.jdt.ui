@@ -191,7 +191,7 @@ public class NLSSourceModifier {
 
 			ImportRewrite importRewrite= new ImportRewrite(cu);
 			String nameToUse= importRewrite.addImport(fullyQualifiedName);
-			TextEdit edit= importRewrite.createEdit(manager.getTextFileBuffer(path).getDocument());
+			TextEdit edit= importRewrite.createEdit(manager.getTextFileBuffer(path).getDocument(), null);
 			parent.addChild(edit);
 
 			return nameToUse;

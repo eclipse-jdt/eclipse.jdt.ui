@@ -718,7 +718,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 			ICompilationUnit cu= importRewrite.getCompilationUnit();
 			try {
 				ITextFileBuffer buffer= RefactoringFileBuffers.acquire(cu);
-				TextEdit importEdit= importRewrite.createEdit(buffer.getDocument());
+				TextEdit importEdit= importRewrite.createEdit(buffer.getDocument(), null);
 				String name= RefactoringCoreMessages.getString("RenamePackageRefactoring.update_imports"); //$NON-NLS-1$
 				TextChangeCompatibility.addTextEdit(manager.get(cu), name, importEdit);
 			} finally {

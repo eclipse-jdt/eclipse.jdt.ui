@@ -110,7 +110,7 @@ public class MoveCuUpdateCreator {
 			if (importRewrite != null && !importRewrite.isEmpty()) {
 				try {
 					ITextFileBuffer buffer= RefactoringFileBuffers.acquire(cu);
-					TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_imports"), importRewrite.createEdit(buffer.getDocument())); //$NON-NLS-1$
+					TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_imports"), importRewrite.createEdit(buffer.getDocument(), null)); //$NON-NLS-1$
 				} finally {
 					RefactoringFileBuffers.release(cu);
 				}
