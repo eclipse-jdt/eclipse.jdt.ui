@@ -2,8 +2,10 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
@@ -23,13 +25,12 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 public class SourceReferenceSourceRangeComputer {
 	
 	private ISourceReference fSourceReference;
-	private ICompilationUnit fCu;
+	private String fCuSource;
 	
-	private SourceReferenceSourceRangeComputer(ISourceReference element, ICompilationUnit cu){
-		Assert.isTrue(cu.exists());
-		fCu= cu;
+	private SourceReferenceSourceRangeComputer(ISourceReference element, String cuSource){
 		Assert.isTrue(((IJavaElement)element).exists());
 		fSourceReference= element;
+		fCuSource= cuSource;
 	}
 	
 	/**
@@ -37,20 +38,36 @@ public class SourceReferenceSourceRangeComputer {
 	 * @see SourceReferenceSourceRangeComputer#computeSourceRange(ISourceReference, ICompilationUnit)
 	 */
 	public static String computeSource(ISourceReference elem) throws JavaModelException{
-		ICompilationUnit cu= SourceReferenceUtil.getCompilationUnit(elem);
-		ISourceRange range= SourceReferenceSourceRangeComputer.computeSourceRange(elem, cu);
+		String cuSource= getCuSource(elem);
+		ISourceRange range= SourceReferenceSourceRangeComputer.computeSourceRange(elem, cuSource);
 		int endIndex= range.getOffset() + range.getLength();
-		return cu.getSource().substring(range.getOffset(), endIndex);
+		return cuSource.substring(range.getOffset(), endIndex);
 	}
+
+    private static String getCuSource(ISourceReference elem) throws JavaModelException {
+		ICompilationUnit cu= SourceReferenceUtil.getCompilationUnit(elem);
+		if (cu != null && cu.exists()){
+			return cu.getSource();
+    	} else if (elem instanceof IMember){
+			IMember member= (IMember)elem;
+			if (! member.isBinary())
+				return null;
+			IClassFile classFile= (IClassFile)member.getAncestor(IJavaElement.CLASS_FILE);
+			if (classFile == null)
+				return null;
+			return classFile.getSource();
+		}
+        return null;
+    }
 	
-	public static ISourceRange computeSourceRange(ISourceReference element, ICompilationUnit cu) throws JavaModelException{
+	public static ISourceRange computeSourceRange(ISourceReference element, String cuSource) throws JavaModelException{
 		try{
 			if ((element instanceof IJavaElement) && ! ((IJavaElement)element).exists())
 				return element.getSourceRange();
-			if (! cu.exists())
+			if (cuSource == null)
 				return element.getSourceRange();
 			
-		 	SourceReferenceSourceRangeComputer inst= new SourceReferenceSourceRangeComputer(element, cu);
+		 	SourceReferenceSourceRangeComputer inst= new SourceReferenceSourceRangeComputer(element, cuSource);
 		 	int offset= inst.computeOffset();
 		 	int end= inst.computeEnd();
 		 	int length= end - offset;
@@ -65,10 +82,9 @@ public class SourceReferenceSourceRangeComputer {
 		int end= fSourceReference.getSourceRange().getOffset() + fSourceReference.getSourceRange().getLength();
 		try{	
 			IScanner scanner= ToolFactory.createScanner(true, true, false, true);
-			String source= fCu.getSource();
-			scanner.setSource(source.toCharArray());
+			scanner.setSource(fCuSource.toCharArray());
 			scanner.resetTo(end, Integer.MAX_VALUE);
-			TextBuffer buff= TextBuffer.create(source);
+			TextBuffer buff= TextBuffer.create(fCuSource);
 			int startLine= buff.getLineOfOffset(scanner.getCurrentTokenEndPosition() + 1);
 			
 			int token= scanner.getNextToken();
@@ -110,7 +126,7 @@ public class SourceReferenceSourceRangeComputer {
 	private int computeOffset() throws CoreException{
 		int offset= fSourceReference.getSourceRange().getOffset();
 		try{
-			TextBuffer buff= TextBuffer.create(fCu.getSource());
+			TextBuffer buff= TextBuffer.create(fCuSource);
 			int lineOffset= buff.getLineInformationOfOffset(offset).getOffset();
 			IScanner scanner= ToolFactory.createScanner(true, true, false, true);
 			scanner.setSource(buff.getContent().toCharArray());

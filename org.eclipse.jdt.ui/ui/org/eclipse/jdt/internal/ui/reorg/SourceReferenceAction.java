@@ -6,11 +6,11 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.ui.IWorkbenchSite;
-
 import org.eclipse.swt.custom.BusyIndicator;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -19,11 +19,13 @@ import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
+import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -31,6 +33,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public abstract class SourceReferenceAction extends SelectionDispatchAction {
+
+	//workaround for bug 18311
+	private static final ISourceRange fgUnknownRange= new SourceRange(-1, 0);
 
 	protected SourceReferenceAction(IWorkbenchSite site) {
 		super(site);
@@ -78,7 +83,7 @@ public abstract class SourceReferenceAction extends SelectionDispatchAction {
 		return getWorkingCopyElements(selection.toList());
 	}
 	
-	private static boolean canWorkOn(Object elem) throws JavaModelException{
+	protected boolean canWorkOn(Object elem) throws JavaModelException{
 		if (elem == null)
 			return false;
 			
@@ -94,8 +99,11 @@ public abstract class SourceReferenceAction extends SelectionDispatchAction {
 		if (elem instanceof ICompilationUnit)
 			return false;
 
-		if ((elem instanceof IMember) && ((IMember)elem).isBinary())
-			return false;
+		if (elem instanceof IMember){ 
+			IMember member= (IMember)elem;
+			if (member.isBinary() && (member.getSourceRange() == null || fgUnknownRange.equals(member.getSourceRange())))
+				return false;
+		}	
 			
 		if (isDeletedFromEditor((ISourceReference)elem))	
 			return false;			
@@ -117,6 +125,8 @@ public abstract class SourceReferenceAction extends SelectionDispatchAction {
 	}
 
 	private static boolean isDeletedFromEditor(ISourceReference elem) throws JavaModelException{
+		if (elem instanceof IMember && ((IMember)elem).isBinary())
+			return false;
 		ICompilationUnit cu= SourceReferenceUtil.getCompilationUnit(elem);
 		ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
 		if (wc.equals(cu))
@@ -133,7 +143,9 @@ public abstract class SourceReferenceAction extends SelectionDispatchAction {
 			if (! (element instanceof IJavaElement)) //can this happen ?
 				wcList.add(element); 
 			ICompilationUnit cu= SourceReferenceUtil.getCompilationUnit(element);
-			if (cu.isWorkingCopy()){
+			if (cu == null){
+				wcList.add(element);
+			} else if (cu.isWorkingCopy()){
 				wcList.add(element);
 			} else {
 				ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
