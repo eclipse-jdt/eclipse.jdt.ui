@@ -728,8 +728,8 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");		
-		buf.append("public abstract class E {\n");
-		buf.append("    public native int foo();\n");
+		buf.append("public class E {\n");
+		buf.append("    public native void foo();\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
 		
