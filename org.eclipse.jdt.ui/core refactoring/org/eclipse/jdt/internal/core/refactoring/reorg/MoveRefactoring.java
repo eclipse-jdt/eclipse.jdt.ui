@@ -82,6 +82,14 @@ public class MoveRefactoring extends ReorgRefactoring {
 		return canCopyResources(dest);	
 	}
 	
+	boolean canCopyPackages(Object dest) throws JavaModelException{
+		return super.canCopyPackages(dest) && !destinationIsParent(getElements(), getDestinationForPackages(dest));
+	}
+	
+	boolean canCopyResources(Object dest) throws JavaModelException{
+		return super.canCopyResources(dest) && ! destinationIsParentForResources(getDestinationForResources(dest));
+	}
+	
 	public boolean canUpdateReferences() throws JavaModelException{
 		if (getDestination() == null)
 			return false;

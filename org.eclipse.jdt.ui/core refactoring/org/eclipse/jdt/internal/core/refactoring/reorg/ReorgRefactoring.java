@@ -144,7 +144,6 @@ public abstract class ReorgRefactoring extends Refactoring {
 		if (hasResources() && ! hasNonResources())	
 			return canCopyResources(dest);
 			
-		//return canMoveCusAndFiles(dest);
 		return isValidDestinationForCusAndFiles(dest);
 	}
 
@@ -230,7 +229,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 		return null;		
 	}
 	
-	private static IContainer getDestinationForResources(IResource dest){
+	static IContainer getDestinationForResources(IResource dest){
 		if (dest instanceof IContainer)
 			return (IContainer)dest;
 		return null;
@@ -313,17 +312,11 @@ public abstract class ReorgRefactoring extends Refactoring {
 	}
 	
 	boolean canCopyResources(Object dest) throws JavaModelException{
-		if (destinationIsParentForResources(getDestinationForResources(dest)))
-			return false;
-		
 		return getDestinationForResources(dest) != null;
 	}
-	
+
 	boolean canCopyPackages(Object dest) throws JavaModelException{
-		if (destinationIsParent(getElements(), getDestinationForPackages(dest)))
-			return false;
-		
-		return getDestinationForPackages(dest) != null;
+		return getDestinationForPackages(dest) != null;	
 	}
 	
 	//---
@@ -331,7 +324,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 	 * Checks if <code>dest</code> isn't the parent of one of the elements given by the 
 	 * list <code>elements</code>.
 	 */
-	private static boolean destinationIsParent(List elements, IJavaElement dest) throws JavaModelException{
+	static boolean destinationIsParent(List elements, IJavaElement dest) throws JavaModelException{
 		return destinationIsParent(elements, dest.getCorrespondingResource());
 	}
 	
@@ -368,7 +361,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 		return false;
 	}
 	
-	private boolean destinationIsParentForResources(IContainer dest){
+	boolean destinationIsParentForResources(IContainer dest){
 		if (dest == null)
 			return false;
 		for (Iterator iter= getElements().iterator(); iter.hasNext(); ){
@@ -499,7 +492,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 			
 		if (parent instanceof IJavaElement) 
 			return !((IJavaElement)parent).isReadOnly();
-		return false;
+		return true;
 	}
 	
 	private static boolean canReorg(ICompilationUnit cu){

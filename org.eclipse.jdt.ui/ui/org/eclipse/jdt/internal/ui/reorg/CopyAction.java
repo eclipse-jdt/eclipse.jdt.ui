@@ -20,7 +20,7 @@ public class CopyAction extends ReorgDestinationAction {
 	public CopyAction(String name, StructuredSelectionProvider provider) {
 		super(name, provider);
 	}
-
+	
 	ReorgRefactoring createRefactoring(List elements){
 		return new CopyRefactoring(elements);
 	}

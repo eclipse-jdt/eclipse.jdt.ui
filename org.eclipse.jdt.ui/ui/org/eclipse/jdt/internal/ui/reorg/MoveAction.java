@@ -6,9 +6,11 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-
+import java.util.Set;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
@@ -88,6 +90,49 @@ public class MoveAction extends ReorgDestinationAction {
 	protected boolean isOkToProceed(ReorgRefactoring refactoring) throws JavaModelException{
 		return (isOkToMoveReadOnly(refactoring));
 	}
+	
+	/*
+	 * @see ReorgDestinationAction#getExcluded(ReorgRefactoring)
+	 */ 
+	Set getExcluded(ReorgRefactoring refactoring) throws JavaModelException{
+		Set elements= refactoring.getElementsThatExistInTarget();
+		Set result= new HashSet();
+		for (Iterator iter= elements.iterator(); iter.hasNext(); ){
+			Object o= iter.next();
+			int action= askIfOverwrite(ReorgUtils.getName(o));
+			if (action == IDialogConstants.CANCEL_ID)
+				return null;
+			if (action == IDialogConstants.YES_TO_ALL_ID)	
+				return new HashSet(0); //nothing excluded
+			if (action == IDialogConstants.NO_ID)		
+				result.add(o);	
+		}
+		return result;
+	}
+	
+	private static int askIfOverwrite(String elementName){
+		Shell shell= JavaPlugin.getActiveWorkbenchShell().getShell();
+		String title= "Resource Exists";
+		String question= "Element " + elementName + " already exists. Would you like to overwrite?";
+		
+		String[] labels= new String[] {IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL,
+															 IDialogConstants.NO_LABEL,  IDialogConstants.CANCEL_LABEL };
+		final MessageDialog dialog = new MessageDialog(shell,	title, null, question, MessageDialog.QUESTION,	labels,  0);
+		shell.getDisplay().syncExec(new Runnable() {
+			public void run() {
+				dialog.open();
+			}
+		});
+		int result = dialog.getReturnCode();
+		if (result == 0)
+			return IDialogConstants.YES_ID;
+		if (result == 1)
+			return IDialogConstants.YES_TO_ALL_ID;
+		if (result == 2)
+			return IDialogConstants.NO_ID;
+		return IDialogConstants.CANCEL_ID;
+	}
+	
 	
 	protected void setShowPreview(boolean showPreview) {
 		fShowPreview = showPreview;

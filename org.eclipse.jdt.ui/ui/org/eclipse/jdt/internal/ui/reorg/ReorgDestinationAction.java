@@ -7,7 +7,6 @@ package org.eclipse.jdt.internal.ui.reorg;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -29,8 +28,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
-import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
-import org.eclipse.jdt.internal.core.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -46,7 +43,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -122,6 +118,12 @@ abstract class ReorgDestinationAction extends ReorgAction {
 	abstract ReorgRefactoring createRefactoring(List elements);
 	
 	//hook to override
+	//returns null iff canceled
+	Set getExcluded(ReorgRefactoring refactoring) throws JavaModelException{
+		return new HashSet(0);
+	}
+	
+	//hook to override
 	protected boolean isOkToProceed(ReorgRefactoring refactoring) throws JavaModelException{
 		return true;
 	}
@@ -154,47 +156,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 													ReorgMessages.getString("copyAction.exception.label")); //$NON-NLS-1$ 
 	}	
 	
-	//returns null iff canceled
-	private static Set getExcluded(ReorgRefactoring refactoring) throws JavaModelException{
-		Set elements= refactoring.getElementsThatExistInTarget();
-		Set result= new HashSet();
-		for (Iterator iter= elements.iterator(); iter.hasNext(); ){
-			Object o= iter.next();
-			int action= askIfOverwrite(ReorgUtils.getName(o));
-			if (action == IDialogConstants.CANCEL_ID)
-				return null;
-			if (action == IDialogConstants.YES_TO_ALL_ID)	
-				return new HashSet(0); //nothing excluded
-			if (action == IDialogConstants.NO_ID)		
-				result.add(o);	
-		}
-		return result;
-	}
 	
-	private static int askIfOverwrite(String elementName){
-		Shell shell= JavaPlugin.getActiveWorkbenchShell().getShell();
-		String title= "Resource Exists";
-		String question= "Element " + elementName + " already exists. Would you like to overwrite?";
-		
-		String[] labels= new String[] {IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL,
-															 IDialogConstants.NO_LABEL,  IDialogConstants.CANCEL_LABEL };
-		final MessageDialog dialog = new MessageDialog(shell,	title, null, question, MessageDialog.QUESTION,	labels,  0);
-		shell.getDisplay().syncExec(new Runnable() {
-			public void run() {
-				dialog.open();
-			}
-		});
-		int result = dialog.getReturnCode();
-		if (result == 0)
-			return IDialogConstants.YES_ID;
-		if (result == 1)
-			return IDialogConstants.YES_TO_ALL_ID;
-		if (result == 2)
-			return IDialogConstants.NO_ID;
-		return IDialogConstants.CANCEL_ID;
-	}
-	
-	//--- 
 	private static boolean ensureSaved(List elements, String actionName) {
 		List unsavedEditors= new ArrayList();
 		List unsavedElements= new ArrayList();
