@@ -301,4 +301,14 @@ public class QuickFixTest extends TestCase {
 	private static void appendSource(CUCorrectionProposal proposal, StringBuffer buf) {
 		
 	}
+	
+	protected static void assertNoErrors(IInvocationContext context) {
+		IProblem[] problems= context.getASTRoot().getProblems();
+		for (int i= 0; i < problems.length; i++) {
+			if (problems[i].isError()) {
+				assertTrue("source has error: " + problems[i].getMessage(), false);
+			}
+		}
+	}
+	
 }
