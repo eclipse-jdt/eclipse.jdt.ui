@@ -7,6 +7,8 @@ package org.eclipse.jdt.internal.ui.dialogs;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -16,9 +18,11 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
+import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 
@@ -26,6 +30,48 @@ import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
  * A dialog to select a type from a list of types.
  */
 public class TypeSelectionDialog extends TwoPaneElementSelector {
+
+	private static class TypeFilterMatcher implements FilteredList.FilterMatcher {
+
+		private StringMatcher fMatcher;
+		private StringMatcher fQualifierMatcher;
+		
+		/*
+		 * @see FilteredList.FilterMatcher#setFilter(String, boolean)
+		 */
+		public void setFilter(String pattern, boolean ignoreCase, boolean igoreWildCards) {
+			int qualifierIndex= pattern.lastIndexOf("."); //$NON-NLS-1$
+
+			// type			
+			if (qualifierIndex == -1) {
+				fQualifierMatcher= null;
+				fMatcher= new StringMatcher(pattern + '*', ignoreCase, igoreWildCards);
+				
+			// qualified type
+			} else {
+				fQualifierMatcher= new StringMatcher(pattern.substring(0, qualifierIndex), ignoreCase, igoreWildCards);
+				fMatcher= new StringMatcher(pattern.substring(qualifierIndex + 1), ignoreCase, igoreWildCards);
+			}
+		}
+
+		/*
+		 * @see FilteredList.FilterMatcher#match(Object)
+		 */
+		public boolean match(Object element) {
+			if (!(element instanceof TypeInfo))
+				return false;
+
+			TypeInfo type= (TypeInfo) element;
+
+			if (!fMatcher.match(type.getTypeName()))
+				return false;
+
+			if (fQualifierMatcher == null)
+				return true;
+
+			return fQualifierMatcher.match(type.getTypeContainerName());
+		}	
+	}
 
 	private IRunnableContext fRunnableContext;
 	private IJavaSearchScope fScope;
@@ -41,8 +87,8 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	public TypeSelectionDialog(Shell parent, IRunnableContext context,
 		IJavaSearchScope scope, int style)
 	{
-		super(parent, new TypeInfoLabelProvider(0),
-			new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_PACKAGE_ONLY + TypeInfoLabelProvider.SHOW_ROOT_POSTFIX));
+		super(parent, new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_TYPE_ONLY),
+			new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_TYPE_CONTAINER_ONLY + TypeInfoLabelProvider.SHOW_ROOT_POSTFIX));
 
 		Assert.isNotNull(context);
 		Assert.isNotNull(scope);
@@ -60,6 +106,17 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 			setFilter("A"); //$NON-NLS-1$
 				
 		super.create();
+	}
+
+	/*
+	 * @see AbstractElementListSelectionDialog#createFilteredList(Composite)
+	 */
+ 	protected FilteredList createFilteredList(Composite parent) {
+ 		FilteredList list= super.createFilteredList(parent);
+ 		
+		fFilteredList.setFilterMatcher(new TypeFilterMatcher());
+		
+		return list;
 	}
 	
 	/**

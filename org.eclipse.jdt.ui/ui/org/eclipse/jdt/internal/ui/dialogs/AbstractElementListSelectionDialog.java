@@ -39,7 +39,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	
 	private Label fMessage;
 
-	private FilteredList fFilteredList;
+	protected FilteredList fFilteredList;
 	private Text fFilterText;
 	
 	private ISelectionValidator fValidator;	

@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.TableItem;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 
+import org.eclipse.jdt.internal.core.Assert;
 import org.eclipse.jdt.internal.core.refactoring.util.Selection;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
@@ -33,6 +34,35 @@ import org.eclipse.jdt.internal.ui.util.TypeInfo;
  * be hidden (folding).
  */
 public class FilteredList extends Composite {
+	public interface FilterMatcher {
+		/**
+		 * Sets the filter.
+		 * 
+		 * @param pattern         the filter pattern.
+		 * @param ignoreCase      a flag indicating whether pattern matching is case insensitive or not.
+		 * @param ignoreWildCards a flag indicating whether wildcard characters are interpreted or not.
+		 */
+		void setFilter(String pattern, boolean ignoreCase, boolean ignoreWildCards);
+
+		/**
+		 * Returns <code>true</code> if the object matches the pattern, <code>false</code> otherwise.
+		 * <code>setFilter()</code> must have been called at least once prior to a call to this method.
+		 */
+		boolean match(Object element);	
+	}
+	
+	private class DefaultFilterMatcher implements FilterMatcher {
+		private StringMatcher fMatcher;
+		
+		public void setFilter(String pattern, boolean ignoreCase, boolean ignoreWildCards) {
+			fMatcher= new StringMatcher(pattern + '*', ignoreCase, ignoreWildCards);
+		}
+		
+		public boolean match(Object element) {
+			return fMatcher.match(fRenderer.getText(element));
+		}	
+	}
+
 	private Table fList;
 	private ILabelProvider fRenderer;
 	private boolean fMatchEmtpyString= true;
@@ -49,6 +79,8 @@ public class FilteredList extends Composite {
 	
 	private int[] fFilteredIndices;
 	private int fFilteredCount;
+	
+	private FilterMatcher fFilterMatcher= new DefaultFilterMatcher();
 
 	private static class Label {
 		public final String string;
@@ -156,12 +188,12 @@ public class FilteredList extends Composite {
 				fRenderer.getImage(fElements[i]));
 
 		fSorter.sort(fLabels, fElements);
+
+		fFilteredIndices= new int[length];
+		fFilteredCount= filter();
 		
 		fFoldedIndices= new int[length];
 		fFoldedCount= fold();
-
-		fFilteredIndices= new int[length];	
-		fFilteredCount= filter();
 
 		updateList();
 	}
@@ -172,6 +204,14 @@ public class FilteredList extends Composite {
 	 */
 	public boolean isEmpty() {
 		return (fElements == null) || (fElements.length == 0);
+	}
+
+	/**
+	 * Sets the filter matcher.
+	 */
+	public void setFilterMatcher(FilterMatcher filterMatcher) {
+		Assert.isNotNull(filterMatcher);
+		fFilterMatcher= filterMatcher;
 	}
 
     /**
@@ -226,20 +266,19 @@ public class FilteredList extends Composite {
 		// fill indices
 		int[] indices= new int[elements.length];
 		for (int i= 0; i != elements.length; i++) {
-			int j;
-			for (j= 0; j != fFilteredCount; j++) {
-				int k = fFilteredIndices[j];
-				int max= (k == fFoldedCount - 1)
-					? fElements.length
-					: fFoldedIndices[k + 1];
-				
-				int l;
-				for (l= fFoldedIndices[k]; l != max; l++) {
+			int j;			
+			for (j= 0; j != fFoldedCount; j++) {
+				int max= (j == fFoldedCount - 1)
+					? fFilteredCount
+					: fFoldedIndices[j + 1];
+
+				int l;					
+				for (l= fFoldedIndices[j]; l != max; l++) {
 					// found matching element?
-					if (fElements[l].equals(elements[i])) {
+					if (fElements[fFilteredIndices[l]].equals(elements[i])) {
 						indices[i]= j;
-						break;
-					}					
+						break;	
+					}
 				}
 				
 				if (l != max)
@@ -247,7 +286,7 @@ public class FilteredList extends Composite {
 			}
 			
 			// not found
-			if (j == fFilteredCount)
+			if (j == fFoldedCount)
 				indices[i] = 0;
 		}
 		
@@ -268,7 +307,7 @@ public class FilteredList extends Composite {
 		Object[] elements= new Object[indices.length];
 		
 		for (int i= 0; i != indices.length; i++)
-			elements[i]= fElements[fFoldedIndices[fFilteredIndices[indices[i]]]];
+			elements[i]= fElements[fFilteredIndices[fFoldedIndices[indices[i]]]];
 		
 		return elements;		
 	}
@@ -281,6 +320,7 @@ public class FilteredList extends Composite {
 		fFilter= (filter == null) ? "" : filter; //$NON-NLS-1$
 
 		fFilteredCount= filter();
+		fFoldedCount= fold();
 		updateList();
 	}
 	
@@ -298,19 +338,17 @@ public class FilteredList extends Composite {
 	 * @return returns an array of elements folded together, <code>null</code> if index is out of range.
 	 */
 	public Object[] getFoldedElements(int index) {
-		if ((index < 0) || (index >= fFilteredCount))
+		if ((index < 0) || (index >= fFoldedCount))
 			return null;
 		
-		index= fFilteredIndices[index];
-
 		int start= fFoldedIndices[index];			
 		int count= (index == fFoldedCount - 1)
-			? fElements.length - start
+			? fFilteredCount - start
 			: fFoldedIndices[index + 1] - start;
 			
 		Object[] elements= new Object[count];
 		for (int i= 0; i != count; i++)
-			elements[i]= fElements[start + i];
+			elements[i]= fElements[fFilteredIndices[start + i]];
 				
 		return elements;
 	}
@@ -321,19 +359,19 @@ public class FilteredList extends Composite {
      * @return returns the number of elements after folding.
      */
 	private int fold() {
-		int length= fElements.length;
-		
 		if (fAllowDuplicates) {
-			for (int i= 0; i != length; i++)			
+			for (int i= 0; i != fFilteredCount; i++) 		
 				fFoldedIndices[i]= i; // identity mapping
-				
-			return length;			
+
+			return fFilteredCount;			
 		
 		} else {
 			int k= 0;
 			Label last= null;
-			for (int i= 0; i != length; i++) {
-				Label current= fLabels[i];
+			for (int i= 0; i != fFilteredCount; i++) {
+				int j= fFilteredIndices[i];
+				
+				Label current= fLabels[j];
 				if (! current.equals(last)) {
 					fFoldedIndices[k]= i;
 					k++;
@@ -352,12 +390,11 @@ public class FilteredList extends Composite {
 		if (((fFilter == null) || (fFilter.length() == 0)) && !fMatchEmtpyString)
 			return 0;
 		
-		StringMatcher matcher= new StringMatcher(fFilter + "*", fIgnoreCase, false); //$NON-NLS-1$
+		fFilterMatcher.setFilter(fFilter, fIgnoreCase, false);
 
 		int k= 0;
-		for (int i= 0; i != fFoldedCount; i++) {
-			int j = fFoldedIndices[i];
-			if (matcher.match(fLabels[j].string))
+		for (int i= 0; i != fElements.length; i++) {
+			if (fFilterMatcher.match(fElements[i]))
 				fFilteredIndices[k++]= i;
 		}			
 						
@@ -375,17 +412,17 @@ public class FilteredList extends Composite {
 		
 		// resize table
 		int itemCount= fList.getItemCount();
-		if (fFilteredCount < itemCount)
-			fList.remove(0, itemCount - fFilteredCount - 1);
-		else if (fFilteredCount > itemCount)
-			for (int i= 0; i != fFilteredCount - itemCount; i++)
+		if (fFoldedCount < itemCount)
+			fList.remove(0, itemCount - fFoldedCount - 1);
+		else if (fFoldedCount > itemCount)
+			for (int i= 0; i != fFoldedCount - itemCount; i++)
 				new TableItem(fList, SWT.NONE);
 
 		// fill table
 		TableItem[] items= fList.getItems();
-		for (int i= 0; i != fFilteredCount; i++) {
+		for (int i= 0; i != fFoldedCount; i++) {
 			TableItem item= items[i];
-			Label label= fLabels[fFoldedIndices[fFilteredIndices[i]]];
+			Label label= fLabels[fFilteredIndices[fFoldedIndices[i]]];
 			
 			item.setText(label.string);
 			item.setImage(label.image);
