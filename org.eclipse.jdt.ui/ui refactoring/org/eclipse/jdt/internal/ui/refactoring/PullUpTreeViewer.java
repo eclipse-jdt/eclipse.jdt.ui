@@ -152,7 +152,7 @@ public class PullUpTreeViewer extends CheckboxTreeViewer {
 		}
 	}
 	
-	private void setSubtreeGrayed(Object element, boolean grayed) {
+	public void setSubtreeGrayed(Object element, boolean grayed) {
 		Widget widget= findItem(element);
 		if (widget instanceof TreeItem) {
 			TreeItem item= (TreeItem)widget;
