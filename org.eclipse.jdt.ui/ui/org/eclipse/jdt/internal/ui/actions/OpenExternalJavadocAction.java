@@ -6,15 +6,11 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -26,8 +22,10 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IUpdate;
 
+import org.eclipse.help.IHelpResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
@@ -152,40 +150,18 @@ public class OpenExternalJavadocAction extends Action implements IUpdate, IObjec
 	 * Copied from AboutPluginsDialog.openMoreInfo
 	 */
 	public static void openInBrowser(final URL url, final Shell shell) {
-		//System.out.println("Opening " + url.toExternalForm());
-		
-		if (SWT.getPlatform().equals("win32")) {	//$NON-NLS-1$
-			if (!Program.launch(url.toString())) {
-				showError(shell, "Opening '" + url.toString() + "' with external editor failed.");
+		IHelpResource helpResource= new IHelpResource() {
+			public String getHref() {
+				return url.toExternalForm();
 			}
-		} else {
-			Thread launcher = new Thread("External Javadoc Launcher") {	//$NON-NLS-1$
-				public void run() {
-					try {
-						if (webBrowserOpened) {
-							Runtime.getRuntime().exec("netscape -remote openURL(" + url.toString() + ")");	//$NON-NLS-1$
-						} else {
-							Process p = Runtime.getRuntime().exec("netscape " + url.toString());	//$NON-NLS-1$
-							webBrowserOpened = true;
-							try {
-								if (p != null)
-									p.waitFor();
-							} catch (InterruptedException e) {
-								JavaPlugin.log(e);
-								showError(shell, "Opening cancelled.");
-							} finally {
-								webBrowserOpened = false;
-							}
-						}
-					} catch (IOException e) {
-						JavaPlugin.log(e);
-						showError(shell, "Opening failed. See log for details");
-					}
-				}
-			};
-			launcher.start();
-		}		
+
+			public String getLabel() {
+				return url.toExternalForm();
+			}
+		};
+		WorkbenchHelp.getHelpSupport().displayHelpResource(helpResource);
 	}
+
 	
 	private static void showError(final Shell shell, final String message) {
 		Display.getDefault().asyncExec(new Runnable() {
