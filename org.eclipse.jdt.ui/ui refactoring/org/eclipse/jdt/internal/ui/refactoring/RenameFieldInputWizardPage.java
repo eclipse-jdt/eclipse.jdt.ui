@@ -110,7 +110,7 @@ public class RenameFieldInputWizardPage extends RenameInputWizardPage {
 	
 	private boolean isGetterRenamingEnabled(){
 		try {
-			return getRenameFieldRefactoring().getGetter() != null;
+			return getRenameFieldRefactoring().canEnableGetterRenaming();
 		} catch(JavaModelException e) {
 			JavaPlugin.log(e);
 			return false;
@@ -119,7 +119,7 @@ public class RenameFieldInputWizardPage extends RenameInputWizardPage {
 	
 	private boolean isSetterRenamingEnabled(){
 		try {
-			return getRenameFieldRefactoring().getSetter() != null;
+			return getRenameFieldRefactoring().canEnableSetterRenaming();
 		} catch(JavaModelException e) {
 			JavaPlugin.log(e);
 			return false;
