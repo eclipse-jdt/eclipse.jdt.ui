@@ -6,15 +6,13 @@ package org.eclipse.jdt.internal.ui.text.java;
  */
   
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
+import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -26,30 +24,21 @@ import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.util.MigrationCompletionRequestorAdapter;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 
 /**
  * Bin to collect the proposal of the infrastructure on code assist in a java text.
  */
-public class ResultCollector extends MigrationCompletionRequestorAdapter {
+public class ResultCollector extends CompletionRequestorAdapter {
 		
-	private class ProposalComparator implements Comparator {
-		public int compare(Object o1, Object o2) {
-			ICompletionProposal c1= (ICompletionProposal) o1;
-			ICompletionProposal c2= (ICompletionProposal) o2;
-			return c1.getDisplayString().compareToIgnoreCase(c2.getDisplayString());
-		}
-	};
-
 	private final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-', ' ' };
 	private final static char[] METHOD_TRIGGERS= new char[] { ';', ',', '.', '\t', '[', ' ' };
 	private final static char[] TYPE_TRIGGERS= new char[] { '.', '\t', '[', '(', ' ' };
 	private final static char[] VAR_TRIGGER= new char[] { '\t', ' ', '=', ';' };
 	
-	private ArrayList fFields= new ArrayList(), fKeywords= new ArrayList(), 
-						fLabels= new ArrayList(), fMethods= new ArrayList(),
-						fModifiers= new ArrayList(), fPackages= new ArrayList(),
+	private ArrayList fFields= new ArrayList(), fKeywords= new ArrayList(10), 
+						fLabels= new ArrayList(10), fMethods= new ArrayList(),
+						fModifiers= new ArrayList(10), fPackages= new ArrayList(),
 						fTypes= new ArrayList(), fVariables= new ArrayList();
 
 	private IProblem fLastProblem;
@@ -60,7 +49,7 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 	private ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
 	
 	private ArrayList[] fResults = new ArrayList[] {
-		fVariables, fFields, fMethods, fTypes, fKeywords, fModifiers, fLabels, fPackages
+		fPackages, fLabels, fModifiers, fKeywords, fTypes, fMethods, fFields, fVariables
 	};
 	
 	private int fUserReplacementLength;
@@ -80,7 +69,7 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 			descriptor= getDeprecatedDescriptor(descriptor);
 
 		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-		fTypes.add(createTypeCompletion(start, end, new String(completionName), descriptor, new String(typeName), new String(packageName), info));
+		fTypes.add(createTypeCompletion(start, end, new String(completionName), descriptor, new String(typeName), new String(packageName), info, relevance));
 	}
 	
 	/*
@@ -99,8 +88,6 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 		int modifiers, int start, int end, int relevance) {
 
 		ImageDescriptor descriptor= getMemberDescriptor(modifiers);	
-		if (Flags.isDeprecated(modifiers))
-		 	descriptor= getDeprecatedDescriptor(descriptor);	
 		
 		StringBuffer nameBuffer= new StringBuffer();
 		nameBuffer.append(name);
@@ -113,7 +100,7 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 			nameBuffer.append(declaringTypeName);
 		}	
 		
-		JavaCompletionProposal proposal= createCompletion(start, end, new String(completionName), descriptor, nameBuffer.toString());
+		JavaCompletionProposal proposal= createCompletion(start, end, new String(completionName), descriptor, nameBuffer.toString(), relevance);
 		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name));
 		proposal.setTriggerCharacters(VAR_TRIGGER);
 		
@@ -129,7 +116,7 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 			descriptor= getDeprecatedDescriptor(descriptor);
 
 		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-		fTypes.add(createTypeCompletion(start, end, new String(completionName), descriptor, new String(typeName), new String(packageName), info));
+		fTypes.add(createTypeCompletion(start, end, new String(completionName), descriptor, new String(typeName), new String(packageName), info, relevance));
 	}
 	
 	/*
@@ -138,7 +125,7 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 	public void acceptAnonymousType(char[] superTypePackageName, char[] superTypeName, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames,
 		char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
 
-		JavaCompletionProposal	proposal= createAnonymousTypeCompletion(superTypePackageName, superTypeName, parameterTypeNames, parameterNames, completionName, completionStart, completionEnd);
+		JavaCompletionProposal	proposal= createAnonymousTypeCompletion(superTypePackageName, superTypeName, parameterTypeNames, parameterNames, completionName, completionStart, completionEnd, relevance);
 		proposal.setProposalInfo(new ProposalInfo(fJavaProject, superTypePackageName, superTypeName));
 		fTypes.add(proposal);
 	}	
@@ -148,7 +135,7 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 	 */	
 	public void acceptKeyword(char[] keyword, int start, int end, int relevance) {
 		String kw= new String(keyword);
-		fKeywords.add(createCompletion(start, end, kw, null, kw));
+		fKeywords.add(createCompletion(start, end, kw, null, kw, relevance));
 	}
 	
 	/*
@@ -156,7 +143,7 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 	 */	
 	public void acceptLabel(char[] labelName, int start, int end, int relevance) {
 		String ln= new String(labelName);
-		fLabels.add(createCompletion(start, end, ln, null, ln));
+		fLabels.add(createCompletion(start, end, ln, null, ln, relevance));
 	}
 	
 	/*
@@ -169,7 +156,7 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 			buf.append("    "); //$NON-NLS-1$
 			buf.append(typeName);
 		}
-		JavaCompletionProposal proposal= createCompletion(start, end, new String(name), null, buf.toString());
+		JavaCompletionProposal proposal= createCompletion(start, end, new String(name), null, buf.toString(), relevance);
 		proposal.setTriggerCharacters(VAR_TRIGGER);
 		fVariables.add(proposal);
 	}
@@ -200,7 +187,7 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 		char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers,
 		int start, int end, int relevance) {
 	
-		JavaCompletionProposal proposal= createMethodCallCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
+		JavaCompletionProposal proposal= createMethodCallCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end, relevance);
 		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, returnTypeName.length == 0));
 
 		boolean hasOpeningBracket= completionName.length == 0 || (completionName.length > 0 && completionName[completionName.length - 1] == ')');
@@ -232,14 +219,14 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 	 */	
 	public void acceptModifier(char[] modifier, int start, int end, int relevance) {
 		String mod= new String(modifier);
-		fModifiers.add(createCompletion(start, end, mod, null, mod));
+		fModifiers.add(createCompletion(start, end, mod, null, mod, relevance));
 	}
 	
 	/*
 	 * @see ICompletionRequestor#acceptPackage
 	 */	
 	public void acceptPackage(char[] packageName, char[] completionName, int start, int end, int relevance) {
-		fPackages.add(createCompletion(start, end, new String(completionName), JavaPluginImages.DESC_OBJS_PACKAGE, new String(packageName)));
+		fPackages.add(createCompletion(start, end, new String(completionName), JavaPluginImages.DESC_OBJS_PACKAGE, new String(packageName), relevance));
 	}
 	
 	/*
@@ -247,7 +234,7 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 	 */	
 	public void acceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end, int relevance) {
 		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
-		fTypes.add(createTypeCompletion(start, end, new String(completionName), JavaPluginImages.DESC_OBJS_CLASS, new String(typeName), new String(packageName), info));
+		fTypes.add(createTypeCompletion(start, end, new String(completionName), JavaPluginImages.DESC_OBJS_CLASS, new String(typeName), new String(packageName), info, relevance));
 	}
 	
 	/*
@@ -255,7 +242,8 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 	 */
 	public void acceptMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int start, int end, int relevance) {
 		// XXX: To be revised
-		JavaCompletionProposal proposal= createMethodDeclarationCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
+		JavaCompletionProposal proposal= createMethodDeclarationCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end, relevance);
+
 		fMethods.add(proposal);
 	}
 	
@@ -270,7 +258,7 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 			buf.append(" - "); //$NON-NLS-1$
 			buf.append(typeName);
 		}
-		JavaCompletionProposal proposal= createCompletion(start, end, new String(completionName), null, buf.toString());
+		JavaCompletionProposal proposal= createCompletion(start, end, new String(completionName), null, buf.toString(), relevance);
 		proposal.setTriggerCharacters(VAR_TRIGGER);
 		fVariables.add(proposal);
 	}	
@@ -282,29 +270,27 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 	}
 
 	public JavaCompletionProposal[] getResults() {
-		ArrayList result= new ArrayList();
-		ProposalComparator comperator= new ProposalComparator();
+		// return unsorted
+		int totLen= 0;
 		for (int i= 0; i < fResults.length; i++) {
-			ArrayList bucket = fResults[i];
-			int size= bucket.size();
-			if (size == 1) {
-				result.add(bucket.get(0));
-			} else if (size > 1) {
-				Object[] sortedBucket = new Object[size];
-				bucket.toArray(sortedBucket);
-				Arrays.sort(sortedBucket, comperator);
-				for (int j= 0; j < sortedBucket.length; j++)
-					result.add(sortedBucket[j]);
+			totLen += fResults[i].size();
+		}
+		JavaCompletionProposal[] result= new JavaCompletionProposal[totLen];
+		int k= 0;
+		for (int i= 0; i < fResults.length; i++) {
+			ArrayList curr= fResults[i];
+			int currLen= curr.size();
+			for (int j= 0; j < currLen; j++) {
+				JavaCompletionProposal proposal= (JavaCompletionProposal) curr.get(j);
+				// for equal relevance, take categories
+				proposal.setRelevance(proposal.getRelevance() * 16 + i);
+				result[k++]= proposal;
 			}
 		}		
-		return (JavaCompletionProposal[]) result.toArray(new JavaCompletionProposal[result.size()]);
+		return result;
 	}
 
-	private JavaCompletionProposal createMethodCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end) {
-		ImageDescriptor descriptor= getMemberDescriptor(modifiers);
-		if (Flags.isDeprecated(modifiers))
-		 	descriptor= getDeprecatedDescriptor(descriptor);
-
+	private StringBuffer getMethodDisplayString(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName) {
 		StringBuffer nameBuffer= new StringBuffer();
 		nameBuffer.append(name);
 		nameBuffer.append('(');
@@ -320,18 +306,22 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 			nameBuffer.append(" - "); //$NON-NLS-1$
 			nameBuffer.append(declaringTypeName);
 		}
-		return createCompletion(start, end, new String(completionName), descriptor, nameBuffer.toString());
+		return nameBuffer;
 	}
 
-	protected JavaCompletionProposal createMethodCallCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end) {
-		return createMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
+	protected JavaCompletionProposal createMethodCallCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end, int relevance) {
+		ImageDescriptor descriptor= getMemberDescriptor(modifiers);
+		StringBuffer nameBuffer= getMethodDisplayString(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName);
+		return createCompletion(start, end, new String(completionName), descriptor, nameBuffer.toString(), relevance);
 	}
 
-	protected JavaCompletionProposal createMethodDeclarationCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end) {
-		return createMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
+	protected JavaCompletionProposal createMethodDeclarationCompletion(char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypeName, char[] completionName, int modifiers, int start, int end, int relevance) {
+		ImageDescriptor descriptor= getMemberDescriptor(modifiers);
+		StringBuffer nameBuffer= getMethodDisplayString(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName);
+		return createCompletion(start, end, new String(completionName), descriptor, nameBuffer.toString(), relevance);
 	}
 
-	protected JavaCompletionProposal createAnonymousTypeCompletion(char[] declaringTypePackageName, char[] declaringTypeName, char[][] parameterTypeNames, char[][] parameterNames, char[] completionName, int start, int end) {
+	protected JavaCompletionProposal createAnonymousTypeCompletion(char[] declaringTypePackageName, char[] declaringTypeName, char[][] parameterTypeNames, char[][] parameterNames, char[] completionName, int start, int end, int relevance) {
 		StringBuffer declTypeBuf= new StringBuffer();
 		if (declaringTypePackageName.length > 0) {
 			declTypeBuf.append(declaringTypePackageName);
@@ -351,11 +341,11 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 	
 		int length= end - start;
 		
-		return new AnonymousTypeCompletionProposal(fJavaProject, fCompilationUnit, start, length, new String(completionName), nameBuffer.toString(), declTypeBuf.toString());
+		return new AnonymousTypeCompletionProposal(fJavaProject, fCompilationUnit, start, length, new String(completionName), nameBuffer.toString(), declTypeBuf.toString(), relevance);
 	}
 
 	
-	protected JavaCompletionProposal createTypeCompletion(int start, int end, String completion, ImageDescriptor descriptor, String typeName, String containerName, ProposalInfo proposalInfo) {
+	protected JavaCompletionProposal createTypeCompletion(int start, int end, String completion, ImageDescriptor descriptor, String typeName, String containerName, ProposalInfo proposalInfo, int relevance) {
 		IImportDeclaration importDeclaration= null;
 		if (containerName != null && fCompilationUnit != null) {
 			if (completion.equals(JavaModelUtil.concatenateName(containerName, typeName))) {
@@ -374,7 +364,7 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 		}
 		String name= buf.toString();
 		
-		JavaCompletionProposal proposal= createCompletion(start, end, completion, descriptor, name);
+		JavaCompletionProposal proposal= createCompletion(start, end, completion, descriptor, name, relevance);
 		proposal.setImportDeclaration(importDeclaration);
 		proposal.setProposalInfo(proposalInfo);
 		proposal.setTriggerCharacters(TYPE_TRIGGERS);
@@ -382,15 +372,20 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 	}
 
 	protected ImageDescriptor getMemberDescriptor(int modifiers) {
+		ImageDescriptor desc;
 		if (Flags.isPublic(modifiers)) {
-			return JavaPluginImages.DESC_MISC_PUBLIC;
+			desc= JavaPluginImages.DESC_MISC_PUBLIC;
 		} else if (Flags.isProtected(modifiers)) {
-			return JavaPluginImages.DESC_MISC_PROTECTED;
+			desc= JavaPluginImages.DESC_MISC_PROTECTED;
 		} else if (Flags.isPrivate(modifiers)) {
-			return JavaPluginImages.DESC_MISC_PRIVATE;
+			desc= JavaPluginImages.DESC_MISC_PRIVATE;
 		} else {
-			return JavaPluginImages.DESC_MISC_DEFAULT;
+			desc= JavaPluginImages.DESC_MISC_DEFAULT;
 		}
+		if (Flags.isDeprecated(modifiers))
+		 	return getDeprecatedDescriptor(desc);
+		
+		return desc;
 	}
 	
 	protected ImageDescriptor getDeprecatedDescriptor(ImageDescriptor descriptor) {
@@ -398,7 +393,7 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 		return new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.WARNING, size);	    
 	}
 	
-	protected JavaCompletionProposal createCompletion(int start, int end, String completion, ImageDescriptor descriptor, String name) {
+	protected JavaCompletionProposal createCompletion(int start, int end, String completion, ImageDescriptor descriptor, String name, int relevance) {
 		int length;
 		if (fUserReplacementLength == -1) {
 			length= fPreventEating ? fCodeAssistOffset - start : end - start;
@@ -411,7 +406,7 @@ public class ResultCollector extends MigrationCompletionRequestorAdapter {
 		}
 
 		Image icon= (descriptor == null) ? null : fRegistry.get(descriptor);
-		return new JavaCompletionProposal(completion, start, length, icon, name);
+		return new JavaCompletionProposal(completion, start, length, icon, name, relevance);
 	}
 	
 	/**

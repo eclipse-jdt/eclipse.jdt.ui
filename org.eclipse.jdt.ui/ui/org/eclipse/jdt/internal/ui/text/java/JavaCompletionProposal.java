@@ -5,34 +5,29 @@ package org.eclipse.jdt.internal.ui.text.java;
  * All Rights Reserved.
  */
  
-import org.eclipse.jface.util.Assert;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportContainer;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.util.Assert;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 
 
-public class JavaCompletionProposal implements ICompletionProposal, ICompletionProposalExtension {
+public class JavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension {
 
 	private String fDisplayString;
 	private String fReplacementString;
@@ -45,6 +40,8 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 	private ProposalInfo fProposalInfo;
 	private IImportDeclaration fImportDeclaration;
 	private char[] fTriggerCharacters;
+	
+	private int fRelevance;
 
 	/**
 	 * Creates a new completion proposal. All fields are initialized based on the provided information.
@@ -56,7 +53,7 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 	 * @param displayString the string to be displayed for the proposal
 	 * If set to <code>null</code>, the replacement string will be taken as display string.
 	 */
-	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, String displayString) {
+	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, String displayString, int relevance) {
 		Assert.isNotNull(replacementString);
 		Assert.isTrue(replacementOffset >= 0);
 		Assert.isTrue(replacementLength >= 0);
@@ -66,6 +63,7 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 		fReplacementLength= replacementLength;
 		fImage= image;
 		fDisplayString= displayString != null ? displayString : replacementString;
+		fRelevance= relevance;
 
 		fCursorPosition= replacementString.length();
 	
@@ -327,4 +325,21 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 		
 		return false;
 	}
+	
+	/**
+	 * Gets the proposal's relevance.
+	 * @return Returns a int
+	 */
+	public int getRelevance() {
+		return fRelevance;
+	}
+
+	/**
+	 * Sets the proposal's relevance.
+	 * @param relevance The relevance to set
+	 */
+	public void setRelevance(int relevance) {
+		fRelevance= relevance;
+	}
+
 }

@@ -6,12 +6,10 @@ package org.eclipse.jdt.internal.ui.text.template;
 
 import java.util.ArrayList;
 
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -20,13 +18,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.Assert;
 import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.Templates;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
-import org.eclipse.jdt.internal.corext.template.java.JavaDocContext;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
-import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 
 public class TemplateEngine {
@@ -58,8 +53,8 @@ public class TemplateEngine {
 	/**
 	 * Returns the array of matching templates.
 	 */
-	public ICompletionProposal[] getResults() {
-		return (ICompletionProposal[]) fProposals.toArray(new ICompletionProposal[fProposals.size()]);
+	public IJavaCompletionProposal[] getResults() {
+		return (IJavaCompletionProposal[]) fProposals.toArray(new IJavaCompletionProposal[fProposals.size()]);
 	}
 
 	/**

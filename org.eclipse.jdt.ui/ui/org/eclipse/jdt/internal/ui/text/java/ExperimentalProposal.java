@@ -38,9 +38,9 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 	 * @param image     the icon of the proposal.
 	 */		
 	public ExperimentalProposal(String replacementString, int replacementOffset, int replacementLength, Image image,
-	    String displayString, int[] positionOffsets, int[] positionLengths, ITextViewer viewer)
+	    String displayString, int[] positionOffsets, int[] positionLengths, ITextViewer viewer, int relevance)
 	{
-		super(replacementString, replacementOffset, replacementLength, image, displayString);		
+		super(replacementString, replacementOffset, replacementLength, image, displayString, relevance);		
 
 		fPositionOffsets= positionOffsets;
 		fPositionLengths= positionLengths;

@@ -4,22 +4,17 @@
  */
 package org.eclipse.jdt.internal.ui.text.template;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.BadPositionCategoryException;
-import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.internal.core.Assert;
@@ -29,13 +24,14 @@ import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.corext.template.TemplatePosition;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
 
 /**
  * A template proposal.
  */
-public class TemplateProposal implements ICompletionProposal {
+public class TemplateProposal implements IJavaCompletionProposal {
 
 	private final Template fTemplate;
 	private final TemplateContext fContext;
@@ -217,6 +213,13 @@ public class TemplateProposal implements ICompletionProposal {
 	private void openErrorDialog(CoreException e) {
 		Shell shell= fViewer.getTextWidget().getShell();
 		MessageDialog.openError(shell, TemplateMessages.getString("TemplateEvaluator.error.title"), e.getMessage()); //$NON-NLS-1$
+	}
+
+	/* (non-Javadoc)
+	 * @see IJavaCompletionProposal#getRelevance()
+	 */
+	public int getRelevance() {
+		return 90;
 	}
 
 }

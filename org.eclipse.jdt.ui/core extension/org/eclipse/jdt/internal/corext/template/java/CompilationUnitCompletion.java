@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.corext.template.java;
 import java.util.Iterator;
 import java.util.Vector;
 
+import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -16,13 +17,12 @@ import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.core.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.util.MigrationCompletionRequestorAdapter;
 
 /**
  * A completion requestor to collect informations on local variables.
  * This class is used for guessing variable names like arrays, collections, etc.
  */
-class CompilationUnitCompletion extends MigrationCompletionRequestorAdapter {
+class CompilationUnitCompletion extends CompletionRequestorAdapter {
 
 	static class LocalVariable {
 		String name;

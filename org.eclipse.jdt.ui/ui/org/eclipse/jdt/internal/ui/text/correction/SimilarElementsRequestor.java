@@ -2,9 +2,9 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.HashSet;
 
-import org.eclipse.jdt.internal.ui.util.MigrationCompletionRequestorAdapter;
+import org.eclipse.jdt.core.CompletionRequestorAdapter;
 
-public class SimilarElementsRequestor extends MigrationCompletionRequestorAdapter {
+public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	
 	public static final int CLASSES= 1;
 	public static final int INTERFACES= 2;

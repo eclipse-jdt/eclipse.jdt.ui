@@ -10,7 +10,7 @@ import java.io.Reader;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -32,6 +32,8 @@ public class ProposalInfo {
 	private char[][] fParameterPackages;
 	private char[][] fParameterTypes;
 	private boolean fIsConstructor;
+	
+	private IMember fMember;
 
 	public ProposalInfo(IJavaProject jproject, char[] packName, char[] typeQualifiedName, char[] methodName, char[][] paramPackages, char[][] paramTypes, boolean isConstructor) {
 		fJavaProject= jproject;
@@ -41,6 +43,10 @@ public class ProposalInfo {
 		fParameterPackages= paramPackages;
 		fParameterTypes= paramTypes;
 		fIsConstructor= isConstructor;
+	}
+	
+	public ProposalInfo(IMember member) {
+		fMember= member;
 	}
 	
 	public ProposalInfo(IJavaProject jproject, char[] packName, char[] typeQualifiedName) {
@@ -62,14 +68,10 @@ public class ProposalInfo {
 		return Signature.createTypeSignature(buf.toString(), true);
 	}
 	
-	/**
-	 * Gets the text for this proposal info
-	 */	
-	public String getInfo() {
-		try {
+	private IMember getMember() throws JavaModelException {
+		if (fMember == null) {
 			IType type= JavaModelUtil.findType(fJavaProject, new String(fPackageName), new String(fTypeName));
 			if (type != null) {
-				Reader reader= null;
 				if (fMemberName != null) {
 					String name= new String(fMemberName);
 					if (fParameterTypes != null) {
@@ -77,24 +79,33 @@ public class ProposalInfo {
 						for (int i= 0; i < fParameterTypes.length; i++) {
 							paramTypes[i]= getParameterSignature(i);
 						}
-						IMethod method= JavaModelUtil.findMethod(name, paramTypes, fIsConstructor, type);
-						if (method != null) {
-							reader= JavaDocAccess.getJavaDoc(method, true);
-						}
+						fMember= JavaModelUtil.findMethod(name, paramTypes, fIsConstructor, type);
 					} else {
 						IField field= type.getField(name);
 						if (field.exists()) {
-							reader= JavaDocAccess.getJavaDoc(field, true);
+							fMember= field;
 						}
 					}
 				} else {
-					reader= JavaDocAccess.getJavaDoc(type, true);
+					fMember= type;
 				}
-				
+			}
+		}
+		return fMember;
+	}
+	
+	/**
+	 * Gets the text for this proposal info
+	 */	
+	public String getInfo() {
+		try {
+			IMember member= getMember();
+			if (member != null) {
+				Reader reader= JavaDocAccess.getJavaDoc(member, true);
 				if (reader != null) {
 					return new JavaDoc2HTMLTextReader(reader).getString();
-				}				
-			}
+				}
+			}	
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		} catch (IOException e) {
@@ -102,6 +113,4 @@ public class ProposalInfo {
 		}
 		return null;
 	}
-
-
 }

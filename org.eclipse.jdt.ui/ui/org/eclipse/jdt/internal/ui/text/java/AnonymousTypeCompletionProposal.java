@@ -34,8 +34,8 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 	
 	private ImportsStructure fImportStructure;
 
-	public AnonymousTypeCompletionProposal(IJavaProject jproject, ICompilationUnit cu, int start, int length, String constructorCompletion, String displayName, String declaringTypeName) {
-		super(constructorCompletion, start, length, null, displayName);
+	public AnonymousTypeCompletionProposal(IJavaProject jproject, ICompilationUnit cu, int start, int length, String constructorCompletion, String displayName, String declaringTypeName, int relevance) {
+		super(constructorCompletion, start, length, null, displayName, relevance);
 		Assert.isNotNull(declaringTypeName);
 		Assert.isNotNull(jproject);
 		

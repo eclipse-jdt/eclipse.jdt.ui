@@ -27,6 +27,8 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
+import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
 
 
@@ -36,7 +38,7 @@ import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
  */
 public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	
-	private static class CompletionProposalComparator implements Comparator {
+	private static class JavaDocCompletionProposalComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
 			ICompletionProposal c1= (ICompletionProposal) o1;
 			ICompletionProposal c2= (ICompletionProposal) o2;
@@ -47,7 +49,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	private IEditorPart fEditor;
 	private IWorkingCopyManager fManager;
 	private char[] fProposalAutoActivationSet;
-	private Comparator fComparator;
+	private JavaCompletionProposalComparator fComparator;
 	private TemplateEngine fTemplateEngine;
 	
 	private boolean fRestrictToMatchingCase;
@@ -60,6 +62,8 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 		if (contextType != null)
 			fTemplateEngine= new TemplateEngine(contextType);
 		fRestrictToMatchingCase= false;
+		
+		fComparator= new JavaCompletionProposalComparator();
 	}
 	
 	/**
@@ -68,7 +72,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	 * @param order <code>true</code> if proposals should be ordered.
 	 */
 	public void orderProposalsAlphabetically(boolean order) {
-		fComparator= order ? new CompletionProposalComparator() : null;
+		fComparator.setOrderAlphabetically(order);
 	}
 	
 	/**
@@ -133,7 +137,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
 		IDocument document= viewer.getDocument();
 
-		ICompletionProposal[] results= new ICompletionProposal[0];
+		IJavaCompletionProposal[] results= new IJavaCompletionProposal[0];
 
 		try {
 			if (unit != null) {
@@ -147,11 +151,12 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 					length= selection.y;
 				}
 				
-				CompletionEvaluator evaluator= new CompletionEvaluator(unit, document, offset, length);
+				JavaDocCompletionEvaluator evaluator= new JavaDocCompletionEvaluator(unit, document, offset, length);
 				evaluator.restrictProposalsToMatchingCases(fRestrictToMatchingCase);
 				results= evaluator.computeProposals();
 			}
-		} catch (JavaModelException x) {
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
 		}
 
 		if (fTemplateEngine != null) {
@@ -161,13 +166,16 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 			} catch (JavaModelException x) {
 			}				
 			
-			ICompletionProposal[] templateResults= fTemplateEngine.getResults();
-	
-			// concatenate arrays
-			ICompletionProposal[] total= new ICompletionProposal[results.length + templateResults.length];
-			System.arraycopy(templateResults, 0, total, 0, templateResults.length);
-			System.arraycopy(results, 0, total, templateResults.length, results.length);
-			results= total;
+			IJavaCompletionProposal[] templateResults= fTemplateEngine.getResults();
+			if (results.length == 0) {
+				results= templateResults;
+			} else {
+				// concatenate arrays
+				IJavaCompletionProposal[] total= new IJavaCompletionProposal[results.length + templateResults.length];
+				System.arraycopy(templateResults, 0, total, 0, templateResults.length);
+				System.arraycopy(results, 0, total, templateResults.length, results.length);
+				results= total;
+			}
 		}
 
 		/*
@@ -180,9 +188,8 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	/**
 	 * Order the given proposals.
 	 */
-	private ICompletionProposal[] order(ICompletionProposal[] proposals) {
-		if (fComparator != null)
-			Arrays.sort(proposals, fComparator);
+	private IJavaCompletionProposal[] order(IJavaCompletionProposal[] proposals) {
+		Arrays.sort(proposals, fComparator);
 		return proposals;	
 	}
 }

@@ -9,17 +9,14 @@ package org.eclipse.jdt.internal.ui.text.java;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Vector;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -33,8 +30,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
@@ -49,15 +44,7 @@ import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
  * Java completion processor.
  */
 public class JavaCompletionProcessor implements IContentAssistProcessor {
-	
-	private static class CompletionProposalComparator implements Comparator {
-		public int compare(Object o1, Object o2) {
-			ICompletionProposal c1= (ICompletionProposal) o1;
-			ICompletionProposal c2= (ICompletionProposal) o2;
-			return c1.getDisplayString().compareToIgnoreCase(c2.getDisplayString());
-		}
-	};
-	
+		
 	private static class ContextInformationWrapper implements IContextInformation, IContextInformationExtension {
 		
 		private final IContextInformation fContextInformation;
@@ -113,7 +100,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	private IContextInformationValidator fValidator;
 	
 	private char[] fProposalAutoActivationSet;
-	private Comparator fComparator;
+	private JavaCompletionProposalComparator fComparator;
 	private boolean fAllowAddImports;
 	
 	private TemplateEngine fTemplateEngine;
@@ -129,6 +116,8 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 			fTemplateEngine= new TemplateEngine(contextType);
 		fExperimentalCollector= new ExperimentalResultCollector();
 		fAllowAddImports= true;
+		
+		fComparator= new JavaCompletionProposalComparator();
 	}
 	
 	/**
@@ -165,7 +154,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	 * @param order <code>true</code> if proposals should be ordered.
 	 */
 	public void orderProposalsAlphabetically(boolean order) {
-		fComparator= order ? new CompletionProposalComparator() : null;
+		fComparator.setOrderAlphabetically(order);
 	}
 	
 	/**
@@ -293,8 +282,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	 * Order the given proposals.
 	 */
 	private ICompletionProposal[] order(ICompletionProposal[] proposals) {
-		if (fComparator != null)
-			Arrays.sort(proposals, fComparator);
+		Arrays.sort(proposals, fComparator);
 		return proposals;	
 	}
 	
@@ -304,7 +292,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
 		
 		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
-		ICompletionProposal[] results;
+		IJavaCompletionProposal[] results;
 
 		if (ExperimentalPreference.fillArgumentsOnMethodCompletion(JavaPlugin.getDefault().getPreferenceStore())) {
 				
@@ -356,10 +344,10 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 				ErrorDialog.openError(shell, JavaTextMessages.getString("CompletionProcessor.error.accessing.title"), JavaTextMessages.getString("CompletionProcessor.error.accessing.message"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 			}				
 			
-			ICompletionProposal[] templateResults= fTemplateEngine.getResults();
+			IJavaCompletionProposal[] templateResults= fTemplateEngine.getResults();
 	
 			// concatenate arrays
-			ICompletionProposal[] total= new ICompletionProposal[results.length + templateResults.length];
+			IJavaCompletionProposal[] total= new IJavaCompletionProposal[results.length + templateResults.length];
 			System.arraycopy(templateResults, 0, total, 0, templateResults.length);
 			System.arraycopy(results, 0, total, templateResults.length, results.length);
 			results= total;
