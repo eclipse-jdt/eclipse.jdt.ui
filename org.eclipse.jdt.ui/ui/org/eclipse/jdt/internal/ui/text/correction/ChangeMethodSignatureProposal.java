@@ -158,6 +158,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 					newTagElement.setTagName(TagElement.TAG_PARAM);
 					SimpleName arg= ast.newSimpleName("x"); //$NON-NLS-1$
 					newTagElement.fragments().add(arg);
+					insertTabStop(rewrite, newTagElement.fragments(), "param_tagcomment" + i); //$NON-NLS-1$
 					insertParamTag(rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY), parameters, k, newTagElement);
 					desc.resultingTagArg= arg; // set the name later
 				} else {
@@ -337,6 +338,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 					newTagElement.setTagName(TagElement.TAG_THROWS);
 					ASTNode newRef= ASTNodeFactory.newName(ast, type);
 					newTagElement.fragments().add(newRef);
+					insertTabStop(rewrite, newTagElement.fragments(), "throws_tagcomment" + i); //$NON-NLS-1$
 					insertThrowsTag(rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY), exceptions, k, newTagElement);
 					
 					addLinkedPosition(rewrite.track(newRef), false, key);
@@ -390,6 +392,13 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				}
 			}
 		}
+	}
+	
+	private void insertTabStop(ASTRewrite rewriter, List fragments, String linkedName) {
+		TextElement textElement= rewriter.getAST().newTextElement();
+		textElement.setText(""); //$NON-NLS-1$
+		fragments.add(textElement);
+		addLinkedPosition(rewriter.track(textElement), false, linkedName);
 	}
 	
 	private TagElement findThrowsTag(MethodDeclaration decl, Name exception) {

@@ -871,7 +871,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("    /**\n");
 		buf.append("     * Not much to say here.\n");
-		buf.append("     * @throws IOException\n");
+		buf.append("     * @throws IOException \n");
 		buf.append("     */\n");
 		buf.append("    public void foo() throws IOException {\n");
 		buf.append("        goo().substring(2);\n");
@@ -945,7 +945,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    /**\n");
 		buf.append("     * Not much to say here.\n");
 		buf.append("     * @throws ParseException Parsing failed\n");
-		buf.append("     * @throws IOException\n");
+		buf.append("     * @throws IOException \n");
 		buf.append("     */\n");
 		buf.append("    public void foo() throws ParseException, IOException {\n");
 		buf.append("        goo().substring(2);\n");
@@ -1089,7 +1089,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        return;\n");
 		buf.append("    }\n");
 		buf.append("    /**\n");
-		buf.append("     * @throws IOException\n");
+		buf.append("     * @throws IOException \n");
 		buf.append("     * @since 3.0\n");
 		buf.append("     */\n");
 		buf.append("    public void foo() throws IOException {\n");

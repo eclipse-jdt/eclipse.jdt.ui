@@ -102,8 +102,11 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 				TagElement newTagElement= ast.newTagElement();
 				newTagElement.setTagName(TagElement.TAG_PARAM);
 				newTagElement.fragments().add(newTagRef);
+				TextElement commentStart= ast.newTextElement();
+				newTagElement.fragments().add(commentStart);
 				
 				addLinkedPosition(rewrite.track(newTagRef), true, KEY_NAME);
+				addLinkedPosition(rewrite.track(commentStart), false, "comment_start"); //$NON-NLS-1$
 				
 				ListRewrite tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 				JavadocTagsSubProcessor.insertTag(tagsRewriter, newTagElement, leadingNames);

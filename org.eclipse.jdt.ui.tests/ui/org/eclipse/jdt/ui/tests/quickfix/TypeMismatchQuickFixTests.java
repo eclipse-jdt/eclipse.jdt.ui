@@ -1091,7 +1091,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		buf.append("     *                  More about the parameter\n");
 		buf.append("     * @return The returned argument\n");
 		buf.append("     * @throws IOException IO problems\n");
-		buf.append("     * @throws ParseException\n");
+		buf.append("     * @throws ParseException \n");
 		buf.append("     * @since 3.0\n");
 		buf.append("     */\n");
 		buf.append("    String[] getValues(int i) throws IOException, ParseException {\n");

@@ -42,6 +42,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -87,7 +88,7 @@ public class JavadocTagsSubProcessor {
 		}
 	}
 
-	private static final class AddMissingJavadocTagProposal extends ASTRewriteCorrectionProposal {
+	private static final class AddMissingJavadocTagProposal extends LinkedCorrectionProposal {
 		
 		private final BodyDeclaration fBodyDecl; // MethodDecl or TypeDecl
 		private final ASTNode fMissingNode;
@@ -101,20 +102,28 @@ public class JavadocTagsSubProcessor {
 		protected ASTRewrite getRewrite() throws CoreException {
 			AST ast= fBodyDecl.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-		 	Javadoc javadoc= fBodyDecl.getJavadoc();
+		 	insertMissingJavadocTag(rewrite, fMissingNode, fBodyDecl);
+			return rewrite;
+		}
+
+		private void insertMissingJavadocTag(ASTRewrite rewrite, ASTNode missingNode, BodyDeclaration bodyDecl) {
+			AST ast= bodyDecl.getAST();
+			Javadoc javadoc= bodyDecl.getJavadoc();
 		 	ListRewrite tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 			
-		 	StructuralPropertyDescriptor location= fMissingNode.getLocationInParent();
+		 	StructuralPropertyDescriptor location= missingNode.getLocationInParent();
+		 	TagElement newTag;
 		 	if (location == SingleVariableDeclaration.NAME_PROPERTY) {
 		 		// normal parameter
-		 		SingleVariableDeclaration decl= (SingleVariableDeclaration) fMissingNode.getParent();
+		 		SingleVariableDeclaration decl= (SingleVariableDeclaration) missingNode.getParent();
 		 		
-				String name= ((SimpleName) fMissingNode).getIdentifier();
-				TagElement newTag= ast.newTagElement();
+				String name= ((SimpleName) missingNode).getIdentifier();
+				newTag= ast.newTagElement();
 				newTag.setTagName(TagElement.TAG_PARAM);
-				newTag.fragments().add(ast.newSimpleName(name));
+				List fragments= newTag.fragments();
+				fragments.add(ast.newSimpleName(name));
 				
-				MethodDeclaration methodDeclaration= (MethodDeclaration) fBodyDecl;
+				MethodDeclaration methodDeclaration= (MethodDeclaration) bodyDecl;
 				List params= methodDeclaration.parameters();
 				
 				Set sameKindLeadingNames= getPreviousParamNames(params, decl);
@@ -127,36 +136,43 @@ public class JavadocTagsSubProcessor {
 				insertTag(tagsRewriter, newTag, sameKindLeadingNames);
 		 	} else if (location == TypeParameter.NAME_PROPERTY) {
 		 		// type parameter
-		 		TypeParameter typeParam= (TypeParameter) fMissingNode.getParent();
+		 		TypeParameter typeParam= (TypeParameter) missingNode.getParent();
 		 		
-				String name= ((SimpleName) fMissingNode).getIdentifier();
-				TagElement newTag= ast.newTagElement();
+				String name= ((SimpleName) missingNode).getIdentifier();
+				newTag= ast.newTagElement();
 				newTag.setTagName(TagElement.TAG_PARAM);
-	 			TextElement text= ast.newTextElement();
-	 			text.setText('<' + name + '>');
+				TextElement text= ast.newTextElement();
+				text.setText('<' + name + '>');
 				newTag.fragments().add(text);
 				List params;
-				if (fBodyDecl instanceof TypeDeclaration) {
-					params= ((TypeDeclaration) fBodyDecl).typeParameters();
+				if (bodyDecl instanceof TypeDeclaration) {
+					params= ((TypeDeclaration) bodyDecl).typeParameters();
 				} else {
-					params= ((MethodDeclaration) fBodyDecl).typeParameters();
+					params= ((MethodDeclaration) bodyDecl).typeParameters();
 				}
 				insertTag(tagsRewriter, newTag, getPreviousTypeParamNames(params, typeParam));
 		 	} else if (location == MethodDeclaration.RETURN_TYPE2_PROPERTY) {
-				TagElement newTag= ast.newTagElement();
+				newTag= ast.newTagElement();
 				newTag.setTagName(TagElement.TAG_RETURN);
 				insertTag(tagsRewriter, newTag, null);
 		 	} else if (location == MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY) {
-				TagElement newTag= ast.newTagElement();
+				newTag= ast.newTagElement();
 				newTag.setTagName(TagElement.TAG_THROWS);
-				List exceptions= ((MethodDeclaration) fBodyDecl).thrownExceptions();
-				insertTag(tagsRewriter, newTag, getPreviousExceptionNames(exceptions, fMissingNode));
+				List exceptions= ((MethodDeclaration) bodyDecl).thrownExceptions();
+				insertTag(tagsRewriter, newTag, getPreviousExceptionNames(exceptions, missingNode));
+		 	} else {
+		 		Assert.isTrue(false, "AddMissingJavadocTagProposal: unexpected node location"); //$NON-NLS-1$
+		 		return;
 		 	}
-			return rewrite;
+		 	
+			TextElement textElement= ast.newTextElement();
+			textElement.setText(""); //$NON-NLS-1$
+			newTag.fragments().add(textElement);
+			addLinkedPosition(rewrite.track(textElement), false, "comment_start"); //$NON-NLS-1$
 		}
 	}
 	
-	private static final class AddAllMissingJavadocTagsProposal extends ASTRewriteCorrectionProposal {
+	private static final class AddAllMissingJavadocTagsProposal extends LinkedCorrectionProposal {
 		
 		private final BodyDeclaration fBodyDecl;
 
@@ -174,6 +190,98 @@ public class JavadocTagsSubProcessor {
 			}
 			return rewrite;
 		}
+
+		private void insertAllMissingMethodTags(ASTRewrite rewriter, MethodDeclaration methodDecl) {
+		 	AST ast= methodDecl.getAST();
+		 	Javadoc javadoc= methodDecl.getJavadoc();
+		 	ListRewrite tagsRewriter= rewriter.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
+		 	
+		 	List typeParams= methodDecl.typeParameters();
+		 	List typeParamNames= new ArrayList();
+		 	for (int i= typeParams.size() - 1; i >= 0 ; i--) {
+		 		TypeParameter decl= (TypeParameter) typeParams.get(i);
+		 		String name= decl.getName().getIdentifier();
+		 		if (findTag(javadoc, TagElement.TAG_PARAM, name) == null) {
+		 			TagElement newTag= ast.newTagElement();
+		 			newTag.setTagName(TagElement.TAG_PARAM);
+		 			TextElement text= ast.newTextElement();
+		 			text.setText('<' + name + '>');
+		 			newTag.fragments().add(text);
+					insertTabStop(rewriter, newTag.fragments(), "typeParam" + i); //$NON-NLS-1$
+		 			insertTag(tagsRewriter, newTag, getPreviousTypeParamNames(typeParams, decl));
+		 		}
+				typeParamNames.add(name);
+		 	}
+		 	List params= methodDecl.parameters();
+		 	for (int i= params.size() - 1; i >= 0 ; i--) {
+		 		SingleVariableDeclaration decl= (SingleVariableDeclaration) params.get(i);
+		 		String name= decl.getName().getIdentifier();
+		 		if (findTag(javadoc, TagElement.TAG_PARAM, name) == null) {
+		 			TagElement newTag= ast.newTagElement();
+		 			newTag.setTagName(TagElement.TAG_PARAM);
+		 			newTag.fragments().add(ast.newSimpleName(name));
+					insertTabStop(rewriter, newTag.fragments(), "methParam" + i); //$NON-NLS-1$
+		 			Set sameKindLeadingNames= getPreviousParamNames(params, decl);
+		 			sameKindLeadingNames.addAll(typeParamNames);
+		 			insertTag(tagsRewriter, newTag, sameKindLeadingNames);
+		 		}
+		 	}
+		 	if (!methodDecl.isConstructor()) {
+		 		Type type= methodDecl.getReturnType2();
+		 		if (!type.isPrimitiveType() || (((PrimitiveType) type).getPrimitiveTypeCode() != PrimitiveType.VOID)) {
+		 			if (findTag(javadoc, TagElement.TAG_RETURN, null) == null) {
+		 				TagElement newTag= ast.newTagElement();
+		 				newTag.setTagName(TagElement.TAG_RETURN);
+						insertTabStop(rewriter, newTag.fragments(), "return"); //$NON-NLS-1$
+		 				insertTag(tagsRewriter, newTag, null);
+		 			}
+		 		}
+		 	}
+		 	List thrownExceptions= methodDecl.thrownExceptions();
+		 	for (int i= thrownExceptions.size() - 1; i >= 0 ; i--) {
+		 		Name exception= (Name) thrownExceptions.get(i);
+		 		ITypeBinding binding= exception.resolveTypeBinding();
+		 		if (binding != null) {
+		 			String name= binding.getName();
+		 			if (findThrowsTag(javadoc, name) == null) {
+		 				TagElement newTag= ast.newTagElement();
+		 				newTag.setTagName(TagElement.TAG_THROWS);
+		 				newTag.fragments().add(ast.newSimpleName(name));
+						insertTabStop(rewriter, newTag.fragments(), "exception" + i); //$NON-NLS-1$
+		 				insertTag(tagsRewriter, newTag, getPreviousExceptionNames(thrownExceptions, exception));
+		 			}
+		 		}
+		 	}
+		 }
+
+		private void insertAllMissingTypeTags(ASTRewrite rewriter, TypeDeclaration typeDecl) {
+			AST ast= typeDecl.getAST();
+			Javadoc javadoc= typeDecl.getJavadoc();
+			ListRewrite tagsRewriter= rewriter.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
+
+			List typeParams= typeDecl.typeParameters();
+			for (int i= typeParams.size() - 1; i >= 0; i--) {
+				TypeParameter decl= (TypeParameter) typeParams.get(i);
+				String name= decl.getName().getIdentifier();
+				if (findTag(javadoc, TagElement.TAG_PARAM, name) == null) {
+					TagElement newTag= ast.newTagElement();
+					newTag.setTagName(TagElement.TAG_PARAM);
+					TextElement text= ast.newTextElement();
+					text.setText('<' + name + '>');
+					newTag.fragments().add(text);
+					insertTabStop(rewriter, newTag.fragments(), "typeParam" + i); //$NON-NLS-1$
+					insertTag(tagsRewriter, newTag, getPreviousTypeParamNames(typeParams, decl));
+				}
+			}
+		}
+		
+		private void insertTabStop(ASTRewrite rewriter, List fragments, String linkedName) {
+			TextElement textElement= rewriter.getAST().newTextElement();
+			textElement.setText(""); //$NON-NLS-1$
+			fragments.add(textElement);
+			addLinkedPosition(rewriter.track(textElement), false, linkedName);
+		}
+		
 	}
 	 
 	public static void getMissingJavadocTagProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
@@ -285,86 +393,6 @@ public class JavadocTagsSubProcessor {
 			proposals.add(new AddJavadocCommentProposal(label, cu, 1, declaration.getStartPosition(), comment));
 		}
 	}
-	 
-	public static void insertAllMissingMethodTags(ASTRewrite rewriter, MethodDeclaration methodDecl) {
-	 	AST ast= methodDecl.getAST();
-	 	Javadoc javadoc= methodDecl.getJavadoc();
-	 	ListRewrite tagsRewriter= rewriter.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
-	 	
-	 	List typeParams= methodDecl.typeParameters();
-	 	List typeParamNames= new ArrayList();
-	 	for (int i= typeParams.size() - 1; i >= 0 ; i--) {
-	 		TypeParameter decl= (TypeParameter) typeParams.get(i);
-	 		String name= decl.getName().getIdentifier();
-	 		if (findTag(javadoc, TagElement.TAG_PARAM, name) == null) {
-	 			TagElement newTag= ast.newTagElement();
-	 			newTag.setTagName(TagElement.TAG_PARAM);
-	 			TextElement text= ast.newTextElement();
-	 			text.setText('<' + name + '>');
-	 			newTag.fragments().add(text);
-	 			insertTag(tagsRewriter, newTag, getPreviousTypeParamNames(typeParams, decl));
-	 		}
- 			typeParamNames.add(name);
-	 	}
-	 	List params= methodDecl.parameters();
-	 	for (int i= params.size() - 1; i >= 0 ; i--) {
-	 		SingleVariableDeclaration decl= (SingleVariableDeclaration) params.get(i);
-	 		String name= decl.getName().getIdentifier();
-	 		if (findTag(javadoc, TagElement.TAG_PARAM, name) == null) {
-	 			TagElement newTag= ast.newTagElement();
-	 			newTag.setTagName(TagElement.TAG_PARAM);
-	 			newTag.fragments().add(ast.newSimpleName(name));
-	 			Set sameKindLeadingNames= getPreviousParamNames(params, decl);
-	 			sameKindLeadingNames.addAll(typeParamNames);
-	 			insertTag(tagsRewriter, newTag, sameKindLeadingNames);
-	 		}
-	 	}
-	 	if (!methodDecl.isConstructor()) {
-	 		Type type= methodDecl.getReturnType2();
-	 		if (!type.isPrimitiveType() || (((PrimitiveType) type).getPrimitiveTypeCode() != PrimitiveType.VOID)) {
-	 			if (findTag(javadoc, TagElement.TAG_RETURN, null) == null) {
-	 				TagElement newTag= ast.newTagElement();
-	 				newTag.setTagName(TagElement.TAG_RETURN);
-	 				insertTag(tagsRewriter, newTag, null);
-	 			}
-	 		}
-	 	}
-	 	List thrownExceptions= methodDecl.thrownExceptions();
-	 	for (int i= thrownExceptions.size() - 1; i >= 0 ; i--) {
-	 		Name exception= (Name) thrownExceptions.get(i);
-	 		ITypeBinding binding= exception.resolveTypeBinding();
-	 		if (binding != null) {
-	 			String name= binding.getName();
-	 			if (findThrowsTag(javadoc, name) == null) {
-	 				TagElement newTag= ast.newTagElement();
-	 				newTag.setTagName(TagElement.TAG_THROWS);
-	 				newTag.fragments().add(ast.newSimpleName(name));
-	 				insertTag(tagsRewriter, newTag, getPreviousExceptionNames(thrownExceptions, exception));
-	 			}
-	 		}
-	 	}
-	 }
-	 
-	 public static void insertAllMissingTypeTags(ASTRewrite rewriter, TypeDeclaration typeDecl) {
-	 	AST ast= typeDecl.getAST();
-	 	Javadoc javadoc= typeDecl.getJavadoc();
-	 	ListRewrite tagsRewriter= rewriter.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
-	 	
-	 	List typeParams= typeDecl.typeParameters();
-	 	for (int i= typeParams.size() - 1; i >= 0 ; i--) {
-	 		TypeParameter decl= (TypeParameter) typeParams.get(i);
-	 		String name= decl.getName().getIdentifier();
-	 		if (findTag(javadoc, TagElement.TAG_PARAM, name) == null) {
-	 			TagElement newTag= ast.newTagElement();
-	 			newTag.setTagName(TagElement.TAG_PARAM);
-	 			TextElement text= ast.newTextElement();
-	 			text.setText('<' + name + '>');
-	 			newTag.fragments().add(text);
-	 			insertTag(tagsRewriter, newTag, getPreviousTypeParamNames(typeParams, decl));
-	 		}
-	 	}
-	 }
-
 	 
 	private static Set getPreviousTypeParamNames(List typeParams, ASTNode missingNode) {
 		Set previousNames=  new HashSet();

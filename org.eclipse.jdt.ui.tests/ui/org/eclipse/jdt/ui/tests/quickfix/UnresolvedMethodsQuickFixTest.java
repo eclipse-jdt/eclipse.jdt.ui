@@ -49,17 +49,11 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 	}
 
 	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+		return setUpTest(new TestSuite(THIS));
 	}
 	
 	public static Test suite() {
-		if (true) {
-			return allTests();
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new UnresolvedMethodsQuickFixTest("testConstructorInvocationMoreArguments2"));
-			return new ProjectTestSetup(suite);
-		}
+		return allTests();
 	}
 
 	public static Test setUpTest(Test test) {
@@ -2057,9 +2051,9 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("\n");	
 		buf.append("public class X {\n");
 		buf.append("    /**\n");
-		buf.append("     * @param set\n");
+		buf.append("     * @param set \n");
 		buf.append("     * @param i The int value\n");
-		buf.append("     * @param k\n");
+		buf.append("     * @param k \n");
 		buf.append("     */\n");
 		buf.append("    public void xoo(Set set, int i, int k) {\n");
 		buf.append("       int j= 0;\n");		
@@ -2292,7 +2286,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    /**\n");
 		buf.append("     * My favourite constructor.\n");
-		buf.append("     * @param vector\n");
+		buf.append("     * @param vector \n");
 		buf.append("     */\n");
 		buf.append("    public E(Vector vector) {\n");
 		buf.append("    }\n");

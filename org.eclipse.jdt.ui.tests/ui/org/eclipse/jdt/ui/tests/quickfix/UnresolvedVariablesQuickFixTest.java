@@ -52,17 +52,15 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 	}
 
 	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+		return setUpTest(new TestSuite(THIS));
+	}
+	
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
 	}
 	
 	public static Test suite() {
-		if (false) {
-			return allTests();
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new UnresolvedVariablesQuickFixTest("testVarInForInitializer2"));
-			return new ProjectTestSetup(suite);
-		}
+		return allTests();
 	}
 
 
@@ -290,7 +288,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    /**\n");
-		buf.append("     * @param i\n");
+		buf.append("     * @param i \n");
 		buf.append("     * @return Returns a number\n");
 		buf.append("     */\n");
 		buf.append("    int foo(int[] i) {\n");

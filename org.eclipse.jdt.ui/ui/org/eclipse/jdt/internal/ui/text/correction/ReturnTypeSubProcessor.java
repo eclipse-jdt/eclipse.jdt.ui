@@ -157,7 +157,12 @@ public class ReturnTypeSubProcessor {
 				if (javadoc != null) {
 					TagElement newTag= ast.newTagElement();
 					newTag.setTagName(TagElement.TAG_RETURN);
+					TextElement commentStart= ast.newTextElement();
+					newTag.fragments().add(commentStart);
+					
 					JavadocTagsSubProcessor.insertTag(rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY), newTag, null);
+					proposal.addLinkedPosition(rewrite.track(commentStart), false, "comment_start"); //$NON-NLS-1$
+
 				}
 				proposals.add(proposal);
 			}
@@ -204,6 +209,13 @@ public class ReturnTypeSubProcessor {
 				typeName= "void"; //$NON-NLS-1$		
 				type= ast.newPrimitiveType(PrimitiveType.VOID);	
 			}
+
+			
+			String label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.missingreturntype.description", typeName); //$NON-NLS-1$		
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
+			proposal.setImportRewrite(imports);
+			
 			rewrite.set(methodDeclaration, MethodDeclaration.RETURN_TYPE2_PROPERTY, type, null);
 			rewrite.set(methodDeclaration, MethodDeclaration.CONSTRUCTOR_PROPERTY, Boolean.FALSE, null);
 
@@ -211,13 +223,12 @@ public class ReturnTypeSubProcessor {
 			if (javadoc != null && typeBinding != null) {
 				TagElement newTag= ast.newTagElement();
 				newTag.setTagName(TagElement.TAG_RETURN);
+				TextElement commentStart= ast.newTextElement();
+				newTag.fragments().add(commentStart);
+				
 				JavadocTagsSubProcessor.insertTag(rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY), newTag, null);
+				proposal.addLinkedPosition(rewrite.track(commentStart), false, "comment_start"); //$NON-NLS-1$
 			}
-			
-			String label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.missingreturntype.description", typeName); //$NON-NLS-1$		
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
-			proposal.setImportRewrite(imports);
 			
 			String key= "return_type"; //$NON-NLS-1$
 			proposal.addLinkedPosition(rewrite.track(type), true, key);
