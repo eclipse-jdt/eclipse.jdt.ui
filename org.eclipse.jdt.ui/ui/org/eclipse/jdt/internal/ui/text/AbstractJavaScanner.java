@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -18,6 +19,7 @@ import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.BufferedRuleBasedScanner;
 import org.eclipse.jface.text.rules.IRule;
+import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
@@ -41,6 +43,8 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 	private String[] fPropertyNamesStyle;
 	
 	
+	private boolean fNeedsLazyColorLoading;
+
 	/** 
 	 * Returns the list of preference keys which define the tokens
 	 * used in the rules of this scanner.
@@ -70,14 +74,40 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 		fPropertyNamesColor= getTokenProperties();
 		int length= fPropertyNamesColor.length;
 		fPropertyNamesStyle= new String[length];
+		
+		fNeedsLazyColorLoading= Display.getCurrent() == null; 
+
 		for (int i= 0; i < length; i++) {
 			fPropertyNamesStyle[i]= fPropertyNamesColor[i] + "_bold"; //$NON-NLS-1$
-			addToken(fPropertyNamesColor[i], fPropertyNamesStyle[i]);
+			if (fNeedsLazyColorLoading)
+				addTokenWithProxyAttribute(fPropertyNamesColor[i], fPropertyNamesStyle[i]);
+			else
+				addToken(fPropertyNamesColor[i], fPropertyNamesStyle[i]);
 		}
 		
 		initializeRules();
 	}
 		
+	public IToken nextToken() {
+		if (fNeedsLazyColorLoading)
+			resolveProxyAttributes();
+		return super.nextToken();
+	}
+
+	private void resolveProxyAttributes() {
+		if (fNeedsLazyColorLoading && Display.getCurrent() != null) {
+			for (int i= 0; i < fPropertyNamesColor.length; i++) {
+				addToken(fPropertyNamesColor[i], fPropertyNamesStyle[i]);
+			}
+			fNeedsLazyColorLoading= true;
+		}
+	}
+
+	private void addTokenWithProxyAttribute(String colorKey, String styleKey) {
+		boolean bold= fPreferenceStore.getBoolean(styleKey);
+		fTokenMap.put(colorKey, new Token(new TextAttribute(null, null, bold ? SWT.BOLD : SWT.NORMAL)));
+	}
+
 	private void addToken(String colorKey, String styleKey) {
 		RGB rgb= PreferenceConverter.getColor(fPreferenceStore, colorKey);
 		if (fColorManager instanceof IColorManagerExtension) {
@@ -87,10 +117,19 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 		}
 		
 		boolean bold= fPreferenceStore.getBoolean(styleKey);
-		fTokenMap.put(colorKey, new Token(new TextAttribute(fColorManager.getColor(colorKey), null, bold ? SWT.BOLD : SWT.NORMAL)));
+		
+		if (!fNeedsLazyColorLoading)
+			fTokenMap.put(colorKey, new Token(new TextAttribute(fColorManager.getColor(colorKey), null, bold ? SWT.BOLD : SWT.NORMAL)));
+		else {
+			Token token= ((Token)fTokenMap.get(colorKey));
+			if (token != null)
+				token.setData(new TextAttribute(fColorManager.getColor(colorKey), null, bold ? SWT.BOLD : SWT.NORMAL));
+		}
 	}
 	
 	protected Token getToken(String key) {
+		if (fNeedsLazyColorLoading)
+			resolveProxyAttributes();
 		return (Token) fTokenMap.get(key);
 	}
 		
