@@ -12,8 +12,11 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.eclipse.jdt.core.IType;
+//import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -33,17 +36,36 @@ class ChangeTypeContentProvider implements ITreeContentProvider {
 		if (element instanceof RootType){
 			return ((RootType)element).getChildren();
 		}	
-		IType[] superTypes = fGeneralizeType.getTypeHierarchy().getSupertypes((IType)element);
+		Object[] superTypes = getDirectSuperTypes((ITypeBinding)element).toArray();
 		Arrays.sort(superTypes, new Comparator(){
 			public int compare(Object o1, Object o2) {
-				String name1 = ((IType)o1).getFullyQualifiedName();
-				String name2 = ((IType)o2).getFullyQualifiedName();
+				String name1 = ((ITypeBinding)o1).getQualifiedName();
+				String name2 = ((ITypeBinding)o2).getQualifiedName();
 				return name1.compareTo(name2);
 			}	
 		});
 		return superTypes;
-		
 	}
+	
+	/**
+	 * Returns the direct superclass and direct superinterfaces. Class Object is
+	 * included in the result if the root of the hierarchy is a top-level
+	 * interface. 
+	 */
+	public Set/*<ITypeBinding>*/ getDirectSuperTypes(ITypeBinding type){
+		Set/*<ITypeBinding>*/ result= new HashSet();
+		if (type.getSuperclass() != null){
+			result.add(type.getSuperclass());
+		}	
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i=0; i < interfaces.length; i++){
+			result.add(interfaces[i]);
+		}
+		if (fGeneralizeType.getOriginalType().isInterface() && type != fGeneralizeType.getObject()){
+			result.add(fGeneralizeType.getObject());
+		}
+		return result;
+	}	
 
 	public Object[] getElements(Object element) {
 		Assert.isTrue(element instanceof RootType);
@@ -70,12 +92,12 @@ class ChangeTypeContentProvider implements ITreeContentProvider {
 	 * default.
 	 */
 	static class RootType {
-		RootType(IType root){
+		RootType(ITypeBinding root){
 			fRoot = root;
 		}
-		public IType[] getChildren(){
-			return new IType[]{ fRoot };
+		public ITypeBinding[] getChildren(){
+			return new ITypeBinding[]{ fRoot };
 		}
-		private IType fRoot;
+		private ITypeBinding fRoot;
 	}
 }

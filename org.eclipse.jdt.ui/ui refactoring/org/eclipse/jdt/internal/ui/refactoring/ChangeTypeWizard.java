@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,8 +18,6 @@ import java.util.Iterator;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.jdt.core.IType;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -43,12 +40,14 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 
-import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
+import org.eclipse.jdt.core.dom.ITypeBinding;
+
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
+
+import org.eclipse.jdt.internal.ui.dialogs.SourceActionLabelProvider;
 
 
 /**
@@ -56,10 +55,12 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
  */
 public class ChangeTypeWizard extends RefactoringWizard {
 
+	private ChangeTypeRefactoring fCT;
 
 	public ChangeTypeWizard(ChangeTypeRefactoring ref) {
 		super(ref, DIALOG_BASED_UESR_INTERFACE);
 		setDefaultPageTitle(RefactoringMessages.getString("ChangeTypeWizard.title")); //$NON-NLS-1$
+		fCT= ref;
 	}
 
 	/* non java-doc
@@ -70,13 +71,13 @@ public class ChangeTypeWizard extends RefactoringWizard {
 	}
 	
 	// For debugging
-	static String print(Collection/*<IType>*/ types){
+	static String print(Collection/*<ITypeBinding>*/ types){
 		if (types.isEmpty())
 			return "{ }"; //$NON-NLS-1$
 		String result = "{ "; //$NON-NLS-1$
 		for (Iterator it=types.iterator(); it.hasNext(); ){
-			IType type= (IType)it.next();
-			result += type.getFullyQualifiedName();
+			ITypeBinding type= (ITypeBinding)it.next();
+			result += type.getQualifiedName();
 			if (it.hasNext()){
 				result += ", ";  //$NON-NLS-1$
 			} else {
@@ -90,7 +91,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 	/**
 	 * A JavaElementLabelProvider that supports graying out of invalid types.
 	 */
-	private class ChangeTypeLabelProvider extends JavaElementLabelProvider 
+	private class ChangeTypeLabelProvider extends SourceActionLabelProvider 
 										  implements IColorProvider {
 		
 		private Color fGrayColor;
@@ -101,9 +102,9 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			fGrayImages= new HashMap();
 		}
 		
-		private Collection/*<IType>*/ fInvalidTypes;
+		private Collection/*<ITypeBinding>*/ fInvalidTypes;
 		
-		public void grayOut(Collection/*<IType>*/ invalidTypes){
+		public void grayOut(Collection/*<ITypeBinding>*/ invalidTypes){
 			fInvalidTypes= invalidTypes; 
 			/*
 			 * Invalidate all labels. Invalidating only invalid types doesn't
@@ -180,15 +181,15 @@ public class ChangeTypeWizard extends RefactoringWizard {
 		}
 		
 		private class ValidTypesTask implements Runnable {
-			private Collection/*<IType>*/ fInvalidTypes;
-			private Collection/*<IType>*/ fValidTypes;
+			private Collection/*<ITypeBinding>*/ fInvalidTypes;
+			private Collection/*<ITypeBinding>*/ fValidTypes;
 			public void run() {
 				IRunnableWithProgress runnable= new IRunnableWithProgress() {
 					public void run(IProgressMonitor pm) {
 						pm.beginTask(RefactoringMessages.getString("ChangeTypeWizard.analyzing"), 1000); //$NON-NLS-1$
 						ChangeTypeRefactoring ct= (ChangeTypeRefactoring)ChangeTypeWizard.this.getRefactoring();
 						fInvalidTypes = new HashSet();
-						fInvalidTypes.addAll(Arrays.asList(ct.getTypeHierarchy().getAllSupertypes(ct.getOriginalType())));
+						fInvalidTypes.addAll(fCT.getAllSuperTypes(ct.getOriginalType()));
 						fValidTypes= ct.computeValidTypes(new SubProgressMonitor(pm, 950));
 						fInvalidTypes.add(ct.getOriginalType());
 						fInvalidTypes.removeAll(fValidTypes);
@@ -219,12 +220,12 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			}			
 		}
 		
-		private TreeItem getInitialSelection(Collection/*<IType>*/ types) {
+		private TreeItem getInitialSelection(Collection/*<ITypeBinding>*/ types) {
 			
 			// first, find a most general valid type (there may be more than one)
-			IType type= (IType)types.iterator().next();
+			ITypeBinding type= (ITypeBinding)types.iterator().next();
 			for (Iterator it= types.iterator(); it.hasNext(); ){
-				IType other= (IType)it.next();
+				ITypeBinding other= (ITypeBinding)it.next();
 				if (getGeneralizeTypeRefactoring().isSubTypeOf(type, other)){
 					type= other;
 				}
@@ -234,7 +235,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			return findItem(fTreeViewer.getTree().getItems(), type);
 		}
 		
-		private TreeItem findItem(TreeItem[] items, IType type){
+		private TreeItem findItem(TreeItem[] items, ITypeBinding type){
 			for (int i=0; i < items.length; i++){
 				if (items[i].getData().equals(type)) return items[i];
 			}
@@ -289,7 +290,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			ISelectionChangedListener listener= new ISelectionChangedListener(){
 				public void selectionChanged(SelectionChangedEvent event) {
 					IStructuredSelection selection= (IStructuredSelection)event.getSelection();
-					typeSelected((IType)selection.getFirstElement());
+					typeSelected((ITypeBinding)selection.getFirstElement());
 				}
 			};
 			fTreeViewer.addSelectionChangedListener(listener);
@@ -297,7 +298,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			fTreeViewer.expandToLevel(10);
 		}
 
-		private void typeSelected(IType type) {
+		private void typeSelected(ITypeBinding type) {
 			boolean isValid= getGeneralizeTypeRefactoring().getValidTypes().contains(type);
 			ChangeTypeInputPage.this.setPageComplete(isValid);
 			if (isValid) {
@@ -305,12 +306,12 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			} else {
 				if (getGeneralizeTypeRefactoring().getOriginalType().equals(type)) {
 					ChangeTypeInputPage.this.setMessage(RefactoringMessages.getFormattedString(
-						"ChangeTypeWizard.with_itself", type.getElementName())); //$NON-NLS-1$
+						"ChangeTypeWizard.with_itself", type.getName())); //$NON-NLS-1$
 					
 				} else {
 					ChangeTypeInputPage.this.setMessage(RefactoringMessages.getFormattedString(
 						"ChangeTypeWizard.grayed_types",  //$NON-NLS-1$
-						new Object[] {type.getElementName(), getGeneralizeTypeRefactoring().getOriginalType().getElementName()}));
+						new Object[] {type.getName(), getGeneralizeTypeRefactoring().getOriginalType().getName()}));
 				}
 			}
 		}
@@ -326,9 +327,9 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			return super.getNextPage();
 		}
 
-		private IType getSelectedType() {
+		private ITypeBinding getSelectedType() {
 			IStructuredSelection ss= (IStructuredSelection)fTreeViewer.getSelection();
-			return (IType)ss.getFirstElement();
+			return (ITypeBinding)ss.getFirstElement();
 		}
 
 		/*
