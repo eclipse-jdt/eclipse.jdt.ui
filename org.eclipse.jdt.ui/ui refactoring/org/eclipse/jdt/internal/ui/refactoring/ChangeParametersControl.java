@@ -340,11 +340,12 @@ public class ChangeParametersControl extends Composite {
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				fParameterInfos.add(ParameterInfo.createInfoForAddedParameter());
+				ParameterInfo newInfo= ParameterInfo.createInfoForAddedParameter();
+				fParameterInfos.add(newInfo);
+				fListener.parameterAdded(newInfo);
 				fTableViewer.refresh();
 				fTableViewer.getControl().setFocus();
 				getTable().setSelection(getTableItemCount() - 1);
-				fListener.parameterListChanged();
 				updateButtonsEnabledState();
 			}
 		});	

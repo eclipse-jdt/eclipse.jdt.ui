@@ -20,7 +20,6 @@ import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -60,7 +59,7 @@ public class ChangeSignatureInputPage extends UserInputWizardPage {
 	
 	private void createVisibilityControl(Composite parent) {
 		try {
-			List allowedVisibilities= convertToIntegerList(getModifyParametersRefactoring().getAvailableVisibilities());
+			List allowedVisibilities= convertToIntegerList(getChangeMethodSignatureRefactoring().getAvailableVisibilities());
 			if (allowedVisibilities.size() == 1)
 				return;
 			
@@ -91,7 +90,7 @@ public class ChangeSignatureInputPage extends UserInputWizardPage {
 						new Integer(JdtFlags.VISIBILITY_CODE_PROTECTED),
 						new Integer(JdtFlags.VISIBILITY_CODE_PACKAGE),
 						new Integer(JdtFlags.VISIBILITY_CODE_PRIVATE)};
-			Integer initialVisibility= new Integer(getModifyParametersRefactoring().getVisibility());
+			Integer initialVisibility= new Integer(getChangeMethodSignatureRefactoring().getVisibility());
 			for (int i= 0; i < labels.length; i++) {
 				Button radio= new Button(group, SWT.RADIO);
 				Integer visibilityCode= data[i];
@@ -101,7 +100,7 @@ public class ChangeSignatureInputPage extends UserInputWizardPage {
 				radio.setEnabled(allowedVisibilities.contains(visibilityCode));
 				radio.addSelectionListener(new SelectionAdapter() {
 					public void widgetSelected(SelectionEvent event) {
-						getModifyParametersRefactoring().setVisibility(((Integer)event.widget.getData()).intValue());
+						getChangeMethodSignatureRefactoring().setVisibility(((Integer)event.widget.getData()).intValue());
 						if (((Button)event.widget).getSelection())
 							update(true);
 					}
@@ -131,12 +130,16 @@ public class ChangeSignatureInputPage extends UserInputWizardPage {
 			public void parameterListChanged() {
 				update(true);
 			}
+			public void parameterAdded(ParameterInfo parameter) {
+				getChangeMethodSignatureRefactoring().setupNewParameterInfo(parameter);
+				update(true);
+			}
 		}, true, true);
 		cp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
-		cp.setInput(getModifyParametersRefactoring().getParameterInfos());
+		cp.setInput(getChangeMethodSignatureRefactoring().getParameterInfos());
 	}
-
-	private ChangeSignatureRefactoring getModifyParametersRefactoring(){
+	
+	private ChangeSignatureRefactoring getChangeMethodSignatureRefactoring(){
 		return	(ChangeSignatureRefactoring)getRefactoring();
 	}
 
@@ -147,7 +150,7 @@ public class ChangeSignatureInputPage extends UserInputWizardPage {
 
 	private void updateStatus(boolean displayErrorMessage) {
 		try{
-			RefactoringStatus nameCheck= getModifyParametersRefactoring().checkParameters();
+			RefactoringStatus nameCheck= getChangeMethodSignatureRefactoring().checkParameters();
 			if (nameCheck.hasFatalError()){
 				if (displayErrorMessage)
 					setErrorMessage(nameCheck.getFirstMessage(RefactoringStatus.FATAL));
@@ -164,7 +167,7 @@ public class ChangeSignatureInputPage extends UserInputWizardPage {
 
 	private void updateSignaturePreview() {
 		try{
-			fSignaturePreview.setText(RefactoringMessages.getString("ChangeSignatureInputPage.method_Signature_Preview") + getModifyParametersRefactoring().getMethodSignaturePreview()); //$NON-NLS-1$
+			fSignaturePreview.setText(RefactoringMessages.getString("ChangeSignatureInputPage.method_Signature_Preview") + getChangeMethodSignatureRefactoring().getMethodSignaturePreview()); //$NON-NLS-1$
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, RefactoringMessages.getString("ChangeSignatureRefactoring.modify_Parameters"), RefactoringMessages.getString("ChangeSignatureInputPage.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 		}	
