@@ -11,11 +11,8 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.jface.text.Assert;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
-
-import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 
 
 /**
@@ -49,11 +46,8 @@ public class EditorHighlightingSynchronizer implements ILinkedModeListener {
 	 * @see org.eclipse.jface.text.link.ILinkedModeListener#left(org.eclipse.jface.text.link.LinkedModeModel, int)
 	 */
 	public void left(LinkedModeModel environment, int flags) {
-		if (fWasOccurrencesOn) {
+		if (fWasOccurrencesOn)
 			fEditor.installOccurrencesFinder();
-			ITextSelection selection= (ITextSelection) fEditor.getSelectionProvider().getSelection();
-			SelectionListenerWithASTManager.getDefault().forceSelectionChange(fEditor, selection);
-		}
 	}
 
 	/*

@@ -53,6 +53,7 @@ public interface IJavaHelpContextIds {
 	public static final String REMOVE_FROM_CLASSPATH_ACTION=														PREFIX + "removefromclasspath_action_context"; //$NON-NLS-1$
 
 	public static final String TOGGLE_PRESENTATION_ACTION= 								PREFIX + "toggle_presentation_action_context"; //$NON-NLS-1$
+	public static final String TOGGLE_MARK_OCCURRENCES_ACTION= 								PREFIX + "toggle_mark_occurrences_action_context"; //$NON-NLS-1$
 	public static final String TOGGLE_TEXTHOVER_ACTION= 									PREFIX + "toggle_texthover_action_context"; //$NON-NLS-1$
 
 	public static final String OPEN_CLASS_WIZARD_ACTION= 									PREFIX + "open_class_wizard_action"; //$NON-NLS-1$

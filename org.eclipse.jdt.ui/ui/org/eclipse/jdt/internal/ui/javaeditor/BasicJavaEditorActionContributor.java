@@ -46,6 +46,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	private List fPartListeners= new ArrayList();
 	
 	private TogglePresentationAction fTogglePresentation;
+	private ToggleMarkOccurrencesAction fToggleMarkOccurrencesAction;
 	private GotoAnnotationAction fPreviousAnnotation;
 	private GotoAnnotationAction fNextAnnotation;
 	
@@ -78,6 +79,8 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		
 		// actions that are "contributed" to editors, they are considered belonging to the active editor
 		fTogglePresentation= new TogglePresentationAction();
+		
+		fToggleMarkOccurrencesAction= new ToggleMarkOccurrencesAction();
 		
 		fPreviousAnnotation= new GotoAnnotationAction("PreviousAnnotation.", false); //$NON-NLS-1$
 
@@ -136,6 +139,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		bars.setGlobalActionHandler(ITextEditorActionConstants.NEXT, fNextAnnotation);
 		bars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, fPreviousAnnotation);
 		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY, fTogglePresentation);
+		bars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.TOGGLE_MARK_OCCURRENCES, fToggleMarkOccurrencesAction);
 		
 		bars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fShowJavaDoc);
 	}
@@ -196,6 +200,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			textEditor= (ITextEditor) part;
 			
 		fTogglePresentation.setEditor(textEditor);
+		fToggleMarkOccurrencesAction.setEditor(textEditor);
 		fPreviousAnnotation.setEditor(textEditor);
 		fNextAnnotation.setEditor(textEditor);
 		

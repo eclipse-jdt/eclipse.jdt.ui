@@ -588,4 +588,11 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * @since 3.0
 	 */
 	public static final String REMOVE_OCCURRENCE_ANNOTATIONS= "org.eclipse.jdt.ui.edit.text.remove.occurrence.annotations";  //$NON-NLS-1$
+
+	/**
+	 * Action definition id of toggle mark occurrences action.
+	 * Value: <code>"org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"</code>
+	 * @since 3.0
+	 */
+	public static final String TOGGLE_MARK_OCCURRENCES= "org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"; //$NON-NLS-1$
 }

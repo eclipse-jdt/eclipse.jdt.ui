@@ -725,6 +725,28 @@
       </specification>
 	</extension>
 
+   	<extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            label="%javaEditorPresentationActionSet.label"
+            visible="false"
+            id="org.eclipse.jdt.ui.text.java.actionSet.presentation">
+         <action
+               allowLabelUpdate="true"
+               style="toggle"
+               toolbarPath="Normal/Presentation"
+               id="org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"
+               definitionId="org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"
+               disabledIcon="icons/full/dtool16/mark_occurrences.gif"
+               icon="icons/full/etool16/mark_occurrences.gif"
+               helpContextId="toggle_mark_occurrences_action_context"
+               label="%toggleMarkOccurrences.label"
+               retarget="true"
+               tooltip="%toggleMarkOccurrences.tooltip">
+         </action>
+      </actionSet>
+   </extension>
+
    <extension
          id="org.eclipse.jdt.ui.JavaDocumentSetupParticipant"
          name="%javaDocumentSetupParticipant"
@@ -2158,6 +2180,15 @@
                id="org.eclipse.jdt.ui.ClassFileEditor">
          </part>
       </actionSetPartAssociation>
+      <actionSetPartAssociation
+            targetID="org.eclipse.jdt.ui.text.java.actionSet.presentation">
+         <part
+               id="org.eclipse.jdt.ui.CompilationUnitEditor">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.ClassFileEditor">
+         </part>
+      </actionSetPartAssociation>
    </extension>
    <extension
          point="org.eclipse.ui.popupMenus">
@@ -2725,6 +2756,19 @@
             command="org.eclipse.jdt.ui.edit.text.java.indent"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
+	  <command
+	        name="%toggleMarkOccurrences.label"
+	        description="%toggleMarkOccurrences.description"
+	        category="org.eclipse.jdt.ui.category.source"
+	        id="org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences">
+	  </command>
+	  <keyBinding
+	        string=""
+	        scope="org.eclipse.jdt.ui.javaEditorScope"
+	        command="org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"
+	        keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration">
+	  </keyBinding>
+      
 <!-- refactoring -->
       <command
             name="%ActionDefinition.refactorQuickMenu.name"

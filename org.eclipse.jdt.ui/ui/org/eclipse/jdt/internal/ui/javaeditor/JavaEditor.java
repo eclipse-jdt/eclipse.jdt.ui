@@ -2014,8 +2014,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * @see org.eclipse.swt.events.ShellAdapter#shellActivated(org.eclipse.swt.events.ShellEvent)
 		 */
 		public void shellActivated(ShellEvent e) {
-			if (fMarkOccurrenceAnnotations && isActivePart())
-				SelectionListenerWithASTManager.getDefault().forceSelectionChange(JavaEditor.this, (ITextSelection)getSelectionProvider().getSelection());
+			if (fMarkOccurrenceAnnotations && isActivePart()) {
+				fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
+				SelectionListenerWithASTManager.getDefault().forceSelectionChange(JavaEditor.this, (ITextSelection)fForcedMarkOccurrencesSelection);
+			}
 		}
 		
 		/*
@@ -2137,6 +2139,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.0
 	 */
 	private boolean fMarkExceptionOccurrences;
+	/**
+	 * 
+	 */
+	private ISelection fForcedMarkOccurrencesSelection;
 	/**
 	 * The internal shell activation listener for updating occurrences.
 	 * @since 3.0
@@ -3378,7 +3384,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		
 		private boolean isCancelled() {
 			return fCancelled || fProgressMonitor.isCanceled()
-				||  fPostSelectionValidator != null && !fPostSelectionValidator.isValid(fSelection)
+				||  fPostSelectionValidator != null && !(fPostSelectionValidator.isValid(fSelection) || fForcedMarkOccurrencesSelection == fSelection)
 				|| LinkedModeModel.hasInstalledModel(fDocument);
 		}
 		
@@ -3553,6 +3559,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 		};
 		SelectionListenerWithASTManager.getDefault().addListener(this, fPostSelectionListenerWithAST);
+		if (getSelectionProvider() != null) {
+			fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
+			SelectionListenerWithASTManager.getDefault().forceSelectionChange(this, (ITextSelection)fForcedMarkOccurrencesSelection);
+		}
 	}
 	
 	protected void uninstallOccurrencesFinder() {
