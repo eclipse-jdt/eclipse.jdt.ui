@@ -13,20 +13,23 @@ package org.eclipse.jdt.internal.ui.reorg;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.IWorkbenchSite;
-
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.dnd.Clipboard;
 
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg2.DeleteAction;
 
 public class ReorgActionFactory {
 	private ReorgActionFactory(){
@@ -68,18 +71,14 @@ public class ReorgActionFactory {
 		return dual;
 	}
 	
+	public static DeleteAction createDeleteAction(Object[] elements){
+		return new DeleteAction(new MockWorkbenchSite(elements));
+	}	
+
 	public static SelectionDispatchAction createDeleteAction(IWorkbenchSite site){
-		DeleteResourcesAction a1= new DeleteResourcesAction(site);
-		DeleteSourceReferencesAction a2= new DeleteSourceReferencesAction(site);
-		String helpContextID= IJavaHelpContextIds.DELETE_ACTION;
-		DualReorgAction dual= new DualReorgAction(site, ReorgMessages.getString("ReorgGroup.delete"), ReorgMessages.getString("deleteAction.description"), a1, a2, helpContextID); //$NON-NLS-1$ //$NON-NLS-2$
-		
-		ISharedImages workbenchImages= getWorkbenchSharedImages();
-		dual.setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_DELETE_DISABLED));
-		dual.setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_DELETE));		
-		dual.setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_DELETE_HOVER));
-		return dual;
+		return new DeleteAction(site);
 	}
+	
 	public static ISharedImages getWorkbenchSharedImages() {
 		return JavaPlugin.getDefault().getWorkbench().getSharedImages();
 	}
@@ -99,10 +98,6 @@ public class ReorgActionFactory {
 			}
 		};
 	}
-	
-	public static DeleteSourceReferencesAction createDeleteSourceReferencesAction(ISourceReference[] elements){
-		return new DeleteSourceReferencesAction(new MockWorkbenchSite(elements));
-	}	
 	
 	public static JdtCopyAction createDnDCopyAction(List elems, final IResource destination){
 		JdtCopyAction action= new JdtCopyAction(new MockWorkbenchSite(elems)){
