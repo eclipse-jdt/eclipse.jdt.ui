@@ -232,7 +232,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		registerAdapters();
 		
 		if (USE_WORKING_COPY_OWNERS)
-			DefaultWorkingCopyOwner.PRIMARY.factory= new CustomBufferFactory();
+			DefaultWorkingCopyOwner.PRIMARY.factory= getBufferFactory();
 
 		/*
 		 * Backward compatibility: propagate the Java editor font from a
