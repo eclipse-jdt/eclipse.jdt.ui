@@ -62,6 +62,9 @@ public class RenameParametersRefactoring extends MethodRefactoring{
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(getMethod()));
+		HackFinder.fixMeSoon("fix this");
+		if (getMethod().isConstructor())
+			result.addFatalError("Temporarily not available for constructors");
 		if (fOldParameterNames == null || fOldParameterNames.length == 0)
 			result.addFatalError("Only applicable to methods with parameters."); 
 		return result;
@@ -193,7 +196,7 @@ public class RenameParametersRefactoring extends MethodRefactoring{
 		int length= fOldParameterNames[parameterIndex].length();
 		String newName= fNewParameterNames[parameterIndex];
 		String oldName= fOldParameterNames[parameterIndex];
-		builder.addReplace("rename parameter " + oldName + " to: " + newName, occurrenceOffset, length, newName);
+		builder.addReplace("update parameter reference", occurrenceOffset, length, newName);
 	}
 }
 
