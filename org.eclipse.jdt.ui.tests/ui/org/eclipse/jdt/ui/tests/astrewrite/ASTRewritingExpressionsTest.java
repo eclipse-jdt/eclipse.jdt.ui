@@ -12,31 +12,11 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.*;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.ArrayAccess;
-import org.eclipse.jdt.core.dom.ArrayCreation;
-import org.eclipse.jdt.core.dom.ArrayType;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.NumberLiteral;
-import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewriteAnalyzer;
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
 public class ASTRewritingExpressionsTest extends ASTRewritingTest {
@@ -481,13 +461,168 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
-	
-
-	
-
+	public void testCatchClause() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        } catch (CoreException e) {\n");
+		buf.append("        }\n");			
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-	
-	
-	
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 3", statements.size() == 1);
+		List catchClauses= ((TryStatement) statements.get(0)).catchClauses();
+		assertTrue("Number of catchClauses not 2", catchClauses.size() == 2);
+		{ // change exception type
+			CatchClause clause= (CatchClause) catchClauses.get(0);
+			
+			SingleVariableDeclaration exception= clause.getException();
+			
+			SingleVariableDeclaration newException= ast.newSingleVariableDeclaration();
+						
+			newException.setType(ast.newSimpleType(ast.newSimpleName("NullPointerException")));
+			newException.setName(ast.newSimpleName("ex"));
+			
+			ASTRewriteAnalyzer.markAsReplaced(exception, newException);
+		}
+		{ // change body
+			CatchClause clause= (CatchClause) catchClauses.get(1);
+			Block body= clause.getBody();
+			
+			Block newBody= ast.newBlock();
+			ReturnStatement returnStatement= ast.newReturnStatement();
+			newBody.statements().add(returnStatement);
+			
+			ASTRewriteAnalyzer.markAsReplaced(body, newBody);
+		}
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("        } catch (NullPointerException ex) {\n");
+		buf.append("        } catch (CoreException e) {\n");
+		buf.append("            return;\n");	
+		buf.append("        }\n");			
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	public void testClassInstanceCreation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        goo().new Inner();\n");
+		buf.append("        new Runnable(\"Hello\") {\n");
+		buf.append("            public void run() {\n");
+		buf.append("            }\n");		
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 2", statements.size() == 2);
+		{ // remove expression, change type name, add argument, add anonym decl
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
+			ClassInstanceCreation creation= (ClassInstanceCreation) stmt.getExpression();
+
+			ASTRewriteAnalyzer.markAsRemoved(creation.getExpression());
+			
+			SimpleName newName= ast.newSimpleName("NewInner");
+			ASTRewriteAnalyzer.markAsReplaced(creation.getName(), newName);
+			
+			List arguments= creation.arguments();
+			
+			StringLiteral stringLiteral1= ast.newStringLiteral();
+			stringLiteral1.setLiteralValue("Hello");
+			arguments.add(stringLiteral1);
+			ASTRewriteAnalyzer.markAsInserted(stringLiteral1);
+			
+			StringLiteral stringLiteral2= ast.newStringLiteral();
+			stringLiteral2.setLiteralValue("World");
+			arguments.add(stringLiteral2);
+			ASTRewriteAnalyzer.markAsInserted(stringLiteral2);
+
+			
+			assertTrue("Has anonym class decl", creation.getAnonymousClassDeclaration() == null);
+			
+			AnonymousClassDeclaration anonymDecl= ast.newAnonymousClassDeclaration();
+			MethodDeclaration anonymMethDecl= createNewMethod(ast, "newMethod", false);
+			anonymDecl.bodyDeclarations().add(anonymMethDecl);
+			
+			creation.setAnonymousClassDeclaration(anonymDecl);
+			ASTRewriteAnalyzer.markAsInserted(anonymDecl);			
+
+		}
+		{ // add expression, remove argument, remove anonym decl 
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(1);
+			ClassInstanceCreation creation= (ClassInstanceCreation) stmt.getExpression();
+
+			assertTrue("Has expression", creation.getExpression() == null);
+			
+			SimpleName newExpression= ast.newSimpleName("x");
+			creation.setExpression(newExpression);
+			
+			ASTRewriteAnalyzer.markAsInserted(newExpression);
+			
+			List arguments= creation.arguments();
+			assertTrue("Must have 1 argument", arguments.size() == 1);
+			
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) arguments.get(0));
+			
+			ASTRewriteAnalyzer.markAsRemoved(creation.getAnonymousClassDeclaration());
+		}
+		
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        new NewInner(\"Hello\", \"World\"){\n");
+		buf.append("            private void newMethod(String str) {\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("        x.new Runnable();\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
 	
 }

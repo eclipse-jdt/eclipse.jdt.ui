@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.ToolFactory;
@@ -79,6 +80,11 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	/* package */ static boolean isReplaced(ASTNode node) {
 		return node.getProperty(KEY) instanceof ASTReplace;
 	}
+	
+	/* package */ static boolean isRemoved(ASTNode node) {
+		Object info= node.getProperty(KEY);
+		return info instanceof ASTReplace && (((ASTReplace) info).replacingNode == null);
+	}	
 	
 	/* package */ static boolean isModified(ASTNode node) {
 		return node.getProperty(KEY) instanceof ASTModify;
@@ -184,7 +190,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		if (offset > 0 && Character.isLetterOrDigit(fTextBuffer.getChar(offset - 1))) {
 			addInsert(offset, " ", "Add Space before");
 		}
-		addGenerated(offset, 0, inserted, 0, false);
+		addGenerated(offset, 0, inserted, getIndent(offset), true);
 		if (Character.isLetterOrDigit(fTextBuffer.getChar(offset))) {
 			addInsert(offset, " ", "Add Space after");
 		}
@@ -194,17 +200,47 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		int offset= old.getStartPosition();
 		int len= old.getLength();
 		if (modified == null) {
-			while (offset > 0 && Strings.isIndentChar(fTextBuffer.getChar(offset - 1))) {
-				offset--;
-				len++;
+			// remove spaces before node if is not the ident.
+			int pos= offset;
+			while (pos > 0 && Strings.isIndentChar(fTextBuffer.getChar(pos - 1))) {
+				pos--;
+			}
+			if (pos == 0 || !Character.isWhitespace(fTextBuffer.getChar(pos - 1))) {
+				// is not line delim -> not the indent
+				len= len + offset - pos;
+				offset= pos;
 			}
 			addDelete(offset, len, "Remove Node");
 		} else {
-			addGenerated(offset, len, modified, 0, false);
+			addGenerated(offset, len, modified, getIndent(offset), true);
 		}
 	}
 	
-
+	private int rewriteOptionalQualifier(ASTNode node, int startPos) {
+		if (isInserted(node)) {
+			addGenerated(startPos, 0, node, getIndent(startPos), true);
+			addInsert(startPos, ".", "Dot");
+			return startPos;
+		} else {
+			if (isReplaced(node)) {
+				ASTNode replacingNode= getReplacingNode(node);
+				if (replacingNode == null) {
+					try {
+						int dotStart= node.getStartPosition() + node.getLength();
+						int dotEnd= ASTResolving.getPositionAfter(getScanner(dotStart), ITerminalSymbols.TokenNameDOT);
+						addDelete(startPos, dotEnd - startPos, "remove node and dot");
+					} catch (InvalidInputException e) {
+						JavaPlugin.log(e);
+					}
+				} else {
+					addGenerated(startPos, node.getLength(), node, getIndent(startPos), true);
+				}
+			} else {
+				node.accept(this);
+			}
+			return node.getStartPosition() + node.getLength();
+		}
+	}
 	
 	private int rewriteParagraphList(List list, int insertPos, int insertIndent) {
 		ASTNode last= null; 
@@ -289,7 +325,14 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return false;
 	}
 	
-	private void rewriteList(int startPos, String keyword, List list, boolean updateKeyword) {
+	private void visitList(List list) {
+		for (Iterator iter= list.iterator(); iter.hasNext();) {
+			((ASTNode) iter.next()).accept(this);
+		}
+	}
+	
+	private int rewriteList(int startPos, String keyword, List list, boolean updateKeyword) {
+
 		int currPos= startPos;
 			
 		// count number of nodes before and after the rewrite
@@ -305,7 +348,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				if (before == 1) { // first entry
 					currPos= elem.getStartPosition();
 				}
-				if (!isReplaced(elem) || getReplacingNode(elem) != null) {
+				if (!isRemoved(elem)) {
 					after++;
 				}
 				lastExisting= elem;
@@ -316,8 +359,9 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			if (before != 0) { // deleting the list
 				int endPos= lastExisting.getStartPosition() + lastExisting.getLength();
 				addDelete(startPos, endPos - startPos, "Remove all");
+				return endPos;
 			}
-			return;
+			return startPos;
 		}
 		
 		if (before == 0) { // creating a new list -> insert keyword first (e.g. " throws ")
@@ -368,6 +412,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				currPos= nextStart;
 			}
 		}
+		return currPos;
 	}
 	
 	private void replaceParagraph(ASTNode elem, ASTNode changed) {
@@ -906,21 +951,59 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(CatchClause)
 	 */
 	public boolean visit(CatchClause node) {
-		return super.visit(node);
+		ASTNode exception= node.getException();
+		if (isReplaced(exception)) {
+			replaceNode(exception, getReplacingNode(exception));
+		}		
+		Block body= node.getBody();
+		if (isReplaced(body)) {
+			replaceParagraph(body, getReplacingNode(body));
+		}
+		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(CharacterLiteral)
 	 */
 	public boolean visit(CharacterLiteral node) {
-		return super.visit(node);
+		checkNoModification(node); // no modification possible
+		return false;
 	}
+	
+		
+	
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ClassInstanceCreation)
 	 */
 	public boolean visit(ClassInstanceCreation node) {
-		return super.visit(node);
+		Expression expression= node.getExpression();
+		if (expression != null) {
+			rewriteOptionalQualifier(expression, node.getStartPosition());
+		}
+		
+		Name name= node.getName();
+		if (isReplaced(name)) {
+			replaceNode(name, getReplacingNode(name));
+		}
+		
+		List arguments= node.arguments();
+		if (hasChanges(arguments)) {
+			try {
+				int startpos= ASTResolving.getPositionAfter(getScanner(name.getStartPosition() + name.getLength()), ITerminalSymbols.TokenNameLPAREN);
+				rewriteList(startpos, "", arguments, false);
+			} catch (InvalidInputException e) {
+				JavaPlugin.log(e);
+			}
+		} else {
+			visitList(arguments);
+		}
+		
+		AnonymousClassDeclaration decl= node.getAnonymousClassDeclaration();
+		if (decl != null) {
+			rewriteNode(decl, node.getStartPosition() + node.getLength());
+		}
+		return false;
 	}
 
 	/* (non-Javadoc)
