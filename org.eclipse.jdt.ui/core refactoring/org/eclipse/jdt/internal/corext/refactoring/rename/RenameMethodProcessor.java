@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.WorkingCopyOwner;
@@ -78,7 +79,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		fMethod= method;
 		setNewElementName(fMethod.getElementName());
 		fUpdateReferences= true;
-		fWorkingCopyOwner= new WorkingCopyOwner() { };
+		fWorkingCopyOwner= new WorkingCopyOwner() {/*must subclass*/};
 	}	
 	
 	protected void setData(RenameMethodProcessor other) {
@@ -211,9 +212,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			pm.setTaskName(RefactoringCoreMessages.getString("RenameMethodRefactoring.taskName.checkingPreconditions")); //$NON-NLS-1$
 			
 			if (fUpdateReferences)
-				result.merge(checkRelatedMethods(new SubProgressMonitor(pm, 1)));
-			else
-				pm.worked(1);
+				result.merge(checkRelatedMethods());
+			pm.worked(1);
 			
 			if (fUpdateReferences)
 				result.merge(analyzeCompilationUnits());	
@@ -222,11 +222,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			if (result.hasFatalError())
 				return result;
 			
+			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 3));
 			if (fUpdateReferences)
 				result.merge(analyzeRenameChanges(new SubProgressMonitor(pm, 1)));
-				// TODO: analyzeRenameChanges already calls createChangeManager(pm), but throws it away!
-				
-			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 3));
+			else
+				pm.worked(1);
+			
 			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
 			if (checker != null) {
 				checker.addFiles(getAllFilesToModify());
@@ -247,7 +248,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return RefactoringScopeFactory.create(method);
 	}
 	
-	SearchPattern createOccurrenceSearchPattern(IProgressMonitor pm) throws CoreException {
+	/** */
+	SearchPattern createOccurrenceSearchPattern(IProgressMonitor pm) {
 		HashSet methods= new HashSet(fMethodsToRename);
 		methods.add(fMethod);
 		IMethod[] ms= (IMethod[]) methods.toArray(new IMethod[methods.size()]);
@@ -292,7 +294,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return Checks.checkIfConstructorName(method, newName, method.getDeclaringType().getElementName());
 	}
 	
-	private RefactoringStatus checkRelatedMethods(IProgressMonitor pm) throws CoreException { 
+	private RefactoringStatus checkRelatedMethods() throws CoreException { 
 		RefactoringStatus result= new RefactoringStatus();
 		for (Iterator iter= fMethodsToRename.iterator(); iter.hasNext(); ) {
 			IMethod method= (IMethod)iter.next();
@@ -341,10 +343,9 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		try {
 			pm.beginTask("", 3); //$NON-NLS-1$
 			
-			TextChangeManager manager= createChangeManager(new SubProgressMonitor(pm, 1));
 			SearchResultGroup[] oldOccurrences= getOccurrences();
-			SearchResultGroup[] newOccurrences= getNewOccurrences(new SubProgressMonitor(pm, 1), manager);
-			RefactoringStatus result= RenameAnalyzeUtil.analyzeRenameChanges(manager, oldOccurrences, newOccurrences);
+			SearchResultGroup[] newOccurrences= getNewOccurrences(new SubProgressMonitor(pm, 1));
+			RefactoringStatus result= RenameAnalyzeUtil.analyzeRenameChanges(fChangeManager, oldOccurrences, newOccurrences);
 			return result;
 		} finally{
 			pm.done();
@@ -356,12 +357,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		}
 	}
 
-	private SearchResultGroup[] getNewOccurrences(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
+	private SearchResultGroup[] getNewOccurrences(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 3); //$NON-NLS-1$
 		try {
-			ICompilationUnit[] compilationUnitsToModify= manager.getAllCompilationUnits();
+			ICompilationUnit[] compilationUnitsToModify= fChangeManager.getAllCompilationUnits();
 			fNewWorkingCopies= RenameAnalyzeUtil.createNewWorkingCopies(
-					compilationUnitsToModify, manager, fWorkingCopyOwner, new SubProgressMonitor(pm, 1));
+					compilationUnitsToModify, fChangeManager, fWorkingCopyOwner, new SubProgressMonitor(pm, 1));
 			
 			ICompilationUnit declaringCuWorkingCopy= RenameAnalyzeUtil.findWorkingCopyForCu(fNewWorkingCopies, fMethod.getCompilationUnit());
 			if (declaringCuWorkingCopy == null)
@@ -481,7 +482,10 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 	
 	final void addDeclarationUpdate(TextChange change) throws CoreException {
-		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("RenameMethodRefactoring.update_declaration"), new ReplaceEdit(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), getNewElementName())); //$NON-NLS-1$
+		String editName= RefactoringCoreMessages.getString("RenameMethodRefactoring.update_declaration"); //$NON-NLS-1$
+		ISourceRange nameRange= fMethod.getNameRange();
+		ReplaceEdit replaceEdit= new ReplaceEdit(nameRange.getOffset(), nameRange.getLength(), getNewElementName());
+		TextChangeCompatibility.addTextEdit(change, editName, replaceEdit);
 	}
 	
 	final TextEdit createTextChange(SearchMatch searchResult) {

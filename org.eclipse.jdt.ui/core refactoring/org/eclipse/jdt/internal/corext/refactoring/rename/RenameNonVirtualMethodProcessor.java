@@ -128,7 +128,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	/* non java-doc
 	 * overriding RenameMethodrefactoring@createSearchPattern
 	 */
-	SearchPattern createOccurrenceSearchPattern(IProgressMonitor pm) throws CoreException {
+	SearchPattern createOccurrenceSearchPattern(IProgressMonitor pm) {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		SearchPattern pattern= SearchPattern.createPattern(getMethod(), IJavaSearchConstants.ALL_OCCURRENCES);
 		pm.done();
@@ -154,6 +154,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	}
 
 	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws CoreException {
+		//TODO: should not do the search again!
 		pm.beginTask("", 2);	 //$NON-NLS-1$
 		SearchPattern pattern= createReferenceSearchPattern();
 		return RefactoringSearchEngine.search(pattern, createRefactoringScope(),

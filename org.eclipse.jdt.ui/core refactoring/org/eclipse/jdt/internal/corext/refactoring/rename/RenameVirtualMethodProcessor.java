@@ -136,8 +136,8 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	private IMethod[] relatedTypeDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws CoreException {
 		try{
 			Set result= new HashSet();
-			pm.beginTask("", 2); //$NON-NLS-1$
-			Set types= getRelatedTypes(new SubProgressMonitor(pm, 1));
+			Set types= getRelatedTypes();
+			pm.beginTask("", types.size()); //$NON-NLS-1$
 			for (Iterator iter= types.iterator(); iter.hasNext(); ) {
 				IMethod m= Checks.findMethod(method, (IType)iter.next());
 				IMethod[] hierarchyMethod= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), m, newName);
@@ -173,7 +173,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 		return false;		
 	}
 	
-	private Set getRelatedTypes(IProgressMonitor pm) throws CoreException {
+	private Set getRelatedTypes() {
 		Set methods= getMethodsToRename();
 		Set result= new HashSet(methods.size());
 		for (Iterator iter= methods.iterator(); iter.hasNext(); ){
