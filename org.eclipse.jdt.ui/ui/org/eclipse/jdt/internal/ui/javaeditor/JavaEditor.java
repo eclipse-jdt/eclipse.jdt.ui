@@ -19,6 +19,11 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Preferences;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BidiSegmentEvent;
 import org.eclipse.swt.custom.BidiSegmentListener;
@@ -95,12 +100,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Preferences;
-
-import org.eclipse.core.resources.IMarker;
-
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPageLayout;
@@ -143,6 +142,18 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
+import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
+import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.ui.actions.ShowActionGroup;
+import org.eclipse.jdt.ui.text.IColorManager;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
@@ -159,18 +170,6 @@ import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
-import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
-import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
-import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
-import org.eclipse.jdt.ui.actions.ShowActionGroup;
-import org.eclipse.jdt.ui.text.IColorManager;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
 
 /**
  * Java specific text editor.
@@ -657,14 +656,16 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				deactivate();
 				return;
 			}
+			
+			boolean wasActive= fCursor != null;
 				
 			deactivate();
-			
-			IAction action= getAction("OpenEditor");  //$NON-NLS-1$
-			if (action == null)
-				return;
-				
-			action.run();			
+
+			if (wasActive) {
+				IAction action= getAction("OpenEditor");  //$NON-NLS-1$
+				if (action != null)
+					action.run();
+			}
 		}
 
 		/*

@@ -1022,7 +1022,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		text= PreferencesMessages.getString("JavaEditorPreferencePage.navigation.browserLikeLinksKeyModifier"); //$NON-NLS-1$
 		fBrowserLikeLinksKeyModifierText= addTextField(composite, text, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, 20, 0, false);
 		
-		fBrowserLikeLinksKeyModifierText.setEnabled(fBrowserLikeLinksCheckBox.getSelection());
+
+		boolean enabled= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS);
+		fBrowserLikeLinksKeyModifierText.setEnabled(enabled);
 		
 		fBrowserLikeLinksKeyModifierText.addKeyListener(new KeyListener() {
 			private boolean isModifierCandidate;
