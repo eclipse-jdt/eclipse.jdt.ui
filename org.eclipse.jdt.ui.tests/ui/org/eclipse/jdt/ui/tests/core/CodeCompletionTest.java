@@ -19,6 +19,7 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
 import org.eclipse.ui.IEditorPart;
 
@@ -57,7 +58,7 @@ public class CodeCompletionTest extends CoreTests {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new CodeCompletionTest("test1"));
+			suite.addTest(new CodeCompletionTest("testSetterCompletion1"));
 			return new ProjectTestSetup(suite);
 		}	
 	}
@@ -71,13 +72,19 @@ public class CodeCompletionTest extends CoreTests {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "1");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
+		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
 		JavaCore.setOptions(options);
 		
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, true);
 
-		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.OVERRIDECOMMENT).setPattern("/* (non-Javadoc)\n * ${see_to_overridden}\n */");	
-		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.METHODSTUB).setPattern("//TODO\n${body_statement}");
+		TemplateStore codeTemplateStore= JavaPlugin.getDefault().getCodeTemplateStore();
+		codeTemplateStore.findTemplate(CodeTemplateContextType.OVERRIDECOMMENT).setPattern("/* (non-Javadoc)\n * ${see_to_overridden}\n */");	
+		codeTemplateStore.findTemplate(CodeTemplateContextType.METHODSTUB).setPattern("//TODO\n${body_statement}");
+		codeTemplateStore.findTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT).setPattern("/**\n * Constructor.\n */");
+		codeTemplateStore.findTemplate(CodeTemplateContextType.METHODCOMMENT).setPattern("/**\n * Method.\n */");
+		codeTemplateStore.findTemplate(CodeTemplateContextType.CONSTRUCTORSTUB).setPattern("//TODO\n${body_statement}");
+
 	}
 
 
@@ -198,7 +205,7 @@ public class CodeCompletionTest extends CoreTests {
 	}	
 
 
-	public void testMethodStubCompletion1() throws Exception {
+	public void testOverrideCompletion1() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
@@ -269,7 +276,7 @@ public class CodeCompletionTest extends CoreTests {
 		
 	}
 	
-	public void testMethodStubCompletion2() throws Exception {
+	public void testOverrideCompletion2() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
@@ -339,7 +346,7 @@ public class CodeCompletionTest extends CoreTests {
 		}		
 	}
 	
-	public void testMethodStubCompletion3() throws Exception {
+	public void testOverrideCompletion3() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
@@ -406,5 +413,272 @@ public class CodeCompletionTest extends CoreTests {
 		} finally {
 			part.getSite().getPage().closeAllEditors(false);
 		}		
+	}
+	
+	
+	public void testGetterCompletion1() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.io.BufferedWriter;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    private BufferedWriter fWriter;\n");
+		buf.append("    get//here\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+		
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		IEditorPart part= EditorUtility.openInEditor(cu);
+		try {
+			String str= "//here";
+
+			int offset= contents.indexOf(str);
+
+			ResultCollector collector= new ResultCollector();
+			collector.reset(offset, cu.getJavaProject(), cu);
+			collector.setViewer(null);
+			collector.setReplacementLength(0);
+			collector.setPreventEating(true);
+
+			cu.codeComplete(offset, collector);
+
+			JavaCompletionProposal[] proposals= collector.getResults();
+
+			JavaCompletionProposal proposal= null;
+
+			for (int i= 0; i < proposals.length; i++) {
+				if (proposals[i].getDisplayString().startsWith("getWriter")) {
+					proposal= proposals[i];
+				}
+			}
+			assertNotNull("no proposal for getWriter()", proposal);
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			proposal.apply(doc);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.io.BufferedWriter;\n");
+			buf.append("\n");
+			buf.append("public class A {\n");
+			buf.append("    private BufferedWriter fWriter;\n");
+			buf.append("    /**\n");
+			buf.append("     * @return Returns the writer.\n");
+			buf.append("     */\n");
+			buf.append("    public BufferedWriter getWriter() {\n");
+			buf.append("        return fWriter;\n");
+			buf.append("    }//here\n");
+			buf.append("}\n");
+			assertEqualString(doc.get(), buf.toString()); 
+		} finally {
+			part.getSite().getPage().closeAllEditors(false);
+		}		
+	}
+	
+	public void testSetterCompletion1() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.io.BufferedWriter;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    private BufferedWriter writer;\n");
+		buf.append("    se//here\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+		
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		IEditorPart part= EditorUtility.openInEditor(cu);
+		try {
+			String str= "//here";
+
+			int offset= contents.indexOf(str);
+
+			ResultCollector collector= new ResultCollector();
+			collector.reset(offset, cu.getJavaProject(), cu);
+			collector.setViewer(null);
+			collector.setReplacementLength(0);
+			collector.setPreventEating(true);
+
+			cu.codeComplete(offset, collector);
+
+			JavaCompletionProposal[] proposals= collector.getResults();
+
+			JavaCompletionProposal proposal= null;
+
+			for (int i= 0; i < proposals.length; i++) {
+				if (proposals[i].getDisplayString().startsWith("setWriter")) {
+					proposal= proposals[i];
+				}
+			}
+			assertNotNull("no proposal for setWriter()", proposal);
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			proposal.apply(doc);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.io.BufferedWriter;\n");
+			buf.append("\n");
+			buf.append("public class A {\n");
+			buf.append("    private BufferedWriter writer;\n");
+			buf.append("    /**\n");
+			buf.append("     * @param writer The writer to set.\n");
+			buf.append("     */\n");
+			buf.append("    public void setWriter(BufferedWriter writer) {\n");
+			buf.append("        this.writer = writer;\n");
+			buf.append("    }//here\n");
+			buf.append("}\n");
+			assertEqualString(doc.get(), buf.toString()); 
+		} finally {
+			part.getSite().getPage().closeAllEditors(false);
+		}		
+	}
+	
+	public void testMethodCompletion() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.io.BufferedWriter;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    private BufferedWriter writer;\n");
+		buf.append("    foo//here\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+		
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		IEditorPart part= EditorUtility.openInEditor(cu);
+		try {
+			String str= "//here";
+
+			int offset= contents.indexOf(str);
+
+			ResultCollector collector= new ResultCollector();
+			collector.reset(offset, cu.getJavaProject(), cu);
+			collector.setViewer(null);
+			collector.setReplacementLength(0);
+			collector.setPreventEating(true);
+
+			cu.codeComplete(offset, collector);
+
+			JavaCompletionProposal[] proposals= collector.getResults();
+
+			JavaCompletionProposal proposal= null;
+
+			for (int i= 0; i < proposals.length; i++) {
+				if (proposals[i].getDisplayString().startsWith("foo")) {
+					proposal= proposals[i];
+				}
+			}
+			assertNotNull("no proposal for foo()", proposal);
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			proposal.apply(doc);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.io.BufferedWriter;\n");
+			buf.append("\n");
+			buf.append("public class A {\n");
+			buf.append("    private BufferedWriter writer;\n");
+			buf.append("    /**\n");
+			buf.append("     * Method.\n");
+			buf.append("     */\n");
+			buf.append("    private void foo() {\n");
+			buf.append("        //TODO\n");
+			buf.append("\n");
+			buf.append("    }//here\n");
+			buf.append("}\n");
+			assertEqualString(doc.get(), buf.toString()); 
+		} finally {
+			part.getSite().getPage().closeAllEditors(false);
+		}		
+	}
+	
+	
+	public void testConstructorCompletion() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.io.BufferedWriter;\n");
+		buf.append("\n");
+		buf.append("public class MyClass {\n");
+		buf.append("    private BufferedWriter writer;\n");
+		buf.append("    //here\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+		
+		ICompilationUnit cu= pack1.createCompilationUnit("MyClass.java", contents, false, null);
+
+		IEditorPart part= EditorUtility.openInEditor(cu);
+		try {
+			String str= "//here";
+
+			int offset= contents.indexOf(str);
+
+			ResultCollector collector= new ResultCollector();
+			collector.reset(offset, cu.getJavaProject(), cu);
+			collector.setViewer(null);
+			collector.setReplacementLength(0);
+			collector.setPreventEating(true);
+
+			cu.codeComplete(offset, collector);
+
+			JavaCompletionProposal[] proposals= collector.getResults();
+
+			JavaCompletionProposal proposal= null;
+
+			for (int i= 0; i < proposals.length; i++) {
+				if (proposals[i].getDisplayString().startsWith("MyClass")) {
+					proposal= proposals[i];
+				}
+			}
+			assertNotNull("no proposal for MyClass()", proposal);
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			proposal.apply(doc);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.io.BufferedWriter;\n");
+			buf.append("\n");
+			buf.append("public class MyClass {\n");
+			buf.append("    private BufferedWriter writer;\n");
+			buf.append("    /**\n");
+			buf.append("     * Constructor.\n");
+			buf.append("     */\n");
+			buf.append("    public MyClass() {\n");
+			buf.append("        //TODO\n");
+			buf.append("\n");
+			buf.append("    }//here\n");
+			buf.append("}\n");
+			assertEqualString(doc.get(), buf.toString()); 
+		} finally {
+			part.getSite().getPage().closeAllEditors(false);
+		}		
 	}	
+
+
+	
 }

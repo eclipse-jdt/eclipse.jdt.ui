@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.ITextViewer;
@@ -491,13 +490,11 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 	}	
 	
 	protected ImageDescriptor getDeprecatedDescriptor(ImageDescriptor descriptor) {
-		Point size= new Point(16, 16);
-		return new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.WARNING, size);	    
+		return new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.DEPRECATED, JavaElementImageProvider.SMALL_SIZE);	    
 	}
 	
 	protected ImageDescriptor getStaticDescriptor(ImageDescriptor descriptor) {
-		Point size= new Point(16, 16);
-		return new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, size);
+		return new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
 	}
 	
 	protected JavaCompletionProposal createCompletion(int start, int end, String completion, ImageDescriptor descriptor, String name, int relevance) {
