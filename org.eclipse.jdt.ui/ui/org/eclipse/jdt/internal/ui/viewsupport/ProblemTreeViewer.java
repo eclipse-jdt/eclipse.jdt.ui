@@ -93,6 +93,14 @@ public class ProblemTreeViewer extends TreeViewer {
 	}
 
 	/*
+	 * @see StructuredViewer#unmapAllElements()
+	 */
+	protected void unmapAllElements() {
+		fResourceToItemMapper.clearMap();
+		super.unmapAllElements();
+	}
+
+	/*
 	 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
 	 */
 	protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {

@@ -94,6 +94,14 @@ public class ProblemTableViewer extends TableViewer {
 		}		
 		super.unmapElement(element, item);
 	}
+
+	/*
+	 * @see StructuredViewer#unmapAllElements()
+	 */
+	protected void unmapAllElements() {
+		fResourceToItemMapper.clearMap();
+		super.unmapAllElements();
+	}
 	
 	/*
 	 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
