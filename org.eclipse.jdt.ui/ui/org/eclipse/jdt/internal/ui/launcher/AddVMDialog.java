@@ -213,9 +213,13 @@ public class AddVMDialog extends StatusDialog {
 	}
 
 	protected IStatus validateVMName() {
+		String name= fVMName.getText();
+		if (name == null || "".equals(name.trim())) {
+			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "You must enter a name", null);
+		}
 		IVMInstall[] vms= getVMType().getVMInstalls();
 		for (int i= 0; i < vms.length; i++) {
-			if (vms[i].getName().equals(fVMName.getText())) {
+			if (vms[i].getName().equals(name)) {
 				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The name is already ussed", null);
 			}
 		}
@@ -266,7 +270,7 @@ public class AddVMDialog extends StatusDialog {
 				zip= new ZipFile(f);
 				ZipEntry e= zip.getEntry("java/lang/Object.class");
 				if (e == null)
-					return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The selected file does't contain java.lang.Object.class", null);
+					return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The selected file doesn't contain java.lang.Object.class", null);
 			} catch (IOException e) {
 				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "Exception while accessing zip file", e);
 			} finally {
