@@ -131,6 +131,10 @@ public class RippleMethodFinder2 {
 		
 		findAllDeclarations(new SubProgressMonitor(pm, 1), owner);
 		//TODO: report binary methods to an error status
+		//TODO: report assertion as error status and fall back to only return fMethod
+		//check for bug 81058: 
+		Assert.isTrue(fDeclarations.contains(fMethod), "Search for method declaration did not find original element"); //$NON-NLS-1$
+		
 		createHierarchyOfDeclarations(new SubProgressMonitor(pm, 1));
 		createTypeToMethod();
 		createUnionFind();
