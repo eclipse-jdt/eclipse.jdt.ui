@@ -537,21 +537,22 @@ public class ASTFlattener extends GenericVisitor {
 			this.fBuffer.append(" ");//$NON-NLS-1$
 		}
 		this.fBuffer.append("{");//$NON-NLS-1$
-		BodyDeclaration prev= null;
-		for (Iterator it= node.bodyDeclarations().iterator(); it.hasNext();) {
-			BodyDeclaration d= (BodyDeclaration) it.next();
-			if (prev instanceof EnumConstantDeclaration) {
-				// enum constant declarations do not include punctuation
-				if (d instanceof EnumConstantDeclaration) {
-					// enum constant declarations are separated by commas
-					this.fBuffer.append(", ");//$NON-NLS-1$
-				} else {
-					// semicolon separates last enum constant declaration from 
-					// first class body declarations
-					this.fBuffer.append("; ");//$NON-NLS-1$
-				}
-			}
+		for (Iterator it = node.enumConstants().iterator(); it.hasNext(); ) {
+			EnumConstantDeclaration d = (EnumConstantDeclaration) it.next();
 			d.accept(this);
+			// enum constant declarations do not include punctuation
+			if (it.hasNext()) {
+				// enum constant declarations are separated by commas
+				this.fBuffer.append(", ");//$NON-NLS-1$
+			}
+		}
+		if (!node.bodyDeclarations().isEmpty()) {
+			this.fBuffer.append("; ");//$NON-NLS-1$
+			for (Iterator it = node.bodyDeclarations().iterator(); it.hasNext(); ) {
+				BodyDeclaration d = (BodyDeclaration) it.next();
+				d.accept(this);
+				// other body declarations include trailing punctuation
+			}
 		}
 		this.fBuffer.append("}");//$NON-NLS-1$
 		return false;
