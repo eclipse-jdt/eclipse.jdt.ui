@@ -324,8 +324,8 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
 	}
 
 	public void test48() throws Exception{
-		printTestDisabledMessage("regression test for Bug#22938");
-//		helper1("newname", true, 4, 16, 4, 20);
+//		printTestDisabledMessage("regression test for Bug#22938");
+		helper1("newname", true, 4, 16, 4, 20);
 	}
 	
 // -----
