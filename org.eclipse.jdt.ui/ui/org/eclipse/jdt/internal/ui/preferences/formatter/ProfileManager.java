@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.formatter.DefaultCodeFormatterOptions;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 
@@ -549,7 +548,7 @@ public class ProfileManager extends Observable {
 	 * @return Returns the settings for the Java Conventions profile.
 	 */
 	public static Map getJavaSettings() {
-		final Map options= DefaultCodeFormatterOptions.getJavaConventionsSettings().getMap();
+		final Map options= DefaultCodeFormatterConstants.getJavaConventionsSettings();
 		new CommentFormattingContext().storeToMap(getUIPreferenceStore(), options, true);
 
 		ProfileVersioner.setLatestCompliance(options);
