@@ -401,7 +401,7 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 		return PreviewWizardPage.PAGE_NAME.equals(fCurrentPage.getName());
 	}
 	
-	private void previewPressed(Button button) {
+	private void previewPressed() {
 		IWizardPage current= fCurrentPage;
 		fCurrentPage= fCurrentPage.getNextPage();
 		if (current == fCurrentPage)
@@ -531,7 +531,7 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 			Button preview= createButton(parent, PREVIEW_ID, RefactoringMessages.getString("RefactoringWizardDialog2.buttons.preview.label"), false); //$NON-NLS-1$
 			preview.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					previewPressed((Button)e.widget);
+					previewPressed();
 				}
 			});
 		}

@@ -29,7 +29,7 @@ class NLSSubstitutionContentProvider implements IStructuredContentProvider {
 		return fHolder.getSubstitutions();
 	}
 	
-	public NLSLine[] getLines(Object inputElement) {
+	public NLSLine[] getLines() {
 		return fHolder.getLines();
 	}
 	

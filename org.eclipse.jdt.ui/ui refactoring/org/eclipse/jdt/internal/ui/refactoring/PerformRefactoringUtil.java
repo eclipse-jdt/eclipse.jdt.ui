@@ -64,7 +64,7 @@ public class PerformRefactoringUtil {
 			if (t instanceof CoreException) {
 				IStatus status= ((CoreException)t).getStatus();
 				if (status != null && status.getCode() == IJavaStatusConstants.CHANGE_ABORTED && status.getPlugin().equals(status.getPlugin())) {
-					success= handleChangeAbortException(execContext, context, (ChangeAbortException)status.getException());
+					success= handleChangeAbortException(execContext, context);
 					return true;
 				}
 			}
@@ -80,7 +80,7 @@ public class PerformRefactoringUtil {
 		return true;
 	}
 	
-	private static boolean handleChangeAbortException(IRunnableContext execContext, final ChangeContext context, ChangeAbortException exception) {
+	private static boolean handleChangeAbortException(IRunnableContext execContext, final ChangeContext context) {
 		if (!context.getTryToUndo())
 			return false; // Return false since we handle an unexpected exception and we don't have any
 						  // idea in which state the workbench is.

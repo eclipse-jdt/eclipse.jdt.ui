@@ -123,7 +123,7 @@ public class RenameAction extends SelectionDispatchAction {
 			return;
 		if (fRenameTemp != null && fRenameTemp.canRun(selection))
 			fRenameTemp.run(selection);
-		else if (fRenameJavaElement.canRun(selection))
+		else if (fRenameJavaElement.canRun())
 			fRenameJavaElement.run(selection);
 		else
 			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("RenameAction.rename"), RefactoringMessages.getString("RenameAction.unavailable"));  //$NON-NLS-1$ //$NON-NLS-2$

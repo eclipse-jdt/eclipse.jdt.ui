@@ -108,7 +108,7 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 	protected void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
-		if (canRun(selection)){
+		if (canRun()){
 			startRefactoring();	
 		} else {
 			String unavailable= RefactoringMessages.getString("ConvertNestedToTopAction.To_activate"); //$NON-NLS-1$
@@ -137,7 +137,7 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 		}
 	}
 		
-	private boolean canRun(ITextSelection selection){
+	private boolean canRun(){
 		IJavaElement[] elements= resolveElements();
 		if (elements.length != 1)
 			return false;

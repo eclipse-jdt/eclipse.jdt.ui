@@ -653,7 +653,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private void initializeRefactoring(){
 		NLSRefactoring ref= (NLSRefactoring) getRefactoring();
 		ref.setNlsSubstitutions(addKeyPrefix(getNlsSubstutions(), fPrefixField.getText()));
-		ref.setLines(getContentProvider().getLines(getCu()));
+		ref.setLines(getContentProvider().getLines());
 	}
 		
 	public boolean performFinish(){

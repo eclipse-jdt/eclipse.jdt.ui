@@ -135,7 +135,7 @@ abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 		
 		if (fPreflightStatus != null && fPreflightStatus.hasError()) {
 			String name= getName();
-			MultiStatus status = createMultiStatus(name);
+			MultiStatus status = createMultiStatus();
 			String message= RefactoringMessages.getFormattedString("UndoManagerAction.cannot_be_executed", name); //$NON-NLS-1$
 			ErrorDialog error= new ErrorDialog(parent, name, message, status, IStatus.ERROR) {
 				public void create() {
@@ -152,7 +152,7 @@ abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 		fPreflightStatus= status;
 	}
 	
-	private MultiStatus createMultiStatus(String name) {
+	private MultiStatus createMultiStatus() {
 		MultiStatus status= new MultiStatus(
 			JavaPlugin.getPluginId(), 
 			IStatus.ERROR,

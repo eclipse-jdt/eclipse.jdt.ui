@@ -57,7 +57,7 @@ public class RefactoringStarter {
 	public Object activate(Refactoring refactoring, RefactoringWizard wizard, Shell parent, String dialogTitle, boolean mustSaveEditors) throws JavaModelException {
 		if (! canActivate(mustSaveEditors))
 			return null;
-		RefactoringStatus activationStatus= checkActivation(refactoring, dialogTitle);
+		RefactoringStatus activationStatus= checkActivation(refactoring);
 		if (activationStatus.hasFatalError()){
 			return RefactoringErrorDialogUtil.open(dialogTitle, activationStatus);
 		} else {
@@ -80,7 +80,7 @@ public class RefactoringStarter {
 		if (! checkReadOnly(element))
 			return null;
 		Refactoring refactoring= (Refactoring)renameRefactoring;
-		RefactoringStatus activationStatus= checkActivation(refactoring, dialogTitle);
+		RefactoringStatus activationStatus= checkActivation(refactoring);
 		if (activationStatus.hasFatalError()){
 			return RefactoringErrorDialogUtil.open(dialogTitle, activationStatus);
 		} else{
@@ -111,7 +111,7 @@ public class RefactoringStarter {
 		} 		
 	}
 	
-	private RefactoringStatus checkActivation(Refactoring refactoring, String errorDialogTitle){		
+	private RefactoringStatus checkActivation(Refactoring refactoring){		
 		try {
 			CheckConditionsOperation cco= new CheckConditionsOperation(refactoring, CheckConditionsOperation.ACTIVATION);
 			IRunnableContext context= new BusyIndicatorRunnableContext();

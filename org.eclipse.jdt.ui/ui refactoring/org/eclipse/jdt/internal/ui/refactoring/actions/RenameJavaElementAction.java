@@ -103,7 +103,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	
 	protected void run(ITextSelection selection) {
 		try {
-			IJavaElement element= getJavaElement(selection);
+			IJavaElement element= getJavaElement();
 			if (element != null) {
 				RenameSupport support= createGeneric(element, null, RenameSupport.UPDATE_REFERENCES);
 				if (support.preCheck().isOK()) {
@@ -117,8 +117,8 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		MessageDialog.openInformation(getShell(), RefactoringMessages.getString("RenameJavaElementAction.name"), RefactoringMessages.getString("RenameJavaElementAction.not_available"));  //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
-	public boolean canRun(ITextSelection selection) {
-		IJavaElement element= getJavaElement(selection);
+	public boolean canRun() {
+		IJavaElement element= getJavaElement();
 		if (element == null)
 			return false;
 		try {
@@ -147,7 +147,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		support.openDialog(getShell());
 	}
 	
-	private IJavaElement getJavaElement(ITextSelection selection) {
+	private IJavaElement getJavaElement() {
 		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(), RefactoringMessages.getString("RenameJavaElementAction.name")); //$NON-NLS-1$
 		if (elements == null || elements.length != 1)
 			return null;

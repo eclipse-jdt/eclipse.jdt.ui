@@ -83,10 +83,10 @@ public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */		
 	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(checkEnabled(selection));
+		setEnabled(checkEnabled());
 	}
 	
-	private boolean checkEnabled(ITextSelection selection) {
+	private boolean checkEnabled() {
 		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
 	}
 	

@@ -118,7 +118,7 @@ public class PullUpAction extends SelectionDispatchAction{
 	protected void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
-		if (canRun(selection)){
+		if (canRun()){
 			startRefactoring();	
 		} else {
 			String unavailable= RefactoringMessages.getString("PullUpAction.unavailable"); //$NON-NLS-1$
@@ -139,7 +139,7 @@ public class PullUpAction extends SelectionDispatchAction{
 		return shouldAcceptElements(selection.toArray());
 	}
 		
-	private boolean canRun(ITextSelection selection){
+	private boolean canRun(){
 		try {
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
 			if (element == null)

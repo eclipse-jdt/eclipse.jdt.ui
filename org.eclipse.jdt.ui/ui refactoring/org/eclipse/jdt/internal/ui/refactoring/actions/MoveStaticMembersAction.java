@@ -91,7 +91,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
      * @see SelectionDispatchAction#run(ITextSelection)
      */
 	protected void run(ITextSelection selection) {
-		if (canRun(selection)){
+		if (canRun()){
 			startRefactoring();	
 		} else {
 			String unavailable= RefactoringMessages.getString("MoveMembersAction.unavailable"); //$NON-NLS-1$;
@@ -112,7 +112,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		return shouldAcceptElements(selection.toArray());
 	}
 		
-	private boolean canRun(ITextSelection selection){
+	private boolean canRun(){
 		try {
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
 			if (element == null)
