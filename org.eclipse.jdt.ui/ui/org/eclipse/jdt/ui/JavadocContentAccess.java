@@ -29,6 +29,8 @@ import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocCommentReader;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
+
 /**
  * Helper needed get the content of a Javadoc comment. 
  *
@@ -43,6 +45,7 @@ public class JavadocContentAccess {
 	 * @param member The member to get the Javadoc of.
 	 * @param allowInherited For methods with no (Javadoc) comment, the comment of the overridden class
 	 * is returned if <code>allowInherited</code> is <code>true</code>.
+	 * @throws JavaModelException is thrown when the elements javadoc can not be accessed
 	 */
 	public static Reader getContentReader(IMember member, boolean allowInherited) throws JavaModelException {
 		IBuffer buf= member.isBinary() ? member.getClassFile().getBuffer() : member.getCompilationUnit().getBuffer();
@@ -80,6 +83,23 @@ public class JavadocContentAccess {
 		if (allowInherited && (member.getElementType() == IJavaElement.METHOD)) {
 			IMethod method= (IMethod) member;
 			return findDocInHierarchy(method.getDeclaringType(), method.getElementName(), method.getParameterTypes(), method.isConstructor());
+		}
+		return null;
+	}
+	
+	/**
+	 * Gets a reader for an IMember's Javadoc comment content from the source attachment.
+	 * and renders the tags in HTML. 
+	 * Returns null if the member does not contain a Javadoc comment or if no source is available.
+	 * @param member The member to get the Javadoc of.
+	 * @param allowInherited For methods with no (Javadoc) comment, the comment of the overridden class
+	 * is returned if <code>allowInherited</code> is <code>true</code>.
+	 * @throws JavaModelException is thrown when the elements javadoc can not be accessed
+	 */
+	public Reader getHTMLContentReader(IMember member, boolean allowInherited) throws JavaModelException {
+		Reader contentReader= getContentReader(member, allowInherited);
+		if (contentReader != null) {
+			return new JavaDoc2HTMLTextReader(contentReader);
 		}
 		return null;
 	}
