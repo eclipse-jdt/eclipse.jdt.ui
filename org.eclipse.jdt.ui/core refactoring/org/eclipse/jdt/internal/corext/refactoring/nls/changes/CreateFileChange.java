@@ -105,7 +105,12 @@ public class CreateFileChange extends Change {
 	}
 	
 	protected IFile getOldFile(IProgressMonitor pm){
-		return ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
+		pm.beginTask("", 1);
+		try{
+			return ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
+		} finally{
+			pm.done();
+		}
 	}
 
 	private InputStream getInputStream(){
