@@ -10,6 +10,7 @@ class R {
 	
 	static class S extends R {
 		private static final int CONSTANT= R.instance.rF();
+
 		int f(){
 			int d= CONSTANT;		
 			return 0;	

@@ -2,6 +2,7 @@
 package p;
 class A {
 	private static final int CONSTANT= 100;
+
 	void f() {
 		int i= CONSTANT;
 	}

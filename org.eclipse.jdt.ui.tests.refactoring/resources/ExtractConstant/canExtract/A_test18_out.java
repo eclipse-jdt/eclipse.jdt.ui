@@ -2,6 +2,7 @@
 package p;
 class ClassName {
 	private static final int CONSTANT= 0;
+
 	int f() {
 		return ClassName.CONSTANT;
 	}

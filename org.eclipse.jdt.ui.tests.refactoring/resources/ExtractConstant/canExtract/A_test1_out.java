@@ -2,6 +2,7 @@
 package p;
 class A {
 	private static final int CONSTANT= 1 + 2;
+
 	void f() {
 		int i= CONSTANT;
 	}

@@ -4,4 +4,5 @@ class EndsOnSameLine {
 		System.out.println(CONSTANT);
 	}
 
-	static final String FOO= "foo"; private static final String CONSTANT= FOO + FOO;} // $NON-NLS-1$
+	static final String FOO= "foo";
+	private static final String CONSTANT= FOO + FOO;} // $NON-NLS-1$

@@ -3,6 +3,7 @@ package p;
 
 class A {
 	private static final int CONSTANT= 3 + 1;
+
 	void foob() {
 		int a= 2 * 3 + CONSTANT;
 
