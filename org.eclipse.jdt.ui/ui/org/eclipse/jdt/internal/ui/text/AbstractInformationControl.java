@@ -59,6 +59,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tracker;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
@@ -330,6 +331,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	private Listener fDeactivateListener;
 	private boolean fIsDecativateListenerActive= false;
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
+	private Menu fMenu;
 
 	
 	/**
@@ -475,7 +477,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			 * @see org.eclipse.swt.widgets.Listener#handleEvent(org.eclipse.swt.widgets.Event)
 			 */
 			public void handleEvent(Event event) {
-				if (fIsDecativateListenerActive)
+				if (fIsDecativateListenerActive)// && (fMenu == null || !fMenu.isVisible()))
 					dispose();
 			}
 		};
@@ -486,7 +488,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			 * @see org.eclipse.swt.events.ShellAdapter#shellActivated(org.eclipse.swt.events.ShellEvent)
 			 */
 			public void shellActivated(ShellEvent e) {
-				if (e.widget == fShell)
+				if (e.widget == fShell && fShell.getShells().length == 0)
 					fIsDecativateListenerActive= true;
 			}
 		});
@@ -633,14 +635,13 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	private void showViewMenu( ) {
 		fIsDecativateListenerActive= false;
 		
-		Menu aMenu = getViewMenuManager().createContextMenu(fShell);
-		
+		fMenu= getViewMenuManager().createContextMenu(fShell);
 		Rectangle bounds = fToolBar.getBounds();
 		Point topLeft = new Point(bounds.x, bounds.y + bounds.height);
 		topLeft = fShell.toDisplay(topLeft);
-		aMenu.setLocation(topLeft.x, topLeft.y);
+		fMenu.setLocation(topLeft.x, topLeft.y);
 
-		aMenu.setVisible(true);
+		fMenu.setVisible(true);
 	}
 	
 	private void createStatusField(Composite parent) {
@@ -841,6 +842,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 * {@inheritDoc}
 	 */
 	public void setVisible(boolean visible) {
+		if (visible || fIsDecativateListenerActive)
 			fShell.setVisible(visible);
 	}
 
@@ -852,9 +854,6 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			fShell.dispose();
 		else
 			widgetDisposed(null);
-		
-		if (fViewMenuManager != null)
-			fViewMenuManager.dispose();
 	}
 	
 	/**
@@ -873,6 +872,10 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		fComposite= null;
 		fFilterText= null;
 		fStatusTextFont= null;
+		
+		if (fViewMenuManager != null)
+			fViewMenuManager.dispose();
+
 	}
 
 	/**
