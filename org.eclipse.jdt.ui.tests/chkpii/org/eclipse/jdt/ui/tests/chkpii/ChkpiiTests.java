@@ -140,7 +140,11 @@ public class ChkpiiTests extends TestCase {
 		String filePath= toLocation(getClass().getResource("ignoreFiles.txt"));
 
 		StringTokenizer tokenizer= new StringTokenizer(filePath, File.separator);
-		String path= tokenizer.nextToken();
+		
+		String path= "";
+		if (filePath.charAt(0) != File.pathSeparatorChar)
+			path= tokenizer.nextToken();
+			
 		while (tokenizer.hasMoreTokens()) {
 			String token= tokenizer.nextToken();
 			if (token.equals("org.eclipse.jdt.ui.tests"))
