@@ -436,6 +436,9 @@ public final class ImportsStructure implements IImportsStructure {
 			buf.append('<');
 			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
 			for (int i= 0; i < typeArguments.length; i++) {
+				if (i > 0) {
+					buf.append(", "); //$NON-NLS-1$
+				}
 				buf.append(addImport(typeArguments[i])); // recursive
 			}
 			buf.append('>');
