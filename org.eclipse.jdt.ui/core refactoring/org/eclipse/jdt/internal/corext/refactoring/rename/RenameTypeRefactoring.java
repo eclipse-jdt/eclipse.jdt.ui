@@ -222,7 +222,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	 * Method declared in IQualifiedNameUpdatingRefactoring
 	 */	
 	public boolean canEnableQualifiedNameUpdating() {
-		return !fType.getPackageFragment().isDefaultPackage();
+		return !fType.getPackageFragment().isDefaultPackage() && !(fType.getParent() instanceof IType);
 	}
 	
 	/* non java-doc
@@ -830,8 +830,8 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	
 	private void computeQualifiedNameMatches(IProgressMonitor pm) throws JavaModelException {
 		IPackageFragment fragment= fType.getPackageFragment();
-		fQualifiedNameFinder= new QualifiedNameFinder(fType.getFullyQualifiedName(),  fragment.getElementName() + "." + fNewName,
-			fFilePatterns, fType.getJavaProject().getProject());
-		fQualifiedNameFinder.process(pm);
+		fQualifiedNameFinder= new QualifiedNameFinder();
+		fQualifiedNameFinder.process(fType.getFullyQualifiedName(),  fragment.getElementName() + "." + fNewName,
+			fFilePatterns, fType.getJavaProject().getProject(), pm);
 	}	
 }

@@ -47,24 +47,98 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitCh
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
-public class MoveRefactoring extends ReorgRefactoring {
+public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameUpdatingRefactoring {
 	
 	private boolean fUpdateReferences;
+	private boolean fUpdateQualifiedNames;
+	private String fFilePatterns;
+	
 	private TextChangeManager fChangeManager;
+	private QualifiedNameFinder fQualifiedNameFinder;
 	
 	private final CodeGenerationSettings fSettings;
 	
-	public MoveRefactoring(List elements, CodeGenerationSettings settings){
+	public MoveRefactoring(List elements, CodeGenerationSettings settings) {
 		super(elements);
 		Assert.isNotNull(settings);
 		fSettings= settings;
+		fQualifiedNameFinder= new QualifiedNameFinder();
 	}
 		
+	/* non java-doc
+	 * Method declared in IQualifiedNameUpdatingRefactoring
+	 */	
+	public boolean canEnableQualifiedNameUpdating() {
+		Object destination= getDestination();
+		if (!(destination instanceof IPackageFragment))
+			return false;
+		if (((IPackageFragment)destination).isDefaultPackage())
+			return false;
+		return canUpdateQualifiedNames();
+	}
+	
+	public boolean canUpdateQualifiedNames() {
+		List elements= getElementsToReorg();
+		Class last= null;
+		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (last == null) {
+				IJavaElement parent= null;
+				if (element instanceof ICompilationUnit) {
+					parent= ((IJavaElement)element).getParent();
+					last= element.getClass();
+				} else if (element instanceof IType) {
+					parent= ((IJavaElement)element).getParent();
+					last= element.getClass();
+				} else {
+					return false;
+				}
+				if (parent instanceof IPackageFragment && ((IPackageFragment)parent).isDefaultPackage())
+					return false;
+			} else {
+				if (!last.equals(element.getClass()))
+					return false;
+			}
+		}
+		return true;
+	}
+	
+	/* non java-doc
+	 * Method declared in IQualifiedNameUpdatingRefactoring
+	 */	
+	public boolean getUpdateQualifiedNames() {
+		return fUpdateQualifiedNames;
+	}
+	
+	/* non java-doc
+	 * Method declared in IQualifiedNameUpdatingRefactoring
+	 */	
+	public void setUpdateQualifiedNames(boolean update) {
+		fUpdateQualifiedNames= update;
+	}
+	
+	/* non java-doc
+	 * Method declared in IQualifiedNameUpdatingRefactoring
+	 */	
+	public String getFilePatterns() {
+		return fFilePatterns;
+	}
+	
+	/* non java-doc
+	 * Method declared in IQualifiedNameUpdatingRefactoring
+	 */	
+	public void setFilePatterns(String patterns) {
+		Assert.isNotNull(patterns);
+		fFilePatterns= patterns;
+	}
+	
 	/* non java-doc
 	 * @see IRefactoring#getName()
 	 */
@@ -76,7 +150,7 @@ public class MoveRefactoring extends ReorgRefactoring {
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
 	public final RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2); //$NON-NLS-1$
+		pm.beginTask("", 3); //$NON-NLS-1$
 		try{
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkReferencesToNotPublicTypes(new SubProgressMonitor(pm, 1)));
@@ -188,7 +262,10 @@ public class MoveRefactoring extends ReorgRefactoring {
 	}
 	
 	private IFile[] getAllFilesToModify() throws CoreException{
-		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
+		List result= new ArrayList();
+		result.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
+		result.addAll(Arrays.asList(fQualifiedNameFinder.getAllFiles()));
+		return (IFile[]) result.toArray(new IFile[result.size()]);
 	}
 	
 	private RefactoringStatus validateModifiesFiles() throws CoreException{
@@ -324,42 +401,67 @@ public class MoveRefactoring extends ReorgRefactoring {
 	 * @see IRefactoring#creteChange(IProgressMonitor)
 	 */	
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		if (! fUpdateReferences)
-			return super.createChange(pm);
-		
-		pm.beginTask("", 2); //$NON-NLS-1$
-		try{
-			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("MoveRefactoring.reorganize_elements"), 2){ //$NON-NLS-1$
-				public boolean isUndoable(){ //XX this can be undoable in some cases. should enable it at some point.
-					return false; 
+		if (! fUpdateReferences) {
+			if (! fUpdateQualifiedNames) {
+				return super.createChange(pm);
+			} else {
+				pm.beginTask("", 2); //$NON-NLS-1$
+				IChange change= super.createChange(new SubProgressMonitor(pm, 1));
+				CompositeChange result= new CompositeChange(RefactoringCoreMessages.getString("MoveRefactoring.reorganize_elements"), 2) { //$NON-NLS-1$
+					public boolean isUndoable(){ //XX this can be undoable in some cases. should enable it at some point.
+						return false; 
+					}
+				};
+				if (change instanceof ICompositeChange) {
+					addAllChildren(result, (ICompositeChange)change);		
+				} else {
+					result.add(change); 
 				}
-			};
-			
-			//XX workaround for bug 13558
-			//<workaround>
-			if (fChangeManager == null){
-				fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
-				try {
-					RefactoringStatus status= validateModifiesFiles();
-					if (status.hasFatalError())
-						fChangeManager= new TextChangeManager();
-				} catch(CoreException e) {
-					throw new JavaModelException(e);
-				}
-			}	
-			//</workaround>
+				computeQualifiedNameMatches(new SubProgressMonitor(pm, 1));
+				result.addAll(fQualifiedNameFinder.getAllChanges());
 				
-			addAllChildren(composite, new CompositeChange(RefactoringCoreMessages.getString("MoveRefactoring.reorganize_elements"), fChangeManager.getAllChanges())); //$NON-NLS-1$
+				return result;
+			}
+		} else {
+			pm.beginTask("", 2 + (fUpdateQualifiedNames ? 1 : 0)); //$NON-NLS-1$
+			try{
+				CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("MoveRefactoring.reorganize_elements"), 2){ //$NON-NLS-1$
+					public boolean isUndoable(){ //XX this can be undoable in some cases. should enable it at some point.
+						return false; 
+					}
+				};
 			
-			IChange fileMove= super.createChange(new SubProgressMonitor(pm, 1));
-			if (fileMove instanceof ICompositeChange){
-				addAllChildren(composite, (ICompositeChange)fileMove);		
-			} else{
-				composite.add(fileMove);
-			}	
-			return composite;
-		} finally{
-			pm.done();
+				//XX workaround for bug 13558
+				//<workaround>
+				if (fChangeManager == null){
+					fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
+					try {
+						RefactoringStatus status= validateModifiesFiles();
+						if (status.hasFatalError())
+							fChangeManager= new TextChangeManager();
+					} catch(CoreException e) {
+						throw new JavaModelException(e);
+					}
+				}	
+				//</workaround>
+				
+				addAllChildren(composite, new CompositeChange(RefactoringCoreMessages.getString("MoveRefactoring.reorganize_elements"), fChangeManager.getAllChanges())); //$NON-NLS-1$
+			
+				if (fUpdateQualifiedNames) {
+					computeQualifiedNameMatches(new SubProgressMonitor(pm, 1));
+					composite.addAll(fQualifiedNameFinder.getAllChanges());
+				}
+				
+				IChange fileMove= super.createChange(new SubProgressMonitor(pm, 1));
+				if (fileMove instanceof ICompositeChange) {
+					addAllChildren(composite, (ICompositeChange)fileMove);		
+				} else{
+					composite.add(fileMove);
+				}
+				return composite;
+			} finally{
+				pm.done();
+			}
 		}
 	}
 	
@@ -427,5 +529,34 @@ public class MoveRefactoring extends ReorgRefactoring {
 	IChange createChange(IProgressMonitor pm, IResource res) throws JavaModelException{
 		return new MoveResourceChange(res, getDestinationForResources(getDestination()));
 	}
+	
+	private void computeQualifiedNameMatches(IProgressMonitor pm) throws JavaModelException {
+		if (!fUpdateQualifiedNames)
+			return;
+		IPackageFragment destination= (IPackageFragment)getDestination();
+		List elements= getElements();
+		pm.beginTask("", elements.size());
+		pm.subTask("Scanning for qualified names in non Java files...");
+		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			Object element= (Object)iter.next();
+			if (element instanceof ICompilationUnit) {
+				IType[] types= ((ICompilationUnit)element).getTypes();
+				IProgressMonitor typesMonitor= new SubProgressMonitor(pm, 1);
+				typesMonitor.beginTask("", types.length);
+				for (int i= 0; i < types.length; i++) {
+					handleType(types[i], destination, new SubProgressMonitor(typesMonitor, 1));
+				}
+				typesMonitor.done();
+			} else if (element instanceof IType) {
+				handleType((IType)element, destination, new SubProgressMonitor(pm, 1));
+			}
+		}
+		pm.done();
+	}
+	
+	private void handleType(IType type, IPackageFragment destination, IProgressMonitor pm) throws JavaModelException {
+		fQualifiedNameFinder.process(type.getFullyQualifiedName(),  destination.getElementName() + "." + type.getTypeQualifiedName(),
+					fFilePatterns, type.getJavaProject().getProject(), pm);
+	}	
 }
 

@@ -4,11 +4,18 @@
  */
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.boot.BootLoader;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+
+import org.eclipse.core.boot.BootLoader;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -17,8 +24,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.DebugUtils;
-
 
 public class RenameTypeTests extends RefactoringTest {
 	
@@ -960,5 +967,35 @@ public class RenameTypeTests extends RefactoringTest {
 	
 	public void test9() throws Exception { 
 		helper2("A", "B");		
+	}
+	
+	public void testQualifiedName1() throws Exception {
+		IPackageFragment packageP1= getRoot().createPackageFragment("p", true, null);
+		
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType classA= getType(cu, "A");
+		
+		String content= getFileContents(getTestPath() + "testQualifiedName1/in/build.xml");
+		IProject project= classA.getJavaProject().getProject();
+		IFile file= project.getFile("build.xml");
+		file.create(new ByteArrayInputStream(content.getBytes()), true, null);
+				
+		IRefactoring ref= createRefactoring(classA, "B");
+		IQualifiedNameUpdatingRefactoring qr= (IQualifiedNameUpdatingRefactoring)ref;
+		qr.setUpdateQualifiedNames(true);
+		qr.setFilePatterns("*.xml");
+		
+		assertEquals("was supposed to pass", null, performRefactoring(ref));
+		
+		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
+		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
+		InputStreamReader reader= new InputStreamReader(file.getContents(true));
+		StringBuffer newContent= new StringBuffer();
+		int ch;
+		while((ch= reader.read()) != -1)
+			newContent.append((char)ch);
+		String definedContent= getFileContents(getTestPath() + "testQualifiedName1/out/build.xml");
+		assertEquals("invalid updating build.xml", newContent.toString(), definedContent);
+		
 	}
 }

@@ -8,19 +8,29 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
+
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -28,27 +38,32 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.refactoring.QualifiedNameComponent;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage;
 import org.eclipse.jdt.internal.ui.reorg.CopyQueries;
 import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
 import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
 import org.eclipse.jdt.internal.ui.reorg.MockWorkbenchSite;
 import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
+import org.eclipse.jdt.internal.ui.reorg.ReorgMessages;
 import org.eclipse.jdt.internal.ui.reorg.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implements TransferDropTargetListener {
 
@@ -351,32 +366,26 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			return fTarget;
 		}
 		
-		protected boolean isOkToProceed(ReorgRefactoring refactoring) throws JavaModelException{
+		protected boolean isOkToProceed(ReorgRefactoring refactoring) throws JavaModelException {
 			if (!super.isOkToProceed(refactoring))
 				return false;
 			return askIfUpdateReferences((MoveRefactoring)refactoring);
 		}
 		
 		//returns false iff canceled or error
-		private boolean askIfUpdateReferences(MoveRefactoring ref) throws JavaModelException{
-			if (! ref.canUpdateReferences()){
+		private boolean askIfUpdateReferences(MoveRefactoring ref) throws JavaModelException {
+			if (! ref.canUpdateReferences() && !ref.canUpdateQualifiedNames()) {
 				setShowPreview(false);
 				return true;
 			}	
-			switch (askIfUpdateReferences()){
+			switch (showMoveDialog(ref)){
 				case IDialogConstants.CANCEL_ID:
-				   setShowPreview(false);
+				 	setShowPreview(false);
 					return false;
-				case IDialogConstants.NO_ID:
-					ref.setUpdateReferences(false);
-					setShowPreview(false);
-					return true;	
 				case IDialogConstants.YES_ID:
-					ref.setUpdateReferences(true);
 					setShowPreview(false);
 					return true;
 				case PREVIEW_ID:		 
-					ref.setUpdateReferences(true);
 					setShowPreview(true);
 					return true;
 				default: 
@@ -385,28 +394,132 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			}
 		}
 		
-		private static int askIfUpdateReferences(){
+		private static int showMoveDialog(MoveRefactoring ref) {
 			Shell shell= JavaPlugin.getActiveWorkbenchShell().getShell();
-			String title= PackagesMessages.getString("SelectionTransferDropAdapter.dialog.title"); //$NON-NLS-1$
-			String preview= PackagesMessages.getString("SelectionTransferDropAdapter.dialog.preview.label"); //$NON-NLS-1$
-			String question= PackagesMessages.getString("SelectionTransferDropAdapter.dialog.question"); //$NON-NLS-1$
-			
-			String[] labels= new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL,
-																 preview,  IDialogConstants.CANCEL_LABEL };
-			final MessageDialog dialog = new MessageDialog(shell, title, null, question, MessageDialog.QUESTION,	labels, 2); //preview is default
+			final UpdateDialog dialog= new UpdateDialog(shell, ref);
 			shell.getDisplay().syncExec(new Runnable() {
 				public void run() {
 					dialog.open();
 				}
 			});
-			int result = dialog.getReturnCode();
-			if (result == 0)
-				return IDialogConstants.YES_ID;
-			if (result == 1)
-				return IDialogConstants.NO_ID;
-			if (result == 2)
-				return PREVIEW_ID;
-			return IDialogConstants.CANCEL_ID;
+			return dialog.getReturnCode();
+		}
+		
+		private static class UpdateDialog extends Dialog {
+			private Button fPreview;
+			private MoveRefactoring fRefactoring;
+			private Button fReferenceCheckbox;
+			private Button fQualifiedNameCheckbox;
+			private QualifiedNameComponent fQualifiedNameComponent;
+			
+			public UpdateDialog(Shell parentShell, MoveRefactoring refactoring) {
+				super(parentShell);
+				fRefactoring= refactoring;
+			}
+			protected void configureShell(Shell shell) {
+				shell.setText(PackagesMessages.getString("SelectionTransferDropAdapter.dialog.title")); //$NON-NLS-1$
+				super.configureShell(shell);
+			}
+			protected void createButtonsForButtonBar(Composite parent) {
+				fPreview= createButton(parent, PREVIEW_ID, ReorgMessages.getString("JdtMoveAction.preview"), false); //$NON-NLS-1$
+				super.createButtonsForButtonBar(parent);
+			}
+			protected void buttonPressed(int buttonId) {
+				if (buttonId == PREVIEW_ID) {
+					setReturnCode(PREVIEW_ID);
+					close();
+				} else {
+					super.buttonPressed(buttonId);
+				}
+			}
+
+			protected Control createDialogArea(Composite parent) {
+				Composite result= (Composite)super.createDialogArea(parent);
+				addUpdateReferenceComponent(result);
+				addUpdateQualifiedNameComponent(result, ((GridLayout)result.getLayout()).marginWidth);
+				return result;
+			}
+			private void updateButtons() {
+				Button okButton= getButton(IDialogConstants.OK_ID);
+				boolean okEnabled= true;	// we keep this since the code got copied from JdtMoveAction. 
+				okButton.setEnabled(okEnabled);
+				fReferenceCheckbox.setEnabled(okEnabled && canUpdateReferences());
+				fRefactoring.setUpdateReferences(fReferenceCheckbox.getEnabled() && fReferenceCheckbox.getSelection());
+				if (fQualifiedNameCheckbox != null) {
+					boolean enabled= okEnabled && fRefactoring.canEnableQualifiedNameUpdating();
+					fQualifiedNameCheckbox.setEnabled(enabled);
+					if (enabled) {
+						fQualifiedNameComponent.setEnabled(fRefactoring.getUpdateQualifiedNames());
+						if (fRefactoring.getUpdateQualifiedNames())
+							okButton.setEnabled(false);
+					} else {
+						fQualifiedNameComponent.setEnabled(false);
+					}
+					fRefactoring.setUpdateQualifiedNames(fQualifiedNameCheckbox.getEnabled() && fQualifiedNameCheckbox.getSelection());
+				}
+				boolean preview= okEnabled;
+				if (preview)
+					preview= 
+						fRefactoring.getUpdateQualifiedNames() && fRefactoring.canEnableQualifiedNameUpdating() ||
+						fReferenceCheckbox.getSelection() && canUpdateReferences();
+				fPreview.setEnabled(preview);
+			}
+			private void addUpdateReferenceComponent(Composite result) {
+				fReferenceCheckbox= new Button(result, SWT.CHECK);
+				fReferenceCheckbox.setText(ReorgMessages.getString("JdtMoveAction.update_references")); //$NON-NLS-1$
+				fReferenceCheckbox.setSelection(true);
+				fReferenceCheckbox.setEnabled(canUpdateReferences());
+			
+				fReferenceCheckbox.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent e) {
+						fRefactoring.setUpdateReferences(((Button)e.widget).getSelection());
+						updateButtons();
+					}
+				});
+			}
+			private boolean canUpdateReferences() {
+				try{
+					return fRefactoring.canUpdateReferences();
+				} catch (JavaModelException e){
+					return false;
+				}
+			}
+			private void addUpdateQualifiedNameComponent(Composite parent, int marginWidth) {
+				if (!fRefactoring.canUpdateQualifiedNames())
+					return;
+				fQualifiedNameCheckbox= new Button(parent, SWT.CHECK);
+				int indent= marginWidth + fQualifiedNameCheckbox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+				fQualifiedNameCheckbox.setText(RefactoringMessages.getString("RenameInputWizardPage.update_qualified_names")); //$NON-NLS-1$
+				fQualifiedNameCheckbox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+				fQualifiedNameCheckbox.setSelection(fRefactoring.getUpdateQualifiedNames());
+		
+				fQualifiedNameComponent= new QualifiedNameComponent(parent, SWT.NONE, fRefactoring, getRefactoringSettings());
+				fQualifiedNameComponent.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+				GridData gd= (GridData)fQualifiedNameComponent.getLayoutData();
+				gd.horizontalAlignment= GridData.FILL;
+				gd.horizontalIndent= indent;
+				fQualifiedNameComponent.setEnabled(false);
+
+				fQualifiedNameCheckbox.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent e) {
+						boolean enabled= ((Button)e.widget).getSelection();
+						fQualifiedNameComponent.setEnabled(enabled);
+						fRefactoring.setUpdateQualifiedNames(enabled);
+						updateButtons();
+					}
+				});
+			}
+			protected IDialogSettings getRefactoringSettings() {
+				IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
+				if (settings == null)
+					return null;
+				IDialogSettings result= settings.getSection(RefactoringWizardPage.REFACTORING_SETTINGS);
+				if (result == null) {
+					result= new DialogSettings(RefactoringWizardPage.REFACTORING_SETTINGS);
+					settings.addSection(result); 
+				}
+				return result;
+			}			
 		}
 	}
 }

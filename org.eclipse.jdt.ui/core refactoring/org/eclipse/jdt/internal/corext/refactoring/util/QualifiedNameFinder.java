@@ -19,6 +19,7 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -29,6 +30,8 @@ import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
 import org.eclipse.search.internal.core.text.TextSearchEngine;
 import org.eclipse.search.internal.core.text.TextSearchScope;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -54,9 +57,14 @@ public class QualifiedNameFinder {
 		public void accept(IResource resource, String line, int start, int length, int lineNumber) throws CoreException {
 			if (resource.getType() != IResource.FILE)
 				return;
-			TextChange change= (TextChange)fChanges.get(resource);
+			// Make sure we don't change Compilation Units
+			IFile file= (IFile)resource;
+			IJavaElement element= JavaCore.create(file);
+			if (element != null && element.exists())
+				return;
+			TextChange change= (TextChange)fChanges.get(file);
 			if (change == null) {
-				change= new TextFileChange(resource.getName(), (IFile)resource);
+				change= new TextFileChange(resource.getName(), file);
 				fChanges.put(resource, change);
 				fChangesList.add(change);
 			}
@@ -71,32 +79,26 @@ public class QualifiedNameFinder {
 			return fProgressMonitor;
 		}
 	}
-	
-	private String fPattern;
-	private String fNewValue;
-	private TextSearchScope fScope;
-	
+		
 	private Map fChanges;
 	private List fChangesList;
 	private IProgressMonitor fProgressMonitor;
 	
-	
-	public QualifiedNameFinder(String pattern, String newValue, String filePatterns, IProject root)  throws JavaModelException {
-		Assert.isNotNull(filePatterns);
-		Assert.isNotNull(pattern);
-		Assert.isNotNull(newValue);
-		Assert.isNotNull(root);
-		fPattern= pattern;
-		fNewValue= newValue;
-		fScope= createScope(filePatterns, root);
+	public QualifiedNameFinder() {
 		fChanges= new HashMap();
 		fChangesList= new ArrayList();
 	}
 	
-	public void process(IProgressMonitor monitor) {
-		ResultCollector collector= new ResultCollector(fNewValue, monitor);
+	public void process(String pattern, String newValue, String filePatterns, IProject root, IProgressMonitor monitor) throws JavaModelException {
+		Assert.isNotNull(pattern);
+		Assert.isNotNull(newValue);
+		Assert.isNotNull(filePatterns);
+		Assert.isNotNull(root);
+		if (monitor == null)
+			monitor= new NullProgressMonitor();
+		ResultCollector collector= new ResultCollector(newValue, monitor);
 		TextSearchEngine engine= new TextSearchEngine();
-		engine.search(ResourcesPlugin.getWorkspace(), fPattern, "", fScope, collector);
+		engine.search(ResourcesPlugin.getWorkspace(), pattern, "", createScope(filePatterns, root), collector);
 	}
 	
 	public TextChange[] getAllChanges() {

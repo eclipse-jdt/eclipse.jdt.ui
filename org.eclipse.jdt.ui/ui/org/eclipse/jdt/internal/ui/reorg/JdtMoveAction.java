@@ -8,12 +8,16 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -34,12 +38,16 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
+import org.eclipse.jdt.internal.ui.refactoring.QualifiedNameComponent;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringErrorDialogUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -164,7 +172,9 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	private class MoveDestinationDialog extends ElementTreeSelectionDialog {
 		private static final int PREVIEW_ID= IDialogConstants.CLIENT_ID + 1;
 		private MoveRefactoring fRefactoring;
-		private Button fCheckbox;
+		private Button fReferenceCheckbox;
+		private Button fQualifiedNameCheckbox;
+		private QualifiedNameComponent fQualifiedNameComponent;
 		private Button fPreview;
 		
 		MoveDestinationDialog(Shell parent, ILabelProvider labelProvider, 	ITreeContentProvider contentProvider, MoveRefactoring refactoring){
@@ -174,43 +184,37 @@ public class JdtMoveAction extends ReorgDestinationAction {
 			setDoubleClickSelects(false);
 		}
 		
-		protected Control createDialogArea(Composite parent) {
-			Composite result= (Composite)super.createDialogArea(parent);
-			fCheckbox= new Button(result, SWT.CHECK);
-			fCheckbox.setText(ReorgMessages.getString("JdtMoveAction.update_references")); //$NON-NLS-1$
-			fCheckbox.setEnabled(canUpdateReferences());
-			fCheckbox.setSelection(true);
-			
-			fCheckbox.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					updatePreviewButton();
-					fRefactoring.setUpdateReferences(getUpdateReferences());
-				}
-			});
-			return result;
-		}
-		
-		protected void createButtonsForButtonBar(Composite parent) {
-			super.createButtonsForButtonBar(parent);
-			fPreview= createButton(parent, PREVIEW_ID, ReorgMessages.getString("JdtMoveAction.preview"), false); //$NON-NLS-1$
-		}
-		
 		protected void updateOKStatus() {
 			super.updateOKStatus();
 			try{
+				Button okButton= getOkButton();
+				boolean okEnabled= okButton.getEnabled();
 				fRefactoring.setDestination(getFirstResult());
-				fCheckbox.setEnabled(getOkButton().getEnabled() &&  canUpdateReferences());
-				fRefactoring.setUpdateReferences(getUpdateReferences());
-				updatePreviewButton();
+				fReferenceCheckbox.setEnabled(okEnabled && canUpdateReferences());
+				fRefactoring.setUpdateReferences(fReferenceCheckbox.getEnabled() && fReferenceCheckbox.getSelection());
+				if (fQualifiedNameCheckbox != null) {
+					boolean enabled= okEnabled && fRefactoring.canEnableQualifiedNameUpdating();
+					fQualifiedNameCheckbox.setEnabled(enabled);
+					if (enabled) {
+						fQualifiedNameComponent.setEnabled(fRefactoring.getUpdateQualifiedNames());
+						if (fRefactoring.getUpdateQualifiedNames())
+							okButton.setEnabled(false);
+					} else {
+						fQualifiedNameComponent.setEnabled(false);
+					}
+					fRefactoring.setUpdateQualifiedNames(fQualifiedNameCheckbox.getEnabled() && fQualifiedNameCheckbox.getSelection());
+				}
+				boolean preview= okEnabled;
+				if (preview)
+					preview= 
+						fRefactoring.getUpdateQualifiedNames() && fRefactoring.canEnableQualifiedNameUpdating() ||
+						fReferenceCheckbox.getSelection() && fRefactoring.canUpdateReferences();
+				fPreview.setEnabled(preview);
 			} catch (JavaModelException e){
 				ExceptionHandler.handle(e, ReorgMessages.getString("JdtMoveAction.move"), ReorgMessages.getString("JdtMoveAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 			}		
 		}
 
-		private boolean getUpdateReferences() {
-			return fCheckbox.getEnabled() && fCheckbox.getSelection();
-		}
-		
 		protected void buttonPressed(int buttonId) {
 			fShowPreview= (buttonId == PREVIEW_ID);
 			super.buttonPressed(buttonId);
@@ -218,24 +222,81 @@ public class JdtMoveAction extends ReorgDestinationAction {
 				close();
 		}
 		
-		private void updatePreviewButton(){
-			fPreview.setEnabled(getUpdateReferences());
+		protected void configureShell(Shell newShell) {
+			super.configureShell(newShell);
+			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.MOVE_DESTINATION_DIALOG);
+		}
+
+		protected void createButtonsForButtonBar(Composite parent) {
+			fPreview= createButton(parent, PREVIEW_ID, ReorgMessages.getString("JdtMoveAction.preview"), false); //$NON-NLS-1$
+			super.createButtonsForButtonBar(parent);
 		}
 		
-		private boolean canUpdateReferences(){
+		protected Control createDialogArea(Composite parent) {
+			Composite result= (Composite)super.createDialogArea(parent);
+			addUpdateReferenceComponent(result);
+			addUpdateQualifiedNameComponent(result, ((GridLayout)result.getLayout()).marginWidth);
+			return result;
+		}
+
+		private void addUpdateReferenceComponent(Composite result) {
+			fReferenceCheckbox= new Button(result, SWT.CHECK);
+			fReferenceCheckbox.setText(ReorgMessages.getString("JdtMoveAction.update_references")); //$NON-NLS-1$
+			fReferenceCheckbox.setSelection(true);
+			fReferenceCheckbox.setEnabled(canUpdateReferences());
+			
+			fReferenceCheckbox.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					fRefactoring.setUpdateReferences(((Button)e.widget).getSelection());
+					updateOKStatus();
+				}
+			});
+		}
+		
+		private boolean canUpdateReferences() {
 			try{
 				return fRefactoring.canUpdateReferences();
 			} catch (JavaModelException e){
 				return false;
 			}
 		}
-		/*
-		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
-		 */
-		protected void configureShell(Shell newShell) {
-			super.configureShell(newShell);
-			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.MOVE_DESTINATION_DIALOG);
-		}
+		
+		private void addUpdateQualifiedNameComponent(Composite parent, int marginWidth) {
+			if (!fRefactoring.canUpdateQualifiedNames())
+				return;
+			fQualifiedNameCheckbox= new Button(parent, SWT.CHECK);
+			int indent= marginWidth + fQualifiedNameCheckbox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+			fQualifiedNameCheckbox.setText(RefactoringMessages.getString("RenameInputWizardPage.update_qualified_names")); //$NON-NLS-1$
+			fQualifiedNameCheckbox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			fQualifiedNameCheckbox.setSelection(fRefactoring.getUpdateQualifiedNames());
+		
+			fQualifiedNameComponent= new QualifiedNameComponent(parent, SWT.NONE, fRefactoring, getRefactoringSettings());
+			fQualifiedNameComponent.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			GridData gd= (GridData)fQualifiedNameComponent.getLayoutData();
+			gd.horizontalAlignment= GridData.FILL;
+			gd.horizontalIndent= indent;
+			fQualifiedNameComponent.setEnabled(false);
 
+			fQualifiedNameCheckbox.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					boolean enabled= ((Button)e.widget).getSelection();
+					fQualifiedNameComponent.setEnabled(enabled);
+					fRefactoring.setUpdateQualifiedNames(enabled);
+					updateOKStatus();
+				}
+			});
+		}
+		
+		protected IDialogSettings getRefactoringSettings() {
+			IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
+			if (settings == null)
+				return null;
+			IDialogSettings result= settings.getSection(RefactoringWizardPage.REFACTORING_SETTINGS);
+			if (result == null) {
+				result= new DialogSettings(RefactoringWizardPage.REFACTORING_SETTINGS);
+				settings.addSection(result); 
+			}
+			return result;
+		}			
 	}
 }

@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
  */
 public abstract class RefactoringWizardPage extends WizardPage {
 
-	private static final String REFACTORING_SETTINGS= "org.eclipse.jdt.ui.refactoring"; //$NON-NLS-1$
+	public static final String REFACTORING_SETTINGS= "org.eclipse.jdt.ui.refactoring"; //$NON-NLS-1$
 
 	/**
 	 * Creates a new refactoring wizard page.

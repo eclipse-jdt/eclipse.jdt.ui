@@ -10,11 +10,12 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.tagging;
 
-public interface IQualifiedNameUpdatingRefactoring extends IRenameRefactoring {
+public interface IQualifiedNameUpdatingRefactoring {
 
 	/**
 	 * Performs a dynamic check whether this refactoring object is capable of
-	 * updating qualified names in non Java files.
+	 * updating qualified names in non Java files. The return value of this
+	 * method may change according to the state of the refactoring.
 	 */
 	public boolean canEnableQualifiedNameUpdating();
 	
