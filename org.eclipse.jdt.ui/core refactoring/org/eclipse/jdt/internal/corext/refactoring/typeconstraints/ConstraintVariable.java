@@ -67,6 +67,9 @@ public abstract class ConstraintVariable {
 		return Bindings.hashCode(fBinding);
 	}
 	
+	/**
+	 * can be <code>null</code>.
+	 */
 	public ITypeBinding getBinding() {
 		return fBinding;
 	}
