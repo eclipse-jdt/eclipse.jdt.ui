@@ -64,13 +64,13 @@ public class CreateCompilationUnitChange extends Change {
 				
 				if (fAddFileComment) {
 					IBuffer buf= fCompilationUnit.getBuffer();
-					buf.replace(0, 0, getTemplate("filecomment"));
+					buf.replace(0, 0, getTemplate("filecomment")); //$NON-NLS-1$
 					buf.save(null, false);
 				}
 
 				StringBuffer buf= new StringBuffer();
 				if (fAddTypeComment) {
-					buf.append(getTemplate("typecomment"));
+					buf.append(getTemplate("typecomment")); //$NON-NLS-1$
 				}
 				createTypeStub(fCompilationUnit, fIsClass, buf);
 				String formattedContent= StubUtility.codeFormat(buf.toString(), 0, lineDelimiter);
@@ -86,14 +86,14 @@ public class CreateCompilationUnitChange extends Change {
 	}
 
 	protected void createTypeStub(ICompilationUnit cu, boolean isClass, StringBuffer buf) {
-		buf.append("public ");
+		buf.append("public "); //$NON-NLS-1$
 		if (isClass) {
-			buf.append(" class ");
+			buf.append(" class "); //$NON-NLS-1$
 		} else {
-			buf.append(" interface ");
+			buf.append(" interface "); //$NON-NLS-1$
 		}
 		buf.append(Signature.getQualifier(cu.getElementName()));
-		buf.append(" {\n\n}\n");
+		buf.append(" {\n\n}\n"); //$NON-NLS-1$
 	}
 	
 	protected String getTemplate(String name) throws CoreException {
@@ -104,7 +104,7 @@ public class CreateCompilationUnitChange extends Change {
 				return template;
 			}
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	
@@ -119,7 +119,7 @@ public class CreateCompilationUnitChange extends Change {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return RefactoringCoreMessages.getString("CreateCUChange.CreateCU.name");
+		return RefactoringCoreMessages.getString("CreateCUChange.CreateCU.name"); //$NON-NLS-1$
 	}
 
 	/*
