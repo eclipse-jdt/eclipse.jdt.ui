@@ -35,7 +35,7 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	 */ 
 	protected void addUserInputPages(){
 		String initialSetting= getRenameRefactoring().getCurrentName();
-		setPageTitle(getPageTitle() + ": "+ initialSetting); //$NON-NLS-1$
+		setPageTitle(getPageTitle());
 		createInputPage(initialSetting).setImageDescriptor(fInputPageImageDescriptor);
 		createInputPage(initialSetting).setMessage(fPageMessage);
 		addPage(createInputPage(initialSetting));
