@@ -193,18 +193,6 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 			};
 			WorkbenchRunnableAdapter op= new WorkbenchRunnableAdapter(runnable);
 			op.runAsUserJob(PreferencesMessages.getString("BuildPathsPropertyPage.job.title"), null);  //$NON-NLS-1$
-//			try {
-//				Shell shell= getControl().getShell();
-//				new ProgressMonitorDialog(shell).run(true, true, op);
-//			} catch (InvocationTargetException e) {
-//				String title= PreferencesMessages.getString("BuildPathsPropertyPage.error.title"); //$NON-NLS-1$
-//				String message= PreferencesMessages.getString("BuildPathsPropertyPage.error.message"); //$NON-NLS-1$
-//				ExceptionHandler.handle(e, shell, title, message);
-//				return false;
-//			} catch (InterruptedException e) {
-//				// cancelled
-//				return false;
-//			}
 		}
 		return true;
 	}
@@ -217,20 +205,4 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		StatusUtil.applyToStatusLine(this, status);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.IPreferencePage#performCancel()
-	 */
-	public boolean performCancel() {
-		if (fBuildPathsBlock != null) {
-			getSettings().put(INDEX, fBuildPathsBlock.getPageIndex());
-            IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
-                public void run(IProgressMonitor monitor)   throws CoreException, OperationCanceledException {
-                    fBuildPathsBlock.configureJavaProject(null);
-                }
-            };
-            WorkbenchRunnableAdapter op= new WorkbenchRunnableAdapter(runnable);
-            op.runAsUserJob(PreferencesMessages.getString("BuildPathsPropertyPage.job.title"), null);  //$NON-NLS-1$
-		}
-		return super.performCancel();
-	}
 }
