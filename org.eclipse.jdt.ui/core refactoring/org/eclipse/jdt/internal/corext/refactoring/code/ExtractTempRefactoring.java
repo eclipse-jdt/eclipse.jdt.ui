@@ -15,7 +15,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
@@ -65,7 +64,6 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 public class ExtractTempRefactoring extends Refactoring {
 	
-	private static final int DEFAULT_TAB_SIZE= 4;
 	private static final String[] KNOWN_METHOD_NAME_PREFIXES= {"get", "is"}; //$NON-NLS-2$ //$NON-NLS-1$
 			
 	private final int fSelectionStart;
@@ -517,7 +515,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		try{
 			buffer= TextBuffer.acquire(getFile());
 			int startLine= buffer.getLineOfOffset(insertBefore.getStartPosition());
-			return CodeFormatterUtil.createIndentString(buffer.getLineIndent(startLine, getTabSize()));	
+			return CodeFormatterUtil.createIndentString(buffer.getLineIndent(startLine, CodeFormatterUtil.getTabWidth()));	
 		} finally {
 			if (buffer != null)
 				TextBuffer.release(buffer);
@@ -608,21 +606,4 @@ public class ExtractTempRefactoring extends Refactoring {
 		else
 			return (IFile)fCu.getCorrespondingResource();
 	}
-
-	public static int getTabSize() {
-		return getPositiveIntValue(((String) JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_SIZE)));
-	}
-	
-	private static int getPositiveIntValue(String string) {
-		try {
-			if (Integer.parseInt(string) >= 0) 
-				return Integer.parseInt(string);
-			else	
-				return DEFAULT_TAB_SIZE;
-		} catch (NumberFormatException e) {
-			Assert.isTrue(false); //should never happen
-			return DEFAULT_TAB_SIZE;
-		}
-	}	
-	
 }
