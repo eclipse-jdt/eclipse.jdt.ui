@@ -281,7 +281,12 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 						try {
 							return filter(c.getChildren());
 						} catch (JavaModelException x) {
-							JavaPlugin.log(x);
+							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=38341
+							// don't log NotExist exceptions as this is a valid case
+							// since we might have been posted and the element
+							// removed in the meantime.
+							if (JavaPlugin.isDebug() || !x.isDoesNotExist())
+								JavaPlugin.log(x);
 						}
 					}
 					return NO_CHILDREN;
@@ -323,7 +328,12 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 							IJavaElement[] children= filter(c.getChildren());
 							return (children != null && children.length > 0);
 						} catch (JavaModelException x) {
-							JavaPlugin.log(x);
+							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=38341
+							// don't log NotExist exceptions as this is a valid case
+							// since we might have been posted and the element
+							// removed in the meantime.
+							if (JavaPlugin.isDebug() || !x.isDoesNotExist())
+								JavaPlugin.log(x);
 						}
 					}
 					return false;
