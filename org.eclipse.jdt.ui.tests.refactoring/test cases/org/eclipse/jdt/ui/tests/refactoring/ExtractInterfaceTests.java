@@ -45,21 +45,28 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		
 	/******* shortcuts **********/
 	
+	private static String getTopLevelTypeName(String typeQualifiedTyperName){
+		int dotIndex= typeQualifiedTyperName.indexOf('.');
+		if (dotIndex == -1)
+			return typeQualifiedTyperName;
+		return typeQualifiedTyperName.substring(0, dotIndex);
+	}
+	
 	private IType getClassFromTestFile(IPackageFragment pack, String className) throws Exception{
-		return getType(createCUfromTestFile(pack, className), className);
+		return getType(createCUfromTestFile(pack, getTopLevelTypeName(className)), className);
 	}
 
 	private void validatePassingTest(String className, String[] cuNames, String newInterfaceName, String[] extractedNames, String[][] extractedSignatures, boolean replaceOccurrences) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
 				
 		ExtractInterfaceRefactoring ref= new ExtractInterfaceRefactoring(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		ref.setNewInterfaceName(newInterfaceName);
 		assertEquals("interface name should be accepted", RefactoringStatus.OK, ref.checkNewInterfaceName(newInterfaceName).getSeverity());
 		
 		ICompilationUnit[] cus= new ICompilationUnit[cuNames.length];
 		for (int i= 0; i < cuNames.length; i++) {
 			cus[i]= createCUfromTestFile(clas.getPackageFragment(), cuNames[i]);			
 		}
-		ref.setNewInterfaceName(newInterfaceName);
 		ref.setReplaceOccurrences(replaceOccurrences);	
 		IMethod[] extractedMethods= TestUtil.getMethods(clas, extractedNames, extractedSignatures);
 		ref.setExtractedMembers(extractedMethods);
@@ -79,9 +86,9 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 				
 		ExtractInterfaceRefactoring ref= new ExtractInterfaceRefactoring(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		ref.setNewInterfaceName(newInterfaceName);
 		assertEquals("interface name should be accepted", RefactoringStatus.OK, ref.checkNewInterfaceName(newInterfaceName).getSeverity());
 		
-		ref.setNewInterfaceName(newInterfaceName);
 		if (extractAll)
 			ref.setExtractedMembers(ref.getExtractableMembers());
 		ref.setReplaceOccurrences(replaceOccurrences);	
@@ -461,6 +468,13 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		String[] names= new String[]{"amount"};
 		String[][] signatures= new String[][]{new String[0]};
 		validatePassingTest("A", new String[]{"A", "B", "C"}, "I", names, signatures, true);
+	}
+
+	public void test77() throws Exception{
+		printTestDisabledMessage("bug 23699");
+//		String[] names= new String[]{"amount"};
+//		String[][] signatures= new String[][]{new String[0]};
+//		validatePassingTest("A.Inner", new String[]{"A", "B"}, "I", names, signatures, true);
 	}
 
 	public void testFail0() throws Exception{
