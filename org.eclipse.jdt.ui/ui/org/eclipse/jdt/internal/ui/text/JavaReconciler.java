@@ -20,7 +20,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
 
 import org.eclipse.ui.IPartListener;
@@ -28,8 +27,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.texteditor.ITextEditor;
-
-import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
 
 
  
@@ -107,7 +104,7 @@ public class JavaReconciler extends MonoReconciler {
 	/**
 	 * Creates a new reconciler.
 	 */
-	public JavaReconciler(ITextEditor editor, IReconcilingStrategy strategy, boolean isIncremental) {
+	public JavaReconciler(ITextEditor editor, JavaCompositeReconcilingStrategy strategy, boolean isIncremental) {
 		super(strategy, isIncremental);
 		fTextEditor= editor;
 	}
@@ -151,11 +148,8 @@ public class JavaReconciler extends MonoReconciler {
 	 */
 	protected void forceReconciling() {
 		super.forceReconciling();
-        IReconcilingStrategy strategy= getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
-        if (strategy instanceof JavaReconcilingStrategy) {
-			JavaReconcilingStrategy java= (JavaReconcilingStrategy) strategy;
-			java.notifyParticipants(false);
-		}
+        JavaCompositeReconcilingStrategy strategy= (JavaCompositeReconcilingStrategy) getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
+		strategy.notifyParticipants(false);
 	}
     
 	/*
@@ -163,10 +157,7 @@ public class JavaReconciler extends MonoReconciler {
 	 */
 	protected void reconcilerReset() {
 		super.reconcilerReset();
-        IReconcilingStrategy strategy= getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
-        if (strategy instanceof JavaReconcilingStrategy) {
-			JavaReconcilingStrategy java= (JavaReconcilingStrategy) strategy;
-			java.notifyParticipants(true);
-		}
+        JavaCompositeReconcilingStrategy strategy= (JavaCompositeReconcilingStrategy) getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
+		strategy.notifyParticipants(true);
 	}
 }

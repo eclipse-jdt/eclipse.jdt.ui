@@ -50,15 +50,14 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
-import org.eclipse.jdt.ui.text.spelling.WordCompletionProcessor;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
+import org.eclipse.jdt.internal.ui.text.JavaCompositeReconcilingStrategy;
 import org.eclipse.jdt.internal.ui.text.JavaElementProvider;
 import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
 import org.eclipse.jdt.internal.ui.text.JavaReconciler;
@@ -69,7 +68,6 @@ import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
-import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
@@ -77,6 +75,7 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverProxy;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaInformationProvider;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
+import org.eclipse.jdt.internal.ui.text.spelling.WordCompletionProcessor;
 import org.eclipse.jdt.internal.ui.typehierarchy.HierarchyInformationControl;
 
 
@@ -291,19 +290,10 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 
 		final ITextEditor editor= getEditor();
 		if (editor != null && editor.isEditable()) {
-
-// 			--- Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=51092 is to use old reconciler ---			
-			JavaReconciler reconciler= new JavaReconciler(editor, new JavaReconcilingStrategy(editor), false);
-//			final JavaMultiPassReconciler reconciler= new JavaMultiPassReconciler(editor);
-//			final IReconcilingStrategy strategy= new SpellReconcileStrategy(editor, getConfiguredDocumentPartitioning(sourceViewer), PreferenceConstants.getPreferenceStore());
-//
-//			reconciler.addReconcilingStrategy(strategy, IJavaPartitions.JAVA_DOC);
-//			reconciler.addReconcilingStrategy(strategy, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
-//			reconciler.addReconcilingStrategy(strategy, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
-//			reconciler.addReconcilingStrategy(new JavaReconcilingStrategy(editor), IDocument.DEFAULT_CONTENT_TYPE);
-//
-//			reconciler.setIsIncrementalReconciler(false);
 			
+			JavaCompositeReconcilingStrategy strategy= new JavaCompositeReconcilingStrategy(editor, getConfiguredDocumentPartitioning(sourceViewer));
+			JavaReconciler reconciler= new JavaReconciler(editor, strategy, false);
+			reconciler.setIsIncrementalReconciler(false);
 			reconciler.setProgressMonitor(new NullProgressMonitor());
 			reconciler.setDelay(500);
 

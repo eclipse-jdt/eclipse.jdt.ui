@@ -24,8 +24,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
-import org.eclipse.jdt.ui.text.spelling.SpellCheckEngine;
-import org.eclipse.jdt.ui.text.spelling.engine.ISpellCheckPreferenceKeys;
+import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckPreferenceKeys;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;

@@ -40,7 +40,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.spelling.SpellCheckEngine;
+import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;

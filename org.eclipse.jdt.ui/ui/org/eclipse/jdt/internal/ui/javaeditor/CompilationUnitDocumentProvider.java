@@ -76,7 +76,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
-import org.eclipse.jdt.ui.text.spelling.SpellReconcileStrategy.SpellProblem;
+import org.eclipse.jdt.internal.ui.text.spelling.SpellReconcileStrategy.SpellProblem;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -466,14 +466,20 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 			
 			/*
-			 * @see IProblemRequestor#beginReporting()
+			 * @see org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension#beginReportingSequence()
 			 */
-			public void beginReporting() {				
+			public void beginReportingSequence() {
 				ICompilationUnit unit= getWorkingCopy(fInput);
 				if (unit != null && unit.getJavaProject().isOnClasspath(unit))
 					fCollectedProblems= new ArrayList();
 				else
 					fCollectedProblems= null;
+			}
+			
+			/*
+			 * @see IProblemRequestor#beginReporting()
+			 */
+			public void beginReporting() {				
 			}
 			
 			/*
@@ -483,11 +489,17 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				if (isActive())
 					fCollectedProblems.add(problem);
 			}
-
+			
 			/*
 			 * @see IProblemRequestor#endReporting()
 			 */
 			public void endReporting() {
+			}
+			
+			/*
+			 * @see org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension#endReportingSequence()
+			 */
+			public void endReportingSequence() {
 				
 				if (!isActive())
 					return;

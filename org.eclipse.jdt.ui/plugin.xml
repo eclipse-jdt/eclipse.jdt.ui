@@ -112,7 +112,7 @@
       </javadocCompletionProcessor>
       <javadocCompletionProcessor
             name="%spellingJavadocCompletionProcessor"
-            class="org.eclipse.jdt.ui.text.spelling.WordCompletionProcessor"
+            class="org.eclipse.jdt.internal.ui.text.spelling.WordCompletionProcessor"
             id= "org.eclipse.jdt.ui.text.javadoc.spelling.WordCompletionProcessor">
       </javadocCompletionProcessor>
    </extension>
@@ -125,7 +125,7 @@
       </quickFixProcessor>
       <quickFixProcessor
             name="%spellingQuickFixProcessor"
-            class="org.eclipse.jdt.ui.text.spelling.WordQuickFixProcessor"
+            class="org.eclipse.jdt.internal.ui.text.spelling.WordQuickFixProcessor"
             id= "org.eclipse.jdt.ui.text.correction.spelling.QuickFixProcessor">
       </quickFixProcessor>
    </extension>
