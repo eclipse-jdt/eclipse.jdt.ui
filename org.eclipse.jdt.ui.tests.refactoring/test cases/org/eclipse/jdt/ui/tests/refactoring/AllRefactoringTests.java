@@ -28,6 +28,7 @@ public class AllRefactoringTests {
 		suite.addTest(MoveMembersTests.suite());
 		suite.addTest(ExtractInterfaceTests.suite());
 		suite.addTest(MoveInnerToTopLevelTests.suite());
+		suite.addTest(UseSupertypeWherePossibleTests.suite());
 		
 		//--methods
 		suite.addTest(RenameVirtualMethodInClassTests.suite());
