@@ -133,11 +133,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	};
 	
 	private final String[][] fAnnotationDecorationListModel= new String[][] {
-		{"None", AnnotationPreference.STYLE_NONE},
-		{"Squigglies", AnnotationPreference.STYLE_SQUIGGLIES},
-		{"Underline", AnnotationPreference.STYLE_UNDERLINE},
-		{"Box", AnnotationPreference.STYLE_BOX},
-		{"IBeam", AnnotationPreference.STYLE_IBEAM}
+		{PreferencesMessages.getString("JavaEditorPreferencePage.AnnotationDecoration.NONE"), AnnotationPreference.STYLE_NONE}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.AnnotationDecoration.SQUIGGLIES"), AnnotationPreference.STYLE_SQUIGGLIES}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.AnnotationDecoration.UNDERLINE"), AnnotationPreference.STYLE_UNDERLINE}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.AnnotationDecoration.BOX"), AnnotationPreference.STYLE_BOX}, //$NON-NLS-1$
+		{PreferencesMessages.getString("JavaEditorPreferencePage.AnnotationDecoration.IBEAM"), AnnotationPreference.STYLE_IBEAM} //$NON-NLS-1$
 	};
 
 	private OverlayPreferenceStore fOverlayStore;
