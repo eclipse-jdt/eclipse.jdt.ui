@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.testplugin;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import junit.framework.Test;
@@ -33,7 +34,7 @@ public class TestWorkbench extends Workbench {
 			}
 		}
 		IPath location= JavaTestPlugin.getDefault().getWorkspace().getRoot().getLocation();
-		System.out.print("Workspace-location: " + location.toString());
+		System.out.println("Workspace-location: " + location.toString());
 				
 		
 		try {
@@ -55,12 +56,22 @@ public class TestWorkbench extends Workbench {
 	
 	public Test getTest(String className) throws Exception {
 		Class testClass= getClass().getClassLoader().loadClass(className);
+
+		Method suiteMethod= null;
 		try {
-			Method suiteMethod= testClass.getMethod(TestRunner.SUITE_METHODNAME, new Class[0]);
-			return (Test) suiteMethod.invoke(null, new Class[0]); // static method
-		} catch (Exception e) {
+			suiteMethod= testClass.getMethod(TestRunner.SUITE_METHODNAME, new Class[0]);
+	 	} catch (Exception e) {
+	 		// try to extract a test suite automatically	
 			return new TestSuite(testClass);
 		}
+		try {
+			return (Test) suiteMethod.invoke(null, new Class[0]); // static method
+		} catch (InvocationTargetException e) {
+			System.out.println("Failed to invoke suite():" + e.getTargetException().toString());
+		} catch (IllegalAccessException e) {
+			System.out.println("Failed to invoke suite():" + e.toString());
+		}
+		return null; 
 
 	}
 	

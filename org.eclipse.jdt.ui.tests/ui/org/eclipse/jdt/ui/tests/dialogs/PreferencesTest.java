@@ -3,7 +3,9 @@ package org.eclipse.jdt.ui.tests.dialogs;
 import java.util.Iterator;
 
 import junit.framework.Assert;
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
@@ -43,6 +45,28 @@ public class PreferencesTest extends TestCase {
 	public static void main(String[] args) {
 		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), PreferencesTest.class, args);
 	}
+	
+	public static Test suite() {
+		TestSuite suite= new TestSuite(PreferencesTest.class.getName());
+		suite.addTest(new PreferencesTest("testJavaBasePrefPage"));
+		suite.addTest(new PreferencesTest("testClasspathVarPrefPage"));
+		suite.addTest(new PreferencesTest("testCodeFormatterPrefPage"));
+		suite.addTest(new PreferencesTest("testExecArgPropPage"));
+		suite.addTest(new PreferencesTest("testImportOrganizePrefPage"));
+		suite.addTest(new PreferencesTest("testInfoPropPage"));
+		suite.addTest(new PreferencesTest("testJARSourceAttachmentPropPage"));
+		suite.addTest(new PreferencesTest("testJavaBasePrefPage"));
+		suite.addTest(new PreferencesTest("testJavaCompilerPrefPage"));
+		suite.addTest(new PreferencesTest("testJavaDebugPrefPage"));
+		suite.addTest(new PreferencesTest("testJavaEditorPrefPage"));
+		suite.addTest(new PreferencesTest("testNoExecArgPropPage"));
+		suite.addTest(new PreferencesTest("testRefactoringPrefPage"));
+		suite.addTest(new PreferencesTest("testVMPrefPage"));
+		suite.addTest(new PreferencesTest("testVMPropPage"));
+		suite.addTest(new PreferencesTest("testVSourceLookupPage"));
+		suite.addTest(new PreferencesTest("testVariableSourceAttachmentPropPage"));					
+		return suite;
+	}	
 	
 	private static class PreferenceDialogWrapper extends PreferenceDialog {
 		
@@ -106,13 +130,14 @@ public class PreferencesTest extends TestCase {
 		}
 		return dialog;
 	}
+	
 	private PropertyDialog getPropertyDialog(String id, IAdaptable element) {
 		PropertyDialogWrapper dialog = null;
 
 		PropertyPageManager manager = new PropertyPageManager();
 		String title = "";
 		String name  = "";
-		
+
 		// load pages for the selection
 		// fill the manager with contributions from the matching contributors
 		PropertyPageContributorManager.getManager().contribute(manager, element);

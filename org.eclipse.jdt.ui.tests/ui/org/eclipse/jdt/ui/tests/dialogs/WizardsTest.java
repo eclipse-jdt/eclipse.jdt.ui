@@ -1,6 +1,8 @@
 package org.eclipse.jdt.ui.tests.dialogs;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -39,6 +41,18 @@ public class WizardsTest extends TestCase {
 	public static void main(String[] args) {
 		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), WizardsTest.class, args);
 	}
+	
+	public static Test suite() {
+		TestSuite suite= new TestSuite(WizardsTest.class.getName());
+		suite.addTest(new WizardsTest("testClassWizard"));
+		suite.addTest(new WizardsTest("testInterfaceWizard"));
+		suite.addTest(new WizardsTest("testJarPackageWizard"));
+		suite.addTest(new WizardsTest("testNewProjectWizard"));
+		suite.addTest(new WizardsTest("testPackageWizard"));
+		suite.addTest(new WizardsTest("testScrapbookWizard"));
+		suite.addTest(new WizardsTest("testSourceFolderWizard"));				
+		return suite;
+	}		
 	
 	public WizardsTest(String name) {
 		super(name);

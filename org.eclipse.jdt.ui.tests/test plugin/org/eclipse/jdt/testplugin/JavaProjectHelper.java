@@ -3,6 +3,7 @@ package org.eclipse.jdt.testplugin;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.zip.ZipFile;
@@ -29,6 +30,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.core.ClasspathEntry;
 
 /**
  * Helper methods to set up a IJavaProject.
@@ -82,6 +85,7 @@ public class JavaProjectHelper {
 	 * Removes a IJavaProject.
 	 */		
 	public static void delete(IJavaProject jproject) throws CoreException {
+		jproject.setRawClasspath(new ClasspathEntry[0], jproject.getProject().getFullPath(), null);
 		jproject.getProject().delete(true, true, null);
 	}
 
@@ -149,7 +153,15 @@ public class JavaProjectHelper {
 	public static IPackageFragmentRoot addLibraryWithImport(IJavaProject jproject, IPath jarPath, IPath sourceAttachPath, IPath sourceAttachRoot) throws IOException, CoreException {
 		IProject project= jproject.getProject();
 		IFile newFile= project.getFile(jarPath.lastSegment());
-		newFile.create(new FileInputStream(jarPath.toFile()), false, null);
+		InputStream inputStream= null;
+		try {
+			inputStream= new FileInputStream(jarPath.toFile()); 
+			newFile.create(inputStream, true, null);
+		} finally {
+			if (inputStream != null) {
+				try { inputStream.close(); } catch (IOException e) { }
+			}
+		}				
 		return addLibrary(jproject, newFile.getFullPath(), sourceAttachPath, sourceAttachRoot);
 	}	
 
