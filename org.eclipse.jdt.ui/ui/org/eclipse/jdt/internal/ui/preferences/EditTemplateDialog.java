@@ -4,6 +4,12 @@
  */
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
@@ -19,9 +25,16 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.debug.internal.ui.TextViewerAction;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentEvent;
@@ -30,9 +43,13 @@ import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -121,6 +138,9 @@ public class EditTemplateDialog extends StatusDialog {
 	private TemplateVerifier fVerifier= new TemplateVerifier();
 	
 	private boolean fSuppressError= true; // #4354
+	
+	private Map fGlobalActions= new HashMap(10);
+	private List fSelectionActions = new ArrayList(3);
 		
 	public EditTemplateDialog(Shell parent, Template template, boolean edit) {
 		super(parent);
@@ -200,6 +220,8 @@ public class EditTemplateDialog extends StatusDialog {
 		fContextCombo.select(getIndex(fTemplate.getContext()));
 		fPatternEditor.getDocument().set(fTemplate.getPattern());
 
+		initializeActions();
+
 		return composite;
 	}
 
@@ -251,8 +273,69 @@ public class EditTemplateDialog extends StatusDialog {
 		data.widthHint= convertWidthInCharsToPixels(60);
 		data.heightHint= convertHeightInCharsToPixels(5);
 		control.setLayoutData(data);
-		
+
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {			
+			public void selectionChanged(SelectionChangedEvent event) {
+				updateSelectionDependentActions();
+			}
+		});
+
 		return viewer;
+	}
+
+	private void initializeActions() {
+		TextViewerAction action= new TextViewerAction(fPatternEditor, fPatternEditor.CUT);
+		action.setText(TemplateMessages.getString("EditTemplateDialog.cut")); //$NON-NLS-1$
+		fGlobalActions.put(ITextEditorActionConstants.CUT, action);
+
+		action= new TextViewerAction(fPatternEditor, fPatternEditor.COPY);
+		action.setText(TemplateMessages.getString("EditTemplateDialog.copy")); //$NON-NLS-1$
+		fGlobalActions.put(ITextEditorActionConstants.COPY, action);
+
+		action= new TextViewerAction(fPatternEditor, fPatternEditor.PASTE);
+		action.setText(TemplateMessages.getString("EditTemplateDialog.paste")); //$NON-NLS-1$
+		fGlobalActions.put(ITextEditorActionConstants.PASTE, action);
+
+		action= new TextViewerAction(fPatternEditor, fPatternEditor.SELECT_ALL);
+		action.setText(TemplateMessages.getString("EditTemplateDialog.select.all")); //$NON-NLS-1$
+		fGlobalActions.put(ITextEditorActionConstants.SELECT_ALL, action);
+				
+		fSelectionActions.add(ITextEditorActionConstants.CUT);
+		fSelectionActions.add(ITextEditorActionConstants.COPY);
+		fSelectionActions.add(ITextEditorActionConstants.PASTE);
+		
+		// create context menu
+		MenuManager manager= new MenuManager(null, null);
+		manager.setRemoveAllWhenShown(true);
+		manager.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(IMenuManager mgr) {
+				fillContextMenu(mgr);
+			}
+		});
+
+		StyledText text= fPatternEditor.getTextWidget();		
+		Menu menu= manager.createContextMenu(text);
+		text.setMenu(menu);
+	}
+
+	private void fillContextMenu(IMenuManager menu) {
+		menu.add((IAction) fGlobalActions.get(ITextEditorActionConstants.CUT));
+		menu.add((IAction) fGlobalActions.get(ITextEditorActionConstants.COPY));
+		menu.add((IAction) fGlobalActions.get(ITextEditorActionConstants.PASTE));
+		menu.add((IAction) fGlobalActions.get(ITextEditorActionConstants.SELECT_ALL));
+	}
+
+	protected void updateSelectionDependentActions() {
+		Iterator iterator= fSelectionActions.iterator();
+		while (iterator.hasNext())
+			updateAction((String)iterator.next());		
+	}
+
+
+	protected void updateAction(String actionId) {
+		IAction action= (IAction)fGlobalActions.get(actionId);
+		if (action instanceof IUpdate)
+			((IUpdate) action).update();
 	}
 
 	private static int getIndex(String context) {
@@ -265,7 +348,6 @@ public class EditTemplateDialog extends StatusDialog {
 	}
 	
 	protected void okPressed() {
-		// read back fields
 		fTemplate.setName(fNameText.getText());
 		fTemplate.setDescription(fDescriptionText.getText());
 		fTemplate.setContext(fContextCombo.getText());
