@@ -62,6 +62,9 @@ public class TextPerformanceTestCase extends TestCase {
 	/** created performance meters */
 	private List fPerformanceMeters;
 	
+	/** {@link KeyboardProbe} singleton */
+	private static KeyboardProbe fgKeyboardProbe;
+
 	/*
 	 * @see TestCase#TestCase()
 	 */
@@ -284,7 +287,18 @@ public class TextPerformanceTestCase extends TestCase {
 	 * 
 	 * @return the null performance meter singleton
 	 */
-	protected final PerformanceMeter getNullPerformanceMeter() {
+	protected static final PerformanceMeter getNullPerformanceMeter() {
 		return Performance.getDefault().getNullPerformanceMeter();
+	}
+	
+	/**
+	 * Returns the keyboard probe singleton.
+	 * 
+	 * @return the keyboard probe singleton.
+	 */
+	protected static final KeyboardProbe getKeyboardProbe() {
+		if (fgKeyboardProbe == null)
+			fgKeyboardProbe= new KeyboardProbe();
+		return fgKeyboardProbe;
 	}
 }
