@@ -346,15 +346,6 @@ public class JavaDocLocations {
 		buf.append("index.html"); //$NON-NLS-1$
 	}	
 	
-	private static boolean doesExist(URL url) {
-		if (url.getProtocol().equals("file")) { //$NON-NLS-1$
-			File file= new File(url.getFile());
-			return file.isFile();
-		}	
-		return true;
-	}
-	
-	
 	private static void appendTypePath(IType type, StringBuffer buf) {
 		IPackageFragment pack= type.getPackageFragment();
 		String packPath= pack.getElementName().replace('.', '/');

@@ -118,12 +118,6 @@ public class JavaModelUtil {
 		return null;
 	}
 	
-	private static IType findType(IClassFile classFile, String fullyQualifiedName) throws JavaModelException{
-		if (getFullyQualifiedName(classFile.getType()).equals(fullyQualifiedName))
-			return classFile.getType();
-		return null;
-	}
-	
 	/** 
 	 * Finds a type by package and type name.
 	 * @param jproject the java project to search in
