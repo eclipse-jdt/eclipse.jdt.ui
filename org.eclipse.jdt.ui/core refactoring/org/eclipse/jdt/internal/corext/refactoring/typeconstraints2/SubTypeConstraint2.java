@@ -34,7 +34,7 @@ public final class SubTypeConstraint2 implements ITypeConstraint2 {
 			return false;
 
 		ITypeConstraint2 otherTC= (ITypeConstraint2) other;
-		return getLeft() == otherTC.getLeft() && getRight() == otherTC.getRight();
+		return fDescendant == otherTC.getLeft() && fAncestor == otherTC.getRight();
 	}
 
 	public final ConstraintVariable2 getLeft() {
@@ -49,13 +49,13 @@ public final class SubTypeConstraint2 implements ITypeConstraint2 {
 	 * @see java.lang.Object#hashCode()
 	 */
 	public final int hashCode() {
-		return getLeft().hashCode() ^ 37 * getRight().hashCode();
+		return fDescendant.hashCode() ^ 37 * fAncestor.hashCode();
 	}
 
 	/*
 	 * @see java.lang.Object#toString()
 	 */
 	public final String toString() {
-		return getLeft().toString() + " <= " + getRight().toString(); //$NON-NLS-1$ //$NON-NLS-2$
+		return fDescendant.toString() + " <= " + fAncestor.toString(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }
