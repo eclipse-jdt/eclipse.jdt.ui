@@ -18,7 +18,6 @@ import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -28,7 +27,6 @@ public class ExtensionPointTestSetup extends TestSetup {
 	private IJavaProject fJavaProject;
 	private IPackageFragmentRoot fRoot;
 	private static final String CONTAINER= "src";
-	private IPackageFragment fTestPackage;
 
 	public ExtensionPointTestSetup(Test test) {
 		super(test);
@@ -50,7 +48,7 @@ public class ExtensionPointTestSetup extends TestSetup {
 		description.setAutoBuilding(false);
 		workspace.setDescription(description);
 		
-		fTestPackage= getRoot().createPackageFragment("test", true, null);
+		getRoot().createPackageFragment("test", true, null);
 	}
 
 	protected void tearDown() throws Exception {
