@@ -112,11 +112,18 @@ abstract class PackageFragmentRootReorgChange extends Change {
 		return name;
 	}
 	
-	protected int getUpdateModelFlags() throws JavaModelException{
-		int originating= IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH;		//does not apply to copy
-		int destination= IPackageFragmentRoot.DESTINATION_PROJECT_CLASSPATH;
-		int otherProjects= IPackageFragmentRoot.OTHER_REFERRING_PROJECTS_CLASSPATH;//does not apply to copy
-		int replace= IPackageFragmentRoot.REPLACE;
+	protected int getUpdateModelFlags(boolean isCopy) throws JavaModelException{
+		final int destination= IPackageFragmentRoot.DESTINATION_PROJECT_CLASSPATH;
+		final int replace= IPackageFragmentRoot.REPLACE;
+		final int originating;
+		final int otherProjects;
+		if (isCopy){
+			originating= 0; //ORIGINATING_PROJECT_CLASSPATH does not apply to copy
+			otherProjects= 0;//OTHER_REFERRING_PROJECTS_CLASSPATH does not apply to copy
+		} else{
+			originating= IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH;
+			otherProjects= IPackageFragmentRoot.OTHER_REFERRING_PROJECTS_CLASSPATH;
+		}
 		
 		if (! JavaCore.create(getDestinationProject()).exists())
 			return replace | originating;

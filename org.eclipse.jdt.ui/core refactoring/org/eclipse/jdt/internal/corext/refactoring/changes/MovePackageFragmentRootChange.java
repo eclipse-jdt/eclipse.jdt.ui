@@ -31,7 +31,7 @@ public class MovePackageFragmentRootChange extends PackageFragmentRootReorgChang
 	 * @see org.eclipse.jdt.internal.corext.refactoring.changes.PackageFragmentRootReorgChange#doPerform(org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	protected void doPerform(IPath destinationPath, IProgressMonitor pm) throws JavaModelException {
-		getRoot().move(destinationPath, getResourceUpdateFlags(), getUpdateModelFlags(), null, pm);
+		getRoot().move(destinationPath, getResourceUpdateFlags(), getUpdateModelFlags(false), null, pm);
 	}
 
 	/*
