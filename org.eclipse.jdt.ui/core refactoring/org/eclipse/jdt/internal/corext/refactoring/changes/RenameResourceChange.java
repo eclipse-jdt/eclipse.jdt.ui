@@ -57,7 +57,7 @@ public class RenameResourceChange extends Change {
 				pm.worked(1);
 				return;
 			} 
-			getResource().move(renamedResourcePath(fResourcePath, fNewName), false, pm);
+			getResource().move(renamedResourcePath(fResourcePath, fNewName), IResource.NONE, pm);
 		} catch(Exception e){
 			handleException(context, e);
 			setActive(false);

@@ -1,5 +1,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -56,7 +57,7 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 			pm.beginTask(RefactoringCoreMessages.getString("RenameSourceFolderChange.renaming"), 2); //$NON-NLS-1$
 			modifyClassPath(new SubProgressMonitor(pm, 1));
 			IPath path= getResource().getFullPath().removeLastSegments(1).append(getNewName());
-			getResource().move(path, false, new SubProgressMonitor(pm, 1));
+			getResource().move(path, IResource.NONE, new SubProgressMonitor(pm, 1));
 		} finally{
 			pm.done();
 		}	
