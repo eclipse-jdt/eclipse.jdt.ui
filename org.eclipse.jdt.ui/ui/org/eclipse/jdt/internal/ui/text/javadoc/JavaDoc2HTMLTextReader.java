@@ -54,6 +54,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 		"@serialField",		//$NON-NLS-1$
 		"@since",			//$NON-NLS-1$
 		"@throws",			//$NON-NLS-1$
+		"@todo",				//$NON-NLS-1$
 		"@version"			//$NON-NLS-1$
 	};
 	private static final int MAX_TAG_LENGTH= "@serialField".length();//$NON-NLS-1$
