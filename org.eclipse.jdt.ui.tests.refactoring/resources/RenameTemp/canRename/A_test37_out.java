@@ -2,6 +2,6 @@
 package p;
 class A{
 	void f(){
-		int j, i;
+		int y, j;
 	}
 }
