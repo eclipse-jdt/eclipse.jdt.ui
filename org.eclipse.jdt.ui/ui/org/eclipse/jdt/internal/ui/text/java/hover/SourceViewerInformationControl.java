@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyEvent;
@@ -46,7 +47,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
  * 
  * @since 3.0
  */
-public class SourceViewerInformationControl implements IInformationControl, IInformationControlExtension {
+public class SourceViewerInformationControl implements IInformationControl, IInformationControlExtension, DisposeListener {
 	
 	/** Border thickness in pixels. */
 	private static final int BORDER= 1;
@@ -174,6 +175,8 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 
 			fStatusField.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 		}
+		
+		addDisposeListener(this);
 	}
 
 	/**
@@ -260,20 +263,28 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	public void setVisible(boolean visible) {
 			fShell.setVisible(visible);
 	}
-	
-	/*
-	 * @see IInformationControl#dispose()
+
+	/**
+	 * {@inheritDoc}
+	 * @since 3.0
 	 */
-	public void dispose() {
+	public void widgetDisposed(DisposeEvent event) {
 		if (fStatusTextFont != null && !fStatusTextFont.isDisposed())
 			fStatusTextFont.dispose();
 		
-		if (fShell != null) {
-			if (!fShell.isDisposed())
-				fShell.dispose();
-			fShell= null;
-			fText= null;
-		}
+		fStatusTextFont= null;
+		fShell= null;
+		fText= null;
+	}
+		
+	/**
+	 * {@inheritDoc}
+	 */
+	public final void dispose() {
+		if (fShell != null && !fShell.isDisposed())
+			fShell.dispose();
+		else
+			widgetDisposed(null);
 	}
 	
 	/*
