@@ -266,7 +266,8 @@ public class PasteSourceReferencesFromClipboardAction extends SelectionDispatchA
 	}
 	
 	private  boolean canPasteInImportContainer(TypedSource[] elements){
-		return areAllValuesOfType(elements, IJavaElement.IMPORT_DECLARATION);
+		//not supported in MemberEdit yet
+		return false;
 	}
 	
 	private  boolean canPasteInType(TypedSource[] elements){
