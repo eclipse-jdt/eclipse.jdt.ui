@@ -21,8 +21,8 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
@@ -67,7 +67,7 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
-		TypeDeclaration decl= findTypeDeclaration(astRoot.types(), fOldName);
+		AbstractTypeDeclaration decl= findTypeDeclaration(astRoot.types(), fOldName);
 		if (decl != null) {
 			ASTNode[] sameNodes= LinkedNodeFinder.findByNode(astRoot, decl.getName());
 			for (int i= 0; i < sameNodes.length; i++) {
@@ -77,9 +77,9 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 		return rewrite;
 	}
 	
-	private TypeDeclaration findTypeDeclaration(List types, String name) {
+	private AbstractTypeDeclaration findTypeDeclaration(List types, String name) {
 		for (Iterator iter= types.iterator(); iter.hasNext();) {
-			TypeDeclaration decl= (TypeDeclaration) iter.next();
+			AbstractTypeDeclaration decl= (AbstractTypeDeclaration) iter.next();
 			if (name.equals(decl.getName().getIdentifier())) {
 				return decl;
 			}

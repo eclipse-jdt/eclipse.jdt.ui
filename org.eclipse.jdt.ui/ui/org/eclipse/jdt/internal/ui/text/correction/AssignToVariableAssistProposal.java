@@ -123,7 +123,6 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		
 		Expression expression= isParamToField ? ((SingleVariableDeclaration) fNodeToAssign).getName() : ((ExpressionStatement) fNodeToAssign).getExpression();
 		
-		boolean isAnonymous= newTypeDecl.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;
 		ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
 		List decls= (List) newTypeDecl.getStructuralProperty(property);
 		
@@ -140,6 +139,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			return null;
 		}
 		
+		boolean isAnonymous= newTypeDecl.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;
 		boolean isStatic= Modifier.isStatic(bodyDecl.getModifiers()) && !isAnonymous;
 		boolean isConstructorParam= isParamToField && fNodeToAssign.getParent() instanceof MethodDeclaration && ((MethodDeclaration) fNodeToAssign.getParent()).isConstructor();
 		int modifiers= Modifier.PRIVATE;
@@ -177,7 +177,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			FieldAccess fieldAccess= ast.newFieldAccess();
 			fieldAccess.setName(accessName);
 			if (isStatic) {
-				String typeName= ((TypeDeclaration) newTypeDecl).getName().getIdentifier();
+				String typeName= ((AbstractTypeDeclaration) newTypeDecl).getName().getIdentifier();
 				fieldAccess.setExpression(ast.newSimpleName(typeName));
 			} else {
 				fieldAccess.setExpression(ast.newThisExpression());

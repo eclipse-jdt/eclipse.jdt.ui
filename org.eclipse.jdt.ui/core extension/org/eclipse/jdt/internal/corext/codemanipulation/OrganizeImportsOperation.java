@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -49,7 +50,6 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -140,7 +140,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			if (parent instanceof Type) {
 				parent= parent.getParent();
 			}
-			if (parent instanceof TypeDeclaration && parent.getParent() instanceof CompilationUnit) {
+			if (parent instanceof AbstractTypeDeclaration && parent.getParent() instanceof CompilationUnit) {
 				return true;
 			}
 			

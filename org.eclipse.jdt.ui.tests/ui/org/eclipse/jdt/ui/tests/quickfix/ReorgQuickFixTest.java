@@ -64,21 +64,17 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		super(name);
 	}
 
-
 	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+		return setUpTest(new TestSuite(THIS));
+	}
+	
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
 	}
 	
 	public static Test suite() {
-		if (true) {
-			return allTests();
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new ReorgQuickFixTest("testAddToClasspath2"));
-			return new ProjectTestSetup(suite);
-		}
+		return allTests();
 	}
-
 
 	protected void setUp() throws Exception {
 		Hashtable options= TestOptions.getFormatterOptions();
@@ -520,7 +516,44 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());			
-	}		
+	}
+	
+	public void testWrongTypeNameInEnum() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");		
+		buf.append("public enum X {\n");
+		buf.append("    A;\n");
+		buf.append("    public X() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		buf.append("package test1;\n");
+		buf.append("\n");		
+		buf.append("public class X {\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("X.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		
+		String preview= getPreviewContent(proposal);				
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");		
+		buf.append("public enum E {\n");
+		buf.append("    A;\n");
+		buf.append("    public E() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
+	}
 	
 	public void testTodoTasks1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

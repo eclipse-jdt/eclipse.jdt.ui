@@ -48,19 +48,12 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		super(name);
 	}
 
-
 	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+		return setUpTest(new TestSuite(THIS));
 	}
 	
 	public static Test suite() {
-		if (true) {
-			return allTests();
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new ReturnTypeQuickFixTest("testMethodWithConstructorName"));
-			return new ProjectTestSetup(suite);
-		}
+		return allTests();
 	}
 
 	public static Test setUpTest(Test test) {

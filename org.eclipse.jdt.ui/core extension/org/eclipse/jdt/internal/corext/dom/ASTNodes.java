@@ -652,81 +652,89 @@ public class ASTNodes {
 	 * 
 	 * @param memberType the type of the member to be added. Valid values are: <code>
 	 *  ASTNode.TYPE_DECLARATION</code>, <code>ASTNode.INITIALIZER</code>, <code>
+	 *  ASTNode.ENUM_DECLARATION</code>, <code>ASTNode.ANNOTATION_TYPE_DECLARATION</code>, <code>
 	 *  ASTNode.FIELD_DECLARATION<code> and <code>ASTNode.METHOD_DECLARATION</code>.
 	 * @param container a list containing objects of type <code>BodyDeclaration</code>
 	 * @param isStatic
 	 * @return the insertion index to be used
 	 */
 	private static int getInsertionIndex(List container, int memberType, boolean isStatic) {
-		if (memberType == ASTNode.TYPE_DECLARATION || memberType == ASTNode.INITIALIZER) {
-			int last= -1;
-			int i= 0;
-			for (Iterator iter= container.iterator(); iter.hasNext(); i++) {
-				int nodeType= ((BodyDeclaration)iter.next()).getNodeType();
-				switch (nodeType) {
-					case ASTNode.TYPE_DECLARATION:
-					case ASTNode.INITIALIZER:
-						if (nodeType == memberType)
-							last= i;
-						break;
-					default:
-						return last + 1;
-				}
-			}
-			return last + 1;
-		}
-		
 		int defaultIndex= container.size();
-		if (memberType == ASTNode.FIELD_DECLARATION) {
-			int first= -1;
-			int last= -1;
-			int i= 0;
-			for (Iterator iter= container.iterator(); iter.hasNext(); i++) {
-				int nodeType= ((BodyDeclaration)iter.next()).getNodeType();
-				switch (nodeType) {
-					case ASTNode.FIELD_DECLARATION:
-						last= i;
-						break;
-					case ASTNode.METHOD_DECLARATION:
-						if (first == -1)
-							first= i;
-						break;
+		
+		switch (memberType) {
+			case ASTNode.TYPE_DECLARATION:
+			case ASTNode.ENUM_DECLARATION :
+			case ASTNode.ANNOTATION_TYPE_DECLARATION :
+			case ASTNode.INITIALIZER: {
+				int last= -1;
+				int i= 0;
+				for (Iterator iter= container.iterator(); iter.hasNext(); i++) {
+					int nodeType= ((BodyDeclaration)iter.next()).getNodeType();
+					switch (nodeType) {
+						case ASTNode.TYPE_DECLARATION:
+						case ASTNode.INITIALIZER:
+						case ASTNode.ENUM_DECLARATION :
+						case ASTNode.ANNOTATION_TYPE_DECLARATION :
+							if (nodeType == memberType)
+								last= i;
+							break;
+						default:
+							return last + 1;
+					}
 				}
+				return last + 1;
 			}
-			if (last != -1)
-				return ++last;
-			if (first != -1)
-				return first;
-			return defaultIndex;
-		}
-		if (memberType == ASTNode.METHOD_DECLARATION) {
-			int lastMethod= -1;
-			int lastStaticMethod= -1;
-			int firstMethod= -1;
-			int i= 0;
-			for (Iterator iter= container.iterator(); iter.hasNext(); i++) {
-				ASTNode node= (ASTNode)iter.next();
-				int nodeType= node.getNodeType();
-				switch (nodeType) {
-					case ASTNode.METHOD_DECLARATION:
-						MethodDeclaration declaration= (MethodDeclaration)node;
-						if (firstMethod == -1)
-							firstMethod= i;
-						if (isStatic && Modifier.isStatic(declaration.getModifiers()))
-							lastStaticMethod= i;
-						lastMethod= i;
+			case ASTNode.FIELD_DECLARATION: {
+				int first= -1;
+				int last= -1;
+				int i= 0;
+				for (Iterator iter= container.iterator(); iter.hasNext(); i++) {
+					int nodeType= ((BodyDeclaration)iter.next()).getNodeType();
+					switch (nodeType) {
+						case ASTNode.FIELD_DECLARATION:
+							last= i;
+							break;
+						case ASTNode.METHOD_DECLARATION:
+							if (first == -1)
+								first= i;
+							break;
+					}
 				}
+				if (last != -1)
+					return ++last;
+				if (first != -1)
+					return first;
+				return defaultIndex;
 			}
-			if (isStatic) {
-				if (lastStaticMethod != -1)
-					return ++lastStaticMethod;
-				else if (firstMethod != -1)
-					return firstMethod;
-			} else {
-				if (lastMethod != -1)
-					return ++lastMethod;
+			case ASTNode.METHOD_DECLARATION: {
+				int lastMethod= -1;
+				int lastStaticMethod= -1;
+				int firstMethod= -1;
+				int i= 0;
+				for (Iterator iter= container.iterator(); iter.hasNext(); i++) {
+					ASTNode node= (ASTNode)iter.next();
+					int nodeType= node.getNodeType();
+					switch (nodeType) {
+						case ASTNode.METHOD_DECLARATION:
+							MethodDeclaration declaration= (MethodDeclaration)node;
+							if (firstMethod == -1)
+								firstMethod= i;
+							if (isStatic && Modifier.isStatic(declaration.getModifiers()))
+								lastStaticMethod= i;
+							lastMethod= i;
+					}
+				}
+				if (isStatic) {
+					if (lastStaticMethod != -1)
+						return ++lastStaticMethod;
+					else if (firstMethod != -1)
+						return firstMethod;
+				} else {
+					if (lastMethod != -1)
+						return ++lastMethod;
+				}
+				return defaultIndex;
 			}
-			return defaultIndex;
 		}
 		return defaultIndex;
 	}

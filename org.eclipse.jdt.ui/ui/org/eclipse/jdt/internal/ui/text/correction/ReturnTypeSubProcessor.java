@@ -80,6 +80,14 @@ public class ReturnTypeSubProcessor {
 		public boolean visit(TypeDeclaration node) {
 			return false;
 		}
+		
+		public boolean visit(EnumDeclaration node) {
+			return false;
+		}
+		
+		public boolean visit(AnnotationTypeDeclaration node) {
+			return false;
+		}
 
 	}	
 	
@@ -224,9 +232,9 @@ public class ReturnTypeSubProcessor {
 			
 			// change to constructor
 			ASTNode parentType= ASTResolving.findParentType(decl);
-			if (parentType instanceof TypeDeclaration) {
-				TypeDeclaration typeDeclaration= (TypeDeclaration) parentType;
-				if (!typeDeclaration.isInterface()) {
+			if (parentType instanceof AbstractTypeDeclaration) {
+				boolean isInterface= parentType instanceof TypeDeclaration && ((TypeDeclaration) parentType).isInterface();
+				if (!isInterface) {
 					String constructorName= ((TypeDeclaration) parentType).getName().getIdentifier();
 					ASTNode nameNode= methodDeclaration.getName();
 					label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.wrongconstructorname.description", constructorName); //$NON-NLS-1$		

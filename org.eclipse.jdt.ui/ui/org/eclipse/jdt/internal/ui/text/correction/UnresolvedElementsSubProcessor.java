@@ -402,6 +402,10 @@ public class UnresolvedElementsSubProcessor {
 				if (node.getLocationInParent() == ParameterizedType.TYPE_ARGUMENTS_PROPERTY) {
 					return SimilarElementsRequestor.REF_TYPES;
 				}
+			} else if (parent instanceof WildcardType) {
+				if (node.getLocationInParent() == WildcardType.BOUND_PROPERTY) {
+					return SimilarElementsRequestor.REF_TYPES;
+				}
 			}
 			node= parent;
 			parent= parent.getParent();
@@ -415,6 +419,9 @@ public class UnresolvedElementsSubProcessor {
 				} else if (node.equals(typeDeclaration.getSuperclassType())) {
 					kind= SimilarElementsRequestor.CLASSES;
 				}
+				break;
+			case ASTNode.ENUM_DECLARATION:
+				kind= SimilarElementsRequestor.INTERFACES;
 				break;
 			case ASTNode.METHOD_DECLARATION:
 				MethodDeclaration methodDeclaration= (MethodDeclaration) parent;

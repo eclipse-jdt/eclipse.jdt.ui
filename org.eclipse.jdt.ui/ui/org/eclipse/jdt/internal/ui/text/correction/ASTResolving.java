@@ -410,12 +410,12 @@ public class ASTResolving {
 	}
 	
 	/**
-	 * Returns either a TypeDeclaration or an AnonymousTypeDeclaration
+	 * Returns either a AbstractTypeDeclaration or an AnonymousTypeDeclaration
 	 * @param node
 	 * @return CompilationUnit
 	 */
 	public static ASTNode findParentType(ASTNode node) {
-		while ((node != null) && (node.getNodeType() != ASTNode.TYPE_DECLARATION) && (node.getNodeType() != ASTNode.ANONYMOUS_CLASS_DECLARATION)) {
+		while ((node instanceof AbstractTypeDeclaration) || (node instanceof AnnotationTypeDeclaration)) {
 			node= node.getParent();
 		}
 		return node;
@@ -512,37 +512,6 @@ public class ASTResolving {
 			return ast.newPrimitiveType(PrimitiveType.toCode(name));
 		} else if (!binding.isNullType() && !binding.isAnonymous()) {
 			return ast.newSimpleType(ast.newSimpleName(binding.getName()));
-		}
-		return null;
-	}
-	
-	private static TypeDeclaration findTypeDeclaration(List decls, String name) {
-		for (Iterator iter= decls.iterator(); iter.hasNext();) {
-			ASTNode elem= (ASTNode) iter.next();
-			if (elem instanceof TypeDeclaration) {
-				TypeDeclaration decl= (TypeDeclaration) elem;
-				if (name.equals(decl.getName().getIdentifier())) {
-					return decl;
-				}
-			}
-		}
-		return null;
-	}
-
-	public static TypeDeclaration findTypeDeclaration(CompilationUnit root, ITypeBinding binding) {
-		ArrayList names= new ArrayList(5);
-		while (binding != null) {
-			names.add(binding.getName());
-			binding= binding.getDeclaringClass();
-		}
-		List types= root.types();
-		for (int i= names.size() - 1; i >= 0; i--) {
-			String name= (String) names.get(i);
-			TypeDeclaration decl= findTypeDeclaration(types, name);
-			if (decl == null || i == 0) {
-				return decl;
-			}
-			types= decl.bodyDeclarations();
 		}
 		return null;
 	}

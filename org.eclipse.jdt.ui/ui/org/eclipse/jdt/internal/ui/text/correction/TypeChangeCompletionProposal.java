@@ -77,11 +77,12 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 				ASTNode parent= declNode.getParent();
 				if (parent instanceof FieldDeclaration) {
 					FieldDeclaration fieldDecl= (FieldDeclaration) parent;
-					if (fieldDecl.fragments().size() > 1 && (fieldDecl.getParent() instanceof TypeDeclaration)) { // split
+					if (fieldDecl.fragments().size() > 1 && (fieldDecl.getParent() instanceof AbstractTypeDeclaration)) { // split
 						VariableDeclarationFragment placeholder= (VariableDeclarationFragment) rewrite.createMoveTarget(declNode);
 						FieldDeclaration newField= ast.newFieldDeclaration(placeholder);
 						newField.setType(type);
-						rewrite.getListRewrite(fieldDecl.getParent(), TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertAfter(newField, parent, null);
+						AbstractTypeDeclaration typeDecl= (AbstractTypeDeclaration) fieldDecl.getParent();
+						rewrite.getListRewrite(typeDecl, typeDecl.getBodyDeclarationsProperty()).insertAfter(newField, parent, null);
 					} else {
 						rewrite.set(fieldDecl, FieldDeclaration.TYPE_PROPERTY, type, null);
 						rewrite.set(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS_PROPERTY, new Integer(0), null);
