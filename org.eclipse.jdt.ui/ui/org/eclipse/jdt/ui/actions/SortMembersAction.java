@@ -17,11 +17,12 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
@@ -30,19 +31,17 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.SortMembersOperation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
@@ -70,6 +69,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class SortMembersAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
+	private final static String ID= "org.eclipse.jdt.ui.actions.SortMembersAction"; //$NON-NLS-1$
 
 	/**
 	 * Creates a new <code>SortMembersAction</code>. The action requires
@@ -107,13 +107,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		boolean enabled= false;
-		try {
-			enabled= getSelectedCompilationUnit(selection) != null;
-		} catch (JavaModelException e) {
-			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.filterNotPresentException(e))
-				JavaPlugin.log(e);
-		}
+		enabled= getSelectedCompilationUnit(selection) != null;
 		setEnabled(enabled);
 	}	
 	
@@ -192,9 +186,16 @@ public class SortMembersAction extends SelectionDispatchAction {
 		}		
 		
 		if (containsRelevantMarkers(editor)) {
-			if (!MessageDialog.openConfirm(getShell(), getDialogTitle(), ActionMessages.getString("SortMembersAction.containsmarkers"))) { //$NON-NLS-1$
-				return;
-			}
+			int returnCode= OptionalMessageDialog.open(ID, 
+					getShell(), 
+					getDialogTitle(),
+					null,
+					ActionMessages.getString("SortMembersAction.containsmarkers"),  //$NON-NLS-1$
+					MessageDialog.WARNING, 		
+					new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 
+					0);
+			if (returnCode != OptionalMessageDialog.NOT_SHOWN && 
+					returnCode != Window.OK ) return;	
 		}
 
 		SortMembersOperation op= new SortMembersOperation(cu, null);
@@ -208,7 +209,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 		}
 	}
 		
-	private ICompilationUnit getSelectedCompilationUnit(IStructuredSelection selection) throws JavaModelException {
+	private ICompilationUnit getSelectedCompilationUnit(IStructuredSelection selection) {
 		if (selection.size() == 1) {
 			Object element= selection.getFirstElement();
 			if (element instanceof ICompilationUnit) {
