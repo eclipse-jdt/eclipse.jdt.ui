@@ -67,6 +67,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -206,8 +207,17 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		return false;
 	}	
 
-	private static boolean canRunOn(IField[] fields) {
-		return fields != null && fields.length > 0;
+	private boolean canRunOn(IField[] fields) throws JavaModelException {
+		if (fields != null && fields.length > 0) {
+			for (int i= 0; i < fields.length; i++) {
+				if (JdtFlags.isEnum(fields[i])) {
+					MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.enum_not_applicable")); //$NON-NLS-1$			
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 	
 	private void resetNumEntries() {
@@ -219,6 +229,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}
 
 	private void run(IType type, IField[] preselected, boolean editor) throws CoreException {
+		if (type.isEnum()) {
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.enum_not_applicable")); //$NON-NLS-1$
+			return;
+		}
 		if (type.isInterface()) {
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.interface_not_applicable")); //$NON-NLS-1$					
 			return;

@@ -20,9 +20,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.window.Window;
+
+import org.eclipse.jface.text.IRewriteTarget;
+import org.eclipse.jface.text.ITextSelection;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -34,31 +55,15 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.swt.graphics.Image;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.text.IRewriteTarget;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
-import org.eclipse.jface.window.Window;
-
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.ISelectionStatusValidator;
-import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation.Methods2Field;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -74,9 +79,6 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
 
 /**
  * Creates delegate methods for a type's fields. Opens a dialog with a list of
@@ -174,7 +176,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				run((IType) firstElement, new IField[0], false);
 			else if (firstElement instanceof ICompilationUnit)
 				run(JavaElementUtil.getMainType((ICompilationUnit) firstElement), new IField[0], false);
-			else
+			else if (!(firstElement instanceof IField))
 				MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.not_applicable")); //$NON-NLS-1$
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.error.actionfailed")); //$NON-NLS-1$
@@ -182,22 +184,28 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 	}
 
-	private static boolean canRunOn(IType type) throws JavaModelException {
-		if (type == null || type.getCompilationUnit() == null || type.isInterface())
+	private boolean canRunOn(IType type) throws JavaModelException {
+		if (type == null || type.getCompilationUnit() == null || type.isInterface()) {
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.not_applicable")); //$NON-NLS-1$
 			return false;
-
+		} else if (type.isEnum()) {
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.enum_not_applicable")); //$NON-NLS-1$
+			return false;
+		}
 		return canRunOn(type.getFields());
 	}
 
-	private static boolean canRunOn(IField[] fields) throws JavaModelException {
+	private boolean canRunOn(IField[] fields) throws JavaModelException {
 		if (fields == null) {
 			return false;
 		}
-		int count = 0;
-		for (int i = 0; i < fields.length; i++) {
-			if (!hasPrimitiveType(fields[i]) || isArray(fields[i])) {
+		int count= 0;
+		for (int i= 0; i < fields.length; i++) {
+			if (JdtFlags.isEnum(fields[i])) {
+				MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.enum_not_applicable")); //$NON-NLS-1$
+				return false;
+			} else if (!hasPrimitiveType(fields[i]) || isArray(fields[i]))
 				count++;
-			}
 		}
 		return (count > 0);
 	}
@@ -252,10 +260,8 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			return;
 		if (!ActionUtil.isProcessable(getShell(), type))
 			return;
-		if(!canRunOn(type)){
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.not_applicable")); //$NON-NLS-1$
-			return;
-		}			
+		if(!canRunOn(type))
+			return;	
 		showUI(type, preselected);
 	}
 
