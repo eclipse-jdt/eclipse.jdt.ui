@@ -64,6 +64,9 @@ public class NodeProperty extends ASTAttribute {
 			} else {
 				buf.append("null"); //$NON-NLS-1$
 			}
+		} else if (fProperty.isChildListProperty()) {
+			List node= (List) getNode();
+			buf.append(" (").append(node.size()).append(')'); //$NON-NLS-1$
 		}
 		return buf.toString();
 	}

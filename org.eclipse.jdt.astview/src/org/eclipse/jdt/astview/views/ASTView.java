@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.astview.views;
 
+import java.text.MessageFormat;
+
 import org.eclipse.jdt.astview.ASTViewImages;
 import org.eclipse.jdt.astview.ASTViewPlugin;
 import org.eclipse.jdt.astview.EditorUtility;
@@ -291,10 +293,16 @@ public class ASTView extends ViewPart {
 			parser.setSource((IClassFile) input);
 		}
 		try {
+			long startTime= System.currentTimeMillis();
 			CompilationUnit root= (CompilationUnit) parser.createAST(null);
+			long endTime= System.currentTimeMillis();
 			if (root == null) {
 				throw new CoreException(getErrorStatus("Could not create AST", null)); //$NON-NLS-1$
 			}
+			String msg= "{0} ({1}). Creation time: {2,number} ms"; //$NON-NLS-1$
+			String version= astLevel == AST.JLS2 ? "AST Level 2" : "AST Level 3";  //$NON-NLS-1$//$NON-NLS-2$
+			Object[] args= { ((IJavaElement) input).getElementName(), version, new Long(endTime - startTime) };
+			setContentDescription(MessageFormat.format(msg, args));
 			
 			fViewer.setInput(root);
 			setASTUptoDate(true);

@@ -13,24 +13,35 @@ package org.eclipse.jdt.astview.views;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.viewers.IColorProvider;
+import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
-public class ASTViewLabelProvider extends LabelProvider implements IColorProvider {
+public class ASTViewLabelProvider extends LabelProvider implements IColorProvider, IFontProvider {
 	
 	private int fSelectionStart;
 	private int fSelectionLength;
 	
+	private Color fBlue, fRed, fDarkGray, fYellow;
+	
 	public ASTViewLabelProvider() {
 		fSelectionStart= -1;
 		fSelectionLength= -1;
+		
+		Display display= Display.getCurrent();
+		
+		fRed= display.getSystemColor(SWT.COLOR_RED);
+		fDarkGray= display.getSystemColor(SWT.COLOR_DARK_GRAY);
+		fBlue= display.getSystemColor(SWT.COLOR_DARK_BLUE);
+		fYellow= display.getSystemColor(SWT.COLOR_YELLOW);
 	}
 	
 	public void setSelectedRange(int start, int length) {
@@ -88,14 +99,18 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			int parentend= start + parent.getLength();
 			
 			if (start < parentstart || end > parentend) {
-				return Display.getCurrent().getSystemColor(SWT.COLOR_RED);
+				return fRed;
 			}
 
-			return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY);
+			return fDarkGray;
 		} else if (element instanceof Binding) {
-			if (((Binding) element).getBinding() == null) {
-				return Display.getCurrent().getSystemColor(SWT.COLOR_RED);
+			Binding binding= (Binding) element;
+			if (binding.isRequired() && binding.getBinding() == null) {
+				return fRed;
 			}
+			return fBlue;
+		} else if (element instanceof BindingProperty) {
+			return fBlue;
 		}
 		return null;
 	}
@@ -105,7 +120,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	 */
 	public Color getBackground(Object element) {
 		if (fSelectionStart != -1 && isInside(element)) {
-			return Display.getCurrent().getSystemColor(SWT.COLOR_YELLOW);
+			return fYellow;
 		}
 		return null;
 	}
@@ -130,6 +145,13 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			}
 		}
 		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.IFontProvider#getFont(java.lang.Object)
+	 */
+	public Font getFont(Object element) {
+		return null;
 	}
 	
 }

@@ -47,11 +47,11 @@ public class BindingProperty extends ASTAttribute {
 	public BindingProperty(Binding parent, String name, IBinding[] bindings) {
 		fParent= parent;
 		if (bindings == null || bindings.length == 0) {
-			fName= name + ": none"; //$NON-NLS-1$
+			fName= name + " (0)"; //$NON-NLS-1$
 			fValues= null;
 		} else {
-			fName= name;
 			fValues= createBindings(bindings);
+			fName= name + " (" + String.valueOf(fValues.length) + ')'; //$NON-NLS-1$
 		}
 	}
 	
@@ -62,7 +62,7 @@ public class BindingProperty extends ASTAttribute {
 	private Binding[] createBindings(IBinding[] bindings) {
 		Binding[] res= new Binding[bindings.length];
 		for (int i= 0; i < res.length; i++) {
-			res[i]= new Binding(this, String.valueOf(i), bindings[i]);
+			res[i]= new Binding(this, String.valueOf(i), bindings[i], true);
 		}
 		return res;
 	}
