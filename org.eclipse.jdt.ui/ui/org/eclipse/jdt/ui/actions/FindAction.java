@@ -12,26 +12,10 @@ package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
-
-import org.eclipse.jface.text.ITextSelection;
-
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-
-import org.eclipse.search.ui.NewSearchUI;
-import org.eclipse.search.ui.SearchUI;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IWorkspaceDescription;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -45,13 +29,26 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+
+import org.eclipse.search.ui.NewSearchUI;
+import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.internal.ui.search.JavaSearchDescription;
 import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
@@ -60,6 +57,8 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchResultCollector;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 /**
  * Abstract class for Java search actions.
@@ -272,7 +271,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), element))
 			return;
 		
-		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_BGSEARCH)) {
+//		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_BGSEARCH)) {
+		if (true) {
 			try {
 				performNewSearch(element);
 			} catch (JavaModelException ex) {

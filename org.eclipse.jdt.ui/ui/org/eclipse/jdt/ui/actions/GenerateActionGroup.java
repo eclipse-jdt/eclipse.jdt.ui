@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
@@ -37,12 +38,13 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
-
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.AddTaskAction;
+import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
 import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
  * Action group that adds the source and generate actions to a part's context
@@ -82,6 +84,20 @@ public class GenerateActionGroup extends ActionGroup {
 	private ConvertLineDelimitersAction fConvertToWindows;
 	private ConvertLineDelimitersAction fConvertToUNIX;
 	private ConvertLineDelimitersAction fConvertToMac;
+	
+	private static final String QUICK_MENU_ID= "org.eclipse.jdt.ui.edit.text.java.source.quickMenu"; //$NON-NLS-1$
+	
+	private class RefactorQuickAccessAction extends JDTQuickMenuAction {
+		public RefactorQuickAccessAction(CompilationUnitEditor editor) {
+			super(editor, QUICK_MENU_ID); //$NON-NLS-1$
+		}
+		protected void fillMenu(IMenuManager menu) {
+			fillQuickMenu(menu);
+		}
+	}
+	
+	private RefactorQuickAccessAction fQuickAccessAction;
+	private IKeyBindingService fKeyBindingService;	
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
@@ -155,6 +171,10 @@ public class GenerateActionGroup extends ActionGroup {
 		fConvertToMac.setActionDefinitionId(ITextEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_MAC);
 		fConvertToMac.setHelpContextId(IAbstractTextEditorHelpContextIds.CONVERT_LINE_DELIMITERS_TO_MAC);
 		editor.setAction("ConvertLineDelimitersToMac", fConvertToMac); //$NON-NLS-1$
+		
+		fQuickAccessAction= new RefactorQuickAccessAction(editor);
+		fKeyBindingService= editor.getEditorSite().getKeyBindingService();
+		fKeyBindingService.registerAction(fQuickAccessAction);
 	}
 	
 	/**
@@ -165,7 +185,7 @@ public class GenerateActionGroup extends ActionGroup {
 	 * @param page the page that owns this action group
 	 */
 	public GenerateActionGroup(Page page) {
-		this(page.getSite());
+		this(page.getSite(), null);
 	}
 
 	/**
@@ -176,10 +196,10 @@ public class GenerateActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public GenerateActionGroup(IViewPart part) {
-		this(part.getSite());
+		this(part.getSite(), part.getSite().getKeyBindingService());
 	}
 	
-	private GenerateActionGroup(IWorkbenchSite site) {
+	private GenerateActionGroup(IWorkbenchSite site, IKeyBindingService keyBindingService) {
 		fSite= site;
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
@@ -258,6 +278,12 @@ public class GenerateActionGroup extends ActionGroup {
 		registerSelectionListener(provider, fOrganizeImports);
 		registerSelectionListener(provider, fSortMembers);
 		registerSelectionListener(provider, fAddTaskAction);
+		
+		fKeyBindingService= keyBindingService;
+		if (fKeyBindingService != null) {
+			fQuickAccessAction= new RefactorQuickAccessAction(null);
+			fKeyBindingService.registerAction(fQuickAccessAction);
+		}
 	}
 	
 	private void registerSelectionListener(ISelectionProvider provider, ISelectionChangedListener listener) {
@@ -297,64 +323,73 @@ public class GenerateActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		IMenuManager subMenu= null;
+		String shortCut= null; //$NON-NLS-1$
+		if (fQuickAccessAction != null) {
+			shortCut= fQuickAccessAction.getShortCutString(); //$NON-NLS-1$
+		}		
+		IMenuManager subMenu= new MenuManager(
+			ActionMessages.getString("SourceMenu.label") + (shortCut != null ? "\t" + shortCut : "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		int added= 0;
 		if (isEditorOwner()) {
-			subMenu= createEditorSubMenu(menu);
+			added= fillEditorSubMenu(subMenu);
 		} else {
-			subMenu= createViewSubMenu(menu);
+			added= fillViewSubMenu(subMenu);
 		}
-		if (subMenu != null)
+		if (added > 0)
 			menu.appendToGroup(fGroupName, subMenu);
 	}
 	
-	private IMenuManager createEditorSubMenu(IMenuManager mainMenu) {
-		IMenuManager result= new MenuManager(ActionMessages.getString("SourceMenu.label")); //$NON-NLS-1$
+	private void fillQuickMenu(IMenuManager menu) {
+		if (isEditorOwner()) {
+			fillEditorSubMenu(menu);
+		} else {
+			fillViewSubMenu(menu);
+		}
+	}
+	
+	private int fillEditorSubMenu(IMenuManager source) {
 		int added= 0;
-		added+= addEditorAction(result, "ToggleComment"); //$NON-NLS-1$
-		added+= addEditorAction(result, "AddBlockComment"); //$NON-NLS-1$
-		added+= addEditorAction(result, "RemoveBlockComment"); //$NON-NLS-1$
-		added+= addEditorAction(result, "Format"); //$NON-NLS-1$
-		added+= addEditorAction(result, "Indent"); //$NON-NLS-1$
-		result.add(new Separator());
-		added+= addAction(result, fOrganizeImports);
-		added+= addAction(result, fAddImport);
-		result.add(new Separator());
-		added+= addAction(result, fOverrideMethods);
-		added+= addAction(result, fAddGetterSetter);
-		added+= addAction(result, fAddDelegateMethods);
-		added+= addAction(result, fAddUnimplementedConstructors);
-		added+= addAction(result, fGenerateConstructorUsingFields);
-		added+= addAction(result, fAddJavaDocStub);
-		result.add(new Separator());		
-		added+= addAction(result, fSurroundWithTryCatch);
-		if (added == 0)
-			result= null;
-		return result;
+		added+= addEditorAction(source, "ToggleComment"); //$NON-NLS-1$
+		added+= addEditorAction(source, "AddBlockComment"); //$NON-NLS-1$
+		added+= addEditorAction(source, "RemoveBlockComment"); //$NON-NLS-1$
+		added+= addEditorAction(source, "Format"); //$NON-NLS-1$
+		added+= addEditorAction(source, "Indent"); //$NON-NLS-1$
+		source.add(new Separator());
+		added+= addAction(source, fOrganizeImports);
+		added+= addAction(source, fAddImport);
+		source.add(new Separator());
+		added+= addAction(source, fOverrideMethods);
+		added+= addAction(source, fAddGetterSetter);
+		added+= addAction(source, fAddDelegateMethods);
+		added+= addAction(source, fAddUnimplementedConstructors);
+		added+= addAction(source, fGenerateConstructorUsingFields);
+		added+= addAction(source, fAddJavaDocStub);
+		source.add(new Separator());		
+		added+= addAction(source, fSurroundWithTryCatch);
+		added+= addAction(source, fExternalizeStrings);
+		return added;
 	}
 
-	private IMenuManager createViewSubMenu(IMenuManager mainMenu) {
-		IMenuManager result= new MenuManager(ActionMessages.getString("SourceMenu.label")); //$NON-NLS-1$
+	private int fillViewSubMenu(IMenuManager source) {
 		int added= 0;
-		added+= addAction(result, fSortMembers);
-		result.add(new Separator());
-		added+= addAction(result, fOrganizeImports);
-		added+= addAction(result, fAddImport);
-		result.add(new Separator());
-		added+= addAction(result, fOverrideMethods);
-		added+= addAction(result, fAddGetterSetter);
-		added+= addAction(result, fAddDelegateMethods);
-		added+= addAction(result, fAddUnimplementedConstructors);
-		added+= addAction(result, fGenerateConstructorUsingFields);
-		added+= addAction(result, fAddJavaDocStub);
-		added+= addAction(result, fAddToClasspathAction);
-		added+= addAction(result, fRemoveFromClasspathAction);
-		result.add(new Separator());		
-		added+= addAction(result, fSurroundWithTryCatch);
-		added+= addAction(result, fExternalizeStrings);
-		added+= addAction(result, fFindStringsToExternalize);
-		if (added == 0)
-			result= null;
-		return result;
+		added+= addAction(source, fSortMembers);
+		source.add(new Separator());
+		added+= addAction(source, fOrganizeImports);
+		added+= addAction(source, fAddImport);
+		source.add(new Separator());
+		added+= addAction(source, fOverrideMethods);
+		added+= addAction(source, fAddGetterSetter);
+		added+= addAction(source, fAddDelegateMethods);
+		added+= addAction(source, fAddUnimplementedConstructors);
+		added+= addAction(source, fGenerateConstructorUsingFields);
+		added+= addAction(source, fAddJavaDocStub);
+		added+= addAction(source, fAddToClasspathAction);
+		added+= addAction(source, fRemoveFromClasspathAction);
+		source.add(new Separator());		
+		added+= addAction(source, fSurroundWithTryCatch);
+		added+= addAction(source, fExternalizeStrings);
+		added+= addAction(source, fFindStringsToExternalize);
+		return added;
 	}
 
 	/* (non-Javadoc)
@@ -367,6 +402,9 @@ public class GenerateActionGroup extends ActionGroup {
 				ISelectionChangedListener listener= (ISelectionChangedListener) iter.next();
 				provider.removeSelectionChangedListener(listener);
 			}
+		}
+		if (fQuickAccessAction != null && fKeyBindingService != null) {
+			fKeyBindingService.unregisterAction(fQuickAccessAction);
 		}
 		fEditor= null;
 		super.dispose();

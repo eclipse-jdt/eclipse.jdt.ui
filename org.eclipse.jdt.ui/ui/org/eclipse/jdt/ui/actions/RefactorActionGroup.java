@@ -16,12 +16,9 @@ import java.util.List;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableItem;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -44,7 +41,7 @@ import org.eclipse.ui.part.Page;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-import org.eclipse.jdt.internal.ui.actions.QuickAccessAction2;
+import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -121,33 +118,19 @@ public class RefactorActionGroup extends ActionGroup {
 	
 	private List fEditorActions;
 	
-	/*
-	private class RefactorQuickAccessAction extends QuickAccessAction {
-		public RefactorQuickAccessAction(CompilationUnitEditor editor) {
-			super("org.eclipse.jdt.ui.edit.text.java.refactor.quickList", editor); //$NON-NLS-1$
-			setActionDefinitionId("org.eclipse.jdt.ui.edit.text.java.refactor.quickList"); //$NON-NLS-1$
-		}
-		protected String getTableHeader() {
-			return RefactoringMessages.getString("RefactorActionGroup.quickAccess.title"); //$NON-NLS-1$
-		}
-		protected void addItems(Table table) {
-			fillQuickAccessMenu(table);
-		}
-	}
-	*/
+	private static final String QUICK_MENU_ID= "org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"; //$NON-NLS-1$
 	
-	private class RefactorQuickAccessAction extends QuickAccessAction2 {
+	private class RefactorQuickAccessAction extends JDTQuickMenuAction {
 		public RefactorQuickAccessAction(CompilationUnitEditor editor) {
-			super(editor); //$NON-NLS-1$
-			setActionDefinitionId("org.eclipse.jdt.ui.edit.text.java.refactor.quickList"); //$NON-NLS-1$
+			super(editor, QUICK_MENU_ID); //$NON-NLS-1$
 		}
-
-		protected void addItems(IMenuManager menu) {
-			fillQuickAccessMenu(menu);
+		protected void fillMenu(IMenuManager menu) {
+			fillQuickMenu(menu);
 		}
 	}
 	
 	private RefactorQuickAccessAction fQuickAccessAction;
+	private IKeyBindingService fKeyBindingService;
 
 	private static class NoActionAvailable extends Action {
 		public NoActionAvailable() {
@@ -165,7 +148,7 @@ public class RefactorActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public RefactorActionGroup(IViewPart part) {
-		this(part.getSite());
+		this(part.getSite(), part.getSite().getKeyBindingService());
 	}	
 	
 	/**
@@ -176,7 +159,7 @@ public class RefactorActionGroup extends ActionGroup {
 	 * @param page the page that owns this action group
 	 */
 	public RefactorActionGroup(Page page) {
-		this(page.getSite());
+		this(page.getSite(), null);
 	}
 	
 	/**
@@ -299,11 +282,11 @@ public class RefactorActionGroup extends ActionGroup {
 		fEditorActions.add(fSelfEncapsulateField);
 		
 		fQuickAccessAction= new RefactorQuickAccessAction(editor);
-		IKeyBindingService service= editor.getEditorSite().getKeyBindingService();
-		service.registerAction(fQuickAccessAction);
+		fKeyBindingService= editor.getEditorSite().getKeyBindingService();
+		fKeyBindingService.registerAction(fQuickAccessAction);
 	}
 
-	private RefactorActionGroup(IWorkbenchSite site) {
+	private RefactorActionGroup(IWorkbenchSite site, IKeyBindingService keyBindingService) {
 		fSite= site;
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
@@ -359,8 +342,14 @@ public class RefactorActionGroup extends ActionGroup {
 		fConvertAnonymousToNestedAction= new ConvertAnonymousToNestedAction(fSite);
 		fConvertAnonymousToNestedAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_ANONYMOUS_TO_NESTED);
 		initAction(fConvertAnonymousToNestedAction, provider, selection);
+		
+		fKeyBindingService= keyBindingService;
+		if (fKeyBindingService != null) {
+			fQuickAccessAction= new RefactorQuickAccessAction(null);
+			fKeyBindingService.registerAction(fQuickAccessAction);
+		}
 	}
-
+	
 	private static void initAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection){
 		action.update(selection);
 		provider.addSelectionChangedListener(action);
@@ -422,8 +411,8 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fUseSupertypeAction, provider);
 		disposeAction(fConvertLocalToFieldAction, provider);
 		disposeAction(fConvertAnonymousToNestedAction, provider);
-		if (fQuickAccessAction != null) {
-			fEditor.getSite().getKeyBindingService().unregisterAction(fQuickAccessAction);
+		if (fQuickAccessAction != null && fKeyBindingService != null) {
+			fKeyBindingService.unregisterAction(fQuickAccessAction);
 		}
 		super.dispose();
 	}
@@ -434,7 +423,13 @@ public class RefactorActionGroup extends ActionGroup {
 	}
 	
 	private void addRefactorSubmenu(IMenuManager menu) {
-		IMenuManager refactorSubmenu= new MenuManager(ActionMessages.getString("RefactorMenu.label"), MENU_ID);  //$NON-NLS-1$
+		String shortCut= null; //$NON-NLS-1$
+		if (fQuickAccessAction != null) {
+			shortCut= fQuickAccessAction.getShortCutString(); //$NON-NLS-1$
+		}
+		IMenuManager refactorSubmenu= new MenuManager(
+			ActionMessages.getString("RefactorMenu.label") + (shortCut != null ? "\t" + shortCut : ""), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			MENU_ID);  
 		if (fEditor != null) {
 			refactorSubmenu.addMenuListener(new IMenuListener() {
 				public void menuAboutToShow(IMenuManager manager) {
@@ -523,45 +518,21 @@ public class RefactorActionGroup extends ActionGroup {
 			getDocument(fEditor.getEditorInput());
 	}
 	
-	private void fillQuickAccessMenu(IMenuManager menu) {
-		ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
-		JavaTextSelection javaSelection= new JavaTextSelection(
-			getEditorInput(), getDocument(), textSelection.getOffset(), textSelection.getLength());
-		
-		for (Iterator iter= fEditorActions.iterator(); iter.hasNext(); ) {
-			((SelectionDispatchAction)iter.next()).update(javaSelection);
-		}
-		fillRefactorMenu(menu);
-		for (Iterator iter= fEditorActions.iterator(); iter.hasNext(); ) {
-			((SelectionDispatchAction)iter.next()).update(textSelection);
-		}
-	}
-
-	private void fillQuickAccessMenu(Table table) {
-		ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
-		JavaTextSelection javaSelection= new JavaTextSelection(
-			getEditorInput(), getDocument(), textSelection.getOffset(), textSelection.getLength());
-		
-		for (Iterator iter= fEditorActions.iterator(); iter.hasNext(); ) {
-			SelectionDispatchAction action= (SelectionDispatchAction)iter.next();
-			action.update(javaSelection);
-			if (action.isEnabled()) {
-				TableItem item= new TableItem(table, SWT.NONE);
-				item.setText(removeAmpersand(action.getText()));
-				item.setData(action);
+	private void fillQuickMenu(IMenuManager menu) {
+		if (fEditor != null) {
+			ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
+			JavaTextSelection javaSelection= new JavaTextSelection(
+				getEditorInput(), getDocument(), textSelection.getOffset(), textSelection.getLength());
+			
+			for (Iterator iter= fEditorActions.iterator(); iter.hasNext(); ) {
+				((SelectionDispatchAction)iter.next()).update(javaSelection);
 			}
-			action.update(textSelection);
+			fillRefactorMenu(menu);
+			for (Iterator iter= fEditorActions.iterator(); iter.hasNext(); ) {
+				((SelectionDispatchAction)iter.next()).update(textSelection);
+			}
+		} else {
+			fillRefactorMenu(menu);
 		}
-	}
-
-	private static String removeAmpersand(String string) {
-		StringBuffer result= new StringBuffer();
-		for (int i= 0; i < string.length(); i++) {
-			char ch= string.charAt(i);
-			if (ch == '&')
-				continue;
-			result.append(ch);
-		}
-		return result.toString();
 	}
 }

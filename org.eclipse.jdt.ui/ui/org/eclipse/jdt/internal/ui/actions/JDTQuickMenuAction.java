@@ -12,58 +12,37 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.ui.IWorkbenchPartSite;
-
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 
-public abstract class QuickAccessAction2 extends Action {
+public abstract class JDTQuickMenuAction extends QuickMenuAction { 
 	
 	private CompilationUnitEditor fEditor;
-	private IWorkbenchPartSite fSite;
 	
-	public QuickAccessAction2(CompilationUnitEditor editor) {
-		fEditor= editor;
-		fSite= editor.getSite();
+	public JDTQuickMenuAction(String commandId) {
+		super(commandId);
 	}
 
-	public void run() {
-		MenuManager menu= new MenuManager();
-		addItems(menu);
-		Shell parent= fEditor.getViewer().getTextWidget().getShell();
-		Menu widget= menu.createContextMenu(parent);
-		if (widget.getItemCount() > 0) {
-			widget.setDefaultItem(widget.getItem(0));
-		}
-		
-		Point cursorLocation= fEditor.getViewer().getTextWidget().toDisplay(computeWordStart());
-		widget.setLocation(cursorLocation);
-		widget.setVisible(true);
+	public JDTQuickMenuAction(CompilationUnitEditor editor, String commandId) {
+		super(commandId);
+		fEditor= editor;
+	}
+
+	protected Point getMenuLocation(StyledText text) {
+		if (fEditor == null || text != fEditor.getViewer().getTextWidget())
+			return null;
+		return fEditor.getViewer().getTextWidget().toDisplay(computeWordStart());
 	}
 	
-	protected abstract void addItems(IMenuManager menu);
-	
-	/**
-	 * Determines graphical area covered by the given text region.
-	 *
-	 * @param region the region whose graphical extend must be computed
-	 * @return the graphical extend of the given region
-	 */
 	private Point computeWordStart() {
-		
 		ITextSelection selection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
 		IRegion textRegion= JavaWordFinder.findWord(fEditor.getViewer().getDocument(), selection.getOffset());
 				
@@ -77,14 +56,6 @@ public abstract class QuickAccessAction2 extends Action {
 		return result;
 	}
 	
-	/**
-	 * Translates a given region of the text viewer's document into
-	 * the corresponding region of the viewer's widget.
-	 * 
-	 * @param region the document region
-	 * @return the corresponding widget region
-	 * @since 2.1
-	 */
 	private IRegion modelRange2WidgetRange(IRegion region) {
 		ISourceViewer viewer= fEditor.getViewer();
 		if (viewer instanceof ITextViewerExtension5) {
