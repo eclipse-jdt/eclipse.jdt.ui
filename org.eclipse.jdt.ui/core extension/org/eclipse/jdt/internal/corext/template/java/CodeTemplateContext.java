@@ -8,19 +8,15 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.IJavaProject;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.corext.template.CodeTemplates;
 import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
-import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.TemplateTranslator;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
   */
@@ -59,13 +55,6 @@ public class CodeTemplateContext extends TemplateContext {
 		TemplateBuffer buffer= translator.translate(template.getPattern());
 
 		getContextType().edit(buffer, this);
-
-		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
-		boolean useCodeFormatter= prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);			
-
-		ITemplateEditor formatter= new JavaFormatter(fLineDelimiter, fInitialIndentLevel, useCodeFormatter);
-		formatter.edit(buffer, this);
-
 		return buffer;
 	}
 
@@ -77,12 +66,18 @@ public class CodeTemplateContext extends TemplateContext {
 	}
 
 	/**
-	 * Evaluates a codetemplate in the context of a compilation unit
+	 * Evaluates a codetemplate in the given cotext
 	 */
-	public static String evaluateTemplate(Template template, IJavaProject project, Map mappedValues, String lineDelimiter, int initialIndentLevel) throws CoreException {
+	public static String evaluateTemplate(String templateName, IJavaProject project, Map mappedValues, String lineDelimiter, int initialIndentLevel) throws CoreException {
+		Template[] templates= CodeTemplates.getInstance().getTemplates(templateName);
+		if (templates == null || templates.length != 1) {
+			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.getString("CodeTemplateContext.error.message"), null)); //$NON-NLS-1$
+		}
+		Template template= templates[0];
+
 		ContextType contextType= ContextTypeRegistry.getInstance().getContextType(template.getContextTypeName()); //$NON-NLS-1$
 		if (contextType == null)
-			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.getString("CodeTemplateTemplateContext.error.message"), null)); //$NON-NLS-1$
+			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.getString("CodeTemplateContext.error.message"), null)); //$NON-NLS-1$
 
 		CodeTemplateContext context= new CodeTemplateContext(contextType, project, mappedValues, lineDelimiter, initialIndentLevel);
 		TemplateBuffer buffer= context.evaluate(template);

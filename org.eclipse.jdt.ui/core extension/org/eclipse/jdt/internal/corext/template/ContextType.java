@@ -72,6 +72,30 @@ public abstract class ContextType implements ITemplateEditor {
 	public Iterator variableIterator() {
 	 	return fVariables.values().iterator();   
 	}
+	
+	/**
+	 * Returns the variable with the given name
+	 */
+	protected TemplateVariable getVariable(String name) {
+		return (TemplateVariable) fVariables.get(name);
+	}	
+
+	/**
+	 * Validates a pattern and returnes <code>null</code> if the validation was
+	 * a success or an error message if not.
+	 */
+	public String validate(String pattern) throws CoreException {
+		TemplateTranslator translator= new TemplateTranslator();
+		TemplateBuffer buffer= translator.translate(pattern);
+		if (buffer != null) {
+			return validateVariables(buffer.getVariables());
+		}
+		return translator.getErrorMessage();
+	}
+	
+	protected String validateVariables(TemplatePosition[] variables) {
+		return null;
+	}
 
     /*
      * @see ITemplateEditor#edit(TemplateBuffer)

@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
@@ -77,7 +78,6 @@ import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
-import org.eclipse.jdt.internal.corext.template.TemplateTranslator;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
@@ -207,7 +207,7 @@ public class EditTemplateDialog extends StatusDialog {
 	private Button fInsertVariableButton;
 	private boolean fIsNameModifiable;
 
-	private TemplateTranslator fTranslator= new TemplateTranslator();	
+	private StatusInfo fValidationStatus;
 	private boolean fSuppressError= true; // #4354	
 	private Map fGlobalActions= new HashMap(10);
 	private List fSelectionActions = new ArrayList(3);	
@@ -229,11 +229,11 @@ public class EditTemplateDialog extends StatusDialog {
 		fIsNameModifiable= isNameModifiable;
 		
 		fContextTypes= contextTypes;
+		fValidationStatus= new StatusInfo();
 		
 		ContextType type= ContextTypeRegistry.getInstance().getContextType(template.getContextTypeName());
 		fProcessor.setContextType(type);
 	}
-	
 	
 	/*
 	 * @see Dialog#createDialogArea(Composite)
@@ -244,6 +244,12 @@ public class EditTemplateDialog extends StatusDialog {
 		layout.numColumns= 2;
 		parent.setLayout(layout);
 		parent.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+		ModifyListener listener= new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				doTextWidgetChanged(e.widget);
+			}
+		};
 		
 		if (fIsNameModifiable) {
 			createLabel(parent, TemplateMessages.getString("EditTemplateDialog.name")); //$NON-NLS-1$	
@@ -258,14 +264,7 @@ public class EditTemplateDialog extends StatusDialog {
 
 			fNameText= createText(composite);
 			
-			fNameText.addModifyListener(new ModifyListener() {
-				public void modifyText(ModifyEvent e) {
-					if (fSuppressError && (fNameText.getText().trim().length() != 0))
-						fSuppressError= false;
-
-					updateButtons();
-				}
-			});
+			fNameText.addModifyListener(listener);
 			createLabel(composite, TemplateMessages.getString("EditTemplateDialog.context")); //$NON-NLS-1$		
 			fContextCombo= new Combo(composite, SWT.READ_ONLY);
 	
@@ -273,16 +272,12 @@ public class EditTemplateDialog extends StatusDialog {
 				fContextCombo.add(fContextTypes[i]);
 			}
 	
-			fContextCombo.addModifyListener(new ModifyListener() {
-				public void modifyText(ModifyEvent e) {
-					String name= fContextCombo.getText();
-					fProcessor.setContextType(ContextTypeRegistry.getInstance().getContextType(name));				
-				}
-			});
+			fContextCombo.addModifyListener(listener);
 		}
 		
 		createLabel(parent, TemplateMessages.getString("EditTemplateDialog.description")); //$NON-NLS-1$		
 		fDescriptionText= createText(parent);
+		fDescriptionText.addModifyListener(listener);
 
 		Label patternLabel= createLabel(parent, TemplateMessages.getString("EditTemplateDialog.pattern")); //$NON-NLS-1$
 		patternLabel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
@@ -320,6 +315,44 @@ public class EditTemplateDialog extends StatusDialog {
 
 		return composite;
 	}
+	
+	protected void doTextWidgetChanged(Widget w) {
+		if (w == fNameText) {
+			String name= fNameText.getText();
+			if (fSuppressError && (name.trim().length() != 0))
+				fSuppressError= false;
+
+			fTemplate.setName(name);
+			updateButtons();			
+		} else if (w == fContextCombo) {
+			String name= fContextCombo.getText();
+			fTemplate.setContext(name);
+			fProcessor.setContextType(ContextTypeRegistry.getInstance().getContextType(name));
+		} else if (w == fDescriptionText) {
+			String desc= fDescriptionText.getText();
+			fTemplate.setDescription(desc);
+		}	
+	}
+	
+	protected void doSourceChanged(IDocument document) {
+		String text= document.get();
+		fTemplate.setPattern(text);
+		fValidationStatus.setOK();
+		ContextType contextType= ContextTypeRegistry.getInstance().getContextType(fTemplate.getContextTypeName());
+		if (contextType != null) {
+			try {
+				String errorMessage= contextType.validate(text);
+				if (errorMessage != null) {
+					fValidationStatus.setError(errorMessage);
+				}
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}			
+		}
+
+		updateUndoAction();
+		updateButtons();
+	}	
 
 	private static GridData getButtonGridData(Button button) {
 		GridData data= new GridData(GridData.FILL_HORIZONTAL);
@@ -372,14 +405,7 @@ public class EditTemplateDialog extends StatusDialog {
 		
 		viewer.addTextListener(new ITextListener() {
 			public void textChanged(TextEvent event) {
-			    try {
-					fTranslator.translate(event.getDocumentEvent().getDocument().get());
-			    } catch (CoreException e) {
-			     	JavaPlugin.log(e);
-			    }
-				
-				updateUndoAction();
-				updateButtons();
+				doSourceChanged(event.getDocumentEvent().getDocument());
 			}
 		});
 
@@ -536,29 +562,21 @@ public class EditTemplateDialog extends StatusDialog {
 	}
 	
 	protected void okPressed() {
-		if (fIsNameModifiable) {
-			fTemplate.setName(fNameText.getText());
-			fTemplate.setContext(fContextCombo.getText());
-		}		
-		fTemplate.setDescription(fDescriptionText.getText());
-		fTemplate.setPattern(fPatternEditor.getTextWidget().getText());
 		super.okPressed();
 	}
 	
 	private void updateButtons() {		
+		StatusInfo status;
+
 		boolean valid= fNameText == null || fNameText.getText().trim().length() != 0;
-
-		StatusInfo status= new StatusInfo();
-		
 		if (!valid) {
-			if (fSuppressError)
-				status.setError(""); //$NON-NLS-1$							
-			else
+			status = new StatusInfo();
+			if (!fSuppressError) {
 				status.setError(TemplateMessages.getString("EditTemplateDialog.error.noname")); //$NON-NLS-1$
- 		} else if (fTranslator.getErrorMessage() != null) {
- 			status.setError(fTranslator.getErrorMessage());	
-		}
-
+			}
+ 		} else {
+ 			status= fValidationStatus; 
+ 		}
 		updateStatus(status);
 	}
 

@@ -12,8 +12,6 @@ import java.util.Vector;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
-
 /**
  * The template translator translates a string into a template buffer.
  * The EBNF grammer of a valid string is as follows:
@@ -105,17 +103,6 @@ public class TemplateTranslator {
 
 		String translatedString= fBuffer.toString();
 		TemplatePosition[] variables= findVariables(translatedString, offsets, lengths);
-
-		// check for multiple cursor variables		
-		for (int i= 0; i < variables.length; i++) {
-			TemplatePosition position= variables[i];
-			if (position.getName().equals(JavaTemplateMessages.getString("GlobalVariables.variable.name.cursor"))) { //$NON-NLS-1$				
-				if (position.getOffsets().length > 1) {
-					fErrorMessage= TemplateMessages.getString("TemplateTranslator.error.multiple.cursor.variables"); //$NON-NLS-1$
-					return null;
-				}
-			}
-		}
 
 		return new TemplateBuffer(translatedString, variables);
 	}

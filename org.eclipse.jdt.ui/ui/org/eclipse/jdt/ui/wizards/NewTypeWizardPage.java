@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -53,6 +54,8 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -67,6 +70,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.Templates;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -1332,18 +1337,21 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			String lineDelimiter= null;	
 			if (!isInnerClass) {
 				lineDelimiter= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-				
-				String packStatement= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ";" + lineDelimiter + lineDelimiter; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$		
+										
 				ICompilationUnit parentCU= pack.createCompilationUnit(clName + ".java", "", false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$
 				createdWorkingCopy= (ICompilationUnit) parentCU.getSharedWorkingCopy(null, JavaUI.getBufferFactory(), null);
-				createdWorkingCopy.getBuffer().setContents(packStatement);
-			
+							
 				imports= new ImportsStructure(createdWorkingCopy, prefOrder, threshold, false);
 				// add an import that will be removed again. Having this import solves 14661
 				imports.addImport(pack.getElementName(), getTypeName());
 				
-				String content= constructTypeStub(new ImportsManager(imports), lineDelimiter, createdWorkingCopy);
-				createdType= createdWorkingCopy.createType(content, null, false, new SubProgressMonitor(monitor, 3));
+				String typeContent= constructTypeStub(new ImportsManager(imports), lineDelimiter);
+				
+				String cuContent= constructCUContent(pack, typeContent, lineDelimiter);
+				
+				createdWorkingCopy.getBuffer().setContents(cuContent);
+				
+				createdType= createdWorkingCopy.getType(clName);
 			} else {
 				IType enclosingType= getEnclosingType();
 				
@@ -1364,7 +1372,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				}
 				
 				lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
-				String content= constructTypeStub(new ImportsManager(imports), lineDelimiter, parentCU);
+				String content= constructTypeStub(new ImportsManager(imports), lineDelimiter);
 				IJavaElement[] elems= enclosingType.getChildren();
 				IJavaElement sibling= elems.length > 0 ? elems[0] : null;
 				
@@ -1412,6 +1420,28 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 	}	
 
+	private String constructCUContent(IPackageFragment pack, String typeContent, String lineDelimiter) throws CoreException {
+		String packStatement= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ';';
+		
+		HashMap templateContext= new HashMap();
+		templateContext.put(CodeTemplateContextType.PACKAGE_STATEMENT, packStatement);
+		templateContext.put(CodeTemplateContextType.TYPE_DECLARATION, typeContent);
+		String content= CodeTemplateContext.evaluateTemplate(CodeTemplateContextType.NEWTYPE_NAME, pack.getJavaProject(), templateContext, lineDelimiter, 0);
+		if (content.length() == 0) {
+			return getDefaultCUContent(packStatement, typeContent, lineDelimiter);
+		}
+		CompilationUnit unit= AST.parseCompilationUnit(content.toCharArray());
+		if (!pack.isDefaultPackage() && unit.getPackage() == null || unit.types().isEmpty()) {
+			return getDefaultCUContent(packStatement, typeContent, lineDelimiter);
+		}
+		return content;
+	}
+	
+	private String getDefaultCUContent(String packStatement, String typeContent, String lineDelimiter) {
+		return packStatement + lineDelimiter + lineDelimiter + typeContent;
+	}
+	
+
 	/**
 	 * Returns the created type. The method only returns a valid type 
 	 * after <code>createType</code> has been called.
@@ -1457,13 +1487,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	/*
 	 * Called from createType to construct the source for this type
 	 */		
-	private String constructTypeStub(ImportsManager imports, String lineDelimiter, ICompilationUnit parentCU) {	
+	private String constructTypeStub(ImportsManager imports, String lineDelimiter) {	
 		StringBuffer buf= new StringBuffer();
-		String typeComment= getTypeComment(parentCU);
-		if (typeComment != null && typeComment.length() > 0) {
-			buf.append(typeComment);
-			buf.append(lineDelimiter);
-		}
 			
 		int modifiers= getModifiers();
 		buf.append(Flags.toString(modifiers));

@@ -14,6 +14,8 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
+import org.eclipse.jdt.internal.corext.template.TemplateMessages;
+import org.eclipse.jdt.internal.corext.template.TemplatePosition;
 import org.eclipse.jdt.internal.corext.template.TemplateVariable;
 
 /**
@@ -160,5 +162,21 @@ public abstract class CompilationUnitContextType extends ContextType {
 
 	public abstract CompilationUnitContext createContext(IDocument document, int completionPosition, int i, ICompilationUnit compilationUnit);
 
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.template.ContextType#validateVariables(org.eclipse.jdt.internal.corext.template.TemplatePosition[])
+	 */
+	protected String validateVariables(TemplatePosition[] variables) {
+		// check for multiple cursor variables		
+		for (int i= 0; i < variables.length; i++) {
+			TemplatePosition position= variables[i];
+			if (position.getName().equals(JavaTemplateMessages.getString("GlobalVariables.variable.name.cursor"))) { //$NON-NLS-1$				
+				if (position.getOffsets().length > 1) {
+					return TemplateMessages.getString("ContextType.error.multiple.cursor.variables"); //$NON-NLS-1$
+				}
+			}
+		}
+		return null;
+	}
 
 }

@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.TableColumn;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
@@ -100,7 +99,7 @@ public class CodeTemplatePreferencePage extends PreferencePage implements IWorkb
 	//private Button fDisableAllButton;
 
 	private SourceViewer fPatternViewer;
-	private Button fFormatButton;
+	//private Button fFormatButton;
 	
 	public CodeTemplatePreferencePage() {
 		super();
@@ -281,18 +280,20 @@ public class CodeTemplatePreferencePage extends PreferencePage implements IWorkb
 		*/
 		fPatternViewer= createViewer(parent);
 		
-		fFormatButton= new Button(parent, SWT.CHECK);
+		/*fFormatButton= new Button(parent, SWT.CHECK);
 		fFormatButton.setText(TemplateMessages.getString("CodeTemplatePreferencePage.use.code.formatter")); //$NON-NLS-1$
         GridData gd1= new GridData();
         gd1.horizontalSpan= 2;
         fFormatButton.setLayoutData(gd1);
+		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		fFormatButton.setSelection(prefs.getBoolean(PREF_FORMAT_TEMPLATES));        
+        */
 
 		fTableViewer.setInput(fTemplates);
 //		fTableViewer.setAllChecked(false);
 //		fTableViewer.setCheckedElements(getEnabledTemplates());		
 
-		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
-		fFormatButton.setSelection(prefs.getBoolean(PREF_FORMAT_TEMPLATES));
+
 
 		updateButtons();
 		configureTableResizing(innerParent, buttons, table, column1, column3);
@@ -565,8 +566,8 @@ public class CodeTemplatePreferencePage extends PreferencePage implements IWorkb
 	 * @see PreferencePage#performDefaults()
 	 */
 	protected void performDefaults() {
-		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
-		fFormatButton.setSelection(prefs.getDefaultBoolean(PREF_FORMAT_TEMPLATES));
+		//IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		//fFormatButton.setSelection(prefs.getDefaultBoolean(PREF_FORMAT_TEMPLATES));
 
 		try {
 			fTemplates.restoreDefaults();
@@ -585,8 +586,8 @@ public class CodeTemplatePreferencePage extends PreferencePage implements IWorkb
 	 * @see PreferencePage#performOk()
 	 */	
 	public boolean performOk() {
-		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
-		prefs.setValue(PREF_FORMAT_TEMPLATES, fFormatButton.getSelection());
+		//IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		//prefs.setValue(PREF_FORMAT_TEMPLATES, fFormatButton.getSelection());
 
 		try {
 			fTemplates.save();
@@ -595,7 +596,7 @@ public class CodeTemplatePreferencePage extends PreferencePage implements IWorkb
 			openWriteErrorDialog(e);
 		}
 		
-		JavaPlugin.getDefault().savePluginPreferences();
+		//JavaPlugin.getDefault().savePluginPreferences();
 		return super.performOk();
 	}	
 	
