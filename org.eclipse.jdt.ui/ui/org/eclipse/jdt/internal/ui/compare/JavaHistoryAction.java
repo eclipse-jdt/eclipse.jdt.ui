@@ -49,12 +49,12 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 		
 		public String getName() {
 			if (fInEditor)
-				return "Editor Buffer";
-			return "Workspace File";
+				return CompareMessages.getString("Editor_Buffer"); //$NON-NLS-1$
+			return CompareMessages.getString("Workspace_File"); //$NON-NLS-1$
 		}
 		
 		public String getType() {
-			return "java";
+			return "java";	//$NON-NLS-1$
 		}
 		
 		public Image getImage() {
@@ -167,7 +167,12 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 			
 	protected boolean isEnabled(ISelection selection) {
 		IMember m= getEditionElement(selection);
-		return getWorkingCopy(m) != null;
+		if (m == null)
+			return false;
+		IFile file= getFile(m);
+		if (beingEdited(file))
+			return getWorkingCopy(m) != null;
+		return true;
 	}
 	
 	/**

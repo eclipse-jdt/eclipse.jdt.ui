@@ -129,7 +129,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 				JavaPlugin.log(ex);
 			}
 			if (lines == null) {
-				MessageDialog.openError(shell, errorTitle, "couldn't get text to insert");
+				MessageDialog.openError(shell, errorTitle, errorMessage);
 				return;
 			}
 			
@@ -141,7 +141,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			else
 				edit= createEdit(lines, parent);
 			if (edit == null) {
-				MessageDialog.openError(shell, errorTitle, "couldn't determine place to insert");
+				MessageDialog.openError(shell, errorTitle, errorMessage);
 				return;
 			}
 			
@@ -153,7 +153,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 						
 		} catch(CoreException ex) {
 			JavaPlugin.log(ex);
-			MessageDialog.openError(shell, errorTitle, "error with TextBuffer");
+			MessageDialog.openError(shell, errorTitle, errorMessage);
 		} finally {
 			if (buffer != null)
 				TextBuffer.release(buffer);

@@ -50,7 +50,7 @@ public class CompilationUnitDelta {
 		
 		void dump(int level) {
 			for (int i= 0; i < level; i++)	
-				System.out.print("  ");
+				System.out.print("  ");	//$NON-NLS-1$
 			System.out.println(fName);
 			
 			if (fChildren != null) {

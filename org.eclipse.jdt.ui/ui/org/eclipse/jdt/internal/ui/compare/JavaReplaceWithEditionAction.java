@@ -61,7 +61,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		IMember input= getEditionElement(selection);
 		if (input == null) {
 			// shouldn't happen because Action should not be enabled in the first place
-			MessageDialog.openInformation(shell, errorTitle, errorMessage);
+			MessageDialog.openError(shell, errorTitle, errorMessage);
 			return;
 		}
 		
@@ -90,8 +90,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			ITypedElement ti= d.selectEdition(target, editions, input);
 						
 			if (ti instanceof IStreamContentAccessor) {
-				IStreamContentAccessor sca= (IStreamContentAccessor) ti;				
-										
+														
 				// from the edition get the lines (text) to insert
 				String[] lines= null;
 				try {
@@ -100,7 +99,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 					JavaPlugin.log(ex);
 				}
 				if (lines == null) {
-					MessageDialog.openError(shell, errorTitle, "couldn't get text to insert");
+					MessageDialog.openError(shell, errorTitle, errorMessage);
 					return;
 				}
 				
@@ -116,7 +115,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 
 		} catch(CoreException ex) {
 			JavaPlugin.log(ex);
-			MessageDialog.openError(shell, errorTitle, "error with TextBuffer");
+			MessageDialog.openError(shell, errorTitle, errorMessage);
 		} finally {
 			if (buffer != null)
 				TextBuffer.release(buffer);

@@ -184,7 +184,6 @@ class JavaCompareUtilities {
 	 */
 	static String[] readLines(InputStream is) {
 		
-		String[] lines= null;
 		try {
 			StringBuffer sb= null;
 			List list= new ArrayList();
