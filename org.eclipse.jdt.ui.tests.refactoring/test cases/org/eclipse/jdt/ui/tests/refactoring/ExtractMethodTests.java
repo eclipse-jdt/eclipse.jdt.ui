@@ -123,6 +123,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		performTest(fgTestSetup.getBranchPackage(), "A", COMPARE_WITH_OUTPUT, "branch_out");
 	}
 	
+	protected void errorTest() throws Exception {
+		performTest(fgTestSetup.getErrorPackage(), "A", COMPARE_WITH_OUTPUT, "error_out");
+	}
+	
 	protected void wikiTest() throws Exception {
 		performTest(fgTestSetup.getWikiPackage(), "A", COMPARE_WITH_OUTPUT, "wiki_out");
 	}
@@ -1365,6 +1369,16 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	
 	public void test755() throws Exception {
 		branchTest();
+	}
+	
+	//---- Test for CUs with compiler errors
+	
+	public void test801() throws Exception {
+		errorTest();
+	}
+	
+	public void test802() throws Exception {
+		errorTest();
 	}
 	
 	//---- Test copied from http://c2.com/cgi/wiki?RefactoringBenchmarksForExtractMethod

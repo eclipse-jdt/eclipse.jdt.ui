@@ -13,7 +13,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 final class EncapsulatePostfixAccess extends SimpleTextEdit {
 	
 	public EncapsulatePostfixAccess(String getter, String setter, PostfixExpression  postfix) {
-		super(postfix.getStartPosition(), postfix.getLength(), setter + "(" + getter + "() " + postfix.getOperator().toString().substring(0, 1) + " 1)");
+		super(postfix.getStartPosition(), postfix.getLength(), setter + "(" + getter + "() " + postfix.getOperator().toString().substring(0, 1) + " 1)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}	
 	
 	private EncapsulatePostfixAccess(TextRange range, String text) {

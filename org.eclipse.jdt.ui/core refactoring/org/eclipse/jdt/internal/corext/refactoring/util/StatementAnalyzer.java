@@ -57,14 +57,14 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		int pos= fBuffer.indexOfStatementCharacter(selection.getOffset());
 		ASTNode node= nodes[0];
 		if (node.getStartPosition() != pos) {
-			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.doesNotCover"));
+			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.doesNotCover")); //$NON-NLS-1$
 			return;
 		}	
 		
 		node= nodes[nodes.length - 1];
 		pos= fBuffer.indexOfStatementCharacter(node.getStartPosition() + node.getLength());
 		if (pos != -1 && pos <= selection.getInclusiveEnd())
-			invalidSelection("End of selection contains characters that do not belong to a statement.");
+			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.end_of_selection")); //$NON-NLS-1$
 	}
 	
 	protected RefactoringStatus getStatus() {
@@ -101,7 +101,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode[] selectedNodes= getSelectedNodes();
 		if (doAfterValidation(node, selectedNodes)) {
 			if (contains(selectedNodes, node.getBody()) && contains(selectedNodes, node.getExpression())) {
-				invalidSelection("Operation not applicable to a do statement's body and expression.");
+				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.do_body_expression")); //$NON-NLS-1$
 			}
 		}
 		super.endVisit(node);
@@ -116,11 +116,11 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 			boolean containsExpression= contains(selectedNodes, node.getExpression());
 			boolean containsUpdaters= contains(selectedNodes, node.updaters());
 			if (contains(selectedNodes, node.initializers()) && containsExpression) {
-				invalidSelection("Operation not applicable to a for statement's initializer and expression part.");
+				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.for_initializer_expression")); //$NON-NLS-1$
 			} else if (containsExpression && containsUpdaters) {
-				invalidSelection("Operation not applicable to a for statement's expression and updater part.");
+				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.for_expression_updater")); //$NON-NLS-1$
 			} else if (containsUpdaters && contains(selectedNodes, node.getBody())) {
-				invalidSelection("Operation not applicable to a for statement's updater and body part.");
+				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.for_updater_body")); //$NON-NLS-1$
 			}
 		}
 		super.endVisit(node);
@@ -164,15 +164,15 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode firstSelectedNode= getFirstSelectedNode();
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.AFTER) {
 			if (firstSelectedNode == node.getBody() || firstSelectedNode == node.getFinally()) {
-				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.try_statement"));
+				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.try_statement")); //$NON-NLS-1$
 			} else {
 				List catchClauses= node.catchClauses();
 				for (Iterator iterator= catchClauses.iterator(); iterator.hasNext();) {
 					CatchClause element= (CatchClause)iterator.next();
 					if (element == firstSelectedNode || element.getBody() == firstSelectedNode) {
-						invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.try_statement"));
+						invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.try_statement")); //$NON-NLS-1$
 					} else if (element.getException() == firstSelectedNode) {
-						invalidSelection("Operation is not applicable to a catch block's argument declaration.");
+						invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.catch_argument")); //$NON-NLS-1$
 					}
 				}
 			}
@@ -187,7 +187,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode[] selectedNodes= getSelectedNodes();
 		if (doAfterValidation(node, selectedNodes)) {
 			if (contains(selectedNodes, node.getExpression()) && contains(selectedNodes, node.getBody())) {
-				invalidSelection("Operation not applicable to a while statement's expression and body.");
+				invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.while_expression_body")); //$NON-NLS-1$
 			}
 		}
 		super.endVisit(node);

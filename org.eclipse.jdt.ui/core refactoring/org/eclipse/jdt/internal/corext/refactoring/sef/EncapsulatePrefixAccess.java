@@ -13,7 +13,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 final class EncapsulatePrefixAccess extends SimpleTextEdit {
 	
 	public EncapsulatePrefixAccess(String getter, String setter, PrefixExpression  prefix) {
-		super(prefix.getStartPosition(), prefix.getLength(), setter + "(" + getter + "() " + prefix.getOperator().toString().substring(0, 1) + " 1)");
+		super(prefix.getStartPosition(), prefix.getLength(), setter + "(" + getter + "() " + prefix.getOperator().toString().substring(0, 1) + " 1)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}	
 	
 	private EncapsulatePrefixAccess(TextRange range, String text) {

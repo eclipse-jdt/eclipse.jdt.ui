@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
@@ -28,6 +29,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -97,35 +99,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
 	}
 	
 	public Type getReturnType() {
-		if (fReturnType != null)
-			return fReturnType;
-			
-		AST ast= fEnclosingMethod.getAST();
-		switch (fReturnKind) {
-			case ACCESS_TO_LOCAL:
-				fReturnType= ASTNodes.getType(ASTNodes.findVariableDeclaration(fReturnValue, fEnclosingMethod));
-				break;
-			case EXPRESSION:
-				Expression expression= (Expression)getFirstSelectedNode();
-				ITypeBinding type= expression.resolveTypeBinding();
-				if (type != null) {
-					fReturnType= Bindings.createType(type, ast);
-					break;
-				}
-				fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
-				getStatus().addError("Cannot determine expression's return type. Using void instead.", JavaSourceContext.create(fCUnit, expression));
-				break;	
-			case RETURN_STATEMENT_VALUE:
-				if (fEnclosingMethod.isConstructor())
-					return null;
-				fReturnType= fEnclosingMethod.getReturnType();
-				break;
-			default:
-				fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
-		}
 		return fReturnType;
 	}
-	
+
 	public boolean generateImport() {
 		switch (fReturnKind) {
 			case EXPRESSION:
@@ -157,16 +133,16 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
 	
 	//---- Activation checking ---------------------------------------------------------------------------
 	
-	public void checkActivation(RefactoringStatus status) {
-		status.merge(getStatus());
-		checkExpression(status);
-		if (status.hasFatalError())
-			return;
+	public RefactoringStatus checkActivation() {
+		RefactoringStatus result= getStatus();
+		checkExpression(result);
+		if (result.hasFatalError())
+			return result;
 			
 		fReturnKind= UNDEFINED;
 		fMaxVariableId= LocalVariableIndex.perform(fEnclosingMethod);
-		if (analyzeSelection(status).hasFatalError())
-			return;
+		if (analyzeSelection(result).hasFatalError())
+			return result;
 
 		int returns= fReturnKind == NO ? 0 : 1;
 		if (fReturnValue != null) {
@@ -179,9 +155,12 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
 		}
 			
 		if (returns > 1) {
-			status.addFatalError("Ambiguous return value: expression, access to local or return statement extracted."); //$NON-NLS-1$
+			result.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.ambiguous_return_value")); //$NON-NLS-1$
 			fReturnKind= MULTIPLE;
+			return result;
 		}
+		initReturnType();
+		return result;
 	}
 	
 	private void checkExpression(RefactoringStatus status) {
@@ -189,10 +168,36 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
 		if (nodes != null && nodes.length == 1) {
 			ASTNode node= nodes[0];
 			if (node instanceof NullLiteral) {
-				status.addFatalError("Cannot extract the single keyword null.", JavaSourceContext.create(fCUnit, node));
+				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_null"), JavaSourceContext.create(fCUnit, node)); //$NON-NLS-1$
 			} else if (node instanceof Type) {
-				status.addFatalError("Currently no support to extract a single type reference.", JavaSourceContext.create(fCUnit, node));
+				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_type_reference"), JavaSourceContext.create(fCUnit, node)); //$NON-NLS-1$
 			}
+		}
+	}
+	
+	private void initReturnType() {
+		AST ast= fEnclosingMethod.getAST();
+		switch (fReturnKind) {
+			case ACCESS_TO_LOCAL:
+				fReturnType= ASTNodes.getType(ASTNodes.findVariableDeclaration(fReturnValue, fEnclosingMethod));
+				break;
+			case EXPRESSION:
+				Expression expression= (Expression)getFirstSelectedNode();
+				ITypeBinding type= expression.resolveTypeBinding();
+				if (type != null) {
+					fReturnType= Bindings.createType(type, ast);
+					break;
+				}
+				fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
+				getStatus().addError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_determine_return_type"), JavaSourceContext.create(fCUnit, expression)); //$NON-NLS-1$
+				break;	
+			case RETURN_STATEMENT_VALUE:
+				if (fEnclosingMethod.isConstructor())
+					fReturnType= null;
+				fReturnType= fEnclosingMethod.getReturnType();
+				break;
+			default:
+				fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
 		}
 	}
 	
@@ -222,7 +227,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
 		fInputFlowInfo= flowAnalyzer.perform(getSelectedNodes());
 		
 		if (fInputFlowInfo.branches()) {
-			status.addFatalError("Selection contains branch statement but corresponding branch target isn't selected.");
+			status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.branch_mismatch")); //$NON-NLS-1$
 			fReturnKind= ERROR;
 			return status;
 		}
@@ -295,7 +300,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
 				break;
 			default:
 				fReturnValue= null;
-				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.assignments_to_local"));
+				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.assignments_to_local")); //$NON-NLS-1$
 				return;
 		}
 		List callerLocals= new ArrayList(5);
@@ -385,7 +390,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
 			if (node == firstParent)
 				return;
 		} while (node != null);
-		invalidSelection("Not all selected statements are enclosed by the same parent statement.");
+		invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.parent_mismatch")); //$NON-NLS-1$
 	}
 	
 	public void endVisit(CompilationUnit node) {
@@ -394,12 +399,12 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
 			if (status.hasFatalError())
 				break superCall;
 			if (!hasSelectedNodes()) {
-				status.addFatalError(RefactoringCoreMessages.getString("StatementAnalyzer.only_method_body")); //$NON-NLS-1$
+				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.only_method_body")); //$NON-NLS-1$
 				break superCall;
 			}
 			fEnclosingMethod= (MethodDeclaration)ASTNodes.getParent(getFirstSelectedNode(), MethodDeclaration.class);
 			if (fEnclosingMethod == null) {
-				status.addFatalError(RefactoringCoreMessages.getString("StatementAnalyzer.only_method_body")); //$NON-NLS-1$
+				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.only_method_body")); //$NON-NLS-1$
 				break superCall;
 			}
 			status.merge(LocalTypeAnalyzer.perform(fEnclosingMethod, getSelection()));
@@ -410,7 +415,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
 	public boolean visit(AnonymousClassDeclaration node) {
 		boolean result= super.visit(node);
 		if (isFirstSelectedNode(node)) {
-			invalidSelection("Cannot extract the body of a anonymous type declaration. Select whole declaration.", JavaSourceContext.create(fCUnit, node));
+			invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_anonymous_type"), JavaSourceContext.create(fCUnit, node)); //$NON-NLS-1$
 			return false;
 		}
 		return result;
@@ -421,17 +426,24 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
 		
 		int actionStart= getBuffer().indexAfter(Scanner.TokenNamedo, node.getStartPosition());
 		if (getSelection().getOffset() == actionStart) {
-			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.after_do_keyword"), JavaSourceContext.create(fCUnit, getSelection())); //$NON-NLS-1$
+			invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.after_do_keyword"), JavaSourceContext.create(fCUnit, getSelection())); //$NON-NLS-1$
 			return false;
 		}
 		
 		return result;
 	}
 
+	public boolean visit(MethodDeclaration node) {
+		Block body= node.getBody();
+		if (body == null || !getSelection().enclosedBy(body))
+			return false;
+		return super.visit(node);
+	}
+	
 	public boolean visit(SuperMethodInvocation node) {
 		boolean result= super.visit(node);
 		if (getSelection().getVisitSelectionMode(node) == Selection.SELECTED) {
-			invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.super_or_this"), JavaSourceContext.create(fCUnit, node)); //$NON-NLS-1$
+			invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.super_or_this"), JavaSourceContext.create(fCUnit, node)); //$NON-NLS-1$
 			return false;
 		}
 		return result;
@@ -440,7 +452,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
 	public boolean visit(VariableDeclarationFragment node) {
 		boolean result= super.visit(node);
 		if (isFirstSelectedNode(node)) {
-			invalidSelection("Cannot extract a variable declaration fragment. Select whole declaration statement.", JavaSourceContext.create(fCUnit, node));
+			invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_variable_declaration_fragment"), JavaSourceContext.create(fCUnit, node)); //$NON-NLS-1$
 			return false;
 		}
 		return result;
@@ -449,9 +461,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
 	public void endVisit(ForStatement node) {
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.AFTER) {
 			if (node.initializers().contains(getFirstSelectedNode())) {
-				invalidSelection("Cannot extract initialization part of a for statement.", JavaSourceContext.create(fCUnit, getSelection()));
+				invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_for_initializer"), JavaSourceContext.create(fCUnit, getSelection())); //$NON-NLS-1$
 			} else if (node.updaters().contains(getLastSelectedNode())) {
-				invalidSelection("Cannot extract increment part of a for statement.", JavaSourceContext.create(fCUnit, getSelection()));
+				invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_for_updater"), JavaSourceContext.create(fCUnit, getSelection())); //$NON-NLS-1$
 			}
 		}
 		super.endVisit(node);
@@ -473,7 +485,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
 	
 	private void checkTypeInDeclaration(Type node) {
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED && getFirstSelectedNode() == node) {
-			invalidSelection("Cannot extract parts of a variable declaration. Select whole declaration.", JavaSourceContext.create(fCUnit, getSelection()));
+			invalidSelection(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_variable_declaration"), JavaSourceContext.create(fCUnit, getSelection())); //$NON-NLS-1$
 		}
 	}
 }

@@ -50,7 +50,7 @@ public class CommentAnalyzer {
 				}
 			} 
 		} catch (InvalidInputException e) {
-			result.addFatalError(RefactoringCoreMessages.getString("CommentAnalyzer.Internal_error")); //$NON-NLS-1$
+			result.addFatalError(RefactoringCoreMessages.getString("CommentAnalyzer.internal_error")); //$NON-NLS-1$
 		}
 	}
 	

@@ -17,7 +17,7 @@ final class EncapsulateReadAccess extends SimpleTextEdit {
 	}
 	
 	public EncapsulateReadAccess(String getter, int offset, int length) {
-		super(offset, length, getter + "()");
+		super(offset, length, getter + "()"); //$NON-NLS-1$
 	}
 	
 	private EncapsulateReadAccess(TextRange range, String text) {

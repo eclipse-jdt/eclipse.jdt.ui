@@ -19,13 +19,13 @@ final class EncapsulateWriteAccess extends MultiTextEdit {
 		int length= getLength(assignment, offset);
 		int bracket= getBracketOffset(assignment);
 		if (assignment.getOperator() == Assignment.Operator.ASSIGN) {
-			add(SimpleTextEdit.createReplace(offset, length, setter + "("));
-			add(SimpleTextEdit.createInsert(bracket, ")"));
+			add(SimpleTextEdit.createReplace(offset, length, setter + "(")); //$NON-NLS-1$
+			add(SimpleTextEdit.createInsert(bracket, ")")); //$NON-NLS-1$
 		} else {
 			boolean needsParentheses= ASTNodes.needsParenthesis(assignment.getRightHandSide());
-			add(SimpleTextEdit.createInsert(offset, setter + "("));
-			add(SimpleTextEdit.createReplace(offset, length, getGetter(getter, assignment) + "() " + getOperator(assignment) + " " + (needsParentheses ? "(" : "")));
-			add(SimpleTextEdit.createInsert(bracket, ")" + (needsParentheses ? ")" : "")));
+			add(SimpleTextEdit.createInsert(offset, setter + "(")); //$NON-NLS-1$
+			add(SimpleTextEdit.createReplace(offset, length, getGetter(getter, assignment) + "() " + getOperator(assignment) + " " + (needsParentheses ? "(" : ""))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			add(SimpleTextEdit.createInsert(bracket, ")" + (needsParentheses ? ")" : ""))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 	}
 	
@@ -50,7 +50,7 @@ final class EncapsulateWriteAccess extends MultiTextEdit {
 	private static String getGetter(String getter, Assignment assignment) {
 		Expression lhs= assignment.getLeftHandSide();
 		if (lhs instanceof QualifiedName) {
-			return ASTNodes.asString(((QualifiedName)lhs).getQualifier()) + "." + getter;
+			return ASTNodes.asString(((QualifiedName)lhs).getQualifier()) + "." + getter; //$NON-NLS-1$
 		} else {
 			return getter;
 		}		

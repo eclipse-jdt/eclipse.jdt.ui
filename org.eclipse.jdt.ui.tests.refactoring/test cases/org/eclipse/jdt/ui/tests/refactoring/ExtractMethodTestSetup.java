@@ -37,6 +37,7 @@ public class ExtractMethodTestSetup extends TestSetup {
 	private IPackageFragment fNestedPackage;
 	private IPackageFragment fReturnPackage;
 	private IPackageFragment fBranchPackage;
+	private IPackageFragment fErrorPackage;
 	private IPackageFragment fWikiPackage;
 	
 	public ExtractMethodTestSetup(Test test) {
@@ -70,6 +71,7 @@ public class ExtractMethodTestSetup extends TestSetup {
 		fNestedPackage= getRoot().createPackageFragment("nested_in", true, null);
 		fReturnPackage= getRoot().createPackageFragment("return_in", true, null);
 		fBranchPackage= getRoot().createPackageFragment("branch_in", true, null);
+		fErrorPackage= getRoot().createPackageFragment("error_in", true, null);
 		fWikiPackage= getRoot().createPackageFragment("wiki_in", true, null);
 		
 		ICompilationUnit cu= fExpressionPackage.createCompilationUnit(
@@ -126,6 +128,10 @@ public class ExtractMethodTestSetup extends TestSetup {
 	
 	public IPackageFragment getBranchPackage() {
 		return fBranchPackage;
+	}
+
+	public IPackageFragment getErrorPackage() {
+		return fErrorPackage;
 	}
 
 	public IPackageFragment getWikiPackage() {

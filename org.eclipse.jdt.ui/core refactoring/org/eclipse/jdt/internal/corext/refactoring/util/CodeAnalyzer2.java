@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.CompilationUnitBuffer;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
@@ -28,7 +29,7 @@ public class CodeAnalyzer2 extends StatementAnalyzer {
 			return;
 		ASTNode node= getFirstSelectedNode();
 		if (node instanceof ArrayInitializer) {
-			status.addFatalError("Operation not applicable to an array initializer.", JavaSourceContext.create(fCUnit, node));
+			status.addFatalError(RefactoringCoreMessages.getString("CodeAnalyzer.array_initializer"), JavaSourceContext.create(fCUnit, node)); //$NON-NLS-1$
 		}
 	}
 }

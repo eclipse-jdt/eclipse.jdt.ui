@@ -247,7 +247,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			if (statement instanceof SwitchCase) {
 				// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=10881
 				SwitchCase switchCase= (SwitchCase)statement;
-				if (switchCase.getExpression() == null || (switchCase.getExpression() instanceof SimpleName && ((SimpleName)switchCase.getExpression()).getIdentifier().equals("MISSING"))) {
+				if (switchCase.getExpression() == null || (switchCase.getExpression() instanceof SimpleName && ((SimpleName)switchCase.getExpression()).getIdentifier().equals("MISSING"))) { //$NON-NLS-1$
 					result.setHasDefaultCase();
 				}
 				if (info == null) {

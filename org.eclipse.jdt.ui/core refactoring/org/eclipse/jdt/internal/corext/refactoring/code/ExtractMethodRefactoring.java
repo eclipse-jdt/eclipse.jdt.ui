@@ -62,25 +62,23 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private boolean fCallOnDeclarationLine= true;
 	
 	private ExtractMethodAnalyzer fAnalyzer;
-	// private CompilationUnitBuffer fBuffer;
 	private String fVisibility;
 	private String fMethodName;
-	private boolean fCallNeedsSemicolon;
 	private int fMethodFlags= Modifier.PROTECTED;
 
-	private static final String EMPTY= "";
-	private static final String BLANK= " ";
-	private static final String RETURN= "return";
-	private static final String RETURN_BLANK= "return ";
-	private static final String SEMICOLON= ";";
-	private static final String COMMA_BLANK= ", ";
-	private static final String STATIC= "static";
+	private static final String EMPTY= ""; //$NON-NLS-1$
+	private static final String BLANK= " "; //$NON-NLS-1$
+	private static final String RETURN= "return"; //$NON-NLS-1$
+	private static final String RETURN_BLANK= "return "; //$NON-NLS-1$
+	private static final String SEMICOLON= ";"; //$NON-NLS-1$
+	private static final String COMMA_BLANK= ", "; //$NON-NLS-1$
+	private static final String STATIC= "static"; //$NON-NLS-1$
 	
 	private class InsertNewMethod extends SimpleTextEdit {
 		private int fMethodStart;
 		private int fMethodEnd;
 		public InsertNewMethod(int offset, int methodStart, int methodEnd) {
-			super(offset, 0, "");
+			super(offset, 0, ""); //$NON-NLS-1$
 			fMethodStart= methodStart;
 			fMethodEnd= methodEnd;
 		}
@@ -100,7 +98,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private class ReplaceCall extends SimpleTextEdit {
 		private int fMethodStart;
 		public ReplaceCall(int offset, int length, int methodStart) {
-			super(offset, length, "");
+			super(offset, length, ""); //$NON-NLS-1$
 			fMethodStart= methodStart;
 		}
 		public void connect(TextBufferEditor editor) {
@@ -131,9 +129,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fSelectionLength= selectionLength;
 		fSelectionEnd= fSelectionStart + fSelectionLength - 1;
 		if (asymetricAssignment)
-			fAssignment= "= ";
+			fAssignment= "= "; //$NON-NLS-1$
 		else
-			fAssignment= " = ";
+			fAssignment= " = "; //$NON-NLS-1$
 		fTabWidth= tabWidth;
 	}
 	
@@ -162,18 +160,18 @@ public class ExtractMethodRefactoring extends Refactoring {
 			CompilationUnit root= AST.parseCompilationUnit(fCUnit, true);
 			root.accept(createVisitor());
 			
-			fAnalyzer.checkActivation(result);
+			result.merge(fAnalyzer.checkActivation());
 			if (result.hasFatalError())
 				return result;
 			if (fVisibility == null) {
 				int modifiers= fAnalyzer.getEnclosingMethod().getModifiers();
-				String visibility= "";
+				String visibility= ""; //$NON-NLS-1$
 				if (Modifier.isPublic(modifiers))
-					visibility= "public";
+					visibility= "public"; //$NON-NLS-1$
 				else if (Modifier.isProtected(modifiers))
-					visibility= "protected";
+					visibility= "protected"; //$NON-NLS-1$
 				else if (Modifier.isPrivate(modifiers))
-					visibility= "private";
+					visibility= "private"; //$NON-NLS-1$
 				setVisibility(visibility);
 				
 			}
@@ -293,7 +291,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}
 	
 		if (!fImportEdit.isEmpty())
-			result.addTextEdit("Organize Imports", fImportEdit);
+			result.addTextEdit(RefactoringCoreMessages.getString("ExtractMethodRefactoring.organize_imports"), fImportEdit); //$NON-NLS-1$
 		
 		// Inserting the new method
 		result.addTextEdit(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName), //$NON-NLS-1$
@@ -364,7 +362,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		result.append(getSignature());
 		result.append(" {"); //$NON-NLS-1$
 		result.append(delimiter);
-		result.append(computeSource(buffer, indent + '\t', delimiter));
+		result.append(computeSource(buffer, indent + '\t', delimiter)); //$NON-NLS-1$
 		result.append(indent);
 		result.append("}"); //$NON-NLS-1$
 		return result.toString();
@@ -429,8 +427,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 			Expression expression= (Expression)fAnalyzer.getFirstSelectedNode();
 			// XXX http://dev.eclipse.org/bugs/show_bug.cgi?id=10865
 			ITypeBinding binding= expression.resolveTypeBinding();
-			if (!binding.isPrimitive() || !"void".equals(binding.getName()))
-				result.append(RETURN_BLANK); //$NON-NLS-1$
+			if (binding != null && (!binding.isPrimitive() || !"void".equals(binding.getName()))) //$NON-NLS-1$
+				result.append(RETURN_BLANK);
 		}
 		
 		// Reformat and add to buffer
@@ -545,7 +543,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}	
 	
 	private void appendArguments(StringBuffer buffer) {
-		buffer.append('(');
+		buffer.append('('); //$NON-NLS-1$
 		IVariableBinding[] arguments= fAnalyzer.getArguments();
 		for (int i= 0; i < arguments.length; i++) {
 			IVariableBinding argument= arguments[i];
@@ -556,7 +554,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				buffer.append(COMMA_BLANK);
 			appendLocalDeclaration(buffer, argument);
 		}
-		buffer.append(')');
+		buffer.append(')'); //$NON-NLS-1$
 	}
 	
 	private void appendThrownExceptions(StringBuffer buffer) {

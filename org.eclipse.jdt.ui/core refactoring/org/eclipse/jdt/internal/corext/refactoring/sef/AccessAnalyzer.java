@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.BindingIdentifier;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -40,10 +41,10 @@ class AccessAnalyzer extends ASTVisitor {
 	private boolean fSetterMustReturnValue;
 	private boolean fEncapsulateDeclaringClass;
 
-	private static final String READ_ACCESS= "Encapsulate read access";
-	private static final String WRITE_ACCESS= "Encapsulate write access";
-	private static final String PREFIX_ACCESS= "Encapsulate prefix access";
-	private static final String POSTFIX_ACCESS= "Encapsulate postfix access";
+	private static final String READ_ACCESS= RefactoringCoreMessages.getString("SelfEncapsulateField.AccessAnalyzer.encapsulate_read_access"); //$NON-NLS-1$
+	private static final String WRITE_ACCESS= RefactoringCoreMessages.getString("SelfEncapsulateField.AccessAnalyzer.encapsulate_write_access"); //$NON-NLS-1$
+	private static final String PREFIX_ACCESS= RefactoringCoreMessages.getString("SelfEncapsulateField.AccessAnalyzer.encapsulate_prefix_access"); //$NON-NLS-1$
+	private static final String POSTFIX_ACCESS= RefactoringCoreMessages.getString("SelfEncapsulateField.AccessAnalyzer.encapsulate_postfix_access"); //$NON-NLS-1$
 		
 	public AccessAnalyzer(SelfEncapsulateFieldRefactoring refactoring, ICompilationUnit unit, BindingIdentifier field, BindingIdentifier declaringClass, TextChange change) {
 		Assert.isNotNull(refactoring);
@@ -107,7 +108,7 @@ class AccessAnalyzer extends ASTVisitor {
 
 		ASTNode parent= node.getParent();
 		if (!(parent instanceof ExpressionStatement)) {
-			fStatus.addError("Cannot convert postfix expression. It is used inside another expression.", 
+			fStatus.addError(RefactoringCoreMessages.getString("SelfEncapsulateField.AccessAnalyzer.cannot_convert_postfix_expression"),  //$NON-NLS-1$
 				JavaSourceContext.create(fCUnit, new SourceRange(node)));
 			return false;
 		}
