@@ -36,6 +36,8 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 
 	private static final Class THIS= OpenJavaEditorTest.class;
 
+	private static final String SHORT_NAME_FIRST_RUN= "Open Java editor (first in session)";
+
 	private static final String SHORT_NAME_WARM_RUN= "Open Java editor (reopen)";
 
 	public static final int N_OF_RUNS= 15;
@@ -72,6 +74,7 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	public void testOpenFirstEditor() throws PartInitException {
 		Performance performance= Performance.getDefault();
 		PerformanceMeter performanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
+		performance.tagAsSummary(performanceMeter, SHORT_NAME_FIRST_RUN, Dimension.ELAPSED_PROCESS); 
 		measureOpenInEditor(new IFile[] { ResourceTestHelper.findFile(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX + FILE_SUFFIX) }, performanceMeter, true);
 	}
 	

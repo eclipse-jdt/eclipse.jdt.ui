@@ -13,7 +13,6 @@ package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.eclipse.test.performance.Performance;
 
 /**
  * Measures the time to type in one single method into a large Java class
@@ -21,6 +20,8 @@ import org.eclipse.test.performance.Performance;
  */
 public class JavaNonInitialTypingTest extends NonInitialTypingTest {
 
+	private static final String SHORT_NAME_TYPING= "Java editor typing speed";
+	
 	private static final Class THIS= JavaNonInitialTypingTest.class;
 	
 	public static Test suite() {
@@ -28,10 +29,15 @@ public class JavaNonInitialTypingTest extends NonInitialTypingTest {
 	}
 	
 	protected String getScenarioId() {
-		String scenarioId= Performance.getDefault().getDefaultScenarioId(this);
-		if ("org.eclipse.jdt.text.tests.performance.JavaNonInitialTypingTest#testTypeAMethod()".equals(scenarioId))
+		if ("testTypeAMethod".equals(getName()))
 			return "org.eclipse.jdt.text.tests.performance.NonInitialTypingTest#testTypeAMethod()";
 		return super.getScenarioId();
+	}
+
+	protected String getSummaryName() {
+		if ("testTypeAMethod".equals(getName()))
+			return SHORT_NAME_TYPING;
+		return null;
 	}
 
 	protected String getEditorId() {

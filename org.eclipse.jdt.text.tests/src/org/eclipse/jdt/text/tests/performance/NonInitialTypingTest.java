@@ -16,6 +16,7 @@ import junit.framework.TestCase;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
@@ -53,9 +54,17 @@ public abstract class NonInitialTypingTest extends TestCase {
 		// dirty editor to avoid initial dirtying / validate edit costs
 		fKeyboardProbe= new KeyboardProbe();
 		dirtyEditor();
-		fMeter= Performance.getDefault().createPerformanceMeter(getScenarioId());
+		Performance performance= Performance.getDefault();
+		fMeter= performance.createPerformanceMeter(getScenarioId());
+		String summaryName= getSummaryName();
+		if (summaryName != null)
+			performance.tagAsSummary(fMeter, summaryName, Dimension.ELAPSED_PROCESS); 
 	}
 	
+	protected String getSummaryName() {
+		return null;
+	}
+
 	protected abstract String getEditorId();
 
 	protected String getScenarioId() {
