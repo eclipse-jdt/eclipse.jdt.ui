@@ -111,13 +111,10 @@ public class SourceReferenceSourceRangeComputer {
 		int offset= fSourceReference.getSourceRange().getOffset();
 		try{
 			TextBuffer buff= TextBuffer.create(fCu.getSource());
-			String lineSource= buff.getLineContentOfOffset(offset);
 			int lineOffset= buff.getLineInformationOfOffset(offset).getOffset();
-			int offsetDiff= offset- lineOffset;
-			
 			IScanner scanner= ToolFactory.createScanner(true, true, false, true);
-			scanner.setSource(lineSource.toCharArray());
-			scanner.resetTo(0, Integer.MAX_VALUE);
+			scanner.setSource(buff.getContent().toCharArray());
+			scanner.resetTo(lineOffset, Integer.MAX_VALUE);
 			
 			int token= scanner.getNextToken();
 			while (token != ITerminalSymbols.TokenNameEOF) {
@@ -128,12 +125,10 @@ public class SourceReferenceSourceRangeComputer {
 						break;	
 					case ITerminalSymbols.TokenNameCOMMENT_LINE :
 						break;
-					case ITerminalSymbols.TokenNameCOMMENT_JAVADOC :
-						break;		
 					case ITerminalSymbols.TokenNameCOMMENT_BLOCK :
 						break;			
 					default:
-						if (offsetDiff == scanner.getCurrentTokenEndPosition() - scanner.getCurrentTokenSource().length + 1)
+						if (scanner.getCurrentTokenStartPosition() == offset)
 							return lineOffset;
 						else
 							return offset;	
