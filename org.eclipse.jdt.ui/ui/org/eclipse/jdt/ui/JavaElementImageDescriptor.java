@@ -167,17 +167,19 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	protected void drawCompositeImage(int width, int height) {
 		ImageData bg= getImageData(fBaseImage);
 			
-		drawImage(bg, 0, 0);
 		
 		if ((fFlags & DEPRECATED) != 0) { // over the full image
 			Point size= getSize();
 			ImageData data= getImageData(JavaPluginImages.DESC_OVR_DEPRECATED);
 			drawImage(data, 0, size.y - data.height);
 		}
-		
+		drawImage(bg, 0, 0);
+				
 		drawTopRight();
 		drawBottomRight();
 		drawBottomLeft();
+		
+
 	}
 	
 	private ImageData getImageData(ImageDescriptor descriptor) {
