@@ -1,5 +1,8 @@
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
 package org.eclipse.jdt.ui;
-
 
 import java.util.ArrayList;
 import java.util.List;
