@@ -3,17 +3,17 @@
 <schema targetNamespace="org.eclipse.jdt.ui">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.eclipse.jdt.ui" id="searchParticipants" name="Java Search Participants"/>
+         <meta.schema plugin="org.eclipse.jdt.ui" id="queryParticipants" name="Java Query Participants"/>
       </appInfo>
       <documentation>
-         [Enter description of this extension point.]
+         This extension point allows clients to contribute results to java searches.
       </documentation>
    </annotation>
 
    <element name="extension">
       <complexType>
          <sequence>
-            <element ref="searchParticipant"/>
+            <element ref="queryParticipant"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -39,12 +39,12 @@
       </complexType>
    </element>
 
-   <element name="searchParticipant">
+   <element name="queryParticipant">
       <complexType>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  The class that implements this query participan. The class must be public and implement &lt;samp&gt;org.eclipse.jdt.ui.search.IQueryParticipant&lt;/samp&gt; with a zero-argument constructor.
                </documentation>
                <appInfo>
                   <meta.attribute kind="java"/>
@@ -54,21 +54,21 @@
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  The unique id of this query participant.
                </documentation>
             </annotation>
          </attribute>
          <attribute name="nature" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  The project nature id this participant should be active for. If the participant should be active for multiple project natures, multiple participants must be defined.
                </documentation>
             </annotation>
          </attribute>
          <attribute name="label" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  A user readeable label for the participant.
                </documentation>
             </annotation>
          </attribute>
@@ -80,7 +80,7 @@
          <meta.section type="since"/>
       </appInfo>
       <documentation>
-         [Enter the first release in which this extension point appears.]
+         3.0
       </documentation>
    </annotation>
 
@@ -89,7 +89,21 @@
          <meta.section type="examples"/>
       </appInfo>
       <documentation>
-         [Enter extension point usage example here.]
+         The following is an example of a query participant contribution:
+
+&lt;p&gt;
+&lt;pre&gt;
+   &lt;extension
+         point=&quot;org.eclipse.jdt.ui.queryParticipants&quot;&gt;
+      &lt;queryParticipant
+            label=&quot;Example Query Participant&quot;
+            nature=&quot;org.eclipse.jdt.core.javanature&quot;
+            class=&quot;org.eclipse.jdt.ui.example.TestParticipant&quot;
+            id=&quot;org.eclipse.jdt.ui.example.TestParticipant&quot;&gt;
+      &lt;/queryParticipant&gt;
+   &lt;/extension&gt;
+&lt;/pre&gt;
+&lt;/p&gt;
       </documentation>
    </annotation>
 
@@ -98,7 +112,7 @@
          <meta.section type="apiInfo"/>
       </appInfo>
       <documentation>
-         [Enter API information here.]
+         The contributed class must implement &lt;code&gt;org.eclipse.jdt.ui.search.IQueryParticipant&lt;/code&gt;
       </documentation>
    </annotation>
 
@@ -107,7 +121,7 @@
          <meta.section type="implementation"/>
       </appInfo>
       <documentation>
-         [Enter information about supplied implementation of this extension point.]
+         none
       </documentation>
    </annotation>
 
@@ -116,7 +130,12 @@
          <meta.section type="copyright"/>
       </appInfo>
       <documentation>
-         
+         &lt;p&gt;
+&lt;a href=&quot;hglegal.htm&quot;&gt;
+ &lt;img SRC=&quot;ngibmcpy.gif&quot;
+   ALT=&quot;Copyright (c) 2000, 2003 IBM Corporation and others. All Rights Reserved.&quot;
+   BORDER=0 height=14 width=324&gt;&lt;/a&gt;
+&lt;/p&gt;
       </documentation>
    </annotation>
 

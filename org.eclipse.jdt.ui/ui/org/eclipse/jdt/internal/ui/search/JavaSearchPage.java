@@ -21,15 +21,46 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
-
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
+import org.eclipse.jdt.internal.ui.preferences.PreferencePageSupport;
+import org.eclipse.jdt.internal.ui.preferences.SearchParticipantsPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.RowLayouter;
+import org.eclipse.jdt.ui.search.IQueryParticipant;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.DialogPage;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.search.ui.ISearchPage;
+import org.eclipse.search.ui.ISearchPageContainer;
+import org.eclipse.search.ui.ISearchResultViewEntry;
+import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -44,17 +75,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.DialogPage;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
-
-import org.eclipse.jface.text.ITextSelection;
-
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -62,33 +82,6 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.IWorkbenchAdapter;
-
-import org.eclipse.search.ui.ISearchPage;
-import org.eclipse.search.ui.ISearchPageContainer;
-import org.eclipse.search.ui.ISearchResultViewEntry;
-import org.eclipse.search.ui.NewSearchUI;
-
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
 public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSearchConstants {
 	
@@ -172,14 +165,13 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		}
 	}
 	
-	static final String PARTICIPANT_EXTENSION_POINT= "org.eclipse.jdt.ui.searchParticipants"; //$NON-NLS-1$
+	public static final String PARTICIPANT_EXTENSION_POINT= "org.eclipse.jdt.ui.queryParticipants"; //$NON-NLS-1$
 
 	public static final String EXTENSION_POINT_ID= "org.eclipse.jdt.ui.JavaSearchPage"; //$NON-NLS-1$
 
 	// Dialog store id constants
 	private final static String PAGE_NAME= "JavaSearchPage"; //$NON-NLS-1$
 	private final static String STORE_CASE_SENSITIVE= PAGE_NAME + "CASE_SENSITIVE"; //$NON-NLS-1$
-	private final static String STORE_ACTIVE_PARTICIPANTS= PAGE_NAME + "ACTIVE_PARTICIPANTS"; //$NON-NLS-1$
 	private static List fgPreviousSearchPatterns= new ArrayList(20);
 	
 	private SearchPatternData fInitialData;
@@ -189,11 +181,11 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	private IDialogSettings fDialogSettings;
 	private boolean fIsCaseSensitive;
 	
-	private Map fActiveParticipants= new HashMap();	private Combo fPattern;
+	private Combo fPattern;
 	private ISearchPageContainer fContainer;
 	private Button fCaseSensitive;
 	
-	private Button fSelectParticipants;	private Button[] fSearchFor;
+	private Button[] fSearchFor;
 	private String[] fSearchForText= {
 		SearchMessages.getString("SearchPage.searchFor.type"), //$NON-NLS-1$
 		SearchMessages.getString("SearchPage.searchFor.method"), //$NON-NLS-1$
@@ -340,14 +332,12 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		} 
 		
 		IQueryParticipant[] participants= new IQueryParticipant[0];
-		/*
-		 * TODO enable search participants when ready.
-		 * try {
+		try {
 			participants= getSearchParticipants(concernedProjects);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), SearchMessages.getString("Search.Error.search.title"), SearchMessages.getString("Search.Error.search.message")); //$NON-NLS-2$ //$NON-NLS-1$
 			return false;
-		}*/
+		}
 		textSearchJob= new JavaSearchQuery(querySpec, participants);
 		new SearchResultUpdater((JavaSearchResult) textSearchJob.getSearchResult());
 		NewSearchUI.runQuery(textSearchJob);	
@@ -506,8 +496,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 		layouter.perform(createExpression(result));
 		layouter.perform(createSearchFor(result), createLimitTo(result), -1);
-		// TODO reenable participants
-		//createParticipants(result);
+
+		createParticipants(result);
 		
 		SelectionAdapter javaElementInitializer= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
@@ -533,39 +523,25 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		initSelections();
 	}
 
-	/**
-	 * @param result
-	 * @return
-	 */
-	private Control createParticipants(Composite result) {
-		fSelectParticipants= new Button(result, SWT.PUSH);
-		fSelectParticipants.setText("Extended...");
+	private void createParticipants(Composite result) {
+		Button selectParticipants= new Button(result, SWT.PUSH);
+		selectParticipants.setText(SearchMessages.getString("SearchPage.select_participants.label")); //$NON-NLS-1$
 		GridData gd= new GridData();
 		gd.verticalAlignment= GridData.VERTICAL_ALIGN_BEGINNING;
 		gd.horizontalAlignment= GridData.HORIZONTAL_ALIGN_END;
 		gd.grabExcessHorizontalSpace= false;
 		gd.horizontalAlignment= GridData.END;
 		gd.horizontalSpan= 2;
-		fSelectParticipants.setLayoutData(gd);
-		fSelectParticipants.addSelectionListener(new SelectionAdapter() {
+		selectParticipants.setLayoutData(gd);
+		selectParticipants.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				ParticipantSelectionDialog dialog= new ParticipantSelectionDialog(getShell());
-				dialog.setInitialSelections(fActiveParticipants.values().toArray());
-				if (dialog.open() == Dialog.OK) {
-					Object[] elements= dialog.getResult();
-					if (elements != null) {
-						fActiveParticipants.clear();
-						for (int i= 0; i < elements.length; i++) {
-							IConfigurationElement participant= (IConfigurationElement) elements[i];
-							fActiveParticipants.put(participant.getAttribute("id"), participant); //$NON-NLS-1$
-						}
-						writeConfiguration();
-					}
-				}
+				PreferencePageSupport.showPreferencePage(getShell(), "org.eclipse.jdt.ui.preferences.SearchParticipantsPreferencePage", new SearchParticipantsPreferencePage()); //$NON-NLS-1$
 			}
+
 		});
-		return fSelectParticipants;
 	}
+
+
 	private Control createExpression(Composite parent) {
 		Composite result= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout(2, false);
@@ -920,41 +896,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	private void readConfiguration() {
 		IDialogSettings s= getDialogSettings();
 		fIsCaseSensitive= s.getBoolean(STORE_CASE_SENSITIVE);
-		
-		readActiveParticipants(s);
 	}
 	
-	private void readActiveParticipants(IDialogSettings s) {
-		String[] ids= s.getArray(STORE_ACTIVE_PARTICIPANTS);
-		fActiveParticipants= new HashMap();
-		if (ids != null) {
-			IConfigurationElement[] allParticipants= Platform.getPluginRegistry().getConfigurationElementsFor(PARTICIPANT_EXTENSION_POINT);
-			for (int i= 0; i < allParticipants.length; i++) {
-				for (int j= 0; j < ids.length; j++) {
-					if (ids[j].equals(allParticipants[i].getAttribute("id"))) //$NON-NLS-1$
-						fActiveParticipants.put(ids[j], allParticipants[i]);
-				}
-			}
-		}
-	}	/**
-	 * Stores it current configuration in the dialog store.
-	 */
-	private void writeConfiguration() {
-		IDialogSettings s= getDialogSettings();
-		s.put(STORE_CASE_SENSITIVE, fIsCaseSensitive);
-		
-		writeActiveParticpants(s);
-	}
-	
-	private void writeActiveParticpants(IDialogSettings s) {
-		String[] ids= new String[fActiveParticipants.size()];
-		Iterator participants= fActiveParticipants.keySet().iterator();
-		int i= 0;
-		while (participants.hasNext()) {
-			ids[i++]=  (String) participants.next();
-		}
-		s.put(STORE_ACTIVE_PARTICIPANTS, ids);
-	}	private void collectConcernedProjects(Set projects, ISelection selection) {
+	private void collectConcernedProjects(Set projects, ISelection selection) {
 		if (!(selection instanceof IStructuredSelection))
 			return;
 		IStructuredSelection structuredSelection= (IStructuredSelection)selection;
@@ -964,7 +908,17 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			if (project != null)
 				projects.add(project);
 		}
+	}	
+
+	/**
+	 * Stores it current configuration in the dialog store.
+	 */
+	private void writeConfiguration() {
+		IDialogSettings s= getDialogSettings();
+		s.put(STORE_CASE_SENSITIVE, fIsCaseSensitive);
 	}
+	
+
 
 	private void collectConcernedProjects(Set projects, IWorkingSet[] workingSets) {
 		for (int i= 0; i < workingSets.length; i++)
@@ -1005,7 +959,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}
 	
 	private void collectParticipants(Map participants, Set projects) throws CoreException {
-		Iterator activeParticipants= fActiveParticipants.values().iterator();
+		Iterator activeParticipants= SearchParticipantsPreferencePage.readActiveParticipants().values().iterator();
 		while (activeParticipants.hasNext()) {
 			IConfigurationElement participant= (IConfigurationElement) activeParticipants.next();
 			String id= participant.getAttribute("id"); //$NON-NLS-1$
@@ -1018,4 +972,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 					participants.put(id, participant.createExecutableExtension("class")); //$NON-NLS-1$
 			}
 		}
-	}}
+	}
+
+}

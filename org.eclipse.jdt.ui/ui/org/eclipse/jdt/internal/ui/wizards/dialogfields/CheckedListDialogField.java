@@ -11,13 +11,8 @@
 package org.eclipse.jdt.internal.ui.wizards.dialogfields;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Table;
-
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -25,6 +20,10 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Table;
 
 /**
  * A list with checkboxes and a button bar. Typical buttons are 'Check All' and 'Uncheck All'.
@@ -150,7 +149,7 @@ public class CheckedListDialogField extends ListDialogField {
 	/**
 	 * Sets the checked elements.
 	 */	
-	public void setCheckedElements(List list) {
+	public void setCheckedElements(Collection list) {
 		fCheckElements= new ArrayList(list);
 		if (fTable != null) {
 			((CheckboxTableViewer)fTable).setCheckedElements(list.toArray());

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.search;
+package org.eclipse.jdt.ui.search;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -25,8 +25,6 @@ import org.eclipse.search.ui.text.Match;
  * search result. If two search participants report matches against the same element, one of them will
  * be chosen to handle the element.
  * 
- * TODO who owns the images here? Who instantiates?
- * dispose()??
  */
 public interface ISearchUIParticipant {
 
@@ -48,5 +46,21 @@ public interface ISearchUIParticipant {
 	 */
 	public String getText(Object element);
 
+	/**
+	 * Opens an editor on the given element and selects the given range of text.
+	 * The location of matches are automatically updated when a file is edited
+	 * through the file buffer infrastructure (see {@link org.eclipse.core.filebuffers.ITextFileBufferManager}). 
+	 * When a file buffer is saved, the current positions are written back to the 
+	 * match.
+	 * 
+	 * @param match
+	 *            The match to show
+	 * @param currentOffset
+	 *            The current start offset of the match
+	 * @param currentLength
+	 *            The current length of the selection
+	 * @throws PartInitException
+	 *             If an editor can't be opened.
+	 */
 	void showMatch(Match match, int currentOffset, int currentLength) throws PartInitException;
 }

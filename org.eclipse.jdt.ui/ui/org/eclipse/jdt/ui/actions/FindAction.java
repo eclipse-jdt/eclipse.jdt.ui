@@ -266,6 +266,10 @@ public abstract class FindAction extends SelectionDispatchAction {
 	public void selectionChanged(ITextSelection selection) {
 	}
 
+	/**
+	 * Executes this action for the given java element.
+	 * @param javaElement The java element to be found.
+	 */
 	public void run(IJavaElement element) {
 		
 		if (!ActionUtil.isProcessable(getShell(), element))
@@ -332,11 +336,11 @@ public abstract class FindAction extends SelectionDispatchAction {
 		}
 	}
 
-	protected JavaSearchQuery createJob(IJavaElement element) throws JavaModelException {
+	JavaSearchQuery createJob(IJavaElement element) throws JavaModelException {
 		return new JavaSearchQuery(new ElementQuerySpecification(element, getLimitTo(), getScope(element), getScopeDescription(element)));
 	}
 
-	protected Object createSearchDescription(IJavaElement element) {
+	Object createSearchDescription(IJavaElement element) {
 		IType type= getType(element);
 		return new JavaSearchDescription(getLimitTo(), element, null, getScopeDescription(type));
 	}

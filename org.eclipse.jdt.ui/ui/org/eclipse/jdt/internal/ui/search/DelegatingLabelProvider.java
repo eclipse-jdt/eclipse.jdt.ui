@@ -18,6 +18,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.ui.search.*;
 
 
 public class DelegatingLabelProvider extends LabelProvider {
@@ -52,7 +53,7 @@ public class DelegatingLabelProvider extends LabelProvider {
 		if (matchCount == 0)
 			return text;
 		if (matchCount == 1)
-			return internalGetText(element)+ " (" + 1 + " match)";
+			return text;
 		return text + " (" + matchCount + " matches)";
 	}
 

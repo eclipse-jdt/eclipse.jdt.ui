@@ -44,6 +44,9 @@
    <extension-point id="quickFixProcessors" name="%quickFixProcessorExtensionPoint" schema="schema/quickFixProcessors.exsd"/>
    <extension-point id="quickAssistProcessors" name="%quickAssistProcessorExtensionPoint" schema="schema/quickAssistProcessors.exsd"/>
    <extension-point id="classpathContainerPage" name="%classpathContainerPageExtensionPoint" schema="schema/classpathContainerPage.exsd"/>
+   
+   <extension-point id="queryParticipants" name="Java Query Participants" schema="schema/queryParticipants.exsd"/>
+   
 
 <extension
 	point="org.eclipse.ui.decorators">
@@ -770,6 +773,12 @@
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.TypeFilterPreferencePage"
             id="org.eclipse.jdt.ui.preferences.TypeFilterPreferencePage">
+      </page>
+      <page
+            name="%searchParticipantsPrefName"
+            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.SearchParticipantsPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.SearchParticipantsPreferencePage">
       </page>
       <page
             name="%codeFormatterPrefName"

@@ -8,13 +8,14 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.search;
+package org.eclipse.jdt.ui.search;
 
 import org.eclipse.search.ui.text.Match;
 
 /**
- * An interface to report matches against. This class serves as a bottleneck and minimal interface
- * to report matches to the java search infrastructure. 
+ * A callback interface to report matches against. This class serves as a bottleneck and minimal interface
+ * to report matches to the java search infrastructure. query participants will be passed an
+ * instance of this interface when their <code>search(...)</code> method is called.
  * Clients must not implement this interface.
  */
 public interface ISearchRequestor {
