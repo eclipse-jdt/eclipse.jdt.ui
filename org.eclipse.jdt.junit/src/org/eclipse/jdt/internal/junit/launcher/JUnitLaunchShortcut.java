@@ -134,7 +134,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		ILaunchConfigurationType configType= getJUnitLaunchConfigType();
 		List candidateConfigs= Collections.EMPTY_LIST;
 		try {
-			ILaunchConfiguration[] configs= DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurations(configType);
+			ILaunchConfiguration[] configs= getLaunchManager().getLaunchConfigurations(configType);
 			candidateConfigs= new ArrayList(configs.length);
 			for (int i= 0; i < configs.length; i++) {
 				ILaunchConfiguration config= configs[i];
@@ -200,7 +200,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		ILaunchConfiguration config = null;
 		try {
 			ILaunchConfigurationType configType= getJUnitLaunchConfigType();
-			ILaunchConfigurationWorkingCopy wc = configType.newInstance(null, type.getElementName() + " [" + type.getJavaProject().getElementName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+			ILaunchConfigurationWorkingCopy wc = configType.newInstance(null, getLaunchManager().generateUniqueLaunchConfigurationNameFrom(type.getElementName())); 
 			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, type.getFullyQualifiedName());
 			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, type.getJavaProject().getElementName());
 			wc.setAttribute(IDebugUIConstants.ATTR_TARGET_DEBUG_PERSPECTIVE, IDebugUIConstants.PERSPECTIVE_DEFAULT);
@@ -220,6 +220,10 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		ILaunchManager lm= DebugPlugin.getDefault().getLaunchManager();
 		return lm.getLaunchConfigurationType(JUnitLaunchConfiguration.ID_JUNIT_APPLICATION);		
 	}	
+	
+	protected ILaunchManager getLaunchManager() {
+		return DebugPlugin.getDefault().getLaunchManager();
+	}
 	
 	/**
 	 * Convenience method to get the window that owns this action's Shell.
