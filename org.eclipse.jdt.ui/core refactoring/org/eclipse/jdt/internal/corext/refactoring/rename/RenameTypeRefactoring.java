@@ -323,7 +323,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		return new RefactoringStatus();
 	}
 	
-	private String createNewPath(String newName)throws JavaModelException{
+	private String createNewPath(String newName) throws JavaModelException{
 		return getResource(fType).getFullPath().removeLastSegments(1).append(newName).toString();
 	}
 	
