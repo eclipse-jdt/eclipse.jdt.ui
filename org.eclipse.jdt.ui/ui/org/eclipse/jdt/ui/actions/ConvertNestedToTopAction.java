@@ -198,7 +198,7 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 	}
 
 	private static MoveInnerToTopRefactoring createRefactoring(IType type) throws JavaModelException {
-		return MoveInnerToTopRefactoring.create(type, JavaPreferencesSettings.getCodeGenerationSettings());
+		return MoveInnerToTopRefactoring.create(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()));
 	}
 
 	private void startRefactoring(IType type) throws JavaModelException {

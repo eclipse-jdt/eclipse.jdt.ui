@@ -69,14 +69,20 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	private void verifyDisabled(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		IJavaProject project= null;
+		if (javaElements != null && javaElements.length > 0)
+			project= javaElements[0].getJavaProject();
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(project);
 		assertTrue("copy should be disabled", ! CopyRefactoring.isAvailable(resources, javaElements, settings));
 		CopyRefactoring refactoring2= CopyRefactoring.create(resources, javaElements, settings);
 		assertTrue(refactoring2 == null);
 	}
 
 	private CopyRefactoring verifyEnabled(IResource[] resources, IJavaElement[] javaElements, INewNameQueries newNameQueries, IReorgQueries reorgQueries) throws JavaModelException {
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		IJavaProject project= null;
+		if (javaElements != null && javaElements.length > 0)
+			project= javaElements[0].getJavaProject();
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(project);
 		assertTrue("copy should be enabled", CopyRefactoring.isAvailable(resources, javaElements, settings));
 		CopyRefactoring refactoring2= CopyRefactoring.create(resources, javaElements, settings);
 		assertNotNull(refactoring2);

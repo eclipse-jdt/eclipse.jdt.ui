@@ -37,7 +37,7 @@ public class AbstractMoveCompilationUnitPrefTest extends RepeatingRefactoringPer
 		JavaMoveProcessor processor= JavaMoveProcessor.create(
 			new IResource[0], 
 			new IJavaElement[] {cunit},
-			JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaPreferencesSettings.getCodeGenerationSettings(cunit.getJavaProject()));
 		IPackageFragment destination= fTestProject.getSourceFolder().createPackageFragment("destination", false, null); 
 		processor.setDestination(destination);
 		processor.setReorgQueries(new MockReorgQueries());

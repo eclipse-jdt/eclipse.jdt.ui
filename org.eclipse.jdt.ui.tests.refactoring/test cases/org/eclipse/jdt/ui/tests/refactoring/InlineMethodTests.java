@@ -65,7 +65,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		int[] selection= getSelection(source);
 		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(
 			unit, selection[0], selection[1],
-			JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaPreferencesSettings.getCodeGenerationSettings(unit.getJavaProject()));
 		String out= null;
 		switch (mode) {
 			case COMPARE_WITH_OUTPUT:

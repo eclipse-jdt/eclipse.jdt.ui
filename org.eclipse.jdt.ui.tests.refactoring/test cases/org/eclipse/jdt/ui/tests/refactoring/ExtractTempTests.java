@@ -92,7 +92,7 @@ public class ExtractTempTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractTempRefactoring ref= ExtractTempRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
-		                                                       JavaPreferencesSettings.getCodeGenerationSettings());
+		                                                       JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
 																
 		RefactoringStatus activationResult= ref.checkInitialConditions(new NullProgressMonitor());	
 		assertTrue("activation was supposed to be successful", activationResult.isOK());																
@@ -119,7 +119,7 @@ public class ExtractTempTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractTempRefactoring ref= ExtractTempRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
-															   JavaPreferencesSettings.getCodeGenerationSettings());
+															   JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
 																
 		RefactoringStatus activationResult= ref.checkInitialConditions(new NullProgressMonitor());	
 		assertTrue("activation was supposed to be successful", activationResult.isOK());																
@@ -146,7 +146,7 @@ public class ExtractTempTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractTempRefactoring ref= ExtractTempRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
-																									JavaPreferencesSettings.getCodeGenerationSettings());
+																									JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
 		
 		ref.setReplaceAllOccurrences(replaceAll);
 		ref.setDeclareFinal(makeFinal);
@@ -546,6 +546,21 @@ public class ExtractTempTests extends RefactoringTest {
 
 	public void test84() throws Exception{
 		helper1(5, 16, 5, 17, false, false, "temp", "j");
+	}
+
+	public void test85() throws Exception{
+		printTestDisabledMessage("test for enum constant");
+//		helper1(10, 22, 10, 32, true, true, "temp", "test2");
+	}
+
+	public void test86() throws Exception{
+		printTestDisabledMessage("test for parameterized class instance creation");
+//		helper1(14, 22, 14, 37, true, true, "temp", "name");
+	}
+
+	public void test87() throws Exception{
+		printTestDisabledMessage("test for parameterized class instance creation");
+//		helper1(15, 17, 15, 27, true, true, "temp", "a2");
 	}
 	
 	public void testZeroLengthSelection0() throws Exception {

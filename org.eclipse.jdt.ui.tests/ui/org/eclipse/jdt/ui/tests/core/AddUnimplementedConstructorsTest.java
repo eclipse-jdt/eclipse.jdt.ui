@@ -93,7 +93,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		
 		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT).setPattern(comment.toString());
 		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.CONSTRUCTORSTUB).setPattern("${body_statement}\n// TODO");	
-		fSettings= JavaPreferencesSettings.getCodeGenerationSettings();
+		fSettings= JavaPreferencesSettings.getCodeGenerationSettings(null);
 		fSettings.createComments= true;
 	}
 

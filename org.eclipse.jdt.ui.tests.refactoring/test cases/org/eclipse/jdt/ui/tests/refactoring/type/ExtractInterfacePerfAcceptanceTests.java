@@ -53,7 +53,7 @@ public class ExtractInterfacePerfAcceptanceTests extends RefactoringPerformanceT
 		super.setUp();
 		fProject= new SWTTestProject();
 		IType control= fProject.getProject().findType("org.eclipse.swt.widgets.Control");
-		fRefactoring= ExtractInterfaceRefactoring.create(control, JavaPreferencesSettings.getCodeGenerationSettings());
+		fRefactoring= ExtractInterfaceRefactoring.create(control, JavaPreferencesSettings.getCodeGenerationSettings(fProject.getProject()));
 		IMethod[] methods= control.getMethods();
 		List extractedMembers= new ArrayList();
 		for (int i= 0; i < methods.length; i++) {

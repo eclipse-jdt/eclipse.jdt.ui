@@ -141,7 +141,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		fSettings= getDialogSettings().getSection(SelfEncapsulateFieldWizard.DIALOG_SETTING_SECTION);
 		if (fSettings == null) {
 			fSettings= getDialogSettings().addNewSection(SelfEncapsulateFieldWizard.DIALOG_SETTING_SECTION);
-			fSettings.put(GENERATE_JAVADOC, JavaPreferencesSettings.getCodeGenerationSettings().createComments);
+			fSettings.put(GENERATE_JAVADOC, JavaPreferencesSettings.getCodeGenerationSettings(fRefactoring.getField().getJavaProject()).createComments);
 		}
 		fRefactoring.setGenerateJavadoc(fSettings.getBoolean(GENERATE_JAVADOC));
 	}	

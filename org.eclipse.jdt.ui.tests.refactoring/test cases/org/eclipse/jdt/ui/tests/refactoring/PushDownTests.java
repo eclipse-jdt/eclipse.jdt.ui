@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -59,7 +60,10 @@ public class PushDownTests extends RefactoringTest {
 	}
 
 	private static PushDownRefactoring createRefactoring(IMember[] members) throws JavaModelException{
-		return PushDownRefactoring.create(members, JavaPreferencesSettings.getCodeGenerationSettings());
+		IJavaProject project= null;
+		if (members != null && members.length > 0)
+			project= members[0].getJavaProject();
+		return PushDownRefactoring.create(members, JavaPreferencesSettings.getCodeGenerationSettings(project));
 	}
 
 	private PushDownRefactoring createRefactoringPrepareForInputCheck(String[] selectedMethodNames, String[][] selectedMethodSignatures, 

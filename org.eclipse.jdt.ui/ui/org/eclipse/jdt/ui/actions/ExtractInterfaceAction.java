@@ -179,7 +179,7 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 	}
 	
 	private void startRefactoring(IType type) throws JavaModelException {
-		ExtractInterfaceRefactoring refactoring= ExtractInterfaceRefactoring.create(type, JavaPreferencesSettings.getCodeGenerationSettings());
+		ExtractInterfaceRefactoring refactoring= ExtractInterfaceRefactoring.create(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()));
 		Assert.isNotNull(refactoring);
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
 		if (!ActionUtil.isProcessable(getShell(), refactoring.getInputType()))

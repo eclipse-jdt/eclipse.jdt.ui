@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -61,7 +62,10 @@ public class PullUpTests extends RefactoringTest {
 	//-------------------
 	
 	private static PullUpRefactoring createRefactoring(IMember[] methods) throws JavaModelException{
-		return PullUpRefactoring.create(methods, JavaPreferencesSettings.getCodeGenerationSettings());
+		IJavaProject project= null;
+		if (methods != null && methods.length > 0)
+			project= methods[0].getJavaProject();
+		return PullUpRefactoring.create(methods, JavaPreferencesSettings.getCodeGenerationSettings(project));
 	}
 	
 	private void fieldMethodHelper1(String[] fieldNames, String[] methodNames, String[][] signatures, boolean deleteAllInSourceType, boolean deleteAllMatchingMethods) throws Exception{
@@ -516,7 +520,7 @@ public class PullUpTests extends RefactoringTest {
 	}
 
 	public void test25() throws Exception{
-//		printTestDisabledMessage("bug in ASTRewrite - extra dimentions 29553");
+//		printTestDisabledMessage("bug in ASTRewrite - extra dimensions 29553");
 		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);
 	}
 

@@ -105,7 +105,7 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 		return ExtractMethodRefactoring.create(
 			cunit, 
 			selection.getOffset(), selection.getLength(),
-			JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaPreferencesSettings.getCodeGenerationSettings(cunit.getJavaProject()));
 	}
 
 	private static RefactoringWizard createWizard(ExtractMethodRefactoring refactoring) {

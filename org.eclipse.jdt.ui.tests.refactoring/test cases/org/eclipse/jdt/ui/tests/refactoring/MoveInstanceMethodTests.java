@@ -105,7 +105,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
 		IMethod method= getMethod(selectionCu, selection);
 		assertNotNull(method);
-		MoveInstanceMethodRefactoring ref= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		MoveInstanceMethodRefactoring ref= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings(selectionCu.getJavaProject()));
 		RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());
 		if (!result.isOK())
 			return;
@@ -169,7 +169,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
 		IMethod method= getMethod(selectionCu, selection);
 		assertNotNull(method);
-		MoveInstanceMethodRefactoring ref= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		MoveInstanceMethodRefactoring ref= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings(selectionCu.getJavaProject()));
 
 		assertNotNull("refactoring should be created", ref);
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
@@ -206,7 +206,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
 		IMethod method= getMethod(selectionCu, selection);
 		assertNotNull(method);
-		MoveInstanceMethodRefactoring ref= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		MoveInstanceMethodRefactoring ref= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings(selectionCu.getJavaProject()));
 
 		assertNotNull("refactoring should be created", ref);
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());

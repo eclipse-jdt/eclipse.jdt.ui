@@ -27,6 +27,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
@@ -163,7 +164,10 @@ public class MoveAction extends SelectionDispatchAction{
 		IMember[] array= new IMember[]{(IMember)element};
 		if (! MoveStaticMembersProcessor.isAvailable(array))	
 			return false;
-		MoveStaticMembersProcessor refactoring= MoveStaticMembersProcessor.create(array, JavaPreferencesSettings.getCodeGenerationSettings());
+		IJavaProject project= null;
+		if (array.length > 0)
+			project= array[0].getJavaProject();
+		MoveStaticMembersProcessor refactoring= MoveStaticMembersProcessor.create(array, JavaPreferencesSettings.getCodeGenerationSettings(project));
 		if (refactoring == null)
 			return false;
 		fMoveStaticMembersAction.run(selection);
@@ -193,7 +197,10 @@ public class MoveAction extends SelectionDispatchAction{
 		IMember[] array= getSelectedMembers(selection);
 		if (! MoveStaticMembersProcessor.isAvailable(array))	
 			return false;
-		MoveStaticMembersProcessor refactoring= MoveStaticMembersProcessor.create(array, JavaPreferencesSettings.getCodeGenerationSettings());
+		IJavaProject project= null;
+		if (array.length > 0)
+			project= array[0].getJavaProject();
+		MoveStaticMembersProcessor refactoring= MoveStaticMembersProcessor.create(array, JavaPreferencesSettings.getCodeGenerationSettings(project));
 		if (refactoring == null)
 			return false;
 		fMoveStaticMembersAction.run(selection);
@@ -208,7 +215,7 @@ public class MoveAction extends SelectionDispatchAction{
 		IMethod method= (IMethod)element;
 		if (! MoveInstanceMethodRefactoring.isAvailable(method))
 			return false;	
-		MoveInstanceMethodRefactoring refactoring= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		MoveInstanceMethodRefactoring refactoring= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings(method.getJavaProject()));
 		if (refactoring == null)
 			return false;
 		fMoveInstanceMethodAction.run(selection);	
@@ -221,7 +228,7 @@ public class MoveAction extends SelectionDispatchAction{
 			return false;	
 		if (! MoveInstanceMethodRefactoring.isAvailable(method))
 			return false;	
-		MoveInstanceMethodRefactoring refactoring= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		MoveInstanceMethodRefactoring refactoring= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings(method.getJavaProject()));
 		if (refactoring == null)
 			return false;
 		fMoveInstanceMethodAction.run(selection);	

@@ -599,7 +599,7 @@ public class JavaContext extends CompilationUnitContext {
 
 			try {
 				
-				CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+				CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
 				ImportsStructure structure= new ImportsStructure(cu, settings.importOrder, settings.importThreshold, true);
 				structure.addImport("java.util.Iterator"); //$NON-NLS-1$
 				structure.create(false, null);

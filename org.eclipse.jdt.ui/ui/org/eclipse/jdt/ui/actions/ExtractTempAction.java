@@ -98,7 +98,7 @@ public class ExtractTempAction extends SelectionDispatchAction {
 
 	private static ExtractTempRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return ExtractTempRefactoring.create(cunit, selection.getOffset(), selection.getLength(), 
-																 JavaPreferencesSettings.getCodeGenerationSettings());
+																 JavaPreferencesSettings.getCodeGenerationSettings(cunit.getJavaProject()));
 	}
 
 	private static RefactoringWizard createWizard(ExtractTempRefactoring refactoring) {

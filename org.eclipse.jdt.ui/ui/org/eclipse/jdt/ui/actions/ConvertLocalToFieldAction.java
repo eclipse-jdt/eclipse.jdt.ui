@@ -60,7 +60,7 @@ public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 	}
 
 	private static PromoteTempToFieldRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
-		return PromoteTempToFieldRefactoring.create(cunit, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings());
+		return PromoteTempToFieldRefactoring.create(cunit, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings(cunit.getJavaProject()));
 	}
 
 	private static RefactoringWizard createWizard(PromoteTempToFieldRefactoring refactoring) {

@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -73,7 +74,10 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 	}
 	
 	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		return CopyRefactoring.isAvailable(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+		IJavaProject project= null;
+		if (javaElements != null && javaElements.length > 0)
+			project= javaElements[0].getJavaProject();
+		return CopyRefactoring.isAvailable(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(project));
 	}
 
 	private CopyProjectAction createWorkbenchAction(IStructuredSelection selection) {
@@ -119,6 +123,9 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 	}
 
 	private CopyRefactoring createRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		return CopyRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+		IJavaProject project= null;
+		if (javaElements != null && javaElements.length > 0)
+			project= javaElements[0].getJavaProject();
+		return CopyRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(project));
 	}
 }

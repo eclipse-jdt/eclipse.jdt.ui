@@ -93,7 +93,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		IType clas= parentClas.getType(className);
 		
 		assertTrue("should be enabled", MoveInnerToTopRefactoring.isAvailable(clas));
-		MoveInnerToTopRefactoring ref= MoveInnerToTopRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		MoveInnerToTopRefactoring ref= MoveInnerToTopRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 		assertTrue("activation was supposed to be successful" + preconditionResult.toString(), preconditionResult.isOK());
 		
@@ -133,7 +133,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		IType parentClas= getClassFromTestFile(getPackageP(), parentClassName);
 		IType clas= parentClas.getType(className);
 
-		MoveInnerToTopRefactoring ref= MoveInnerToTopRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		MoveInnerToTopRefactoring ref= MoveInnerToTopRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
 		if (expectedSeverity == NOT_AVAILABLE && ref == null)
 			return;
 		assertEquals("refactoring availability not as expected", expectedSeverity == NOT_AVAILABLE, ref == null);
@@ -446,7 +446,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		int offset= TextRangeUtil.getOffset(parentClas.getCompilationUnit(), 5, 25);
 		IType nestedLocal= (IType) parentClas.getCompilationUnit().codeSelect(offset, 0)[0];
 	
-		MoveInnerToTopRefactoring ref= MoveInnerToTopRefactoring.create(nestedLocal, JavaPreferencesSettings.getCodeGenerationSettings());
+		MoveInnerToTopRefactoring ref= MoveInnerToTopRefactoring.create(nestedLocal, JavaPreferencesSettings.getCodeGenerationSettings(parentClas.getJavaProject()));
 		assertNull("refactoring was not supposed to be available", ref);
 	}
 }

@@ -121,7 +121,7 @@ public class MultiMoveTest extends RefactoringTest {
 
 			IResource[] resources= {};
 			IJavaElement[] javaElements= {p1A, p1B};
-			JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(p1A.getJavaProject()));
 			processor.setReorgQueries(new MockReorgQueries());
 			processor.setDestination(packP2);
 			processor.setUpdateReferences(true);
@@ -184,7 +184,7 @@ public class MultiMoveTest extends RefactoringTest {
 
 			IResource[] resources= {};
 			IJavaElement[] javaElements= {p1A, p1B};
-			JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(p1A.getJavaProject()));
 			processor.setReorgQueries(new MockReorgQueries());
 			processor.setDestination(packP2);
 			processor.setUpdateReferences(true);
@@ -244,7 +244,7 @@ public class MultiMoveTest extends RefactoringTest {
 
 			IResource[] resources= {};
 			IJavaElement[] javaElements= {p1A};
-			JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(p1A.getJavaProject()));
 			processor.setReorgQueries(new MockReorgQueries());
 			processor.setDestination(packP2);
 			processor.setUpdateReferences(true);
@@ -304,7 +304,7 @@ public class MultiMoveTest extends RefactoringTest {
 
 			IResource[] resources= {};
 			IJavaElement[] javaElements= {p1A};
-			JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(p1A.getJavaProject()));
 			processor.setReorgQueries(new MockReorgQueries());
 			processor.setDestination(packP2);
 			processor.setUpdateReferences(true);
@@ -355,7 +355,7 @@ public class MultiMoveTest extends RefactoringTest {
 
 			IResource[] resources= {};
 			IJavaElement[] javaElements= {p1};
-			JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(p1.getJavaProject()));
 			processor.setReorgQueries(new MockReorgQueries());
 			processor.setDestination(r2);
 		    performDummySearch();
@@ -403,7 +403,7 @@ public class MultiMoveTest extends RefactoringTest {
 
 			IResource[] resources= {};
 			IJavaElement[] javaElements= {p1};
-			JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(p1.getJavaProject()));
 			processor.setReorgQueries(new MockReorgQueries());
 			processor.setDestination(r2);
 		    performDummySearch();
@@ -449,7 +449,7 @@ public class MultiMoveTest extends RefactoringTest {
 
 			IResource[] resources= {};
 			IJavaElement[] javaElements= {p1};
-			JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(p1.getJavaProject()));
 			processor.setReorgQueries(new MockReorgQueries());
 			processor.setDestination(r2);
 		    performDummySearch();

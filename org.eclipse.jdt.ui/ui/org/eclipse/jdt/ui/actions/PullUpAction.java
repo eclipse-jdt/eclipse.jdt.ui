@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -184,7 +185,10 @@ public class PullUpAction extends SelectionDispatchAction {
 	}
 
 	private static PullUpRefactoring createNewRefactoringInstance(IMember[] members) throws JavaModelException {
-		return PullUpRefactoring.create(members, JavaPreferencesSettings.getCodeGenerationSettings());
+		IJavaProject project= null;
+		if (members != null && members.length > 0)
+			project= members[0].getJavaProject();
+		return PullUpRefactoring.create(members, JavaPreferencesSettings.getCodeGenerationSettings(project));
 	}
 
 	private static IMember[] convertToMemberArray(Object[] obj) {

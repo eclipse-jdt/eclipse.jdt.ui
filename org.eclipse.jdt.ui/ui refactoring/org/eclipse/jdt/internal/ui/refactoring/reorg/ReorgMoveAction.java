@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -91,11 +92,14 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 		IJavaElement element= selection.resolveEnclosingElement();
 		if (element == null)
 			return false;
-		return JavaMoveProcessor.isAvailable(new IResource[0], new IJavaElement[] {element}, JavaPreferencesSettings.getCodeGenerationSettings());
+		return JavaMoveProcessor.isAvailable(new IResource[0], new IJavaElement[] {element}, JavaPreferencesSettings.getCodeGenerationSettings(element.getJavaProject()));
 	}
 
 	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		return JavaMoveProcessor.isAvailable(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+		IJavaProject project= null;
+		if (javaElements != null && javaElements.length > 0)
+			project= javaElements[0].getJavaProject();
+		return JavaMoveProcessor.isAvailable(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(project));
 	}
 
 	private MoveProjectAction createWorkbenchAction(IStructuredSelection selection) {
@@ -146,6 +150,9 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 	}
 
 	private JavaMoveProcessor createMoveProcessor(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		return JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+		IJavaProject project= null;
+		if (javaElements != null && javaElements.length > 0)
+			project= javaElements[0].getJavaProject();
+		return JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(project));
 	}
 }

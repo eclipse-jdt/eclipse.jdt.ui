@@ -34,7 +34,7 @@ public class AbstractMoveStaticMemberPrefTest extends RepeatingRefactoringPerfor
 		IMember member= type.getField("VALUE");
 		MoveStaticMembersProcessor processor= MoveStaticMembersProcessor.create(
 			new IMember[] {member},
-			JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaPreferencesSettings.getCodeGenerationSettings(cunit.getJavaProject()));
 		IPackageFragment destPack= fTestProject.getSourceFolder().createPackageFragment("destination", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package destination;\n");

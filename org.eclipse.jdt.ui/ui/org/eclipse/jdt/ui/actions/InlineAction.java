@@ -130,7 +130,7 @@ public class InlineAction extends SelectionDispatchAction {
 	private boolean tryInlineConstant(ICompilationUnit cu, ITextSelection selection){
 		InlineConstantRefactoring inlineConstantRef= InlineConstantRefactoring.create(
 				cu, selection.getOffset(), selection.getLength(),
-				JavaPreferencesSettings.getCodeGenerationSettings());
+				JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
 		if (inlineConstantRef == null)	
 			return false;
 		fInlineConstant.run(selection);
@@ -140,7 +140,7 @@ public class InlineAction extends SelectionDispatchAction {
 	private boolean tryInlineMethod(ICompilationUnit cu, ITextSelection selection){
 		InlineMethodRefactoring inlineMethodRef= InlineMethodRefactoring.create(
 			cu, selection.getOffset(), selection.getLength(),
-			JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
 		if (inlineMethodRef == null)	
 			return false;
 		fInlineMethod.run(selection);

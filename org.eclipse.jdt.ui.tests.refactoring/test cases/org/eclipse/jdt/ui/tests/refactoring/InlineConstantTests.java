@@ -94,7 +94,7 @@ public class InlineConstantTests extends RefactoringTest {
 		ICompilationUnit selectionCu= cus[selectionCuIndex];
 		
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
-		InlineConstantRefactoring ref= InlineConstantRefactoring.create(selectionCu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings());
+		InlineConstantRefactoring ref= InlineConstantRefactoring.create(selectionCu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings(selectionCu.getJavaProject()));
 
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());	
 
@@ -134,7 +134,7 @@ public class InlineConstantTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
 		InlineConstantRefactoring ref= InlineConstantRefactoring.create(selectionCu, selection.getOffset(), selection.getLength(), 
 										
-		JavaPreferencesSettings.getCodeGenerationSettings());
+		JavaPreferencesSettings.getCodeGenerationSettings(selectionCu.getJavaProject()));
 		if (ref == null)
 			return;
 		RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());	

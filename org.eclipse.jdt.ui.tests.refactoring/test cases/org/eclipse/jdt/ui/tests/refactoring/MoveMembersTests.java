@@ -15,6 +15,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -59,7 +60,10 @@ public class MoveMembersTests extends RefactoringTest {
 	}
 	
 	private static MoveRefactoring createRefactoring(IMember[] members, String destination) throws JavaModelException{
-		MoveStaticMembersProcessor processor= MoveStaticMembersProcessor.create(members, JavaPreferencesSettings.getCodeGenerationSettings());
+		IJavaProject project= null;
+		if (members != null && members.length > 0)
+			project= members[0].getJavaProject();
+		MoveStaticMembersProcessor processor= MoveStaticMembersProcessor.create(members, JavaPreferencesSettings.getCodeGenerationSettings(project));
 		if (processor == null)
 			return null;
 		processor.setDestinationTypeFullyQualifiedName(destination);

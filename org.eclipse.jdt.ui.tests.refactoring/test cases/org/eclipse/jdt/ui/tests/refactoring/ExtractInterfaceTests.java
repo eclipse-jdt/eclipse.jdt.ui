@@ -94,7 +94,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	private void validatePassingTest(String className, String[] cuNames, String newInterfaceName, boolean replaceOccurrences, String[] extractedMethodNames, String[][] extractedSignatures, String[] extractedFieldNames) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
 				
-		ExtractInterfaceRefactoring ref= ExtractInterfaceRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		ExtractInterfaceRefactoring ref= ExtractInterfaceRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
 		ref.setNewInterfaceName(newInterfaceName);
 		assertEquals("interface name should be accepted", RefactoringStatus.OK, ref.checkNewInterfaceName(newInterfaceName).getSeverity());
 		
@@ -123,7 +123,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		ICompilationUnit cu= clas.getCompilationUnit();
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 				
-		ExtractInterfaceRefactoring ref= ExtractInterfaceRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		ExtractInterfaceRefactoring ref= ExtractInterfaceRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
 		ref.setNewInterfaceName(newInterfaceName);
 		assertEquals("interface name should be accepted", RefactoringStatus.OK, ref.checkNewInterfaceName(newInterfaceName).getSeverity());
 		
@@ -143,7 +143,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 
 	private void validateFailingTest(String className, String newInterfaceName, boolean extractAll, int expectedSeverity) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
-		ExtractInterfaceRefactoring ref= ExtractInterfaceRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		ExtractInterfaceRefactoring ref= ExtractInterfaceRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
 		
 		ref.setNewInterfaceName(newInterfaceName);
 		if (extractAll)
@@ -701,16 +701,16 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	}
 
 	public void test102() throws Exception{
-		String[] names= new String[]{};
-		String[][] signatures= new String[][]{};
 // Disabled test: Convert to new type constraints infrastructure
+//		String[] names= new String[]{};
+//		String[][] signatures= new String[][]{};
 //		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
 	}
 
 	public void test103() throws Exception{
-		String[] names= new String[]{};
-		String[][] signatures= new String[][]{};
 // Disabled test: Convert to new type constraints infrastructure
+//		String[] names= new String[]{};
+//		String[][] signatures= new String[][]{};
 //		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
 	}
 
@@ -842,7 +842,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	}
 
 	public void testInterface4() throws Exception{
-		printTestDisabledMessage("cannot yet update refs (in methods) to itself if it's an interface");
+		printTestDisabledMessage("cannot yet update references (in methods) to itself if it's an interface");
 //		String[] methodNames= {"a"};
 //		String[][] signatures= {{"QA;", "QA;"}};
 //		String[] fieldNames= null;

@@ -177,7 +177,7 @@ public class IntroduceFactoryAction extends SelectionDispatchAction {
 	private static IntroduceFactoryRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return IntroduceFactoryRefactoring.create(cunit, 
 				selection.getOffset(), selection.getLength(),
-				JavaPreferencesSettings.getCodeGenerationSettings());
+				JavaPreferencesSettings.getCodeGenerationSettings(cunit.getJavaProject()));
 	}
 
 	private RefactoringWizard createWizard(IntroduceFactoryRefactoring refactoring) {

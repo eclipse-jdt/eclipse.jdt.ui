@@ -88,17 +88,17 @@ public class ExtractConstantTests extends RefactoringTest {
 		ICompilationUnit cu= createCU(getPackageP(), getName()+".java", getFileContents(TEST_PATH_PREFIX + getRefactoringPath() + "nameGuessing/" + getName()+".java"));
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractConstantRefactoring ref= ExtractConstantRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
-																									JavaPreferencesSettings.getCodeGenerationSettings());		
+																									JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));		
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 		assertTrue("activation was supposed to be successful" + preconditionResult.toString(), preconditionResult.isOK());
-		assertEquals("contant name not guessed", expectedGuessedName, ref.guessConstantName());
+		assertEquals("constant name not guessed", expectedGuessedName, ref.guessConstantName());
 	}
 
 	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, boolean qualifyReferencesWithConstantName, String constantName, String guessedConstantName) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractConstantRefactoring ref= ExtractConstantRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
-																									JavaPreferencesSettings.getCodeGenerationSettings());
+																									JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 		assertTrue("activation was supposed to be successful" + preconditionResult.toString(), preconditionResult.isOK());
 
@@ -142,7 +142,7 @@ public class ExtractConstantTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractConstantRefactoring ref= ExtractConstantRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
-																									JavaPreferencesSettings.getCodeGenerationSettings());
+																									JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
 		ref.setReplaceAllOccurrences(replaceAll);
 		ref.setConstantName(constantName);
 		RefactoringStatus result= performRefactoring(ref);

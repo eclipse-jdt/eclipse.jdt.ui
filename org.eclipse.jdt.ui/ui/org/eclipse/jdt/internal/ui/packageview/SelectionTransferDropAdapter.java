@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -168,7 +169,10 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		if (fMoveProcessor == null) {
 			IResource[] resources= ReorgUtils.getResources(fElements);
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
-			fMoveProcessor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			IJavaProject project= null;
+			if (javaElements != null && javaElements.length > 0)
+				project= javaElements[0].getJavaProject();
+			fMoveProcessor= JavaMoveProcessor.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(project));
 		}
 		
 		if (!canMoveElements())
@@ -220,7 +224,10 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		if (fCopyRefactoring2 == null) {
 			IResource[] resources= ReorgUtils.getResources(fElements);
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
-			fCopyRefactoring2= CopyRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
+			IJavaProject project= null;
+			if (javaElements != null && javaElements.length > 0)
+				project= javaElements[0].getJavaProject();
+			fCopyRefactoring2= CopyRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings(project));
 		}
 		
 		if (!canCopyElements())

@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -168,8 +169,11 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		Set memberSet= new HashSet();
 		memberSet.addAll(Arrays.asList(elements));
 		IMember[] methods= (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
+		IJavaProject project= null;
+		if (methods.length > 0)
+			project= methods[0].getJavaProject();
 		return new MoveRefactoring(MoveStaticMembersProcessor.create(
-			methods, JavaPreferencesSettings.getCodeGenerationSettings()));
+			methods, JavaPreferencesSettings.getCodeGenerationSettings(project)));
 	}
 
 	private static RefactoringWizard createWizard(MoveRefactoring refactoring) {

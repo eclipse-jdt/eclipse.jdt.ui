@@ -99,7 +99,7 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 
 	private static ExtractConstantRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return ExtractConstantRefactoring.create(cunit, selection.getOffset(), selection.getLength(), 
-																 JavaPreferencesSettings.getCodeGenerationSettings());
+																 JavaPreferencesSettings.getCodeGenerationSettings(cunit.getJavaProject()));
 	}
 
 	private static RefactoringWizard createWizard(ExtractConstantRefactoring refactoring) {
