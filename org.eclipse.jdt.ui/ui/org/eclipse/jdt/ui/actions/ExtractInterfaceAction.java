@@ -47,7 +47,7 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 	}
 
 	/**
-	 * Creates a new <code>ModifyParametersAction</code>. The action requires
+	 * Creates a new <code>ExtractInterfaceAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
