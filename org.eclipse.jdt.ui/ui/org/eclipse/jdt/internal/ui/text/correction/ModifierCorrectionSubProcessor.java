@@ -79,9 +79,9 @@ public class ModifierCorrectionSubProcessor {
 			if (visibilityChange) {
 				excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
 				includedModifiers= getNeededVisibility(selectedNode, typeBinding);
-				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changevisibility.description", new String[] { name, getVisibilityString(includedModifiers) });
+				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changevisibility.description", new String[] { name, getVisibilityString(includedModifiers) });
 			} else {				
-				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changemodifiertostatic.description", name);
+				label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertostatic.description", name);
 				includedModifiers= Modifier.STATIC;
 			}
 			ICompilationUnit targetCU= Binding2JavaModel.findCompilationUnit(typeBinding, cu.getJavaProject());
@@ -166,44 +166,34 @@ public class ModifierCorrectionSubProcessor {
 				}
 			}
 	
-			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removeabstract.description");
+			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.removeabstract.description");
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
 			proposal.calculateEditsAndClearRewrites();
 			proposals.add(proposal);
 		}
-		
-		if (problemPos.getId() == IProblem.BodyForAbstractMethod) {
-			/* disabled: bug 24623 
-			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
-			rewrite.markAsRemoved(decl.getBody());
-			
-			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removebody.description");
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			ASTRewriteCorrectionProposal proposal2= new ASTRewriteCorrectionProposal(label, cu, rewrite, 0, image);
-			proposal2.calculateEditsAndClearRewrites();
-			proposals.add(proposal2);
-			*/
-		}
-		
+				
 		if (problemPos.getId() == IProblem.AbstractMethodInAbstractClass && (parentType instanceof TypeDeclaration)) {
-			TypeDeclaration typeDeclaration= (TypeDeclaration) parentType;
-			
-			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
-			
-			AST ast= astRoot.getAST();
-			TypeDeclaration modifiedNode= ast.newTypeDeclaration();
-			modifiedNode.setInterface(typeDeclaration.isInterface());
-			modifiedNode.setModifiers(typeDeclaration.getModifiers() | Modifier.ABSTRACT);
-			rewrite.markAsModified(typeDeclaration, modifiedNode);
-	
-			String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addabstract.description", typeDeclaration.getName().getIdentifier());
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 3, image);
+			ASTRewriteCorrectionProposal proposal= getMakeTypeStaticProposal(cu, (TypeDeclaration) parentType);
 			proposal.calculateEditsAndClearRewrites();
 			proposals.add(proposal);
 		}		
 		
 	}
+	
+	public static ASTRewriteCorrectionProposal getMakeTypeStaticProposal(ICompilationUnit cu, TypeDeclaration typeDeclaration) {
+		ASTRewrite rewrite= new ASTRewrite(typeDeclaration.getParent());
+		
+		AST ast= typeDeclaration.getAST();
+		TypeDeclaration modifiedNode= ast.newTypeDeclaration();
+		modifiedNode.setInterface(typeDeclaration.isInterface());
+		modifiedNode.setModifiers(typeDeclaration.getModifiers() | Modifier.ABSTRACT);
+		rewrite.markAsModified(typeDeclaration, modifiedNode);
+
+		String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.addabstract.description", typeDeclaration.getName().getIdentifier());
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		return new ASTRewriteCorrectionProposal(label, cu, rewrite, 3, image);
+	}
+	
 
 }

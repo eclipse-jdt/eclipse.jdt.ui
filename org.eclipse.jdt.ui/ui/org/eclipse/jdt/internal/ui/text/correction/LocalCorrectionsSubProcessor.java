@@ -281,7 +281,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
-	public static void addUnimplementedMethodsProposals(ProblemPosition problemPos, ArrayList proposals) {
+	public static void addUnimplementedMethodsProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		ICompilationUnit cu= problemPos.getCompilationUnit();
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		ASTNode selectedNode= ASTResolving.findCoveringNode(astRoot, problemPos.getOffset(), problemPos.getLength());
@@ -299,7 +299,11 @@ public class LocalCorrectionsSubProcessor {
 			UnimplementedMethodsCompletionProposal proposal= new UnimplementedMethodsCompletionProposal(cu, typeNode, 0);
 			proposals.add(proposal);
 		}
-
+		if (typeNode instanceof TypeDeclaration) {
+			TypeDeclaration typeDeclaration= (TypeDeclaration) typeNode;
+			ASTRewriteCorrectionProposal proposal= ModifierCorrectionSubProcessor.getMakeTypeStaticProposal(cu, typeDeclaration);
+			proposals.add(proposal);
+		}
 	}
 
 
