@@ -80,7 +80,7 @@ public class RefactorActionGroup extends ActionGroup {
 	
 	private RefactorActionGroup(UnifiedSite site, IInputSelectionProvider provider) {
 		fSite= site;
-		fOldRefactorGroup= new RefactoringGroup(false);
+		fOldRefactorGroup= new RefactoringGroup(false, site);
 		fOldContext= new GroupContext(provider);
 		
 		ISelectionProvider sp= fSite.getSelectionProvider();
@@ -101,6 +101,7 @@ public class RefactorActionGroup extends ActionGroup {
 	 */
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
+		fOldRefactorGroup.fillActionBars(actionBars);
 		actionBars.setGlobalActionHandler(RetargetActionIDs.SELF_ENCAPSULATE_FIELD, fSelfEncapsulateField);
 	}
 	
