@@ -2,7 +2,7 @@
 
 if (size < currentSize) {
 try {
-size = inStream.available();
+size = (long) inStream.available();
 } catch (IOException e) {
 }
 }

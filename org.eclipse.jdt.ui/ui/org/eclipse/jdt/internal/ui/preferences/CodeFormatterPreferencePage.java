@@ -66,6 +66,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 	private static final String PREF_STYLE_COMPACT_ASSIGNEMENT= JavaCore.FORMATTER_COMPACT_ASSIGNMENT;
 	private static final String PREF_TAB_CHAR= JavaCore.FORMATTER_TAB_CHAR;
 	private static final String PREF_TAB_SIZE= JavaCore.FORMATTER_TAB_SIZE;
+	private static final String PREF_SPACE_CASTEXPRESSION= "org.eclipse.jdt.core.formatter.space.castexpression"; //TODO
 
 	// values
 	private static final String INSERT=  JavaCore.INSERT;
@@ -85,7 +86,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		return new String[] {
 			PREF_NEWLINE_OPENING_BRACES, PREF_NEWLINE_CONTROL_STATEMENT, PREF_NEWLINE_CLEAR_ALL,
 			PREF_NEWLINE_ELSE_IF, PREF_NEWLINE_EMPTY_BLOCK, PREF_LINE_SPLIT,
-			PREF_STYLE_COMPACT_ASSIGNEMENT, PREF_TAB_CHAR, PREF_TAB_SIZE
+			PREF_STYLE_COMPACT_ASSIGNEMENT, PREF_TAB_CHAR, PREF_TAB_SIZE, PREF_SPACE_CASTEXPRESSION
 		};	
 	}
 	
@@ -228,8 +229,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(layout);
-				
-			
+		
 		TabFolder folder= new TabFolder(composite, SWT.NONE);
 		folder.setLayout(new TabFolderLayout());	
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -275,6 +275,9 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		label= PreferencesMessages.getString("CodeFormatterPreferencePage.style_compact_assignement.label"); //$NON-NLS-1$
 		addCheckBox(styleComposite, label, PREF_STYLE_COMPACT_ASSIGNEMENT, new String[] { COMPACT, NORMAL } );		
 
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.style_space_castexpression.label"); //$NON-NLS-1$
+		addCheckBox(styleComposite, label, PREF_SPACE_CASTEXPRESSION, insertNotInsert );		
+
 		label= PreferencesMessages.getString("CodeFormatterPreferencePage.tab_char.label"); //$NON-NLS-1$
 		addCheckBox(styleComposite, label, PREF_TAB_CHAR, new String[] { TAB, SPACE } );		
 
@@ -311,7 +314,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		Control control= previewViewer.getControl();
 		GridData gdata= new GridData(GridData.FILL_BOTH);
 		gdata.widthHint= convertWidthInCharsToPixels(30);
-		gdata.heightHint= convertHeightInCharsToPixels(5);
+		gdata.heightHint= convertHeightInCharsToPixels(12);
 		control.setLayoutData(gdata);
 		return previewViewer;
 	}
@@ -328,7 +331,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		checkBox.setData(data);
 		checkBox.setLayoutData(gd);
 		
-		String currValue= (String)fWorkingValues.get(key);	
+		String currValue= (String) fWorkingValues.get(key);	
 		checkBox.setSelection(data.getSelection(currValue) == 0);
 		checkBox.addSelectionListener(fButtonSelectionListener);
 		
@@ -423,8 +426,10 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 			rin= new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(filename)));
 			String line;
 			while ((line= rin.readLine()) != null) {
+				if (btxt.length() > 0) {
+					btxt.append(separator);
+				}
 				btxt.append(line);
-				btxt.append(separator);
 			}
 		} catch (IOException io) {
 			JavaPlugin.log(io);
