@@ -14,8 +14,7 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.IWorkingSet;
 
-import org.eclipse.jdt.internal.ui.workingsets.HistoryWorkingSet;
-import org.eclipse.jdt.internal.ui.workingsets.dyn.IDynamicWorkingSet;
+import org.eclipse.jdt.internal.ui.workingsets.HistoryWorkingSetUpdater;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
 
@@ -28,8 +27,9 @@ public class WorkingSetAwareJavaElementSorter extends JavaElementSorter implemen
 	}
 	
 	public void sort(Viewer viewer, Object[] elements) {
-		if (fParent instanceof IDynamicWorkingSet) {
-			if (((IDynamicWorkingSet)fParent).getImplementation() instanceof HistoryWorkingSet)
+		if (fParent instanceof IWorkingSet) {
+			IWorkingSet workingSet= (IWorkingSet)fParent;
+			if (HistoryWorkingSetUpdater.ID.equals(workingSet.getId()))
 				return;
 		}
 		super.sort(viewer, elements);

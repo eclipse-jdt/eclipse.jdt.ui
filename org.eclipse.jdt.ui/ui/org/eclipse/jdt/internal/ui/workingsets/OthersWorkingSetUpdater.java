@@ -28,21 +28,20 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
-import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
+import org.eclipse.ui.IWorkingSetUpdater;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.internal.ui.workingsets.dyn.DynamicWorkingSetImplementation;
-
-public class OthersWorkingSet extends DynamicWorkingSetImplementation {
+public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 	
-	public static final String ID= "org.eclipse.jdt.internal.ui.othersWorkingSet";  //$NON-NLS-1$
-	private static final String FACTORY_ID= ID;
+	public static final String ID= "org.eclipse.jdt.internal.ui.OthersWorkingSet";  //$NON-NLS-1$
 	
+	private IWorkingSet fWorkingSet;
 	private WorkingSetModel fWorkingSetModel;
 	
 	private class ResourceChangeListener implements IResourceChangeListener {
@@ -50,7 +49,7 @@ public class OthersWorkingSet extends DynamicWorkingSetImplementation {
 			IResourceDelta delta= event.getDelta();
 			IResourceDelta[] affectedChildren= delta.getAffectedChildren(IResourceDelta.ADDED | IResourceDelta.REMOVED, IResource.PROJECT);
 			if (affectedChildren.length > 0) {
-				fireContentChanged();
+				updateElements();
 			}
 		}
 	}
@@ -59,30 +58,36 @@ public class OthersWorkingSet extends DynamicWorkingSetImplementation {
 	private class WorkingSetListener implements IPropertyChangeListener {
 		public void propertyChange(PropertyChangeEvent event) {
 			if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(event.getProperty())) {
-				if (event.getNewValue() != getWorkingSet()) {
-					OthersWorkingSet.this.fWorkingSetModel.fireEvent(new PropertyChangeEvent(
-						this, 
-						IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE, 
-						null,
-						getWorkingSet()));
-					// Workaround we have to fire the changed event again due to the fact
-					// that we render elements only once.
-					OthersWorkingSet.this.fWorkingSetModel.fireEvent(event);
+				if (event.getNewValue() != fWorkingSet) {
+					updateElements();
 				}
 			}
 		}
 	}
 	private IPropertyChangeListener fWorkingSetListener;
 	
-	public OthersWorkingSet() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public void add(IWorkingSet workingSet) {
+		Assert.isTrue(fWorkingSet == null);
+		fWorkingSet= workingSet;
 	}
 	
-	public OthersWorkingSet(WorkingSetModel model) {
-		init(model);
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean remove(IWorkingSet workingSet) {
+		Assert.isTrue(fWorkingSet == workingSet);
+		fWorkingSet= null;
+		return true;
 	}
 	
-	public OthersWorkingSet(IMemento memento) {
-		// nothing to restore
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean contains(IWorkingSet workingSet) {
+		return fWorkingSet == workingSet;
 	}
 	
 	public void init(WorkingSetModel model) {
@@ -91,6 +96,7 @@ public class OthersWorkingSet extends DynamicWorkingSetImplementation {
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(fResourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 		fWorkingSetListener= new WorkingSetListener();
 		PlatformUI.getWorkbench().getWorkingSetManager().addPropertyChangeListener(fWorkingSetListener);
+		updateElements();
 	}
 	
 	public void dispose() {
@@ -105,16 +111,12 @@ public class OthersWorkingSet extends DynamicWorkingSetImplementation {
 		
 	}
 	
-	public String getId() {
-		return ID;
-	}
-	
-	public IAdaptable[] getElements() {
+	public void updateElements() {
 		List result= new ArrayList();
 		Set projects= new HashSet();
 		IWorkingSet[] workingSets= fWorkingSetModel.getActiveWorkingSets();
 		for (int i= 0; i < workingSets.length; i++) {
-			if (workingSets[i] == this.getWorkingSet()) continue;
+			if (workingSets[i] == fWorkingSet) continue;
 			IAdaptable[] elements= workingSets[i].getElements();
 			for (int j= 0; j < elements.length; j++) {
 				IAdaptable element= elements[j];
@@ -138,17 +140,6 @@ public class OthersWorkingSet extends DynamicWorkingSetImplementation {
 			}
 		} catch (JavaModelException e) {
 		}
-		return (IAdaptable[])result.toArray(new IAdaptable[result.size()]);
-	}
-	
-	public String getFactoryId() {
-		return FACTORY_ID;
-	}
-	
-	public void saveState(IMemento memento) {
-	}
-	
-	public boolean isEditable() {
-		return false;
+		fWorkingSet.setElements((IAdaptable[])result.toArray(new IAdaptable[result.size()]));
 	}
 }

@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.action.IMenuListener;
@@ -59,6 +60,7 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
@@ -131,6 +133,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.ConfigureWorkingSetAction;
 import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
@@ -174,9 +177,6 @@ public class PackageExplorerPart extends ViewPart
 	static final String TAG_LAYOUT= "layout"; //$NON-NLS-1$
 	static final String TAG_CURRENT_FRAME= "currentFramge"; //$NON-NLS-1$
 	static final String TAG_ROOT_MODE= "rootMode"; //$NON-NLS-1$
-	
-	public static final boolean ENABLE_WORKING_SET_MODE= false;
-	
 	
 	private int fRootMode;
 	private WorkingSetModel fWorkingSetModel;
@@ -494,16 +494,46 @@ public class PackageExplorerPart extends ViewPart
 				}
 			}
 		}
-		protected List getSelectionFromWidget() {
-			List all= super.getSelectionFromWidget();
-			List result= new ArrayList(all.size());
-			for (Iterator iter= all.iterator(); iter.hasNext();) {
-				Object element= iter.next();
-				if (!result.contains(element))
-					result.add(element);
+		public ISelection getSelection() {
+			Control control = getControl();
+			if (control == null || control.isDisposed()) {
+				return StructuredSelection.EMPTY;
 			}
-			return result;
+			Tree tree= getTree();
+			TreeItem[] selection= tree.getSelection();
+			List result= new ArrayList(selection.length);
+			Map element2TreeItem= new HashMap();
+			for (int i= 0; i < selection.length; i++) {
+				TreeItem item= selection[i];
+				Object element= getElement(item);
+				if (element == null)
+					continue;
+				if (!result.contains(element)) {
+					result.add(element);
+				}
+				Object obj= element2TreeItem.get(element);
+				if (obj == null) {
+					element2TreeItem.put(element, item);
+				} else if (obj instanceof TreeItem) {
+					List l= new ArrayList(2);
+					l.add(obj);
+					l.add(item);
+					element2TreeItem.put(element, l);
+				} else if (obj instanceof List) {
+					((List)obj).add(item);
+				} else {
+					Assert.isTrue(false, "Should not happen"); //$NON-NLS-1$
+				}
+			}
+			return new MultiElementSelection(result, element2TreeItem);
 		}
+		
+		private Object getElement(TreeItem item) {
+			Object result= item.getData();
+			if (result == null)
+				return null;
+			return result;
+		}		
 	}
  
 	/* (non-Javadoc)
@@ -515,31 +545,16 @@ public class PackageExplorerPart extends ViewPart
 		super.init(site, memento);
 		fMemento= memento;
 		restoreRootMode(fMemento);
-		if (ENABLE_WORKING_SET_MODE) {
-			Platform.run(new ISafeRunnable() {
-				public void handleException(Throwable exception) {
-					fWorkingSetModel= new WorkingSetModel();
-				}
-				public void run() throws Exception {
-					fWorkingSetModel= fMemento != null 
-					? new WorkingSetModel(fMemento) 
-					: new WorkingSetModel();
-				}
-			});
-		} else {
-			fWorkingSetModel= new WorkingSetModel();
+		if (showWorkingSets()) {
+			createWorkingSetModel();
 		}
 		restoreLayoutState(memento);
 	}
 
 	private void restoreRootMode(IMemento memento) {
-		if (ENABLE_WORKING_SET_MODE) {
-			if (memento != null) {
-				Integer value= fMemento.getInteger(TAG_ROOT_MODE);
-				fRootMode= value == null ? ViewActionGroup.SHOW_PROJECTS : value.intValue(); 
-			} else {
-				fRootMode= ViewActionGroup.SHOW_PROJECTS;
-			}
+		if (memento != null) {
+			Integer value= fMemento.getInteger(TAG_ROOT_MODE);
+			fRootMode= value == null ? ViewActionGroup.SHOW_PROJECTS : value.intValue(); 
 		} else {
 			fRootMode= ViewActionGroup.SHOW_PROJECTS;
 		}
@@ -880,6 +895,8 @@ public class PackageExplorerPart extends ViewPart
 
 	private void makeActions() {
 		fActionSet= new PackageExplorerActionGroup(this);
+		if (fWorkingSetModel != null)
+			fActionSet.getWorkingSetActionGroup().setWorkingSetModel(fWorkingSetModel);
 	}
 	
 	//---- Event handling ----------------------------------------------------------
@@ -901,7 +918,7 @@ public class PackageExplorerPart extends ViewPart
 			new FileTransferDragAdapter(fViewer)
 		};
 		fViewer.addDragSupport(ops, transfers, new JdtViewerDragAdapter(fViewer, dragListeners));
-				}
+	}
 
 	private void initDrop() {
 		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK | DND.DROP_DEFAULT;
@@ -913,7 +930,7 @@ public class PackageExplorerPart extends ViewPart
 			new FileTransferDropAdapter(fViewer)
 		};
 		fViewer.addDropSupport(ops, transfers, new DelegatingDropAdapter(dropListeners));
-					}
+	}
 
 	/**
 	 * Handles selection changed in viewer.
@@ -1645,14 +1662,42 @@ public class PackageExplorerPart extends ViewPart
 
 	public void rootModeChanged(int newMode) {
 		fRootMode= newMode;
+		if (showWorkingSets() && fWorkingSetModel == null) {
+			createWorkingSetModel();
+			if (fActionSet != null) {
+				fActionSet.getWorkingSetActionGroup().setWorkingSetModel(fWorkingSetModel);
+			}
+		}
 		ISelection selection= fViewer.getSelection();
-		fViewer.getControl().setRedraw(false);
-		fViewer.setInput(null);
-		setProviders();
-		setSorter();
-		fViewer.setInput(findInputElement());
-		fViewer.setSelection(selection, true);
-		fViewer.getControl().setRedraw(true);
+		try {
+			fViewer.getControl().setRedraw(false);
+			fViewer.setInput(null);
+			setProviders();
+			setSorter();
+			fViewer.setInput(findInputElement());
+			fViewer.setSelection(selection, true);
+		} finally {
+			fViewer.getControl().setRedraw(true);
+		}
+		if (fWorkingSetModel.needsConfiguration()) {
+			ConfigureWorkingSetAction action= new ConfigureWorkingSetAction(getSite().getShell());
+			action.setWorkingSetModel(fWorkingSetModel);
+			action.run();
+			fWorkingSetModel.configured();
+		}
+	}
+
+	private void createWorkingSetModel() {
+		Platform.run(new ISafeRunnable() {
+			public void run() throws Exception {
+				fWorkingSetModel= fMemento != null 
+				? new WorkingSetModel(fMemento) 
+				: new WorkingSetModel();
+			}
+			public void handleException(Throwable exception) {
+				fWorkingSetModel= new WorkingSetModel();
+			}
+		});
 	}
 
 	public WorkingSetModel getWorkingSetModel() {

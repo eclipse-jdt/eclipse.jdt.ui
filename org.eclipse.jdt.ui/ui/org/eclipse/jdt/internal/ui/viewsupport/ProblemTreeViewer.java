@@ -124,6 +124,10 @@ public class ProblemTreeViewer extends TreeViewer {
 				return;
 			}
 			event= new LabelProviderChangedEvent((IBaseLabelProvider) event.getSource(), others.toArray());
+		} else {
+			// we have modified the list of changed elements via add additional parents.
+			if (event.getElements() != changed)
+				event= new LabelProviderChangedEvent((IBaseLabelProvider) event.getSource(), changed);
 		}
 		super.handleLabelProviderChanged(event);
 	}
@@ -150,6 +154,6 @@ public class ProblemTreeViewer extends TreeViewer {
 	
 	protected Object[] addAditionalProblemParents(Object[] elements) {
 		return elements;
-	};
+	}
 }
 

@@ -20,18 +20,19 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IDialogConstants;
 
 import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.dialogs.IWorkingSetSelectionDialog;
-
 
 public class ConfigureWorkingSetAction extends Action {
 
 	private final Shell fParent;
-	private final WorkingSetModel fWorkingSetModel;
+	private WorkingSetModel fWorkingSetModel;
 
-	public ConfigureWorkingSetAction(WorkingSetModel workingSetModel, Shell parent) {
+	public ConfigureWorkingSetAction(Shell parent) {
 		super(WorkingSetMessages.getString("ConfigureWorkingSetAction.label")); //$NON-NLS-1$
-		fWorkingSetModel= workingSetModel;
 		fParent= parent;
+	}
+	
+	public void setWorkingSetModel(WorkingSetModel model) {
+		fWorkingSetModel= model;
 	}
 	
 	/**
@@ -39,10 +40,9 @@ public class ConfigureWorkingSetAction extends Action {
 	 */
 	public void run() {
 		List workingSets= new ArrayList(Arrays.asList(fWorkingSetModel.getAllWorkingSets()));
-		IWorkingSetSelectionDialog dialog= new WorkingSetSelectionDialog(
+		WorkingSetConfigurationDialog dialog= new WorkingSetConfigurationDialog(
 			fParent, 
-			(IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()]), 
-			true, false); //$NON-NLS-1$
+			(IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()])); //$NON-NLS-1$
 		dialog.setSelection(fWorkingSetModel.getActiveWorkingSets());
 		if (dialog.open() == IDialogConstants.OK_ID) {
 			IWorkingSet[] selection= dialog.getSelection();

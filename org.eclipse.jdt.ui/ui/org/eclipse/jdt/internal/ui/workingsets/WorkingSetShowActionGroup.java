@@ -20,6 +20,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.actions.ActionGroup;
@@ -27,12 +28,19 @@ import org.eclipse.ui.actions.ActionGroup;
 public class WorkingSetShowActionGroup extends ActionGroup implements IWorkingSetActionGroup {
 	
 	private List fContributions= new ArrayList();
-	private final WorkingSetModel fWorkingSetMode;
+	private ConfigureWorkingSetAction fConfigureWorkingSetAction;	
+	private WorkingSetModel fWorkingSetModel;
 	private final Shell fShell; 
 	
-	public WorkingSetShowActionGroup(WorkingSetModel workingSetMode, Shell shell) {
-		fWorkingSetMode= workingSetMode;
+	public WorkingSetShowActionGroup(Shell shell) {
 		fShell= shell;
+	}
+	
+	public void setWorkingSetMode(WorkingSetModel model) {
+		Assert.isNotNull(model);
+		fWorkingSetModel= model;
+		if (fConfigureWorkingSetAction != null)
+			fConfigureWorkingSetAction.setWorkingSetModel(fWorkingSetModel);
 	}
 	
 	/**
@@ -45,9 +53,10 @@ public class WorkingSetShowActionGroup extends ActionGroup implements IWorkingSe
 	}
 	
 	public void fillViewMenu(IMenuManager menuManager) {
-		ConfigureWorkingSetAction configureWorkingSetAction= 
-			new ConfigureWorkingSetAction(fWorkingSetMode, fShell);
-		addAction(menuManager, configureWorkingSetAction);
+		fConfigureWorkingSetAction=  new ConfigureWorkingSetAction(fShell);
+		if (fWorkingSetModel != null)
+			fConfigureWorkingSetAction.setWorkingSetModel(fWorkingSetModel);
+		addAction(menuManager, fConfigureWorkingSetAction);
 	}
 	
 	public void cleanViewMenu(IMenuManager menuManager) {

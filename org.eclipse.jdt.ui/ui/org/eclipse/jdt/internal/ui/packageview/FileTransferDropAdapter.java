@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.packageview;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
@@ -46,6 +47,13 @@ class FileTransferDropAdapter extends JdtViewerDropAdapter implements TransferDr
 	
 	public Transfer getTransfer() {
 		return FileTransfer.getInstance();
+	}
+	
+	public boolean isEnabled(DropTargetEvent event) {
+		Object target= event.item != null ? event.item.getData() : null;
+		if (target == null)
+			return false;
+		return target instanceof IJavaElement || target instanceof IResource;
 	}
 
 	//---- Actual DND -----------------------------------------------------------------

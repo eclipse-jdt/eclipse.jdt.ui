@@ -65,6 +65,13 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	public Transfer getTransfer() {
 		return LocalSelectionTransfer.getInstance();
 	}
+	
+	public boolean isEnabled(DropTargetEvent event) {
+		Object target= event.item != null ? event.item.getData() : null;
+		if (target == null)
+			return false;
+		return target instanceof IJavaElement || target instanceof IResource;
+	}
 
 	//---- Actual DND -----------------------------------------------------------------
 	
@@ -98,9 +105,9 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		try {
 			switch(operation) {
 				case DND.DROP_DEFAULT:	event.detail= handleValidateDefault(target, event); break;
-				case DND.DROP_COPY: 		event.detail= handleValidateCopy(target, event); break;
-				case DND.DROP_MOVE: 		event.detail= handleValidateMove(target, event); break;
-				case DND.DROP_LINK: 			event.detail= handleValidateLink(target, event); break;
+				case DND.DROP_COPY: 	event.detail= handleValidateCopy(target, event); break;
+				case DND.DROP_MOVE: 	event.detail= handleValidateMove(target, event); break;
+				case DND.DROP_LINK: 	event.detail= handleValidateLink(target, event); break;
 			}
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, PackagesMessages.getString("SelectionTransferDropAdapter.error.title"), PackagesMessages.getString("SelectionTransferDropAdapter.error.message")); //$NON-NLS-1$ //$NON-NLS-2$

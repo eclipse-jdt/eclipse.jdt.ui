@@ -54,6 +54,7 @@ import org.eclipse.ui.views.framelist.UpAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetActionGroup;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -115,10 +116,10 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			new BuildActionGroup(fPart),
 			new JavaSearchActionGroup(fPart),
 			new ProjectActionGroup(fPart), 
-			fViewActionGroup= new ViewActionGroup(fPart.getWorkingSetModel(), fPart.getRootMode(), workingSetListener, shell),
-
+			fViewActionGroup= new ViewActionGroup(fPart.getRootMode(), workingSetListener, shell),
 			fCustomFiltersActionGroup= new CustomFiltersActionGroup(fPart, viewer),
-			new LayoutActionGroup(part)});
+			new LayoutActionGroup(part),
+			new WorkingSetActionGroup(part)});
 		
 
 		fViewActionGroup.fillFilters(viewer);

@@ -14,8 +14,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -24,7 +22,6 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
-import org.eclipse.jdt.internal.ui.workingsets.dyn.LocalWorkingSetManager;
 
 public class WorkingSetAwareContentProvider extends PackageExplorerContentProvider {
 
@@ -99,23 +96,13 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 	}
 	
 	private void workingSetModelChanged(PropertyChangeEvent event) {
-		if (LocalWorkingSetManager.CHANGE_WORKING_SET_MANAGER_CONTENT_CHANGED.equals(event.getProperty())) {
+		String property= event.getProperty();
+		if (WorkingSetModel.CHANGE_WORKING_SET_MODEL_CONTENT.equals(property)) {
 			postRefresh(fWorkingSetModel);
-		} else if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(event.getProperty())) {
+		} else if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
+			postRefresh(event.getNewValue());
+		} else if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
 			postRefresh(event.getNewValue());
 		}
-	}
-	
-	private void postRefresh(final Object[] elements, final boolean updateLabels) {
-		postRunnable(new Runnable() {
-			public void run() {
-				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()){
-					for (int i= 0; i < elements.length; i++) {
-						fViewer.refresh(elements[i], updateLabels);
-					}
-				}
-			}
-		});
 	}
 }
