@@ -145,7 +145,7 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 	public final RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= Checks.checkIfCuBroken(getMethod());
 		if (Flags.isNative(getMethod().getFlags()))
-			result.addError("Renaming native methods will cause UsatisfiedLinkError on runtime.");
+			result.addError("Renaming native methods will cause UnsatisfiedLinkError on runtime.");
 		return result;
 	}
 					
