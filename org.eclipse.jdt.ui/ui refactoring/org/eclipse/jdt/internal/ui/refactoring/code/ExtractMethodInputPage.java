@@ -220,6 +220,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 				fFirstTime= false;
 				setPageComplete(false);
 				updatePreview(getText());
+				fTextField.setFocus();
 			} else {
 				setPageComplete(validatePage(true));
 			}
