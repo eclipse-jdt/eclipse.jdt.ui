@@ -146,6 +146,7 @@ public class AllTypesCache {
 	 * The lock for synchronizing all activity in the AllTypesCache.
 	 */
 	private static Object fgLock= new Object();
+		private static boolean fgIsLocked;
 		private volatile static TypeCacher fgTypeCacherThread;
 		private static TypeInfo[] fgTypeCache;
 		private static int fgSizeHint= INITIAL_SIZE;
@@ -209,19 +210,24 @@ public class AllTypesCache {
 		forceDeltaComplete();
 		
 		synchronized(fgLock) {
-			
+							
 			if (fgTypeCache == null) {
 				// cache is empty
 				
 				if (fgTypeCacherThread == null) {
 					// cache synchroneously
 					ArrayList searchResult= new ArrayList(fgSizeHint);
-					if (search(new TypeInfoRequestor(searchResult), IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor)) {
-						TypeInfo[] result= (TypeInfo[]) searchResult.toArray(new TypeInfo[searchResult.size()]);
-						Arrays.sort(result, fgTypeNameComparator);
-						fgTypeCache= result;
-						fgSizeHint= result.length;
-					}
+					try {
+						fgIsLocked= true;
+						if (search(new TypeInfoRequestor(searchResult), IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor)) {
+							TypeInfo[] result= (TypeInfo[]) searchResult.toArray(new TypeInfo[searchResult.size()]);
+							Arrays.sort(result, fgTypeNameComparator);
+							fgTypeCache= result;
+							fgSizeHint= result.length;
+						}
+					} finally {
+						fgIsLocked= false;
+					}	
 				} else {
 					// wait for the thread to finished
 					try {
@@ -469,6 +475,12 @@ public class AllTypesCache {
 		
 		forceDeltaComplete();
 		
+		if (fgIsLocked) {
+			System.err.println("would block");
+			fgAsyncMode= true;
+			return;
+		}
+		
 		synchronized(fgLock) {
 			if (fgTypeCacherThread != null) {
 				// there is already a thread
@@ -477,6 +489,7 @@ public class AllTypesCache {
 						fgTypeCacherThread.abort();																		
 				} else {
 					// there is already a thread running
+					// do nothing
 				}							
 			} else {
 				if (fgTerminated) {
