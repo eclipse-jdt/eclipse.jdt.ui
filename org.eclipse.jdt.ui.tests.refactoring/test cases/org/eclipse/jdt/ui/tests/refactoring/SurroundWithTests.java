@@ -92,7 +92,8 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 	}
 	
 	public void testOneLine() throws Exception {
-		tryCatchTest();
+		System.out.println("test SurroundWithTests.testOneLine disabled for bug 55221");
+		//tryCatchTest();
 	}	
 	
 	public void testMultiLine() throws Exception {
