@@ -293,7 +293,10 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener {
 		TreeItem parent= treeItem.getParentItem();
 		if (parent == fCachedParent)
 			return;
-		fCachedItems= parent.getItems();
+		if (parent != null)
+			fCachedItems= parent.getItems();
+		else
+			fCachedItems= null;
 		fCachedParent= parent;	
 	}
 
