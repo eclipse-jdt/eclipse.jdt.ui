@@ -22,16 +22,13 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.help.IHelp;
-
 public class OpenBrowserUtil {
 	
 	public static void open(final URL url, Display display, String dialogTitle) {
-		IHelp help= WorkbenchHelp.getHelpSupport();
-		if (help != null) {
-			BusyIndicator.showWhile(display, new Runnable() {
+		if (WorkbenchHelp.getHelpSupport() != null) {
+			BusyIndicator.showWhile(null, new Runnable() {
 				public void run() {
-					WorkbenchHelp.getHelpSupport().displayHelpResource(url.toExternalForm() + "?noframes=true"); //$NON-NLS-1$
+					WorkbenchHelp.displayHelpResource(url.toExternalForm() + "?noframes=true"); //$NON-NLS-1$
 				}
 			});			
 		} else {
