@@ -78,22 +78,8 @@ public class RenameAction extends ReorgAction {
 		renameElement(element);
 	}
 	
-	protected boolean confirmIfUnsaved(Object element) {
-		ArrayList unsavedEditors= new ArrayList();
-		ArrayList unsavedElements= new ArrayList();
-		
-		ArrayList elements= new ArrayList();
-		elements.add(element);
-		collectUnsavedEditors(elements, unsavedEditors, unsavedElements);
-		if (unsavedEditors.size() == 0)
-			return true;
-		return MessageDialog.openConfirm(JavaPlugin.getActiveWorkbenchShell(), getActionName(), getConfirmDiscardChangesMessage());
-	}
-	
+
 	protected void renameElement(final Object element) {
-		if (!confirmIfUnsaved(element))
-			return;
-			
 		String title= ReorgMessages.getString("renameAction.rename.title"); //$NON-NLS-1$
 		String message= ReorgMessages.getString("renameAction.newName"); //$NON-NLS-1$
 		final INamingPolicy policy= ReorgSupportFactory.createNamingPolicy(element);
