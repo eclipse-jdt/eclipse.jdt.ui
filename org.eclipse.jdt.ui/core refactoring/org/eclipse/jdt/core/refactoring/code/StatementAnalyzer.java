@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	
 	// internal state.
 	private int fMode;
-	private int fLastEnd;
+	private int fCursorPosition;
 
 	// Error handling	
 	private RefactoringStatus fStatus= new RefactoringStatus();
@@ -202,7 +202,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	private void invalidSelection(String message) {
 		reset();
 		fMessage= message;
-		fLastEnd= Integer.MAX_VALUE;
+		fCursorPosition= Integer.MAX_VALUE;
 	}
 	
 	private boolean visitStatement(Statement statement, BlockScope scope) {
@@ -211,7 +211,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 			case UNDEFINED:
 				return false;			
 			case BEFORE:
-				if (fLastEnd < fSelection.start && fSelection.covers(statement)) {
+				if (fCursorPosition < fSelection.start && fSelection.covers(statement)) {
 					startFound(statement);
 				}
 				break;
@@ -248,13 +248,13 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 	
 	private void trackLastEnd(Statement statement) {
-		if (statement.sourceEnd > fLastEnd)
-			fLastEnd= statement.sourceEnd;
+		if (statement.sourceEnd > fCursorPosition)
+			fCursorPosition= statement.sourceEnd;
 	}
 	
 	private void trackLastEnd(int end) {
-		if (end > fLastEnd)
-			fLastEnd= end;
+		if (end > fCursorPosition)
+			fCursorPosition= end;
 	}
 	
 	private boolean visitAssignment(Assignment assignment, BlockScope scope, boolean compound) {
@@ -365,7 +365,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	//--- Expression / Condition handling -----------------------------------------
 
 	public boolean visitBinaryExpression(BinaryExpression binaryExpression, BlockScope scope, int returnType) {
-		int currentScanPosition= fLastEnd;
+		int currentScanPosition= fCursorPosition;
 		if (!visitStatement(binaryExpression, scope))
 			return false;
 		if (fMode != SELECTED)
@@ -390,7 +390,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		int conditionEnd= fBuffer.indexOf(')', condition.sourceEnd + 1) - 1;
 		if (fSelection.coveredBy(conditionStart, conditionEnd)) {
 			fAstNodeData.put(node, new Boolean(true));
-			fLastEnd= conditionStart - 1;
+			fCursorPosition= conditionStart - 1;
 			return true;
 		}
 		return false;
@@ -413,7 +413,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	public void acceptProblem(IProblem problem) {
 		if (fMode != UNDEFINED) {
 			reset();
-			fLastEnd= Integer.MAX_VALUE;
+			fCursorPosition= Integer.MAX_VALUE;
 			fStatus.addFatalError("Compilation unit has compile error at line " + problem.getSourceLineNumber() + ": " + problem.getMessage());
 		}
 	}
@@ -603,9 +603,9 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		
 		if (fSelection.intersects(block)) {
 			reset();
-			fLastEnd= Integer.MAX_VALUE;
+			fCursorPosition= Integer.MAX_VALUE;
 		} else {
-			fLastEnd= block.sourceStart;
+			fCursorPosition= block.sourceStart;
 		}
 		
 		return result;
@@ -618,7 +618,6 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(Break breakStatement, BlockScope scope) {
-		HackFinder.fixMeSoon("1GCU7OH: ITPJCORE:WIN2000 - Break.sourceEnd contains tailing comments");
 		if (breakStatement.label == null) {
 			breakStatement.sourceEnd= breakStatement.sourceStart + BREAK_LENGTH - 1;
 		}
@@ -650,7 +649,6 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(Continue continueStatement, BlockScope scope) {
-		HackFinder.fixMeSoon("1GCU7OH: ITPJCORE:WIN2000 - Break.sourceEnd contains tailing comments");
 		if (continueStatement.label == null) {
 			continueStatement.sourceEnd= continueStatement.sourceStart + CONTINUE_LENGTH - 1;
 		}
@@ -677,7 +675,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 			
 			// Check if action part is selected.
 			if (fSelection.coveredBy(actionStart + 1, actionEnd)) {
-				fLastEnd= actionStart;
+				fCursorPosition= actionStart;
 				return true;
 			}
 				
@@ -695,7 +693,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	public void endVisit(DoStatement doStatement, BlockScope scope) {
 		endVisitImplicitBranchTarget(doStatement, scope);
 		endVisitConditionBlock(doStatement, "a do-while");
-		fLastEnd= doStatement.sourceEnd;
+		fCursorPosition= doStatement.sourceEnd;
 	}
 
 	public boolean visit(DoubleLiteral doubleLiteral, BlockScope scope) {
@@ -741,7 +739,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 			} else if (forStatement.initializations != null) {
 				start= forStatement.initializations[forStatement.initializations.length - 1].sourceEnd;
 			}
-			fLastEnd= fBuffer.indexOf(')', start + 1);
+			fCursorPosition= fBuffer.indexOf(')', start + 1);
 		}
 		return result;
 	}
@@ -758,7 +756,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 		int conditionEnd= fBuffer.indexOf(';', forStatement.condition.sourceEnd) - 1;
 		if (fSelection.coveredBy(conditionStart, conditionEnd)) {
 			fAstNodeData.put(forStatement, new Boolean(true));
-			fLastEnd= conditionStart - 1;
+			fCursorPosition= conditionStart - 1;
 			return true;
 		}	
 		return false;
@@ -778,7 +776,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 			if (isConditionSelected(ifStatement, ifStatement.condition, ifStatement.sourceStart))
 				return true;
 
-			if ((fLastEnd= getIfElseBodyStart(ifStatement, nextStart) - 1) >= 0)
+			if ((fCursorPosition= getIfElseBodyStart(ifStatement, nextStart) - 1) >= 0)
 				return true;
 				
 			invalidSelection("Selection must either cover whole if-then-else statement or parts of then or else block");
@@ -861,7 +859,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(ReturnStatement returnStatement, BlockScope scope) {
-		fAdjustedSelectionEnd= fBuffer.indexOfLastCharacterBeforeLineBreak(fLastEnd);
+		fAdjustedSelectionEnd= fBuffer.indexOfLastCharacterBeforeLineBreak(fCursorPosition);
 		boolean result= visitStatement(returnStatement, scope);
 		if (fMode == StatementAnalyzer.SELECTED) {
 			if (fPotentialReturnMessage != null) {
@@ -894,7 +892,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 				invalidSelection("Selection must either cover whole switch statement or parts of a single case block");
 				return false;
 			} else {
-				fLastEnd= lastEnd;
+				fCursorPosition= lastEnd;
 			}
 		}
 		return true;
@@ -937,20 +935,17 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 	}
 
 	public boolean visit(SynchronizedStatement synchronizedStatement, BlockScope scope) {
-		HackFinder.fixMeSoon("1GE2LO2: ITPJCORE:WIN2000 - SourceStart and SourceEnd of synchronized statement");
 		if (!visitStatement(synchronizedStatement, scope))
 			return false;
 		
-		int nextStart= fBuffer.indexOfStatementCharacter(synchronizedStatement.sourceEnd + 1);
-		if (fMode == BEFORE && fSelection.end < nextStart) {
-			if (fSelection.intersects(synchronizedStatement)) {
-				invalidSelection("Seleciton must either cover whole synchronized statement or parts of the synchronized block");
-				return false;
-			} else {
-				if (fSelection.enclosedBy(synchronizedStatement.block)) {
-					fLastEnd= synchronizedStatement.block.sourceStart;
-				}
+		if (isPartOfNodeSelected(synchronizedStatement)) {
+			if (fSelection.enclosedBy(synchronizedStatement.block)) {
+				fCursorPosition= synchronizedStatement.block.sourceStart;
+				return true;
 			}
+				
+			invalidSelection("Seleciton must either cover whole synchronized statement or parts of the synchronized block");
+			return false;
 		}
 		return true;
 	}
@@ -989,7 +984,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 				} else {
 					lastEnd= tryStatement.sourceEnd;
 				}
-				fLastEnd= lastEnd;
+				fCursorPosition= lastEnd;
 			}
 		}
 		
@@ -1025,7 +1020,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.ecli
 			if (isConditionSelected(whileStatement, whileStatement.condition, whileStatement.sourceStart + WHILE_LENGTH))
 				return true;
 				
-			fLastEnd= fBuffer.indexOf(')', whileStatement.condition.sourceEnd);
+			fCursorPosition= fBuffer.indexOf(')', whileStatement.condition.sourceEnd);
 		}
 		return true;
 	}
