@@ -1170,7 +1170,9 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 */
 	public boolean visit(AssertStatement node) {
 		int offset= rewriteRequiredNode(node.getExpression());
-		rewriteNode(node.getMessage(), offset, " : "); //$NON-NLS-1$
+		if (node.getMessage() != null) { 
+			rewriteNode(node.getMessage(), offset, " : "); //$NON-NLS-1$
+		}
 		return false;
 	}
 
