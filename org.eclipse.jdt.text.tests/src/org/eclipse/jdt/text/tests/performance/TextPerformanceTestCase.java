@@ -11,6 +11,10 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import org.eclipse.core.runtime.Platform;
+
+import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
+
 import junit.framework.TestCase;
 
 /**
@@ -20,14 +24,26 @@ import junit.framework.TestCase;
  */
 public class TextPerformanceTestCase extends TestCase {
 
-	/** <code>true</code> iff the default number of runs should be used */
-	private static final boolean USE_DEFAULT_RUNS= false;
+	/** containing plug-in id */
+	private static final String PLUGIN_ID= JdtTextTestPlugin.PLUGIN_ID;
 	
-	/** default number of warm-up runs */
-	private static final int DEFAULT_WARM_UP_RUNS= 1;
+	/** boolean option, a value of <code>"true"</code> enables overriding of the number of runs */
+	private static final String OVERRIDE_RUNS_OPTION= "/debug/performance/OverrideRuns";
+
+	/** integer option, its value overrides the number of warm-up runs */
+	private static final String OVERRIDE_WARM_UP_RUNS_OPTION= "/debug/performance/OverrideWarmUpRuns";
+
+	/** integer option, its value overrides the number of measured runs */
+	private static final String OVERRIDE_MEASURED_RUNS_OPTION= "/debug/performance/OverrideMeasuredRuns";
+
+	/** <code>true</code> iff the number of runs should be overridden */
+	private static final boolean OVERRIDE_RUNS= Boolean.toString(true).equals(Platform.getDebugOption(PLUGIN_ID + OVERRIDE_RUNS_OPTION));
 	
-	/** default number of measured runs */
-	private static final int DEFAULT_MEASURED_RUNS= 2;
+	/** overridden number of warm-up runs */
+	private static final int OVERRIDE_WARM_UP_RUNS= intValueOf(Platform.getDebugOption(PLUGIN_ID + OVERRIDE_WARM_UP_RUNS_OPTION), 1);
+	
+	/** overridden number of measured runs */
+	private static final int OVERRIDE_MEASURED_RUNS= intValueOf(Platform.getDebugOption(PLUGIN_ID + OVERRIDE_MEASURED_RUNS_OPTION), 2);
 	
 	/** custom number of warm-up runs */
 	private int fCustomWarmUpRuns= -1;
@@ -50,17 +66,36 @@ public class TextPerformanceTestCase extends TestCase {
 	}
 	
 	/**
+	 * Returns the integer value of the given string unless the string
+	 * cannot be interpreted as such, in this case the given default is
+	 * returned.
+	 * 
+	 * @param stringValue the string to be interpreted as integer
+	 * @param defaultValue the default integer value
+	 * @return the integer value
+	 */
+	private static int intValueOf(String stringValue, int defaultValue) {
+		try {
+			if (stringValue != null)
+				return Integer.valueOf(stringValue).intValue();
+		} catch (NumberFormatException e) {
+			// use default
+		}
+		return defaultValue;
+	}
+
+	/**
 	 * @return number of warm-up runs, must have been set before
 	 */
 	protected final int getWarmUpRuns() {
 		assertTrue(fCustomWarmUpRuns >= 0);
-		if (USE_DEFAULT_RUNS)
-			return DEFAULT_WARM_UP_RUNS;
+		if (OVERRIDE_RUNS)
+			return OVERRIDE_WARM_UP_RUNS;
 		return fCustomWarmUpRuns;
 	}
 	
 	/**
-	 * Sets the number of warm-up runs. Can be overruled.
+	 * Sets the number of warm-up runs. Can be overridden.
 	 * 
 	 * @param runs number of warm-up runs
 	 */
@@ -73,13 +108,13 @@ public class TextPerformanceTestCase extends TestCase {
 	 */
 	protected final int getMeasuredRuns() {
 		assertTrue(fCustomMeasuredRuns >= 0);
-		if (USE_DEFAULT_RUNS)
-			return DEFAULT_MEASURED_RUNS;
+		if (OVERRIDE_RUNS)
+			return OVERRIDE_MEASURED_RUNS;
 		return fCustomMeasuredRuns;
 	}
 	
 	/**
-	 * Sets the number of measured runs. Can be overruled.
+	 * Sets the number of measured runs. Can be overridden.
 	 * 
 	 * @param runs number of measured runs
 	 */
