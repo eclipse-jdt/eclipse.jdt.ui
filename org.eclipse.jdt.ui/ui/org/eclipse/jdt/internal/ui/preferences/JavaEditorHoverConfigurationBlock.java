@@ -286,10 +286,11 @@ class JavaEditorHoverConfigurationBlock {
 					if (id.equals(descriptors[i].getId())) {
 						fHoverConfigs[i].fIsEnabled= event.getChecked();
 						fModifierEditor.setEnabled(event.getChecked());
-						return;
+						break;
 					}
 					i++;
 				}
+				updateStatus();
 			}
 		});
 		
@@ -407,6 +408,8 @@ class JavaEditorHoverConfigurationBlock {
 	void initializeFields() {
 		fShowHoverAffordanceCheckbox.setSelection(fStore.getBoolean(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE));
 
+		fModifierEditor.setEnabled(false);
+		
 		Iterator e= fCheckBoxes.keySet().iterator();
 		while (e.hasNext()) {
 			Button b= (Button) e.next();
@@ -445,6 +448,7 @@ class JavaEditorHoverConfigurationBlock {
 	void performDefaults() {
 		restoreFromPreferences();
 		initializeFields();
+		fHoverTableViewer.refresh();
 	}
 
 	private void restoreFromPreferences() {
@@ -520,8 +524,11 @@ class JavaEditorHoverConfigurationBlock {
 	private void handleHoverListSelection() {	
 		int i= fHoverTable.getSelectionIndex();
 		
-		if (i < 0)
+		if (i < 0) {
+			if (fHoverTable.getSelectionCount() == 0)
+				fModifierEditor.setEnabled(false);
 			return;
+		}
 		
 		boolean enabled= fHoverConfigs[i].fIsEnabled;
 		fModifierEditor.setEnabled(enabled);
