@@ -399,7 +399,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 		if (binding != null && binding.isFromSource()) {
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, binding);
-			if (targetCU != null && JavaModelUtil.isEditable(targetCU)) {			
+			if (targetCU != null) {			
 				String label;
 				Image image;
 				if (cu.equals(targetCU)) {
@@ -480,7 +480,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 		if (targetBinding != null && targetBinding.isFromSource()) {
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, targetBinding);
-			if (targetCU != null && JavaModelUtil.isEditable(targetCU)) {
+			if (targetCU != null) {
 				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconstructor.description", targetBinding.getName()); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 				proposals.add(new NewMethodCompletionProposal(label, targetCU, selectedNode, arguments, targetBinding, 1, image));

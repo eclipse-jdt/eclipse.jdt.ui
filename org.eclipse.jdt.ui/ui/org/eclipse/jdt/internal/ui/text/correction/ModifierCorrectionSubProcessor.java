@@ -12,7 +12,6 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -97,7 +96,7 @@ public class ModifierCorrectionSubProcessor {
 				return;
 			}
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), typeBinding);
-			if (targetCU != null && JavaModelUtil.isEditable(targetCU)) {
+			if (targetCU != null) {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, binding, selectedNode, includedModifiers, excludedModifiers, 0, image));
 			}
@@ -334,10 +333,6 @@ public class ModifierCorrectionSubProcessor {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= context.getCoveringNode();
-		
-		
-		
-		
 		if (!(selectedNode instanceof SimpleName)) {
 			return;
 		}

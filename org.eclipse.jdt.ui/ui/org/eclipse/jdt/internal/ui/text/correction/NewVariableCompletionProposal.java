@@ -14,9 +14,11 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IEditorPart;
@@ -28,6 +30,8 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
@@ -245,8 +249,16 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 			
 			IEditorPart part= null;
 			if (fIsInDifferentCU) {
+				ICompilationUnit unit= getCompilationUnit();
+				IStatus status= Resources.makeCommittable(JavaModelUtil.toOriginal(unit).getResource(), null);
+				if (!status.isOK()) {
+					String label= CorrectionMessages.getString("NewVariableCompletionProposal.error.title"); //$NON-NLS-1$
+					String message= CorrectionMessages.getString("NewVariableCompletionProposal.error.message"); //$NON-NLS-1$
+					ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), label, message, status);
+					return;
+				}
 				change.setKeepExecutedTextEdits(true);
-				part= EditorUtility.openInEditor(getCompilationUnit(), true);
+				part= EditorUtility.openInEditor(unit, true);
 			}
 			super.apply(document);
 		
