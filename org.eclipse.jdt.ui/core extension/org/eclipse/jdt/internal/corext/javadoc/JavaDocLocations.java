@@ -11,9 +11,12 @@
 package org.eclipse.jdt.internal.corext.javadoc;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -34,17 +37,8 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
-import org.eclipse.core.runtime.Status;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -62,8 +56,18 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.corext.CorextMessages;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIException;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 public class JavaDocLocations {
 	
@@ -74,8 +78,9 @@ public class JavaDocLocations {
 	private static final String NODE_PATH= "path"; //$NON-NLS-1$
 	private static final String NODE_URL= "url"; //$NON-NLS-1$
 	
+	private static final String STORE_FILE= "javadoclocations.xml"; //$NON-NLS-1$
+	
 	private static final boolean IS_CASE_SENSITIVE = !new File("Temp").equals(new File("temp")); //$NON-NLS-1$ //$NON-NLS-2$
-
 	
 	private static Map fgJavadocLocations= null;
 	private static JavaDocVMInstallListener fgVMInstallListener= null;
@@ -108,11 +113,21 @@ public class JavaDocLocations {
 		return externalPath;
 	}
 
-	private static void setJavadocBaseLocation(IPath path, URL url) {
+	private static void setJavadocBaseLocation(IPath path, URL url, boolean save) {
+		boolean needsSave;
 		if (url == null) {
-			getJavaDocLocations().remove(path);
+			Object old= getJavaDocLocations().remove(path);
+			needsSave= save && (old != null);
 		} else {
-			getJavaDocLocations().put(path, url);
+			Object old= getJavaDocLocations().put(path, url);
+			needsSave= save && !url.equals(old);
+		}
+		if (needsSave) {
+			try {
+				storeLocations();
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
 		}
 	}
 	
@@ -127,14 +142,14 @@ public class JavaDocLocations {
 	 * Sets the Javadoc location for an archive with the given path.
 	 */
 	public static void setLibraryJavadocLocation(IPath archivePath, URL url) {
-		setJavadocBaseLocation(canonicalizedPath(archivePath), url);
+		setJavadocBaseLocation(canonicalizedPath(archivePath), url, true);
 	}
 	
 	/**
 	 * Sets the Javadoc location for an archive with the given path.
 	 */
 	public static void setProjectJavadocLocation(IJavaProject project, URL url) {
-		setJavadocBaseLocation(project.getProject().getFullPath(), url);
+		setJavadocBaseLocation(project.getProject().getFullPath(), url, true);
 	}
 	
 	public static URL getProjectJavadocLocation(IJavaProject project) {
@@ -161,8 +176,83 @@ public class JavaDocLocations {
 			return getProjectJavadocLocation(root.getJavaProject());
 		}	
 	}
-		
-	private static String getLocationsAsXMLString(Map locations) throws CoreException {
+	
+	// loading & storing
+
+	private static File getStoreFile() {
+		IPath path= JavaPlugin.getDefault().getStateLocation();
+		path= path.append(STORE_FILE);
+		return path.toFile();
+	}
+	
+	private static JavaUIException createException(Throwable t, String message) {
+		return new JavaUIException(JavaUIStatus.createError(JavaUIStatus.ERROR, message, t));
+	}	
+
+	private static synchronized void storeLocations() throws CoreException {
+		Writer writer= null;
+		try {
+			writer= new FileWriter(getStoreFile());
+			saveToStream(fgJavadocLocations, writer);
+		} catch (IOException e) {
+			throw createException(e, CorextMessages.getString("JavaDocLocations.error.writeFile")); //$NON-NLS-1$
+		} finally {
+			try {
+				if (writer != null)
+					writer.close();
+			} catch (IOException e) {
+				//	error closing reader: ignore
+			}
+		}
+	}
+	
+	private static boolean loadOldForCompatibility() {
+		// in 2.0, the Javadoc locations were store as one big string im the persistent properties
+		try {
+			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+			String xmlString= root.getPersistentProperty(QUALIFIED_NAME); 
+			if (xmlString != null) { // only set when workspace is old
+				Reader reader= new StringReader(xmlString);
+				try {
+					loadFromStream(reader);
+					root.setPersistentProperty(QUALIFIED_NAME, null); // clear property
+					return true;
+				} finally {
+					try {
+						reader.close();
+					} catch (IOException e) {
+						// error closing reader: ignore
+					}
+				}
+			}
+		} catch (CoreException e) {
+			JavaPlugin.log(e); // log but ignore
+		}
+		return false;
+	}
+	
+	private static boolean loadFromFile() throws CoreException {
+		File file= getStoreFile();
+		if (file.exists()) {
+			Reader reader= null;
+			try {
+				reader= new FileReader(getStoreFile());
+				loadFromStream(reader);
+				return true;
+			} catch (IOException e) {
+				throw createException(e, CorextMessages.getString("JavaDocLocations.error.readFile")); //$NON-NLS-1$
+			} finally {
+				try {
+					if (reader != null)
+					reader.close();
+				} catch (IOException e) {}
+			}
+		}
+		return false;
+	}	
+	
+	
+	private static void saveToStream(Map locations, Writer writer) throws CoreException {
 		Document document = new DocumentImpl();
 		Element rootElement = document.createElement(NODE_ROOT);
 		document.appendChild(rootElement);
@@ -179,33 +269,29 @@ public class JavaDocLocations {
 			rootElement.appendChild(varElement);
 		}
 
-		// produce a String output
-		StringWriter writer = new StringWriter();
 		try {
 			OutputFormat format = new OutputFormat();
 			format.setIndenting(true);
 			Serializer serializer = SerializerFactory.getSerializerFactory(Method.XML).makeSerializer(writer, format);
 			serializer.asDOMSerializer().serialize(document);
 		} catch (IOException e) {
-			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, "Error", e); //$NON-NLS-1$
-			throw new CoreException(status);			
+			throw createException(e, CorextMessages.getString("JavaDocLocations.error.serializeXML")); //$NON-NLS-1$
 		}
-		return writer.toString();			
 	}
 	
-	private static void readVariables(String xmlString) throws IOException {
-		StringReader reader = new StringReader(xmlString);
+	private static void loadFromStream(Reader reader) throws CoreException {
 		Element cpElement;
 		try {
 			DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			cpElement = parser.parse(new InputSource(reader)).getDocumentElement();
 		} catch (SAXException e) {
-			return;
+			throw createException(e, CorextMessages.getString("JavaDocLocations.error.readXML")); //$NON-NLS-1$
 		} catch (ParserConfigurationException e) {
-			return;
-		} finally {
-			reader.close();
+			throw createException(e, CorextMessages.getString("JavaDocLocations.error.readXML")); //$NON-NLS-1$
+		} catch (IOException e) {
+			throw createException(e, CorextMessages.getString("JavaDocLocations.error.readXML")); //$NON-NLS-1$
 		}
+		
 		if (cpElement == null) return;
 		if (!cpElement.getNodeName().equalsIgnoreCase(NODE_ROOT)) {
 			return;
@@ -220,7 +306,11 @@ public class JavaDocLocations {
 				if (element.getNodeName().equalsIgnoreCase(NODE_ENTRY)) {
 					String varPath = element.getAttribute(NODE_PATH);
 					String varURL = element.getAttribute(NODE_URL);
-					setJavadocBaseLocation(new Path(varPath), new URL(varURL));
+					try {
+						setJavadocBaseLocation(new Path(varPath), new URL(varURL), false);
+					} catch (MalformedURLException e) {
+						throw createException(e, CorextMessages.getString("JavaDocLocations.error.readXML")); //$NON-NLS-1$
+					}
 				}
 			}
 		}
@@ -228,33 +318,25 @@ public class JavaDocLocations {
 	
 	
 	public static void shutdownJavadocLocations() throws CoreException {
-		if (fgJavadocLocations == null) {
+		if (fgVMInstallListener == null) {
 			return;
 		}
-		
-		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		String xmlString= getLocationsAsXMLString(fgJavadocLocations);
-		root.setPersistentProperty(QUALIFIED_NAME, xmlString);
-		
 		fgVMInstallListener.remove();
 		fgVMInstallListener= null;
-		fgJavadocLocations= null;
+		fgJavadocLocations= null;			
 	}
 	
-	private static void initJavadocLocations() throws CoreException {
-		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		String xmlString= root.getPersistentProperty(QUALIFIED_NAME); 
-		if (xmlString != null) {
-			try {
-				readVariables(xmlString);
-			} catch (IOException e) {
-				IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, "Error", e); //$NON-NLS-1$
-				throw new CoreException(status);
+	private static synchronized void initJavadocLocations() throws CoreException {
+		try {
+			if (loadOldForCompatibility()) {
+				storeLocations();
+			} else {
+				loadFromFile();
 			}
-		}
-		
-		fgVMInstallListener= new JavaDocVMInstallListener();
-		fgVMInstallListener.init();		
+		} finally {
+			fgVMInstallListener= new JavaDocVMInstallListener();
+			fgVMInstallListener.init();	
+		}			
 	}
 	
 	public static URL getJavadocLocation(IJavaElement element, boolean includeMemberReference) throws JavaModelException {
