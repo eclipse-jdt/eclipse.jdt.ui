@@ -89,6 +89,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommand;
 import org.eclipse.ui.commands.ICommandManager;
 import org.eclipse.ui.commands.IKeySequenceBinding;
+import org.eclipse.ui.contexts.IWorkbenchContextSupport;
 import org.eclipse.ui.keys.KeySequence;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -156,6 +157,8 @@ public abstract class AbstractInformationControl implements IInformationControl,
 
 		/**
 		 * Creates a fill layout with a border.
+		 * 
+		 * @param borderSize the border size
 		 */
 		public BorderFillLayout(int borderSize) {
 			if (borderSize < 0)
@@ -165,6 +168,8 @@ public abstract class AbstractInformationControl implements IInformationControl,
 
 		/**
 		 * Returns the border size.
+		 * 
+		 * @return the border size
 		 */
 		public int getBorderSize() {
 			return fBorderSize;
@@ -635,11 +640,11 @@ public abstract class AbstractInformationControl implements IInformationControl,
 
 		// Remember current scope and then remove it.
 		fKeyBindingScopes= fKeyBindingService.getScopes();
-		fKeyBindingService.setScopes(new String[] {});
+//		fKeyBindingService.setScopes(new String[] {});
 		
 		// Register shell with key binding support
 		IWorkbench workbench= PlatformUI.getWorkbench();
-		workbench.getCommandSupport().registerForKeyBindings(fShell, false);
+		workbench.getContextSupport().registerShell(fShell, IWorkbenchContextSupport.TYPE_WINDOW | IWorkbenchContextSupport.TYPE_DIALOG);
 		
 		// Register action with key binding service
 		fShowViewMenuAction= new Action("showViewMenu") { //$NON-NLS-1$
@@ -762,6 +767,8 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 *   ? => any character
 	 *   * => any string
 	 * </p>
+	 * 
+	 * @param pattern the pattern
 	 */
 	protected void setMatcherString(String pattern) {
 		if (pattern.length() == 0) {
@@ -779,6 +786,8 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	
 	/**
 	 * Implementers can modify
+	 * 
+	 * @return the selected element
 	 */
 	protected Object getSelectedElement() {
 		if (fTreeViewer == null)
