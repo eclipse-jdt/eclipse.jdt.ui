@@ -294,7 +294,7 @@ public final class WhiteSpaceOptions {
     
     private final static PreviewSnippet WILDCARD_PREVIEW= new PreviewSnippet(
             CodeFormatter.K_CLASS_BODY_DECLARATIONS,
-            "Map<? extends K, ? super V> t;" //$NON-NLS-1$
+            "Map<X<?>, Y<? extends K, ? super V>> t;" //$NON-NLS-1$
         );
     
     
