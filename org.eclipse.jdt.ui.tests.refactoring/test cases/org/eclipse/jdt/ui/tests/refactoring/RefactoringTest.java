@@ -41,9 +41,9 @@ import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -359,15 +359,13 @@ public abstract class RefactoringTest extends TestCase {
 	
 	public static void performDummySearch(IJavaElement element) throws Exception{
 		new SearchEngine().searchAllTypeNames(
-			ResourcesPlugin.getWorkspace(),
-			null,
-			null,
-			SearchPattern.R_EXACT_MATCH,
-			true,
-			IJavaSearchConstants.CLASS,
-			SearchEngine.createJavaSearchScope(new IJavaElement[]{element}),
-			new Requestor(),
-			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+			null, 
+			"XXXXXXXXX".toCharArray(), // make sure we search a concrete name. This is faster according to Kent 
+			SearchPattern.R_EXACT_MATCH, 
+			IJavaSearchConstants.CLASS, 
+			SearchEngine.createJavaSearchScope(new IJavaElement[]{element}), 
+			new Requestor(), 
+			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
 			null);
 	}
 	
@@ -496,12 +494,6 @@ public abstract class RefactoringTest extends TestCase {
 		assertEquals(message, expected2, actual2);		
 	}
 	
-	private static class Requestor implements ITypeNameRequestor{
-		
-		public void acceptClass(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
-		}
-
-		public void acceptInterface(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
-		}
+	private static class Requestor extends TypeNameRequestor {
 	}
 }
