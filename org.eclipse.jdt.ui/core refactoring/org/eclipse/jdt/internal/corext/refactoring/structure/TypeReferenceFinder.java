@@ -16,7 +16,7 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 
-public class TypeReferenceFinder {
+class TypeReferenceFinder {
 
 	public static ISourceRange[] findTypeReferenceRanges(SearchResult[] searchResults, ICompilationUnit cu) throws JavaModelException {
 		Assert.isNotNull(searchResults);
