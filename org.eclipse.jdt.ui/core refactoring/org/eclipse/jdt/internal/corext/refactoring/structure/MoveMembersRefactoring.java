@@ -564,7 +564,7 @@ public class MoveMembersRefactoring extends Refactoring {
 		ISourceRange[] ranges= (ISourceRange[]) accessModifications.keySet().toArray(new ISourceRange[accessModifications.keySet().size()]);
 		ISourceRange[] sortedRanges= SourceRange.reverseSortByOffset(ranges);
 		
-		ISourceRange originalRange= SourceReferenceSourceRangeComputer.computeSourceRange(member, member.getCompilationUnit());
+		ISourceRange originalRange= SourceReferenceSourceRangeComputer.computeSourceRange(member, member.getCompilationUnit().getSource());
 		
 		for (int i= 0; i < sortedRanges.length; i++) {
 			int start= sortedRanges[i].getOffset() - originalRange.getOffset();

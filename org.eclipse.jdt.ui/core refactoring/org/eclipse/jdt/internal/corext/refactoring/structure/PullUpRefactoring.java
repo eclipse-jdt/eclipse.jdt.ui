@@ -777,7 +777,7 @@ public class PullUpRefactoring extends Refactoring {
 		ISourceRange[] superRefOffsert= SourceRange.reverseSortByOffset(SuperReferenceFinder.findSuperReferenceRanges(method));
 		
 		StringBuffer source= new StringBuffer(SourceReferenceSourceRangeComputer.computeSource(method));
-		ISourceRange originalMethodRange= SourceReferenceSourceRangeComputer.computeSourceRange(method, method.getCompilationUnit());
+		ISourceRange originalMethodRange= SourceReferenceSourceRangeComputer.computeSourceRange(method, method.getCompilationUnit().getSource());
 		
 		for (int i= 0; i < superRefOffsert.length; i++) {
 			int start= superRefOffsert[i].getOffset() - originalMethodRange.getOffset();
