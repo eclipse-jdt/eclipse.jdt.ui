@@ -14,17 +14,23 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 public class TypeHandle {
 	
 	private String fTypeKey;
+	private final String fQualifiedName;
 	//TODO: type parameters, array component types
 	
-	TypeHandle(String typeKey) {
+	TypeHandle(String typeKey, String qualifiedName) {
 		fTypeKey= typeKey;
+		fQualifiedName= qualifiedName;
 	}
 	
 	public String getTypeKey() {
 		return fTypeKey;
 	}
 	
-	//TODO: JLS3: 4.9 Subtyping. (Maybe on BindingHandleFactory)
+	public String getQualifiedName() {
+		return fQualifiedName;
+	}
+	
+	//TODO: JLS3: 4.9 Subtyping. (Maybe on TypeHandleFactory)
 	// isSupertype
 	// isProperSupertype
 	// isDirectSupertype

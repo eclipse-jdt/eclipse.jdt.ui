@@ -22,7 +22,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -38,6 +37,7 @@ public class GenericizeContainerClientsRefactoring extends Refactoring {
 
 	private TextChangeManager fChangeManager;
 	private final IJavaElement[] fElements;
+	private GenericizeContainerClientsAnalyzer fAnalyzer;
 	
 	private GenericizeContainerClientsRefactoring(IJavaElement[] elements) {
 		fElements= elements;
@@ -76,8 +76,8 @@ public class GenericizeContainerClientsRefactoring extends Refactoring {
 		pm.beginTask(RefactoringCoreMessages.getString("GenericizeContainerClientsRefactoring.checking_preconditions"), 1); //$NON-NLS-1$
 		try {
 			RefactoringStatus result= check15();
-			
-			searchContainerReferences(pm, result);
+			fAnalyzer= new GenericizeContainerClientsAnalyzer(fElements);
+			fAnalyzer.analyzeContainerReferences(pm, result);
 			
 //			result.merge(performAnalysis(pm));
 			
@@ -136,13 +136,6 @@ public class GenericizeContainerClientsRefactoring extends Refactoring {
 //		return new RefactoringStatus();
 //	}
 
-	private void searchContainerReferences(IProgressMonitor pm, RefactoringStatus result) throws JavaModelException {
-		GenericContainers.create(fElements[0].getJavaProject(), pm);
-		
-//		SearchPattern pattern= null;
-//		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(fElements, IJavaSearchScope.SOURCES);
-//		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, searchScope, pm, result);
-	}
 	
 
 	/*
@@ -150,8 +143,10 @@ public class GenericizeContainerClientsRefactoring extends Refactoring {
 	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		pm.beginTask("", 1); //$NON-NLS-1$
-		try{
-			return new DynamicValidationStateChange(RefactoringCoreMessages.getString("Change.javaChanges"), fChangeManager.getAllChanges()); //$NON-NLS-1$
+		try {
+			DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.getString("Change.javaChanges"), fChangeManager.getAllChanges()); //$NON-NLS-1$
+			fAnalyzer= null; // free memory
+			return result;
 		} finally{
 			pm.done();
 			//TODO: clear caches

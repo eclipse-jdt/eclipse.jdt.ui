@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 public class TypeHandleFactory {
 
-	HashMap fKeyToTypeHandle; // WeakHashMap wouldn't work if TypeHandle holds a reference to key
+	HashMap/*<String, TypeHandle>*/ fKeyToTypeHandle; // WeakHashMap wouldn't work if TypeHandle holds a reference to key
 	
 	public TypeHandleFactory() {
 		fKeyToTypeHandle= new HashMap();
@@ -31,7 +31,7 @@ public class TypeHandleFactory {
 			return stored;
 		
 		//TODO: create supertype, array component, and type parameter TypeHandles
-		stored= new TypeHandle(key);
+		stored= new TypeHandle(key, typeBinding.getQualifiedName());
 		fKeyToTypeHandle.put(key, stored);
 		return stored;
 	}

@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 
-public abstract class ConstraintVariable {
+public abstract class ConstraintVariable2 {
 	
 	protected static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/TypeConstraints")); //$NON-NLS-1$//$NON-NLS-2$
 	protected static final String TO_STRING= "toString"; //$NON-NLS-1$
@@ -34,7 +34,7 @@ public abstract class ConstraintVariable {
 	/**
 	 * @param typeHandle the type binding, or <code>null</code>
 	 */
-	protected ConstraintVariable(TypeHandle typeHandle, ITypeBinding typeBinding) {
+	protected ConstraintVariable2(TypeHandle typeHandle, ITypeBinding typeBinding) {
 		if (typeHandle != null) {
 			fTypeHandle= typeHandle;
 		}
@@ -42,7 +42,7 @@ public abstract class ConstraintVariable {
 			setData(TO_STRING, Bindings.asString(typeBinding));
 	}
 	
-	public TypeHandle getTypeBinding() {
+	public TypeHandle getTypeHandle() {
 		return fTypeHandle;
 	}
 	
@@ -92,4 +92,7 @@ public abstract class ConstraintVariable {
 		return toString == null ? fTypeHandle.getTypeKey() : toString;
 	}
 	
+	protected abstract int getHash();
+	
+	protected abstract boolean isSameAs(ConstraintVariable2 other);
 }
