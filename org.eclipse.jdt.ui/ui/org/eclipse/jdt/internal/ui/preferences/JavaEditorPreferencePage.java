@@ -25,6 +25,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -377,17 +378,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		colorComposite.setLayout(new GridLayout());
 
 		Composite backgroundComposite= new Composite(colorComposite, SWT.NULL);
-		GridLayout layout= new GridLayout();
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		layout.numColumns= 2;
-		backgroundComposite.setLayout(layout);
+		backgroundComposite.setLayout(new RowLayout());
 
 		Label label= new Label(backgroundComposite, SWT.NULL);
 		label.setText(JavaUIMessages.getString("JavaEditorPreferencePage.backgroundColor")); //$NON-NLS-1$
-		GridData gd= new GridData();
-		gd.horizontalSpan= 2;
-		label.setLayoutData(gd);
 
 		SelectionListener backgroundSelectionListener= new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {				
@@ -400,9 +394,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		fBackgroundDefaultRadioButton= new Button(backgroundComposite, SWT.RADIO | SWT.LEFT);
 		fBackgroundDefaultRadioButton.setText(JavaUIMessages.getString("JavaEditorPreferencePage.systemDefault")); //$NON-NLS-1$
-		gd= new GridData();
-		gd.horizontalSpan= 2;
-		fBackgroundDefaultRadioButton.setLayoutData(gd);
 		fBackgroundDefaultRadioButton.addSelectionListener(backgroundSelectionListener);
 
 		fBackgroundCustomRadioButton= new Button(backgroundComposite, SWT.RADIO | SWT.LEFT);
@@ -411,21 +402,18 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		fBackgroundColorEditor= new ColorEditor(backgroundComposite);
 		fBackgroundColorButton= fBackgroundColorEditor.getButton();
-		gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalAlignment= GridData.BEGINNING;
-		fBackgroundColorButton.setLayoutData(gd);
 
 		label= new Label(colorComposite, SWT.LEFT);
 		label.setText(JavaUIMessages.getString("JavaEditorPreferencePage.foreground")); //$NON-NLS-1$
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Composite editorComposite= new Composite(colorComposite, SWT.NONE);
-		layout= new GridLayout();
+		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		editorComposite.setLayout(layout);
-		gd= new GridData(GridData.FILL_BOTH);
+		GridData gd= new GridData(GridData.FILL_BOTH);
 		editorComposite.setLayoutData(gd);		
 
 		fSyntaxColorList= new List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
