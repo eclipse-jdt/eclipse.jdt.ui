@@ -13,12 +13,14 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.jface.action.IMenuManager;
 
+import org.eclipse.ui.editors.text.EncodingActionGroup;
+
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.RetargetAction;
-import org.eclipse.ui.editors.text.EncodingActionGroup;
+import org.eclipse.ui.ide.IDEActionFactory;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
@@ -91,6 +93,9 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 		IActionBars actionBars= getActionBars();
 		actionBars.setGlobalActionHandler(JdtActionConstants.SHIFT_RIGHT, getAction(textEditor, "ShiftRight")); //$NON-NLS-1$
 		actionBars.setGlobalActionHandler(JdtActionConstants.SHIFT_LEFT, getAction(textEditor, "ShiftLeft")); //$NON-NLS-1$
+
+		actionBars.setGlobalActionHandler(IDEActionFactory.ADD_TASK.getId(), getAction(textEditor, IDEActionFactory.ADD_TASK.getId())); //$NON-NLS-1$
+		actionBars.setGlobalActionHandler(IDEActionFactory.BOOKMARK.getId(), getAction(textEditor, IDEActionFactory.BOOKMARK.getId())); //$NON-NLS-1$
 		
 		// character encoding
 		fEncodingActionGroup.retarget(textEditor);

@@ -486,8 +486,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		 *	setAction(ITextEditorActionConstants.RULER_MANAGE_BOOKMARKS, new ClassFileMarkerRulerAction("ManageBookmarks.", getVerticalRuler(), this, IMarker.BOOKMARK, true)); //$NON-NLS-1$
 		 *	setAction(ITextEditorActionConstants.RULER_MANAGE_TASKS, new ClassFileMarkerRulerAction("ManageTasks.", getVerticalRuler(), this, IMarker.TASK, true)); //$NON-NLS-1$
 		 */
-		setAction(ITextEditorActionConstants.BOOKMARK, null);
-		setAction(ITextEditorActionConstants.ADD_TASK, null);		
 	}
 	
 	/*
