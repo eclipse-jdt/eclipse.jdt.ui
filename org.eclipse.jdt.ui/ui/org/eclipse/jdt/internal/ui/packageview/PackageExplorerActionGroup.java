@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.packageview;
 
 import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -25,8 +24,6 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -40,9 +37,7 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.actions.MoveResourceAction;
 import org.eclipse.ui.actions.OpenInNewWindowAction;
-import org.eclipse.ui.actions.RenameResourceAction;
 import org.eclipse.ui.views.framelist.BackAction;
 import org.eclipse.ui.views.framelist.ForwardAction;
 import org.eclipse.ui.views.framelist.FrameAction;
@@ -54,6 +49,10 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IOpenable;
+
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
@@ -69,11 +68,7 @@ import org.eclipse.jdt.ui.actions.NavigateActionGroup;
 import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
-import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
-import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
-
-class PackageExplorerActionGroup extends CompositeActionGroup implements ISelectionChangedListener {
+class PackageExplorerActionGroup extends CompositeActionGroup {
 
 	private PackageExplorerPart fPart;
 
@@ -85,20 +80,14 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	private GotoPackageAction fGotoPackageAction;
 	private GotoResourceAction fGotoResourceAction;
 	private CollapseAllAction fCollapseAllAction;
-	private RenameResourceAction fRenameResourceAction;
-	private MoveResourceAction fMoveResourceAction;
 	
 	private ToggleLinkingAction fToggleLinkingAction;
 
+	private RefactorActionGroup fRefactorActionGroup;
 	private NavigateActionGroup fNavigateActionGroup;
 	private WorkingSetFilterActionGroup fWorkingSetFilterActionGroup;
 	
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;	
-
-	private int fLastElement;
-	private static final int INIT= 0;
-	private static final int RESOURCE= 1;
-	private static final int REST= 2; 
  	
 	public PackageExplorerActionGroup(PackageExplorerPart part) {
 		super();
@@ -113,14 +102,12 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		
 		IWorkbenchPartSite site = fPart.getSite();
 		Shell shell= site.getShell();
-		ISelectionProvider provider= site.getSelectionProvider();
-		IStructuredSelection selection= (IStructuredSelection) provider.getSelection();
 		setGroups(new ActionGroup[] {
 			new NewWizardsActionGroup(site),
 			fNavigateActionGroup= new NavigateActionGroup(fPart), 
 			new CCPActionGroup(fPart),
 			new GenerateActionGroup(fPart), 
-			new RefactorActionGroup(fPart),
+			fRefactorActionGroup= new RefactorActionGroup(fPart),
 			new ImportActionGroup(fPart),
 			new BuildActionGroup(fPart),
 			new JavaSearchActionGroup(fPart),
@@ -142,56 +129,17 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		fForwardAction= new ForwardAction(frameList);
 		fUpAction= new UpAction(frameList);
 		
-		fRenameResourceAction= new RenameResourceAction(shell);		
-		fMoveResourceAction= new MoveResourceAction(shell);
-		
 		fGotoTypeAction= new GotoTypeAction(fPart);
 		fGotoPackageAction= new GotoPackageAction(fPart);
 		fGotoResourceAction= new GotoResourceAction(fPart);
 		fCollapseAllAction= new CollapseAllAction(fPart);	
 		fToggleLinkingAction = new ToggleLinkingAction(fPart); 
-
-		provider.addSelectionChangedListener(this);
-		update(selection);
-		
-		fLastElement= INIT;
 	}
 
 	public void dispose() {
-		ISelectionProvider provider= fPart.getSite().getSelectionProvider();
-		provider.removeSelectionChangedListener(this);
 		super.dispose();
 	}
 	
-	//---- Selection changed listener ---------------------------------------------------------
-	
-	public void selectionChanged(SelectionChangedEvent event) {
-		fRenameResourceAction.selectionChanged(event);
-		fMoveResourceAction.selectionChanged(event);
-		IStructuredSelection selection= (IStructuredSelection)event.getSelection();
-		update(selection);
-	}
-
-	private void update(IStructuredSelection selection) {
-		int size= selection.size();
-		Object element= selection.getFirstElement();
-		IActionBars actionBars= fPart.getViewSite().getActionBars();
-		if (size == 1 && element instanceof IResource) {
-			if (fLastElement != RESOURCE) {		// fLastAction in a work around for http://bugs.eclipse.org/bugs/show_bug.cgi?id=30508
-				actionBars.setGlobalActionHandler(ActionFactory.RENAME.getId(), fRenameResourceAction);
-				actionBars.setGlobalActionHandler(ActionFactory.MOVE.getId(), fMoveResourceAction);
-				actionBars.updateActionBars();
-				fLastElement= RESOURCE;
-			}
-		} else {
-			if (fLastElement != REST) {
-				actionBars.setGlobalActionHandler(ActionFactory.RENAME.getId(), null);
-				actionBars.setGlobalActionHandler(ActionFactory.MOVE.getId(), null);
-				actionBars.updateActionBars();
-				fLastElement= REST;
-			}
-		}
-	}
 
 	//---- Persistent state -----------------------------------------------------------------------
 
@@ -231,6 +179,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.GO_TO_RESOURCE, fGotoResourceAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.GOTO_TYPE, fGotoTypeAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.GOTO_PACKAGE, fGotoPackageAction);
+		
+		fRefactorActionGroup.retargetFileMenuActions(actionBars);
 	}
 
 	/* package */ void fillToolBar(IToolBarManager toolBar) {

@@ -36,6 +36,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 
@@ -380,6 +381,16 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.USE_SUPERTYPE, fUseSupertypeAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_LOCAL_TO_FIELD, fConvertLocalToFieldAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_ANONYMOUS_TO_NESTED, fConvertAnonymousToNestedAction);
+	}
+	
+	/**
+	 * Retargets the File actions with the corresponding refactoring actions.
+	 * 
+	 * @param actionBars the action bar to register the move and rename action with
+	 */
+	public void retargetFileMenuActions(IActionBars actionBars) {
+		actionBars.setGlobalActionHandler(ActionFactory.RENAME.getId(), fRenameAction);
+		actionBars.setGlobalActionHandler(ActionFactory.MOVE.getId(), fMoveAction);
 	}
 	
 	/* (non-Javadoc)
