@@ -29,6 +29,7 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ListRewriter;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
@@ -48,7 +49,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 	}
 	
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
@@ -331,15 +332,14 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			assertTrue("must be 3 parameters", parameters.size() == 3);
 
 			SingleVariableDeclaration newParam= createNewParam(ast, "m");
-			parameters.add(0, newParam);
-			rewrite.markAsInserted(newParam);
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.PARAMETERS).insertFirst(newParam, null);
 
 			List thrownExceptions= methodDecl.thrownExceptions();
 			assertTrue("must be 0 thrown exceptions", thrownExceptions.size() == 0);
 			
 			Name newThrownException= ast.newSimpleName("InterruptedException");
-			thrownExceptions.add(newThrownException);
-			rewrite.markAsInserted(newThrownException);
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS).insertFirst(newThrownException, null);
+
 		}
 		{ // insert before second param & insert before first exception & add synchronized
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "gee");
@@ -351,16 +351,16 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			List parameters= methodDecl.parameters();
 			assertTrue("must be 3 parameters", parameters.size() == 3);
 
+			ASTNode secondParam= (ASTNode) parameters.get(1);
 			SingleVariableDeclaration newParam= createNewParam(ast, "m");
-			parameters.add(1, newParam);
-			rewrite.markAsInserted(newParam);
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.PARAMETERS).insertBefore(newParam, secondParam, null);
 
 			List thrownExceptions= methodDecl.thrownExceptions();
 			assertTrue("must be 1 thrown exceptions", thrownExceptions.size() == 1);
 			
+			ASTNode firstException= (ASTNode) thrownExceptions.get(0);
 			Name newThrownException= ast.newSimpleName("InterruptedException");
-			thrownExceptions.add(0, newThrownException);
-			rewrite.markAsInserted(newThrownException);
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS).insertBefore(newThrownException, firstException, null);
 		}		
 		{ // insert after last param & insert after first exception & add synchronized, static
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "hee");
@@ -371,56 +371,59 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			
 			List parameters= methodDecl.parameters();
 			assertTrue("must be 3 parameters", parameters.size() == 3);
-
+			
 			SingleVariableDeclaration newParam= createNewParam(ast, "m");
-			parameters.add(newParam);
-			rewrite.markAsInserted(newParam);
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.PARAMETERS).insertLast(newParam, null);
 
 			List thrownExceptions= methodDecl.thrownExceptions();
 			assertTrue("must be 1 thrown exceptions", thrownExceptions.size() == 1);
 			
+			ASTNode firstException= (ASTNode) thrownExceptions.get(0);
 			Name newThrownException= ast.newSimpleName("InterruptedException");
-			thrownExceptions.add(newThrownException);
-			rewrite.markAsInserted(newThrownException);
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS).insertAfter(newThrownException, firstException, null);
+
 		}				
 		{ // insert 2 params before first & insert between two exception
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "iee");
 			List parameters= methodDecl.parameters();
 			assertTrue("must be 3 parameters", parameters.size() == 3);
 
+			ASTNode firstParam= (ASTNode) parameters.get(0);
+			
 			SingleVariableDeclaration newParam1= createNewParam(ast, "m1");
 			SingleVariableDeclaration newParam2= createNewParam(ast, "m2");
-			parameters.add(0, newParam1);
-			parameters.add(1, newParam2);
-			rewrite.markAsInserted(newParam1);
-			rewrite.markAsInserted(newParam2);
+			
+			ListRewriter listRewrite = rewrite.getListRewrite(methodDecl, ASTNodeConstants.PARAMETERS);
+			listRewrite.insertBefore(newParam1, firstParam, null);
+			listRewrite.insertBefore(newParam2, firstParam, null);
 
 			List thrownExceptions= methodDecl.thrownExceptions();
 			assertTrue("must be 2 thrown exceptions", thrownExceptions.size() == 2);
 			
+			ASTNode firstException= (ASTNode) thrownExceptions.get(0);
 			Name newThrownException= ast.newSimpleName("InterruptedException");
-			thrownExceptions.add(1, newThrownException);
-			rewrite.markAsInserted(newThrownException);
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS).insertAfter(newThrownException, firstException, null);
 		}			
 		{ // insert 2 params after first & replace the second exception and insert new after
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "jee");
 			List parameters= methodDecl.parameters();
 			assertTrue("must be 3 parameters", parameters.size() == 3);
 
+			ListRewriter listRewrite = rewrite.getListRewrite(methodDecl, ASTNodeConstants.PARAMETERS);
+
+			ASTNode firstParam= (ASTNode) parameters.get(0);
+			
 			SingleVariableDeclaration newParam1= createNewParam(ast, "m1");
 			SingleVariableDeclaration newParam2= createNewParam(ast, "m2");
-			parameters.add(1, newParam1);
-			parameters.add(2, newParam2);
-			rewrite.markAsInserted(newParam1);
-			rewrite.markAsInserted(newParam2);
+			listRewrite.insertAfter(newParam2, firstParam, null);
+			listRewrite.insertAfter(newParam1, firstParam, null);
 
 			List thrownExceptions= methodDecl.thrownExceptions();
 			assertTrue("must be 2 thrown exceptions", thrownExceptions.size() == 2);
 			
 			Name newThrownException1= ast.newSimpleName("InterruptedException");
-			thrownExceptions.add(newThrownException1);
-			rewrite.markAsInserted(newThrownException1);
-			
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS).insertLast(newThrownException1, null);
+
 			Name newThrownException2= ast.newSimpleName("ArrayStoreException");
 			rewrite.markAsReplaced((ASTNode) thrownExceptions.get(1), newThrownException2);
 		}
@@ -429,43 +432,47 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			List parameters= methodDecl.parameters();
 			assertTrue("must be 3 parameters", parameters.size() == 3);
 
+			ListRewriter listRewrite= rewrite.getListRewrite(methodDecl, ASTNodeConstants.PARAMETERS);
+			ASTNode lastParam= (ASTNode) parameters.get(2);
+			
 			SingleVariableDeclaration newParam1= createNewParam(ast, "m1");
 			SingleVariableDeclaration newParam2= createNewParam(ast, "m2");
-			parameters.add(newParam1);
-			parameters.add(newParam2);
-			rewrite.markAsInserted(newParam1);
-			rewrite.markAsInserted(newParam2);
+
+			listRewrite.insertAfter(newParam2, lastParam, null);
+			listRewrite.insertAfter(newParam1, lastParam, null);
 			
 			List thrownExceptions= methodDecl.thrownExceptions();
 			assertTrue("must be 3 thrown exceptions", thrownExceptions.size() == 3);
 			
-			Name newThrownException= ast.newSimpleName("InterruptedException");
-			thrownExceptions.add(newThrownException);
-			rewrite.markAsInserted(newThrownException);
+			ASTNode lastException= (ASTNode) thrownExceptions.get(2);
+			rewrite.markAsRemoved(lastException);
 			
-			rewrite.markAsRemoved((ASTNode) thrownExceptions.get(2));			
+			Name newThrownException= ast.newSimpleName("InterruptedException");
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS).insertBefore(newThrownException, lastException, null);
 		}	
 		{ // insert at first and last position & remove 2nd, add after 2nd, remove 3rd
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "lee");
 			List parameters= methodDecl.parameters();
 			assertTrue("must be 3 parameters", parameters.size() == 3);
 
+			ListRewriter listRewrite= rewrite.getListRewrite(methodDecl, ASTNodeConstants.PARAMETERS);
+			
 			SingleVariableDeclaration newParam1= createNewParam(ast, "m1");
 			SingleVariableDeclaration newParam2= createNewParam(ast, "m2");
-			parameters.add(0, newParam1);
-			parameters.add(newParam2);
-			rewrite.markAsInserted(newParam1);
-			rewrite.markAsInserted(newParam2);
+			listRewrite.insertFirst(newParam1, null);
+			listRewrite.insertLast(newParam2, null);
 			
 			List thrownExceptions= methodDecl.thrownExceptions();
 			assertTrue("must be 3 thrown exceptions", thrownExceptions.size() == 3);
 			
-			rewrite.markAsRemoved((ASTNode) thrownExceptions.get(1));
-			rewrite.markAsRemoved((ASTNode) thrownExceptions.get(2));
+			ASTNode secondException= (ASTNode) thrownExceptions.get(1);
+			ASTNode lastException= (ASTNode) thrownExceptions.get(2);
+			rewrite.markAsRemoved(secondException);
+			rewrite.markAsRemoved(lastException);
 			
 			Name newThrownException= ast.newSimpleName("InterruptedException");
-			thrownExceptions.add(2, newThrownException);
-			rewrite.markAsInserted(newThrownException);			
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS).insertAfter(newThrownException, secondException, null);
+
 		}				
 
 
@@ -509,12 +516,12 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			List parameters= methodDecl.parameters();
 			assertTrue("must be 3 parameters", parameters.size() == 3);
 
+			ListRewriter listRewrite= rewrite.getListRewrite(methodDecl, ASTNodeConstants.PARAMETERS);
+			
 			SingleVariableDeclaration newParam1= createNewParam(ast, "m1");
 			SingleVariableDeclaration newParam2= createNewParam(ast, "m2");
-			parameters.add(0, newParam1);
-			parameters.add(newParam2);
-			rewrite.markAsInserted(newParam1);
-			rewrite.markAsInserted(newParam2);
+			listRewrite.insertFirst(newParam1, null);
+			listRewrite.insertLast(newParam2, null);
 			
 			List thrownExceptions= methodDecl.thrownExceptions();
 			assertTrue("must be 3 thrown exceptions", thrownExceptions.size() == 3);
@@ -523,8 +530,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			rewrite.markAsRemoved((ASTNode) thrownExceptions.get(2));
 			
 			Name newThrownException= ast.newSimpleName("InterruptedException");
-			thrownExceptions.add(2, newThrownException);
-			rewrite.markAsInserted(newThrownException);			
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS).insertLast(newThrownException, null);
 		}				
 
 
@@ -574,19 +580,17 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			rewrite.markAsRemoved((ASTNode) parameters.get(2));
 
 			SingleVariableDeclaration newParam= createNewParam(ast, "m");
-			parameters.add(newParam);
-			rewrite.markAsInserted(newParam);
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.PARAMETERS).insertLast(newParam, null);
+
 
 			List thrownExceptions= methodDecl.thrownExceptions();
 			assertTrue("must be 0 thrown exceptions", thrownExceptions.size() == 0);
 			
 			Name newThrownException1= ast.newSimpleName("InterruptedException");
-			thrownExceptions.add(newThrownException1);
-			rewrite.markAsInserted(newThrownException1);
-			
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS).insertLast(newThrownException1, null);
+
 			Name newThrownException2= ast.newSimpleName("ArrayStoreException");
-			thrownExceptions.add(newThrownException2);
-			rewrite.markAsInserted(newThrownException2);
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS).insertLast(newThrownException2, null);
 			
 		}
 		{ // delete first 2, replace last and insert after & replace first exception and insert before
@@ -601,8 +605,8 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			rewrite.markAsReplaced((ASTNode) parameters.get(2), newParam1);
 						
 			SingleVariableDeclaration newParam2= createNewParam(ast, "m2");
-			parameters.add(newParam2);
-			rewrite.markAsInserted(newParam2);
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.PARAMETERS).insertLast(newParam2, null);
+
 
 			List thrownExceptions= methodDecl.thrownExceptions();
 			assertTrue("must be 1 thrown exceptions", thrownExceptions.size() == 1);
@@ -611,8 +615,8 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			rewrite.markAsReplaced((ASTNode) thrownExceptions.get(0), modifiedThrownException);
 						
 			Name newThrownException2= ast.newSimpleName("ArrayStoreException");
-			thrownExceptions.add(newThrownException2);
-			rewrite.markAsInserted(newThrownException2);
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS).insertLast(newThrownException2, null);
+
 		}		
 		{ // delete first 2, replace last and insert at first & remove first and insert before
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "hee");
@@ -626,9 +630,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			rewrite.markAsReplaced((ASTNode) parameters.get(2), newParam1);
 						
 			SingleVariableDeclaration newParam2= createNewParam(ast, "m2");
-			parameters.add(0, newParam2);
-			rewrite.markAsInserted(newParam2);
-
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.PARAMETERS).insertFirst(newParam2, null);
 
 			List thrownExceptions= methodDecl.thrownExceptions();
 			assertTrue("must be 1 thrown exceptions", thrownExceptions.size() == 1);
@@ -636,8 +638,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			rewrite.markAsRemoved((ASTNode) thrownExceptions.get(0));
 						
 			Name newThrownException2= ast.newSimpleName("ArrayStoreException");
-			thrownExceptions.add(newThrownException2);
-			rewrite.markAsInserted(newThrownException2);
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS).insertLast(newThrownException2, null);
 		}				
 
 
@@ -686,19 +687,17 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			rewrite.markAsRemoved((ASTNode) parameters.get(2));
 
 			SingleVariableDeclaration newParam= createNewParam(ast, "m");
-			parameters.add(newParam);
-			rewrite.markAsInserted(newParam);
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.PARAMETERS).insertLast(newParam, null);
 
 			List thrownExceptions= methodDecl.thrownExceptions();
 			assertTrue("must be 0 thrown exceptions", thrownExceptions.size() == 0);
 			
 			Name newThrownException1= ast.newSimpleName("InterruptedException");
-			thrownExceptions.add(newThrownException1);
-			rewrite.markAsInserted(newThrownException1);
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS).insertLast(newThrownException1, null);
 			
 			Name newThrownException2= ast.newSimpleName("ArrayStoreException");
-			thrownExceptions.add(newThrownException2);
-			rewrite.markAsInserted(newThrownException2);
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS).insertLast(newThrownException2, null);
+
 			
 		}
 
@@ -772,9 +771,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			assertTrue("Has body", body == null);
 			
 			Block newBlock= ast.newBlock();
-			methodDecl.setBody(newBlock);
-
-			rewrite.markAsInserted(newBlock);
+			rewrite.markAsInsert(methodDecl, ASTNodeConstants.BODY, newBlock, null);
 		}		
 
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
@@ -825,8 +822,8 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.EXTRA_DIMENSIONS, new Integer(1), null);
 			
 			Name newThrownException2= ast.newSimpleName("ArrayStoreException");
-			methodDecl.thrownExceptions().add(newThrownException2);
-			rewrite.markAsInserted(newThrownException2);			
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS).insertLast(newThrownException2, null);
+
 		}
 		{ // add extra dim, remove throws
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo2");
@@ -841,8 +838,8 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.EXTRA_DIMENSIONS, new Integer(1), null);
 			
 			Name newThrownException2= ast.newSimpleName("ArrayStoreException");
-			methodDecl.thrownExceptions().add(newThrownException2);
-			rewrite.markAsInserted(newThrownException2);			
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS).insertLast(newThrownException2, null);
+
 		}
 		{ // add extra dim, remove throws
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo4");
@@ -855,14 +852,14 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo5");
 			
 			SingleVariableDeclaration newParam1= createNewParam(ast, "m1");
-			methodDecl.parameters().add(newParam1);
-			rewrite.markAsInserted(newParam1);						
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.PARAMETERS).insertLast(newParam1, null);
+
 			
 			rewrite.markAsReplaced(methodDecl, ASTNodeConstants.EXTRA_DIMENSIONS, new Integer(4), null);
 			
 			Name newThrownException2= ast.newSimpleName("ArrayStoreException");
-			methodDecl.thrownExceptions().add(newThrownException2);
-			rewrite.markAsInserted(newThrownException2);			
+			rewrite.getListRewrite(methodDecl, ASTNodeConstants.THROWN_EXCEPTIONS).insertLast(newThrownException2, null);
+	
 		}
 		{ // remove params, add extra dim, remove throws
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo6");
@@ -930,16 +927,13 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			
 			PrimitiveType newType= ast.newPrimitiveType(PrimitiveType.BOOLEAN);
 			rewrite.markAsReplaced(decl.getType(), newType);
-			
-			List fragments= decl.fragments();
-			
+					
 			VariableDeclarationFragment frag=	ast.newVariableDeclarationFragment();
 			frag.setName(ast.newSimpleName("k1"));
 			frag.setInitializer(null);
-			
-			rewrite.markAsInserted(frag);
-			
-			fragments.add(frag);
+
+			rewrite.getListRewrite(decl, ASTNodeConstants.FRAGMENTS).insertLast(frag, null);
+
 		}
 		{	// add modifiers, remove first two fragments, replace last
 			FieldDeclaration decl= fieldDeclarations[1];
@@ -1252,10 +1246,9 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		{
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo2");
 			ASTNode node= rewrite.createCopy(methodDecl);
-			
-			type.bodyDeclarations().add(1, node);
-			
-			rewrite.markAsInserted(node);
+
+			ASTNode firstDecl= (ASTNode) type.bodyDeclarations().get(0);
+			rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS).insertAfter(node, firstDecl, null);
 		}
 
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
@@ -1340,14 +1333,8 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		clearRewrite(rewrite);
 	}
 	
-	private static final boolean BUG_38447= true;
-	
 	
 	public void testBUG_38447() throws Exception {
-		
-		if (BUG_38447) {
-			return;
-		}
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1429,8 +1416,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
 			ASTNode copy= rewrite.createCopy(methodDecl);
 			
-			type.bodyDeclarations().add(copy);
-			rewrite.markAsInserted(copy);
+			rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS).insertLast(copy, null);
 			
 			MethodDeclaration newMethodDecl= createNewMethod(astRoot.getAST(), "xoo", false);
 			rewrite.markAsReplaced(methodDecl, newMethodDecl);
@@ -1491,18 +1477,13 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		TypeDeclaration type= findTypeDeclaration(astRoot, "DD");
 		{
-			List decls= type.bodyDeclarations();
-			//FieldDeclaration field= (FieldDeclaration) decls.get(0);
-
 			VariableDeclarationFragment frag= ast.newVariableDeclarationFragment();
 			frag.setName(ast.newSimpleName("fColor"));
 			FieldDeclaration newField= ast.newFieldDeclaration(frag);
 			newField.setType(ast.newPrimitiveType(PrimitiveType.CHAR));
 			newField.setModifiers(Modifier.PRIVATE);
-			
-			rewrite.markAsInserted(newField);
-			decls.add(1, newField);
-			
+					
+			rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS).insertAt(newField, 1, null);
 		}
 
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
