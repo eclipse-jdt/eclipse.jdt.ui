@@ -25,10 +25,12 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
@@ -123,15 +125,23 @@ public class ASTNodeSearchUtil {
 	}
 		
 	public static FieldDeclaration getFieldDeclarationNode(IField iField, CompilationUnit cuNode) throws JavaModelException {
-		return (FieldDeclaration)ASTNodes.getParent(getNameNode(iField, cuNode), FieldDeclaration.class);
+		return (FieldDeclaration) ASTNodes.getParent(getNameNode(iField, cuNode), FieldDeclaration.class);
+	}
+
+	public static EnumDeclaration getEnumDeclarationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
+		return (EnumDeclaration) ASTNodes.getParent(getNameNode(iType, cuNode), EnumDeclaration.class);
+	}
+
+	public static AnnotationTypeDeclaration getAnnotationTypeDeclarationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
+		return (AnnotationTypeDeclaration) ASTNodes.getParent(getNameNode(iType, cuNode), AnnotationTypeDeclaration.class);
 	}
 
 	public static TypeDeclaration getTypeDeclarationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
-		return (TypeDeclaration)ASTNodes.getParent(getNameNode(iType, cuNode), TypeDeclaration.class);
+		return (TypeDeclaration) ASTNodes.getParent(getNameNode(iType, cuNode), TypeDeclaration.class);
 	}
 	
 	public static ClassInstanceCreation getClassInstanceCreationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
-		return (ClassInstanceCreation)ASTNodes.getParent(getNameNode(iType, cuNode), ClassInstanceCreation.class);
+		return (ClassInstanceCreation) ASTNodes.getParent(getNameNode(iType, cuNode), ClassInstanceCreation.class);
 	}
 	
 	public static List getBodyDeclarationList(IType iType, CompilationUnit cuNode) throws JavaModelException {
@@ -141,7 +151,7 @@ public class ASTNodeSearchUtil {
 			return getTypeDeclarationNode(iType, cuNode).bodyDeclarations();
 	}
 	
-	//returns an array becaus of the import container, which does not represent 1 node but many
+	//returns an array because of the import container, which does not represent 1 node but many
 	//for fields, it returns the whole declaration node
 	public static ASTNode[] getDeclarationNodes(IJavaElement element, CompilationUnit cuNode) throws JavaModelException {
 		switch(element.getElementType()){
