@@ -18,12 +18,10 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.FileStatusContext;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 public class TextStatusContextViewer extends SourceContextViewer {
