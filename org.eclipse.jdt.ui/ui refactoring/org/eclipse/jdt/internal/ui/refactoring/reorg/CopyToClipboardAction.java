@@ -176,7 +176,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			
 			TypedSource[] typedSources= TypedSource.createTypeSources(javaElementsForClipboard);
 			String[] fileNameArray= (String[]) fileNames.toArray(new String[fileNames.size()]);
-			copyToClipboard(resourcesForClipboard, fileNameArray, namesBuf.toString(), javaElementsForClipboard, typedSources);
+			copyToClipboard(resourcesForClipboard, fileNameArray, namesBuf.toString(), javaElementsForClipboard, typedSources, 0);
 		}
 
 		private static IJavaElement[] getCompilationUnits(IJavaElement[] javaElements) {
@@ -222,15 +222,16 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 				fileName.add(location.toOSString());			
 		}
 		
-		private void copyToClipboard(IResource[] resources, String[] fileNames, String names, IJavaElement[] javaElements, TypedSource[] typedSources){
+		private void copyToClipboard(IResource[] resources, String[] fileNames, String names, IJavaElement[] javaElements, TypedSource[] typedSources, int repeat){
+			final int repeat_max_count= 10;
 			try{
 				fClipboard.setContents( createDataArray(resources, javaElements, fileNames, names, typedSources),
 										createDataTypeArray(resources, javaElements, fileNames, typedSources));
 			} catch (SWTError e) {
-				if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
+				if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD || repeat >= repeat_max_count)
 					throw e;
 				if (fAutoRepreatOnFailure || MessageDialog.openQuestion(fShell, "Problem Copying to Clipboard", "There was a problem when accessing the system clipboard. Retry?"))
-					copyToClipboard(resources, fileNames, names, javaElements, typedSources);
+					copyToClipboard(resources, fileNames, names, javaElements, typedSources, repeat+1);
 			}
 		}
 		
