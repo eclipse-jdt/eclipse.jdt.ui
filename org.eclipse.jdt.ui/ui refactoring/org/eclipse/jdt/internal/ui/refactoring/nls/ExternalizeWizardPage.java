@@ -607,8 +607,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		});
 		fTableViewer.addFilter(new ViewerFilter() {
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				if (!fFilterCheckBox.getSelection()) {
+					return true;
+				}
 				NLSSubstitution curr= (NLSSubstitution) element;
-				return !fFilterCheckBox.getSelection() || (curr.getInitialState() == NLSSubstitution.INTERNALIZED);
+				return (curr.getInitialState() == NLSSubstitution.INTERNALIZED) || (curr.getInitialState() == NLSSubstitution.EXTERNALIZED && curr.getInitialValue() == null);
 			}
 		});
 		
