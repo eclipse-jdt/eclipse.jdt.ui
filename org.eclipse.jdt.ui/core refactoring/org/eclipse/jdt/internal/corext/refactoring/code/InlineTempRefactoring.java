@@ -24,11 +24,14 @@ import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
@@ -186,12 +189,30 @@ public class InlineTempRefactoring extends Refactoring {
 		pm.beginTask("", offsets.length); //$NON-NLS-1$
 		String changeName= RefactoringCoreMessages.getString("InlineTempRefactoring.inline_edit_name") + getTempName(); //$NON-NLS-1$
 		int length= getTempName().length();
-		String initializerSource= getInitializerSource();
 		for(int i= 0; i < offsets.length; i++){
-			change.addTextEdit(changeName, SimpleTextEdit.createReplace(offsets[i].intValue(), length, initializerSource));
+			int offset= offsets[i].intValue();
+            String sourceToInline= getInitializerSource(needsBrackets(offset));
+			change.addTextEdit(changeName, SimpleTextEdit.createReplace(offset, length, sourceToInline));
 			pm.worked(1);	
 		}
 	}
+	
+    private boolean needsBrackets(int offset) {
+    	if (neverNeedsBracketsAroundReferences())
+    		return false;
+    	SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(offset, getTempName().length()), true);
+    	fCompilationUnitNode.accept(analyzer);
+    	ASTNode firstSelected= analyzer.getFirstSelectedNode();
+    	if (firstSelected == null)
+    		return true;
+    	ASTNode parent= firstSelected.getParent();
+    	if (parent instanceof VariableDeclarationFragment){
+    		VariableDeclarationFragment vdf= (VariableDeclarationFragment)parent;
+    		if (vdf.getInitializer().equals(firstSelected))
+    			return false;	
+    	}
+        return true;
+    }
 
 	private void removeTemp(TextChange change) throws JavaModelException {
 		//FIX ME - multi declarations
@@ -215,30 +236,34 @@ public class InlineTempRefactoring extends Refactoring {
 		change.addTextEdit(changeName, new LineEndDeleteTextEdit(offset, length, fCu.getSource()));
 	}
 	
-	private String getInitializerSource() throws JavaModelException{
+	private String getInitializerSource(boolean brackets) throws JavaModelException{
+		if (brackets)
+			return '(' + getRawInitializerSource() + ')'; 
+		else
+			return getRawInitializerSource(); 
+	}
+	
+	private String getRawInitializerSource() throws JavaModelException{
 		int start= fTempDeclaration.getInitializer().getStartPosition();
 		int length= fTempDeclaration.getInitializer().getLength();
 		int end= start + length;
-		String rawSource= fCu.getSource().substring(start, end);
-		if (! needsBracketsAroundReferences(fTempDeclaration.getInitializer()))
-			return rawSource;
-		else 
-			return "(" + rawSource + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+		return fCu.getSource().substring(start, end);
 	}
+	
+    private boolean neverNeedsBracketsAroundReferences() {
+		Expression expression= fTempDeclaration.getInitializer();
+		if (ASTNodes.needsParenthesis(expression))	
+			return false;	
+		if (expression instanceof Assignment)//for estetic reasons
+			return false;	
+		if (expression instanceof CastExpression)
+			return false;	
+		return true;		
+    }
 	
 	private Integer[] getOccurrenceOffsets() throws JavaModelException{
 		return TempOccurrenceFinder.findTempOccurrenceOffsets(fCompilationUnitNode, fTempDeclaration, true, false);
 	}	
-	
-	private static boolean needsBracketsAroundReferences(Expression expression){
-		if (ASTNodes.needsParenthesis(expression))	
-			return true;	
-		if (expression instanceof Assignment)//for estetic reasons
-			return true;	
-		if (expression instanceof CastExpression)
-			return true;	
-		return false;		
-	}
 	
 	//--- private helper classes
 	
