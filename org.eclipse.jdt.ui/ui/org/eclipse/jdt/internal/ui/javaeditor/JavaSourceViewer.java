@@ -155,7 +155,7 @@ public class JavaSourceViewer extends SourceViewer implements IPropertyChangeLis
 			fHierarchyPresenter= ((JavaSourceViewerConfiguration)configuration).getHierarchyPresenter(this, true);
 			fHierarchyPresenter.install(this);
             
-			fPreferenceStore= ((JavaSourceViewerConfiguration)configuration).getPreferenceStore();
+			fPreferenceStore= ((JavaSourceViewerConfiguration)configuration).getNewPreferenceStore();
 			if (fPreferenceStore != null) {
 				fPreferenceStore.addPropertyChangeListener(this);
 				initializeViewerColors();

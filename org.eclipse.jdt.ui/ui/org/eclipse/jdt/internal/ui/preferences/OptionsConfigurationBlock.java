@@ -14,8 +14,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
@@ -42,6 +44,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -143,12 +146,40 @@ public abstract class OptionsConfigurationBlock {
 		
 	protected void setOptions(Map map) {
 		if (fProject != null) {
+			firePropertyChangeEvents(fProject.getOptions(false), map);
 			fProject.setOptions(map);
 		} else {
 			JavaCore.setOptions((Hashtable) map);
 		}	
 	} 
 	
+	/**
+	 * @param newOptions
+	 */
+	private void firePropertyChangeEvents(Map oldOptions, Map newOptions) {
+		oldOptions= new HashMap(oldOptions);
+		Object source= fProject.getProject();
+		MockupPreferenceStore store= JavaPlugin.getDefault().getMockupPreferenceStore();
+		Iterator iter= newOptions.entrySet().iterator();
+		while (iter.hasNext()) {
+			Entry entry= (Entry) iter.next();
+		
+			String name= (String) entry.getKey();
+			Object oldValue= oldOptions.get(name);
+			Object newValue= entry.getValue();
+			
+			if ((oldValue != null && !oldValue.equals(newValue)) || (oldValue == null && newValue != null))
+				store.firePropertyChangeEvent(source, name, oldValue, newValue);
+			oldOptions.remove(name);
+		}
+		
+		iter= oldOptions.entrySet().iterator();
+		while (iter.hasNext()) {
+			Entry entry= (Entry) iter.next();
+			store.firePropertyChangeEvent(source, (String) entry.getKey(), entry.getValue(), null);
+		}
+	}
+
 	protected Shell getShell() {
 		return fShell;
 	}

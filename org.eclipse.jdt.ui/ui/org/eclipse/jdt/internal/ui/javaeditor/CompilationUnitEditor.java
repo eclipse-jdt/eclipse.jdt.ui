@@ -1039,7 +1039,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		markAsStateDependentAction("IndentOnTab", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("IndentOnTab", true); //$NON-NLS-1$
 		
-		if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_TAB)) {
+		if (getNewPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_TAB)) {
 			// don't replace Shift Right - have to make sure their enablement is mutually exclusive
 //			removeActionActivationCode(ITextEditorActionConstants.SHIFT_RIGHT);
 			setActionActivationCode("IndentOnTab", '\t', -1, SWT.NONE); //$NON-NLS-1$
@@ -1363,7 +1363,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	}
 	
 	private boolean isTabConversionEnabled() {
-		IPreferenceStore store= getPreferenceStore();
+		IPreferenceStore store= getNewPreferenceStore();
 		return store.getBoolean(SPACES_FOR_TABS);
 	}
 	
@@ -1396,7 +1396,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		if (isTabConversionEnabled())
 			startTabConversion();			
 			
-		IPreferenceStore preferenceStore= getPreferenceStore();
+		IPreferenceStore preferenceStore= getNewPreferenceStore();
 		boolean closeBrackets= preferenceStore.getBoolean(CLOSE_BRACKETS);
 		boolean closeStrings= preferenceStore.getBoolean(CLOSE_STRINGS);
 		
@@ -1457,12 +1457,12 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				String p= event.getProperty();		
 				
 				if (CLOSE_BRACKETS.equals(p)) {
-					fBracketInserter.setCloseBracketsEnabled(getPreferenceStore().getBoolean(p));
+					fBracketInserter.setCloseBracketsEnabled(getNewPreferenceStore().getBoolean(p));
 					return;	
 				}
 
 				if (CLOSE_STRINGS.equals(p)) {
-					fBracketInserter.setCloseStringsEnabled(getPreferenceStore().getBoolean(p));
+					fBracketInserter.setCloseStringsEnabled(getNewPreferenceStore().getBoolean(p));
 					return;
 				}
 								
@@ -1475,7 +1475,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				}
 				
 				if (PreferenceConstants.EDITOR_SMART_TAB.equals(p)) {
-					if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_TAB)) {
+					if (getNewPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_TAB)) {
 						setActionActivationCode("IndentOnTab", '\t', -1, SWT.NONE); //$NON-NLS-1$
 					} else {
 						removeActionActivationCode("IndentOnTab"); //$NON-NLS-1$
@@ -1484,7 +1484,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 
 				IContentAssistant c= asv.getContentAssistant();
 				if (c instanceof ContentAssistant)
-					ContentAssistPreference.changeConfiguration((ContentAssistant) c, getPreferenceStore(), event);
+					ContentAssistPreference.changeConfiguration((ContentAssistant) c, getNewPreferenceStore(), event);
+
+				if (CODE_FORMATTER_TAB_SIZE.equals(p)) {
+					asv.updateIndentationPrefixes();
+					if (fTabConverter != null)
+						fTabConverter.setNumberOfSpacesPerTab(getTabSize());
+				}
 			}
 				
 		} finally {
@@ -1492,22 +1498,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		}
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#handlePreferencePropertyChanged(org.eclipse.core.runtime.Preferences.PropertyChangeEvent)
-	 */
-	protected void handlePreferencePropertyChanged(org.eclipse.core.runtime.Preferences.PropertyChangeEvent event) {
-		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
-		if (asv != null) {
-			String p= event.getProperty();					
-			if (CODE_FORMATTER_TAB_SIZE.equals(p)) {
-				asv.updateIndentationPrefixes();
-				if (fTabConverter != null)
-					fTabConverter.setNumberOfSpacesPerTab(getTabSize());
-			}
-		}
-		super.handlePreferencePropertyChanged(event);
-	}
-	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#createJavaSourceViewer(org.eclipse.swt.widgets.Composite, org.eclipse.jface.text.source.IVerticalRuler, org.eclipse.jface.text.source.IOverviewRuler, boolean, int)
 	 */
@@ -1581,7 +1571,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	protected boolean isPrefQuickDiffAlwaysOn() {
 		// reestablishes the behaviour from ExtendedTextEditor which was hacked by JavaEditor
 		// to disable the change bar for the class file (attached source) java editor.
-		IPreferenceStore store= getPreferenceStore();
+		IPreferenceStore store= getNewPreferenceStore();
 		return store.getBoolean(ExtendedTextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON);
 	}
 

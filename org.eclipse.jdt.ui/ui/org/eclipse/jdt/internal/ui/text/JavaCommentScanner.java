@@ -99,16 +99,47 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		initialize();
 	}
 
+	/**
+	 * Initialize with the given arguments.
+	 * 
+	 * @param manager Color manager
+	 * @param store Preference store
+	 * @param defaultTokenProperty Default token property
+	 * 
+	 * @since 3.0	
+	 */
+	public JavaCommentScanner(IColorManager manager, IPreferenceStore store, String defaultTokenProperty) {
+		this(manager, store, null, defaultTokenProperty, new String[] { defaultTokenProperty, TASK_TAG });
+	}
+	
+	/**
+	 * Initialize with the given arguments.
+	 * 
+	 * @param manager Color manager
+	 * @param store Preference store
+	 * @param defaultTokenProperty Default token property
+	 * @param tokenProperties Token properties
+	 * 
+	 * @since 3.0
+	 */
+	public JavaCommentScanner(IColorManager manager, IPreferenceStore store, String defaultTokenProperty, String[] tokenProperties) {
+		this(manager, store, null, defaultTokenProperty, tokenProperties);
+	}
+
 	/*
 	 * @see AbstractJavaScanner#createRules()
 	 */
 	protected List createRules() {
 		List list= new ArrayList();
 		
-		if (fCorePreferenceStore != null) {
-			// Add rule for Task Tags.
+		// Add rule for Task Tags.
+		String tasks= null;
+		if (getPreferenceStore().contains(COMPILER_TASK_TAGS))
+			tasks= getPreferenceStore().getString(COMPILER_TASK_TAGS);
+		else if (fCorePreferenceStore != null)
+			tasks= fCorePreferenceStore.getString(COMPILER_TASK_TAGS);
+		if (tasks != null) {
 			fTaskTagRule= new TaskTagRule(getToken(TASK_TAG), getToken(fDefaultTokenProperty));
-			String tasks= fCorePreferenceStore.getString(COMPILER_TASK_TAGS);
 			fTaskTagRule.addTaskTags(tasks);
 			list.add(fTaskTagRule);
 		}

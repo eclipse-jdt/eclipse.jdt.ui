@@ -153,6 +153,17 @@ public final class JavaDocScanner extends JavaCommentScanner {
 		super(manager, store, coreStore, IJavaColorConstants.JAVADOC_DEFAULT, fgTokenProperties);
 	}
 	
+	/**
+	 * Initialize with the given arguments
+	 * @param manager	Color manager
+	 * @param store	Preference store
+	 * 
+	 * @since 3.0
+	 */
+	public JavaDocScanner(IColorManager manager, IPreferenceStore store) {
+		this(manager, store, null);
+	}
+
 	public IDocument getDocument() {
 		return fDocument;
 	}

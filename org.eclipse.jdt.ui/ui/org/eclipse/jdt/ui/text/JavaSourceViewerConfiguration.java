@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jface.text.AbstractInformationControlManager;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
 import org.eclipse.jface.text.IAutoIndentStrategy;
@@ -47,26 +48,33 @@ import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.PreferencesAdapter;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
+import org.eclipse.jdt.internal.ui.text.JavaCommentScanner;
 import org.eclipse.jdt.internal.ui.text.JavaCompositeReconcilingStrategy;
 import org.eclipse.jdt.internal.ui.text.JavaElementProvider;
 import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
 import org.eclipse.jdt.internal.ui.text.JavaReconciler;
+import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.comment.JavaDocRegion;
 import org.eclipse.jdt.internal.ui.text.comment.JavaSnippetFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
@@ -77,6 +85,7 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverProxy;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaInformationProvider;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
 import org.eclipse.jdt.internal.ui.text.spelling.WordCompletionProcessor;
 import org.eclipse.jdt.internal.ui.typehierarchy.HierarchyInformationControl;
 
@@ -111,6 +120,44 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	
 
 	/**
+	 * The Java source code scanner
+	 *
+	 * @since 3.0
+	 */
+	private AbstractJavaScanner fCodeScanner;
+	/** 
+	 * The Java multiline comment scanner 
+	 *
+	 * @since 3.0
+	 */
+	private AbstractJavaScanner fMultilineCommentScanner;
+	/**
+	 * The Java singleline comment scanner
+	 *
+	 * @since 3.0
+	 */
+	private AbstractJavaScanner fSinglelineCommentScanner;
+	/**
+	 * The Java string scanner
+	 *
+	 * @since 3.0
+	 */
+	private AbstractJavaScanner fStringScanner;
+	/**
+	 * The JavaDoc scanner
+	 *
+	 * @since 3.0
+	 */
+	private AbstractJavaScanner fJavaDocScanner;
+	/**
+	 * The new preference store
+	 * <p>Note that this is work in progress and still subject to change.</p>
+	 *
+	 * @since 3.0
+	 */
+	private IPreferenceStore fNewPreferenceStore;
+	
+	/**
 	 * Creates a new Java source viewer configuration for viewers in the given editor 
 	 * using the given Java tools and the specified document partitioning.
 	 *
@@ -124,6 +171,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		fJavaTextTools= tools;
 		fTextEditor= editor;
 		fDocumentPartitioning= partitioning;
+		setNewPreferenceStore(createNewPreferenceStore());
 	}
 
 	/**
@@ -143,8 +191,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 *
 	 * @return the Java source code scanner
 	 */
-	protected RuleBasedScanner getCodeScanner() {
-		return fJavaTextTools.getCodeScanner();
+	public RuleBasedScanner getCodeScanner() {
+		return fCodeScanner;
 	}
 	
 	/**
@@ -153,8 +201,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @return the Java multiline comment scanner
 	 * @since 2.0
 	 */
-	protected RuleBasedScanner getMultilineCommentScanner() {
-		return fJavaTextTools.getMultilineCommentScanner();
+	public RuleBasedScanner getMultilineCommentScanner() {
+		return fMultilineCommentScanner;
 	}
 	
 	/**
@@ -163,8 +211,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @return the Java singleline comment scanner
 	 * @since 2.0
 	 */
-	protected RuleBasedScanner getSinglelineCommentScanner() {
-		return fJavaTextTools.getSinglelineCommentScanner();
+	public RuleBasedScanner getSinglelineCommentScanner() {
+		return fSinglelineCommentScanner;
 	}
 	
 	/**
@@ -173,8 +221,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @return the Java string scanner
 	 * @since 2.0
 	 */
-	protected RuleBasedScanner getStringScanner() {
-		return fJavaTextTools.getStringScanner();
+	public RuleBasedScanner getStringScanner() {
+		return fStringScanner;
 	}
 	
 	/**
@@ -182,8 +230,8 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 *
 	 * @return the JavaDoc scanner
 	 */
-	protected RuleBasedScanner getJavaDocScanner() {
-		return fJavaTextTools.getJavaDocScanner();
+	public RuleBasedScanner getJavaDocScanner() {
+		return fJavaDocScanner;
 	}
 	
 	/**
@@ -207,15 +255,77 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	/**
 	 * Returns the preference store used by this configuration to initialize
 	 * the individual bits and pieces.
+	 * <p>
+	 * FIXME: deprecate when new API is stabilized.
+	 * </p> 
 	 * 
 	 * @return the preference store used to initialize this configuration
-	 * 
 	 * @since 2.0
 	 */
 	public IPreferenceStore getPreferenceStore() {
 		return fJavaTextTools.getPreferenceStore();
 	}
 	
+	/**
+	 * Returns the new preference store used by this configuration to initialize
+	 * the individual bits and pieces.
+	 * <p>
+	 * XXX: Note that this is work in progress and API is still subject to change.
+	 * </p>
+	 * 
+	 * @return the new preference store used to initialize this configuration
+	 * 
+	 * @since 3.0
+	 */
+	public IPreferenceStore getNewPreferenceStore() {
+		return fNewPreferenceStore;
+	}
+	
+	/**
+	 * Sets the preference store used by this configuration to initialize
+	 * the individual bits and pieces to the given preference store.
+	 * <p>
+	 * XXX: Note that this is work in progress and API is still subject to change.
+	 * </p>
+	 * 
+	 * @param preferenceStore the preference store to initialize this configuration
+	 * 
+	 * @since 3.0
+	 */
+	public void setNewPreferenceStore(IPreferenceStore preferenceStore) {
+		fNewPreferenceStore= preferenceStore;
+		initializeScanners();
+	}
+	
+	/**
+	 * Creates and returns a new preference store which combines the preference
+	 * stores from the text tools.
+	 *
+	 * @param tools Text tools
+	 * @return Legacy preference store
+	 * 
+	 * @since 3.0
+	 */
+	private IPreferenceStore createNewPreferenceStore() {
+		if (fJavaTextTools.getCorePreferenceStore() == null)
+			return fJavaTextTools.getPreferenceStore();
+		
+		return new ChainedPreferenceStore(new IPreferenceStore[] { fJavaTextTools.getPreferenceStore(), new PreferencesAdapter(fJavaTextTools.getCorePreferenceStore()) });
+	}
+
+	/**
+	 * Initializes the scanners.
+	 * 
+	 * @since 3.0 
+	 */
+	private void initializeScanners() {
+		fCodeScanner= new JavaCodeScanner(getColorManager(), getNewPreferenceStore());
+		fMultilineCommentScanner= new JavaCommentScanner(getColorManager(), getNewPreferenceStore(), IJavaColorConstants.JAVA_MULTI_LINE_COMMENT);
+		fSinglelineCommentScanner= new JavaCommentScanner(getColorManager(), getNewPreferenceStore(), IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);
+		fStringScanner= new SingleTokenJavaScanner(getColorManager(), getNewPreferenceStore(), IJavaColorConstants.JAVA_STRING);
+		fJavaDocScanner= new JavaDocScanner(getColorManager(), getNewPreferenceStore());
+	}
+
 	/*
 	 * @see SourceViewerConfiguration#getPresentationReconciler(ISourceViewer)
 	 */
@@ -275,9 +385,9 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 
 			assistant.setContentAssistProcessor(new JavaDocCompletionProcessor(getEditor()), IJavaPartitions.JAVA_DOC);
 			
-			ContentAssistPreference.configure(assistant, getPreferenceStore());
+			ContentAssistPreference.configure(assistant, getNewPreferenceStore());
 			
-			assistant.setContextInformationPopupOrientation(ContentAssistant.CONTEXT_INFO_ABOVE);
+			assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
 			assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
 					
 			return assistant;
@@ -349,7 +459,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		// prefix[0] is either '\t' or ' ' x tabWidth, depending on useSpaces
 				
 		int tabWidth= CodeFormatterUtil.getTabWidth();
-		boolean useSpaces= getPreferenceStore().getBoolean(SPACES_FOR_TABS);
+		boolean useSpaces= getNewPreferenceStore().getBoolean(SPACES_FOR_TABS);
 		
 		for (int i= 0; i <= tabWidth; i++) {
 		    StringBuffer prefix= new StringBuffer();
@@ -380,11 +490,16 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getTabWidth(ISourceViewer)
 	 */
 	public int getTabWidth(ISourceViewer sourceViewer) {
-		if (getPreferenceStore().contains(ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH))
-			return getPreferenceStore().getInt(ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
+		IPreferenceStore store= fNewPreferenceStore;
+		if (fNewPreferenceStore == null)
+			// backwards compatibility code
+			store= getPreferenceStore();
+
+		if (store.contains(ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH))
+			return store.getInt(ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
 		else
 			// backwards compatibility code
-			return getPreferenceStore().getInt(PREFERENCE_TAB_WIDTH);
+			return store.getInt(PREFERENCE_TAB_WIDTH);
 	}
 
 	/*
@@ -587,7 +702,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		else
 			presenter= new InformationPresenter(getOutlinePresenterControlCreator(sourceViewer, IJavaEditorActionDefinitionIds.SHOW_OUTLINE));
 		presenter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
-		presenter.setAnchor(InformationPresenter.ANCHOR_GLOBAL);
+		presenter.setAnchor(AbstractInformationControlManager.ANCHOR_GLOBAL);
 		IInformationProvider provider= new JavaElementProvider(getEditor(), doCodeResolve);
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_DOC);
@@ -611,7 +726,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	public IInformationPresenter getHierarchyPresenter(ISourceViewer sourceViewer, boolean doCodeResolve) {
 		InformationPresenter presenter= new InformationPresenter(getHierarchyPresenterControlCreator(sourceViewer));
 		presenter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
-		presenter.setAnchor(InformationPresenter.ANCHOR_GLOBAL);
+		presenter.setAnchor(AbstractInformationControlManager.ANCHOR_GLOBAL);
 		IInformationProvider provider= new JavaElementProvider(getEditor(), doCodeResolve);
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_DOC);

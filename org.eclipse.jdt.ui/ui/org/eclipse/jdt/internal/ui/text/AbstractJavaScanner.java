@@ -221,4 +221,14 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 				token.setData(new TextAttribute(oldAttr.getForeground(), oldAttr.getBackground(), bold ? SWT.BOLD : SWT.NORMAL));
 		}
 	}
+	/**
+	 * Returns the preference store.
+	 * 
+	 * @return the preference store.
+	 *
+	 * @since 3.0
+	 */
+	protected IPreferenceStore getPreferenceStore() {
+		return fPreferenceStore;
+	}
 }

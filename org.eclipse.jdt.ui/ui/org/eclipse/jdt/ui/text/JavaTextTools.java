@@ -134,7 +134,7 @@ public class JavaTextTools {
 	 * @param store the preference store to initialize the text tools. The text tool
 	 *			instance installs a listener on the passed preference store to adapt itself to 
 	 *			changes in the preference store. In general <code>PreferenceConstants.
-	 *			getPreferenceStore()</code> shoould be used to initialize the text tools.
+	 *			getPreferenceStore()</code> should be used to initialize the text tools.
 	 * @param coreStore optional preference store to initialize the text tools. The text tool
 	 *			instance installs a listener on the passed preference store to adapt itself to 
 	 *			changes in the preference store.
@@ -392,5 +392,15 @@ public class JavaTextTools {
 	 */
 	public IPreferenceStore getPreferenceStore() {
 		return fPreferenceStore;
+	}
+
+	/**
+	 * Returns this text tool's core preference store.
+	 * 
+	 * @return the core preference store
+	 * @since 3.0
+	 */
+	public Preferences getCorePreferenceStore() {
+		return fCorePreferenceStore;
 	}
 }

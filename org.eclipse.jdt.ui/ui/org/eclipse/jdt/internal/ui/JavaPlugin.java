@@ -76,6 +76,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.javaeditor.filebuffers.CompilationUnitDocumentProvider2;
 import org.eclipse.jdt.internal.ui.javaeditor.filebuffers.CustomBufferFactory2;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
+import org.eclipse.jdt.internal.ui.preferences.MockupPreferenceStore;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
@@ -120,6 +121,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 	
 	private JavaEditorTextHoverDescriptor[] fJavaEditorTextHoverDescriptors;
 	
+	/**
+	 * Mockup preference store for firing events and registering listeners on project setting changes.
+	 * FIXME: Temporary solution.
+	 * 
+	 * @since 3.0
+	 */
+	private MockupPreferenceStore fMockupPreferenceStore;
 
 	
 	public static JavaPlugin getDefault() {
@@ -394,6 +402,16 @@ public class JavaPlugin extends AbstractUIPlugin {
 			fWorkingCopyManager= new WorkingCopyManager(provider);
 		}
 		return fWorkingCopyManager;
+	}
+	
+	/** 
+	 * Returns the mockup preference store for firing events and registering listeners on project setting changes. Temporary solution.
+	 */
+	public MockupPreferenceStore getMockupPreferenceStore() {
+		if (fMockupPreferenceStore == null)
+			fMockupPreferenceStore= new MockupPreferenceStore();
+		
+		return fMockupPreferenceStore;
 	}
 	
 	public synchronized ProblemMarkerManager getProblemMarkerManager() {

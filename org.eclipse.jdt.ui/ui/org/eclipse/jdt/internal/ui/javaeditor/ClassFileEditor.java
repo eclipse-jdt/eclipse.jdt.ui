@@ -519,6 +519,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#getInputElement()
 	 */
 	protected IJavaElement getInputJavaElement() {
+		if (getEditorInput() == null)
+			return null;
+		
 		return ((IClassFileEditorInput)getEditorInput()).getClassFile();
 	}
 	
