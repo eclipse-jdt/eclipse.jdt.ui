@@ -132,7 +132,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 
 		fTree= new CheckboxTreeViewer(composite, SWT.H_SCROLL | SWT.V_SCROLL);
 		gd= new GridData(GridData.FILL_BOTH | GridData.GRAB_VERTICAL);
-		gd.heightHint= convertHeightInCharsToPixels(10);
+		gd.heightHint= convertHeightInCharsToPixels(15);
 		fTree.getControl().setLayoutData(gd);
 		
 		fTreeContentProvider= new JavaWorkingSetPageContentProvider();
