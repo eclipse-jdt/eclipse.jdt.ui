@@ -18,9 +18,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
@@ -35,13 +36,13 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.SortMembersOperation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-import org.eclipse.jdt.internal.ui.javaeditor.AnnotationType;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
@@ -178,10 +179,8 @@ public class SortMembersAction extends SelectionDispatchAction {
 			Object element= iterator.next();
 			if (element instanceof IJavaAnnotation) {
 				IJavaAnnotation annot= (IJavaAnnotation) element;
-				if (annot.isRelevant() && !annot.isTemporary()) {
-					AnnotationType type= annot.getAnnotationType();
-					return (type == AnnotationType.BOOKMARK || type == AnnotationType.TASK || type == AnnotationType.UNKNOWN);
-				}
+				if (annot.isRelevant() && !annot.isTemporary() && !annot.isProblem())
+					return true;
 			}
 		}		
 		return false;
