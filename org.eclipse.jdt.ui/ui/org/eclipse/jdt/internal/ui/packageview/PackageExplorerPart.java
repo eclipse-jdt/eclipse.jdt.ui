@@ -82,6 +82,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.search.ui.IWorkingSet;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
@@ -148,6 +149,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private JavaElementPatternFilter fPatternFilter= new JavaElementPatternFilter();
 	private LibraryFilter fLibraryFilter= new LibraryFilter();
 	private BinaryProjectFilter fBinaryFilter= new BinaryProjectFilter();
+	private WorkingSetFilter fWorkingSetFilter= new WorkingSetFilter();
 
 	private ProblemTreeViewer fViewer; 
 	private PackagesFrameSource fFrameSource;
@@ -172,6 +174,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
  	private FilterSelectionAction fFilterAction;
  	private ShowLibrariesAction fShowLibrariesAction;
 	private ShowBinariesAction fShowBinariesAction;
+	private FilterWorkingSetAction fFilterWorkingSetAction;
+	private RemoveWorkingSetFilterAction fRemoveWorkingSetAction;
 	private IMemento fMemento;
 	
 	private ISelectionChangedListener fSelectionListener;
@@ -279,6 +283,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer.addFilter(fPatternFilter);
 		fViewer.addFilter(fLibraryFilter);
 		fViewer.addFilter(fBinaryFilter);
+		fViewer.addFilter(fWorkingSetFilter);
 		if(fMemento != null) 
 			restoreFilters();
 		else
@@ -348,7 +353,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		IMenuManager menu = actionBars.getMenuManager();
 		menu.add(fFilterAction);
 		menu.add(fShowLibrariesAction);  
-		menu.add(fShowBinariesAction);  
+		menu.add(fShowBinariesAction);
+		menu.add(fFilterWorkingSetAction); 
+		menu.add(fRemoveWorkingSetAction); 
 	}
 		
 	private Object findInputElement() {
@@ -377,16 +384,30 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * Returns the tool tip text for the given element.
 	 */
 	String getToolTipText(Object element) {
-		if (!(element instanceof IResource))
-			return ((ILabelProvider) getViewer().getLabelProvider()).getText(element);
-		
-		IPath path= ((IResource) element).getFullPath();
-		if (path.isRoot()) {
-			return PackagesMessages.getString("PackageExplorer.title"); //$NON-NLS-1$
+		String result;
+		if (!(element instanceof IResource)) {
+			result= ((ILabelProvider) getViewer().getLabelProvider()).getText(element);
+		} else {
+			IPath path= ((IResource) element).getFullPath();
+			if (path.isRoot()) {
+				result= PackagesMessages.getString("PackageExplorer.title"); //$NON-NLS-1$
+			} else {
+				result= path.makeRelative().toString();
+			}
 		}
-		else {
-			return path.makeRelative().toString();
-		}
+		IWorkingSet ws= fWorkingSetFilter.getWorkingSet();
+		if (ws == null)
+			return result;
+		String wsstr= "Working Set: "+ws.getName();
+		if (result.length() == 0)
+			return wsstr;
+		return result + " - " + wsstr;
+	}
+	
+	public String getTitleToolTip() {
+		if (fViewer == null)
+			return super.getTitleToolTip();
+		return getToolTipText(fViewer.getInput());
 	}
 	
 	/**
@@ -396,6 +417,14 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer.getTree().setFocus();
 	}
 
+	/**
+	 * Sets the working set to be used for filtering this part
+	 */
+	public void setWorkingSet(IWorkingSet ws) {
+		fWorkingSetFilter.setWorkingSet(ws);
+		firePropertyChange(IWorkbenchPart.PROP_TITLE);
+	}
+	
 	/**
 	 * Returns the shell to use for opening dialogs.
 	 * Used in this class, and in the actions.
@@ -491,6 +520,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fFilterAction = new FilterSelectionAction(getShell(), this, PackagesMessages.getString("PackageExplorer.filters")); //$NON-NLS-1$
 		fShowLibrariesAction = new ShowLibrariesAction(this, PackagesMessages.getString("PackageExplorer.referencedLibs")); //$NON-NLS-1$
 		fShowBinariesAction = new ShowBinariesAction(getShell(), this, PackagesMessages.getString("PackageExplorer.binaryProjects")); //$NON-NLS-1$
+		fFilterWorkingSetAction = new FilterWorkingSetAction(getShell(), this, "Filter Working Set..."); //$NON-NLS-1$
+		fRemoveWorkingSetAction = new RemoveWorkingSetFilterAction(getShell(), this, "Remove Working Set Filter"); //$NON-NLS-1$
 		
 		fBackAction= new BackAction(fFrameList);
 		fForwardAction= new ForwardAction(fFrameList);
@@ -620,9 +651,14 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			}
 		}
 		if (fViewer.isExpandable(element)) {
-			if (JavaBasePreferencePage.doubleClockGoesInto())
-				fZoomInAction.run();
-			else {
+			if (JavaBasePreferencePage.doubleClockGoesInto()) {
+				// don't zoom into compilation units and class files
+				if (element instanceof IOpenable && 
+					!(element instanceof ICompilationUnit) && 
+					!(element instanceof IClassFile)) {
+					fZoomInAction.run();
+				}
+			} else {
 				fViewer.setExpandedState(element, !fViewer.getExpandedState(element));
 				expandMainType(element);
 			}
@@ -1009,6 +1045,14 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	}
 
 	/**
+ 	 * Returns the working set filter for this view.
+ 	 * @return the working set filter
+ 	 */
+	WorkingSetFilter getWorkingSetFilter() {
+		return fWorkingSetFilter;
+	}
+
+	/**
  	 * Returns the Binary filter for this view.
  	 * @return the binary filter
  	 */
@@ -1038,7 +1082,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		//restore binary fileter
 		String showbin= fMemento.getString(TAG_SHOWBINARIES);
 		if (showbin != null)
-			getBinaryFilter().setShowBinaries(show.equals("true")); //$NON-NLS-1$
+			getBinaryFilter().setShowBinaries(showbin.equals("true")); //$NON-NLS-1$
 		else 
 			initBinaryFilterFromPreferences();		
 	}

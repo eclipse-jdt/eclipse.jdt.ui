@@ -5,27 +5,38 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IUpdate;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+import org.eclipse.jdt.internal.ui.search.JavaElementAction;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
@@ -33,35 +44,21 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
  * Tries to reveal the selected element in the package navigator 
  * view.
  */
-public class ShowInPackageViewAction extends Action implements IUpdate {
+public class ShowInPackageViewAction extends JavaElementAction {
 
 	private ISelectionProvider fSelectionProvider;
 
-	public ShowInPackageViewAction(IWorkbenchPartSite site, ISelectionProvider provider) {
-		super(JavaUIMessages.getString("ShowInPackageViewAction.label")); //$NON-NLS-1$
+	public ShowInPackageViewAction() {
+		super(JavaUIMessages.getString("ShowInPackageViewAction.label"), new Class[] {IJavaElement.class} ); //$NON-NLS-1$
 		setDescription(JavaUIMessages.getString("ShowInPackageViewAction.description")); //$NON-NLS-1$
 		setToolTipText(JavaUIMessages.getString("ShowInPackageViewAction.tooltip")); //$NON-NLS-1$
-		Assert.isNotNull(provider);
-		fSelectionProvider= provider;
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.SHOW_IN_PACKAGEVIEW_ACTION });	
 	}
-	
-	public void update() {
-		setEnabled(canOperateOn());
-	}
-	
-	public boolean canOperateOn() {
-		ISelection s= fSelectionProvider.getSelection();
-		Object element= SelectionUtil.getSingleElement(s);
-		if (!(element instanceof IPackageDeclaration || element instanceof IImportDeclaration || element instanceof IType))
-			return false;	
-		return true;	
-	}
-	
-	public void run() {
-		if (!canOperateOn())
-			return;
-		Object o= ((IStructuredSelection)fSelectionProvider.getSelection()).getFirstElement();
+
+	/*
+	 * @see JavaElementAction#run(IJavaElement)
+	 */
+	public void run(IJavaElement o) {
 		IJavaElement element= null;
 		if (o instanceof IPackageDeclaration)
 			element= JavaModelUtil.findParentOfKind((IJavaElement)o, IJavaElement.PACKAGE_FRAGMENT);
@@ -100,15 +97,50 @@ public class ShowInPackageViewAction extends Action implements IUpdate {
 				element= JavaModelUtil.findParentOfKind((IJavaElement)o, IJavaElement.CLASS_FILE);
 			}
 		}
-		
+		else if (o instanceof IMember){
+			element= (IJavaElement)JavaModelUtil.getOpenable(o);
+		}
 		if (element != null) {
-			PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
-			if (view != null) {
-				view.selectReveal(new StructuredSelection(element));
-				return;
-			}
+			showInPackagesView(element);
+			return;
 		}	
 		//XXX revisit need a standard way to give the user this feedback
 		JavaPlugin.getActiveWorkbenchShell().getDisplay().beep();	
-	}	
+	}
+
+	protected void showInPackagesView(Object element) {
+		PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
+		if (view != null) {
+			view.selectReveal(new StructuredSelection(element));
+			return;
+		}
+	}
+	
+	private Object getEditorInput() {
+		IEditorPart part= JavaPlugin.getDefault().getActivePage().getActiveEditor();
+		if (part != null) {
+			IEditorInput input= part.getEditorInput();
+			if (input instanceof IClassFileEditorInput)
+				return ((IClassFileEditorInput)input).getClassFile();
+			if (input instanceof IFileEditorInput) {
+				IFile file= ((IFileEditorInput)input).getFile();
+				return JavaCore.create(file);
+			}
+		}
+		return null;
+	}
+		
+	/*
+	 * @see JavaElementAction#getJavaElement(ITextSelection)
+	 */
+	protected IJavaElement getJavaElement(ITextSelection selection) {
+		if (selection.getLength() == 0) {
+			Object input= getEditorInput();
+			if (input != null)
+				showInPackagesView(input);
+			return null;
+		}
+		return super.getJavaElement(selection);
+	}
+
 }
