@@ -230,10 +230,14 @@ public class TodoTaskConfigurationBlock {
 
 	private Composite createMarkersTabContent(Composite folder) {
 		
-		Composite markersComposite= new Composite(folder, SWT.NULL);
-		markersComposite.setLayout(new GridLayout());
-
 		GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		
+		Composite markersComposite= new Composite(folder, SWT.NULL);
+		markersComposite.setLayout(layout);
+
+		layout= new GridLayout();
 		layout.numColumns= 2;
 
 		Group group= new Group(markersComposite, SWT.NONE);

@@ -7,15 +7,18 @@ package org.eclipse.jdt.internal.ui.preferences;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
+import org.eclipse.jface.preference.IPreferenceNode;
+import org.eclipse.jface.preference.IPreferencePage;
+import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.preference.PreferenceManager;
+import org.eclipse.jface.preference.PreferenceNode;
 
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -27,23 +30,48 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
 /**
- * Property page used to set the project's Javadoc location for sources
+ * Property page used to configure project specific compiler settings
  */
 public class CompilerPropertyPage extends PropertyPage {
 
 	private CompilerConfigurationBlock fConfigurationBlock;
 	private Control fConfigurationBlockControl;
 	private ControlEnableState fBlockEnableState;
-	private Button fUseWorkspaceSettings;
-	private Button fUseProjectSettings;
+	private SelectionButtonDialogField fUseWorkspaceSettings;
+	private SelectionButtonDialogField fChangeWorkspaceSettings;
+	private SelectionButtonDialogField fUseProjectSettings;
 	private IStatus fBlockStatus;
 	
 
 	public CompilerPropertyPage() {
 		fBlockStatus= new StatusInfo();
 		fBlockEnableState= null;
+		
+		IDialogFieldListener listener= new IDialogFieldListener() {
+			public void dialogFieldChanged(DialogField field) {
+				doDialogFieldChanged(field);
+			}
+		};
+		
+		fUseWorkspaceSettings= new SelectionButtonDialogField(SWT.RADIO);
+		fUseWorkspaceSettings.setDialogFieldListener(listener);
+		fUseWorkspaceSettings.setLabelText(PreferencesMessages.getString("CompilerPropertyPage.useworkspacesettings.label"));
+
+		fChangeWorkspaceSettings= new SelectionButtonDialogField(SWT.PUSH);
+		fChangeWorkspaceSettings.setLabelText(PreferencesMessages.getString("CompilerPropertyPage.useworkspacesettings.change"));
+		fChangeWorkspaceSettings.setDialogFieldListener(listener);
+	
+		fUseWorkspaceSettings.attachDialogField(fChangeWorkspaceSettings);
+
+		fUseProjectSettings= new SelectionButtonDialogField(SWT.RADIO);
+		fUseProjectSettings.setDialogFieldListener(listener);
+		fUseProjectSettings.setLabelText(PreferencesMessages.getString("CompilerPropertyPage.useprojectsettings.label"));
 	}
 
 	/*
@@ -51,7 +79,7 @@ public class CompilerPropertyPage extends PropertyPage {
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.COMPILER_PREFERENCE_PAGE);
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.TODOTASK_PROPERTY_PAGE);
 	}
 
 	/*
@@ -64,32 +92,27 @@ public class CompilerPropertyPage extends PropertyPage {
 				doStatusChanged();
 			}
 		};		
-		fConfigurationBlock= new CompilerConfigurationBlock(listener, getProject());		
+		fConfigurationBlock= new CompilerConfigurationBlock(listener, getProject());
 		
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
-		layout.marginWidth= 0;		
+		layout.marginWidth= 0;
+		layout.numColumns= 2;
 		composite.setLayout(layout);
-				
-		fUseWorkspaceSettings= new Button(composite, SWT.RADIO);
-		fUseWorkspaceSettings.setText(PreferencesMessages.getString("CompilerPropertyPage.useworkspacesettings.label"));
-		fUseWorkspaceSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		fUseProjectSettings= new Button(composite, SWT.RADIO);
-		fUseProjectSettings.setText(PreferencesMessages.getString("CompilerPropertyPage.useprojectsettings.label"));
-		fUseProjectSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
-		fUseProjectSettings.addSelectionListener(new SelectionListener() {
-			public void widgetSelected(SelectionEvent event) {
-				doRadioButtonChanged();
-			}
-			public void widgetDefaultSelected(SelectionEvent event) {
-				doRadioButtonChanged();
-			}
-		});
+		fUseWorkspaceSettings.doFillIntoGrid(composite, 1);
+		LayoutUtil.setHorizontalGrabbing(fUseWorkspaceSettings.getSelectionButton(null));
+		
+		fChangeWorkspaceSettings.doFillIntoGrid(composite, 1);
+		
+		fUseProjectSettings.doFillIntoGrid(composite, 2);
+		
+		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL );
+		data.horizontalSpan= 2;
 		
 		fConfigurationBlockControl= fConfigurationBlock.createContents(composite);
-		fConfigurationBlockControl.setLayoutData(new GridData(GridData.FILL));
+		fConfigurationBlockControl.setLayoutData(data);
 		
 		boolean useProjectSettings= fConfigurationBlock.hasProjectSpecificOptions();
 		
@@ -101,12 +124,18 @@ public class CompilerPropertyPage extends PropertyPage {
 	}
 	
 	private boolean useProjectSettings() {
-		return fUseProjectSettings.getSelection();
+		return fUseProjectSettings.isSelected();
 	}
 	
-	private void doRadioButtonChanged() {
-		updateEnableState();
-		doStatusChanged();
+	private void doDialogFieldChanged(DialogField field) {
+		if (field == fChangeWorkspaceSettings) {
+			String id= "org.eclipse.jdt.ui.preferences.CompilerPreferencePage";
+			CompilerPreferencePage page= new CompilerPreferencePage();
+			showPreferencePage(id, page);
+		} else {
+			updateEnableState();
+			doStatusChanged();
+		}
 	}	
 	/**
 	 * Method statusChanged.
@@ -155,6 +184,23 @@ public class CompilerPropertyPage extends PropertyPage {
 	private void updateStatus(IStatus status) {
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);
+	}
+	
+	private boolean showPreferencePage(String id, IPreferencePage page) {
+		final IPreferenceNode targetNode = new PreferenceNode(id, page);
+		
+		PreferenceManager manager = new PreferenceManager();
+		manager.addToRoot(targetNode);
+		final PreferenceDialog dialog = new PreferenceDialog(getControl().getShell(), manager);
+		final boolean [] result = new boolean[] { false };
+		BusyIndicator.showWhile(getControl().getDisplay(), new Runnable() {
+			public void run() {
+				dialog.create();
+				dialog.setMessage(targetNode.getLabelText());
+				result[0]= (dialog.open() == PreferenceDialog.OK);
+			}
+		});
+		return result[0];
 	}	
 
 }

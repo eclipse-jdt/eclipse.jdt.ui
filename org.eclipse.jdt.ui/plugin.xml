@@ -280,8 +280,19 @@
        objectClass="org.eclipse.jdt.core.IJavaProject"
        class="org.eclipse.jdt.internal.ui.preferences.CompilerPropertyPage">
        <filter name="nature" value="org.eclipse.jdt.core.javanature"/>
-   	</page> 	
-   	
+   	</page>
+    <page name="%todoPageName"
+  	   id="org.eclipse.jdt.ui.propertyPages.TodoTaskPropertyPage"
+       objectClass="org.eclipse.core.resources.IProject"
+       class="org.eclipse.jdt.internal.ui.preferences.TodoTaskPropertyPage">
+       <filter name="nature" value="org.eclipse.jdt.core.javanature"/>
+   	</page>
+   	<page name="%todoPageName"
+  	   id="org.eclipse.jdt.ui.propertyPages.TodoTaskPropertyPage"
+       objectClass="org.eclipse.jdt.core.IJavaProject"
+       class="org.eclipse.jdt.internal.ui.preferences.TodoTaskPropertyPage">
+       <filter name="nature" value="org.eclipse.jdt.core.javanature"/>
+   	</page>    	
    	<page name="%sourceAttachmentPageName"
 		id="org.eclipse.jdt.ui.propertyPages.SourceAttachmentPage1" 
 		objectClass="org.eclipse.jdt.core.IPackageFragmentRoot"
@@ -429,7 +440,12 @@
 		id="org.eclipse.jdt.ui.preferences.CompilerPreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.CompilerPreferencePage"
 		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
-	</page>	
+	</page>
+	<page name="%todoTaskPrefName"
+		id = "org.eclipse.jdt.ui.preferences.TodoTaskPreferencePage"
+		class="org.eclipse.jdt.internal.ui.preferences.TodoTaskPreferencePage"
+		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
+	</page>		
 	<page name="%templatePageName"
 		id = "org.eclipse.jdt.ui.preferences.TemplatePreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage"

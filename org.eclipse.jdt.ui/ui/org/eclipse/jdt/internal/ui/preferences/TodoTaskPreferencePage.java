@@ -29,7 +29,11 @@ public class TodoTaskPreferencePage extends PreferencePage implements IWorkbench
 
 	public TodoTaskPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(PreferencesMessages.getString("TodoTaskPreferencePage.description")); //$NON-NLS-1$
+		//setDescription(PreferencesMessages.getString("TodoTaskPreferencePage.description")); //$NON-NLS-1$
+		
+		// only used when page is shown programatically
+		setTitle(PreferencesMessages.getString("TodoTaskPreferencePage.title"));
+
 		fConfigurationBlock= new TodoTaskConfigurationBlock(this, null);
 	}
 		
@@ -45,7 +49,7 @@ public class TodoTaskPreferencePage extends PreferencePage implements IWorkbench
 	public void createControl(Composite parent) {
 		// added for 1GEUGE6: ITPJUI:WIN2000 - Help is the same on all preference pages
 		super.createControl(parent);
-		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.COMPILER_PREFERENCE_PAGE);
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.TODOTASK_PREFERENCE_PAGE);
 	}	
 
 	/*
@@ -72,12 +76,7 @@ public class TodoTaskPreferencePage extends PreferencePage implements IWorkbench
 		fConfigurationBlock.performDefaults();
 		super.performDefaults();
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener#IStatusChangeListener()
-	 */
-	public void IStatusChangeListener() {
-	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener#statusChanged(org.eclipse.core.runtime.IStatus)
 	 */
