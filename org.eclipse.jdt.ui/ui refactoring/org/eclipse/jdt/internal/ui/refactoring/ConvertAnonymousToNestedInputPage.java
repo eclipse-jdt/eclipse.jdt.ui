@@ -31,9 +31,7 @@ public class ConvertAnonymousToNestedInputPage extends UserInputWizardPage {
 
 	private static final String DESCRIPTION = "Select the name and modifiers for the new nested class";
 	public static final String PAGE_NAME= "ConvertAnonymousToNestedInputPage";//$NON-NLS-1$
-    private Button fDeclareStaticCheckbox;
-    private Button fDeclareFinalCheckbox;
-
+    
 	public ConvertAnonymousToNestedInputPage() {
 		super(PAGE_NAME, true);
 		setDescription(DESCRIPTION);
@@ -48,26 +46,28 @@ public class ConvertAnonymousToNestedInputPage extends UserInputWizardPage {
 		result.setLayout(layout);
 		
 		addVisibilityControl(result);
-		addFieldNameField(result);
+		Text textField= addFieldNameField(result);
 		addDeclareFinalCheckbox(result);
 		
+		textField.setFocus();
 		setPageComplete(false);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_WIZARD_PAGE);		
 	}
 
-    private void addFieldNameField(Composite result) {
+    private Text addFieldNameField(Composite result) {
         Label nameLabel= new Label(result, SWT.NONE);
         nameLabel.setText("&Class name:");
         nameLabel.setLayoutData(new GridData());
         
-        final Text nameField= new Text(result, SWT.BORDER | SWT.SINGLE);
-        nameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        nameField.addModifyListener(new ModifyListener(){
+		final Text classNameField= new Text(result, SWT.BORDER | SWT.SINGLE);
+        classNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        classNameField.addModifyListener(new ModifyListener(){
         	public void modifyText(ModifyEvent e) {
-        		ConvertAnonymousToNestedInputPage.this.getConvertRefactoring().setClassName(nameField.getText());
+        		ConvertAnonymousToNestedInputPage.this.getConvertRefactoring().setClassName(classNameField.getText());
         		ConvertAnonymousToNestedInputPage.this.updateStatus();
             }
         });
+        return classNameField;
     }
 	
 	private void updateStatus() {
@@ -90,16 +90,16 @@ public class ConvertAnonymousToNestedInputPage extends UserInputWizardPage {
 	
 	 public void addDeclareFinalCheckbox(Composite result) {
         GridData gd;
-        fDeclareFinalCheckbox= new Button(result, SWT.CHECK);
-        fDeclareFinalCheckbox.setEnabled(getConvertRefactoring().canEnableSettingFinal());
-        fDeclareFinalCheckbox.setSelection(getConvertRefactoring().getDeclareFinal());
-        fDeclareFinalCheckbox.setText("Decla&re class as 'final'");
+        final Button declareFinalCheckbox= new Button(result, SWT.CHECK);
+        declareFinalCheckbox.setEnabled(getConvertRefactoring().canEnableSettingFinal());
+        declareFinalCheckbox.setSelection(getConvertRefactoring().getDeclareFinal());
+        declareFinalCheckbox.setText("Decla&re class as 'final'");
         gd= new GridData(GridData.FILL_HORIZONTAL);
         gd.horizontalSpan= 2;
-        fDeclareFinalCheckbox.setLayoutData(gd);
-        fDeclareFinalCheckbox.addSelectionListener(new SelectionAdapter(){
+        declareFinalCheckbox.setLayoutData(gd);
+        declareFinalCheckbox.addSelectionListener(new SelectionAdapter(){
         	public void widgetSelected(SelectionEvent e) {
-        		getConvertRefactoring().setDeclareFinal(fDeclareFinalCheckbox.getSelection());
+        		getConvertRefactoring().setDeclareFinal(declareFinalCheckbox.getSelection());
             }
         });
     }
