@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -37,6 +38,7 @@ import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 public abstract class ReorgRefactoring extends Refactoring {
 	
@@ -47,8 +49,8 @@ public abstract class ReorgRefactoring extends Refactoring {
 	private IFile[] fUnsavedFiles= new IFile[0];
 	
 	ReorgRefactoring(List elements){
-		fElements= elements;
 		Assert.isNotNull(elements);
+		fElements= convertToInputElements(elements);
 		fExcludedElements= new HashSet(0);
 	}
 	
@@ -693,5 +695,31 @@ public abstract class ReorgRefactoring extends Refactoring {
 		}
 		return null;
 	}
+	
+	private static List convertToInputElements(List elements){
+		List converted= new ArrayList(elements.size());
+		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			Object convertedObject= convertToInputElements(iter.next());
+			if (convertedObject != null)
+				converted.add(convertedObject);
+		}
+		return converted;
+	}
+	
+	private static Object convertToInputElements(Object element) {
+		if (! (element instanceof IType))
+			return element;
+		IType type= (IType)element;
+		try {
+			if (JavaElementUtil.isMainType(type))
+				return type.getCompilationUnit();
+			else
+				return null;	
+		} catch(JavaModelException e) {
+			//ignore
+			return null;	
+		}
+	}
+	
 }
 
