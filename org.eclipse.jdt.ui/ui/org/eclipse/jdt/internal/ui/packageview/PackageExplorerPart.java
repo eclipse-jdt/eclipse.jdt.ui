@@ -746,17 +746,18 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (!isLinkingEnabled())  
 			return;
 		Object input= getElementOfInput(editor.getEditorInput());
-		// we only activate IFiles, revealing class files is 
-		// distracting since it expands the JDK node
-		if (input instanceof IFile) {
-			Object element= JavaCore.create((IFile)input);
-			if (element == null) // try a non Java resource
-				element= input;
-			if (element != null) {
-				ISelection newSelection= new StructuredSelection(element);
-				if (!fViewer.getSelection().equals(newSelection)) {
-				 	fViewer.setSelection(newSelection);
-				}
+		Object element= null;
+		
+		if (input instanceof IFile) 
+			element= JavaCore.create((IFile)input);
+			
+		if (element == null) // try a non Java resource
+			element= input;
+			
+		if (element != null) {
+			ISelection newSelection= new StructuredSelection(element);
+			if (!fViewer.getSelection().equals(newSelection)) {
+				 fViewer.setSelection(newSelection);
 			}
 		}
 	}
