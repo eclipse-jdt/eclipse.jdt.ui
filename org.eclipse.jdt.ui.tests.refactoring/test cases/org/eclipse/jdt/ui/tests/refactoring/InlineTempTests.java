@@ -132,7 +132,17 @@ public class InlineTempTests extends RefactoringTest {
 //		printTestDisabledMessage("regression test for bug#9001");
 		helper1();
 	}
+	
+	public void test11() throws Exception{
+		helper1();
+	}	
 
+	public void test12() throws Exception{
+		helper1();
+	}	
+
+	//------
+	
 	public void testFail0() throws Exception{
 //		printTestDisabledMessage("compile errors are ok now");
 		helper2();
