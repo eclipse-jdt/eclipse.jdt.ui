@@ -31,6 +31,7 @@ public class PackagesView extends JavaBrowsingPart {
 	 * Adds filters the viewer of this part.
 	 */
 	protected void addFilters() {
+		super.addFilters();
 		getViewer().addFilter(new EmptyInnerPackageFilter());
 		getViewer().addFilter(new NonJavaElementFilter());
 		getViewer().addFilter(new LibraryFilter());

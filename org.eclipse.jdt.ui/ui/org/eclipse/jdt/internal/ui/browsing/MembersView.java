@@ -69,6 +69,7 @@ public class MembersView extends JavaBrowsingPart {
 	 * Adds filters the viewer of this part.
 	 */
 	protected void addFilters() {
+		super.addFilters();
 	}
 
 	protected void fillToolBar(IToolBarManager tbm) {

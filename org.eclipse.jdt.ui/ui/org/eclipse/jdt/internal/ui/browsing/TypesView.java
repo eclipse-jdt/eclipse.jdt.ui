@@ -37,6 +37,7 @@ public class TypesView extends JavaBrowsingPart {
 	 * Adds filters the viewer of this part.
 	 */
 	protected void addFilters() {
+		super.addFilters();
 		getViewer().addFilter(new NonJavaElementFilter());
 	}
 
