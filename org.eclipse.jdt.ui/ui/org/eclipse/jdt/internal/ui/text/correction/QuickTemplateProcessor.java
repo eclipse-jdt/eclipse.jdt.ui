@@ -87,11 +87,15 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 		}
 		
 		try {
-			ICompilationUnit cu= context.getCompilationUnit();
-			IDocument document= getDocument(cu);
-			
 			int offset= context.getSelectionOffset();
 			int length= context.getSelectionLength();
+			if (length == 0) {
+				return null;
+			}
+			
+			ICompilationUnit cu= context.getCompilationUnit();
+			IDocument document= getDocument(cu);
+
 			// test if selection is either a full line or spans over multiple lines
 			int startLine= document.getLineOfOffset(offset);
 			int endLine= document.getLineOfOffset(offset + length);
