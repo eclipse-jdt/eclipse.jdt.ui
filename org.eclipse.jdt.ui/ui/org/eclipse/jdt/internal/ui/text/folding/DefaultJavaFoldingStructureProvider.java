@@ -174,6 +174,13 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	 * @see org.eclipse.jface.text.source.projection.IProjectionListener#projectionEnabled()
 	 */
 	public void projectionEnabled() {
+		// http://home.ott.oti.com/teams/wswb/anon/out/vms/index.html
+		// projectionEnabled messages are not always paired with projectionDisabled
+		// i.e. multiple enabled messages may be sent out.
+		// we have to make sure that we disable first when getting an enable
+		// message.
+		projectionDisabled();
+		
 		if (fEditor instanceof JavaEditor) {
 			initialize();
 			fElementListener= new ElementChangedListener();
