@@ -81,7 +81,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private static JavaPlugin fgJavaPlugin;
 
 	/*
-	 * Work in progress. Might be moved to Java UI.
+	 * XXX: Work in progress. Might be moved to Java UI.
 	 */
 	public static String ID_BROWSING_PERSPECTIVE= JavaUI.ID_PLUGIN + ".JavaBrowsingPerspective";	
 	public static String ID_PROJECTS_VIEW= JavaUI.ID_PLUGIN + ".ProjectsView";
