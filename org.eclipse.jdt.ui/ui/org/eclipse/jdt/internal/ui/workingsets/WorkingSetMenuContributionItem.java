@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.workingsets;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 
@@ -33,9 +34,14 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 	private int fId;
 	private IWorkingSet fWorkingSet;
 	private WorkingSetFilterActionGroup fActionGroup;
+	private Image fImage;
 
 	/**
 	 * Constructor for WorkingSetMenuContributionItem.
+	 * 
+	 * @param id the id
+	 * @param actionGroup the action group
+	 * @param workingSet the working set
 	 */
 	public WorkingSetMenuContributionItem(int id, WorkingSetFilterActionGroup actionGroup, IWorkingSet workingSet) {
 		super(getId(id));
@@ -52,11 +58,9 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 	public void fill(Menu menu, int index) {
 		MenuItem mi= new MenuItem(menu, SWT.RADIO, index);
 		mi.setText("&" + fId + " " + fWorkingSet.getName());  //$NON-NLS-1$  //$NON-NLS-2$
-		/*
-		 * XXX: Don't set the image - would look bad because other menu items don't provide image
-		 * XXX: Get working set specific image name from XML - would need to cache icons
-		 */
-//		mi.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVA_WORKING_SET));
+		if (fImage == null)
+			fImage= fWorkingSet.getImage().createImage();
+		mi.setImage(fImage);
 		mi.setSelection(fWorkingSet.equals(fActionGroup.getWorkingSet()));
 		mi.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -67,8 +71,20 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 		});
 	}
 	
-	/**
-	 * Overridden to always return true and force dynamic menu building.
+	/*
+	 * @see org.eclipse.jface.action.ContributionItem#dispose()
+	 * @since 3.0
+	 */
+	public void dispose() {
+		if (fImage != null && !fImage.isDisposed())
+			fImage.dispose();
+		fImage= null;
+		
+		super.dispose();
+	}
+	
+	/*
+	 * @see org.eclipse.jface.action.IContributionItem#isDynamic()
 	 */
 	public boolean isDynamic() {
 		return true;
