@@ -18,6 +18,7 @@ import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -28,16 +29,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
-	/**
-	 * Returns whether the text ends with one of the given search strings.
-	 */
-	private boolean hasLineDelimiters(IDocument document, String text) throws BadLocationException {
+	private boolean isLineDelimiters(IDocument document, String text) throws BadLocationException {
 		String[] delimiters= document.getLegalLineDelimiters();
-		
-		for (int i= 0; i < delimiters.length; i++)
-			if (text.indexOf(delimiters[i]) != -1)
-				return true;
-		
+		if (delimiters != null)
+			return TextUtilities.equals(delimiters, text) > -1;
 		return false;
 	}
 	
@@ -116,7 +111,7 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 				
 			if (preferenceStore.getBoolean(PreferenceConstants.EDITOR_WRAP_STRINGS) &&
-				hasLineDelimiters(document, command.text))
+				isLineDelimiters(document, command.text))
 			{
 				javaStringIndentAfterNewLine(document, command);
 			}
