@@ -19,6 +19,10 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -26,12 +30,14 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
-import org.eclipse.text.edits.InsertEdit;
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageDeclaration;
@@ -74,10 +80,13 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -105,12 +114,6 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.DocumentChange;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextChange;
 
 /**
  * Extract Local Variable (from selected expression inside method or initializer).
@@ -757,6 +760,22 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (deepestCommonParent instanceof TryStatement || deepestCommonParent instanceof IfStatement) {
 			if (deepestCommonParent.getParent() instanceof Block)
 				return deepestCommonParent;
+			if (deepestCommonParent.getParent() instanceof SwitchStatement) {
+				SwitchStatement statement= (SwitchStatement) deepestCommonParent.getParent();
+				final List statements= statement.statements();
+				for (int index= 0; index < statements.size(); index++) {
+					if (statements.get(index) == deepestCommonParent) {
+						for (int offset= index; offset >= 0; offset--) {
+							if (statements.get(offset) instanceof SwitchCase) {
+								for (int stat= offset + 1; stat < statements.size(); stat++) {
+									if (!(statements.get(stat) instanceof VariableDeclarationStatement))
+										return (ASTNode) statements.get(stat);
+								}
+							}
+						}
+					}
+				}
+			}
 			if (commonPath.length < firstReplaceNodeParents.length)
 				return getInnermostStatementInBlock(firstReplaceNodeParents[commonPath.length]);
 		}
