@@ -167,4 +167,8 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 	public void testDeclarationInitializer() throws Exception {
 		 tryCatchTest();
 	}
+	
+	public void testThenStatement() throws Exception {
+		 tryCatchTest();
+	}
 }

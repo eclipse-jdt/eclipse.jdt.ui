@@ -177,17 +177,21 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			fTryBody= new ArrayList(2);
 			List newStatements= createLocals();
 			newStatements.add(createTryCatchStatement(buffer.getLineDelimiter()));
-			List container= getSelectedNodeContainer();
-			if (selectedNodeIsDeclaration()) {
-				int index= container.indexOf(fSelectedNode);
-				for (Iterator iter= newStatements.iterator(); iter.hasNext();) {
-					ASTNode element= (ASTNode)iter.next();
-					fRewriter.markAsInserted(element);
-					container.add(++index, element);
-				}
+			if (newStatements.size() == 1) {
+				fRewriter.markAsReplaced(fSelectedNode, (ASTNode)newStatements.get(0));
 			} else {
-				fRewriter.markAsReplaced(fSelectedNode, container, 
-					(ASTNode[])newStatements.toArray(new ASTNode[newStatements.size()]));
+				List container= getSelectedNodeContainer();
+				if (selectedNodeIsDeclaration()) {
+					int index= container.indexOf(fSelectedNode);
+					for (Iterator iter= newStatements.iterator(); iter.hasNext();) {
+						ASTNode element= (ASTNode)iter.next();
+						fRewriter.markAsInserted(element);
+						container.add(++index, element);
+					}
+				} else {
+					fRewriter.markAsReplaced(fSelectedNode, container, 
+						(ASTNode[])newStatements.toArray(new ASTNode[newStatements.size()]));
+				}
 			}
 			
 			if (!fImportEdit.isEmpty()) {
@@ -196,7 +200,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			}
 			MultiTextEdit change= new MultiTextEdit();
 			root.add(change);
-			fRewriter.rewriteNode(buffer, change, null);
+			fRewriter.rewriteNode(buffer, change);
 			result.addGroupDescription(new GroupDescription(NN, new TextEdit[] {change} ));
 			return result;
 		} catch (JavaModelException e) {
