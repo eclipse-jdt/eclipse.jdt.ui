@@ -38,7 +38,6 @@ import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -46,7 +45,6 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -60,14 +58,11 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchPattern;
-
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
@@ -89,6 +84,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -299,7 +297,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		sub.beginTask(NO_NAME, affectedCUs.length);
 		IVariableBinding fieldIdentifier= fFieldDeclaration.resolveBinding();
 		ITypeBinding declaringClass= 
-			((TypeDeclaration)ASTNodes.getParent(fFieldDeclaration, TypeDeclaration.class)).resolveBinding();
+			((AbstractTypeDeclaration)ASTNodes.getParent(fFieldDeclaration, AbstractTypeDeclaration.class)).resolveBinding();
 		List ownerDescriptions= new ArrayList();
 		ICompilationUnit owner= fField.getCompilationUnit();
 		for (int i= 0; i < affectedCUs.length; i++) {
@@ -399,7 +397,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	}
 	
 	private void checkInHierarchy(RefactoringStatus status) {
-		TypeDeclaration declaration= (TypeDeclaration)ASTNodes.getParent(fFieldDeclaration, ASTNode.TYPE_DECLARATION);
+		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration)ASTNodes.getParent(fFieldDeclaration, AbstractTypeDeclaration.class);
 		ITypeBinding type= declaration.resolveBinding();
 		if (type != null) {
 			ITypeBinding fieldType= fFieldDeclaration.resolveBinding().getType();
@@ -482,12 +480,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	private ChildListPropertyDescriptor getBodyDeclarationsProperty(ASTNode declaration) {
 		if (declaration instanceof AnonymousClassDeclaration)
 			return AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY;
-		else if (declaration instanceof AnnotationTypeDeclaration)
-			return AnnotationTypeDeclaration.BODY_DECLARATIONS_PROPERTY;
-		else if (declaration instanceof TypeDeclaration)
-			return TypeDeclaration.BODY_DECLARATIONS_PROPERTY;
-		else if (declaration instanceof EnumDeclaration)
-			return EnumDeclaration.BODY_DECLARATIONS_PROPERTY;
+		else if (declaration instanceof AbstractTypeDeclaration)
+			return ((AbstractTypeDeclaration) declaration).getBodyDeclarationsProperty();
 		Assert.isTrue(false);
 		return null;
 	}

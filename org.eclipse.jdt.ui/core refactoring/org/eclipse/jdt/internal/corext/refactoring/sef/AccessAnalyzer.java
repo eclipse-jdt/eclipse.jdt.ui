@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -37,7 +38,6 @@ import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -197,7 +197,7 @@ class AccessAnalyzer extends ASTVisitor {
 			return result;
 			
 		if (binding instanceof IVariableBinding) {
-			TypeDeclaration type= (TypeDeclaration)ASTNodes.getParent(node, TypeDeclaration.class);
+			AbstractTypeDeclaration type= (AbstractTypeDeclaration)ASTNodes.getParent(node, AbstractTypeDeclaration.class);
 			if (type != null) {
 				ITypeBinding declaringType= type.resolveBinding();
 				return !Bindings.equals(fDeclaringClassBinding, declaringType);
