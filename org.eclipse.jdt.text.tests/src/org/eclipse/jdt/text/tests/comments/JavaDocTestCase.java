@@ -311,4 +311,15 @@ public class JavaDocTestCase extends CommentTestCase {
 		String result= testFormat(input);
 		assertEquals(expected, result);
 	}
+	
+	public void testNoChange1() {
+		String content= PREFIX + DELIMITER + POSTFIX;
+		assertEquals(content, testFormat(content));
+	}
+	
+	public void testNoFormat1() {
+		setUserOption(PreferenceConstants.FORMATTER_COMMENT_FORMAT, "false");
+		String content= PREFIX + DELIMITER + POSTFIX;
+		assertEquals(content, testFormat(content));
+	}
 }
