@@ -100,11 +100,11 @@ public abstract class JavaHistoryAction extends Action implements IActionDelegat
 		}
 		
 		public InputStream getContents() {
-			return new ByteArrayInputStream(JavaCompareUtilities.getBytes(fBuffer.getContent(), "UTF-16"));
+			return new ByteArrayInputStream(JavaCompareUtilities.getBytes(fBuffer.getContent(), "UTF-16")); //$NON-NLS-1$
 		}
 		
 		public String getCharset() {
-			return "UTF-16";
+			return "UTF-16"; //$NON-NLS-1$
 		}
 	}
 

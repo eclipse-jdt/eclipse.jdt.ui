@@ -60,7 +60,7 @@ public class JavaCompareAction implements IActionDelegate {
 		public InputStream getContents() throws CoreException {
 			byte[] bytes;
 			try {
-				bytes= fContents.getBytes("UTF-16");
+				bytes= fContents.getBytes("UTF-16"); //$NON-NLS-1$
 			} catch (UnsupportedEncodingException e) {
 				bytes= fContents.getBytes();
 			}
@@ -68,7 +68,7 @@ public class JavaCompareAction implements IActionDelegate {
 		}
 		
 		public String getCharset() {
-			return "UTF-16";
+			return "UTF-16"; //$NON-NLS-1$
 		}
 	}
 	
