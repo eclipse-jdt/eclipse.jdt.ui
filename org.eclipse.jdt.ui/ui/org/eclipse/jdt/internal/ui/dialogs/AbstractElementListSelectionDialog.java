@@ -157,7 +157,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 * Sets the filter pattern.
 	 * @param filter the filter pattern.
 	 */
-	protected void setFilter(String filter) {
+	public void setFilter(String filter) {
 		if (fFilterText == null)
 			fFilter= filter;
 		else
@@ -168,7 +168,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 * Returns the current filter pattern.
 	 * @return returns the current filter pattern.
 	 */
-	protected String getFilter() {
+	public String getFilter() {
 		if (fFilteredList == null)
 			return fFilter;
 		else

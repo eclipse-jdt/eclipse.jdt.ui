@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.SharedImages;
+import org.eclipse.jdt.internal.ui.dialogs.AbstractElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
@@ -271,18 +272,27 @@ public final class JavaUI {
 	 *   <code>IJavaElementSearchConstants.CONSIDER_BINARIES</code>,
 	 *   <code>CONSIDER_EXTERNAL_JARS</code>, or their bitwise OR, or <code>0</code>
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
+	 * @param filter the filter
 	 * @return a new selection dialog
 	 */
-	public static SelectionDialog createMainTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection) {
-		SelectionDialog dialog= null;
+	public static SelectionDialog createMainTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection, String filter) {
+		AbstractElementListSelectionDialog dialog= null;
 		if (multipleSelection) {
 			dialog= new MultiMainTypeSelectionDialog(parent, context, scope, style);
 		} else {
 			dialog= new MainTypeSelectionDialog(parent, context, scope, style);
-		}
+		}		
+		dialog.setFilter(filter);
 		return dialog;
 	}
 
+	/**
+	 * @see createMainTypeDialog(Shell,IRunnableContext,IJavaSearchScope,int,boolean,String)
+	 */
+	public static SelectionDialog createMainTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection) {
+		return createMainTypeDialog(parent, context, scope, style, multipleSelection, "A");
+	}
+	
 	/**
 	 * Creates a selection dialog that lists all types in the given project.
 	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
