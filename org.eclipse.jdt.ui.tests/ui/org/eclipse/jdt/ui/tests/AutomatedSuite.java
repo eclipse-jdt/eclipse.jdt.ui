@@ -16,6 +16,7 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.ui.tests.astrewrite.ASTRewritingTest;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewDeltaTests;
+import org.eclipse.jdt.ui.tests.callhierarchy.CallHierarchyContentProviderTest;
 import org.eclipse.jdt.ui.tests.core.CoreTests;
 import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests1;
 import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests2;
@@ -58,7 +59,9 @@ public class AutomatedSuite extends TestSuite {
 		addTest(ContentProviderTests4.suite());	
 		
 		addTest(PackagesViewContentProviderTests.suite());
-		addTest(PackagesViewDeltaTests.suite());				
+		addTest(PackagesViewDeltaTests.suite());
+		
+		addTest(CallHierarchyContentProviderTest.suite());
 	}
 	
 }
