@@ -168,9 +168,9 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		addGroup(menu, IContextMenuConstants.GROUP_SEARCH,  IContextMenuConstants.GROUP_SHOW);
 		addAction(menu, IContextMenuConstants.GROUP_SHOW, "OpenOnSelection"); //$NON-NLS-1$
 		addAction(menu, IContextMenuConstants.GROUP_SHOW, "OpenHierarchyOnSelection"); //$NON-NLS-1$
+		addAction(menu, IContextMenuConstants.GROUP_ADDITIONS, "Inspect"); //$NON-NLS-1$
 		addAction(menu, IContextMenuConstants.GROUP_ADDITIONS, "Display"); //$NON-NLS-1$
 		addAction(menu, IContextMenuConstants.GROUP_ADDITIONS, "Run"); //$NON-NLS-1$
-		addAction(menu, IContextMenuConstants.GROUP_ADDITIONS, "Inspect"); //$NON-NLS-1$
 	}
 
 	public boolean isVMLaunched() {
