@@ -182,7 +182,10 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				f.install();
 				BufferSynchronizer b= new BufferSynchronizer(d, c);
 				b.install();
-				return new CompilationUnitInfo(d, m, f, c, b);
+				
+				CompilationUnitInfo info= new CompilationUnitInfo(d, m, f, c, b);
+				info.setModificationStamp(computeModificationStamp(input.getFile()));
+				return info;
 				
 			} catch (JavaModelException x) {
 				throw new CoreException(x.getStatus());
@@ -257,13 +260,13 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				IResource resource= original.getUnderlyingResource();
 				
 				if (resource != null)
-					checkSynchronizationState(resource);
+					checkSynchronizationState(info.fModificationStamp, resource);
 				
 				// commit working copy
 				info.fCopy.commit(false, monitor);
 				
 				if (resource != null)
-					info.setModificationStamp(resource.getModificationStamp());
+					info.setModificationStamp(computeModificationStamp(resource));
 				
 				AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
 				model.updateMarkers(info.fDocument);
