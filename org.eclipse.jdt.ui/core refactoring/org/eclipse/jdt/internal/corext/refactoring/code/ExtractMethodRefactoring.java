@@ -508,7 +508,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 	
 	private String getType(VariableDeclaration declaration) {
-		return ASTNodes.asString(ASTNodes.getType(declaration));
+		return ASTNodes.asString(ASTNodes.getType(declaration.getAST(), declaration));
 	}
 	
 	//---- Code generation -----------------------------------------------------------------------
@@ -636,7 +636,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			VariableDeclaration infoDecl= getVariableDeclaration(info);
 			SingleVariableDeclaration parameter= fAST.newSingleVariableDeclaration();
 			parameter.setModifiers(ASTNodes.getModifiers(infoDecl));
-			parameter.setType((Type)ASTNode.copySubtree(fAST, ASTNodes.getType(infoDecl)));
+			parameter.setType(ASTNodes.getType(fAST, infoDecl));
 			parameter.setName(fAST.newSimpleName(info.getNewName()));
 			parameters.add(parameter);
 		}
@@ -716,7 +716,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fragment.setInitializer(intilizer);	
 		VariableDeclarationStatement result= fAST.newVariableDeclarationStatement(fragment);
 		result.setModifiers(ASTNodes.getModifiers(original));
-		result.setType((Type)ASTNode.copySubtree(fAST, ASTNodes.getType(original)));
+		result.setType(ASTNodes.getType(fAST, original));
 		return result;
 	}
 }

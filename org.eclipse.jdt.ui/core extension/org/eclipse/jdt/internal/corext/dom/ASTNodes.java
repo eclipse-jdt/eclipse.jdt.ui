@@ -234,11 +234,11 @@ public class ASTNodes {
 	 * Returns the type node for the given declaration. The returned node
 	 * is a copy and is owned by a different AST. The returned node contains
 	 * any extra dimensions.
-	 * @param declaration
-	 * @return
+	 * @param ast The AST to create the resulting type with.
+	 * @param declaration The variable declaration to get the type from
+	 * @return A new type node created with the given AST.
 	 */
-	public static Type getType(VariableDeclaration declaration) {
-		AST ast= new AST();
+	public static Type getType(AST ast, VariableDeclaration declaration) {
 		Type type= null;
 		if (declaration instanceof SingleVariableDeclaration) {
 			type= ((SingleVariableDeclaration)declaration).getType();
@@ -251,7 +251,7 @@ public class ASTNodes {
 		}
 		if (type == null)
 			return null;
-		type= (Type)ASTNode.copySubtree(ast, type);
+		type= (Type) ASTNode.copySubtree(ast, type);
 		int extraDim= 0;
 		if (declaration.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			extraDim= ((VariableDeclarationFragment)declaration).getExtraDimensions();

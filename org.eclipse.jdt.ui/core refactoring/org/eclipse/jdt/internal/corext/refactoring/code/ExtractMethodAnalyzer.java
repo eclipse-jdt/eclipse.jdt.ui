@@ -197,7 +197,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		switch (fReturnKind) {
 			case ACCESS_TO_LOCAL:
 				VariableDeclaration declaration= ASTNodes.findVariableDeclaration(fReturnValue, fEnclosingMethod);
-				fReturnType= ASTNodes.getType(declaration);
+				fReturnType= ASTNodes.getType(ast, declaration);
 				break;
 			case EXPRESSION:
 				Expression expression= (Expression)getFirstSelectedNode();
