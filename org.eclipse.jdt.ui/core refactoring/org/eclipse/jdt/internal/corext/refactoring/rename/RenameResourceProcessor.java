@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
@@ -36,12 +37,17 @@ public class RenameResourceProcessor extends RenameProcessor {
 	//---- IRenameProcessor methods ---------------------------------------
 		
 	public void initialize(Object element) throws CoreException {
-		Assert.isTrue(element instanceof IResource);
-		fResource= (IResource)element;
+		if (!(element instanceof IAdaptable))
+			return;
+		fResource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
+		if (fResource == null)
+			return;
 		setNewElementName(fResource.getName());
 	}
 	
 	public boolean isAvailable() throws JavaModelException {
+		if (fResource == null)
+			return false;
 		if (! fResource.exists())
 			return false;
 		if (! fResource.isAccessible())	

@@ -96,6 +96,8 @@ public class RenamePackageProcessor extends RenameProcessor implements IReferenc
 	}
 	
 	public boolean isAvailable() throws CoreException {
+		if (fPackage == null)
+			return false;
 		if (! Checks.isAvailable(fPackage))
 			return false;
 		if (fPackage.isDefaultPackage())

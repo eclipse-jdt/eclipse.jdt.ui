@@ -96,10 +96,10 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 	//---- IRefactoringProcessor ---------------------------------------------------
 
 	public void initialize(Object element) {
-		if (element instanceof IType) {
-			fType= (IType)element;
-			setNewElementName(fType.getElementName());
-		}
+		if (!(element instanceof IType))
+			return;
+		fType= (IType)element;
+		setNewElementName(fType.getElementName());
 		fUpdateReferences= true; //default is yes
 		fUpdateJavaDoc= false;
 		fUpdateComments= false;

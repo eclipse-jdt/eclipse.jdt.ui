@@ -11,10 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
-
-import org.eclipse.core.resources.IResource;
 
 
 public class ObjectStateExpression extends CompositeExpression {
@@ -33,10 +30,10 @@ public class ObjectStateExpression extends CompositeExpression {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
 	 */
 	public int evaluate(Object element) throws CoreException {
-		if (fAdaptable != null) {
-			if (("*".equals(fAdaptable) || isInstanceOf(element, fAdaptable)) && (element instanceof IAdaptable)) //$NON-NLS-1$
-				element= ((IAdaptable)element).getAdapter(IResource.class); 
-		}
+//		if (fAdaptable != null) {
+//			if (("*".equals(fAdaptable) || isInstanceOf(element, fAdaptable)) && (element instanceof IAdaptable)) //$NON-NLS-1$
+//				element= ((IAdaptable)element).getAdapter(IResource.class); 
+//		}
 		if (element == null)
 			return ITestResult.FALSE;
 		return evaluateAnd(element);
