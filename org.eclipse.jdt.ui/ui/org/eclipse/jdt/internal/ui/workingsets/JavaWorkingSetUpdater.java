@@ -37,7 +37,6 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 	public static final String ID= "org.eclipse.jdt.ui.JavaWorkingSetPage"; //$NON-NLS-1$
 	
 	private List fWorkingSets;
-	private IElementChangedListener fListener;
 	
 	private static class WorkingSetDelta {
 		private IWorkingSet fWorkingSet;
@@ -66,19 +65,16 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 	
 	public JavaWorkingSetUpdater() {
 		fWorkingSets= new ArrayList();
+		JavaCore.addElementChangedListener(this);
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public void add(IWorkingSet workingSet) {
+		checkElementExistence(workingSet);
 		synchronized (fWorkingSets) {
-			checkElementExistence(workingSet);
 			fWorkingSets.add(workingSet);
-		}
-		if (fListener == null) {
-			fListener= this;
-			JavaCore.addElementChangedListener(fListener);
 		}
 	}
 
@@ -86,13 +82,9 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 	 * {@inheritDoc}
 	 */
 	public boolean remove(IWorkingSet workingSet) {
-		boolean result= false;
+		boolean result;
 		synchronized(fWorkingSets) {
 			result= fWorkingSets.remove(workingSet);
-		}
-		if (fWorkingSets.size() == 0) {
-			JavaCore.removeElementChangedListener(fListener);
-			fListener= null;
 		}
 		return result;
 	}
@@ -101,35 +93,39 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 	 * {@inheritDoc}
 	 */
 	public boolean contains(IWorkingSet workingSet) {
-		return fWorkingSets.contains(workingSet);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void dispose() {
-		if (fListener != null) {
-			JavaCore.removeElementChangedListener(fListener);
-			fListener= null;
+		synchronized(fWorkingSets) {
+			return fWorkingSets.contains(workingSet);
 		}
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void elementChanged(ElementChangedEvent event) {
+	public void dispose() {
 		synchronized(fWorkingSets) {
-			for (Iterator iter= fWorkingSets.iterator(); iter.hasNext();) {
-				WorkingSetDelta workingSetDelta= new WorkingSetDelta((IWorkingSet)iter.next());
-				processJavaDelta(workingSetDelta, event.getDelta());
-				IResourceDelta[] resourceDeltas= event.getDelta().getResourceDeltas();
-				if (resourceDeltas != null) {
-					for (int i= 0; i < resourceDeltas.length; i++) {
-						processResourceDelta(workingSetDelta, resourceDeltas[i]);
-					}
+			fWorkingSets.clear();
+		}
+		JavaCore.removeElementChangedListener(this);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void elementChanged(ElementChangedEvent event) {
+		IWorkingSet[] workingSets;
+		synchronized(fWorkingSets) {
+			workingSets= (IWorkingSet[])fWorkingSets.toArray(new IWorkingSet[fWorkingSets.size()]);
+		}
+		for (int w= 0; w < workingSets.length; w++) {
+			WorkingSetDelta workingSetDelta= new WorkingSetDelta(workingSets[w]);
+			processJavaDelta(workingSetDelta, event.getDelta());
+			IResourceDelta[] resourceDeltas= event.getDelta().getResourceDeltas();
+			if (resourceDeltas != null) {
+				for (int r= 0; r < resourceDeltas.length; r++) {
+					processResourceDelta(workingSetDelta, resourceDeltas[r]);
 				}
-				workingSetDelta.process();
 			}
+			workingSetDelta.process();
 		}
 	}
 
