@@ -18,6 +18,18 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.WizardDialog;
+
+import org.eclipse.ui.IFileEditorInput;
+
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILauncher;
@@ -27,12 +39,15 @@ import org.eclipse.debug.core.model.ISourceLocator;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.LaunchWizard;
 import org.eclipse.debug.internal.ui.LaunchWizardDialog;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.debug.ui.JavaApplicationWizard;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 import org.eclipse.jdt.internal.ui.util.Utilities;
@@ -43,15 +58,6 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.ProjectSourceLocator;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.eclipse.jdt.launching.VMRunnerResult;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IFileEditorInput;
-import org.omg.CORBA.UNKNOWN;
 
 /**
  * A launcher for running java main classes. Uses JDI to launch a vm in debug 
