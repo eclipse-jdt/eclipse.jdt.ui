@@ -4238,18 +4238,6 @@
    
 <!-- End Refactoring -->
 
-<!-- =========================================================================== -->
-<!-- Work in Progress                                                            -->
-<!-- =========================================================================== -->
-   <extension
-         point="org.eclipse.ui.preferencePages">
-      <page
-            name="%workInProgress.name"
-            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage"
-            id="org.eclipse.jdt.ui.preferences.WorkInProgressPreferencePage">
-      </page>
-   </extension>
 <!-- add the quick diff context menu -->
    <extension
          point="org.eclipse.ui.popupMenus">
