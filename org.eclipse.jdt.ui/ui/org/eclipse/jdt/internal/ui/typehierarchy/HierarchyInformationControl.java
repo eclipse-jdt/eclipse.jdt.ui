@@ -165,6 +165,10 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		if (fFocus == null) {
 			return true;
 		}
+		if (type.equals(fFocus.getDeclaringType())) {
+			return true;
+		}
+		
 		IMethod[] methods= type.findMethods(fFocus);
 		if (methods != null && methods.length > 0) {
 			try {
