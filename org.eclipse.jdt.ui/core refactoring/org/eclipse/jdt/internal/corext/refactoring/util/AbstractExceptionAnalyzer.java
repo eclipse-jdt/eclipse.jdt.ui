@@ -50,20 +50,33 @@ public abstract class AbstractExceptionAnalyzer extends AbstractSyntaxTreeVisito
 	
 	public abstract boolean visit(AllocationExpression node, BlockScope scope);
 	
-	public boolean visit(TryStatement statement, BlockScope scope) {
+	public boolean visit(TryStatement node, BlockScope scope) {
 		fCurrentExceptions= new ArrayList(1);
 		fTryStack.push(fCurrentExceptions);
-		return true;
+		// Actually this is the wrong scope. But since tryBlock.scope is not visible we can't do any better. 
+		// The scope is only used to call getJavaLangRuntimeException so it doesn't matter.
+		node.tryBlock.traverse(this, scope);
+		// do not dive into. We have to do this in endVisit.
+		return false;
 	}
 	
-	public void endVisit(TryStatement statement, BlockScope scope) {
-		if (statement.catchArguments != null)
-			handleCatchArguments(statement.catchArguments, scope);
+	public void endVisit(TryStatement node, BlockScope scope) {
+		if (node.catchArguments != null)
+			handleCatchArguments(node.catchArguments, scope);
 		List current= (List)fTryStack.pop();
 		fCurrentExceptions= (List)fTryStack.peek();
 		for (Iterator iter= current.iterator(); iter.hasNext();) {
 			addException(iter.next());
 		}
+		// Actually we are using the wrong scope. But since tryBlock.scope is not visible we can't do any better. 
+		// The scope is only used to call getJavaLangRuntimeException so it doesn't matter.
+		if (node.catchBlocks != null) {
+			for (int i= 0; i < node.catchBlocks.length; i++) {
+				node.catchBlocks[i].traverse(this, scope);
+			}
+		}
+		if (node.finallyBlock != null)
+			node.finallyBlock.traverse(this, scope);
 	}
 	
 	protected boolean handleExceptions(MethodBinding binding) {

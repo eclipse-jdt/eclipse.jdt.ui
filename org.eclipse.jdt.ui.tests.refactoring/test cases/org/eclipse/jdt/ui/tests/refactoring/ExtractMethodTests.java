@@ -904,6 +904,14 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		tryTest();
 	}
 	
+	public void test461() throws Exception {
+		tryTest();
+	}
+	
+	public void test462() throws Exception {
+		tryTest();
+	}
+	
 	//---- Test local vars and types
 	
 	public void test500() throws Exception {
@@ -1190,6 +1198,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test618() throws Exception {
+		expressionTest();
+	}
+	
+	public void test619() throws Exception {
 		expressionTest();
 	}
 	

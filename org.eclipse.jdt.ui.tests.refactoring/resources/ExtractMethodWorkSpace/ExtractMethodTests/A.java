@@ -1,8 +1,10 @@
-class A {
-	int i(){ return 0;}
-	void m(){
-		/*[*/i();
-		m();/*]*/
+public class A {
+	void m() throws Exception{
+		/*[*/try{
+			for (;;){
+			}
+		}catch(Exception e){
+			throw new Exception();
+		}/*]*/
 	}
-}
-
+	}

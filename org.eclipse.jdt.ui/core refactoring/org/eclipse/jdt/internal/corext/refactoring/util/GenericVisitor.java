@@ -257,6 +257,13 @@ public class GenericVisitor implements IAbstractSyntaxTreeVisitor, IParentProvid
 	}
 
 	public boolean visit(FieldReference node, BlockScope scope) {
+		// XXX Begin http://dev.eclipse.org/bugs/show_bug.cgi?id=8452
+		if (node.receiver != null) {
+			int start= ASTUtil.getSourceStart(node.receiver);
+			if (start < node.sourceStart)
+				node.sourceStart= start;
+		}
+		// XXX End http://dev.eclipse.org/bugs/show_bug.cgi?id=8452
 		return visitNode(node, scope);
 	}
 
