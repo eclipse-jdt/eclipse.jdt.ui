@@ -92,7 +92,6 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ParameterType
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.RawBindingVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ReturnTypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.SimpleTypeConstraint;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeBindings;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeConstraintFactory;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -131,15 +130,15 @@ class ExtractInterfaceUtil {
 			ITypeConstraint constraint= constraints[i];
 			if (constraint.isSimpleTypeConstraint()){
 				SimpleTypeConstraint simple= (SimpleTypeConstraint)constraint;
-				if (simple.getLeft().isEqualBinding(typeBinding))
+				if (simple.getLeft().getBinding() != null && Bindings.equals(simple.getLeft().getBinding(), typeBinding))
 					result.add(simple.getLeft());
-				if (simple.getRight().isEqualBinding(typeBinding))
+				if (simple.getRight().getBinding() != null && Bindings.equals(simple.getRight().getBinding(), typeBinding))
 					result.add(simple.getRight());
 
-				if (simple.getRight().getBinding() != null && simple.getRight().getBinding().isArray() && Bindings.equals(simple.getRight().getBinding().getElementType(), typeBinding))
-					result.add(simple.getRight());
 				if (simple.getLeft().getBinding() != null && simple.getLeft().getBinding().isArray() && Bindings.equals(simple.getLeft().getBinding().getElementType(), typeBinding))
 					result.add(simple.getLeft());
+				if (simple.getRight().getBinding() != null && simple.getRight().getBinding().isArray() && Bindings.equals(simple.getRight().getBinding().getElementType(), typeBinding))
+					result.add(simple.getRight());
 					
 			} else {
 				CompositeOrTypeConstraint cotc= (CompositeOrTypeConstraint)constraint;
@@ -176,9 +175,10 @@ class ExtractInterfaceUtil {
 	}
 
 	private static ITypeBinding getSuperTypeBinding(ITypeBinding typeBinding, IType superType) {
-		Set setOfAll= TypeBindings.getSuperTypes(typeBinding);
+		Set setOfAll= new HashSet();
+		setOfAll.addAll(Arrays.asList(Bindings.getAllSuperTypes(typeBinding)));
 		
-		// otherwise does not contain java.lang.Object
+		// otherwise does not contain java.lang.Object for interfaces
 		setOfAll.add(ASTCreator.createAST(fCu, null).getAST().resolveWellKnownType("java.lang.Object")); //$NON-NLS-1$
 		
 		
@@ -310,13 +310,14 @@ class ExtractInterfaceUtil {
 	}
 	
 	private static boolean canAddLeftSideToInitialBadSet(SimpleTypeConstraint sc, Set setOfAll, ConstraintVariable interfaceVariable) {
+		Assert.isTrue(sc.isSubtypeConstraint());
 		ConstraintVariable left= sc.getLeft();
 		ConstraintVariable right= sc.getRight();
-		if (! (left instanceof ExpressionVariable) && ! (left instanceof TypeVariable))
+		if (! (left instanceof ExpressionVariable || left instanceof TypeVariable))
 			return false;
 		else if (! setOfAll.contains(left))	
 			return false;
-		else if (interfaceVariable.isSubtypeOf(right))
+		else if (interfaceVariable.canBeAssignedTo(right))
 			return false;
 		//DeclaringTypeVariables are different - they can never be updated by this refactoring
 		else if (setOfAll.contains(right) && ! (right instanceof DeclaringTypeVariable))
@@ -350,7 +351,7 @@ class ExtractInterfaceUtil {
 	private static boolean rightSideIsSubtypeOf(SimpleTypeConstraint[] simpleTypeConstraints, ConstraintVariable interfaceVariable) {
 		for (int i= 0; i < simpleTypeConstraints.length; i++) {
 			ConstraintVariable right= simpleTypeConstraints[i].getRight();
-			if (right.isSubtypeOf(interfaceVariable))
+			if (right.canBeAssignedTo(interfaceVariable))
 				return true;
 		}
 		return false;

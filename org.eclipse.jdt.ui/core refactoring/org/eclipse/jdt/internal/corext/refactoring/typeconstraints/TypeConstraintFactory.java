@@ -87,11 +87,12 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 	}
 
 	/**
-	 * Avoid creating constraints involving primitive types and self-constraints 
+	 * {@inheritDoc}
+	 * Avoid creating constraints involving primitive types and self-constraints.
 	 */
 	public boolean filter(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator operator) {
-		if ((v1.getBinding() != null && v1.getBinding().isPrimitive()) || 
-			(v1 == v2)){
+		if ((v1.getBinding() != null && v1.getBinding().isPrimitive())
+				|| v1 == v2) {
 			if (PRINT_STATS) fNrFiltered++;
 			if (PRINT_STATS) dumpStats();
 			return true;

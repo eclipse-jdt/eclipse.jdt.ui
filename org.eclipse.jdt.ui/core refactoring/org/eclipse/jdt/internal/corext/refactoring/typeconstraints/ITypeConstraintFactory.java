@@ -25,6 +25,11 @@ public interface ITypeConstraintFactory {
 	 * Allows for avoiding the creation of SimpleTypeConstraints based on properties of
 	 * their constituent ConstraintVariables and ConstraintOperators. Can be used to e.g. 
 	 * avoid creation of constraints for assignments between built-in types.
+	 * 
+	 * @param v1 
+	 * @param v2
+	 * @param operator
+	 * @return whether the constraint should <em>not</em> be created
 	 */
 	public boolean filter(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator operator);
 	

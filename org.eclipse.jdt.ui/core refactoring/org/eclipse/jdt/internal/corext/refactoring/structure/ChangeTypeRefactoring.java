@@ -87,7 +87,6 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ITypeConstrai
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ParameterTypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ReturnTypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.SimpleTypeConstraint;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeBindings;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeConstraintFactory;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -313,11 +312,12 @@ public class ChangeTypeRefactoring extends Refactoring {
 
 			TypeConstraintFactory typeConstraintFactory = new TypeConstraintFactory(){
 				public boolean filter(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator o){
-					if (o.isStrictSubtypeOperator()) return true;
-					if (v1.getBinding() != null && 
-						v2.getBinding() != null &&
-						!TypeBindings.isEqualTo(v1.getBinding(), fSelectionTypeBinding) &&
-						!TypeBindings.isEqualTo(v2.getBinding(), fSelectionTypeBinding)){
+					if (o.isStrictSubtypeOperator()) //TODO: explain why these can be excluded
+						return true;
+					//Don't create constraint if fSelectionTypeBinding is not involved:
+					if (v1.getBinding() != null && v2.getBinding() != null
+							&& ! Bindings.equals(v1.getBinding(), fSelectionTypeBinding)
+							&& ! Bindings.equals(v2.getBinding(), fSelectionTypeBinding)) {
 						if (PRINT_STATS) fNrFiltered++;
 						return true;
 					}		
@@ -405,10 +405,10 @@ public class ChangeTypeRefactoring extends Refactoring {
 
 	// copied from FullConstraintCreator
 	private static Set getDeclaringSuperTypes(IMethodBinding methodBinding) {
-		Set allSuperTypes= TypeBindings.getSuperTypes(methodBinding.getDeclaringClass());
+		ITypeBinding[] allSuperTypes= Bindings.getAllSuperTypes(methodBinding.getDeclaringClass());
 		Set result= new HashSet();
-		for (Iterator iter= allSuperTypes.iterator(); iter.hasNext();) {
-			ITypeBinding type= (ITypeBinding) iter.next();
+		for (int i= 0; i < allSuperTypes.length; i++) {
+			ITypeBinding type= allSuperTypes[i];
 			if (findMethod(methodBinding, type) != null)
 				result.add(type);
 		}

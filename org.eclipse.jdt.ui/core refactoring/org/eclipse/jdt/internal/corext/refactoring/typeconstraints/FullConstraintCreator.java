@@ -126,7 +126,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		Type type= castExpression.getType();
 		ITypeConstraint[] definesConstraint= fTypeConstraintFactory.createDefinesConstraint(fConstraintVariableFactory.makeExpressionOrTypeVariable(castExpression, getContext()), 
 				                                                                        fConstraintVariableFactory.makeTypeVariable(castExpression.getType()));
-		if (TypeBindings.isClassBinding(expression.resolveTypeBinding()) && TypeBindings.isClassBinding(type.resolveBinding())){
+		if (isClassBinding(expression.resolveTypeBinding()) && isClassBinding(type.resolveBinding())){
 			ConstraintVariable expressionVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(expression, getContext());
 			ConstraintVariable castExpressionVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(castExpression, getContext());
 			ITypeConstraint[] c2 = createOrOrSubtypeConstraint(expressionVariable, castExpressionVariable);
@@ -200,7 +200,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 	public ITypeConstraint[] create(InstanceofExpression instanceofExpression){
 		Expression expression= instanceofExpression.getLeftOperand();
 		Type type= instanceofExpression.getRightOperand();
-		if (TypeBindings.isClassBinding(expression.resolveTypeBinding()) && TypeBindings.isClassBinding(type.resolveBinding())){
+		if (isClassBinding(expression.resolveTypeBinding()) && isClassBinding(type.resolveBinding())) {
 			ConstraintVariable expressionVar= fConstraintVariableFactory.makeExpressionOrTypeVariable(expression, getContext());
 			ConstraintVariable typeVariable= fConstraintVariableFactory.makeTypeVariable(type);
 			return createOrOrSubtypeConstraint(expressionVar, typeVariable);
@@ -604,10 +604,10 @@ public class FullConstraintCreator extends ConstraintCreator{
 	 * return Set of ITypeBindings
 	 */
 	private static Set getDeclaringSuperTypes(IVariableBinding fieldBinding) {
-		Set allSuperTypes= TypeBindings.getSuperTypes(fieldBinding.getDeclaringClass());
+		ITypeBinding[] allSuperTypes= Bindings.getAllSuperTypes(fieldBinding.getDeclaringClass());
 		Set result= new HashSet();
-		for (Iterator iter= allSuperTypes.iterator(); iter.hasNext();) {
-			ITypeBinding type= (ITypeBinding) iter.next();
+		for (int i= 0; i < allSuperTypes.length; i++) {
+			ITypeBinding type= allSuperTypes[i];
 			if (findField(fieldBinding, type) != null)
 				result.add(type);
 		}
@@ -632,12 +632,13 @@ public class FullConstraintCreator extends ConstraintCreator{
 	
 	/* 
 	 * @param declaringSuperTypes Set of ITypeBindings
+	 * @return <code>true</code> iff <code>declaringSuperTypes</code> contains a type
+	 * 		which is a strict supertype of <code>type</code>
 	 */
 	private static boolean containsASuperType(ITypeBinding type, Set declaringSuperTypes) {
 		for (Iterator iter= declaringSuperTypes.iterator(); iter.hasNext();) {
 			ITypeBinding maybeSuperType= (ITypeBinding) iter.next();
-			if (TypeBindings.isSubtypeBindingOf(type, maybeSuperType) &&
-					!TypeBindings.isEqualTo(type, maybeSuperType))
+			if (! Bindings.equals(maybeSuperType, type) && Bindings.isSuperType(maybeSuperType, type))
 				return true;
 		}
 		return false;
@@ -648,9 +649,10 @@ public class FullConstraintCreator extends ConstraintCreator{
 	 */
 	private static Set getDeclaringSuperTypes(IMethodBinding methodBinding) {
 		ITypeBinding superClass = methodBinding.getDeclaringClass();
-		Set allSuperTypes= TypeBindings.getSuperTypes(superClass);
+		Set allSuperTypes= new HashSet();
+		allSuperTypes.addAll(Arrays.asList(Bindings.getAllSuperTypes(superClass)));
 		if (allSuperTypes.isEmpty())
-			allSuperTypes.add(methodBinding.getDeclaringClass());
+			allSuperTypes.add(methodBinding.getDeclaringClass()); //TODO: Why only iff empty? The declaring class is not a supertype ...
 		Set result= new HashSet();
 		for (Iterator iter= allSuperTypes.iterator(); iter.hasNext();) {
 			ITypeBinding type= (ITypeBinding) iter.next();
@@ -664,6 +666,10 @@ public class FullConstraintCreator extends ConstraintCreator{
 		if (methodBinding.getDeclaringClass().equals(type))
 			return methodBinding;
 		return Bindings.findMethodInType(type, methodBinding.getName(), methodBinding.getParameterTypes());
+	}
+
+	private static boolean isClassBinding(ITypeBinding typeBinding){
+		return typeBinding != null && typeBinding.isClass();
 	}
 	
 }

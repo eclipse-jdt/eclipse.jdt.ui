@@ -12,42 +12,43 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.TypeRules;
+
 public abstract class ConstraintVariable {
+	/**
+	 * The type binding, or <code>null</code>.
+	 */
 	private final ITypeBinding fBinding;
 
+	/**
+	 * @param binding the type binding, or <code>null</code>
+	 */
 	protected ConstraintVariable(ITypeBinding binding) {
-		fBinding= binding;//can be null
+		fBinding= binding;
 	}
 
-	public boolean isEqualType(ConstraintVariable other) {
-		return isEqualBinding(other.fBinding);
+	public boolean canBeAssignedTo(ConstraintVariable targetVariable) {
+		if (fBinding == null || targetVariable.fBinding == null)
+			return false;
+		return TypeRules.canAssign(fBinding, targetVariable.fBinding);
 	}
 
-	public boolean isStrictSubtypeOf(ConstraintVariable other) {
-		return TypeBindings.isSubtypeBindingOf(fBinding, other.fBinding);
-	}
-
-	public boolean isSubtypeOf(ConstraintVariable other) {
-		return isEqualType(other) || isStrictSubtypeOf(other);
-	}
-
-	public boolean isEqualBinding(ITypeBinding binding){
-		return TypeBindings.isEqualTo(fBinding, binding);
-	}
-	
 	public String toResolvedString() {
-		return TypeBindings.toString(fBinding);
+		if (fBinding == null)
+			return "<NULL BINDING>"; //$NON-NLS-1$
+		return Bindings.asString(fBinding);
 	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		return TypeBindings.toString(fBinding);
+		return toResolvedString();
 	}
 		
 	/**
-	 * can be <code>null</code>.
+	 * @return the type binding or <code>null</code>
 	 */
 	public ITypeBinding getBinding() {
 		return fBinding;
