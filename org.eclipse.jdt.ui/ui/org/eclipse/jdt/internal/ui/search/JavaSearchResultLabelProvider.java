@@ -25,8 +25,6 @@ import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ILocalVariable;
-
 
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 
