@@ -181,8 +181,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		 */
 		protected class CompilationUnitAnnotationModel extends ResourceMarkerAnnotationModel implements IProblemRequestor {
 			
-			private List fCollectedProblems= new ArrayList();
-			private List fGeneratedAnnotations= new ArrayList();
+			private List fCollectedProblems;
+			private List fGeneratedAnnotations;
 			private boolean fTemporaryProblemsChanged= false;
 			
 			
@@ -212,7 +212,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see IProblemRequestor#beginReporting()
 			 */
 			public void beginReporting() {
-				if (fCollectedProblems == null)
+				if (!isActive())
 					return;
 					
 				fTemporaryProblemsChanged= false;
@@ -228,7 +228,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see IProblemRequestor#acceptProblem(IProblem)
 			 */
 			public void acceptProblem(IProblem problem) {
-				if (fCollectedProblems != null)
+				if (isActive())
 					fCollectedProblems.add(problem);
 			}
 
@@ -236,7 +236,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see IProblemRequestor#endReporting()
 			 */
 			public void endReporting() {
-				if (fCollectedProblems == null)
+				if (!isActive())
 					return;
 					
 				if (fCollectedProblems.size() > 0) {
@@ -284,6 +284,13 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 */
 			protected void fireModelChanged() {
 				fireModelChanged(new CompilationUnitAnnotationModelEvent(this, true));
+			}
+			
+			/*
+			 * @see IProblemRequestor#isActive()
+			 */
+			public boolean isActive() {
+				return fCollectedProblems != null;
 			}
 		};
 		

@@ -327,7 +327,21 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	 * @see IBuffer#setContents(String)
 	 */
 	public void setContents(String contents) {
-		fDocument.set(normalize(contents));
+		int oldLength= fDocument.getLength();
+		
+		if (contents == null) {
+			
+			if (oldLength != 0)
+				fDocument.set("");
+		
+		} else {
+		
+			String newContents= normalize(contents);
+			int newLength= newContents.length();
+			
+			if (oldLength != newLength || !newContents.equals(fDocument.get()))
+				fDocument.set(newContents);
+		}
 	}
 	
 	/*
