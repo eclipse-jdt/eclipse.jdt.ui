@@ -11,7 +11,11 @@
 *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Vector;
 
@@ -44,13 +48,13 @@ import org.eclipse.swt.widgets.TreeItem;
  */
 class HierarchyRunView implements ITestRunView, IMenuListener {
 	
-	/**
-	 * The tree widget
-	 */
 	private Tree fTree;
 	
 	private TreeItem fCachedParent;
 	private TreeItem[] fCachedItems;
+	
+	private TreeItem fLastParent;
+	private List fExecutionPath;
 	
 	private boolean fMoveSelection= false;
 	
@@ -66,8 +70,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 			fTestCount= testCount;
 		}
 	}
-	
-	
+		
 	/**
 	 * Vector of SuiteInfo items
 	 */
@@ -88,7 +91,8 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 	private final Image fSuiteFailIcon= TestRunnerViewPart.createImage("obj16/tsuitefail.gif"); //$NON-NLS-1$
 	private final Image fTestIcon= TestRunnerViewPart.createImage("obj16/test.gif"); //$NON-NLS-1$
 	private final Image fTestRunningIcon= TestRunnerViewPart.createImage("obj16/testrun.gif"); //$NON-NLS-1$
-		
+	private final Image fSuiteRunningIcon= TestRunnerViewPart.createImage("obj16/tsuiterun.gif"); //$NON-NLS-1$
+	
 	private class ExpandAllAction extends Action {
 		public ExpandAllAction() {
 			setText(JUnitMessages.getString("ExpandAllAction.text"));  //$NON-NLS-1$
@@ -126,13 +130,14 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		addListeners();
 	}
 
-	private void disposeIcons() {
+	void disposeIcons() {
 		fErrorIcon.dispose();
 		fFailureIcon.dispose();
 		fOkIcon.dispose();
 		fHierarchyIcon.dispose();
 		fTestIcon.dispose();
 		fTestRunningIcon.dispose();
+		fSuiteRunningIcon.dispose();
 		fSuiteIcon.dispose();
 		fSuiteErrorIcon.dispose();
 		fSuiteFailIcon.dispose(); 
@@ -189,11 +194,71 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		TreeItem treeItem= findTreeItem(testId);
 		if (treeItem == null)  
 			return;
+		TreeItem parent= treeItem.getParentItem();
+		if (fLastParent != parent) {
+			updatePath(parent);
+			fLastParent= parent;
+		}
 		setCurrentItem(treeItem);		
 	}
 
+	private void updatePath(TreeItem parent) {
+		List newPath= new ArrayList();
+		while (parent != null) {
+			newPath.add(parent);
+			parent= parent.getParentItem();
+		}
+		Collections.reverse(newPath);
+		
+		// common path
+		ListIterator old= fExecutionPath.listIterator();
+		ListIterator np= newPath.listIterator();
+		int c= 0;
+		while (old.hasNext() && np.hasNext()) {
+			if (old.next() != np.next())
+				break;
+			c++;
+		}
+		// clear old path
+		for (ListIterator iter= fExecutionPath.listIterator(c); iter.hasNext(); ) 
+			refreshItem((TreeItem) iter.next(), false);		
+		// update new path
+		for (ListIterator iter= newPath.listIterator(c); iter.hasNext(); ) 
+			refreshItem((TreeItem) iter.next(), true);		
+		fExecutionPath= newPath;
+	}
+	
+	private void refreshItem(TreeItem item, boolean onPath) {
+		if (onPath)
+			item.setImage(fSuiteRunningIcon);
+		else {
+			TestRunInfo info= getTestRunInfo(item);
+			switch (info.getStatus()) {
+			case  ITestRunListener.STATUS_ERROR:
+				item.setImage(fSuiteErrorIcon);
+				break;
+			case  ITestRunListener.STATUS_FAILURE:
+				item.setImage(fSuiteFailIcon);
+				break;
+			default:
+				item.setImage(fSuiteIcon);
+			}
+		}
+	}
+	
 	private void setCurrentItem(TreeItem treeItem) {
 		treeItem.setImage(fTestRunningIcon);
+	
+		TreeItem parent= treeItem.getParentItem();
+		if (fTestRunnerPart.isAutoScroll()) {
+			fTree.showItem(treeItem);
+			while (parent != null) {
+				if (parent.getExpanded()) 
+					break;
+				parent.setExpanded(true);
+				parent= parent.getParentItem();
+			}
+		}
 	}
 
 	public void endTest(String testId) {	
@@ -208,7 +273,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		if (fTestRunnerPart.isAutoScroll()) {
 			fTree.showItem(treeItem);
 			cacheItems(treeItem);
-			collapseIfOK(treeItem);
+			collapsePassedTests(treeItem);
 		} 
 	}
 
@@ -220,7 +285,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		fCachedParent= parent;	
 	}
 
-	private void collapseIfOK(TreeItem treeItem) {
+	private void collapsePassedTests(TreeItem treeItem) {
 		TreeItem parent= treeItem.getParentItem();
 		if (parent != null) {
 			TreeItem[] items= null;
@@ -239,7 +304,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 				}
 				if (ok) {
 					parent.setExpanded(false);
-					collapseIfOK(parent);
+					collapsePassedTests(parent);
 				}
 			}
 		}
@@ -254,8 +319,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		if(testInfo.getStatus() == ITestRunListener.STATUS_OK) {
 			treeItem.setImage(fOkIcon);	
 			return;
-		}
-		
+		}		
 		if (testInfo.getStatus() == ITestRunListener.STATUS_FAILURE) 
 			treeItem.setImage(fFailureIcon);
 		else if (testInfo.getStatus() == ITestRunListener.STATUS_ERROR)
@@ -269,19 +333,18 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		
 		if (parent == null)
 			return;
-		Image parentImage= parent.getImage();
+		TestRunInfo parentInfo= getTestRunInfo(parent);
+		int parentStatus= parentInfo.getStatus();
 		
 		if (status == ITestRunListener.STATUS_FAILURE) {
-			if (parentImage == fSuiteErrorIcon || parentImage == fSuiteFailIcon) 
+			if (parentStatus == ITestRunListener.STATUS_ERROR || parentStatus == ITestRunListener.STATUS_FAILURE) 
 				return;
-			parent.setImage(fSuiteFailIcon);
-			getTestRunInfo(parent).setStatus(ITestRunListener.STATUS_FAILURE);
+			parentInfo.setStatus(ITestRunListener.STATUS_FAILURE);
 			testRunInfo.setStatus(ITestRunListener.STATUS_FAILURE);
 		} else {
-			if (parentImage == fSuiteErrorIcon) 
+			if (parentStatus == ITestRunListener.STATUS_ERROR) 
 				return;
-			parent.setImage(fSuiteErrorIcon);
-			getTestRunInfo(parent).setStatus(ITestRunListener.STATUS_ERROR);
+			parentInfo.setStatus(ITestRunListener.STATUS_ERROR);
 			testRunInfo.setStatus(ITestRunListener.STATUS_ERROR);
 		}
 		propagateStatus(parent, status);
@@ -307,6 +370,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		fCachedParent= null;
 		fCachedItems= null;
 		fMoveSelection= false;
+		fExecutionPath= new ArrayList();
 	}
 	
 	private void testSelected() {
@@ -394,7 +458,7 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 			fSuiteInfos.addElement(new SuiteInfo(treeItem, testCount));
 		} else if(isSuite.equals("true")) { //$NON-NLS-1$
 			treeItem= new TreeItem(((SuiteInfo) fSuiteInfos.lastElement()).fTreeItem, SWT.NONE);
-			treeItem.setImage(fHierarchyIcon);
+			treeItem.setImage(fSuiteIcon);
 			((SuiteInfo)fSuiteInfos.lastElement()).fTestCount -= 1;
 			fSuiteInfos.addElement(new SuiteInfo(treeItem, testCount));
 		} else {
@@ -595,6 +659,12 @@ class HierarchyRunView implements ITestRunView, IMenuListener {
 		TreeItem[] items= item.getItems();
 		for (int i= 0; i < items.length; i++) {
 			expandAll(items[i]);
+		}
+	}
+
+	public void aboutToEnd() {
+		for (int i= 0; i < fExecutionPath.size(); i++) {
+			refreshItem((TreeItem) fExecutionPath.get(i), false);
 		}
 	}
 }

@@ -332,4 +332,7 @@ class FailureRunView implements ITestRunView, IMenuListener {
 		TestRunInfo info= getTestInfo(item);
 		fRunnerViewPart.showTest(info);
 	}
+
+	public void aboutToEnd() {
+	}
 }

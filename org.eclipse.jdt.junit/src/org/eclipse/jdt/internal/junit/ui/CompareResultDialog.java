@@ -144,12 +144,12 @@ public class CompareResultDialog extends Dialog {
 	        return fContent;
 	    }
 	    private static InputStream createInputStream(String s) {
-	        try {
-	            return new ByteArrayInputStream(s.getBytes(ResourcesPlugin.getEncoding()));
-	        } catch (UnsupportedEncodingException e) {
-	            return new ByteArrayInputStream(s.getBytes());
-	        }
-	    }
+		    try {
+		        return new ByteArrayInputStream(s.getBytes(ResourcesPlugin.getEncoding()));
+		    } catch (UnsupportedEncodingException e) {
+		        return new ByteArrayInputStream(s.getBytes());
+		    }
+		}
 	}
 
     private TextMergeViewer fViewer;

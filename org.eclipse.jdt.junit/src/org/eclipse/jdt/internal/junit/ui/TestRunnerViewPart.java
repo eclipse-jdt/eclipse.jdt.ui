@@ -416,6 +416,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 					fDirtyListener= new DirtyListener();
 					JavaCore.addElementChangedListener(fDirtyListener);
 				}
+				for (Enumeration e= fTestRunViews.elements(); e.hasMoreElements();) {
+					ITestRunView v= (ITestRunView) e.nextElement();
+					v.aboutToEnd();
+				}
 			}
 		});	
 	}
@@ -704,7 +708,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 			}
 		});
 	}
-
+	
 	private void postEndTest(final String testId, final String testName) {
 		postSyncRunnable(new Runnable() {
 			public void run() {

@@ -38,6 +38,11 @@ interface ITestRunView {
 	public void aboutToStart();
 
 	/**
+	 * Informs that the suite is about to start 
+	 */
+	public void aboutToEnd();
+	
+	/**
 	 * Returns the name of the RunView
 	 */
 	public String getName();
