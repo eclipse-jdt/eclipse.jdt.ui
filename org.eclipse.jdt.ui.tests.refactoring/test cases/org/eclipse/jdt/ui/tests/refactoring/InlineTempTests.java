@@ -141,6 +141,10 @@ public class InlineTempTests extends RefactoringTest {
 		helper1();
 	}	
 
+	public void test13() throws Exception{
+		helper1();
+	}	
+
 	//------
 	
 	public void testFail0() throws Exception{
