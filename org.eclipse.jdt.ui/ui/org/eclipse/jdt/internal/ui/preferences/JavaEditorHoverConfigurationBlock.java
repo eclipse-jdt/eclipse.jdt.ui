@@ -46,9 +46,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
-import org.eclipse.jdt.internal.ui.text.java.hover.JavaSourceHover;
-import org.eclipse.jdt.internal.ui.text.java.hover.BestMatchHover;
-
 
 /**
  * Configures Java Editor hover preferences.

@@ -308,11 +308,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), fKeys);
 	}
 	
-	public static void initDefaults(IPreferenceStore store) {
-		
-
-	}
-
 	/*
 	 * @see IWorkbenchPreferencePage#init()
 	 */	
