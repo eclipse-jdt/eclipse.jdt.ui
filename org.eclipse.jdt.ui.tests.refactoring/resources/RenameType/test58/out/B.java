@@ -1,8 +1,8 @@
 package p;
 class Sup{
+	static int CONSTANT= 0;
 }
 class B extends Sup {
-	private static int CONSTANT= 0;
 }
 
 class Test {
