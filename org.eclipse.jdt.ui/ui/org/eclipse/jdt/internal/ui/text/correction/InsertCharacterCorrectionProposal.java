@@ -28,8 +28,8 @@ public class InsertCharacterCorrectionProposal extends CUCorrectionProposal {
 	private boolean fAtBeginning;
 
 
-	public InsertCharacterCorrectionProposal(ProblemPosition problemPos, String label, String insertString, boolean atBeginning) throws CoreException {
-		super(label, problemPos);
+	public InsertCharacterCorrectionProposal(ProblemPosition problemPos, String label, String insertString, boolean atBeginning, int relevance) throws CoreException {
+		super(label, problemPos, relevance);
 		fInsertionString= insertString;
 		fAtBeginning= atBeginning;
 	}
@@ -55,7 +55,7 @@ public class InsertCharacterCorrectionProposal extends CUCorrectionProposal {
 		try {
 			IBuffer buf= cu.getBuffer();
 			while (offset >= start) {
-				if ("\n\r".indexOf(buf.getChar(offset - 1)) == -1) {
+				if ("\n\r".indexOf(buf.getChar(offset - 1)) == -1) { //$NON-NLS-1$
 					return offset;
 				}
 				offset--;

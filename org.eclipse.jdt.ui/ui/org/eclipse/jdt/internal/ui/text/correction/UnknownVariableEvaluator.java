@@ -11,25 +11,24 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.util.MigrationCompletionRequestorAdapter;
 
 public class UnknownVariableEvaluator {
 		
-	private static class SimilarVariableRequestor extends CompletionRequestorAdapter {
+	private static class SimilarVariableRequestor extends MigrationCompletionRequestorAdapter {
 		
 		private String fVariableName;
 		private HashSet fResult;
@@ -50,9 +49,9 @@ public class UnknownVariableEvaluator {
 		}
 		
 		/* (non-Javadoc)
-		 * @see ICompletionRequestor#acceptField(char[], char[], char[], char[], char[], char[], int, int, int)
+		 * @see ICompletionRequestor#acceptField(char[], char[], char[], char[], char[], char[], int, int, int, int)
 		 */
-		public void acceptField(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[] typePackageName, char[] typeName, char[] completionName, int modifiers, int completionStart, int completionEnd) {
+		public void acceptField(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[] typePackageName, char[] typeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
 			addVariable(name);
 		}
 
@@ -63,10 +62,6 @@ public class UnknownVariableEvaluator {
 			addVariable(name);
 		}
 
-		/**
-		 * Gets the result.
-		 * @return Returns a HashSet
-		 */
 		public HashSet getResult() {
 			return fResult;
 		}
@@ -91,8 +86,8 @@ public class UnknownVariableEvaluator {
 		Iterator iter= result.iterator();
 		while (iter.hasNext()) {
 			String curr= (String) iter.next();
-			String label= "Change to " + curr;
-			proposals.add(new ReplaceCorrectionProposal(problemPos, label, curr));
+			String label= CorrectionMessages.getFormattedString("UnknownVariableEvaluator.change.description", curr); //$NON-NLS-1$
+			proposals.add(new ReplaceCorrectionProposal(problemPos, label, curr, 3));
 		}
 		
 		// new field
@@ -101,8 +96,8 @@ public class UnknownVariableEvaluator {
 			IType parentType= (IType) JavaModelUtil.findElementOfKind(elem, IJavaElement.TYPE);
 
 			if (parentType != null) {
-				String label= "Create field " + variableName;
-				proposals.add(new NewVariableCompletionProposal(parentType, problemPos, label, variableName));
+				String label= CorrectionMessages.getFormattedString("UnknownVariableEvaluator.create.description", variableName); //$NON-NLS-1$
+				proposals.add(new NewVariableCompletionProposal(parentType, problemPos, label, variableName, 2));
 			}
 		}
 	}

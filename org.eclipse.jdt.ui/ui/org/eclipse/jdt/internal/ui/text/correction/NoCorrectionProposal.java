@@ -44,18 +44,18 @@ public class NoCorrectionProposal implements ICompletionProposal {
 	 */
 	public String getAdditionalProposalInfo() {
 		StringBuffer buf= new StringBuffer();
-		buf.append("<p><b>");
+		buf.append("<p><b>"); //$NON-NLS-1$
 		buf.append(getErrorCode(fProblemPosition.getId()));
-		buf.append("</b></p>");
-		buf.append("<p>");
+		buf.append("</b></p>"); //$NON-NLS-1$
+		buf.append("<p>"); //$NON-NLS-1$
 		buf.append(fProblemPosition.getMessage());
-		buf.append("</p>");
+		buf.append("</p>"); //$NON-NLS-1$
 		String[] arg= fProblemPosition.getArguments();
 		if (arg != null) {
 			for (int i= 0; i < arg.length; i++) {
-				buf.append("<p>");
+				buf.append("<p>"); //$NON-NLS-1$
 				buf.append(arg[i]);
-				buf.append("</p>");				
+				buf.append("</p>");				 //$NON-NLS-1$
 			}
 		}
 	
@@ -66,25 +66,25 @@ public class NoCorrectionProposal implements ICompletionProposal {
 		StringBuffer buf= new StringBuffer();
 		
 		if ((code & IProblem.TypeRelated) != 0) {
-			buf.append("TypeRelated + ");
+			buf.append("TypeRelated + "); //$NON-NLS-1$
 		}
 		if ((code & IProblem.FieldRelated) != 0) {
-			buf.append("FieldRelated + ");
+			buf.append("FieldRelated + "); //$NON-NLS-1$
 		}
 		if ((code & IProblem.ConstructorRelated) != 0) {
-			buf.append("ConstructorRelated + ");
+			buf.append("ConstructorRelated + "); //$NON-NLS-1$
 		}
 		if ((code & IProblem.MethodRelated) != 0) {
-			buf.append("MethodRelated + ");
+			buf.append("MethodRelated + "); //$NON-NLS-1$
 		}
 		if ((code & IProblem.ImportRelated) != 0) {
-			buf.append("ImportRelated + ");
+			buf.append("ImportRelated + "); //$NON-NLS-1$
 		}
 		if ((code & IProblem.Internal) != 0) {
-			buf.append("Internal + ");
+			buf.append("Internal + "); //$NON-NLS-1$
 		}
 		if ((code & IProblem.Syntax) != 0) {
-			buf.append("Syntax + ");
+			buf.append("Syntax + "); //$NON-NLS-1$
 		}
 		buf.append(code & IProblem.IgnoreCategoriesMask);
 		
@@ -102,7 +102,7 @@ public class NoCorrectionProposal implements ICompletionProposal {
 	 * @see ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return "No correction available";
+		return "No correction available"; //$NON-NLS-1$
 	}
 
 	/*

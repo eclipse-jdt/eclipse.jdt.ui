@@ -40,8 +40,8 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	private String fMethodName;
 	private String[] fParamTypes;
 
-	public NewMethodCompletionProposal(IType type, ProblemPosition problemPos, String label, String methodName, String[] paramTypes) throws CoreException {
-		super(label, problemPos);
+	public NewMethodCompletionProposal(IType type, ProblemPosition problemPos, String label, String methodName, String[] paramTypes, int relevance) throws CoreException {
+		super(label, problemPos, relevance);
 		
 		fParentType= type;
 		fMethodName= methodName;
@@ -73,9 +73,9 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 		memberEdit.setUseFormatter(true);
 		
 		if (!importEdit.isEmpty()) {
-			changeElement.addTextEdit("Add imports", importEdit);
+			changeElement.addTextEdit("Add imports", importEdit); //$NON-NLS-1$
 		}
-		changeElement.addTextEdit("Add method", memberEdit);
+		changeElement.addTextEdit("Add method", memberEdit); //$NON-NLS-1$
 	}
 	
 	
@@ -85,16 +85,16 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 		ITypeBinding returnType= evaluateMethodType(importEdit);
 		String returnTypeName= returnType.getName();
 	
-		buf.append("private ");
+		buf.append("private "); //$NON-NLS-1$
 		buf.append(returnTypeName);
 		buf.append(' ');
 		buf.append(fMethodName);
-		buf.append("(");
+		buf.append("("); //$NON-NLS-1$
 		if (fParamTypes.length > 0) {
 			String[] paramNames= new NameProposer().proposeParameterNames(fParamTypes);
 			for (int i= 0; i < fParamTypes.length; i++) {
 				if (i > 0) {
-					buf.append(", ");
+					buf.append(", "); //$NON-NLS-1$
 				}
 				String curr= fParamTypes[i];
 				if (curr.indexOf('.') != -1) {
@@ -102,20 +102,20 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 					curr= Signature.getSimpleName(curr);
 				}
 				buf.append(curr);
-				buf.append(" ");
+				buf.append(" "); //$NON-NLS-1$
 				buf.append(paramNames[i]);
 			}
 		}
-		buf.append(") {\n");
+		buf.append(") {\n"); //$NON-NLS-1$
 
 		if (!returnType.isPrimitive()) {
-			buf.append("return null;\n");
-		} else if (returnTypeName.equals("boolean")) {
-			buf.append("return false;\n");
-		} else if (!returnTypeName.equals("void")) {
-			buf.append("return 0;\n");
+			buf.append("return null;\n"); //$NON-NLS-1$
+		} else if (returnTypeName.equals("boolean")) { //$NON-NLS-1$
+			buf.append("return false;\n"); //$NON-NLS-1$
+		} else if (!returnTypeName.equals("void")) { //$NON-NLS-1$
+			buf.append("return 0;\n"); //$NON-NLS-1$
 		}
-		buf.append("}\n");
+		buf.append("}\n"); //$NON-NLS-1$
 		return buf.toString();
 	}
 	
@@ -124,17 +124,17 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 		CompilationUnit cu= AST.parseCompilationUnit(getCompilationUnit(), true);
 
 		ASTNode node= ASTResolving.findSelectedNode(cu, pos.getOffset(), pos.getLength());
-		
-
-		ITypeBinding binding= ASTResolving.getTypeBinding(node.getParent());
-		if (binding != null) {
-			ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
-			if (!baseType.isPrimitive()) {
-				importEdit.addImport(Bindings.getFullyQualifiedName(baseType));
+		if (node != null) {
+			ITypeBinding binding= ASTResolving.getTypeBinding(node.getParent());
+			if (binding != null) {
+				ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
+				if (!baseType.isPrimitive()) {
+					importEdit.addImport(Bindings.getFullyQualifiedName(baseType));
+				}
+				return binding;
 			}
-			return binding;
 		}
-		return cu.getAST().resolveWellKnownType("void");
+		return cu.getAST().resolveWellKnownType("void"); //$NON-NLS-1$
 	}	
 		
 	/*

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2001, 2002 International Business Machines Corp. and others.
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v0.5 
  * which accompanies this distribution, and is available at
@@ -23,8 +23,10 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -69,7 +71,7 @@ public class ASTResolving {
 			// expression == xx
 			if (op == InfixExpression.Operator.LEFT_SHIFT || op == InfixExpression.Operator.RIGHT_SHIFT_UNSIGNED		
 					|| op == InfixExpression.Operator.RIGHT_SHIFT_SIGNED) {
-				return infix.getAST().resolveWellKnownType("int");
+				return infix.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
 			}
 			return infix.getLeftOperand().resolveTypeBinding();
 		} else if (parent instanceof VariableDeclarationFragment) {
@@ -79,26 +81,26 @@ public class ASTResolving {
 				VariableDeclarationStatement stmt= (VariableDeclarationStatement) frag.getParent();
 				return stmt.getType().resolveBinding();
 			}
-//		} else if (parent instanceof MethodInvocation) {
-//			MethodInvocation invocation= (MethodInvocation) parent;
-//			SimpleName name= invocation.getName();
-//			IMethodBinding binding= ASTNodes.getMethodBinding(name);
-//			if (binding != null) {
-//				return getParameterTypeBinding(node, invocation.arguments(), binding);
-//			}				
-//		} else if (parent instanceof SuperConstructorInvocation) {
-//			SuperConstructorInvocation invocation= (SuperConstructorInvocation) parent;
-//			IMethodBinding binding= invocation.resolveConstructorBinding();
-//			if (binding != null) {
-//				return getParameterTypeBinding(node, invocation.arguments(), binding);
-//			}
+		} else if (parent instanceof MethodInvocation) {
+			MethodInvocation invocation= (MethodInvocation) parent;
+			SimpleName name= invocation.getName();
+			IMethodBinding binding= ASTNodes.getMethodBinding(name);
+			if (binding != null) {
+				return getParameterTypeBinding(node, invocation.arguments(), binding);
+			}				
+		} else if (parent instanceof SuperConstructorInvocation) {
+			SuperConstructorInvocation invocation= (SuperConstructorInvocation) parent;
+			IMethodBinding binding= invocation.resolveConstructorBinding();
+			if (binding != null) {
+				return getParameterTypeBinding(node, invocation.arguments(), binding);
+			}
 		} else if (parent instanceof IfStatement || parent instanceof WhileStatement || parent instanceof DoStatement) {
 			if (node instanceof Expression) {
-				return parent.getAST().resolveWellKnownType("boolean");
+				return parent.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
 			}
 		} else if (parent instanceof SwitchStatement) {
 			if (((SwitchStatement) parent).getExpression().equals(node)) {
-				return parent.getAST().resolveWellKnownType("int");
+				return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
 			}
 		} else if (parent instanceof ReturnStatement) {
 			MethodDeclaration decl= findParentMethodDeclaration(parent);

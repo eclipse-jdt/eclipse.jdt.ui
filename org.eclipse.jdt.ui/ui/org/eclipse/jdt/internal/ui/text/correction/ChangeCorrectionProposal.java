@@ -32,10 +32,13 @@ public abstract class ChangeCorrectionProposal implements ICompletionProposal {
 
 	private ProblemPosition fProblemPosition;
 	private String fName;
+	
+	private int fRelevance;
 
-	public ChangeCorrectionProposal(String name, ProblemPosition problemPos) {
+	public ChangeCorrectionProposal(String name, ProblemPosition problemPos, int relevance) {
 		fProblemPosition= problemPos;
 		fName= name;
+		fRelevance= relevance;
 	}
 	
 	/*
@@ -66,14 +69,14 @@ public abstract class ChangeCorrectionProposal implements ICompletionProposal {
 	 */
 	public String getAdditionalProposalInfo() {
 		StringBuffer buf= new StringBuffer();
-		buf.append("<p>");
+		buf.append("<p>"); //$NON-NLS-1$
 		try {
 			buf.append(getChange().getName());
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 			buf.append(getDisplayString());
 		}
-		buf.append("</p>");
+		buf.append("</p>"); //$NON-NLS-1$
 		return buf.toString();
 	}
 
@@ -115,7 +118,7 @@ public abstract class ChangeCorrectionProposal implements ICompletionProposal {
 
 	/**
 	 * Gets the change element.
-	 * @return Returns a CompilationUnitChange
+	 * @return Returns a Change
 	 */
 	protected abstract Change getChange() throws CoreException;
 
@@ -125,6 +128,22 @@ public abstract class ChangeCorrectionProposal implements ICompletionProposal {
 	 */
 	public void setDisplayName(String name) {
 		fName= name;
+	}
+
+	/**
+	 * Gets the relevance.
+	 * @return Returns an int
+	 */
+	public int getRelevance() {
+		return fRelevance;
+	}
+
+	/**
+	 * Sets the relevance.
+	 * @param relevance The relevance to set
+	 */
+	public void setRelevance(int relevance) {
+		fRelevance= relevance;
 	}
 
 }

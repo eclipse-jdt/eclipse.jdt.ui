@@ -33,8 +33,8 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 	private CompilationUnitChange fCompilationUnitChange;
 	private ICompilationUnit fCompilationUnit;
 
-	public CUCorrectionProposal(String name, ProblemPosition problemPos) throws CoreException {
-		super(name, problemPos);
+	public CUCorrectionProposal(String name, ProblemPosition problemPos, int relevance) throws CoreException {
+		super(name, problemPos, relevance);
 		fCompilationUnit= problemPos.getCompilationUnit();
 		fCompilationUnitChange= null;
 	}
@@ -71,11 +71,11 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 			EditChange[] changes= change.getTextEditChanges();		
 			for (int i= 0; i < changes.length; i++) {
 				TextRange range= change.getNewTextRange(changes[i]);
-				buf.append("<p>...</p>");
+				buf.append("<p>...</p>"); //$NON-NLS-1$
 				appendContent(textBuffer, range, 1, buf);
 			}
 			if (changes.length > 0) {
-				buf.append("<p>...</p>");
+				buf.append("<p>...</p>"); //$NON-NLS-1$
 			}
 			
 		} catch(CoreException e) {
@@ -91,22 +91,22 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 		int rangeStart= range.getOffset();
 		int rangeEnd= rangeStart + range.getLength();
 		for (int i= startLine; i <= endLine; i++) {
-			buf.append("<p>");
+			buf.append("<p>"); //$NON-NLS-1$
 			TextRegion lineInfo= buffer.getLineInformation(i);
 			int start= lineInfo.getOffset();
 			int end= lineInfo.getOffset() + lineInfo.getLength();
 			if (rangeStart >= start && rangeStart <= end) {
 				buf.append(buffer.getContent(start, rangeStart - start));
-				buf.append("<b>");
+				buf.append("<b>"); //$NON-NLS-1$
 				start= rangeStart;
 			}
 			if (rangeEnd >= start && rangeEnd <= end) {
 				buf.append(buffer.getContent(start, rangeEnd - start));
-				buf.append("</b>");
+				buf.append("</b>"); //$NON-NLS-1$
 				start= rangeEnd;
 			}
 			buf.append(buffer.getContent(start, end - start));
-			buf.append("</p>");
+			buf.append("</p>"); //$NON-NLS-1$
 		}
 	}		
 		

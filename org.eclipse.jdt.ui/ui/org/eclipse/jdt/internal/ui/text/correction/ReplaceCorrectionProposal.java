@@ -25,8 +25,8 @@ public class ReplaceCorrectionProposal extends CUCorrectionProposal {
 	
 	private String fReplacementString;
 
-	public ReplaceCorrectionProposal(ProblemPosition problemPos, String label, String replacementString) throws CoreException {
-		super(label, problemPos);
+	public ReplaceCorrectionProposal(ProblemPosition problemPos, String label, String replacementString, int relevance) throws CoreException {
+		super(label, problemPos, relevance);
 		fReplacementString= replacementString;
 	}
 

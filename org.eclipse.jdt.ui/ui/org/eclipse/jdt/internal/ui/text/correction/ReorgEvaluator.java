@@ -41,14 +41,15 @@ public class ReorgEvaluator {
 			// rename type
 			Path path= new Path(args[0]);
 			String newName= path.removeFileExtension().lastSegment();
-			String label= "Rename type to '" + newName + "'";
-			proposals.add(new ReplaceCorrectionProposal(problemPos, label, newName));
+			String label= CorrectionMessages.getFormattedString("ReorgEvaluator.renametype.description", newName); //$NON-NLS-1$
+			proposals.add(new ReplaceCorrectionProposal(problemPos, label, newName, 1));
 			
-			String newCUName= args[1] + ".java";
+			String newCUName= args[1] + ".java"; //$NON-NLS-1$
 			final RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
-			label= "Rename complation unit to '" + newCUName + "'";
+
+			label= CorrectionMessages.getFormattedString("ReorgEvaluator.renamecu.description", newCUName); //$NON-NLS-1$
 			// rename cu
-			proposals.add(new ChangeCorrectionProposal(label, problemPos) {
+			proposals.add(new ChangeCorrectionProposal(label, problemPos, 2) {
 				protected Change getChange() throws CoreException {
 					return change;
 				}
@@ -62,13 +63,13 @@ public class ReorgEvaluator {
 			ICompilationUnit cu= problemPos.getCompilationUnit();
 			
 			// correct pack decl
-			proposals.add(new CorrectPackageDeclarationProposal(problemPos));
+			proposals.add(new CorrectPackageDeclarationProposal(problemPos, 1));
 
 			// move to pack
 			IPackageFragment currPack= (IPackageFragment) cu.getParent();
 			
 			IPackageDeclaration[] packDecls= cu.getPackageDeclarations();
-			String newPackName= packDecls.length > 0 ? packDecls[0].getElementName() : "";
+			String newPackName= packDecls.length > 0 ? packDecls[0].getElementName() : ""; //$NON-NLS-1$
 				
 			
 			IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(cu);
@@ -76,9 +77,9 @@ public class ReorgEvaluator {
 
 			String label;
 			if (newPack.isDefaultPackage()) {
-				label= "Move '" + cu.getElementName() + "' to the default package";
+				label= CorrectionMessages.getFormattedString("ReorgEvaluator.movecu.default.description", cu.getElementName()); //$NON-NLS-1$
 			} else {
-				label= "Move '" + cu.getElementName() + "' to package '" + JavaElementLabels.getElementLabel(newPack, 0) + "'";
+				label= CorrectionMessages.getFormattedString("ReorgEvaluator.movecu.description", new Object[] { cu.getElementName(), newPack.getElementName() }); //$NON-NLS-1$
 			}
 
 			
@@ -86,7 +87,7 @@ public class ReorgEvaluator {
 			composite.add(new CreatePackageChange(newPack));
 			composite.add(new MoveCompilationUnitChange(cu, newPack));
 
-			proposals.add(new ChangeCorrectionProposal(label, problemPos) {
+			proposals.add(new ChangeCorrectionProposal(label, problemPos, 2) {
 				protected Change getChange() throws CoreException {
 					return composite;
 				}

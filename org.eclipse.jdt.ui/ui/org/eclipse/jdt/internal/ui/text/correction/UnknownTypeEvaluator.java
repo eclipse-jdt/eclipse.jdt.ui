@@ -17,16 +17,15 @@ import java.util.Iterator;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.MigrationCompletionRequestorAdapter;
 
 
 public class UnknownTypeEvaluator {
@@ -38,7 +37,7 @@ public class UnknownTypeEvaluator {
 	public static final int TYPE= CLASS | INTERFACE;
 	public static final int TYPE_IMP= CLASS | INTERFACE | IMPORTED_ONLY;
 		
-	private static class SimilarTypesRequestor extends CompletionRequestorAdapter {
+	private static class SimilarTypesRequestor extends MigrationCompletionRequestorAdapter {
 		
 		private String fTypeName;
 		private int fKind;
@@ -63,9 +62,9 @@ public class UnknownTypeEvaluator {
 		
 		
 		/*
-		 * @see ICompletionRequestor#acceptMethod(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int)
+		 * @see ICompletionRequestor#acceptMethod(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int, int)
 		 */
-		private void addType(char[] packageName, char[] typeName, char[] completionName) {
+		private void addType(char[] packageName, char[] typeName, char[] completionName, int relevance) {
 			StringBuffer buf= new StringBuffer();
 			if (packageName.length > 0) {
 				buf.append(packageName);
@@ -76,10 +75,7 @@ public class UnknownTypeEvaluator {
 			if (fResult.contains(qualifiedName)) {
 				return;
 			}
-			if ("java.util.List".equals(qualifiedName)) {
-				buf.append("a");
-			}
-			
+		
 			if (NameMatcher.isSimilarName(fTypeName, new String(typeName))) {
 				if ((fKind & IMPORTED_ONLY) == 0 || qualifiedName.equals(new String(completionName))) {
 					fResult.add(qualifiedName);
@@ -92,18 +88,18 @@ public class UnknownTypeEvaluator {
 		/*
 		 * @see ICompletionRequestor#acceptClass(char[], char[], char[], int, int, int)
 		 */
-		public void acceptClass(char[] packageName, char[] className, char[] completionName, int modifiers, int completionStart, int completionEnd) {
+		public void acceptClass(char[] packageName, char[] className, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
 			if ((fKind & CLASS) != 0) {
-				addType(packageName, className, completionName);
+				addType(packageName, className, completionName, relevance);
 			}
 		}
 
 		/*
 		 * @see ICompletionRequestor#acceptInterface(char[], char[], char[], int, int, int)
 		 */
-		public void acceptInterface(char[] packageName, char[] interfaceName, char[] completionName, int modifiers, int completionStart, int completionEnd) {
+		public void acceptInterface(char[] packageName, char[] interfaceName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
 			if ((fKind & INTERFACE) != 0) {
-				addType(packageName, interfaceName, completionName);
+				addType(packageName, interfaceName, completionName, relevance);
 			}
 		}
 
@@ -138,19 +134,21 @@ public class UnknownTypeEvaluator {
 			String simpleName= Signature.getSimpleName(curr);
 			boolean importOnly= simpleName.equals(typeName);
 			
-			CUCorrectionProposal proposal= new CUCorrectionProposal("", problemPos);
+			CUCorrectionProposal proposal= new CUCorrectionProposal("", problemPos, 0); //$NON-NLS-1$
 			proposals.add(proposal);
 			
 			CompilationUnitChange change= proposal.getCompilationUnitChange();
 			
 			if (!importEdit.isEmpty()) {
-				change.addTextEdit("Add Import", importEdit);
+				change.addTextEdit("Add Import", importEdit); //$NON-NLS-1$
 			}
 			if (!importOnly) {
-				change.addTextEdit("Change", SimpleTextEdit.createReplace(problemPos.getOffset(), problemPos.getLength(), simpleName));
-				proposal.setDisplayName("Change to '" + simpleName + "'");
+				change.addTextEdit("Change", SimpleTextEdit.createReplace(problemPos.getOffset(), problemPos.getLength(), simpleName)); //$NON-NLS-1$
+				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnknownTypeEvaluator.change.description", simpleName)); //$NON-NLS-1$
+				proposal.setRelevance(3);
 			} else {
-				proposal.setDisplayName("Import '" + curr + "'");
+				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnknownTypeEvaluator.import.description", curr)); //$NON-NLS-1$
+				proposal.setRelevance(5);
 			}
 		}
 				

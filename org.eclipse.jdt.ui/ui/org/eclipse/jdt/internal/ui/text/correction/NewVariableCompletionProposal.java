@@ -46,8 +46,8 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 
 	private String fVariableName;
 
-	public NewVariableCompletionProposal(IType type, ProblemPosition problemPos, String label, String variableName) throws CoreException {
-		super(label, problemPos);
+	public NewVariableCompletionProposal(IType type, ProblemPosition problemPos, String label, String variableName, int relevance) throws CoreException {
+		super(label, problemPos, relevance);
 		
 		fParentType= type;
 		fVariableName= variableName;
@@ -73,9 +73,9 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 		memberEdit.setUseFormatter(true);
 		
 		if (!importEdit.isEmpty()) {
-			changeElement.addTextEdit("Add imports", importEdit);
+			changeElement.addTextEdit("Add imports", importEdit); //$NON-NLS-1$
 		}
-		changeElement.addTextEdit("Add field", memberEdit);
+		changeElement.addTextEdit("Add field", memberEdit); //$NON-NLS-1$
 	}
 	
 	
@@ -83,11 +83,11 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 		StringBuffer buf= new StringBuffer();
 		String varType= evaluateVariableType(importEdit);
 		
-		buf.append("private ");
+		buf.append("private "); //$NON-NLS-1$
 		buf.append(varType);
 		buf.append(' ');
 		buf.append(fVariableName);
-		buf.append(";\n");
+		buf.append(";\n"); //$NON-NLS-1$
 		return buf.toString();
 	}
 		
@@ -103,16 +103,17 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 		CompilationUnit cu= AST.parseCompilationUnit(getCompilationUnit(), true);
 
 		ASTNode node= ASTResolving.findSelectedNode(cu, pos.getOffset(), pos.getLength());
-
-		ITypeBinding binding= ASTResolving.getTypeBinding(node);
-		if (binding != null) {
-			ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
-			if (!baseType.isPrimitive()) {
-				importEdit.addImport(Bindings.getFullyQualifiedName(baseType));
+		if (node != null) {
+			ITypeBinding binding= ASTResolving.getTypeBinding(node);
+			if (binding != null) {
+				ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
+				if (!baseType.isPrimitive()) {
+					importEdit.addImport(Bindings.getFullyQualifiedName(baseType));
+				}
+				return binding.getName();
 			}
-			return binding.getName();
 		}
-		return "Object";
+		return "Object"; //$NON-NLS-1$
 	}
 	
 

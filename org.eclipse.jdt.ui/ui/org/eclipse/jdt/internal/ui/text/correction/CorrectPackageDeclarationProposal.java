@@ -26,8 +26,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 
-	public CorrectPackageDeclarationProposal(ProblemPosition problemPos) throws CoreException {
-		super("Correct package declaration", problemPos);
+	public CorrectPackageDeclarationProposal(ProblemPosition problemPos, int relevance) throws CoreException {
+		super(CorrectionMessages.getString("CorrectPackageDeclarationProposal.name"), problemPos, relevance); //$NON-NLS-1$
 	}
 
 	/*
@@ -42,19 +42,19 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 		if (parentPack.isDefaultPackage() && decls.length > 0) {
 			for (int i= 0; i < decls.length; i++) {
 				ISourceRange range= decls[i].getSourceRange();
-				change.addTextEdit("Remove Declaration", SimpleTextEdit.createDelete(range.getOffset(), range.getLength()));
+				change.addTextEdit(CorrectionMessages.getString("CorrectPackageDeclarationProposal.removeedit.label"), SimpleTextEdit.createDelete(range.getOffset(), range.getLength())); //$NON-NLS-1$
 			}
 			return;
 		}
 		if (!parentPack.isDefaultPackage() && decls.length == 0) {
 			String lineDelim= StubUtility.getLineDelimiterUsed(cu);
-			String str= "package " + parentPack.getElementName() + ";" + lineDelim + lineDelim;
-			change.addTextEdit("Add Declaration", SimpleTextEdit.createInsert(0, str));
+			String str= "package " + parentPack.getElementName() + ";" + lineDelim + lineDelim; //$NON-NLS-1$ //$NON-NLS-2$
+			change.addTextEdit(CorrectionMessages.getString("CorrectPackageDeclarationProposal.addedit.label"), SimpleTextEdit.createInsert(0, str)); //$NON-NLS-1$
 			return;
 		}
 		
 		ProblemPosition pos= getProblemPosition();
-		change.addTextEdit("Change Name", SimpleTextEdit.createReplace(pos.getOffset(), pos.getLength(), parentPack.getElementName()));
+		change.addTextEdit(CorrectionMessages.getString("CorrectPackageDeclarationProposal.changenameedit.label"), SimpleTextEdit.createReplace(pos.getOffset(), pos.getLength(), parentPack.getElementName())); //$NON-NLS-1$
 	}
 	
 	/*
@@ -66,15 +66,15 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 		try {
 			IPackageDeclaration[] decls= cu.getPackageDeclarations();		
 			if (parentPack.isDefaultPackage() && decls.length > 0) {
-				return "Remove package declaration 'package " + decls[0].getElementName() + ";'";
+				return CorrectionMessages.getString("CorrectPackageDeclarationProposal.remove.description") + decls[0].getElementName() + ";'"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			if (!parentPack.isDefaultPackage() && decls.length == 0) {	
-				return ("Add package declaration '" + parentPack.getElementName() + "'");
+				return (CorrectionMessages.getString("CorrectPackageDeclarationProposal.add.description") + parentPack.getElementName() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		} catch(JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		return ("Change package declaration to '" + parentPack.getElementName() + "'");
+		return (CorrectionMessages.getString("CorrectPackageDeclarationProposal.change.description") + parentPack.getElementName() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 	}	
 
 }

@@ -11,7 +11,10 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -40,6 +43,22 @@ import org.eclipse.jdt.internal.ui.javaeditor.ProblemAnnotationIterator;
 
 
 public class JavaCorrectionProcessor implements IContentAssistProcessor {
+
+	private static class CorrectionsComparator implements Comparator {
+		
+		private static Collator fgCollator= Collator.getInstance();
+		
+		public int compare(Object o1, Object o2) {
+			ChangeCorrectionProposal e1= (ChangeCorrectionProposal) o1;
+			ChangeCorrectionProposal e2= (ChangeCorrectionProposal) o2;
+			int del= e2.getRelevance() - e1.getRelevance();
+			if (del != 0) {
+				return del;
+			}
+			return fgCollator.compare(e1.getDisplayString(), e2.getDisplayString());
+		}
+	}
+
 
 	private IEditorPart fEditor;
 
@@ -80,7 +99,9 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		if (proposals.isEmpty()) {
 			return null;
 		}
-		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+		ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+		Arrays.sort(res, new CorrectionsComparator());
+		return res;
 	}
 	
 	private void collectCorrections(ProblemPosition problemPos, ArrayList proposals) {
@@ -88,10 +109,10 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			int id= problemPos.getId();
 			switch (id) {
 				case IProblem.UnterminatedString:
-					proposals.add(new InsertCharacterCorrectionProposal(problemPos, "Insert missing quote", "\"", false));
+					proposals.add(new InsertCharacterCorrectionProposal(problemPos, CorrectionMessages.getString("JavaCorrectionProcessor.addquote.description"), "\"", false, 0)); //$NON-NLS-1$ //$NON-NLS-2$
 					break;
 				case IProblem.UnterminatedComment:
-					proposals.add(new InsertCharacterCorrectionProposal(problemPos, "Terminate Comment", "*/", false));
+					proposals.add(new InsertCharacterCorrectionProposal(problemPos, CorrectionMessages.getString("JavaCorrectionProcessor.addcomment.description"), "*/", false, 0)); //$NON-NLS-1$ //$NON-NLS-2$
 					break;
 				case IProblem.UndefinedMethod:
 					UnknownMethodEvaluator.getProposals(problemPos, proposals);

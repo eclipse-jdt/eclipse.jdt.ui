@@ -18,17 +18,17 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.util.MigrationCompletionRequestorAdapter;
 
 public class UnknownMethodEvaluator {
 		
-	private static class SimilarMethodsRequestor extends CompletionRequestorAdapter {
+	private static class SimilarMethodsRequestor extends MigrationCompletionRequestorAdapter {
 		
 		private String fMethodName;
 		private int fNumberOfArguments;
@@ -41,21 +41,20 @@ public class UnknownMethodEvaluator {
 		}
 		
 		/*
-		 * @see ICompletionRequestor#acceptMethod(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int)
+		 * @see ICompletionRequestor#acceptMethod(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int, int)
 		 */
-		public void acceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd) {
+		public void acceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
 			String methodName= new String(selector);
 			if (!fResult.contains(methodName)) {
-				if (fNumberOfArguments == parameterTypeNames.length 
-					&& NameMatcher.isSimilarName(fMethodName, methodName)) {
+				if (fNumberOfArguments == parameterTypeNames.length) {
+					int similarity= NameMatcher.getSimilararity(fMethodName, methodName);
+					if (similarity >= 0) {
 						fResult.add(methodName);
+					}
 				}
 			}
 		}
-		/**
-		 * Gets the result.
-		 * @return Returns a HashSet
-		 */
+
 		public HashSet getResult() {
 			return fResult;
 		}
@@ -85,8 +84,8 @@ public class UnknownMethodEvaluator {
 		Iterator iter= result.iterator();
 		while (iter.hasNext()) {
 			String curr= (String) iter.next();
-			String label= "Change to " + curr + "(...)";
-			proposals.add(new ReplaceCorrectionProposal(problemPos, label, curr));
+			String label= CorrectionMessages.getFormattedString("UnknownMethodEvaluator.change.description", curr); //$NON-NLS-1$
+			proposals.add(new ReplaceCorrectionProposal(problemPos, label, curr, 2));
 		}
 		
 		// new method
@@ -96,14 +95,14 @@ public class UnknownMethodEvaluator {
 		if (elem instanceof IMember) {
 			IType parentType= (IType) JavaModelUtil.findElementOfKind(elem, IJavaElement.TYPE);
 			if (parentType != null && typeName.equals(JavaModelUtil.getFullyQualifiedName(parentType))) {
-				String label= "Create method " + methodName + "(...)";
-				proposals.add(new NewMethodCompletionProposal(parentType, problemPos, label, methodName, arguments));
+				String label= CorrectionMessages.getFormattedString("UnknownMethodEvaluator.create.description", methodName); //$NON-NLS-1$
+				proposals.add(new NewMethodCompletionProposal(parentType, problemPos, label, methodName, arguments, 1));
 			}
 		}
 	}
 	
 	private static String[] getArguments(String signature) {
-		StringTokenizer tok= new StringTokenizer(signature, ",");
+		StringTokenizer tok= new StringTokenizer(signature, ","); //$NON-NLS-1$
 		int nTokens= tok.countTokens();
 		String[] res= new String[nTokens];
 		for (int i= 0; i < nTokens; i++) {
