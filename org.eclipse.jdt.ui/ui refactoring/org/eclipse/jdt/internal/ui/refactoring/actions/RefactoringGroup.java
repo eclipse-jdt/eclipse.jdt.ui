@@ -7,8 +7,8 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.wizard.Wizard;
 
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
@@ -71,7 +71,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 	public void fill(IMenuManager manager, GroupContext context) {
 	
 		ISelectionProvider selectionProvider= context.getSelectionProvider();
-		if (!isSelectionOk())
+		if (!isSelectionOk(selectionProvider))
 			return;
 		
 		createActions(selectionProvider);
