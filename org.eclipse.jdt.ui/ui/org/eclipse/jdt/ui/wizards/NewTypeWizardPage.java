@@ -418,7 +418,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * Sets the focus on the type name.
 	 */		
 	protected void setFocus() {
-		fTypeNameDialogField.setFocus();
+		fTypeNameDialogField.postSetFocusOnDialogField(getShell().getDisplay());
 	}
 				
 	// -------- TypeFieldsAdapter --------

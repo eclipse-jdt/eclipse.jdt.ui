@@ -116,7 +116,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		createContainerControls(composite, nColumns);
 		createPackageControls(composite, nColumns);
 		
-		fPackageDialogField.setFocus();
+		fPackageDialogField.postSetFocusOnDialogField(parent.getDisplay());
 		
 		setControl(composite);
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.NEW_PACKAGE_WIZARD_PAGE);
