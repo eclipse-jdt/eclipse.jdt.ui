@@ -327,8 +327,11 @@ public class ExtractTempRefactoring extends Refactoring {
 		String modifier= fDeclareFinal ? "final ": "";
 		String typeName= new String(tb.sourceName());
 		String initializer= fCu.getSource().substring(fSelectionStart, fSelectionStart + fSelectionLength);
-		String text= modifier + typeName + " " + fTempName + getAssignmentString() + initializer+ ";" + getLineDelimiter();
-		return text;
+		String text= modifier + typeName + " " + fTempName + getAssignmentString() + initializer;
+		if (! initializer.endsWith(";"))	
+			return text + ";" + getLineDelimiter();
+		else	
+			return text + getLineDelimiter();
 	}
 
 	private String getIndent(AstNode insertBefore) throws CoreException {
