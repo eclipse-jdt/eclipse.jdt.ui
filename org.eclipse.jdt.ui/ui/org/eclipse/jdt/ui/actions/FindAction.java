@@ -268,7 +268,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 
 	/**
 	 * Executes this action for the given java element.
-	 * @param javaElement The java element to be found.
+	 * @param element The java element to be found.
 	 */
 	public void run(IJavaElement element) {
 		

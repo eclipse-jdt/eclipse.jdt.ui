@@ -62,7 +62,7 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 	 * requires that the selection provided by the site's selection provider is of 
 	 * type <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
-	 * @param part the view part that owns this action group
+	 * @param site the view part that owns this action group
 	 */
 	public WriteReferencesSearchGroup(IWorkbenchSite site) {
 		fSite= site;
