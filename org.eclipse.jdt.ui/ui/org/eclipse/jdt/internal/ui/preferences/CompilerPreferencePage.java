@@ -448,7 +448,8 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 					updateComplianceDefaultSettings();
 				}
 			} else if (!PREF_SOURCE_COMPATIBILITY.equals(changedKey) &&
-					!PREF_CODEGEN_TARGET_PLATFORM.equals(changedKey)) {
+					!PREF_CODEGEN_TARGET_PLATFORM.equals(changedKey) &&
+					!PREF_PB_ASSERT_AS_IDENTIFIER.equals(changedKey)) {
 				return;
 			}
 		} else {
@@ -479,6 +480,12 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 				return status;
 			}
 		}
+		if (checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_4)) {
+			if (!checkValue(PREF_CODEGEN_TARGET_PLATFORM, VERSION_1_4)) {
+				status.setError(JavaUIMessages.getString("CompilerPreferencePage.src14tgt14.error"));
+				return status;
+			}
+		}		
 		return status;
 	}		
 
