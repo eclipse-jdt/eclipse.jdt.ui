@@ -327,10 +327,10 @@ public class DeleteTest extends RefactoringTest{
 			}
 		};
 		return new IReorgQueries(){
-			public IConfirmQuery createYesNoQuery(String queryTitle, int queryID) {
+			public IConfirmQuery createYesNoQuery(String queryTitle, boolean allowCancel, int queryID) {
 				return yesQuery;
 			}
-			public IConfirmQuery createYesYesToAllNoNoToAllQuery(String queryTitle, int queryID) {
+			public IConfirmQuery createYesYesToAllNoNoToAllQuery(String queryTitle, boolean allowCancel, int queryID) {
 				return yesQuery;
 			}
 		};
