@@ -17,15 +17,15 @@ import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.TextEditChangeGroup;
 
 /* package */ class TextEditChangeElement extends ChangeElement {
 	
 	private static final ChangeElement[] fgChildren= new ChangeElement[0];
 	
-	private EditChange fChange;
+	private TextEditChangeGroup fChange;
 	
-	public TextEditChangeElement(ChangeElement parent, EditChange change) {
+	public TextEditChangeElement(ChangeElement parent, TextEditChangeGroup change) {
 		super(parent);
 		fChange= change;
 		Assert.isNotNull(fChange);
@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange
 	 * 
 	 * @return the <code>TextEditChange</code>
 	 */
-	public EditChange getTextEditChange() {
+	public TextEditChangeGroup getTextEditChange() {
 		return fChange;
 	}
 		
@@ -61,7 +61,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange
 				IRegion range= getTextRange(this);
 				Object input= null;
 				if (range != null) {
-					input= TextChangePreviewViewer.createInput(new EditChange[] {fChange}, range);
+					input= TextChangePreviewViewer.createInput(new TextEditChangeGroup[] {fChange}, range);
 				} else {
 					input= TextChangePreviewViewer.createInput(fChange, 2);
 				}

@@ -42,20 +42,41 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
+/**
+ * A text change is a special change object that applies a {@link TextEdit
+ * text edit tree} to a document. The text change manages the text edit tree. 
+ * Access to the document must be provided by concrete subclasses via the method
+ * {@link #aquireDocument(IProgressMonitor) aquireDocument} and 
+ * {@link #releaseDocument(IDocument, IProgressMonitor) releaseDocument}.
+ * <p>
+ * A text change offers the ability to access the original content of
+ * the document as well as creating a preview of the change. The edit
+ * tree gets copied when creating any king of preview. Therefore no region
+ * updating on the original edit tree takes place when requesting a preview
+ * (for more information on region unpdating see class {@link TextEdit TextEdit}. 
+ * If region tracking is required for a preview it can be enabled via a call 
+ * to the method {@link #setKeepPreviewEdits(boolean) setKeepPreviewEdits}.
+ * If enabled the text change keeps the copied edit tree executed for the
+ * preview allowing clients to map an original edit to an executed edit. The
+ * executed edit can then be used to determine its position in the preview.
+ * </p>
+ * 
+ * @since 3.0
+ */
 public abstract class TextChange extends Change {
 
-	public static class EditChange {
+	public static class TextEditChangeGroup {
 		private boolean fIsActive;
 		private TextChange fTextChange;
-		private TextEditGroup fDescription;
+		private TextEditGroup fTextEditGroup;
 		
-		/* package */ EditChange(TextEditGroup description, TextChange change) {
+		/* package */ TextEditChangeGroup(TextChange change, TextEditGroup group) {
 			fTextChange= change;
 			fIsActive= true;
-			fDescription= description;
+			fTextEditGroup= group;
 		}
 		public String getName() {
-			return fDescription.getName();
+			return fTextEditGroup.getName();
 		}
 		public void setActive(boolean active) {
 			fIsActive= active;
@@ -66,14 +87,17 @@ public abstract class TextChange extends Change {
 		public TextChange getTextChange() {
 			return fTextChange;
 		}
-		public IRegion getTextRange() {
-			return fDescription.getRegion();
+		public IRegion getRegion() {
+			return fTextEditGroup.getRegion();
 		}
 		public boolean isEmpty() {
-			return fDescription.isEmpty();
+			return fTextEditGroup.isEmpty();
+		}
+		public TextEdit[] getTextEdits() {
+			return fTextEditGroup.getTextEdits();
 		}
 		/* package */ TextEditGroup getTextEditGroup() {
-			return fDescription;
+			return fTextEditGroup;
 		}
 		public boolean coveredBy(IRegion sourceRegion) {
 			int sLength= sourceRegion.getLength();
@@ -81,7 +105,7 @@ public abstract class TextChange extends Change {
 				return false;
 			int sOffset= sourceRegion.getOffset();
 			int sEnd= sOffset + sLength - 1;
-			TextEdit[] edits= fDescription.getTextEdits();
+			TextEdit[] edits= fTextEditGroup.getTextEdits();
 			for (int i= 0; i < edits.length; i++) {
 				TextEdit edit= edits[i];
 				if (edit.isDeleted())
@@ -101,7 +125,7 @@ public abstract class TextChange extends Change {
 		}
 	}
 	
-	protected static class LocalTextEditProcessor extends TextEditProcessor {
+	private static class LocalTextEditProcessor extends TextEditProcessor {
 		public static final int EXCLUDE= 1;
 		public static final int INCLUDE= 2;
 
@@ -163,7 +187,7 @@ public abstract class TextChange extends Change {
 		public IRegion region;
 	}
 	
-	private List fTextEditChanges;
+	private List fTextEditChangeGroups;
 	private TextEditCopier fCopier;
 	private TextEdit fEdit;
 	private boolean fTrackEdits;
@@ -174,7 +198,7 @@ public abstract class TextChange extends Change {
 	 * A special object denoting all edits managed by the text change. This even 
 	 * includes those edits not managed by a <code>TextEditChangeGroup</code> 
 	 */
-	private static final EditChange[] ALL_EDITS= new EditChange[0]; 
+	private static final TextEditChangeGroup[] ALL_EDITS= new TextEditChangeGroup[0]; 
 	
 	/**
 	 * Creates a new text change with the specified name.  The name is a 
@@ -190,10 +214,28 @@ public abstract class TextChange extends Change {
 	 */
 	protected TextChange(String name) {
 		super(name);
-		fTextEditChanges= new ArrayList(5);
+		fTextEditChangeGroups= new ArrayList(5);
 		fTextType= "txt"; //$NON-NLS-1$
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setActive(boolean active) {
+		super.setActive(active);
+		for (Iterator iter= fTextEditChangeGroups.iterator(); iter.hasNext();) {
+			TextEditChangeGroup element= (TextEditChangeGroup) iter.next();
+			element.setActive(active);
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public IChange getUndoChange() {
+		return fUndoChange;
+	}
+
 	/**
 	 * Sets the text type. The text type is used to determine the content
 	 * merge viewer used to present the difference between the original
@@ -228,6 +270,8 @@ public abstract class TextChange extends Change {
 			return RefactoringStatus.createFatalErrorStatus(e.getMessage());
 		}
 	}
+
+	//---- Edit management -----------------------------------------------
 	
 	/**
 	 * Sets the root text edit that should be applied to the 
@@ -240,7 +284,6 @@ public abstract class TextChange extends Change {
 		Assert.isTrue(fEdit == null, "Root edit can only be set once"); //$NON-NLS-1$
 		Assert.isTrue(edit != null);
 		fEdit= edit;
-		fTextEditChanges= new ArrayList(5);
 	}
 	
 	/**
@@ -253,90 +296,88 @@ public abstract class TextChange extends Change {
 	}	
 	
 	/**
-	 * Adds a {@link TextEditGroup}. Calling the methods requires that a
-	 * root edit has been set via the method {@link #setEdit(TextEdit)}.
-	 * The edits managed by the given text edit group must be part of the
-	 * change's root edit. 
+	 * Adds a {@link TextEditGroup text edit group}. This method is a convenient
+	 * method for calling <code>change.addTextEditChangeGroup(new 
+	 * TextEditChangeGroup(change, group));</code>.
 	 * 
 	 * @param group the text edit group to add
 	 */
-	public void addGroupDescription(TextEditGroup group) {
+	public void addTextEditGroup(TextEditGroup group) {
+		addTextEditChangeGroup(new TextEditChangeGroup(this, group));
+	}
+	
+	/**
+	 * Adds a {@link TextEditChangeGroup text edit change group}. Calling the methods 
+	 * requires that a root edit has been set via the method {@link #setEdit(TextEdit)
+	 * setEdit}. The edits managed by the given text edit change group must be part of 
+	 * the change's root edit. 
+	 * 
+	 * @param group the text edit change group to add
+	 */
+	public void addTextEditChangeGroup(TextEditChangeGroup group) {
 		Assert.isTrue(fEdit != null, "Can only add a description if a root edit exists"); //$NON-NLS-1$
 		Assert.isTrue(group != null);
-		fTextEditChanges.add(new EditChange(group, this));
+		fTextEditChangeGroups.add(group);
 	}
 	
 	/**
-	 * Returns the {@link TextEditGroup}s added to this text change via
-	 * the method {@link #addTextEditGroup}.
+	 * Returns the {@link TextEditChangeGroup text edit change groups} managed by this 
+	 * text change.
 	 * 
-	 * @return the text edit groups added by this text change
-	 */	
-	public TextEditGroup[] getGroupDescriptions() {
-		TextEditGroup[] res= new TextEditGroup[fTextEditChanges.size()];
-		for (int i= 0; i < res.length; i++) {
-			EditChange elem= (EditChange) fTextEditChanges.get(i);
-			res[i]= elem.getTextEditGroup();
-		}
-		return res;	
-	}
-	
-	/**
-	 * Returns the {@link TextEditGroup} with the given name or <code>
-	 * null</code> if no such {@link TextEditGroup} exists.
-	 * 
-	 * @return the text edit group with the given name
-	 */	
-	public TextEditGroup getGroupDescription(String name) {
-		for (int i= 0; i < fTextEditChanges.size(); i++) {
-			EditChange elem= (EditChange) fTextEditChanges.get(i);
-			TextEditGroup description= elem.getTextEditGroup();
-			if (name.equals(description.getName())) {
-				return description;
-			}
-		}
-		return null;	
-	}	
-	
-	
-	/**
-	 * Returns the text edit changes managed by this text change.
-	 * 
-	 * @return the text edit changes
+	 * @return the text edit change groups
 	 */
-	public EditChange[] getTextEditChanges() {
-		return (EditChange[])fTextEditChanges.toArray(new EditChange[fTextEditChanges.size()]);
+	public TextEditChangeGroup[] getTextEditChangeGroups() {
+		return (TextEditChangeGroup[])fTextEditChangeGroups.toArray(new TextEditChangeGroup[fTextEditChangeGroups.size()]);
 	}
 	
-	private final IDocument getDocument() throws CoreException {
-		IDocument result= aquireDocument(new NullProgressMonitor());
-		releaseDocument(result, new NullProgressMonitor());
-		return result;
-	}
-	
+	/**
+	 * Aquires a reference to the document to be changed by this text
+	 * change. A document aquired by this call <em>MUST</em> be released
+	 * via a call to {@link #releaseDocument(IDocument, IProgressMonitor)
+	 * releaseDocument}.
+	 * 
+	 * @param pm a progress monitor
+	 * 
+	 * @return a reference to the document to be changed
+	 * 
+	 * @throws CoreException if the document can't be aquired
+	 */
 	protected abstract IDocument aquireDocument(IProgressMonitor pm) throws CoreException;
 	
+	/**
+	 * Releases the document aquired via a call to {@link #aquireDocument(IProgressMonitor)
+	 * aquireDocument}.
+	 * 
+	 * @param document the document to release
+	 * @param pm a progress monitor
+	 * 
+	 * @throws CoreException if the document can't be released
+	 */
 	protected abstract void releaseDocument(IDocument document, IProgressMonitor pm) throws CoreException;
 	
+	/**
+	 * Hook to create a corresponding undo change for the given edit 
+	 * when performing this change object.
+	 * 
+	 * @param edit the {@link UndoEdit undo edit} to create a undo change
+	 *  object for
+	 * 
+	 * @return the undo change
+	 * 
+	 * @throws CoreException if an undo change can't be created
+	 */
 	protected abstract IChange createUndoChange(UndoEdit edit) throws CoreException;
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	public IChange getUndoChange() {
-		return fUndoChange;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public final void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
+	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		try {
 			IDocument document= null;
 			try {
 				document= aquireDocument(new SubProgressMonitor(pm, 1));
-				TextEditProcessor processor= createTextEditProcessor(document, TextEdit.CREATE_UNDO);
+				TextEditProcessor processor= createTextEditProcessor(document, TextEdit.CREATE_UNDO, false);
 				UndoEdit undo= processor.performEdits();
 				fUndoChange= createUndoChange(undo);
 			} catch (BadLocationException e) {
@@ -350,27 +391,49 @@ public abstract class TextChange extends Change {
 			throw new JavaModelException(e);
 		}
 	}
+	
+	//---- Method to access the current content of the text change ---------
 
 	/**
-	 * Returns the text this change is working on.
+	 * Returns the current content of the document this text
+	 * change is applied to.
 	 * 
-	 * @return the original text.
-	 * @exception CoreException if text cannot be accessed
+	 * @return the current content of the text change
+	 * 
+	 * @exception CoreException if the content can't be accessed
 	 */
 	public String getCurrentContent() throws CoreException {
 		return getDocument().get();
 	}
 	
 	/**
+	 * Returns the current content of the text change clipped to a specific
+	 * region. The region is determined as follows:
+	 * <ul>
+	 *   <li>if <code>expandRegionToFullLine</code> is <code>false</code>
+	 *       then the parameter <code>region</code> determines the clipping.
+	 *   </li>
+	 *   <li>if <code>expandRegionToFullLine</code> is <code>true</code>
+	 *       then the region determined by the parameter <code>region</code>
+	 *       is extended to cover full lines. 
+	 *   </li>
+	 *   <li>if <code>surroundingLines</code> &gt; 0 then the given number
+	 *       of surrounding lines is added. The value of <code>surroundingLines
+	 *       </code> is only considered if <code>expandRegionToFullLine</code>
+	 *       is <code>true</code>
+	 *   </li>
+	 * </ul> 
 	 * 
-	 * @param region the region of the document that should be returned. The
-	 *  region must denote a valid range in the document represented by this
-	 *  text change.
+	 * @param region the starting region for the clipping
 	 * @param expandRegionToFullLine if <code>true</code> is passed the region
-	 *  is extended to cover full lines. If <code>false</code> is passed the
-	 *  region is unchanged.
-	 * @param surroundLines
-	 * @return
+	 *  is extended to cover full lines
+	 * @param surroundingLines the number of surrounding lines to be added to 
+	 *  the clipping region. Is only considered if <code>expandRegionToFullLine
+	 *  </code> is <code>true</code>
+	 * 
+	 * @return the current content of the text change clipped to a region
+	 *  determined by the given parameters.
+	 * 
 	 * @throws CoreException
 	 */
 	public String getCurrentContent(IRegion region, boolean expandRegionToFullLine, int surroundLines) throws CoreException {
@@ -381,23 +444,143 @@ public abstract class TextChange extends Change {
 		return getContent(document, region, expandRegionToFullLine, 0);
 	}
 
+	//---- Method to access the preview content of the text change ---------
+
+	/**
+	 * Controls whether the text change should keep executed edits during 
+	 * preview generation.
+	 * 
+	 * @param keep if <code>true</code> executed preview edits are kept
+	 */
+	public void setKeepPreviewEdits(boolean keep) {
+		fTrackEdits= keep;
+		if (!fTrackEdits)
+			fCopier= null;
+	}
+	
+	/**
+	 * Returns whether preview edits are remembered for further region
+	 * tracking or not.
+	 * 
+	 * @return <code>true</code> if executed text edits are remembered
+	 * during preview generation; otherwise <code>false</code>
+	 */
+	public boolean getKeepPreviewEdits() {
+		return fTrackEdits;
+	}
+	
+	/**
+	 * Returns the edit that got executed during preview generation
+	 * instead of the given orignial. The method requires that <code>
+	 * setKeepPreviewEdits</code> is set to <code>true</code> and that 
+	 * a preview has been requested via one of the <code>getPreview*
+	 * </code> methods.
+	 * <p>
+	 * The method returns <code>null</code> if the original isn't managed
+	 * by this text change.
+	 * </p>
+	 * 
+	 * @param original the original edit managed by this text change
+	 * 
+	 * @return the edit executed during preview generation
+	 */
+	public TextEdit getPreviewEdit(TextEdit original) {
+		Assert.isTrue(fTrackEdits && fCopier != null && original != null);
+		return fCopier.getCopy(original);
+	}
+	
+	/**
+	 * Returns the edits that were executed during preview generation
+	 * instead of the given array of orignial edits. The method requires 
+	 * that <code>setKeepPreviewEdits</code> is set to <code>true</code> 
+	 * and that a preview has been requested via one of the <code>
+	 * getPreview*</code> methods.
+	 * <p>
+	 * The method returns an empty array if none of the original edits
+	 * is managed by this text change.
+	 * </p>
+	 * 
+	 * @param original an array of original edits managed by this text
+	 *  change
+	 * 
+	 * @return an array of edits containing the corresponding edits 
+	 *  executed during preview generation
+	 */
+	public TextEdit[] getPreviewEdits(TextEdit[] originals) {
+		Assert.isTrue(fTrackEdits && fCopier != null && originals != null);
+		if (originals.length == 0)
+			return new TextEdit[0];
+		List result= new ArrayList(originals.length);
+		for (int i= 0; i < originals.length; i++) {
+			TextEdit copy= fCopier.getCopy(originals[i]);
+			if (copy != null)
+				result.add(copy);
+		}
+		return (TextEdit[]) result.toArray(new TextEdit[result.size()]);
+	}
+	
+	/**
+	 * Returns a document containing a preview of the text change. The
+	 * preview is computed by executing the all managed text edits. The
+	 * method considers the active state of the added {@link TextEditChangeGroup
+	 * text edit change groups}.
+	 * 
+	 * @return a document containing the preview of the text change
+	 * 
+	 * @throws CoreException if the preview can't be created
+	 */
 	public IDocument getPreviewDocument() throws CoreException {
 		PreviewAndRegion result= getPreviewDocument(ALL_EDITS);
 		return result.document;
 	}
 	
 	/**
-	 * Returns a preview of the change without actually modifying the 
-	 * underlying element.
+	 * Returns the preview content as a string. This is a convenient
+	 * method for calling <code>getPreviewDocument().get()</code>.
 	 * 
-	 * @return the change's preview
-	 * @exception CoreException if the preview could not be created
+	 * @return the preview 
+	 * 
+	 * @throws CoreException if the preview can't be created
 	 */
 	public String getPreviewContent() throws CoreException {
 		return getPreviewDocument().get();
 	}
 	
-	public String getPreviewContent(EditChange[] changes, IRegion region, boolean expandRegionToFullLine, int surroundingLines) throws CoreException {
+	/**
+	 * Returns a preview of the text change clipped to a specific region.
+	 * The preview is created by appying the text edits managed by the
+	 * given array of {@link TextEditChangeGroup text edit change groups}. 
+	 * The region is determined as follows:
+	 * <ul>
+	 *   <li>if <code>expandRegionToFullLine</code> is <code>false</code>
+	 *       then the parameter <code>region</code> determines the clipping.
+	 *   </li>
+	 *   <li>if <code>expandRegionToFullLine</code> is <code>true</code>
+	 *       then the region determined by the parameter <code>region</code>
+	 *       is extended to cover full lines. 
+	 *   </li>
+	 *   <li>if <code>surroundingLines</code> &gt; 0 then the given number
+	 *       of surrounding lines is added. The value of <code>surroundingLines
+	 *       </code> is only considered if <code>expandRegionToFullLine</code>
+	 *       is <code>true</code>
+	 *   </li>
+	 * </ul> 
+	 * 
+	 * @param region the starting region for the clipping
+	 * @param expandRegionToFullLine if <code>true</code> is passed the region
+	 *  is extended to cover full lines
+	 * @param surroundingLines the number of surrounding lines to be added to 
+	 *  the clipping region. Is only considered if <code>expandRegionToFullLine
+	 *  </code> is <code>true</code>
+	 * 
+	 * @return the current content of the text change clipped to a region
+	 *  determined by the given parameters.
+	 * 
+	 * @throws CoreException
+	 * 
+	 * @see #getCurrentContent(IRegion, boolean, int)
+	 */
+	public String getPreviewContent(TextEditChangeGroup[] changes, IRegion region, boolean expandRegionToFullLine, int surroundingLines) throws CoreException {
 		IRegion currentRegion= getRegion(changes);
 		Assert.isTrue(region.getOffset() <= currentRegion.getOffset() && 
 			currentRegion.getOffset() + currentRegion.getLength() <= region.getOffset() + region.getLength());
@@ -407,96 +590,14 @@ public abstract class TextChange extends Change {
 		
 	}
 
-	/**
-	 * Controls whether the text change should keep executed edits. If set to <code>true</code>
-	 * a call to <code>getExecutedTextEdit(TextEdit original)</code> will return the executed edit
-	 * associated with the original edit.
-	 * 
-	 * @param keep if <code>true</code> executed edits are kept
-	 */
-	public void setKeepExecutedTextEdits(boolean keep) {
-		fTrackEdits= keep;
-		if (!fTrackEdits)
-			fCopier= null;
-	}
-	
-	/**
-	 * Returns the edit that got copied and executed instead of the orignial.
-	 * 
-	 * @return the executed edit
-	 */
-	private TextEdit getExecutedTextEdit(TextEdit original) {
-		if (!fTrackEdits || fCopier == null)
-			return null;
-		return fCopier.getCopy(original);
-	}
-	
-	/**
-	 * Returns the text range of the given text edit. If the change doesn't 
-	 * manage the given text edit or if <code>setTrackPositionChanges</code> 
-	 * is set to <code>false</code> <code>null</code> is returned.
-	 * 
-	 * <p>
-	 * Note: API is under construction
-	 * </P>
-	 */
-	public IRegion getNewTextRange(TextEdit edit) {
-		Assert.isNotNull(edit);
-		TextEdit result= getExecutedTextEdit(edit);
-		if (result == null)
-			return null;
-		return result.getRegion();
-	}
-	
-	/**
-	 * Returns the new text range for given text edits. If <code>setTrackPositionChanges</code> 
-	 * is set to <code>false</code> <code>null</code> is returned.
-	 * 
-	 * <p>
-	 * Note: API is under construction
-	 * </P>
-	 */
-	public IRegion getNewTextRange(TextEdit[] edits) {
-		Assert.isTrue(edits != null && edits.length > 0);
-		if (!fTrackEdits || fCopier == null)
-			return null;		
-		
-		TextEdit[] copies= new TextEdit[edits.length];
-		for (int i= 0; i < edits.length; i++) {
-			TextEdit copy= fCopier.getCopy(edits[i]);
-			if (copy == null)
-				return null;
-			copies[i]= copy;
-		}
-		return TextEdit.getCoverage(copies);
-	}	
-	
-	/**
-	 * Note: API is under construction
-	 */
-	public IRegion getNewTextRange(EditChange editChange) {
-		return getNewTextRange(editChange.getTextEditGroup().getTextEdits());
-	}
-	
-	/* (Non-Javadoc)
-	 * Method declared in IChange.
-	 */
-	public void setActive(boolean active) {
-		super.setActive(active);
-		for (Iterator iter= fTextEditChanges.iterator(); iter.hasNext();) {
-			EditChange element= (EditChange) iter.next();
-			element.setActive(active);
-		}
-	}
-	
 	//---- private helper methods --------------------------------------------------
 	
-	private PreviewAndRegion getPreviewDocument(EditChange[] changes) throws CoreException {
+	private PreviewAndRegion getPreviewDocument(TextEditChangeGroup[] changes) throws CoreException {
 		IDocument document= new Document(getDocument().get());
 		boolean trackChanges= fTrackEdits;
-		setKeepExecutedTextEdits(true);
+		setKeepPreviewEdits(true);
 		TextEditProcessor processor= changes == ALL_EDITS
-			? createTextEditProcessor(document, TextEdit.NONE)
+			? createTextEditProcessor(document, TextEdit.NONE, true)
 			: createTextEditProcessor(document, TextEdit.NONE, changes);
 		try {
 			processor.performEdits();
@@ -504,39 +605,45 @@ public abstract class TextChange extends Change {
 		} catch (BadLocationException e) {
 			throw Changes.asCoreException(e);
 		} finally {
-			setKeepExecutedTextEdits(trackChanges);
+			setKeepPreviewEdits(trackChanges);
 		}
 	}
 	
-	private TextEditProcessor createTextEditProcessor(IDocument document, int flags) throws CoreException {
+	private TextEditProcessor createTextEditProcessor(IDocument document, int flags, boolean preview) throws CoreException {
 		if (fEdit == null)
 			return new TextEditProcessor(document, new MultiTextEdit(0,0), flags);
 		List excludes= new ArrayList(0);
-		for (Iterator iter= fTextEditChanges.iterator(); iter.hasNext(); ) {
-			EditChange edit= (EditChange)iter.next();
+		for (Iterator iter= fTextEditChangeGroups.iterator(); iter.hasNext(); ) {
+			TextEditChangeGroup edit= (TextEditChangeGroup)iter.next();
 			if (!edit.isActive()) {
 				excludes.addAll(Arrays.asList(edit.getTextEditGroup().getTextEdits()));
 			}
 		}
-		fCopier= new TextEditCopier(fEdit);
-		TextEdit copiedEdit= fCopier.perform();
-		if (fTrackEdits)
-			flags= flags | TextEdit.UPDATE_REGIONS;
-		LocalTextEditProcessor result= new LocalTextEditProcessor(document, copiedEdit, flags);
-		result.setExcludes(mapEdits(
-			(TextEdit[])excludes.toArray(new TextEdit[excludes.size()]),
-			fCopier));	
-		if (!fTrackEdits)
-			fCopier= null;
-		return result;
+		if (preview) {
+			fCopier= new TextEditCopier(fEdit);
+			TextEdit copiedEdit= fCopier.perform();
+			if (fTrackEdits)
+				flags= flags | TextEdit.UPDATE_REGIONS;
+			LocalTextEditProcessor result= new LocalTextEditProcessor(document, copiedEdit, flags);
+			result.setExcludes(mapEdits(
+				(TextEdit[])excludes.toArray(new TextEdit[excludes.size()]),
+				fCopier));	
+			if (!fTrackEdits)
+				fCopier= null;
+			return result;
+		} else {
+			LocalTextEditProcessor result= new LocalTextEditProcessor(document, fEdit, flags | TextEdit.UPDATE_REGIONS);
+			result.setExcludes((TextEdit[])excludes.toArray(new TextEdit[excludes.size()]));
+			return result;
+		}
 	}
 	
-	private TextEditProcessor createTextEditProcessor(IDocument document, int flags, EditChange[] changes) throws CoreException {
+	private TextEditProcessor createTextEditProcessor(IDocument document, int flags, TextEditChangeGroup[] changes) throws CoreException {
 		if (fEdit == null)
 			return new TextEditProcessor(document, new MultiTextEdit(0,0), flags);
 		List includes= new ArrayList(0);
 		for (int c= 0; c < changes.length; c++) {
-			EditChange change= changes[c];
+			TextEditChangeGroup change= changes[c];
 			Assert.isTrue(change.getTextChange() == this);
 			if (change.isActive()) {
 				includes.addAll(Arrays.asList(change.getTextEditGroup().getTextEdits()));
@@ -552,6 +659,12 @@ public abstract class TextChange extends Change {
 			fCopier));
 		if (!fTrackEdits)
 			fCopier= null;
+		return result;
+	}
+	
+	private IDocument getDocument() throws CoreException {
+		IDocument result= aquireDocument(new NullProgressMonitor());
+		releaseDocument(result, new NullProgressMonitor());
 		return result;
 	}
 	
@@ -585,7 +698,7 @@ public abstract class TextChange extends Change {
 		}
 	}
 	
-	private IRegion getRegion(EditChange[] changes) {
+	private IRegion getRegion(TextEditChangeGroup[] changes) {
 		if (changes == ALL_EDITS) {
 			if (fEdit == null)
 				return null;
@@ -601,7 +714,7 @@ public abstract class TextChange extends Change {
 		}
 	}
 	
-	private IRegion getNewRegion(EditChange[] changes) {
+	private IRegion getNewRegion(TextEditChangeGroup[] changes) {
 		if (changes == ALL_EDITS) {
 			if (fEdit == null)
 				return null;

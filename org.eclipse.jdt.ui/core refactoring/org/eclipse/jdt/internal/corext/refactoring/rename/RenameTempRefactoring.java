@@ -266,7 +266,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 						
 			TextEdit[] edits= getAllRenameEdits();
 			TextChange change= new TextBufferChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), TextBuffer.create(fCu.getSource())); //$NON-NLS-1$
-			change.setKeepExecutedTextEdits(true);
+			change.setKeepPreviewEdits(true);
 		
 			wc= RefactoringAnalyzeUtil.getWorkingCopyWithNewContent(edits, change, fCu);
 			String newCuSource= change.getPreviewContent();

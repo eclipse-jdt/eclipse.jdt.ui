@@ -33,7 +33,7 @@ public class TextChangeCompatibility {
 			change.setEdit(root);
 		}
 		insert(root, edit);
-		change.addGroupDescription(new TextEditGroup(name, edit));
+		change.addTextEditGroup(new TextEditGroup(name, edit));
 	}
 	
 	public static void addTextEdit(TextChange change, String name, TextEdit[] edits) {
@@ -48,7 +48,7 @@ public class TextChangeCompatibility {
 		for (int i= 0; i < edits.length; i++) {
 			insert(root, edits[i]);
 		}
-		change.addGroupDescription(new TextEditGroup(name, edits));
+		change.addTextEditGroup(new TextEditGroup(name, edits));
 	}
 	
 	private static void insert(TextEdit parent, TextEdit edit) {

@@ -252,7 +252,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			
 			IEditorPart part= null;
 			if (selection != null || linked != null) {
-				change.setKeepExecutedTextEdits(true);
+				change.setKeepPreviewEdits(true);
 				
 				part= EditorUtility.isOpenInEditor(unit);
 				if (part == null) {
@@ -279,7 +279,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				enterLinkedMode(change, viewer, linked, selection);
 			} else if (selection != null && part instanceof ITextEditor) {
 				// select a result
-				IRegion range= change.getNewTextRange(selection.getTextEdits());
+				IRegion range= TextEdit.getCoverage(change.getPreviewEdits(selection.getTextEdits()));
 				int pos= range.getOffset() + range.getLength();
 				((ITextEditor) part).selectAndReveal(pos, 0);
 			}
@@ -306,7 +306,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				
 			TextEdit[] textEdits= curr.getTextEdits();
 			if (name != null && textEdits.length > 0) {
-				IRegion range= change.getNewTextRange(textEdits);
+				IRegion range= TextEdit.getCoverage(change.getPreviewEdits(textEdits));
 				if (range != null) {	// all edits could be deleted
 					ICompletionProposal[] linkedModeProposals= getLinkedModeProposals(name);
 					if (linkedModeProposals != null && linkedModeProposals.length > 1) {
@@ -335,7 +335,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			if (selection != null) {
 				TextEdit[] textEdits= selection.getTextEdits();
 				if (textEdits.length > 0) {
-					IRegion range= change.getNewTextRange(textEdits);
+					IRegion range= TextEdit.getCoverage(change.getPreviewEdits(textEdits));
 					if (range != null)
 						ui.setExitPosition(viewer, range.getOffset() + range.getLength(), 0, Integer.MAX_VALUE);
 				}					

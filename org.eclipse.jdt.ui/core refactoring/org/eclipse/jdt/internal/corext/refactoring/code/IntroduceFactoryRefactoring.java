@@ -711,7 +711,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				TextEditGroup	factoryGD= new TextEditGroup(RefactoringCoreMessages.getString("IntroduceFactory.addFactoryMethod")); //$NON-NLS-1$
 
 				createFactoryChange(unitRewriter, unit, factoryGD);
-				unitChange.addGroupDescription(factoryGD);
+				unitChange.addTextEditGroup(factoryGD);
 				someChange= true;
 			}
 
@@ -725,7 +725,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				TextEditGroup	declGD= new TextEditGroup(RefactoringCoreMessages.getString("IntroduceFactory.protectConstructor")); //$NON-NLS-1$
 
 				if (protectConstructor(unit, unitRewriter, declGD)) {
-					unitChange.addGroupDescription(declGD);
+					unitChange.addTextEditGroup(declGD);
 					someChange= true;
 				}
 			}
@@ -791,7 +791,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				TextEditGroup gd= new TextEditGroup(RefactoringCoreMessages.getString("IntroduceFactory.replaceCalls")); //$NON-NLS-1$
 
 				createFactoryMethodCall(ctorCallAST, creation, unitRewriter, gd);
-				unitChange.addGroupDescription(gd);
+				unitChange.addTextEditGroup(gd);
 				someCallPatched= true;
 			}
 		}

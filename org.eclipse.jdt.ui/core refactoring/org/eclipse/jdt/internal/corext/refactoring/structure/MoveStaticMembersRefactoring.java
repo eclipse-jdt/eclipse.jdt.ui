@@ -141,7 +141,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 					edit.addChild(imports.createEdit(buffer));
 				result.setEdit(edit);
 				for (Iterator iter= groups.iterator(); iter.hasNext();) {
-					result.addGroupDescription((TextEditGroup)iter.next());
+					result.addTextEditGroup((TextEditGroup)iter.next());
 				}
 			} finally {
 				TextBuffer.release(buffer);

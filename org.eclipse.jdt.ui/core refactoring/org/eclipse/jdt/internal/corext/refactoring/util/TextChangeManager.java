@@ -63,7 +63,7 @@ public class TextChangeManager {
 		TextChange result= (TextChange)fMap.get(cu);
 		if (result == null) {
 			result= new CompilationUnitChange(cu.getElementName(), cu);
-			result.setKeepExecutedTextEdits(fKeepExecutedTextEdits);
+			result.setKeepPreviewEdits(fKeepExecutedTextEdits);
 			fMap.put(cu, result);
 		}
 		return result;

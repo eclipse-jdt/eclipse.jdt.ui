@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -30,7 +32,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.TextEditChangeGroup;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
@@ -104,10 +106,10 @@ class RenameAnalyzeUtil {
 			return null;
 		
 		IRegion oldMatchRange= createTextRange(searchResult);
-		EditChange[] editChanges= change.getTextEditChanges();	
+		TextEditChangeGroup[] editChanges= change.getTextEditChangeGroups();	
 		for (int i= 0; i < editChanges.length; i++) {
-			if (oldMatchRange.equals(editChanges[i].getTextRange()))
-				return change.getNewTextRange(editChanges[i]);
+			if (oldMatchRange.equals(editChanges[i].getRegion()))
+				return TextEdit.getCoverage(change.getPreviewEdits(editChanges[i].getTextEdits()));
 		}
 		return null;
 	}

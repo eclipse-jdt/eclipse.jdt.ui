@@ -35,17 +35,17 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.TextEditChangeGroup;
 
 public class TextChangePreviewViewer implements IChangePreviewViewer {
 
 	private ComparePreviewer fViewer;
 	
 	private static class TextEditChangeInput {
-		EditChange change;
+		TextEditChangeGroup change;
 		int surroundingLines;
 		
-		EditChange[] changes;
+		TextEditChangeGroup[] changes;
 		IRegion range;
 	}
 	
@@ -110,14 +110,14 @@ public class TextChangePreviewViewer implements IChangePreviewViewer {
 		return change;
 	}
 	
-	public static Object createInput(EditChange change, int surroundingLines) {
+	public static Object createInput(TextEditChangeGroup change, int surroundingLines) {
 		TextEditChangeInput result= new TextEditChangeInput();
 		result.change= change;
 		result.surroundingLines= surroundingLines;
 		return result;
 	}
 	
-	public static Object createInput(EditChange[] changes, IRegion range) {
+	public static Object createInput(TextEditChangeGroup[] changes, IRegion range) {
 		TextEditChangeInput result= new TextEditChangeInput();
 		result.changes= changes;
 		result.range= range;
@@ -150,10 +150,10 @@ public class TextChangePreviewViewer implements IChangePreviewViewer {
 		} else if (input instanceof TextEditChangeInput) {
 			TextEditChangeInput edi= (TextEditChangeInput)input;
 			if (edi.change != null && edi.surroundingLines >= 0) {
-				TextChange.EditChange editChange= edi.change;
+				TextChange.TextEditChangeGroup editChange= edi.change;
 				TextChange change= editChange.getTextChange();
-				setInput(change.getCurrentContent(editChange.getTextRange(), true, 2),
-					change.getPreviewContent(new EditChange[] { editChange }, editChange.getTextRange(), true, 2),
+				setInput(change.getCurrentContent(editChange.getRegion(), true, 2),
+					change.getPreviewContent(new TextEditChangeGroup[] { editChange }, editChange.getRegion(), true, 2),
 					change.getTextType());
 				return;
 			} else if (edi.changes != null && edi.changes.length > 0 && edi.range != null) {

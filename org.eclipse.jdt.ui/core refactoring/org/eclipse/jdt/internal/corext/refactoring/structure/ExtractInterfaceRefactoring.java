@@ -318,7 +318,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 				String typeName= fInputType.getElementName();
 				int offset= oldRange.getOffset() + oldRange.getLength() - typeName.length();
 				TextEdit edit= new ReplaceEdit(offset, typeName.length(), fNewInterfaceName);
-				TextChangeCompatibility.addTextEdit(ExtractInterfaceUtil.getTextChange(manager, cu), RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update_reference"), edit); 
+				TextChangeCompatibility.addTextEdit(ExtractInterfaceUtil.getTextChange(manager, cu), RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update_reference"), edit);  //$NON-NLS-1$
 			}
 			fSource= ExtractInterfaceUtil.getTextChange(manager, newCuWC).getPreviewContent();
 			manager.remove(newCuWC);
@@ -361,7 +361,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private static IRegion getOldRange(TextEdit[] edits, IRegion newRange, TextChange change) {
 		for (int i= 0; i < edits.length; i++) {
 			TextEdit edit= edits[i];
-			if (change.getNewTextRange(edit).equals(newRange))
+			if (change.getPreviewEdit(edit).getRegion().equals(newRange))
 				return edit.getRegion();
 		}
 		Assert.isTrue(false, "original text range not found"); //$NON-NLS-1$

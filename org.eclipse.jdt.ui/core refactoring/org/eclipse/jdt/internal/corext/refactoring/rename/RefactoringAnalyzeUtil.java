@@ -188,8 +188,8 @@ public class RefactoringAnalyzeUtil {
 	private static IRegion getTextRange(TextEdit edit, TextChange change){
 		if (change == null)
 			return edit.getRegion();
-		 else
-			return change.getNewTextRange(edit);
+		else
+			return change.getPreviewEdit(edit).getRegion();
 	}
 
 	private static Set getOldProblems(CompilationUnit oldCuNode) {

@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.TextEditChangeGroup;
 
 /**
  * A default content provider to present a hierarchy of <code>IChange</code>
@@ -43,8 +43,8 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 	
 	private static class OffsetComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
-			EditChange c1= (EditChange)o1;
-			EditChange c2= (EditChange)o2;
+			TextEditChangeGroup c1= (TextEditChangeGroup)o1;
+			TextEditChangeGroup c2= (TextEditChangeGroup)o2;
 			int p1= getOffset(c1);
 			int p2= getOffset(c2);
 			if (p1 < p2)
@@ -54,8 +54,8 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 			// same offset
 			return 0;	
 		}
-		private int getOffset(EditChange edit) {
-			return edit.getTextRange().getOffset();
+		private int getOffset(TextEditChangeGroup edit) {
+			return edit.getRegion().getOffset();
 		}
 	}
 	
@@ -124,9 +124,9 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 			CompilationUnitChange cunitChange= (CompilationUnitChange)change;
 			ICompilationUnit cunit= cunitChange.getCompilationUnit();
 			Map map= new HashMap(20);
-			EditChange[] changes=getSortedTextEditChanges(cunitChange);
+			TextEditChangeGroup[] changes=getSortedTextEditChanges(cunitChange);
 			for (int i= 0; i < changes.length; i++) {
-				EditChange tec= changes[i];
+				TextEditChangeGroup tec= changes[i];
 				try {
 					IJavaElement element= getModifiedJavaElement(tec, cunit);
 					if (element.equals(cunit)) {
@@ -141,7 +141,7 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 			}
 			result= (ChangeElement[]) children.toArray(new ChangeElement[children.size()]);
 		} else if (change instanceof TextChange) {
-			EditChange[] changes= getSortedTextEditChanges((TextChange)change);
+			TextEditChangeGroup[] changes= getSortedTextEditChanges((TextChange)change);
 			result= new ChangeElement[changes.length];
 			for (int i= 0; i < changes.length; i++) {
 				result[i]= new TextEditChangeElement(changeElement, changes[i]);
@@ -151,8 +151,8 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 		return result;
 	}
 	
-	private EditChange[] getSortedTextEditChanges(TextChange change) {
-		EditChange[] edits= change.getTextEditChanges();
+	private TextEditChangeGroup[] getSortedTextEditChanges(TextChange change) {
+		TextEditChangeGroup[] edits= change.getTextEditChangeGroups();
 		List result= new ArrayList(edits.length);
 		for (int i= 0; i < edits.length; i++) {
 			if (!edits[i].isEmpty())
@@ -160,7 +160,7 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 		}
 		Comparator comparator= new OffsetComparator();
 		Collections.sort(result, comparator);
-		return (EditChange[])result.toArray(new EditChange[result.size()]);
+		return (TextEditChangeGroup[])result.toArray(new TextEditChangeGroup[result.size()]);
 	}
 	
 	private PseudoJavaChangeElement getChangeElement(Map map, IJavaElement element, List children, ChangeElement cunitChange) {
@@ -181,8 +181,8 @@ class ChangeElementContentProvider  implements ITreeContentProvider {
 		return result;
 	}
 	
-	private IJavaElement getModifiedJavaElement(EditChange edit, ICompilationUnit cunit) throws JavaModelException {
-		IRegion range= edit.getTextRange();
+	private IJavaElement getModifiedJavaElement(TextEditChangeGroup edit, ICompilationUnit cunit) throws JavaModelException {
+		IRegion range= edit.getRegion();
 		if (range.getOffset() == 0 && range.getLength() == 0)
 			return cunit;
 		IJavaElement result= cunit.getElementAt(range.getOffset());

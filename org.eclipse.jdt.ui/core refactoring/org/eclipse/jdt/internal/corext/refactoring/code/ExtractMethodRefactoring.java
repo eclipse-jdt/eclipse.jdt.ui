@@ -387,14 +387,14 @@ public class ExtractMethodRefactoring extends Refactoring {
 			MethodDeclaration mm= createNewMethod(fMethodName, true, target, buffer.getLineDelimiter());
 
 			TextEditGroup insertDesc= new TextEditGroup(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName)); //$NON-NLS-1$
-			result.addGroupDescription(insertDesc);
+			result.addTextEditGroup(insertDesc);
 			
 			fRewriter.markAsInserted(mm, insertDesc);
 			List container= ASTNodes.getContainingList(declaration);
 			container.add(container.indexOf(declaration) + 1, mm);
 			
 			TextEditGroup description= new TextEditGroup(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName)); //$NON-NLS-1$
-			result.addGroupDescription(description);
+			result.addTextEditGroup(description);
 			
 			ASTNode[] callNodes= createCallNodes(null);
 			fRewriter.markAsReplaced(target, callNodes[0], description);
@@ -414,7 +414,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			if (!fImportRewriter.isEmpty()) {
 				TextEdit edit= fImportRewriter.createEdit(buffer);
 				root.addChild(edit);
-				result.addGroupDescription(new TextEditGroup(
+				result.addTextEditGroup(new TextEditGroup(
 					RefactoringCoreMessages.getString("ExtractMethodRefactoring.organize_imports"), //$NON-NLS-1$
 					new TextEdit[] {edit}
 				));
@@ -617,7 +617,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			label= RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.duplicates.multi", fMethodName); //$NON-NLS-1$
 		
 		TextEditGroup description= new TextEditGroup(label);
-		result.addGroupDescription(description);
+		result.addTextEditGroup(description);
 		
 		for (int d= 0; d < fDuplicates.length; d++) {
 			SnippetFinder.Match duplicate= fDuplicates[d];

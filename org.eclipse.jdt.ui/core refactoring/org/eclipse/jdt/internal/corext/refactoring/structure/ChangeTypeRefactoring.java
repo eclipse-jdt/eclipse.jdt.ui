@@ -521,7 +521,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		//TODO handle types other than simple (e.g., arrays)
 		Type newType= ast.newSimpleType(ast.newSimpleName(typeName)); 
 		unitRewriter.markAsReplaced(oldType, newType, gd);
-		unitChange.addGroupDescription(gd);
+		unitChange.addTextEditGroup(gd);
 	}	
 	
 	private void groupChangesByCompilationUnit(Map relevantVarsByUnit) throws JavaModelException {

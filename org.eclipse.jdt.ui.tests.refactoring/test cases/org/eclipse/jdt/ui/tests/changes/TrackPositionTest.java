@@ -48,7 +48,7 @@ public class TrackPositionTest extends TestCase {
 	protected void setUp() throws Exception {
 		fBuffer= TextBuffer.create("0123456789");
 		fChange= new TextBufferChange(NN, fBuffer);
-		fChange.setKeepExecutedTextEdits(true);
+		fChange.setKeepPreviewEdits(true);
 	}
 	
 	protected void tearDown() throws Exception {
@@ -59,7 +59,7 @@ public class TrackPositionTest extends TestCase {
 		TextEdit edit= new ReplaceEdit(2, 2, "xyz");
 		TextChangeCompatibility.addTextEdit(fChange, NN, edit);
 		executeChange();
-		assertEquals(fChange.getNewTextRange(edit), 2, 3);
+		assertEquals(edit.getRegion(), 2, 3);
 	}
 	
 	public void test2() throws Exception {
@@ -68,7 +68,7 @@ public class TrackPositionTest extends TestCase {
 		IDocument preview= fChange.getPreviewDocument();
 		assertEquals(fBuffer.getContent(), "0123456789");
 		assertEquals(preview.get(), "01234xy89");
-		assertEquals(fChange.getNewTextRange(edit), 5, 2);
+		assertEquals(fChange.getPreviewEdit(edit).getRegion(), 5, 2);
 	}
 		
 	private void executeChange() throws Exception {

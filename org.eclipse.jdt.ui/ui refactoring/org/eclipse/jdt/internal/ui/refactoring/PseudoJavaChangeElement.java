@@ -26,7 +26,7 @@ import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.TextEditChangeGroup;
 
 /* package */ class PseudoJavaChangeElement extends ChangeElement {
 
@@ -68,7 +68,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange
 			if (change instanceof TextChange) {
 				List edits= collectTextEditChanges();
 				viewer.setInput(TextChangePreviewViewer.createInput(
-					(EditChange[])edits.toArray(new EditChange[edits.size()]),
+					(TextEditChangeGroup[])edits.toArray(new TextEditChangeGroup[edits.size()]),
 					getTextRange()));
 			}
 		} else {
