@@ -146,7 +146,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
 			IType type= (IType) selection.getFirstElement();
-			return type.getCompilationUnit() != null && type.isClass();
+			return type.getCompilationUnit() != null && type.isClass() && !type.isLocal();
 			// look if class: not cheap but done by all source generation actions
 		}
 
@@ -209,7 +209,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		return null;
 	}
 
-	private static boolean canRunOn(IField[] fields) throws JavaModelException {
+	private static boolean canRunOn(IField[] fields) {
 		return fields != null && fields.length > 0;
 	}
 
@@ -456,7 +456,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		MessageDialog.openError(getShell(), title, message);
 	}
 
-	private IField[] getWorkingCopyFields(IField[] fields) throws CoreException {
+	private IField[] getWorkingCopyFields(IField[] fields) {
 		if (fields.length == 0)
 			return new IField[0];
 		ICompilationUnit cu= fields[0].getCompilationUnit();

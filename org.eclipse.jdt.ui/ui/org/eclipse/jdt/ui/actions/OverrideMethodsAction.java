@@ -117,7 +117,9 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	private boolean canEnable(IStructuredSelection selection) throws JavaModelException {
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
 			IType type= (IType) selection.getFirstElement();
-			return type.getCompilationUnit() != null && type.isClass(); // look if class: not cheap but done by all source generation actions
+			//	look if class: not cheap but done by all source generation actions
+			// disable anonymous until create method is supported by jdt.core (bug 44395)
+			return type.getCompilationUnit() != null && type.isClass() && !type.isAnonymous();
 		}
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))

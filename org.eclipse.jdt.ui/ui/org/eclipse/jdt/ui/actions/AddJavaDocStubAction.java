@@ -219,7 +219,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 				Object curr= elements.get(i);
 				if (curr instanceof IMethod || curr instanceof IType || curr instanceof IField) {
 					IMember member= (IMember)curr; // limit to methods, types & fields
-					
+
 					if (i == 0) {
 						cu= member.getCompilationUnit();
 						if (cu == null) {
@@ -227,7 +227,10 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 						}
 					} else if (!cu.equals(member.getCompilationUnit())) {
 						return null;
-					}						
+					}
+					if (member instanceof IType && member.getElementName().length() == 0) {
+						return null; // anonymous type
+					}
 					res[i]= member;
 				} else {
 					return null;

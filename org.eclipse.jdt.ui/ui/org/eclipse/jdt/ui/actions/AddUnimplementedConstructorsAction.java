@@ -140,7 +140,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	private boolean canEnable(IStructuredSelection selection) throws JavaModelException {
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
 			IType type= (IType) selection.getFirstElement();
-			return type.getCompilationUnit() != null && type.isClass(); // look if class: not cheap but done by all source generation actions
+			return type.getCompilationUnit() != null && type.isClass() && !type.isLocal(); // look if class: not cheap but done by all source generation actions
 		}
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))

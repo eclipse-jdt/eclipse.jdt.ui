@@ -195,7 +195,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
 			IType type= (IType) selection.getFirstElement();
-			return type.getCompilationUnit() != null && type.isClass(); // look if class: not cheap but done by all source generation actions
+			//	look if class: not cheap but done by all source generation actions
+			// disable locals until create method is supported by jdt.core (bug 44395)
+			return type.getCompilationUnit() != null && type.isClass() && !type.isLocal();
 		}
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
@@ -204,7 +206,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		return false;
 	}	
 
-	private static boolean canRunOn(IField[] fields) throws JavaModelException {
+	private static boolean canRunOn(IField[] fields) {
 		return fields != null && fields.length > 0;
 	}
 	
@@ -725,7 +727,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		MessageDialog.openError(getShell(), title, message);
 	}
 
-	private IField[] getWorkingCopyFields(IField[] fields) throws CoreException {
+	private IField[] getWorkingCopyFields(IField[] fields) {
 		if (fields.length == 0)
 			return new IField[0];
 		ICompilationUnit cu= fields[0].getCompilationUnit();
@@ -761,7 +763,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		private Map fGetterSetterEntries;	//IField -> Object[] (with 0 to 2 elements of type GetterSetterEntry)
 		private IField fPreselected;
 		
-		public AddGetterSetterContentProvider(Map entries) throws JavaModelException {
+		public AddGetterSetterContentProvider(Map entries) {
 			fGetterSetterEntries= entries;		
 		}		
 
