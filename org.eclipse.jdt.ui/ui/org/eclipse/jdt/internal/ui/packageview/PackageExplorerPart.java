@@ -85,6 +85,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -876,8 +877,9 @@ public class PackageExplorerPart extends ViewPart
 	boolean showInput(Object input) {
 		Object element= null;
 			
-		if (input instanceof IFile) 
+		if (input instanceof IFile && isOnClassPath((IFile)input)) {
 			element= JavaCore.create((IFile)input);
+		}
 				
 		if (element == null) // try a non Java resource
 			element= input;
@@ -905,6 +907,17 @@ public class PackageExplorerPart extends ViewPart
 		}
 		return false;
 	}
+	
+	private boolean isOnClassPath(IFile file) {
+		IJavaProject jproject= JavaCore.create(file.getProject());
+		try {
+			return jproject.isOnClasspath(file);
+		} catch (JavaModelException e) {
+			// fall through
+		}
+		return false;
+	}
+
 	/**
 	 * Returns the element's parent.
 	 * 
