@@ -261,7 +261,7 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 		protected Control createDialogArea(Composite parent) {
 			Composite result= (Composite)super.createDialogArea(parent);
 			fCheckbox= new Button(result, SWT.CHECK);
-			fCheckbox.setText("Show only compilation units with not externalized strings");
+			fCheckbox.setText("Hide compilation units with no strings to externalize");
 			fCheckbox.setSelection(loadCheckboxState(false));
 
 			if (fCheckbox.getSelection() && ! NonNLSListDialog.this.hasFilters())
