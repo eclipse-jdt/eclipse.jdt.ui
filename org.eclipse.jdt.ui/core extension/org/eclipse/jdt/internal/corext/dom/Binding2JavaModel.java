@@ -66,6 +66,13 @@ public class Binding2JavaModel {
 		return null;
 	}
 	
+	public static IMethod find(IMethodBinding method, IJavaProject scope) throws JavaModelException {
+		IType type= find(method.getDeclaringClass(), scope);
+		if (type == null)
+			return null;
+		return find(method, type);	
+	}
+	
 	//---- Helper methods to convert a type --------------------------------------------
 	
 	private static IPath getPathToCompilationUnit(IPackageBinding packageBinding, String topLevelTypeName) {
