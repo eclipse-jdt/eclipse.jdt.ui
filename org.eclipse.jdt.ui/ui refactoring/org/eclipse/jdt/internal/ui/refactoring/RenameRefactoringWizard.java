@@ -26,34 +26,34 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 		fInputPageImageDescriptor= desc;
 	}
 	
+	protected String getPageContextHelpId() {
+		return fPageContextHelpId;
+	}
+	
 	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
 		String initialSetting= getRenameRefactoring().getCurrentName();
 		setPageTitle(getPageTitle() + ": "+ initialSetting); //$NON-NLS-1$
-		RenameInputWizardPage page= new RenameInputWizardPage(fPageContextHelpId, true, initialSetting) {
+		createInputPage(initialSetting).setImageDescriptor(fInputPageImageDescriptor);
+		createInputPage(initialSetting).setMessage(fPageMessage);
+		addPage(createInputPage(initialSetting));
+	}
+
+	protected RenameInputWizardPage createInputPage(String initialSetting) {
+		return new RenameInputWizardPage(fPageContextHelpId, true, initialSetting) {
 			protected RefactoringStatus validateTextField(String text) {
 				return validateNewName(text);
 			}	
 		};
-		page.setImageDescriptor(fInputPageImageDescriptor);
-		page.setMessage(fPageMessage);
-		addPage(page);
-	}
-	
-	/* non java-doc
-	 * @see RefactoringWizard#addPreviewPage
-	 */ 
-	protected void addPreviewPage() {
-		addPage(new PreviewWizardPage());
 	}
 	
 	private IRenameRefactoring getRenameRefactoring(){
 		return (IRenameRefactoring)getRefactoring();	
 	}
 	
-	private RefactoringStatus validateNewName(String newName){
+	protected RefactoringStatus validateNewName(String newName){
 		IRenameRefactoring ref= getRenameRefactoring();
 		ref.setNewName(newName);
 		try{

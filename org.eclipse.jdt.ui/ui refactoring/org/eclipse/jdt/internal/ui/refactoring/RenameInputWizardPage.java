@@ -24,21 +24,21 @@ public class RenameInputWizardPage extends TextInputWizardPage{
 	 * @see DialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
-		Composite result= new Composite(parent, SWT.NONE);
-		setControl(result);
+		Composite superComposite= new Composite(parent, SWT.NONE);
+		setControl(superComposite);				superComposite.setLayout(new GridLayout());		Composite composite= new Composite(superComposite, SWT.NONE);		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));			
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;		layout.verticalSpacing= 8;
-		result.setLayout(layout);
+		composite.setLayout(layout);
 		RowLayouter layouter= new RowLayouter(2);
 		
-		Label label= new Label(result, SWT.NONE);
+		Label label= new Label(composite, SWT.NONE);
 		label.setText(getLabelText());
 		
-		Text text= createTextInputField(result);
+		Text text= createTextInputField(composite);
 		text.selectAll();
 		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 				
-		layouter.perform(label, text, 1);				addOptionalUpdateReferencesCheckbox(result, layouter);		addOptionalUpdateCommentsAndStringCheckboxes(result, layouter);				WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, fHelpContextID));	}		private void addOptionalUpdateCommentsAndStringCheckboxes(Composite result, RowLayouter layouter) {		if (!(getRefactoring() instanceof ITextUpdatingRefactoring))			return; 				ITextUpdatingRefactoring refactoring= (ITextUpdatingRefactoring)getRefactoring();		if (!refactoring.canEnableTextUpdating())			return;				addUpdateJavaDocCheckbox(result, layouter, refactoring);		addUpdateCommentsCheckbox(result, layouter, refactoring);		addUpdateStringsCheckbox(result, layouter, refactoring);	}
+		layouter.perform(label, text, 1);				addOptionalUpdateReferencesCheckbox(composite, layouter);		addOptionalUpdateCommentsAndStringCheckboxes(composite, layouter);				WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, fHelpContextID));	}		private void addOptionalUpdateCommentsAndStringCheckboxes(Composite result, RowLayouter layouter) {		if (!(getRefactoring() instanceof ITextUpdatingRefactoring))			return; 				ITextUpdatingRefactoring refactoring= (ITextUpdatingRefactoring)getRefactoring();		if (!refactoring.canEnableTextUpdating())			return;				addUpdateJavaDocCheckbox(result, layouter, refactoring);		addUpdateCommentsCheckbox(result, layouter, refactoring);		addUpdateStringsCheckbox(result, layouter, refactoring);	}
 
 	private void addOptionalUpdateReferencesCheckbox(Composite result, RowLayouter layouter) {		if (! (getRefactoring() instanceof IReferenceUpdatingRefactoring))			return;		final IReferenceUpdatingRefactoring ref= (IReferenceUpdatingRefactoring)getRefactoring();			if (! ref.canEnableUpdateReferences())				return;
 		String title= "Update references to the renamed element";		boolean defaultValue= ref.getUpdateReferences();		final Button checkBox= createCheckbox(result, title, defaultValue, layouter);		ref.setUpdateReferences(checkBox.getSelection());		checkBox.addSelectionListener(new SelectionAdapter(){			public void widgetSelected(SelectionEvent e) {				ref.setUpdateReferences(checkBox.getSelection());			}		});		
