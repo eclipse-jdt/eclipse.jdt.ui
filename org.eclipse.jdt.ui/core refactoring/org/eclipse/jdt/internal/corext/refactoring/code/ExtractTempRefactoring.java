@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -60,6 +62,7 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
@@ -138,15 +141,67 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	public String guessTempName() throws JavaModelException{
 		IExpressionFragment selected= getSelectedExpression();
-		if (selected.getAssociatedNode() instanceof MethodInvocation){
-			MethodInvocation mi= (MethodInvocation)selected.getAssociatedNode();
-			for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
-				String proposal= tryTempNamePrefix(KNOWN_METHOD_NAME_PREFIXES[i], mi.getName().getIdentifier());
-				if (proposal != null)
-					return proposal;
-			}
+		ASTNode associatedNode= selected.getAssociatedNode();
+		if (associatedNode instanceof MethodInvocation){
+			String candidate= guessTempNameFromMethodInvocation((MethodInvocation)associatedNode);
+			if (candidate != null)
+				return candidate;
+		}
+		if (associatedNode instanceof Expression) {
+			String candidate= guessTempNameFromExpression((Expression)associatedNode);
+			if (candidate != null)
+				return candidate;			
 		}
 		return fTempName;
+	}
+	
+	private static String guessTempNameFromMethodInvocation(MethodInvocation selectedMethodInvocation) {
+		for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
+			String proposal= tryTempNamePrefix(KNOWN_METHOD_NAME_PREFIXES[i], selectedMethodInvocation.getName().getIdentifier());
+			if (proposal != null)
+				return proposal;
+		}
+		return null;
+	}
+	
+	private String guessTempNameFromExpression(Expression selectedExpression) throws JavaModelException {
+		ITypeBinding expressionBinding= selectedExpression.resolveTypeBinding();
+			
+		String packageName= getPackageName(expressionBinding);
+		String typeName= getQualifiedName(expressionBinding);
+		if (typeName.length() == 0)
+			typeName= expressionBinding.getName();
+		if (typeName.length() == 0)			
+			return fTempName;
+		String[] candidates= NamingConventions.suggestLocalVariableNames(fCu.getJavaProject(), packageName, typeName, expressionBinding.getDimensions(), getExcludedVariableNames());
+		if (candidates.length > 0)
+			return candidates[0];
+		return null;
+	}
+	
+	private static String getPackageName(ITypeBinding typeBinding) {
+		if (typeBinding.getPackage() != null)
+			return typeBinding.getPackage().getName();
+		else
+			return "";
+	}
+
+	private String[] getExcludedVariableNames() throws JavaModelException {
+		IBinding[] bindings= new ScopeAnalyzer(fCompilationUnitNode).getDeclarationsInScope(getSelectedExpression().getStartPosition(), ScopeAnalyzer.VARIABLES);
+		String[] names= new String[bindings.length];
+		for (int i= 0; i < names.length; i++) {
+			names[i]= bindings[i].getName();
+		}
+		return names;
+	}
+
+	private static String getQualifiedName(ITypeBinding typeBinding) {
+		if (typeBinding.isAnonymous())
+			return getQualifiedName(typeBinding.getSuperclass());
+		if (! typeBinding.isArray())
+			return typeBinding.getQualifiedName();
+		else
+			return typeBinding.getElementType().getQualifiedName();
 	}
 
 	private static String tryTempNamePrefix(String prefix, String methodName){
