@@ -117,14 +117,7 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 	}	
 
 	private static boolean canRemove(Object element){
-		if (! (element instanceof IPackageFragmentRoot))
-			return false;
-		IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-		if (! root.isArchive())
-			return false;
-		if (root.isExternal())
-			return false;
-		return true;	
+		return element instanceof IPackageFragmentRoot;
 	}	
 }
 
