@@ -97,8 +97,10 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
-		initializeHighlightColor(fViewer);
-		redrawRegion();
+		if (event.getProperty().equals(CompilationUnitEditor.LINKED_POSITION_COLOR)) {
+			initializeHighlightColor(fViewer);
+			redrawRegion();
+		}
 	}
 
 	private void initializeHighlightColor(ITextViewer viewer) {
@@ -106,8 +108,11 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		if (fFrameColor != null)
 			fFrameColor.dispose();
 
-		Display display= viewer.getTextWidget().getDisplay();
-		fFrameColor= createColor(fgStore, CompilationUnitEditor.LINKED_POSITION_COLOR, display);
+		StyledText text= viewer.getTextWidget();
+		if (text != null) {
+			Display display= text.getDisplay();
+			fFrameColor= createColor(fgStore, CompilationUnitEditor.LINKED_POSITION_COLOR, display);
+		}
 	}
 
 	/**
@@ -432,7 +437,9 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		int offset= fFramePosition.getOffset() -  region.getOffset();
 		int length= fFramePosition.getLength();
 
-		fViewer.getTextWidget().redrawRange(offset, length, true);
+		StyledText text= fViewer.getTextWidget();
+		if (text != null && !text.isDisposed())
+			text.redrawRange(offset, length, true);
 	}
 
 	private void selectRegion() {
@@ -446,7 +453,9 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		int start= fFramePosition.getOffset() - region.getOffset();
 		int end= fFramePosition.getLength() + start;	
 
-		fViewer.getTextWidget().setSelection(start, end);		
+		StyledText text= fViewer.getTextWidget();
+		if (text != null && !text.isDisposed())
+			text.setSelection(start, end);
 	}
 
 	private void updateCaret() {
@@ -459,8 +468,11 @@ public class LinkedPositionUI implements LinkedPositionListener,
 
 		int offset= fFramePosition.getOffset() + fCaretOffset - region.getOffset();
 		
-		if ((offset >= 0) && (offset <= region.getLength()))	
-			fViewer.getTextWidget().setCaretOffset(offset);
+		if ((offset >= 0) && (offset <= region.getLength())) {
+			StyledText text= fViewer.getTextWidget();
+			if (text != null && !text.isDisposed())
+				text.setCaretOffset(offset);
+		}
 	}
 
 	/*
