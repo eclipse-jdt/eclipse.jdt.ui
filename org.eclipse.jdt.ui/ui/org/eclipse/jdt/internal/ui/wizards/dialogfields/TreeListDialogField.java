@@ -153,13 +153,9 @@ public class TreeListDialogField extends DialogField {
 		fViewerSorter= viewerSorter;
 	}
 	
-	/**
-	* Sets the viewerSorter.
-	* @param viewerSorter The viewerSorter to set
-	*/
 	public void setTreeExpansionLevel(int level) {
 		fTreeExpandLevel= level;
-		if (fTree != null) {
+		if (fTree != null && fTreeExpandLevel > 0) {
 			fTree.expandToLevel(level);
 		}
 	}	
@@ -249,7 +245,7 @@ public class TreeListDialogField extends DialogField {
 	/**
 	* Returns the tree control. When called the first time, the control will be
 	* created.
-	* @param The parent composite when called the first time, or <code>null</code>
+	* @param parent The parent composite when called the first time, or <code>null</code>
 	* after.
 	*/
 	public Control getTreeControl(Composite parent) {
@@ -264,7 +260,6 @@ public class TreeListDialogField extends DialogField {
 					handleKeyPressed(e);
 				}
 			});
-			fTree.setAutoExpandLevel(99);
 			fTree.setContentProvider(fTreeViewerAdapter);
 			fTree.setLabelProvider(fLabelProvider);
 			fTree.addSelectionChangedListener(fTreeViewerAdapter);
@@ -334,7 +329,7 @@ public class TreeListDialogField extends DialogField {
 	/**
 	* Returns the composite containing the buttons. When called the first time, the control
 	* will be created.
-	* @param The parent composite when called the first time, or <code>null</code>
+	* @param parent The parent composite when called the first time, or <code>null</code>
 	* after.
 	*/
 	public Composite getButtonBox(Composite parent) {
