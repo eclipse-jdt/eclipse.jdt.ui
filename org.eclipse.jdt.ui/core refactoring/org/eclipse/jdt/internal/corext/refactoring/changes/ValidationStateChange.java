@@ -29,18 +29,16 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.corext.refactoring.ListenerList;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.IDynamicValidationStateChange;
-import org.eclipse.ltk.core.refactoring.IValidationStateListener;
+import org.eclipse.ltk.core.refactoring.IUndoManager;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.ValidationStateChangedEvent;
+import org.eclipse.ltk.core.refactoring.UndoManagerAdapter;
 
-public class ValidationStateChange extends CompositeChange implements IDynamicValidationStateChange {
+public class ValidationStateChange extends CompositeChange {
 	
 	private class FlushListener implements IElementChangedListener {
 		public void elementChanged(ElementChangedEvent event) {
@@ -127,11 +125,25 @@ public class ValidationStateChange extends CompositeChange implements IDynamicVa
 		}
 	}
 	
-	private int fInRefactoringCount;
-	private ListenerList fListeners= new ListenerList();
+	private class UndoManagerListener extends UndoManagerAdapter {
+		private int fInRefactoringCount;
+		
+		public void aboutToPerformChange(IUndoManager manager, Change change) {
+			fInRefactoringCount++;
+		}
+		public void changePerformed(IUndoManager manager, Change change) {
+			fInRefactoringCount--;
+		}
+		public boolean isPerformingChange() {
+			return fInRefactoringCount > 0;
+		}
+	}
+	
 	private RefactoringStatus fValidationState= null;
+	
 	private FlushListener fFlushListener;
 	private SaveListener fSaveListener;
+	private UndoManagerListener fUndoManagerListener;
 	
 	public ValidationStateChange() {
 		super();
@@ -152,6 +164,14 @@ public class ValidationStateChange extends CompositeChange implements IDynamicVa
 	public ValidationStateChange(String name, Change[] changes) {
 		super(name, changes);
 		markAsGeneric();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void initializeValidationData(IProgressMonitor pm) {
+		super.initializeValidationData(pm);
+		addListeners();
 	}
 	
 	/**
@@ -181,48 +201,6 @@ public class ValidationStateChange extends CompositeChange implements IDynamicVa
 	/**
 	 * {@inheritDoc}
 	 */
-	public void addValidationStateListener(IValidationStateListener listener) {
-		fListeners.add(listener);
-		addListeners();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void removeValidationStateListener(IValidationStateListener listener) {
-		fListeners.remove(listener);
-		if (fListeners.size() == 0) {
-			removeListeners();
-		}
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public void aboutToPerformChange(Change change) {
-		fInRefactoringCount++;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public void changePerformed(Change change, Change undo, Exception e) {
-		fInRefactoringCount--;
-		if (fInRefactoringCount == 0) {
-			// if the undo object == null then this change object is invalid
-			// because the work space state will not be restored properly.
-			// Additionally if an exception occurred this change is invalid as
-			// well.
-			if ((undo == null || e != null) && fValidationState != null) {
-				fireValidationStateChanged();
-			}
-			fValidationState= null;
-		}
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
 	protected Change createUndoChange(Change[] childUndos) {
 		ValidationStateChange result= new ValidationStateChange();
 		for (int i= 0; i < childUndos.length; i++) {
@@ -231,7 +209,16 @@ public class ValidationStateChange extends CompositeChange implements IDynamicVa
 		return result;
 	}
 	
+	public void dispose() {
+		removeListeners();
+		super.dispose();
+	}
+	
 	private void addListeners() {
+		if (fUndoManagerListener == null) {
+			fUndoManagerListener= new UndoManagerListener();
+			RefactoringCore.getUndoManager().addListener(fUndoManagerListener);
+		}
 		if (fFlushListener == null) {
 			fFlushListener= new FlushListener();
 			JavaCore.addElementChangedListener(fFlushListener);
@@ -243,28 +230,25 @@ public class ValidationStateChange extends CompositeChange implements IDynamicVa
 	}
 
 	private void removeListeners() {
-		if (fFlushListener != null) {
-			JavaCore.removeElementChangedListener(fFlushListener);
-			fFlushListener= null;
-		}
 		if (fSaveListener != null) {
 			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fSaveListener);
 			fSaveListener= null;
 		}
+		if (fFlushListener != null) {
+			JavaCore.removeElementChangedListener(fFlushListener);
+			fFlushListener= null;
+		}
+		if (fUndoManagerListener != null) {
+			RefactoringCore.getUndoManager().removeListener(fUndoManagerListener);
+			fUndoManagerListener= null;
+		}
 	}
 
 	private void workspaceChanged() {
-		fValidationState= RefactoringStatus.createFatalErrorStatus("Workspace has changed since change has been created");
-		if (fInRefactoringCount > 0)
+		if (fUndoManagerListener != null && fUndoManagerListener.isPerformingChange())
 			return;
-		fireValidationStateChanged();
-	}
-
-	private void fireValidationStateChanged() {
-		ValidationStateChangedEvent event= new ValidationStateChangedEvent(this);
-		Object[] listeners= fListeners.getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			((IValidationStateListener)listeners[i]).stateChanged(event);
-		}
+		fValidationState= RefactoringStatus.createFatalErrorStatus("Workspace has changed since change has been created");
+		RefactoringCore.getUndoManager().flush();
+		removeListeners();
 	}
 }

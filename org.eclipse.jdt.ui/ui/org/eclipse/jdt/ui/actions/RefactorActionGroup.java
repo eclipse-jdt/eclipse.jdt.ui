@@ -16,9 +16,12 @@ import java.util.List;
 
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -33,6 +36,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
@@ -40,6 +44,7 @@ import org.eclipse.ui.part.Page;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.QuickAccessAction2;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -115,6 +120,34 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fSelfEncapsulateField;
 	
 	private List fEditorActions;
+	
+	/*
+	private class RefactorQuickAccessAction extends QuickAccessAction {
+		public RefactorQuickAccessAction(CompilationUnitEditor editor) {
+			super("org.eclipse.jdt.ui.edit.text.java.refactor.quickList", editor); //$NON-NLS-1$
+			setActionDefinitionId("org.eclipse.jdt.ui.edit.text.java.refactor.quickList"); //$NON-NLS-1$
+		}
+		protected String getTableHeader() {
+			return RefactoringMessages.getString("RefactorActionGroup.quickAccess.title"); //$NON-NLS-1$
+		}
+		protected void addItems(Table table) {
+			fillQuickAccessMenu(table);
+		}
+	}
+	*/
+	
+	private class RefactorQuickAccessAction extends QuickAccessAction2 {
+		public RefactorQuickAccessAction(CompilationUnitEditor editor) {
+			super(editor); //$NON-NLS-1$
+			setActionDefinitionId("org.eclipse.jdt.ui.edit.text.java.refactor.quickList"); //$NON-NLS-1$
+		}
+
+		protected void addItems(IMenuManager menu) {
+			fillQuickAccessMenu(menu);
+		}
+	}
+	
+	private RefactorQuickAccessAction fQuickAccessAction;
 
 	private static class NoActionAvailable extends Action {
 		public NoActionAvailable() {
@@ -163,18 +196,30 @@ public class RefactorActionGroup extends ActionGroup {
 		editor.setAction("RenameElement", fRenameAction); //$NON-NLS-1$
 		fEditorActions.add(fRenameAction);
 		
-		fSelfEncapsulateField= new SelfEncapsulateFieldAction(editor);
-		fSelfEncapsulateField.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELF_ENCAPSULATE_FIELD);
-		fSelfEncapsulateField.update(selection);
-		editor.setAction("SelfEncapsulateField", fSelfEncapsulateField); //$NON-NLS-1$
-		fEditorActions.add(fSelfEncapsulateField);
-		
+		fMoveAction= new MoveAction(editor);
+		fMoveAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.MOVE_ELEMENT);
+		fMoveAction.update(selection);
+		editor.setAction("MoveElement", fMoveAction); //$NON-NLS-1$
+		fEditorActions.add(fMoveAction);
+				
 		fModifyParametersAction= new ModifyParametersAction(editor);
 		fModifyParametersAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.MODIFY_METHOD_PARAMETERS);
 		fModifyParametersAction.update(selection);
 		editor.setAction("ModifyParameters", fModifyParametersAction); //$NON-NLS-1$
 		fEditorActions.add(fModifyParametersAction);
 
+		fConvertAnonymousToNestedAction= new ConvertAnonymousToNestedAction(editor);
+		fConvertAnonymousToNestedAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_ANONYMOUS_TO_NESTED);
+		initAction(fConvertAnonymousToNestedAction, provider, selection);
+		editor.setAction("ConvertAnonymousToNested", fConvertAnonymousToNestedAction); //$NON-NLS-1$
+		fEditorActions.add(fConvertAnonymousToNestedAction);
+
+		fConvertNestedToTopAction= new ConvertNestedToTopAction(editor);
+		fConvertNestedToTopAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.MOVE_INNER_TO_TOP);
+		fConvertNestedToTopAction.update(selection);
+		editor.setAction("MoveInnerToTop", fConvertNestedToTopAction); //$NON-NLS-1$
+		fEditorActions.add(fConvertNestedToTopAction);
+		
 		fPullUpAction= new PullUpAction(editor);
 		fPullUpAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.PULL_UP);
 		fPullUpAction.update(selection);
@@ -187,35 +232,23 @@ public class RefactorActionGroup extends ActionGroup {
 		editor.setAction("PushDown", fPushDownAction); //$NON-NLS-1$
 		fEditorActions.add(fPushDownAction);
 		
-		fMoveAction= new MoveAction(editor);
-		fMoveAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.MOVE_ELEMENT);
-		fMoveAction.update(selection);
-		editor.setAction("MoveElement", fMoveAction); //$NON-NLS-1$
-		fEditorActions.add(fMoveAction);
-				
-		fExtractTempAction= new ExtractTempAction(editor);
-		fExtractTempAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_LOCAL_VARIABLE);
-		initAction(fExtractTempAction, provider, selection);
-		editor.setAction("ExtractLocalVariable", fExtractTempAction); //$NON-NLS-1$
-		fEditorActions.add(fExtractTempAction);
+		fExtractInterfaceAction= new ExtractInterfaceAction(editor);
+		fExtractInterfaceAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_INTERFACE);
+		fExtractInterfaceAction.update(selection);
+		editor.setAction("ExtractInterface", fExtractInterfaceAction); //$NON-NLS-1$
+		fEditorActions.add(fExtractInterfaceAction);
 
-		fIntroduceParameterAction= new IntroduceParameterAction(editor);
-		fIntroduceParameterAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INTRODUCE_PARAMETER);
-		initAction(fIntroduceParameterAction, provider, selection);
-		editor.setAction("IntroduceParameter", fIntroduceParameterAction); //$NON-NLS-1$
-		fEditorActions.add(fIntroduceParameterAction);
+		fChangeTypeAction= new ChangeTypeAction(editor);
+		fChangeTypeAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.CHANGE_TYPE);
+		initAction(fChangeTypeAction, provider, selection);
+		editor.setAction("ChangeType", fChangeTypeAction); //$NON-NLS-1$
+		fEditorActions.add(fChangeTypeAction);
 
-		fIntroduceFactoryAction= new IntroduceFactoryAction(editor);
-		fIntroduceFactoryAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INTRODUCE_FACTORY);
-		initAction(fIntroduceFactoryAction, provider, selection);
-		editor.setAction("IntroduceFactory", fIntroduceFactoryAction); //$NON-NLS-1$
-		fEditorActions.add(fIntroduceFactoryAction);
-
-		fExtractConstantAction= new ExtractConstantAction(editor);
-		fExtractConstantAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_CONSTANT);
-		initAction(fExtractConstantAction, provider, selection);
-		editor.setAction("ExtractConstant", fExtractConstantAction); //$NON-NLS-1$
-		fEditorActions.add(fExtractConstantAction);
+		fUseSupertypeAction= new UseSupertypeAction(editor);
+		fUseSupertypeAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.USE_SUPERTYPE);
+		fUseSupertypeAction.update(selection);
+		editor.setAction("UseSupertype", fUseSupertypeAction); //$NON-NLS-1$
+		fEditorActions.add(fUseSupertypeAction);
 		
 		fInlineAction= new InlineAction(editor);
 		fInlineAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE);
@@ -229,41 +262,45 @@ public class RefactorActionGroup extends ActionGroup {
 		editor.setAction("ExtractMethod", fExtractMethodAction); //$NON-NLS-1$
 		fEditorActions.add(fExtractMethodAction);
 
+		fExtractTempAction= new ExtractTempAction(editor);
+		fExtractTempAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_LOCAL_VARIABLE);
+		initAction(fExtractTempAction, provider, selection);
+		editor.setAction("ExtractLocalVariable", fExtractTempAction); //$NON-NLS-1$
+		fEditorActions.add(fExtractTempAction);
+
+		fExtractConstantAction= new ExtractConstantAction(editor);
+		fExtractConstantAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_CONSTANT);
+		initAction(fExtractConstantAction, provider, selection);
+		editor.setAction("ExtractConstant", fExtractConstantAction); //$NON-NLS-1$
+		fEditorActions.add(fExtractConstantAction);
+		
+		fIntroduceParameterAction= new IntroduceParameterAction(editor);
+		fIntroduceParameterAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INTRODUCE_PARAMETER);
+		initAction(fIntroduceParameterAction, provider, selection);
+		editor.setAction("IntroduceParameter", fIntroduceParameterAction); //$NON-NLS-1$
+		fEditorActions.add(fIntroduceParameterAction);
+
+		fIntroduceFactoryAction= new IntroduceFactoryAction(editor);
+		fIntroduceFactoryAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INTRODUCE_FACTORY);
+		initAction(fIntroduceFactoryAction, provider, selection);
+		editor.setAction("IntroduceFactory", fIntroduceFactoryAction); //$NON-NLS-1$
+		fEditorActions.add(fIntroduceFactoryAction);
+
 		fConvertLocalToFieldAction= new ConvertLocalToFieldAction(editor);
 		fConvertLocalToFieldAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.PROMOTE_LOCAL_VARIABLE);
 		initAction(fConvertLocalToFieldAction, provider, selection);
 		editor.setAction("PromoteTemp", fConvertLocalToFieldAction); //$NON-NLS-1$
 		fEditorActions.add(fConvertLocalToFieldAction);
 
-		fConvertAnonymousToNestedAction= new ConvertAnonymousToNestedAction(editor);
-		fConvertAnonymousToNestedAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_ANONYMOUS_TO_NESTED);
-		initAction(fConvertAnonymousToNestedAction, provider, selection);
-		editor.setAction("ConvertAnonymousToNested", fConvertAnonymousToNestedAction); //$NON-NLS-1$
-		fEditorActions.add(fConvertAnonymousToNestedAction);
-
-		fExtractInterfaceAction= new ExtractInterfaceAction(editor);
-		fExtractInterfaceAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_INTERFACE);
-		fExtractInterfaceAction.update(selection);
-		editor.setAction("ExtractInterface", fExtractInterfaceAction); //$NON-NLS-1$
-		fEditorActions.add(fExtractInterfaceAction);
-
-		fChangeTypeAction= new ChangeTypeAction(editor);
-		fChangeTypeAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.CHANGE_TYPE);
-		initAction(fChangeTypeAction, provider, selection);
-		editor.setAction("ChangeType", fChangeTypeAction); //$NON-NLS-1$
-		fEditorActions.add(fChangeTypeAction);
-
-		fConvertNestedToTopAction= new ConvertNestedToTopAction(editor);
-		fConvertNestedToTopAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.MOVE_INNER_TO_TOP);
-		fConvertNestedToTopAction.update(selection);
-		editor.setAction("MoveInnerToTop", fConvertNestedToTopAction); //$NON-NLS-1$
-		fEditorActions.add(fConvertNestedToTopAction);
+		fSelfEncapsulateField= new SelfEncapsulateFieldAction(editor);
+		fSelfEncapsulateField.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELF_ENCAPSULATE_FIELD);
+		fSelfEncapsulateField.update(selection);
+		editor.setAction("SelfEncapsulateField", fSelfEncapsulateField); //$NON-NLS-1$
+		fEditorActions.add(fSelfEncapsulateField);
 		
-		fUseSupertypeAction= new UseSupertypeAction(editor);
-		fUseSupertypeAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.USE_SUPERTYPE);
-		fUseSupertypeAction.update(selection);
-		editor.setAction("UseSupertype", fUseSupertypeAction); //$NON-NLS-1$
-		fEditorActions.add(fUseSupertypeAction);
+		fQuickAccessAction= new RefactorQuickAccessAction(editor);
+		IKeyBindingService service= editor.getEditorSite().getKeyBindingService();
+		service.registerAction(fQuickAccessAction);
 	}
 
 	private RefactorActionGroup(IWorkbenchSite site) {
@@ -385,6 +422,9 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fUseSupertypeAction, provider);
 		disposeAction(fConvertLocalToFieldAction, provider);
 		disposeAction(fConvertAnonymousToNestedAction, provider);
+		if (fQuickAccessAction != null) {
+			fEditor.getSite().getKeyBindingService().unregisterAction(fQuickAccessAction);
+		}
 		super.dispose();
 	}
 	
@@ -481,5 +521,47 @@ public class RefactorActionGroup extends ActionGroup {
 	private IDocument getDocument() {
 		return JavaPlugin.getDefault().getCompilationUnitDocumentProvider().
 			getDocument(fEditor.getEditorInput());
+	}
+	
+	private void fillQuickAccessMenu(IMenuManager menu) {
+		ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
+		JavaTextSelection javaSelection= new JavaTextSelection(
+			getEditorInput(), getDocument(), textSelection.getOffset(), textSelection.getLength());
+		
+		for (Iterator iter= fEditorActions.iterator(); iter.hasNext(); ) {
+			((SelectionDispatchAction)iter.next()).update(javaSelection);
+		}
+		fillRefactorMenu(menu);
+		for (Iterator iter= fEditorActions.iterator(); iter.hasNext(); ) {
+			((SelectionDispatchAction)iter.next()).update(textSelection);
+		}
+	}
+
+	private void fillQuickAccessMenu(Table table) {
+		ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
+		JavaTextSelection javaSelection= new JavaTextSelection(
+			getEditorInput(), getDocument(), textSelection.getOffset(), textSelection.getLength());
+		
+		for (Iterator iter= fEditorActions.iterator(); iter.hasNext(); ) {
+			SelectionDispatchAction action= (SelectionDispatchAction)iter.next();
+			action.update(javaSelection);
+			if (action.isEnabled()) {
+				TableItem item= new TableItem(table, SWT.NONE);
+				item.setText(removeAmpersand(action.getText()));
+				item.setData(action);
+			}
+			action.update(textSelection);
+		}
+	}
+
+	private static String removeAmpersand(String string) {
+		StringBuffer result= new StringBuffer();
+		for (int i= 0; i < string.length(); i++) {
+			char ch= string.charAt(i);
+			if (ch == '&')
+				continue;
+			result.append(ch);
+		}
+		return result.toString();
 	}
 }

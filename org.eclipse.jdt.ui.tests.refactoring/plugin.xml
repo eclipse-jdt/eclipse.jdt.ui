@@ -23,5 +23,6 @@
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.jdt.ui.tests"/>
       <import plugin="org.eclipse.core.runtime.compatibility" optional="true"/>
+	  <import plugin="org.eclipse.ltk.core.refactoring"/>      
    </requires>
 </plugin>

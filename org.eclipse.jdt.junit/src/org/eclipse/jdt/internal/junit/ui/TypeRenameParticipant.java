@@ -62,7 +62,7 @@ public class TypeRenameParticipant extends RenameParticipant {
 		/**
 		 * {@inheritDoc}
 		 */
-		public void initializeValidationData(IProgressMonitor pm) throws CoreException {
+		public void initializeValidationData(IProgressMonitor pm) {
 			// must be implemented to decide correct value of isValid
 		}
 

@@ -31,12 +31,13 @@
 		<import plugin="org.eclipse.jdt.launching"/>
 		<import plugin="org.eclipse.jdt.debug.ui"/>
 		<import plugin="org.eclipse.core.runtime.compatibility"/>
+	    <import plugin="org.eclipse.ltk.core.refactoring"/>
 	</requires>
 
 	<!-- =========================================================================== -->
 	<!-- Refactoring Participant                                                     -->
 	<!-- =========================================================================== -->
-	<extension point="org.eclipse.jdt.ui.renameParticipants">
+	<extension point="org.eclipse.ltk.core.refactoring.renameParticipants">
 	  <renameParticipant
 	  	id="org.eclipse.jsp.renameParticipant.IType"
 	  	class="org.eclipse.jsp.RenameTypeParticipant">

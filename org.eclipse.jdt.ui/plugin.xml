@@ -33,6 +33,8 @@
       <import plugin="org.eclipse.ui.views"/>
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.core.runtime.compatibility"/>
+      <import plugin="org.eclipse.ltk.core.refactoring"/>
+      <import plugin="org.eclipse.ltk.ui.refactoring"/>
    </requires>
 
 
@@ -86,11 +88,6 @@
 	</decorator>	
 </extension>
 
-   <extension-point id="renameParticipants" name="%renameParticipantsExtensionPoint"/>
-   <extension-point id="createParticipants" name="%createParticipantsExtensionPoint"/>
-   <extension-point id="deleteParticipants" name="%deleteParticipantsExtensionPoint"/>
-   <extension-point id="moveParticipants" name="%moveParticipantsExtensionPoint"/>
-   <extension-point id="copyParticipants" name="%copyParticipantsExtensionPoint"/>
    <extension-point id="statusContextViewers" name="%statusViewerExtensionPoint"/>
    <extension-point id="changePreviewViewers" name="%changeViewerExtensionPoint"/>
 
@@ -2679,6 +2676,12 @@
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
 <!-- refactoring -->
+      <command
+            name="Refactoring Quick List"
+            description="Refactoring Quick List"
+            category="org.eclipse.jdt.ui.category.refactoring"
+            id="org.eclipse.jdt.ui.edit.text.java.refactor.quickList">
+      </command>
       <command
             name="%ActionDefinition.refactorUndo.name"
             description="%ActionDefinition.refactorUndo.description"

@@ -33,6 +33,7 @@
       <import plugin="org.eclipse.jdt.debug.ui"/>
       <import plugin="org.eclipse.jdt.junit.runtime"/>
       <import plugin="org.eclipse.compare"/>
+	  <import plugin="org.eclipse.ltk.core.refactoring"/>      
    </requires>
 
 
@@ -285,7 +286,7 @@
             id="org.eclipse.jdt.junit.IResourceExtender">
       </propertyTester>
    </extension>
-   <extension point="org.eclipse.jdt.ui.renameParticipants">
+   <extension point="org.eclipse.ltk.core.refactoring.renameParticipants">
       <renameParticipant
 			id="org.eclipse.jdt.junit.renameTypeParticipant" 
 			class="org.eclipse.jdt.internal.junit.ui.TypeRenameParticipant">

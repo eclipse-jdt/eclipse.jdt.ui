@@ -35,7 +35,7 @@ public abstract class JDTChange extends Change {
 	
 	private long fModificationStamp= IResource.NULL_STAMP;
 
-	public void initializeValidationData(IProgressMonitor pm) throws CoreException {
+	public void initializeValidationData(IProgressMonitor pm) {
 		IResource resource= getResource(getModifiedElement());
 		if (resource != null) {
 			fModificationStamp= resource.getModificationStamp();

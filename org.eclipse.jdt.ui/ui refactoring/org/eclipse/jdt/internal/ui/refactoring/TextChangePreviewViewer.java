@@ -32,8 +32,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextEditChangeGroup;
 import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.TextEditChangeGroup;
 
 public class TextChangePreviewViewer implements IChangePreviewViewer {
 
