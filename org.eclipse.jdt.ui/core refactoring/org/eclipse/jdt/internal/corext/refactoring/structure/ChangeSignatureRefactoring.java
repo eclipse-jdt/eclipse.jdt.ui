@@ -323,14 +323,15 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 	
 	private void checkParameters(RefactoringStatus result) {
-		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
+		int i= 1;
+		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext(); i++) {
 			ParameterInfo info= (ParameterInfo) iter.next();
 			if (info.isDeleted())
 				continue;
-			checkParameterType(result, info);
+			checkParameterName(result, info, i);
 			if (result.hasFatalError())
 				return;
-			result.merge(Checks.checkTempName(info.getNewName()));
+			checkParameterType(result, info);
 			if (result.hasFatalError())
 				return;
 			if (info.isAdded())	
@@ -338,6 +339,15 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 	}
 	
+	private void checkParameterName(RefactoringStatus result, ParameterInfo info, int position) {
+		if (info.getNewName().trim().length() == 0) {
+			result.addFatalError(RefactoringCoreMessages.getFormattedString(
+					"ChangeSignatureRefactoring.param_name_not_empty", Integer.toString(position))); //$NON-NLS-1$
+		} else {
+			result.merge(Checks.checkTempName(info.getNewName()));
+		}
+	}
+
 	private void checkReturnType(RefactoringStatus result) {
 		if ("".equals(fReturnTypeName.trim())) { //$NON-NLS-1$
 			String msg= RefactoringCoreMessages.getString("ChangeSignatureRefactoring.return_type_not_empty"); //$NON-NLS-1$
