@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -189,7 +190,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 		try{
 			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("ReorgRefactoring.reorganize_elements"), fElements.size()); //$NON-NLS-1$
 			for (Iterator iter= fElements.iterator(); iter.hasNext();){
-				composite.add(createChange(iter.next()));
+				composite.add(createChange(new SubProgressMonitor(pm, 1), iter.next()));
 			}
 			return composite;
 		} finally{
@@ -197,30 +198,34 @@ public abstract class ReorgRefactoring extends Refactoring {
 		}
 	}
 	
-	private IChange createChange(Object o) throws JavaModelException{
-		if (fExcludedElements.contains(o))
+	private IChange createChange(IProgressMonitor pm, Object o) throws JavaModelException{
+		try {
+			if (fExcludedElements.contains(o))
+				return null;
+			
+			if (o instanceof IPackageFragmentRoot)
+				return createChange(pm, (IPackageFragmentRoot)o);
+				
+			if (o instanceof IPackageFragment)
+				return createChange(pm, (IPackageFragment)o);
+			
+			if (o instanceof ICompilationUnit)	
+				return createChange(pm, (ICompilationUnit)o);
+			
+			if (o instanceof IResource)
+				return createChange(pm, (IResource)o);
+				
+			Assert.isTrue(false, RefactoringCoreMessages.getString("ReorgRefactoring.assert.whyhere"));	 //$NON-NLS-1$
 			return null;
-		
-		if (o instanceof IPackageFragmentRoot)
-			return createChange((IPackageFragmentRoot)o);
-			
-		if (o instanceof IPackageFragment)
-			return createChange((IPackageFragment)o);
-		
-		if (o instanceof ICompilationUnit)	
-			return createChange((ICompilationUnit)o);
-		
-		if (o instanceof IResource)
-			return createChange((IResource)o);
-			
-		Assert.isTrue(false, RefactoringCoreMessages.getString("ReorgRefactoring.assert.whyhere"));	 //$NON-NLS-1$
-		return null;	
+		} finally{
+			pm.done();
+		}	
 	}
 	
-	abstract IChange createChange(IPackageFragmentRoot root) throws JavaModelException;
-	abstract IChange createChange(IPackageFragment pack) throws JavaModelException;
-	abstract IChange createChange(ICompilationUnit cu) throws JavaModelException;
-	abstract IChange createChange(IResource res) throws JavaModelException;
+	abstract IChange createChange(IProgressMonitor pm, IPackageFragmentRoot root) throws JavaModelException;
+	abstract IChange createChange(IProgressMonitor pm, IPackageFragment pack) throws JavaModelException;
+	abstract IChange createChange(IProgressMonitor pm, ICompilationUnit cu) throws JavaModelException;
+	abstract IChange createChange(IProgressMonitor pm, IResource res) throws JavaModelException;
 	
 	/** returns IPackageFragment or IContainer
 	 */

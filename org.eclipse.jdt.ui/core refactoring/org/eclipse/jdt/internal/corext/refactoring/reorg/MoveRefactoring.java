@@ -281,7 +281,7 @@ public class MoveRefactoring extends ReorgRefactoring {
 	/*
 	 * @see ReorgRefactoring#createChange(ICompilationUnit)
 	 */	
-	IChange createChange(ICompilationUnit cu) throws JavaModelException{
+	IChange createChange(IProgressMonitor pm, ICompilationUnit cu) throws JavaModelException{
 		Object dest= getDestinationForCusAndFiles(getDestination());
 		if (dest instanceof IPackageFragment)
 			return new MoveCompilationUnitChange(cu, (IPackageFragment)dest);
@@ -292,7 +292,7 @@ public class MoveRefactoring extends ReorgRefactoring {
 	/*
 	 * @see ReorgRefactoring#createChange(IPackageFragmentRoot)
 	 */
-	IChange createChange(IPackageFragmentRoot root) throws JavaModelException{
+	IChange createChange(IProgressMonitor pm, IPackageFragmentRoot root) throws JavaModelException{
 		IResource res= root.getUnderlyingResource();
 		IProject project= getDestinationForSourceFolders(getDestination());
 		IJavaProject javaProject= JavaCore.create(project);
@@ -306,14 +306,14 @@ public class MoveRefactoring extends ReorgRefactoring {
 	/*
 	 * @see ReorgRefactoring#createChange(IPackageFragment)
 	 */		
-	IChange createChange(IPackageFragment pack) throws JavaModelException{
+	IChange createChange(IProgressMonitor pm, IPackageFragment pack) throws JavaModelException{
 		return new MovePackageChange(pack, getDestinationForPackages(getDestination()));
 	}
 	
 	/*
 	 * @see ReorgRefactoring#createChange(IResource)
 	 */	
-	IChange createChange(IResource res) throws JavaModelException{
+	IChange createChange(IProgressMonitor pm, IResource res) throws JavaModelException{
 		return new MoveResourceChange(res, getDestinationForResources(getDestination()));
 	}
 }
