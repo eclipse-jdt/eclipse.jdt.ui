@@ -27,13 +27,10 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
@@ -77,12 +74,11 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
-import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -96,7 +92,9 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 	private static final String MODIFIER= "static final"; //$NON-NLS-1$
 	private static final String[] KNOWN_METHOD_NAME_PREFIXES= {"get", "is"}; //$NON-NLS-2$ //$NON-NLS-1$
-
+	
+	
+	private CompilationUnitRewrite fCuRewrite;
 	private final int fSelectionStart;
 	private final int fSelectionLength;
 	private final ICompilationUnit fCu;
@@ -107,7 +105,6 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 	private String fAccessModifier= PRIVATE; //default value
 	private String fConstantName= ""; //$NON-NLS-1$;
-	private CompilationUnit fCompilationUnitNode;
 
 	private boolean fSelectionAllStaticFinal;
 	private boolean fAllStaticFinalCheckPerformed= false;
@@ -117,6 +114,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 	//Constant Declaration Location
 	private BodyDeclaration fToInsertAfter;
 	private boolean fInsertFirst;
+	
+	private CompilationUnitChange fChange;
 
 	private ExtractConstantRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
@@ -250,9 +249,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		try {
 			pm.beginTask("", 8); //$NON-NLS-1$
 	
-			RefactoringStatus result= Checks.validateModifiesFiles(
-				ResourceUtil.getFiles(new ICompilationUnit[] { fCu }),
-				getValidationContext());
+			RefactoringStatus result= Checks.validateEdit(fCu, getValidationContext());
 			if (result.hasFatalError())
 				return result;
 			pm.worked(1);
@@ -296,7 +293,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			
 			if (selectedExpression == null) {
 				String message= RefactoringCoreMessages.getString("ExtractConstantRefactoring.select_expression"); //$NON-NLS-1$
-				return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCompilationUnitNode, message);
+				return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCuRewrite.getRoot(), message);
 			}
 			pm.worked(1);
 			
@@ -352,7 +349,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private void initializeAST(IProgressMonitor pm) {
-		fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true, pm);
+		fCuRewrite= new CompilationUnitRewrite(fCu);
 	}
 
 	private RefactoringStatus checkExpression() throws JavaModelException {
@@ -399,6 +396,11 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return Checks.checkConstantName(getConstantName());
 	}
 	
+	// !! similar to ExtractTempRefactoring equivalent
+	public String getConstantSignaturePreview() throws JavaModelException {
+		return getModifier() + " " + getConstantTypeName() + " " + fConstantName; //$NON-NLS-2$//$NON-NLS-1$
+	}
+
 	private boolean fieldExistsInThisType() 
 		throws JavaModelException
 	{
@@ -406,7 +408,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.getString("ExtractConstantRefactoring.checking_preconditions"), 1); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.getString("ExtractConstantRefactoring.checking_preconditions"), 4); //$NON-NLS-1$
 		
 		/* Note: some checks are performed on change of input widget
 		 * values. (e.g. see ExtractConstantRefactoring.checkConstantNameOnChange())
@@ -415,33 +417,39 @@ public class ExtractConstantRefactoring extends Refactoring {
 		//TODO: possibly add more checking for name conflicts that might
 		//      lead to a change in behaviour
 		
-		RefactoringStatus result= checkCompilation();
-		
-		pm.done();
-		return result;
-	}
-
-	private RefactoringStatus checkCompilation() throws JavaModelException {
 		ITextFileBuffer buffer= null;
-		final ICompilationUnit original= WorkingCopyUtil.getOriginal(fCu);
 		try {
 			RefactoringStatus result= new RefactoringStatus();
-			TextChange change= new DocumentChange(RefactoringCoreMessages.getString("ExtractConstantRefactoring.rename"), new Document(fCu.getSource())); //$NON-NLS-1$
+			fChange= new CompilationUnitChange(RefactoringCoreMessages.getString("ExtractConstantRefactoring.extract_constant"), fCu); //$NON-NLS-1$
+			buffer= RefactoringFileBuffers.acquire(fCu);
 			try {
-				buffer= RefactoringFileBuffers.acquire(original);
-				TextEdit[] edits= getAllEdits(buffer);
-				TextChangeCompatibility.addTextEdit(change, "", edits); //$NON-NLS-1$
+				String lineDelimiter= buffer.getDocument().getLineDelimiter(buffer.getDocument().getLineOfOffset(fSelectionStart));
+				TextEdit constantDeclarationEdit= createConstantDeclarationEdit(lineDelimiter);
+				TextChangeCompatibility.addTextEdit(fChange, RefactoringCoreMessages.getString("ExtractConstantRefactoring.declare_constant"), constantDeclarationEdit); //$NON-NLS-1$
 			} catch (BadLocationException exception) {
 				JavaPlugin.log(exception);
 			}
-			String newCuSource= change.getPreviewContent(new NullProgressMonitor());
+			pm.worked(1);
+			
+			TextEdit importEdit= createImportEditIfNeeded(buffer);
+			if (importEdit != null)
+				TextChangeCompatibility.addTextEdit(fChange, RefactoringCoreMessages.getString("ExtractConstantRefactoring.update_imports"), importEdit); //$NON-NLS-1$			
+			pm.worked(1);
+			
+			TextEdit[] replaceEdits= createReplaceExpressionWithConstantEdits();
+			for (int i= 0; i < replaceEdits.length; i++) {
+				TextChangeCompatibility.addTextEdit(fChange, RefactoringCoreMessages.getString("ExtractConstantRefactoring.replace"), replaceEdits[i]); //$NON-NLS-1$
+			}
+			pm.worked(1);
+			
+			String newCuSource= fChange.getPreviewContent(new NullProgressMonitor());
 			ASTParser p= ASTParser.newParser(AST.JLS3);
 			p.setSource(newCuSource.toCharArray());
 			p.setUnitName(fCu.getElementName());
 			p.setProject(fCu.getJavaProject());
 			p.setCompilerOptions(RefactoringASTParser.getCompilerOptions(fCu));
 			CompilationUnit newCUNode= (CompilationUnit) p.createAST(null);
-			IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCompilationUnitNode);
+			IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCuRewrite.getRoot());
 			for (int i= 0; i < newProblems.length; i++) {
 				IProblem problem= newProblems[i];
 				if (problem.isError())
@@ -449,62 +457,14 @@ public class ExtractConstantRefactoring extends Refactoring {
 			}
 
 			return result;
-		} catch (JavaModelException e) {
-			throw e;
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
 		} finally {
-			try {
-				RefactoringFileBuffers.release(original);
-			} catch (CoreException e) {
-				throw new JavaModelException(e);
-			}
+			RefactoringFileBuffers.release(fCu);
+			pm.done();
 		}
-	}
-
-	// !! similar to ExtractTempRefactoring equivalent
-	public String getConstantSignaturePreview() throws JavaModelException {
-		return getModifier() + " " + getConstantTypeName() + " " + fConstantName; //$NON-NLS-2$//$NON-NLS-1$
 	}
 
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
-		ITextFileBuffer buffer= null;
-		final ICompilationUnit original= WorkingCopyUtil.getOriginal(fCu);
-		try {
-			buffer= RefactoringFileBuffers.acquire(original);
-			monitor.beginTask(RefactoringCoreMessages.getString("ExtractConstantRefactoring.preview"), 3); //$NON-NLS-1$
-			TextChange result= new CompilationUnitChange(RefactoringCoreMessages.getString("ExtractConstantRefactoring.extract_constant"), fCu); //$NON-NLS-1$
-			try {
-				addConstantDeclaration(result, buffer.getDocument().getLineDelimiter(buffer.getDocument().getLineOfOffset(fSelectionStart)));
-			} catch (CoreException exception) {
-				JavaPlugin.log(exception);
-			} catch (BadLocationException exception) {
-				JavaPlugin.log(exception);
-			}
-			monitor.worked(1);
-			addImportIfNeeded(result, buffer);
-			monitor.worked(1);
-			addReplaceExpressionWithConstant(result);
-			monitor.worked(1);
-
-			return result;
-		} finally {
-			RefactoringFileBuffers.release(original);
-			monitor.done();
-		}
-	}
-
-	private TextEdit[] getAllEdits(ITextFileBuffer buffer) throws CoreException, BadLocationException {
-		Collection edits= new ArrayList(3);
-		edits.add(createConstantDeclarationEdit(buffer.getDocument().getLineDelimiter(buffer.getDocument().getLineOfOffset(fSelectionStart))));
-		TextEdit importEdit= createImportEditIfNeeded(buffer);
-		if (importEdit != null)
-			edits.add(importEdit);
-		TextEdit[] replaceEdits= createReplaceExpressionWithConstantEdits();
-		for (int i= 0; i < replaceEdits.length; i++) {
-			edits.add(replaceEdits[i]);
-		}
-		return (TextEdit[]) edits.toArray(new TextEdit[edits.size()]);
+		return fChange;
 	}
 
 	// !!! analogue in ExtractTempRefactoring
@@ -552,7 +512,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 	
 	private int lineNumber(int offset) {
-		return fCompilationUnitNode.lineNumber(offset);	
+		return fCuRewrite.getRoot().lineNumber(offset);	
 	}
 	
 	private BodyDeclaration getNextBodyDeclaration(BodyDeclaration bodyDeclaration) throws JavaModelException {
@@ -574,7 +534,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 	
 	private int getStartOfFollowingLine(BodyDeclaration declaration) {
-		CompilationUnit cu= fCompilationUnitNode;
+		CompilationUnit cu= fCuRewrite.getRoot();
 		
 		int declEnd= getNodeInclusiveEnd(declaration);
 		int declLine= cu.lineNumber(declEnd);
@@ -632,12 +592,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 	
 	private TextEdit createReplaceEdit(int offset, int length) throws JavaModelException {
-		String constantReference= getConstantNameForReference();
+		String constantReference= getReferenceQualifier() + fConstantName;
 		return new ReplaceEdit(offset, length, constantReference);	
-	}
-	
-	private String getConstantNameForReference() throws JavaModelException {
-		return getReferenceQualifier() + fConstantName;
 	}
 	
 	private String getReferenceQualifier() throws JavaModelException {
@@ -645,26 +601,6 @@ public class ExtractConstantRefactoring extends Refactoring {
 			return getContainingTypeBinding().getName() + "."; //$NON-NLS-1$
 		else
 			return ""; //$NON-NLS-1$
-	}
-
-	// !!!
-	private void addConstantDeclaration(TextChange change, String delimiter) throws CoreException {
-		TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractConstantRefactoring.declare_constant"), createConstantDeclarationEdit(delimiter)); //$NON-NLS-1$
-	}
-
-	// !!! very similar to equivalent in ExtractTempRefactoring
-	private void addImportIfNeeded(TextChange change, ITextFileBuffer buffer) throws CoreException {
-		TextEdit importEdit= createImportEditIfNeeded(buffer);
-		if (importEdit != null)
-			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractConstantRefactoring.update_imports"), importEdit); //$NON-NLS-1$
-	}
-
-	// !!! very similar to equivalent in ExtractTempRefactoring
-	private void addReplaceExpressionWithConstant(TextChange change) throws JavaModelException {
-		TextEdit[] edits= createReplaceExpressionWithConstantEdits();
-		for (int i= 0; i < edits.length; i++) {
-			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ExtractConstantRefactoring.replace"), edits[i]); //$NON-NLS-1$
-		}
 	}
 
 	private void computeConstantDeclarationLocation() 
@@ -886,7 +822,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		if(fSelectedExpression != null)
 			return fSelectedExpression;
 		
-		IASTFragment selectedFragment= ASTFragmentFactory.createFragmentForSourceRange(new SourceRange(fSelectionStart, fSelectionLength), fCompilationUnitNode, fCu);
+		IASTFragment selectedFragment= ASTFragmentFactory.createFragmentForSourceRange(new SourceRange(fSelectionStart, fSelectionLength), fCuRewrite.getRoot(), fCu);
 		
 		if (selectedFragment instanceof IExpressionFragment
 				&& ! Checks.isInsideJavadoc(selectedFragment.getAssociatedNode())) {

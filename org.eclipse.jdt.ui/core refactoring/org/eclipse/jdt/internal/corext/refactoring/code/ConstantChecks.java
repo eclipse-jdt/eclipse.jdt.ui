@@ -88,16 +88,16 @@ class ConstantChecks {
 		
 		private boolean checkName(Name name) {
 			IBinding binding= name.resolveBinding();
-			if(binding == null)
+			if (binding == null)
 				return true;  /* If the binding is null because of compile errors etc., 
 				                  scenarios which may have been deemed unacceptable in
 				                  the presence of semantic information will be admitted. */
 			
 			// If name represents a member:
-			if(binding instanceof IVariableBinding || binding instanceof IMethodBinding)
+			if (binding instanceof IVariableBinding || binding instanceof IMethodBinding)
 				return isMemberReferenceValidInClassInitialization(name);
-			else if(binding instanceof ITypeBinding)
-				return true;	
+			else if (binding instanceof ITypeBinding)
+				return ! ((ITypeBinding) binding).isTypeVariable();
 			else {
 					/*  IPackageBinding is not expected, as a package name not
 					    used as a type name prefix is not expected in such an

@@ -244,6 +244,10 @@ public class ExtractConstantTests extends RefactoringTest {
 		helper1(4, 28, 4, 37, false, false, "CONSTANT");	
 	}
 
+	public void test22() throws Exception {
+		helper1(9, 35, 9, 59, false, false, "ITEMS");	
+	}
+
 	public void testZeroLengthSelection0() throws Exception {
 		helper1(5, 18, 5, 18, false, false, "CONSTANT");	
 	}
@@ -303,6 +307,10 @@ public class ExtractConstantTests extends RefactoringTest {
 	
 	public void testFail15() throws Exception {
 		failHelper1(5, 10, 5, 13, true, true, "CONSTANT");	
+	}
+	
+	public void testFail16() throws Exception {
+		failHelper1(9, 20, 9, 38, true, false, "CONSTANT");	
 	}
 	
 	public void testGuessStringLiteral0() throws Exception {
