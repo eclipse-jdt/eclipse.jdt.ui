@@ -18,6 +18,7 @@
 		<project>org.eclipse.swt</project>
 		<project>org.eclipse.team.core</project>
 		<project>org.eclipse.ui</project>
+		<project>org.eclipse.ui.console</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -17,6 +17,7 @@ import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.IPlaceholderFolderLayout;
+import org.eclipse.ui.console.IConsoleConstants;
 
 import org.eclipse.search.ui.SearchUI;
 
@@ -41,9 +42,9 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		folder.addPlaceholder(IPageLayout.ID_RES_NAV);
 		
 		IPlaceholderFolderLayout outputfolder= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, editorArea); //$NON-NLS-1$
-		outputfolder.addPlaceholder(IPageLayout.ID_TASK_LIST);
+		outputfolder.addPlaceholder(IPageLayout.ID_PROBLEM_VIEW);
 		outputfolder.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
-		outputfolder.addPlaceholder(IDebugUIConstants.ID_CONSOLE_VIEW);
+		outputfolder.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		outputfolder.addPlaceholder(IPageLayout.ID_BOOKMARKS);
 		
 		layout.addActionSet(IDebugUIConstants.LAUNCH_ACTION_SET);
@@ -57,11 +58,11 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(SearchUI.SEARCH_RESULT_VIEW_ID);
 		
 		// views - debugging
-		layout.addShowViewShortcut(IDebugUIConstants.ID_CONSOLE_VIEW);
+		layout.addShowViewShortcut(IConsoleConstants.ID_CONSOLE_VIEW);
 
 		// views - standard workbench
 		layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
-		layout.addShowViewShortcut(IPageLayout.ID_TASK_LIST);
+		layout.addShowViewShortcut(IPageLayout.ID_PROBLEM_VIEW);
 		layout.addShowViewShortcut(IPageLayout.ID_RES_NAV);
 	}
 }

@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
+import org.eclipse.ui.console.IConsoleConstants;
 
 import org.eclipse.search.ui.SearchUI;
 
@@ -38,9 +39,9 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		folder.addPlaceholder(IPageLayout.ID_RES_NAV);
 		
 		IFolderLayout outputfolder= layout.createFolder("bottom", IPageLayout.BOTTOM, (float)0.75, editorArea); //$NON-NLS-1$
-		outputfolder.addView(IPageLayout.ID_TASK_LIST);
+		outputfolder.addView(IPageLayout.ID_PROBLEM_VIEW);
 		outputfolder.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
-		outputfolder.addPlaceholder(IDebugUIConstants.ID_CONSOLE_VIEW);
+		outputfolder.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		outputfolder.addPlaceholder(IPageLayout.ID_BOOKMARKS);
 		
 		layout.addView(IPageLayout.ID_OUTLINE, IPageLayout.RIGHT, (float)0.75, editorArea);
@@ -60,11 +61,11 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(SearchUI.SEARCH_RESULT_VIEW_ID);
 		
 		// views - debugging
-		layout.addShowViewShortcut(IDebugUIConstants.ID_CONSOLE_VIEW);
+		layout.addShowViewShortcut(IConsoleConstants.ID_CONSOLE_VIEW);
 
 		// views - standard workbench
 		layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
-		layout.addShowViewShortcut(IPageLayout.ID_TASK_LIST);
+		layout.addShowViewShortcut(IPageLayout.ID_PROBLEM_VIEW);
 		layout.addShowViewShortcut(IPageLayout.ID_RES_NAV);
 				
 		// new actions - Java project creation wizard
