@@ -121,8 +121,7 @@ public class Implementors {
         return IMPLEMENTOR_FINDERS;
     }
 
-    private IType[] findImplementingTypes(IType type, IProgressMonitor progressMonitor)
-        throws JavaModelException {
+    private IType[] findImplementingTypes(IType type, IProgressMonitor progressMonitor) {
         Collection implementingTypes = new ArrayList();
 
         IImplementorFinder[] finders = getImplementorFinders();
