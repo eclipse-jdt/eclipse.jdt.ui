@@ -316,11 +316,11 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			return;
 		}
 
-		if (kind == IJavaElementDelta.CHANGED && fBrowsingPart.isValidElement(element)) {
-			if ((flags & IJavaElementDelta.F_CHILDREN) == 0 && (flags & IJavaElementDelta.F_MODIFIERS) == 0)
-				postRefresh(element);
-			if ((flags & IJavaElementDelta.F_FINE_GRAINED) == 0 && (flags & IJavaElementDelta.F_MODIFIERS) != 0)
-				postUpdateIcon(element);
+		if (fInput != null && fInput.equals(element)) {
+			if (kind == IJavaElementDelta.CHANGED && (flags & IJavaElementDelta.F_CHILDREN) != 0 && (flags & IJavaElementDelta.F_FINE_GRAINED) != 0) {
+				postRefresh(null, true);
+				return;
+			}
 		}
 
 		if (isClassPathChange(delta))
@@ -381,6 +381,20 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		});
 	 }
 
+	private void postRefresh(final Object root, boolean updateIcon) {
+		if (!updateIcon) {
+			postRefresh(root);
+			return;
+		}
+
+		postRunnable(new Runnable() {
+			public void run() {
+				Control ctrl= fViewer.getControl();
+				if (ctrl != null && !ctrl.isDisposed())
+					fViewer.refresh(root, true);
+			}
+		});
+	}
 		
 	private void postRefresh(final Object root) {
 		postRunnable(new Runnable() {
@@ -388,6 +402,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {
 					fViewer.refresh(root, false);
+//					fViewer.refresh(root);
 				}
 			}
 		});
