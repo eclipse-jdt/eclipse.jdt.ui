@@ -622,7 +622,7 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 			} else {
 				// event consumes the position - delete it
 				position.delete();
-				JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, "linked position deleted -> must leave: "+fPositionCategoryName, null)); //$NON-NLS-1$
+//				JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, "linked position deleted -> must leave: "+fPositionCategoryName, null)); //$NON-NLS-1$
 				fMustLeave= true;
 			}
 		}
@@ -686,6 +686,9 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	 * @see org.eclipse.jface.text.IAutoIndentStrategy#customizeDocumentCommand(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.DocumentCommand)
 	 */
 	public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
+		
+		if (true)
+			return;
 
 		if (fMustLeave) {
 			leave(true);
