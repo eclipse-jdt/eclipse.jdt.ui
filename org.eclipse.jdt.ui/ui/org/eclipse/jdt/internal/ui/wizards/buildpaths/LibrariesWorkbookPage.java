@@ -422,8 +422,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			return false;
 		}
 		Object elem= selElements.get(0);
-		if (fLibrariesList.getIndexOfElement(elem) != -1) {
-			return true;
+		if (elem instanceof CPListElement) {
+			return !(((CPListElement)elem).getResource() instanceof IFolder);
 		}
 		if (elem instanceof CPListElementAttribute) {
 			return true;
@@ -482,9 +482,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private CPListElement[] openClassFolderDialog(CPListElement existing) {	
 
 		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
-		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, existing == null);
 
-		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, getUsedContainers(existing));	
+		IContainer[] usedContainers= getUsedContainers(existing);
+		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, usedContainers);	
 			
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
@@ -492,17 +492,17 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		String title= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.new.title") : NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
 		String message= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.new.description") : NewWizardMessages.getString("LibrariesWorkbookPage.ExistingClassFolderDialog.edit.description"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		FolderSelectionDialog dialog= new FolderSelectionDialog(getShell(), lp, cp);
-		dialog.setValidator(validator);
+		
+		MultipleFolderSelectionDialog dialog= new MultipleFolderSelectionDialog(getShell(), lp, cp);
+		dialog.setExisting(usedContainers);
 		dialog.setTitle(title);
 		dialog.setMessage(message);
 		dialog.addFilter(filter);
 		dialog.setInput(fWorkspaceRoot);
-		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
 		if (existing == null) {
-			dialog.setInitialSelection(fCurrJProject.getProject());
+			dialog.setInitialFocus(fCurrJProject.getProject());
 		} else {
-			dialog.setInitialSelection(existing.getResource());
+			dialog.setInitialFocus(existing.getResource());
 		}
 		
 		if (dialog.open() == Window.OK) {

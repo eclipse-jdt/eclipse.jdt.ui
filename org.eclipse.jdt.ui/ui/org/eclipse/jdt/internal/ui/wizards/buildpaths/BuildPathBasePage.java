@@ -54,7 +54,7 @@ public abstract class BuildPathBasePage {
 			CPListElement curr= (CPListElement) existing.get(i);
 			if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 				IPath currPath= curr.getPath();
-				if (currPath.isPrefixOf(entryPath)) {
+				if (currPath.isPrefixOf(entryPath) && !currPath.equals(entryPath)) {
 					IPath[] exclusionFilters= (IPath[]) curr.getAttribute(CPListElement.EXCLUSION);
 					if (!JavaModelUtil.isExcludedPath(entryPath, exclusionFilters)) {
 						IPath pathToExclude= entryPath.removeFirstSegments(currPath.segmentCount()).addTrailingSeparator();

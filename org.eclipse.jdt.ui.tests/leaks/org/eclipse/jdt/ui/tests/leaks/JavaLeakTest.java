@@ -13,26 +13,32 @@ package org.eclipse.jdt.ui.tests.leaks;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.WizardDialog;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.INewWizard;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+import org.eclipse.jdt.ui.leaktest.LeakTestCase;
+import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.JavaReconciler;
+import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
-import org.eclipse.jdt.internal.ui.wizards.NewProjectCreationWizard;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.ui.leaktest.LeakTestCase;
-import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.INewWizard;
 
 public class JavaLeakTest extends LeakTestCase {
 	
@@ -126,9 +132,9 @@ public class JavaLeakTest extends LeakTestCase {
 	}
 	
 	public void testNewJavaProjectWizard() throws Exception {
-		int count1= getInstanceCount(NewProjectCreationWizard.class);
-		doWizardLeakTest(new NewProjectCreationWizard());
-		int count2= getInstanceCount(NewProjectCreationWizard.class);
+		int count1= getInstanceCount(JavaProjectWizard.class);
+		doWizardLeakTest(new JavaProjectWizard());
+		int count2= getInstanceCount(JavaProjectWizard.class);
 		assertEqualCount("NewProjectCreationWizard", count1, count2);
 	}		
 	

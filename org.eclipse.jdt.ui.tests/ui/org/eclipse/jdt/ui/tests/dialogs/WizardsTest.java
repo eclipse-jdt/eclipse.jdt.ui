@@ -14,6 +14,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.util.DialogCheck;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -27,14 +30,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.util.DialogCheck;
-
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard;
+import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewPackageCreationWizard;
-import org.eclipse.jdt.internal.ui.wizards.NewProjectCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewSnippetFileCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewSourceFolderCreationWizard;
 
@@ -65,7 +65,7 @@ public class WizardsTest extends TestCase {
 	}
 	
 	public void testNewProjectWizard() throws Exception {	
-		NewProjectCreationWizard wizard = new NewProjectCreationWizard();
+		JavaProjectWizard wizard = new JavaProjectWizard();
 		wizard.init(getWorkbench(),  null);
 		wizard.setForcePreviousAndNextButtons(true);
 		WizardDialog dialog = new WizardDialog(getShell(), wizard);

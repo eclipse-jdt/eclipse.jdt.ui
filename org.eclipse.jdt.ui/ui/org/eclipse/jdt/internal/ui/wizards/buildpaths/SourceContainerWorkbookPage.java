@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -38,9 +39,9 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.ui.model.WorkbenchContentProvider;
+import org.eclipse.ui.dialogs.NewFolderDialog;
+import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
-import org.eclipse.ui.views.navigator.ResourceSorter;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -50,7 +51,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -247,19 +247,42 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 	}
 	
+	private boolean hasFolders(IContainer container) {
+		try {
+			IResource[] members= container.members();
+			for (int i= 0; i < members.length; i++) {
+				if (members[i] instanceof IContainer) {
+					return true;
+				}
+			}
+		} catch (CoreException e) {
+			// ignore
+		}
+		return false;
+	}
+	
+	
 	protected void sourcePageCustomButtonPressed(DialogField field, int index) {
 		if (field == fFoldersList) {
 			if (index == IDX_ADD) {
 				List elementsToAdd= new ArrayList(10);
-				if (fCurrJProject.getProject().exists()) {
-					CPListElement[] srcentries= openSourceContainerDialog(null);
-					if (srcentries != null) {
-						for (int i= 0; i < srcentries.length; i++) {
-							elementsToAdd.add(srcentries[i]);
+				IProject project= fCurrJProject.getProject();
+				if (project.exists()) {
+					if (hasFolders(project)) {
+						CPListElement[] srcentries= openSourceContainerDialog(null);
+						if (srcentries != null) {
+							for (int i= 0; i < srcentries.length; i++) {
+								elementsToAdd.add(srcentries[i]);
+							}
 						}
-					}						
+					} else {
+						CPListElement entry= openNewSourceContainerDialog(null, true);
+						if (entry != null) {
+							elementsToAdd.add(entry);
+						}	
+					}
 				} else {
-					CPListElement entry= openNewSourceContainerDialog(null);
+					CPListElement entry= openNewSourceContainerDialog(null, false);
 					if (entry != null) {
 						elementsToAdd.add(entry);
 					}
@@ -310,15 +333,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private void editElementEntry(CPListElement elem) {
 		CPListElement res= null;
 		
-		IResource resource= elem.getResource();
-		if (resource.exists()) {
-			CPListElement[] arr= openSourceContainerDialog(elem);
-			if (arr != null) {
-				res= arr[0];
-			}
-		} else {
-			res= openNewSourceContainerDialog(elem);
-		}
+		res= openNewSourceContainerDialog(elem, true);
 		
 		if (res != null) {
 			fFoldersList.replaceElement(elem, res);
@@ -404,8 +419,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			return false;
 		}
 		Object elem= selElements.get(0);
-		if (fFoldersList.getIndexOfElement(elem) != -1) {
-			return true;
+		if (elem instanceof CPListElement) {
+			return false;
 		}
 		if (elem instanceof CPListElementAttribute) {
 			return true;
@@ -465,17 +480,26 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 	}
 		
-	private CPListElement openNewSourceContainerDialog(CPListElement existing) {	
-		String title= (existing == null) ? NewWizardMessages.getString("SourceContainerWorkbookPage.NewSourceFolderDialog.new.title") : NewWizardMessages.getString("SourceContainerWorkbookPage.NewSourceFolderDialog.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
-
-		IProject proj= fCurrJProject.getProject();
-		NewSourceFolderDialog dialog= new NewSourceFolderDialog(getShell(), title, proj, getExistingContainers(existing), existing);
-		dialog.setMessage(NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.NewSourceFolderDialog.description", fProjPath.toString())); //$NON-NLS-1$
-		if (dialog.open() == Window.OK) {
-			IResource folder= dialog.getSourceFolder();
-			return newCPSourceElement(folder);
+	private CPListElement openNewSourceContainerDialog(CPListElement existing, boolean includeLinked) {	
+		if (includeLinked) {
+			NewFolderDialog dialog= new NewFolderDialog(getShell(), fCurrJProject.getProject());
+			if (dialog.open() == Window.OK) {
+				IResource createdFolder= (IResource) dialog.getResult()[0];
+				return newCPSourceElement(createdFolder);
+			}
+			return null;
+		} else {
+			String title= (existing == null) ? NewWizardMessages.getString("SourceContainerWorkbookPage.NewSourceFolderDialog.new.title") : NewWizardMessages.getString("SourceContainerWorkbookPage.NewSourceFolderDialog.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
+	
+			IProject proj= fCurrJProject.getProject();
+			NewSourceFolderDialog dialog= new NewSourceFolderDialog(getShell(), title, proj, getExistingContainers(existing), existing);
+			dialog.setMessage(NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.NewSourceFolderDialog.description", fProjPath.toString())); //$NON-NLS-1$
+			if (dialog.open() == Window.OK) {
+				IResource folder= dialog.getSourceFolder();
+				return newCPSourceElement(folder);
+			}
+			return null;
 		}
-		return null;
 	}
 	
 	
@@ -516,7 +540,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private CPListElement[] openSourceContainerDialog(CPListElement existing) {
 		
 		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
-		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, existing == null, getExistingContainers(null));
+		List existingContainers= getExistingContainers(null);
 		
 		IProject[] allProjects= fWorkspaceRoot.getProjects();
 		ArrayList rejectedElements= new ArrayList(allProjects.length);
@@ -529,22 +553,21 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, rejectedElements.toArray());
 		
 		ILabelProvider lp= new WorkbenchLabelProvider();
-		ITreeContentProvider cp= new WorkbenchContentProvider();
+		ITreeContentProvider cp= new BaseWorkbenchContentProvider();
 
 		String title= (existing == null) ? NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.new.title") : NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
 		String message= (existing == null) ? NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.new.description") : NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.edit.description"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		FolderSelectionDialog dialog= new FolderSelectionDialog(getShell(), lp, cp);
-		dialog.setValidator(validator);
+		MultipleFolderSelectionDialog dialog= new MultipleFolderSelectionDialog(getShell(), lp, cp);
+		dialog.setExisting(existingContainers.toArray());
 		dialog.setTitle(title);
 		dialog.setMessage(message);
 		dialog.addFilter(filter);
 		dialog.setInput(fCurrJProject.getProject().getParent());
-		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
 		if (existing == null) {
-			dialog.setInitialSelection(fCurrJProject.getProject());
+			dialog.setInitialFocus(fCurrJProject.getProject());
 		} else {
-			dialog.setInitialSelection(existing.getResource());
+			dialog.setInitialFocus(existing.getResource());
 		}		
 		if (dialog.open() == Window.OK) {
 			Object[] elements= dialog.getResult();	

@@ -304,6 +304,7 @@ public class CPListElement {
 				javaDocLocation= JavaUI.getLibraryJavadocLocation(path);
 				break;
 			case IClasspathEntry.CPE_SOURCE:
+				path= path.removeTrailingSeparator();
 				res= root.findMember(path);
 				if (res == null) {
 					if (root.getWorkspace().validatePath(path.toString(), IResource.FOLDER).isOK()) {

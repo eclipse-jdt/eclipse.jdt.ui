@@ -286,11 +286,11 @@
             name="%NewJavaProject.label"
             icon="icons/full/ctool16/newjprj_wiz.gif"
             category="org.eclipse.jdt.ui.java"
-            class="org.eclipse.jdt.internal.ui.wizards.NewProjectCreationWizard"
+            class="org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard"
             preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
             project="true"
             finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
-            id="org.eclipse.jdt.ui.wizards.NewProjectCreationWizard">
+            id="org.eclipse.jdt.ui.wizards.JavaProjectWizard">
          <description>
             %NewJavaProject.description
          </description>

@@ -550,7 +550,7 @@ public class BuildPathsBlock {
 		try {
 			if (!project.exists()) {
 				IProjectDescription desc= project.getWorkspace().newProjectDescription(project.getName());
-				if (Platform.getLocation().equals(locationPath)) {
+				if (Platform.getInstanceLocation().equals(locationPath)) {
 					locationPath= null;
 				}
 				desc.setLocation(locationPath);

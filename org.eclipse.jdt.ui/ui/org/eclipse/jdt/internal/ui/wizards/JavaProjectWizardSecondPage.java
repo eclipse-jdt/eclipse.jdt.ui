@@ -11,6 +11,9 @@
 package org.eclipse.jdt.internal.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -19,28 +22,23 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.jface.operation.IRunnableWithProgress;
-
-import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
-
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
-
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 
 /**
  * As addition to the JavaCapabilityConfigurationPage, the wizard does an
  * early project creation (so that linked folders can be defined) and, if an
  * existing external location was specified, offers to do a classpath detection
  */
-public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPage {
+public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage {
 
-	private WizardNewProjectCreationPage fMainPage;
+	private final JavaProjectWizardFirstPage fFirstPage;
 
-	private IPath fCurrProjectLocation;
+	protected IPath fCurrProjectLocation;
 	protected IProject fCurrProject;
 	
 	protected boolean fCanRemoveContent;
@@ -48,9 +46,9 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 	/**
 	 * Constructor for NewProjectCreationWizardPage.
 	 */
-	public NewProjectCreationWizardPage(WizardNewProjectCreationPage mainPage) {
+	public JavaProjectWizardSecondPage(JavaProjectWizardFirstPage mainPage) {
 		super();
-		fMainPage= mainPage;
+		fFirstPage= mainPage;
 		fCurrProjectLocation= null;
 		fCurrProject= null;
 		fCanRemoveContent= false;
@@ -69,19 +67,15 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 	}
 	
 	private void changeToNewProject() {
-		IProject newProjectHandle= fMainPage.getProjectHandle();
-		IPath newProjectLocation= fMainPage.getLocationPath();
+		final IProject newProjectHandle= fFirstPage.getProjectHandle();
+		final IPath newProjectLocation= fFirstPage.getLocationPath();
 		
-		if (fMainPage.useDefaults()) {
-			fCanRemoveContent= !newProjectLocation.append(fMainPage.getProjectName()).toFile().exists();
-		} else {
-			fCanRemoveContent= !newProjectLocation.toFile().exists();
-		}
-				
+		fCanRemoveContent= !fFirstPage.getDetect();
+		
 		final boolean initialize= !(newProjectHandle.equals(fCurrProject) && newProjectLocation.equals(fCurrProjectLocation));
 		
-		IRunnableWithProgress op= new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+		final IRunnableWithProgress op= new IRunnableWithProgress() {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
 					updateProject(initialize, monitor);
 				} catch (CoreException e) {
@@ -93,39 +87,55 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 		try {
 			getContainer().run(false, true, op);
 		} catch (InvocationTargetException e) {
-			String title= NewWizardMessages.getString("NewProjectCreationWizardPage.EarlyCreationOperation.error.title"); //$NON-NLS-1$
-			String message= NewWizardMessages.getString("NewProjectCreationWizardPage.EarlyCreationOperation.error.desc");			 //$NON-NLS-1$
+			final String title= "New Java project";
+			final String message= "An error occurred while creating project. Check log for details.";
 			ExceptionHandler.handle(e, getShell(), title, message);
 		} catch  (InterruptedException e) {
 			// cancel pressed
 		}
 	}
 	
-	protected void updateProject(boolean initialize, IProgressMonitor monitor) throws CoreException, InterruptedException {
-		fCurrProject= fMainPage.getProjectHandle();
-		fCurrProjectLocation= fMainPage.getLocationPath();
-		boolean noProgressMonitor= !initialize && fCanRemoveContent;
+	protected void updateProject(boolean initialize, IProgressMonitor monitor) throws CoreException {
+		
+		fCurrProject= fFirstPage.getProjectHandle();
+		fCurrProjectLocation= fFirstPage.getLocationPath();
+		
+		final boolean noProgressMonitor= !initialize && !fFirstPage.getDetect();
 		
 		if (monitor == null || noProgressMonitor ) {
 			monitor= new NullProgressMonitor();
 		}
 		try {
-			monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.EarlyCreationOperation.desc"), 2);				 //$NON-NLS-1$
+			monitor.beginTask("Initializing project...", 2);
 			
 			createProject(fCurrProject, fCurrProjectLocation, new SubProgressMonitor(monitor, 1));
 			if (initialize) {
+				
 				IClasspathEntry[] entries= null;
 				IPath outputLocation= null;
 		
-				if (fCurrProjectLocation.toFile().exists() && !Platform.getLocation().equals(fCurrProjectLocation)) {
-					// detect classpath
+				if (fFirstPage.getDetect()) {
 					if (!fCurrProject.getFile(".classpath").exists()) { //$NON-NLS-1$
-						// if .classpath exists noneed to look for files
-						ClassPathDetector detector= new ClassPathDetector(fCurrProject);
+						final ClassPathDetector detector= new ClassPathDetector(fCurrProject);
 						entries= detector.getClasspath();
 						outputLocation= detector.getOutputLocation();
 					}
-				}				
+				} else if (fFirstPage.isSrcBin()) {
+					String srcName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_SRCNAME);
+					String binName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
+					
+					final IPath projectPath= fCurrProject.getFullPath();
+
+					// configure the classpath entries, including the default jre library.
+					final List cpEntries= new ArrayList();
+					cpEntries.add(JavaCore.newSourceEntry(projectPath.append(srcName)));
+					cpEntries.addAll(Arrays.asList(PreferenceConstants.getDefaultJRELibrary()));
+					entries= new IClasspathEntry[cpEntries.size()];
+					cpEntries.toArray(entries);
+					
+					// configure the output location
+					outputLocation= projectPath.append(binName);
+				}
 				init(JavaCore.create(fCurrProject), outputLocation, entries, false);
 			}
 			monitor.worked(1);
@@ -139,7 +149,7 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 	 */
 	public void performFinish(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		try {
-			monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.createproject.desc"), 3);				 //$NON-NLS-1$
+			monitor.beginTask("Creating project...", 3);
 			if (fCurrProject == null) {
 				updateProject(true, new SubProgressMonitor(monitor, 1));
 			}
@@ -156,12 +166,15 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 		}
 		
 		IRunnableWithProgress op= new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				boolean noProgressMonitor= Platform.getLocation().equals(fCurrProjectLocation);
+			public void run(IProgressMonitor monitor) throws InvocationTargetException {
+
+				final boolean noProgressMonitor= Platform.getInstanceLocation().equals(fCurrProjectLocation);
+
 				if (monitor == null || noProgressMonitor) {
 					monitor= new NullProgressMonitor();
 				}
-				monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.removeproject.desc"), 3);				 //$NON-NLS-1$
+
+				monitor.beginTask("Removing project...", 3);
 
 				try {
 					fCurrProject.delete(fCanRemoveContent, false, monitor);
@@ -178,8 +191,8 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 		try {
 			getContainer().run(false, true, op);
 		} catch (InvocationTargetException e) {
-			String title= NewWizardMessages.getString("NewProjectCreationWizardPage.op_error.title"); //$NON-NLS-1$
-			String message= NewWizardMessages.getString("NewProjectCreationWizardPage.op_error_remove.message");			 //$NON-NLS-1$
+			final String title= "Error Creating Java Project";
+			final String message= "An error occurred while removing a temporary project.";
 			ExceptionHandler.handle(e, getShell(), title, message);		
 		} catch  (InterruptedException e) {
 			// cancel pressed

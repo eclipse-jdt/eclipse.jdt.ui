@@ -28,7 +28,7 @@ public class OpenProjectWizardAction extends AbstractOpenWizardAction {
 	}
 	
 	protected Wizard createWizard() { 
-		return new NewProjectCreationWizard(); 
+		return new JavaProjectWizard(); 
 	}	
 	/*
 	 * @see AbstractOpenWizardAction#showWorkspaceEmptyWizard()
