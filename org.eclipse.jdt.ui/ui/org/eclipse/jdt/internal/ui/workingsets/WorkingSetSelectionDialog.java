@@ -303,7 +303,7 @@ public class WorkingSetSelectionDialog extends SelectionDialog implements
         }
         GridData data = new GridData(GridData.FILL_BOTH);
         data.heightHint = SIZING_SELECTION_WIDGET_HEIGHT;
-        data.widthHint = SIZING_SELECTION_WIDGET_WIDTH;
+        data.widthHint = convertWidthInCharsToPixels(50);
         listViewer.getTable().setLayoutData(data);
         listViewer.getTable().setFont(parent.getFont());
 
