@@ -371,69 +371,78 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return nodesToRemove;
 	}
 
-	//XXX
 	private boolean hasIndirectProblems(ASTNode node, Collection nodesToRemove) throws JavaModelException {
-		if (! (node.getParent() instanceof VariableDeclarationStatement))
-			return false;
-
-		VariableDeclarationStatement vds= (VariableDeclarationStatement)node.getParent();
-		if (vds.getType() != node)
-			return false; 
-		VariableDeclarationFragment[] vdfs= getVariableDeclarationFragments(vds);	
-		for (int i= 0; i < vdfs.length; i++) {
-			VariableDeclarationFragment tempDeclaration= vdfs[i];
-			ASTNode[] references= TempOccurrenceFinder.findTempOccurrenceNodes(tempDeclaration, true, false);
-			for (int j= 0; j < references.length; j++) {
-				ASTNode varReference= references[j];
-				ASTNode parent= varReference.getParent();
-				if (parent instanceof VariableDeclarationFragment){
-					VariableDeclarationFragment r1= (VariableDeclarationFragment)parent;
-					if (varReference == r1.getInitializer()){
-						IVariableBinding vb= r1.resolveBinding();
-						if (vb != null && fBadVarSet.contains(getCompilationUnitNode(varReference).findDeclaringNode(vb))){
-							fBadVarSet.add(tempDeclaration);
-							return true;
-						}	
-					}
-				} else if (parent instanceof Assignment){
-					Assignment assmnt= (Assignment)parent;
-					if (varReference == assmnt.getRightHandSide()){
-						Expression lhs= assmnt.getLeftHandSide();
-						if (lhs instanceof SimpleName){
-							IBinding binding= ((SimpleName)lhs).resolveBinding();
-							if (binding != null && fBadVarSet.contains(getCompilationUnitNode(lhs).findDeclaringNode(binding))){
-								fBadVarSet.add(tempDeclaration);
-								return true;
-							}	
-						}
-					}
-				} else if (parent instanceof MethodInvocation){
-					MethodInvocation mi= (MethodInvocation)parent;
-					int argumentIndex= mi.arguments().indexOf(varReference);
-					if (argumentIndex != -1 ){
-						IBinding bin= mi.getName().resolveBinding();
-						if (bin instanceof IMethodBinding){
-							IMethod method= Binding2JavaModel.find((IMethodBinding)bin, getInputClass().getJavaProject());
-							ICompilationUnit cu= method.getCompilationUnit();
-							if (cu == null)
-								return true;
-							SingleVariableDeclaration parDecl= (SingleVariableDeclaration)getMethodDeclarationNode(method).parameters().get(argumentIndex);
-							if (fBadVarSet.contains(parDecl)){
-								fBadVarSet.add(tempDeclaration);
-								return true;
-							}
-						}
-					}
-				} else  if (parent instanceof ReturnStatement){
-					MethodDeclaration md= (MethodDeclaration)ASTNodes.getParent(parent, MethodDeclaration.class);
-					if (nodesToRemove.contains(md.getReturnType())){
-						fBadVarSet.add(tempDeclaration);
-						return true;
-					}	
-				}
+		ASTNode parentNode= node.getParent();
+		if (parentNode instanceof VariableDeclarationStatement){
+			VariableDeclarationStatement vds= (VariableDeclarationStatement)parentNode;
+			if (vds.getType() != node)
+				return false; 
+			VariableDeclarationFragment[] vdfs= getVariableDeclarationFragments(vds);	
+			for (int i= 0; i < vdfs.length; i++) {
+				if (hasIndirectProblems(vdfs[i], nodesToRemove))
+					return true;	
 			}
+		} else if (parentNode instanceof VariableDeclaration){
+			if (hasIndirectProblems((VariableDeclaration)parentNode, nodesToRemove))
+				return true;	
+		} else if (parentNode instanceof CastExpression){
+			if (! isReferenceUpdatable(parentNode, nodesToRemove))
+				return true;	
 		}
 		return false;
+	}
+	
+	private boolean hasIndirectProblems(VariableDeclaration tempDeclaration, Collection nodesToRemove) throws JavaModelException{
+		ASTNode[] references= TempOccurrenceFinder.findTempOccurrenceNodes(tempDeclaration, true, false);
+		for (int i= 0; i < references.length; i++) {
+			if (! isReferenceUpdatable(references[i], nodesToRemove)){
+				fBadVarSet.add(tempDeclaration);
+				return true;
+			}	
+		}
+		return false;
+	}
+	
+	private boolean isReferenceUpdatable(ASTNode varReference, Collection nodesToRemove) throws JavaModelException{
+		ASTNode parent= varReference.getParent();
+		if (parent instanceof VariableDeclarationFragment){
+			VariableDeclarationFragment r1= (VariableDeclarationFragment)parent;
+			if (varReference == r1.getInitializer()){
+				IVariableBinding vb= r1.resolveBinding();
+				if (vb != null && fBadVarSet.contains(getCompilationUnitNode(varReference).findDeclaringNode(vb)))
+					return false;
+			}
+		} else if (parent instanceof Assignment){
+			Assignment assmnt= (Assignment)parent;
+			if (varReference == assmnt.getRightHandSide()){
+				Expression lhs= assmnt.getLeftHandSide();
+				if (lhs instanceof SimpleName){
+					IBinding binding= ((SimpleName)lhs).resolveBinding();
+					if (binding != null && fBadVarSet.contains(getCompilationUnitNode(lhs).findDeclaringNode(binding)))
+						return false;
+				}
+			}
+		} else if (parent instanceof MethodInvocation){
+			MethodInvocation mi= (MethodInvocation)parent;
+			int argumentIndex= mi.arguments().indexOf(varReference);
+			if (argumentIndex != -1 ){
+				IBinding bin= mi.getName().resolveBinding();
+				if (! (bin instanceof IMethodBinding))
+					return false;
+				IMethod method= Binding2JavaModel.find((IMethodBinding)bin, getInputClass().getJavaProject());
+				ICompilationUnit cu= method.getCompilationUnit();
+				if (cu == null)
+					return false;
+				SingleVariableDeclaration parDecl= (SingleVariableDeclaration)getMethodDeclarationNode(method).parameters().get(argumentIndex);
+				if (fBadVarSet.contains(parDecl))
+					return false;
+			}
+		} else if (parent instanceof ReturnStatement){
+			MethodDeclaration md= (MethodDeclaration)ASTNodes.getParent(parent, MethodDeclaration.class);
+			if (nodesToRemove.contains(md.getReturnType()))
+				return false;
+		} 
+		return true;
 	}
 	
 	private static CompilationUnit getCompilationUnitNode(ASTNode node) {
