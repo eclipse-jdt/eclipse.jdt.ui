@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
-import java.util.List;
-
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -198,7 +196,11 @@ public final class ImportRewrite {
 		return !fImportsStructure.hasChanges();
 	}
 
-	public void setCreatedImportCollector(List list) {
-	    fImportsStructure.setCreatedImportCollector(list);
+	public String[] getCreatedImports() {
+	    return fImportsStructure.getCreatedImports();
+	}
+	
+	public String[] getCreatedStaticImports() {
+	    return fImportsStructure.getCreatedStaticImports();
 	}
 }

@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -308,9 +309,6 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			fNumberOfImportsAdded= 0;
 			fNumberOfImportsRemoved= 0;
 			
-			ArrayList createdImports= new ArrayList();
-			fImportsStructure.setCreatedImportCollector(createdImports);
-			
 			monitor.beginTask(CodeGenerationMessages.getFormattedString("OrganizeImportsOperation.description", cu.getElementName()), 5); //$NON-NLS-1$
 
 			Set/*<String>*/ oldSingleImports= new HashSet();
@@ -364,15 +362,17 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 			fImportsStructure.create(fDoSave, new SubProgressMonitor(monitor, 1));
 			
-			determineImportDifferences(createdImports, oldSingleImports, oldDemandImports);
+			determineImportDifferences(fImportsStructure.getCreatedImports(), oldSingleImports, oldDemandImports);
 			processor= null;
 		} finally {
 			monitor.done();
 		}
 	}
 	
-	private void determineImportDifferences(List importsAdded, Set oldSingleImports, Set oldDemandImports) {
-  		Object[] content= oldSingleImports.toArray();
+	private void determineImportDifferences(String[] imports, Set oldSingleImports, Set oldDemandImports) {
+  		ArrayList importsAdded= new ArrayList(Arrays.asList(imports));
+		
+		Object[] content= oldSingleImports.toArray();
 	    for (int i= 0; i < content.length; i++) {
 	        String importName= (String) content[i];
 	        if (importsAdded.remove(importName))

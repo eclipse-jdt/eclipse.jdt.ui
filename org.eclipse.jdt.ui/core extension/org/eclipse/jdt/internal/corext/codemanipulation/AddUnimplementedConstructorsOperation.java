@@ -69,7 +69,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	private final boolean fApply;
 
 	/** The qualified names of the generated imports */
-	private final List fCreatedImports= new ArrayList();
+	private String[] fCreatedImports;
 
 	/** The method binding keys for which a constructor was generated */
 	private final List fCreatedMethods= new ArrayList();
@@ -148,9 +148,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	 * @return the generated imports
 	 */
 	public final String[] getCreatedImports() {
-		final String[] imports= new String[fCreatedImports.size()];
-		fCreatedImports.toArray(imports);
-		return imports;
+		return fCreatedImports;
 	}
 
 	/**
@@ -234,7 +232,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 						if (fInsert instanceof IMethod)
 							insertion= (MethodDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
 						ImportRewrite imports= rewrite.getImportRewrite();
-						imports.setCreatedImportCollector(fCreatedImports);
+						fCreatedImports= imports.getCreatedImports();
 						String key= null;
 						MethodDeclaration stub= null;
 						for (int index= 0; index < fKeys.length; index++) {

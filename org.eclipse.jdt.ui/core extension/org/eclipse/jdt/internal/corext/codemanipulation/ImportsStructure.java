@@ -16,9 +16,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.text.edits.DeleteEdit;
+import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -40,10 +41,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 
-import org.eclipse.compare.contentmergeviewer.ITokenComparator;
-import org.eclipse.compare.rangedifferencer.RangeDifference;
-import org.eclipse.compare.rangedifferencer.RangeDifferencer;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
@@ -54,6 +51,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -73,14 +71,12 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
 
 /**
  * Created on a Compilation unit, the ImportsStructure allows to add
@@ -98,6 +94,7 @@ public final class ImportsStructure implements IImportsStructure {
 	private boolean fFindAmbiguousImports;
 	
 	private List fImportsCreated;
+	private List fStaticImportsCreated;
 	private boolean fHasChanges= false;
 	private IRegion fReplaceRange;
 	
@@ -126,16 +123,17 @@ public final class ImportsStructure implements IImportsStructure {
 		fFindAmbiguousImports= !restoreExistingImports;
 		
 		fPackageEntries= new ArrayList(20);
+		fImportsCreated= null; // initialized on 'create'
+		fStaticImportsCreated= null;
 		
 		IProgressMonitor monitor= new NullProgressMonitor();
 		IDocument document= null;
 		try {
 			document= aquireDocument(monitor);
-			if (restoreExistingImports && container.exists()) {
-				addExistingImports(document, cu.getImports());
-			}
 			fReplaceRange= evaluateReplaceRange(document);
-			
+			if (restoreExistingImports && container.exists()) {
+				addExistingImports(document, cu.getImports(), fReplaceRange);
+			}
 		} catch (BadLocationException e) {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		} finally {
@@ -148,15 +146,14 @@ public final class ImportsStructure implements IImportsStructure {
 			String curr= preferenceOrder[i];
 			if (curr.length() > 0 && curr.charAt(0) == '#') {
 				curr= curr.substring(1);
-				order[i]= new PackageEntry(curr, curr, true);
+				order[i]= new PackageEntry(curr, curr, true); // static import group
 			} else {
-				order[i]= new PackageEntry(curr, curr, false);
+				order[i]= new PackageEntry(curr, curr, false); // normal import group
 			}
 		}
 		
 		addPreferenceOrderHolders(order);
 		
-		fImportsCreated= null;
 		fHasChanges= false;
 	}
 	
@@ -220,7 +217,7 @@ public final class ImportsStructure implements IImportsStructure {
 	}
 
 	
-	private void addExistingImports(IDocument document, IImportDeclaration[] decls) throws JavaModelException, BadLocationException {
+	private void addExistingImports(IDocument document, IImportDeclaration[] decls, IRegion replaceRange) throws JavaModelException, BadLocationException {
 		if (decls.length == 0) {
 			return;
 		}				
@@ -253,7 +250,7 @@ public final class ImportsStructure implements IImportsStructure {
 				currEndLine++;
 				nextOffset= document.getLineInformation(currEndLine).getOffset();
 			}
-			currPackage.add(new ImportDeclEntry(name, document.get(currOffset, nextOffset - currOffset), isStatic));
+			currPackage.add(new ImportDeclEntry(name, isStatic, new Region(currOffset, nextOffset - currOffset)));
 			currOffset= nextOffset;
 			curr= next;
 				
@@ -263,7 +260,7 @@ public final class ImportsStructure implements IImportsStructure {
 				
 				currPackage= new PackageEntry(); // create a comment package entry for this
 				fPackageEntries.add(currPackage);
-				currPackage.add(new ImportDeclEntry(null, document.get(currOffset, nextOffset - currOffset), false));
+				currPackage.add(new ImportDeclEntry(null, false, new Region(currOffset, nextOffset - currOffset)));
 					
 				currOffset= nextOffset;
 			}
@@ -278,9 +275,8 @@ public final class ImportsStructure implements IImportsStructure {
 			fPackageEntries.add(currPackage);
 		}
 		ISourceRange range= curr.getSourceRange();			
-		int endOffset= range.getOffset() + range.getLength();
-		String content= document.get(currOffset, endOffset - currOffset) + TextUtilities.getDefaultLineDelimiter(document);
-		currPackage.add(new ImportDeclEntry(name, content, isStatic));
+		int length= replaceRange.getOffset() + replaceRange.getLength() - range.getOffset();
+		currPackage.add(new ImportDeclEntry(name, isStatic, new Region(range.getOffset(), length)));
 	}		
 		
 	/**
@@ -311,7 +307,7 @@ public final class ImportsStructure implements IImportsStructure {
 		fFindAmbiguousImports= findAmbiguousImports;
 	}	
 			
-	public static class PackageMatcher {
+	private static class PackageMatcher {
 		private String fNewName;
 		private String fBestName;
 		private int fBestMatchLen;
@@ -497,8 +493,6 @@ public final class ImportsStructure implements IImportsStructure {
 				Type erasureType= ast.newSimpleType(ast.newSimpleName(res));
 				ParameterizedType paramType= ast.newParameterizedType(erasureType);
 				List arguments= paramType.typeArguments();
-				
-
 				for (int i= 0; i < typeArguments.length; i++) {
 					arguments.add(addImport(typeArguments[i], ast));
 				}
@@ -637,7 +631,7 @@ public final class ImportsStructure implements IImportsStructure {
 				}
 			}
 		}
-		ImportDeclEntry decl= new ImportDeclEntry(fullName, null, true);
+		ImportDeclEntry decl= new ImportDeclEntry(fullName, true, null);
 		
 		sortIn(declaringTypeName, decl, true);
 		return simpleName;
@@ -678,7 +672,7 @@ public final class ImportsStructure implements IImportsStructure {
 			}
 		}
 		
-		ImportDeclEntry decl= new ImportDeclEntry(fullTypeName, null, false);
+		ImportDeclEntry decl= new ImportDeclEntry(fullTypeName, false, null);
 			
 		sortIn(typeContainerName, decl, false);
 		return typeName;
@@ -842,7 +836,6 @@ public final class ImportsStructure implements IImportsStructure {
 			document= aquireDocument(new SubProgressMonitor(monitor, 1));
 			MultiTextEdit edit= getResultingEdits(document, new SubProgressMonitor(monitor, 1));
 			if (edit.hasChildren()) {
-
 				if (save) {
 					commitDocument(document, edit, new SubProgressMonitor(monitor, 1));
 				} else {
@@ -937,22 +930,31 @@ public final class ImportsStructure implements IImportsStructure {
 			monitor= new NullProgressMonitor();
 		}
 		try {
+			fImportsCreated= new ArrayList();
+			fStaticImportsCreated= new ArrayList();
 		
 			int importsStart=  fReplaceRange.getOffset();
 			int importsLen= fReplaceRange.getLength();
 					
 			String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
 			boolean useSpaceBetween= useSpaceBetweenGroups();
+						
+			int currPos= importsStart;
+			MultiTextEdit resEdit= new MultiTextEdit();
 			
-			StringBuffer buf= new StringBuffer();
-					
-			int nCreated= 0;
+			if (importsLen == 0) {
+				// new import container
+				resEdit.addChild(new InsertEdit(currPos, lineDelim)); // first entry, might be removed later
+			}
+			
 			PackageEntry lastPackage= null;
 			
 			Set onDemandConflicts= null;
 			if (fFindAmbiguousImports) {
 				onDemandConflicts= evaluateStarImportConflicts(monitor);
 			}
+			
+			ArrayList stringsToInsert= new ArrayList();
 			
 			int nPackageEntries= fPackageEntries.size();
 			for (int i= 0; i < nPackageEntries; i++) {
@@ -973,7 +975,7 @@ public final class ImportsStructure implements IImportsStructure {
 						ImportDeclEntry last= lastPackage.getImportAt(lastPackage.getNumberOfImports() - 1);
 						ImportDeclEntry first= pack.getImportAt(0);
 						if (!lastPackage.isComment() && (last.isNew() || first.isNew())) {
-							buf.append(lineDelim);
+							stringsToInsert.add(lineDelim);
 						}
 					}
 				}
@@ -984,66 +986,102 @@ public final class ImportsStructure implements IImportsStructure {
 				boolean doStarImport= pack.hasStarImport(fImportOnDemandThreshold, onDemandConflicts);
 				if (doStarImport && (pack.find("*") == null)) { //$NON-NLS-1$
 					String starImportString= pack.getName() + ".*"; //$NON-NLS-1$
-					appendImportToBuffer(buf, starImportString, isStatic, lineDelim);
-					nCreated++;
+					String str= getNewImportString(starImportString, isStatic, lineDelim);
+					stringsToInsert.add(str);
 				}
 				
 				for (int k= 0; k < nImports; k++) {
 					ImportDeclEntry currDecl= pack.getImportAt(k);
-					String content= currDecl.getContent();
+					IRegion region= currDecl.getSourceRange();
 					
-					if (content == null) { // new entry
+					if (region == null) { // new entry
 						if (!doStarImport || currDecl.isOnDemand() || (onDemandConflicts != null && onDemandConflicts.contains(currDecl.getSimpleName()))) {
-							appendImportToBuffer(buf, currDecl.getElementName(), isStatic, lineDelim);
-							nCreated++;
+							String str= getNewImportString(currDecl.getElementName(), isStatic, lineDelim);
+							stringsToInsert.add(str);
 						}
 					} else {
-						buf.append(content);
+						int offset= region.getOffset();
+						removeAndInsertNew(document, currPos, offset, stringsToInsert, resEdit);
+						stringsToInsert.clear();
+						currPos= offset + region.getLength();
 					}
 				}
 			}
 			
-			if (importsLen == 0 && nCreated > 0) { // new import container
-				if (fCompilationUnit.getPackageDeclarations().length > 0) { // package statement
-					buf.insert(0, lineDelim);
-				}
-				// check if a space between import and first type is needed
-				IType[] types= fCompilationUnit.getTypes();
-				if (types.length > 0) {
-					if (types[0].getSourceRange().getOffset() == importsStart) {
-						buf.append(lineDelim);
+			int end= importsStart + importsLen;
+			removeAndInsertNew(document, currPos, end, stringsToInsert, resEdit);
+			
+			if (importsLen == 0) {
+				if (!fImportsCreated.isEmpty() || !fStaticImportsCreated.isEmpty()) { // new import container
+					if (fCompilationUnit.getPackageDeclarations().length == 0) { // no package statement
+						resEdit.removeChild(0);
 					}
+					// check if a space between import and first type is needed
+					IType[] types= fCompilationUnit.getTypes();
+					if (types.length > 0) {
+						if (types[0].getSourceRange().getOffset() == importsStart) {
+							resEdit.addChild(new InsertEdit(currPos, lineDelim));
+						}
+					}
+				} else {
+					return new MultiTextEdit(); // no changes
 				}
 			}
-			
-			String newContent= buf.toString();
-			String oldContent= document.get(importsStart, importsLen);
-			
-			return getTextEdit(oldContent, importsStart, newContent);
+			return resEdit;
 		} finally {
 			monitor.done();
 		}
 	}
 	
-	private MultiTextEdit getTextEdit(String oldContent, int offset, String newContent) {
-		MultiTextEdit edit= new MultiTextEdit();
-		
-		ITokenComparator leftSide= new JavaTokenComparator(newContent, false); 
-		ITokenComparator rightSide= new JavaTokenComparator(oldContent, false);
-		
-		RangeDifference[] differences= RangeDifferencer.findRanges(leftSide, rightSide);
-		for (int i= 0; i < differences.length; i++) {
-			RangeDifference curr= differences[i];
-			if (curr.kind() == RangeDifference.CHANGE) {
-				int oldStart= rightSide.getTokenStart(curr.rightStart());
-				int oldEnd= rightSide.getTokenStart(curr.rightEnd());
-				int newStart= leftSide.getTokenStart(curr.leftStart());
-				int newEnd= leftSide.getTokenStart(curr.leftEnd());
-				String newString= newContent.substring(newStart, newEnd);
-				edit.addChild(new ReplaceEdit(offset + oldStart, oldEnd - oldStart, newString));
+	private void removeAndInsertNew(IDocument doc, int contentOffset, int contentEnd, ArrayList stringsToInsert, MultiTextEdit resEdit) throws BadLocationException {
+		int pos= contentOffset;
+		for (int i= 0; i < stringsToInsert.size(); i++) {
+			String curr= (String) stringsToInsert.get(i);
+			int idx= findInDocument(doc, curr, pos, contentEnd);
+			if (idx != -1) {
+				if (idx != pos) {
+					resEdit.addChild(new DeleteEdit(pos, idx - pos));
+				}
+				pos= idx + curr.length();
+			} else {
+				resEdit.addChild(new InsertEdit(pos, curr));
 			}
 		}
-		return edit;
+		if (pos < contentEnd) {
+			resEdit.addChild(new DeleteEdit(pos, contentEnd - pos));
+		}
+	}
+
+	private int findInDocument(IDocument doc, String str, int start, int end) throws BadLocationException {
+		int pos= start;
+		int len= str.length();
+		if (pos + len > end || str.length() == 0) {
+			return -1;
+		}
+		char first= str.charAt(0);
+		int step= str.indexOf(first, 1);
+		if (step == -1) {
+			step= len;
+		}
+		while (pos + len <= end) {
+			if (doc.getChar(pos) == first) {
+				int k= 1;
+				while (k < len && doc.getChar(pos + k) == str.charAt(k)) {
+					k++;
+				}
+				if (k == len) {
+					return pos; // found
+				}
+				if (k < step) {
+					pos+= k;
+				} else {
+					pos+= step;
+				}
+			} else {
+				pos++;
+			}
+		}
+		return -1;
 	}
 	
 	
@@ -1053,7 +1091,7 @@ public final class ImportsStructure implements IImportsStructure {
 	private boolean useSpaceBetweenGroups() {
 		try {
 			String sample= "import a.A;\n\n import b.B;\nclass C {}"; //$NON-NLS-1$
-			TextEdit res= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, sample, 0, String.valueOf('\n'), fCompilationUnit.getJavaProject().getOptions(true));
+			TextEdit res= ToolFactory.createCodeFormatter(fCompilationUnit.getJavaProject().getOptions(true)).format(CodeFormatter.K_COMPILATION_UNIT, sample, 0, sample.length(), 0, String.valueOf('\n'));
 			Document doc= new Document(sample);
 			res.apply(doc);
 			int idx1= doc.search(0, "import", true, true, false); //$NON-NLS-1$
@@ -1180,7 +1218,8 @@ public final class ImportsStructure implements IImportsStructure {
 		return false;
 	}
 	
-	private void appendImportToBuffer(StringBuffer buf, String importName, boolean isStatic, String lineDelim) {
+	private String getNewImportString(String importName, boolean isStatic, String lineDelim) {
+		StringBuffer buf= new StringBuffer();
 		buf.append("import "); //$NON-NLS-1$
 		if (isStatic) {
 			buf.append("static "); //$NON-NLS-1$
@@ -1190,9 +1229,12 @@ public final class ImportsStructure implements IImportsStructure {
 		buf.append(lineDelim);
 		// str= StubUtility.codeFormat(str, 0, lineDelim);
 		
-		if (fImportsCreated != null) {
+		if (isStatic) {
+			fStaticImportsCreated.add(importName);
+		} else {
 			fImportsCreated.add(importName);
 		}
+		return buf.toString();
 	}
 	
 	private int getPackageStatementEndPos(IDocument document) throws JavaModelException, BadLocationException {
@@ -1228,12 +1270,12 @@ public final class ImportsStructure implements IImportsStructure {
 	private static final class ImportDeclEntry {
 		
 		private String fElementName;
-		private String fContent;
+		private IRegion fSourceRange;
 		private final boolean fIsStatic;
 		
-		public ImportDeclEntry(String elementName, String existingContent, boolean isStatic) {
+		public ImportDeclEntry(String elementName, boolean isStatic, IRegion sourceRange) {
 			fElementName= elementName;
-			fContent= existingContent;
+			fSourceRange= sourceRange;
 			fIsStatic= isStatic;
 		}
 				
@@ -1265,15 +1307,15 @@ public final class ImportsStructure implements IImportsStructure {
 		}
 			
 		public boolean isNew() {
-			return fContent == null;
+			return fSourceRange == null;
 		}
 		
 		public boolean isComment() {
 			return fElementName == null;
 		}
 		
-		public String getContent() {
-			return fContent;
+		public IRegion getSourceRange() {
+			return fSourceRange;
 		}
 				
 	}
@@ -1487,8 +1529,12 @@ public final class ImportsStructure implements IImportsStructure {
 		}
 	}	
 	
-	public void setCreatedImportCollector(List list) {
-	    fImportsCreated= list;
+	public String[] getCreatedImports() {
+	    return (String[]) fImportsCreated.toArray(new String[fImportsCreated.size()]);
+	}
+	
+	public String[] getCreatedStaticImports() {
+	    return (String[]) fStaticImportsCreated.toArray(new String[fStaticImportsCreated.size()]);
 	}
 
 	/**
