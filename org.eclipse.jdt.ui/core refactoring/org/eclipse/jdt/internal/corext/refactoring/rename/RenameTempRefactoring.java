@@ -16,7 +16,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -119,7 +118,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		initAST();
 		if (fTempDeclarationNode == null)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameTempRefactoring.must_select_local")); //$NON-NLS-1$
-		if (ASTNodes.getParent(fTempDeclarationNode, MethodDeclaration.class) == null)
+		if (! Checks.isDeclaredInMethod(fTempDeclarationNode))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameTempRefactoring.only_in_methods")); //$NON-NLS-1$
 			
 		initNames();			
