@@ -42,11 +42,11 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		
 		IFolderLayout outputfolder= layout.createFolder("bottom", IPageLayout.BOTTOM, (float)0.75, editorArea); //$NON-NLS-1$
 		outputfolder.addView(IPageLayout.ID_PROBLEM_VIEW);
+		outputfolder.addView(JavaUI.ID_JAVADOC_VIEW);
+		outputfolder.addView(JavaUI.ID_SOURCE_VIEW);
 		outputfolder.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
 		outputfolder.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		outputfolder.addPlaceholder(IPageLayout.ID_BOOKMARKS);
-		outputfolder.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
-		outputfolder.addPlaceholder(JavaUI.ID_JAVADOC_VIEW);
 		
 		layout.addView(IPageLayout.ID_OUTLINE, IPageLayout.RIGHT, (float)0.75, editorArea);
 		
