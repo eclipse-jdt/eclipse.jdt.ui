@@ -33,11 +33,12 @@
       <import plugin="org.eclipse.jdt.debug.ui"/>
       <import plugin="org.eclipse.jdt.junit.runtime"/>
       <import plugin="org.eclipse.compare"/>
-	  <import plugin="org.eclipse.ltk.core.refactoring"/>      
+      <import plugin="org.eclipse.ltk.core.refactoring"/>
    </requires>
 
 
    <extension-point id="testRunListeners" name="%testRunListeners.name" schema="schema/testRunListeners.exsd"/>
+   <extension-point id="junitLaunchConfigs" name="JUnit Launch Configurations" schema="schema/junitLaunchConfigs.exsd"/>
 
    <extension
          point="org.eclipse.ui.views">
@@ -129,15 +130,15 @@
             helpContextId="org.eclipse.jdt.junit.junit_tab_group"
             class="org.eclipse.jdt.internal.junit.launcher.JUnitTabGroup"
             id="org.eclipse.jdt.junit.launchConfigurationTabGroup.junit">
-            <launchMode 
-                  mode="debug"
-                  perspective="org.eclipse.debug.ui.DebugPerspective"
-                  description="%JUnitTabGroupDescription.debug">
-            </launchMode>
-            <launchMode
-                  mode="run"
-                  description="%JUnitTabGroupDescription.run">
-            </launchMode>
+         <launchMode
+               perspective="org.eclipse.debug.ui.DebugPerspective"
+               description="%JUnitTabGroupDescription.debug"
+               mode="debug">
+         </launchMode>
+         <launchMode
+               description="%JUnitTabGroupDescription.run"
+               mode="run">
+         </launchMode>
       </launchConfigurationTabGroup>
    </extension>
    <extension
@@ -152,9 +153,14 @@
             icon="icons/full/etool16/new_testcase.gif"
             category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
             id="org.eclipse.jdt.junit.wizards.NewTestCaseCreationWizard">
-         <class class="org.eclipse.jdt.internal.junit.wizards.NewTestCaseCreationWizard">
-            <parameter name="javatype" value="true"/>
-         </class> <!-- see bug 48164 for wrong pde compiler warnings --> 
+         <class
+               class="org.eclipse.jdt.internal.junit.wizards.NewTestCaseCreationWizard">
+            <parameter
+                  name="javatype"
+                  value="true">
+            </parameter>
+         </class>
+<!-- see bug 48164 for wrong pde compiler warnings -->
          <description>
             %TestWizard.description
          </description>
@@ -222,25 +228,38 @@
             modes="run, debug"
             id="org.eclipse.jdt.junit.junitShortcut">
          <contextualLaunch>
-           <enablement>
-             <with variable="selection">
-               <count value="1"/>
-               <iterate>
-                 <or>
-                   <test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/>
-                   <test property="org.eclipse.debug.ui.matchesPattern" value="*.class"/>
-                 </or>
-                 <test property="org.eclipse.jdt.junit.isTest"/>
-               </iterate>
-             </with>
-           </enablement>
-           <contextLabel
-         	  mode="run"
-         	  label="%JUnitShortcutRun.label"/>
-  		   <contextLabel
-  		 	  mode="debug"
-  		 	  label="%JUnitShortcutDebug.label"/>
-  		 </contextualLaunch>
+            <enablement>
+               <with
+                     variable="selection">
+                  <count
+                        value="1">
+                  </count>
+                  <iterate>
+                     <or>
+                        <test
+                              property="org.eclipse.debug.ui.matchesPattern"
+                              value="*.java">
+                        </test>
+                        <test
+                              property="org.eclipse.debug.ui.matchesPattern"
+                              value="*.class">
+                        </test>
+                     </or>
+                     <test
+                           property="org.eclipse.jdt.junit.isTest">
+                     </test>
+                  </iterate>
+               </with>
+            </enablement>
+            <contextLabel
+                  label="%JUnitShortcutRun.label"
+                  mode="run">
+            </contextLabel>
+            <contextLabel
+                  label="%JUnitShortcutDebug.label"
+                  mode="debug">
+            </contextLabel>
+         </contextualLaunch>
          <perspective
                id="org.eclipse.jdt.ui.JavaPerspective">
          </perspective>
@@ -270,27 +289,53 @@
             id="org.eclipse.jdt.junit.JUnitQuickFixProcessor">
       </quickFixProcessor>
    </extension>
-   <extension point="org.eclipse.core.expressions.propertyTesters">
+   <extension
+         point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
-      		namespace="org.eclipse.jdt.junit"
             properties="isTest"
+            namespace="org.eclipse.jdt.junit"
             type="org.eclipse.jdt.core.IType"
             class="org.eclipse.jdt.internal.junit.ui.JavaTypeExtender"
             id="org.eclipse.jdt.junit.ITypeExtender">
       </propertyTester>
       <propertyTester
-      		namespace="org.eclipse.jdt.junit"
             properties="isTest"
+            namespace="org.eclipse.jdt.junit"
             type="org.eclipse.core.resources.IResource"
             class="org.eclipse.jdt.internal.junit.launcher.ResourceExtender"
             id="org.eclipse.jdt.junit.IResourceExtender">
       </propertyTester>
    </extension>
-   <extension point="org.eclipse.ltk.core.refactoring.renameParticipants">
+   <extension
+         point="org.eclipse.ltk.core.refactoring.renameParticipants">
       <renameParticipant
-			id="org.eclipse.jdt.junit.renameTypeParticipant"
-			name="%RenameTypeParticipant.name" 
-			class="org.eclipse.jdt.internal.junit.ui.TypeRenameParticipant">
+            name="%RenameTypeParticipant.name"
+            class="org.eclipse.jdt.internal.junit.refactoring.TypeRenameParticipant"
+            id="org.eclipse.jdt.junit.renameTypeParticipant">
+         <enablement>
+            <with
+                  variable="affectedNatures">
+               <iterate>
+                  <equals
+                        value="org.eclipse.jdt.core.javanature">
+                  </equals>
+               </iterate>
+            </with>
+            <with
+                  variable="element">
+               <instanceof
+                     value="org.eclipse.jdt.core.IType">
+               </instanceof>
+               <test
+                     property="org.eclipse.jdt.junit.isTest">
+               </test>
+            </with>
+         </enablement>
+      </renameParticipant>
+      <renameParticipant
+            class="org.eclipse.jdt.internal.junit.refactoring.ProjectRenameParticipant"
+            name="JUnit Project Rename Participant"
+            id="org.eclipse.jdt.junit.renameTypeParticipant">
          <enablement>
            <with variable="affectedNatures">
              <iterate>
@@ -298,11 +343,20 @@
              </iterate>
            </with>
            <with variable="element">
-             <instanceof value="org.eclipse.jdt.core.IType"/>
-             <test property="org.eclipse.jdt.junit.isTest"/>
+   	         <instanceof value="org.eclipse.jdt.core.IJavaProject"/>
            </with>
          </enablement>
       </renameParticipant>
+      
+   </extension>
+   <extension
+         point="org.eclipse.jdt.junit.junitLaunchConfigs">
+      <launchConfigType
+            configTypeID="org.eclipse.jdt.junit.launchconfig">
+      </launchConfigType>
+      <launchConfigType
+            configTypeID="org.eclipse.pde.ui.JunitLaunchConfig">
+      </launchConfigType>
    </extension>
 
 </plugin>
