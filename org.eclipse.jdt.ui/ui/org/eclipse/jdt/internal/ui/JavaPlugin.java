@@ -6,20 +6,16 @@ package org.eclipse.jdt.internal.ui;
 
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IPluginDescriptor;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
@@ -45,7 +41,7 @@ import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
@@ -280,8 +276,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	protected void initializeDefaultPreferences(IPreferenceStore store) {
 		super.initializeDefaultPreferences(store);
 		
-		store.setDefault(IPreferencesConstants.EDITOR_SHOW_HOVER, true);
-		store.setDefault(IPreferencesConstants.EDITOR_SHOW_SEGMENTS, false);
+		store.setDefault(PreferenceConstants.EDITOR_SHOW_HOVER, true);
+		store.setDefault(PreferenceConstants.EDITOR_SHOW_SEGMENTS, false);
 		
 		JavaBasePreferencePage.initDefaults(store);
 		AppearancePreferencePage.initDefaults(store);

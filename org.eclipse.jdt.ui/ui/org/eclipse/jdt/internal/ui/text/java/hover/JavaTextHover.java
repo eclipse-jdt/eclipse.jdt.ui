@@ -37,9 +37,9 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
-import org.eclipse.jdt.internal.ui.IPreferencesConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
@@ -95,7 +95,7 @@ public class JavaTextHover implements ITextHover {
 		 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 		 */
 		public void propertyChange(PropertyChangeEvent event) {
-			if (IPreferencesConstants.EDITOR_SHOW_HOVER.equals(event.getProperty())) {
+			if (PreferenceConstants.EDITOR_SHOW_HOVER.equals(event.getProperty())) {
 				Object newValue= event.getNewValue();
 				if (newValue instanceof Boolean)
 					fEnabled= ((Boolean) newValue).booleanValue();
@@ -170,7 +170,7 @@ public class JavaTextHover implements ITextHover {
 			fPropertyChangeListener= new PropertyChangeListener();
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 			store.addPropertyChangeListener(fPropertyChangeListener);
-			fEnabled= store.getBoolean(IPreferencesConstants.EDITOR_SHOW_HOVER);
+			fEnabled= store.getBoolean(PreferenceConstants.EDITOR_SHOW_HOVER);
 
 			installTextHovers();
 

@@ -32,7 +32,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.PreferencesConstants;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
@@ -299,7 +299,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
 		IJavaCompletionProposal[] results;
 
-		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferencesConstants.CODEASSIST_FILL_ARGUMENT_NAMES)) {
+		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES)) {
 				
 			try {
 				if (unit != null) {

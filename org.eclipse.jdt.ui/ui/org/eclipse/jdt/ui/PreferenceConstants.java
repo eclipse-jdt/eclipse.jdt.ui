@@ -26,10 +26,9 @@ import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
  * Preference constants used in the JDT-UI preference store.
  * @since 2.0
   */
-public class PreferencesConstants {
+public class PreferenceConstants {
 
-	private PreferencesConstants() {
-		super();
+	private PreferenceConstants() {
 	}
 	
 	/**
@@ -313,7 +312,7 @@ public class PreferencesConstants {
 	public final static String EDITOR_MULTI_LINE_COMMENT_COLOR= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT;
 
 	/**
-	 * Enable / Disable the usage of bold style for multi line comments.
+	 * Enable / Disable the usage of bold style for multi line comments. Boolean value.
 	 */
 	public final static String EDITOR_MULTI_LINE_COMMENT_BOLD= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + JavaEditorPreferencePage.BOLD;
 
@@ -325,7 +324,7 @@ public class PreferencesConstants {
 	public final static String EDITOR_SINGLE_LINE_COMMENT_COLOR= IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT;
 
 	/**
-	 * Enable / Disable the usage of bold style for single line comments.
+	 * Enable / Disable the usage of bold style for single line comments. Boolean value.
 	 */
 	public final static String EDITOR_SINGLE_LINE_COMMENT_BOLD= IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + JavaEditorPreferencePage.BOLD;
 
@@ -337,7 +336,7 @@ public class PreferencesConstants {
 	public final static String EDITOR_JAVA_KEYWORD_COLOR= IJavaColorConstants.JAVA_KEYWORD;
 
 	/**
-	 * Enable / Disable the usage of bold style for java keywords.
+	 * Enable / Disable the usage of bold style for java keywords. Boolean value.
 	 */
 	public final static String EDITOR_JAVA_KEYWORD_BOLD= IJavaColorConstants.JAVA_KEYWORD + JavaEditorPreferencePage.BOLD;
 
@@ -349,7 +348,7 @@ public class PreferencesConstants {
 	public final static String EDITOR_STRING_COLOR= IJavaColorConstants.JAVA_STRING;
 
 	/**
-	 * Enable / Disable the usage of bold style for string constants.
+	 * Enable / Disable the usage of bold style for string constants. Boolean value.
 	 */
 	public final static String EDITOR_STRING_BOLD= IJavaColorConstants.JAVA_STRING + JavaEditorPreferencePage.BOLD;
 
@@ -361,7 +360,7 @@ public class PreferencesConstants {
 	public final static String EDITOR_JAVA_DEFAULT_COLOR= IJavaColorConstants.JAVA_DEFAULT;
 
 	/**
-	 * Enable / Disable the usage of bold style for java default text.
+	 * Enable / Disable the usage of bold style for java default text. Boolean value.
 	 */
 	public final static String EDITOR_JAVA_DEFAULT_BOLD= IJavaColorConstants.JAVA_DEFAULT + JavaEditorPreferencePage.BOLD;
 
@@ -373,7 +372,7 @@ public class PreferencesConstants {
 	public final static String EDITOR_JAVADOC_KEYWORD_COLOR= IJavaColorConstants.JAVADOC_KEYWORD;
 
 	/**
-	 * Enable / Disable the usage of bold style for javadoc keywords.
+	 * Enable / Disable the usage of bold style for javadoc keywords. Boolean value.
 	 */
 	public final static String EDITOR_JAVADOC_KEYWORD_BOLD= IJavaColorConstants.JAVADOC_KEYWORD + JavaEditorPreferencePage.BOLD;
 
@@ -385,7 +384,7 @@ public class PreferencesConstants {
 	public final static String EDITOR_JAVADOC_TAG_COLOR= IJavaColorConstants.JAVADOC_TAG;
 
 	/**
-	 * Enable / Disable the usage of bold style for javadoc tags.
+	 * Enable / Disable the usage of bold style for javadoc tags. Boolean value.
 	 */
 	public final static String EDITOR_JAVADOC_TAG_BOLD= IJavaColorConstants.JAVADOC_TAG + JavaEditorPreferencePage.BOLD;
 
@@ -397,7 +396,7 @@ public class PreferencesConstants {
 	public final static String EDITOR_JAVADOC_LINKS_COLOR= IJavaColorConstants.JAVADOC_LINK;
 
 	/**
-	 * Enable / Disable the usage of bold style for javadoc links.
+	 * Enable / Disable the usage of bold style for javadoc links. Boolean value.
 	 */
 	public final static String EDITOR_JAVADOC_LINKS_BOLD= IJavaColorConstants.JAVADOC_LINK + JavaEditorPreferencePage.BOLD;
 		
@@ -409,9 +408,19 @@ public class PreferencesConstants {
 	public final static String EDITOR_JAVADOC_DEFAULT_COLOR= IJavaColorConstants.JAVADOC_DEFAULT;
 
 	/**
-	 * Enable / Disable the usage of bold style for javadoc default text.
+	 * Enable / Disable the usage of bold style for javadoc default text. Boolean value.
 	 */
 	public final static String EDITOR_JAVADOC_DEFAULT_BOLD= IJavaColorConstants.JAVADOC_DEFAULT + JavaEditorPreferencePage.BOLD;
+
+	/**
+	 * Enable / Disable hover tooltips in the editor. Boolean value.
+	 */
+	public static final String EDITOR_SHOW_HOVER= "org.eclipse.jdt.ui.editor.showHover"; //$NON-NLS-1$
+
+	/**
+	 * Enable / Disable segmented view (Show selected element only)
+	 */
+	public static final String EDITOR_SHOW_SEGMENTS= "org.eclipse.jdt.ui.editor.showSegments"; //$NON-NLS-1$
 
 	/**
 	 * Enable / Disable the auto activation of the Java code assist. Boolean value.

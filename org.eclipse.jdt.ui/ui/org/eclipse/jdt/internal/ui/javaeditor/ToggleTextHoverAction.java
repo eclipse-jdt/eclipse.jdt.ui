@@ -6,9 +6,19 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
-import java.util.ResourceBundle;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.ITextEditor;import org.eclipse.ui.texteditor.TextEditorAction;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.TextEditorAction;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 /**
@@ -31,7 +41,7 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 	
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.TOGGLE_TEXTHOVER_ACTION);	
 
-		boolean showHover= getStore().getBoolean(IPreferencesConstants.EDITOR_SHOW_HOVER);
+		boolean showHover= getStore().getBoolean(PreferenceConstants.EDITOR_SHOW_HOVER);
 		setChecked(showHover);
 		
 		getStore().addPropertyChangeListener(this);
@@ -47,8 +57,8 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 	 * @see IAction#actionPerformed
 	 */
 	public void run() {
-		boolean showHover= !getStore().getBoolean(IPreferencesConstants.EDITOR_SHOW_HOVER);
-		getStore().setValue(IPreferencesConstants.EDITOR_SHOW_HOVER, showHover);
+		boolean showHover= !getStore().getBoolean(PreferenceConstants.EDITOR_SHOW_HOVER);
+		getStore().setValue(PreferenceConstants.EDITOR_SHOW_HOVER, showHover);
 		setChecked(showHover);
 	}
 	
@@ -56,7 +66,7 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 	 * @see TextEditorAction#update
 	 */
 	public void update() {
-		boolean showHover= getStore().getBoolean(IPreferencesConstants.EDITOR_SHOW_HOVER);
+		boolean showHover= getStore().getBoolean(PreferenceConstants.EDITOR_SHOW_HOVER);
 		setChecked(showHover);
 		setEnabled(true);
 	}
@@ -73,7 +83,7 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getProperty().equals(IPreferencesConstants.EDITOR_SHOW_HOVER))
+		if (event.getProperty().equals(PreferenceConstants.EDITOR_SHOW_HOVER))
 			update();
 	}
 
