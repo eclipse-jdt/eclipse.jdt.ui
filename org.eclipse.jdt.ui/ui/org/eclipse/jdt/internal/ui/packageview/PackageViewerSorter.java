@@ -14,9 +14,11 @@ import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaSourceElementSorter;
 
 /**
  *	A sorter to sort the packages in the packages viewer in the following order:
@@ -28,6 +30,7 @@ public class PackageViewerSorter extends ViewerSorter {
 	// these instance variables serve as a cache for a single sort operation.
 	private boolean fIsClassPathSortOrder;
 	private IClasspathEntry[] fClassPath;
+	private JavaSourceElementSorter fMemberSorter= new JavaSourceElementSorter();
 
 	public boolean isSorterProperty(Object element, String property) {
 		return (IBasicPropertyConstants.P_TEXT.equals(property) || IBasicPropertyConstants.P_IMAGE.equals(property));
@@ -35,7 +38,7 @@ public class PackageViewerSorter extends ViewerSorter {
 				
 	public void sort(Viewer v, Object[] property) {
 		fClassPath= null;
-		
+
 		try {
 			if (property.length < 2)
 				return;
@@ -60,6 +63,14 @@ public class PackageViewerSorter extends ViewerSorter {
 	}
 	
 	public int compare(Viewer v, Object e1, Object e2) {
+		int cat1= category(e1);
+		int cat2= category(e2);
+
+		if (cat1 != cat2)
+			return cat1 - cat2;
+
+		// cat1 == cat2
+
 		// show resources after Java elements
 		// we have to handle both IStorage and IResource separately
 		IResource r1= null;
@@ -148,4 +159,13 @@ public class PackageViewerSorter extends ViewerSorter {
 		}
 		return 0;
 	}
+	/*
+	 * @see ViewerSorter#category(Object)
+	 */
+	public int category(Object element) {
+		if (element instanceof IMember) 
+			return fMemberSorter.category(element);
+		return super.category(element);
+	}
+
 }

@@ -919,12 +919,23 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 				if (types.length > 0)
 					type= types[0];
 			}
-			if (element instanceof IClassFile) {
+			else if (element instanceof IClassFile) {
 				IClassFile cf= (IClassFile)element;
 				type= cf.getType();
 			}			
-			if (type != null) 
-				fViewer.expandToLevel(type, 1);
+			if (type != null) {
+				final IType type2= type;
+				Control ctrl= fViewer.getControl();
+				if (ctrl != null && !ctrl.isDisposed()) {
+					ctrl.getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							Control ctrl= fViewer.getControl();
+							if (ctrl != null && !ctrl.isDisposed()) 
+								fViewer.expandToLevel(type2, 1);
+						}
+					}); 
+				}
+			}
 		} catch(JavaModelException e) {
 			// no reveal
 		}

@@ -70,8 +70,16 @@ public class JavaElementContentProvider extends BaseJavaElementContentProvider i
 	/**
 	 * Creates a new content provider for Java elements.
 	 */
-	public JavaElementContentProvider(boolean provideSourceReferenceChildren) {
-		super(provideSourceReferenceChildren);
+	public JavaElementContentProvider(boolean provideMembers) {
+		super(provideMembers);
+	}
+
+	/**
+	 * Returns whether the members are provided when asking
+	 * for a CU's or ClassFile's children.
+	 */
+	public boolean getProvideMembers() {
+		return fProvideMembers;
 	}
 
 	/* (non-Javadoc)
