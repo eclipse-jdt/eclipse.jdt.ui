@@ -5,12 +5,9 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
 import java.text.DateFormat;
-import java.util.Date;
 
 import org.eclipse.jdt.internal.corext.template.SimpleTemplateVariable;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
-
-import org.eclipse.jdt.internal.corext.template.TemplateVariable;
 
 /**
  * Global variables which are available in any context.

@@ -4,8 +4,6 @@
  */
 package org.eclipse.jdt.internal.corext.template.java;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;

@@ -7,8 +7,6 @@ package org.eclipse.jdt.internal.corext.template;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 /**
  * A template buffer is a container for a string and variables.

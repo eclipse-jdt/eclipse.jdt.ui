@@ -4,8 +4,6 @@
  */
 package org.eclipse.jdt.internal.corext.template;
 
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;

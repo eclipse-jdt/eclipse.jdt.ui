@@ -4,11 +4,7 @@
  */
 package org.eclipse.jdt.internal.corext.template.java;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-
-import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
-import org.eclipse.jdt.internal.corext.template.TemplateVariable;
 
 /**
  * A context type for javadoc.
