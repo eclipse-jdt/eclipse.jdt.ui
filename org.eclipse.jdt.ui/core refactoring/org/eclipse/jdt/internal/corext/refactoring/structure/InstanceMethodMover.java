@@ -490,7 +490,7 @@ class InstanceMethodMover {
 	
 	static class Method {
 		static class Delegation {
-			private final NewReceiver fNewReceiver;
+			private final NewReceiver fNewReceiver2;
 			private final Method fDelegatingMethod;
 			
 			private String fCalledMethodName;
@@ -501,7 +501,7 @@ class InstanceMethodMover {
 			
 			private Delegation(Method delegatingMethod, NewReceiver newReceiver) {
 				Assert.isNotNull(newReceiver);
-				fNewReceiver= newReceiver;
+				fNewReceiver2= newReceiver;
 				fDelegatingMethod= delegatingMethod;
 			}
 			
@@ -543,7 +543,7 @@ class InstanceMethodMover {
 				Assert.isTrue(isComplete());
 				
 				MethodInvocation invocation= fDelegatingMethod.getAST().newMethodInvocation();
-				invocation.setExpression(fNewReceiver.createReferenceForContext(fDelegatingMethod));
+				invocation.setExpression(fNewReceiver2.createReferenceForContext(fDelegatingMethod));
 				invocation.setName(fDelegatingMethod.getAST().newSimpleName(fCalledMethodName));
 				
 				Parameter[] params= fDelegatingMethod.getParameters();

@@ -236,7 +236,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				private final RefactoringStatus fStatus;
 				private final Expression fNewLocation;
 				private final ICompilationUnit fNewLocationCU;
-				private final Expression fInitializer;
+				private final Expression fInitializer3;
 				
 				private List fQualifications= new ArrayList();
 				private boolean fCanBePrepared= true;
@@ -246,7 +246,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				
 				public InitializerTraversal(Expression initializer, Expression newLocation, ICompilationUnit newLocationCU, RefactoringStatus status) {
 					fStatus= status;
-					fInitializer= initializer;
+					fInitializer3= initializer;
 					fNewLocation= newLocation;
 					fNewLocationCU= newLocationCU;
 					
@@ -289,7 +289,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				}
 				
 				private boolean shouldQualify(SimpleName memberName) {
-					if(!areInSameClassOrInterface(fInitializer, fNewLocation))
+					if(!areInSameClassOrInterface(fInitializer3, fNewLocation))
 						return true;
 					
 					return mayBeShadowedByLocalDeclaration(memberName);
@@ -390,7 +390,7 @@ public class InlineConstantRefactoring extends Refactoring {
 								name,
 								new IntegerMapping() {
 									public int map(int position) {
-										return position - fInitializer.getStartPosition();
+										return position - fInitializer3.getStartPosition();
 									}								
 								}
 							);
@@ -433,7 +433,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			}
 // ---- End InlineTargetCompilationUnit.InitializerExpressionRelocationPreparer.InitializerTraversal											
 			
-			private final Expression fInitializer;
+			private final Expression fInitializer2;
 			private final ICompilationUnit fInitializerCU;
 			private final Expression fLocation;
 			private final ICompilationUnit fLocationCU;
@@ -445,7 +445,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			}
 			
 			private InitializerExpressionRelocationPreparer(Expression initializer, ICompilationUnit initializerCU, Expression location, ICompilationUnit locationCU, Set newTypes, RefactoringStatus status) {
-				fInitializer= initializer;
+				fInitializer2= initializer;
 				fInitializerCU= initializerCU;
 				fLocation= location;
 				fLocationCU= locationCU;
@@ -454,7 +454,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			}
 			
 			private String prepareInitializer() throws JavaModelException{
-				InitializerTraversal traversal= new InitializerTraversal(fInitializer, fLocation, fLocationCU, fStatus);
+				InitializerTraversal traversal= new InitializerTraversal(fInitializer2, fLocation, fLocationCU, fStatus);
 				
 				if(!traversal.canInitializerBePrepared())
 					return null;
@@ -472,7 +472,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			}
 			
 			private boolean shouldParenthesize() {
-				return shouldParenthesizeSubstitute(fInitializer, fLocation);
+				return shouldParenthesizeSubstitute(fInitializer2, fLocation);
 			}
 			
 			private static boolean shouldParenthesizeSubstitute(Expression substitute, Expression location) {
@@ -487,7 +487,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			}
 		
 			private String getOriginalInitializerString() throws JavaModelException {
-				return fInitializerCU.getBuffer().getText(fInitializer.getStartPosition(), fInitializer.getLength());	
+				return fInitializerCU.getBuffer().getText(fInitializer2.getStartPosition(), fInitializer2.getLength());	
 			}	
 		}
 // ---- End InlineTargetCompilationUnit.InitializerExpressionRelocationPreparer --------------------------------------------------				
