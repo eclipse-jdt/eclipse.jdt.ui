@@ -78,7 +78,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	protected void searchAndLaunch(Object[] search, String mode) {
 		if (search != null) {
 			if (search.length == 0) {
-				MessageDialog.openInformation(getShell(), JUnitMessages.getString("LaunchTestAction.dialog.title"), JUnitMessages.getString("LaunchTestAction.message.notests")); //$NON-NLS-1$ //$NON-NLS-1$
+				MessageDialog.openInformation(getShell(), JUnitMessages.getString("LaunchTestAction.dialog.title"), JUnitMessages.getString("LaunchTestAction.message.notests")); //$NON-NLS-1$ //$NON-NLS-2$
 				return;
 			}	
 			if (search[0] instanceof IJavaElement) {
@@ -127,16 +127,16 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 			mode, 
 			container, 
 			handleIdentifier, 
-			"", 
-			""
+			"",  //$NON-NLS-1$
+			"" //$NON-NLS-1$
 		);
 		if (config == null) {
 			config = createConfiguration(
 				container.getJavaProject(),
 				container.getElementName(),
-				"",
+				"", //$NON-NLS-1$
 				handleIdentifier,
-				""
+				"" //$NON-NLS-1$
 			);
 		}
 		launchConfiguration(mode, config);
@@ -147,17 +147,17 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		ILaunchConfiguration config = findLaunchConfiguration(
 			mode, 
 			type, 
-			"", 
+			"",  //$NON-NLS-1$
 			fullyQualifiedName, 
-			""
+			"" //$NON-NLS-1$
 		);
 		if (config == null) {
 			config= createConfiguration(
 				type.getJavaProject(),
 				type.getElementName(),
 				fullyQualifiedName,
-				"",
-				""
+				"", //$NON-NLS-1$
+				"" //$NON-NLS-1$
 			);
 		}
 		launchConfiguration(mode, config);
@@ -169,7 +169,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		ILaunchConfiguration config = findLaunchConfiguration(
 			mode, 
 			method, 
-			"", 
+			"",  //$NON-NLS-1$
 			fullyQualifiedName, 
 			method.getElementName()
 		);
@@ -177,9 +177,9 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		if (config == null) {
 			config= createConfiguration(
 				method.getJavaProject(),
-				declaringType.getElementName()+"."+method.getElementName(),
+				declaringType.getElementName()+"."+method.getElementName(), //$NON-NLS-1$
 				fullyQualifiedName,
-				"",
+				"", //$NON-NLS-1$
 				method.getElementName()
 			);
 		}
@@ -227,10 +227,10 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 			candidateConfigs= new ArrayList(configs.length);
 			for (int i= 0; i < configs.length; i++) {
 				ILaunchConfiguration config= configs[i];
-				if ((config.getAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, "").equals(container)) &&
-					(config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "").equals(testClass)) &&
-					(config.getAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR,"").equals(testName)) &&  
-					(config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "").equals(element.getJavaProject().getElementName()))) { 
+				if ((config.getAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, "").equals(container)) && //$NON-NLS-1$
+					(config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "").equals(testClass)) && //$NON-NLS-1$
+					(config.getAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR,"").equals(testName)) &&   //$NON-NLS-1$
+					(config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "").equals(element.getJavaProject().getElementName()))) {  //$NON-NLS-1$
 						candidateConfigs.add(config);
 				}
 			}

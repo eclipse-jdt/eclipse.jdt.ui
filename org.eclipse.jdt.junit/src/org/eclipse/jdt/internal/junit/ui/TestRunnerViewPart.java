@@ -28,7 +28,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.ToolBar;
 
 import org.eclipse.jface.action.Action;
@@ -100,7 +99,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 	 */
 	private TestRunInfo fFirstFailure;
 
-	private ProgressBar fProgressBar;
+	private JUnitProgressBar fProgressBar;
 	private ProgressImages fProgressImages;
 	private Image fViewImage;
 	private CounterPanel fCounterPanel;
@@ -488,7 +487,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 			ILaunchConfiguration launchConfiguration= fLastLaunch.getLaunchConfiguration();
 			if (launchConfiguration != null) {
 				try {
-					ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy("Rerun "+testName);
+					ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy("Rerun "+testName); //$NON-NLS-1$
 					tmp.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testName);
 					tmp.launch(fLastLaunch.getLaunchMode(), null);	
 					return;	
@@ -525,9 +524,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 	}
 
 	private void resetProgressBar(final int total) {
-		fProgressBar.setMinimum(0);
-		fProgressBar.setSelection(0);
-		fProgressBar.setForeground(getDisplay().getSystemColor(SWT.COLOR_GREEN));
+		fProgressBar.reset();
 		fProgressBar.setMaximum(total);
 	}
 
@@ -570,8 +567,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 
 	private void handleEndTest() {
 		refreshCounters();
-		updateProgressColor(fFailures+fErrors);
-		fProgressBar.setSelection(fProgressBar.getSelection() + 1);
+		fProgressBar.step(fFailures+fErrors);
 		if (fShowOnErrorOnly) {
 			Image progress= fProgressImages.getImage(fExecutedTests, fTestCount, fErrors, fFailures);
 			if (progress != fViewImage) {
@@ -581,18 +577,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 		}
 	}
 
-	private void updateProgressColor(int failures) {
-		if (failures > 0)
-			fProgressBar.setForeground(getDisplay().getSystemColor(SWT.COLOR_RED));
-		else 
-			fProgressBar.setForeground(getDisplay().getSystemColor(SWT.COLOR_GREEN));
-	}
-
 	private void refreshCounters() {
 		fCounterPanel.setErrorValue(fErrors);
 		fCounterPanel.setFailureValue(fFailures);
 		fCounterPanel.setRunValue(fExecutedTests);
-		updateProgressColor(fErrors + fFailures);
 	}
 
 	protected void postShowTestResultsView() {
@@ -724,6 +712,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 					return;
 				fCounterPanel.reset();
 				fFailureView.clear();
+				fProgressBar.reset();
 				clearStatus();
 				start(testCount);
 			}
@@ -799,7 +788,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 	private Composite createProgressCountPanel(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
-		fProgressBar = new ProgressBar(composite, SWT.HORIZONTAL);
+		fProgressBar = new JUnitProgressBar(composite);
 		fProgressBar.setLayoutData(
 			new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		fCounterPanel = new CounterPanel(composite);

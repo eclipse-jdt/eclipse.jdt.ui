@@ -8,9 +8,9 @@ public class ContainerComparator implements Comparator {
 		String container1= (String)o1;
 		String container2= (String)o2;
 		if (container1 == null)
-			container1= "";
+			container1= ""; //$NON-NLS-1$
 		if (container2 == null)
-			container2= "";
+			container2= ""; //$NON-NLS-1$
 		return container1.compareTo(container2);
     }
 }

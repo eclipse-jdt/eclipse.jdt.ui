@@ -49,13 +49,13 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 	private void run(IStructuredSelection selection) {
 		IJavaElement[] elements= getSelectedElements(selection);
 		if (elements == null || elements.length == 0) {
-			MessageDialog.openInformation(getShell(), "Go to Test", "Select a method, type, or compilation unit to open tests that refer to them.");
+			MessageDialog.openInformation(getShell(), JUnitMessages.getString("GotoReferencedTestAction.dialog.title"), JUnitMessages.getString("GotoReferencedTestAction.dialog.message")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 		try {
 			run(elements);
 		} catch (CoreException e) {
-			ErrorDialog.openError(getShell(), "Go to Test", "Error trying to find test", e.getStatus());
+			ErrorDialog.openError(getShell(), JUnitMessages.getString("GotoReferencedTestAction.dialog.title"), JUnitMessages.getString("GotoReferencedTestAction.dialog.error"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 			
@@ -69,13 +69,13 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 			if (type != IJavaElement.METHOD && type != IJavaElement.TYPE) {
 		 		element= SelectionConverter.getTypeAtOffset(editor);
 		 		if (element == null) {
-					MessageDialog.openInformation(getShell(), "Go to Test", "Selection is not inside of a type or method.");
+					MessageDialog.openInformation(getShell(), JUnitMessages.getString("GotoReferencedTestAction.dialog.title"), JUnitMessages.getString("GotoReferencedTestAction.dialog.error.nomethod")); //$NON-NLS-1$ //$NON-NLS-2$
 					return;
 		 		}
 			}
 			run(new IMember[] { (IMember)element });
 		} catch (CoreException e) {
-			ErrorDialog.openError(getShell(), "Go to Test", "Error trying to find test", e.getStatus());
+			ErrorDialog.openError(getShell(), JUnitMessages.getString("GotoReferencedTestAction.dialog.title"), JUnitMessages.getString("GotoReferencedTestAction.dialog.error"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -83,8 +83,9 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 		IJavaElement element= elements[0];
 		
 		SelectionStatusDialog dialog = new TestMethodSelectionDialog(getShell(), new ProgressMonitorDialog(getShell()), element); 
-		dialog.setTitle("Select Test"); 
-		dialog.setMessage("Select a test that refers to '"+element.getElementName()+"'."); 
+		dialog.setTitle(JUnitMessages.getString("GotoReferencedTestAction.selectdialog.title"));  //$NON-NLS-1$
+		String msg= JUnitMessages.getFormattedString("GotoReferencedTestAction.dialog.select_message", element.getElementName()); //$NON-NLS-1$
+		dialog.setMessage(msg); 
 		
 		if (dialog.open() == SelectionDialog.CANCEL) 
 			return;

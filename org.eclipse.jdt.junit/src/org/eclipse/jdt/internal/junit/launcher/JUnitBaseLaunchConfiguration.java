@@ -45,7 +45,7 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 	public static final String TESTTYPE_ATTR= JUnitPlugin.PLUGIN_ID+".TESTTYPE"; //$NON-NLS-1$
 	public static final String TESTNAME_ATTR= JUnitPlugin.PLUGIN_ID+".TESTNAME"; //$NON-NLS-1$
 	public static final String ATTR_KEEPRUNNING = JUnitPlugin.PLUGIN_ID+ ".KEEPRUNNING_ATTR"; //$NON-NLS-1$
-	public static final String LAUNCH_CONTAINER_ATTR= JUnitPlugin.PLUGIN_ID+".CONTAINER";
+	public static final String LAUNCH_CONTAINER_ATTR= JUnitPlugin.PLUGIN_ID+".CONTAINER"; //$NON-NLS-1$
 	/**
 	 * @see ILaunchConfigurationDelegate#launch(ILaunchConfiguration, String)
 	 */
@@ -99,7 +99,7 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 //			abort("No test type specified", null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE); //$NON-NLS-1$
 //		}
 		
-		String containerHandle = configuration.getAttribute(LAUNCH_CONTAINER_ATTR, "");
+		String containerHandle = configuration.getAttribute(LAUNCH_CONTAINER_ATTR, ""); //$NON-NLS-1$
 		if (containerHandle.length() == 0) {
 			return findSingleTest(javaProject, testTypeName);
 		}

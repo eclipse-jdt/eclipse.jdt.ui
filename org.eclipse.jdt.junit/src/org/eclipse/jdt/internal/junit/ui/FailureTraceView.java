@@ -30,7 +30,7 @@ import org.eclipse.jface.action.MenuManager;
  * A view that shows a stack trace of a failed test.
  */
 class FailureTraceView implements IMenuListener {
-	private static final String FRAME_PREFIX= "at ";
+	private static final String FRAME_PREFIX= "at "; //$NON-NLS-1$
 	private Table fTable;
 	private TestRunnerViewPart fTestRunner;
 	private String fInputTrace;

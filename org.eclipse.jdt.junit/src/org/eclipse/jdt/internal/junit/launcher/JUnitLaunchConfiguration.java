@@ -41,7 +41,7 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 		String[] classPath= createClassPath(configuration);	
 		String progArgs= getProgramArguments(configuration);
 		VMRunnerConfiguration vmConfig= new VMRunnerConfiguration("org.eclipse.jdt.internal.junit.runner.RemoteTestRunner", classPath); //$NON-NLS-1$
-		String testName= configuration.getAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, "");
+		String testName= configuration.getAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, ""); //$NON-NLS-1$
 		
 		// insert the program arguments
 		Vector argv= new Vector(10);
@@ -61,7 +61,7 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 		// a testname was specified just run the single test
 		if (testName.length() > 0) {
 			argv.add("-test"); //$NON-NLS-1$
-			argv.add(testTypes[0].getFullyQualifiedName()+":"+testName);			
+			argv.add(testTypes[0].getFullyQualifiedName()+":"+testName);			 //$NON-NLS-1$
 		} else if (testTypes.length > 1) {
 			String fileName= createTestNamesFile(testTypes);
 			argv.add("-testNameFile"); //$NON-NLS-1$
@@ -79,7 +79,7 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 
 	private String createTestNamesFile(IType[] testTypes) throws CoreException {
 		try {
-			File file= File.createTempFile("testNames", ".txt");
+			File file= File.createTempFile("testNames", ".txt"); //$NON-NLS-1$ //$NON-NLS-2$
 			file.deleteOnExit();
 			BufferedWriter bw= null;
 			try {
@@ -96,7 +96,7 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 			}
 			return file.getAbsolutePath();
 		} catch (IOException e) {
-			throw new CoreException(new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID, IStatus.ERROR, "", e));
+			throw new CoreException(new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID, IStatus.ERROR, "", e)); //$NON-NLS-1$
 		}
 	}
 	

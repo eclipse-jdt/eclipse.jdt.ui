@@ -184,21 +184,21 @@ public class RemoteTestRunner implements TestListener {
 				}
 				fTestClassNames= (String[]) list.toArray(new String[list.size()]);
 			}	
-			else if(args[i].toLowerCase().equals("-test")) {
+			else if(args[i].toLowerCase().equals("-test")) { //$NON-NLS-1$
 				String testName= args[i+1];
 				int p= testName.indexOf(':');
 				if (p == -1)
-					throw new IllegalArgumentException("Testname not separated by \'%\'");
+					throw new IllegalArgumentException("Testname not separated by \'%\'"); //$NON-NLS-1$
 				fTestName= testName.substring(p+1);
 				fTestClassNames= new String[]{ testName.substring(0, p)  };
 				i++;
 			}			
-			else if(args[i].toLowerCase().equals("-testnamefile")) {
+			else if(args[i].toLowerCase().equals("-testnamefile")) { //$NON-NLS-1$
 				String testNameFile= args[i+1];
 				try {
 					readTestNames(testNameFile);
 				} catch (IOException e) {
-					throw new IllegalArgumentException("Cannot read testname file.");		
+					throw new IllegalArgumentException("Cannot read testname file.");		 //$NON-NLS-1$
 				}
 				i++;
 			
@@ -240,9 +240,9 @@ public class RemoteTestRunner implements TestListener {
 			br.close();
 		}
 		if (fDebugMode) {
-			System.out.println("Tests:");
+			System.out.println("Tests:"); //$NON-NLS-1$
 			for (int i= 0; i < fTestClassNames.length; i++) {
-				System.out.println("    "+fTestClassNames[i]);
+				System.out.println("    "+fTestClassNames[i]); //$NON-NLS-1$
 			}
 		}
 	}
@@ -402,7 +402,7 @@ public class RemoteTestRunner implements TestListener {
 			Class reloadedTestClass= getClassLoader().loadClass(className);
 			reloadedTest= createTest(testName, reloadedTestClass);
 		} catch(Exception e) {
-			reloadedTest= warning("Could not create test \'"+testName+"\'");
+			reloadedTest= warning("Could not create test \'"+testName+"\'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		TestResult result= new TestResult();
 		reloadedTest.run(result);
@@ -413,7 +413,7 @@ public class RemoteTestRunner implements TestListener {
 	 * Returns a test which will fail and log a warning message.
 	 */
 	 private Test warning(final String message) {
-		return new TestCase("warning") {
+		return new TestCase("warning") { //$NON-NLS-1$
 			protected void runTest() {
 				fail(message);
 			}
@@ -443,7 +443,7 @@ public class RemoteTestRunner implements TestListener {
 		} catch (NoSuchMethodException e) {
 		} catch (ClassCastException e) {
 		}
-		return warning("Could not create test \'"+testName+"\' ");
+		return warning("Could not create test \'"+testName+"\' "); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 

@@ -73,7 +73,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	private Label fTestLabel;
 	private Text fTestText;
 	private Button fSearchButton;
-	private final Image fTestIcon= createImage("obj16/test.gif");
+	private final Image fTestIcon= createImage("obj16/test.gif"); //$NON-NLS-1$
 	private Label fTestMethodLabel;
 	private Text fContainerText;
 	private IJavaElement fContainerElement;
@@ -104,7 +104,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	private void createTestContainerSelectionGroup(Composite comp) {
 		GridData gd;
 		fTestContainerRadioButton= new Button(comp, SWT.RADIO);
-		fTestContainerRadioButton.setText("All Tests in Project, Source Folder or Package:");
+		fTestContainerRadioButton.setText(JUnitMessages.getString("JUnitMainTab.label.container")); //$NON-NLS-1$
 		gd = new GridData();
 		gd.horizontalSpan = 2;
 		fTestContainerRadioButton.setLayoutData(gd);
@@ -158,7 +158,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	public void createTestSelectionGroup(Composite comp) {
 		GridData gd;
 		fTestRadioButton= new Button(comp, SWT.RADIO /*| SWT.LEFT*/);
-		fTestRadioButton.setText(JUnitMessages.getString("JUnitMainTab.label.test"));
+		fTestRadioButton.setText(JUnitMessages.getString("JUnitMainTab.label.test")); //$NON-NLS-1$
 		gd = new GridData();
 		gd.horizontalSpan = 2;
 		fTestRadioButton.setLayoutData(gd); 
@@ -191,7 +191,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		});
 		setButtonGridData(fSearchButton);
 		fTestMethodLabel= new Label(comp, SWT.NONE);
-		fTestMethodLabel.setText(""); 
+		fTestMethodLabel.setText("");  //$NON-NLS-1$
 		gd= new GridData();
 		gd.horizontalSpan = 2;
 		gd.horizontalIndent= 20;
@@ -242,7 +242,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	 */
 	public void initializeFrom(ILaunchConfiguration config) {
 		updateProjectFromConfig(config);
-		String containerHandle= "";
+		String containerHandle= ""; //$NON-NLS-1$
 		try {
 			containerHandle = config.getAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, ""); //$NON-NLS-1$
 		} catch (CoreException ce) {			
@@ -275,7 +275,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	
 	protected void updateTestTypeFromConfig(ILaunchConfiguration config) {
 		String testTypeName= ""; //$NON-NLS-1$
-		String testMethodName= "";
+		String testMethodName= ""; //$NON-NLS-1$
 		try {
 			testTypeName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, ""); //$NON-NLS-1$
 			testMethodName = config.getAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, ""); //$NON-NLS-1$
@@ -286,17 +286,17 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		setEnableContainerTestGroup(false);		
 		fTestContainerRadioButton.setSelection(false);
 		fTestText.setText(testTypeName);
-		fContainerText.setText("");
-		if (!"".equals(testMethodName)) {
-			fTestMethodLabel.setText("Test method: "+testMethodName);
+		fContainerText.setText(""); //$NON-NLS-1$
+		if (!"".equals(testMethodName)) { //$NON-NLS-1$
+			fTestMethodLabel.setText(JUnitMessages.getString("JUnitMainTab.label.method")+testMethodName); //$NON-NLS-1$
 		} else {
-			fTestMethodLabel.setText("");
+			fTestMethodLabel.setText(""); //$NON-NLS-1$
 		}
 		
 	}
 
 	protected void updateTestContainerFromConfig(ILaunchConfiguration config) {
-		String containerHandle= "";
+		String containerHandle= ""; //$NON-NLS-1$
 		try {
 			containerHandle = config.getAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, ""); //$NON-NLS-1$
 			if (containerHandle.length() > 0) {
@@ -310,7 +310,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		fTestRadioButton.setSelection(false);
 		if (fContainerElement != null) 
 			fContainerText.setText(fContainerElement.getElementName());
-		fTestText.setText("");
+		fTestText.setText(""); //$NON-NLS-1$
 	}
 	/**
 	 * @see ILaunchConfigurationTab#performApply(ILaunchConfigurationWorkingCopy)
@@ -514,7 +514,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 
 	private void initializeName(ILaunchConfigurationWorkingCopy config, String name) {
 		if (name == null) {
-			name= "";
+			name= ""; //$NON-NLS-1$
 		}
 		if (name.length() > 0) {
 			int index = name.lastIndexOf('.');
@@ -549,7 +549,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		} catch (InvocationTargetException ite) {
 		}
 		if (name == null)
-			name= "";
+			name= ""; //$NON-NLS-1$
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, name);
 		initializeName(config, name);
 	}
@@ -581,8 +581,8 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, provider);
 		dialog.setValidator(validator);
 		dialog.setSorter(new JavaElementSorter());
-		dialog.setTitle("Folder Selection"); 
-		dialog.setMessage("Choose a Project, Source Folder or Package:"); 
+		dialog.setTitle(JUnitMessages.getString("JUnitMainTab.folderdialog.title"));  //$NON-NLS-1$
+		dialog.setMessage(JUnitMessages.getString("JUnitMainTab.folderdialog.message"));  //$NON-NLS-1$
 		dialog.addFilter(filter);
 		dialog.setInput(JavaCore.create(getWorkspaceRoot()));
 		dialog.setInitialSelection(initElement);

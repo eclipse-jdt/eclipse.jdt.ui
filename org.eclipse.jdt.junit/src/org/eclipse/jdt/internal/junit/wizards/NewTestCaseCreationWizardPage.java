@@ -679,7 +679,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		fMethodStubsButtons.setEnabled(2, true);//enable setUp() checkbox
 		fMethodStubsButtons.setEnabled(3, true);//enable tearDown() checkbox
 		String superClassName= getSuperClass();
-		if (superClassName == null || superClassName.trim().equals("")) {
+		if (superClassName == null || superClassName.trim().equals("")) { //$NON-NLS-1$
 			fSuperClassStatus= new JUnitStatus();
 			((JUnitStatus)fSuperClassStatus).setError("Super class name is empty"); //$NON-NLS-1$
 			return;	
