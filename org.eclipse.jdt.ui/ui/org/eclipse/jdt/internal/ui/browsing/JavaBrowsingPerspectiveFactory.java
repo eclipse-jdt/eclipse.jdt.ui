@@ -15,6 +15,9 @@ import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPerspectiveFactory;
+
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
@@ -106,6 +109,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
 		placeHolderBottom.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
 		placeHolderBottom.addPlaceholder(JavaUI.ID_JAVADOC_VIEW);
+		placeHolderBottom.addPlaceholder(JavaPerspectiveFactory.ID_PROGRESS_VIEW);
 	}
 
 	private void createHorizontalLayout(IPageLayout layout) {

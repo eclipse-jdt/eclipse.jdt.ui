@@ -45,6 +45,7 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		outputfolder.addPlaceholder(IPageLayout.ID_BOOKMARKS);
 		outputfolder.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
 		outputfolder.addPlaceholder(JavaUI.ID_JAVADOC_VIEW);
+		outputfolder.addPlaceholder(JavaPerspectiveFactory.ID_PROGRESS_VIEW);
 		
 		layout.addActionSet(IDebugUIConstants.LAUNCH_ACTION_SET);
 		layout.addActionSet(JavaUI.ID_ACTION_SET);
