@@ -6,19 +6,18 @@ package org.eclipse.jdt.internal.core.refactoring.changes;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.core.refactoring.NullChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Change;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
-import org.eclipse.jdt.internal.core.refactoring.changes.*;
-import org.eclipse.jdt.internal.core.refactoring.*;
 
 public class DeleteFromClasspathChange extends Change {
 
@@ -103,7 +102,7 @@ public class DeleteFromClasspathChange extends Change {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return "Remove entry from classpath";
+		return "Remove entry from classpath of Java project: '" + getJavaProject().getElementName() + "'";
 	}
 
 	/* non java-doc
