@@ -88,7 +88,6 @@ import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
@@ -550,19 +549,16 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * Links to editor (if option enabled)
 	 */
 	private void linkToEditor(IStructuredSelection selection) {	
-		//if (!isLinkingEnabled())
-		//	return; 
-				
 		Object obj= selection.getFirstElement();
 		Object element= null;
 
 		if (selection.size() == 1) {
 			if (obj instanceof IJavaElement) {
-				IJavaElement cu= JavaModelUtil.findElementOfKind((IJavaElement)obj, IJavaElement.COMPILATION_UNIT);
+				IJavaElement cu= ((IJavaElement)obj).getAncestor(IJavaElement.COMPILATION_UNIT);
 				if (cu != null)
 					element= getResourceFor(cu);
 				if (element == null)
-					element= JavaModelUtil.findElementOfKind((IJavaElement)obj, IJavaElement.CLASS_FILE);
+					element= ((IJavaElement)obj).getAncestor(IJavaElement.CLASS_FILE);
 			}
 			else if (obj instanceof IFile)
 				element= obj;
@@ -770,11 +766,17 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			IStructuredSelection oldSelection= (IStructuredSelection)getSelection();
 			if (oldSelection.size() == 1) {
 				Object o= oldSelection.getFirstElement();
-				if (o instanceof IMember) {
-					IMember m= (IMember)o;
-					if (element.equals(m.getCompilationUnit()))
-						return;
-					if (element.equals(m.getClassFile())) 
+				if (o instanceof IJavaElement) {
+					ICompilationUnit cu= (ICompilationUnit)((IJavaElement)o).getAncestor(IJavaElement.COMPILATION_UNIT);
+					if (cu != null) {
+						if (cu.isWorkingCopy())
+							cu= (ICompilationUnit)cu.getOriginalElement();
+						if ( element.equals(cu))
+							return;
+					}
+
+					IClassFile cf= (IClassFile)((IJavaElement)o).getAncestor(IJavaElement.CLASS_FILE);
+					if (cf != null && element.equals(cf))
 						return;
 				}
 			}
