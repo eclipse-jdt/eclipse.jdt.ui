@@ -264,7 +264,9 @@ public class TextBuffer {
 			fDocument.replace(offset, length, text);
 		} catch (BadLocationException e) {
 			IStatus s= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, 
-				"Replace failed due to wrong range [" + offset + "," + length + "]", e);
+				TextManipulationMessages.getFormattedString(
+					"TextBuffer.wrongRange",  //$NON-NLS-1$
+					new Object[] {new Integer(offset), new Integer(length) } ), e);
 			throw new CoreException(s);
 		}	
 	}

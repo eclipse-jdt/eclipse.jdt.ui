@@ -185,7 +185,7 @@ import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 	
 	private void throwNotManaged() throws CoreException {
 		IStatus s= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 
-			JavaStatusConstants.INTERNAL_ERROR, "Buffer not managed", null);
+			JavaStatusConstants.INTERNAL_ERROR, TextManipulationMessages.getString("TextBufferFactory.bufferNotManaged"), null); //$NON-NLS-1$
 		throw new CoreException(s);
 	}
 }

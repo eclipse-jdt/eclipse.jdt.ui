@@ -26,7 +26,7 @@ public final class MoveTextEdit extends TextEdit {
 			return super.perform(buffer);
 		}
 		public TextEdit copy() {
-			Assert.isTrue(false, "This should never happen");
+			Assert.isTrue(false, "This should never happen"); //$NON-NLS-1$
 			return super.copy();
 		}
 	}
@@ -119,7 +119,7 @@ public final class MoveTextEdit extends TextEdit {
 			TextRange source= getSourceRange();
 			TextRange target= getTargetRange();
 			String current= buffer.getContent(source.fOffset, source.fLength);
-			buffer.replace(source, "");
+			buffer.replace(source, ""); //$NON-NLS-1$
 			buffer.replace(target, current);
 		}
 	}

@@ -166,7 +166,7 @@ public class TextBufferEditor {
 				throw new JavaModelException(null, IJavaModelStatusConstants.NO_ELEMENTS_TO_PROCESS);
 		}
 		try {
-			pm.beginTask("", fNumberOfNodes + 10);
+			pm.beginTask("", fNumberOfNodes + 10); //$NON-NLS-1$
 			UndoMemento undo= null;
 			if (fMode == REDO) {
 				undo= fRootNode.performDo(fBuffer, pm);

@@ -22,7 +22,7 @@ public abstract class SimpleTextEdit extends TextEdit {
 	}
 	
 	public static SimpleTextEdit createDelete(int offset, int length) {
-		return new SimpleTextEditImpl(offset, length, "");
+		return new SimpleTextEditImpl(offset, length, ""); //$NON-NLS-1$
 	}
 	
 	private final static class SimpleTextEditImpl extends SimpleTextEdit {
@@ -38,7 +38,7 @@ public abstract class SimpleTextEdit extends TextEdit {
 	}
 	
 	protected SimpleTextEdit() {
-		this(TextRange.UNDEFINED, "");
+		this(TextRange.UNDEFINED, ""); //$NON-NLS-1$
 	}
 	
 	protected SimpleTextEdit(int offset, int length, String text) {
