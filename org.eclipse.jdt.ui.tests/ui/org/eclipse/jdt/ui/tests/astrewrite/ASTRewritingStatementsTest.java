@@ -106,7 +106,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	public void testAdd() throws Exception {
 		{	/* foo(): append a return statement */
 			ICompilationUnit cu= fCU_C;
-			CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 			TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 			
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
@@ -139,7 +139,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		}
 		{	/* hoo(): return; -> return false;  */
 			ICompilationUnit cu= fCU_D;
-			CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 			TypeDeclaration type= findTypeDeclaration(astRoot, "D");
 		
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "hoo");
@@ -180,7 +180,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	public void testRemove() throws Exception {
 		{	/* foo():  remove if... */
 			ICompilationUnit cu= fCU_C;
-			CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 			TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 			
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
@@ -208,7 +208,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		}
 		{	/* goo(): remove new Integer(3) */
 			ICompilationUnit cu= fCU_D;
-			CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 			TypeDeclaration type= findTypeDeclaration(astRoot, "D");
 		
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "goo");
@@ -246,7 +246,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	public void testReplace() throws Exception {
 		{	/* foo(): if.. -> return; */
 			ICompilationUnit cu= fCU_C;
-			CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 			TypeDeclaration type= findTypeDeclaration(astRoot, "C");
 			
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
@@ -276,7 +276,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		}		
 		{	/* goo(): new Integer(3) -> 'null' */
 			ICompilationUnit cu= fCU_D;
-			CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+			CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 			TypeDeclaration type= findTypeDeclaration(astRoot, "D");
 		
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "goo");
@@ -326,7 +326,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		
 		AST ast= astRoot.getAST();
 		

@@ -101,7 +101,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		
 	public void testTypeDeclChanges() throws Exception {
 		ICompilationUnit cu= fCU_E;
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
 		{ 
@@ -193,7 +193,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 	
 	public void testTypeDeclRemoves() throws Exception {
 		ICompilationUnit cu= fCU_E;
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		{ // change to interface, remove supertype, remove first interface, remove field
 			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
@@ -270,7 +270,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 
 	public void testTypeDeclInserts() throws Exception {
 		ICompilationUnit cu= fCU_E;
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		assertTrue("Errors in AST", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		AST ast= astRoot.getAST();
 		{ // add interface & set to final
@@ -394,7 +394,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T.java", buf.toString(), false, null);				
 
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		assertTrue("Errors in AST", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		AST ast= astRoot.getAST();
 		
@@ -429,7 +429,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		
 		AST ast= astRoot.getAST();
 		

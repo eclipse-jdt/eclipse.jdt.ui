@@ -92,7 +92,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		
 		AST ast= astRoot.getAST();
 		
@@ -112,7 +112,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			NumberLiteral name= ast.newNumberLiteral("1");
 			ASTRewriteAnalyzer.markAsReplaced(left.getIndex(), name);
 			
-			ASTNode placeHolder= ASTRewriteAnalyzer.getPlaceholderForExisting(left.getIndex());
+			ASTNode placeHolder= ASTRewriteAnalyzer.createCopyTarget(left.getIndex());
 			ASTRewriteAnalyzer.markAsReplaced(right.getIndex(), placeHolder);
 			
 			SimpleName newName= ast.newSimpleName("o");
@@ -153,7 +153,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		
 		AST ast= astRoot.getAST();
 		
@@ -278,7 +278,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		
 		AST ast= astRoot.getAST();
 		
@@ -362,7 +362,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		
 		AST ast= astRoot.getAST();
 		
@@ -417,7 +417,69 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
-
+	public void testCastExpression() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        x= (E) clone();\n");
+		buf.append("        z= y.toList();\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 2", statements.size() == 2);
+		{ // change cast type and cast expression
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
+			Assignment assignment= (Assignment) stmt.getExpression();
+			
+			CastExpression expression= (CastExpression) assignment.getRightHandSide();
+			SimpleType newType= ast.newSimpleType(ast.newSimpleName("SuperE"));
+			ASTRewriteAnalyzer.markAsReplaced(expression.getType(), newType);
+			
+			SimpleName newExpression= ast.newSimpleName("a");
+			ASTRewriteAnalyzer.markAsReplaced(expression.getExpression(), newExpression);
+		}
+		{ // create cast
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(1);
+			Assignment assignment= (Assignment) stmt.getExpression();
+			
+			Expression rightHand= assignment.getRightHandSide();
+			
+			Expression placeholder= (Expression) ASTRewriteAnalyzer.createCopyTarget(rightHand);
+			
+			CastExpression newCastExpression= ast.newCastExpression();
+			newCastExpression.setType(ast.newSimpleType(ast.newSimpleName("List")));
+			newCastExpression.setExpression(placeholder);
+			
+			ASTRewriteAnalyzer.markAsReplaced(rightHand, newCastExpression);
+		}
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        x= (SuperE) a;\n");
+		buf.append("        z= (List) y.toList();\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
 	
 	
 

@@ -91,7 +91,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 	
 	public void testMethodDeclChanges() throws Exception {
 		ICompilationUnit cu= fCU_E;
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		
@@ -206,7 +206,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 	
 	public void testListRemoves() throws Exception {
 		ICompilationUnit cu= fCU_E;
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		
@@ -309,7 +309,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 	
 	public void testListInserts() throws Exception {
 		ICompilationUnit cu= fCU_E;
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		
@@ -484,7 +484,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 	
 	public void testListCombinations() throws Exception {
 		ICompilationUnit cu= fCU_E;
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		
@@ -587,7 +587,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 	
 	public void testMethodBody() throws Exception {
 		ICompilationUnit cu= fCU_E;
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		

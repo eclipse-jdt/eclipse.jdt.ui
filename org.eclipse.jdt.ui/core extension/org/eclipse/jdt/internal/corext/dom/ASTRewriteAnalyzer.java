@@ -44,7 +44,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 
 	private static final String KEY= "ASTChangeData";
 
-	public static ASTNode getPlaceholderForExisting(ASTNode node) {
+	public static ASTNode createCopyTarget(ASTNode node) {
 		return ASTWithExistingFlattener.getPlaceholder(node);
 	}
 
@@ -887,7 +887,19 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(CastExpression)
 	 */
 	public boolean visit(CastExpression node) {
-		return super.visit(node);
+		Type type= node.getType();
+		if (isReplaced(type)) {
+			replaceNode(type, getReplacingNode(type));
+		} else {
+			type.accept(this);
+		}		
+		Expression expression= node.getExpression();
+		if (isReplaced(expression)) {
+			replaceNode(expression, getReplacingNode(expression));
+		} else {
+			expression.accept(this);
+		}				
+		return false;
 	}
 
 	/* (non-Javadoc)

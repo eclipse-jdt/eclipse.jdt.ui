@@ -100,7 +100,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 	
 	public void testMoveDeclSameLevel() throws Exception {
 		ICompilationUnit cu= fCU_E;
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		assertTrue("Code has errors", (astRoot.getFlags() & astRoot.MALFORMED) == 0);
 		
@@ -115,7 +115,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			TypeDeclaration innerType= (TypeDeclaration) members.get(0);
 			
 			ASTRewriteAnalyzer.markAsRemoved(innerType);
-			ASTNode movedNode= ASTRewriteAnalyzer.getPlaceholderForExisting(innerType);
+			ASTNode movedNode= ASTRewriteAnalyzer.createCopyTarget(innerType);
 			members.add(movedNode);
 			
 			Statement toMove;
@@ -141,8 +141,8 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 				List statements= body.statements();
 				assertTrue("Has statements", statements.isEmpty());
 				
-				ASTNode insertNodeForMove= ASTRewriteAnalyzer.getPlaceholderForExisting(toMove);
-				ASTNode insertNodeForCopy= ASTRewriteAnalyzer.getPlaceholderForExisting(toCopy);
+				ASTNode insertNodeForMove= ASTRewriteAnalyzer.createCopyTarget(toMove);
+				ASTNode insertNodeForCopy= ASTRewriteAnalyzer.createCopyTarget(toCopy);
 				
 				statements.add(insertNodeForCopy);
 				statements.add(insertNodeForMove);
@@ -186,7 +186,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 
 	public void testMoveDeclDifferentLevel() throws Exception {
 		ICompilationUnit cu= fCU_E;
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		assertTrue("Code has errors", (astRoot.getFlags() & astRoot.MALFORMED) == 0);
 		
@@ -208,12 +208,12 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 				
 				ASTRewriteAnalyzer.markAsRemoved(outerType);
 				
-				ASTNode insertNodeForCopy= ASTRewriteAnalyzer.getPlaceholderForExisting(outerType);
+				ASTNode insertNodeForCopy= ASTRewriteAnalyzer.createCopyTarget(outerType);
 				innerMembers.add(insertNodeForCopy);
 			}
 			{ // copy method of inner to main type
 				MethodDeclaration methodDecl= (MethodDeclaration) innerMembers.get(0);
-				ASTNode insertNodeForMove= ASTRewriteAnalyzer.getPlaceholderForExisting(methodDecl);
+				ASTNode insertNodeForMove= ASTRewriteAnalyzer.createCopyTarget(methodDecl);
 				members.add(insertNodeForMove);
 			}
 			{ // nest body of constructor in a while statement
@@ -225,7 +225,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 				WhileStatement whileStatement= ast.newWhileStatement();
 				whileStatement.setExpression(ast.newBooleanLiteral(true));
 				
-				Statement insertNodeForCopy= (Statement) ASTRewriteAnalyzer.getPlaceholderForExisting(body);
+				Statement insertNodeForCopy= (Statement) ASTRewriteAnalyzer.createCopyTarget(body);
 				
 				whileStatement.setBody(insertNodeForCopy); // set existing body
 
@@ -276,7 +276,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 	
 	public void testMoveStatements() throws Exception {
 		ICompilationUnit cu= fCU_E;
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		assertTrue("Code has errors", (astRoot.getFlags() & astRoot.MALFORMED) == 0);
 		
@@ -294,8 +294,8 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			
 			IfStatement ifStatement= (IfStatement) statements.get(3);
 			
-			Statement insertNodeForCopy1= (Statement) ASTRewriteAnalyzer.getPlaceholderForExisting((ASTNode) statements.get(1));
-			Statement insertNodeForCopy2= (Statement) ASTRewriteAnalyzer.getPlaceholderForExisting((ASTNode) statements.get(2));
+			Statement insertNodeForCopy1= (Statement) ASTRewriteAnalyzer.createCopyTarget((ASTNode) statements.get(1));
+			Statement insertNodeForCopy2= (Statement) ASTRewriteAnalyzer.createCopyTarget((ASTNode) statements.get(2));
 			
 			Block whileBody= ast.newBlock();
 			
