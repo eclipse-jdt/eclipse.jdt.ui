@@ -291,9 +291,11 @@ public class ProfileManager extends Observable {
 	 * The keys of the built-in profiles
 	 */
 	public final static String ECLIPSE21_PROFILE= "org.eclipse.jdt.ui.default_profile"; //$NON-NLS-1$
+	public final static String ECLIPSE_PROFILE= "org.eclipse.jdt.ui.default.eclipse_profile"; //$NON-NLS-1$
 	public final static String JAVA_PROFILE= "org.eclipse.jdt.ui.default.sun_profile"; //$NON-NLS-1$
 	public final static String SHARED_PROFILE= "org.eclipse.jdt.ui.default.shared"; //$NON-NLS-1$
 	
+	public final static String DEFAULT_PROFILE= ECLIPSE_PROFILE;
 	
 	/**
 	 * A map containing the available profiles, using the IDs as keys.
@@ -352,11 +354,25 @@ public class ProfileManager extends Observable {
 		}
 		
 		Collections.sort(fProfilesByName);
-				
-		String profileId= new InstanceScope().getNode(JavaUI.ID_PLUGIN).get(PROFILE_KEY, JAVA_PROFILE);
+		
+		InstanceScope instanceScope= new InstanceScope();
+		String profileId= instanceScope.getNode(JavaUI.ID_PLUGIN).get(PROFILE_KEY, null);
+		
+		// fix for bug 89739
+		if (profileId == null) { // no profile set, or always inherited from default
+			profileId= DEFAULT_PROFILE; // use eclipse as default
+			IEclipsePreferences node= instanceScope.getNode(JavaCore.PLUGIN_ID);
+			if (node != null) {
+				String tabSetting= node.get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, null);
+				if (JavaCore.SPACE.equals(tabSetting)) {
+					profileId= JAVA_PROFILE;
+				}
+			}
+		}
+		
 		Profile profile= (Profile) fProfiles.get(profileId);
 		if (profile == null) {
-			profile= (Profile) fProfiles.get(JAVA_PROFILE);
+			profile= (Profile) fProfiles.get(DEFAULT_PROFILE);
 		}
 		fSelected= profile;
 		
@@ -559,7 +575,11 @@ public class ProfileManager extends Observable {
 		profiles.put(javaProfile.getID(), javaProfile);
 		profilesByName.add(javaProfile);
 		
-		final Profile eclipse21Profile= new BuiltInProfile(ECLIPSE21_PROFILE, FormatterMessages.getString("ProfileManager.default_profile.name"), getEclipse21Settings(), 2); //$NON-NLS-1$
+		final Profile eclipseProfile= new BuiltInProfile(ECLIPSE_PROFILE, FormatterMessages.getString("ProfileManager.eclipse_profile.name"), getEclipseSettings(), 2); //$NON-NLS-1$
+		profiles.put(eclipseProfile.getID(), eclipseProfile);
+		profilesByName.add(eclipseProfile);
+		
+		final Profile eclipse21Profile= new BuiltInProfile(ECLIPSE21_PROFILE, FormatterMessages.getString("ProfileManager.default_profile.name"), getEclipse21Settings(), 3); //$NON-NLS-1$
 		profiles.put(eclipse21Profile.getID(), eclipse21Profile);
 		profilesByName.add(eclipse21Profile);
 	}
@@ -574,6 +594,16 @@ public class ProfileManager extends Observable {
 		ProfileVersioner.setLatestCompliance(options);
 		return options;
 	}
+	
+	/**
+	 * @return Returns the settings for the new eclipse profile.
+	 */	
+	public static Map getEclipseSettings() {
+		final Map options= DefaultCodeFormatterConstants.getEclipseDefaultSettings();
+
+		ProfileVersioner.setLatestCompliance(options);
+		return options;
+	}
 
 	/** 
 	 * @return Returns the settings for the Java Conventions profile.
@@ -583,6 +613,13 @@ public class ProfileManager extends Observable {
 
 		ProfileVersioner.setLatestCompliance(options);
 		return options;
+	}
+	
+	/** 
+	 * @return Returns the default settings.
+	 */
+	public static Map getDefaultSettings() {
+		return getEclipseSettings();
 	}
 	
 	

@@ -474,7 +474,7 @@ public class CodeFormatterConfigurationBlock {
 	}
 	
 	public void performDefaults() {
-		Profile profile= fProfileManager.getProfile(ProfileManager.JAVA_PROFILE);
+		Profile profile= fProfileManager.getProfile(ProfileManager.DEFAULT_PROFILE);
 		if (profile != null) {
 			int defaultIndex= fProfileManager.getSortedProfiles().indexOf(profile);
 			if (defaultIndex != -1) {

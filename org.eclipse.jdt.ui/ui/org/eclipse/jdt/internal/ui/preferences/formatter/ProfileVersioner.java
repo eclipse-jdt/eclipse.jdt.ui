@@ -43,7 +43,7 @@ public class ProfileVersioner {
 	}
 	
 	public static Map updateAndComplete(Map oldSettings, int version) {
-		final Map newSettings= ProfileManager.getJavaSettings();
+		final Map newSettings= ProfileManager.getDefaultSettings();
 		
 		switch (version) {
 
