@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -401,6 +402,8 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			parent= parent.getParent();
 		
 		if (parent instanceof ClassInstanceCreation) {
+			return false;
+		} else if (parent instanceof AbstractTypeDeclaration) {
 			return false;
 		} else if (parent instanceof TypeLiteral) {
 			return false;
