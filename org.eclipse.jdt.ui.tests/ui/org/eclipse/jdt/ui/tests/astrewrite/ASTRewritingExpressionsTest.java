@@ -33,7 +33,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingExpressionsTest("testMethodInvocation1"));
+			suite.addTest(new ASTRewritingExpressionsTest("testCastExpression_bug28824"));
 			return suite;
 		}		
 	}
@@ -449,7 +449,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			newCastExpression.setExpression(placeholder);
 			
 			rewrite.markAsReplaced(rightHand, newCastExpression);
-		}
+		}	
 				
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
@@ -461,12 +461,75 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
 		buf.append("        x= (SuperE) a;\n");
-		buf.append("        z= (List) y.toList();\n");
+		buf.append("        z= (List) y.toList();\n");	
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
 	}
+	
+	private boolean BUG_28824= true;
+	
+	public void testCastExpression_bug28824() throws Exception {
+		if (BUG_28824) {
+			return;
+		}
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        z= foo().y.toList();\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 1", statements.size() == 1);
+		{ // create cast
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
+			Assignment assignment= (Assignment) stmt.getExpression();
+			
+			Expression rightHand= assignment.getRightHandSide();
+			
+			String rightHandString= cu.getBuffer().getText(rightHand.getStartPosition(), rightHand.getLength());
+			assertEqualString(rightHandString, "foo().y.toList()");
+			
+			Expression placeholder= (Expression) rewrite.createCopy(rightHand);
+			
+			CastExpression newCastExpression= ast.newCastExpression();
+			newCastExpression.setType(ast.newSimpleType(ast.newSimpleName("List")));
+			newCastExpression.setExpression(placeholder);
+			
+			rewrite.markAsReplaced(rightHand, newCastExpression);
+		}		
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        z= (List) foo().y.toList();\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+	
 	
 	public void testCatchClause() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
