@@ -84,22 +84,55 @@ public class UndoManager implements IUndoManager {
 	private ListenerList fListeners;
 	private FlushListener fFlushListener;
 	
+	/**
+	 * Creates a new undo manager with an empty undo and redo stack.
+	 */
 	public UndoManager(){
 		flush();
 	}
 	
+	/* (Non-Javadoc)
+	 * Method declared in IUndoManager.
+	 */
 	public void addListener(IUndoManagerListener listener) {
 		if (fListeners == null)
 			fListeners= new ListenerList();
 		fListeners.add(listener);
 	}
 	
+	/* (Non-Javadoc)
+	 * Method declared in IUndoManager.
+	 */
 	public void removeListener(IUndoManagerListener listener) {
 		if (fListeners == null)
 			return;
 		fListeners.remove(listener);
 	}
 	
+	/* (Non-Javadoc)
+	 * Method declared in IUndoManager.
+	 */
+	public void aboutToPerformRefactoring() {
+		// Remove the resource change listener since we are changing code.
+		if (fFlushListener != null)
+			JavaCore.removeElementChangedListener(fFlushListener);
+	}
+	
+	/* (Non-Javadoc)
+	 * Method declared in IUndoManager.
+	 */
+	public void refactoringPerformed(boolean success) {
+		if (success) {
+			if (fFlushListener != null)
+				JavaCore.addElementChangedListener(fFlushListener);
+		} else {
+			flush();
+		}
+	}
+	
+	/* (Non-Javadoc)
+	 * Method declared in IUndoManager.
+	 */
 	public void flush(){
 		flushUndo();
 		flushRedo();
@@ -119,6 +152,9 @@ public class UndoManager implements IUndoManager {
 		fireNoMoreRedos();
 	}
 		
+	/* (Non-Javadoc)
+	 * Method declared in IUndoManager.
+	 */
 	public void addUndo(String refactoringName, IChange change){
 		Assert.isNotNull(refactoringName, "refactoring"); //$NON-NLS-1$
 		Assert.isNotNull(change, "change"); //$NON-NLS-1$
@@ -132,6 +168,9 @@ public class UndoManager implements IUndoManager {
 		fireUndoAdded();
 	}
 	
+	/* (Non-Javadoc)
+	 * Method declared in IUndoManager.
+	 */
 	public RefactoringStatus performUndo(ChangeContext context, IProgressMonitor pm) throws JavaModelException{
 		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		RefactoringStatus result= new RefactoringStatus();
@@ -155,6 +194,9 @@ public class UndoManager implements IUndoManager {
 		return result;	
 	}
 
+	/* (Non-Javadoc)
+	 * Method declared in IUndoManager.
+	 */
 	public RefactoringStatus performRedo(ChangeContext context, IProgressMonitor pm) throws JavaModelException{
 		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		RefactoringStatus result= new RefactoringStatus();
@@ -204,20 +246,32 @@ public class UndoManager implements IUndoManager {
 		}
 	}
 	
+	/* (Non-Javadoc)
+	 * Method declared in IUndoManager.
+	 */
 	public boolean anythingToRedo(){
 		return !fRedoChanges.empty();
 	}
 	
+	/* (Non-Javadoc)
+	 * Method declared in IUndoManager.
+	 */
 	public boolean anythingToUndo(){
 		return !fUndoChanges.empty();
 	}
 	
+	/* (Non-Javadoc)
+	 * Method declared in IUndoManager.
+	 */
 	public String peekUndoName() {
 		if (fUndoNames.size() > 0)
 			return (String)fUndoNames.peek();
 		return null;	
 	}
 	
+	/* (Non-Javadoc)
+	 * Method declared in IUndoManager.
+	 */
 	public String peekRedoName() {
 		if (fRedoNames.size() > 0)
 			return (String)fRedoNames.peek();

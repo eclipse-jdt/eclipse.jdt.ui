@@ -7,7 +7,7 @@ package org.eclipse.jdt.internal.core.refactoring.base;
 import java.util.ArrayList;import java.util.List;import org.eclipse.core.resources.IFile;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.text.AbstractTextBufferChange;
 
 /**
- * A change context is used to given an <code>IChange</code> object access to several workspace
+ * A change context is used to give an <code>IChange</code> object access to several workspace
  * resource independend from whether the change is executed head less or not. 
  * <p>
  * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 

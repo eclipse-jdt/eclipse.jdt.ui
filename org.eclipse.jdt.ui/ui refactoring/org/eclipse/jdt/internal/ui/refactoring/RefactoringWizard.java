@@ -6,7 +6,30 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
-import org.eclipse.jface.operation.IRunnableContext;import org.eclipse.jface.util.Assert;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.jface.wizard.Wizard;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.internal.core.refactoring.base.ChangeAbortException;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;import org.eclipse.jdt.internal.ui.refactoring.changes.ChangeExceptionHandler;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.Wizard;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
+
+import org.eclipse.jdt.internal.core.refactoring.base.ChangeAbortException;
+import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.refactoring.base.IUndoManager;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
+import org.eclipse.jdt.internal.ui.refactoring.changes.ChangeExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class RefactoringWizard extends Wizard {
 
 	private String fPageTitle;
@@ -263,16 +286,19 @@ public class RefactoringWizard extends Wizard {
 
 	public boolean performFinish(PerformChangeOperation op) {
 		ChangeContext context= new ChangeContext(new ChangeExceptionHandler());
+		boolean success= false;
+		IUndoManager undoManager= fRefactoring.getUndoManager();
 		try{
 			op.setChangeContext(context);
+			undoManager.aboutToPerformRefactoring();
 			getContainer().run(false, false, op);	
-			//XXX: this should be done by someone else
 			if (op.changeExecuted())
-				fRefactoring.getUndoManager().addUndo(fRefactoring.getName(), op.getChange().getUndoChange());
+				undoManager.addUndo(fRefactoring.getName(), op.getChange().getUndoChange());
+			success= true;
 		} catch (InvocationTargetException e) {
 			Throwable t= e.getTargetException();
 			if (t instanceof ChangeAbortException) {
-				handleChangeAbortException(context, (ChangeAbortException)t);
+				success= handleChangeAbortException(context, (ChangeAbortException)t);
 				return true;
 			} else {
 				handleUnexpectedException(e);
@@ -282,14 +308,16 @@ public class RefactoringWizard extends Wizard {
 			return false;
 		} finally {
 			context.clearPerformedChanges();
+			undoManager.refactoringPerformed(success);
 		}
 		
 		return true;
 	}
 	
-	private void handleChangeAbortException(final ChangeContext context, ChangeAbortException exception) {
+	private boolean handleChangeAbortException(final ChangeContext context, ChangeAbortException exception) {
 		if (!context.getTryToUndo())
-			return;
+			return false; // Return false since we handle an unexpected exception and we don't have any
+						  // idea in which state the workbench is.
 			
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			protected void execute(IProgressMonitor pm) throws CoreException, InvocationTargetException {
@@ -316,9 +344,12 @@ public class RefactoringWizard extends Wizard {
 			getContainer().run(false, false, op);
 		} catch (InvocationTargetException e) {
 			handleUnexpectedException(e);
+			return false;
 		} catch (InterruptedException e) {
 			// not possible. Operation not cancelable.
 		}
+		
+		return true;
 	}
 	
 	private void handleUnexpectedException(InvocationTargetException e) {
