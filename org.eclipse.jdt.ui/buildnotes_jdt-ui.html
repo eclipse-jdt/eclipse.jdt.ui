@@ -18,6 +18,17 @@ Eclipse 3.1 Platform Build Notes<br>
 Java Development Tooling UI</h1>
 To see which bugs have been addressed in one of the builds simply open the <a href="http://bugs.eclipse.org/bugs/query.cgi?short_desc_type=allwordssubstr&amp;product=JDT&amp;component=UI&amp;long_desc_type=allwordssubstr&amp;long_desc=&amp;bug_file_loc_type=allwordssubstr&amp;bug_file_loc=&amp;keywords_type=allwords&amp;keywords=&amp;emailtype1=substring&amp;email1=&amp;emailtype2=substring&amp;email2=&amp;bugidtype=include&amp;bug_id=&amp;votes=&amp;changedin=&amp;chfieldfrom=&amp;chfieldto=Now&amp;chfieldvalue=&amp;namedcmd=Assigned&amp;newqueryname=&amp;field0-0-0=noop&amp;type0-0-0=noop&amp;value0-0-0=">JDT UI bugzilla query page</a>, select status, resolution and the time frame.
 <br><br>
+========== Eclipse Build Input March 29th 2005 ==========<br>
+<pre>
+- Javadoc locations for libraries are now stored in the library's classpath attributes.
+  Attribute name is IClasspathAttribute#JAVADOC_LOCATION_ATTRIBUTE_NAME
+  JavaUI#setLibraryJavadocLocations(IPath[], URL[]), JavaUI#setLibraryJavadocLocation(IPath, URL) and
+  JavaUI#getLibraryJavadocLocation() are deprecated.
+  JavaUI#getLibraryJavadocLocation(IClasspathEntry) and BuildPathDialogAccess#configureJavadocLocation(Shell, IClasspathEntry)
+  have been added.
+</pre>
+
+
 ========== Eclipse Build Input March 22th 2005 ==========<br>
 <pre>
 - Extract Interface and Use Supertype Refactoring now use the new less resource-demanding type constraints infrastructure

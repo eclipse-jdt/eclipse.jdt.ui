@@ -37,12 +37,15 @@ import org.eclipse.ui.views.navigator.ResourceSorter;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathContainerWizard;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.EditVariableEntryDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.JavadocLocationDialog;
@@ -86,8 +89,11 @@ public final class BuildPathDialogAccess {
 	 * contains it.
 	 */
 	public static IClasspathEntry configureSourceAttachment(Shell shell, IClasspathEntry initialEntry) {
+		if (initialEntry == null) {
+			throw new IllegalArgumentException();
+		}
 		int entryKind= initialEntry.getEntryKind();
-		if (initialEntry == null || (entryKind != IClasspathEntry.CPE_LIBRARY && entryKind != IClasspathEntry.CPE_VARIABLE)) {
+		if (entryKind != IClasspathEntry.CPE_LIBRARY && entryKind != IClasspathEntry.CPE_VARIABLE) {
 			throw new IllegalArgumentException();
 		}
 		
@@ -121,6 +127,40 @@ public final class BuildPathDialogAccess {
 		JavadocLocationDialog dialog=  new JavadocLocationDialog(shell, libraryName, initialURL);
 		if (dialog.open() == Window.OK) {
 			return new URL[] { dialog.getResult() };
+		}
+		return null;
+	}
+	
+	/**
+	 * Shows the UI for configuring a javadoc location attribute of the classpath entry. <code>null</code> is returned
+	 * if the user cancels the dialog. The dialog does not apply any changes.
+	 * 
+	 * @param shell The parent shell for the dialog.
+	 * @param initialEntry The entry to edit. The kind of the classpath entry must be either
+	 * <code>IClasspathEntry.CPE_LIBRARY</code> or <code>IClasspathEntry.CPE_VARIABLE</code>.
+	 * @return Returns the resulting classpath entry containing a potentially modified javadoc location attribute 
+	 * The resulting entry can be used to replace the original entry on the classpath.
+	 * Note that the dialog does not make any changes on the passed entry nor on the classpath that
+	 * contains it.
+	 * 
+	 * @since 3.1
+	 */
+	public static IClasspathEntry configureJavadocLocation(Shell shell, IClasspathEntry initialEntry) {
+		if (initialEntry == null) {
+			throw new IllegalArgumentException();
+		}
+		int entryKind= initialEntry.getEntryKind();
+		if (entryKind != IClasspathEntry.CPE_LIBRARY && entryKind != IClasspathEntry.CPE_VARIABLE) {
+			throw new IllegalArgumentException();
+		}
+		
+		URL location= JavaUI.getLibraryJavadocLocation(initialEntry);
+		JavadocLocationDialog dialog=  new JavadocLocationDialog(shell, initialEntry.getPath().toString(), location);
+		if (dialog.open() == Window.OK) {
+			CPListElement element= CPListElement.createFromExisting(initialEntry, null);
+			URL res= dialog.getResult();
+			element.setAttribute(CPListElement.JAVADOC, res != null ? res.toExternalForm() : null);
+			return element.getClasspathEntry();
 		}
 		return null;
 	}

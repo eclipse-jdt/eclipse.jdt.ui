@@ -17,7 +17,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -25,6 +27,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -33,7 +36,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
@@ -48,6 +50,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -346,39 +349,18 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private void editAttributeEntry(CPListElementAttribute elem) {
 		String key= elem.getKey();
+		boolean attributeChanged= false;
+		CPListElement selElement= elem.getParent();
+		
 		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
-			CPListElement selElement= elem.getParent();
-			
-			IPath containerPath= null;
-			boolean applyChanges= false;
-			Object parentContainer= selElement.getParentContainer();
-			if (parentContainer instanceof CPListElement) {
-				containerPath= ((CPListElement) parentContainer).getPath();
-				applyChanges= true;
-			}
-			Shell shell= getShell();
-			IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(shell, selElement.getClasspathEntry());
+			IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(getShell(), selElement.getClasspathEntry());
 			if (result != null) {
-				if (applyChanges) {
-					try {
-						IRunnableWithProgress runnable= SourceAttachmentBlock.getRunnable(shell, result, fCurrJProject, containerPath);
-						PlatformUI.getWorkbench().getProgressService().run(true, true, runnable);
-
-					} catch (InvocationTargetException e) {
-						String title= NewWizardMessages.getString("LibrariesWorkbookPage.configurecontainer.error.title"); //$NON-NLS-1$
-						String message= NewWizardMessages.getString("LibrariesWorkbookPage.configurecontainer.error.message"); //$NON-NLS-1$
-						ExceptionHandler.handle(e, shell, title, message);
-
-					} catch (InterruptedException e) {
-						return;
-					}
-				}
 				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, result.getSourceAttachmentPath());
+				attributeChanged= true;
 				fLibrariesList.refresh();
 				fClassPathList.refresh(); // images
 			}
 		} else if (key.equals(CPListElement.JAVADOC)) {
-			CPListElement selElement= elem.getParent();
 			String initialLocation= (String) selElement.getAttribute(CPListElement.JAVADOC);
 			
 			String elementName= new CPListLabelProvider().getText(selElement);
@@ -386,23 +368,50 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				URL url= initialLocation != null ? new URL(initialLocation) : null;
 				URL[] result= BuildPathDialogAccess.configureJavadocLocation(getShell(), elementName, url);
 				if (result != null) {
-					selElement.setAttribute(CPListElement.JAVADOC, result[0].toExternalForm());
+					URL newURL= result[0];
+					selElement.setAttribute(CPListElement.JAVADOC, newURL != null ? newURL.toExternalForm() : null);
+					attributeChanged= true;
+
 					fLibrariesList.refresh();
+					fClassPathList.dialogFieldChanged(); // validate
 				}
 			} catch (MalformedURLException e) {
 				// ignore
 			}
 		} else if (key.equals(CPListElement.ACCESSRULES)) {
-			showTypeRestrictionDialog(elem.getParent());		
+			TypeRestrictionDialog dialog= new TypeRestrictionDialog(getShell(), selElement);
+			if (dialog.open() == Window.OK) {
+				selElement.setAttribute(CPListElement.ACCESSRULES, dialog.getAccessRules());
+				attributeChanged= true;
+				
+				fLibrariesList.refresh();
+				fClassPathList.dialogFieldChanged(); // validate
+			}
+		}
+		if (attributeChanged) {
+			Object parentContainer= selElement.getParentContainer();
+			if (parentContainer instanceof CPListElement) { // inside a container: apply changes right away
+				IClasspathEntry updatedEntry= selElement.getClasspathEntry();
+				updateContainerEntry(updatedEntry, fCurrJProject, ((CPListElement) parentContainer).getPath());
+			}
 		}
 	}
 
-	private void showTypeRestrictionDialog(CPListElement selElement) {
-		TypeRestrictionDialog dialog= new TypeRestrictionDialog(getShell(), selElement);
-		if (dialog.open() == Window.OK) {
-			selElement.setAttribute(CPListElement.ACCESSRULES, dialog.getAccessRules());
-			fLibrariesList.refresh();
-			fClassPathList.dialogFieldChanged(); // validate
+	private void updateContainerEntry(final IClasspathEntry newEntry, final IJavaProject jproject, final IPath containerPath) {
+		try {
+			IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+				public void run(IProgressMonitor monitor) throws CoreException {				
+					BuildPathSupport.modifyClasspathEntry(null, newEntry, jproject, containerPath, monitor);
+				}
+			};
+			PlatformUI.getWorkbench().getProgressService().run(true, true, new WorkbenchRunnableAdapter(runnable));
+
+		} catch (InvocationTargetException e) {
+			String title= NewWizardMessages.getString("LibrariesWorkbookPage.configurecontainer.error.title"); //$NON-NLS-1$
+			String message= NewWizardMessages.getString("LibrariesWorkbookPage.configurecontainer.error.message"); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), title, message);
+		} catch (InterruptedException e) {
+			// 
 		}
 	}
 		

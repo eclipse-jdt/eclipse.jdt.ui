@@ -868,13 +868,15 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			}
 		} else if (key.equals(CPListElement.JAVADOC)) {
 			CPListElement selElement= elem.getParent();
+			
 			String initialLocation= (String) selElement.getAttribute(CPListElement.JAVADOC);
 			String elementName= new CPListLabelProvider().getText(selElement);
 			try {
 				URL locationURL= initialLocation != null ? new URL(initialLocation) : null;
 				URL[] result= BuildPathDialogAccess.configureJavadocLocation(getShell(), elementName, locationURL);
 				if (result != null) {
-					selElement.setAttribute(CPListElement.JAVADOC, result[0].toExternalForm());
+					URL newURL= result[0];
+					selElement.setAttribute(CPListElement.JAVADOC, newURL != null ? newURL.toExternalForm() : null);
 					fLibraryList.refresh();
 				}
 			} catch (MalformedURLException e) {

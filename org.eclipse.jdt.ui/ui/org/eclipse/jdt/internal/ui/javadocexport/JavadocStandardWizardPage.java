@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,12 +20,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
-import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -42,18 +44,25 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationBlock;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
@@ -294,7 +303,14 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 					if (entry.getType() == IRuntimeClasspathEntry.PROJECT) {
 						result.add(new JavadocLinkRef(JavaCore.create((IProject) entry.getResource())));
 					} else if (entry.getType() == IRuntimeClasspathEntry.ARCHIVE) {
-						result.add(new JavadocLinkRef(entry.getPath()));
+						IClasspathEntry classpathEntry= entry.getClasspathEntry();
+						if (classpathEntry != null) {
+							IPath containerPath= null;
+							if (curr.getType() == IRuntimeClasspathEntry.CONTAINER) {
+								containerPath= curr.getPath();
+							}
+							result.add(new JavadocLinkRef(containerPath, classpathEntry, project));
+						}
 					}
 				}
 			}
@@ -491,8 +507,11 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		JavadocLinkRef obj= (JavadocLinkRef) selected.get(0);
 		if (obj != null) {
 			JavadocPropertyDialog jdialog= new JavadocPropertyDialog(getShell(), obj);
-			jdialog.open();
+			if (jdialog.open() == Window.OK) {
+				fListDialogField.refresh();
+			}
 		}
+
 	}
 
 	private class JavadocPropertyDialog extends StatusDialog implements IStatusChangeListener {
@@ -526,8 +545,22 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		 * @see Dialog#okPressed()
 		 */
 		protected void okPressed() {
-			URL javadocLocation= fJavadocConfigurationBlock.getJavadocLocation();
-			fElement.setURL(javadocLocation);
+			try {
+				IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+					public void run(IProgressMonitor monitor) throws CoreException {
+						URL javadocLocation= fJavadocConfigurationBlock.getJavadocLocation();
+						fElement.setURL(javadocLocation, monitor);
+					}
+				};
+				PlatformUI.getWorkbench().getProgressService().run(true, true, new WorkbenchRunnableAdapter(runnable));
+
+			} catch (InvocationTargetException e) {
+				String title= JavadocExportMessages.getString("JavadocStandardWizardPage.configurecontainer.error.title"); //$NON-NLS-1$
+				String message= JavadocExportMessages.getString("JavadocStandardWizardPage.configurecontainer.error.message"); //$NON-NLS-1$
+				ExceptionHandler.handle(e, getShell(), title, message);
+			} catch (InterruptedException e) {
+				// user cancelled
+			}
 			
 			fListDialogField.refresh();
 			doValidation(LINK_REFERENCES);
