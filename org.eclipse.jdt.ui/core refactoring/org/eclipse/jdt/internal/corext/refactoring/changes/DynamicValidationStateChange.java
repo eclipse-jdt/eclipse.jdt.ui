@@ -12,16 +12,21 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
-import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class DynamicValidationStateChange extends CompositeChange implements WorkspaceTracker.Listener {
 	
@@ -93,6 +98,18 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 	
 	public void workspaceChanged() {
 		fValidationState= RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("DynamicValidationStateChange.workspace_changed")); //$NON-NLS-1$
+		Change[] children= clear();
+		for (int i= 0; i < children.length; i++) {
+			final Change change= children[i];
+			Platform.run(new ISafeRunnable() {
+				public void run() throws Exception {
+					change.dispose();
+				}
+				public void handleException(Throwable exception) {
+					JavaPlugin.log(exception);
+				}
+			});
+		}
 		RefactoringCore.getUndoManager().flush();
 	}
 }
