@@ -30,6 +30,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlExtension;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
@@ -122,7 +123,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	private Shell fShell;
 	/** The control's text widget */
 	private StyledText fText;
-	/** The contrl source viewer */
+	/** The control's source viewer */
 	private SourceViewer fViewer;	
 	
 
@@ -332,6 +333,10 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 */
 	public boolean hasContents() {
 		return fText.getCharCount() > 0;
+	}
+	
+	protected ISourceViewer getViewer()  {
+		return fViewer;
 	}
 }
 
