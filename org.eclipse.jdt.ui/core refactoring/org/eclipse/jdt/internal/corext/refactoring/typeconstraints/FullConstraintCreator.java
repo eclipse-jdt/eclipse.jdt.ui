@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -190,6 +191,16 @@ public class FullConstraintCreator extends ConstraintCreator{
 	}
 
 	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCreator#create(org.eclipse.jdt.core.dom.ParenthesizedExpression)
+	 */
+	public ITypeConstraint[] create(ParenthesizedExpression node) {
+		ConstraintVariable v1= new ExpressionVariable(node);
+		ConstraintVariable v2= new ExpressionVariable(node.getExpression());
+		ITypeConstraint equal= SimpleTypeConstraint.createEqualsConstraint(v1, v2);
+		return new ITypeConstraint[]{equal};
+	}
+
+	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodInvocation)
 	 */
 	public ITypeConstraint[] create(MethodInvocation invocation){
@@ -254,11 +265,12 @@ public class FullConstraintCreator extends ConstraintCreator{
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SingleVariableDeclaration)
 	 */
 	public ITypeConstraint[] create(SingleVariableDeclaration svd){
+		ITypeConstraint defines= SimpleTypeConstraint.createDefinesConstraint(new ExpressionVariable(svd.getName()), new TypeVariable(svd.getType()));
 		if (svd.getInitializer() == null)
-			return new ITypeConstraint[0];	
+			return new ITypeConstraint[]{defines};	
 		ITypeConstraint[] result= new ITypeConstraint[2];
 		result[0]= SimpleTypeConstraint.createSubtypeConstraint(new ExpressionVariable(svd.getInitializer()), new ExpressionVariable(svd.getName()));
-		result[1]= SimpleTypeConstraint.createDefinesConstraint(new ExpressionVariable(svd.getName()), new TypeVariable(svd.getType()));
+		result[1]= defines;
 		return result;
 	}
 
