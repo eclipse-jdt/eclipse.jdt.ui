@@ -8,7 +8,7 @@ import org.eclipse.core.runtime.CoreException;
 
 /**
  * A text edit that does nothing. A <code>NopTextEdit</code> can be used to track
- * positions when executing <code>TextEdits</code> associeated with a <code>
+ * positions when executing <code>TextEdits</code> associated with a <code>
  * TextBufferEditor</code>.
  */
 public class NopTextEdit extends TextEdit {
