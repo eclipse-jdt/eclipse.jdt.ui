@@ -44,8 +44,6 @@ public class MoveInnerToTopAction extends SelectionDispatchAction {
 		this(editor.getEditorSite());
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
-		if (true) //XXX work in progress
-			setEnabled(false);
 	}
 
 	/**
@@ -95,8 +93,6 @@ public class MoveInnerToTopAction extends SelectionDispatchAction {
 	}
 		
 	private boolean canEnable(IStructuredSelection selection){
-		if (true) //XXX work in progress
-			return false;
 		try {
 			if (selection.isEmpty() || selection.size() != 1) 
 				return false;
@@ -116,8 +112,6 @@ public class MoveInnerToTopAction extends SelectionDispatchAction {
 	}
 		
 	private boolean canRun(ITextSelection selection){
-		if (true) //XXX work in progress
-			return false;
 		IJavaElement[] elements= resolveElements();
 		if (elements.length != 1)
 			return false;
@@ -163,4 +157,5 @@ public class MoveInnerToTopAction extends SelectionDispatchAction {
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-	}}
+	}
+}
