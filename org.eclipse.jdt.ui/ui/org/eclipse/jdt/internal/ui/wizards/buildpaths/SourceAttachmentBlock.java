@@ -372,8 +372,8 @@ public class SourceAttachmentBlock {
 		// and (if variable) the prefix variable name is existing
 		if (fResolvedFile != null) {
 			if (fIsVariableEntry) {
-				// prefix has valid format, is resolvable
-				return fPrefixStatus.isOK();
+				// prefix has valid format, is resolvable and not empty
+				return fPrefixStatus.isOK() && fPrefixField.getText().length() > 0;
 			}
 			return true;
 		}
