@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,7 +30,6 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.LinkedModeModel;
@@ -59,7 +57,6 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
@@ -74,8 +71,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 
 	public static class LinkedModeGroup {
-		private List fPositions= new ArrayList(); // list of ITrackedNodePosition
-		private List fProposals= new ArrayList(); // list of IJavaCompletionProposal
+		final List fPositions= new ArrayList(); // list of ITrackedNodePosition
+		final List fProposals= new ArrayList(); // list of IJavaCompletionProposal
 		
 		public ITrackedNodePosition[] getPositions() {
 			return (ITrackedNodePosition[])fPositions.toArray(new ITrackedNodePosition[fPositions.size()]);
@@ -226,8 +223,8 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			if (!positions.isEmpty()) {
 				LinkedPositionGroup group= new LinkedPositionGroup();
 
-				List proposals= curr.fProposals;
-				if (proposals.size() <= 1) {
+				IJavaCompletionProposal[] linkedModeProposals= curr.getProposals();
+				if (linkedModeProposals.length <= 1) {
 					for (int i= 0; i < positions.size(); i++) {
 						ITrackedNodePosition pos= (ITrackedNodePosition) positions.get(i);
 						if (pos.getStartPosition() != -1) {
@@ -235,8 +232,6 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 						}
 					}
 				} else {
-					ICompletionProposal[] linkedModeProposals= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
-					Arrays.sort(linkedModeProposals, JavaCompletionProposalComparator.getInstance());
 					for (int i= 0; i < positions.size(); i++) {
 						ITrackedNodePosition pos= (ITrackedNodePosition) positions.get(i);
 						if (pos.getStartPosition() != -1) {
