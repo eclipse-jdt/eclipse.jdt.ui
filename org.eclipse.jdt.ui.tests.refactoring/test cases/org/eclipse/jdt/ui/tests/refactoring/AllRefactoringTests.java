@@ -25,6 +25,7 @@ public class AllRefactoringTests {
 		suite.addTest(RenameStaticMethodTests.suite());
 		suite.addTest(RenameParametersTests.suite());
 		suite.addTest(RenameTempTests.suite());
+		suite.addTest(InlineTempTests.suite());
 		//suite.addTest(ReorderParametersTests.noSetupSuite());
 		
 		//--types
