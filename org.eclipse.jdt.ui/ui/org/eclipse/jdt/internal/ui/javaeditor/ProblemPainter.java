@@ -130,6 +130,9 @@ public class ProblemPainter implements IPainter, PaintListener {
 				
 		// compute (number of point) * 2
 		int length= ((2 * peeks) + 1) * 2;
+		if (length < 0)
+			return new int[0];
+			
 		int[] coordinates= new int[length];
 		
 		// cache peeks' y-coordinates
