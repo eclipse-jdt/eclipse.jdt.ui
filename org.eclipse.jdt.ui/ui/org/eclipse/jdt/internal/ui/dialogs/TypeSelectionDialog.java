@@ -19,8 +19,6 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	private final static String PREFIX= "type_selector.";
 	private final static String NO_MAPPING_PREFIX= PREFIX+"no_mapping.";
 	
-	private static List fgAllTypesList;
-	private static IElementChangedListener fgListener;
 			
 	public TypeSelectionDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean ignoreCase, boolean matchEmtpyString) {
 		super(parent, "", null, new TypeRefLabelProvider(0), new TypeRefLabelProvider(TypeRefLabelProvider.SHOW_PACKAGE_ONLY + TypeRefLabelProvider.SHOW_ROOT_POSTFIX), ignoreCase, matchEmtpyString);		
@@ -38,18 +36,13 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	 */
 	public int open() {
 		AllTypesSearchEngine engine= new AllTypesSearchEngine(JavaPlugin.getWorkspace());
-		if (fgAllTypesList == null){
-			fgAllTypesList= engine.searchTypes(fRunnableContext, fScope, fStyle);
-			if (fgListener == null){
-				fgListener= new DeltaListener();
-				JavaCore.addElementChangedListener(fgListener);
-			}	
-		}	
-
-		if (fgAllTypesList.isEmpty())
+		
+		List typeList= TypeCache.findTypes(engine, fStyle, fRunnableContext, fScope);
+		
+		if (typeList.isEmpty())
 			return CANCEL;
 			
-		TypeRef[] typeRefs= (TypeRef[])fgAllTypesList.toArray(new TypeRef[fgAllTypesList.size()]);
+		TypeRef[] typeRefs= (TypeRef[])typeList.toArray(new TypeRef[typeList.size()]);
 		setElements(typeRefs);
 		setInitialSelection("A");
 		return super.open();
@@ -80,83 +73,6 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 				MessageDialog.openError(getShell(), title, message);
 				setResult(null);
 			}
-		}
-	}
-	
-	private static class DeltaListener implements IElementChangedListener{
-		public void elementChanged(ElementChangedEvent event){
-			if (fgAllTypesList == null)
-				return;
-				
-			IJavaElementDelta delta= event.getDelta();
-			IJavaElement element= delta.getElement();
-			int type= element.getElementType();
-			
-			if (type == IJavaElement.CLASS_FILE)
-				return;				
-			
-			processDelta(delta);
-		}
-		
-		private boolean mustFlush(IJavaElementDelta delta){
-			if (delta.getKind() != IJavaElementDelta.CHANGED)
-				return true;
-			
-			//if it's a cu we wait
-			if (delta.getElement().getElementType() == IJavaElement.COMPILATION_UNIT) 
-				return false;
-			
-			//must be only children
-			if (delta.getFlags() != IJavaElementDelta.F_CHILDREN)
-				return true;
-			
-			//special case: if it's a type then _it_ must be added or removed
-			if (delta.getElement().getElementType() == IJavaElement.TYPE) 
-				return false;
-				
-			if ((delta.getAddedChildren() != null) && (delta.getAddedChildren().length != 0))
-				return true;
-				
-			return false;	
-		}
-		
-		/*
-		 * returns false iff list is flushed and we can stop processing
-		 */
-		private boolean processDelta(IJavaElementDelta delta){
-			if (shouldStopProcessing(delta))
-				return true;
-				
-			if (mustFlush(delta)){
-				fgAllTypesList= null;
-				return false;
-			}	
-			IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();
-			if (affectedChildren == null)
-				return true;
-				
-			for (int i= 0; i < affectedChildren.length; i++){
-				if (! processDelta(affectedChildren[i]))
-					return false;
-			}	
-			return true;
-		}
-		
-		private static boolean shouldStopProcessing(IJavaElementDelta delta){
-			int type= delta.getElement().getElementType();
-			if (type == IJavaElement.FIELD)
-				return true;
-			if (type == IJavaElement.METHOD)
-				return true;
-			if (type == IJavaElement.INITIALIZER)
-				return true;
-			if (type == IJavaElement.PACKAGE_DECLARATION)
-				return true;
-			if (type == IJavaElement.IMPORT_CONTAINER)
-				return true;	
-			if (type == IJavaElement.IMPORT_DECLARATION)
-				return true;		
-			return false;	
 		}
 	}
 }
