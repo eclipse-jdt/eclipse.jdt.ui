@@ -11,6 +11,8 @@ public class AllTests {
 		suite.addTest(PasteSourceReferenceActionTests.suite());
 		suite.addTest(DeleteSourceReferenceActionTests.suite());
 		suite.addTest(StructureSelectionActionTests.suite());
+		suite.addTest(CopyResourcesToClipboardActionTest.suite());
+		suite.addTest(PasteResourcesFromClipboardActionTest.suite());
 	    return suite;
 	}
 
