@@ -101,7 +101,6 @@ public class JavaElementSorter extends ViewerSorter {
 						} else {
 							return CU_MEMBERS;
 						}
-						break;
 					}
 					case IJavaElement.PACKAGE_DECLARATION:
 						return CU_MEMBERS;
