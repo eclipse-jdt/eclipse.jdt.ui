@@ -30,7 +30,6 @@ import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;
 import org.eclipse.jdt.refactoring.tests.infra.TextBufferChangeCreator;
@@ -100,12 +99,7 @@ public abstract class RefactoringTest extends TestCase {
 	protected final RefactoringStatus performRefactoring(IRefactoring ref) throws JavaModelException {
 		if (ref instanceof Refactoring)
 			((Refactoring)ref).setUnsavedFiles(new IFile[0]);
-		RefactoringStatus status= new RefactoringStatus();
-		if (ref instanceof IPreactivatedRefactoring)
-			status.merge(((IPreactivatedRefactoring)ref).checkPreactivation());
-		if (status.hasFatalError())	
-			return status;
-		status.merge(ref.checkPreconditions(fgNullProgressMonitor));
+		RefactoringStatus status= ref.checkPreconditions(fgNullProgressMonitor);
 		if (!status.isOK())
 			return status;
 
