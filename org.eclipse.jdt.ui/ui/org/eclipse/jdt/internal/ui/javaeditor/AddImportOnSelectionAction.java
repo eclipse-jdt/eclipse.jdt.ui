@@ -101,8 +101,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					String simpleName= Signature.getSimpleName(name);
 					String containerName= Signature.getQualifier(name);
 					
-					IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IResource[] { cu.getJavaProject().getProject() });
-					searchScope.setIncludesClasspaths(true);
+					IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { cu.getJavaProject() });
 					
 					TypeInfo[] types= findAllTypes(simpleName, searchScope, null);
 					if (types.length== 0) {

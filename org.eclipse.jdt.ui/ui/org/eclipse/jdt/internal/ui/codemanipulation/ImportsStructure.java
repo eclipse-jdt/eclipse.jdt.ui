@@ -26,6 +26,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.DocumentManager;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
+/**
+ * Created on a Compilation unit, the ImportsStructure allows to add
+ * Import Declarations that are added next to the existing import that
+ * has the best match.
+ */
 public class ImportsStructure implements IImportsStructure {
 	
 	private ICompilationUnit fCompilationUnit;
@@ -34,14 +39,19 @@ public class ImportsStructure implements IImportsStructure {
 	private int fImportOnDemandThreshold;
 	
 	private boolean fReplaceExistingImports;
+	private boolean fFilterImplicitImports;
 	
 	/**
 	 * Creates an ImportsStructure for a compilation unit with existing
 	 * imports. New imports are added next to the existing import that
-	 * has the best match.
+	 * is matching best.
 	 */
 	public ImportsStructure(ICompilationUnit cu) throws JavaModelException {
 		fCompilationUnit= cu;
+		fImportOnDemandThreshold= Integer.MAX_VALUE;
+		fReplaceExistingImports= false;
+		fFilterImplicitImports= true;		
+		
 		IImportDeclaration[] decls= cu.getImports();
 		fPackageEntries= new ArrayList(decls.length + 5);
 		
@@ -54,20 +64,21 @@ public class ImportsStructure implements IImportsStructure {
 			}
 			curr.add(decls[i]);
 		}
-		
-		fImportOnDemandThreshold= Integer.MAX_VALUE;
-		fReplaceExistingImports= false;
 	}
 
 	/**
-	 * Creates an ImportsStructure for a compilation unit where exiting imports should be
+	 * Creates an ImportsStructure for a compilation unit where existing imports should be
 	 * completly ignored. Create will replace all existing imports 
-	 * @param preferenceOrder Defines the prefered order of imports.
+	 * @param preferenceOrder Defines the preferred order of imports.
 	 * @param importThreshold Defines the number of imports in a package needed to introduce a
 	 * import on demand instead (e.g. java.util.*)
 	 */
 	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold) {
 		fCompilationUnit= cu;
+		fImportOnDemandThreshold= importThreshold;
+		fReplaceExistingImports= true;
+		fFilterImplicitImports= true;		
+		
 		int nEntries= preferenceOrder.length;
 		
 		fPackageEntries= new ArrayList(20 + nEntries);
@@ -75,14 +86,26 @@ public class ImportsStructure implements IImportsStructure {
 			PackageEntry entry= new PackageEntry(preferenceOrder[i], i);
 			fPackageEntries.add(entry);
 		}			
-		
-		fImportOnDemandThreshold= importThreshold;
-		fReplaceExistingImports= true;
 	}	
 		
+	/**
+	 * Returns the compilation unit of this import structure.
+	 */
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
+	
+	/**
+	 * Sets that implicit imports (types in default package, cu- package and
+	 * 'java.lang') should not be created. Note that this is a heuristic filter and can
+	 * lead to missing imports, e.g. in cases where a type is forced to be specified
+	 * due to a name conflict.
+	 * By default, the filter is enabled.
+	 * @param filterImplicitImports The filterImplicitImports to set
+	 */
+	public void setFilterImplicitImports(boolean filterImplicitImports) {
+		fFilterImplicitImports= filterImplicitImports;
+	}	
 			
 	private static boolean sameMatchLenTest(String newName, String bestName, String currName, int matchLen) {				
 		// known: bestName and currName differ from newName at position 'matchLen'
@@ -118,13 +141,13 @@ public class ImportsStructure implements IImportsStructure {
 			
 			PackageEntry curr= (PackageEntry) fPackageEntries.get(i);
 			String currName= curr.getName();
-			int currMatchLen= getMatchLen(currName, newName);
+			int currMatchLen= getCommonPrefixLength(currName, newName);
 			
 			if (currMatchLen > bestMatchLen) {
 				isBetterMatch= true;
 			} else if (currMatchLen == bestMatchLen) {		
 				if (currMatchLen == newName.length() && currMatchLen == currName.length() && currMatchLen == bestName.length()) {
-					// dulicate entry and complete match
+					// duplicate entry and complete match
 					isBetterMatch= curr.getNumberOfImports() > bestMatch.getNumberOfImports();
 				} else {
 					isBetterMatch= sameMatchLenTest(newName, bestName, currName, currMatchLen);
@@ -141,10 +164,27 @@ public class ImportsStructure implements IImportsStructure {
 		}
 		return bestMatch;
 	}
+	
+	private static int getCommonPrefixLength(String s, String t) {
+		int len= Math.min(s.length(), t.length());
+		for (int i= 0; i < len; i++) {
+			if (s.charAt(i) != t.charAt(i)) {
+				return i;
+			}
+		}
+		return len;
+	}	
+	
+	private static char getCharAt(String str, int index) {
+		if (str.length() > index) {
+			return str.charAt(index);
+		}
+		return 0;
+	}		
 
 	/**
 	 * Adds a new import declaration that is sorted in the structure using
-	 * the best match algorithm. If an import already exists, the import is
+	 * a best match algorithm. If an import already exists, the import is
 	 * not added.
 	 * @param qualifiedTypeName The fully qualified name of the type to import
 	 */			
@@ -156,7 +196,7 @@ public class ImportsStructure implements IImportsStructure {
 	
 	/**
 	 * Adds a new import declaration that is sorted in the structure using
-	 * the best match algorithm. If an import already exists, the import is
+	 * a best match algorithm. If an import already exists, the import is
 	 * not added.
 	 * @param packageName The package name of the type to import
 	 * @param typeName The type name of the type to import (can be '*' for imports-on-demand)
@@ -176,12 +216,12 @@ public class ImportsStructure implements IImportsStructure {
 				bestMatch.sortIn(decl);
 			} else {
 				// create a new packageentry
-				PackageEntry packEntry= new PackageEntry(packageName, bestMatch.getCategory());
+				PackageEntry packEntry= new PackageEntry(packageName, bestMatch.getGroupID());
 				packEntry.add(decl);
 				int index= fPackageEntries.indexOf(bestMatch);
-				if (cmp < 0) { 	// sort in ahead of best match
+				if (cmp < 0) { 	// insert ahead of best match
 					fPackageEntries.add(index, packEntry);
-				} else {		// sort in after best match
+				} else {		// insert after best match
 					fPackageEntries.add(index + 1, packEntry);
 				}
 			}
@@ -190,7 +230,7 @@ public class ImportsStructure implements IImportsStructure {
 	
 	/**
 	 * Adds a new import declaration that is sorted in the structure using
-	 * the best match algorithm. If an import already exists, the import is
+	 * a best match algorithm. If an import already exists, the import is
 	 * not added.
 	 * @param packageName The package name of the type to import
 	 * @param enclosingTypeName Name of the enclosing type (dor-separated)
@@ -200,22 +240,6 @@ public class ImportsStructure implements IImportsStructure {
 		addImport(JavaModelUtil.concatenateName(packageName, enclosingTypeName), typeName);
 	}	
 		
-	private static int getMatchLen(String s, String t) {
-		int len= Math.min(s.length(), t.length());
-		for (int i= 0; i < len; i++) {
-			if (s.charAt(i) != t.charAt(i)) {
-				return i;
-			}
-		}
-		return len;
-	}	
-	
-	private static char getCharAt(String str, int index) {
-		if (str.length() > index) {
-			return str.charAt(index);
-		}
-		return 0;
-	}
 	
 	/**
 	 * Creates all new elements in the import structure.
@@ -293,7 +317,7 @@ public class ImportsStructure implements IImportsStructure {
 		// all (top level) types in this cu
 		IType[] topLevelTypes= fCompilationUnit.getTypes();
 	
-		int lastCategory= -1;
+		int lastGroupID= -1;
 		
 		// create from last to first to not invalidate positions
 		for (int i= fPackageEntries.size() -1; i >= 0; i--) {
@@ -301,13 +325,13 @@ public class ImportsStructure implements IImportsStructure {
 			int nImports= pack.getNumberOfImports();
 			if (nImports > 0) {
 				String packName= pack.getName();
-				if (isImportNeeded(packName, topLevelTypes)) {
+				if (!fFilterImplicitImports || isImportNeeded(packName, topLevelTypes)) {
 					// add empty line
-					if (pack.getCategory() != lastCategory) {
-						if (lastCategory != -1) {
+					if (pack.getGroupID() != lastGroupID) {
+						if (lastGroupID != -1) {
 							buf.insert(lastPos, lineDelim);
 						}
-						lastCategory= pack.getCategory();
+						lastGroupID= pack.getGroupID();
 					}
 					
 					if (nImports >= fImportOnDemandThreshold) {
@@ -409,12 +433,12 @@ public class ImportsStructure implements IImportsStructure {
 		
 		private String fName;
 		private ArrayList fImportEntries;
-		private int fCategory;
+		private int fGroup;
 				
-		public PackageEntry(String name, int category) {
+		public PackageEntry(String name, int group) {
 			fName= name;
 			fImportEntries= new ArrayList(5);
-			fCategory= category;
+			fGroup= group;
 		}	
 		
 		public int findInsertPosition(String fullImportName) {
@@ -451,22 +475,6 @@ public class ImportsStructure implements IImportsStructure {
 			fImportEntries.add(imp); 
 		}
 		
-		/*public IImportDeclaration findTypeName(String typeName) {
-			int nInports= fImportEntries.size();
-			if (nInports > 0) {
-				String fullName= StubUtility.getFullTypeName(fName, typeName);
-				for (int i= 0; i < nInports; i++) {
-					IImportDeclaration curr= getImportAt(i);
-					if (!curr.isOnDemand()) {
-						if (fullName.equals(curr.getElementName())) {
-							return curr;
-						}
-					}
-				}
-			}
-			return null;
-		}*/
-		
 		public final IImportDeclaration getImportAt(int index) {
 			return (IImportDeclaration)fImportEntries.get(index);
 		}	
@@ -479,12 +487,10 @@ public class ImportsStructure implements IImportsStructure {
 			return fName;
 		}
 		
-		public int getCategory() {
-			return fCategory;
+		public int getGroupID() {
+			return fGroup;
 		}
 	
 	}	
-
-	
 
 }

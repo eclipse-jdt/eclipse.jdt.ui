@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -68,15 +69,14 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			fTypeRefsFound= new ArrayList();  	// cached array list for reuse			
 			
 			fAllTypes= new ArrayList(500);
-			IProject project= impStructure.getCompilationUnit().getJavaProject().getProject();
+			IJavaProject project= impStructure.getCompilationUnit().getJavaProject();
 			fetchAllTypes(fAllTypes, project, monitor);
 		}
 	
 		
-		private void fetchAllTypes(ArrayList list, IProject project, IProgressMonitor monitor) {
-			IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IResource[] { project });		
-			searchScope.setIncludesBinaries(true);
-			AllTypesSearchEngine searchEngine= new AllTypesSearchEngine(project.getWorkspace());
+		private void fetchAllTypes(ArrayList list, IJavaProject project, IProgressMonitor monitor) {
+			IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaProject[] { project });		
+			AllTypesSearchEngine searchEngine= new AllTypesSearchEngine(project.getProject().getWorkspace());
 			searchEngine.searchTypes(list, searchScope, IJavaElementSearchConstants.CONSIDER_TYPES, monitor);
 		}
 		

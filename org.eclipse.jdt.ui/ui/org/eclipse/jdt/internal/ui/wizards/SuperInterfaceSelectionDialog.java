@@ -9,12 +9,10 @@ import java.util.List;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableContext;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
@@ -31,7 +29,7 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 	private ListDialogField fList;
 	private List fOldContent;
 	
-	public SuperInterfaceSelectionDialog(Shell parent, IRunnableContext context, ListDialogField list, IProject p) {
+	public SuperInterfaceSelectionDialog(Shell parent, IRunnableContext context, ListDialogField list, IJavaProject p) {
 		super(parent, context, createSearchScope(p), IJavaElementSearchConstants.CONSIDER_INTERFACES);
 		fList= list;
 		//to restore the content of the dialog field if the dialog is canceled
@@ -78,11 +76,8 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 			fList.addElement(((TypeInfo)ref).getFullyQualifiedName());
 	}
 	
-	private static IJavaSearchScope createSearchScope(IProject p) {
-		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IResource[] { p });
-		scope.setIncludesBinaries(true);
-		scope.setIncludesClasspaths(true);
-		return scope;
+	private static IJavaSearchScope createSearchScope(IJavaProject p) {
+		return SearchEngine.createJavaSearchScope(new IJavaProject[] { p });
 	}
 	
 	/*

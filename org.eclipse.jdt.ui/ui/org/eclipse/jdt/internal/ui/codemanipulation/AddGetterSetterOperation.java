@@ -43,9 +43,9 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	 * Creates the operation.
 	 * @param fields The fields to create setter/getters for.
 	 * @param skipFinalSettersQuery Callback to ask if the setter can be skipped for a final field.
-	 *        Argument of the query is the final field.
+	 *        Argument of the query is the final field. <code>null</code> is a valid input and stands for skip all.
 	 * @param skipExistingQuery Callback to ask if setter / getters that already exist can be skipped.
-	 *        Argument of the query is the existing method.
+	 *        Argument of the query is the existing method. <code>null</code> is a valid input and stands for skip all.
 	 */
 	public AddGetterSetterOperation(IField[] fields, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery) {
 		super();
@@ -62,7 +62,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	private String evalAccessorName(String fieldname) {
 		if (fieldname.length() > 0) {
 			char firstLetter= fieldname.charAt(0);			
-			if (!Character.isUpperCase(firstLetter)) {
+			if (Character.isLowerCase(firstLetter)) {
 				if (fieldname.length() > 1) {
 					char secondLetter= fieldname.charAt(1);
 					if (Character.isUpperCase(secondLetter)) {
@@ -84,8 +84,8 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	private String getArgumentName(String accessorName) {
 		if (accessorName.length() > 0) {
 			char firstLetter= accessorName.charAt(0);
-			if (!Character.isLowerCase(firstLetter)) {
-				return "" + Character.toLowerCase(firstLetter) + accessorName.substring(1); //$NON-NLS-1$
+			if (Character.isUpperCase(firstLetter)) {
+				return String.valueOf(Character.toLowerCase(firstLetter)) + accessorName.substring(1);
 			}
 		}
 		return accessorName;
@@ -149,8 +149,8 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		try {
 			monitor.beginTask(CodeManipulationMessages.getFormattedString("AddGetterSetterOperation.processField", field.getElementName()), 2); //$NON-NLS-1$
 	
-			fSkipAllFinalSetters= false;
-			fSkipAllExisting= false;
+			fSkipAllFinalSetters= (fSkipFinalSettersQuery == null);
+			fSkipAllExisting= (fSkipExistingQuery == null);
 	
 			String fieldName= field.getElementName();
 			String accessorName= evalAccessorName(fieldName);
