@@ -3074,6 +3074,23 @@
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
 
+<!-- perspectives -->
+      <command
+            name="%PerspectiveCommand.javaBrowsing.name"
+            description="%PerspectiveCommand.javaBrowsing.description"
+            categoryId="org.eclipse.ui.category.perspectives"
+            id="org.eclipse.jdt.ui.JavaBrowsingPerspective" />
+      <command
+            name="%PerspectiveCommand.java.name"
+            description="%PerspectiveCommand.java.description"
+            categoryId="org.eclipse.ui.category.perspectives"
+            id="org.eclipse.jdt.ui.JavaPerspective" />
+      <command
+            name="%PerspectiveCommand.javaTypeHierarchy.name"
+            description="%PerspectiveCommand.javaTypeHierarchy.description"
+            categoryId="org.eclipse.ui.category.perspectives"
+            id="org.eclipse.jdt.ui.JavaHierarchyPerspective" />
+            
 <!-- views -->
       <command
             name="%ViewCommand.typeHierarchy.name"
@@ -4641,7 +4658,7 @@
       </view>
    </extension>
 
-<!--- classpath conatainer -->
+<!--- classpath container -->
    
    <extension
          point="org.eclipse.jdt.ui.classpathContainerPage">
