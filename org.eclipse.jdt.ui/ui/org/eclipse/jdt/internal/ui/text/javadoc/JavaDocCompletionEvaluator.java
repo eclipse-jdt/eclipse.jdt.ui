@@ -318,7 +318,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 						fResult.add(createCompletion(curr, argument, curr, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS), null, 100));
 					}
 				}
-				evalTypeNameCompletions((IMethod)elem, fCurrentPos - argument.length());
+				evalTypeNameCompletions((IMethod)elem, fCurrentPos - argument.length(), argument);
 			}
 			return true;
 		} else if ("@serialData".equals(tag)) { //$NON-NLS-1$
@@ -335,7 +335,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		int wordStart= fCurrentPos - arg.length();
 		int pidx= arg.indexOf('#');
 		if (pidx == -1) {
-			evalTypeNameCompletions(elem, wordStart);
+			evalTypeNameCompletions(elem, wordStart, arg);
 		} else {
 			IType parent= null;
 			if (pidx > 0) {
@@ -359,7 +359,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		}
 	}
 	
-	private void evalTypeNameCompletions(IMember currElem, int wordStart) throws JavaModelException {
+	private void evalTypeNameCompletions(IMember currElem, int wordStart, String arg) throws JavaModelException {
 		ICompilationUnit preparedCU= createPreparedCU(currElem, wordStart, fCurrentPos);
 		if (preparedCU != null) {
 			CompletionRequestorAdapter requestor= new CompletionRequestorAdapter() {
@@ -386,7 +386,8 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 			};
 			try {
 				preparedCU.codeComplete(fCurrentPos, requestor);
-				if (currElem.getDeclaringType() == null && fCurrentPos > wordStart) {
+				if (currElem.getDeclaringType() == null && fCurrentPos > wordStart && currElem.getElementName().startsWith(arg)) {
+					// for top level types, we use a fake import statement and the current type is never suggested
 					IType type= (IType) currElem;
 					char[] name= type.getElementName().toCharArray();
 					fResult.add(createSeeTypeCompletion(type.isClass(), wordStart, fCurrentPos, name, name, JavaModelUtil.getTypeContainerName(type).toCharArray(), 50));
