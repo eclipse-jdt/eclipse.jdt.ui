@@ -118,8 +118,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 	private boolean isConstructor() {
 		return fNode.getNodeType() != ASTNode.METHOD_INVOCATION && fNode.getNodeType() != ASTNode.SUPER_METHOD_INVOCATION;
 	}
-
-
+	
 	private MethodDeclaration getStub(AST ast) throws CoreException {
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		
@@ -145,10 +144,14 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		Block body= ast.newBlock();
 		if (!isConstructor()) {
 			Type returnType= evaluateMethodType(ast);
-			decl.setReturnType(returnType);
-			ReturnStatement returnStatement= ast.newReturnStatement();
-			returnStatement.setExpression(ASTResolving.getInitExpression(returnType));
-			body.statements().add(returnStatement);
+			if (returnType == null) {
+				decl.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
+			} else {
+				decl.setReturnType(returnType);
+				ReturnStatement returnStatement= ast.newReturnStatement();
+				returnStatement.setExpression(ASTResolving.getInitExpression(returnType));
+				body.statements().add(returnStatement);
+			}
 		}
 		decl.setBody(body);
 
@@ -236,7 +239,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			addImport(binding);
 			return ASTResolving.getTypeFromTypeBinding(ast, binding);
 		}
-		return ast.newPrimitiveType(PrimitiveType.VOID);
+		return null;
 	}
 	
 	private Type evaluateParameterType(AST ast, Expression expr) throws CoreException {
