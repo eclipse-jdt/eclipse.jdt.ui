@@ -199,7 +199,7 @@ public class ExtractTempTests extends RefactoringTest {
 	}
 	
 	public void test26() throws Exception{
-		printTestDisabledMessage("incorrect temp placement - must fix");
+		printTestDisabledMessage("regression test for 9905");
 //		helper1(5, 19, 5, 23, true, false, "temp");
 	}
 	
