@@ -444,7 +444,7 @@
 	<page name="%templatePageName"
 		id = "org.eclipse.jdt.ui.preferences.TemplatePreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage"
-		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
+		category= "org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage">
 	</page>
 	<page name="%codeGenerationPreferencePageName"
 		id = "org.eclipse.jdt.ui.preferences.CodeGenerationPreferencePage"
