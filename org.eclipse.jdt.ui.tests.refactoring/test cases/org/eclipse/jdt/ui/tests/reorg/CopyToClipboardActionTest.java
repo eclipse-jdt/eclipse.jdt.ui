@@ -13,7 +13,6 @@ package org.eclipse.jdt.ui.tests.reorg;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.Test;
@@ -47,6 +46,7 @@ import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.internal.ui.reorg.MockWorkbenchSite;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg2.CopyToClipboardAction;
+import org.eclipse.jdt.internal.corext.refactoring.reorg2.JavaElementTransfer;
 
 
 public class CopyToClipboardActionTest extends RefactoringTest{
@@ -178,7 +178,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		assertEquals("names", computeExpectedNames(resourcesCopied, javaElementsCopied), clipboardText);
 		checkFiles(resourcesCopied, javaElementsCopied, clipboardFiles);
 		checkElements(resourcesCopied, clipboardResources);
-//		checkElements(javaElementsCopied, clipboardJavaElements);
+		checkElements(javaElementsCopied, clipboardJavaElements);
 	}
 	
 	private String computeExpectedNames(IResource[] resourcesCopied, IJavaElement[] javaElementsCopied) {
@@ -205,11 +205,22 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 
 	private static void checkElements(Object[] copied, Object[] retreivedFromClipboard) {
 		assertEquals("different number of elements", copied.length, retreivedFromClipboard.length);
-		sortByHashCode(copied);
-		sortByHashCode(retreivedFromClipboard);
+		sortByName(copied);
+		sortByName(retreivedFromClipboard);
 		for (int i= 0; i < retreivedFromClipboard.length; i++) {
-			assertTrue("different: copied " + getName(copied[i]) + " retreived: " + getName(retreivedFromClipboard[i]) , copied[i].equals(retreivedFromClipboard[i]));
+			Object retreived= retreivedFromClipboard[i];
+			assertTrue("element does not exist", exists(retreived));
+			assertTrue("different copied " + getName(copied[i]) + " retreived: " + getName(retreived) , copied[i].equals(retreivedFromClipboard[i]));
 		}
+	}
+
+	private static boolean exists(Object element) {
+		if (element instanceof IJavaElement)
+			return ((IJavaElement)element).exists();
+		if (element instanceof IResource)
+			return ((IResource)element).exists();
+		assertTrue(false);
+		return false;
 	}
 
 	private static String getName(Object object) {
@@ -220,10 +231,10 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		return object == null ? null : object.toString();
 	}
 
-	private static void sortByHashCode(Object[] copied) {
+	private static void sortByName(Object[] copied) {
 		Arrays.sort(copied, new Comparator(){
 			public int compare(Object arg0, Object arg1) {
-				return arg0.hashCode() - arg1.hashCode();
+				return getName(arg0).compareTo(getName(arg1));
 			}
 		});
 	}
@@ -266,8 +277,8 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	}
 
 	private IJavaElement[] getClipboardJavaElements() {
-		//TODO implement me
-		return new IJavaElement[0];
+		IJavaElement[] elements= (IJavaElement[])fClipboard.getContents(JavaElementTransfer.getInstance());
+		return elements == null ? new IJavaElement[0]: elements; 
 	}
 
 	private String[] getClipboardFiles() {
@@ -461,7 +472,10 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	}
 
 	public void testEnabled12() throws Exception{
-		Object importContainer= fCuA.getImportContainer();
+		printTestDisabledMessage("disabled due to bug 37750");
+		if (true)
+			return;
+		IJavaElement importContainer= fCuA.getImportContainer();
 		Object[] elements= {importContainer};
 		checkEnabled(elements);
 	}
@@ -506,6 +520,10 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	}
 	
 	public void testEnabled19() throws Exception{
+		printTestDisabledMessage("disabled due to bug 37750");
+		if (true)
+			return;
+
 		Object classA= fCuA.getType("A");
 		Object importContainer= fCuA.getImportContainer();
 		Object packDecl= fCuA.getPackageDeclarations()[0];
