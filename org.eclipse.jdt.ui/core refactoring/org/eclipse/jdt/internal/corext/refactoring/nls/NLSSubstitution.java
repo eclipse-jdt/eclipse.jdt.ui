@@ -16,26 +16,29 @@ public class NLSSubstitution {
 	public static final int EXTERNALIZED= 0;
 	public static final int IGNORED= 1;
 	public static final int INTERNALIZED= 2;
-
+	
 	public static final int DEFAULT= EXTERNALIZED;
 	public static final int STATE_COUNT= 3;
 	
-	public String fKey;
-	public String fValue;
-	public NLSElement fNLSElement;
-	public int fState;
-	public boolean putToPropertyFile= true;
-    private int fOldState;
+	private int fState;
+	private String fKey;
+	private String fValue;
+    
+	private int fInitialState;
+	private String fInitialKey;
+	private String fInitialValue;
+	
+	public NLSElement fNLSElement;	
     private AccessorClassInfo fAccessorClassInfo;
 
-    // TODO: makes things easier...
-    private static String fPrefix;
+    private static String fPrefix = "";
     
     public NLSSubstitution(int state, String value, NLSElement element) {        
 		fNLSElement= element;
 		fValue = value;
-		fState= state;
-		fOldState = state;
+		fState = state;
+		fInitialState = state;
+		fInitialValue = value;
 		Assert.isTrue(state == EXTERNALIZED || state == IGNORED || state == INTERNALIZED);
 	}
     
@@ -44,7 +47,8 @@ public class NLSSubstitution {
 	    if (state != EXTERNALIZED) {
 	        throw new IllegalArgumentException("Set to INTERNALIZE/IGNORED State with different Constructor");	        
 	    }
-	    fKey = key;	    
+	    fKey = key;
+	    fInitialKey = key;
 	    fAccessorClassInfo = accessorClassInfo;
 	}
 	
@@ -55,25 +59,39 @@ public class NLSSubstitution {
 				   || task == NLSSubstitution.INTERNALIZED);
 		int result= 0;
 		for (int i= 0; i < elems.length; i++){
-			if (elems[i].fState == task)
+			if (elems[i].fState == task) {
 				result++;
+			}
 		}	
 		return result;   
 	}
-  
-	public String getKeyWithPrefix(String prefix) {
-	    return prefix + fKey;	
+	
+	public String getKeyWithoutPrefix() {
+	    return fKey;	
 	}
 	
-    public String getKey() {
+    /**
+     * Returns key dependent on state. 
+     * @return prefix + key when 
+     */
+	public String getKey() {
+        if ((fState == EXTERNALIZED) && hasStateChanged()) {
+            return fPrefix + fKey;
+        }
         return fKey;
     }
     
     public void setKey(String key) {
+        if (fState != EXTERNALIZED) {
+            throw new IllegalStateException("Must be in Externalized State !");
+        }
         this.fKey = key;
     }    
     
     public void setValue(String value) {
+        if (fState != EXTERNALIZED) {
+            throw new IllegalStateException("Must be in Externalized State !");
+        }
         this.fValue = value;
     }
     
@@ -89,44 +107,49 @@ public class NLSSubstitution {
         this.fState = state;
     }
     
-    public boolean hasChanged() {     
-        return !(fState == fOldState);
+    public boolean hasStateChanged() {     
+        return fState != fInitialState;
+    }
+    
+    public boolean hasChanged() {
+        return hasStateChanged() || 
+        ((fValue != null) && (fInitialValue != null) && !fInitialValue.equals(fValue)) ||
+        ((fKey != null) && (fInitialKey != null) && !fInitialKey.equals(fKey)) ||
+        ((fInitialValue == null) && (fValue != null));
     }
 
-    public int getOldState() {
-        return fOldState;
+    public int getInitialState() {
+        return fInitialState;
+    }
+    
+    public String getInitialKey() {
+        return fInitialKey;
+    }
+    
+    public String getInitialValue() {
+        return fInitialValue;
     }
     
     public AccessorClassInfo getAccessorClassInfo() {
         return fAccessorClassInfo;
     }
     
-    public void setPrefix(String prefix) {
+    /**
+     * Prefix is valid for ALL Substitutions, that have changed into EXTERNALIZED state.
+     */
+    public static void setPrefix(String prefix) {
         fPrefix = prefix;
     }
     
-    public boolean hasDuplicateKey(NLSSubstitution[] substitutions, String prefix) {
-        if (fState == EXTERNALIZED) {
-            String key;
-            if (hasChanged()) {
-                key = prefix + fKey;                
-            } else {
-                key = fKey;
-            }
+    public boolean hasDuplicateKey(NLSSubstitution[] substitutions) {
+        if (fState == EXTERNALIZED) {            
             int counter = 0;
             for (int i = 0; i < substitutions.length; i++) {
-                NLSSubstitution substitution = substitutions[i];
-                                
-                if (substitution.getState() == EXTERNALIZED) {
-                    if (substitution.hasChanged()) {
-                        if (substitution.getKeyWithPrefix(prefix).equals(key)) {
-                            counter++;
-                        }
-                    } else {
-                        if (substitution.getKey().equals(key)) {
-                            counter++;
-                        }                    
-                    }
+                NLSSubstitution substitution = substitutions[i];                                
+                if (substitution.getState() == EXTERNALIZED) {                    
+                    if (substitution.getKey().equals(getKey())) {
+                        counter++;
+                    }                        
                 }
             }
             if (counter > 1) {
@@ -136,8 +159,8 @@ public class NLSSubstitution {
         return false;
     }
     
-    public void generateKey(NLSSubstitution[] substitutions, String keyPrefix) {
-    	if (fState != EXTERNALIZED || ((fState == EXTERNALIZED) && hasChanged())) {    		
+    public void generateKey(NLSSubstitution[] substitutions) {
+    	if (fState != EXTERNALIZED || ((fState == EXTERNALIZED) && hasStateChanged())) {    		
     		int counter = 0;
     		fKey = createKey(counter);
     		while(true) {
@@ -145,21 +168,20 @@ public class NLSSubstitution {
     			for (i = 0; i < substitutions.length; i++) {
     				NLSSubstitution substitution = substitutions[i];
     				if ((substitution == this) || (substitution.fState != EXTERNALIZED)) continue;
-    				if (substitution.hasChanged()) {
-    					if (substitution.getKey().equals(fKey)) {
-        					fKey = createKey(counter++);
-        					break;
-        				}
-    				} else {
-    					if (substitution.getKey().equals(getKeyWithPrefix(keyPrefix))) {
-    						fKey = createKey(counter++);
-    						break;
-    					}
+    				if (substitution.getKey().equals(getKey())) {
+    				    fKey = createKey(counter++);
+    				    break;    				
     				}
     			}
     			if (i == substitutions.length) return;
     		}
     	}
+    }
+
+    public void revert() {
+        fState = fInitialState;
+        fKey = fInitialKey;
+        fValue = fInitialValue;        
     }
     
     private String createKey(int counter) {

@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHolder;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSInfo;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
@@ -68,7 +69,7 @@ public class NLSHolderTest extends TestCase {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);        
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         pack.createCompilationUnit("TestMessages.java", ACCESSOR_KLAZZ, false, null);
-        NLSHolder nlsHolder = NLSHolder.create(cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
         NLSSubstitution[] substitution = nlsHolder.getSubstitutions();
         assertEquals(substitution.length, 1);
         assertEquals(substitution[0].getKey(), "Key.5");        

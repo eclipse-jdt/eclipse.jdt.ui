@@ -64,10 +64,11 @@ public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
 
         // add parameters parameter by parameter
         NLSRefactoring refac = NLSRefactoring.create(cu, fHelper.fCodeGenerationSettings);
-        NLSSubstitution[] subs = refac.getSubstitutions();        
+        NLSSubstitution[] subs = refac.getSubstitutions();
+        NLSSubstitution.setPrefix("");
         for (int i = 0; i < subs.length; i++) {
             subs[i].setState(NLSSubstitution.EXTERNALIZED);
-            subs[i].generateKey(subs, "");
+            subs[i].generateKey(subs);
         }       
         
         check(refac);
@@ -188,9 +189,10 @@ public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
     private NLSRefactoring prepareRefac(ICompilationUnit cu) {
         NLSRefactoring refac = NLSRefactoring.create(cu, fHelper.fCodeGenerationSettings);
         NLSSubstitution[] subs = refac.getSubstitutions();
+        NLSSubstitution.setPrefix("");
         for (int i = 0; i < subs.length; i++) {
             subs[i].setState(NLSSubstitution.EXTERNALIZED);
-            subs[i].generateKey(subs, "");
+            subs[i].generateKey(subs);
         }  
         fillInValues(refac);
         return refac;

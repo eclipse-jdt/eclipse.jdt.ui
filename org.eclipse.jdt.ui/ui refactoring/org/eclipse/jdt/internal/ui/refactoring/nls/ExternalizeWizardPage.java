@@ -71,6 +71,7 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -128,14 +129,14 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			if (property == null)
 				return false;
 
-			if (! (element instanceof NLSSubstitution))	
+			if (!(element instanceof NLSSubstitution))	
 				return false;
 				
 			if (PROPERTIES[STATE_PROP].equals(property))
 				return true;
 			
-			NLSSubstitution subs = (NLSSubstitution) element;			
-			return subs.hasChanged() && (subs.getState() == NLSSubstitution.EXTERNALIZED);			    
+			NLSSubstitution substitution = (NLSSubstitution) element;			
+			return (substitution.getState() == NLSSubstitution.EXTERNALIZED);
 		}
 		
 		/**
@@ -145,11 +146,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			if (element instanceof NLSSubstitution) {
 				NLSSubstitution substitution= (NLSSubstitution) element;
 				if (PROPERTIES[KEY_PROP].equals(property))
-					return substitution.fKey;
+					return substitution.getKeyWithoutPrefix();
 				if (PROPERTIES[VAL_PROP].equals(property))
-				    return substitution.fValue;
+				    return substitution.getValue();
 				if (PROPERTIES[STATE_PROP].equals(property)){
-					return new Integer(substitution.fState);
+					return new Integer(substitution.getState());
 				}	
 			}
 			return null;
@@ -165,17 +166,18 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 					NLSSubstitution substitution= (NLSSubstitution) data;
 					if (PROPERTIES[KEY_PROP].equals(property)) {
 						substitution.setKey((String) value);
-						fTableViewer.update(substitution, new String[] { property });
 						fTableViewer.refresh(true);
+						validateKeys();
 					}
 					if (PROPERTIES[VAL_PROP].equals(property)) {						
 					    substitution.setValue((String) value);
+					    validateKeys();
 						fTableViewer.update(substitution, new String[] { property });
 					}
 					if (PROPERTIES[STATE_PROP].equals(property)) {
 						substitution.setState(((Integer)value).intValue());
-						if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasChanged()) {
-						    substitution.generateKey(fSubstitutions, fPrefixField.getText());
+						if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasStateChanged()) {
+						    substitution.generateKey(fSubstitutions);
 						}
 						fTableViewer.update(substitution, new String[] { property });
 					}
@@ -201,15 +203,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			if (element instanceof NLSSubstitution) {
 				NLSSubstitution substitution= (NLSSubstitution) element;
 				if (columnIndex == KEY_PROP){
-				    if (substitution.fState == NLSSubstitution.EXTERNALIZED) {
-					    if (substitution.hasChanged()) {
-					        columnText = substitution.getKeyWithPrefix(fPrefixField.getText());					        
-					    } else {
-					        columnText = substitution.getKey();
-					    }
+				    if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
+				        columnText = substitution.getKey();					    
 					}					 
-				} else if ((columnIndex == VAL_PROP) && (substitution.fValue != null)) {			    
-				    columnText = substitution.fValue;				    
+				} else if ((columnIndex == VAL_PROP) && (substitution.getValue() != null)) {			    
+				    columnText = substitution.getValue();				    
 				}
 			}
 			return unwindEscapeChars(columnText); 
@@ -266,11 +264,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		
 		private Image getNLSImage(NLSSubstitution sub){
 		    Image image = getNLSImage(sub.getState());
-		    if ((sub.fValue == null) && (sub.getKey() != null)) {
+		    if ((sub.getValue() == null) && (sub.getKey() != null)) {
 		        JavaElementImageDescriptor imageDescriptor = 
 		            new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.ERROR, JavaElementImageProvider.SMALL_SIZE);	        
 		        return imageDescriptor.createImage();
-		    } else if (sub.hasDuplicateKey(fSubstitutions, fPrefixField.getText())) {
+		    } else if (sub.hasDuplicateKey(fSubstitutions)) {
 		        JavaElementImageDescriptor imageDescriptor = 
 		            new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.WARNING, JavaElementImageProvider.SMALL_SIZE);	        
 		        return imageDescriptor.createImage();	        
@@ -328,10 +326,14 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				
 			fValueField= new StringDialogField();
 			fValueField.setLabelText(NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Enter_value")); //$NON-NLS-1$
-			fValueField.setDialogFieldListener(this);			
-	
-			fKeyField.setText(substitution.getKey());
-			fValueField.setText(substitution.getValue());
+			fValueField.setDialogFieldListener(this);
+			
+			fKeyField.setText(substitution.getKeyWithoutPrefix());
+			if (substitution.getValue() == null) {
+				fValueField.setText("");			    
+			} else {
+			    fValueField.setText(substitution.getValue());
+			}
 		}
 			
 		public KeyValuePair getResult() {
@@ -367,7 +369,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
 		 */
 		public void dialogFieldChanged(DialogField field) {
-			// validate
 			IStatus keyStatus= validateIdentifiers(getTokens(fKeyField.getText(), ","), true); //$NON-NLS-1$
 			IStatus valueStatus= validateIdentifiers(getTokens(fValueField.getText(), ","), false); //$NON-NLS-1$
 				
@@ -426,16 +427,13 @@ class ExternalizeWizardPage extends UserInputWizardPage {
     private Button fRevertButton;
 	private Button fEditButton;
 	
-	private Label fWarningIcon;
-	private Label fErrorIcon;
-    private Label fWarningDesc;
-    private Label fErrorDesc;
-	
 	public ExternalizeWizardPage(NLSRefactoring nlsRefactoring) {
 		super(PAGE_NAME);
 		fCu = nlsRefactoring.getCu();
 		fSubstitutions = nlsRefactoring.getSubstitutions();		
 		fDefaultPrefix = nlsRefactoring.getPrefixHint();
+		
+		NLSSubstitution.setPrefix(fDefaultPrefix);
 		
 		createDefaultExternalization(fSubstitutions, fDefaultPrefix);
 	}	
@@ -459,9 +457,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		createTableViewer(composite);
 		createSourceViewer(composite);
 				
-		composite.setWeights(new int[]{65, 45});
-	 
-		createStatusLabels(supercomposite);
+		composite.setWeights(new int[]{65, 45});	
+		
 		validateKeys();
 		
 		// promote control
@@ -491,8 +488,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 								List widgetSel= getSelectionFromWidget();
 								if (widgetSel == null || widgetSel.size() != 1)
 									return;
-								NLSSubstitution s= (NLSSubstitution)widgetSel.get(0);
-								Integer value= (Integer)getCellModifier().getValue(s, PROPERTIES[STATE_PROP]);
+								NLSSubstitution substitution= (NLSSubstitution)widgetSel.get(0);
+								Integer value= (Integer)getCellModifier().getValue(substitution, PROPERTIES[STATE_PROP]);
 								int newValue= MultiStateCellEditor.getNextValue(NLSSubstitution.STATE_COUNT, value.intValue());
 								getCellModifier().modify(item, PROPERTIES[STATE_PROP], new Integer(newValue));
 							}	
@@ -525,11 +522,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			public void doubleClick(DoubleClickEvent event) {
 				Set selected= getSelectedTableEntries();
 				if (selected.size() != 1)
-					return;
+					return;				
 				NLSSubstitution substitution= (NLSSubstitution)selected.iterator().next();
-				if ((substitution.hasChanged()) && (substitution.getState() == NLSSubstitution.EXTERNALIZED)) {
+				if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
 					openEditButton(event.getSelection());
-				}
+				}				
 			}
 		});
 		
@@ -545,7 +542,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
             NLSSubstitution substitution = substitutions[i];
             if (substitution.getState() == NLSSubstitution.INTERNALIZED) {
                 substitution.setState(NLSSubstitution.EXTERNALIZED);
-                substitution.generateKey(substitutions, defaultPrefix);
+                substitution.generateKey(substitutions);
             }
         }
     }
@@ -615,83 +612,46 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fPrefixField.selectAll();
 		
 		fPrefixField.addModifyListener(new ModifyListener() {
-            public void modifyText(ModifyEvent e) {       
+            public void modifyText(ModifyEvent e) {
+                NLSSubstitution.setPrefix(fPrefixField.getText());
                 fTableViewer.refresh(true);
             }		    
 		});
 	}	
 	
 	private void validateKeys() {
-	    checkDuplicateKeys();
-	    checkMissingKeys();
+	    RefactoringStatus status = new RefactoringStatus();
+	    checkDuplicateKeys(status);
+	    checkMissingKeys(status);
+	    setPageComplete(status);	    
 	}
 	
-    private void checkDuplicateKeys() {
+    private void checkDuplicateKeys(RefactoringStatus status) {
         for (int i = 0; i < fSubstitutions.length; i++) {
             NLSSubstitution substitution = fSubstitutions[i];
-            if (hasDuplicateKey(substitution)) {
-                showWarningStatus(true);
+            if (hasDuplicateKey(substitution)) {                
+                status.addWarning("Keys are duplicate.");
                 return;
             }            
-        }
-	    showWarningStatus(false);
+        }        
     }
     
-    private void checkMissingKeys() {
+    private void checkMissingKeys(RefactoringStatus status) {
         for (int i = 0; i < fSubstitutions.length; i++) {
             NLSSubstitution substitution = fSubstitutions[i];
             if ((substitution.getValue() == null) && (substitution.getKey() != null)) {
-                showErrorStatus(true);
+                status.addFatalError("Entry is missing in Property File.");
                 return;                
             }            
         }
-	    showErrorStatus(false);
     }
 
     private boolean hasDuplicateKey(NLSSubstitution substitution) {
 	    if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
-	        if (substitution.hasChanged()) {
-	            return substitution.hasDuplicateKey(fSubstitutions, fPrefixField.getText());	            
-	        } else {
-	            return substitution.hasDuplicateKey(fSubstitutions, "");
-	        }
+	        return substitution.hasDuplicateKey(fSubstitutions);
 	    }
 	    return false;
-	}
-
-	private void createStatusLabels(Composite parent){
-		Composite labelComposite= new Composite(parent, SWT.NONE);
-		GridLayout gl= new GridLayout();
-		gl.numColumns= 2;		
-		labelComposite.setLayout(gl);
-		//labelComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
-		fWarningIcon = new Label(labelComposite, SWT.NONE);		
-		ImageDescriptor imageDescriptor = JavaPluginImages.DESC_OVR_WARNING;
-		fWarningIcon.setImage(imageDescriptor.createImage());
-		fWarningIcon.setLayoutData(new GridData());
-		
-		fWarningDesc = new Label(labelComposite, SWT.NONE);
-        fWarningDesc.setText("Indication of duplicated keys.");		
-		
-		fErrorIcon = new Label(labelComposite, SWT.NONE);		
-		imageDescriptor = JavaPluginImages.DESC_OVR_ERROR;
-		fErrorIcon.setImage(imageDescriptor.createImage());
-		fErrorIcon.setLayoutData(new GridData());
-		
-		fErrorDesc = new Label(labelComposite, SWT.NONE);
-        fErrorDesc.setText("Indication of missing keys in the property file.");
-	}
-	
-	private void showErrorStatus(boolean visible) {
-	    fErrorIcon.setVisible(visible);
-	    fErrorDesc.setVisible(visible);
-	}
-	
-	private void showWarningStatus(boolean visible) {
-	    fWarningIcon.setVisible(visible);
-	    fWarningDesc.setVisible(visible);
-	}
+	}	
 	
 	private void createTableComposite(Composite parent) {
 		Composite comp= new Composite(parent, SWT.NONE);
@@ -785,7 +745,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
                 Set selection = getSelectedTableEntries();
                 for (Iterator iter = selection.iterator(); iter.hasNext();) {
                     NLSSubstitution substitution = (NLSSubstitution) iter.next();
-                    substitution.setState(substitution.getOldState());                                        
+                    substitution.revert();                                        
                 }
                 fTableViewer.refresh();
                 updateButtonStates((IStructuredSelection) fTableViewer.getSelection());
@@ -821,6 +781,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			substitution.setKey(kvPair.getKey());
 			substitution.setValue(kvPair.getValue());
 			fTableViewer.update(substitution, new String[] { PROPERTIES[KEY_PROP], PROPERTIES[VAL_PROP] });
+			validateKeys();
 		} finally{
 			fTableViewer.refresh();
 			fTableViewer.getControl().setFocus();
@@ -846,8 +807,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		for (Iterator iter= selected.iterator(); iter.hasNext();) {
 		    NLSSubstitution substitution = (NLSSubstitution) iter.next();
 			substitution.setState(state);
-			if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasChanged()) {
-			    substitution.generateKey(fSubstitutions, fPrefixField.getText());
+			if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasStateChanged()) {
+			    substitution.generateKey(fSubstitutions);
 			}
 		}
 		fTableViewer.update(selected.toArray(), props);		
@@ -896,7 +857,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	    
 	    if (selection.size() == 1){
 	        NLSSubstitution substitution= (NLSSubstitution) selection.getFirstElement();	
-	        fEditButton.setEnabled(substitution.hasChanged() && (substitution.fState == NLSSubstitution.EXTERNALIZED));
+	        fEditButton.setEnabled(substitution.getState() == NLSSubstitution.EXTERNALIZED);
 	        
 	    } else {	
 	        fEditButton.setEnabled(false);			
@@ -922,23 +883,15 @@ class ExternalizeWizardPage extends UserInputWizardPage {
         }
 	    return true;	    
 	}
-	
-	private void initializeRefactoring(){
-		NLSRefactoring refactoring= (NLSRefactoring) getRefactoring();
-		refactoring.setSubstitutionPrefix(fPrefixField.getText());
-	}
 		
 	public boolean performFinish(){
-		initializeRefactoring();
-		
 		//when finish is pressed on the first page - we want the settings from the
 		//second page to be set to the refactoring object
 		((ExternalizeWizardPage2)getWizard().getPage(ExternalizeWizardPage2.PAGE_NAME)).updateRefactoring();
 		return super.performFinish();
 	}
 	
-	public IWizardPage getNextPage() {
-		initializeRefactoring();
+	public IWizardPage getNextPage() {		
 		return super.getNextPage();
 	}
 	

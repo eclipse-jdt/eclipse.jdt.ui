@@ -22,23 +22,19 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
  * - accessor class name, resource bundle name
  */
 public class NLSHint {
-    
-    private NLSInfo nlsInfo;
-
     private ITypeBinding fAccessorClassBinding;
     private IPackageFragment fPackage;
     private String fResourceBundle;
     private IPackageFragment fResourceBundlePackage;
 
-    public NLSHint(NLSSubstitution[] nlsSubstitution, ICompilationUnit cu) {
+    public NLSHint(NLSSubstitution[] nlsSubstitution, ICompilationUnit cu, NLSInfo nlsInfo) {
         IPackageFragment defaultPackage = (IPackageFragment) cu.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
         fPackage = defaultPackage;
         fResourceBundlePackage = defaultPackage;        
         
         NLSElement nlsElement = findFirstNLSElementForHint(nlsSubstitution);
         
-        if (nlsElement != null) {        
-            nlsInfo = new NLSInfo(cu);
+        if (nlsElement != null) {
             fAccessorClassBinding = nlsInfo.getAccessorClass(nlsElement);
             if (fAccessorClassBinding != null) {            
                 try {
@@ -77,7 +73,7 @@ public class NLSHint {
         NLSSubstitution substitution;
         for (int i = 0; i < nlsSubstitutions.length; i++) {
             substitution = nlsSubstitutions[i];
-            if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && !substitution.hasChanged()) {
+            if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && !substitution.hasStateChanged()) {
                 return substitution.fNLSElement;
             }
         }

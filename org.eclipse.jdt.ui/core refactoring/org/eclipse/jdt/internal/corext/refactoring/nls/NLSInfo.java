@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
+import org.eclipse.jface.text.Region;
 
 public class NLSInfo {
     
@@ -36,6 +37,7 @@ public class NLSInfo {
         private ITypeBinding fBinding;        
         int fOffset;
         int fLength;
+        Region fRegion;        
         
         AccessorClassHelper(ASTNode atsNode, NLSElement nlsElement) {
             if (!nlsElement.hasTag()) {
@@ -46,12 +48,12 @@ public class NLSInfo {
             if ((nlsStringLiteral != null) && (nlsStringLiteral.getParent() instanceof MethodInvocation)) {
                 ASTNode parent = nlsStringLiteral.getParent();
                 MethodInvocation methodInvocation = (MethodInvocation) parent;
-                if (methodInvocation.arguments().indexOf(nlsStringLiteral) == 0) {
+                List args = methodInvocation.arguments();
+                if ((args.indexOf(nlsStringLiteral) == 0) && (args.size() == 1)) {
                     IMethodBinding binding = methodInvocation.resolveMethodBinding();
                     if (binding != null && Modifier.isStatic(binding.getModifiers())) {
                         fName = binding.getDeclaringClass().getName();
-                        fOffset = parent.getStartPosition();
-                        fLength = parent.getLength();                        
+                        fRegion = new Region(parent.getStartPosition(), parent.getLength());                                                
                         fBinding = binding.getDeclaringClass();
                     }
                 }
@@ -80,7 +82,7 @@ public class NLSInfo {
         }
         
         public AccessorClassInfo getInfo() {
-            return new AccessorClassInfo(fName, fOffset, fLength);
+            return new AccessorClassInfo(fName, fRegion);
         }
     }    
     

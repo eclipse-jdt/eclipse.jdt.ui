@@ -125,17 +125,15 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
     
     private NLSRefactoring createDefaultNls(ICompilationUnit cu) {
         NLSRefactoring nls = NLSRefactoring.create(cu, fHelper.fCodeGenerationSettings);
-        // this is done by the ui
-        
-        NLSSubstitution[] substitutions = nls.getSubstitutions();
-        
-        substitutions[0].setState(NLSSubstitution.EXTERNALIZED);
-        substitutions[0].generateKey(substitutions, "");
                 
         nls.setAccessorPackage(fHelper.getPackageFragment("/TestSetupProject/src1/p")); //$NON-NLS-1$
         nls.setPropertyFilePath(fHelper.getFile("/TestSetupProject/src2/p/test.properties").getFullPath()); //$NON-NLS-1$
         nls.setAccessorClassName("Messages"); //$NON-NLS-1$
-        nls.setSubstitutionPrefix("test"); //$NON-NLS-1$
+        
+        NLSSubstitution[] substitutions = nls.getSubstitutions();  
+        NLSSubstitution.setPrefix("test");
+        substitutions[0].setState(NLSSubstitution.EXTERNALIZED);
+        substitutions[0].generateKey(substitutions);
         return nls;
     }
 

@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHolder;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSInfo;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSourceModifier;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -24,14 +25,14 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
-public class NLSSourceModificationTest extends TestCase {
+public class NLSSourceModifierTest extends TestCase {
     
     private IJavaProject javaProject;
     
     private IPackageFragmentRoot fSourceFolder;
     
     public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(NLSSourceModificationTest.class));
+		return new ProjectTestSetup(new TestSuite(NLSSourceModifierTest.class));
 	}
 	
 	public static Test suite() {
@@ -47,7 +48,7 @@ public class NLSSourceModificationTest extends TestCase {
         JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());        
     }
        
-    public NLSSourceModificationTest(String name) {
+    public NLSSourceModifierTest(String name) {
         super(name); 
     }
     
@@ -61,11 +62,13 @@ public class NLSSourceModificationTest extends TestCase {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         
-        NLSHolder nlsHolder = NLSHolder.create(cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
         NLSSubstitution[] nlsSubstitutions = nlsHolder.getSubstitutions();
+        NLSSubstitution.setPrefix("key.");
         nlsSubstitutions[0].setState(NLSSubstitution.EXTERNALIZED);
+        nlsSubstitutions[0].generateKey(nlsSubstitutions);
         
-        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, "${key}", "${key}", "key.", false, pack, "Accessor");
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, "${key}", "${key}", false, pack, "Accessor");
         
         Document doc = new Document(klazz);
         change.getEdit().apply(doc);
@@ -87,11 +90,12 @@ public class NLSSourceModificationTest extends TestCase {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         
-        NLSHolder nlsHolder = NLSHolder.create(cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
         NLSSubstitution[] nlsSubstitutions = nlsHolder.getSubstitutions();
+        NLSSubstitution.setPrefix("key.");
         nlsSubstitutions[0].setState(NLSSubstitution.IGNORED);
         
-        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, "${key}", "${key}", "key.", false, pack, "Accessor");
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, "${key}", "${key}", false, pack, "Accessor");
         
         Document doc = new Document(klazz);
         change.getEdit().apply(doc);
@@ -116,18 +120,20 @@ public class NLSSourceModificationTest extends TestCase {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         
-        NLSHolder nlsHolder = NLSHolder.create(cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
         NLSSubstitution[] nlsSubstitutions = nlsHolder.getSubstitutions();
+        NLSSubstitution.setPrefix("key.");
         nlsSubstitutions[0].setState(NLSSubstitution.EXTERNALIZED);
+        nlsSubstitutions[0].generateKey(nlsSubstitutions);
         
-        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, "${key}", "${key}", "key.", false, pack, "Accessor");
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, "${key}", "${key}", false, pack, "Accessor");
         
         Document doc = new Document(klazz);
         change.getEdit().apply(doc);
         
         assertEquals(
                 "public class Test {\n" +
-                "	private String str=Accessor.getString(\"key.1\"); //$NON-NLS-1$\n" +
+                "	private String str=Accessor.getString(\"key.0\"); //$NON-NLS-1$\n" +
             	"}\n", 
             	doc.get());
     }
@@ -142,11 +148,12 @@ public class NLSSourceModificationTest extends TestCase {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         
-        NLSHolder nlsHolder = NLSHolder.create(cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
         NLSSubstitution[] nlsSubstitutions = nlsHolder.getSubstitutions();
+        NLSSubstitution.setPrefix("key.");
         nlsSubstitutions[0].setState(NLSSubstitution.INTERNALIZED);
         
-        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, "${key}", "${key}", "key.", false, pack, "Accessor");
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, "${key}", "${key}", false, pack, "Accessor");
         
         Document doc = new Document(klazz);
         change.getEdit().apply(doc);
@@ -179,12 +186,13 @@ public class NLSSourceModificationTest extends TestCase {
         ICompilationUnit cu= pack.createCompilationUnit("Accessor.java", accessorKlazz, false, null);
         cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         
-        NLSHolder nlsHolder = NLSHolder.create(cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
         NLSSubstitution[] nlsSubstitutions = nlsHolder.getSubstitutions();
+        NLSSubstitution.setPrefix("key.");
+        nlsSubstitutions[0].setValue("whatever");
         nlsSubstitutions[0].setState(NLSSubstitution.IGNORED);
-        nlsSubstitutions[0].fValue = "whatever";
         
-        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, "${key}", "${key}", "key.", false, pack, "Accessor");
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, "${key}", "${key}", false, pack, "Accessor");
         
         Document doc = new Document(klazz);
         change.getEdit().apply(doc);
@@ -218,12 +226,13 @@ public class NLSSourceModificationTest extends TestCase {
         ICompilationUnit cu= pack.createCompilationUnit("Accessor.java", accessorKlazz, false, null);
         cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         
-        NLSHolder nlsHolder = NLSHolder.create(cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
         NLSSubstitution[] nlsSubstitutions = nlsHolder.getSubstitutions();
+        NLSSubstitution.setPrefix("key.");
+        nlsSubstitutions[0].setValue("whatever");
         nlsSubstitutions[0].setState(NLSSubstitution.INTERNALIZED);
-        nlsSubstitutions[0].fValue = "whatever";
         
-        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, "${key}", "${key}", "key.", false, pack, "Accessor");
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, "${key}", "${key}", false, pack, "Accessor");
         
         Document doc = new Document(klazz);
         change.getEdit().apply(doc);
@@ -232,6 +241,43 @@ public class NLSSourceModificationTest extends TestCase {
                 "package test;\n" +
                 "public class Test {\n" +
                 "	private String str=\"whatever\"; \n" +
+                "}\n",  
+            	doc.get());
+    }
+    
+    public void testReplacementOfKey() throws Exception {        
+        String klazz =
+            "package test;\n" +
+            "public class Test {\n" +
+            "	private String str=Accessor.getString(\"key.0\"); //$NON-NLS-1$\n" +
+            "}\n"; 
+        
+        String accessorKlazz =
+            "package test;\n" +
+    		"public class Accessor {\n" +
+    		"	private static final String BUNDLE_NAME = \"test.test\";//$NON-NLS-1$\n" +
+    		"	public static String getString(String s) {\n" +
+    		"		return \"\";\n" +
+    		"	}\n" +
+    		"}\n";
+        
+        IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+        ICompilationUnit cu= pack.createCompilationUnit("Accessor.java", accessorKlazz, false, null);
+        cu= pack.createCompilationUnit("Test.java", klazz, false, null);
+        
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
+        NLSSubstitution[] nlsSubstitutions = nlsHolder.getSubstitutions();
+        nlsSubstitutions[0].setKey("nls.0");        
+        
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, "${key}", "${key}", false, pack, "Accessor");
+        
+        Document doc = new Document(klazz);
+        change.getEdit().apply(doc);
+        
+        assertEquals(
+                "package test;\n" +
+                "public class Test {\n" +
+                "	private String str=Accessor.getString(\"nls.0\"); //$NON-NLS-1$\n" +
                 "}\n",  
             	doc.get());
     }

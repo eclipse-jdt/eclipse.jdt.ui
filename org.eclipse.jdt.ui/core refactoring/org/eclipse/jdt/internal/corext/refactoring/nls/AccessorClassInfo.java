@@ -8,18 +8,18 @@
  ****************************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
+import org.eclipse.jface.text.Region;
+
 
 public class AccessorClassInfo {
     
     String fName;
-    int fOffset;
-    int fLength;
+    Region fRegion;
     
-    public AccessorClassInfo(String name, int offset, int length) {
+    public AccessorClassInfo(String name, Region accessorRegion) {
         super();
         fName = name;
-        fOffset = offset;
-        fLength = length;
+        fRegion = accessorRegion;
     }
     
     public boolean equals(Object obj) {

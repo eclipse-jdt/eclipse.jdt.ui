@@ -44,11 +44,6 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
-/**
- * the nls refactoring is unfortunately not a good citizen ... after a create
- * ... you have to parmetrize it with some parameters. see the testcase:
- * NlsRefactoringCreateChangeTest
- */
 public class NLSRefactoring extends Refactoring {
 
     public static final String BUNDLE_NAME = "BUNDLE_NAME"; //$NON-NLS-1$
@@ -64,9 +59,9 @@ public class NLSRefactoring extends Refactoring {
     private String fSubstitutionPattern;
     private ICompilationUnit fCu;
     private final CodeGenerationSettings fCodeGenerationSettings;
-    private String fSubstitutionPrefix;
-    private NLSHolder fNlsHolder;
     private NLSHint fNlsHint;
+    private NLSSubstitution[] fSubstitutions;
+    
     
     private NLSRefactoring(ICompilationUnit cu, CodeGenerationSettings codeGenerationSettings) {
         Assert.isNotNull(cu);
@@ -74,7 +69,9 @@ public class NLSRefactoring extends Refactoring {
 
         fCu = cu;
         fCodeGenerationSettings = codeGenerationSettings;
-        fNlsHolder = NLSHolder.create(cu);
+        NLSInfo nlsInfo = new NLSInfo(cu);
+        fSubstitutions = NLSHolder.create(cu, nlsInfo).getSubstitutions();
+        fNlsHint = new NLSHint(fSubstitutions, cu, nlsInfo);
     }
 
     public static NLSRefactoring create(ICompilationUnit cu, CodeGenerationSettings codeGenerationSettings) {
@@ -101,7 +98,7 @@ public class NLSRefactoring extends Refactoring {
      */
     public void setSubstitutionPattern(String pattern) {
         Assert.isNotNull(pattern);
-        fSubstitutionPattern = pattern;
+        fSubstitutionPattern = pattern;        
     }
 
     /**
@@ -145,7 +142,7 @@ public class NLSRefactoring extends Refactoring {
 
     public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 
-        if (fNlsHolder.getSubstitutions().length == 0) {
+        if (fSubstitutions.length == 0) {
             String message = NLSMessages.getFormattedString("NLSRefactoring.no_strings", fCu.getElementName());//$NON-NLS-1$
             return RefactoringStatus.createFatalErrorStatus(message);
         }
@@ -176,9 +173,7 @@ public class NLSRefactoring extends Refactoring {
 
             result.merge(checkForKeysAlreadyDefined());
             pm.worked(1);
-
-            // TODO check prefix
-
+            
             result.merge(checkKeys());
             pm.worked(1);
 
@@ -219,10 +214,9 @@ public class NLSRefactoring extends Refactoring {
                 result.add(
                         NLSSourceModifier.create(
                                 getCu(), 
-                                fNlsHolder.getSubstitutions(), 
+                                fSubstitutions, 
                                 getDefaultSubstitutionPattern(), 
-                                fSubstitutionPattern, 
-                                fSubstitutionPrefix, 
+                                fSubstitutionPattern,
                                 willCreateAccessorClass(), 
                                 fAccessorPackage, 
                                 fAccessorClassName));
@@ -231,8 +225,7 @@ public class NLSRefactoring extends Refactoring {
 
             if (willModifyPropertyFile()) {
             	result.add(NLSPropertyFileModifier.create(
-            			fNlsHolder.getSubstitutions(), 
-						fSubstitutionPrefix,
+            			fSubstitutions,
 						fPropertyFilePath));            	
             }
             pm.worked(1);
@@ -244,10 +237,9 @@ public class NLSRefactoring extends Refactoring {
     }
 
     private void checkParameters() {
-        Assert.isNotNull(fNlsHolder.getSubstitutions());
+        Assert.isNotNull(fSubstitutions);
         Assert.isNotNull(fAccessorPackage);
-        Assert.isNotNull(fPropertyFilePath);
-        Assert.isNotNull(fNlsHolder.getLines());
+        Assert.isNotNull(fPropertyFilePath);        
 
         // these values have defaults ...
         Assert.isNotNull(fAccessorClassName);
@@ -320,21 +312,23 @@ public class NLSRefactoring extends Refactoring {
         PropertyResourceBundle bundle = getPropertyBundle();
         if (bundle == null) { return null; }
 
-        NLSSubstitution[] subs = fNlsHolder.getSubstitutions();
+        NLSSubstitution[] subs = fSubstitutions;
 
         for (int i = 0; i < subs.length; i++) {
-            String keyWithPrefix = subs[i].getKeyWithPrefix(fSubstitutionPrefix);
-            String s = getBundleString(bundle, keyWithPrefix);
-            if (s != null) {
-                if (!hasSameValue(s, subs[i])) {
-                    String[] args = { keyWithPrefix, s, subs[i].fNLSElement.getValue()};
-                    String msg = NLSMessages.getFormattedString("NLSrefactoring.already_exists", args); //$NON-NLS-1$
-                    result.addFatalError(msg);
-                } else {
-                    subs[i].putToPropertyFile = false;
-                    String[] args = { keyWithPrefix, s};
-                    String msg = NLSMessages.getFormattedString("NLSrefactoring.already_in_bundle", args); //$NON-NLS-1$
-                    result.addWarning(msg);
+            NLSSubstitution substitution = subs[i];
+            if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasStateChanged()) {
+                String key = substitution.getKey();
+                String s = getBundleString(bundle, key);
+                if (s != null) {
+                    if (!s.equals(substitution.getValue())) {
+                        String[] args = { key, s, substitution.getValue()};
+                        String msg = NLSMessages.getFormattedString("NLSrefactoring.already_exists", args); //$NON-NLS-1$
+                        result.addFatalError(msg);
+                    } else {                        
+                        String[] args = { key, s};
+                        String msg = NLSMessages.getFormattedString("NLSrefactoring.already_in_bundle", args); //$NON-NLS-1$
+                        result.addWarning(msg);
+                    }
                 }
             }
         }
@@ -385,10 +379,10 @@ public class NLSRefactoring extends Refactoring {
 
     private RefactoringStatus checkForDuplicateKeys() {
         Map map = new HashMap(); //String (key) -> Set of NLSSubstitution
-        NLSSubstitution[] subs = fNlsHolder.getSubstitutions();
+        NLSSubstitution[] subs = fSubstitutions;
         for (int i = 0; i < subs.length; i++) {
             NLSSubstitution sub = subs[i];
-            String key = sub.getKeyWithPrefix(fSubstitutionPrefix);
+            String key = sub.getKey();
             if (!map.containsKey(key)) {
                 map.put(key, new HashSet());
             }
@@ -410,21 +404,17 @@ public class NLSRefactoring extends Refactoring {
         if (subs.size() <= 1) return null;
 
         NLSSubstitution[] toTranslate = getEntriesToTranslate(subs);
-        if (toTranslate.length <= 1) return null;
-
-        for (int i = 0; i < toTranslate.length; i++) {
-            toTranslate[i].putToPropertyFile = (i == 0);
-        }
+        if (toTranslate.length <= 1) return null;        
 
         String value = toTranslate[0].fNLSElement.getValue();
         for (int i = 0; i < toTranslate.length; i++) {
             NLSSubstitution each = toTranslate[i];
             if (!hasSameValue(value, each)) {
-                String msg = NLSMessages.getFormattedString("NLSrefactoring.duplicated", each.fKey);//$NON-NLS-1$
+                String msg = NLSMessages.getFormattedString("NLSrefactoring.duplicated", each.getKey());//$NON-NLS-1$
                 return RefactoringStatus.createFatalErrorStatus(msg);
             }
         }
-        String[] args = { toTranslate[0].fKey, value};
+        String[] args = { toTranslate[0].getKey(), value};
         String msg = NLSMessages.getFormattedString("NLSrefactoring.reused", args); //$NON-NLS-1$
         return RefactoringStatus.createWarningStatus(msg);
     }
@@ -433,17 +423,17 @@ public class NLSRefactoring extends Refactoring {
         List result = new ArrayList(subs.size());
         for (Iterator iter = subs.iterator(); iter.hasNext();) {
             NLSSubstitution each = (NLSSubstitution) iter.next();
-            if (each.fState == NLSSubstitution.EXTERNALIZED) result.add(each);
+            if (each.getState() == NLSSubstitution.EXTERNALIZED) result.add(each);
         }
         return (NLSSubstitution[]) result.toArray(new NLSSubstitution[result.size()]);
     }
 
     private RefactoringStatus checkKeys() {
         RefactoringStatus result = new RefactoringStatus();
-        NLSSubstitution[] subs = fNlsHolder.getSubstitutions();
+        NLSSubstitution[] subs = fSubstitutions;
         for (int i = 0; i < subs.length; i++) {
             NLSSubstitution substitution = subs[i];
-            if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasChanged()) {
+            if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasStateChanged()) {
                 result.merge(checkKey(substitution.getKey()));
             }
         }
@@ -477,7 +467,7 @@ public class NLSRefactoring extends Refactoring {
 
     private boolean willCreateAccessorClass() throws JavaModelException {
 
-        NLSSubstitution[] subs = fNlsHolder.getSubstitutions();
+        NLSSubstitution[] subs = fSubstitutions;
         if (NLSSubstitution.countItems(subs, NLSSubstitution.EXTERNALIZED) == 0) { return false; }
 
         ICompilationUnit compilationUnit = getAccessorCu();
@@ -493,43 +483,34 @@ public class NLSRefactoring extends Refactoring {
     }
 
     private boolean willModifySource() {
-        NLSSubstitution[] subs = fNlsHolder.getSubstitutions();
+        NLSSubstitution[] subs = fSubstitutions;
         for (int i = 0; i < subs.length; i++) {
-            if (subs[i].hasChanged()) return true;
+            if (subs[i].hasStateChanged()) return true;
         }
-        //if (willAddImportDeclaration()) return true;
-
         return false;
     }
 
     private boolean willModifyPropertyFile() {
-        NLSSubstitution[] subs = fNlsHolder.getSubstitutions();
+        NLSSubstitution[] subs = fSubstitutions;
         for (int i = 0; i < subs.length; i++) {
             NLSSubstitution substitution = subs[i];
             if (substitution.hasChanged()) {
-                if (!(((substitution.getState() == NLSSubstitution.INTERNALIZED) && 
-                        (substitution.getOldState() == NLSSubstitution.IGNORED)) ||
-                        ((substitution.getState() == NLSSubstitution.IGNORED) && 
-                        (substitution.getOldState() == NLSSubstitution.INTERNALIZED)))) {
-                    return true;        
+                if (substitution.hasStateChanged()) {
+                    if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) || 
+                            (substitution.getInitialState() == NLSSubstitution.EXTERNALIZED)) {
+                        return true; 
+                    }
+                } else {
+                    return true;                    
                 }
             }
         }
         return false;
     }
-    
-    // TODO: necessary ?
-    private boolean willAddImportDeclaration() {
-        NLSSubstitution[] subs = fNlsHolder.getSubstitutions();
-        if (NLSSubstitution.countItems(subs, NLSSubstitution.EXTERNALIZED) == 0) { return false; }
 
-        return true;
-    }
-
-    private static boolean typeNameExistsInPackage(IPackageFragment pack, String name) throws JavaModelException {
+    private boolean typeNameExistsInPackage(IPackageFragment pack, String name) throws JavaModelException {
         return Checks.findTypeInPackage(pack, name) != null;
     }
-
 
     private String getAccessorCUName() {
         return fAccessorClassName + ".java"; //$NON-NLS-1$
@@ -548,19 +529,11 @@ public class NLSRefactoring extends Refactoring {
     public void setAccessorPackage(IPackageFragment packageFragment) {
         Assert.isNotNull(packageFragment);
         fAccessorPackage = packageFragment;
-    }
-
-    public void setSubstitutionPrefix(String string) {
-        fSubstitutionPrefix = string;
-    }
+    }    
 
     public NLSSubstitution[] getSubstitutions() {
-        return fNlsHolder.getSubstitutions();
-    }
-
-    public NLSLine[] getNLSLines() {
-        return fNlsHolder.getLines();
-    }
+        return fSubstitutions;
+    }    
 
     public String getPrefixHint() {
         String cuName = fCu.getElementName();
@@ -569,10 +542,7 @@ public class NLSRefactoring extends Refactoring {
         return ""; //$NON-NLS-1$
     }
 
-    public NLSHint getNlsHint() {
-        if (fNlsHint == null) {
-            fNlsHint = new NLSHint(fNlsHolder.getSubstitutions(), fCu);
-        }
+    public NLSHint getNlsHint() {        
         return fNlsHint;
     }
 

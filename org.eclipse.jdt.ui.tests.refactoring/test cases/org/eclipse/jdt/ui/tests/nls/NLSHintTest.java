@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHint;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHolder;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSInfo;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
@@ -81,8 +82,8 @@ public class NLSHintTest extends TestCase {
 			"	private String str=\"whateverKey\";//$NON-NLS-1$\n" +
 			"}\n";
     	ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
-        NLSHolder nlsHolder = NLSHolder.create(cu);
-        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
+        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu, new NLSInfo(cu));
         assertEquals(null, hint.getMessageClass());    	
     }
     
@@ -97,8 +98,8 @@ public class NLSHintTest extends TestCase {
             "	String[] foo = {\"ab\", String.valueOf(Boolean.valueOf(\"cd\")), \"de\"}; //$NON-NLS-1$ //$NON-NLS-2$\n" +
 			"}\n";
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
-        NLSHolder nlsHolder = NLSHolder.create(cu);
-        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
+        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu, new NLSInfo(cu));
         assertEquals(null, hint.getMessageClass());
         assertEquals(pack, hint.getMessageClassPackage());
         assertEquals(null, hint.getResourceBundle());
@@ -116,8 +117,8 @@ public class NLSHintTest extends TestCase {
 			"	private String str=\"whateverKey\".toString();//$NON-NLS-1$\n" +
 			"}\n";
     	ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
-        NLSHolder nlsHolder = NLSHolder.create(cu);
-        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
+        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu, new NLSInfo(cu));
         assertEquals(null, hint.getMessageClass());    	
     }
        
@@ -140,8 +141,8 @@ public class NLSHintTest extends TestCase {
     	ICompilationUnit cu= pack.createCompilationUnit("Wrong.java", klazz2, false, null);
     	cu= pack.createCompilationUnit("Test.java", klazz, false, null);
     	
-        NLSHolder nlsHolder = NLSHolder.create(cu);
-        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
+        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu, new NLSInfo(cu));
         assertEquals(null, hint.getMessageClass());    	
     }
 
@@ -152,8 +153,8 @@ public class NLSHintTest extends TestCase {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         String klazz = "package test;\n" + TEST_KLAZZ;
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
-        NLSHolder nlsHolder = NLSHolder.create(cu);
-        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
+        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu, new NLSInfo(cu));
         assertEquals(null, hint.getMessageClass());
     }
 
@@ -165,8 +166,8 @@ public class NLSHintTest extends TestCase {
         klazz = "package test;\n" + ACCESSOR_KLAZZ;
         pack.createCompilationUnit("TestMessages.java", klazz, false, null);
         
-        NLSHolder nlsHolder = NLSHolder.create(cu);
-        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
+        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu, new NLSInfo(cu));
         assertEquals("TestMessages", hint.getMessageClass());
         assertEquals(pack, hint.getMessageClassPackage());
     }
@@ -177,8 +178,8 @@ public class NLSHintTest extends TestCase {
         
         pack.createCompilationUnit("TestMessages.java", ACCESSOR_KLAZZ, false, null);        
         
-        NLSHolder nlsHolder = NLSHolder.create(cu);
-        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu);        
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
+        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu, new NLSInfo(cu));        
         assertEquals(pack, hint.getMessageClassPackage());
     }
     
@@ -194,8 +195,8 @@ public class NLSHintTest extends TestCase {
         klazz = "package test.foo;\n" + ACCESSOR_KLAZZ;
         fooPackage.createCompilationUnit("TestMessages.java", klazz, false, null);
                 
-        NLSHolder nlsHolder = NLSHolder.create(cu);
-        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
+        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu, new NLSInfo(cu));
         assertEquals(fooPackage, hint.getMessageClassPackage());
     }    
 
@@ -206,8 +207,8 @@ public class NLSHintTest extends TestCase {
         
         klazz = "package test;\n" +ACCESSOR_KLAZZ;        
         pack.createCompilationUnit("TestMessages.java", klazz, false, null);
-        NLSHolder nlsHolder = NLSHolder.create(cu);
-        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
+        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu, new NLSInfo(cu));
         assertEquals("test.properties", hint.getResourceBundle());
     }
     
@@ -230,8 +231,8 @@ public class NLSHintTest extends TestCase {
             "}\n";
         fooPackage.createCompilationUnit("TestMessages.java", klazz, false, null);        
         
-        NLSHolder nlsHolder = NLSHolder.create(cu);
-        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
+        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu, new NLSInfo(cu));
         assertEquals("TestMessages.properties", hint.getResourceBundle());        
     }
     
@@ -247,8 +248,8 @@ public class NLSHintTest extends TestCase {
         fooPackage.createCompilationUnit("TestMessages.java", klazz, false, null);
         
         createResource(pack, "test.properties", "a=0");
-        NLSHolder nlsHolder = NLSHolder.create(cu);
-        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
+        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu, new NLSInfo(cu));
         assertEquals(pack, hint.getResourceBundlePackage());
     }
     
@@ -272,8 +273,8 @@ public class NLSHintTest extends TestCase {
         fooPackage.createCompilationUnit("TestMessages.java", klazz, false, null); 
         
         createResource(fooPackage, "TestMessages.properties", "a=0");
-        NLSHolder nlsHolder = NLSHolder.create(cu);
-        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
+        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu, new NLSInfo(cu));
         assertEquals(fooPackage, hint.getResourceBundlePackage());
     }
     
@@ -282,8 +283,8 @@ public class NLSHintTest extends TestCase {
         String klazz = "package test;\n" + TEST_KLAZZ;
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         
-        NLSHolder nlsHolder = NLSHolder.create(cu);
-        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu);
+        NLSHolder nlsHolder = NLSHolder.create(cu, new NLSInfo(cu));
+        NLSHint hint = new NLSHint(nlsHolder.getSubstitutions(), cu, new NLSInfo(cu));
         assertEquals(pack, hint.getMessageClassPackage());
         assertEquals(pack, hint.getResourceBundlePackage());
     }

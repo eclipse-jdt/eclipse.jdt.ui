@@ -19,6 +19,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 
 public class PropertyFileDocumentModellTest extends TestCase {
 
@@ -54,6 +55,20 @@ public class PropertyFileDocumentModellTest extends TestCase {
         assertEquals("org.eclipse.nls.1=value\n" +
         		"org.eclipse.nls.2=value\n" +
             	"org.eclipse=value\n", props.get());       
+    }
+    
+    public void testInsertIntoDoc2() throws Exception {
+        Document props = new Document( 
+            "org.1=value\n" +
+            "org.2=value\n");
+        PropertyFileDocumentModell modell = new PropertyFileDocumentModell(props);
+        
+        InsertEdit insertEdit = modell.insert("arg.1", "value");
+        insertEdit.apply(props);
+        
+        assertEquals("org.1=value\n" +
+        		"org.2=value\n" +
+            	"arg.1=value\n", props.get());       
     }
     
     public void testManyInsertsIntoDoc() throws Exception {
@@ -184,6 +199,22 @@ public class PropertyFileDocumentModellTest extends TestCase {
                 "org.eclipse.2=value2\n",
 				props.get());
     }        
+    
+    public void testReplacementOfKeyValuePair() throws Exception {
+    	Document props = new Document(
+            "org.eclipse.1=value1\n" +
+            "org.eclipse.2=value2\n" +
+            "org.eclipse.3=value3\n");
+    	PropertyFileDocumentModell modell = new PropertyFileDocumentModell(props);
+    	
+    	ReplaceEdit replaceEdit = modell.replace(new KeyValuePair("org.eclipse.2", "value"), new KeyValuePair("org.1", "value"));
+    	replaceEdit.apply(props);
+    	
+    	assertEquals("org.eclipse.1=value1\n" +
+                "org.1=value\n" +
+                "org.eclipse.3=value3\n",
+				props.get());
+    }
     
     // Escaping stuff
     public void testEscapingOfComments() {

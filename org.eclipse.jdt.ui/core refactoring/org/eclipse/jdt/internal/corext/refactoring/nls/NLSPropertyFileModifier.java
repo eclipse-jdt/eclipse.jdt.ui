@@ -29,8 +29,7 @@ import org.eclipse.text.edits.InsertEdit;
 public class NLSPropertyFileModifier {
 	
 	public static Change create(
-			NLSSubstitution[] nlsSubstitutions, 
-			String substitutionPrefix,
+			NLSSubstitution[] nlsSubstitutions,
 			IPath propertyFilePath) throws CoreException {
 	    
         String name = NLSMessages.getFormattedString("NLSrefactoring.Append_to_property_file", propertyFilePath.toString()); //$NON-NLS-1$
@@ -38,7 +37,7 @@ public class NLSPropertyFileModifier {
         if (!Checks.resourceExists(propertyFilePath)) {
             // TODO: tmp TextChange Object..stupid
             textChange = new DocumentChange(name, new Document());
-            addChanges(textChange, nlsSubstitutions, substitutionPrefix);
+            addChanges(textChange, nlsSubstitutions);
             textChange.perform(new NullProgressMonitor());
             return new CreateTextFileChange(propertyFilePath, textChange.getCurrentContent(), "8859_1", "txt"); //$NON-NLS-1$ //$NON-NLS-2$
         }
@@ -46,7 +45,7 @@ public class NLSPropertyFileModifier {
         textChange = new TextFileChange(name, getPropertyFile(propertyFilePath));
 
         try {
-            addChanges(textChange, nlsSubstitutions, substitutionPrefix);
+            addChanges(textChange, nlsSubstitutions);
         } catch (Exception e) {
             // error while creating some of the changes
         }
@@ -58,37 +57,64 @@ public class NLSPropertyFileModifier {
         return (IFile) (ResourcesPlugin.getWorkspace().getRoot().findMember(propertyFilePath));
     }
 
-    private static void addChanges(TextChange textChange, NLSSubstitution[] substitutions, String prefix) throws CoreException {
-        PropertyFileDocumentModell modell = new PropertyFileDocumentModell(new Document(textChange.getCurrentContent()));
-        addInsertEdits(textChange, substitutions, prefix, modell);        
-        addRemoveEdits(textChange, substitutions, modell);        
+    private static void addChanges(TextChange textChange, NLSSubstitution[] substitutions) throws CoreException {
+        PropertyFileDocumentModell model = new PropertyFileDocumentModell(new Document(textChange.getCurrentContent()));
+        addInsertEdits(textChange, substitutions, model);        
+        addRemoveEdits(textChange, substitutions, model);        
+        addReplaceEdits(textChange, substitutions, model);
     }
     
-    private static void addInsertEdits(TextChange textChange, NLSSubstitution[] substitutions, String prefix, PropertyFileDocumentModell modell) {
-        KeyValuePair[] keyValuePairs = convertSubstitutionsToKeyValue(substitutions, prefix);
+    private static void addReplaceEdits(TextChange textChange, NLSSubstitution[] substitutions, PropertyFileDocumentModell model) {
+        for (int i = 0; i < substitutions.length; i++) {
+            NLSSubstitution substitution = substitutions[i];
+            if (substitution.hasChanged() && !substitution.hasStateChanged()) {
+                if (substitution.getInitialValue() != null) {
+                    KeyValuePair initialPair = new KeyValuePair(substitution.getInitialKey(), substitution.getInitialValue());
+                    KeyValuePair newPair  = new KeyValuePair(substitution.getKey(), substitution.getValue());
+                    TextChangeCompatibility.addTextEdit(textChange, 
+                            "NLSRefactoring.replace_entry", 
+                            model.replace(initialPair, newPair));
+                }
+            }
+        }
+    }
+
+    private static void addInsertEdits(TextChange textChange, NLSSubstitution[] substitutions, PropertyFileDocumentModell modell) {
+        KeyValuePair[] keyValuePairs = convertSubstitutionsToKeyValue(substitutions);
 
         InsertEdit[] inserts = modell.insert(keyValuePairs);
         for (int i = 0; i < inserts.length; i++) {
             String message = NLSMessages.getFormattedString("NLSRefactoring.add_entry", keyValuePairs[i].fKey); //$NON-NLS-1$
             TextChangeCompatibility.addTextEdit(textChange, message, inserts[i]);
         }
+        
+        for (int i = 0; i < substitutions.length; i++) {
+            NLSSubstitution substitution = substitutions[i];
+            if (substitution.hasChanged() && !substitution.hasStateChanged() && (substitution.getInitialValue() == null)) {
+                InsertEdit insert = modell.insert(new KeyValuePair(substitution.getKey(), substitution.getValue()));
+                String message = NLSMessages.getFormattedString("NLSRefactoring.add_entry", substitution.getKey()); //$NON-NLS-1$
+                TextChangeCompatibility.addTextEdit(textChange, message, insert);                
+            }
+        }
     }
  
     private static void addRemoveEdits(TextChange textChange, NLSSubstitution[] substitutions, PropertyFileDocumentModell modell) {
         for (int i = 0; i < substitutions.length; i++) {
             NLSSubstitution substitution = substitutions[i];
-            if (substitution.hasChanged() && (substitution.getOldState() == NLSSubstitution.EXTERNALIZED)) {
-                TextChangeCompatibility.addTextEdit(textChange, "remove property", modell.remove(substitution.getKey()));
+            if (substitution.hasStateChanged() && (substitution.getInitialState() == NLSSubstitution.EXTERNALIZED)) {
+                if (substitution.getInitialValue() != null) {
+                    TextChangeCompatibility.addTextEdit(textChange, "NLSRefactoring.remove_entry", modell.remove(substitution.getKey()));
+                }
             }
         }
     }
 
-    private static KeyValuePair[] convertSubstitutionsToKeyValue(NLSSubstitution[] substitutions, String prefix) {
+    private static KeyValuePair[] convertSubstitutionsToKeyValue(NLSSubstitution[] substitutions) {
         List subs = new ArrayList(substitutions.length);
         for (int i = 0; i < substitutions.length; i++) {
             NLSSubstitution substitution = substitutions[i];
-            if (substitution.hasChanged() && (substitution.fState == NLSSubstitution.EXTERNALIZED)) {
-                subs.add(new KeyValuePair(prefix + substitution.fKey, substitution.fValue));
+            if (substitution.hasStateChanged() && (substitution.getState() == NLSSubstitution.EXTERNALIZED)) {
+                subs.add(new KeyValuePair(substitution.getKey(), substitution.getValue()));
             }
         }
         return (KeyValuePair[]) subs.toArray(new KeyValuePair[subs.size()]);

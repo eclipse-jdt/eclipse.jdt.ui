@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 
 public class PropertyFileDocumentModell {
 
@@ -51,6 +52,19 @@ public class PropertyFileDocumentModell {
             if (keyValuePair.fKey.equals(key)) {
             	KeyValuePairModell next = (KeyValuePairModell) iter.next();
             	return new DeleteEdit(keyValuePair.fOffset, next.fOffset - keyValuePair.fOffset);
+            }            
+        }
+        return null;
+    }
+    
+    public ReplaceEdit replace(KeyValuePair toReplace, KeyValuePair replaceWith) {     
+        for (Iterator iter = fKeyValuePairs.iterator(); iter.hasNext();) {
+            KeyValuePairModell keyValuePair = (KeyValuePairModell) iter.next();
+            if (keyValuePair.fKey.equals(toReplace.getKey())) {
+                String newText = new KeyValuePairModell(replaceWith).getEncodedText();
+                KeyValuePairModell next = (KeyValuePairModell) iter.next();
+                int range = next.fOffset - keyValuePair.fOffset;
+            	return new ReplaceEdit(keyValuePair.fOffset, range, newText);
             }            
         }
         return null;
@@ -149,6 +163,8 @@ public class PropertyFileDocumentModell {
             for (int i=0; i<minLen; i++) {
                 if (key.charAt(i) == fKey.charAt(i)) {
                     counter++;                    
+                } else {
+                    break;
                 }
             }            
             return counter - diffLen;

@@ -32,7 +32,7 @@ public class NLSSourceModifier {
 	private final String fDefaultSubstitution;
 
 	private NLSSourceModifier(String defaultSubstitution,
-		String substitutionPattern, String substitutionPrefix) {		
+		String substitutionPattern) {		
 		fSubstitutionPattern= substitutionPattern;
 		fDefaultSubstitution= defaultSubstitution;					
 	}
@@ -41,14 +41,13 @@ public class NLSSourceModifier {
 			ICompilationUnit cu, 
 			NLSSubstitution[] subs, 
 			String defaultSubstitution,
-			String substitutionPattern, 
-			String substitutionPrefix, 
-			boolean willCreateAccessor, 
+			String substitutionPattern,
+			boolean mustCreateImport, 
 			IPackageFragment accessorPackage,
 			String accessorClassName) throws CoreException {
 
 		NLSSourceModifier sourceModification= 
-		    new NLSSourceModifier(defaultSubstitution, substitutionPattern, substitutionPrefix);
+		    new NLSSourceModifier(defaultSubstitution, substitutionPattern);
 
 		String message= NLSMessages.getFormattedString("NLSRefactoring.externalize_strings", //$NON-NLS-1$
 			cu.getElementName());
@@ -57,32 +56,36 @@ public class NLSSourceModifier {
 		MultiTextEdit multiTextEdit= new MultiTextEdit();
 		change.setEdit(multiTextEdit);
 
-		if (willCreateAccessor) {
+		if (mustCreateImport) {
 			accessorClassName= sourceModification.createImportForAccessor(multiTextEdit, accessorClassName, accessorPackage, cu);
 		}
 		
 		for (int i = 0; i < subs.length; i++) {
             NLSSubstitution substitution = subs[i];
-            if (substitution.hasChanged()) {
+            if (substitution.hasStateChanged()) {
                 if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
-                    if (substitution.getOldState() == NLSSubstitution.INTERNALIZED) { 
-                        sourceModification.addNLS(substitution, change, accessorClassName, substitutionPrefix);
-                    } else if (substitution.getOldState() == NLSSubstitution.IGNORED) {
-                        sourceModification.addAccessor(substitution, change, accessorClassName, substitutionPrefix);                  
+                    if (substitution.getInitialState() == NLSSubstitution.INTERNALIZED) { 
+                        sourceModification.addNLS(substitution, change, accessorClassName);
+                    } else if (substitution.getInitialState() == NLSSubstitution.IGNORED) {
+                        sourceModification.addAccessor(substitution, change, accessorClassName);                  
                     }
                 } else if (substitution.getState() == NLSSubstitution.INTERNALIZED) {
-                    if (substitution.getOldState() == NLSSubstitution.IGNORED) {
+                    if (substitution.getInitialState() == NLSSubstitution.IGNORED) {
                         sourceModification.deleteTag(substitution, change);
-                    } else if (substitution.getOldState() == NLSSubstitution.EXTERNALIZED) {
+                    } else if (substitution.getInitialState() == NLSSubstitution.EXTERNALIZED) {
                         sourceModification.deleteAccessor(substitution, change);
                         sourceModification.deleteTag(substitution, change);
                     }
                 } else if (substitution.getState() == NLSSubstitution.IGNORED) {
-                    if (substitution.getOldState() == NLSSubstitution.INTERNALIZED) {
-                        sourceModification.addNLS(substitution, change, accessorClassName, substitutionPrefix);                        
-                    } else if (substitution.getOldState() == NLSSubstitution.EXTERNALIZED) {
+                    if (substitution.getInitialState() == NLSSubstitution.INTERNALIZED) {
+                        sourceModification.addNLS(substitution, change, accessorClassName);                        
+                    } else if (substitution.getInitialState() == NLSSubstitution.EXTERNALIZED) {
                         sourceModification.deleteAccessor(substitution, change);
                     }                    
+                }
+            } else if (substitution.hasChanged()) {
+                if (substitution.getKey() != substitution.getInitialKey()) {
+                    sourceModification.replaceKey(substitution, change);
                 }
             }
         }   
@@ -90,16 +93,58 @@ public class NLSSourceModifier {
 		return change;
 	}
 
+    private void replaceKey(NLSSubstitution substitution, TextChange change) {
+        TextRegion region = substitution.fNLSElement.getPosition();
+        TextChangeCompatibility.addTextEdit(
+                change, 
+                "", 
+                new ReplaceEdit(region.getOffset(), 
+                        region.getLength(), 
+                        "\"" + unwindEscapeChars(substitution.getKey()) + "\""));
+    }        
+
     private void deleteAccessor(NLSSubstitution substitution, TextChange change) {
         AccessorClassInfo accessorClassInfo = substitution.getAccessorClassInfo();
         if (substitution.getAccessorClassInfo() != null) {
             TextChangeCompatibility.addTextEdit(
                     change, 
                     "", 
-                    new ReplaceEdit(accessorClassInfo.fOffset, 
-                            accessorClassInfo.fLength, 
-                            "\"" + substitution.fValue + "\""));
+                    new ReplaceEdit(accessorClassInfo.fRegion.getOffset(), 
+                            accessorClassInfo.fRegion.getLength(), 
+                            "\"" + unwindEscapeChars(substitution.getValue()) + "\""));
         }           
+    }
+    
+    // TODO: not dry
+    private String unwindEscapeChars(String s){
+        if (s != null) {
+            StringBuffer sb= new StringBuffer(s.length());
+            int length= s.length();
+            for (int i= 0; i < length; i++){
+                char c= s.charAt(i);
+                sb.append(getUnwoundString(c));
+            }
+            return sb.toString();
+        } 
+        return null;
+    }
+    
+    private String getUnwoundString(char c){
+    	switch(c){
+    		case '\b' :
+    			return "\\b";//$NON-NLS-1$
+    		case '\t' :
+    			return "\\t";//$NON-NLS-1$
+    		case '\n' :
+    			return "\\n";//$NON-NLS-1$
+    		case '\f' :
+    			return "\\f";//$NON-NLS-1$	
+    		case '\r' :
+    			return "\\r";//$NON-NLS-1$
+    		case '\\' :
+    			return "\\\\";//$NON-NLS-1$
+    	}
+    	return String.valueOf(c);
     }
 
     private void deleteTag(NLSSubstitution substitution, TextChange change) {
@@ -133,13 +178,12 @@ public class NLSSourceModifier {
 				TextBuffer.release(buffer);
 			}
 		}
-
 	}
 
-	private void addNLS(NLSSubstitution sub, TextChange change, String accessorName, String substitutionPrefix) {
-        if (sub.fState == NLSSubstitution.INTERNALIZED) return;
+	private void addNLS(NLSSubstitution sub, TextChange change, String accessorName) {
+        if (sub.getState() == NLSSubstitution.INTERNALIZED) return;
         
-        String text = addAccessor(sub, change, accessorName, substitutionPrefix);
+        String text = addAccessor(sub, change, accessorName);
         
         NLSElement element = sub.fNLSElement;
         String[] args = { text, element.getValue()};
@@ -147,12 +191,12 @@ public class NLSSourceModifier {
         TextChangeCompatibility.addTextEdit(change, name, createAddTagChange(element));
     }
     
-    private String addAccessor(NLSSubstitution sub, TextChange change, String accessorName, String substitutionPrefix) {
+    private String addAccessor(NLSSubstitution sub, TextChange change, String accessorName) {
         TextRegion position = sub.fNLSElement.getPosition();
         String text = NLSMessages.getFormattedString("NLSrefactoring.extrenalize_string", sub.fNLSElement.getValue()); //$NON-NLS-1$
         
-        if (sub.fState == NLSSubstitution.EXTERNALIZED) {
-            String resourceGetter = createResourceGetter(sub.getKeyWithPrefix(substitutionPrefix), accessorName);
+        if (sub.getState() == NLSSubstitution.EXTERNALIZED) {
+            String resourceGetter = createResourceGetter(sub.getKey(), accessorName);
             TextChangeCompatibility.addTextEdit(change, text, new ReplaceEdit(position.getOffset(), 
                     position.getLength(), 
                     resourceGetter));

@@ -27,31 +27,25 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
  * <code>NLSLine</code> elements for a given <code>ICompilationUnit</code>.  
  */
 public class NLSHolder {	
-	private NLSSubstitution[] fSubstitutions;
-	private NLSLine[] fLines;
+	private NLSSubstitution[] fSubstitutions;	
 	
 	// Property Files are cached here.
 	private static Map propertyMap = new HashMap();
 	
 	//clients create instances by using the factory method
-	private NLSHolder(NLSSubstitution[] substitutions, NLSLine[] lines, ICompilationUnit cu) {
-		fSubstitutions= substitutions;
-		fLines= lines;
+	private NLSHolder(NLSSubstitution[] substitutions) {
+		fSubstitutions= substitutions;		
 		propertyMap.clear();
 	}
 
-	public static NLSHolder create(ICompilationUnit cu){
+	public static NLSHolder create(ICompilationUnit cu, NLSInfo nlsInfo){
 		NLSLine[] nlsLines= createRawLines(cu);
-		NLSSubstitution[] subs = createNLSSubstitutions(nlsLines, cu);
-		return new NLSHolder(subs, nlsLines, cu);
+		NLSSubstitution[] subs = createNLSSubstitutions(nlsLines, nlsInfo);
+		return new NLSHolder(subs);
 	}
 
 	public NLSSubstitution[] getSubstitutions(){
 		return fSubstitutions;
-	}
-	
-	public NLSLine[] getLines(){
-		return fLines;
 	}
 	
 	private static NLSLine[] createRawLines(ICompilationUnit cu){
@@ -64,8 +58,7 @@ public class NLSHolder {
 		}		
 	}	
 	
-	private static NLSSubstitution[] createNLSSubstitutions(NLSLine[] lines, ICompilationUnit cu) {
-	    NLSInfo nlsInfo = new NLSInfo(cu);
+	private static NLSSubstitution[] createNLSSubstitutions(NLSLine[] lines, NLSInfo nlsInfo) {	    
 		List result= new ArrayList();		
 		for (int i = 0; i < lines.length; i++) {
 			NLSElement[] elements= lines[i].getElements();
@@ -93,7 +86,7 @@ public class NLSHolder {
 						        }
 						    }
 						}
-						String value = "";
+						String value = null;
 						if (props != null) {
 						    value = props.getProperty(key);
 						}

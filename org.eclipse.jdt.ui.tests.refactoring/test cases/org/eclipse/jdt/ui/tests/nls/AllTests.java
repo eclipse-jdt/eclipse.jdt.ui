@@ -29,6 +29,7 @@ public class AllTests {
         suite.addTest(NlsRefactoringCheckInitialConditionsTest.allTests());
         suite.addTest(NlsRefactoringCheckFinalConditionsTest.allTests());
         suite.addTest(NlsRefactoringCreateChangeTest.allTests());
+        suite.addTest(NLSSourceModifierTest.allTests());
         suite.addTest(NLSHintTest.allTests());
         suite.addTest(PropertyFileDocumentModellTest.suite());
         suite.addTest(SimpleLineReaderTest.suite());
