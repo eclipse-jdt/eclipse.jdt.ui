@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -26,6 +27,7 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.FilteredList;
 import org.eclipse.ui.dialogs.TwoPaneElementSelector;
 
@@ -36,6 +38,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
@@ -176,39 +179,38 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	 */
 	public int open() {
 		final ArrayList typeList= new ArrayList();
-		if (AllTypesCache.isCacheUpToDate()) {
-			// run without progress monitor
-			try {
-				AllTypesCache.getTypes(fScope, fElementKinds, null, typeList);
-			} catch (JavaModelException e) {
-				ExceptionHandler.handle(e, JavaUIMessages.getString("TypeSelectionDialog.error2Title"), JavaUIMessages.getString("TypeSelectionDialog.error2Message")); //$NON-NLS-1$ //$NON-NLS-2$
-				return CANCEL;
-			}
-		} else {
-			IRunnableWithProgress runnable= new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						AllTypesCache.getTypes(fScope, fElementKinds, monitor, typeList);
-					} catch (JavaModelException e) {
-						throw new InvocationTargetException(e);
-					}
-					if (monitor.isCanceled()) {
-						throw new InterruptedException();
-					}
+		try {
+			if (isCacheUpToDate()) {
+				// run without progress monitor
+				try {
+					AllTypesCache.getTypes(fScope, fElementKinds, null, typeList);
+				} catch (JavaModelException e) {
+					ExceptionHandler.handle(e, JavaUIMessages.getString("TypeSelectionDialog.error2Title"), JavaUIMessages.getString("TypeSelectionDialog.error2Message")); //$NON-NLS-1$ //$NON-NLS-2$
+					return CANCEL;
 				}
-			};
-
-			try {
+			} else {
+				IRunnableWithProgress runnable= new IRunnableWithProgress() {
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						try {
+							AllTypesCache.getTypes(fScope, fElementKinds, monitor, typeList);
+						} catch (JavaModelException e) {
+							throw new InvocationTargetException(e);
+						}
+						if (monitor.isCanceled()) {
+							throw new InterruptedException();
+						}
+					}
+				};
 				fRunnableContext.run(true, true, runnable);
-			} catch (InvocationTargetException e) {
-				ExceptionHandler.handle(e, JavaUIMessages.getString("TypeSelectionDialog.error3Title"), JavaUIMessages.getString("TypeSelectionDialog.error3Message")); //$NON-NLS-1$ //$NON-NLS-2$
-				return CANCEL;
-			} catch (InterruptedException e) {
-				// cancelled by user
-				return CANCEL;
 			}
+		} catch (InvocationTargetException e) {
+			ExceptionHandler.handle(e, JavaUIMessages.getString("TypeSelectionDialog.error3Title"), JavaUIMessages.getString("TypeSelectionDialog.error3Message")); //$NON-NLS-1$ //$NON-NLS-2$
+			return CANCEL;
+		} catch (InterruptedException e) {
+			// cancelled by user
+			return CANCEL;
 		}
-		
+			
 		if (typeList.isEmpty()) {
 			String title= JavaUIMessages.getString("TypeSelectionDialog.notypes.title"); //$NON-NLS-1$
 			String message= JavaUIMessages.getString("TypeSelectionDialog.notypes.message"); //$NON-NLS-1$
@@ -253,4 +255,18 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 		}
 	}
 	
+	private boolean isCacheUpToDate() throws InvocationTargetException, InterruptedException {
+		final boolean result[]= new boolean[1];
+		IRunnableWithProgress runnable= new IRunnableWithProgress() {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+				try {
+					result[0]= AllTypesCache.isCacheUpToDate(monitor);
+				} catch (OperationCanceledException e) {
+					throw new InterruptedException(e.getMessage());
+				}
+			}
+		};
+		PlatformUI.getWorkbench().getProgressService().run(true, true, runnable);
+		return result[0];
+	}
 }
