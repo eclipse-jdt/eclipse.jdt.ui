@@ -405,6 +405,7 @@ public class JavaIndenter {
 			} else {
 				indentBlockLess= false;
 				hasBrace= true;
+				return fPosition;
 			}
 		}
 		
@@ -490,8 +491,7 @@ public class JavaIndenter {
 				
 				case Symbols.TokenCOLON: // switch statements and labels
 					if (searchCaseGotoDefault()) {
-						if (!hasBrace || matchBrace)
-							fIndent++;
+						fIndent++;
 						return fPosition;
 					}
 					break;
@@ -508,7 +508,6 @@ public class JavaIndenter {
 				case Symbols.TokenLBRACE:
 				
 					int searchPos= fPreviousPos;
-					int bracePos= fPosition;
 					
 					// special array handling
 					nextToken();
@@ -543,7 +542,7 @@ public class JavaIndenter {
 					
 					// indent when searching over an LBRACE
 					fIndent++;
-					return bracePos;
+					break;
 					
 				case Symbols.TokenSEMICOLON:
 					// search start of code forward or continue
