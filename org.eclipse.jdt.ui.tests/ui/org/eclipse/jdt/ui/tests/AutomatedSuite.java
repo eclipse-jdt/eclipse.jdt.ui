@@ -25,6 +25,7 @@ import org.eclipse.jdt.ui.tests.packageview.ContentProviderTests4;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
 import org.eclipse.jdt.ui.tests.text.HTML2TextReaderTester;
 import org.eclipse.jdt.ui.tests.text.JavaDoc2HTMLTextReaderTester;
+import org.eclipse.jdt.ui.tests.text.JavaHeuristicScannerTest;
 import org.eclipse.jdt.ui.tests.wizardapi.NewJavaProjectWizardTest;
 
 
@@ -62,6 +63,8 @@ public class AutomatedSuite extends TestSuite {
 		addTest(PackagesViewDeltaTests.suite());
 		
 		addTest(CallHierarchyContentProviderTest.suite());
+		
+		addTest(JavaHeuristicScannerTest.suite());
 	}
 	
 }
