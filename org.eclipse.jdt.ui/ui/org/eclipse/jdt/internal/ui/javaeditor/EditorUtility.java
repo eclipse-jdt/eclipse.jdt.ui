@@ -329,4 +329,41 @@ public class EditorUtility {
 
 		return 0;
 	}
+
+	/**
+	 * Returns the modifier string for the given SWT modifier
+	 * modifier bits.
+	 * 
+	 * @param stateMask	the SWT modifier bits
+	 * @return the modifier string
+	 * @since 2.1.1
+	 */
+	public static String getModifierString(int stateMask) {
+		String modifierString= ""; //$NON-NLS-1$
+		if ((stateMask & SWT.CTRL) == SWT.CTRL)
+			modifierString= appendModifierString(modifierString, SWT.CTRL);
+		if ((stateMask & SWT.ALT) == SWT.ALT)
+			modifierString= appendModifierString(modifierString, SWT.ALT);
+		if ((stateMask & SWT.SHIFT) == SWT.SHIFT)
+			modifierString= appendModifierString(modifierString, SWT.SHIFT);
+		if ((stateMask & SWT.COMMAND) == SWT.COMMAND)
+			modifierString= appendModifierString(modifierString,  SWT.COMMAND);
+		
+		return modifierString;
+	}
+
+	/**
+	 * Appends to modifier string of the given SWT modifier bit
+	 * to the given modifierString.
+	 * 
+	 * @param modifierString	the modifier string
+	 * @param modifier			an int with SWT modifier bit
+	 * @return the concatenated modifier string
+	 * @since 2.1.1
+	 */
+	private static String appendModifierString(String modifierString, int modifier) {
+		if (modifierString == null)
+			modifierString= ""; //$NON-NLS-1$
+		return JavaEditorMessages.getFormattedString("EditorUtility.concatModifierStrings", new String[] {modifierString, Action.findModifierString(modifier)}); //$NON-NLS-1$
+	}
 }
