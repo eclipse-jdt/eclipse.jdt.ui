@@ -22,10 +22,12 @@ import org.eclipse.compare.rangedifferencer.RangeDifferencer;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
+import org.eclipse.jdt.internal.corext.refactoring.changes.enhanced.*;
+//import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+//import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+//import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
+//import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
+import org.eclipse.jdt.internal.corext.textmanipulation.enhanced.*;
 
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -33,20 +35,20 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
 
 
-public class CUCorrectionProposal extends ChangeCorrectionProposal {
+public class CUCorrectionProposalEnhanced extends ChangeCorrectionProposal {
 
 	private boolean fIsInitialized;
 
-	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance) throws CoreException {
+	public CUCorrectionProposalEnhanced(String name, ICompilationUnit cu, int relevance) throws CoreException {
 		this(name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}
 	
-	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image) throws CoreException {
+	public CUCorrectionProposalEnhanced(String name, ICompilationUnit cu, int relevance, Image image) throws CoreException {
 		super(name, createCompilationUnitChange(name, cu, false), relevance, image);
 		fIsInitialized= false;
 	}
 	
-	public CUCorrectionProposal(String name, CompilationUnitChange change, int relevance) throws CoreException {
+	public CUCorrectionProposalEnhanced(String name, CompilationUnitChange change, int relevance) throws CoreException {
 		super(name, change, relevance);
 		change.setTrackPositionChanges(true);
 		fIsInitialized= true;

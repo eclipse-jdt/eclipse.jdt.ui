@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-public final class MoveTargetEdit extends AbstractTransferEdit {
+public class MoveTargetEdit extends AbstractTransferEdit {
 
 	private MoveSourceEdit fSource;
 
@@ -49,7 +49,7 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 	public void perform(TextBuffer buffer) throws CoreException {
 		if (++fSource.fCounter == 2) {
 			try {
-				String source= fSource.getContent();
+				String source= getSourceContent();
 	
 				if (!getTextRange().isDeleted()) {
 					// Insert target
@@ -68,6 +68,13 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 			}
 		}
 	}
+	
+	/**
+	 * Gets the content from the source edit.
+	 */
+	protected String getSourceContent() {
+		return fSource.getContent();
+	}	
 
 	/* non Java-doc
 	 * @see TextEdit#copy

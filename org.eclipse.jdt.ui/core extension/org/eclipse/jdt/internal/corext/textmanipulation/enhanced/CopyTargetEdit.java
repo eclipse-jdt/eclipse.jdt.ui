@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.corext.textmanipulation.enhanced;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
-public final class CopyTargetEdit extends AbstractTransferEdit {
+public class CopyTargetEdit extends AbstractTransferEdit {
 
 	private CopySourceEdit fSource;
 
@@ -47,12 +47,20 @@ public final class CopyTargetEdit extends AbstractTransferEdit {
 	public void perform(TextBuffer buffer) throws CoreException {
 		if (++fSource.fCounter == 2 && !getTextRange().isDeleted()) {
 			try {
-				buffer.replace(getTextRange(), fSource.getContent());
+				buffer.replace(getTextRange(), getSourceContent());
 			} finally {
 				fSource.clearContent();
 			}
 		}
 	}
+	
+	/**
+	 * Gets the content from the source edit.
+	 */
+	protected String getSourceContent() {
+		return fSource.getContent();
+	}
+	
 	
 	/* package */ IStatus checkEdit(int bufferLength) {
 		IStatus s= super.checkEdit(bufferLength);
