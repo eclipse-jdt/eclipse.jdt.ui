@@ -169,6 +169,25 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(5, 20, 5, 23, true, false, "temp");
 	}	
 	
+	public void test20() throws Exception{
+		printTestDisabledMessage("single method call not used as an expression");
+//		helper1(5, 9, 5, 12, false, false, "temp");
+	}	
+	
+	public void test21() throws Exception{
+		printTestDisabledMessage("single method call not used as an expression");	
+//		helper1(5, 16, 5, 17, false, false, "temp");
+	}	
+	
+	public void test22() throws Exception{
+		printTestDisabledMessage("single method call not used as an expression");	
+//		helper1(6, 13, 6, 16, false, false, "temp");
+	}	
+
+	public void test23() throws Exception{
+		helper1(7, 17, 7, 20, false, false, "temp");
+	}		
+	
 	// -- testing failing preconditions
 	public void testFail0() throws Exception{
 		failHelper1(5, 16, 5, 17, false, false, "temp");
