@@ -1,7 +1,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -13,12 +12,14 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 
-public class ASTNodeMappingManager {
+class ASTNodeMappingManager {
 
 	private final Map fCUsToCuNodes;
+	private final Map fCuNodesToCus;
 	
 	public ASTNodeMappingManager() {
 		fCUsToCuNodes= new HashMap();
+		fCuNodesToCus= new HashMap();
 	}
 
 	public CompilationUnit getAST(ICompilationUnit cu){
@@ -28,23 +29,22 @@ public class ASTNodeMappingManager {
 		}	
 		CompilationUnit cuNode= AST.parseCompilationUnit(wc, true);
 		fCUsToCuNodes.put(wc, cuNode);
+		fCuNodesToCus.put(cuNode, wc);
 		return cuNode;	
 	}
 	
 	public ICompilationUnit getCompilationUnit(ASTNode node) {
 		CompilationUnit cuNode= (CompilationUnit)ASTNodes.getParent(node, CompilationUnit.class);
-		Assert.isTrue(fCUsToCuNodes.containsValue(cuNode)); //the cu node must've been created before
-		
-		for (Iterator iter= fCUsToCuNodes.keySet().iterator(); iter.hasNext();) {
-			ICompilationUnit cu= (ICompilationUnit) iter.next();
-			if (fCUsToCuNodes.get(cu) == cuNode)
-				return cu;
-		}	
-		Assert.isTrue(false); //checked before
-		return null;
+		Assert.isTrue(fCuNodesToCus.containsKey(cuNode)); //the cu node must've been created before
+		return (ICompilationUnit)fCuNodesToCus.get(cuNode);
 	}
 
 	public ICompilationUnit[] getAllCompilationUnits(){
 		return (ICompilationUnit[]) fCUsToCuNodes.keySet().toArray(new ICompilationUnit[fCUsToCuNodes.keySet().size()]);
+	}
+	
+	public void clear(){
+		fCuNodesToCus.clear();
+		fCUsToCuNodes.clear();
 	}
 }
