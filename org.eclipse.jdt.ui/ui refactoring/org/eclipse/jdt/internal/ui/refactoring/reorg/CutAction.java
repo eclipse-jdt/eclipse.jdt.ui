@@ -128,7 +128,7 @@ public class CutAction extends SelectionDispatchAction{
 	private void runDelete(IStructuredSelection selection) throws CoreException, InterruptedException, InvocationTargetException {
 		Object[] elements= selection.toArray();
 		DeleteRefactoring refactoring= createRefactoring(elements);
-		Assert.isTrue(refactoring.isAvailable());
+		Assert.isTrue(refactoring.isApplicable());
 		IRunnableContext context= new ProgressMonitorDialog(getShell());
 		JavaDeleteProcessor processor= (JavaDeleteProcessor)refactoring.getAdapter(JavaDeleteProcessor.class);
 		if (processor != null)

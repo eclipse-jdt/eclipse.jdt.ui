@@ -195,7 +195,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		}
 		List result= new ArrayList();
 		for (Iterator iter= collected.iterator(); iter.hasNext();) {
-			result.addAll(Arrays.asList(ParticipantManager.getDeleteParticipants(this, 
+			result.addAll(Arrays.asList(ParticipantManager.loadDeleteParticipants(this, 
 				iter.next(), new DeleteArguments(), 
 				natures, shared)));
 		}

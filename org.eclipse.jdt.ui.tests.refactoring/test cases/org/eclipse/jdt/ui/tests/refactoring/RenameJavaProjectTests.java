@@ -59,7 +59,7 @@ public class RenameJavaProjectTests extends RefactoringTest {
 			String[] handles= ParticipantTesting.createHandles(p1, p1.getResource());
 			RenameJavaProjectProcessor processor= new RenameJavaProjectProcessor(p1);
 			RenameRefactoring ref= new RenameRefactoring(processor);
-			assertTrue(ref.isAvailable());
+			assertTrue(ref.isApplicable());
 			processor.setNewElementName(newProjectName);
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("not expected to fail", null, result);

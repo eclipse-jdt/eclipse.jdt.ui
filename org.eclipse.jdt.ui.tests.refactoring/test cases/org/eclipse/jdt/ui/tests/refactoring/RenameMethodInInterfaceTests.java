@@ -49,7 +49,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		
 		RenameProcessor processor= new RenameVirtualMethodProcessor(interfaceI.getMethod(methodName, signatures));
 		RenameRefactoring ref= new RenameRefactoring(processor);
-		assertTrue(! ref.isAvailable());
+		assertTrue(! ref.isApplicable());
 	}
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");

@@ -127,7 +127,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 	private void addParticipants(List result, IMethod method, String methodName, String[] natures, SharableParticipants shared) throws CoreException {
 		RenameArguments args= new RenameArguments(methodName, getUpdateReferences());
-		RenameParticipant[] participants= ParticipantManager.getRenameParticipants(this, method, args, natures, shared);
+		RenameParticipant[] participants= ParticipantManager.loadRenameParticipants(this, method, args, natures, shared);
 		result.addAll(Arrays.asList(participants));
 	}
 

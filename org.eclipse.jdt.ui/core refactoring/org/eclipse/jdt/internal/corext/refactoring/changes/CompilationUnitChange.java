@@ -65,10 +65,10 @@ public class CompilationUnitChange extends TextFileChange {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IDocument aquireDocument(IProgressMonitor pm) throws CoreException {
+	protected IDocument acquireDocument(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		fCUnit.becomeWorkingCopy(null, new SubProgressMonitor(pm, 1));
-		return super.aquireDocument(new SubProgressMonitor(pm, 1));
+		return super.acquireDocument(new SubProgressMonitor(pm, 1));
 	}
 	
 	/**

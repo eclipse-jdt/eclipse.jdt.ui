@@ -1239,7 +1239,7 @@ class ReorgPolicyFactory {
 				IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 				for (int i= 0; i < roots.length; i++) {
 					IPackageFragmentRoot root= roots[i];
-					result.addAll(Arrays.asList(ParticipantManager.getMoveParticipants(processor, 
+					result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(processor, 
 						root, new MoveArguments(destination, updateReferences), 
 						natures, shared)));
 					if (root.getResource() != null && destination.getResource() != null)
@@ -1329,7 +1329,7 @@ class ReorgPolicyFactory {
 			IPackageFragmentRoot javaDestination= getDestinationAsPackageFragmentRoot();
 			for (int i= 0; i < packages.length; i++) {
 				IPackageFragment pack= packages[i];
-				result.addAll(Arrays.asList(ParticipantManager.getMoveParticipants(processor, 
+				result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(processor, 
 					pack, new MoveArguments(javaDestination, updateReferences), 
 					natures, shared)));
 				IResource resourceDestination= javaDestination.getResource();
@@ -1453,13 +1453,13 @@ class ReorgPolicyFactory {
 				ICompilationUnit[] units= getCus();
 				for (int i= 0; i < units.length; i++) {
 					ICompilationUnit unit= units[i];
-					result.addAll(Arrays.asList(ParticipantManager.getMoveParticipants(processor, 
+					result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(processor, 
 						unit, new MoveArguments(unitDestination, updateReferenes), 
 						natures, shared)));
 					IType[] types= unit.getTypes();
 					for (int tt= 0; tt < types.length; tt++) {
 						IType type= types[tt];
-						derived.addAll(Arrays.asList(ParticipantManager.getMoveParticipants(processor, 
+						derived.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(processor, 
 							type, new MoveArguments(unitDestination, updateReferenes), 
 							natures, shared)));
 					}
@@ -1472,14 +1472,14 @@ class ReorgPolicyFactory {
 				IFile[] files= getFiles();
 				for (int i= 0; i < files.length; i++) {
 					IFile file= files[i];
-					result.addAll(Arrays.asList(ParticipantManager.getMoveParticipants(processor, 
+					result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(processor, 
 						file, new MoveArguments(container, updateReferenes), 
 						natures, shared)));
 				}
 				IFolder[] folders= getFolders();
 				for (int i= 0; i < folders.length; i++) {
 					IFolder folder= folders[i];
-					result.addAll(Arrays.asList(ParticipantManager.getMoveParticipants(processor, 
+					result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(processor, 
 						folder, new MoveArguments(container, updateReferenes), 
 						natures, shared)));
 				}

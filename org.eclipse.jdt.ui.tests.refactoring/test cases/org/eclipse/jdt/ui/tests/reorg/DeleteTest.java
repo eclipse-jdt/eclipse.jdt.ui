@@ -68,13 +68,13 @@ public class DeleteTest extends RefactoringTest{
 	private void verifyDisabled(Object[] elements) throws CoreException {
 		JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
 		DeleteRefactoring ref= new DeleteRefactoring(processor);
-		assertTrue("delete should be disabled", !ref.isAvailable());
+		assertTrue("delete should be disabled", !ref.isApplicable());
 	}
 
 	private void verifyEnabled(Object[] elements) throws CoreException {
 		JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
 		DeleteRefactoring ref= new DeleteRefactoring(processor);
-		assertTrue("delete should be enabled", ref.isAvailable());
+		assertTrue("delete should be enabled", ref.isApplicable());
 	}
 
 	private IPackageFragmentRoot getArchiveRoot() throws JavaModelException, Exception {

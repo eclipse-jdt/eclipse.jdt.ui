@@ -111,7 +111,7 @@ public class RenameResourceProcessor extends RenameProcessor implements INameUpd
 		List result= new ArrayList();
 		RenameArguments arguments= new RenameArguments(getNewElementName(), getUpdateReferences());
 		for (int i= 0; i < elements.length; i++) {
-			result.addAll(Arrays.asList(ParticipantManager.getRenameParticipants(this, 
+			result.addAll(Arrays.asList(ParticipantManager.loadRenameParticipants(this, 
 				elements[i], arguments,
 				natures, shared)));
 		}

@@ -20,15 +20,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.ltk.core.refactoring.participants.CopyArguments;
-import org.eclipse.ltk.core.refactoring.participants.CopyParticipant;
 import org.eclipse.ltk.core.refactoring.participants.CreateArguments;
 import org.eclipse.ltk.core.refactoring.participants.CreateParticipant;
 import org.eclipse.ltk.core.refactoring.participants.DeleteArguments;
 import org.eclipse.ltk.core.refactoring.participants.DeleteParticipant;
-import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.MoveParticipant;
+import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
@@ -47,9 +45,6 @@ public class ResourceModifications {
 	
 	private List fMove;
 	private List fMoveArguments;
-	
-	private List fCopy;
-	private List fCopyArguments;
 	
 	private IResource fRename;
 	private RenameArguments fRenameArguments;
@@ -78,21 +73,6 @@ public class ResourceModifications {
 		fDelete.add(delete);
 	}
 	
-	/**
-	 * Adds the given resource to the list of resources
-	 * to be copied.
-	 * 
-	 * @param copy the resource to be copied
-	 */
-	public void addCopy(IResource copy, CopyArguments arguments) {
-		if (fCopy == null) {
-			fCopy= new ArrayList(2);
-			fCopyArguments= new ArrayList(2);
-		}
-		fCopy.add(copy);
-		fCopyArguments.add(arguments);
-	}
-
 	/**
 	 * Adds the given resource to the list of resources
 	 * to be moved.
@@ -130,7 +110,7 @@ public class ResourceModifications {
 		if (fDelete != null) {
 			DeleteArguments arguments= new DeleteArguments();
 			for (Iterator iter= fDelete.iterator(); iter.hasNext();) {
-				DeleteParticipant[] deletes= ParticipantManager.getDeleteParticipants(processor, 
+				DeleteParticipant[] deletes= ParticipantManager.loadDeleteParticipants(processor, 
 					iter.next(), arguments, 
 					natures, shared);
 				result.addAll(Arrays.asList(deletes));
@@ -139,7 +119,7 @@ public class ResourceModifications {
 		if (fCreate != null) {
 			CreateArguments arguments= new CreateArguments();
 			for (Iterator iter= fCreate.iterator(); iter.hasNext();) {
-				CreateParticipant[] creates= ParticipantManager.getCreateParticipants(processor, 
+				CreateParticipant[] creates= ParticipantManager.loadCreateParticipants(processor, 
 					iter.next(), arguments, 
 					natures, shared);
 				result.addAll(Arrays.asList(creates));
@@ -149,25 +129,27 @@ public class ResourceModifications {
 			for (int i= 0; i < fMove.size(); i++) {
 				Object element= fMove.get(i);
 				MoveArguments arguments= (MoveArguments)fMoveArguments.get(i);
-				MoveParticipant[] moves= ParticipantManager.getMoveParticipants(processor, 
+				MoveParticipant[] moves= ParticipantManager.loadMoveParticipants(processor, 
 					element, arguments, 
 					natures, shared);
 				result.addAll(Arrays.asList(moves));
 				
 			}
 		}
+		/*
 		if (fCopy != null) {
 			for (int i= 0; i < fCopy.size(); i++) {
 				Object element= fCopy.get(i);
 				CopyArguments arguments= (CopyArguments)fCopyArguments.get(i);
-				CopyParticipant[] copies= ParticipantManager.getCopyParticipants(processor, 
+				CopyParticipant[] copies= ParticipantManager.loadCopyParticipants(processor, 
 					element, arguments, 
 					natures, shared);
 				result.addAll(Arrays.asList(copies));
 			}
 		}
+		*/
 		if (fRename != null) {
-			RenameParticipant[] renames= ParticipantManager.getRenameParticipants(processor, 
+			RenameParticipant[] renames= ParticipantManager.loadRenameParticipants(processor, 
 				fRename, fRenameArguments, 
 				natures, shared);
 			result.addAll(Arrays.asList(renames));

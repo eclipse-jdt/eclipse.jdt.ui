@@ -42,7 +42,7 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements INa
 	protected void loadElementParticipants(List result, RenameArguments arguments, String[] natures, SharableParticipants shared) throws CoreException {
 		Object[] elements= getElements();
 		for (int i= 0; i < elements.length; i++) {
-			result.addAll(Arrays.asList(ParticipantManager.getRenameParticipants(this, 
+			result.addAll(Arrays.asList(ParticipantManager.loadRenameParticipants(this, 
 				elements[i],  arguments,
 				natures, shared)));
 		}
@@ -54,7 +54,7 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements INa
 			ResourceModifications resourceModifications, String[] natures, SharableParticipants shared) throws CoreException {
 		if (derivedElements != null) {
 			for (int i= 0; i < derivedElements.length; i++) {
-				RenameParticipant[] participants= ParticipantManager.getRenameParticipants(this, 
+				RenameParticipant[] participants= ParticipantManager.loadRenameParticipants(this, 
 					derivedElements[i], arguments, 
 					natures, shared);
 				result.addAll(Arrays.asList(participants));

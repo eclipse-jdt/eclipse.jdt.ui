@@ -46,7 +46,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
 		RenameMethodProcessor processor= new RenameVirtualMethodProcessor(classA.getMethod(methodName, signatures));
 		RenameRefactoring ref= new RenameRefactoring(processor);
-		assertTrue(! ref.isAvailable());
+		assertTrue(! ref.isApplicable());
 	}	
 	
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
