@@ -1108,4 +1108,32 @@ public class PushDownTests extends RefactoringTest {
 		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
 	}
 
+	public void testEnablement0() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeA= cu.getType("A");
+		IMember[] members= {typeA};
+		assertTrue("should be enabled", PushDownRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement1() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeA= cu.getType("A");
+		IMember[] members= {typeA};
+		assertTrue("should be disabled", ! PushDownRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement2() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("Outer").getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be disabled", ! PushDownRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement3() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeA= cu.getType("A");
+		IType typeB= cu.getType("B");
+		IMember[] members= {typeA, typeB};
+		assertTrue("should be disabled", ! PushDownRefactoring.isAvailable(members));
+	}
 }
