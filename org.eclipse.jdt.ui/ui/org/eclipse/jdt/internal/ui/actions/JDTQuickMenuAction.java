@@ -39,7 +39,7 @@ public abstract class JDTQuickMenuAction extends QuickMenuAction {
 	protected Point computeMenuLocation(StyledText text) {
 		if (fEditor == null || text != fEditor.getViewer().getTextWidget())
 			return null;
-		return fEditor.getViewer().getTextWidget().toDisplay(computeWordStart());
+		return computeWordStart();
 	}
 	
 	private Point computeWordStart() {
@@ -53,6 +53,8 @@ public abstract class JDTQuickMenuAction extends QuickMenuAction {
 		Point result= styledText.getLocationAtOffset(start);
 		result.y+= styledText.getLineHeight();
 		
+		if (!styledText.getClientArea().contains(result))
+			return null;
 		return result;
 	}
 	

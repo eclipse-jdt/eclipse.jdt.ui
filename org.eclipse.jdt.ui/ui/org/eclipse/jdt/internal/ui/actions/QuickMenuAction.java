@@ -65,12 +65,12 @@ public abstract class QuickMenuAction extends Action {
 		if (focus == null || focus.isDisposed())
 			return;
 		
-		Point location= computeMenuLocation(focus);
-		if (location == null)
-			return;
 		MenuManager menu= new MenuManager();
 		fillMenu(menu);
 		final Menu widget= menu.createContextMenu(focus.getShell());
+		Point location= computeMenuLocation(focus, widget);
+		if (location == null)
+			return;
 		widget.setLocation(location);
 		widget.setVisible(true);
 	}
@@ -101,15 +101,38 @@ public abstract class QuickMenuAction extends Action {
 		return null; //$NON-NLS-1$
 	}
 	
-	private Point computeMenuLocation(Control focus) {
+	private Point computeMenuLocation(Control focus, Menu menu) {
+		Point cursorLocation= focus.getDisplay().getCursorLocation();
+		Rectangle clientArea= null;
+		Point result= null;
 		if (focus instanceof StyledText) {
-			return computeMenuLocation((StyledText)focus);
+			StyledText styledText= (StyledText)focus;
+			clientArea= styledText.getClientArea();
+			result= computeMenuLocation(styledText);
 		} else if (focus instanceof Tree) {
-			return computeMenuLocation((Tree)focus);
+			Tree tree= (Tree)focus;
+			clientArea= tree.getClientArea();
+			result= computeMenuLocation(tree);
 		} else if (focus instanceof Table) {
-			return computeMenuLocation((Table)focus);
+			Table table= (Table)focus;
+			clientArea= table.getClientArea();
+			result= computeMenuLocation(table);
 		}
-		return null;
+		if (result == null) {
+			result= focus.toControl(cursorLocation);
+		}
+		if (clientArea != null && !clientArea.contains(result)) {
+			result= new Point(
+				clientArea.x + clientArea.width  / 2, 
+				clientArea.y + clientArea.height / 2);
+		}
+		Rectangle shellArea= focus.getShell().getClientArea();
+		if (!shellArea.contains(focus.getShell().toControl(focus.toDisplay(result)))) {
+			result= new Point(
+				shellArea.x + shellArea.width  / 2,
+				shellArea.y + shellArea.height / 2);
+		}
+		return focus.toDisplay(result);
 	}
 	
 	/**
@@ -118,12 +141,16 @@ public abstract class QuickMenuAction extends Action {
 	 * 
 	 * @param text the styled text widget that has the focus
 	 * 
-	 * @return a display relative position of the menu to pop up
+	 * @return a widget relative position of the menu to pop up or
+	 *  <code>null</code> if now position inside the widget can
+	 *  be computed
 	 */
 	protected Point computeMenuLocation(StyledText text) {
 		Point result= text.getLocationAtOffset(text.getCaretOffset());
 		result.y+= text.getLineHeight();
-		return text.toDisplay(result);
+		if (!text.getClientArea().contains(result))
+			return null;
+		return result;
 	}
 	
 	/**
@@ -132,29 +159,37 @@ public abstract class QuickMenuAction extends Action {
 	 * 
 	 * @param tree the tree widget that has the focus
 	 * 
-	 * @return a display relative position of the menu to pop up
+	 * @return a widget relative position of the menu to pop up or
+	 *  <code>null</code> if now position inside the widget can
+	 *  be computed
 	 */
 	protected Point computeMenuLocation(Tree tree) {
 		TreeItem[] items= tree.getSelection();
+		Rectangle clientArea= tree.getClientArea();
 		switch (items.length) {
 			case 0:
 				return null;
 			case 1:
 				Rectangle bounds= items[0].getBounds();
-				return tree.toDisplay(
-					Math.max(0, bounds.x + getAvarageCharWith(tree) * CHAR_INDENT), 
-					bounds.y + bounds.height);
+				Rectangle intersect= clientArea.intersection(bounds);
+				if (intersect != null && intersect.height == bounds.height) {
+					return new Point(
+						Math.max(0, bounds.x + getAvarageCharWith(tree) * CHAR_INDENT), 
+						bounds.y + bounds.height);
+				} else {
+					return null;
+				}
 			default:
 				Rectangle[] rectangles= new Rectangle[items.length];
 				for (int i= 0; i < rectangles.length; i++) {
 					rectangles[i]= items[i].getBounds();
 				}
 				Point cursorLocation= tree.getDisplay().getCursorLocation();
-				Point p= findBestLocation(getIncludedPositions(rectangles, tree.getClientArea()), 
+				Point result= findBestLocation(getIncludedPositions(rectangles, clientArea), 
 					tree.toControl(cursorLocation));
-				if (p == null)
-					return cursorLocation;
-				return tree.toDisplay(p.x + getAvarageCharWith(tree) * CHAR_INDENT, p.y);
+				if (result != null)
+					result.x= result.x + getAvarageCharWith(tree) * CHAR_INDENT;
+				return result;
 		}
 	}
 	
@@ -164,19 +199,27 @@ public abstract class QuickMenuAction extends Action {
 	 * 
 	 * @param table the table widget that has the focus
 	 * 
-	 * @return a widget relative position of the menu to pop up
+	 * @return a widget relative position of the menu to pop up or
+	 *  <code>null</code> if now position inside the widget can
+	 *  be computed
 	 */
 	protected Point computeMenuLocation(Table table) {
 		TableItem[] items= table.getSelection();
+		Rectangle clientArea= table.getClientArea();
 		switch (items.length) {
 			case 0: {
 				return null;
 			} case 1: {
 				Rectangle bounds= items[0].getBounds(0);
 				Rectangle iBounds= items[0].getImageBounds(0);
-				return table.toDisplay(
-					Math.max(0, bounds.x + iBounds.width + getAvarageCharWith(table) * CHAR_INDENT), 
-					bounds.y + bounds.height);
+				Rectangle intersect= clientArea.intersection(bounds);
+				if (intersect != null && intersect.height == bounds.height) {
+					return new Point(
+						Math.max(0, bounds.x + iBounds.width + getAvarageCharWith(table) * CHAR_INDENT), 
+						bounds.y + bounds.height);
+				} else {
+					return null;
+				}
 			} default: {
 				Rectangle[] rectangles= new Rectangle[items.length];
 				for (int i= 0; i < rectangles.length; i++) {
@@ -184,13 +227,11 @@ public abstract class QuickMenuAction extends Action {
 				}
 				Rectangle iBounds= items[0].getImageBounds(0);
 				Point cursorLocation= table.getDisplay().getCursorLocation();
-				Point p= findBestLocation(getIncludedPositions(rectangles, table.getClientArea()), 
+				Point result= findBestLocation(getIncludedPositions(rectangles, clientArea), 
 					table.toControl(cursorLocation));
-				if (p == null)
-					return cursorLocation;
-				return table.toDisplay(
-					p.x + iBounds.width + getAvarageCharWith(table) * CHAR_INDENT, 
-					p.y);
+				if (result != null) 
+					result.x= result.x + iBounds.width + getAvarageCharWith(table) * CHAR_INDENT;
+				return result;
 			}
 		}
 	}
