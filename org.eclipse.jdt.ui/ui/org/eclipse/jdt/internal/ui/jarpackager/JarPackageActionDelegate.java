@@ -32,7 +32,7 @@ public abstract class JarPackageActionDelegate implements IActionDelegate {
 
 	private IStructuredSelection fSelection;
 	private IWorkbench fWorkbench;
-	private	JarPackageReader fReader= null;
+	private JarPackageReader fReader= null;
 
 	/**
 	 * Returns the active shell.
