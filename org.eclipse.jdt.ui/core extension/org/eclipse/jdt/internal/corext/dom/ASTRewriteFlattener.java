@@ -532,7 +532,7 @@ public class ASTRewriteFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(Javadoc)
 	 */
 	public boolean visit(Javadoc node) {
-		fResult.append(getAttribute(node, ASTNodeConstants.COMMENT));
+		fResult.append(node.getComment());
 		return false;
 	}
 

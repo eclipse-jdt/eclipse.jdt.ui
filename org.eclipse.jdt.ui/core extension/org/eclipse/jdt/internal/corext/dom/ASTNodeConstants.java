@@ -55,46 +55,40 @@ public class ASTNodeConstants {
 
 	/**
 	 * Property for nodes of type
-	 * <code>Javadoc</code>.
-	 */
-	public static final int COMMENT = 7;
-
-	/**
-	 * Property for nodes of type
 	 * <code>ArrayType</code>.
 	 */
-	public static final int COMPONENT_TYPE = 8;
+	public static final int COMPONENT_TYPE = 7;
 
 	/**
 	 * Property for nodes of type
 	 * <code>ArrayCreation</code>.
 	 */
-	public static final int DIMENSIONS = 9;
+	public static final int DIMENSIONS = 8;
 
 	/**
 	 * Property for nodes of type
 	 * <code>ConditionalExpression</code>.
 	 */
-	public static final int ELSE_EXPRESSION = 10;
+	public static final int ELSE_EXPRESSION = 9;
 
 	/**
 	 * Property for nodes of type
 	 * <code>IfStatement</code>.
 	 */
-	public static final int ELSE_STATEMENT = 11;
+	public static final int ELSE_STATEMENT = 10;
 
 	/**
 	 * Property for nodes of type
 	 * <code>CharacterLiteral</code>,
 	 * <code>StringLiteral</code>.
 	 */
-	public static final int ESCAPED_VALUE = 12;
+	public static final int ESCAPED_VALUE = 11;
 
 	/**
 	 * Property for nodes of type
 	 * <code>CatchClause</code>.
 	 */
-	public static final int EXCEPTION = 13;
+	public static final int EXCEPTION = 12;
 
 	/**
 	 * Property for nodes of type
@@ -117,19 +111,19 @@ public class ASTNodeConstants {
 	 * <code>ThrowStatement</code>,
 	 * <code>WhileStatement</code>.
 	 */
-	public static final int EXPRESSION = 14;
+	public static final int EXPRESSION = 13;
 
 	/**
 	 * Property for nodes of type
 	 * <code>ArrayInitializer</code>.
 	 */
-	public static final int EXPRESSIONS = 15;
+	public static final int EXPRESSIONS = 14;
 
 	/**
 	 * Property for nodes of type
 	 * <code>InfixExpression</code>.
 	 */
-	public static final int EXTENDED_OPERANDS = 16;
+	public static final int EXTENDED_OPERANDS = 15;
 
 	/**
 	 * Property for nodes of type
@@ -137,39 +131,40 @@ public class ASTNodeConstants {
 	 * <code>SingleVariableDeclaration</code>,
 	 * <code>VariableDeclarationFragment</code>.
 	 */
-	public static final int EXTRA_DIMENSIONS = 17;
+	public static final int EXTRA_DIMENSIONS = 16;
 
 	/**
 	 * Property for nodes of type
 	 * <code>TryStatement</code>.
 	 */
-	public static final int FINALLY = 18;
+	public static final int FINALLY = 17;
 
 	/**
 	 * Property for nodes of type
 	 * <code>FieldDeclaration</code>,
+	 * <code>TagElement</code>,
 	 * <code>VariableDeclarationExpression</code>,
 	 * <code>VariableDeclarationStatement</code>.
 	 */
-	public static final int FRAGMENTS = 19;
+	public static final int FRAGMENTS = 18;
 
 	/**
 	 * Property for nodes of type
 	 * <code>SimpleName</code>.
 	 */
-	public static final int IDENTIFIER = 20;
+	public static final int IDENTIFIER = 19;
 
 	/**
 	 * Property for nodes of type
 	 * <code>CompilationUnit</code>.
 	 */
-	public static final int IMPORTS = 21;
+	public static final int IMPORTS = 20;
 
 	/**
 	 * Property for nodes of type
 	 * <code>ArrayAccess</code>.
 	 */
-	public static final int INDEX = 22;
+	public static final int INDEX = 21;
 
 	/**
 	 * Property for nodes of type
@@ -177,31 +172,31 @@ public class ASTNodeConstants {
 	 * <code>SingleVariableDeclaration</code>,
 	 * <code>VariableDeclarationFragment</code>.
 	 */
-	public static final int INITIALIZER = 23;
+	public static final int INITIALIZER = 22;
 
 	/**
 	 * Property for nodes of type
 	 * <code>ForStatement</code>.
 	 */
-	public static final int INITIALIZERS = 24;
+	public static final int INITIALIZERS = 23;
 
 	/**
 	 * Property for nodes of type
 	 * <code>MethodDeclaration</code>.
 	 */
-	public static final int IS_CONSTRUCTOR = 25;
+	public static final int IS_CONSTRUCTOR = 24;
 
 	/**
 	 * Property for nodes of type
 	 * <code>TypeDeclaration</code>.
 	 */
-	public static final int IS_INTERFACE = 26;
+	public static final int IS_INTERFACE = 25;
 
 	/**
 	 * Property for nodes of type
 	 * <code>ImportDeclaration</code>.
 	 */
-	public static final int IS_ON_DEMAND = 27;
+	public static final int IS_ON_DEMAND = 26;
 
 	/**
 	 * Property for nodes of type
@@ -210,7 +205,7 @@ public class ASTNodeConstants {
 	 * <code>MethodDeclaration</code>,
 	 * <code>TypeDeclaration</code>.
 	 */
-	public static final int JAVADOC = 28;
+	public static final int JAVADOC = 27;
 
 	/**
 	 * Property for nodes of type
@@ -218,32 +213,32 @@ public class ASTNodeConstants {
 	 * <code>ContinueStatement</code>,
 	 * <code>LabeledStatement</code>.
 	 */
-	public static final int LABEL = 29;
+	public static final int LABEL = 28;
 
 	/**
 	 * Property for nodes of type
 	 * <code>Assignment</code>.
 	 */
-	public static final int LEFT_HAND_SIDE = 30;
+	public static final int LEFT_HAND_SIDE = 29;
 
 	/**
 	 * Property for nodes of type
 	 * <code>InfixExpression</code>,
 	 * <code>InstanceofExpression</code>.
 	 */
-	public static final int LEFT_OPERAND = 31;
+	public static final int LEFT_OPERAND = 30;
 
 	/**
 	 * Property for nodes of type
 	 * <code>StringLiteral</code>.
 	 */
-	public static final int LITERAL_VALUE = 32;
+	public static final int LITERAL_VALUE = 31;
 
 	/**
 	 * Property for nodes of type
 	 * <code>AssertStatement</code>.
 	 */
-	public static final int MESSAGE = 33;
+	public static final int MESSAGE = 32;
 
 	/**
 	 * Property for nodes of type
@@ -255,15 +250,18 @@ public class ASTNodeConstants {
 	 * <code>VariableDeclarationExpression</code>,
 	 * <code>VariableDeclarationStatement</code>.
 	 */
-	public static final int MODIFIERS = 34;
+	public static final int MODIFIERS = 33;
 
 	/**
 	 * Property for nodes of type
 	 * <code>ClassInstanceCreation</code>,
 	 * <code>FieldAccess</code>,
 	 * <code>ImportDeclaration</code>,
+	 * <code>MemberRef</code>,
 	 * <code>MethodDeclaration</code>,
 	 * <code>MethodInvocation</code>,
+	 * <code>MethodRef</code>,
+	 * <code>MethodRefParameter</code>,
 	 * <code>PackageDeclaration</code>,
 	 * <code>QualifiedName</code>,
 	 * <code>SimpleType</code>,
@@ -273,14 +271,14 @@ public class ASTNodeConstants {
 	 * <code>TypeDeclaration</code>,
 	 * <code>VariableDeclarationFragment</code>.
 	 */
-	public static final int NAME = 35;
+	public static final int NAME = 34;
 
 	/**
 	 * Property for nodes of type
 	 * <code>PostfixExpression</code>,
 	 * <code>PrefixExpression</code>.
 	 */
-	public static final int OPERAND = 36;
+	public static final int OPERAND = 35;
 
 	/**
 	 * Property for nodes of type
@@ -289,126 +287,148 @@ public class ASTNodeConstants {
 	 * <code>PostfixExpression</code>,
 	 * <code>PrefixExpression</code>.
 	 */
-	public static final int OPERATOR = 37;
+	public static final int OPERATOR = 36;
 
 	/**
 	 * Property for nodes of type
 	 * <code>CompilationUnit</code>.
 	 */
-	public static final int PACKAGE = 38;
+	public static final int PACKAGE = 37;
 
 	/**
 	 * Property for nodes of type
-	 * <code>MethodDeclaration</code>.
+	 * <code>MethodDeclaration</code>,
+	 * <code>MethodRef</code>.
 	 */
-	public static final int PARAMETERS = 39;
+	public static final int PARAMETERS = 38;
 
 	/**
 	 * Property for nodes of type
 	 * <code>PrimitiveType</code>.
 	 */
-	public static final int PRIMITIVE_TYPE_CODE = 40;
+	public static final int PRIMITIVE_TYPE_CODE = 39;
 
 	/**
 	 * Property for nodes of type
+	 * <code>MemberRef</code>,
+	 * <code>MethodRef</code>,
 	 * <code>QualifiedName</code>,
 	 * <code>SuperFieldAccess</code>,
 	 * <code>SuperMethodInvocation</code>,
 	 * <code>ThisExpression</code>.
 	 */
-	public static final int QUALIFIER = 41;
+	public static final int QUALIFIER = 40;
 
 	/**
 	 * Property for nodes of type
 	 * <code>MethodDeclaration</code>.
 	 */
-	public static final int RETURN_TYPE = 42;
+	public static final int RETURN_TYPE = 41;
 
 	/**
 	 * Property for nodes of type
 	 * <code>Assignment</code>.
 	 */
-	public static final int RIGHT_HAND_SIDE = 43;
+	public static final int RIGHT_HAND_SIDE = 42;
 
 	/**
 	 * Property for nodes of type
 	 * <code>InfixExpression</code>,
 	 * <code>InstanceofExpression</code>.
 	 */
-	public static final int RIGHT_OPERAND = 44;
+	public static final int RIGHT_OPERAND = 43;
 
 	/**
 	 * Property for nodes of type
 	 * <code>Block</code>,
 	 * <code>SwitchStatement</code>.
 	 */
-	public static final int STATEMENTS = 45;
+	public static final int STATEMENTS = 44;
 
 	/**
 	 * Property for nodes of type
 	 * <code>TypeDeclaration</code>.
 	 */
-	public static final int SUPER_INTERFACES = 46;
+	public static final int SUPER_INTERFACES = 45;
 
 	/**
 	 * Property for nodes of type
 	 * <code>TypeDeclaration</code>.
 	 */
-	public static final int SUPERCLASS = 47;
+	public static final int SUPERCLASS = 46;
+
+	/**
+	 * Property for nodes of type
+	 * <code>TagElement</code>.
+	 */
+	public static final int TAG_NAME = 47;
+
+	/**
+	 * Property for nodes of type
+	 * <code>Javadoc</code>.
+	 */
+	public static final int TAGS = 48;
+
+	/**
+	 * Property for nodes of type
+	 * <code>TextElement</code>.
+	 */
+	public static final int TEXT = 49;
 
 	/**
 	 * Property for nodes of type
 	 * <code>ConditionalExpression</code>.
 	 */
-	public static final int THEN_EXPRESSION = 48;
+	public static final int THEN_EXPRESSION = 50;
 
 	/**
 	 * Property for nodes of type
 	 * <code>IfStatement</code>.
 	 */
-	public static final int THEN_STATEMENT = 49;
+	public static final int THEN_STATEMENT = 51;
 
 	/**
 	 * Property for nodes of type
 	 * <code>MethodDeclaration</code>.
 	 */
-	public static final int THROWN_EXCEPTIONS = 50;
+	public static final int THROWN_EXCEPTIONS = 52;
 
 	/**
 	 * Property for nodes of type
 	 * <code>NumberLiteral</code>.
 	 */
-	public static final int TOKEN = 51;
+	public static final int TOKEN = 53;
 
 	/**
 	 * Property for nodes of type
 	 * <code>ArrayCreation</code>,
 	 * <code>CastExpression</code>,
 	 * <code>FieldDeclaration</code>,
+	 * <code>MethodRefParameter</code>,
 	 * <code>SingleVariableDeclaration</code>,
 	 * <code>TypeLiteral</code>,
 	 * <code>VariableDeclarationExpression</code>,
 	 * <code>VariableDeclarationStatement</code>.
 	 */
-	public static final int TYPE = 52;
+	public static final int TYPE = 54;
 
 	/**
 	 * Property for nodes of type
 	 * <code>TypeDeclarationStatement</code>.
 	 */
-	public static final int TYPE_DECLARATION = 53;
+	public static final int TYPE_DECLARATION = 55;
 
 	/**
 	 * Property for nodes of type
 	 * <code>CompilationUnit</code>.
 	 */
-	public static final int TYPES = 54;
+	public static final int TYPES = 56;
 
 	/**
 	 * Property for nodes of type
 	 * <code>ForStatement</code>.
 	 */
-	public static final int UPDATERS = 55;
+	public static final int UPDATERS = 57;
 
 	/**
 	 *Returns <code>true</code> if a node has the given property.
@@ -498,9 +518,11 @@ public class ASTNodeConstants {
 			case ASTNode.INSTANCEOF_EXPRESSION :
 				return (property == LEFT_OPERAND) || (property == RIGHT_OPERAND);
 			case ASTNode.JAVADOC :
-				return property == COMMENT;
+				return property == TAGS;
 			case ASTNode.LABELED_STATEMENT :
 				return (property == BODY) || (property == LABEL);
+			case ASTNode.MEMBER_REF :
+				return (property == NAME) || (property == QUALIFIER);
 			case ASTNode.METHOD_DECLARATION :
 				switch (property) {
 					case BODY :
@@ -517,6 +539,10 @@ public class ASTNodeConstants {
 				return false;
 			case ASTNode.METHOD_INVOCATION :
 				return (property == ARGUMENTS) || (property == EXPRESSION) || (property == NAME);
+			case ASTNode.METHOD_REF :
+				return (property == NAME) || (property == PARAMETERS) || (property == QUALIFIER);
+			case ASTNode.METHOD_REF_PARAMETER :
+				return (property == NAME) || (property == TYPE);
 			case ASTNode.NUMBER_LITERAL :
 				return property == TOKEN;
 			case ASTNode.PACKAGE_DECLARATION :
@@ -561,6 +587,10 @@ public class ASTNodeConstants {
 				return (property == EXPRESSION) || (property == STATEMENTS);
 			case ASTNode.SYNCHRONIZED_STATEMENT :
 				return (property == BODY) || (property == EXPRESSION);
+			case ASTNode.TAG_ELEMENT :
+				return (property == FRAGMENTS) || (property == TAG_NAME);
+			case ASTNode.TEXT_ELEMENT :
+				return property == TEXT;
 			case ASTNode.THIS_EXPRESSION :
 				return property == QUALIFIER;
 			case ASTNode.THROW_STATEMENT :
@@ -596,7 +626,7 @@ public class ASTNodeConstants {
 	}
 
 	/**
-	  * Returns <code>true</code> if property of a node is a list property.
+	 * Returns <code>true</code> if property of a node is a list property.
 	 */
 	public static boolean isListProperty(int property) {
 		switch (property) {
@@ -612,6 +642,7 @@ public class ASTNodeConstants {
 			case PARAMETERS :
 			case STATEMENTS :
 			case SUPER_INTERFACES :
+			case TAGS :
 			case THROWN_EXCEPTIONS :
 			case TYPES :
 			case UPDATERS :
@@ -621,11 +652,10 @@ public class ASTNodeConstants {
 	}
 
 	/**
-	  * Returns <code>true</code> if property of a node is an attribute property (Not a List and not an ASTNode).
+	 * Returns <code>true</code> if property of a node is an attribute property (Not a List and not an ASTNode).
 	 */
 	public static boolean isAttributeProperty(int property) {
 		switch (property) {
-			case COMMENT :
 			case ESCAPED_VALUE :
 			case EXTRA_DIMENSIONS :
 			case IDENTIFIER :
@@ -636,6 +666,8 @@ public class ASTNodeConstants {
 			case MODIFIERS :
 			case OPERATOR :
 			case PRIMITIVE_TYPE_CODE :
+			case TAG_NAME :
+			case TEXT :
 			case TOKEN :
 				return true;
 		}
@@ -875,8 +907,8 @@ public class ASTNodeConstants {
 				}
 				break;
 			case ASTNode.JAVADOC :
-				if (property == COMMENT) {
-					return ((Javadoc) node).getComment();
+				if (property == TAGS) {
+					return ((Javadoc) node).tags();
 				}
 				break;
 			case ASTNode.LABELED_STATEMENT :
@@ -885,6 +917,14 @@ public class ASTNodeConstants {
 						return ((LabeledStatement) node).getBody();
 					case LABEL :
 						return ((LabeledStatement) node).getLabel();
+				}
+				break;
+			case ASTNode.MEMBER_REF :
+				switch (property) {
+					case NAME :
+						return ((MemberRef) node).getName();
+					case QUALIFIER :
+						return ((MemberRef) node).getQualifier();
 				}
 				break;
 			case ASTNode.METHOD_DECLARATION :
@@ -917,6 +957,24 @@ public class ASTNodeConstants {
 						return ((MethodInvocation) node).getExpression();
 					case NAME :
 						return ((MethodInvocation) node).getName();
+				}
+				break;
+			case ASTNode.METHOD_REF :
+				switch (property) {
+					case NAME :
+						return ((MethodRef) node).getName();
+					case QUALIFIER :
+						return ((MethodRef) node).getQualifier();
+					case PARAMETERS :
+						return ((MethodRef) node).parameters();
+				}
+				break;
+			case ASTNode.METHOD_REF_PARAMETER :
+				switch (property) {
+					case NAME :
+						return ((MethodRefParameter) node).getName();
+					case TYPE :
+						return ((MethodRefParameter) node).getType();
 				}
 				break;
 			case ASTNode.NUMBER_LITERAL :
@@ -1045,6 +1103,19 @@ public class ASTNodeConstants {
 						return ((SynchronizedStatement) node).getBody();
 					case EXPRESSION :
 						return ((SynchronizedStatement) node).getExpression();
+				}
+				break;
+			case ASTNode.TAG_ELEMENT :
+				switch (property) {
+					case FRAGMENTS :
+						return ((TagElement) node).fragments();
+					case TAG_NAME :
+						return ((TagElement) node).getTagName();
+				}
+				break;
+			case ASTNode.TEXT_ELEMENT :
+				if (property == TEXT) {
+					return ((TextElement) node).getText();
 				}
 				break;
 			case ASTNode.THIS_EXPRESSION :
@@ -1260,10 +1331,16 @@ public class ASTNodeConstants {
 				if (((InstanceofExpression) parent).getLeftOperand() == node)
 					return LEFT_OPERAND;
 				return RIGHT_OPERAND;
+			case ASTNode.JAVADOC :
+				return TAGS;
 			case ASTNode.LABELED_STATEMENT :
 				if (((LabeledStatement) parent).getBody() == node)
 					return BODY;
 				return LABEL;
+			case ASTNode.MEMBER_REF :
+				if (((MemberRef) parent).getName() == node)
+					return NAME;
+				return QUALIFIER;
 			case ASTNode.METHOD_DECLARATION :
 				MethodDeclaration methodDeclaration = (MethodDeclaration) parent;
 				if (methodDeclaration.getBody() == node)
@@ -1284,6 +1361,17 @@ public class ASTNodeConstants {
 				if (methodInvocation.getName() == node)
 					return NAME;
 				return ARGUMENTS;
+			case ASTNode.METHOD_REF :
+				MethodRef methodRef = (MethodRef) parent;
+				if (methodRef.getName() == node)
+					return NAME;
+				if (methodRef.getQualifier() == node)
+					return QUALIFIER;
+				return PARAMETERS;
+			case ASTNode.METHOD_REF_PARAMETER :
+				if (((MethodRefParameter) parent).getName() == node)
+					return NAME;
+				return TYPE;
 			case ASTNode.PACKAGE_DECLARATION :
 				return NAME;
 			case ASTNode.PARENTHESIZED_EXPRESSION :
@@ -1332,6 +1420,8 @@ public class ASTNodeConstants {
 				if (((SynchronizedStatement) parent).getBody() == node)
 					return BODY;
 				return EXPRESSION;
+			case ASTNode.TAG_ELEMENT :
+				return FRAGMENTS;
 			case ASTNode.THIS_EXPRESSION :
 				return QUALIFIER;
 			case ASTNode.THROW_STATEMENT :
@@ -1396,7 +1486,7 @@ public class ASTNodeConstants {
 			case ASTNode.ASSERT_STATEMENT :
 				return new int[] { EXPRESSION, MESSAGE };
 			case ASTNode.ASSIGNMENT :
-				return new int[] { OPERATOR, LEFT_HAND_SIDE, RIGHT_HAND_SIDE };
+				return new int[] { LEFT_HAND_SIDE, OPERATOR, RIGHT_HAND_SIDE };
 			case ASTNode.BLOCK :
 				return new int[] { STATEMENTS };
 			case ASTNode.BREAK_STATEMENT :
@@ -1412,39 +1502,45 @@ public class ASTNodeConstants {
 			case ASTNode.COMPILATION_UNIT :
 				return new int[] { PACKAGE, IMPORTS, TYPES };
 			case ASTNode.CONDITIONAL_EXPRESSION :
-				return new int[] { EXPRESSION, THEN_EXPRESSION, ELSE_EXPRESSION };
+				return new int[] { EXPRESSION, ELSE_EXPRESSION, THEN_EXPRESSION };
 			case ASTNode.CONSTRUCTOR_INVOCATION :
 				return new int[] { ARGUMENTS };
 			case ASTNode.CONTINUE_STATEMENT :
 				return new int[] { LABEL };
 			case ASTNode.DO_STATEMENT :
-				return new int[] { EXPRESSION, BODY };
+				return new int[] { BODY, EXPRESSION };
 			case ASTNode.EXPRESSION_STATEMENT :
 				return new int[] { EXPRESSION };
 			case ASTNode.FIELD_ACCESS :
 				return new int[] { EXPRESSION, NAME };
 			case ASTNode.FIELD_DECLARATION :
-				return new int[] { MODIFIERS, TYPE, FRAGMENTS, JAVADOC };
+				return new int[] { JAVADOC, MODIFIERS, TYPE, FRAGMENTS };
 			case ASTNode.FOR_STATEMENT :
 				return new int[] { INITIALIZERS, EXPRESSION, UPDATERS, BODY };
 			case ASTNode.IF_STATEMENT :
-				return new int[] { EXPRESSION, THEN_STATEMENT, ELSE_STATEMENT };
+				return new int[] { EXPRESSION, ELSE_STATEMENT, THEN_STATEMENT };
 			case ASTNode.IMPORT_DECLARATION :
 				return new int[] { NAME, IS_ON_DEMAND };
 			case ASTNode.INFIX_EXPRESSION :
-				return new int[] { OPERATOR, LEFT_OPERAND, RIGHT_OPERAND, EXTENDED_OPERANDS };
+				return new int[] { LEFT_OPERAND, OPERATOR, RIGHT_OPERAND, EXTENDED_OPERANDS };
 			case ASTNode.INITIALIZER :
-				return new int[] { MODIFIERS, BODY, JAVADOC };
+				return new int[] { JAVADOC, MODIFIERS, BODY };
 			case ASTNode.INSTANCEOF_EXPRESSION :
 				return new int[] { LEFT_OPERAND, RIGHT_OPERAND };
 			case ASTNode.JAVADOC :
-				return new int[] { COMMENT };
+				return new int[] { TAGS };
 			case ASTNode.LABELED_STATEMENT :
 				return new int[] { LABEL, BODY };
+			case ASTNode.MEMBER_REF :
+				return new int[] { QUALIFIER, NAME };
 			case ASTNode.METHOD_DECLARATION :
-				return new int[] { IS_CONSTRUCTOR, MODIFIERS, NAME, PARAMETERS, THROWN_EXCEPTIONS, RETURN_TYPE, EXTRA_DIMENSIONS, BODY, JAVADOC };
+				return new int[] { JAVADOC, MODIFIERS, IS_CONSTRUCTOR, RETURN_TYPE, NAME, EXTRA_DIMENSIONS, PARAMETERS, THROWN_EXCEPTIONS, BODY };
 			case ASTNode.METHOD_INVOCATION :
 				return new int[] { EXPRESSION, NAME, ARGUMENTS };
+			case ASTNode.METHOD_REF :
+				return new int[] { QUALIFIER, NAME, PARAMETERS };
+			case ASTNode.METHOD_REF_PARAMETER :
+				return new int[] { TYPE, NAME };
 			case ASTNode.NUMBER_LITERAL :
 				return new int[] { TOKEN };
 			case ASTNode.PACKAGE_DECLARATION :
@@ -1452,7 +1548,7 @@ public class ASTNodeConstants {
 			case ASTNode.PARENTHESIZED_EXPRESSION :
 				return new int[] { EXPRESSION };
 			case ASTNode.POSTFIX_EXPRESSION :
-				return new int[] { OPERATOR, OPERAND };
+				return new int[] { OPERAND, OPERATOR };
 			case ASTNode.PREFIX_EXPRESSION :
 				return new int[] { OPERATOR, OPERAND };
 			case ASTNode.PRIMITIVE_TYPE :
@@ -1466,7 +1562,7 @@ public class ASTNodeConstants {
 			case ASTNode.SIMPLE_TYPE :
 				return new int[] { NAME };
 			case ASTNode.SINGLE_VARIABLE_DECLARATION :
-				return new int[] { MODIFIERS, NAME, TYPE, EXTRA_DIMENSIONS, INITIALIZER };
+				return new int[] { MODIFIERS, TYPE, NAME, EXTRA_DIMENSIONS, INITIALIZER };
 			case ASTNode.STRING_LITERAL :
 				return new int[] { ESCAPED_VALUE, LITERAL_VALUE };
 			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION :
@@ -1481,6 +1577,10 @@ public class ASTNodeConstants {
 				return new int[] { EXPRESSION, STATEMENTS };
 			case ASTNode.SYNCHRONIZED_STATEMENT :
 				return new int[] { EXPRESSION, BODY };
+			case ASTNode.TAG_ELEMENT :
+				return new int[] { TAG_NAME, FRAGMENTS };
+			case ASTNode.TEXT_ELEMENT :
+				return new int[] { TEXT };
 			case ASTNode.THIS_EXPRESSION :
 				return new int[] { QUALIFIER };
 			case ASTNode.THROW_STATEMENT :
@@ -1488,7 +1588,7 @@ public class ASTNodeConstants {
 			case ASTNode.TRY_STATEMENT :
 				return new int[] { BODY, CATCH_CLAUSES, FINALLY };
 			case ASTNode.TYPE_DECLARATION :
-				return new int[] { IS_INTERFACE, MODIFIERS, NAME, SUPERCLASS, SUPER_INTERFACES, BODY_DECLARATIONS, JAVADOC };
+				return new int[] { JAVADOC, MODIFIERS, IS_INTERFACE, NAME, SUPERCLASS, SUPER_INTERFACES, BODY_DECLARATIONS };
 			case ASTNode.TYPE_DECLARATION_STATEMENT :
 				return new int[] { TYPE_DECLARATION };
 			case ASTNode.TYPE_LITERAL :
@@ -1522,8 +1622,6 @@ public class ASTNodeConstants {
 				return "BODY_DECLARATIONS"; //$NON-NLS-1$
 			case CATCH_CLAUSES :
 				return "CATCH_CLAUSES"; //$NON-NLS-1$
-			case COMMENT :
-				return "COMMENT"; //$NON-NLS-1$
 			case COMPONENT_TYPE :
 				return "COMPONENT_TYPE"; //$NON-NLS-1$
 			case DIMENSIONS :
@@ -1604,6 +1702,12 @@ public class ASTNodeConstants {
 				return "SUPERCLASS"; //$NON-NLS-1$
 			case SUPER_INTERFACES :
 				return "SUPER_INTERFACES"; //$NON-NLS-1$
+			case TAG_NAME :
+				return "TAG_NAME"; //$NON-NLS-1$
+			case TAGS :
+				return "TAGS"; //$NON-NLS-1$
+			case TEXT :
+				return "TEXT"; //$NON-NLS-1$
 			case THEN_EXPRESSION :
 				return "THEN_EXPRESSION"; //$NON-NLS-1$
 			case THEN_STATEMENT :
