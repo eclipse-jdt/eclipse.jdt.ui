@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
@@ -507,11 +508,31 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	private ASTNode[] getNodesToReplace() throws JavaModelException {
-		if (fReplaceAllOccurrences)
-			return  AstMatchingNodeFinder.findMatchingNodes(getSelectedMethodNode(), getSelectedExpression());
-		else 
+		if (fReplaceAllOccurrences){
+			ASTNode[] allMatches= AstMatchingNodeFinder.findMatchingNodes(getSelectedMethodNode(), getSelectedExpression());
+			return retainOnlyReplacableMatches(allMatches);
+		} else {
 			return new ASTNode[]{getSelectedExpression()};	
+		}	
 	}
+
+    private static ASTNode[] retainOnlyReplacableMatches(ASTNode[] allMatches) {
+    	List result= new ArrayList(allMatches.length);
+    	for (int i= 0; i < allMatches.length; i++) {
+            if (canReplace(allMatches[i]))
+            	result.add(allMatches[i]);
+        }
+        return (ASTNode[]) result.toArray(new ASTNode[result.size()]);
+    }
+
+    private static boolean canReplace(ASTNode node) {
+    	if (node.getParent() instanceof VariableDeclarationFragment){
+    		VariableDeclarationFragment vdf= (VariableDeclarationFragment)node.getParent();
+    		if (node.equals(vdf.getName()))
+    			return false;
+    	}
+        return true;
+    }
 		
 	private MethodDeclaration getSelectedMethodNode() throws JavaModelException {
 		return (MethodDeclaration)ASTNodes.getParent(getSelectedExpression(), MethodDeclaration.class);
