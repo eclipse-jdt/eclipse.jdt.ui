@@ -33,14 +33,6 @@ public class DisplayAction extends EvaluateAction {
 		}
 	}
 	
-	protected void reportProblems(IJavaEvaluationResult result) {
-		IMarker[] problems= result.getProblems();
-		if (problems.length == 0)
-			reportError(result.getException());
-		else
-			reportProblems(problems);
-	}
-	
 	protected void insertResult(IJavaValue result) {
 		
 		StringBuffer resultString= new StringBuffer();
