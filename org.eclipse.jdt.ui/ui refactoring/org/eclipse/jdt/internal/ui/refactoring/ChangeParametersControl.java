@@ -243,7 +243,7 @@ public class ChangeParametersControl extends Composite {
 			public void keyTraversed(TraverseEvent e) {
 				if (e.detail == SWT.TRAVERSE_RETURN && e.stateMask == SWT.NONE) {
 					editColumnOrNextPossible(0);
-					e.doit= false;
+					e.detail= SWT.TRAVERSE_NONE;
 				}
 			}
 		});
@@ -507,22 +507,22 @@ public class ChangeParametersControl extends Composite {
 					switch (e.detail) {
 						case SWT.TRAVERSE_TAB_NEXT :
 							editColumnOrNextPossible(nextColumn(editorColumn));
-							e.doit= false;
+							e.detail= SWT.TRAVERSE_NONE;
 							break;
 
 						case SWT.TRAVERSE_TAB_PREVIOUS :
 							editColumnOrPrevPossible(prevColumn(editorColumn));
-							e.doit= false;
+							e.detail= SWT.TRAVERSE_NONE;
 							break;
 						
 						case SWT.TRAVERSE_ESCAPE :
 							fTableViewer.cancelEditing();
-							e.doit= false;
+							e.detail= SWT.TRAVERSE_NONE;
 							break;
 						
 						case SWT.TRAVERSE_RETURN :
 							editor.deactivate();
-							e.doit= false;
+							e.detail= SWT.TRAVERSE_NONE;
 							break;
 							
 						default :
