@@ -5,7 +5,6 @@
 package org.eclipse.jdt.internal.corext.util;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.resources.IWorkspaceRoot;

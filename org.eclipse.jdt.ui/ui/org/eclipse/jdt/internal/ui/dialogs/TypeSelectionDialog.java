@@ -7,7 +7,6 @@ package org.eclipse.jdt.internal.ui.dialogs;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -21,8 +20,8 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.ui.dialogs.TwoPaneElementSelector;
 import org.eclipse.ui.dialogs.FilteredList;
+import org.eclipse.ui.dialogs.TwoPaneElementSelector;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;

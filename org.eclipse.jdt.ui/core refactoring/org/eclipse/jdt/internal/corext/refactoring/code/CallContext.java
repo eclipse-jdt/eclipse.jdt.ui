@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 import java.util.List;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 
 public class CallContext {
 
