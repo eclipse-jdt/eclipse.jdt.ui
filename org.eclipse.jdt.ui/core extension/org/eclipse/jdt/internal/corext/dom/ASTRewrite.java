@@ -83,6 +83,8 @@ public final class ASTRewrite {
 	public static final int FIELD_DECLARATION= 10;
 	public static final int METHOD_DECLARATION= 11;
 	public static final int INITIALIZER= 12;
+	public static final int PACKAGE_DECLARATION= 13;
+	public static final int IMPORT_DECLARATION= 14;
 	
 	/** Constant used to describe the kind of the change */
 	public static final int INSERTED= 1;
@@ -480,7 +482,8 @@ public final class ASTRewrite {
 	 * <code>FIELD_DECLARATION</code>, <code>INITIALIZER</code>,
 	 * <code>TYPE_DECLARATION</code>, <code>BLOCK</code>, <code>STATEMENT</code>,
 	 *  <code>SINGLEVAR_DECLARATION</code>,<code> VAR_DECLARATION_FRAGMENT</code>,
-	 * <code>TYPE</code>, <code>EXPRESSION</code> and <code>JAVADOC</code> .
+	 * <code>TYPE</code>, <code>EXPRESSION</code>, 
+	 * <code>PACKAGE_DECLARATION</code>, <code>IMPORT_DECLARATION</code> and <code>JAVADOC</code>.
 	 * @return the place holder node
 	 */
 	public final ASTNode createPlaceholder(String code, int nodeType) {
@@ -526,6 +529,12 @@ public final class ASTRewrite {
 			case ASTRewrite.TYPE_DECLARATION:
 				placeHolder= ast.newTypeDeclaration();
 				break;
+			case ASTRewrite.PACKAGE_DECLARATION:
+				placeHolder= ast.newPackageDeclaration();
+				break;
+			case ASTRewrite.IMPORT_DECLARATION:
+				placeHolder= ast.newImportDeclaration();
+				break;
 			default:
 				return null;
 		}
@@ -565,6 +574,10 @@ public final class ASTRewrite {
 			return TYPE;
 		} else if (existingNode instanceof Javadoc) {
 			return JAVADOC;				
+		} else if (existingNode instanceof PackageDeclaration) {
+			return PACKAGE_DECLARATION;				
+		} else if (existingNode instanceof ImportDeclaration) {
+			return IMPORT_DECLARATION;				
 		} else {
 			return UNKNOWN;
 		}
