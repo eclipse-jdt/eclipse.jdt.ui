@@ -73,6 +73,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private FrameForwardAction fForwardAction;
 	private ZoomInAction fZoomInAction;
 	private FrameUpAction fUpAction;
+	private GotoTypeAction fGotoTypeAction;
 
  	
 	private static final String SELECT_FILTERS_LABEL = "&Filters...";
@@ -359,6 +360,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		gotoMenu.add(fBackAction);
 		gotoMenu.add(fForwardAction);
 		gotoMenu.add(fUpAction);
+		gotoMenu.add(fGotoTypeAction);
 	}
 
 	private void makeActions() {
@@ -394,6 +396,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fUpAction.setImageDescriptor(getImageDescriptor("elcl16/up_nav.gif"));
 		fUpAction.setDisabledImageDescriptor(getImageDescriptor("dlcl16/up_nav.gif"));
 
+		fGotoTypeAction= new GotoTypeAction(this);
 		IActionBars actionService= getViewSite().getActionBars();
 		actionService.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
 	}
