@@ -295,7 +295,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		if (method != null) {
 			ICompilationUnit source= method.getCompilationUnit();
 			if (source == null) {
-				status.addFatalError(RefactoringCoreMessages.getString("InlineMethodRefactoring.error.classFile")); //$NON-NLS-1$
+				status.addFatalError(RefactoringCoreMessages.getFormattedString("InlineMethodRefactoring.error.classFile", method.getElementName())); //$NON-NLS-1$
 				return null;
 			}
 			

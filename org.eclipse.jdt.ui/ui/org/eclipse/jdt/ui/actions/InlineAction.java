@@ -61,8 +61,8 @@ public class InlineAction extends SelectionDispatchAction {
 		super(site);
 		setText(RefactoringMessages.getString("InlineAction.Inline")); //$NON-NLS-1$
 		fInlineTemp		= new InlineTempAction(site);
-		fInlineMethod	= new InlineMethodAction(site);
 		fInlineConstant	= new InlineConstantAction(site);
+		fInlineMethod	= new InlineMethodAction(site);
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
 	}
 
@@ -75,8 +75,8 @@ public class InlineAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("InlineAction.Inline")); //$NON-NLS-1$
 		fEditor= editor;
 		fInlineTemp		= new InlineTempAction(editor);
-		fInlineMethod	= new InlineMethodAction(editor);
 		fInlineConstant	= new InlineConstantAction(editor);
+		fInlineMethod	= new InlineMethodAction(editor);
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
 		setEnabled(getCompilationUnit() != null);
 	}
@@ -106,12 +106,13 @@ public class InlineAction extends SelectionDispatchAction {
 		if (fInlineTemp.isEnabled() && tryInlineTemp(cu, selection))
 			return;
 
+		if (fInlineConstant.isEnabled() && tryInlineConstant(cu, selection))
+			return;
+		
+		//InlineMethod is last (also tries enclosing element):
 		if (fInlineMethod.isEnabled() && tryInlineMethod(cu, selection))
 			return;
 		
-		if (fInlineConstant.isEnabled() && tryInlineConstant(cu, selection))
-			return;
-	
 		MessageDialog.openInformation(getShell(), RefactoringMessages.getString("InlineAction.dialog_title"), RefactoringMessages.getString("InlineAction.select")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
@@ -123,6 +124,16 @@ public class InlineAction extends SelectionDispatchAction {
 		return true;
 	}
 	
+	private boolean tryInlineConstant(ICompilationUnit cu, ITextSelection selection){
+		InlineConstantRefactoring inlineConstantRef= InlineConstantRefactoring.create(
+				cu, selection.getOffset(), selection.getLength(),
+				JavaPreferencesSettings.getCodeGenerationSettings());
+		if (inlineConstantRef == null)	
+			return false;
+		fInlineConstant.run(selection);
+		return true;
+	}
+	
 	private boolean tryInlineMethod(ICompilationUnit cu, ITextSelection selection){
 		InlineMethodRefactoring inlineMethodRef= InlineMethodRefactoring.create(
 			cu, selection.getOffset(), selection.getLength(),
@@ -130,16 +141,6 @@ public class InlineAction extends SelectionDispatchAction {
 		if (inlineMethodRef == null)	
 			return false;
 		fInlineMethod.run(selection);
-		return true;
-	}
-	
-	private boolean tryInlineConstant(ICompilationUnit cu, ITextSelection selection){
-		InlineConstantRefactoring inlineConstantRef= InlineConstantRefactoring.create(
-			cu, selection.getOffset(), selection.getLength(),
-			JavaPreferencesSettings.getCodeGenerationSettings());
-		if (inlineConstantRef == null)	
-			return false;
-		fInlineConstant.run(selection);
 		return true;
 	}
 	
