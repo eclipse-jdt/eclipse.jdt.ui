@@ -43,6 +43,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		node.setSourceRange(-1, 0);
 	}
 	
+	public static void markAsRemoved(ASTNode node) {
+		markAsReplaced(node, null);
+	}
+	
 	public static void markAsReplaced(ASTNode node, ASTNode modifiedNode) {
 		ASTReplace replace= new ASTReplace();
 		replace.modifiedNode= modifiedNode;
@@ -786,7 +790,9 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ArrayInitializer)
 	 */
 	public boolean visit(ArrayInitializer node) {
-		return super.visit(node);
+		List expressions= node.expressions();
+		rewriteList(node.getStartPosition() + 1, "", expressions, false);
+		return false;
 	}
 
 	/* (non-Javadoc)
