@@ -18,13 +18,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  * A JavaImageDescriptor consists of a base image and several adornments. The adornments
  * are computed according to the flags either passed during creation or set via the method
  * <code>setAdornments</code>. 
- * </p>
- * It is guaranteed that objects that conform to this interface are also instances of type
- * <code>ImageDescriptor</code>
- * </p>
- * <b>Note:</b> This class/interface is part of an interim API that is still under development 
- * and expected to change before reaching stability.
- * </p>
  * 
  * @since 2.0 
  */

@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerMessages;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 
 /**
- * Creates a JAR file for the given JAR package.
+ * Creates a JAR file for the given JAR package data.
  * 
  * Clients may subclass.
  * 
