@@ -105,7 +105,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 	
 	private int findEndingTag(StringBuffer buffer) {
 		String s= buffer.toString();
-		for (int  = 0; i < TAGS.length; i++) {
+		for (int  i= 0; i < TAGS.length; i++) {
 			if (s.endsWith(TAGS[i]))
 				return i;			
 		}
