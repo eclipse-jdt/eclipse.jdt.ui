@@ -12,9 +12,11 @@ package org.eclipse.jdt.internal.corext.refactoring;
 
 public class ParameterInfo {
 	
+	private static final int INDEX_FOR_ADDED= -1;
+	private final String oldName;
+	private final int oldIndex;
 	private String type;
-	private String oldName;
-	private int oldIndex;
+	private String defaultValue;
 	private String newName;
 	private Object data;
 	
@@ -23,10 +25,31 @@ public class ParameterInfo {
 		this.oldName= name;
 		this.newName= name;
 		this.oldIndex= index;
+		this.defaultValue= "";
+	}
+
+	public static ParameterInfo createInfoForAddedParameter(){
+		return new ParameterInfo("", "", INDEX_FOR_ADDED);
+	}
+	
+	public boolean isAdded(){
+		return oldIndex == INDEX_FOR_ADDED;
+	}
+	
+	public String getDefaultValue(){
+		return defaultValue;
+	}
+	
+	public void setDefaultValue(String value){
+		this.defaultValue= value;
 	}
 	
 	public String getType() {
 		return type;
+	}
+	
+	public void setType(String type){
+		this.type= type;
 	}
 
 	public String getOldName() {
