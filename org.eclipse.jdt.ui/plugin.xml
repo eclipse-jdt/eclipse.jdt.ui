@@ -1507,7 +1507,7 @@ JavaStructureDiffViewerCreator
 	</actionDefinition>
 
 	<actionDefinition
-		id="org.eclipse.jdt.ui.edit.text.java.open.structure"
+		id="org.eclipse.jdt.ui.navigate.java.open.structure"
 		name= "%ActionDefinition.open.structure.name"
 		description="%ActionDefinition.open.structure.description">
 	</actionDefinition>	
@@ -1595,7 +1595,7 @@ JavaStructureDiffViewerCreator
 		<accelerator key="Ctrl+1" id="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals" />
 		<accelerator key="F2" id="org.eclipse.jdt.ui.edit.text.java.show.javadoc" />
 		<accelerator key="Ctrl+O" id="org.eclipse.jdt.ui.edit.text.java.show.outline" />
-		<accelerator key="Ctrl+F3" id="org.eclipse.jdt.ui.edit.text.java.open.structure" />
+		<accelerator key="Ctrl+F3" id="org.eclipse.jdt.ui.navigate.java.open.structure" />
 
 		<!-- override accelerators for Chinese China -->
 		<accelerator key="Alt+/" id="org.eclipse.jdt.ui.edit.text.java.content.assist.proposals" locale="zh_CN" />
@@ -1682,7 +1682,7 @@ JavaStructureDiffViewerCreator
 		<accelerator key="Ctrl+Shift+Space" id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" />
 		<accelerator key="Ctrl+1" id="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals" />
 		<accelerator key="F2" id="org.eclipse.jdt.ui.edit.text.java.show.javadoc" />
-		<accelerator key="Ctrl+F3" id="org.eclipse.jdt.ui.edit.text.java.open.structure" />
+		<accelerator key="Ctrl+F3" id="org.eclipse.jdt.ui.navigate.java.open.structure" />
 		<accelerator key="Ctrl+O" id="org.eclipse.jdt.ui.edit.text.java.show.outline" />
 
 		<!-- override accelerators for Chinese -->

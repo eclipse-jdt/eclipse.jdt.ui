@@ -97,6 +97,18 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 */
 	public static final String SHOW_JAVADOC= "org.eclipse.jdt.ui.edit.text.java.show.javadoc"; //$NON-NLS-1$
 
+	/**
+	 * Action definition ID of the edit -> Show Outline action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.show.outline"</code>).
+	 */
+	public static final String SHOW_OUTLINE= "org.eclipse.jdt.ui.edit.text.java.show.outline"; //$NON-NLS-1$
+	
+	/**
+	 * Action definition ID of the Navigate -> Open Structure action
+	 * (value <code>"org.eclipse.jdt.ui.navigate.java.open.structure"</code>).
+	 */
+	public static final String OPEN_STRUCTURE= "org.eclipse.jdt.ui.navigate.java.open.structure"; //$NON-NLS-1$
+
 	// source
 	
 	/**
