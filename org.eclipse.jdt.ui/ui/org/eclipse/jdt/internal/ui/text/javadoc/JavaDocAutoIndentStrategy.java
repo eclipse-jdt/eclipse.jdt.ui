@@ -246,20 +246,24 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * If in doubt, it will assume that the javadoc is new.
 	 */
 	private static boolean isNewComment(IDocument document, int commandOffset, String partitioning) {
-
+		
 		try {
 			int lineIndex= document.getLineOfOffset(commandOffset) + 1;
 			if (lineIndex >= document.getNumberOfLines())
 				return true;
-
+			
 			IRegion line= document.getLineInformation(lineIndex);
 			ITypedRegion partition= TextUtilities.getPartition(document, partitioning, commandOffset);
-			if (document.getLineOffset(lineIndex) >= partition.getOffset() + partition.getLength())
+			int partitionEnd= partition.getOffset() + partition.getLength();
+			if (line.getOffset() >= partitionEnd)
 				return false;
-
-			String string= document.get(line.getOffset(), line.getLength());				
-			if (!string.trim().startsWith("*")) //$NON-NLS-1$
-				return true;
+			
+			if (document.getLength() == partitionEnd)
+				return true; // partition goes to end of document - probably a new comment
+			
+			String comment= document.get(partition.getOffset(), partition.getLength());
+			if (comment.indexOf("/*", 2) != -1) //$NON-NLS-1$
+				return true; // enclosed another comment -> probably a new comment
 			
 			return false;
 			

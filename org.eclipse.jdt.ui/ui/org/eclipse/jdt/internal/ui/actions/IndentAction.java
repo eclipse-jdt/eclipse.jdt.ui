@@ -79,6 +79,7 @@ public class IndentAction extends TextEditorAction {
 	 * @param bundle the resource bundle
 	 * @param prefix the prefix to use for keys in <code>bundle</code>
 	 * @param editor the text editor
+	 * @param isTabAction whether the action should insert tabs if over the indentation
 	 */
 	public IndentAction(ResourceBundle bundle, String prefix, ITextEditor editor, boolean isTabAction) {
 		super(bundle, prefix, editor);
@@ -210,6 +211,7 @@ public class IndentAction extends TextEditorAction {
 	private boolean indentLine(IDocument document, int line, int caret, JavaIndenter indenter, JavaHeuristicScanner scanner) throws BadLocationException {
 		IRegion currentLine= document.getLineInformation(line);
 		int offset= currentLine.getOffset();
+		int wsStart= offset; // where we start searching for non-WS; after the "//" in single line comments
 		
 		String indent= null;
 		if (offset < document.getLength()) {
@@ -235,11 +237,38 @@ public class IndentAction extends TextEditorAction {
 				command.text= "\n"; //$NON-NLS-1$
 				command.offset= start;
 				new JavaDocAutoIndentStrategy(IJavaPartitions.JAVA_PARTITIONING).customizeDocumentCommand(document, command);
-				int i= command.text.indexOf('*');
-				if (i != -1)
-					indent= command.text.substring(1, i);
-				else
-					indent= command.text.substring(1);
+				int to= 1;
+				while (to < command.text.length() && Character.isWhitespace(command.text.charAt(to)))
+					to++;
+				indent= command.text.substring(1, to);
+				
+			} else if (partition.getOffset() == offset && type.equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
+				
+				// line comment starting at position 0 -> indent inside
+				int slashes= 2;
+				while (slashes < document.getLength() - 1 && document.get(offset + slashes, 2).equals("//")) //$NON-NLS-1$
+					slashes+= 2;
+				
+				wsStart= offset + slashes;
+				
+				StringBuffer computed= indenter.computeIndentation(offset);
+				int tabSize= JavaPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
+				while (slashes > 0) {
+					char c= computed.charAt(0);
+					if (c == '\t')
+						if (slashes > tabSize)
+							slashes-= tabSize;
+						else
+							break;
+					else if (c == ' ')
+						slashes--;
+					else break;
+					
+					computed.deleteCharAt(0);
+				}
+				
+				indent= document.get(offset, wsStart - offset) + computed;
+				
 			}
 		} 
 		
@@ -255,7 +284,7 @@ public class IndentAction extends TextEditorAction {
 		// change document:
 		// get current white space
 		int lineLength= currentLine.getLength();
-		int end= scanner.findNonWhitespaceForwardInAnyPartition(offset, offset + lineLength);
+		int end= scanner.findNonWhitespaceForwardInAnyPartition(wsStart, offset + lineLength);
 		if (end == JavaHeuristicScanner.NOT_FOUND)
 			end= offset + lineLength;
 		int length= end - offset;
