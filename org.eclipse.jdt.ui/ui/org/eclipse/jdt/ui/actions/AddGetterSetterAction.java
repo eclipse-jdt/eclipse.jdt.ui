@@ -316,14 +316,14 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		return workingCopyFields;	
 	}
 	//---- Java Editior --------------------------------------------------------------
+    
+    /* (non-Javadoc)
+     * Method declared on SelectionDispatchAction
+     */		
+    protected void selectionChanged(ITextSelection selection) {
+    	setEnabled(fEditor != null && !fEditor.isEditorInputReadOnly());
+    }
 	
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */		
-	protected void selectionChanged(ITextSelection selection) {
-		setEnabled(fEditor != null);
-	}
-
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
@@ -355,6 +355,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			JavaPlugin.log(e.getStatus());
 			showError(ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
 		}
+	}
+	
+	/* package */ void editorStateChanged() {
+		setEnabled(!fEditor.isEditorInputReadOnly());
 	}
 	
 	private boolean checkCu(IMember member) throws JavaModelException{

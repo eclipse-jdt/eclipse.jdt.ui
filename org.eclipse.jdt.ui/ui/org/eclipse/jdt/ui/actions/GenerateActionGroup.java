@@ -102,7 +102,10 @@ public class GenerateActionGroup extends ActionGroup {
 		fOverrideMethods.editorStateChanged();
 		editor.setAction("OverrideMethods", fOverrideMethods); //$NON-NLS-1$
 		
-		fAddGetterSetter= new AddGetterSetterAction(editor);		
+		fAddGetterSetter= new AddGetterSetterAction(editor);
+		fAddGetterSetter.setActionDefinitionId(IJavaEditorActionDefinitionIds.CREATE_GETTER_SETTER);
+		fAddGetterSetter.editorStateChanged();
+		editor.setAction("AddGetterSetter", fAddGetterSetter); //$NON-NLS-1$
 		
 		fAddUnimplementedConstructors= new AddUnimplementedConstructorsAction(editor);
 		fAddUnimplementedConstructors.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_UNIMPLEMENTED_CONTRUCTORS);
@@ -219,6 +222,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddUnimplementedConstructors.editorStateChanged();
 		fAddJavaDocStub.editorStateChanged();
 		fSurroundWithTryCatch.editorStateChanged();
+		fAddGetterSetter.editorStateChanged();
 	}
 
 	/* (non-Javadoc)

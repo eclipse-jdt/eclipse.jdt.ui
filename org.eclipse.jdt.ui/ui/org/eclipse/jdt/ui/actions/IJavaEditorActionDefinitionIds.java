@@ -31,6 +31,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String SURROUND_WITH_TRY_CATCH= "org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch"; //$NON-NLS-1$
 	public static final String OVERRIDE_METHODS= "org.eclipse.jdt.ui.edit.text.java.override.methods"; //$NON-NLS-1$
 	public static final String ADD_UNIMPLEMENTED_CONTRUCTORS= "org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors"; //$NON-NLS-1$
+	public static final String CREATE_GETTER_SETTER= "org.eclipse.jdt.ui.edit.text.java.create.getter.setter"; //$NON-NLS-1$
 	public static final String EXTERNALIZE_STRINGS= "org.eclipse.jdt.ui.edit.text.java.externalize.strings"; //$NON-NLS-1$
 	public static final String SHOW_NEXT_PROBLEM= "org.eclipse.jdt.ui.edit.text.java.show.next.problem"; //$NON-NLS-1$
 	public static final String SHOW_PREVIOUS_PROBLEM= "org.eclipse.jdt.ui.edit.text.java.show.previous.problem"; //$NON-NLS-1$
