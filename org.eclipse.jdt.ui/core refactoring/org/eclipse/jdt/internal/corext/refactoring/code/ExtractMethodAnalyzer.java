@@ -243,7 +243,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 	
 	private RefactoringStatus analyzeSelection(RefactoringStatus status) {
 		fInputFlowContext= new FlowContext(0, fOuterMostMethodScope.analysisIndex);
-		fInputFlowContext.setConsiderExecutionFlow(true);
 		fInputFlowContext.setConsiderAccessMode(true);
 		fInputFlowContext.setComputeMode(FlowContext.ARGUMENTS);
 		
@@ -297,7 +296,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 	private void computeOutput(RefactoringStatus status) {
 		// First find all writes inside the selection.
 		FlowContext flowContext= new FlowContext(0, fOuterMostMethodScope.analysisIndex);
-		flowContext.setConsiderExecutionFlow(false);
 		flowContext.setConsiderAccessMode(true);
 		flowContext.setComputeMode(FlowContext.RETURN_VALUES);
 		FlowInfo returnInfo= new InOutFlowAnalyzer(flowContext, getSelection()).analyse(getSelectedNodes(), (BlockScope)getEnclosingScope());
@@ -305,7 +303,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 		
 		int counter= 0;
 		flowContext.setComputeMode(FlowContext.ARGUMENTS);
-		FlowInfo argInfo= new InputFlowAnalyzer(flowContext, getSelection()).analyse(fEnclosingMethod, fClassScope);
+		FlowInfo argInfo= new InputFlowAnalyzer(flowContext, getSelection()).perform(fEnclosingMethod, fClassScope);
 		LocalVariableBinding[] reads= argInfo.get(flowContext, FlowInfo.READ | FlowInfo.READ_POTENTIAL | FlowInfo.UNKNOWN);
 		outer: for (int i= 0; i < returnValues.length && counter <= 1; i++) {
 			LocalVariableBinding binding= returnValues[i];

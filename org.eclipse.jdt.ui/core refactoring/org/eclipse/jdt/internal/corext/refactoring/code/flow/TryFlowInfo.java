@@ -17,7 +17,7 @@ class TryFlowInfo extends FlowInfo {
 		assign(info);
 	}
 	
-	public void mergeCase(FlowInfo info, FlowContext context) {
+	public void mergeCatch(FlowInfo info, FlowContext context) {
 		if (info == null)
 			return;
 			

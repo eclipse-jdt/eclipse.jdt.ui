@@ -10,10 +10,8 @@ class BranchFlowInfo extends FlowInfo {
 	
 	public BranchFlowInfo(char[] label, FlowContext context) {
 		super(NO_RETURN);
-		if (context.considerExecutionFlow()) {
-			fBranches= new HashSet(2);
-			fBranches.add(makeString(label));
-		}
+		fBranches= new HashSet(2);
+		fBranches.add(makeString(label));
 	}
 }
 

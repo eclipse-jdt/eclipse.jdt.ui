@@ -45,12 +45,12 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 			}
 			initialize();
 			if (fEnclosingMethod == null) {
-				invalidSelection("Cannot sorround selection with try/catch block. Selection does not contain statements from a method body."); 
+				invalidSelection("Cannot surround selection with try/catch block. Selection does not contain statements from a method body."); 
 				break superCall;
 			}
 			fExceptions= ExceptionAnalyzer.perform(fEnclosingMethod, fSelection, fClassScope);
 			if (fExceptions == null || fExceptions.length == 0) {
-				invalidSelection("No uncaught exceptions are thrown by the selected statement(s).");
+				invalidSelection("No uncaught exceptions are thrown by the selected code.");
 				break superCall;
 			}
 			if (!isValidParent()) {

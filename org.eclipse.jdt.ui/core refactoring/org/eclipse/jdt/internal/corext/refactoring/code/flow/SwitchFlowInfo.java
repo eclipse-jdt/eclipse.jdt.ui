@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
 class SwitchFlowInfo extends FlowInfo {
 	private GenericConditionalFlowInfo fCases;
+	private boolean fHasNullCaseInfo;
 	
 	public SwitchFlowInfo() {
 		fCases= new GenericConditionalFlowInfo();
@@ -18,13 +19,15 @@ class SwitchFlowInfo extends FlowInfo {
 	}
 	
 	public void mergeCase(FlowInfo info, FlowContext context) {
-		if (info == null)
+		if (info == null) {
+			fHasNullCaseInfo= true;
 			return;
+		}
 		fCases.mergeConditional(info, context);
 	}
 	
 	public void mergeDefault(boolean defaultCaseExists, FlowContext context) {
-		if (!defaultCaseExists)
+		if (!defaultCaseExists || fHasNullCaseInfo)
 			fCases.mergeEmptyCondition(context);
 		mergeSequential(fCases, context);
 	}

@@ -19,7 +19,7 @@ public class ChangeExceptionHandler implements IChangeExceptionHandler {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		final MessageDialog dialog= new MessageDialog(parent,
 			RefactoringMessages.getString("ChangeExceptionHandler.refactoring"), null, //$NON-NLS-1$
-			RefactoringMessages.getFormattedString("ChangeExceptionHandler.unexpected_exception", e.getMessage()), //$NON-NLS-1$
+			RefactoringMessages.getFormattedString("ChangeExceptionHandler.unexpected_exception", new String[] {change.getName(), e.getMessage()}), //$NON-NLS-1$
 			MessageDialog.ERROR, new String[] { RefactoringMessages.getString("ChangeExceptionHandler.undo"), RefactoringMessages.getString("ChangeExceptionHandler.abort")}, 1); //$NON-NLS-2$ //$NON-NLS-1$
 		final int[] result= new int[1];	
 		Runnable runnable= new Runnable() {

@@ -1008,6 +1008,22 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		localsTest();
 	}
 	
+	public void test523() throws Exception {
+		localsTest();
+	}
+	
+	public void test524() throws Exception {
+		localsTest();
+	}
+	
+	public void test525() throws Exception {
+		localsTest();
+	}
+	
+	public void test526() throws Exception {
+		localsTest();
+	}
+	
 	public void test530() throws Exception {
 		localsTest();
 	}
@@ -1323,6 +1339,18 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test723() throws Exception {
+		returnTest();
+	}
+	
+	public void test724() throws Exception {
+		returnTest();
+	}
+	
+	public void test725() throws Exception {
+		returnTest();
+	}
+	
+	public void test726() throws Exception {
 		returnTest();
 	}
 	

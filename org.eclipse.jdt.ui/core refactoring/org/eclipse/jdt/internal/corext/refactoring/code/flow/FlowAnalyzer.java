@@ -17,6 +17,9 @@ import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.corext.refactoring.util.ASTUtil;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 /**
  * Special flow analyzer to determine the return value of the extracted method
@@ -28,6 +31,31 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
  * return a value.
  */
 abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
+
+	static protected class SwitchData {
+		private boolean fHasDefaultCase;
+		private List fRanges= new ArrayList(4);
+		private List fInfos= new ArrayList(4);
+		public void setHasDefaultCase() {
+			fHasDefaultCase= true;
+		}
+		public boolean hasDefaultCase() {
+			return fHasDefaultCase;
+		}
+		public void add(TextRange range, FlowInfo info) {
+			fRanges.add(range);
+			fInfos.add(info);
+		}
+		public TextRange[] getRanges() {
+			return (TextRange[]) fRanges.toArray(new TextRange[fRanges.size()]);	
+		}
+		public FlowInfo[] getInfos() {
+			return (FlowInfo[]) fInfos.toArray(new FlowInfo[fInfos.size()]);
+		}
+		public FlowInfo getInfo(int index) {
+			return (FlowInfo)fInfos.get(index);
+		}
+	}
 
 	private HashMap fData = new HashMap(100);
 	/* package */ FlowContext fFlowContext= null;
@@ -100,6 +128,10 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 
 	protected BlockFlowInfo createBlock() {
 		return new BlockFlowInfo();
+	}
+	
+	protected MessageSendFlowInfo createMessageSendFlowInfo() {
+		return new MessageSendFlowInfo();
 	}
 	
 	protected FlowContext getFlowContext() {
@@ -201,6 +233,53 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 		process(info, declaration.fields);
 		process(info, declaration.methods);
 		info.setNoReturn();
+	}
+	
+	//---- Helper to process switch statement ----------------------------------------
+	
+	protected SwitchData createSwitchData(SwitchStatement node) {
+		SwitchData result= new SwitchData();
+		Statement[] statements= node.statements;
+		if (statements == null || statements.length == 0)
+			return result;
+			
+		int start= -1, end= -1;
+		GenericSequentialFlowInfo info= null;
+		
+		for (int i= 0; i < statements.length; i++) {
+			Statement statement= statements[i];
+			if (statement instanceof DefaultCase) {
+				result.setHasDefaultCase();
+			}
+			if (statement instanceof Case || statement instanceof DefaultCase) {
+				if (info == null) {
+					info= createSequential();
+					start= ASTUtil.getSourceStart(statement);
+				} else {
+					if (info.isReturn() || info.isPartialReturn() || info.branches()) {
+						result.add(TextRange.createFromStartAndInclusiveEnd(start, end), info);
+						info= createSequential();
+						start= ASTUtil.getSourceStart(statement);
+					}
+				}
+			} else {
+				info.merge(getFlowInfo(statement), fFlowContext);
+			}
+			end= ASTUtil.getSourceEnd(statement);
+		}
+		result.add(TextRange.createFromStartAndInclusiveEnd(start, end), info);
+		return result;
+	}
+	
+	protected void endVisit(SwitchStatement node, SwitchData data) {
+		SwitchFlowInfo switchFlowInfo= createSwitch();
+		setFlowInfo(node, switchFlowInfo);
+		switchFlowInfo.mergeTest(getFlowInfo(node.testExpression), fFlowContext);
+		FlowInfo[] cases= data.getInfos();
+		for (int i= 0; i < cases.length; i++)
+			switchFlowInfo.mergeCase(cases[i], fFlowContext);
+		switchFlowInfo.mergeDefault(data.hasDefaultCase(), fFlowContext);	
+		switchFlowInfo.removeLabel(null);
 	}
 	
 	//---- concret visit methods --------------------------------------------------------
@@ -505,9 +584,16 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 	public void endVisit(MessageSend node, BlockScope scope) {
 		if (skipNode(node))
 			return;
-		// First evaluate arguments and then the receiver.
-		GenericSequentialFlowInfo info= processSequential(node, node.arguments);
-		process(info, node.receiver);
+		MessageSendFlowInfo info= createMessageSendFlowInfo();
+		setFlowInfo(node, info);
+		if (node.arguments != null) {
+			for (int i= 0; i < node.arguments.length; i++) {
+				Expression arg= node.arguments[i];
+				info.mergeArgument(getFlowInfo(arg), fFlowContext);
+			}
+		}
+		info.mergeReceiver(getFlowInfo(node.receiver), fFlowContext);
+		info.mergeExceptions(node.binding, fFlowContext);
 	}
 
 	public void endVisit(MethodDeclaration node, ClassScope scope) {
@@ -624,35 +710,7 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 	public void endVisit(SwitchStatement node, BlockScope scope) {
 		if (skipNode(node))
 			return;
-		Statement[] statements= node.statements;
-		SwitchFlowInfo switchFlowInfo= createSwitch();
-		setFlowInfo(node, switchFlowInfo);
-		switchFlowInfo.mergeTest(getFlowInfo(node.testExpression), fFlowContext);
-		GenericSequentialFlowInfo info= null;
-		boolean defaultCaseExists= false;
-		
-		for (int i= 0; i < statements.length; i++) {
-			Statement statement= statements[i];
-			if (statement instanceof DefaultCase) {
-				defaultCaseExists= true;
-			}
-			if (statement instanceof Case || statement instanceof DefaultCase) {
-				if (info == null) {
-					info= createSequential();
-				} else {
-					if (info.isReturn() || info.isPartialReturn() || info.branches()) {
-						switchFlowInfo.mergeCase(info, fFlowContext);
-						info= createSequential();
-					}
-				}
-			} else {
-				info.merge(getFlowInfo(statement), fFlowContext);
-			}
-		}
-		switchFlowInfo.mergeCase(info, fFlowContext);
-		switchFlowInfo.mergeDefault(defaultCaseExists, fFlowContext);
-			
-		switchFlowInfo.removeLabel(null);
+		endVisit(node, createSwitchData(node));
 	}
 
 	public void endVisit(SynchronizedStatement node, BlockScope scope) {
@@ -672,6 +730,7 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 		ThrowFlowInfo info= createThrow();
 		setFlowInfo(node, info);
 		info.merge(getFlowInfo(node.exception), fFlowContext);
+		info.mergeException(node.exceptionType, fFlowContext);
 	}
 
 	public void endVisit(TrueLiteral node, BlockScope scope) {
@@ -686,8 +745,9 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 		info.mergeTry(getFlowInfo(node.tryBlock), fFlowContext);
 		Block[] blocks= node.catchBlocks;
 		if (blocks != null) {
+			info.removeExceptions(node.catchArguments);
 			for (int i= 0; i < blocks.length; i++) {
-				info.mergeCase(getFlowInfo(blocks[i]), fFlowContext);
+				info.mergeCatch(getFlowInfo(blocks[i]), fFlowContext);
 			}
 		}
 		info.mergeFinally(getFlowInfo(node.finallyBlock), fFlowContext);
@@ -1034,7 +1094,21 @@ abstract class FlowAnalyzer implements IAbstractSyntaxTreeVisitor {
 	}
 
 	public boolean visit(TryStatement node, BlockScope scope) {
-		return traverseNode(node);
+		if (traverseNode(node)) {
+			fFlowContext.pushExcptions(node.catchArguments);
+			node.tryBlock.traverse(this, scope);
+			fFlowContext.popExceptions();
+			if (node.catchArguments != null) {
+				for (int i= 0; i < node.catchArguments.length; i++) {
+					node.catchArguments[i].traverse(this, scope);
+					node.catchBlocks[i].traverse(this, scope);
+				}
+			}
+			if (node.finallyBlock != null) {
+				node.finallyBlock.traverse(this, scope);
+			}
+		}
+		return false;
 	}
 
 	public boolean visit(TypeDeclaration node, CompilationUnitScope scope) {

@@ -22,6 +22,7 @@ class GenericConditionalFlowInfo extends FlowInfo {
 	public void mergeAccessMode(FlowInfo info, FlowContext context) {
 		if (info == null)
 			return;
+			
 		mergeAccessModeConditional(info, context);
 	}
 }

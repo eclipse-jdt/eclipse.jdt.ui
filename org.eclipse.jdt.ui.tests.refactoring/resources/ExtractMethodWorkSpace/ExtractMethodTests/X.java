@@ -1,15 +1,22 @@
-class X{
-	void f(){
-		int i= 0;
-		int j= 1;
-		switch (j){
-			case 1:
-				/*[*/i= 1;/*]*/
-				// break;
-			default:
-				i--;
-				i= -1;
-				break;
+public class X {
+	class Inner extends Exception {
+	}
+}
+class DD extends X.Inner {
+	DD() {
+		new X().super();
+	}
+	public final static boolean DEBUG= true;
+	public void foo0() {
+		try {
+			d();
+		} catch (X.Inner e) {
 		}
 	}
+
+	protected void d() throws X.Inner {
+		if (DEBUG)
+			throw new X().new Inner();//<<SELECT AND EXTRACT
+	}
+
 }

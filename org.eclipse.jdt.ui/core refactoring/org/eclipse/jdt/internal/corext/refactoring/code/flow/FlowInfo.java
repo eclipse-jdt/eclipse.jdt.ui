@@ -9,9 +9,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 
 public abstract class FlowInfo {
 	
@@ -58,7 +61,7 @@ public abstract class FlowInfo {
 	/* PARTIAL_RETURN */	{ NOT_POSSIBLE,		PARTIAL_RETURN,	PARTIAL_RETURN,	PARTIAL_RETURN, PARTIAL_RETURN, PARTIAL_RETURN, PARTIAL_RETURN	},
 	/* VOID_RETURN */		{ NOT_POSSIBLE,		VOID_RETURN,	PARTIAL_RETURN,	PARTIAL_RETURN, VOID_RETURN,	NOT_POSSIBLE,	VOID_RETURN		},
 	/* VALUE_RETURN */		{ NOT_POSSIBLE,		VALUE_RETURN,	PARTIAL_RETURN, PARTIAL_RETURN, NOT_POSSIBLE,	VALUE_RETURN,	VALUE_RETURN	},
-	/* THROW */				{ NOT_POSSIBLE,		THROW,			NO_RETURN,		PARTIAL_RETURN, VOID_RETURN,	VALUE_RETURN,	THROW			}
+	/* THROW */					{ NOT_POSSIBLE,		THROW,			NO_RETURN,		PARTIAL_RETURN, VOID_RETURN,	VALUE_RETURN,	THROW			}
 	};
 		
 	// Table to merge return modes for sequential statements (y: fReturnKind, x: other.fReturnKind)
@@ -70,15 +73,16 @@ public abstract class FlowInfo {
 	/* PARTIAL_RETURN */	{ NOT_POSSIBLE,		PARTIAL_RETURN,	PARTIAL_RETURN,	PARTIAL_RETURN,	VOID_RETURN,	VALUE_RETURN,	THROW			},
 	/* VOID_RETURN */		{ NOT_POSSIBLE,		VOID_RETURN,	VOID_RETURN,	PARTIAL_RETURN,	VOID_RETURN,	NOT_POSSIBLE,	NOT_POSSIBLE	},
 	/* VALUE_RETURN */		{ NOT_POSSIBLE,		VALUE_RETURN,	VALUE_RETURN,	PARTIAL_RETURN,	NOT_POSSIBLE,	VALUE_RETURN,	NOT_POSSIBLE	},
-	/* THROW */				{ NOT_POSSIBLE,		THROW,			THROW,			PARTIAL_RETURN,	VOID_RETURN,	VALUE_RETURN,	THROW			}
+	/* THROW */					{ NOT_POSSIBLE,		THROW,			THROW,			PARTIAL_RETURN,	VOID_RETURN,	VALUE_RETURN,	THROW			}
 	};
 		
 	protected static final String UNLABELED = "@unlabeled"; //$NON-NLS-1$
 	protected static final LocalVariableBinding[] EMPTY_ARRAY= new LocalVariableBinding[0];
 
 	protected int fReturnKind;
-	protected HashSet fBranches;
 	protected int[] fAccessModes;
+	protected HashSet fBranches;
+	protected HashSet fExceptions;
 	
 	protected FlowInfo() {
 		this(UNDEFINED);
@@ -93,6 +97,7 @@ public abstract class FlowInfo {
 	protected void assignExecutionFlow(FlowInfo right) {
 		fReturnKind= right.fReturnKind;
 		fBranches= right.fBranches;
+		fExceptions= right.fExceptions;
 	}
 	
 	protected void assignAccessMode(FlowInfo right) {
@@ -114,19 +119,7 @@ public abstract class FlowInfo {
 		mergeExecutionFlowSequential(info, context);
 	}
 	
-	//---- Execution flow handling --------------------------------------------------
-	
-	protected HashSet getBranches() {
-		return fBranches;
-	}
-	
-	protected void removeLabel(char[] label) {
-		if (fBranches != null) {
-			fBranches.remove(makeString(label));
-			if (fBranches.isEmpty())
-				fBranches= null;
-		}
-	}
+	//---- Return Kind ------------------------------------------------------------------
 	
 	public void setNoReturn() {
 		fReturnKind= NO_RETURN;
@@ -152,19 +145,32 @@ public abstract class FlowInfo {
 		return fReturnKind == VALUE_RETURN;
 	}
 	
+	public boolean isThrow() {
+		return fReturnKind == THROW;
+	}
+
 	public boolean isReturn() {
 		return fReturnKind == VOID_RETURN || fReturnKind == VALUE_RETURN;
 	}
 	
-	public boolean isThrow() {
-		return fReturnKind == THROW;
-	}
+	//---- Branches -------------------------------------------------------------------------
 	
 	public boolean branches() {
-		HashSet branches= getBranches();
-		return branches != null && !branches.isEmpty();
+		return fBranches != null && !fBranches.isEmpty();
 	}
-
+	
+	protected HashSet getBranches() {
+		return fBranches;
+	}
+	
+	protected void removeLabel(char[] label) {
+		if (fBranches != null) {
+			fBranches.remove(makeString(label));
+			if (fBranches.isEmpty())
+				fBranches= null;
+		}
+	}
+	
 	protected static String makeString(char[] label) {
 		if (label == null)
 			return UNLABELED;
@@ -172,42 +178,88 @@ public abstract class FlowInfo {
 			return new String(label);
 	}
 	
-	private void mergeExecutionFlowSequential(FlowInfo otherInfo, FlowContext context) {
-		if (!context.considerExecutionFlow())
+	//---- Exceptions -----------------------------------------------------------------------
+	
+	public TypeBinding[] getExceptions() {
+		if (fExceptions == null)
+			return new TypeBinding[0];
+		return (TypeBinding[]) fExceptions.toArray(new TypeBinding[fExceptions.size()]);
+	}
+
+	protected boolean hasUncaughtException() {
+		return fExceptions != null && !fExceptions.isEmpty();
+	}
+	
+	protected void addException(TypeBinding type) {
+		if (fExceptions == null)
+			fExceptions= new HashSet(2);
+		fExceptions.add(type);
+	}
+	
+	protected void removeExceptions(Argument[] catchArguments) {
+		if (fExceptions == null)
 			return;
-		fReturnKind= RETURN_KIND_SEQUENTIAL_TABLE[fReturnKind][otherInfo.fReturnKind];
+		TypeBinding[] exceptions= (TypeBinding[]) fExceptions.toArray(new TypeBinding[fExceptions.size()]);
+		for (int i= 0; i < exceptions.length; i++) {
+			handleException(catchArguments, exceptions[i]);
+		}
+		if (fExceptions.isEmpty())
+			fExceptions= null;
+	}
+
+	private void handleException(Argument[] catchArguments, TypeBinding type) {
+		for (int j= 0; j < catchArguments.length; j++) {
+			Argument arg= catchArguments[j];
+			if (arg.binding == null)
+				continue;
+			ReferenceBinding catchedType= (ReferenceBinding)arg.binding.type;
+			while (catchedType != null) {
+				if (catchedType == type) {
+					fExceptions.remove(type);
+					return;
+				}
+				catchedType= catchedType.superclass();
+			}
+		}
+	}
+	
+	//---- Execution flow -------------------------------------------------------------------
+	
+	private void mergeExecutionFlowSequential(FlowInfo otherInfo, FlowContext context) {
+		int other= otherInfo.fReturnKind;
+		if (branches() && other == VALUE_RETURN)
+			other= PARTIAL_RETURN;
+		fReturnKind= RETURN_KIND_SEQUENTIAL_TABLE[fReturnKind][other];
 		mergeBranches(otherInfo, context);
+		mergeExceptions(otherInfo, context);
 	}
 	
 	private void mergeExecutionFlowConditional(FlowInfo otherInfo, FlowContext context) {
-		if (!context.considerExecutionFlow())
-			return;
-			
 		fReturnKind= RETURN_KIND_CONDITIONAL_TABLE[fReturnKind][otherInfo.fReturnKind];
 		mergeBranches(otherInfo, context);			
+		mergeExceptions(otherInfo, context);
 	}
 	
 	private void mergeBranches(FlowInfo otherInfo, FlowContext context) {
-		HashSet otherBranches= otherInfo.fBranches;
-		if (otherBranches != null) {
-			if (fBranches == null) {
-				fBranches= otherBranches;
+		fBranches= mergeHashSets(fBranches, otherInfo.fBranches);
+	}
+
+	private void mergeExceptions(FlowInfo otherInfo, FlowContext context) {
+		fExceptions= mergeHashSets(fExceptions, otherInfo.fExceptions);
+	}
+	
+	private static HashSet mergeHashSets(HashSet thisSet, HashSet otherSet) {
+		if (otherSet != null) {
+			if (thisSet == null) {
+				thisSet= otherSet;
 			} else {
-				Iterator iter= otherBranches.iterator();
+				Iterator iter= otherSet.iterator();
 				while (iter.hasNext()) {
-					Object elem= iter.next();
-					fBranches.add(elem);
+					thisSet.add(iter.next());
 				}
 			}
 		}
-		if (branches()) {
-			if (context.considerAccessMode() && fAccessModes != null) {
-				for (int i= 0; i < fAccessModes.length; i++)
-					fAccessModes[i]= ACCESS_MODE_OPEN_BRANCH_TABLE[getIndex(fAccessModes[i])];
-			}
-			if (context.considerExecutionFlow() && fReturnKind == VALUE_RETURN)
-				fReturnKind= PARTIAL_RETURN;
-		}
+		return thisSet;
 	}
 	
 	//---- Local access handling --------------------------------------------------
@@ -265,6 +317,13 @@ public abstract class FlowInfo {
 		if (others == null)	// others are all unused. So nothing to do
 			return;
 			
+		// Must not consider return kind since a return statement can't control execution flow
+		// inside a method. It always leaves the method.	
+		if (branches() || hasUncaughtException()) {
+			for (int i= 0; i < others.length; i++)
+				others[i]= ACCESS_MODE_OPEN_BRANCH_TABLE[getIndex(others[i])];
+		}
+		
 		if (fAccessModes == null) {	// all current variables are unused
 			fAccessModes= others;
 			return;
@@ -337,20 +396,24 @@ public abstract class FlowInfo {
 			}
 		}
 	}
-
+	
 	protected void mergeEmptyCondition(FlowContext context) {
-		if (context.considerExecutionFlow() && (fReturnKind == VALUE_RETURN || fReturnKind == VOID_RETURN))
+		if (fReturnKind == VALUE_RETURN || fReturnKind == VOID_RETURN)
 			fReturnKind= PARTIAL_RETURN;
 			
 		if (!context.considerAccessMode())
 			return;
 			
-		if (fAccessModes != null) {
-			for (int i= 0; i < fAccessModes.length; i++) {
-				fAccessModes[i]= ACCESS_MODE_CONDITIONAL_TABLE
-					[getIndex(fAccessModes[i])]
-					[getIndex(UNUSED)];
-			}
+		if (fAccessModes == null) {
+			fAccessModes= new int[context.getArrayLength()];
+			return;
+		}
+		
+		int unused_index= getIndex(UNUSED);
+		for (int i= 0; i < fAccessModes.length; i++) {
+			fAccessModes[i]= ACCESS_MODE_CONDITIONAL_TABLE
+				[getIndex(fAccessModes[i])]
+				[unused_index];
 		}
 	}
 	

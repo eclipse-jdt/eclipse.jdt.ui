@@ -15,6 +15,7 @@ import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 public class InputFlowAnalyzer extends FlowAnalyzer {
 	
@@ -27,7 +28,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			fLoopNode= loopNode;
 		}
 		protected boolean traverseRange(int start, int end) {
-			return end <= fSelection.end || fSelection.enclosedBy(start, end);	
+			return true; // end <= fSelection.end || fSelection.enclosedBy(start, end);	
 		}
 		protected boolean createReturnFlowInfo(ReturnStatement node) {
 			// Make sure that the whole return statement is selected or located before the selection.
@@ -93,7 +94,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 		Assert.isNotNull(fSelection);
 	}
 
-	public FlowInfo analyse(AbstractMethodDeclaration method, ClassScope scope) {
+	public FlowInfo perform(AbstractMethodDeclaration method, ClassScope scope) {
 		FlowContext context= getFlowContext();
 		method.traverse(this, scope);
 		return getFlowInfo(method);
@@ -129,19 +130,75 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			fLoopReentranceVisitor= new LoopReentranceVisitor(fFlowContext, fSelection, node);
 	}
 	
+	public void endVisit(ConditionalExpression node, BlockScope scope) {
+		if (skipNode(node))
+			return;
+		if ((node.valueIfTrue != null && fSelection.coveredBy(node.valueIfTrue)) ||
+				(node.valueIfFalse != null && fSelection.coveredBy(node.valueIfFalse))) {
+			GenericSequentialFlowInfo info= createSequential();
+			setFlowInfo(node, info);
+			endVisitConditional(info, node.condition, new AstNode[] {node.valueIfTrue, node.valueIfFalse});
+		} else {
+			super.endVisit(node, scope);
+		}
+	}
+	
 	public void endVisit(DoStatement node, BlockScope scope) {
 		super.endVisit(node, scope);
 		handleLoopReentrance(node, scope);
 	}
 
+	public void endVisit(IfStatement node, BlockScope scope) {
+		if (skipNode(node))
+			return;
+		if ((node.thenStatement != null && fSelection.coveredBy(node.thenStatement)) || 
+				(node.elseStatement != null && fSelection.coveredBy(node.elseStatement))) {
+			GenericSequentialFlowInfo info= createSequential();
+			setFlowInfo(node, info);
+			endVisitConditional(info, node.condition, new AstNode[] {node.thenStatement, node.elseStatement});
+		} else {
+			super.endVisit(node, scope);
+		}
+	}
+	
 	public void endVisit(ForStatement node, BlockScope scope) {
 		super.endVisit(node, scope);
 		handleLoopReentrance(node, scope);
 	}
 	
+	public void endVisit(SwitchStatement node, BlockScope scope) {
+		if (skipNode(node))
+			return;
+		SwitchData data= createSwitchData(node);
+		TextRange[] ranges= data.getRanges();
+		for (int i= 0; i < ranges.length; i++) {
+			TextRange range= ranges[i];
+			if (fSelection.coveredBy(range.getOffset(), range.getInclusiveEnd())) {
+				GenericSequentialFlowInfo info= createSequential();
+				setFlowInfo(node, info);
+				info.merge(getFlowInfo(node.testExpression), fFlowContext);
+				info.merge(data.getInfo(i), fFlowContext);
+				info.removeLabel(null);
+				return;
+			}
+		}
+		super.endVisit(node, data);
+	}
+	
 	public void endVisit(WhileStatement node, BlockScope scope) {
 		super.endVisit(node, scope);
 		handleLoopReentrance(node, scope);
+	}
+	
+	private void endVisitConditional(GenericSequentialFlowInfo info, AstNode condition, AstNode[] branches) {
+		info.merge(getFlowInfo(condition), fFlowContext);
+		for (int i= 0; i < branches.length; i++) {
+			AstNode branch= branches[i];
+			if (branch != null && fSelection.coveredBy(branch)) {
+				info.merge(getFlowInfo(branch), fFlowContext);
+				break;
+			}
+		}
 	}
 	
 	private void handleLoopReentrance(AstNode node, BlockScope scope) {

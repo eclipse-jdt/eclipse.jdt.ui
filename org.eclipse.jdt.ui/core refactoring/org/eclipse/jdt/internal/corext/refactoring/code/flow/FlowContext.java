@@ -4,8 +4,15 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
-import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
+import org.eclipse.jdt.internal.compiler.ast.Argument;
+import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.corext.Assert;
 
 public class FlowContext {
 
@@ -17,19 +24,16 @@ public class FlowContext {
 	
 	private int fStart;
 	private int fLength;
-	private boolean fConsiderExecutionFlow;
 	private boolean fConsiderAccessMode;
 	private boolean fLoopReentranceMode;
 	private Enum fComputeMode;
 	private LocalVariableBinding[] fLocals;
+	private List fExceptionStack;
 	
 	public FlowContext(int start, int length) {
 		fStart= start;
 		fLength= length;
-	}
-	
-	public void setConsiderExecutionFlow(boolean b) {
-		fConsiderExecutionFlow= b;
+		fExceptionStack= new ArrayList(3);
 	}
 	
 	public void setConsiderAccessMode(boolean b) {
@@ -50,10 +54,6 @@ public class FlowContext {
 	
 	int getStartingIndex() {
 		return fStart;
-	}
-	
-	boolean considerExecutionFlow() {
-		return fConsiderExecutionFlow;
 	}
 	
 	boolean considerAccessMode() {
@@ -96,5 +96,34 @@ public class FlowContext {
 		if (fLocals == null)
 			fLocals= new LocalVariableBinding[fLength];
 		fLocals[local.id - fStart]= local;
-	}	
+	}
+	
+	//---- Exception handling --------------------------------------------------------
+	
+	void pushExcptions(Argument[] catchArguments) {
+		fExceptionStack.add(catchArguments);
+	}
+	
+	void popExceptions() {
+		Assert.isTrue(fExceptionStack.size() > 0);
+		fExceptionStack.remove(fExceptionStack.size() - 1);
+	}
+	
+	boolean isExceptionCaught(TypeBinding excpetionType) {
+		for (Iterator iter= fExceptionStack.iterator(); iter.hasNext(); ) {
+			Argument[] catchArguments= (Argument[])iter.next();
+			for (int i= 0; i < catchArguments.length; i++) {
+				Argument arg= catchArguments[i];
+				if (arg.binding == null)
+					continue;
+				ReferenceBinding catchedType= (ReferenceBinding)catchArguments[i].binding.type;
+				while (catchedType != null) {
+					if (catchedType == excpetionType)
+						return true;
+					catchedType= catchedType.superclass();
+				}
+			}
+		}
+		return false;
+	}
 }
