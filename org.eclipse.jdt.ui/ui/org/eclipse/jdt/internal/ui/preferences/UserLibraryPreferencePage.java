@@ -650,7 +650,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	 */
 	public UserLibraryPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		fDummyProject= getNonExistingProject();
+		fDummyProject= getPlaceholderProject();
 	
 		// title only used when page is shown programatically
 		setTitle(PreferencesMessages.getString("UserLibraryPreferencePage.title")); //$NON-NLS-1$
@@ -692,7 +692,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		doSelectionChanged(fLibraryList); //update button enable state 
 	}
 	
-	private IJavaProject getNonExistingProject() {
+	public static IJavaProject getPlaceholderProject() {
 		String name= "####internal"; //$NON-NLS-1$
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		while (true) {

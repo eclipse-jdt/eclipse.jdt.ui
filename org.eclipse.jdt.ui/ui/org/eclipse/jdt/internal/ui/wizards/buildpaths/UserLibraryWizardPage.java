@@ -68,6 +68,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_ADD_LIBRARY);
 		updateDescription(null);
 		fUsedPaths= new HashSet();
+		fProject= UserLibraryPreferencePage.getPlaceholderProject();
 		
 		LibraryListAdapter adapter= new LibraryListAdapter();
 		String[] buttonLabels= new String[] {
@@ -299,7 +300,6 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	 * @see org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension#initialize(org.eclipse.jdt.core.IJavaProject, org.eclipse.jdt.core.IClasspathEntry[])
 	 */
 	public void initialize(IJavaProject project, IClasspathEntry[] currentEntries) {
-		fProject= project;
 		for (int i= 0; i < currentEntries.length; i++) {
 			IClasspathEntry curr= currentEntries[i];
 			if (curr.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
