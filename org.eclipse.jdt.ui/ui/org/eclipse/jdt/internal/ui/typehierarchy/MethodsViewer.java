@@ -166,6 +166,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	public void showInheritedMethods(boolean on) {
 		MethodsContentProvider cprovider= (MethodsContentProvider) getContentProvider();
 		try {
+			getTable().setRedraw(false);
 			cprovider.showInheritedMethods(on);
 			fShowInheritedMembersAction.setChecked(on);
 			
@@ -176,9 +177,10 @@ public class MethodsViewer extends ProblemTableViewer {
 				lprovider.turnOff(JavaElementLabelProvider.SHOW_POST_QUALIFIED);
 			}
 			refresh();
-			
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getControl().getShell(), TypeHierarchyMessages.getString("MethodsViewer.toggle.error.title"), TypeHierarchyMessages.getString("MethodsViewer.toggle.error.message")); //$NON-NLS-2$ //$NON-NLS-1$
+		} finally {
+			getTable().setRedraw(true);
 		}
 	}
 		
