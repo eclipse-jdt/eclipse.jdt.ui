@@ -187,10 +187,12 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			fClassToTestStatus= classToTestClassChanged();
 			updateDefaultName();
 		} else if (fieldName.equals(SUPER)) {
-			validateSuperClass();
+			validateSuperClass(); 
+			if (!fFirstTime)
+				fTestClassStatus= testClassChanged();	
 		} else if (fieldName.equals(TEST_CLASS)) {
 			fTestClassStatus= testClassChanged();
-		} else if (fieldName.equals(PACKAGE) || fieldName.equals(CONTAINER)) {
+		} else if (fieldName.equals(PACKAGE) || fieldName.equals(CONTAINER) || fieldName.equals(SUPER)) {
 			if (fieldName.equals(PACKAGE))
 				fPackageStatus= packageChanged();
 			if (!fFirstTime) {
@@ -675,8 +677,12 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		fMethodStubsButtons.setEnabled(2, true);//enable setUp() checkbox
 		fMethodStubsButtons.setEnabled(3, true);//enable tearDown() checkbox
 		String superClassName= getSuperClass();
-		
-		if (superClassName != null && !superClassName.equals("") && getPackageFragmentRoot() != null) { //$NON-NLS-1$
+		if (superClassName == null || superClassName.trim().equals("")) {
+			fSuperClassStatus= new JUnitStatus();
+			((JUnitStatus)fSuperClassStatus).setError("Super class name is empty"); //$NON-NLS-1$
+			return;	
+		}
+		if (getPackageFragmentRoot() != null) { //$NON-NLS-1$
 			try {
 				IType type= resolveClassNameToType(getPackageFragmentRoot().getJavaProject(), getPackageFragment(), superClassName);
 				JUnitStatus status = new JUnitStatus();				
