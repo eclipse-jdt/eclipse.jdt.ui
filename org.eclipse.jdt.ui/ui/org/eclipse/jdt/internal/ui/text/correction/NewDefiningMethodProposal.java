@@ -52,7 +52,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 		fMethod= method;
 		fParamNames= paramNames;
 		
-		ImageDescriptor desc= JavaElementImageProvider.getMethodImageDescriptor(binding.isInterface(), method.getModifiers());
+		ImageDescriptor desc= JavaElementImageProvider.getMethodImageDescriptor(binding.isInterface() || binding.isAnnotation(), method.getModifiers());
 		setImage(JavaPlugin.getImageDescriptorRegistry().get(desc));
 	}
 
