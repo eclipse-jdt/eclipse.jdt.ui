@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 
@@ -197,18 +198,22 @@ public class ChangeTypeWizard extends RefactoringWizard {
 						pm.done();
 					}
 				};
+				boolean internalError= false;
 				try {
 					getWizard().getContainer().run(true, true, runnable);
 				} catch (InvocationTargetException e) {
+					internalError= true;
+					JavaPlugin.log(e);
 					ChangeTypeInputPage.this.setErrorMessage(RefactoringMessages.getString("ChangeTypeWizard.internalError")); //$NON-NLS-1$
 				} catch (InterruptedException e) {
 					ChangeTypeInputPage.this.setMessage(RefactoringMessages.getString("ChangeTypeWizard.computationInterrupted")); //$NON-NLS-1$
-	
 				}
 													
 				fLabelProvider.grayOut(fInvalidTypes);
 				
-				if (fValidTypes == null || fValidTypes.size() == 0){
+				if (internalError) {
+					setPageComplete(false);
+				} else if (fValidTypes == null || fValidTypes.size() == 0){
 					ChangeTypeInputPage.this.setErrorMessage(RefactoringMessages.getString("ChangeTypeWizard.declCannotBeChanged")); //$NON-NLS-1$
 					setPageComplete(false);
 				} else {
