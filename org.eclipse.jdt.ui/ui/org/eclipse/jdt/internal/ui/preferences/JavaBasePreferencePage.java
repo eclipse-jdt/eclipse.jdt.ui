@@ -49,7 +49,7 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(IPreferencesConstants.LINK_PACKAGES_TO_EDITOR, true);
-		store.setDefault(IPreferencesConstants.OPEN_TYPE_HIERARCHY, IPreferencesConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE);
+		store.setDefault(IPreferencesConstants.OPEN_TYPE_HIERARCHY, IPreferencesConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
 		store.setDefault(IPreferencesConstants.SRCBIN_FOLDERS_IN_NEWPROJ, true);		
 		store.setDefault(IPreferencesConstants.DOUBLE_CLICK_GOES_INTO, false);		
 	}
