@@ -260,21 +260,21 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 					Character.isWhitespace(document.getChar(command.offset))))
 				{
 					command.doit= false;
-					document.replace(command.offset, 0, String.valueOf(getClosingCharacter(character)));
+					document.replace(command.offset + command.length, 0, String.valueOf(getClosingCharacter(character)));
 				}
 				break;
 
 			case '[':
 				if (preferenceStore.getBoolean(CompilationUnitEditor.CLOSE_BRACKETS)) {
 					command.doit= false;
-					document.replace(command.offset, 0, String.valueOf(getClosingCharacter(character)));
+					document.replace(command.offset + command.length, 0, String.valueOf(getClosingCharacter(character)));
 				}
 				break;
 				
 			case '\"':
 				if (preferenceStore.getBoolean(CompilationUnitEditor.CLOSE_STRINGS)) {
 					command.doit= false;
-					document.replace(command.offset, 0, String.valueOf(getClosingCharacter(character)));
+					document.replace(command.offset + command.length, 0, String.valueOf(getClosingCharacter(character)));
 				}
 				break;
 
