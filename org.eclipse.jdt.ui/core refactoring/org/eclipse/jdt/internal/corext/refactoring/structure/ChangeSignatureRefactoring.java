@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MemberRef;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -68,6 +69,7 @@ import org.eclipse.jdt.core.dom.MethodRefParameter;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -161,7 +163,11 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	public static boolean isAvailable(IMethod method) throws JavaModelException {
 		if (method == null)
 			return false;
-		return Checks.isAvailable(method);
+		if (! Checks.isAvailable(method))
+			return false;
+		if (Flags.isAnnotation(method.getDeclaringType().getFlags()))
+			return false;
+		return true;
 	}	
 	
 	private String getInitialMethodName() {
@@ -609,7 +615,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (result.hasFatalError())
 				return result;
 			
-			resolveTypesWithoutBindings(new SubProgressMonitor(pm, 1)); //TODO: no status, ...
+//			resolveTypesWithoutBindings(new SubProgressMonitor(pm, 1)); // already done in checkSignature(true)
 
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), result);
 
@@ -1171,6 +1177,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		else if (node instanceof SimpleName && 
 				(node.getParent() instanceof MemberRef || node.getParent() instanceof MethodRef))
 			return new DocReferenceUpdate(node.getParent(), cuRewrite, result);
+		
+		else if (ASTNodes.getParent(node, ImportDeclaration.class) != null)
+			return new StaticImportUpdate((ImportDeclaration) ASTNodes.getParent(node, ImportDeclaration.class), cuRewrite, result);
 		
 		else
 			return new NullOccurrenceUpdate(node, cuRewrite, result);
@@ -1937,6 +1946,35 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			
 			MethodRefParameter oldParam= (MethodRefParameter) ((MethodRef) fNode).parameters().get(info.getOldIndex());
 			replaceTypeNode(oldParam.getType(), info.getNewTypeName(), info.getNewTypeBinding());
+		}
+	}
+	
+	class StaticImportUpdate extends OccurrenceUpdate {
+
+		private final ImportDeclaration fImportDecl;
+
+		public StaticImportUpdate(ImportDeclaration importDecl, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
+			super(cuRewrite, null, result);
+			fImportDecl= importDecl;
+		}
+
+		public void updateNode() throws JavaModelException {
+			ImportRewrite importRewrite= fCuRewrite.getImportRewrite();
+			QualifiedName name= (QualifiedName) fImportDecl.getName();
+			//will be removed by importRemover if not used elsewhere ... importRewrite.removeStaticImport(name.getFullyQualifiedName());
+			importRewrite.addStaticImport(name.getQualifier().getFullyQualifiedName(), fMethodName, false);
+		}
+
+		protected ListRewrite getParamgumentsRewrite() {
+			return null;
+		}
+
+		protected ASTNode createNewParamgument(ParameterInfo info) {
+			return null;
+		}
+
+		protected SimpleName getMethodNameNode() {
+			return null;
 		}
 	}
 	

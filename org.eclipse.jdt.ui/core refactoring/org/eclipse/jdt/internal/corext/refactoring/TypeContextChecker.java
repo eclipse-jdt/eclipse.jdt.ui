@@ -473,6 +473,8 @@ public class TypeContextChecker {
 			}
 			
 			buf.append("{\n"); //$NON-NLS-1$
+			if (decl instanceof EnumDeclaration)
+				buf.append(";\n"); //$NON-NLS-1$
 			fillWithTypeStubs(bufBefore, bufAfter, focalPosition, decl.bodyDeclarations());
 			buf= decl.getStartPosition() + decl.getLength() < focalPosition ? bufBefore : bufAfter;
 			buf.append("}\n"); //$NON-NLS-1$

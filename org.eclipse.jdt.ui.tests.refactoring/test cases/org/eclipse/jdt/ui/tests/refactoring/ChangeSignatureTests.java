@@ -43,6 +43,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 	private static final String REFACTORING_PATH= "ChangeSignature/";
 	
 	private static final boolean BUG_83691_CORE_JAVADOC_REF= true;
+	private static final boolean BUG_83319_CORE_REFS_IN_STATIC_IMPORT= true;
+	
 	private static final boolean RUN_CONSTRUCTOR_TEST= true;
 
 	public ChangeSignatureTests(String name) {
@@ -523,7 +525,15 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.NONE;
 		int expectedSeverity= RefactoringStatus.ERROR;
 		helperDoAllFail("run", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, expectedSeverity);
-	}	
+	}
+
+	public void testFailAnnotation1() throws Exception{
+		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
+		IMethod method= classA.getMethod("name", new String[0]);
+		assertNotNull(method);
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
+		assertNull(ref);
+	}
 
 	//---------
 	public void test0() throws Exception{
@@ -1591,6 +1601,41 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.NONE;
 		String newReturnTypeName= null;
 		helperDoAll("A", "A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+	
+	public void testEnum04() throws Exception {
+		String[] signature= {};
+		String[] newNames= {"forward"};
+		String[] newTypes= {"boolean"};
+		String[] newDefaultValues= {"true"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {};
+		int[] deletedIndices= {};
+		int newVisibility= Modifier.PUBLIC;
+		String newReturnTypeName= null;
+		helperDoAll("A", "getNext", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+	
+	public void testStaticImport01() throws Exception {
+		if (BUG_83319_CORE_REFS_IN_STATIC_IMPORT) {
+			printTestDisabledMessage("BUG_83319_CORE_REFS_IN_STATIC_IMPORT");
+			return;
+		}
+		helperRenameMethod(new String[0], "abc");
+	}
+	
+	public void testStaticImport02() throws Exception {
+		String[] signature= {"QInteger;"};
+		String[] newTypes= {"Object"};
+		String[] newNames= {"o"};
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {1};
+		helperAdd(signature, newParamInfo, newIndices);
 	}
 }
 
