@@ -449,6 +449,7 @@
 		id="org.eclipse.jdt.ui.launcher.ScrapbookLauncher"
 		class="org.eclipse.jdt.internal.ui.snippeteditor.ScrapbookLauncher"
 		label="Java Scrapbook Page"
+		public="false"
    		modes="debug" />
 </extension>	
 
