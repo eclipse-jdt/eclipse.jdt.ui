@@ -812,6 +812,44 @@ public class PushDownTests extends RefactoringTest {
 			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
+	public void test33() throws Exception{
+		String[] selectedMethodNames= {"f", "m"};
+		String[][] selectedMethodSignatures= {new String[0], new String[0]};
+		String[] selectedFieldNames= {"i"};
+		String[] namesOfMethodsToPushDown= {"f", "m"};
+		String[][] signaturesOfMethodsToPushDown= {new String[0], new String[0]};
+		String[] namesOfFieldsToPushDown= {"i"};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, 
+			   new String[]{"B", "C"}, new String[]{"p", "p"});
+	}
+
+	public void test34() throws Exception{
+		printTestDisabledMessage("disabled due to missing support for statically imported methods");
+
+//		String[] selectedMethodNames= {"f", "m"};
+//		String[][] selectedMethodSignatures= {new String[0], new String[0]};
+//		String[] selectedFieldNames= {"i"};
+//		String[] namesOfMethodsToPushDown= {"f", "m"};
+//		String[][] signaturesOfMethodsToPushDown= {new String[0], new String[0]};
+//		String[] namesOfFieldsToPushDown= {"i"};
+//		String[] namesOfMethodsToDeclareAbstract= {};
+//		String[][] signaturesOfMethodsToDeclareAbstract= {};
+//		
+//		helper(selectedMethodNames, selectedMethodSignatures, 
+//			   selectedFieldNames,	
+//			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+//			   namesOfFieldsToPushDown, 
+//			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, 
+//			   new String[]{"B", "C"}, new String[]{"p", "p"});
+	}
+
 	public void testFail0() throws Exception {
 		String[] selectedMethodNames= {"f"};
 		String[][] selectedMethodSignatures= {new String[0]};
