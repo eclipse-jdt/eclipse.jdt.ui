@@ -52,26 +52,36 @@ class SourceReferenceAction extends RefactoringAction {
 	}
 	
 	private static boolean canWorkOn(Object elem) throws JavaModelException{
+		if (elem == null)
+			return false;
+			
 		if (! (elem instanceof ISourceReference)) 
 			return false;
+			
 		if (! (elem instanceof IJavaElement)) 
 			return false;
-					
-		if (isDeletedFromEditor((ISourceReference)elem))	
-			return false;			
+								
 		if (elem instanceof IClassFile) 
 			return false;
+
 		if (elem instanceof ICompilationUnit)
 			return false;
-			
 
-		if (elem instanceof IMember)
-			return ! ((IMember)elem).isBinary();
+		if ((elem instanceof IMember) && ((IMember)elem).isBinary())
+			return false;
 			
+		if (isDeletedFromEditor((ISourceReference)elem))	
+			return false;			
+			
+		if (elem instanceof IMember) //binary excluded before
+			return true;
+
 		if (elem instanceof IImportContainer)
 			return true;
+
 		if (elem instanceof IImportDeclaration)
 			return true;
+
 		if (elem instanceof IPackageDeclaration)
 			return true;			
 		
