@@ -1123,7 +1123,7 @@ public abstract class TypePage extends ContainerPage {
 
 		IJavaProject project= root.getJavaProject();
 		SuperInterfaceSelectionDialog dialog= new SuperInterfaceSelectionDialog(getShell(), getWizard().getContainer(), fSuperInterfacesDialogField, project);
-		dialog.setTitle(NewWizardMessages.getString("TypePage.InterfacesDialog.title")); //$NON-NLS-1$
+		dialog.setTitle(fIsClass ? NewWizardMessages.getString("TypePage.InterfacesDialog.class.title") : NewWizardMessages.getString("TypePage.InterfacesDialog.interface.title"));
 		dialog.setMessage(NewWizardMessages.getString("TypePage.InterfacesDialog.message")); //$NON-NLS-1$
 		dialog.open();
 		return;
