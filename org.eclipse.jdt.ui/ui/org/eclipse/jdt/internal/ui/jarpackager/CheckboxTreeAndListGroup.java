@@ -685,7 +685,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 		boolean whiteChecked= determineShouldBeWhiteChecked(treeElement);
 		boolean shouldBeAtLeastGray= determineShouldBeAtLeastGrayChecked(treeElement);
 
-		fTreeViewer.setChecked(treeElement, shouldBeAtLeastGray);
+		fTreeViewer.setChecked(treeElement, whiteChecked || shouldBeAtLeastGray);
 		setWhiteChecked(treeElement, whiteChecked);
 		if (whiteChecked)
 			fTreeViewer.setGrayed(treeElement, false);

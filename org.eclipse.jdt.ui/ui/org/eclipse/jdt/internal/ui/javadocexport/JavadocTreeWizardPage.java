@@ -627,7 +627,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 				fTreeStatus= new StatusInfo();
 
-				if (fInputGroup.getAllCheckedTreeItems().size() == 0)
+				if (!fInputGroup.getAllCheckedListItems().hasNext())
 					fTreeStatus.setError(JavadocExportMessages.getString("JavadocTreeWizardPage.invalidtreeselection.error")); //$NON-NLS-1$
 				updateStatus(findMostSevereStatus());
 

@@ -50,24 +50,12 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 	 */
 	public Object[] getElements(Object inputElement) {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		ArrayList list= new ArrayList();
 		try {
-			IJavaProject[] jprojects= JavaCore.create(root).getJavaProjects();
-			for (int i= 0; i < jprojects.length; i++) {
-				IJavaProject javaProject= jprojects[i];
-				IPackageFragment[] els= javaProject.getPackageFragments();
-				for (int j= 0; j < els.length; j++) {
-					IPackageFragment iPackageFragment= els[j];
-					if (iPackageFragment.getCompilationUnits().length > 0) {
-						list.add(javaProject);
-						break;
-					}
-				}
-			}
+			return JavaCore.create(root).getJavaProjects();
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		return list.toArray();
+		return new Object[0];
 	}
 
 	/*
@@ -111,7 +99,7 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 		for (int i= 0; i < roots.length; i++) {
 			IPackageFragmentRoot root= roots[i];
 			if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
-				if (root.getPath().equals(root.getJavaProject().getProject().getFullPath())) {
+				if (root.getPath().equals(root.getJavaProject().getPath())) {
 					return getPackageFragments(root);
 				}
 				result.add(root);
