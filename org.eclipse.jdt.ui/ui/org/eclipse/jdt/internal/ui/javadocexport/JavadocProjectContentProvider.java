@@ -89,14 +89,7 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 	 * @see ITreeContentProvider#hasChildren(Object)
 	 */
 	public boolean hasChildren(Object element) {
-		try {
-			if (element instanceof IPackageFragment)
-				return (((IPackageFragment) element).getChildren().length > 0);
-			else
-				return (getChildren(element).length > 0);
-		} catch (JavaModelException e) {
-		}
-		return false;
+		return (getChildren(element).length > 0);
 	}
 
 	/*
