@@ -4,20 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.dialogs;
  
-import java.util.List;
-
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.util.Assert;
-
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
+import java.util.List;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.operation.IRunnableContext;import org.eclipse.jface.util.Assert;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
 
 /**
  * A dialog to select a type from a list of types. The dialog allows
@@ -57,6 +44,14 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 		fScope= scope;
 		Assert.isNotNull(fScope);
 		fStyle= style;
+	}
+	
+	/**
+	 * @see Windows#configureShell
+	 */
+	protected void configureShell(Shell newShell) {
+		super.configureShell(newShell);
+		WorkbenchHelp.setHelp(newShell, new Object[] { IJavaHelpContextIds.MAINTYPE_SELECTION_DIALOG });
 	}
 
 	/*

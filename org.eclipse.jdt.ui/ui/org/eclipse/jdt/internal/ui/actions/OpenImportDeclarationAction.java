@@ -4,25 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.actions;
 
-import java.util.ResourceBundle;
-
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.texteditor.IUpdate;
-
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import java.util.ResourceBundle;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.PartInitException;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.ui.texteditor.IUpdate;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 
 /**
@@ -39,6 +21,8 @@ public class OpenImportDeclarationAction extends JavaUIAction implements IUpdate
 	public OpenImportDeclarationAction(ISelectionProvider provider) {
 		super(JavaPlugin.getResourceString(PREFIX + "label"));
 		fSelectionProvider= provider;
+		
+		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.OPEN_IMPORTDECL_ACTION });	
 	}
 	
 	public void update() {

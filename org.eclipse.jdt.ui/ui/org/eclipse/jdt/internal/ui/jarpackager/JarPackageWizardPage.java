@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.io.File;import java.util.Iterator;import java.util.Set;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Text;import org.eclipse.ui.dialogs.SaveAsDialog;import org.eclipse.ui.dialogs.WizardExportResourcesPage;
+import java.io.File;import java.util.Iterator;import java.util.Set;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Text;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.ui.dialogs.SaveAsDialog;import org.eclipse.ui.dialogs.WizardExportResourcesPage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
 
 /**
  *	Page 1 of the JAR Package wizard
@@ -102,6 +102,8 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		updatePageCompletion();
 
 		giveFocusToDestination();
+		
+		WorkbenchHelp.setHelp(composite, new DialogPageContextComputer(this, IJavaHelpContextIds.JARPACKAGER_WIZARD_PAGE));								
 	}
 	/**
 	 *	Create the export options specification widgets.

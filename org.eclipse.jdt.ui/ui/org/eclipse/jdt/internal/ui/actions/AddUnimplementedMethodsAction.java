@@ -4,29 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.actions;
 
-import java.lang.reflect.InvocationTargetException;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PartInitException;
-
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.IUIConstants;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.codemanipulation.AddUnimplementedMethodsOperation;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import java.lang.reflect.InvocationTargetException;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.PartInitException;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IUIConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.codemanipulation.AddUnimplementedMethodsOperation;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 
 /**
@@ -46,6 +24,9 @@ public class AddUnimplementedMethodsAction extends JavaUIAction {
 	public AddUnimplementedMethodsAction(ISelectionProvider selProvider) {
 		super(JavaPlugin.getResourceBundle(), ACTION_PREFIX);
 		fSelectionProvider= selProvider;
+		
+		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.ADD_UNIMPLEMENTED_METHODS_ACTION });
+		
 	}
 
 	public void run() {
