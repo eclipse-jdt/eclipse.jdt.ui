@@ -493,18 +493,20 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		// prefix[0] is either '\t' or ' ' x tabWidth, depending on useSpaces
 		
 		IJavaProject project= getProject();
-		int tabWidth= CodeFormatterUtil.getTabWidth(project);
+		final int tabWidth= CodeFormatterUtil.getTabWidth(project);
+		final int indentWidth= CodeFormatterUtil.getIndentWidth(project);
+		int spaceEquivalents= Math.min(tabWidth, indentWidth);
 		boolean useSpaces;
 		if (project == null)
-			useSpaces= JavaCore.SPACE.equals(JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
+			useSpaces= JavaCore.SPACE.equals(JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR)) || tabWidth > indentWidth;
 		else
-			useSpaces= JavaCore.SPACE.equals(project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, true));
+			useSpaces= JavaCore.SPACE.equals(project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, true)) || tabWidth > indentWidth;
 		
-		for (int i= 0; i <= tabWidth; i++) {
+		for (int i= 0; i <= spaceEquivalents; i++) {
 		    StringBuffer prefix= new StringBuffer();
 
 			if (useSpaces) {
-			    for (int j= 0; j + i < tabWidth; j++)
+			    for (int j= 0; j + i < spaceEquivalents; j++)
 			    	prefix.append(' ');
 		    	
 				if (i != 0)
@@ -513,7 +515,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			    for (int j= 0; j < i; j++)
 			    	prefix.append(' ');
 		    	
-				if (i != tabWidth)
+				if (i != spaceEquivalents)
 		    		prefix.append('\t');
 			}
 			
