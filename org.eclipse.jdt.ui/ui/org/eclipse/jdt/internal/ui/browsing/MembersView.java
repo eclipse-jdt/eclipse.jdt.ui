@@ -42,6 +42,7 @@ public class MembersView extends JavaBrowsingPart {
 	
 	public MembersView() {
 		setHasWorkingSetFilter(false);
+		setHasCustomSetFilter(false);
 	}
 
 	/**

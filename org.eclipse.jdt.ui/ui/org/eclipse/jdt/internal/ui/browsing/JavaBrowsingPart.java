@@ -127,6 +127,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	// Actions
 	private WorkingSetFilterActionGroup fWorkingSetFilterActionGroup;
 	private boolean fHasWorkingSetFilter= true;
+	private boolean fHasCustomFilter= true;
 	private OpenEditorActionGroup fOpenEditorGroup;
 	private CCPActionGroup fCCPActionGroup;
 	private BuildActionGroup fBuildActionGroup;
@@ -179,13 +180,15 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		}
 		if (fHasWorkingSetFilter)
 			fWorkingSetFilterActionGroup.saveState(memento);
-		fCustomFiltersActionGroup.saveState(memento);
+		if (fHasCustomFilter)
+			fCustomFiltersActionGroup.saveState(memento);
 	}	
 
 	protected void restoreState(IMemento memento) {
 		if (fHasWorkingSetFilter)
 			fWorkingSetFilterActionGroup.restoreState(memento);
-		fCustomFiltersActionGroup.restoreState(memento);
+		if (fHasCustomFilter)
+			fCustomFiltersActionGroup.restoreState(memento);
 	}	
 
 	/**
@@ -219,7 +222,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		addKeyListener();
 
 		// Custom filter group
-		fCustomFiltersActionGroup= new CustomFiltersActionGroup(this, fViewer);
+		if (fHasCustomFilter)
+			fCustomFiltersActionGroup= new CustomFiltersActionGroup(this, fViewer);
 
 		if (fMemento != null)
 			restoreState(fMemento);
@@ -298,19 +302,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 		actionBars.updateActionBars();
 	
-//		IMenuManager menu= actionBars.getMenuManager();
-//		menu.add(fFilterAction);
-		
-//		menu.add(fShowLibrariesAction);  
-		//menu.add(fShowBinariesAction);
-//		menu.add(fFilterWorkingSetAction); 
-//		menu.add(fRemoveWorkingSetAction); 
-//
-//		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-//		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$
-
 		fActionGroups.fillActionBars(actionBars);
-		fCustomFiltersActionGroup.fillActionBars(actionBars);
+		
+		if (fHasCustomFilter)
+			fCustomFiltersActionGroup.fillActionBars(actionBars);
 	}
 	
 	//---- IWorkbenchPart ------------------------------------------------------
@@ -573,6 +568,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	void setHasWorkingSetFilter(boolean state) {
 		fHasWorkingSetFilter= state;
 	}
+
+	void setHasCustomSetFilter(boolean state) {
+		fHasCustomFilter= state;
+	}
 	
 	protected void setInput(Object input) {
 		setViewerInput(input);
@@ -664,7 +663,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 */
 	protected void addFilters() {
 		// default is to have no filters
-//		fCustomFiltersActionGroup= new CustomFiltersActionGroup(this);
 	}
 
 	/**
