@@ -716,69 +716,6 @@ JavaStructureDiffViewerCreator
 <!-- NLS tool 																	 -->
 <!-- =========================================================================== -->
 
-<!-- 'Externalize Strings' Action                                                -->
-<extension
-      point="org.eclipse.ui.popupMenus">
-   <objectContribution
-         objectClass="org.eclipse.jdt.core.ICompilationUnit"
-         id="org.eclipse.jdt.internal.ui.refactoring.nls">
-      <action
-            label="%NLSexternalizeStringsLabel"
-            class="org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeAction"
-            menubarPath="additions"
-            enablesFor="1"
-            id="ExternalizeStrings">
-      </action>
-   </objectContribution>
-</extension>
-
-<!-- 'Find Strings to Externalize' Action                                        -->
-<extension
-      point="org.eclipse.ui.popupMenus">
-   <objectContribution
-         objectClass="org.eclipse.jdt.core.IPackageFragment"
-         id="org.eclipse.jdt.internal.ui.refactoring.nls">
-      <action
-            label="%NLSfindStringsLabel"
-            class="org.eclipse.jdt.internal.ui.refactoring.nls.FindStringsAction"
-            menubarPath="additions"
-            enablesFor="+"
-            id="FindStringsInPackages">
-      </action>
-   </objectContribution>
-</extension>
-
-<extension
-      point="org.eclipse.ui.popupMenus">
-   <objectContribution
-         objectClass="org.eclipse.jdt.core.IJavaProject"
-         id="org.eclipse.jdt.internal.ui.refactoring.nls">
-      <action
-            label="%NLSfindStringsLabel"
-            class="org.eclipse.jdt.internal.ui.refactoring.nls.FindStringsAction"
-            menubarPath="additions"
-            enablesFor="+"
-            id="FindStringsInProjects">
-      </action>
-   </objectContribution>
-</extension>
-
-<extension
-      point="org.eclipse.ui.popupMenus">
-   <objectContribution
-         objectClass="org.eclipse.jdt.core.IPackageFragmentRoot"
-         id="org.eclipse.jdt.internal.ui.refactoring.nls">
-      <action
-            label="%NLSfindStringsLabel"
-            class="org.eclipse.jdt.internal.ui.refactoring.nls.FindStringsAction"
-            menubarPath="additions"
-            enablesFor="+"
-            id="FindStringsInSourceFolders">
-      </action>
-   </objectContribution>
-</extension>
-
-
 <!-- NLS Search Page
 <extension point="org.eclipse.search.searchPages">
    <page id="org.eclipse.jdt.ui.refactoring.NLSSearchPage"
