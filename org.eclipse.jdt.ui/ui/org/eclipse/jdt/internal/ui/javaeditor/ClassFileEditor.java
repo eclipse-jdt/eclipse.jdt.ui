@@ -93,8 +93,13 @@ public class ClassFileEditor extends JavaEditor {
 	 * @see JavaEditor#getCorrespondingElement(IJavaElement)
 	 */
 	protected IJavaElement getCorrespondingElement(IJavaElement element) {
-		IJavaElement parent= JavaModelUtil.findParentOfKind(element, IJavaElement.CLASS_FILE);
-		return (parent == this ? element : null);
+		if (getEditorInput() instanceof IClassFileEditorInput) {
+			IClassFileEditorInput input= (IClassFileEditorInput) getEditorInput();
+			IJavaElement parent= JavaModelUtil.findParentOfKind(element, IJavaElement.CLASS_FILE);
+			if (input.getClassFile() == parent)
+				return element;
+		}
+		return null;
 	}
 	
 	/**
