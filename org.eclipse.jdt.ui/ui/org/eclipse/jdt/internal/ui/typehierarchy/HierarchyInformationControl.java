@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
+import org.eclipse.jdt.internal.ui.text.AbstractInformationControl;
 import org.eclipse.jdt.internal.ui.typehierarchy.SuperTypeHierarchyViewer.SuperTypeHierarchyContentProvider;
 import org.eclipse.jdt.internal.ui.typehierarchy.TraditionalHierarchyViewer.TraditionalHierarchyContentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
@@ -43,14 +43,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 /**
  *
  */
-public class HierarchyInformationControl extends JavaOutlineInformationControl {
+public class HierarchyInformationControl extends AbstractInformationControl {
 
 	private KeyAdapter fKeyAdapter;
 	private TypeHierarchyLifeCycle fLifeCycle;
 
 	public HierarchyInformationControl(Shell parent, int shellStyle, int treeStyle) {
 		super(parent, shellStyle, treeStyle);
-
 	}
 	
 	private KeyAdapter getKeyAdapter() {
@@ -107,6 +106,7 @@ public class HierarchyInformationControl extends JavaOutlineInformationControl {
 			treeViewer.setContentProvider(new TraditionalHierarchyContentProvider(fLifeCycle));
 		}
 		treeViewer.refresh();
+		treeViewer.expandAll();
 	}
 
 	/* (non-Javadoc)
