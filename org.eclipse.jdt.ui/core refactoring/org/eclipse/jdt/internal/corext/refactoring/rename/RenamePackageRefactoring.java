@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,12 +18,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -417,8 +415,8 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		for (int i= 0; i < types.length; i++) {
 			String name= types[i].getElementName();
 			if (topLevelTypeNames.contains(name)){
-				String pattern= "Package ''{0}'' already contains a type named ''{1}''";
-				String msg= MessageFormat.format(pattern, new String[]{packageName, name});
+				String[] keys= {packageName, name};
+				String msg= RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.contains_type", keys); //$NON-NLS-1$
 				Context context= JavaSourceContext.create(types[i]);
 				result.addError(msg, context);
 			}	

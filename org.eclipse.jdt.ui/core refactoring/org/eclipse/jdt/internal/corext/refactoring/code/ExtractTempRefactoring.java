@@ -217,8 +217,8 @@ public class ExtractTempRefactoring extends Refactoring {
 		throws JavaModelException
 	{
 		switch(Checks.checkExpressionIsRValue(getSelectedExpression().getAssociatedExpression())) {
-			case Checks.NOT_RVALUE_MISC:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE);
-			case Checks.NOT_RVALUE_VOID:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractTempRefactoring.no_void"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID);
+			case Checks.NOT_RVALUE_MISC:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE); //$NON-NLS-1$
+			case Checks.NOT_RVALUE_VOID:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractTempRefactoring.no_void"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID); //$NON-NLS-1$
 			case Checks.IS_RVALUE:			return new RefactoringStatus();
 			default:						Assert.isTrue(false); return null;
 		}		
@@ -287,7 +287,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		for (int i= 0; i < matchingFragments.length; i++) {
 			ASTNode node= matchingFragments[i].getAssociatedNode();
 			if (isLeftValue(node)){
-				String msg= "Selected expression is assigned to. Extracting may change the program's semantics";
+				String msg= RefactoringCoreMessages.getString("ExtractTempRefactoring.assigned_to"); //$NON-NLS-1$
 				result.addWarning(msg, JavaSourceContext.create(fCu, node));
 			}
 		}
@@ -512,7 +512,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		String dummyDeclaration= modifier + getTempTypeName() + " " + fTempName + " = " + dummyInitializer + semicolon; //$NON-NLS-1$ //$NON-NLS-2$
 		int[] position= {dummyDeclaration.length() - dummyInitializer.length()  - semicolon.length()};
 		StringBuffer formattedDummyDeclaration= new StringBuffer(formatter.format(dummyDeclaration, 0, position, getLineDelimiter()));
-		String tail= addTrailingLineDelimiter ? getLineDelimiter(): "";
+		String tail= addTrailingLineDelimiter ? getLineDelimiter(): ""; //$NON-NLS-1$
 		return formattedDummyDeclaration.replace(position[0], position[0] + dummyInitializer.length(), initializerSource)
 														.append(tail)
 														.toString();

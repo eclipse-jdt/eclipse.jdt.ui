@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -22,6 +20,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -42,8 +41,8 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange{
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#getName()
 	 */
 	public String getName() {
-		String pattern= "Delete package fragment root ''{0}''";
-		return MessageFormat.format(pattern, new String[]{getRoot().getElementName()});
+		String[] keys= {getRoot().getElementName()};
+		return RefactoringCoreMessages.getFormattedString("DeletePackageFragmentRootChange.delete", keys); //$NON-NLS-1$
 	}
 
 	/*

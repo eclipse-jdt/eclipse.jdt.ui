@@ -105,7 +105,7 @@ public class SourceProvider {
 	
 	public boolean hasReturnValue() {
 		IMethodBinding binding= fDeclaration.resolveBinding();
-		return binding.getReturnType() != fDeclaration.getAST().resolveWellKnownType("void");
+		return binding.getReturnType() != fDeclaration.getAST().resolveWellKnownType("void"); //$NON-NLS-1$
 	}
 	
 	public boolean mustEvaluateReturnValue() {

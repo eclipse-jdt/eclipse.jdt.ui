@@ -1,6 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2003 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Common Public License v1.0 which accompanies
+ * this distribution, and is available at http://www.eclipse.org/legal/cpl-v10.
+ * html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +49,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -83,7 +93,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		fSelectionLength= selectionLength;
 		fCu= cu;
 		
-        fFieldName= "";
+        fFieldName= ""; //$NON-NLS-1$
         fVisibility= Modifier.PRIVATE;
         fDeclareStatic= false;
         fDeclareFinal= false;
@@ -94,7 +104,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
      * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
      */
     public String getName() {
-        return "Promote Local Variable to Field";
+        return RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.name"); //$NON-NLS-1$
     }
     
     public int[] getAvailableVisibilities(){
@@ -218,16 +228,16 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     		initAST();
 
 			if (fTempDeclarationNode == null)
-				return RefactoringStatus.createFatalErrorStatus("Select a declaration or a reference to a local variable.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.select_declaration")); //$NON-NLS-1$
 			
 			if (! Checks.isDeclaredInMethod(fTempDeclarationNode))
-				return RefactoringStatus.createFatalErrorStatus("Currently, only local variables declared in methods can be converted to fields.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.only_declared_in_methods")); //$NON-NLS-1$
 			
 			if (isMethodParameter())
-				return RefactoringStatus.createFatalErrorStatus("Cannot convert method parameters to fields.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.method_parameters")); //$NON-NLS-1$
 
 			if (isTempAnExceptionInCatchBlock())
-				return RefactoringStatus.createFatalErrorStatus("Cannot convert exceptions declared in catch clauses to fields.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.exceptions")); //$NON-NLS-1$
 	
 			result.merge(checkTempTypeForLocalTypeUsage());
 			if (result.hasFatalError())
@@ -263,20 +273,20 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	    //do not create a list - it is not shown in a dialog anyway.
 	    //can optimize here to not walk the whole expression but only until 1 match is found
 	    if (! localTypeAnalyer.getLocalTypeUsageNodes().isEmpty())
-			return RefactoringStatus.createFatalErrorStatus("Cannot promote this local variable to a field because it uses types or variables declared locally in the method");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.uses_types_declared_locally")); //$NON-NLS-1$
         return null;
     }
     
     private RefactoringStatus checkTempTypeForLocalTypeUsage(){
     	VariableDeclarationStatement vds= getTempDeclarationStatement();
     	if (vds == null)
-    		return RefactoringStatus.createFatalErrorStatus("Cannot promote this local variable to a field");
+    		return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.cannot_promote")); //$NON-NLS-1$
     	Type type= 	vds.getType();
     	ITypeBinding binding= type.resolveBinding();
     	if (binding == null)
-    		return RefactoringStatus.createFatalErrorStatus("Cannot promote this local variable to a field");
+    		return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.cannot_promote")); //$NON-NLS-1$
     	if (binding.isLocal())
-			return RefactoringStatus.createFatalErrorStatus("Cannot promote this local variable to a field because it uses a type declared locally in the method");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.uses_type_declared_locally")); //$NON-NLS-1$
 		return null;    	
     }
     
@@ -338,8 +348,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
             method.accept(nameCollector);
             List names= nameCollector.getNames();
             if (names.contains(fFieldName)){
-            	String pattern= "Name conflict with name ''{0}'' used in ''{1}''";
- 				String msg= MessageFormat.format(pattern, new String[]{fFieldName, Bindings.asString(method.resolveBinding())});
+				String[] keys= {fFieldName, Bindings.asString(method.resolveBinding())};
+            	String msg= RefactoringCoreMessages.getFormattedString("PromoteTempToFieldRefactoring.Name_conflict", keys); //$NON-NLS-1$
             	return RefactoringStatus.createFatalErrorStatus(msg);
             }	
         }    	
@@ -356,7 +366,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
                 if (fFieldName.equals(fragment.getName().getIdentifier())){
                 	//cannot conflict with more than 1 name
                 	Context context= JavaSourceContext.create(fCu, fragment);
-                	return RefactoringStatus.createFatalErrorStatus("Name conflict with existing field", context);
+                	return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.Name_conflict_with_field"), context); //$NON-NLS-1$
                 }
             }
         }
@@ -391,7 +401,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
      * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
      */
     public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-    	pm.beginTask("", 1);
+    	pm.beginTask("", 1); //$NON-NLS-1$
     	try{
     		ASTRewrite rewrite= new ASTRewrite(fCompilationUnitNode);
     		addFieldDeclaration(rewrite);
@@ -511,11 +521,11 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
     
     private IChange createChange(ASTRewrite rewrite) throws CoreException{
-        TextChange change= new CompilationUnitChange("", fCu);
+        TextChange change= new CompilationUnitChange("", fCu); //$NON-NLS-1$
         TextBuffer textBuffer= TextBuffer.create(fCu.getBuffer().getContents());
         TextEdit resultingEdits= new MultiTextEdit();
         rewrite.rewriteNode(textBuffer, resultingEdits, null);
-        change.addTextEdit("Promote local variable to field", resultingEdits);
+        change.addTextEdit(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.editName"), resultingEdits); //$NON-NLS-1$
         rewrite.removeModifications();
         return change;
     }

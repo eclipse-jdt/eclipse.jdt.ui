@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -71,6 +70,7 @@ import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -146,7 +146,7 @@ class InstanceMethodMover {
 			Assert.isTrue(inlineDelegator || !removeDelegator);
 			Assert.isTrue(Arrays.asList(method.getPossibleNewReceivers()).contains(this));
 
-			CompositeChange composite= new CompositeChange("Move instance method");
+			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("InstanceMethodMover.move_method")); //$NON-NLS-1$
 			composite.add(addMovedMethodToMyClass(method, newMethodName, originalReceiverParameterName));
 			composite.add(replaceOriginalMethodBodyWithDelegation(method, newMethodName));
 			return composite;
@@ -157,8 +157,8 @@ class InstanceMethodMover {
 			methodEditSession.replaceBodyWithDelegation(
 				specifyDelegationToNewMethod(originalMethod, newMethodName));
 
-			CompilationUnitChange cuChange= new CompilationUnitChange("Transform original method to delegate to new method.", originalMethod.getDeclaringCU());
-			cuChange.addTextEdit("Replace method body with delegation.", methodEditSession.getEdits());
+			CompilationUnitChange cuChange= new CompilationUnitChange(RefactoringCoreMessages.getString("InstanceMethodMover.transform_to_delegate"), originalMethod.getDeclaringCU()); //$NON-NLS-1$
+			cuChange.addTextEdit(RefactoringCoreMessages.getString("InstanceMethodMover.replace_with_delegation"), methodEditSession.getEdits()); //$NON-NLS-1$
 			return cuChange;	
 		}
 		
@@ -175,17 +175,17 @@ class InstanceMethodMover {
 			ASTRewrite rewrite= new ASTRewrite(myClassDeclaration);
 			BodyDeclaration newMethodNode= (BodyDeclaration) rewrite.createPlaceholder(newMethodText, ASTRewrite.BODY_DECLARATION);
 			myClassDeclaration.bodyDeclarations().add(newMethodNode);
-			rewrite.markAsInserted(newMethodNode, "Create method in new receiver's class.");
+			rewrite.markAsInserted(newMethodNode, RefactoringCoreMessages.getString("InstanceMethodMover.create_in_receiver")); //$NON-NLS-1$
 
 			TextBuffer buffer= TextBuffer.create(getReceiverClassCU().getBuffer().getContents());
 			MultiTextEdit edit= new MultiTextEdit();
 			rewrite.rewriteNode(buffer, edit, null);
 			rewrite.removeModifications();
 
-			CompilationUnitChange cuChange= new CompilationUnitChange("Create method in new receiver's class.", getReceiverClassCU());
-			cuChange.addTextEdit("Create method in new receiver's class.", edit);
+			CompilationUnitChange cuChange= new CompilationUnitChange(RefactoringCoreMessages.getString("InstanceMethodMover.create_in_receiver"), getReceiverClassCU()); //$NON-NLS-1$
+			cuChange.addTextEdit(RefactoringCoreMessages.getString("InstanceMethodMover.create_in_receiver"), edit); //$NON-NLS-1$
 			cuChange.addTextEdit(
-				"Add needed imports for created method",
+				RefactoringCoreMessages.getString("InstanceMethodMover.add_imports"), //$NON-NLS-1$
 				createImportEdit(allTypesUsedWithoutQualification, getReceiverClassCU())
 			);
 			return cuChange;		
@@ -273,7 +273,7 @@ class InstanceMethodMover {
 		}
 		
 		public int hashCode() {
-			Assert.isTrue(false, "hashing of NewReceiver unsupported");//unless specified by subclass
+			Assert.isTrue(false, "hashing of NewReceiver unsupported");//unless specified by subclass //$NON-NLS-1$
 			return 0;
 		}	
 		
@@ -284,11 +284,11 @@ class InstanceMethodMover {
 			Assert.isTrue(inlineDelegator || ! removeDelegator);
 		
 			if( ! isReceiverModelClassAvailable())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "Moving to within local classes is currently unsupported.", null, null, RefactoringStatusCodes.CANNOT_MOVE_TO_LOCAL);
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.to_local_localunsupported"), null, null, RefactoringStatusCodes.CANNOT_MOVE_TO_LOCAL); //$NON-NLS-1$
 
 			// TODO: handle moving to within same cu
 			if(isDeclaredInMyCU(method))
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "Moving a method to a class declared within the same compilation unit is currently unsupported.", null, null, RefactoringStatusCodes.CANNOT_MOVE_TO_SAME_CU);
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.moving_to_same_cu_unsupported"), null, null, RefactoringStatusCodes.CANNOT_MOVE_TO_SAME_CU); //$NON-NLS-1$
 			
 			RefactoringStatus result= new RefactoringStatus();
 			checkParameterNames(result, method, originalReceiverParameterName);
@@ -303,8 +303,7 @@ class InstanceMethodMover {
 				SingleVariableDeclaration param= (SingleVariableDeclaration) iter.next();
 				if (originalReceiverParameterName.equals(param.getName().getIdentifier())){
 					Context context= JavaSourceContext.create(method.getDeclaringCU(), param);
-					String pattern= "Parameter name ''{0}'' is already used";
-					String msg= MessageFormat.format(pattern, new String[]{originalReceiverParameterName});
+					String msg= RefactoringCoreMessages.getFormattedString("InstanceMethodMover.parameter_name_used", new String[]{originalReceiverParameterName}); //$NON-NLS-1$
 					int code= RefactoringStatusCodes.PARAM_NAME_ALREADY_USED;
 					RefactoringStatusEntry entry= new RefactoringStatusEntry(msg, RefactoringStatus.ERROR, context, null, code); 
 					result.addEntry(entry);
@@ -649,14 +648,14 @@ class InstanceMethodMover {
 					else if(invocation.arguments().contains(expression))
 						replaceExpressionWithExplicitThis(expression);
 					else		
-						Assert.isTrue(false, "expression should be an expression for which, syntactically, \"this\" could by substituted, so not the name in a method invocation.");
+						Assert.isTrue(false, "expression should be an expression for which, syntactically, \"this\" could by substituted, so not the name in a method invocation."); //$NON-NLS-1$
 				} else if(parent instanceof FieldAccess) {
 					FieldAccess fieldAccess= (FieldAccess) parent;
-					Assert.isTrue(expression.equals(fieldAccess.getExpression()), "expression should be an expression for which, syntactically, \"this\" could by substituted, so not the field name in a field access.");
+					Assert.isTrue(expression.equals(fieldAccess.getExpression()), "expression should be an expression for which, syntactically, \"this\" could by substituted, so not the field name in a field access."); //$NON-NLS-1$
 					replaceReceiverWithImplicitThis(fieldAccess);
 				} else if(parent instanceof QualifiedName) {
 					QualifiedName qualifiedName= (QualifiedName) parent;
-					Assert.isTrue(isQualifiedNameUsedAsFieldAccessOnObject(qualifiedName, expression), "expression should be an expression for which, syntactically, \"this\" could by substituted.");
+					Assert.isTrue(isQualifiedNameUsedAsFieldAccessOnObject(qualifiedName, expression), "expression should be an expression for which, syntactically, \"this\" could by substituted."); //$NON-NLS-1$
 					replaceReceiverWithImplicitThis(qualifiedName);
 				} else
 					replaceExpressionWithExplicitThis(expression);
@@ -789,7 +788,7 @@ class InstanceMethodMover {
 				SingleVariableDeclaration newDecl= fMethod.addNewFirstParameter(parameterType, parameterName);
 				fRewrite.markAsInserted(newDecl);
 				if(parameterType.isClass() || parameterType.isInterface()) {
-					Assert.isNotNull(fTypeReferences, "this session has already been destroyed.");	
+					Assert.isNotNull(fTypeReferences, "this session has already been destroyed.");	 //$NON-NLS-1$
 					fTypeReferences.addOneReference(parameterType);
 				}
 			}
@@ -798,7 +797,7 @@ class InstanceMethodMover {
 				fRewrite.markAsRemoved(fMethod.getParameterDeclaration(parameter));
 				ITypeBinding parameterType= parameter.getType();
 				if(parameterType.isClass() || parameterType.isInterface()) {
-					Assert.isNotNull(fTypeReferences, "this session has already been destroyed.");	
+					Assert.isNotNull(fTypeReferences, "this session has already been destroyed.");	 //$NON-NLS-1$
 					fTypeReferences.removeOneReference(parameterType);
 				}
 			}			
@@ -867,7 +866,7 @@ class InstanceMethodMover {
 			}
 			
 			public Collection getAllTypesUsedWithoutQualificationInEdittedMethod() {
-				Assert.isNotNull(fTypeReferences, "this session has already been destroyed.");
+				Assert.isNotNull(fTypeReferences, "this session has already been destroyed."); //$NON-NLS-1$
 				return fTypeReferences.getTypesReferencedWithoutQualification();
 			}			
 			
@@ -912,7 +911,7 @@ class InstanceMethodMover {
 				Assert.isTrue(classOrInterface.isClass() || classOrInterface.isInterface());
 				
 				Integer value= getValueFor(classOrInterface);
-				Assert.isTrue(value != null, "invalid argument");
+				Assert.isTrue(value != null, "invalid argument"); //$NON-NLS-1$
 				
 				int currentReferences= value.intValue();
 				Assert.isTrue(currentReferences > 0);
@@ -1149,24 +1148,24 @@ class InstanceMethodMover {
 		
 		public RefactoringStatus checkCanBeMoved() {
 			if(isStatic())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "This refactoring cannot be used to move static methods.", null, null, RefactoringStatusCodes.CANNOT_MOVE_STATIC);
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.no_static_methods"), null, null, RefactoringStatusCodes.CANNOT_MOVE_STATIC); //$NON-NLS-1$
 			if(isAbstract())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "Select a single method implementation to move.", null, null, RefactoringStatusCodes.SELECT_METHOD_IMPLEMENTATION);				
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.single_implementation"), null, null, RefactoringStatusCodes.SELECT_METHOD_IMPLEMENTATION);				 //$NON-NLS-1$
 			if(isNative())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "This refactoring cannot be used to move native methods.", null, null, RefactoringStatusCodes.CANNOT_MOVE_NATIVE);
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.no_native_methods"), null, null, RefactoringStatusCodes.CANNOT_MOVE_NATIVE); //$NON-NLS-1$
 			if(isSynchronized())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "This refactoring cannot be used to move synchronized methods.", null, null, RefactoringStatusCodes.CANNOT_MOVE_SYNCHRONIZED);	
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.no_synchronized_methods"), null, null, RefactoringStatusCodes.CANNOT_MOVE_SYNCHRONIZED);	 //$NON-NLS-1$
 			if(isConstructor())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "This refactoring cannot be used to move a constructor.", null, null, RefactoringStatusCodes.CANNOT_MOVE_CONSTRUCTOR);	
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.no_constructors"), null, null, RefactoringStatusCodes.CANNOT_MOVE_CONSTRUCTOR);	 //$NON-NLS-1$
 			if(hasSuperReferences())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "The method cannot be moved, since it uses the \"super\" keyword.", null, null, RefactoringStatusCodes.SUPER_REFERENCES_NOT_ALLOWED);
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.uses_super"), null, null, RefactoringStatusCodes.SUPER_REFERENCES_NOT_ALLOWED); //$NON-NLS-1$
 			if(refersToEnclosingInstances())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "The method cannot be moved, since it refers to enclosing instances (i.e. <EnclosingClassName>.this).", null, null, RefactoringStatusCodes.ENCLOSING_INSTANCE_REFERENCES_NOT_ALLOWED);
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.refers_enclosing_instances"), null, null, RefactoringStatusCodes.ENCLOSING_INSTANCE_REFERENCES_NOT_ALLOWED); //$NON-NLS-1$
 			if(mayBeDirectlyRecursive())				
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "This refactoring cannot be used to move potentially recursive methods.", null, null, RefactoringStatusCodes.CANNOT_MOVE_RECURSIVE);
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.potentially_recursive"), null, null, RefactoringStatusCodes.CANNOT_MOVE_RECURSIVE); //$NON-NLS-1$
 		
 			if (getPossibleNewReceivers().length == 0)
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "This method cannot be moved.", null, null, RefactoringStatusCodes.NO_NEW_RECEIVERS);
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.cannot_be_moved"), null, null, RefactoringStatusCodes.NO_NEW_RECEIVERS); //$NON-NLS-1$
 			return new RefactoringStatus();
 		}
 
@@ -1562,7 +1561,7 @@ class InstanceMethodMover {
 				if(parameter.getBinding().equals(parameterDeclaration.resolveBinding()))
 					return parameterDeclaration;
 			}
-			Assert.isTrue(false, "Parameter must be a parameter to this method.");
+			Assert.isTrue(false, "Parameter must be a parameter to this method."); //$NON-NLS-1$
 			return null;
 		}
 
@@ -1712,7 +1711,7 @@ class InstanceMethodMover {
 				fBuffer.getContent(fRange.getOffset(), fRange.getLength()),
 				fBuffer.getLineIndent(fBuffer.getLineOfOffset(fRange.getOffset()), CodeFormatterUtil.getTabWidth()),
 				CodeFormatterUtil.getTabWidth(),
-				"",
+				"", //$NON-NLS-1$
 				fBuffer.getLineDelimiter()
 			);
 		}
@@ -1762,14 +1761,14 @@ class InstanceMethodMover {
 	private static String prefixToLowercase(String string, int prefixEndExclusive) {
 		String prefix= toLowercase(string.substring(0, prefixEndExclusive));
 		String suffix= prefixEndExclusive == string.length() ?
-		                   ""
+		                   "" //$NON-NLS-1$
 		                   :
 		                   string.substring(prefixEndExclusive);
 		return prefix + suffix;		                   
 	}
 	
 	private static String toLowercase(String string) {
-		String result= "";
+		String result= ""; //$NON-NLS-1$
 		for(int i= 0; i < string.length(); i++)
 			result += Character.toLowerCase(string.charAt(i));
 		return result;
@@ -1848,7 +1847,7 @@ class InstanceMethodMover {
 	}
 
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		Assert.isNotNull(fNewReceiver, "New receiver must be chosen before checkInput(..) is called.");
+		Assert.isNotNull(fNewReceiver, "New receiver must be chosen before checkInput(..) is called."); //$NON-NLS-1$
 		return fNewReceiver.checkMoveOfMethodToMe(fMethodToMove, fNewMethodName, fOriginalReceiverParameterName, fInlineDelegator, fRemoveDelegator);
 	}
 

@@ -31,12 +31,12 @@ public class ParameterInfo {
 		fOldName= name;
 		fNewName= name;
 		fOldIndex= index;
-		fDefaultValue= "";
+		fDefaultValue= ""; //$NON-NLS-1$
 		fIsDeleted= false;
 	}
 
 	public static ParameterInfo createInfoForAddedParameter(){
-		return new ParameterInfo("", "", INDEX_FOR_ADDED);
+		return new ParameterInfo("", "", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	public boolean isDeleted(){

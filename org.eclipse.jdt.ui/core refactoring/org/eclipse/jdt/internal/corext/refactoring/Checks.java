@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Resources;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 /**
  * This class defines a set of reusable static checks methods.
@@ -119,7 +120,7 @@ public class Checks {
 	public static RefactoringStatus checkMethodName(String name) {
 		RefactoringStatus status= checkName(name, JavaConventions.validateMethodName(name));
 		if (status.isOK() && startsWithUpperCase(name))
-			return RefactoringStatus.createWarningStatus("By convention, all names of methods start with lowercase letters");
+			return RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getString("Checks.method_names_lowercase")); //$NON-NLS-1$
 		else	
 			return status;
 	}
@@ -631,7 +632,7 @@ public class Checks {
 				return false;
 			IType[] superTypes= iType.newSupertypeHierarchy(pm).getAllSupertypes(iType);
 			for (int i= 0; i < superTypes.length; i++) {
-				if ("java.lang.Throwable".equals(superTypes[i].getFullyQualifiedName()))
+				if ("java.lang.Throwable".equals(superTypes[i].getFullyQualifiedName())) //$NON-NLS-1$
 					return true;
 			}
 			return false;

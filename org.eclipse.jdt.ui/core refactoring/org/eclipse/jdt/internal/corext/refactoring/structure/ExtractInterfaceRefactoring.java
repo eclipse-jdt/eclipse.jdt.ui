@@ -1,6 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -47,6 +56,7 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -85,7 +95,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Extract Interface";
+		return RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.name"); //$NON-NLS-1$
 	}
 	
 	public IType getInputType() {
@@ -130,18 +140,18 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			return result;
 
 		if (fInputType.isLocal())
-			result.addFatalError("Cannot perform Extract Interface on local types.");
+			result.addFatalError(RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.no_local_types")); //$NON-NLS-1$
 		if (result.hasFatalError())
 			return result;
 
 		if (fInputType.isAnonymous())
-			result.addFatalError("Cannot perform Extract Interface on anonymous types.");
+			result.addFatalError(RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.no_anonymous_types")); //$NON-NLS-1$
 		if (result.hasFatalError())
 			return result;
 
 		//XXX for now
 		if (! Checks.isTopLevel(fInputType))
-			result.addFatalError("Cannot perform Extract Interface on member classes.");
+			result.addFatalError(RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.no_member_classes")); //$NON-NLS-1$
 		if (result.hasFatalError())
 			return result;
 			
@@ -165,14 +175,14 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		IType orig= (IType)WorkingCopyUtil.getOriginal(fInputType);
 		if (orig == null || ! orig.exists()){
-			String key= "The selected type has been deleted from ''{0}''";
-			String message= MessageFormat.format(key, new String[]{fInputType.getCompilationUnit().getElementName()});
+			String[] keys= new String[]{fInputType.getCompilationUnit().getElementName()};
+			String message= RefactoringCoreMessages.getFormattedString("ExtractInterfaceRefactoring.deleted", keys); //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}	
 		fInputType= orig;
 		
 		if (Checks.isException(fInputType, pm)){
-			String message= "Extract Interface refactoring is not available on \"java.lang.Throwable\" and its subclasses";
+			String message= RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.no_Throwable"); //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}
 			
@@ -203,8 +213,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		IType type= Checks.findTypeInPackage(getInputClassPackage(), fNewInterfaceName);
 		if (type == null || ! type.exists())
 			return null;
-		String pattern= "Type named ''{0}'' already exists in package ''{1}''";
-		String message= MessageFormat.format(pattern, new String[]{fNewInterfaceName, getInputClassPackage().getElementName()});
+		String[] keys= new String[]{fNewInterfaceName, getInputClassPackage().getElementName()};
+		String message= RefactoringCoreMessages.getFormattedString("ExtractInterfaceRefactoring.type_exists", keys); //$NON-NLS-1$
 		return RefactoringStatus.createFatalErrorStatus(message);
 	}
 	
@@ -213,13 +223,13 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			RefactoringStatus result= Checks.checkTypeName(newName);
 			if (result.hasFatalError())
 				return result;
-			result.merge(Checks.checkCompilationUnitName(newName + ".java"));
+			result.merge(Checks.checkCompilationUnitName(newName + ".java")); //$NON-NLS-1$
 			if (result.hasFatalError())
 				return result;
 	
 			if (getInputClassPackage().getCompilationUnit(getCuNameForNewInterface()).exists()){
-				String pattern= "Compilation Unit named ''{0}'' already exists in package ''{1}''";
-				String message= MessageFormat.format(pattern, new String[]{getCuNameForNewInterface(), getInputClassPackage().getElementName()});
+				String[] keys= new String[]{getCuNameForNewInterface(), getInputClassPackage().getElementName()};
+				String message= RefactoringCoreMessages.getFormattedString("ExtractInterfaceRefactoring.compilation_Unit_exists", keys); //$NON-NLS-1$
 				result.addFatalError(message);
 				if (result.hasFatalError())
 					return result;
@@ -227,7 +237,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			result.merge(checkInterfaceTypeName());
 			return result;
 		} catch (JavaModelException e) {
-			return RefactoringStatus.createFatalErrorStatus("Internal Error. Please see log for details.");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.internal_Error")); //$NON-NLS-1$
 		}
 	}
 
@@ -244,8 +254,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 1);
-			CompositeChange builder= new CompositeChange("Extract Interface");
+			pm.beginTask("", 1); //$NON-NLS-1$
+			CompositeChange builder= new CompositeChange(RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.name")); //$NON-NLS-1$
 			builder.addAll(fChangeManager.getAllChanges());
 			builder.add(createExtractedInterface());
 			return builder;	
@@ -264,7 +274,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
 		try{
 			pm.beginTask("", 10); //$NON-NLS-1$
-			pm.setTaskName("Analyzing...");
+			pm.setTaskName(RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.analyzing...")); //$NON-NLS-1$
 			TextChangeManager manager= new TextChangeManager();
 			updateTypeDeclaration(manager, new SubProgressMonitor(pm, 1));
 			if (fReplaceOccurrences)
@@ -285,14 +295,14 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private void deleteExtractedMethods(TextChangeManager manager) throws CoreException {
 		IMethod[] methods= getExtractedMethods();
 		for (int i= 0; i < methods.length; i++) {
-			deleteExtractedMember(manager, methods[i], "Delete extracted method");
+			deleteExtractedMember(manager, methods[i], RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.delete_method")); //$NON-NLS-1$
 		}
 	}    
 	
 	private void deleteExtractedFields(TextChangeManager manager) throws CoreException {
 		IField[] fields= getExtractedFields();
 		for (int i= 0; i < fields.length; i++) {
-			deleteExtractedMember(manager, fields[i], "Delete extracted field");
+			deleteExtractedMember(manager, fields[i], RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.delete_field")); //$NON-NLS-1$
 		}
 	}
 	
@@ -358,7 +368,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	private String getCuNameForNewInterface() {
-		return fNewInterfaceName + ".java";
+		return fNewInterfaceName + ".java"; //$NON-NLS-1$
 	}
 	
 	private IPackageFragment getInputClassPackage() {
@@ -379,7 +389,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 
 	private void updateTypeDeclaration(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1);//$NON-NLS-1$
-		String editName= "Update Type Declaration";
+		String editName= RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update_Type_Declaration"); //$NON-NLS-1$
 		int offset= computeIndexOfSuperinterfaceNameInsertion();
 		String text=  computeTextOfSuperinterfaceNameInsertion();
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fInputType.getCompilationUnit());
@@ -513,7 +523,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			StringBuffer methodDeclarationSource= new StringBuffer(iMethod.getCompilationUnit().getBuffer().getText(methodDeclarationOffset, length));
 			
 			if (methodDeclaration.getBody() != null)
-				methodDeclarationSource.append(";");
+				methodDeclarationSource.append(";"); //$NON-NLS-1$
 			
 			if (fUpdatedTypeReferenceNodes != null)
 		        replaceReferencesInMethodDeclaration(methodDeclaration, methodDeclarationOffset, methodDeclarationSource);
@@ -656,7 +666,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
     }
     
     private static void addImportTo(String typeName, StringBuffer buff) {
-        buff.append("import ").append(typeName).append(";");//$NON-NLS-1$
+        buff.append("import ").append(typeName).append(";");//$NON-NLS-1$ //$NON-NLS-2$
     }
 
     private boolean shouldBeImported(IType iType) {

@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -127,7 +128,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
      * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
      */
     public String getName() {
-        return "Convert Anonymous to Inner";
+        return RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.name"); //$NON-NLS-1$
     }
     
     /*
@@ -142,7 +143,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     		initAST();
     		
     		if (fAnonymousInnerClassNode == null)
-    			return RefactoringStatus.createFatalErrorStatus("Place the caret inside an anonymous inner class");
+    			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.place_caret")); //$NON-NLS-1$
     		
     		initializeDefaults();
 	        return new RefactoringStatus();
@@ -153,7 +154,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
     private void initializeDefaults() {
     	fVisibility= Modifier.PRIVATE;
-    	fClassName= "";
+    	fClassName= ""; //$NON-NLS-1$
     	fDeclareFinal= true;
     }
     
@@ -193,13 +194,13 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			return result;
 			
 		if (fClassNamesUsed.contains(fClassName))
-			return RefactoringStatus.createFatalErrorStatus("Nested type with that name already exists");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.type_exists")); //$NON-NLS-1$
 		
 		if (fClassName.equals(getSuperConstructorBinding().getDeclaringClass().getName()))	
-			return RefactoringStatus.createFatalErrorStatus("Choose another name");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.another_name")); //$NON-NLS-1$
 		
 		if (classNameHidesEnclosingType())
-			return RefactoringStatus.createFatalErrorStatus("Class name hides an enclosing type name");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.name_hides")); //$NON-NLS-1$
 		return result;	
 	}
 	
@@ -228,7 +229,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
      * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
      */
     public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-    	pm.beginTask("", 1);
+    	pm.beginTask("", 1); //$NON-NLS-1$
     	try{
     		ASTRewrite rewrite= new ASTRewrite(fCompilationUnitNode);
     		addNestedClass(rewrite);
@@ -242,11 +243,11 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
 
     private IChange createChange(ASTRewrite rewrite) throws CoreException{
-        TextChange change= new CompilationUnitChange("", fCu);
+        TextChange change= new CompilationUnitChange("", fCu); //$NON-NLS-1$
         TextBuffer textBuffer= TextBuffer.create(fCu.getBuffer().getContents());
         TextEdit resultingEdits= new MultiTextEdit();
         rewrite.rewriteNode(textBuffer, resultingEdits, null);
-        change.addTextEdit("Convert anonymous inner class to a nested class", resultingEdits);
+        change.addTextEdit(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.edit_name"), resultingEdits); //$NON-NLS-1$
         rewrite.removeModifications();
         return change;
     }
@@ -404,7 +405,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         
         for (int i= 0; i < usedLocals.length; i++) {
             IVariableBinding local= usedLocals[i];
-            String assignmentCode= ToolFactory.createCodeFormatter().format("this." + local.getName() + "=" + local.getName(), 0, null, getLineSeparator());
+            String assignmentCode= ToolFactory.createCodeFormatter().format("this." + local.getName() + "=" + local.getName(), 0, null, getLineSeparator()); //$NON-NLS-1$ //$NON-NLS-2$
             Expression assignmentExpression= (Expression)rewrite.createPlaceholder(assignmentCode, ASTRewrite.EXPRESSION);
             ExpressionStatement assignmentStatement= getAST().newExpressionStatement(assignmentExpression);
 	        constructorBody.statements().add(assignmentStatement);
@@ -547,7 +548,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     	ITypeBinding binding= getClassInstanceCreation().resolveTypeBinding();
     	if (binding == null)
     		return;
-    	if (binding.getSuperclass().getQualifiedName().equals("java.lang.Object")){	
+    	if (binding.getSuperclass().getQualifiedName().equals("java.lang.Object")){	 //$NON-NLS-1$
 	    	Assert.isTrue(binding.getInterfaces().length <= 1);
     		if (binding.getInterfaces().length == 0)
 	    		return;
@@ -562,7 +563,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
     
     private static String[] getIdentiiers(String nameCode) {
-    	StringTokenizer tokenizer= new StringTokenizer(nameCode, ".");
+    	StringTokenizer tokenizer= new StringTokenizer(nameCode, "."); //$NON-NLS-1$
     	String[] tokens= new String[tokenizer.countTokens()];
     	for (int i= 0; tokenizer.hasMoreTokens(); i++) {
             tokens[i]= tokenizer.nextToken();

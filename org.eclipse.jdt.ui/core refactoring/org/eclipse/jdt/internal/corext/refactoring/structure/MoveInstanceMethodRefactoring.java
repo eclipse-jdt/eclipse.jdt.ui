@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 
 public class MoveInstanceMethodRefactoring extends Refactoring {
@@ -99,7 +100,7 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 		if(node instanceof MethodDeclaration)
 			return (MethodDeclaration) node;
 
-		status.merge(RefactoringStatus.createStatus(RefactoringStatus.FATAL, "A method declaration must be selected in order to activate this refactoring.", null, null, RefactoringStatusCodes.METHOD_NOT_SELECTED));
+		status.merge(RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("MoveInstanceMethodRefactoring.method_declaration"), null, null, RefactoringStatusCodes.METHOD_NOT_SELECTED)); //$NON-NLS-1$
 		return null;
 	} 
 	
@@ -182,6 +183,6 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Move Instance Method";
+		return RefactoringCoreMessages.getString("MoveInstanceMethodRefactoring.name"); //$NON-NLS-1$
 	}
 }

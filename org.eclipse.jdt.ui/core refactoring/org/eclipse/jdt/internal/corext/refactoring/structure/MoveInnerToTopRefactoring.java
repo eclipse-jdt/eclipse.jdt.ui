@@ -1,6 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -64,6 +73,7 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -143,11 +153,11 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	public RefactoringStatus checkEnclosingInstanceName(String name){
 		RefactoringStatus result= Checks.checkFieldName(name);
 		if (! Checks.startsWithLowerCase(name))
-			result.addWarning("By convention, all names of instance fields and local variables start with lowercase letters"); 
+			result.addWarning(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.names_start_lowercase"));  //$NON-NLS-1$
 			
 		if (fType.getField(name).exists()){
-			String pattern= "A field named ''{0}'' is already declared in type ''{1}'' ";
-			String msg= MessageFormat.format(pattern, new String[]{name, fType.getElementName()});
+			Object[] keys= new String[]{name, fType.getElementName()};
+			String msg= RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.already_declared", keys); //$NON-NLS-1$
 			result.addError(msg, JavaSourceContext.create(fType.getField(name)));
 		}	
 		return result;	
@@ -163,7 +173,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		if (result.hasFatalError())
 			return result;
 		if (Checks.isTopLevel(fType))
-			return RefactoringStatus.createFatalErrorStatus("This refactoring is available only on nested types.");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.only_nested_types")); //$NON-NLS-1$
 		return result;
 	}
 
@@ -184,8 +194,8 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		IType orig= (IType)WorkingCopyUtil.getOriginal(fType);
 		if (orig == null || ! orig.exists()){
-			String key= "The selected type has been deleted from ''{0}''";
-			String message= MessageFormat.format(key, new String[]{getInputTypeCu().getElementName()});
+			
+			String message= RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.deleted", new String[]{getInputTypeCu().getElementName()}); //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}	
 		fType= orig;
@@ -205,8 +215,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				result.merge(checkEnclosingInstanceName(fEnclosingInstanceFieldName));
 			
 			if (getInputTypePackage().getCompilationUnit(getNameForNewCu()).exists()){
-				String pattern= "Compilation Unit named ''{0}'' already exists in package ''{1}''";
-				String message= MessageFormat.format(pattern, new String[]{getNameForNewCu(), getInputTypePackage().getElementName()});
+				String message= RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.compilation_Unit_exists", new String[]{getNameForNewCu(), getInputTypePackage().getElementName()}); //$NON-NLS-1$
 				result.addFatalError(message);
 			}	
 			result.merge(checkEnclosingInstanceName(fEnclosingInstanceFieldName));
@@ -230,8 +239,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			for (Iterator iter= constructor.parameters().iterator(); iter.hasNext();) {
 				SingleVariableDeclaration param= (SingleVariableDeclaration) iter.next();
 				if (fEnclosingInstanceFieldName.equals(param.getName().getIdentifier())){
-					String pattern= "Name ''{0}'' is used as a parameter name in one of the constructors of type ''{1}'' ";
-					String msg= MessageFormat.format(pattern, new String[]{param.getName().getIdentifier(), fType.getElementName()});
+					String msg= RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.name_used", new String[]{param.getName().getIdentifier(), fType.getElementName()}); //$NON-NLS-1$
 					result.addError(msg, JavaSourceContext.create(getInputTypeCu(), param));
 				}
 			}
@@ -247,8 +255,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		IType type= Checks.findTypeInPackage(getInputTypePackage(), fType.getElementName());
 		if (type == null || ! type.exists())
 			return null;
-		String pattern= "Type named ''{0}'' already exists in package ''{1}''";
-		String message= MessageFormat.format(pattern, new String[]{fType.getElementName(), getInputTypePackage().getElementName()});
+		String message= RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.type_exists", new String[]{fType.getElementName(), getInputTypePackage().getElementName()}); //$NON-NLS-1$
 		return RefactoringStatus.createFatalErrorStatus(message);
 	}
 	
@@ -260,7 +267,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Move Nested Type to Top Level";
+		return RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.name"); //$NON-NLS-1$
 	}
 
 	/*
@@ -268,8 +275,8 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("Creating change", 1);
-			CompositeChange builder= new CompositeChange("Move Nested Type to Top Level");
+			pm.beginTask(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.creating_preview"), 1); //$NON-NLS-1$
+			CompositeChange builder= new CompositeChange(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.move_to_Top")); //$NON-NLS-1$
 			builder.addAll(fChangeManager.getAllChanges());
 			builder.add(createCompilationUnitForMovedType(new SubProgressMonitor(pm, 1)));
 			return builder;	
@@ -331,7 +338,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			else
 				text= createReadAccessForEnclosingInstance() + '.';
 			int offset= simpleName.getStartPosition();
-			manager.get(getInputTypeCu()).addTextEdit("Update field access", SimpleTextEdit.createInsert(offset, text)); 
+			manager.get(getInputTypeCu()).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.update_field_access"), SimpleTextEdit.createInsert(offset, text));  //$NON-NLS-1$
 		}
 	}
 
@@ -354,7 +361,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			else
 				text= createReadAccessForEnclosingInstance() + '.';
 			int offset= fieldAccess.getStartPosition();
-			manager.get(getInputTypeCu()).addTextEdit("Update field access", SimpleTextEdit.createReplace(offset, length, text));
+			manager.get(getInputTypeCu()).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.update_field_access"), SimpleTextEdit.createReplace(offset, length, text)); //$NON-NLS-1$
 		}
 	}
 	
@@ -377,7 +384,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			else
 				text= createReadAccessForEnclosingInstance() + '.';
 			int offset= methodInvocation.getStartPosition();
-			manager.get(getInputTypeCu()).addTextEdit("Update method invocation", SimpleTextEdit.createReplace(offset, length, text));
+			manager.get(getInputTypeCu()).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.update_method_invocation"), SimpleTextEdit.createReplace(offset, length, text)); //$NON-NLS-1$
 		}
 	}
 
@@ -393,8 +400,8 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		for (int i= 0; i < constructorNodes.length; i++) {
 			MethodDeclaration decl= (MethodDeclaration)ASTNodes.getParent(constructorNodes[i], MethodDeclaration.class);
 			Assert.isTrue(decl.isConstructor());
-			manager.get(getInputTypeCu()).addTextEdit("Add parameter to constructor", createAddParameterToConstructorEdit(decl));
-			manager.get(getInputTypeCu()).addTextEdit("Set enclosing instance field", createSetEnclosingInstanceFieldEdit(decl));
+			manager.get(getInputTypeCu()).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.add_parameter"), createAddParameterToConstructorEdit(decl)); //$NON-NLS-1$
+			manager.get(getInputTypeCu()).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.set_enclosing_instance_field"), createSetEnclosingInstanceFieldEdit(decl)); //$NON-NLS-1$
 		}
 	}
 
@@ -412,7 +419,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			if (first instanceof ConstructorInvocation){
 				ConstructorInvocation ci= (ConstructorInvocation)first;
 				int offsetForArg= computeOffsetForFirstArgumentOrParameter(ci.arguments(), getCompilationUnit(first), first.getStartPosition());
-				String src= ci.arguments().isEmpty() ? fEnclosingInstanceFieldName: fEnclosingInstanceFieldName + ", ";
+				String src= ci.arguments().isEmpty() ? fEnclosingInstanceFieldName: fEnclosingInstanceFieldName + ", "; //$NON-NLS-1$
 				return SimpleTextEdit.createInsert(offsetForArg, src);
 			} else {			
 				Statement last= (Statement)statements.get(statements.size() - 1);
@@ -430,16 +437,16 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		if (decl.parameters().isEmpty())
 			return SimpleTextEdit.createInsert(offset, parameterDeclarationSource);
 		else 
-			return SimpleTextEdit.createInsert(offset, parameterDeclarationSource + ", ");
+			return SimpleTextEdit.createInsert(offset, parameterDeclarationSource + ", "); //$NON-NLS-1$
 	}
 
 	private void addConstructor(TextChangeManager manager) throws CoreException {
 		int tabWidth= CodeFormatterUtil.getTabWidth();
-		String constSource= format(fType.getElementName() + '(' + createDeclarationForEnclosingInstance() + "){" + 
+		String constSource= format(fType.getElementName() + '(' + createDeclarationForEnclosingInstance() + "){" +  //$NON-NLS-1$
 		                 		createEnclosingInstanceInitialization() + '}', 0);
 		String[] constLines= Strings.convertIntoLines(constSource);
 		MemberEdit constEdit= new MemberEdit(fType, MemberEdit.ADD_AT_BEGINNING, constLines, tabWidth);
-		manager.get(getInputTypeCu()).addTextEdit("Add constructor", constEdit);
+		manager.get(getInputTypeCu()).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.add_constructor"), constEdit); //$NON-NLS-1$
 	}
 
 	private void addEnclosingInstanceDeclaration(TextChangeManager manager) throws CoreException {
@@ -447,14 +454,14 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		
 		String[] fieldSource= new String[]{createEnclosingInstanceAccessModifierStrings() + createDeclarationForEnclosingInstance() + ';'};
 		MemberEdit memberEdit= new MemberEdit(fType, MemberEdit.ADD_AT_BEGINNING, fieldSource, tabWidth);
-		manager.get(getInputTypeCu()).addTextEdit("Add enclosing instance declaration", memberEdit);
+		manager.get(getInputTypeCu()).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.add_enclosing_instance_declaration"), memberEdit); //$NON-NLS-1$
 	}
 	
 	private String createEnclosingInstanceAccessModifierStrings(){
 		if (fMarkInstanceFieldAsFinal)
-			return "private final ";
+			return "private final "; //$NON-NLS-1$
 		else 
-			return "private ";
+			return "private "; //$NON-NLS-1$
 	}
 
 	private void removeUnusedTypeModifiers(TextChangeManager manager) throws CoreException {
@@ -462,7 +469,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		for (int i= 0; i < modifiesRanges.length; i++) {
 			//add 1 to remove the space after the modifier
 			TextEdit edit= SimpleTextEdit.createDelete(modifiesRanges[i].getOffset(), modifiesRanges[i].getLength() + 1);		
-			manager.get(getInputTypeCu()).addTextEdit("Delete Unused Modifier", edit);
+			manager.get(getInputTypeCu()).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.delete_Unused_Modifier"), edit); //$NON-NLS-1$
 		}
 	}
 
@@ -478,7 +485,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			} else {
 				TextEdit edit= createReferenceUpdateEdit(node);
 				if (edit != null){
-					manager.get(cu).addTextEdit("Update Type Reference", edit);
+					manager.get(cu).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.update_Type_Reference"), edit); //$NON-NLS-1$
 					if (! getInputTypePackage().equals(cu.getParent()))
 						fImportEditManager.addImportTo(getNewFullyQualifiedNameOfInputType(), cu);
 				}	
@@ -486,7 +493,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			if (node.getParent() instanceof ClassInstanceCreation){
 				MultiTextEdit multiedit= createConstructorReferenceUpdateEdit((ClassInstanceCreation)node.getParent());
 				if (multiedit != null)
-					manager.get(cu).addTextEdit("Update Constructor Reference", multiedit);
+					manager.get(cu).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.update_Constructor_Reference"), multiedit); //$NON-NLS-1$
 			}	
 		}
 	}
@@ -506,7 +513,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private String getSourceOfImport(ImportDeclaration enclosingImport, IBinding importBinding){
 		String fullyQualifiedTypeName= Bindings.getFullyQualifiedImportName((ITypeBinding)importBinding);
 		if (enclosingImport.isOnDemand())
-			return fullyQualifiedTypeName +".*";
+			return fullyQualifiedTypeName +".*"; //$NON-NLS-1$
 		else
 			return fullyQualifiedTypeName;
 	}
@@ -568,7 +575,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 	private void cutType(TextChangeManager manager) throws CoreException {
 		fCutTypeEdit= new DeleteSourceReferenceEdit(fType, getInputTypeCu());
-		manager.get(getInputTypeCu()).addTextEdit("Cut type", fCutTypeEdit);
+		manager.get(getInputTypeCu()).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.cut_type"), fCutTypeEdit); //$NON-NLS-1$
 	}
 
 	private ICompilationUnit getInputTypeCu() {
@@ -609,13 +616,13 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		for (int i= 0; i < typesReferencedInInputType.length; i++) {
 			IType iType= typesReferencedInInputType[i];
 			if (! isImplicityImported(iType))
-				buff.append("import ").append(JavaElementUtil.createSignature(iType)).append(';');
+				buff.append("import ").append(JavaElementUtil.createSignature(iType)).append(';'); //$NON-NLS-1$
 		}
 		return buff.toString();
 	}
 
 	private boolean isImplicityImported(IType iType) {
-		return iType.getParent().getElementName().equals("java.lang") || iType.getPackageFragment().equals(getInputTypePackage());
+		return iType.getParent().getElementName().equals("java.lang") || iType.getPackageFragment().equals(getInputTypePackage()); //$NON-NLS-1$
 	}
 
 	private String createTypeSource(IProgressMonitor pm) throws CoreException {
@@ -687,7 +694,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private String getNameForNewCu() {
-		return fType.getElementName() + ".java";
+		return fType.getElementName() + ".java"; //$NON-NLS-1$
 	}
 
 	private String getLineSeperator() {
@@ -718,7 +725,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private void updateConstructorReferenceInSuperCall(TextChangeManager manager, SuperConstructorInvocation sci) throws CoreException{
 		MultiTextEdit textEdit= createConstructorReferenceUpdateEdit(sci);
 		if (textEdit != null)
-			manager.get(getCompilationUnit(sci)).addTextEdit("Update Constructor Reference", textEdit);
+			manager.get(getCompilationUnit(sci)).addTextEdit(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.update_Constructor_Reference"), textEdit); //$NON-NLS-1$
 	}
 
 	private ASTNode[] getConstructorDeclarationNodes(IProgressMonitor pm) throws JavaModelException{
@@ -758,7 +765,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		if (text == null)
 			return null;
 		if (! cic.arguments().isEmpty())
-			text += ", ";
+			text += ", "; //$NON-NLS-1$
 		return SimpleTextEdit.createInsert(computeOffsetForFirstArgument(cic), text);
 	}
 
@@ -767,7 +774,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		if (text == null)
 			return null;
 		if (! sci.arguments().isEmpty())
-			text += ", ";
+			text += ", "; //$NON-NLS-1$
 		return SimpleTextEdit.createInsert(computeOffsetForFirstArgument(sci), text);
 	}
 

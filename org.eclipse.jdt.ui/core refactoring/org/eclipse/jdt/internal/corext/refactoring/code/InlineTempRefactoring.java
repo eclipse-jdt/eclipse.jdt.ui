@@ -113,7 +113,7 @@ public class InlineTempRefactoring extends Refactoring {
     		case ASTNode.NULL_LITERAL:
     			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTemRefactoring.error.message.nulLiteralsCannotBeInlined")); //$NON-NLS-1$
     		case ASTNode.ARRAY_INITIALIZER:
-    			return RefactoringStatus.createFatalErrorStatus("Array variables initialized with constants cannot be inlined."); 	
+    			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.Array_vars_initialized")); 	 //$NON-NLS-1$
     		default:	
 		        return null;
     	}
@@ -166,7 +166,7 @@ public class InlineTempRefactoring extends Refactoring {
 			ForStatement forStmt= (ForStatement)ASTNodes.getParent(fTempDeclaration, ASTNode.FOR_STATEMENT);
 			for (Iterator iter= forStmt.initializers().iterator(); iter.hasNext();) {
 				if (ASTNodes.isParent(fTempDeclaration, (Expression) iter.next()))
-					return RefactoringStatus.createFatalErrorStatus("Cannot inline variables declared in the initializer list of a 'for' statement.");
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.for_initializers")); //$NON-NLS-1$
 			}
 		}
 		

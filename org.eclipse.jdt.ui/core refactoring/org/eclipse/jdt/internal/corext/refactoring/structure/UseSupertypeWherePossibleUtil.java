@@ -84,6 +84,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 class UseSupertypeWherePossibleUtil {
 
@@ -164,7 +165,7 @@ class UseSupertypeWherePossibleUtil {
 		for (Iterator iter= nodeSet.iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
 			ICompilationUnit cu= getCompilationUnit(node);
-			manager.get(cu).addTextEdit("Update reference", createTypeUpdateEdit(new SourceRange(node)));	
+			manager.get(cu).addTextEdit(RefactoringCoreMessages.getString("UseSupertypeWherePossibleUtil.update_reference"), createTypeUpdateEdit(new SourceRange(node)));	 //$NON-NLS-1$
 			updatedCus.add(cu);
 		}
 		for (Iterator iter= updatedCus.iterator(); iter.hasNext();) {
@@ -206,9 +207,9 @@ class UseSupertypeWherePossibleUtil {
 	}
 	
 	private Collection computeNodesToRemove(Set nodeSet, IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 1); 
+		pm.beginTask("", 1);  //$NON-NLS-1$
 		IProgressMonitor subPm1= new SubProgressMonitor(pm, 1);
-		subPm1.beginTask("", nodeSet.size());
+		subPm1.beginTask("", nodeSet.size()); //$NON-NLS-1$
 		Collection nodesToRemove= new HashSet(0);
 		for (Iterator iter= nodeSet.iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
@@ -220,7 +221,7 @@ class UseSupertypeWherePossibleUtil {
 			return nodesToRemove;
 
 		IProgressMonitor subPm2= new SubProgressMonitor(pm, 1);
-		subPm2.beginTask("", nodeSet.size() - nodesToRemove.size());
+		subPm2.beginTask("", nodeSet.size() - nodesToRemove.size()); //$NON-NLS-1$
 		boolean reiterate;
 		do {
 			reiterate= false;
@@ -245,7 +246,7 @@ class UseSupertypeWherePossibleUtil {
 				if (vds.getType() != node)
 					return false; 
 				VariableDeclarationFragment[] vdfs= getVariableDeclarationFragments(vds);	
-				pm.beginTask("", vdfs.length);
+				pm.beginTask("", vdfs.length); //$NON-NLS-1$
 				for (int i= 0; i < vdfs.length; i++) {
 					if (hasIndirectProblems(vdfs[i], nodesToRemove, new SubProgressMonitor(pm, 1)))
 						return true;	
@@ -255,14 +256,14 @@ class UseSupertypeWherePossibleUtil {
 				if (fd.getType() != node)
 					return false; 
 				VariableDeclarationFragment[] vdfs= getVariableDeclarationFragments(fd);	
-				pm.beginTask("", vdfs.length);
+				pm.beginTask("", vdfs.length); //$NON-NLS-1$
 				for (int i= 0; i < vdfs.length; i++) {
 					if (hasIndirectProblems(vdfs[i], nodesToRemove, new SubProgressMonitor(pm, 1)))
 						return true;	
 				}
 					
 			} else if (parentNode instanceof VariableDeclaration){
-				pm.beginTask("", 1);
+				pm.beginTask("", 1); //$NON-NLS-1$
 				if (isMethodParameter(parentNode)){
 					MethodDeclaration methodDeclaration= (MethodDeclaration)parentNode.getParent();	
 					int parameterIndex= methodDeclaration.parameters().indexOf(parentNode);
@@ -287,11 +288,11 @@ class UseSupertypeWherePossibleUtil {
 				if (hasIndirectProblems((VariableDeclaration)parentNode, nodesToRemove, new SubProgressMonitor(pm, 1)))
 					return true;
 			} else if (parentNode instanceof CastExpression){
-				pm.beginTask("", 1);
+				pm.beginTask("", 1); //$NON-NLS-1$
 				if (! isReferenceUpdatable(parentNode, nodesToRemove))
 					return true;	
 			} else if (parentNode instanceof MethodDeclaration){
-				pm.beginTask("", 3);
+				pm.beginTask("", 3); //$NON-NLS-1$
 				MethodDeclaration methodDeclaration= (MethodDeclaration)parentNode;
 				if (methodDeclaration.getReturnType() == node){
 					IMethod[] methods= getAllRippleMethods(methodDeclaration, new SubProgressMonitor(pm, 1));
@@ -326,7 +327,7 @@ class UseSupertypeWherePossibleUtil {
 	
 	private IMethod[] getAllRippleMethods(MethodDeclaration methodDeclaration, IProgressMonitor pm) throws JavaModelException{
 		try{
-			pm.beginTask("", 2);
+			pm.beginTask("", 2); //$NON-NLS-1$
 			IMethodBinding methodBinding= methodDeclaration.resolveBinding();
 			if (methodBinding == null)
 				return new IMethod[0];
@@ -399,7 +400,7 @@ class UseSupertypeWherePossibleUtil {
 	
 	private static IMethod getTopMethod(IMethod method, IProgressMonitor pm) throws JavaModelException {
 		Assert.isNotNull(method);
-		pm.beginTask("", 3);
+		pm.beginTask("", 3); //$NON-NLS-1$
 		IMethod top= method;
 		IMethod oldTop;
 		do {
@@ -590,7 +591,7 @@ class UseSupertypeWherePossibleUtil {
 	}
 	
 	private boolean hasDirectProblems(ASTNode node, IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			ASTNode parentNode= getUnparenthesizedParent(node);
 			if (parentNode instanceof TypeLiteral)
@@ -733,7 +734,7 @@ class UseSupertypeWherePossibleUtil {
 	private void addSupertypeImport(TextChangeManager manager, ICompilationUnit cu) throws CoreException {
 		ImportEdit importEdit= new ImportEdit(cu, fCodeGenerationSettings);
 		importEdit.addImport(getFullyQualifiedSupertypeName());
-		String pattern= "Adding import to ''{0}''";
+		String pattern= RefactoringCoreMessages.getString("UseSupertypeWherePossibleUtil.adding_import"); //$NON-NLS-1$
 		String editName= MessageFormat.format(pattern, new String[]{getFullyQualifiedSupertypeName()});
 		manager.get(cu).addTextEdit(editName, importEdit);
 	}
@@ -741,7 +742,7 @@ class UseSupertypeWherePossibleUtil {
 	private String getFullyQualifiedSupertypeName() {
 		if (fSuperTypeToUse != null)
 			return JavaModelUtil.getFullyQualifiedName(fSuperTypeToUse);
-		return getInputClassPackage().getElementName() + "." + fSuperTypeName;
+		return getInputClassPackage().getElementName() + "." + fSuperTypeName; //$NON-NLS-1$
 	}
 
 	private IPackageFragment getInputClassPackage() {
@@ -759,7 +760,7 @@ class UseSupertypeWherePossibleUtil {
 	}
 		
 	private boolean canReplaceTypeInDeclarationFragments(VariableDeclarationFragment[] fragments, IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", fragments.length);
+		pm.beginTask("", fragments.length); //$NON-NLS-1$
 		try{
 			for (int i= 0; i < fragments.length; i++) {
 				if (anyVariableReferenceHasDirectProblems(fragments[i], new SubProgressMonitor(pm, 1)))
@@ -790,7 +791,7 @@ class UseSupertypeWherePossibleUtil {
 	}
 
 	private boolean anyVariableReferenceHasDirectProblems(VariableDeclaration varDeclaration, IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		try{
 			if (isInterfaceMethodParameterDeclaration(varDeclaration))
 				return true;
@@ -809,7 +810,7 @@ class UseSupertypeWherePossibleUtil {
 	}
 	
 	private boolean anyReferenceHasDirectProblems(IMember member, IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		try{
 			return anyReferenceNodeHasDirectProblems(getReferenceNodes(member, new SubProgressMonitor(pm, 1)), new SubProgressMonitor(pm, 1));
 		} finally{
@@ -818,7 +819,7 @@ class UseSupertypeWherePossibleUtil {
 	}
 	
 	private boolean anyReferenceNodeHasDirectProblems(ASTNode[] referenceNodes, IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", referenceNodes.length);
+		pm.beginTask("", referenceNodes.length); //$NON-NLS-1$
 		try{
 			for (int i= 0; i < referenceNodes.length; i++) {
 				if (isNotUpdatableReference(referenceNodes[i], new SubProgressMonitor(pm, 1)))

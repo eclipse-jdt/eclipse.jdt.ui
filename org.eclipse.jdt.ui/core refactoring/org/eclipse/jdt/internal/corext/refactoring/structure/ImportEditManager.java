@@ -16,6 +16,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public class ImportEditManager {
 	
@@ -62,7 +63,7 @@ public class ImportEditManager {
 			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit) iter.next());
 			ImportEdit edit= (ImportEdit)fImportEdits.get(cu);
 			if (edit != null && ! edit.isEmpty())
-				manager.get(cu).addTextEdit("Update Imports", edit);
+				manager.get(cu).addTextEdit(RefactoringCoreMessages.getString("ImportEditManager.update_Imports"), edit); //$NON-NLS-1$
 		}
 	}	
 }

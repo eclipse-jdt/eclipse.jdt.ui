@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class RenameFieldRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring, ITextUpdatingRefactoring{
 	
-	private static final String DECLARED_SUPERTYPE= "Cannot be renamed because it is declared in a supertype";
+	private static final String DECLARED_SUPERTYPE= RefactoringCoreMessages.getString("RenameFieldRefactoring.declared_in_supertype"); //$NON-NLS-1$
 	private IField fField;
 	private String fNewName;
 	private SearchResultGroup[] fReferences;
@@ -163,11 +163,11 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	 * @return Error message or <code>null</code> if getter can be renamed.	 */
 	public String canEnableGetterRenaming() throws JavaModelException{
 		if (fField.getDeclaringType().isInterface())
-			return getGetter() == null ? "": null;
+			return getGetter() == null ? "": null; //$NON-NLS-1$
 			
 		IMethod getter= getGetter();
 		if (getter == null) 
-			return "";
+			return ""; //$NON-NLS-1$
 		if (MethodChecks.isVirtual(getter) && null != MethodChecks.isDeclaredInInterface(getter, new NullProgressMonitor()))
 			return DECLARED_SUPERTYPE;
 		if (MethodChecks.isVirtual(getter) && null != MethodChecks.overridesAnotherMethod(getter, new NullProgressMonitor()))
@@ -180,11 +180,11 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	 */
 	public String canEnableSetterRenaming() throws JavaModelException{
 		if (fField.getDeclaringType().isInterface())
-			return getSetter() == null ? "": null;
+			return getSetter() == null ? "": null; //$NON-NLS-1$
 			
 		IMethod setter= getSetter();
 		if (setter == null) 
-			return "";	
+			return "";	 //$NON-NLS-1$
 		if (MethodChecks.isVirtual(setter) && null != MethodChecks.isDeclaredInInterface(setter, new NullProgressMonitor()))
 			return DECLARED_SUPERTYPE;
 		if (MethodChecks.isVirtual(setter) && null != MethodChecks.overridesAnotherMethod(setter, new NullProgressMonitor()))

@@ -69,6 +69,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public class InlineConstantRefactoring extends Refactoring {
 
@@ -195,18 +196,18 @@ public class InlineConstantRefactoring extends Refactoring {
 			}
 			private static String getClassNameQualifiedToTopLevel(ITypeBinding clazz) throws ClassQualificationCannotBePerformed {
 				if(clazz.isAnonymous())
-					throw new ClassQualificationCannotBePerformed("Cannot inline since the initializer to be inlined refers to members declared in an anonymous class scope (currently unsupported).");
+					throw new ClassQualificationCannotBePerformed(RefactoringCoreMessages.getString("InlineConstantRefactoring.members_declared_in_anonymous")); //$NON-NLS-1$
 				
 				ITypeBinding declaring= clazz.getDeclaringClass();
 				
 				String qualifier= declaring == null ?
-                                      "" : getClassNameQualifiedToTopLevel(declaring) + ".";
+                                      "" : getClassNameQualifiedToTopLevel(declaring) + "."; //$NON-NLS-1$ //$NON-NLS-2$
                 return qualifier + clazz.getName();
 			}			
 
 
 			private ClassQualification(String qualifier, int insertionPosition, ITypeBinding qualifyingClass) { 
-				super(insertionPosition, qualifier + ".");
+				super(insertionPosition, qualifier + "."); //$NON-NLS-1$
 				fQualifyingClass= qualifyingClass;
 			}
 			
@@ -266,7 +267,7 @@ public class InlineConstantRefactoring extends Refactoring {
 						Assert.isTrue(((IVariableBinding) binding).isField());
 						
 					int modifiers= binding.getModifiers();
-					Assert.isTrue(Modifier.isStatic(modifiers), "Relocation of non-static initializer expressions is not currently supported");				
+					Assert.isTrue(Modifier.isStatic(modifiers), "Relocation of non-static initializer expressions is not currently supported");				 //$NON-NLS-1$
 				}				
 				private void qualifyMemberName(SimpleName memberName) {
 					checkMemberAcceptable(memberName);
@@ -481,7 +482,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			}
 
 			private static String parenthesize(String string) {
-				return "(" + string + ")";	
+				return "(" + string + ")";	 //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		
 			private String getOriginalInitializerString() throws JavaModelException {
@@ -662,7 +663,9 @@ public class InlineConstantRefactoring extends Refactoring {
 			fEditProblems= new RefactoringStatus();
 			
 			if(fUnit.getSource() == null) {
-				fEditProblems.merge(RefactoringStatus.createStatus(RefactoringStatus.INFO, "References in " + fUnit.getElementName() + " cannot be inlined since source code is not available", null, null, RefactoringStatusCodes.REFERENCE_IN_CLASSFILE));
+				String[] keys= {fUnit.getElementName()};
+				String msg= RefactoringCoreMessages.getFormattedString("InlineConstantRefactoring.source_code_unavailable", keys); //$NON-NLS-1$
+				fEditProblems.merge(RefactoringStatus.createStatus(RefactoringStatus.INFO, msg, null, null, RefactoringStatusCodes.REFERENCE_IN_CLASSFILE));
 			} else {
 				for(int i= 0; i < fReferences.length; i++)
 					addEditsToInline(fReferences[i]);
@@ -696,7 +699,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			TextChange change= new CompilationUnitChange(fUnit.getElementName(), fUnit);
 			TextEdit[] edits= getEdits(status);
 			for(int i= 0; i < edits.length; i++)
-				change.addTextEdit("Inline Constant", edits[i]);
+				change.addTextEdit(RefactoringCoreMessages.getString("InlineConstantRefactoring.Inline"), edits[i]); //$NON-NLS-1$
 			return change;
 		}
 		
@@ -837,7 +840,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			pm.worked(1);
 
 			if (!fCu.isStructureKnown())
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "This file has syntax errors - please fix them first", null, null, RefactoringStatusCodes.SYNTAX_ERRORS);
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.syntax_errors"), null, null, RefactoringStatusCodes.SYNTAX_ERRORS); //$NON-NLS-1$
 			pm.worked(1);
 
 			return checkSelection(new SubProgressMonitor(pm, 2));
@@ -863,7 +866,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			 * XXX: Handle constants with no IField f for which f.exists():
 			 */
 			if(getField()  == null)
-				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "Inlining of constants defined in local or anonymous classes is currently not supported.", null, null, RefactoringStatusCodes.LOCAL_AND_ANONYMOUS_NOT_SUPPORTED);
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.local_anonymous_unsupported"), null, null, RefactoringStatusCodes.LOCAL_AND_ANONYMOUS_NOT_SUPPORTED); //$NON-NLS-1$
 		
 			checkDeclarationSelected();
 
@@ -886,7 +889,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		initializeAST();
 
 		if(getConstantNameNode() == null)
-			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "A static final field must be selected", null, null, RefactoringStatusCodes.NOT_STATIC_FINAL_SELECTED);
+			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.static_final_field"), null, null, RefactoringStatusCodes.NOT_STATIC_FINAL_SELECTED); //$NON-NLS-1$
 		
 		return new RefactoringStatus();
 	}
@@ -894,7 +897,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	private RefactoringStatus checkInitializer() throws JavaModelException {
 		Expression initializer= getInitializer();
 		if(initializer == null)
-			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "Inline Constant cannot inline blank finals", null, null, RefactoringStatusCodes.CANNOT_INLINE_BLANK_FINAL);
+			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.blank_finals"), null, null, RefactoringStatusCodes.CANNOT_INLINE_BLANK_FINAL); //$NON-NLS-1$
 		
 		fInitializerAllStaticFinal= ConstantChecks.isStaticFinalConstant((IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(initializer));
 		fInitializerChecked= true;
@@ -942,7 +945,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	private RefactoringStatus findInitializer() throws JavaModelException {
 		VariableDeclarationFragment declaration= getDeclaration();
 		if(declaration == null)
-			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, "Cannot inline this constant, since it is declared in a binary file.", null, null, RefactoringStatusCodes.DECLARED_IN_CLASSFILE);
+			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.binary_file"), null, null, RefactoringStatusCodes.DECLARED_IN_CLASSFILE); //$NON-NLS-1$
 
 		fInitializer= declaration.getInitializer();
 		fInitializerFound= true;
@@ -1050,11 +1053,11 @@ public class InlineConstantRefactoring extends Refactoring {
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try {
 			//XXX:  fix progress meter
-			pm.beginTask("Generating preview ...", 2);
+			pm.beginTask(RefactoringCoreMessages.getString("InlineConstantRefactoring.preview"), 2); //$NON-NLS-1$
 			
 			IChange[] cuChanges= createCompilationUnitChanges(pm);
 			
-			CompositeChange composite= new CompositeChange("Inline Constant");
+			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("InlineConstantRefactoring.inline")); //$NON-NLS-1$
 			composite.addAll(cuChanges);
 			return composite;
 		} catch (CoreException e) {
@@ -1079,7 +1082,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			return;
 		
 		TextChange change= findOrAddDeclaringCUChange(changes);
-		change.addTextEdit("Remove constant declaration", edit);
+		change.addTextEdit(RefactoringCoreMessages.getString("InlineConstantRefactoring.remove_declaration"), edit); //$NON-NLS-1$
 	}
 	
 	private TextChange findOrAddDeclaringCUChange(List changes) throws JavaModelException, CoreException {
@@ -1138,7 +1141,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	}
 
 	public String getName() {
-		return "Inline Constant";
+		return RefactoringCoreMessages.getString("InlineConstantRefactoring.name"); //$NON-NLS-1$
 	}
 
 	public boolean isInitializerAllStaticFinal() {

@@ -221,7 +221,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private String getModifier() {
-		return getAccessModifier() + " " + MODIFIER;	
+		return getAccessModifier() + " " + MODIFIER;	 //$NON-NLS-1$
 	}
 	
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
@@ -258,8 +258,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 		/* Moved this functionality to Checks, to allow sharing with
 		   ExtractTempRefactoring, others */
 		switch(Checks.checkExpressionIsRValue(getSelectedExpression().getAssociatedExpression())) {
-			case Checks.NOT_RVALUE_MISC:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractConstantRefactoring.select_expression"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE);
-			case Checks.NOT_RVALUE_VOID:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractConstantRefactoring.no_void"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID);
+			case Checks.NOT_RVALUE_MISC:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractConstantRefactoring.select_expression"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE); //$NON-NLS-1$
+			case Checks.NOT_RVALUE_VOID:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractConstantRefactoring.no_void"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID); //$NON-NLS-1$
 			case Checks.IS_RVALUE:			return new RefactoringStatus();
 			default:						Assert.isTrue(false); return null;
 		}		
@@ -481,7 +481,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		Assert.isNotNull(toInsertAfter);
 
 		int insertOffset= getNodeExclusiveEnd(toInsertAfter);
-		String text= " " + createConstantDeclarationSource();
+		String text= " " + createConstantDeclarationSource(); //$NON-NLS-1$
 		return SimpleTextEdit.createInsert(insertOffset, text);
 	}
 		
@@ -525,9 +525,9 @@ public class ExtractConstantRefactoring extends Refactoring {
 	
 	private String getReferenceQualifier() throws JavaModelException {
 		if(qualifyReferencesWithDeclaringClassName())
-			return getContainingTypeBinding().getName() + ".";
+			return getContainingTypeBinding().getName() + "."; //$NON-NLS-1$
 		else
-			return "";
+			return ""; //$NON-NLS-1$
 	}
 
 	// !!!
@@ -653,7 +653,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		ICodeFormatter formatter= ToolFactory.createCodeFormatter();
 		String dummyInitializer= "0"; //$NON-NLS-1$
 		String semicolon= ";"; //$NON-NLS-1$
-		String dummyDeclaration= getModifier() + " " + getConstantTypeName() + " " + fConstantName + " = " + dummyInitializer + semicolon; //$NON-NLS-1$ //$NON-NLS-2$
+		String dummyDeclaration= getModifier() + " " + getConstantTypeName() + " " + fConstantName + " = " + dummyInitializer + semicolon; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		int[] position= { dummyDeclaration.length() - dummyInitializer.length() - semicolon.length()};
 		StringBuffer formattedDummyDeclaration= new StringBuffer(formatter.format(dummyDeclaration, 0, position, getLineDelimiter()));
 		return formattedDummyDeclaration.replace(position[0], position[0] + dummyInitializer.length(), initializerSource).toString();

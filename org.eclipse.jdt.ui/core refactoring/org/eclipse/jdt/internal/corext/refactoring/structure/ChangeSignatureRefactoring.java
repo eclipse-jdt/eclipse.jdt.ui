@@ -1,6 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -118,7 +127,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 			fVisibility= JdtFlags.VISIBILITY_CODE_INVALID;
-			fReturnTypeName= "";
+			fReturnTypeName= ""; //$NON-NLS-1$
 		}
 	}
 	
@@ -216,7 +225,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private String findUnusedParameterName() {
 		Set usedNames= getUsedParameterNames();
 		int i= 0;
-		String prefix= "arg"; 
+		String prefix= "arg";  //$NON-NLS-1$
 		while(true){
 			String candidate= prefix + i++;
 			if (! usedNames.contains(candidate))
@@ -297,22 +306,19 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 	private void checkReturnType(RefactoringStatus result) {
 		if (! isValidTypeName(fReturnTypeName, true)){
-			String pattern= "''{0}'' is not a valid return type name";
-			String msg= MessageFormat.format(pattern, new String[]{fReturnTypeName});
+			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_return_type", new String[]{fReturnTypeName}); //$NON-NLS-1$
 			result.addFatalError(msg);
 		}	
 	}
 
 	private void checkParameterDefaultValue(RefactoringStatus result, ParameterInfo info) {
-		if (info.getDefaultValue().trim().equals("")){
-			String pattern= "Enter the default value for parameter ''{0}''";
-			String msg= MessageFormat.format(pattern, new String[]{info.getNewName()});
+		if (info.getDefaultValue().trim().equals("")){ //$NON-NLS-1$
+			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.default_value", new String[]{info.getNewName()}); //$NON-NLS-1$
 			result.addFatalError(msg);
 			return;
 		}	
 		if (! isValidExpression(info.getDefaultValue())){
-			String pattern= "''{0}'' is not a valid expression";
-			String msg= MessageFormat.format(pattern, new String[]{info.getDefaultValue()});
+			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_expression", new String[]{info.getDefaultValue()}); //$NON-NLS-1$
 			result.addFatalError(msg);
 		}	
 	}
@@ -320,25 +326,23 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private void checkParameterType(RefactoringStatus result, ParameterInfo info) {
 		if (! info.isTypeNameChanged())
 			return;
-		if (info.getNewTypeName().trim().equals("")){
-			String pattern= "Enter the type for parameter ''{0}''";
-			String msg= MessageFormat.format(pattern, new String[]{info.getNewName()});
+		if (info.getNewTypeName().trim().equals("")){ //$NON-NLS-1$
+			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.parameter_type", new String[]{info.getNewName()}); //$NON-NLS-1$
 			result.addFatalError(msg);
 			return;
 		}	
 		if (! isValidTypeName(info.getNewTypeName(), false)){
-			String pattern= "''{0}'' is not a valid parameter type name";
-			String msg= MessageFormat.format(pattern, new String[]{info.getNewTypeName()});
+			String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.invalid_type_name", new String[]{info.getNewTypeName()}); //$NON-NLS-1$
 			result.addFatalError(msg);
 		}	
 	}
 
 	private static boolean isValidTypeName(String string, boolean isVoidAllowed){
-		if ("".equals(string.trim())) //speed up for a common case
+		if ("".equals(string.trim())) //speed up for a common case //$NON-NLS-1$
 			return false;
 		if (! string.trim().equals(string))
 			return false;
-		if (string.equals("void"))
+		if (string.equals("void")) //$NON-NLS-1$
 			return isVoidAllowed;
 		if (! Checks.checkTypeName(string).hasFatalError())
 			return true;
@@ -349,7 +353,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		int offset= cuBuff.length();
 		cuBuff.append(string)
 			  .append(CONST_ASSIGN)
-			  .append("null")
+			  .append("null") //$NON-NLS-1$
 			  .append(CONST_CLOSE);
 		CompilationUnit cu= AST.parseCompilationUnit(cuBuff.toString().toCharArray());
 		Selection selection= Selection.createFromStartLength(offset, string.length());
@@ -377,11 +381,11 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 	private static boolean isValidExpression(String string){
 		String trimmed= string.trim();
-		if ("".equals(trimmed)) //speed up for a common case
+		if ("".equals(trimmed)) //speed up for a common case //$NON-NLS-1$
 			return false;
 		StringBuffer cuBuff= new StringBuffer();
 		cuBuff.append(CONST_CLASS_DECL)
-			  .append("Object")
+			  .append("Object") //$NON-NLS-1$
 			  .append(CONST_ASSIGN);
 		int offset= cuBuff.length();
 		cuBuff.append(trimmed)
@@ -455,7 +459,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.checking_preconditions"), 5); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			if (isSignatureSameAsInitial())
-				return RefactoringStatus.createFatalErrorStatus("Method signature and return type are unchanged.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.unchanged")); //$NON-NLS-1$
 			result.merge(checkSignature());
 			if (result.hasFatalError())
 				return result;
@@ -505,12 +509,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				ASTNode[] paramRefs= TempOccurrenceFinder.findTempOccurrenceNodes(paramDecl, true, false);
 				if (paramRefs.length > 0){
 					Context context= JavaSourceContext.create(cu, paramRefs[0]);
-					String pattern= "Parameter ''{0}'' is used in method ''{1}'' declared in type ''{2}''";
-					String msg= MessageFormat.format(pattern, new String[]{
-													paramDecl.getName().getIdentifier(),
-													decl.getName().getIdentifier(),
-													typeName
-													});
+					Object[] keys= new String[]{paramDecl.getName().getIdentifier(),
+												decl.getName().getIdentifier(),
+												typeName};
+					String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.parameter_used", keys); //$NON-NLS-1$
 					result.addWarning(msg, context);
 				}
 			}	
@@ -523,8 +525,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		AnonymousClassDeclaration anonymous= (AnonymousClassDeclaration)ASTNodes.getParent(decl, AnonymousClassDeclaration.class);
 		if (anonymous != null && ASTNodes.isParent(typeDecl, anonymous)){
 			ClassInstanceCreation cic= (ClassInstanceCreation)ASTNodes.getParent(decl, ClassInstanceCreation.class);
-			String pattern= "anonymous subclass of ''{0}''";
-			return MessageFormat.format(pattern, new String[]{ASTNodes.getNameIdentifier(cic.getName())});
+			return RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.anonymous_subclass", new String[]{ASTNodes.getNameIdentifier(cic.getName())}); //$NON-NLS-1$
 		} else 
 			return typeDecl.getName().getIdentifier();
 	}
@@ -536,7 +537,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	    	return null;
 	    Assert.isTrue(getInitialMethodVisibility() != Modifier.PRIVATE);
 	    if (fVisibility == Modifier.PRIVATE)
-	    	return RefactoringStatus.createWarningStatus("Changing visibility to 'private' will make this method non-virtual, which may affect the program's behavior");
+	    	return RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.non-virtual")); //$NON-NLS-1$
 		return null;
 	}
 	
@@ -557,7 +558,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 	private String getPreviewOfVisibityString() {
 		String visibilityString= JdtFlags.getVisibilityString(fVisibility);
-		if ("".equals(visibilityString))
+		if ("".equals(visibilityString)) //$NON-NLS-1$
 			return visibilityString;
 		return visibilityString + ' ';
 	}
@@ -599,15 +600,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			result.merge(checkCompilation());
 			if (result.hasError())
 				return result;
-//
-//			ParameterInfo[] renamedInfos= getRenamedParameterNames();				
-//			for (int i= 0; i < renamedInfos.length; i++) {
-//				VariableDeclaration vd= getVariableDeclaration(renamedInfos[i], fMethod);
-//				String fullKey= RefactoringAnalyzeUtil.getFullBindingKey(vd);
-//				TextEdit[] paramRenameEdits= findEditGroupDescription(fDescriptionGroups, renamedInfos[i]).getTextEdits();
-//				SimpleName[] problemNodes= ProblemNodeFinder.getProblemNodes(newCUNode, paramRenameEdits, change, fullKey);
-//				result.merge(RefactoringAnalyzeUtil.reportProblemNodes(newCuSource, problemNodes));
-//			}
 			return result;
 		} catch(CoreException e) {
 			throw new JavaModelException(e);
@@ -640,7 +632,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 	
 	private static String createGroupDescriptionString(String oldParamName){
-		return "rename." + oldParamName;
+		return "rename." + oldParamName; //$NON-NLS-1$
 	}
 	
 	private VariableDeclaration getVariableDeclaration(ParameterInfo info, IMethod method) throws JavaModelException {
@@ -731,9 +723,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			String[] paramNames= fRippleMethods[i].getParameterNames();
 			for (int j= 0; j < paramNames.length; j++) {
 				if (newParameterNames.contains(paramNames[j])){
-					String pattern= "Method ''{0}'' already has a parameter named ''{1}''";
 					String[] args= new String[]{JavaElementUtil.createMethodSignature(fRippleMethods[i]), paramNames[j]};
-					String msg= MessageFormat.format(pattern, args);
+					String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.already_has", args); //$NON-NLS-1$
 					Context context= JavaSourceContext.create(fRippleMethods[i].getCompilationUnit(), fRippleMethods[i].getNameRange());
 					result.addError(msg, context);
 				}	
@@ -790,7 +781,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 	//--  changes ----
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			return new CompositeChange(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.restructure_parameters"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 		} finally{
@@ -799,7 +790,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException {
-		pm.beginTask("Preparing preview", 2);
+		pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.preview"), 2); //$NON-NLS-1$
 
 		if (! areNamesSameAsInitial())
 			addRenamings();
@@ -929,13 +920,13 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			TextBuffer textBuffer= TextBuffer.create(fAstManager.getCompilationUnit(cuNode).getBuffer().getContents());
 			TextEdit resultingEdits= new MultiTextEdit();
 			rewrite.rewriteNode(textBuffer, resultingEdits, fDescriptionGroups);
-			manager.get(fAstManager.getCompilationUnit(cuNode)).addTextEdit("Modify parameters", resultingEdits);
+			manager.get(fAstManager.getCompilationUnit(cuNode)).addTextEdit(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.modify_parameters"), resultingEdits); //$NON-NLS-1$
 			rewrite.removeModifications();
 		}
 	}
 
 	private void modifyMethodOccurrences(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", fOccurrenceNodes.length);
+		pm.beginTask("", fOccurrenceNodes.length); //$NON-NLS-1$
 		try{
 			for (int i= 0; i < fOccurrenceNodes.length; i++) {
 				ASTNode methodOccurrence= fOccurrenceNodes[i];
@@ -1157,7 +1148,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	private static String createDeclarationString(ParameterInfo info) {
-		return info.getNewTypeName() + " " + info.getNewName();
+		return info.getNewTypeName() + " " + info.getNewName(); //$NON-NLS-1$
 	}
 
 	private static List getArguments(ASTNode node) {

@@ -101,7 +101,7 @@ class ConstructorReferenceFinder {
 	}
 	
 	private ASTNode[] getImplicitConstructorReferenceNodes(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		List result= new ArrayList();
 		result.addAll(getImplicitConstructorReferenceNodesFromHierarchy(new SubProgressMonitor(pm, 1)));
 		result.addAll(getImplicitConstructorReferencesInClassCreations(new SubProgressMonitor(pm, 1)));

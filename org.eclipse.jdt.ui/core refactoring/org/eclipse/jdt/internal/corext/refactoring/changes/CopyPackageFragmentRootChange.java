@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -19,6 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IDeepCopyQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
@@ -40,8 +39,8 @@ public class CopyPackageFragmentRootChange extends PackageFragmentRootReorgChang
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#getName()
 	 */
 	public String getName() {
-		String pattern= "Copy Package Fragment Root ''{0}'' to project ''{1}''";
-		return MessageFormat.format(pattern, new Object[]{getRoot().getElementName(), getDestinationProject().getName()});
+		String[] keys= {getRoot().getElementName(), getDestinationProject().getName()};
+		return RefactoringCoreMessages.getFormattedString("CopyPackageFragmentRootChange.copy", keys); //$NON-NLS-1$
 	}
 
 }

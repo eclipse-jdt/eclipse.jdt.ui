@@ -1,6 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +32,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -75,14 +85,14 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		IType orig= (IType)WorkingCopyUtil.getOriginal(fInputType);
 		if (orig == null || ! orig.exists()){
-			String key= "The selected type has been deleted from ''{0}''";
-			String message= MessageFormat.format(key, new String[]{fInputType.getCompilationUnit().getElementName()});
+			String[] keys= {fInputType.getCompilationUnit().getElementName()};
+			String message= RefactoringCoreMessages.getFormattedString("UseSupertypeWherePossibleRefactoring.deleted", keys); //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}	
 		fInputType= orig;
 		fSuperTypes= getSuperTypes(pm);
 		if (Checks.isException(fInputType, pm)){
-			String message= "Use Supertype Where Possible refactoring is not available on \"java.lang.Throwable\" and its subclasses";
+			String message= RefactoringCoreMessages.getString("UseSupertypeWherePossibleRefactoring.unavailable_on_Throwable"); //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}
 		return Checks.checkIfCuBroken(fInputType);
@@ -143,8 +153,8 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 1);
-			CompositeChange builder= new CompositeChange("Use Supertype Where Possible");
+			pm.beginTask("", 1); //$NON-NLS-1$
+			CompositeChange builder= new CompositeChange(RefactoringCoreMessages.getString("UseSupertypeWherePossibleRefactoring.name")); //$NON-NLS-1$
 			builder.addAll(fChangeManager.getAllChanges());
 			return builder;	
 		} finally{
@@ -157,7 +167,7 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Use Supertype Where Possible";
+		return RefactoringCoreMessages.getString("UseSupertypeWherePossibleRefactoring.name"); //$NON-NLS-1$
 	}
 
 	private void clearIntermediateState() {
@@ -167,7 +177,7 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
 		try{
 			pm.beginTask("", 1); //$NON-NLS-1$
-			pm.setTaskName("Analyzing...");
+			pm.setTaskName(RefactoringCoreMessages.getString("UseSupertypeWherePossibleRefactoring.analyzing...")); //$NON-NLS-1$
 			TextChangeManager manager= new TextChangeManager();
 			updateReferences(manager, new SubProgressMonitor(pm, 1));
 			return manager;
@@ -177,7 +187,7 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	}
 
 	private void updateReferences(TextChangeManager manager, IProgressMonitor pm) throws JavaModelException, CoreException {
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		try{
 			IMember[] members= getAllDeclaredAndInheritedMembers(fSuperTypeToUse, new SubProgressMonitor(pm, 1));
 			String superTypeName= fSuperTypeToUse.getElementName();
@@ -224,7 +234,7 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 	}
 
 	private static IType getObject(IJavaProject jProject) throws JavaModelException {
-		return jProject.findType("java.lang.Object");
+		return jProject.findType("java.lang.Object"); //$NON-NLS-1$
 	}
 
 }

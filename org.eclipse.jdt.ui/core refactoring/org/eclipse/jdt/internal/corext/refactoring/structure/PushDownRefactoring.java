@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -54,7 +53,6 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -62,6 +60,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
@@ -243,7 +242,7 @@ public class PushDownRefactoring extends Refactoring {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Push Down";
+		return RefactoringCoreMessages.getString("PushDownRefactoring.name"); //$NON-NLS-1$
 	}
 
 	public IType getDeclaringClass(){
@@ -274,7 +273,7 @@ public class PushDownRefactoring extends Refactoring {
 			return result;
 		
 		if (! haveCommonDeclaringType())
-			return RefactoringStatus.createFatalErrorStatus("Selected elements do not have a common delcaring type");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.no_common_type")); //$NON-NLS-1$
 
 		return new RefactoringStatus();
 	}
@@ -302,29 +301,29 @@ public class PushDownRefactoring extends Refactoring {
 	private static RefactoringStatus checkElement(IMember member) throws JavaModelException{
 		if (member.getElementType() != IJavaElement.METHOD && 
 			member.getElementType() != IJavaElement.FIELD)
-				return RefactoringStatus.createFatalErrorStatus("Only fields and methods can be pushed down");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.only_fields_and_methods")); //$NON-NLS-1$
 		if (! member.exists())
-			return RefactoringStatus.createFatalErrorStatus("One or more of the elements does not exist");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.not_exists")); //$NON-NLS-1$
 	
 		if (member.isBinary())
-			return RefactoringStatus.createFatalErrorStatus("Binary members cannot be pulled down");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.binary")); //$NON-NLS-1$
 
 		if (member.isReadOnly())
-			return RefactoringStatus.createFatalErrorStatus("Read only elements cannot be pulled down");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.read_only")); //$NON-NLS-1$
 
 		if (! member.isStructureKnown())
-			return RefactoringStatus.createFatalErrorStatus("Elements with unknown structure cannot be pulled down");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.unknown_structure")); //$NON-NLS-1$
 
 		if (JdtFlags.isStatic(member))
-			return RefactoringStatus.createFatalErrorStatus("Static members cannot be pulled down");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.static")); //$NON-NLS-1$
 			
 		if (member.getElementType() == IJavaElement.METHOD){
 			IMethod method= (IMethod) member;
 			if (method.isConstructor())
-				return RefactoringStatus.createFatalErrorStatus("Constructors cannot be pulled down");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.constructors")); //$NON-NLS-1$
 			
 			if (JdtFlags.isNative(method))
-				return RefactoringStatus.createFatalErrorStatus("Native methods cannot be pulled down");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.native")); //$NON-NLS-1$
 		}
 		return new RefactoringStatus();	
 	}
@@ -368,8 +367,7 @@ public class PushDownRefactoring extends Refactoring {
 	private RefactoringStatus checkPossibleSubclasses(IProgressMonitor pm) throws JavaModelException {
 		IType[] modifiableSubclasses= getDestinationClassesForNonAbstractMembers(pm);
 		if (modifiableSubclasses.length == 0){
-			String pattern= "Class ''{0}'' does not have any modifiable non-anonymous subclasses to which members could be pushed down";
-			String msg= MessageFormat.format(pattern, new String[]{createTypeLabel(getDeclaringClass())});
+			String msg= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.no_subclasses", new String[]{createTypeLabel(getDeclaringClass())});//$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(msg);
 		}
 		return new RefactoringStatus();
@@ -380,7 +378,7 @@ public class PushDownRefactoring extends Refactoring {
 		for (int i= 0; i < fSelectedMembers.length; i++) {
 			IMember orig= fSelectedMembers[i];
 			if (orig == null || ! orig.exists()){
-				String message= "One more more of the selected members does not exist in the saved version of the file";
+				String message= RefactoringCoreMessages.getString("PushDownRefactoring.not_in_saved"); //$NON-NLS-1$
 				return RefactoringStatus.createFatalErrorStatus(message);
 			}	
 		}
@@ -392,13 +390,13 @@ public class PushDownRefactoring extends Refactoring {
 		IType declaringType= getDeclaringClass();
 				
 		if (declaringType.isInterface()) //for now
-			return RefactoringStatus.createFatalErrorStatus("Pushing down interface members is not supported");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.interface_members")); //$NON-NLS-1$
 		
 		if (declaringType.isBinary())
-			return RefactoringStatus.createFatalErrorStatus("Pushing down members declared in binary types is not supported");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.members_of_binary")); //$NON-NLS-1$
 
 		if (declaringType.isReadOnly())
-			return RefactoringStatus.createFatalErrorStatus("Pushing down members declared in read-only types is not supported");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PushDownRefactoring.members_of_read-only")); //$NON-NLS-1$
 		
 		return new RefactoringStatus();
 	}
@@ -433,7 +431,7 @@ public class PushDownRefactoring extends Refactoring {
 	
 	public IMember[] getAdditionalRequiredMembers(IProgressMonitor pm) throws JavaModelException {
 		IMember[] members= getMembersToBeCreatedInSubclasses();
-		pm.beginTask("Calculating required members", members.length);//not true, but not easy to give anything better
+		pm.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.calculating"), members.length);//not true, but not easy to give anything better //$NON-NLS-1$
 		List queue= new ArrayList(members.length);
 		queue.addAll(Arrays.asList(members));
 		int i= 0;
@@ -450,7 +448,7 @@ public class PushDownRefactoring extends Refactoring {
 	}
 	
 	private void addAllRequiredPushableMembers(List queue, IMember member, IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		addAllRequiredPushableMethods(queue, member, new SubProgressMonitor(pm, 1));
 		addAllRequiredPushableFields(queue, member, new SubProgressMonitor(pm, 1));
 		pm.done();
@@ -466,10 +464,10 @@ public class PushDownRefactoring extends Refactoring {
 	}
 	
 	private void addAllRequiredPushableMethods(List queue, IMember member, IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		IMethod[] requiredMethods= ReferenceFinderUtil.getMethodsReferencedIn(new IJavaElement[]{member}, new SubProgressMonitor(pm, 1));
 		SubProgressMonitor sPm= new SubProgressMonitor(pm, 1);
-		sPm.beginTask("", requiredMethods.length);
+		sPm.beginTask("", requiredMethods.length); //$NON-NLS-1$
 		for (int i= 0; i < requiredMethods.length; i++) {
 			IMethod method= requiredMethods[i];
 			if (! MethodChecks.isVirtual(method) && isRequiredPushableMember(queue, method))
@@ -487,7 +485,7 @@ public class PushDownRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 5); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.creating_preview"), 5); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			
 			result.merge(checkMembersInDestinationClasses(new SubProgressMonitor(pm, 1)));
@@ -517,7 +515,7 @@ public class PushDownRefactoring extends Refactoring {
 		IMember[] membersToPush= getMembersToPushDown();
 		RefactoringStatus result= new RefactoringStatus();
 		List movedMembers= Arrays.asList(getMembersToBeCreatedInSubclasses());
-		pm.beginTask("", membersToPush.length);
+		pm.beginTask("", membersToPush.length); //$NON-NLS-1$
 		for (int i= 0; i < membersToPush.length; i++) {
 			IMember member= membersToPush[i];
 			String label= createLabel(member);
@@ -529,9 +527,8 @@ public class PushDownRefactoring extends Refactoring {
 				if (! (element instanceof IMember))
 					continue;
 				IMember referencingMember= (IMember)element;	
-				String pattern= "Pushed down member ''{0}'' is referenced by ''{1}''";
 				Object[] keys= {label, createLabel(referencingMember)};
-				String msg= MessageFormat.format(pattern, keys);	
+				String msg= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.referenced", keys); //$NON-NLS-1$
 				result.addError(msg, JavaSourceContext.create(referencingMember));
 			}
 		}
@@ -557,7 +554,7 @@ public class PushDownRefactoring extends Refactoring {
 
 	private RefactoringStatus checkElementsAccessedByModifiedMembers(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		pm.beginTask("Checking referenced elements", 3);
+		pm.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.checking"), 3); //$NON-NLS-1$
 		IType[] subclasses= getDestinationClassesForNonAbstractMembers(new SubProgressMonitor(pm, 1));
 		result.merge(checkAccessedTypes(subclasses, new SubProgressMonitor(pm, 1)));
 		result.merge(checkAccessedFields(subclasses, new SubProgressMonitor(pm, 1)));
@@ -574,8 +571,7 @@ public class PushDownRefactoring extends Refactoring {
 			for (int j= 0; j < accessedTypes.length; j++) {
 				IType type= accessedTypes[j];
 				if (! canBeAccessedFrom(type, targetClass)){
-					String pattern= "Type ''{0}'' referenced in one of the pushed elements is not accessible from type ''{1}''";
-					String message= MessageFormat.format(pattern, new String[]{createTypeLabel(type), createTypeLabel(targetClass)});
+					String message= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.type_not_accessible", new String[]{createTypeLabel(type), createTypeLabel(targetClass)}); //$NON-NLS-1$
 					result.addError(message, JavaSourceContext.create(type));
 				}	
 			}
@@ -596,8 +592,7 @@ public class PushDownRefactoring extends Refactoring {
 				boolean isAccessible= 	pushedDownList.contains(field) || 
 										canBeAccessedFrom(field, targetClass);
 				if (! isAccessible){
-					String pattern= "Field ''{0}'' referenced in one of the pulled elements is not accessible from type ''{1}''";
-					String message= MessageFormat.format(pattern,  new String[]{createFieldLabel(field), createTypeLabel(targetClass)});
+					String message= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.field_not_accessible", new String[]{createFieldLabel(field), createTypeLabel(targetClass)}); //$NON-NLS-1$
 					result.addError(message, JavaSourceContext.create(field));
 				} 
 			}
@@ -618,8 +613,7 @@ public class PushDownRefactoring extends Refactoring {
 				boolean isAccessible= canBeAccessedFrom(method, targetClass) ||
 									   pushedDownList.contains(method);
 				if (! isAccessible){
-					String pattern= "Method ''{0}'' referenced in one of the pulled elements is not accessible from type ''{1}''";
-					String message= MessageFormat.format(pattern,  new String[]{createMethodLabel(method), createTypeLabel(targetClass)});
+					String message= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.method_not_accessible", new String[]{createMethodLabel(method), createTypeLabel(targetClass)}); //$NON-NLS-1$
 					result.addError(message, JavaSourceContext.create(method));
 				}
 			}
@@ -695,8 +689,7 @@ public class PushDownRefactoring extends Refactoring {
 	private RefactoringStatus checkCallsToDeclaringClassConstructors(IProgressMonitor pm) throws JavaModelException {
 		ASTNode[] refNodes= ConstructorReferenceFinder.getConstructorReferenceNodes(getDeclaringClass(), fAstManager, pm);
 		RefactoringStatus result= new RefactoringStatus();
-		String pattern= "Class ''{0}'' cannot be made abstract because it gets instantiated";
-		String msg= MessageFormat.format(pattern, new Object[]{createTypeLabel(getDeclaringClass())});
+		String msg= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.gets_instantiated", new Object[]{createTypeLabel(getDeclaringClass())}); //$NON-NLS-1$
 		for (int i= 0; i < refNodes.length; i++) {
 			ASTNode node= refNodes[i];
 			if (node instanceof ClassInstanceCreation){
@@ -708,7 +701,7 @@ public class PushDownRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus checkMembersInDestinationClasses(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		IMember[] membersToPushDown= getMembersToBeCreatedInSubclasses();
 
@@ -762,7 +755,7 @@ public class PushDownRefactoring extends Refactoring {
 
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
 		try{
-			pm.beginTask("Creating preview...", 4);
+			pm.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.preview"), 4); //$NON-NLS-1$
 
 			deleteMembersFromDeclaringClass();
 			pm.worked(1);
@@ -787,7 +780,7 @@ public class PushDownRefactoring extends Refactoring {
 	}
 
 	private void addImportsToSubclasses(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 4);
+		pm.beginTask("", 4); //$NON-NLS-1$
 		IMember[] allMembers= MemberActionInfo.getMembers(getInfosForMembersToBeCreatedInSubclassesOfDeclaringClass());
 		IMember[] nonAbstractMembers= getNonAbstractMembers(allMembers);
 		IType[] destForNonAbstract= getDestinationClassesForNonAbstractMembers(new SubProgressMonitor(pm, 1));
@@ -800,7 +793,7 @@ public class PushDownRefactoring extends Refactoring {
 	}
 	
 	private void addImportsToTypesReferencedInMembers(IMember[] members, IType[] destinationClasses, IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		IType[] typesReferenced= getTypesReferencedIn(members, pm);
 		for (int i= 0; i < destinationClasses.length; i++) {
 			ICompilationUnit cu= getWorkingCopyOfCu(destinationClasses[i]);
@@ -851,7 +844,7 @@ public class PushDownRefactoring extends Refactoring {
 	}
 
 	private void createMembersInSubclasses(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		MemberActionInfo[] allMembers= getInfosForMembersToBeCreatedInSubclassesOfDeclaringClass();
 		IType[] destinationsForNonAbstract= getDestinationClassesForNonAbstractMembers(new SubProgressMonitor(pm, 1));
 		IType[] destinationsForAbstract= getDestinationClassesForAbstractMembers(new SubProgressMonitor(pm, 1));
@@ -1170,7 +1163,7 @@ public class PushDownRefactoring extends Refactoring {
 			TextChange textChange= manager.get(cu);
 			if (fImportEditManager.hasImportEditFor(cu))
 				resultingEdits.add(fImportEditManager.getImportEdit(cu));
-			textChange.addTextEdit("Push down class member(s)", resultingEdits);
+			textChange.addTextEdit(RefactoringCoreMessages.getString("PushDownRefactoring.push_down_members"), resultingEdits); //$NON-NLS-1$
 			rewrite.removeModifications();
 		}
 	}
@@ -1214,7 +1207,7 @@ public class PushDownRefactoring extends Refactoring {
 		else if (member instanceof IField)
 			return createFieldLabel((IField)member);
 		else if (member instanceof IInitializer)
-			return "initializer";
+			return RefactoringCoreMessages.getString("PushDownRefactoring.initializer"); //$NON-NLS-1$
 		Assert.isTrue(false);
 		return null;	
 	}

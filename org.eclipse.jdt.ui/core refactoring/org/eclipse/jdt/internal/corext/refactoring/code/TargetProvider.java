@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 abstract class TargetProvider {
 
@@ -77,7 +78,7 @@ abstract class TargetProvider {
 		BodyDeclaration decl= (BodyDeclaration)ASTNodes.getParent(invocation, BodyDeclaration.class);
 		if (decl instanceof FieldDeclaration) {
 			result.addEntry(new RefactoringStatusEntry(
-				"Can't inline call that is used as a field initializer.",
+				RefactoringCoreMessages.getString("TargetProvider.field_initializer"), //$NON-NLS-1$
 				severity, 
 				JavaSourceContext.create(unit, invocation),
 				null, RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER));
@@ -87,7 +88,7 @@ abstract class TargetProvider {
 	static void fastDone(IProgressMonitor pm) {
 		if (pm == null)
 			return;
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		pm.worked(1);
 		pm.done();
 	}
