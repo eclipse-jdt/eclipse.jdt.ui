@@ -569,18 +569,10 @@ public class SourceAttachmentBlock {
 			if (varPath.isPrefixOf(path)) {
 				path= path.removeFirstSegments(varPath.segmentCount());
 			} else {
-				//XXX fix for 1GF9DEV: ITPJUI:WINNT - exception in SourceAttachment page
-				if (path.lastSegment() == null)
-					path= new Path("");
-				else	
-					path= new Path(path.lastSegment());
+				path= new Path(path.lastSegment());
 			}
 		} else {
-			//XXX fix for 1GF9DEV: ITPJUI:WINNT - exception in SourceAttachment page
-			if (path.lastSegment() == null)
-				path= new Path("");
-			else	
-				path= new Path(path.lastSegment());
+			path= new Path(path.lastSegment());
 		}
 		return new Path(varName).append(path);
 	}
