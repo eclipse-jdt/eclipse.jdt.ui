@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.core.dom.*;
 
@@ -50,7 +51,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ASTNode coveringNode= getCoveringNode(context);
 		if (coveringNode != null) {
 			return getCatchClauseToThrowsProposals(context, coveringNode, null) 
-				|| getRenameLocalProposals(context, coveringNode, null)
+				|| getRenameLocalProposals(context, coveringNode, null, null)
 				|| getAssignToVariableProposals(context, coveringNode, null)
 				|| getUnWrapProposals(context, coveringNode, null)
 				|| getAssignParamToFieldProposals(context, coveringNode, null)
@@ -73,7 +74,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (coveringNode != null) {
 			ArrayList resultingCollections= new ArrayList();
 			// quick assists that show up also if there is an error/warning
-			getRenameLocalProposals(context, coveringNode, resultingCollections);
+			getRenameLocalProposals(context, coveringNode, locations, resultingCollections);
 		
 			if (noErrorsAtLocation(locations)) {
 				getCatchClauseToThrowsProposals(context, coveringNode, resultingCollections);
@@ -465,7 +466,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 	
 	
-	private boolean getRenameLocalProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	private boolean getRenameLocalProposals(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection resultingCollections) {
 		if (!(node instanceof SimpleName)) {
 			return false;
 		}
@@ -474,6 +475,21 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (binding != null && binding.getKind() == IBinding.PACKAGE) {
 			return false;
 		}
+
+		if (locations != null) {
+			for (int i= 0; i < locations.length; i++) {
+				switch (locations[i].getProblemId()) {
+					case IProblem.LocalVariableHidingLocalVariable:
+					case IProblem.LocalVariableHidingField:
+					case IProblem.FieldHidingLocalVariable:
+					case IProblem.FieldHidingField:
+					case IProblem.ArgumentHidingLocalVariable:
+					case IProblem.ArgumentHidingField:
+						return false;
+				}
+			}
+		}
+		
 		if (resultingCollections == null) {
 			return true;
 		}

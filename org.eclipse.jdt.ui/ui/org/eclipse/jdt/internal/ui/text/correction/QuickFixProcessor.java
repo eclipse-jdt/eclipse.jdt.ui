@@ -124,7 +124,13 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.DuplicateFinalLocalInitialization:
 			case IProblem.FinalFieldAssignment:
 			case IProblem.DuplicateBlankFinalFieldInitialization:
-			case IProblem.FinalMethodCannotBeOverridden: 
+			case IProblem.FinalMethodCannotBeOverridden:
+			case IProblem.LocalVariableHidingLocalVariable:
+			case IProblem.LocalVariableHidingField:
+			case IProblem.FieldHidingLocalVariable:
+			case IProblem.FieldHidingField:
+			case IProblem.ArgumentHidingLocalVariable:
+			case IProblem.ArgumentHidingField:
 				return true;
 			default:
 				return false;
@@ -352,6 +358,13 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.JavadocMissingThrowsTag:
 				JavadocTagsSubProcessor.getMissingJavadocTagProposals(context, problem, proposals);
 				break;
+			case IProblem.LocalVariableHidingLocalVariable:
+			case IProblem.LocalVariableHidingField:
+			case IProblem.FieldHidingLocalVariable:
+			case IProblem.FieldHidingField:
+			case IProblem.ArgumentHidingLocalVariable:
+			case IProblem.ArgumentHidingField:
+				LocalCorrectionsSubProcessor.addHidingVariablesProposals(context, problem, proposals);
 			default:
 		}
 	}

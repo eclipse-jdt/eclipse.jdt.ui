@@ -803,5 +803,35 @@ public class LocalCorrectionsSubProcessor {
 		proposal.setImportRewrite(imports);
 		proposals.add(proposal);
 	}
+
+	public static void addHidingVariablesProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		CompilationUnit root= context.getASTRoot();
+		ASTNode selectedNode= problem.getCoveringNode(root);
+		if (!(selectedNode instanceof SimpleName)) {
+			return;
+		}
+		SimpleName nameNode= (SimpleName) selectedNode;
 		
+		String name;
+		switch (problem.getProblemId()) {
+			case IProblem.LocalVariableHidingLocalVariable:
+			case IProblem.LocalVariableHidingField:
+				name= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.hiding.local.label", nameNode.getIdentifier()); //$NON-NLS-1$
+				break;
+			case IProblem.FieldHidingLocalVariable:
+			case IProblem.FieldHidingField:
+				name= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.hiding.field.label", nameNode.getIdentifier()); //$NON-NLS-1$
+				break;
+			case IProblem.ArgumentHidingLocalVariable:
+			case IProblem.ArgumentHidingField:
+				name= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.hiding.argument.label", nameNode.getIdentifier()); //$NON-NLS-1$
+				break;
+			default:
+				return;
+		}
+		LinkedNamesAssistProposal proposal= new LinkedNamesAssistProposal(name, context.getCompilationUnit(), nameNode);
+		proposals.add(proposal);
+	}
+
+	
 }

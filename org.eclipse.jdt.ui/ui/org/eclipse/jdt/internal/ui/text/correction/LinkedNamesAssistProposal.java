@@ -51,8 +51,16 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	private SimpleName fNode;
 	private IRegion fSelectedRegion; // initialized by apply()
 	private ICompilationUnit fCompilationUnit;
+	private String fLabel;
 			
 	public LinkedNamesAssistProposal(ICompilationUnit cu, SimpleName node) {
+		this(CorrectionMessages.getString("LinkedNamesAssistProposal.description"), cu, node); //$NON-NLS-1$
+		fNode= node;
+		fCompilationUnit= cu;
+	}
+	
+	public LinkedNamesAssistProposal(String label, ICompilationUnit cu, SimpleName node) {
+		fLabel= label;
 		fNode= node;
 		fCompilationUnit= cu;
 	}
@@ -60,12 +68,13 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
 	 */
-	public void apply(ITextViewer viewer, char trigger, int stateMask, final int offset) {
+	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 		try {
 			// create full ast
 			CompilationUnit root= AST.parseCompilationUnit(fCompilationUnit, true, null, null); // full AST needed
 			ASTNode nameNode= NodeFinder.perform(root, fNode.getStartPosition(), fNode.getLength());
-
+			final int pos= fNode.getStartPosition();
+			
 			ASTNode[] sameNodes;
 			if (nameNode instanceof SimpleName) {
 				sameNodes= LinkedNodeFinder.findByNode(root, (SimpleName) nameNode);
@@ -88,7 +97,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 				 * @return the rank of the node with respect to the invocation offset
 				 */
 				private int rank(ASTNode node) {
-					int relativeRank= node.getStartPosition() + node.getLength() - offset;
+					int relativeRank= node.getStartPosition() + node.getLength() - pos;
 					if (relativeRank < 0)
 						return Integer.MAX_VALUE + relativeRank;
 					else
@@ -145,7 +154,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	 * @see ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return CorrectionMessages.getString("LinkedNamesAssistProposal.description"); //$NON-NLS-1$
+		return fLabel;
 	}
 
 	/*
