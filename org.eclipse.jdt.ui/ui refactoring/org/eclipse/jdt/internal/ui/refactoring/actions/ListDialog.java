@@ -75,19 +75,14 @@ public class ListDialog extends SelectionDialog {
 		createMessageArea(parent);
 		fTableViewer= new TableViewer(parent, getTableStyle());
 		fTableViewer.setContentProvider(fContentProvider);
-		final Table table= fTableViewer.getTable();
-		final TableColumn c= new TableColumn(table, SWT.NULL);
-		fTableViewer.getTable().addControlListener(new ControlAdapter() {
-			public void controlResized(ControlEvent e) {
-				c.setWidth(table.getSize().x-2*table.getBorderWidth());
-			}
-		});
-
+		Table table= fTableViewer.getTable();
+		TableColumn c= new TableColumn(table, SWT.NULL);
 		fTableViewer.setLabelProvider(fLabelProvider);
 		fTableViewer.setInput(fInput);
+		c.pack();
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		gd.heightHint= convertHeightInCharsToPixels(15);
-		gd.widthHint= convertWidthInCharsToPixels(50);
+		gd.widthHint= convertWidthInCharsToPixels(80);
 		table.setLayoutData(gd);
 		return parent;
 	}

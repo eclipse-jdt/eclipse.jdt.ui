@@ -5,13 +5,17 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
+import org.eclipse.jdt.internal.corext.util.Strings;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
 import org.eclipse.jface.viewers.LabelProvider;
+
 import org.eclipse.swt.graphics.Image;
 
 public class RefactoringStatusEntryLabelProvider extends LabelProvider{
 		public String getText(Object element){
-			return ((RefactoringStatusEntry)element).getMessage();
+			return Strings.removeNewLine(((RefactoringStatusEntry)element).getMessage());
 		}
 		public Image getImage(Object element){
 			RefactoringStatusEntry entry= (RefactoringStatusEntry)element;

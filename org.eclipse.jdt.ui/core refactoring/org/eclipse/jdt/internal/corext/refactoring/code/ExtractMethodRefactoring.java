@@ -162,10 +162,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 				result.addFatalError(RefactoringCoreMessages.getString("ExtractMethodRefactoring.Internal_error")); //$NON-NLS-1$
 				return result;
 			}
-			if (!fCUnit.isStructureKnown()) {
-				result.addFatalError(RefactoringCoreMessages.getString("ExtractMethodRefactoring.Syntax_errors")); //$NON-NLS-1$
-				return result;
-			}
 			fBuffer= new ExtendedBuffer(fCUnit.getBuffer());
 			((CompilationUnit)fCUnit).accept(createVisitor());
 			

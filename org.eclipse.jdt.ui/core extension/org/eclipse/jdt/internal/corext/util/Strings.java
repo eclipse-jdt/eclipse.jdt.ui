@@ -24,5 +24,21 @@ public class Strings {
 		}
 		return true;
 	}
+	
+	public static String removeNewLine(String message) {
+			StringBuffer result= new StringBuffer();
+			int current= 0;
+			int index= message.indexOf('\n', 0);
+			while (index != -1) {
+				result.append(message.substring(current, index));
+				if (current < index && index != 0)
+					result.append(' ');
+				current= index + 1;
+				index= message.indexOf('\n', current);
+			}
+			result.append(message.substring(current));
+			return result.toString();
+		}
+	
 }
 

@@ -332,12 +332,13 @@ public class RefactoringStatus {
 
 
 	/**
-	 * Returns the first message which severity is equal or greater than the given
+	 * Returns the first entry which severity is equal or greater than the given
 	 * severity. Returns <code>null</code> if no element exists with
 	 * the given severity.
-	 * @param must me one of <code>FATAL</code>, <code>ERROR</code>, <code>WARNING</code> or <code>INFO</code>.
+	 * @param severity must be one of <code>FATAL</code>, <code>ERROR</code>, 
+	 * 	<code>WARNING</code> or <code>INFO</code>.
 	 */
-	public String getFirstMessage(int severity) {
+	public RefactoringStatusEntry getFirstEntry(int severity) {
 		Assert.isTrue(severity >= OK && severity <= FATAL);
 		if (severity > fSeverity)
 			return null;
@@ -345,9 +346,24 @@ public class RefactoringStatus {
 		while(iter.hasNext()) {
 			RefactoringStatusEntry entry= (RefactoringStatusEntry)iter.next();
 			if (entry.getSeverity() >= severity)
-				return entry.getMessage();
+				return entry;
 		}
 		return null;
+	}
+
+
+	/**
+	 * Returns the first message which severity is equal or greater than the given
+	 * severity. Returns <code>null</code> if no element exists with
+	 * the given severity.
+	 * @param severity must me one of <code>FATAL</code>, <code>ERROR</code>, 
+	 * 	<code>WARNING</code> or <code>INFO</code>.
+	 */
+	public String getFirstMessage(int severity) {
+		RefactoringStatusEntry entry= getFirstEntry(severity);
+		if (entry == null)
+			return null;
+		return entry.getMessage();
 	}
 
 

@@ -186,17 +186,19 @@ public abstract class RefactoringAction extends Action {
 	}
 	
 	public static void openErrorDialog(String dialogTitle, RefactoringStatus status) {
-		if (status.getEntries().size() == 1)
-			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), dialogTitle, status.getFirstMessage(RefactoringStatus.FATAL));
-		else
+		if (status.getEntries().size() == 1) {
+			String message= "The following error prevents performing the operation.\n\n" + status.getFirstMessage(RefactoringStatus.FATAL);
+			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), dialogTitle, message);
+		} else {
 			openListDialog(dialogTitle, status);	
+		}
 	}
 	
 	private static void openListDialog(String dialogTitle, RefactoringStatus status) {
 		ListDialog dialog= new ListDialog(JavaPlugin.getActiveWorkbenchShell());
 		dialog.setInput(status);
 		dialog.setTitle(dialogTitle);
-		dialog.setMessage("The following errors prevent performing the refactoring.");
+		dialog.setMessage("The following errors prevent performing the operation.");
 		dialog.setContentProvider(new RefactoringStatusContentProvider());
 		dialog.setLabelProvider(new RefactoringStatusEntryLabelProvider());
 		dialog.open();	

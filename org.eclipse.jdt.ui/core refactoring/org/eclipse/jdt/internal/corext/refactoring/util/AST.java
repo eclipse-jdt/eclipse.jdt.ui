@@ -68,6 +68,10 @@ public class AST {
 			visitor= tracker;
 		}
 		fRootVisitor.root.traverse(visitor, fRootVisitor.scope);
-	}	
+	}
+	
+	public boolean isMalformed() {
+		return fRootVisitor.root == null;
+	}
 }
 

@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
@@ -24,7 +25,10 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.DeleteNodeEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.ExtendedBuffer;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -98,6 +102,20 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		AST ast= new AST(fCUnit);
+		if (ast.isMalformed()) {
+			IProblem[] problems= ast.getProblems();
+			if (problems.length > 0 && problems[0].isError()) {
+				IProblem problem= problems[0];
+				return RefactoringStatus.createFatalErrorStatus(
+					RefactoringCoreMessages.getFormattedString("Refactoring.compilation_error", //$NON-NLS-1$
+						new Object[] {new Integer(problem.getSourceLineNumber()), problem.getMessage() }),
+					JavaSourceContext.create(fCUnit, new SourceRange(problem.getSourceStart(),
+						problem.getSourceEnd() - problem.getSourceStart() + 1)));
+			} else {
+				return RefactoringStatus.createFatalErrorStatus(
+					RefactoringCoreMessages.getString("Refactoring.generic_compilation_error")); //$NON-NLS-1$
+			}
+		}
 		fAnalyzer= new SurroundWithTryCatchAnalyzer(new ExtendedBuffer(fCUnit.getBuffer()), fSelection);
 		ast.accept(fAnalyzer);
 		result.merge(fAnalyzer.getStatus());

@@ -69,6 +69,10 @@ abstract public class TextSelectionAction extends Action implements IUpdate, IWo
 	
 	protected final ITextSelection getTextSelection() {
 		return (ITextSelection)getEditor().getSelectionProvider().getSelection();
+	}
+	
+	protected final String getOperationNotAvailableDialogTitle() {
+		return fOperationNotAvailableDialogTitle;
 	}	
 	
 	//---- IWorkbenchWindowActionDelegate stuff ----------------------------------------------------

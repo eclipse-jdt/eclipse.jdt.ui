@@ -409,7 +409,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 			return;
 			
 		reset();
-		fStatus.addFatalError(RefactoringCoreMessages.getFormattedString("StatementAnalyzer.compilation_error",  //$NON-NLS-1$
+		fStatus.addFatalError(RefactoringCoreMessages.getFormattedString("Refactoring.compilation_error",  //$NON-NLS-1$
 								new Object[]{new Integer(problem.getSourceLineNumber()), problem.getMessage()}));
 	}
 	

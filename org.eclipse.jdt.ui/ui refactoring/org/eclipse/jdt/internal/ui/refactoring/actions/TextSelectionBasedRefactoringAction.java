@@ -27,7 +27,7 @@ public abstract class TextSelectionBasedRefactoringAction extends TextSelectionA
 	public void run() {
 	try{
 			Refactoring refactoring=  createRefactoring(getCompilationUnit(), getTextSelection());
-			RefactoringAction.activateRefactoringWizard(refactoring, createWizard(refactoring), getText(), false);
+			RefactoringAction.activateRefactoringWizard(refactoring, createWizard(refactoring), getOperationNotAvailableDialogTitle(), false);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, getText(), "Unexpected exception occurred. See log for details.");
 		}	
