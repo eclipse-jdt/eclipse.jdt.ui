@@ -13,9 +13,8 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.text.CollationElementIterator;
-import java.text.Collator;
-import java.text.RuleBasedCollator;
+import java.text.BreakIterator;
+import java.text.CharacterIterator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -125,10 +124,6 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
-import org.eclipse.ui.editors.text.DefaultEncodingSupport;
-import org.eclipse.ui.editors.text.EditorsUI;
-import org.eclipse.ui.editors.text.IEncodingSupport;
-
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -141,6 +136,9 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.editors.text.DefaultEncodingSupport;
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.editors.text.IEncodingSupport;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
@@ -195,7 +193,6 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
@@ -212,11 +209,13 @@ import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.MethodExitsFinder;
 import org.eclipse.jdt.internal.ui.search.OccurrencesFinder;
 import org.eclipse.jdt.internal.ui.text.CustomSourceInformationControl;
+import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
+import org.eclipse.jdt.internal.ui.text.JavaWordIterator;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaExpandHover;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
@@ -1648,9 +1647,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected abstract class NextSubWordAction extends TextNavigationAction {
 
-		/** Collator to determine the sub-word boundaries */
-		private final RuleBasedCollator fCollator= (RuleBasedCollator)Collator.getInstance();
-
+		private JavaWordIterator fIterator= new JavaWordIterator();
 		/**
 		 * Creates a new next sub-word action.
 		 * 
@@ -1659,72 +1656,28 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		protected NextSubWordAction(int code) {
 			super(getSourceViewer().getTextWidget(), code);
 			
-			// Only compare upper-/lower case
-			fCollator.setStrength(Collator.TERTIARY);
 		}
 
 		/*
 		 * @see org.eclipse.jface.action.IAction#run()
 		 */
 		public void run() {
-			try {
-
-				final ISourceViewer viewer= getSourceViewer();
-				final IDocument document= viewer.getDocument();
-	
-				int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
-			
-				// Check whether we are in a java code partition and the preference is enabled
-				final IPreferenceStore store= getPreferenceStore();
-				final ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, position, false);
-				if (!store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
-					super.run();
-					return;				
-				}
-
-				// Check whether right hand character of caret is valid identifier part
-				if (Character.isJavaIdentifierPart(document.getChar(position))) {
-
-					int offset= 0;
-					int order= CollationElementIterator.NULLORDER;
-					short previous= Short.MAX_VALUE;
-					short next= Short.MAX_VALUE;
-
-					// Acquire collator for partition around caret
-					final String buffer= document.get(position, region.getOffset() + region.getLength() - position);
-					final CollationElementIterator iterator= fCollator.getCollationElementIterator(buffer);
-
-					// Iterate to first upper-case character
-					do {
-						// Check whether we reached end of word
-						offset= iterator.getOffset();
-						if (!Character.isJavaIdentifierPart(document.getChar(position + offset))) {
-							if (offset > 0)
-								setCaretPosition(position + offset - 1);
-							super.run();
-							return;
-						}
-
-						// Test next characters
-						order= iterator.next();
-						next= CollationElementIterator.tertiaryOrder(order);
-						if (next <= previous)
-							previous= next;
-						else
-							break;
-
-					} while (order != CollationElementIterator.NULLORDER);
-
-					position += offset;
-					setCaretPosition(position);
-					getTextWidget().showSelection();
-					fireSelectionChanged();
-					return;
-				}
-			} catch (BadLocationException exception) {
-				// Use default behavior
+			// Check whether we are in a java code partition and the preference is enabled
+			final IPreferenceStore store= getPreferenceStore();
+			if (!store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
+				super.run();
+				return;				
 			}
-			super.run();
+			
+			final ISourceViewer viewer= getSourceViewer();
+			final IDocument document= viewer.getDocument();
+			fIterator.setText((CharacterIterator) new DocumentCharacterIterator(document));
+			int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
+			
+			int next= fIterator.following(position);
+			if (next != BreakIterator.DONE)
+				setCaretPosition(next);
+				
 		}
 
 		/**
@@ -1828,8 +1781,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected abstract class PreviousSubWordAction extends TextNavigationAction {
 
-		/** Collator to determine the sub-word boundaries */
-		private final RuleBasedCollator fCollator= (RuleBasedCollator)Collator.getInstance();
+		private JavaWordIterator fIterator= new JavaWordIterator();
 
 		/**
 		 * Creates a new previous sub-word action.
@@ -1838,94 +1790,28 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 */
 		protected PreviousSubWordAction(final int code) {
 			super(getSourceViewer().getTextWidget(), code);
-			
-			// Only compare upper-/lower case
-			fCollator.setStrength(Collator.TERTIARY);
 		}
 
 		/*
 		 * @see org.eclipse.jface.action.IAction#run()
 		 */
 		public void run() {
-			try {
-
-				final ISourceViewer viewer= getSourceViewer();
-				final IDocument document= viewer.getDocument();
-
-				int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset()) - 1;
-			
-				// Check whether we are in a java code partition and the preference is enabled
-				final IPreferenceStore store= getPreferenceStore();
-				if (!store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
-					super.run();
-					return;				
-				}
-
-				// Ignore trailing white spaces
-				char character= document.getChar(position);
-				while (position > 0 && Character.isWhitespace(character)) {
-					--position;
-					character= document.getChar(position);
-				}
-
-				// Check whether left hand character of caret is valid identifier part
-				if (Character.isJavaIdentifierPart(character)) {
-
-					int offset= 0;
-					int order= CollationElementIterator.NULLORDER;
-					short previous= Short.MAX_VALUE;
-					short next= Short.MAX_VALUE;
-
-					// Acquire collator for partition around caret
-					final ITypedRegion region= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, position, false);
-					final String buffer= document.get(region.getOffset(), position - region.getOffset() + 1);
-					final CollationElementIterator iterator= fCollator.getCollationElementIterator(buffer);
-
-					// Iterate to first upper-case character
-					iterator.setOffset(buffer.length() - 1);
-					do {
-
-						// Check whether we reached begin of word or single upper-case start
-						offset= iterator.getOffset();
-						character= document.getChar(region.getOffset() + offset);
-						if (!Character.isJavaIdentifierPart(character)) {
-							int caret= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
-							int current= region.getOffset() + offset + 2;
-							if (caret > current)
-								setCaretPosition(current);
-							super.run();
-							return;
-						} else if (Character.isUpperCase(character)) {
-							++offset;
-							break;
-						}
-
-						// Test next characters
-						order= iterator.previous();
-						next= CollationElementIterator.tertiaryOrder(order);
-						if (next <= previous)
-							previous= next;
-						else
-							break;
-
-					} while (order != CollationElementIterator.NULLORDER);
-
-					// Check left character for multiple upper-case characters
-					position= position - buffer.length() + offset - 1;
-					character= document.getChar(position);
-
-					while (position >= 0 && Character.isUpperCase(character))
-						character= document.getChar(--position);
-
-					setCaretPosition(position + 1);
-					getTextWidget().showSelection();
-					fireSelectionChanged();
-					return;
-				}
-			} catch (BadLocationException exception) {
-				// Use default behavior
+			// Check whether we are in a java code partition and the preference is enabled
+			final IPreferenceStore store= getPreferenceStore();
+			if (!store.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION)) {
+				super.run();
+				return;				
 			}
-			super.run();
+			
+			final ISourceViewer viewer= getSourceViewer();
+			final IDocument document= viewer.getDocument();
+			fIterator.setText((CharacterIterator) new DocumentCharacterIterator(document));
+			int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
+			
+			int previous= fIterator.preceding(position);
+			if (previous != BreakIterator.DONE)
+				setCaretPosition(previous);
+				
 		}
 
 		/**
