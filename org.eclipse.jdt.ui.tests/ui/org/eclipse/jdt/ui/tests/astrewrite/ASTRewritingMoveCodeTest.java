@@ -121,6 +121,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			rewrite.markAsRemoved(innerType);
 			ASTNode movedNode= rewrite.createCopyTarget(innerType);
 			members.add(movedNode);
+			rewrite.markAsInserted(movedNode);
 			
 			Statement toMove;
 			Statement toCopy;
@@ -150,6 +151,9 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 				
 				statements.add(insertNodeForCopy);
 				statements.add(insertNodeForMove);
+				
+				rewrite.markAsInserted(insertNodeForMove);
+				rewrite.markAsInserted(insertNodeForCopy);
 			}	
 		}			
 					
@@ -240,11 +244,14 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 				
 				ASTNode insertNodeForCopy= rewrite.createCopyTarget(outerType);
 				innerMembers.add(insertNodeForCopy);
+				rewrite.markAsInserted(insertNodeForCopy);
+				
 			}
 			{ // copy method of inner to main type
 				MethodDeclaration methodDecl= (MethodDeclaration) innerMembers.get(0);
 				ASTNode insertNodeForMove= rewrite.createCopyTarget(methodDecl);
 				members.add(insertNodeForMove);
+				rewrite.markAsInserted(insertNodeForMove);
 			}
 			{ // nest body of constructor in a while statement
 				MethodDeclaration methodDecl= findMethodDeclaration(type, "E");
@@ -371,6 +378,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			ifBodyStatements.add(1, insertNodeForCopy1);
 			
 			rewrite.markAsInserted(whileStatement);
+			rewrite.markAsInserted(insertNodeForCopy1);
 			
 			rewrite.markAsRemoved((ASTNode) statements.get(1));
 			rewrite.markAsRemoved((ASTNode) statements.get(2));
@@ -447,6 +455,8 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			
 			MethodDeclaration methodGoo= findMethodDeclaration(type, "goo");
 			assertTrue("Cannot find goo", methodGoo != null);
+			
+			rewrite.markAsInserted(placeHolder);
 			
 			methodGoo.getBody().statements().add(placeHolder);
 		}	

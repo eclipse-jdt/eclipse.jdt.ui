@@ -39,7 +39,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingExpressionsTest("testVariableDeclarationFragment"));
+			suite.addTest(new ASTRewritingExpressionsTest("testSuperConstructorInvocation"));
 			return suite;
 		}		
 	}
@@ -943,6 +943,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			ASTNode placeHolder= rewrite.createCopyTarget(invocation.getExpression());
 			
 			rewrite.markAsRemoved(invocation.getExpression());
+			rewrite.markAsInserted(placeHolder);
 			
 			invocation.arguments().add(placeHolder);
 		}
