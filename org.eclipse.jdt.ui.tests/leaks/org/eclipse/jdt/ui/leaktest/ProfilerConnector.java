@@ -12,15 +12,13 @@ package org.eclipse.jdt.ui.leaktest;
 
 import java.util.Vector;
 
-import org.eclipse.jdt.ui.tests.ProfileNatives;
-
 /**
  *
  */
 public class ProfilerConnector {
 
 	public ProfilerConnector() throws ProfileException {
-		if (!ProfileNatives.isLibraryConnected()) {
+		if (!ProfileNatives.isInitialized()) {
 			throw new ProfileException("Not connected to a profiler");
 		}
 	}
