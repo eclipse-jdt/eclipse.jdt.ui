@@ -24,6 +24,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
 
+import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IFileEditorMapping;
 import org.eclipse.ui.PlatformUI;
 
@@ -33,8 +34,15 @@ import org.eclipse.ui.PlatformUI;
  */
 public class StorageLabelProvider extends LabelProvider {
 
+	private IEditorRegistry fEditorRegistry= null;
 	private Map fJarImageMap= new HashMap(10);
 	private Image fDefaultImage;
+
+	private IEditorRegistry getEditorRegistry() {
+		if (fEditorRegistry == null)
+			fEditorRegistry= PlatformUI.getWorkbench().getEditorRegistry();
+		return fEditorRegistry;
+	}
 
 	/* (non-Javadoc)
 	 * @see ILabelProvider#getImage
@@ -90,7 +98,7 @@ public class StorageLabelProvider extends LabelProvider {
 		Image image= (Image)fJarImageMap.get(name);
 		if (image != null) 
 			return image;
-		IFileEditorMapping[] mappings= PlatformUI.getWorkbench().getEditorRegistry().getFileEditorMappings();
+		IFileEditorMapping[] mappings= getEditorRegistry().getFileEditorMappings();
 		int i= 0;
 		while (i < mappings.length) {
 			if (mappings[i].getLabel().equals(name))
@@ -112,7 +120,7 @@ public class StorageLabelProvider extends LabelProvider {
 		}
 
 		// Get the image from the editor registry	
-		ImageDescriptor desc= PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor(name);
+		ImageDescriptor desc= getEditorRegistry().getImageDescriptor(name);
 		image= desc.createImage();
 
 		fJarImageMap.put(key, image);
@@ -122,7 +130,7 @@ public class StorageLabelProvider extends LabelProvider {
 	
 	private Image getDefaultImage() {
 		if (fDefaultImage == null)
-			fDefaultImage= PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor((String)null).createImage();
+			fDefaultImage= getEditorRegistry().getImageDescriptor((String)null).createImage();
 		return fDefaultImage;
 	}
 }
