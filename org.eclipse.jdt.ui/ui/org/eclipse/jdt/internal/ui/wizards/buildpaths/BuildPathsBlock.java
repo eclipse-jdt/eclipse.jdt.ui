@@ -349,6 +349,10 @@ public class BuildPathsBlock {
 	}
 
 	protected void doUpdateUI() {
+		if (fSWTWidget == null || fSWTWidget.isDisposed()) {
+			return;
+		}
+		
 		fBuildPathDialogField.refresh();
 		fClassPathList.refresh();
 	
