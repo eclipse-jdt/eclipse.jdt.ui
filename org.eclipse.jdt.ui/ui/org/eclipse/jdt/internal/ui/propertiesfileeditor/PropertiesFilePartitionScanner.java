@@ -99,18 +99,15 @@ public class PropertiesFilePartitionScanner extends RuleBasedPartitionScanner im
 		// Add rule for leading white space.
 		rules.add(new WhitespacePredicateRule(key));
 
-		// Add rule for comments.
+		// Add rules for comments.
 		rules.add(new EndOfLineRule("#", comment, (char) 0, true)); //$NON-NLS-1$
+		rules.add(new EndOfLineRule("!", comment, (char) 0, true)); //$NON-NLS-1$
 
-		// Add rule for property values.
+		// Add rules for property values.
 		rules.add(new SingleLineRule("=", null, propertyValue, '\\', true, true)); //$NON-NLS-1$
-		
-		// Add rule for property values.
+		rules.add(new SingleLineRule(":", null, propertyValue, '\\', true, true)); //$NON-NLS-1$
 		rules.add(new SingleLineRule(" ", null, propertyValue, '\\', true, true)); //$NON-NLS-1$
-		
-		// Add rule for property values.
 		rules.add(new SingleLineRule("\t", null, propertyValue, '\\', true, true)); //$NON-NLS-1$
-		
 		
 		// Add special case word rule.
 		EmptyCommentRule wordRule= new EmptyCommentRule(comment);

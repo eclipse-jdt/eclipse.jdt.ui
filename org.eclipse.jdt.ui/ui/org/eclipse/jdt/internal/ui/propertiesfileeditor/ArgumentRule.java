@@ -21,7 +21,6 @@ import org.eclipse.jface.text.rules.WordPatternRule;
  * An argument is defined as '{', digit, {digit}, '}' 
  * </p>
  *
- * @see IWordDetector
  * @since 3.1
  */
 public final class ArgumentRule extends WordPatternRule {

@@ -16,7 +16,10 @@ import java.util.List;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.IWordDetector;
 import org.eclipse.jface.text.rules.WhitespaceRule;
 import org.eclipse.jface.text.rules.WordRule;
 
@@ -34,6 +37,36 @@ import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
  */
 public final class PropertyValueScanner extends AbstractJavaScanner {
 
+	public class AssignmentDetector implements IWordDetector {
+		
+		/*
+		 * @see IWordDetector#isWordStart
+		 */
+		public boolean isWordStart(char c) {
+			if ('=' != c || fDocument == null)
+				return false;
+			
+			try {
+				// check whether it is the first '='
+				IRegion lineInfo= fDocument.getLineInformationOfOffset(fOffset);
+				int offset= lineInfo.getOffset();
+				String line= fDocument.get(offset, offset + lineInfo.getLength());
+				int i= line.indexOf('=');
+				return i != -1 && i + lineInfo.getOffset() + 1 == fOffset;
+			} catch (BadLocationException ex) {
+				return false;
+			}
+		}
+		
+		/*
+		 * @see IWordDetector#isWordPart
+		 */
+		public boolean isWordPart(char c) {
+			return false;
+		}
+	}
+
+	
 	private static String[] fgTokenProperties= {
 		PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE,
 		PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT,
@@ -71,7 +104,6 @@ public final class PropertyValueScanner extends AbstractJavaScanner {
 		rules.add(new ArgumentRule(token));
 		
 		// Add word rule for assignment operator.
-		// FIXME: allows more than one '=' per line
 		token= getToken(PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT);
 		WordRule wordRule= new WordRule(new AssignmentDetector(), token);
 		rules.add(wordRule);
