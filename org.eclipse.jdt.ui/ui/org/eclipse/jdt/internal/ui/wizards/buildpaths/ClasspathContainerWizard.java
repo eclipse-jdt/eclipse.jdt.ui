@@ -16,11 +16,11 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 /**
   */
 public class ClasspathContainerWizard extends Wizard {
-	
+
+	private ClasspathContainerDescriptor fPageDesc;
 	private IClasspathEntry fEntryToEdit;
+
 	private IClasspathEntry fNewEntry;
-	
-	private ClasspathContainerSelectionPage fSelectionWizardPage;
 	private IClasspathContainerPage fContainerPage;
 
 	/**
@@ -29,8 +29,19 @@ public class ClasspathContainerWizard extends Wizard {
 	public ClasspathContainerWizard(IClasspathEntry entryToEdit) {
 		super();
 		fEntryToEdit= entryToEdit;
+		fPageDesc= null;
 		fNewEntry= null;
 	}
+	
+	/**
+	 * Constructor for ClasspathContainerWizard.
+	 */
+	public ClasspathContainerWizard(ClasspathContainerDescriptor pageDesc) {
+		super();
+		fEntryToEdit= null;
+		fPageDesc= pageDesc;
+		fNewEntry= null;
+	}	
 	
 	public IClasspathEntry getNewEntry() {
 		return fNewEntry;
@@ -53,45 +64,31 @@ public class ClasspathContainerWizard extends Wizard {
 	 * @see IWizard#addPages()
 	 */
 	public void addPages() {
-		ClasspathContainerDescriptor[] containers= ClasspathContainerDescriptor.getDescriptors();
-		
-		if (fEntryToEdit == null) { // new entry
-			if (containers.length != 1) {
-				fSelectionWizardPage= new ClasspathContainerSelectionPage(containers);
-				addPage(fSelectionWizardPage);
-				
-				// add as dummy, will not be shown
-				fContainerPage= new ClasspathContainerDefaultPage();
-				addPage(fContainerPage); 						
-			} else {
-				try {
-					fContainerPage= containers[0].createPage();
-					fContainerPage.setSelection(null);
-					addPage(fContainerPage);
-				} catch (CoreException e) {
-					handlePageCreationFailed(e);
-				}
-			}
-		} else { // edit entry
+
+		if (fPageDesc == null && fEntryToEdit != null) {
+			ClasspathContainerDescriptor[] containers= ClasspathContainerDescriptor.getDescriptors();
+
+			fPageDesc= findDescriptorPage(containers, fEntryToEdit);
+		}
+
+		if (fPageDesc != null) {
 			IClasspathContainerPage containerPage= null;
-			ClasspathContainerDescriptor desc= findDescriptorPage(containers, fEntryToEdit);
-			if (desc != null) {
-				try {
-					containerPage= desc.createPage();
-				} catch (CoreException e) {
-					handlePageCreationFailed(e);
-				}
+			try {
+				containerPage= fPageDesc.createPage();
+			} catch (CoreException e) {
+				handlePageCreationFailed(e);
 			}
+
 			if (containerPage == null)	{
 				containerPage= new ClasspathContainerDefaultPage();
 			}
 			
 			containerPage.setSelection(fEntryToEdit);
 			fContainerPage= containerPage;
-			fSelectionWizardPage= null;
-			
+
 			addPage(containerPage);
 		}
+
 		super.addPages();
 	}
 	
@@ -111,43 +108,4 @@ public class ClasspathContainerWizard extends Wizard {
 		return null;
 	}			
 	
-	
-		/* (non-Javadoc)
-	 * @see IWizard#getNextPage(IWizardPage)
-	 */
-	public IWizardPage getNextPage(IWizardPage page) {
-		if (page == fSelectionWizardPage) {
-			
-			ClasspathContainerDescriptor selected= fSelectionWizardPage.getSelected();
-			if (selected != null) {
-				try {
-					fContainerPage= selected.createPage();
-					fContainerPage.setSelection(null);
-					fContainerPage.setWizard(this);
-					
-					return fContainerPage;
-				} catch (CoreException e) {
-					handlePageCreationFailed(e);
-				}
-				fContainerPage= null;
-			}	
-		}
-		return super.getNextPage(page);
-	}
-
-	/* (non-Javadoc)
-	 * @see IWizard#canFinish()
-	 */
-	public boolean canFinish() {
-		if (fSelectionWizardPage != null) {
-			if (!fContainerPage.isPageComplete()) {
-				return false;
-			}
-		}
-		if (fContainerPage != null) {
-			return fContainerPage.isPageComplete();
-		}
-		return false;
-	}
-
 }
