@@ -150,26 +150,37 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	 */
 	public int open() {
 		final ArrayList typeList= new ArrayList();
-		IRunnableWithProgress runnable= new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				try {
-					AllTypesCache.getTypes(fScope, fElementKinds, monitor, typeList);
-				} catch (JavaModelException e) {
-					throw new InvocationTargetException(e);
-				}
-				if (monitor.isCanceled()) {
-					throw new InterruptedException();
-				}
+		if (AllTypesCache.isCacheUpToDate()) {
+			// run without progress monitor
+			try {
+				AllTypesCache.getTypes(fScope, fElementKinds, null, typeList);
+			} catch (JavaModelException e) {
+				ExceptionHandler.handle(e, "Exception", "Unexpected exception. See log for details.");
+				return CANCEL;
 			}
-		};
-		
-		try {
-			fRunnableContext.run(true, true, runnable);
-		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, "Exception", "Unexpected exception. See log for details.");
-		} catch (InterruptedException e) {
-			// cancelled by user
-			return CANCEL;
+		} else {
+			IRunnableWithProgress runnable= new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					try {
+						AllTypesCache.getTypes(fScope, fElementKinds, monitor, typeList);
+					} catch (JavaModelException e) {
+						throw new InvocationTargetException(e);
+					}
+					if (monitor.isCanceled()) {
+						throw new InterruptedException();
+					}
+				}
+			};
+
+			try {
+				fRunnableContext.run(true, true, runnable);
+			} catch (InvocationTargetException e) {
+				ExceptionHandler.handle(e, "Exception", "Unexpected exception. See log for details.");
+				return CANCEL;
+			} catch (InterruptedException e) {
+				// cancelled by user
+				return CANCEL;
+			}
 		}
 		
 		if (typeList.isEmpty()) {

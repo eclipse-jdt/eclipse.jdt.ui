@@ -75,6 +75,13 @@ public class AllTypesCache {
 		}
 		
 	}
+	
+	/**
+	 * Returns true if the type cache is up to date.
+	 */
+	public static boolean isCacheUpToDate() {
+		return fgTypeCache != null;
+	}
 
 
 	private static void doSearchTypes(IJavaSearchScope scope, int style, IProgressMonitor monitor, Collection typesFound) throws JavaModelException {
