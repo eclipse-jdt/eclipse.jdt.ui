@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.packageview;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.actions.SelectionProviderAction;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.packageview;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.actions.SelectionProviderAction;
 /**
  * The ShowLibrariesAction is the class that adds the filter views to a PackagesView.
  */

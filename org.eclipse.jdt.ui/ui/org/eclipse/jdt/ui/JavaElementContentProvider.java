@@ -1,8 +1,4 @@
-package org.eclipse.jdt.ui;/*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
- */
+package org.eclipse.jdt.ui;
 
 
 import java.util.ArrayList;

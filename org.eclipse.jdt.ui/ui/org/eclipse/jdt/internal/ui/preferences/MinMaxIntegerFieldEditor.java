@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.preferences;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jface.preference.IntegerFieldEditor;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Text;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.preferences;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jface.preference.IntegerFieldEditor;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Text;
 public class MinMaxIntegerFieldEditor extends IntegerFieldEditor {
 
 	private int fMinimumValue= Integer.MIN_VALUE;

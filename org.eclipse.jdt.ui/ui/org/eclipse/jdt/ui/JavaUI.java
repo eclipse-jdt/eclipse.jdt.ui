@@ -1,7 +1,6 @@
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000, 2001
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
 package org.eclipse.jdt.ui;
 
@@ -71,6 +70,11 @@ public final class JavaUI {
 	 */	
 	public static final String ID_PERSPECTIVE= 		"org.eclipse.jdt.ui.JavaPerspective";
 	
+	/**
+	 * The id of the Java hierarchy perspective
+	 * (value <code>"org.eclipse.jdt.ui.JavaHierarchyPerspective"</code>).
+	 */	
+	public static final String ID_HIERARCHYPERSPECTIVE= "org.eclipse.jdt.ui.JavaHierarchyPerspective";
 	/**
 	 * The id of the Java action set
 	 * (value <code>"org.eclipse.jdt.ui.JavaActionSet"</code>).

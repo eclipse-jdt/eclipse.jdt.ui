@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.packageview;import java.io.StringWriter;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jface.viewers.LabelProvider;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.packageview;import java.io.StringWriter;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.actions.SelectionProviderAction;import org.eclipse.ui.dialogs.ListSelectionDialog;
 
 /**

@@ -1,8 +1,8 @@
-package org.eclipse.jdt.internal.ui;/*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
+package org.eclipse.jdt.internal.ui;
 
 
 import java.text.MessageFormat;import java.util.ArrayList;import java.util.Hashtable;import java.util.List;import java.util.MissingResourceException;import java.util.ResourceBundle;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IAdapterManager;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IPluginDescriptor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.Platform;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.compiler.ConfigurableOption;import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;import org.eclipse.jdt.internal.ui.packageview.ErrorTickManager;import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferencePage;import org.eclipse.jdt.internal.ui.snippeteditor.SnippetFileDocumentProvider;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.IWorkingCopyManager;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.Separator;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.resource.ImageRegistry;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.editors.text.FileDocumentProvider;import org.eclipse.ui.plugin.AbstractUIPlugin;import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -240,10 +240,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 		if (!menu.isEmpty())
 			return;
 			
+		menu.add(new Separator(IContextMenuConstants.GROUP_NEW));
 		menu.add(new Separator(IContextMenuConstants.GROUP_GOTO));
 		menu.add(new Separator(IContextMenuConstants.GROUP_OPEN));
 		menu.add(new Separator(IContextMenuConstants.GROUP_SHOW));
-		menu.add(new Separator(IContextMenuConstants.GROUP_NEW));
 		menu.add(new Separator(IContextMenuConstants.GROUP_BUILD));
 		menu.add(new Separator(IContextMenuConstants.GROUP_REORGANIZE));
 		menu.add(new Separator(IContextMenuConstants.GROUP_GENERATE));

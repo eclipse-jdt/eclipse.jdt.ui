@@ -451,6 +451,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		selProvider.addSelectionChangedListener(new StatusBarUpdater(slManager));
 		
 		getSite().setSelectionProvider(selProvider);
+		
+		IType input= determineInputElement();
+		if (input != null)
+			setInput(input);
 	
 	}
 	
@@ -750,5 +754,16 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 				methodSelectionChanged(fMethodsViewer.getSelection());
 			}
 		}
+	}
+	
+	/**
+	 * Determines the input element to be used initially 
+	 */	
+	private IType determineInputElement() {
+		Object input= getSite().getPage().getInput();
+		if (input instanceof IType) { 
+			return (IType)input;
+		} 
+		return null;	
 	}
 }

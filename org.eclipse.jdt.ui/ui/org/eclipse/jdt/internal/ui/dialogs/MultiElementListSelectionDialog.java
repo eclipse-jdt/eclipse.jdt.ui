@@ -1,9 +1,8 @@
-package org.eclipse.jdt.internal.ui.dialogs;
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
+package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.text.MessageFormat;import java.util.ArrayList;import java.util.Arrays;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IStatus;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.util.Assert;import org.eclipse.jface.viewers.ILabelProvider;
 

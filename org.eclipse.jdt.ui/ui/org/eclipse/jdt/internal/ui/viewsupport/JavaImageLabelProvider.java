@@ -1,3 +1,7 @@
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 
@@ -12,13 +16,13 @@ import org.eclipse.ui.ISharedImages;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
@@ -186,4 +190,5 @@ public class JavaImageLabelProvider {
 		}
 		return img;
 	}
+	
 }

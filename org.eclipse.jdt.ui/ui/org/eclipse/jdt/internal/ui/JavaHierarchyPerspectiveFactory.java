@@ -2,17 +2,18 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
+
 package org.eclipse.jdt.internal.ui;
 import org.eclipse.ui.IFolderLayout;import org.eclipse.ui.IPageLayout;import org.eclipse.ui.IPerspectiveFactory;import org.eclipse.search.ui.SearchUI;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.ui.JavaUI;
 
-public class JavaPerspectiveFactory implements IPerspectiveFactory {
+public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		
 	/**
 	 * Constructs a new Default layout engine.
 	 */
-	public JavaPerspectiveFactory() {
+	public JavaHierarchyPerspectiveFactory() {
 		super();
 	}
 
@@ -20,16 +21,8 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
  		String editorArea = layout.getEditorArea();
 		
 		IFolderLayout folder= layout.createFolder("left", IPageLayout.LEFT, (float)0.25, editorArea);
-		folder.addView(IPageLayout.ID_RES_NAV);
-		folder.addView(JavaUI.ID_TYPE_HIERARCHY);
-		folder.addView(JavaUI.ID_PACKAGES);
-
-		IFolderLayout outputfolder= layout.createFolder("bottom", IPageLayout.BOTTOM, (float)0.75, editorArea);
-		outputfolder.addView(IPageLayout.ID_TASK_LIST);
-		outputfolder.addView(SearchUI.SEARCH_RESULT_VIEW_ID);
-		outputfolder.addView(IDebugUIConstants.ID_CONSOLE_VIEW);
-		
-		layout.addView(IPageLayout.ID_OUTLINE, IPageLayout.RIGHT, (float)0.75, editorArea);
+		folder.addView(JavaUI.ID_TYPE_HIERARCHY); 
+		//folder.addView(JavaUI.ID_PACKAGES);
 		
 		layout.addActionSet(IDebugUIConstants.DEBUG_ACTION_SET);
 		layout.addActionSet(JavaUI.ID_ACTION_SET);
@@ -37,7 +30,6 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		// views - java
 		layout.addShowViewShortcut(JavaUI.ID_PACKAGES);
 		layout.addShowViewShortcut(JavaUI.ID_TYPE_HIERARCHY);
-
 
 		layout.addShowViewShortcut(SearchUI.SEARCH_RESULT_VIEW_ID);
 		
@@ -49,11 +41,5 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
 		layout.addShowViewShortcut(IPageLayout.ID_TASK_LIST);
 		layout.addShowViewShortcut(IPageLayout.ID_RES_NAV);
-				
-		// new actions - Java project creation wizard
-		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.NewPackageCreationWizard");
-		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.NewClassCreationWizard");
-		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.NewInterfaceCreationWizard");
-		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.NewSnippetCreationWizard");	
 	}
 }

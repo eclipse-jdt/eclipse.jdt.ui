@@ -1,10 +1,8 @@
-package org.eclipse.jdt.internal.ui.packageview;
-
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
+package org.eclipse.jdt.internal.ui.packageview;
 
 import java.util.HashSet;import java.util.Iterator;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IStorage;import org.eclipse.core.resources.IncrementalProjectBuilder;import org.eclipse.core.runtime.IPath;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.GroupContext;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.ui.actions.BuildAction;
 

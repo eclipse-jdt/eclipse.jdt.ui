@@ -1,8 +1,8 @@
-package org.eclipse.jdt.internal.ui.viewsupport;/*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
+package org.eclipse.jdt.internal.ui.viewsupport;
 
 
 import java.util.HashMap;
@@ -52,7 +52,7 @@ public class OverlayIconManager {
 		manage(JavaPluginImages.IMG_OBJS_CFILECLASS, JavaPluginImages.DESC_OBJS_CFILECLASS);
 		manage(JavaPluginImages.IMG_OBJS_CFILEINT, JavaPluginImages.DESC_OBJS_CFILEINT);
 		manage(JavaPluginImages.IMG_OBJS_GHOST, JavaPluginImages.DESC_OBJS_GHOST);
-		
+		manage(JavaPluginImages.IMG_OBJS_ENV_VAR, JavaPluginImages.DESC_OBJS_ENV_VAR);
 		ISharedImages images= JavaPlugin.getDefault().getWorkbench().getSharedImages(); 
 		
 		// manage some icons from the desktop (because of overlays).

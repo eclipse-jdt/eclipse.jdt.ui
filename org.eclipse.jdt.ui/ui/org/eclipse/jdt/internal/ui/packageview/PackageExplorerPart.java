@@ -1,15 +1,14 @@
-package org.eclipse.jdt.internal.ui.packageview;
 /*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
  */
+package org.eclipse.jdt.internal.ui.packageview;
 
 
 import java.util.ArrayList;import java.util.Iterator;
 import java.net.URL;
 import java.net.MalformedURLException;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.ShowTypeHierarchyOnTypeAction;import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;import org.eclipse.jdt.internal.ui.reorg.DeleteAction;import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;import org.eclipse.jdt.internal.ui.util.SelectionUtil;import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;import org.eclipse.jdt.internal.ui.wizards.NewGroup;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.IPackagesViewPart;import org.eclipse.jdt.ui.JavaElementContentProvider;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.IToolBarManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.viewers.DoubleClickEvent;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.ShowTypeHierarchyOnTypeAction;import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;import org.eclipse.jdt.internal.ui.reorg.DeleteAction;import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;import org.eclipse.jdt.internal.ui.util.SelectionUtil;import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;import org.eclipse.jdt.internal.ui.wizards.NewGroup;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.IPackagesViewPart;import org.eclipse.jdt.ui.JavaElementContentProvider;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.IStatusLineManager;import org.eclipse.jface.action.IToolBarManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.viewers.DecoratingLabelProvider;import org.eclipse.jface.viewers.DoubleClickEvent;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jface.viewers.ILabelDecorator;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -901,6 +900,22 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		}
 	}
 	
+	/**
+	 * Sets the decorator for the package explorer.
+	 *
+	 * @param decorator a label decorator or <code>null</code> for no decorations.
+	 */
+	public void setLabelDecorator(ILabelDecorator decorator) {
+		int labelFlags= JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS | JavaElementLabelProvider.SHOW_SMALL_ICONS;
+		ILabelProvider javaProvider= new JavaElementLabelProvider(labelFlags);
+		if (decorator == null) {
+			fViewer.setLabelProvider(javaProvider);
+		}
+		else {
+			fViewer.setLabelProvider(new DecoratingLabelProvider(javaProvider, decorator));
+		}
+	}
+
 	/**
 	 * Converts the input to an IType if possible 
 	 */	
