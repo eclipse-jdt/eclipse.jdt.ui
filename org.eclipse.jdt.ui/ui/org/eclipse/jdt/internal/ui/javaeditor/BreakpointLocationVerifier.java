@@ -37,7 +37,8 @@ public class BreakpointLocationVerifier {
 						token == TerminalSymbols.TokenNamecontinue ||
 						token == TerminalSymbols.TokenNameIdentifier ||
 						token == TerminalSymbols.TokenNamereturn ||
-						token == TerminalSymbols.TokenNamethis) {
+						token == TerminalSymbols.TokenNamethis||
+						token == TerminalSymbols.TokenNamesuper) {
 						found= true;
 						break;
 					} else {
@@ -56,5 +57,4 @@ public class BreakpointLocationVerifier {
 		// add 1 to the line number - Document is 0 based, JDI is 1 based
 		return lineNumber + 1;
 	}
-
 }
