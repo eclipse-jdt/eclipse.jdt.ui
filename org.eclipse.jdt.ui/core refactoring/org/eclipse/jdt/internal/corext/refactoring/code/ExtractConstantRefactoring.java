@@ -215,7 +215,9 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 	private static String guessContantName(MethodInvocation selectedNode) {
 		for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
-			return tryTempNamePrefix(KNOWN_METHOD_NAME_PREFIXES[i], selectedNode.getName().getIdentifier());
+			String proposal= tryTempNamePrefix(KNOWN_METHOD_NAME_PREFIXES[i], selectedNode.getName().getIdentifier());
+			if (proposal != null)
+				return proposal;
 		}
 		return null;	
 	}
