@@ -295,6 +295,11 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 				postRefresh(element);
 				return;
 			}
+			// if the raw class path has changed we refresh the entire project
+			if ((flags & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0) {
+				postRefresh(element);
+				return;				
+			}
 		}
 
 		if (kind == IJavaElementDelta.REMOVED) {
