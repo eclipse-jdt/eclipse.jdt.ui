@@ -130,16 +130,24 @@ class ExtractInterfaceUtil {
 			ITypeConstraint constraint= constraints[i];
 			if (constraint.isSimpleTypeConstraint()){
 				SimpleTypeConstraint simple= (SimpleTypeConstraint)constraint;
-				if (simple.getLeft().getBinding() != null && Bindings.equals(simple.getLeft().getBinding(), typeBinding))
-					result.add(simple.getLeft());
-				if (simple.getRight().getBinding() != null && Bindings.equals(simple.getRight().getBinding(), typeBinding))
-					result.add(simple.getRight());
-
-				if (simple.getLeft().getBinding() != null && simple.getLeft().getBinding().isArray() && Bindings.equals(simple.getLeft().getBinding().getElementType(), typeBinding))
-					result.add(simple.getLeft());
-				if (simple.getRight().getBinding() != null && simple.getRight().getBinding().isArray() && Bindings.equals(simple.getRight().getBinding().getElementType(), typeBinding))
-					result.add(simple.getRight());
-					
+				
+				ConstraintVariable left= simple.getLeft();
+				ITypeBinding leftBinding= left.getBinding();
+				ConstraintVariable right= simple.getRight();
+				ITypeBinding rightBinding= right.getBinding();
+				
+				if (leftBinding != null) {
+					if (Bindings.equals(leftBinding, typeBinding))
+						result.add(left);
+					if (leftBinding.isArray() && Bindings.equals(leftBinding.getElementType(), typeBinding))
+						result.add(left);
+				}
+				if (rightBinding != null) {
+					if (Bindings.equals(rightBinding, typeBinding))
+						result.add(right);
+					if (rightBinding.isArray() && Bindings.equals(rightBinding.getElementType(), typeBinding))
+						result.add(right);
+				}
 			} else {
 				CompositeOrTypeConstraint cotc= (CompositeOrTypeConstraint)constraint;
 				result.addAll(Arrays.asList(getAllOfType(cotc.getConstraints(), binding)));
@@ -255,13 +263,13 @@ class ExtractInterfaceUtil {
 	}
 	
 	private static ConstraintVariable[] getUpdatableVariables(ITypeConstraint[] constraints, ITypeBinding classBinding, ITypeBinding interfaceBinding){
-		Set allVariablesOfType= new HashSet(Arrays.asList(getAllOfType(constraints, classBinding)));
-		Set badVariables= new HashSet();
-		Set badConstraints= new HashSet();
+		Set/*<ConstraintVariable>*/ allVariablesOfType= new HashSet(Arrays.asList(getAllOfType(constraints, classBinding)));
+		Set/*<ConstraintVariable>*/ badVariables= new HashSet();
+		Set/*<ITypeConstraint>*/ badConstraints= new HashSet(); // set is never read again!
 		ConstraintVariable[] initialBad= getInitialBad(allVariablesOfType, badVariables, badConstraints, constraints, interfaceBinding);
 		if (initialBad == null || initialBad.length == 0)//TODO to be removed after it's optimized
 			return (ConstraintVariable[]) allVariablesOfType.toArray(new ConstraintVariable[allVariablesOfType.size()]);
-		badVariables.addAll(Arrays.asList(initialBad));
+		badVariables.addAll(Arrays.asList(initialBad)); //TODO: this is redundant
 		boolean repeat= false;
 		do{
 			//TODO can optimize here - don't have to walk the whole constraints array, bad would be enough
@@ -287,7 +295,9 @@ class ExtractInterfaceUtil {
 		return (ConstraintVariable[]) updatable.toArray(new ConstraintVariable[updatable.size()]);
 	}
 	
-	private static ConstraintVariable[] getInitialBad(Set setOfAll, Set badVariables, Set badConstraints, ITypeConstraint[] constraints, ITypeBinding interfaceBinding){
+	private static ConstraintVariable[] getInitialBad(Set/*<ConstraintVariable>*/ setOfAll,
+			Set/*<ConstraintVariable>*/ badVariables, Set/*<ITypeConstraint>*/ badConstraints,
+			ITypeConstraint[] constraints, ITypeBinding interfaceBinding) {
 		ConstraintVariable interfaceVariable= new RawBindingVariable(interfaceBinding);
 		for (int i= 0; i < constraints.length; i++) {
 			ITypeConstraint constraint= constraints[i];
@@ -309,7 +319,8 @@ class ExtractInterfaceUtil {
 		return (ConstraintVariable[]) badVariables.toArray(new ConstraintVariable[badVariables.size()]);
 	}
 	
-	private static boolean canAddLeftSideToInitialBadSet(SimpleTypeConstraint sc, Set setOfAll, ConstraintVariable interfaceVariable) {
+	private static boolean canAddLeftSideToInitialBadSet(SimpleTypeConstraint sc,
+			Set/*<ConstraintVariable>*/ setOfAll, ConstraintVariable interfaceVariable) {
 		Assert.isTrue(sc.isSubtypeConstraint());
 		ConstraintVariable left= sc.getLeft();
 		ConstraintVariable right= sc.getRight();
@@ -328,7 +339,8 @@ class ExtractInterfaceUtil {
 			return true;
 	}
 
-	private static boolean canAddLeftSideToInitialBadSet(ITypeConstraint[] subConstraints, Set setOfAll, ConstraintVariable interfaceVariable) {
+	private static boolean canAddLeftSideToInitialBadSet(ITypeConstraint[] subConstraints,
+			Set/*<ConstraintVariable>*/ setOfAll, ConstraintVariable interfaceVariable) {
 		if (subConstraints.length == 0)
 			return false;
 		if (! allAreSimpleConstraints(subConstraints))
