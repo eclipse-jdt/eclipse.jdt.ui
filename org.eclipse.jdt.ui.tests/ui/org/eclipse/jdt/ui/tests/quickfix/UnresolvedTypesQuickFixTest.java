@@ -357,7 +357,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -392,6 +392,21 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
 		JavaProjectHelper.performDummySearch();
 		newCU.delete(true, null);
+		
+		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
+		newCUWizard.setShowDialog(false);
+		newCUWizard.apply(null);
+		
+		newCU= pack1.getCompilationUnit("ArrayListist.java");
+		assertTrue("Nothing created", newCU.exists());
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface ArrayListist {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
 	}	
 		
 
@@ -566,7 +581,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -593,6 +608,22 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");		
 		buf.append("}\n");
 		assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());
+
+		cu2.getType("F").getType("Inner").delete(true, null);
+
+		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
+		newCUWizard.setShowDialog(false);
+		newCUWizard.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public interface Inner {\n");
+		buf.append("\n");				
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());		
+	
 	}
 	
 	public void testTypeInCatchBlock() throws Exception {
