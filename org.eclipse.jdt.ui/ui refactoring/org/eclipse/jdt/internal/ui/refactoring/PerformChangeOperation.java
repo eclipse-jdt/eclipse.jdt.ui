@@ -97,7 +97,7 @@ public class PerformChangeOperation implements IRunnableWithProgress {
 	public void run(IProgressMonitor pm) throws InvocationTargetException, InterruptedException {
 		fChangeExecuted= false;
 		if (createChange()) {
-			pm.beginTask("", 2);
+			pm.beginTask("", 2); //$NON-NLS-1$
 			fCreateChangeOperation.run(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 			fChange= fCreateChangeOperation.getChange();
 			RefactoringStatus status= fCreateChangeOperation.getStatus();

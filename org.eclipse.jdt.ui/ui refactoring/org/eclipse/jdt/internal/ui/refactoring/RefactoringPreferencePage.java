@@ -6,6 +6,7 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.widgets.Composite;import org.eclipse.jface.preference.BooleanFieldEditor;import org.eclipse.jface.preference.FieldEditor;import org.eclipse.jface.preference.FieldEditorPreferencePage;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.preference.RadioGroupFieldEditor;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class RefactoringPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
@@ -39,16 +40,15 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 	}
 	
 	private FieldEditor createSeverityLevelField(Composite parent){
-			String prefix= "RefactoringPreferencePage.errorPage.severity.";
 			RadioGroupFieldEditor editor= new RadioGroupFieldEditor(
 			RefactoringPreferences.PREF_ERROR_PAGE_SEVERITY_THRESHOLD,
-			getResourceString(prefix + "label"),
+			RefactoringMessages.getString("RefactoringPreferencePage.show_error_page"), //$NON-NLS-1$
 			1,
 			new String[] [] {
-				{ getResourceString(prefix + "fatal"), 			RefactoringPreferences.FATAL_SEVERITY },
-				{ getResourceString(prefix + "error"), 			RefactoringPreferences.ERROR_SEVERITY },
-				{ getResourceString(prefix + "warning"), 		RefactoringPreferences.WARNING_SEVERITY },
-				{ getResourceString(prefix + "information"),	RefactoringPreferences.INFO_SEVERITY }				
+				{ RefactoringMessages.getString("RefactoringPreferencePage.fatal_error"), 			RefactoringPreferences.FATAL_SEVERITY }, //$NON-NLS-1$
+				{ RefactoringMessages.getString("RefactoringPreferencePage.error"), 			RefactoringPreferences.ERROR_SEVERITY }, //$NON-NLS-1$
+				{ RefactoringMessages.getString("RefactoringPreferencePage.warning"), 		RefactoringPreferences.WARNING_SEVERITY }, //$NON-NLS-1$
+				{ RefactoringMessages.getString("RefactoringPreferencePage.info"),	RefactoringPreferences.INFO_SEVERITY } //$NON-NLS-1$
 			},
 			parent
 			);
@@ -56,10 +56,9 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 	}
 	
 	private FieldEditor createSaveAllField(Composite parent){
-		String prefix= "RefactoringPreferencePage.savealleditors.";
 		BooleanFieldEditor editor= new BooleanFieldEditor(
 		RefactoringPreferences.PREF_SAVE_ALL_EDITORS,
-			getResourceString(prefix + "label"),
+			RefactoringMessages.getString("RefactoringPreferencePage.auto_save"), //$NON-NLS-1$
 			BooleanFieldEditor.DEFAULT,
 			parent);
 		return editor;
@@ -67,8 +66,4 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 	
 	public void init(IWorkbench workbench) {
 	}	
-	
-	private String getResourceString(String key) {
-		return RefactoringResources.getResourceString(key);
-	}
 }

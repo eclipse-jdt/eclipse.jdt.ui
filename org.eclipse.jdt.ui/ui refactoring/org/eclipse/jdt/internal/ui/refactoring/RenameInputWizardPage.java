@@ -1,4 +1,5 @@
 /* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.refactoring;import org.eclipse.swt.SWT;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Text;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.util.RowLayouter;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class RenameInputWizardPage extends TextInputWizardPage{
 	private String fHelpContextID;	
@@ -43,7 +44,7 @@ public class RenameInputWizardPage extends TextInputWizardPage{
 	}
 	
 	protected String getLabelText(){
-		return RefactoringResources.getResourceString("RenameInputPage.labelmessage");
+		return RefactoringMessages.getString("RenameInputWizardPage.enter_name"); //$NON-NLS-1$
 	}
 
 }

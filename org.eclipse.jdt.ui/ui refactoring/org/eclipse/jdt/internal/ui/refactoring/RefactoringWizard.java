@@ -19,7 +19,7 @@ public class RefactoringWizard extends Wizard {
 	public RefactoringWizard(String pageTitle, String errorPageContextHelpId) {
 		setNeedsProgressMonitor(true);
 		fPageTitle= pageTitle;
-		setWindowTitle("Refactoring");
+		setWindowTitle(RefactoringMessages.getString("RefactoringWizard.title")); //$NON-NLS-1$
 		fErrorPageContextHelpId= errorPageContextHelpId;
 	}
 	
@@ -242,14 +242,14 @@ public class RefactoringWizard extends Wizard {
 			RefactoringStatus status= null;
 			if (exception != null) {
 				status= new RefactoringStatus();
-				status.addFatalError(exception.getMessage() != null ? exception.getMessage() + ". See log for details." : "Internal error while creating a change object. See log for details.");
+				status.addFatalError(exception.getMessage() != null ? exception.getMessage() + RefactoringMessages.getString("RefactoringWizard.see_log") : RefactoringMessages.getString("RefactoringWizard.Internal_error")); //$NON-NLS-2$ //$NON-NLS-1$
 				JavaPlugin.log(exception);
 			} else {
 				status= op.getStatus();
 			}
 			setStatus(status, style);
 		} else {
-			ExceptionHandler.handle(exception, "Refactoring", "Unexpected exception while creating a change object. See log for a detailed error description.");
+			ExceptionHandler.handle(exception, RefactoringMessages.getString("RefactoringWizard.refactoring"), RefactoringMessages.getString("RefactoringWizard.unexpected_exception")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 		IChange change= op.getChange();	
 		return change;
@@ -290,7 +290,7 @@ public class RefactoringWizard extends Wizard {
 				ChangeContext undoContext= new ChangeContext(new AbortChangeExceptionHandler());
 				try {
 					IChange[] changes= context.getPerformedChanges();
-					pm.beginTask("Undoing changes: ", changes.length);
+					pm.beginTask(RefactoringMessages.getString("RefactoringWizard.undoing"), changes.length); //$NON-NLS-1$
 					IProgressMonitor sub= new NullProgressMonitor();
 					for (int i= changes.length - 1; i >= 0; i--) {
 						IChange change= changes[i];
@@ -316,7 +316,7 @@ public class RefactoringWizard extends Wizard {
 	}
 	
 	private void handleUnexpectedException(InvocationTargetException e) {
-		ExceptionHandler.handle(e, "Refactoring", "Unexpected exception while performing the refactoring. See log for a detailed error description.");
+		ExceptionHandler.handle(e, RefactoringMessages.getString("RefactoringWizard.refactoring"), RefactoringMessages.getString("RefactoringWizard.unexpected_exception_1")); //$NON-NLS-2$ //$NON-NLS-1$
 	}
 
 	//---- Condition checking ------------------------------------------------------------
@@ -347,7 +347,7 @@ public class RefactoringWizard extends Wizard {
 		if (exception != null) {
 			JavaPlugin.log(exception);
 			status= new RefactoringStatus();
-			status.addFatalError("Internal error during precondition checking. See log for detailed error description");
+			status.addFatalError(RefactoringMessages.getString("RefactoringWizard.internal_error_1")); //$NON-NLS-1$
 			JavaPlugin.log(exception);
 		} else {
 			status= op.getStatus();

@@ -9,8 +9,7 @@ import org.eclipse.swt.SWT;import org.eclipse.swt.custom.TableEditor;import or
 	private Table fTable;
 	private TableItem[] fItems;
 	
-	public static final String PAGE_NAME= "RenameParametersInputPage";
-	private static final String PREFIX= PAGE_NAME + ".";
+	public static final String PAGE_NAME= "RenameParametersInputPage"; //$NON-NLS-1$
 	
 	/**
 	 * Creates a new text input page.
@@ -42,8 +41,8 @@ import org.eclipse.swt.SWT;import org.eclipse.swt.custom.TableEditor;import or
 		try{
 			 oldNames= ref.getMethod().getParameterNames();
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, "Refactoring", "Internal error. See log for details.");
-			oldNames= new String[]{""};
+			ExceptionHandler.handle(e, RefactoringMessages.getString("RenameParametersWizardPage.refactoring"), RefactoringMessages.getString("RenameParametersWizardPage.internal_error")); //$NON-NLS-2$ //$NON-NLS-1$
+			oldNames= new String[]{""}; //$NON-NLS-1$
 		}
 		return oldNames;
 	}
@@ -64,9 +63,9 @@ import org.eclipse.swt.SWT;import org.eclipse.swt.custom.TableEditor;import or
 		fTable.setHeaderVisible(true);
 		fTable.setLinesVisible(true);
 		TableColumn column1= new TableColumn(fTable, SWT.NONE);
-		column1.setText("Old Parameter Names");
+		column1.setText(RefactoringMessages.getString("RenameParametersWizardPage.old_names")); //$NON-NLS-1$
 		TableColumn column2= new TableColumn(fTable, SWT.NONE);
-		column2.setText("New Parameter Names");
+		column2.setText(RefactoringMessages.getString("RenameParametersWizardPage.new_names")); //$NON-NLS-1$
 		
 		layout.addColumnData(new ColumnWeightData(50));
 		layout.addColumnData(new ColumnWeightData(50));

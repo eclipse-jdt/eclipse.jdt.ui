@@ -5,7 +5,8 @@
 
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.SashForm;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.compare.CompareConfiguration;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jface.viewers.CheckStateChangedEvent;import org.eclipse.jface.viewers.CheckboxTreeViewer;import org.eclipse.jface.viewers.ICheckStateListener;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.ITreeViewerListener;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeExpansionEvent;import org.eclipse.jface.viewers.Viewer;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.core.refactoring.base.Change;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.ICompositeChange;import org.eclipse.jdt.internal.core.refactoring.text.AbstractTextBufferChange;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.compare.JavaMergeViewer;
+import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.SashForm;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.compare.CompareConfiguration;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jface.viewers.CheckStateChangedEvent;import org.eclipse.jface.viewers.CheckboxTreeViewer;import org.eclipse.jface.viewers.ICheckStateListener;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.ITreeViewerListener;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeExpansionEvent;import org.eclipse.jface.viewers.Viewer;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.core.refactoring.base.Change;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.ICompositeChange;import org.eclipse.jdt.internal.core.refactoring.text.AbstractTextBufferChange;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.compare.JavaMergeViewer;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 /**
  * Presents the changes made by the refactoring.
  * Consists of a tree of changes and a compare viewer that shows the differences. 
@@ -85,7 +86,7 @@ public class PreviewWizardPage extends RefactoringWizardPage {
 			}
 			String name= change.getName();
 			if (name != null) {
-				result.append(" : ");
+				result.append(" : "); //$NON-NLS-1$
 				result.append(name);
 			}
 			return result.toString();
@@ -100,7 +101,7 @@ public class PreviewWizardPage extends RefactoringWizardPage {
 	private JavaMergeViewer fMergeViewer;
 	private CheckboxTreeViewer fTreeViewer;
 	
-	public static final String PAGE_NAME= "PreviewPage";
+	public static final String PAGE_NAME= "PreviewPage"; //$NON-NLS-1$
 	
 	private boolean fExpandFirstNode;
 
@@ -109,7 +110,7 @@ public class PreviewWizardPage extends RefactoringWizardPage {
 	 */
 	public PreviewWizardPage() {
 		super(PAGE_NAME);
-		setDescription(RefactoringResources.getResourceString(getName() + ".description"));
+		setDescription(RefactoringMessages.getString("PreviewWizardPage.description")); //$NON-NLS-1$
 	}
 
 	/**

@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.core.refactoring.base.ITextChange;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class MergeTextViewerContentProvider implements IMergeViewerContentProvider {
 
@@ -61,7 +62,7 @@ public class MergeTextViewerContentProvider implements IMergeViewerContentProvid
 	}
 
 	public String getLeftLabel(Object element) {
-		return RefactoringResources.getResourceString("PreviewPage.CompareViewer.originalSource.label");
+		return RefactoringMessages.getString("MergeTextViewerContentProvider.original_source"); //$NON-NLS-1$
 	}
 
 	public Object getLeftContent(Object element) {
@@ -96,7 +97,7 @@ public class MergeTextViewerContentProvider implements IMergeViewerContentProvid
 	}
 
 	public String getRightLabel(Object element) {
-		return RefactoringResources.getResourceString("PreviewPage.CompareViewer.refactoredSource.label");
+		return RefactoringMessages.getString("MergeTextViewerContentProvider.refactored_source"); //$NON-NLS-1$
 	}
 
 	public Object getRightContent(Object element) {

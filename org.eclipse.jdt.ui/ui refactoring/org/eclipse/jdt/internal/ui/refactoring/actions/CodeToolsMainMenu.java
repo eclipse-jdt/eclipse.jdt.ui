@@ -23,7 +23,7 @@ public class CodeToolsMainMenu {
 	public static void addToMenuBar() {
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
 		
-		MenuManager menu= new MenuManager("#codeTools");
+		MenuManager menu= new MenuManager("#codeTools"); //$NON-NLS-1$
 		menu.add(registerListener(new UndoRefactoringAction()));
 		menu.add(registerListener(new RedoRefactoringAction()));		
 	}

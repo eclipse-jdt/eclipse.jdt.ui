@@ -4,6 +4,7 @@
  */
 
 package org.eclipse.jdt.internal.ui.refactoring.changes;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jdt.internal.core.refactoring.base.ChangeAbortException;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.IChangeExceptionHandler;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 /**
  * An implementation of <code>IChangeExceptionHandler</code> which pops up a dialog
@@ -16,10 +17,10 @@ public class ChangeExceptionHandler implements IChangeExceptionHandler {
 		JavaPlugin.log(e);
 		
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
-		final MessageDialog dialog= new MessageDialog(parent, "Refactoring", null,
-			"An unexpected exception has been caught while processing the Refactoring. Its message is:\n\n" +
-			e.getMessage() + "\n\nPress \"Undo\" to undo all executed changes\nPress \"Abort\" to abort the refactoring",
-			MessageDialog.ERROR, new String[] {"Undo", "Abort"}, 1);
+		final MessageDialog dialog= new MessageDialog(parent, RefactoringMessages.getString("ChangeExceptionHandler.refactoring"), null, //$NON-NLS-1$
+			RefactoringMessages.getString("ChangeExceptionHandler.unexpected_exception") + //$NON-NLS-1$
+			e.getMessage() + RefactoringMessages.getString("ChangeExceptionHandler.press_undo"), //$NON-NLS-1$
+			MessageDialog.ERROR, new String[] {RefactoringMessages.getString("ChangeExceptionHandler.undo"), RefactoringMessages.getString("ChangeExceptionHandler.abort")}, 1); //$NON-NLS-2$ //$NON-NLS-1$
 		final int[] result= new int[1];	
 		Runnable runnable= new Runnable() {
 			public void run() {

@@ -34,12 +34,12 @@ import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.refactoring.AbstractOpenRefactoringWizardAction;
 import org.eclipse.jdt.internal.ui.refactoring.MoveCompilationUnitWizard;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RenameParametersWizard;import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.refactoring.undo.RedoRefactoringAction;
 import org.eclipse.jdt.internal.ui.refactoring.undo.UndoRefactoringAction;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 /**
  * Refactoring menu group
@@ -122,7 +122,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 	// -------------------- method refactorings ----------------------
 	
 	private AbstractOpenRefactoringWizardAction createRenameParametersAction(final ITextBufferChangeCreator changeCreator) {
-		String label= RefactoringResources.getResourceString("Refactoring.RenameParameters.label");
+		String label= RefactoringMessages.getString("RefactoringGroup.rename_parameters"); //$NON-NLS-1$
 		return new AbstractOpenRefactoringWizardAction(label, IMethod.class) {
 			protected Wizard createWizard() {
 				return new RenameParametersWizard();
@@ -134,10 +134,12 @@ public class RefactoringGroup extends ContextMenuGroup {
 	}
 	
 	private AbstractOpenRefactoringWizardAction createRenameMethodInClassAction(final ITextBufferChangeCreator changeCreator) {
-		String label= RefactoringResources.getResourceString("Refactoring.RenameMethod.label");
+		String label= RefactoringMessages.getString("RefactoringGroup.rename"); //$NON-NLS-1$
 		return new AbstractOpenRefactoringWizardAction(label, IMethod.class) {
 			protected Wizard createWizard() {
-				RenameRefactoringWizard w= new RenameRefactoringWizard("Refactoring.RenameMethod", IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_METHOD_ERROR_WIZARD_PAGE);
+				String title= RefactoringMessages.getString("RefactoringGroup.rename_method_title"); //$NON-NLS-1$
+				String message= RefactoringMessages.getString("RefactoringGroup.rename_method_message"); //$NON-NLS-1$
+				RenameRefactoringWizard w= new RenameRefactoringWizard(title, message, IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_METHOD_ERROR_WIZARD_PAGE);
 				w.setInputPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_METHOD);
 				return w;
 			}
@@ -148,10 +150,12 @@ public class RefactoringGroup extends ContextMenuGroup {
 	}
 
 	private AbstractOpenRefactoringWizardAction createRenameMethodInInterfaceAction(final ITextBufferChangeCreator changeCreator) {
-		String label= RefactoringResources.getResourceString("Refactoring.RenameMethod.label");
+		String label= RefactoringMessages.getString("RefactoringGroup.rename"); //$NON-NLS-1$
 		return new AbstractOpenRefactoringWizardAction(label, IMethod.class) {
 			protected Wizard createWizard() {
-				RenameRefactoringWizard w= new RenameRefactoringWizard("Refactoring.RenameMethod", IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_METHOD_ERROR_WIZARD_PAGE);
+				String title= RefactoringMessages.getString("RefactoringGroup.rename_method_title"); //$NON-NLS-1$
+				String message= RefactoringMessages.getString("RefactoringGroup.rename_method_message"); //$NON-NLS-1$
+				RenameRefactoringWizard w= new RenameRefactoringWizard(title, message, IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_METHOD_ERROR_WIZARD_PAGE);
 				w.setInputPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_METHOD);
 				return w;
 			}
@@ -162,10 +166,12 @@ public class RefactoringGroup extends ContextMenuGroup {
 	}
 	
 	private AbstractOpenRefactoringWizardAction createRenamePrivateMethodAction(final ITextBufferChangeCreator changeCreator) {
-		String label= RefactoringResources.getResourceString("Refactoring.RenameMethod.label");
+		String label= RefactoringMessages.getString("RefactoringGroup.rename"); //$NON-NLS-1$
 		return new AbstractOpenRefactoringWizardAction(label, IMethod.class) {
 			protected Wizard createWizard() {
-				RenameRefactoringWizard w= new RenameRefactoringWizard("Refactoring.RenameMethod", IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_METHOD_ERROR_WIZARD_PAGE);
+				String title= RefactoringMessages.getString("RefactoringGroup.rename_method_title"); //$NON-NLS-1$
+				String message= RefactoringMessages.getString("RefactoringGroup.rename_method_message"); //$NON-NLS-1$
+				RenameRefactoringWizard w= new RenameRefactoringWizard(title, message, IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_METHOD_ERROR_WIZARD_PAGE);
 				w.setInputPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_METHOD);
 				return w;
 			}
@@ -177,10 +183,12 @@ public class RefactoringGroup extends ContextMenuGroup {
 	}
 	
 	private AbstractOpenRefactoringWizardAction createRenameStaticMethodAction(final ITextBufferChangeCreator changeCreator) {
-		String label= RefactoringResources.getResourceString("Refactoring.RenameMethod.label");
+		String label= RefactoringMessages.getString("RefactoringGroup.rename"); //$NON-NLS-1$
 		return new AbstractOpenRefactoringWizardAction(label, IMethod.class) {
 			protected Wizard createWizard() {
-				RenameRefactoringWizard w= new RenameRefactoringWizard("Refactoring.RenameMethod", IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_METHOD_ERROR_WIZARD_PAGE);
+				String title= RefactoringMessages.getString("RefactoringGroup.rename_method_title"); //$NON-NLS-1$
+				String message= RefactoringMessages.getString("RefactoringGroup.rename_method_message"); //$NON-NLS-1$
+				RenameRefactoringWizard w= new RenameRefactoringWizard(title, message, IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_METHOD_ERROR_WIZARD_PAGE);
 				w.setInputPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_METHOD);
 				return w;
 			}
@@ -193,10 +201,12 @@ public class RefactoringGroup extends ContextMenuGroup {
 	// -------------------- type refactorings ----------------------
 	
 	private AbstractOpenRefactoringWizardAction createRenameTypeAction(final ITextBufferChangeCreator changeCreator) {	
-		String label= RefactoringResources.getResourceString("Refactoring.RenameType.label");
+		String label= RefactoringMessages.getString("RefactoringGroup.rename"); //$NON-NLS-1$
 		return new AbstractOpenRefactoringWizardAction(label, IType.class) {
-			protected Wizard createWizard() { 
-				RenameRefactoringWizard w= new RenameRefactoringWizard("Refactoring.RenameType", IJavaHelpContextIds.RENAME_TYPE_WIZARD_PAGE, IJavaHelpContextIds.RENAME_TYPE_ERROR_WIZARD_PAGE); 
+			protected Wizard createWizard() {
+				String title= RefactoringMessages.getString("RefactoringGroup.rename_type_title"); //$NON-NLS-1$
+				String message= RefactoringMessages.getString("RefactoringGroup.rename_type_message"); //$NON-NLS-1$
+				RenameRefactoringWizard w= new RenameRefactoringWizard(title, message, IJavaHelpContextIds.RENAME_TYPE_WIZARD_PAGE, IJavaHelpContextIds.RENAME_TYPE_ERROR_WIZARD_PAGE); 
 				w.setInputPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_TYPE);
 				return w;
 			}
@@ -209,10 +219,12 @@ public class RefactoringGroup extends ContextMenuGroup {
 	// -------------------- field refactorings ----------------------
 	
 	private AbstractOpenRefactoringWizardAction createRenameFieldAction(final ITextBufferChangeCreator changeCreator) {	
-		String label= RefactoringResources.getResourceString("Refactoring.RenameField.label");
+		String label= RefactoringMessages.getString("RefactoringGroup.rename"); //$NON-NLS-1$
 		return new AbstractOpenRefactoringWizardAction(label, IField.class) {
-			protected Wizard createWizard() { 
-				RenameRefactoringWizard w= new RenameRefactoringWizard("Refactoring.RenameField", IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_FIELD_ERROR_WIZARD_PAGE); 
+			protected Wizard createWizard() {
+				String title= RefactoringMessages.getString("RefactoringGroup.rename_field_title"); //$NON-NLS-1$
+				String message= RefactoringMessages.getString("RefactoringGroup.rename_field_message"); //$NON-NLS-1$
+				RenameRefactoringWizard w= new RenameRefactoringWizard(title, message, IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_FIELD_ERROR_WIZARD_PAGE); 
 				//XXX: missing icon for field
 				w.setInputPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_CU);
 				return w;
@@ -226,7 +238,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 	// --------- compilation unit refactorings  --------------------
 	
 	private AbstractOpenRefactoringWizardAction createMoveCompilationUnitAction(final ITextBufferChangeCreator changeCreator) {
-		String label= RefactoringResources.getResourceString("Refactoring.MoveCompilationUnit.label");
+		String label= RefactoringMessages.getString("RefactoringGroup.rename"); //$NON-NLS-1$
 		return new AbstractOpenRefactoringWizardAction(label, ICompilationUnit.class) {
 			protected Wizard createWizard() { 
 				return new MoveCompilationUnitWizard(); 

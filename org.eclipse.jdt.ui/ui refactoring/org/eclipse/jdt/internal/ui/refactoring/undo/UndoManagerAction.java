@@ -5,14 +5,15 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.undo;
 
-import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Iterator;import java.util.List;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.core.resources.IFile;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.core.runtime.Status;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IFileEditorInput;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatusEntry;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Iterator;import java.util.List;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.core.resources.IFile;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.core.runtime.Status;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IFileEditorInput;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatusEntry;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public abstract class UndoManagerAction extends JavaUIAction {
 
 	private RefactoringStatus fPreflightStatus;
 
-	public UndoManagerAction(String prefix) {
-		super(RefactoringResources.getResourceBundle(), prefix);
+	public UndoManagerAction(String label) {
+		super(label);
 	}
 	
 	public abstract IRunnableWithProgress createOperation(ChangeContext context);
@@ -29,7 +30,7 @@ public abstract class UndoManagerAction extends JavaUIAction {
 			// Don't execute in separate thread since it updates the UI.
 			dialog.run(false, false, op);
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, "Error", "Internal Error in Undo Manager");
+			ExceptionHandler.handle(e, RefactoringMessages.getString("UndoManagerAction.error"), RefactoringMessages.getString("UndoManagerAction.internal_error")); //$NON-NLS-2$ //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// Opertation isn't cancelable.
 		} finally {
@@ -39,7 +40,7 @@ public abstract class UndoManagerAction extends JavaUIAction {
 		if (fPreflightStatus.hasError()) {
 			String name= getName();
 			MultiStatus status = createMultiStatus(name);
-			String message= name + " cannot be executed.";
+			String message= name + RefactoringMessages.getString("UndoManagerAction.cannot_be_executed"); //$NON-NLS-1$
 			ErrorDialog error= new ErrorDialog(parent, name, message, status, IStatus.ERROR) {
 				public void create() {
 					super.create();
@@ -55,7 +56,7 @@ public abstract class UndoManagerAction extends JavaUIAction {
 		MultiStatus status= new MultiStatus(
 			JavaPlugin.getPluginId(), 
 			IStatus.ERROR,
-			"There are unsaved files affected by the " + name + ". " + name + " can only proceed if you revert the files to their original content.",
+			RefactoringMessages.getString("UndoManagerAction.unsaved_filed"), //$NON-NLS-1$
 			null);
 		String id= JavaPlugin.getPluginId();
 		for (Iterator iter= fPreflightStatus.getEntries().iterator(); iter.hasNext(); ) {

@@ -7,10 +7,6 @@ package org.eclipse.jdt.internal.ui.refactoring;import org.eclipse.jdt.core.Ja
 
 public class RenameParametersWizard extends RefactoringWizard {
 	
-	private static final String RESOURCE_KEY_PREFIX= "Refactoring.RenameParameters";
-	private static final String INPUTPAGE_TITLE_SUFFIX= ".wizard.inputpage.title";
-	private static final String INPUTPAGE_MESSAGE_SUFFIX= ".wizard.inputpage.message";
-	
 	public RenameParametersWizard(){
 		super(getTitle(), IJavaHelpContextIds.RENAME_PARAMS_ERROR_WIZARD_PAGE);
 	}
@@ -34,11 +30,11 @@ public class RenameParametersWizard extends RefactoringWizard {
 	}
 	
 	private static String getTitle(){
-		return RefactoringResources.getResourceString(RESOURCE_KEY_PREFIX + INPUTPAGE_TITLE_SUFFIX);
+		return RefactoringMessages.getString("RenameParametersWizard.title"); //$NON-NLS-1$
 	}
 
 	private static String getMessage(){
-		return RefactoringResources.getResourceString(RESOURCE_KEY_PREFIX + INPUTPAGE_MESSAGE_SUFFIX);
+		return RefactoringMessages.getString("RenameParametersWizard.message"); //$NON-NLS-1$
 	}
 	
 	protected boolean checkActivationOnOpen() {

@@ -32,7 +32,7 @@ class MoveCompilationUnitWizardPage extends TextInputWizardPage{
 	 * @see TextInputWizardPage#getLabelText
 	 */
 	protected String getLabelText(){
-		return RefactoringResources.getResourceString("Refactoring.MoveCompilationUnit.wizardpage.labelmessage");
+		return RefactoringMessages.getString("MoveCompilationUnitWizardPage.choose_package"); //$NON-NLS-1$
 	}
 		
 	/* (non-JavaDoc)
@@ -68,7 +68,7 @@ class MoveCompilationUnitWizardPage extends TextInputWizardPage{
 	private Button createButton(Composite composite){
 		Button button= new Button(composite, SWT.PUSH);
 		button.setLayoutData(new GridData());
-		button.setText(RefactoringResources.getResourceString("Refactoring.MoveCompilationUnit.wizardpage.buttonlabel"));
+		button.setText(RefactoringMessages.getString("MoveCompilationUnitWizardPage.browse")); //$NON-NLS-1$
 		button.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				handleButtonSelection(e);
@@ -79,7 +79,7 @@ class MoveCompilationUnitWizardPage extends TextInputWizardPage{
 	
 	private void handleButtonSelection(SelectionEvent e){
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), getLabelProvider(), false, false);
-		dialog.setTitle(RefactoringResources.getResourceString("Refactoring.MoveCompilationUnit.wizardpage.dialog.title"));
+		dialog.setTitle(RefactoringMessages.getString("MoveCompilationUnitWizardPage.choose_a_package")); //$NON-NLS-1$
 		if (dialog.open(getValidPackages(), getText()) == ElementListSelectionDialog.OK){
 			IPackageFragment selectedPackage= (IPackageFragment)dialog.getSelectedElement();
 			setText(selectedPackage.getElementName());						

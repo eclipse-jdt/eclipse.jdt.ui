@@ -6,6 +6,7 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.IStructuredContentProvider;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatusEntry;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 /**
  * Presents the list of failed preconditions to the user
@@ -19,7 +20,7 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 	
 	private String fHelpContextID;
 
-	public static final String PAGE_NAME= "ErrorPage";
+	public static final String PAGE_NAME= "ErrorPage"; //$NON-NLS-1$
 	
 	public ErrorWizardPage(String helpContextId){
 		super(PAGE_NAME);
@@ -36,15 +37,15 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 			setPageComplete(isRefactoringPossible());
 			int severity= fStatus.getSeverity();
 			if (severity >= RefactoringStatus.FATAL) {
-				setDescription(RefactoringResources.getResourceString(getName() + ".notPossible"));
+				setDescription(RefactoringMessages.getString("ErrorWizardPage.cannot_proceed")); //$NON-NLS-1$
 			} else if (severity >= RefactoringStatus.INFO) {
-				setDescription(RefactoringResources.getResourceString(getName() + ".confirm"));
+				setDescription(RefactoringMessages.getString("ErrorWizardPage.confirm")); //$NON-NLS-1$
 			} else {
-				setDescription("");
+				setDescription(""); //$NON-NLS-1$
 			}
 		} else {
 			setPageComplete(true);
-			setDescription("");
+			setDescription(""); //$NON-NLS-1$
 		}	
 	}
 	

@@ -6,6 +6,7 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Arrays;import java.util.Iterator;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.IStructuredContentProvider;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.core.resources.IFile;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IFileEditorInput;import org.eclipse.ui.dialogs.ListSelectionDialog;import org.eclipse.jdt.internal.core.refactoring.DebugUtils;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 /**
  * An abstract wizard page that can be used to implement user input pages for 
@@ -27,7 +28,7 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 		protected Control createDialogArea(Composite parent) {
 			Composite result= (Composite)super.createDialogArea(parent);
 			final Button check= new Button(result, SWT.CHECK);
-			check.setText(RefactoringResources.getResourceString("SaveEditorsDialog.alwaysSaveMessage"));
+			check.setText(RefactoringMessages.getString("UserInputWizardPage.always_save")); //$NON-NLS-1$
 			check.setSelection(RefactoringPreferences.getSaveAllEditors());
 			check.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
@@ -166,8 +167,8 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 		if (unsavedEditors == null || unsavedEditors.isEmpty())
 			return new ArrayList(0); //as promised in the contract
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
-		String message= RefactoringResources.getResourceString("SaveEditorsDialog.message");
-		String title= RefactoringResources.getResourceString("SaveEditorsDialog.title");
+		String message= RefactoringMessages.getString("UserInputWizardPage.warning"); //$NON-NLS-1$
+		String title= RefactoringMessages.getString("UserInputWizardPage.select_to_save"); //$NON-NLS-1$
 		SaveDialog dialog= new SaveDialog(parent, unsavedEditors, new ListContentProvider(), createLabelProvider(), message);
 		dialog.setTitle(title);
 		dialog.setBlockOnOpen(true);
@@ -218,7 +219,7 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 			//XXX: 1GCQYJK: ITPUI:WIN2000 - Invalid thread access when saving an editor
 			getContainer().run(false, false, createRunnable(editorsToSave));
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), "Refactoring", "Unexpected error while saving open editors");
+			ExceptionHandler.handle(e, getShell(), RefactoringMessages.getString("UserInputWizardPage.refactoring"), RefactoringMessages.getString("UserInputWizardPage.unexpected_error")); //$NON-NLS-2$ //$NON-NLS-1$
 			return false;
 		} catch (InterruptedException e) {
 			// Can't happen. Operation isn't cancelable.

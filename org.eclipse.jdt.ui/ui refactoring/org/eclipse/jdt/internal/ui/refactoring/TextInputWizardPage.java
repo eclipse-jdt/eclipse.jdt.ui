@@ -12,8 +12,7 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	private String fInitialValue;
 	private Text fTextField;	
 	
-	public static final String PAGE_NAME= "TextInputPage";
-	private static final String PREFIX= PAGE_NAME + ".";
+	public static final String PAGE_NAME= "TextInputPage"; //$NON-NLS-1$
 	
 	/**
 	 * Creates a new text input page.
@@ -21,7 +20,7 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	 *  user input page. Otherwise <code>false</code>.
 	 */
 	public TextInputWizardPage(boolean isLastUserPage) {
-		this(isLastUserPage, "");
+		this(isLastUserPage, ""); //$NON-NLS-1$
 	}
 	
 	/**
@@ -107,7 +106,7 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	 * is computed by calling <code>validatePage</code>.
 	 */
 	protected void textModified(String text) {	
-		if (! isEmptyInputValid() && text.equals("")){
+		if (! isEmptyInputValid() && text.equals("")){ //$NON-NLS-1$
 			setPageComplete(false);
 			setErrorMessage(null);
 			return;

@@ -14,12 +14,8 @@ import org.eclipse.jdt.internal.core.refactoring.cus.MoveCompilationUnitRefactor
 
 public class MoveCompilationUnitWizard extends RefactoringWizard {
 
-	private static final String RESOURCEKEY_PREFIX= "Refactoring.MoveCompilationUnit";
-	private static final String INPUTPAGE_TITLE_SUFFIX= ".wizard.inputpage.title";
-	private static final String INPUTPAGE_MESSAGE_SUFFIX= ".wizard.inputpage.message";
-	
 	public MoveCompilationUnitWizard(){
-		super(getInputPageResource(RESOURCEKEY_PREFIX, INPUTPAGE_TITLE_SUFFIX), IJavaHelpContextIds.MOVE_CU_ERROR_WIZARD_PAGE);
+		super(RefactoringMessages.getString("MoveCompilationUnitWizard.title"), IJavaHelpContextIds.MOVE_CU_ERROR_WIZARD_PAGE); //$NON-NLS-1$
 	}
 
 	/**
@@ -27,18 +23,14 @@ public class MoveCompilationUnitWizard extends RefactoringWizard {
 	 */ 
 	protected void addUserInputPages(){
 		MoveCompilationUnitRefactoring ref= getMoveCompilationUnitRefactoring();
-		setPageTitle(getPageTitle() + ": " + ref.getCompilationUnit().getElementName());
+		setPageTitle(getPageTitle() + ": " + ref.getCompilationUnit().getElementName()); //$NON-NLS-1$
 		MoveCompilationUnitWizardPage page=  new MoveCompilationUnitWizardPage(true){
 			protected RefactoringStatus validateTextField(String text) {
 				return validateUserInput(text);
 			}	
 		};
-		page.setMessage(getInputPageResource(RESOURCEKEY_PREFIX, INPUTPAGE_MESSAGE_SUFFIX));
+		page.setMessage(RefactoringMessages.getString("MoveCompilationUnitWizard.message")); //$NON-NLS-1$
 		addPage(page);
-	}
-	
-	private static String getInputPageResource(String prefix, String suffix){
-		return RefactoringResources.getResourceString(prefix + suffix);
 	}
 	
 	private MoveCompilationUnitRefactoring getMoveCompilationUnitRefactoring(){
@@ -58,7 +50,7 @@ public class MoveCompilationUnitWizard extends RefactoringWizard {
 				return ref.checkPackage();
 			} else{
 				RefactoringStatus result= new RefactoringStatus();
-				result.addFatalError("Package not found");
+				result.addFatalError(RefactoringMessages.getString("MoveCompilationUnitWizard.package_not_found")); //$NON-NLS-1$
 				return result;
 			}	
 		} catch (JavaModelException e){

@@ -12,12 +12,9 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	private String fPageContextHelpId;
 	private ImageDescriptor fInputPageImageDescriptor;
 	
-	private static final String INPUTPAGE_TITLE_SUFFIX= ".wizard.inputpage.title";
-	private static final String INPUTPAGE_MESSAGE_SUFFIX= ".wizard.inputpage.message";
-	
-	public RenameRefactoringWizard(String resourceKeyPrefix, String pageContextHelpId, String errorContextHelpId){
-		super(getInputPageResource(resourceKeyPrefix, INPUTPAGE_TITLE_SUFFIX), errorContextHelpId);
-		fPageMessage= getInputPageResource(resourceKeyPrefix, INPUTPAGE_MESSAGE_SUFFIX);
+	public RenameRefactoringWizard(String title, String message, String pageContextHelpId, String errorContextHelpId){
+		super(title, errorContextHelpId);
+		fPageMessage= message;
 		fPageContextHelpId= pageContextHelpId;
 	}
 	
@@ -25,16 +22,12 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 		fInputPageImageDescriptor= desc;
 	}
 	
-	private static String getInputPageResource(String prefix, String suffix){
-		return RefactoringResources.getResourceString(prefix + suffix);
-	}
-
 	/**
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
 		String initialSetting= getRenameRefactoring().getCurrentName();
-		setPageTitle(getPageTitle() + ": "+ initialSetting);
+		setPageTitle(getPageTitle() + ": "+ initialSetting); //$NON-NLS-1$
 		RenameInputWizardPage page= new RenameInputWizardPage(fPageContextHelpId, true, initialSetting) {
 			protected RefactoringStatus validateTextField(String text) {
 				return validateNewName(text);
@@ -56,9 +49,9 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 			return ref.checkNewName();
 		} catch (JavaModelException e){
 			//XXX: should log the exception
-			String msg= e.getMessage() == null ? "": e.getMessage();
+			String msg= e.getMessage() == null ? "": e.getMessage(); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
-			result.addFatalError("Internal error during name checking:" + msg);
+			result.addFatalError(RefactoringMessages.getString("RenameRefactoringWizard.internal_error") + msg); //$NON-NLS-1$
 			return result;
 		}	
 	}
