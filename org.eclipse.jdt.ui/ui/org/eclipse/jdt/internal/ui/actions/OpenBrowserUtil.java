@@ -20,11 +20,20 @@ import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.help.IHelp;
 
 public class OpenBrowserUtil {
 	
-	public static void open(final URL url, final Shell shell, final String dialogTitle) {
+	public static void open(final URL url, Shell shell, String dialogTitle) {
+		if (shell == null) {
+			shell= JavaPlugin.getActiveWorkbenchShell();
+			if (shell == null) {
+				return;
+			}
+		}
+		
 		IHelp help= WorkbenchHelp.getHelpSupport();
 		if (help != null) {
 			BusyIndicator.showWhile(shell.getDisplay(), new Runnable() {
