@@ -23,6 +23,9 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+
+import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -81,7 +84,12 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 		ITextEditor editor= getTextEditor();
 		boolean checked= (editor != null && editor.showsHighlightRangeOnly());
 		setChecked(checked);
-		setEnabled(editor != null);
+		ICompilationUnit cu= null;
+		if (editor != null) {
+			IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
+			cu= manager.getWorkingCopy(editor.getEditorInput());
+		}
+		setEnabled(cu != null);
 	}
 	
 	/*
