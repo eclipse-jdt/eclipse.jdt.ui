@@ -135,7 +135,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		if (annotation instanceof IJavaAnnotation) {
 			IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
 			int problemId= javaAnnotation.getId();
-			if (problemId == -1) {
+			if (problemId != -1) {
 				ICompilationUnit cu= javaAnnotation.getCompilationUnit();
 				if (cu != null) {
 					return hasCorrections(cu, problemId);
