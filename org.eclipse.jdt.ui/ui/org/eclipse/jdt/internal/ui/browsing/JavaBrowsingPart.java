@@ -79,6 +79,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
@@ -133,6 +134,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	private static final String TAG_SELECTED_ELEMENTS= "selectedElements"; //$NON-NLS-1$
 	private static final String TAG_SELECTED_ELEMENT= "selectedElement"; //$NON-NLS-1$
+	private static final String TAG_LOGICAL_PACKAGE= "logicalPackage"; //$NON-NLS-1$
 	private static final String TAG_SELECTED_ELEMENT_PATH= "selectedElementPath"; //$NON-NLS-1$
 
 	private JavaUILabelProvider fLabelProvider;
@@ -217,10 +219,16 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			IMemento selectionMem= memento.createChild(TAG_SELECTED_ELEMENTS);
 			for (int i= 0; i < elements.length; i++) {
 				IMemento elementMem= selectionMem.createChild(TAG_SELECTED_ELEMENT);
-				// we can only persist JavaElements for now
 				Object o= elements[i];
 				if (o instanceof IJavaElement)
 					elementMem.putString(TAG_SELECTED_ELEMENT_PATH, ((IJavaElement) elements[i]).getHandleIdentifier());
+				else if (o instanceof LogicalPackage) {
+					IPackageFragment[] packages=((LogicalPackage)o).getFragments();
+					for (int j= 0; j < packages.length; j++) {
+						IMemento packageMem= elementMem.createChild(TAG_LOGICAL_PACKAGE);
+						packageMem.putString(TAG_SELECTED_ELEMENT_PATH, packages[j].getHandleIdentifier());
+					}
+				}
 			}
 		}
 	}
@@ -236,7 +244,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			fViewer.refresh();
 			fViewer.getControl().setRedraw(true);
 		}
-//		restoreSelectionState(memento);
 	}	
 
 	private ISelection restoreSelectionState(IMemento memento) {
@@ -249,9 +256,28 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			ArrayList list= new ArrayList();
 			IMemento[] elementMem= childMem.getChildren(TAG_SELECTED_ELEMENT);
 			for (int i= 0; i < elementMem.length; i++) {
-				IJavaElement element= JavaCore.create(elementMem[i].getString(TAG_SELECTED_ELEMENT_PATH));
-				if (element != null && element.exists())
-					list.add(element);
+				String javaElementHandle= elementMem[i].getString(TAG_SELECTED_ELEMENT_PATH);
+				if (javaElementHandle == null) {
+					// logical package
+					IMemento[] packagesMem= elementMem[i].getChildren(TAG_LOGICAL_PACKAGE);
+					LogicalPackage lp= null;
+					for (int j= 0; j < packagesMem.length; j++) {
+						javaElementHandle= packagesMem[j].getString(TAG_SELECTED_ELEMENT_PATH);
+						Object pack= (IPackageFragment)JavaCore.create(javaElementHandle);
+						if (pack instanceof IPackageFragment && ((IPackageFragment)pack).exists()) {
+							if (lp == null)
+								lp= new LogicalPackage((IPackageFragment)pack);								
+							else
+								lp.add((IPackageFragment)pack);
+						}
+					}
+					if (lp != null)
+						list.add(lp);
+				} else {
+					IJavaElement element= JavaCore.create(javaElementHandle);
+					if (element != null && element.exists())
+						list.add(element);
+				}
 			}
 			return new StructuredSelection(list);
 		}
@@ -626,7 +652,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		// Set selection
 		Object selectedElement= getSingleElementFromSelection(selection);
 		
-		if (selectedElement != null && part.equals(fPreviousSelectionProvider) && selectedElement.equals(fPreviousSelectedElement))
+		if (selectedElement != null && (part == null || part.equals(fPreviousSelectionProvider)) && selectedElement.equals(fPreviousSelectedElement))
 			return;
 
 		fPreviousSelectedElement= selectedElement;
@@ -661,10 +687,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fPreviousSelectionProvider= part;
 		
 		// Adjust input and set selection and 
-		if (selectedElement instanceof IJavaElement)
-			adjustInputAndSetSelection((IJavaElement)selectedElement);
-		else
-			setSelection(StructuredSelection.EMPTY, true);
+		adjustInputAndSetSelection(selectedElement);
 	}
 
 
@@ -815,9 +838,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		if (selection == null || selection.isEmpty())
 			selection= restoreSelectionState(fMemento);
 			
-		if (selection != null && !selection.isEmpty())
-			input= getSingleElementFromSelection(selection);
-		else {
+		if (selection == null || selection.isEmpty()) { 
 			// Use the input of the page
 			input= getSite().getPage().getInput();
 			if (!(input instanceof IJavaElement)) {
@@ -826,9 +847,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				else
 					return;
 			}
+			selection= new StructuredSelection(input);
 		}
-		if (findElementToSelect((IJavaElement)input) != null)
-			adjustInputAndSetSelection((IJavaElement)input);
+		selectionChanged(null, selection);
 	}
 
 	protected final void setHelp() {
@@ -880,8 +901,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		// Default is to do nothing
 	}
 
-	void adjustInputAndSetSelection(IJavaElement je) {	
-			
+	void adjustInputAndSetSelection(Object o) {
+		if (!(o instanceof IJavaElement)) {
+			setSelection(StructuredSelection.EMPTY, true);
+			return;
+		};
+		
+		IJavaElement je= (IJavaElement)o;
 		IJavaElement elementToSelect= getSuitableJavaElement(findElementToSelect(je));
 		IJavaElement newInput= findInputForJavaElement(je);
 		if (elementToSelect == null && !isValidInput(newInput))
