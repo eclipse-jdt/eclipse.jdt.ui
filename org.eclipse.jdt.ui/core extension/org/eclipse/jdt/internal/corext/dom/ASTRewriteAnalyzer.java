@@ -447,10 +447,15 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 					}
 					if (separatorState == NEW || insertAfterSeparator(elem)) {
 						doTextInsert(currPos, elem, getNodeIndent(i), true, description);
-						if (i != lastNonDelete) {
-							doTextInsert(currPos, getSeparatorString(i), description);
-						}
+						
 						separatorState= NEW;
+						if (i != lastNonDelete) {
+							if (getChangeKind(getNode(nextIndex)) != ASTRewrite.INSERTED) {
+								doTextInsert(currPos, getSeparatorString(i), description);
+							} else {
+								separatorState= NONE;
+							}
+						}
 					} else { // EXISTING && insert before separator
 						doTextInsert(prevEnd, getSeparatorString(i - 1), description);
 						doTextInsert(prevEnd, elem, getNodeIndent(i), true, description);
