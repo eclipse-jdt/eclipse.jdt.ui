@@ -34,14 +34,17 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ltk.core.refactoring.Change;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -182,6 +185,18 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 			ITypeBinding binding= null;
 			ListRewrite rewriter= null;
 			if (fType.isAnonymous()) {
+				final IJavaElement parent= fType.getParent();
+				if (parent instanceof IField) {
+					final EnumConstantDeclaration constant= (EnumConstantDeclaration) NodeFinder.perform(rewrite.getRoot(), ((ISourceReference) parent).getSourceRange());
+					if (constant != null) {
+						final AnonymousClassDeclaration declaration= constant.getAnonymousClassDeclaration();
+						if (declaration != null) {
+							binding= declaration.resolveBinding();
+							if (binding != null)
+								rewriter= rewrite.getASTRewrite().getListRewrite(declaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
+						}
+					}
+				}
 				final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), fType.getNameRange()), ClassInstanceCreation.class);
 				if (creation != null) {
 					binding= creation.resolveTypeBinding();
@@ -232,11 +247,11 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 								}
 							}
 						}
-						imports.createEdit(document);
+						imports.createEdit(document, new SubProgressMonitor(monitor, 1));
 						if (!fImports)
 							rewrite.clearImportRewrites();
 						fCreatedImports= imports.getCreatedImports();
-						
+
 						final Change result= rewrite.createChange();
 						if (result instanceof CompilationUnitChange) {
 							final CompilationUnitChange change= (CompilationUnitChange) result;

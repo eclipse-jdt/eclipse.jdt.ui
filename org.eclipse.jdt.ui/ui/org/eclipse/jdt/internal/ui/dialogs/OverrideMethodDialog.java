@@ -35,12 +35,16 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.internal.dialogs.ContainerCheckedTreeViewer;
 
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -259,17 +263,29 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		fUnit= parser.parse(type.getCompilationUnit(), true);
 		ITypeBinding binding= null;
 		if (type.isAnonymous()) {
-			final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()), ClassInstanceCreation.class);
-			if (creation != null)
-				binding= creation.resolveTypeBinding();
+			final IJavaElement element= type.getParent();
+			if (element instanceof IField) {
+				final IField field= (IField) element;
+				final EnumConstantDeclaration declaration= (EnumConstantDeclaration) NodeFinder.perform(fUnit, field.getSourceRange());
+				final AnonymousClassDeclaration decl= declaration.getAnonymousClassDeclaration();
+				if (decl != null)
+					binding= decl.resolveBinding();
+			} else {
+				final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()), ClassInstanceCreation.class);
+				if (creation != null)
+					binding= creation.resolveTypeBinding();
+			}
 		} else {
 			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()), AbstractTypeDeclaration.class);
 			if (declaration != null)
 				binding= declaration.resolveBinding();
 		}
-		IMethodBinding[] overridable= StubUtility2.getOverridableMethods(binding, false);
-
 		List toImplement= new ArrayList();
+		IMethodBinding[] overridable= null;
+		if (binding != null)
+			overridable= StubUtility2.getOverridableMethods(binding, false);
+		else
+			overridable= new IMethodBinding[] {};
 		for (int i= 0; i < overridable.length; i++) {
 			if (Modifier.isAbstract(overridable[i].getModifiers())) {
 				toImplement.add(overridable[i]);
