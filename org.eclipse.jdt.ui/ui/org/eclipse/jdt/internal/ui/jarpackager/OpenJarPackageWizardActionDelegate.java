@@ -48,7 +48,7 @@ public class OpenJarPackageWizardActionDelegate extends JarPackageActionDelegate
 			return;
 		} catch (CoreException ex) {
 			errorDetail= ex.getLocalizedMessage();
-			ExceptionHandler.handle(ex, parent, JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.title"), JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.message") + errorDetail); //$NON-NLS-2$ //$NON-NLS-1$
+			MessageDialog.openError(parent, JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.title"), JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.message") + errorDetail); //$NON-NLS-2$ //$NON-NLS-1$
 			return;
 		} catch (SAXException ex) {
 			errorDetail= JarPackagerMessages.getString("OpenJarPackageWizardDelegate.badXmlFormat") + ex.getLocalizedMessage(); //$NON-NLS-1$
