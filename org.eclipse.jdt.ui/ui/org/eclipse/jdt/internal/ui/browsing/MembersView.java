@@ -39,6 +39,8 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
@@ -232,16 +234,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 			case IJavaElement.IMPORT_CONTAINER:
 				IJavaElement parent= je.getParent();
 				if (parent instanceof ICompilationUnit) {
-					IType[] types;
-					try {
-						types= ((ICompilationUnit)parent).getAllTypes();
-					} catch (JavaModelException ex) {
-						return null;
-					}
-					if (types.length > 0)
-						return types[0];
-					else
-						return null;
+					return getTypeForCU((ICompilationUnit)parent);
 				}
 				else if (parent instanceof IClassFile)
 					return findInputForJavaElement(parent);
