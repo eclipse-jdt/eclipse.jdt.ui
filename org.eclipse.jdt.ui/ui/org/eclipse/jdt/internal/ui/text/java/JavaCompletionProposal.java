@@ -38,7 +38,6 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	private IContextInformation fContextInformation;
 	private int fContextInformationPosition;
 	private ProposalInfo fProposalInfo;
-	private IImportDeclaration fImportDeclaration;
 	private char[] fTriggerCharacters;
 	
 	private int fRelevance;
@@ -69,7 +68,6 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	
 		fContextInformation= null;
 		fContextInformationPosition= -1;
-		fImportDeclaration= null;
 		fTriggerCharacters= null;
 		fProposalInfo= null;
 	}
@@ -81,15 +79,6 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	public void setContextInformation(IContextInformation contextInformation) {
 		fContextInformation= contextInformation;
 		fContextInformationPosition= (fContextInformation != null ? fCursorPosition : -1);
-	}
-	
-	/**
-	 * Sets the import declaration to import when applied.
-	 * @param importDeclaration Optional import declaration to be added. Can be <code>null</code>. The underlying compilation unit
-	 * is assumed to be compatible with the document passed in <code>apply</code>.
-	 */
-	public void setImportDeclaration(IImportDeclaration importDeclaration) {
-		fImportDeclaration= importDeclaration;
 	}
 	
 	/**
@@ -119,40 +108,11 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		fContextInformationPosition= (fContextInformation != null ? fCursorPosition : -1);
 	}	
 	
-	protected void applyImports(IDocument document) {
-		if (fImportDeclaration == null) {
-			return;
-		}
-		
-		ICompilationUnit cu= (ICompilationUnit) fImportDeclaration.getAncestor(IJavaElement.COMPILATION_UNIT);
-		if (cu != null) {
-			try {
-				IType[] types= cu.getTypes();
-				if (types.length == 0 || types[0].getSourceRange().getOffset() > fReplacementOffset) {
-					// do not add import for code assist on import statements
-					return;
-				}
-
-				String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
-				int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();					
-				ImportsStructure impStructure= new ImportsStructure(cu, prefOrder, threshold, true);
-
-				impStructure.addImport(fImportDeclaration.getElementName());
-				// will modify the document as the CU works on the document
-				impStructure.create(false, null);
-
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
-			}
-		}
-	}
-	
 	/*
 	 * @see ICompletionProposalExtension#apply(IDocument, char, int)
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
 		try {
-			
 			// patch replacement length
 			int delta= offset - (fReplacementOffset + fReplacementLength);
 			if (delta > 0)
@@ -171,11 +131,6 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 				
 				replace(document, fReplacementOffset, fReplacementLength, buffer.toString());
 			}
-			
-			int oldLen= document.getLength();
-			applyImports(document);
-			fReplacementOffset += document.getLength() - oldLen;
-			
 		} catch (BadLocationException x) {
 			// ignore
 		}	

@@ -11,6 +11,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
 
 import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.Flags;
@@ -257,7 +258,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 		}
 
 		JavaCompletionProposal proposal= new MethodStubCompletionProposal(fJavaProject, fCompilationUnit, typeName.toString(), new String(name), paramTypes, start, getLength(start, end), displayString.toString(), new String(completionName));
-		proposal.setImage(fRegistry.get(getMemberDescriptor(modifiers)));
+		proposal.setImage(getImage(getMemberDescriptor(modifiers)));
 		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, returnTypeName.length == 0));
 		proposal.setRelevance(relevance);
 		fMethods.add(proposal);
@@ -357,13 +358,6 @@ public class ResultCollector extends CompletionRequestorAdapter {
 
 	
 	protected JavaCompletionProposal createTypeCompletion(int start, int end, String completion, ImageDescriptor descriptor, String typeName, String containerName, ProposalInfo proposalInfo, int relevance) {
-		IImportDeclaration importDeclaration= null;
-		if (containerName != null && fCompilationUnit != null) {
-			if (completion.equals(JavaModelUtil.concatenateName(containerName, typeName))) {
-				importDeclaration= fCompilationUnit.getImport(completion);
-				completion= typeName;
-			}
-		}
 		StringBuffer buf= new StringBuffer(typeName);
 		if (containerName != null) {
 			buf.append(" - "); //$NON-NLS-1$
@@ -374,9 +368,15 @@ public class ResultCollector extends CompletionRequestorAdapter {
 			}
 		}
 		String name= buf.toString();
-		
-		JavaCompletionProposal proposal= createCompletion(start, end, completion, descriptor, name, relevance);
-		proposal.setImportDeclaration(importDeclaration);
+
+		ICompilationUnit cu= null;
+		if (containerName != null && fCompilationUnit != null) {
+			if (completion.equals(JavaModelUtil.concatenateName(containerName, typeName))) {
+				cu= fCompilationUnit;
+			}
+		}
+	
+		JavaCompletionProposal proposal= new JavaTypeCompletionProposal(completion, cu, start, getLength(start, end), getImage(descriptor), name, relevance);
 		proposal.setProposalInfo(proposalInfo);
 		proposal.setTriggerCharacters(TYPE_TRIGGERS);
 		return proposal;
@@ -405,8 +405,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	}
 	
 	protected JavaCompletionProposal createCompletion(int start, int end, String completion, ImageDescriptor descriptor, String name, int relevance) {
-		Image icon= (descriptor == null) ? null : fRegistry.get(descriptor);
-		return new JavaCompletionProposal(completion, start, getLength(start, end), icon, name, relevance);
+		return new JavaCompletionProposal(completion, start, getLength(start, end), getImage(descriptor), name, relevance);
 	}
 
 	private int getLength(int start, int end) {
@@ -421,6 +420,10 @@ public class ResultCollector extends CompletionRequestorAdapter {
 			}
 		}
 		return length;
+	}
+	
+	private Image getImage(ImageDescriptor descriptor) {
+		return (descriptor == null) ? null : fRegistry.get(descriptor);
 	}
 	
 	/**
