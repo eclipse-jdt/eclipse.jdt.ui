@@ -4,22 +4,27 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import java.util.HashMap;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.viewers.IInputSelectionProvider;import org.eclipse.jface.viewers.ISelection;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.search.ui.IContextMenuContributor;import org.eclipse.search.ui.ISearchResultView;import org.eclipse.search.ui.ISearchResultViewEntry;import org.eclipse.search.ui.SearchUI;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.search.IJavaSearchResultCollector;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.GroupContext;
+import java.text.MessageFormat;
+import java.util.HashMap;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.viewers.IInputSelectionProvider;import org.eclipse.jface.viewers.ISelection;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.search.ui.IContextMenuContributor;import org.eclipse.search.ui.ISearchResultView;import org.eclipse.search.ui.ISearchResultViewEntry;import org.eclipse.search.ui.SearchUI;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.search.IJavaSearchResultCollector;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;import org.eclipse.jdt.internal.ui.util.SelectionUtil;import org.eclipse.jdt.ui.JavaUI;
 
 
 public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 
-	private static final String SPACE_MATCH= " " + SearchMessages.getString("SearchResultCollector.match"); //$NON-NLS-2$ //$NON-NLS-1$
-	private static final String SPACE_MATCHES= " " + SearchMessages.getString("SearchResultCollector.matches"); //$NON-NLS-2$ //$NON-NLS-1$
+	private static final String MATCH= SearchMessages.getString("SearchResultCollector.match"); //$NON-NLS-1$
+	private static final String MATCHES= SearchMessages.getString("SearchResultCollector.matches"); //$NON-NLS-1$
+	private static final String DONE= SearchMessages.getString("SearchResultCollector.done"); //$NON-NLS-1$
+	private static final String SEARCHING= SearchMessages.getString("SearchResultCollector.searching"); //$NON-NLS-1$
 	
 	private IProgressMonitor fMonitor;
 	private IContextMenuContributor fContextMenu;
 	private ISearchResultView fView;
 	private JavaSearchOperation fOperation;
 	private int fMatchCount= 0;
+	private Integer[] fMessageFormatArgs= new Integer[1];
 	
-	private static class ContextMenuContributor implements IContextMenuContributor {
+	private class ContextMenuContributor implements IContextMenuContributor {
 		private ElementSearchAction[] fSearchActions= new ElementSearchAction[] {
 			new FindReferencesAction(), 
 			new FindDeclarationsAction(),
@@ -27,12 +32,15 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 			new FindImplementorsAction()};
 						
 		public void fill(IMenuManager menu, IInputSelectionProvider inputProvider) {
+			IWorkbenchWindow wbWindow= null;
+			if (fView != null && fView.getSite() != null)
+				wbWindow= fView.getSite().getWorkbenchWindow();
+			if (wbWindow == null)
+				wbWindow= JavaPlugin.getActiveWorkbenchWindow();
+
 			JavaPlugin.createStandardGroups(menu);
 			new JavaSearchGroup().fill(menu, new GroupContext(inputProvider));
-			
-			// XXX should get the workbench window from the site. 
-			OpenTypeHierarchyUtil.addToMenu(JavaPlugin.getActiveWorkbenchWindow(), 
-				menu, convertSelection(inputProvider.getSelection()));
+			OpenTypeHierarchyUtil.addToMenu(wbWindow, menu, convertSelection(inputProvider.getSelection()));
 		}
 		
 		private Object convertSelection(ISelection selection) {
@@ -43,7 +51,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 			try {
 				return JavaCore.create((String) ((IMarker) marker).getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));	
 			} catch (CoreException ex) {
-				ExceptionHandler.log(ex, SearchMessages.getString("Search.Error.createJavaElement.message"));
+				ExceptionHandler.log(ex, SearchMessages.getString("Search.Error.createJavaElement.message")); //$NON-NLS-1$
 				return null;
 			}
 		}
@@ -69,9 +77,11 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 				new GotoMarkerAction(),
 				new GroupByKeyComputer(),
 				fOperation);
-		}	
+		}
+		if (!getProgressMonitor().isCanceled())
+			getProgressMonitor().subTask(SEARCHING);
 	}
-	 
+	
 	/**
 	 * @see IJavaSearchResultCollector#accept
 	 */
@@ -89,15 +99,10 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 		marker.setAttributes(attributes);
 
 		fView.addMatch(enclosingElement.getElementName(), enclosingElement, resource, marker);
-		fMatchCount= fMatchCount + 1;
-		if (!getProgressMonitor().isCanceled()) {
-			String text;
-			if (fMatchCount == 1)
-				text= fMatchCount + SPACE_MATCH;
-			else
-				text= fMatchCount + SPACE_MATCHES;
-			getProgressMonitor().subTask(text);
-		}
+
+		fMatchCount++;
+		if (!getProgressMonitor().isCanceled())
+			getProgressMonitor().subTask(getFormattedMatchesString(fMatchCount));
 	}
 	
 	/**
@@ -105,12 +110,8 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	 */
 	public void done() {
 		if (!getProgressMonitor().isCanceled()) {
-			String matchString;
-			if (fMatchCount == 1)
-				matchString= fMatchCount + SPACE_MATCH;
-			else
-				matchString= fMatchCount + SPACE_MATCHES;
-			getProgressMonitor().setTaskName(SearchMessages.getString("SearchResultCollector.done") + ": " + matchString + "   "); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+			String matchesString= getFormattedMatchesString(fMatchCount);
+			getProgressMonitor().setTaskName(MessageFormat.format(DONE, new String[]{matchesString}));
 		}
 
 		if (fView != null)
@@ -134,5 +135,13 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	
 	void setOperation(JavaSearchOperation operation) {
 		fOperation= operation;
+	}
+	
+	private String getFormattedMatchesString(int count) {
+		if (fMatchCount == 1)
+			return MATCH;
+		fMessageFormatArgs[0]= new Integer(count);
+		return MessageFormat.format(MATCHES, fMessageFormatArgs);
+
 	}
 }
