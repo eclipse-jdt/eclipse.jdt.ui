@@ -749,7 +749,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 	}
 	
 	public void testDoStatement1() throws Exception {
-		if (CodeFormatterUtil.OLD_FORMATTER) {
+		if (CodeFormatterUtil.useOldFormatter()) {
 			return; // old fomatter has a bug with do statements
 		}
 		
