@@ -108,6 +108,10 @@ public class ExtractMethodRefactoring extends Refactoring {
 				result.addFatalError("Internal error: compilation unit has wrong type.");
 				return result;
 			}
+			if (!fCUnit.isStructureKnown()) {
+				result.addFatalError("Syntax errors in compilation unit prevent method extraction. Fix fix errors.");
+				return result;
+			}
 			fBuffer= new ExtendedBuffer(fCUnit.getBuffer());
 			((CompilationUnit)fCUnit).accept(createVisitor());
 			

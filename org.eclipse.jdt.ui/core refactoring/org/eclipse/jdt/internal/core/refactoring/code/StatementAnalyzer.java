@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	// internal state.
 	private int fMode;
 	private int fCursorPosition;
+	private boolean fCompileErrorFound;
 
 	// Error handling	
 	private RefactoringStatus fStatus= new RefactoringStatus();
@@ -287,7 +288,7 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 		boolean enclosed= fSelection.coveredBy(node.bodyStart, node.bodyEnd);
 		// Do a reset even if we are in BEFORE mode. We can extract a method defined
 		// inside a method.
-		if (enclosed && (fMode == UNDEFINED || fMode == BEFORE)) {
+		if (!fCompileErrorFound && enclosed && (fMode == UNDEFINED || fMode == BEFORE)) {
 			if (fMode == UNDEFINED) {
 				CommentAnalyzer commentAnalyzer= new CommentAnalyzer();
 				fStatus.merge(commentAnalyzer.check(fSelection, fBuffer.getCharacters(),
@@ -455,11 +456,10 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	//---- Problem management -----------------------------------------------------
 	
 	public void acceptProblem(IProblem problem) {
-		if (fMode != UNDEFINED) {
-			reset();
-			fCursorPosition= Integer.MAX_VALUE;
-			fStatus.addFatalError("Compilation unit has compile error at line " + problem.getSourceLineNumber() + ": " + problem.getMessage());
-		}
+		reset();
+		fCursorPosition= Integer.MAX_VALUE;
+		fStatus.addFatalError("Compilation error at line " + problem.getSourceLineNumber() + " prevents method extraction: " + problem.getMessage());
+		fCompileErrorFound= true;
 	}
 	
 	private int getLineNumber(AstNode node){
