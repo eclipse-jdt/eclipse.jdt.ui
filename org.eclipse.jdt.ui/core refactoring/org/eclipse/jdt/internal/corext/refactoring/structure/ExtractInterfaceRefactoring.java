@@ -2,6 +2,7 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -28,11 +29,15 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -44,6 +49,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
@@ -323,7 +329,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return added;
 	}
 
-	private boolean canReplace(SearchResult searchResult, CompilationUnit cuNode, IProgressMonitor pm) {
+	private boolean canReplace(SearchResult searchResult, CompilationUnit cuNode, IProgressMonitor pm)  throws JavaModelException{
 		///XXX
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartEnd(searchResult.getStart(), searchResult.getEnd()), true);
 		cuNode.accept(analyzer);
@@ -623,13 +629,31 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	//--- 'can replace*' related methods 
-	private boolean canReplaceTypeInVariableDeclarationStatement(CompilationUnit cuNode, VariableDeclarationStatement vds, IProgressMonitor pm) {
+	private boolean canReplaceTypeInVariableDeclarationStatement(CompilationUnit cuNode, VariableDeclarationStatement vds, IProgressMonitor pm) throws JavaModelException{
 		VariableDeclarationFragment[] fragments= (VariableDeclarationFragment[]) vds.fragments().toArray(new VariableDeclarationFragment[vds.fragments().size()]);
 		for (int i= 0; i < fragments.length; i++) {
-			ASTNode[] tempReferences= TempOccurrenceFinder.findTempOccurrenceNodes(cuNode, fragments[i], true, false);			
-			if (tempReferences.length == 0)
-				return true;
+			if (! areAllTempReferencesOK(fragments[i], cuNode))
+				return false;
 		}
-		return false;
+		return true;
+	}
+	private boolean areAllTempReferencesOK(VariableDeclaration tempDeclaration, CompilationUnit cuNode) throws JavaModelException{
+		ASTNode[] tempReferences= TempOccurrenceFinder.findTempOccurrenceNodes(cuNode, tempDeclaration, true, false);			
+		for (int i= 0; i < tempReferences.length; i++) {
+			ASTNode tempRef= tempReferences[i];
+			if (! (tempRef.getParent() instanceof MethodInvocation))
+				return false;
+			MethodInvocation mi= (MethodInvocation)tempRef.getParent();
+			IBinding miBinding= mi.getName().resolveBinding();
+			if (miBinding == null || miBinding.getKind() != IBinding.METHOD)
+				return false;
+			IMethodBinding methodBinding= (IMethodBinding)miBinding;
+			IMethod method= Binding2JavaModel.find(methodBinding, fInputClass);
+			if (method == null)
+				return false;
+			if (! Arrays.asList(fExtractedMembers).contains(method))
+				return false;	
+		}	
+		return true;
 	}
 }
