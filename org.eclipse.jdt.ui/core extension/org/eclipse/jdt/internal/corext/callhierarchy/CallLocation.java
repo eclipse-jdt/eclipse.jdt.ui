@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.callhierarchy;
 
 import org.eclipse.core.runtime.IAdaptable;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IOpenable;
@@ -81,6 +82,8 @@ public class CallLocation implements IAdaptable {
 
     public int getLineNumber() {
         if (fLineNumber == UNKNOWN_LINE_NUMBER) {
+        	//TODO (bug 56129): should not create an AST just to get the line number (very expensive).
+        	//Just create a Document on the IBuffer and get the line number from there.
             CompilationUnit unit= CallHierarchy.getCompilationUnitNode(fMember, false);
             if (unit != null) {
                 fLineNumber= unit.lineNumber(fStart);
@@ -97,9 +100,14 @@ public class CallLocation implements IAdaptable {
         if (fCallText == null) {
             try {
 				IOpenable openable= fMember.getOpenable();
-				if (openable == null)
+				if (openable == null) {
 					return ""; //$NON-NLS-1$
-				fCallText= openable.getBuffer().getText(fStart, (fEnd - fStart));
+                }
+				IBuffer buffer = openable.getBuffer();
+                if (buffer == null) { //binary, without source attachment
+                    return ""; //$NON-NLS-1$
+                }
+                fCallText= buffer.getText(fStart, (fEnd - fStart));
             } catch (JavaModelException e) {
                 JavaPlugin.log(e);
                 return "";    //$NON-NLS-1$
