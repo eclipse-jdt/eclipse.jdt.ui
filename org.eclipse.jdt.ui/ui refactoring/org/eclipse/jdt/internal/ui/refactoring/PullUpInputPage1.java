@@ -32,8 +32,6 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -72,6 +70,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.structure.IMemberActionInfo;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -117,7 +116,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		}
 	}
 
-	private static class MemberActionInfo {
+	private static class MemberActionInfo implements IMemberActionInfo{
 		static final int PULL_UP_ACTION= 			0;//values are important here
 		static final int DECLARE_ABSTRACT_ACTION= 1;//values are important here
 		static final int NO_ACTION= 				2;
@@ -201,6 +200,10 @@ class PullUpInputPage1 extends UserInputWizardPage {
 				return false;
 			return true;	
 		}
+
+		public boolean isNoAction() {
+			return getAction() == NO_ACTION;
+		}
 	}
 	
 	private static class MemberActionInfoLabelProvider extends LabelProvider implements ITableLabelProvider {
@@ -242,57 +245,6 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		public void dispose() {
 			super.dispose();
 			fJavaElementLabelProvider.dispose();
-		}
-	}
-	
-	private static class PullUpCheckboxTableViewer extends CheckboxTableViewer{
-
-		public PullUpCheckboxTableViewer(Table table) {
-			super(table);
-		}
-
-		/*
-		 * @see org.eclipse.jface.viewers.StructuredViewer#doUpdateItem(org.eclipse.swt.widgets.Widget, java.lang.Object, boolean)
-		 */
-		protected void doUpdateItem(Widget widget, Object element, boolean fullMap) {
-			super.doUpdateItem(widget, element, fullMap);
-			if (! (widget instanceof TableItem))
-				return;
-			TableItem item= (TableItem)widget;
-			MemberActionInfo info= (MemberActionInfo)element;
-			item.setChecked(getCheckState(info));
-			Assert.isTrue(item.getChecked() == getCheckState(info));
-		}
-
-		/*
-		 * @see org.eclipse.jface.viewers.Viewer#inputChanged(java.lang.Object, java.lang.Object)
-		 */
-		protected void inputChanged(Object input, Object oldInput) {
-			super.inputChanged(input, oldInput);
-			// XXX workaround for http://bugs.eclipse.org/bugs/show_bug.cgi?id=9390
-			setCheckState((MemberActionInfo[])input);
-		}
-
-		private void setCheckState(MemberActionInfo[] infos) {
-			if (infos == null)
-				return;
-			for (int i= 0; i < infos.length; i++) {
-				MemberActionInfo info= infos[i];
-				setChecked(info, getCheckState(info));
-			}	
-		}
-
-		private static boolean getCheckState(MemberActionInfo info) {
-			return info.getAction() != MemberActionInfo.NO_ACTION;
-		}		
-		
-		/*
-		 * @see org.eclipse.jface.viewers.Viewer#refresh()
-		 */
-		public void refresh() {
-			super.refresh();
-			// XXX workaround for http://bugs.eclipse.org/bugs/show_bug.cgi?id=9390
-			setCheckState((MemberActionInfo[])getInput());			
 		}
 	}
 	
@@ -547,7 +499,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		TableColumn column1= new TableColumn(table, SWT.NONE);
 		column1.setText("Action");
 		
-		fTableViewer= new PullUpCheckboxTableViewer(table);
+		fTableViewer= new PullPushCheckboxTableViewer(table);
 		fTableViewer.setUseHashlookup(true);
 		fTableViewer.setContentProvider(new ArrayContentProvider());
 		fTableViewer.setLabelProvider(new MemberActionInfoLabelProvider());

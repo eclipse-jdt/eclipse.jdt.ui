@@ -32,15 +32,12 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
@@ -171,56 +168,6 @@ public class PushDownInputPage extends UserInputWizardPage {
 			fJavaElementLabelProvider.dispose();
 		}
 	}
-	
-	private static class PushDownTableViewer extends CheckboxTableViewer{
-		public PushDownTableViewer(Table table) {
-			super(table);
-		}
-
-		/*
-		 * @see org.eclipse.jface.viewers.StructuredViewer#doUpdateItem(org.eclipse.swt.widgets.Widget, java.lang.Object, boolean)
-		 */
-		protected void doUpdateItem(Widget widget, Object element, boolean fullMap) {
-			super.doUpdateItem(widget, element, fullMap);
-			if (! (widget instanceof TableItem))
-				return;
-			TableItem item= (TableItem)widget;
-			MemberActionInfo info= (MemberActionInfo)element;
-			item.setChecked(getCheckState(info));
-			Assert.isTrue(item.getChecked() == getCheckState(info));
-		}
-
-		/*
-		 * @see org.eclipse.jface.viewers.Viewer#inputChanged(java.lang.Object, java.lang.Object)
-		 */
-		protected void inputChanged(Object input, Object oldInput) {
-			super.inputChanged(input, oldInput);
-			// XXX workaround for http://bugs.eclipse.org/bugs/show_bug.cgi?id=9390
-			setCheckState((MemberActionInfo[])input);
-		}
-
-		private void setCheckState(MemberActionInfo[] infos) {
-			if (infos == null)
-				return;
-			for (int i= 0; i < infos.length; i++) {
-				MemberActionInfo info= infos[i];
-				setChecked(info, getCheckState(info));
-			}	
-		}
-
-		private static boolean getCheckState(MemberActionInfo info) {
-			return info.getAction() != MemberActionInfo.NO_ACTION;
-		}		
-		
-		/*
-		 * @see org.eclipse.jface.viewers.Viewer#refresh()
-		 */
-		public void refresh() {
-			super.refresh();
-			// XXX workaround for http://bugs.eclipse.org/bugs/show_bug.cgi?id=9390
-			setCheckState((MemberActionInfo[])getInput());			
-		}
-	}
 
 	private static final int MEMBER_COLUMN= 0;
 	private static final int ACTION_COLUMN= 1;
@@ -231,7 +178,7 @@ public class PushDownInputPage extends UserInputWizardPage {
 	private static final int ROW_COUNT= 10;
 
 	private Button fEditButton;
-	private PushDownTableViewer fTableViewer;
+	private PullPushCheckboxTableViewer fTableViewer;
 
 	public PushDownInputPage() {
 		super(PAGE_NAME, true);
@@ -296,7 +243,7 @@ public class PushDownInputPage extends UserInputWizardPage {
 		TableColumn column1= new TableColumn(table, SWT.NONE);
 		column1.setText("Action");
 		
-		fTableViewer= new PushDownTableViewer(table);
+		fTableViewer= new PullPushCheckboxTableViewer(table);
 		fTableViewer.setUseHashlookup(true);
 		fTableViewer.setContentProvider(new ArrayContentProvider());
 		fTableViewer.setLabelProvider(new MemberActionInfoLabelProvider());
