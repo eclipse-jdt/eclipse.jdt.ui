@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -56,13 +57,27 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 	static void perform(ISourceReference[] elements) throws CoreException {
 		ISourceReference[] childrenRemoved= SourceReferenceUtil.removeAllWithParentsSelected(elements);
 		Map mapping= SourceReferenceUtil.groupByFile(childrenRemoved); //IFile -> List of ISourceReference (elements from that file)
+		
+		List emptyCuList= Arrays.asList(getCusLeftEmpty(mapping));
+		
 		for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
 			IFile file= (IFile)iter.next();
-			List l= (List)mapping.get(file);
-			ISourceReference[] refs= (ISourceReference[]) l.toArray(new ISourceReference[l.size()]);
-			delete(file, refs);
+			if (emptyCuList.contains(JavaCore.create(file))) //do not delete in these files
+				continue;
+			deleteAll(mapping, file);
 		}
-		deleteEmptyCus(mapping);
+		
+		ICompilationUnit[] notDeleted= deleteEmptyCus(mapping);
+		for (int i= 0; i < notDeleted.length; i++) {
+			IFile file= (IFile)notDeleted[i].getUnderlyingResource();
+			deleteAll(mapping, file);
+		}
+	}
+
+	private static void deleteAll(Map mapping, IFile file) throws CoreException {
+		List l= (List)mapping.get(file);
+		ISourceReference[] refs= (ISourceReference[]) l.toArray(new ISourceReference[l.size()]);
+		delete(file, refs);
 	}
 
 	private static void delete(IFile file, ISourceReference[] elems) throws CoreException{
@@ -82,19 +97,27 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 		return new DeleteSourceReferenceEdit(ref, SourceReferenceUtil.getCompilationUnit(ref));
 	}
 	
-	private static void deleteEmptyCus(Map mapping) throws JavaModelException {
+	/**
+	 * returns cus that have <b>not</b> been deleted
+	 */
+	private static ICompilationUnit[] deleteEmptyCus(Map mapping) throws JavaModelException {
 		ICompilationUnit[] cusToDelete= getCusLeftEmpty(mapping);
 		if (cusToDelete.length == 0)
-			return;
+			return cusToDelete;
 			
 		if (! isOkToDeleteCus(cusToDelete))
-			return;
-			
+			return cusToDelete;
+		
+		List notDeletedCus= new ArrayList();
+		notDeletedCus.addAll(Arrays.asList(cusToDelete));	
+		
 		for (int i= 0; i < cusToDelete.length; i++) {
 			if (isReadOnly(cusToDelete[i]) && (! isOkToDeleteReadOnly(cusToDelete[i])))
 				continue;
 			cusToDelete[i].delete(false, new NullProgressMonitor());
+			notDeletedCus.remove(cusToDelete[i]);
 		}	
+		return (ICompilationUnit[]) notDeletedCus.toArray(new ICompilationUnit[notDeletedCus.size()]);
 	}
 	
 	private static boolean isReadOnly(ICompilationUnit cu) throws JavaModelException{
