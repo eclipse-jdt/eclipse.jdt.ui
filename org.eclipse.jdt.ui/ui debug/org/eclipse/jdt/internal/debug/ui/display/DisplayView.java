@@ -16,8 +16,8 @@ public class DisplayView extends ViewPart {		/**	 * Display view identifier (
 	/**
 	 * @see ViewPart#createChild(IWorkbenchPartContainer)
 	 */
-	public void createPartControl(Composite parent) {
-		fSourceViewer= new SourceViewer(parent, null, SWT.NULL);		fSourceViewer.configure(new SourceViewerConfiguration());		fSourceViewer.setDocument(new Document());		
+	public void createPartControl(Composite parent) {				int styles= SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION;
+		fSourceViewer= new SourceViewer(parent, null, styles);		fSourceViewer.configure(new SourceViewerConfiguration());		fSourceViewer.setDocument(new Document());		
 		initializeActions();
 		initializeToolBar();
 

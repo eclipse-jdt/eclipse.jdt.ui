@@ -513,6 +513,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				public final static int PROTECTED=	1;
 				public final static int PRIVATE=	2;
 				public final static int DEFAULT=	3;
+				public final static int NOT_STATIC=	4;
 				
 				private int fVisibility;
 				
@@ -524,6 +525,16 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					
 					if ( !(element instanceof IMember))
 						return true;
+						
+					if (element instanceof IType) {
+						IType type= (IType) element;
+						IJavaElement parent= type.getParent();
+						if (parent == null)
+							return true;
+						int elementType= parent.getElementType();
+						if (elementType == IJavaElement.COMPILATION_UNIT || elementType == IJavaElement.CLASS_FILE)
+							return true;
+					}
 						
 					IMember member= (IMember) element;
 					try {
@@ -538,6 +549,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 								return Flags.isPrivate(flags);
 							case DEFAULT:
 								return !(Flags.isPublic(flags) || Flags.isProtected(flags) || Flags.isPrivate(flags));
+							case NOT_STATIC:
+								return !Flags.isStatic(flags);
 						}
 					} catch (JavaModelException x) {
 					}
@@ -768,17 +781,12 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		}
 				
 		addAction(menu, IContextMenuConstants.GROUP_OPEN, "OpenImportDeclaration");
-		// addAction(menu, IContextMenuConstants.GROUP_SHOW, "ShowTypeHierarchy");
 		addAction(menu, IContextMenuConstants.GROUP_SHOW, "ShowInPackageView");
 		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "DeleteElement");
 		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "ReplaceWithEdition");
 		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "AddEdition");
 		addAction(menu, IContextMenuConstants.GROUP_REORGANIZE, "AddMethodEntryBreakpoint");
-		
-		addAction(menu, IContextMenuConstants.GROUP_VIEWER_SETUP, "SortMembers");
-		addAction(menu, IContextMenuConstants.GROUP_VIEWER_SETUP, "HideFields");
-		addAction(menu, IContextMenuConstants.GROUP_VIEWER_SETUP, "HideNonePublicMembers");
-		
+				
 		ContextMenuGroup.add(menu, fActionGroups, fOutlineViewer);
 		
 		addRefactoring(menu);
@@ -803,20 +811,20 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			addSelectionChangedListener(updater);
 		}
 		
-		// let actions appear in the context menu
-//		setAction("SortMembers", new LexicalSortingAction(JavaPlugin.getResourceBundle(), "Outliner.SortMembers."));
-//		setAction("HideFields", new FilterAction(JavaPlugin.getResourceBundle(), "Outliner.HideFields.", new FieldFilter()));
-//		setAction("HideNonePublicMembers", new FilterAction(JavaPlugin.getResourceBundle(), "Outliner.HideNonePublicMembers.", new VisibilityFilter(VisibilityFilter.PUBLIC)));		
-		
-		// let actions appear in the tool bar
 		JavaUIAction action= new LexicalSortingAction(JavaPlugin.getResourceBundle(), "Outliner.SortMembers.");
 		action.setImageDescriptors("lcl16", "alphab_sort_co.gif");
 		toolBarManager.add(action);
+		
 		action= new FilterAction(JavaPlugin.getResourceBundle(), "Outliner.HideFields.", new FieldFilter());
 		action.setImageDescriptors("lcl16", "fields_co.gif");
 		toolBarManager.add(action);
+		
 		action= new FilterAction(JavaPlugin.getResourceBundle(), "Outliner.HideNonePublicMembers.", new VisibilityFilter(VisibilityFilter.PUBLIC));		
-		action.setImageDescriptor(JavaPluginImages.DESC_MISC_PUBLIC);
+		action.setImageDescriptors("lcl16", "public_co.gif");
+		toolBarManager.add(action);
+		
+		action= new FilterAction(JavaPlugin.getResourceBundle(), "Outliner.HideStaticMembers.", new VisibilityFilter(VisibilityFilter.NOT_STATIC));		
+		action.setImageDescriptors("lcl16", "static_co.gif");
 		toolBarManager.add(action);
 	}	
 	
