@@ -17,8 +17,6 @@ import java.util.ResourceBundle;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.jface.dialogs.ErrorDialog;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -60,10 +58,6 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			ErrorDialog.openError(null,
-				JavaTemplateMessages.getString("Templates.error.title"), //$NON-NLS-1$
-				e.getMessage(), e.getStatus());
-
 			clear();
 		}
 
