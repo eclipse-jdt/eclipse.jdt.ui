@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * An abstract default implementation for a change object - suitable for subclassing. This class manages
@@ -140,9 +141,7 @@ public abstract class Change implements IChange {
 			return (IResource)element;
 		} 
 		if (element instanceof ICompilationUnit) {
-			ICompilationUnit cunit= (ICompilationUnit)element;
-			if (cunit.isWorkingCopy())
-				element= cunit.getOriginalElement();
+			return JavaModelUtil.toOriginal((ICompilationUnit)element).getResource();
 		}
 		if (element instanceof IAdaptable) {
 			return (IResource) ((IAdaptable)element).getAdapter(IResource.class);

@@ -430,9 +430,8 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor {
 		}
 						
 		ICompilationUnit cu= fCompilationUnit;
-		if (cu.isWorkingCopy()) {
-			cu= (ICompilationUnit) cu.getOriginalElement();
-		}
+		cu= JavaModelUtil.toOriginal(cu);
+
 		/*
 		 * Explicitly create a new non-shared working copy.
 		 */

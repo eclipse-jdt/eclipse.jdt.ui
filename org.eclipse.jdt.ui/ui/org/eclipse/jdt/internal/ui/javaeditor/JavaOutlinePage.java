@@ -104,6 +104,7 @@ import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -663,11 +664,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					Object input= getInput();
 					if (input instanceof ICompilationUnit) {
 						ICompilationUnit cu= (ICompilationUnit) input;
-						if (cu.isWorkingCopy()) {
-							return cu.getOriginalElement().getResource();
-						} else {
-							return cu.getResource();
-						}				
+						cu= JavaModelUtil.toOriginal(cu);
+						return cu.getResource();		
 					} else if (input instanceof IClassFile) {
 						return ((IClassFile) input).getResource();
 					}

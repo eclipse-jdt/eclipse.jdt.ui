@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class SourceReferenceUtil {
 	
@@ -36,9 +37,7 @@ public class SourceReferenceUtil {
 	
 	public static IFile getFile(ISourceReference ref) throws JavaModelException{
 		ICompilationUnit unit= getCompilationUnit(ref);
-		if (! unit.isWorkingCopy()) 
-			return (IFile)unit.getResource();
-		return (IFile)unit.getOriginalElement().getResource();
+		return (IFile) JavaModelUtil.toOriginal(unit).getResource();
 	}
 	
 	public static ICompilationUnit getCompilationUnit(ISourceReference o){

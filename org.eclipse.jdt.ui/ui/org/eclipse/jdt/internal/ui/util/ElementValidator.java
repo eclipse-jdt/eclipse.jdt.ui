@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -195,9 +196,7 @@ public class ElementValidator {
 				IJavaElement je= (IJavaElement)element;
 				ICompilationUnit cu= (ICompilationUnit)je.getAncestor(IJavaElement.COMPILATION_UNIT);
 				if (cu != null) {
-					if (cu.isWorkingCopy())
-						cu= (ICompilationUnit)cu.getOriginalElement();
-					je= cu;
+					je= JavaModelUtil.toOriginal(cu);
 				}
 				resource= je.getResource();
 			} else {

@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -77,10 +78,7 @@ class GotoTypeAction extends Action {
 		ICompilationUnit cu= (ICompilationUnit) type.getAncestor(IJavaElement.COMPILATION_UNIT);
 		IJavaElement element= null;
 		if (cu != null) {
-			if (cu.isWorkingCopy())
-				element= cu.getOriginalElement();
-			else
-				element= cu;
+			element= JavaModelUtil.toOriginal(cu);
 		}
 		else {
 			element= type.getAncestor(IJavaElement.CLASS_FILE);

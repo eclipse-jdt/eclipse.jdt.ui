@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
@@ -93,8 +94,7 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 			return null;
 			
 		// get to original CU
-		if (cu.isWorkingCopy())
-			cu= (ICompilationUnit) cu.getOriginalElement();
+		cu= JavaModelUtil.toOriginal(cu);
 			
 		// find underlying file
 		IFile file= (IFile) cu.getResource();

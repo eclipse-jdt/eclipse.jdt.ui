@@ -58,6 +58,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /*
  * Open items:
@@ -287,7 +288,10 @@ public class InlineMethodRefactoring extends Refactoring {
 				status.addFatalError(RefactoringCoreMessages.getString("InlineMethodRefactoring.error.classFile")); //$NON-NLS-1$
 				return null;
 			}
-			if (!source.isWorkingCopy()) {
+			
+			source= JavaModelUtil.toWorkingCopy(source);
+			
+			/*if (!source.isWorkingCopy()) {
 				// try to find a working copy if exists.
 				// XXX: This is a layer breaker - should not access jdt.ui
 				IWorkingCopy[] workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
@@ -298,7 +302,7 @@ public class InlineMethodRefactoring extends Refactoring {
 						break;
 					}
 				}
-			}
+			}*/
 			declaration= (MethodDeclaration)JavaElementMapper.perform(method, MethodDeclaration.class);
 			if (declaration != null) {
 				return new SourceProvider(source, declaration);
@@ -341,8 +345,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	}
 	
 	private IFile getFile(ICompilationUnit unit) {
-		if (unit.isWorkingCopy())
-			unit= (ICompilationUnit)unit.getOriginalElement();
+		unit= JavaModelUtil.toOriginal(unit);
 		IResource resource= unit.getResource();
 		if (resource != null && resource.getType() == IResource.FILE)
 			return (IFile)resource;

@@ -404,7 +404,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 							handleCoreException(ex, ex.getMessage());
 					} finally {
 						// ensure problem requestor gets deactivated
-						fCollectedProblems= null;
+						//fCollectedProblems= null;
 					}
 				}
 			}

@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -39,6 +40,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
 
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.core.BufferFactoryWrapper;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
@@ -504,10 +509,7 @@ public class JavaModelUtil {
 	 * Returns if a CU can be edited.
 	 */
 	public static boolean isEditable(ICompilationUnit cu)  {
-		if (cu.isWorkingCopy()) {
-			cu= (ICompilationUnit) cu.getOriginalElement();
-		}
-		IResource resource= cu.getResource();
+		IResource resource= toOriginal(cu).getResource();
 		return (resource.exists() && !resource.isReadOnly());
 	}
 
@@ -573,10 +575,24 @@ public class JavaModelUtil {
 	 * an original the input cu is returned. The returned cu might not exist
 	 */
 	public static ICompilationUnit toOriginal(ICompilationUnit cu) {
+		if (false) {
+			testCompilationUnitOwner("toOriginal", cu); //$NON-NLS-1$
+		}
+		
 		if (cu != null && cu.isWorkingCopy())
 			return (ICompilationUnit) cu.getOriginal(cu);
 		return cu;
-	}	
+	}
+		
+	private static void testCompilationUnitOwner(String methodName, ICompilationUnit cu) {
+		if (cu == null) {
+			return;
+		}
+		if (!isPrimary(cu))  {
+			JavaPlugin.logErrorMessage(methodName + ": operating with non-primary cu"); //$NON-NLS-1$
+		}
+	}
+	
 	
 	/**
 	 * Returns the working copy of the given member. If the member is already in a
@@ -656,6 +672,8 @@ public class JavaModelUtil {
 	 * working copy or the CU has no working copy the input CU is returned.
 	 */	
 	public static ICompilationUnit toWorkingCopy(ICompilationUnit cu) {
+		//testCompilationUnitOwner("toWorkingCopy", cu); //$NON-NLS-1$
+		
 		if (!cu.isWorkingCopy()) {
 			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
 			if (workingCopy != null) {
@@ -664,6 +682,26 @@ public class JavaModelUtil {
 		}
 		return cu;
 	}
+	
+	/**
+	 * Returns true if a cu is a primary cu (original or shared working copy)
+	 */
+	public static boolean isPrimary(ICompilationUnit cu) {
+		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
+			return cu.getOwner() == null;
+		} else {
+			WorkingCopyOwner owner= cu.getOwner();
+			if (owner == null) {
+				return true;
+			}
+			if (owner instanceof BufferFactoryWrapper) {
+				BufferFactoryWrapper wrapper= (BufferFactoryWrapper) owner;
+				return wrapper.factory == JavaUI.getBufferFactory();
+			}
+			return false;
+		}
+	}
+	
 	
 	/*
 	 * http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253

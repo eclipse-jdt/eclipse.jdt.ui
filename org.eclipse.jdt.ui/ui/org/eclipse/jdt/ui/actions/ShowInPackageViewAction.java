@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -178,9 +179,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 				break;
 		}
 		if (element.getElementType() == IJavaElement.COMPILATION_UNIT) {
-			ICompilationUnit unit= (ICompilationUnit)element;
-			if (unit.isWorkingCopy())
-				element= unit.getOriginalElement();
+			element= JavaModelUtil.toOriginal((ICompilationUnit)element);
 		}
 		return element;
 	}

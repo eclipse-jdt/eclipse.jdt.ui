@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
  
 /**
@@ -344,9 +345,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 
 		if (element instanceof ICompilationUnit) {
 			if (getProvideWorkingCopy()) {
-				IJavaElement original= ((IWorkingCopy)element).getOriginalElement();
-				if (original != null)
-					element= original;
+				element= JavaModelUtil.toOriginal((ICompilationUnit) element);
 			}
 			if (kind == IJavaElementDelta.CHANGED) {
 				postRefresh(element);

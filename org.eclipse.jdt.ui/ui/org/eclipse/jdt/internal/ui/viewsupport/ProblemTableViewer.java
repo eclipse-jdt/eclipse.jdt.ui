@@ -34,10 +34,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IWorkingCopy;
 
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
-import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
 
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 /**
@@ -217,7 +216,7 @@ public class ProblemTableViewer extends TableViewer {
 		if (cu.isWorkingCopy())
 			convertedJE= cu.getOriginal(je);
 		else {
-			IWorkingCopy wc= (IWorkingCopy)cu.findSharedWorkingCopy(JavaUI.getBufferFactory());
+			IWorkingCopy wc= EditorUtility.getWorkingCopy(cu);
 			if (wc != null) {
 				IJavaElement[] matches= wc.findElements(je);
 				if (matches != null && matches.length > 0)

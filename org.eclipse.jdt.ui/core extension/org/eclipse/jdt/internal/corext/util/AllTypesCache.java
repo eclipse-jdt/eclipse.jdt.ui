@@ -173,7 +173,11 @@ public class AllTypesCache {
 					}				
 					return processChildrenDelta(delta);
 				case IJavaElement.COMPILATION_UNIT: // content change means refresh from local
-					if (((ICompilationUnit) elem).isWorkingCopy()) {
+					if (!JavaModelUtil.isPrimary((ICompilationUnit) elem)) {
+						return false;
+					}
+
+					if (((ICompilationUnit) elem).isWorkingCopy() && !JavaPlugin.USE_WORKING_COPY_OWNERS) {
 						return false;
 					}
 					if (isAddedOrRemoved || isPossibleStructuralChange(delta.getFlags())) {

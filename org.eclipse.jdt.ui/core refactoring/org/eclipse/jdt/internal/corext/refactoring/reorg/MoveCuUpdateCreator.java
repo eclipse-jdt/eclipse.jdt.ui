@@ -82,9 +82,7 @@ public class MoveCuUpdateCreator {
 	}
 	
 	private static ICompilationUnit convertToOriginal(ICompilationUnit cu){
-		if (! cu.isWorkingCopy())
-			return cu;
-		return (ICompilationUnit)cu.getOriginalElement();	
+		return JavaModelUtil.toOriginal(cu);
 	}
 	
 	public TextChangeManager createChangeManager(IProgressMonitor pm) throws JavaModelException{

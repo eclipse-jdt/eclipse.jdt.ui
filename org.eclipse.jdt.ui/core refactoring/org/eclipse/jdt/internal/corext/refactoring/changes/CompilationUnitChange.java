@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class CompilationUnitChange extends TextFileChange {
 
@@ -36,8 +37,7 @@ public class CompilationUnitChange extends TextFileChange {
 	}
 	
 	private static IFile getFile(ICompilationUnit cunit) throws CoreException {
-		if (cunit.isWorkingCopy())
-			cunit= (ICompilationUnit) cunit.getOriginalElement();
+		cunit= JavaModelUtil.toOriginal(cunit);
 		return (IFile) cunit.getResource();
 	}
 	

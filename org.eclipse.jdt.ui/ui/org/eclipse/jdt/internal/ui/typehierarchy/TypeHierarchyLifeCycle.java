@@ -221,6 +221,10 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				break;
 			case IJavaElement.COMPILATION_UNIT:
 				ICompilationUnit cu= (ICompilationUnit)element;
+				if (!JavaModelUtil.isPrimary(cu)) {
+					return;
+				}
+				
 				boolean isWorkingCopyRemove= isWorkingCopyRemove(cu, delta.getKind());
 				if (isWorkingCopyRemove || delta.getKind() == IJavaElementDelta.CHANGED && isPossibleStructuralChange(delta.getFlags())) {
 					try {

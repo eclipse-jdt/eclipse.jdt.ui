@@ -24,6 +24,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 /**
  * Working set filter for Java viewers.
@@ -148,8 +150,7 @@ public class WorkingSetFilter extends ViewerFilter {
 						searchedElement= searchedElement.getParent();
 						if (searchedElement != null && searchedElement.getElementType() == IJavaElement.COMPILATION_UNIT) {
 							ICompilationUnit cu= (ICompilationUnit)searchedElement;
-							if (cu.isWorkingCopy())
-								searchedElement= cu.getOriginalElement();
+							cu= JavaModelUtil.toOriginal(cu);
 						}
 					}
 				}

@@ -98,13 +98,7 @@ public class CallLocation implements IAdaptable {
 
     private ICompilationUnit getICompilationUnit() {
         ICompilationUnit compilationUnit = fMember.getCompilationUnit();
-
-        if (compilationUnit != null) {
-            if (compilationUnit.isWorkingCopy()) {
-                compilationUnit= (ICompilationUnit) compilationUnit.getOriginalElement();
-            } 
-        }
-        
+		compilationUnit= JavaModelUtil.toOriginal(compilationUnit);
         return compilationUnit;
     }
     

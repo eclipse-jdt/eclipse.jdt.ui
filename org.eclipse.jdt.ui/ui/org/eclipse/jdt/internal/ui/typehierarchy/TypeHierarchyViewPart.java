@@ -425,14 +425,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			if (element instanceof IMember) {
 				if (element.getElementType() != IJavaElement.TYPE) {
 					element= ((IMember) element).getDeclaringType();
-				}				
-				ICompilationUnit cu= ((IMember) element).getCompilationUnit();
-				if (cu != null && cu.isWorkingCopy()) {
-					element= cu.getOriginal(element);
-					if (!element.exists()) {
-						MessageDialog.openError(getSite().getShell(), TypeHierarchyMessages.getString("TypeHierarchyViewPart.error.title"), TypeHierarchyMessages.getString("TypeHierarchyViewPart.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
-						return;
-					}
+				}
+				element= JavaModelUtil.toOriginal((IMember) element);
+				if (!element.exists()) {
+					MessageDialog.openError(getSite().getShell(), TypeHierarchyMessages.getString("TypeHierarchyViewPart.error.title"), TypeHierarchyMessages.getString("TypeHierarchyViewPart.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
+					return;
 				}
 			} else {
 				int kind= element.getElementType();

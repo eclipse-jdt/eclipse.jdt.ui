@@ -58,6 +58,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Surround a set of statements with a try/catch block.
@@ -341,10 +342,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	}
 	
 	private IFile getFile() throws JavaModelException {
-		if (fCUnit.isWorkingCopy())
-			return (IFile)fCUnit.getOriginalElement().getResource();
-		else
-			return (IFile)fCUnit.getResource();
+		return (IFile) JavaModelUtil.toOriginal(fCUnit).getResource();
 	}
 	
 	private boolean selectedNodeIsDeclaration() {

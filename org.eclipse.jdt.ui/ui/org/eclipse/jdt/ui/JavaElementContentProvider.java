@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
  
 /**
@@ -177,9 +178,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 
 		if (element instanceof ICompilationUnit) {
 			if (getProvideWorkingCopy()) {
-				IJavaElement original= ((IWorkingCopy)element).getOriginalElement();
-				if (original != null)
-					element= original;
+				element= JavaModelUtil.toOriginal((ICompilationUnit) element);
 			}
 			if (kind == IJavaElementDelta.CHANGED) {
 				postRefresh(element);

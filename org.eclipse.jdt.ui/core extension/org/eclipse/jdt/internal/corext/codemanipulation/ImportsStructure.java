@@ -578,20 +578,27 @@ public class ImportsStructure implements IImportsStructure {
 	}
 		
 	private TextBuffer aquireTextBuffer() throws CoreException {
-		IFile file= (IFile) JavaModelUtil.toOriginal(fCompilationUnit).getResource();
-		if (file.exists()) {
-			return TextBuffer.acquire(file);
-		} else {
-			return TextBuffer.create(fCompilationUnit.getSource());
+		if (JavaModelUtil.isPrimary(fCompilationUnit)) {
+			IFile file= (IFile) JavaModelUtil.toOriginal(fCompilationUnit).getResource();
+			if (file.exists()) {
+				return TextBuffer.acquire(file);
+			}
 		}
+		return TextBuffer.create(fCompilationUnit.getSource());
 	}
 	
 	private void releaseTextBuffer(TextBuffer buffer) throws CoreException {
-		IFile file= (IFile) JavaModelUtil.toOriginal(fCompilationUnit).getResource();
-		if (!file.exists()) {
+		try {
+			if (JavaModelUtil.isPrimary(fCompilationUnit)) {
+				IFile file= (IFile) JavaModelUtil.toOriginal(fCompilationUnit).getResource();
+				if (file.exists()) {
+					return;
+				}
+			}
 			fCompilationUnit.getBuffer().setContents(buffer.getContent());
-		}	
-		TextBuffer.release(buffer);
+		} finally {
+			TextBuffer.release(buffer);
+		}
 	}
 		
 	/**

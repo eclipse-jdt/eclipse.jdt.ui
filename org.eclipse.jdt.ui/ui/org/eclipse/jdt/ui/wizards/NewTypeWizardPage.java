@@ -36,21 +36,7 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
@@ -62,7 +48,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -83,18 +68,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.SuperInterfaceSelectionDialog;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonStatusDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.*;
 
 /**
  * The class <code>NewTypeWizardPage</code> contains controls and validation routines 
@@ -1350,7 +1324,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				lineDelimiter= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 										
 				ICompilationUnit parentCU= pack.createCompilationUnit(clName + ".java", "", false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$ //$NON-NLS-2$
-				createdWorkingCopy= (ICompilationUnit) parentCU.getSharedWorkingCopy(null, JavaUI.getBufferFactory(), null);
+				// create a working copy with a new owner
+				createdWorkingCopy= parentCU.getWorkingCopy(null);
 							
 				imports= new ImportsStructure(createdWorkingCopy, prefOrder, threshold, false);
 				// add an import that will be removed again. Having this import solves 14661
@@ -1435,7 +1410,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				}
 				monitor.worked(1);
 			}
-			fCreatedType= createdType;
+
+			if (createdWorkingCopy != null) {
+				fCreatedType= (IType) createdType.getPrimaryElement();
+			} else {
+				fCreatedType= createdType;
+			}
 		} finally {
 			if (createdWorkingCopy != null) {
 				createdWorkingCopy.destroy();
