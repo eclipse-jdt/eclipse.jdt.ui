@@ -27,21 +27,18 @@ import org.eclipse.core.runtime.IPluginRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
-
 import org.eclipse.jdt.core.IType;
-
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.launching.ExecutionArguments;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
-
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 /**
  * Launch configuration delegate for a plain JUnit test.
  */
-public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
+public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration  {
+
 	public static final String ID_JUNIT_APPLICATION= "org.eclipse.jdt.junit.launchconfig"; //$NON-NLS-1$
 	/**
 	 * Add a VMRunner with a class path that includes org.eclipse.jdt.junit plugin.
@@ -154,11 +151,5 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 			JUnitPlugin.log(e); // TODO abort run and inform user
 		}
 		return classPath;
-	}	
-	
-	
-	
-	
-	
-		
+	}		
 }
