@@ -250,7 +250,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 
 	protected void configureTableViewer(TableViewer viewer) {
 		viewer.setUseHashlookup(true);
-		viewer.setLabelProvider(new DecoratingLabelProvider(new SortingLabelProvider(this), PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
+		viewer.setLabelProvider(new ColorDecoratingLabelProvider(new SortingLabelProvider(this), PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 		fContentProvider=new JavaSearchTableContentProvider(this);
 		viewer.setContentProvider(fContentProvider);
 		setSortOrder(fCurrentSortOrder);
@@ -259,7 +259,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	protected void configureTreeViewer(TreeViewer viewer) {
 		viewer.setUseHashlookup(true);
 		viewer.setSorter(new ViewerSorter());
-		viewer.setLabelProvider(new DecoratingLabelProvider(new PostfixLabelProvider(this), PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
+		viewer.setLabelProvider(new ColorDecoratingLabelProvider(new PostfixLabelProvider(this), PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 		fContentProvider= new LevelTreeContentProvider(this, fCurrentGrouping);
 		viewer.setContentProvider(fContentProvider);
 	}
