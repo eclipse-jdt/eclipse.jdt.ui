@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class InlineTempAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
-	private String fDialogMessageTitle;
+	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("InlineTempAction.inline_temp");//$NON-NLS-1$
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
@@ -50,7 +50,6 @@ public class InlineTempAction extends SelectionDispatchAction {
 		super(editor.getEditorSite());
 		setText(RefactoringMessages.getString("InlineTempAction.label"));//$NON-NLS-1$
 		fEditor= editor;
-		fDialogMessageTitle= RefactoringMessages.getString("InlineTempAction.inline_temp");//$NON-NLS-1$
 		setEnabled(getCompilationUnit() != null);
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_TEMP_ACTION);
 	}
@@ -67,9 +66,9 @@ public class InlineTempAction extends SelectionDispatchAction {
 	protected void run(ITextSelection selection) {
 		try{
 			Refactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), fDialogMessageTitle, false);
+			new RefactoringStarter().activate(refactoring, createWizard(refactoring), DIALOG_MESSAGE_TITLE, false);
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, fDialogMessageTitle, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
 		}	
 	}
 	
