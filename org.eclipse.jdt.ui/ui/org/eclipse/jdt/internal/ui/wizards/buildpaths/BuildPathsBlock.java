@@ -595,43 +595,8 @@ public class BuildPathsBlock {
 		}	
 		monitor.worked(1);
 			
-		fCurrJProject.setRawClasspath(classpath, new SubProgressMonitor(monitor, 5));
-		
-		updateReferencedProjects(fCurrJProject, prevRequiredProjects, new SubProgressMonitor(monitor, 1));
-		
+		fCurrJProject.setRawClasspath(classpath, new SubProgressMonitor(monitor, 5));		
 	}
-	
-	// --------- project dependencies -----------
-	
-	/**
-	 * @param jproject The Java project after changing the class path
-	 * @param prevRequiredProjects The required projects before changing the class path
-	 */
-	private static void updateReferencedProjects(IJavaProject jproject, String[] prevRequiredProjects, IProgressMonitor monitor) throws CoreException {
-		String[] newRequiredProjects= jproject.getRequiredProjectNames();
-
-		ArrayList prevEntries= new ArrayList(Arrays.asList(prevRequiredProjects));
-		ArrayList newEntries= new ArrayList(Arrays.asList(newRequiredProjects));
-		
-		IProject proj= jproject.getProject();
-		IProjectDescription projDesc= proj.getDescription();  
-		
-		ArrayList newRefs= new ArrayList();
-		IProject[] referencedProjects= projDesc.getReferencedProjects();
-		for (int i= 0; i < referencedProjects.length; i++) {
-			String curr= referencedProjects[i].getName();
-			if (newEntries.remove(curr) || !prevEntries.contains(curr)) {
-				newRefs.add(referencedProjects[i]);
-			}
-		}
-		IWorkspaceRoot root= proj.getWorkspace().getRoot();
-		for (int i= 0; i < newEntries.size(); i++) {
-			String curr= (String) newEntries.get(i);
-			newRefs.add(root.getProject(curr));
-		}		
-		projDesc.setReferencedProjects((IProject[]) newRefs.toArray(new IProject[newRefs.size()]));
-		proj.setDescription(projDesc, monitor);
-	}		
 	
 	/**
 	 * Adds a nature to a project
