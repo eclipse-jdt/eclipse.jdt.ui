@@ -114,6 +114,12 @@ import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
 
 public class ASTView extends ViewPart implements IShowInSource {
 	
+	private static final int JLS3= AST.JLS3;
+	/** (Used to get rid of depracation warnings in code)
+	 * @deprecated
+	 */
+	private static final int JLS2= AST.JLS2;
+
 	private class ASTViewSelectionProvider implements ISelectionProvider {
 		ListenerList fListeners= new ListenerList();
 
@@ -321,7 +327,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		 * @see org.eclipse.ui.IPartListener2#partClosed(org.eclipse.ui.IWorkbenchPartReference)
 		 */
 		public void partClosed(IWorkbenchPartReference partRef) {
-			// not interesting
+			fView.notifyWorkbenchPartClosed(partRef);
 		}
 
 		/* (non-Javadoc)
@@ -396,10 +402,10 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fDoLinkWithEditor= fDialogSettings.getBoolean(SETTINGS_LINK_WITH_EDITOR);
 		fDoUseReconciler= fDialogSettings.getBoolean(SETTINGS_USE_RECONCILER);
 		fCreateBindings= !fDialogSettings.getBoolean(SETTINGS_NO_BINDINGS); // inverse so that default is to create bindings
-		fCurrentASTLevel= AST.JLS2;
+		fCurrentASTLevel= JLS2;
 		try {
 			int level= fDialogSettings.getInt(SETTINGS_JLS);
-			if (level == AST.JLS2 || level == AST.JLS3) {
+			if (level == JLS2 || level == JLS3) {
 				fCurrentASTLevel= level;
 			}
 		} catch (NumberFormatException e) {
@@ -407,6 +413,16 @@ public class ASTView extends ViewPart implements IShowInSource {
 		}
 	}
 	
+	final void notifyWorkbenchPartClosed(IWorkbenchPartReference partRef) {
+		if (fEditor != null && fEditor.equals(partRef.getPart(false))) {
+			try {
+				setInput(null);
+			} catch (CoreException e) {
+				// ignore
+			}
+		}
+	}
+
 	/*(non-Javadoc)
 	 * @see org.eclipse.ui.IViewPart#init(org.eclipse.ui.IViewSite)
 	 */
@@ -457,9 +473,9 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private int getInitialASTLevel(IJavaElement openable) {
 		IJavaProject project= (IJavaProject) openable.getAncestor(IJavaElement.JAVA_PROJECT);
 		if (JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_SOURCE, true))) {
-			return AST.JLS3;
+			return JLS3;
 		}
-		return AST.JLS2;
+		return JLS2;
 	}
 
 	private CompilationUnit internalSetInput(IOpenable input, int offset, int length, int astLevel) throws CoreException {
@@ -547,7 +563,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	}
 
 	private void updateContentDescription(IJavaElement element, CompilationUnit root, long time, boolean useReconciler) {
-		String version= root.getAST().apiLevel() == AST.JLS2 ? "AST Level 2" : "AST Level 3";  //$NON-NLS-1$//$NON-NLS-2$
+		String version= root.getAST().apiLevel() == JLS2 ? "AST Level 2" : "AST Level 3";  //$NON-NLS-1$//$NON-NLS-2$
 		if (useReconciler)
 			version+= ", from reconciler"; //$NON-NLS-1$
 		TreeInfoCollector collector= new TreeInfoCollector(root);
@@ -844,8 +860,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 		ASTViewImages.setImageDescriptors(fLinkWithEditor, ASTViewImages.LINK_WITH_EDITOR);
 			
 		fASTVersionToggleActions= new ASTLevelToggle[] {
-				new ASTLevelToggle("AST Level &2.0", AST.JLS2), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level &3.0", AST.JLS3) //$NON-NLS-1$
+				new ASTLevelToggle("AST Level &2.0", JLS2), //$NON-NLS-1$
+				new ASTLevelToggle("AST Level &3.0", JLS3) //$NON-NLS-1$
 		};
 		
 		fAddToTrayAction= new Action() {
@@ -991,8 +1007,13 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fDoLinkWithEditor= fLinkWithEditor.isChecked();
 		fDialogSettings.put(SETTINGS_LINK_WITH_EDITOR, fDoLinkWithEditor);
 		
-		if (fDoLinkWithEditor && fEditor != null)
-			doLinkWithEditor(fEditor.getSelectionProvider().getSelection());
+
+		if (fDoLinkWithEditor && fEditor != null) {
+			ISelectionProvider selectionProvider= fEditor.getSelectionProvider();
+			if (selectionProvider != null) { // can be null when editor is closed
+				doLinkWithEditor(selectionProvider.getSelection());
+			}
+		}
 	}
 
 	protected void performCollapse() {
