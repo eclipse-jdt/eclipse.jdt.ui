@@ -11,6 +11,8 @@
 package org.eclipse.jdt.ui.tests.dialogs;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -18,7 +20,9 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFile;
@@ -34,8 +38,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.core.JavaProject;
 
 import org.eclipse.jdt.internal.corext.buildpath.AddToClasspathOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
@@ -53,15 +55,17 @@ import org.eclipse.jdt.internal.corext.buildpath.UnincludeOperation;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 
 public class NewProjectWizardTest extends TestCase {
 	
     private static final Class THIS= NewProjectWizardTest.class;
     
-    protected JavaProject fProject;
+    protected IJavaProject fProject;
     protected static NewProjectTestSetup fTestSetup;
     protected String fNormalFolder= "NormalFolder";
     protected String fSubFolder= "SubFolder";
@@ -86,7 +90,7 @@ public class NewProjectWizardTest extends TestCase {
     }
     
     protected void setUp() throws Exception {
-        fProject= (JavaProject)fTestSetup.getWorkspaceProjectWithSrc();
+        fProject= fTestSetup.getWorkspaceProjectWithSrc();
         assertFalse(fProject.isOnClasspath(fProject.getUnderlyingResource()));
     }
 
@@ -137,7 +141,7 @@ public class NewProjectWizardTest extends TestCase {
         assertTrue(folder.exists());
         assertTrue(folder.getName().equals(fNormalFolder));
         assertTrue(ClasspathModifier.getClasspathEntryFor(new Path(fNormalFolder), fProject) == null);
-        assertTrue(ClasspathModifier.contains(new Path(fNormalFolder), parentRoot.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertTrue(contains(new Path(fNormalFolder), parentRoot.getRawClasspathEntry().getExclusionPatterns(), null));
         
         validateClasspath();
     }
@@ -164,7 +168,7 @@ public class NewProjectWizardTest extends TestCase {
         assertTrue(root.getUnderlyingResource().exists());
         assertTrue(root.getElementName().equals(fSubFolder));
         assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject) == null);
-        assertTrue(ClasspathModifier.contains(new Path(fSubFolder), parentRoot.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertTrue(contains(new Path(fSubFolder), parentRoot.getRawClasspathEntry().getExclusionPatterns(), null));
         
         validateClasspath();
     }
@@ -194,7 +198,7 @@ public class NewProjectWizardTest extends TestCase {
         assertTrue(folder.getParent().equals(fragment));
         assertTrue(folder.getName().equals(nfFolder.lastSegment()));
         assertTrue(ClasspathModifier.getClasspathEntryFor(folder.getFullPath(), fProject) == null);
-        assertTrue(ClasspathModifier.contains(folder.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertTrue(contains(folder.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
         
         validateClasspath();
     }
@@ -225,7 +229,7 @@ public class NewProjectWizardTest extends TestCase {
         assertTrue(root.getUnderlyingResource().getParent().equals(fragment));
         assertTrue(root.getElementName().equals(srcFolder.lastSegment()));
         assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject) == null);
-        assertTrue(ClasspathModifier.contains(root.getPath().removeFirstSegments(2), parentRoot.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertTrue(contains(root.getPath().removeFirstSegments(2), parentRoot.getRawClasspathEntry().getExclusionPatterns(), null));
         
         validateClasspath();
     }
@@ -244,16 +248,16 @@ public class NewProjectWizardTest extends TestCase {
     public void testAddNestedNormalFolderToCP() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
         IFolder cpFolder= excludePackage();
         
-        IPackageFragmentRoot root= fProject.getPackageFragmentRoot(cpFolder.getFullPath());
+        IPackageFragmentRoot root= fProject.findPackageFragmentRoot(cpFolder.getFullPath());
         IFolder folder= getFolderHandle(cpFolder.getProjectRelativePath().append(fSubFolder));
         
         IClasspathEntry entry= root.getRawClasspathEntry();
-        assertTrue(ClasspathModifier.contains(new Path(folder.getName()), entry.getExclusionPatterns(), null));
+        assertTrue(contains(new Path(folder.getName()), entry.getExclusionPatterns(), null));
         
         addToClasspath(folder.getProjectRelativePath());
         
         entry= root.getRawClasspathEntry();
-        assertTrue(ClasspathModifier.contains(new Path(folder.getName()), entry.getExclusionPatterns(), null));
+        assertTrue(contains(new Path(folder.getName()), entry.getExclusionPatterns(), null));
         
         validateClasspath();
     }    
@@ -266,12 +270,12 @@ public class NewProjectWizardTest extends TestCase {
         IClasspathEntry entry= root.getRawClasspathEntry();
         
         int nrExclusions= entry.getExclusionPatterns().length;        
-        assertFalse(ClasspathModifier.contains(new Path(fragment.getElementName()), entry.getExclusionPatterns(), null));
+        assertFalse(contains(new Path(fragment.getElementName()), entry.getExclusionPatterns(), null));
         
         addToClasspath(fragment);
          
         entry= root.getRawClasspathEntry();
-        assertTrue(ClasspathModifier.contains(new Path(fragment.getElementName()), entry.getExclusionPatterns(), null));
+        assertTrue(contains(new Path(fragment.getElementName()), entry.getExclusionPatterns(), null));
         assertTrue(entry.getExclusionPatterns().length - 1 == nrExclusions);
         
         validateClasspath();
@@ -280,21 +284,21 @@ public class NewProjectWizardTest extends TestCase {
     public void testAddIncludedPackageToCP() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
         IFolder cpFolder= includePackage();
         
-        IPackageFragmentRoot root= fProject.getPackageFragmentRoot(cpFolder.getFullPath());
+        IPackageFragmentRoot root= fProject.findPackageFragmentRoot(cpFolder.getFullPath());
         IPackageFragment fragment= root.getPackageFragment(fSubFolder);
         
         IClasspathEntry entry= root.getRawClasspathEntry();
         
         int nrInclusions= entry.getInclusionPatterns().length;
         int nrExclusions= entry.getExclusionPatterns().length;
-        assertTrue(ClasspathModifier.contains(new Path(fragment.getElementName()), entry.getInclusionPatterns(), null));
-        assertFalse(ClasspathModifier.contains(new Path(fragment.getElementName()), entry.getExclusionPatterns(), null));
+        assertTrue(contains(new Path(fragment.getElementName()), entry.getInclusionPatterns(), null));
+        assertFalse(contains(new Path(fragment.getElementName()), entry.getExclusionPatterns(), null));
         
         addToClasspath(fragment);
         
         entry= root.getRawClasspathEntry();
-        assertFalse(ClasspathModifier.contains(new Path(fragment.getElementName()), entry.getInclusionPatterns(), null));
-        assertTrue(ClasspathModifier.contains(new Path(fragment.getElementName()), entry.getExclusionPatterns(), null));
+        assertFalse(contains(new Path(fragment.getElementName()), entry.getInclusionPatterns(), null));
+        assertTrue(contains(new Path(fragment.getElementName()), entry.getExclusionPatterns(), null));
         assertTrue(entry.getInclusionPatterns().length + 1 == nrInclusions);
         assertTrue(entry.getExclusionPatterns().length - 1 == nrExclusions);
         
@@ -303,24 +307,24 @@ public class NewProjectWizardTest extends TestCase {
     
     public void testAddExcludedPackageToCP() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
         IFolder cpFolder= excludePackage();
-        IPackageFragmentRoot root= fProject.getPackageFragmentRoot(cpFolder.getFullPath());
+        IPackageFragmentRoot root= fProject.findPackageFragmentRoot(cpFolder.getFullPath());
         IPackageFragment element= root.getPackageFragment(fSubFolder);
         
         IClasspathEntry entry= root.getRawClasspathEntry();
-        assertTrue(ClasspathModifier.contains(new Path(element.getElementName()), entry.getExclusionPatterns(), null));
+        assertTrue(contains(new Path(element.getElementName()), entry.getExclusionPatterns(), null));
         
         addToClasspath(element);
         
-        root= fProject.getPackageFragmentRoot(element.getParent().getPath());
+        root= fProject.findPackageFragmentRoot(element.getParent().getPath());
         entry= root.getRawClasspathEntry();
         
-        assertTrue(ClasspathModifier.contains(new Path(element.getElementName()), entry.getExclusionPatterns(), null));
+        assertTrue(contains(new Path(element.getElementName()), entry.getExclusionPatterns(), null));
         
         validateClasspath();
     }
     
     public void testAddProjectToCP() throws CoreException, InvocationTargetException, InterruptedException {
-        // Situation: Project wich one source folderand one normal folder as 
+        // Situation: Project wich one source folder and one normal folder as 
         // direct childs --> adding the project to the CP should convert the folder into 
         // a package and the .java file into a compilation unit
         IPath srcPath= new Path("src2");
@@ -334,14 +338,14 @@ public class NewProjectWizardTest extends TestCase {
         assertTrue(fProject.findPackageFragment(normalFolder.getFullPath()) == null);
         assertTrue(fProject.findPackageFragment(fragment.getPath()) == null);
         
-        projectRoot= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.ADD_TO_BP, fProject, getOutputFolderQueryInternal(fProject.getOutputLocation()), null, null, null);
-        assertTrue(projectRoot.equals(getProjectRoot(fProject.getCorrespondingResource())));
+        IJavaProject project= (IJavaProject)executeOperation(IClasspathInformationProvider.ADD_TO_BP, fProject, getOutputFolderQueryInternal(fProject.getOutputLocation()), null, null, null);
+        assertTrue(project.equals(fProject));
         
         // project is on classpath
         assertFalse(ClasspathModifier.getClasspathEntryFor(fProject.getPath(), fProject) == null);
         // root is on classpath and excluded on the project
         assertFalse(ClasspathModifier.getClasspathEntryFor(root.getPath(), fProject) == null);
-        assertTrue(ClasspathModifier.isExcludedOnProject(root.getUnderlyingResource(), fProject));
+        assertTrue(ClasspathModifier.isExcluded(root.getUnderlyingResource(), fProject));
         assertFalse(fProject.findPackageFragment(normalFolder.getFullPath()) == null);
         assertFalse(fProject.findPackageFragment(fragment.getPath()) == null);
         
@@ -357,7 +361,7 @@ public class NewProjectWizardTest extends TestCase {
         IFolder folder= (IFolder)executeOperation(IClasspathInformationProvider.REMOVE_FROM_BP, root, null, null, null, null);
         
         assertTrue(folder.getFullPath().equals(root.getPath()));
-        assertFalse(ClasspathModifier.contains(new Path(fNormalFolder), getPaths(), null));
+        assertFalse(contains(new Path(fNormalFolder), getPaths(), null));
         int after= fProject.getRawClasspath().length;
         assertTrue(before == after);
         
@@ -411,7 +415,7 @@ public class NewProjectWizardTest extends TestCase {
     
     public void testExcludeIncludedPackage() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
         IFolder cpFolder= includePackage();
-        IPackageFragmentRoot root= fProject.getPackageFragmentRoot(cpFolder.getFullPath());
+        IPackageFragmentRoot root= fProject.findPackageFragmentRoot(cpFolder.getFullPath());
         IPackageFragment fragment= root.getPackageFragment(fSubFolder);
         
         IClasspathEntry entry= root.getRawClasspathEntry();
@@ -425,8 +429,8 @@ public class NewProjectWizardTest extends TestCase {
         IPath[] exclusionPatterns= entry.getExclusionPatterns();
         assertTrue(inclusionPatterns.length + 1 == nrIncluded);
         assertTrue(exclusionPatterns.length - 1 == nrExcluded);
-        assertFalse(ClasspathModifier.contains(new Path(fragment.getElementName()), inclusionPatterns, null));
-        assertTrue(ClasspathModifier.contains(new Path(fragment.getElementName()), exclusionPatterns, null));
+        assertFalse(contains(new Path(fragment.getElementName()), inclusionPatterns, null));
+        assertTrue(contains(new Path(fragment.getElementName()), exclusionPatterns, null));
         assertTrue(folder.getFullPath().equals(fragment.getPath()));
         
         validateClasspath();
@@ -435,7 +439,7 @@ public class NewProjectWizardTest extends TestCase {
     public void testIncludeExcludedFolder() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
         IFolder cpFolder= excludePackage();
         
-        IPackageFragmentRoot root= fProject.getPackageFragmentRoot(cpFolder.getFullPath());
+        IPackageFragmentRoot root= fProject.findPackageFragmentRoot(cpFolder.getFullPath());
         IFolder folder= getFolderHandle(cpFolder.getProjectRelativePath().append(fSubFolder));
         
         IClasspathEntry entry= root.getRawClasspathEntry();
@@ -449,8 +453,8 @@ public class NewProjectWizardTest extends TestCase {
         IPath[] exclusionPatterns= entry.getExclusionPatterns();
         assertTrue(inclusionPatterns.length - 1 == nrIncluded);
         assertTrue(exclusionPatterns.length + 1 == nrExcluded);
-        assertTrue(ClasspathModifier.contains(new Path(folder.getName()), inclusionPatterns, null));
-        assertFalse(ClasspathModifier.contains(new Path(folder.getName()), exclusionPatterns, null));
+        assertTrue(contains(new Path(folder.getName()), inclusionPatterns, null));
+        assertFalse(contains(new Path(folder.getName()), exclusionPatterns, null));
         assertTrue(fragment.getPath().equals(folder.getFullPath()));
         
         validateClasspath();
@@ -459,7 +463,7 @@ public class NewProjectWizardTest extends TestCase {
     public void testRemoveInclusion() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
         IFolder cpFolder= includePackage();
         
-        IPackageFragmentRoot root= fProject.getPackageFragmentRoot(cpFolder.getFullPath());
+        IPackageFragmentRoot root= fProject.findPackageFragmentRoot(cpFolder.getFullPath());
         IPackageFragment fragment= root.getPackageFragment(fSubFolder);
         
         IClasspathEntry entry= root.getRawClasspathEntry();
@@ -473,8 +477,8 @@ public class NewProjectWizardTest extends TestCase {
         IPath[] exclusionPatterns= entry.getExclusionPatterns();
         assertTrue(inclusionPatterns.length + 1 == nrIncluded);
         assertTrue(exclusionPatterns.length == nrExcluded);
-        assertFalse(ClasspathModifier.contains(new Path(fragment.getElementName()), inclusionPatterns, null));
-        assertFalse(ClasspathModifier.contains(new Path(fragment.getElementName()), exclusionPatterns, null));
+        assertFalse(contains(new Path(fragment.getElementName()), inclusionPatterns, null));
+        assertFalse(contains(new Path(fragment.getElementName()), exclusionPatterns, null));
         assertTrue(frag.getPath().equals(fragment.getPath()));
         
         validateClasspath();
@@ -483,7 +487,7 @@ public class NewProjectWizardTest extends TestCase {
     public void testRemoveExclusion() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {
         IFolder cpFolder= excludePackage();
         
-        IPackageFragmentRoot root= fProject.getPackageFragmentRoot(cpFolder.getFullPath());
+        IPackageFragmentRoot root= fProject.findPackageFragmentRoot(cpFolder.getFullPath());
         IFolder folder= getFolderHandle(cpFolder.getProjectRelativePath().append(fSubFolder));
         
         IClasspathEntry entry= root.getRawClasspathEntry();
@@ -497,8 +501,8 @@ public class NewProjectWizardTest extends TestCase {
         IPath[] exclusionPatterns= entry.getExclusionPatterns();
         assertTrue(inclusionPatterns.length == nrIncluded);
         assertTrue(exclusionPatterns.length + 1 == nrExcluded);
-        assertFalse(ClasspathModifier.contains(new Path(folder.getName()), inclusionPatterns, null));
-        assertFalse(ClasspathModifier.contains(new Path(folder.getName()), exclusionPatterns, null));
+        assertFalse(contains(new Path(folder.getName()), inclusionPatterns, null));
+        assertFalse(contains(new Path(folder.getName()), exclusionPatterns, null));
         assertTrue(fragment.getPath().equals(folder.getFullPath()));
         
         validateClasspath();
@@ -509,8 +513,8 @@ public class NewProjectWizardTest extends TestCase {
         final IPackageFragment includedPackage= root.getPackageFragment(fSubFolder);
         final IPackageFragment excludedPackage= root.getPackageFragment(fSubFolder + "2");
         
-        assertFalse(ClasspathModifier.contains(new Path(includedPackage.getElementName()).addTrailingSeparator(), root.getRawClasspathEntry().getInclusionPatterns(), null));
-        assertFalse(ClasspathModifier.contains(new Path(excludedPackage.getElementName()).addTrailingSeparator(), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertFalse(contains(new Path(includedPackage.getElementName()).addTrailingSeparator(), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertFalse(contains(new Path(excludedPackage.getElementName()).addTrailingSeparator(), root.getRawClasspathEntry().getExclusionPatterns(), null));
         
         ClasspathModifierQueries.IInclusionExclusionQuery query= new ClasspathModifierQueries.IInclusionExclusionQuery() {
 
@@ -529,8 +533,8 @@ public class NewProjectWizardTest extends TestCase {
         };
         root= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.EDIT, root, null, null, null, query);
         
-        assertTrue(ClasspathModifier.contains(new Path(includedPackage.getElementName()).addTrailingSeparator(), root.getRawClasspathEntry().getInclusionPatterns(), null));
-        assertTrue(ClasspathModifier.contains(new Path(excludedPackage.getElementName()).addTrailingSeparator(), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertTrue(contains(new Path(includedPackage.getElementName()).addTrailingSeparator(), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertTrue(contains(new Path(excludedPackage.getElementName()).addTrailingSeparator(), root.getRawClasspathEntry().getExclusionPatterns(), null));
         
         validateClasspath();
     }
@@ -556,8 +560,8 @@ public class NewProjectWizardTest extends TestCase {
         assertTrue(entry.getInclusionPatterns().length == 0);
         // one has to be left because it is a source folder
         assertTrue(entry.getExclusionPatterns().length == 1);
-        assertTrue(ClasspathModifier.contains(folder.getFullPath(), getPaths(), null));
-        assertTrue(ClasspathModifier.contains(subSrcFolder.getFullPath(), getPaths(), null));
+        assertTrue(contains(folder.getFullPath(), getPaths(), null));
+        assertTrue(contains(subSrcFolder.getFullPath(), getPaths(), null));
         assertTrue(fProject.getRawClasspath().length == numberOnCP);
         assertTrue(editedRoot.getPath().equals(root.getPath()));
         
@@ -621,7 +625,7 @@ public class NewProjectWizardTest extends TestCase {
         IPath editedOutputPath= new Path(oldOutputPath.toString() + "3");
 
         IFolder folder= getFolderHandle(new Path (fNormalFolder));
-        IPackageFragmentRoot root= fProject.getPackageFragmentRoot(folder.getFullPath());
+        IPackageFragmentRoot root= fProject.findPackageFragmentRoot(folder.getFullPath());
         CPListElement elem= CPListElement.createFromExisting(root.getRawClasspathEntry(), fProject);
         
         assertTrue(((IPath)newAttribute.getValue()).equals(editedOutputPath));
@@ -632,7 +636,7 @@ public class NewProjectWizardTest extends TestCase {
     
     public void testEditOutputFolderWithNullReturn() throws JavaModelException, CoreException, InvocationTargetException, InterruptedException {        
         CPListElementAttribute attribute= createOutputFolder(getOutputLocationQuery().getOutputLocation());
-        IPackageFragmentRoot root= fProject.getFolderPackageFragmentRoot(fProject.getPath().append(fNormalFolder));
+        IPackageFragmentRoot root= fProject.findPackageFragmentRoot(fProject.getPath().append(fNormalFolder));
         
         assertTrue(root.getRawClasspathEntry().getOutputLocation() != null);
         
@@ -680,7 +684,7 @@ public class NewProjectWizardTest extends TestCase {
         
         ICompilationUnit newCu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.INCLUDE, cu, null, null, null, null);
         
-        assertTrue(ClasspathModifier.contains(newCu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertTrue(contains(newCu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
         assertTrue(newCu.getPath().equals(cu.getPath()));
         
         validateClasspath();
@@ -695,7 +699,7 @@ public class NewProjectWizardTest extends TestCase {
         
         IFile excludedFile=(IFile)executeOperation(IClasspathInformationProvider.EXCLUDE, cu, null, null, null, null);
         
-        assertTrue(ClasspathModifier.contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertTrue(contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
         assertTrue(excludedFile.getFullPath().equals(cu.getPath()));
         
         validateClasspath();
@@ -712,12 +716,12 @@ public class NewProjectWizardTest extends TestCase {
         IFile excludedFile= (IFile)executeOperation(IClasspathInformationProvider.EXCLUDE, cu, null, null, null, null);
         
         assertTrue(root.getRawClasspathEntry().getInclusionPatterns().length == 0);
-        assertTrue(ClasspathModifier.contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertTrue(contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
         
         ICompilationUnit newCu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.INCLUDE, cu, null, null, null, null);
         
         assertTrue(root.getRawClasspathEntry().getExclusionPatterns().length == 0);
-        assertTrue(ClasspathModifier.contains(newCu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertTrue(contains(newCu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
         assertTrue(excludedFile.getFullPath().equals(newCu.getPath()));
         
         validateClasspath();
@@ -734,12 +738,12 @@ public class NewProjectWizardTest extends TestCase {
         ICompilationUnit newCu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.INCLUDE, cu, null, null, null, null);
         
         assertTrue(root.getRawClasspathEntry().getExclusionPatterns().length == 0);
-        assertTrue(ClasspathModifier.contains(cu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertTrue(contains(cu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
         
         IFile excludedFile= (IFile)executeOperation(IClasspathInformationProvider.EXCLUDE, newCu, null, null, null, null);
         
         assertTrue(root.getRawClasspathEntry().getInclusionPatterns().length == 0);
-        assertTrue(ClasspathModifier.contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertTrue(contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
         assertTrue(excludedFile.getFullPath().equals(newCu.getPath()));
         
         validateClasspath();
@@ -752,11 +756,11 @@ public class NewProjectWizardTest extends TestCase {
         
         assertTrue(root.getRawClasspathEntry().getInclusionPatterns().length == 0);
         ICompilationUnit newCu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.INCLUDE, cu, null, null, null, null);
-        assertTrue(ClasspathModifier.contains(newCu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertTrue(contains(newCu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
         
         newCu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.UNINCLUDE, newCu, null, null, null, null);
         
-        assertFalse(ClasspathModifier.contains(newCu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertFalse(contains(newCu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
         assertTrue(newCu.getPath().equals(cu.getPath()));
         
         validateClasspath();
@@ -770,12 +774,12 @@ public class NewProjectWizardTest extends TestCase {
         assertTrue(root.getRawClasspathEntry().getExclusionPatterns().length == 0);
         IFile excludedFile= (IFile)executeOperation(IClasspathInformationProvider.EXCLUDE, cu, null, null, null, null);
       
-        assertTrue(ClasspathModifier.contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertTrue(contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
         assertTrue(excludedFile.getFullPath().equals(cu.getPath()));
         
         ICompilationUnit newCu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.UNEXCLUDE, excludedFile, null, null, null, null);
         
-        assertFalse(ClasspathModifier.contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertFalse(contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
         assertTrue(newCu.getPath().equals(cu.getPath()));
         
         validateClasspath();
@@ -796,7 +800,7 @@ public class NewProjectWizardTest extends TestCase {
         
         ICompilationUnit newCu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.INCLUDE, cu.getUnderlyingResource(), null, null, null, null);
         
-        assertTrue(ClasspathModifier.contains(newCu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertTrue(contains(newCu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
         assertTrue(newCu.getPath().equals(cu.getPath()));
         
         validateClasspath();
@@ -866,7 +870,7 @@ public class NewProjectWizardTest extends TestCase {
         cu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.INCLUDE, cu, null, null, null, null);
         
         assertTrue(root.getRawClasspathEntry().getInclusionPatterns().length == 2);
-        assertTrue(ClasspathModifier.contains(cu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertTrue(contains(cu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
         
         validateClasspath();
     }
@@ -882,8 +886,8 @@ public class NewProjectWizardTest extends TestCase {
         IFile excludedFile= (IFile)executeOperation(IClasspathInformationProvider.EXCLUDE, cu, null, null, null, null);
         
         assertTrue(root.getRawClasspathEntry().getInclusionPatterns().length == 1);
-        assertFalse(ClasspathModifier.contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
-        assertTrue(ClasspathModifier.contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertFalse(contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertTrue(contains(excludedFile.getFullPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
         
         validateClasspath();
     }
@@ -897,7 +901,7 @@ public class NewProjectWizardTest extends TestCase {
         cu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.INCLUDE, cu, null, null, null, null);
         
         cu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.UNINCLUDE, cu, null, null, null, null);
-        assertFalse(ClasspathModifier.contains(cu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
+        assertFalse(contains(cu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getInclusionPatterns(), null));
         
         validateClasspath();
     }
@@ -911,7 +915,7 @@ public class NewProjectWizardTest extends TestCase {
         IFile excludedFile= (IFile)executeOperation(IClasspathInformationProvider.EXCLUDE, cu, null, null, null, null);
         
         cu= (ICompilationUnit)executeOperation(IClasspathInformationProvider.UNEXCLUDE, excludedFile, null, null, null, null);
-        assertFalse(ClasspathModifier.contains(cu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
+        assertFalse(contains(cu.getPath().removeFirstSegments(2), root.getRawClasspathEntry().getExclusionPatterns(), null));
         assertTrue(excludedFile.getFullPath().equals(cu.getPath()));
         
         validateClasspath();
@@ -922,12 +926,15 @@ public class NewProjectWizardTest extends TestCase {
         final Object[] returnValue= {null};
         IClasspathInformationProvider provider= new IClasspathInformationProvider() {
 
-            public void handleResult(Object result, IPath oldOutputLocation, CoreException exception, int operationType) {
-                returnValue[0]= result;
+            public void handleResult(List result, CoreException exception, int operationType) {
+                if (result.size() == 1)
+                    returnValue[0]= result.get(0);
             }
 
-            public Object getSelection() {
-                return selection;
+            public List getSelection() {
+                List list= new ArrayList();
+                list.add(selection);
+                return list;
             }
 
             public IJavaProject getJavaProject() {
@@ -948,6 +955,16 @@ public class NewProjectWizardTest extends TestCase {
 
             public ClasspathModifierQueries.IFolderCreationQuery getFolderCreationQuery() {
                 return creationQuery;
+            }
+
+            public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            public void deleteCreatedResources() {
+                // TODO Auto-generated method stub
+                
             }
             
         };
@@ -973,23 +990,23 @@ public class NewProjectWizardTest extends TestCase {
     
     protected IPackageFragmentRoot addToClasspath(IPath path) throws CoreException, InvocationTargetException, InterruptedException {
         IPath[] paths= getPaths();
-        assertFalse(ClasspathModifier.contains(path, paths, null));     
+        assertFalse(contains(path, paths, null));     
         
         IPackageFragmentRoot root= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.ADD_TO_BP, getFolderHandle(path), getOutputFolderQueryInternal(fProject.getOutputLocation()), null, null, null);
 
         paths= getPaths();
-        assertTrue(ClasspathModifier.contains(root.getPath(), getPaths(), null));
+        assertTrue(contains(root.getPath(), getPaths(), null));
         return root;
     }
     
     protected IPackageFragmentRoot addToClasspath(IJavaElement element) throws CoreException, InvocationTargetException, InterruptedException {
         IPath[] paths= getPaths();
-        assertFalse(ClasspathModifier.contains(element.getPath(), paths, null));
+        assertFalse(contains(element.getPath(), paths, null));
         
         IPackageFragmentRoot root= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.ADD_TO_BP, element, getOutputFolderQueryInternal(fProject.getOutputLocation()), null, null, null);
         
         paths= getPaths();
-        assertTrue(ClasspathModifier.contains(element.getPath(), paths, null));
+        assertTrue(contains(element.getPath(), paths, null));
         return root;
     }
     
@@ -1008,7 +1025,7 @@ public class NewProjectWizardTest extends TestCase {
         entry= root.getRawClasspathEntry();
         IPath[] inclusionPatterns= entry.getInclusionPatterns();
         int after= inclusionPatterns.length;
-        assertTrue(ClasspathModifier.contains(new Path(folder.getName()), inclusionPatterns, null));
+        assertTrue(contains(new Path(folder.getName()), inclusionPatterns, null));
         assertTrue(before + 1 == after);
         return cpFolder;
     }
@@ -1027,7 +1044,7 @@ public class NewProjectWizardTest extends TestCase {
         entry= root.getRawClasspathEntry();
         IPath[] exclusionPatterns= entry.getExclusionPatterns();
         assertTrue(nrExcluded + 1 == exclusionPatterns.length);
-        assertTrue(ClasspathModifier.contains(new Path(fragment.getElementName()), exclusionPatterns, null));
+        assertTrue(contains(new Path(fragment.getElementName()), exclusionPatterns, null));
         return cpFolder;
     }
     
@@ -1157,6 +1174,43 @@ public class NewProjectWizardTest extends TestCase {
     
     protected IPackageFragmentRoot getProjectRoot(IResource resource) throws JavaModelException {
         return ClasspathModifier.getFragmentRoot(resource, fProject, null);
+    }
+    
+    protected static boolean contains(IPath path, IPath[] paths, IProgressMonitor monitor) {
+        if (monitor == null)
+            monitor= new NullProgressMonitor();
+        if (path == null)
+            return false;
+        try {
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.ComparePaths"), paths.length); //$NON-NLS-1$
+            if (path.getFileExtension() == null)
+                path= new Path(completeName(path.toString())); //$NON-NLS-1$
+            for (int i=0; i < paths.length; i++) {
+                if (paths[i].equals(path))
+                    return true;
+                monitor.worked(1);
+            }
+        } finally {
+           monitor.done();
+       }            
+       return false;
+    }
+    
+    /**
+     * Add a '/' at the end of the name if
+     * it does not end with '.java'.
+     * 
+     * @param name append '/' at the end if
+     * necessary
+     * @return modified string
+     */
+    private static String completeName(String name) {
+        if (!name.endsWith(".java")) { //$NON-NLS-1$
+            name= name + "/"; //$NON-NLS-1$
+            name= name.replace('.', '/');
+            return name;
+        }
+        return name;
     }
 }
 
