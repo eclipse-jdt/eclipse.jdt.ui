@@ -195,13 +195,13 @@ public class TypeMismatchSubProcessor {
 				targetCu= cu;
 			} else {
 				callerBindingDecl= Bindings.getGenericField(variableBinding);
-				declaringType= variableBinding.getDeclaringClass().getGenericType();
+				declaringType= variableBinding.getDeclaringClass().getTypeDeclaration();
 			}
 		} else if (callerBinding instanceof IMethodBinding) {
 			IMethodBinding methodBinding= (IMethodBinding) callerBinding;
 			if (!methodBinding.isConstructor()) {
-				declaringType= methodBinding.getDeclaringClass().getGenericType();
-				callerBindingDecl= methodBinding.getGenericMethod();
+				declaringType= methodBinding.getDeclaringClass().getTypeDeclaration();
+				callerBindingDecl= methodBinding.getMethodDeclaration();
 			}
 		}
 		if (declaringType != null && declaringType.isFromSource()) {
@@ -216,7 +216,7 @@ public class TypeMismatchSubProcessor {
 		if (!isAssignedNode) {
 			ITypeBinding nodeType= nodeToCast.resolveTypeBinding();
 			if (castTypeBinding.isInterface() && nodeType != null && nodeType.isClass() && !nodeType.isAnonymous() && nodeType.isFromSource()) {
-				ITypeBinding typeDecl= nodeType.getGenericType();
+				ITypeBinding typeDecl= nodeType.getTypeDeclaration();
 				ICompilationUnit nodeCu= ASTResolving.findCompilationUnitForBinding(cu, astRoot, typeDecl);
 				if (nodeCu != null) {
 					//TODO: check if interface contains wildcards
@@ -294,12 +294,12 @@ public class TypeMismatchSubProcessor {
 
 		
 		ICompilationUnit cu= context.getCompilationUnit();
-		IMethodBinding methodDecl= binding.getGenericMethod();
+		IMethodBinding methodDecl= binding.getMethodDeclaration();
 		proposals.add(new TypeChangeCompletionProposal(cu, methodDecl, astRoot, overridden.getReturnType(), false, 8));
 		
 		ICompilationUnit targetCu= cu;
 		
-		IMethodBinding overriddenDecl= overridden.getGenericMethod();
+		IMethodBinding overriddenDecl= overridden.getMethodDeclaration();
 		ITypeBinding overridenDeclType= overriddenDecl.getDeclaringClass();
 
 		if (overridenDeclType.isFromSource()) {

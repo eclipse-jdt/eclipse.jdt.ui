@@ -225,7 +225,7 @@ public class UnresolvedElementsSubProcessor {
 		ICompilationUnit targetCU;
 		ITypeBinding senderDeclBinding;
 		if (binding != null) {
-			senderDeclBinding= binding.getGenericType();
+			senderDeclBinding= binding.getTypeDeclaration();
 			targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, binding);
 		} else { // binding is null for accesses without qualifier
 			senderDeclBinding= declaringTypeBinding;
@@ -723,7 +723,7 @@ public class UnresolvedElementsSubProcessor {
 			}				
 		}
 		if (binding != null && binding.isFromSource()) {
-			ITypeBinding senderDeclBinding= binding.getGenericType();
+			ITypeBinding senderDeclBinding= binding.getTypeDeclaration();
 			
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, senderDeclBinding);
 			if (targetCU != null) {			
@@ -931,7 +931,7 @@ public class UnresolvedElementsSubProcessor {
 		
 		ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);
 		if (targetCU != null) {
-			IMethodBinding methodDecl= methodBinding.getGenericMethod();
+			IMethodBinding methodDecl= methodBinding.getMethodDeclaration();
 			ITypeBinding[] declParameterTypes= methodDecl.getParameterTypes();
 			
 			ChangeDescription[] changeDesc= new ChangeDescription[declParameterTypes.length];
@@ -1028,7 +1028,7 @@ public class UnresolvedElementsSubProcessor {
 			proposals.add(proposal);				
 		}
 		
-		IMethodBinding methodDecl= methodRef.getGenericMethod();
+		IMethodBinding methodDecl= methodRef.getMethodDeclaration();
 		ITypeBinding declaringType= methodDecl.getDeclaringClass();
 		
 		// add parameters
@@ -1101,7 +1101,7 @@ public class UnresolvedElementsSubProcessor {
 	private static String getMethodSignature(IMethodBinding binding, boolean inOtherCU) {
 		StringBuffer buf= new StringBuffer();
 		if (inOtherCU && !binding.isConstructor()) {
-			buf.append(binding.getDeclaringClass().getGenericType().getName()).append('.'); // simple type name
+			buf.append(binding.getDeclaringClass().getTypeDeclaration().getName()).append('.'); // simple type name
 		}
 		buf.append(binding.getName());
 		return getMethodSignature(buf.toString(), binding.getParameterTypes());
@@ -1163,7 +1163,7 @@ public class UnresolvedElementsSubProcessor {
 				indexOfDiff[nDiffs++]= n;
 			}
 		}
-		ITypeBinding declaringTypeDecl= methodBinding.getDeclaringClass().getGenericType();
+		ITypeBinding declaringTypeDecl= methodBinding.getDeclaringClass().getTypeDeclaration();
 		
 		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit astRoot= context.getASTRoot();
@@ -1223,7 +1223,7 @@ public class UnresolvedElementsSubProcessor {
 						for (int i= 0; i < nDiffs; i++) {
 							changeDesc[idx1]= new SwapDescription(idx2);
 						}
-						IMethodBinding methodDecl= methodBinding.getGenericMethod();
+						IMethodBinding methodDecl= methodBinding.getMethodDeclaration();
 						ITypeBinding[] declParamTypes= methodDecl.getParameterTypes();
 						
 						ITypeBinding[] swappedTypes= new ITypeBinding[] { declParamTypes[idx1], declParamTypes[idx2] };
@@ -1253,7 +1253,7 @@ public class UnresolvedElementsSubProcessor {
 					String name= arg instanceof SimpleName ? ((SimpleName) arg).getIdentifier() : null;					
 					changeDesc[diffIndex]= new EditDescription(argTypes[diffIndex], name);
 				}
-				IMethodBinding methodDecl= methodBinding.getGenericMethod();
+				IMethodBinding methodDecl= methodBinding.getMethodDeclaration();
 				ITypeBinding[] declParamTypes= methodDecl.getParameterTypes();
 				
 				ITypeBinding[] newParamTypes= new ITypeBinding[changeDesc.length];
@@ -1388,7 +1388,7 @@ public class UnresolvedElementsSubProcessor {
 		addParameterMissmatchProposals(context, problem, similarElements, selectedNode, arguments, proposals);
 		
 		if (targetBinding.isFromSource()) {
-			ITypeBinding targetDecl= targetBinding.getGenericType();
+			ITypeBinding targetDecl= targetBinding.getTypeDeclaration();
 			
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, targetDecl);
 			if (targetCU != null) {
