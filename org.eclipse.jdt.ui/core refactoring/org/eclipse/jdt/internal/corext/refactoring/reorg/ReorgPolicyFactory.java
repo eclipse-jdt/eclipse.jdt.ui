@@ -727,15 +727,17 @@ class ReorgPolicyFactory {
 					listRewrite= targetRewrite.getListRewrite(destinationContainer, ((AbstractTypeDeclaration) destinationContainer).getBodyDeclarationsProperty());
 				else
 					listRewrite= targetRewrite.getListRewrite(destinationContainer, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
-				
+
 				if (nodeDestination != null) {
-					listRewrite.insertAfter(newMember, nodeDestination, null);
-				} else {
-					List bodyDeclarations= listRewrite.getRewrittenList();
-					int insertionIndex= ASTNodes.getInsertionIndex(newMember, bodyDeclarations);
-					listRewrite.insertAt(newMember, insertionIndex, null);
-				}
-				return; //could insert into/after destination
+					final List list= listRewrite.getOriginalList();
+					final int index= list.indexOf(nodeDestination);
+					if (index > 0 && index < list.size() - 1) {
+						listRewrite.insertBefore(newMember, (ASTNode) list.get(index), null);
+					} else
+						listRewrite.insertLast(newMember, null);
+				} else
+					listRewrite.insertAt(newMember, ASTNodes.getInsertionIndex(newMember, listRewrite.getRewrittenList()), null);
+				return; // could insert into/after destination
 			}
 			// fall-back / default:
 			final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getDestinationAsType(), destinationCuNode);
