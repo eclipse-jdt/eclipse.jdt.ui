@@ -132,9 +132,10 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 				ActionMessages.getFormattedString("SelfEncapsulateFieldAction.dialog.field_doesnot_exit", selectedField.getElementName()));  //$NON-NLS-1$
 			return;
 		}
-			
-		SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field, JavaPreferencesSettings.getCodeGenerationSettings());
+		
 		try  {	
+			SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field, JavaPreferencesSettings.getCodeGenerationSettings());
+		
 			new RefactoringStarter().activate(
 				refactoring, 
 				new SelfEncapsulateFieldWizard(refactoring), getShell(), getDialogTitle(), true);

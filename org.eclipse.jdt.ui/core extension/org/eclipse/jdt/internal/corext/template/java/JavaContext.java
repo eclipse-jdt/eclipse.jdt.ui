@@ -18,18 +18,15 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
 
 import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
 import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
@@ -40,6 +37,9 @@ import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.L
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * A context for java source.
@@ -358,16 +358,17 @@ public class JavaContext extends CompilationUnitContext {
 		LocalVariable[] localArrays= completion.findLocalArrays();
 		
 		if (localArrays.length > 0) {
-			String typeName= localArrays[localArrays.length - 1].typeName;
+			int idx= localArrays.length - 1;
+			
+			LocalVariable var= localArrays[idx];
+			
+			IJavaProject project= getCompilationUnit().getJavaProject();
+			String typeName= var.typeName;
 			String baseTypeName= typeName.substring(0, typeName.lastIndexOf('['));
 
-			NameProposer proposer= new NameProposer();
-			String[] proposals= proposer.proposeLocalVariableName(baseTypeName);
-
-			for (int i= 0; i < proposals.length; i++) {
-				String variableName= proposals[i];
-				if (!completion.existsLocalName(variableName))
-					return variableName;				
+			String[] proposals= NamingConventions.suggestLocalVariableNames(project, var.typePackageName, baseTypeName, 0, completion.getLocalVariableNames());
+			if (proposals.length > 0) {
+				return proposals[0];
 			}
 		}
 

@@ -9,12 +9,14 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
@@ -57,7 +59,13 @@ public class SefTests extends AbstractSelectionTestCase {
 		IField field= getField(unit, fieldName);
 		assertNotNull(field);
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		settings.fieldPrefixes= new String[0];
+		
+		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
+		preferences.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
+		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
+		preferences.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
+		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
+
 		SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field, settings);
 		RefactoringStatus status= refactoring.checkPreconditions(pm);
 		assertTrue(!status.hasFatalError());
@@ -78,7 +86,14 @@ public class SefTests extends AbstractSelectionTestCase {
 		IField field= getField(unit, fieldName);
 		assertNotNull(field);
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		settings.fieldPrefixes= new String[0];
+
+		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
+		preferences.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
+		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
+		preferences.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
+		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
+
+
 		SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field, settings);
 		RefactoringStatus status= refactoring.checkPreconditions(new NullProgressMonitor());
 		assertTrue(status.hasError());

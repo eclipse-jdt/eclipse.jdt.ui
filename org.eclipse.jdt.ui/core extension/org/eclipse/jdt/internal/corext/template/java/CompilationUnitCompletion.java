@@ -107,6 +107,16 @@ class CompilationUnitCompletion extends CompletionRequestorAdapter {
 
 		return false;
 	}
+	
+	String[] getLocalVariableNames() {
+		String[] res= new String[fLocalVariables.size()];
+		int i= 0;
+		for (Iterator iterator = fLocalVariables.iterator(); iterator.hasNext();) {
+			LocalVariable localVariable = (LocalVariable) iterator.next();
+			res[i++]= localVariable.name;
+		}		
+		return res;
+	}	
 
 	LocalVariable[] findLocalArrays() {
 		Vector vector= new Vector();

@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -37,8 +38,8 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ChangeVisibilityEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.BindingIdentifier;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -81,18 +82,17 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	
 	private static final String NO_NAME= ""; //$NON-NLS-1$
 	
-	public SelfEncapsulateFieldRefactoring(IField field, CodeGenerationSettings settings) {
+	public SelfEncapsulateFieldRefactoring(IField field, CodeGenerationSettings settings) throws JavaModelException {
 		Assert.isNotNull(field);
 		Assert.isNotNull(settings);
 		fField= field;
 		fSettings= settings;
 		fChangeManager= new TextChangeManager();
 		fChange= new CompositeChange(getName());
-		NameProposer proposer= new NameProposer(fSettings.fieldPrefixes, fSettings.fieldSuffixes);
-		fGetterName= RefactoringCoreMessages.getFormattedString("SelfEncapsulateField.getter", new String[] { proposer.proposeAccessorName(field)}); //$NON-NLS-1$
-		fSetterName= RefactoringCoreMessages.getFormattedString("SelfEncapsulateField.setter", new String[] { proposer.proposeAccessorName(field)}); //$NON-NLS-1$
+		fGetterName= GetterSetterUtil.getGetterName(field, null);
+		fSetterName= GetterSetterUtil.getSetterName(field, null);
 		fEncapsulateDeclaringClass= true;
-		fArgName= proposer.proposeArgName(field);
+		fArgName= NamingConventions.removePrefixAndSuffixForFieldName(field.getJavaProject(), field.getElementName(), field.getFlags());
 		checkArgName();
 		fNewMethods= new TextEdit[2];
 	}
