@@ -18,6 +18,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -25,12 +28,21 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
+import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
+import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -61,8 +73,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -77,25 +87,14 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
-import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
-import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
-import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class MoveStaticMembersProcessor extends MoveProcessor {
 	
@@ -917,23 +916,19 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		}
 		// extract updated members
 		String[] updatedMemberSources= new String[members.length];
-		try {
-			ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fSource.getCu());
-			TextEdit edit= fSource.getASTRewrite().rewriteAST(buffer.getDocument(), fSource.getCu().getJavaProject().getOptions(true));
-			edit.apply(buffer.getDocument(), TextEdit.UPDATE_REGIONS);
-			for (int i= 0; i < members.length; i++) {
-				updatedMemberSources[i]= getUpdatedMember(buffer, members[i]);
-			}
-			fSource.clearASTRewrite();
-			return updatedMemberSources;
-		} finally {
-			RefactoringFileBuffers.release(fSource.getCu());
+		IDocument document= new Document(fSource.getCu().getBuffer().getContents());
+		TextEdit edit= fSource.getASTRewrite().rewriteAST(document, fSource.getCu().getJavaProject().getOptions(true));
+		edit.apply(document, TextEdit.UPDATE_REGIONS);
+		for (int i= 0; i < members.length; i++) {
+			updatedMemberSources[i]= getUpdatedMember(document, members[i]);
 		}
+		fSource.clearASTRewrite();
+		return updatedMemberSources;
 	}
 
-	private String getUpdatedMember(ITextFileBuffer buffer, BodyDeclaration declaration) throws BadLocationException {
+	private String getUpdatedMember(IDocument document, BodyDeclaration declaration) throws BadLocationException {
 		ITrackedNodePosition trackedPosition= (ITrackedNodePosition) declaration.getProperty(TRACKED_POSITION_PROPERTY);
-		return Strings.trimIndentation(buffer.getDocument().get(trackedPosition.getStartPosition(), trackedPosition.getLength()), fPreferences.tabWidth, false);
+		return Strings.trimIndentation(document.get(trackedPosition.getStartPosition(), trackedPosition.getLength()), fPreferences.tabWidth, false);
 	}
 
 	private RefactoringStatus moveMembers(BodyDeclaration[] members, String[] sources) throws CoreException {
