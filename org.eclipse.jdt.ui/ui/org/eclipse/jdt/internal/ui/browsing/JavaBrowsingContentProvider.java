@@ -399,10 +399,8 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		postRunnable(new Runnable() {
 			public void run() {
 				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) {
+				if (ctrl != null && !ctrl.isDisposed())
 					fViewer.refresh(root, false);
-//					fViewer.refresh(root);
-				}
 			}
 		});
 	}
