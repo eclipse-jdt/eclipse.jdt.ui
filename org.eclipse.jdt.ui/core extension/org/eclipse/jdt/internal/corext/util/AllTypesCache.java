@@ -403,8 +403,14 @@ public class AllTypesCache {
 			 || (delta.getFlags() & (IJavaElementDelta.F_ADDED_TO_CLASSPATH | IJavaElementDelta.F_REMOVED_FROM_CLASSPATH)) != 0;
 			
 			switch (elem.getElementType()) {
-				case IJavaElement.JAVA_MODEL:
 				case IJavaElement.JAVA_PROJECT:
+					// check if project got opened or closed
+					if ((delta.getKind()& IJavaElementDelta.CHANGED) != 0 &&
+						(delta.getFlags() & (IJavaElementDelta.F_CLOSED | IJavaElementDelta.F_OPENED)) != 0) {
+						return true;
+					}
+					return processChildrenDelta(delta);
+				case IJavaElement.JAVA_MODEL:
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 				case IJavaElement.PACKAGE_FRAGMENT:
 				case IJavaElement.CLASS_FILE:

@@ -71,7 +71,7 @@ public class AllTypesCacheTest extends TestCase {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new AllTypesCacheTest("testClasspathChange"));
+			suite.addTest(new AllTypesCacheTest("testOpenCloseProject"));
 			return new ProjectTestSetup(suite);
 		}	
 	}
@@ -298,6 +298,21 @@ public class AllTypesCacheTest extends TestCase {
 			JavaPlugin.getActivePage().closeAllEditors(false);
 		}
 	
+	}
+	
+	public void testOpenCloseProject() throws Exception {
+		TypeInfo[] result= AllTypesCache.getTypesForName("TestCase", SearchEngine.createWorkspaceScope(), null);
+		assertTrue("TestCase found", result.length == 1 && 
+				   "junit.framework.TestCase".equals(result[0].getFullyQualifiedName()));
+		
+		fJProject2.getProject().close(null);
+		result= AllTypesCache.getTypesForName("TestCase", SearchEngine.createWorkspaceScope(), null);
+		assertTrue("TestCase not found", result.length == 0);
+		
+		fJProject2.getProject().open(null);
+		result= AllTypesCache.getTypesForName("TestCase", SearchEngine.createWorkspaceScope(), null);
+		assertTrue("TestCase found", result.length == 1 && 
+				   "junit.framework.TestCase".equals(result[0].getFullyQualifiedName()));
 	}
 	
 	private TypeInfo findTypeRef(List refs, String fullname) {
