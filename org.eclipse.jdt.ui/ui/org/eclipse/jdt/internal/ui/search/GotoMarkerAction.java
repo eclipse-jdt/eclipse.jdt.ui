@@ -7,10 +7,12 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -25,10 +27,11 @@ import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.search.ui.SearchUI;
 
+import org.eclipse.search.internal.ui.SearchPlugin;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IPackagesViewPart;
 import org.eclipse.jdt.ui.JavaUI;
@@ -38,7 +41,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 public class GotoMarkerAction extends Action {
@@ -64,21 +66,10 @@ public class GotoMarkerAction extends Action {
 			return;
 		IWorkbenchPage wbPage= JavaPlugin.getActivePage();
 		IJavaElement javaElement= SearchUtil.getJavaElement(marker);
-//		if (javaElement == null) {
-//			beep();
-//			return;
-//		}
 
-		if (javaElement != null && javaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-			// Goto packages view
-			try {
-				IViewPart view= wbPage.showView(JavaUI.ID_PACKAGES);
-				if (view instanceof IPackagesViewPart)
-					((IPackagesViewPart)view).selectAndReveal(javaElement);
-			} catch (PartInitException ex) {
-				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
-			}
-		} else {
+		if (javaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
+			gotoPackagesView(javaElement, wbPage);
+		else {
 			if (SearchUI.reuseEditor())
 				showWithReuse(marker, resource, javaElement, wbPage);
 			else
@@ -93,10 +84,8 @@ public class GotoMarkerAction extends Action {
 			if (objectToOpen == null)
 				objectToOpen= marker.getResource();
 			editor= EditorUtility.openInEditor(objectToOpen, false);
-		} catch (PartInitException ex) {
-			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
-		} catch (JavaModelException ex) {
-			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
+		} catch (CoreException ex) {
+			MessageDialog.openError(SearchPlugin.getActiveWorkbenchShell(), SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 		if (editor != null)
 			editor.gotoMarker(marker);
@@ -136,7 +125,7 @@ public class GotoMarkerAction extends Action {
 				try {
 					editor= page.openEditor(input, editorId, false);
 				} catch (PartInitException ex) {
-					ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
+					MessageDialog.openError(SearchPlugin.getActiveWorkbenchShell(), SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
 					return;
 				}
 		} else {
@@ -154,7 +143,7 @@ public class GotoMarkerAction extends Action {
 			if (view instanceof IPackagesViewPart)
 				((IPackagesViewPart)view).selectAndReveal(javaElement);
 		} catch (PartInitException ex) {
-			ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
+			MessageDialog.openError(SearchPlugin.getActiveWorkbenchShell(), SearchMessages.getString("Search.Error.openEditor.title"), SearchMessages.getString("Search.Error.openEditor.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
 	
