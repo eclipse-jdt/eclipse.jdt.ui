@@ -116,9 +116,6 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm)	throws JavaModelException {
 		
-		if (fSelectionStart < 0)
-			return RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
-		
 		if (!(fCu instanceof CompilationUnit))
 			return RefactoringStatus.createFatalErrorStatus("Internal Error");
 
