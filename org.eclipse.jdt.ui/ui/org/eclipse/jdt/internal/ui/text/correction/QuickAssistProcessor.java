@@ -57,6 +57,11 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 		ExpressionStatement expressionStatement= (ExpressionStatement) statement;
 
 		Expression expression= expressionStatement.getExpression();
+		if (expression.getNodeType() == ASTNode.ASSIGNMENT) {
+			return; // too confusing and not helpful
+		}
+		
+		
 		ITypeBinding typeBinding= expression.resolveTypeBinding();
 		typeBinding= ASTResolving.normalizeTypeBinding(typeBinding);
 		if (typeBinding == null) {
