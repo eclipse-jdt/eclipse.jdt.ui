@@ -36,7 +36,7 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 	private static final String KEY_DESCRIPTION= "JavaBasePreferencePage.description";
 	private static final String KEY_LINKING= "JavaBasePreferencePage.linkSelection";
 	private static final String KEY_USE_SRCBIN_FOLDERS= "JavaBasePreferencePage.useSrcBinFoldersInNewProj";
-	
+	private static final String KEY_DOUBLE_CLICK_GOES_INTO= "JavaBasePreferencePage.doubleClickGoesInto";
 	private static final String KEY_OPEN_TYPE_HIERARCHY= "JavaBasePreferencePage.openTypeHierarchy";
 	private static final String KEY_OPEN_PERSPECTIVE= "JavaBasePreferencePage.openTypeHierarchy.inPerspective";
 	private static final String KEY_OPEN_VIEW_PART= "JavaBasePreferencePage.openTypeHierarchy.inViewPart";
@@ -51,6 +51,7 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 		store.setDefault(IPreferencesConstants.LINK_PACKAGES_TO_EDITOR, true);
 		store.setDefault(IPreferencesConstants.OPEN_TYPE_HIERARCHY, IPreferencesConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE);
 		store.setDefault(IPreferencesConstants.SRCBIN_FOLDERS_IN_NEWPROJ, true);		
+		store.setDefault(IPreferencesConstants.DOUBLE_CLICK_GOES_INTO, false);		
 	}
 
 	protected void createFieldEditors() {
@@ -66,6 +67,13 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 		boolEditor= new BooleanFieldEditor(
 			IPreferencesConstants.SRCBIN_FOLDERS_IN_NEWPROJ,
 			JavaPlugin.getResourceString(KEY_USE_SRCBIN_FOLDERS),
+			parent
+		);
+		addField(boolEditor);
+		
+		boolEditor= new BooleanFieldEditor(
+			IPreferencesConstants.DOUBLE_CLICK_GOES_INTO,
+			JavaPlugin.getResourceString(KEY_DOUBLE_CLICK_GOES_INTO),
 			parent
 		);
 		addField(boolEditor);
@@ -104,6 +112,12 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 		return IPreferencesConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART.equals(
 			JavaPlugin.getDefault().getPreferenceStore().getString(IPreferencesConstants.OPEN_TYPE_HIERARCHY));
 	}
+	
+	public static boolean doubleClockGoesInto() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		return store.getBoolean(IPreferencesConstants.DOUBLE_CLICK_GOES_INTO);
+	}
+
 }
 
 
