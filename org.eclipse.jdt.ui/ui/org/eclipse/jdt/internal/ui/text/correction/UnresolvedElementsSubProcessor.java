@@ -537,17 +537,7 @@ public class UnresolvedElementsSubProcessor {
 		CompilationUnit astRoot= context.getASTRoot();		
 		
 		// add arguments
-		{
-			ASTNode selectedNode= context.getCoveringNode();
-			ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
-			
-			for (int i= 0; i < diff; i++) {
-				int idx= indexSkipped[i];
-				Expression newArg= ASTNodeFactory.newDefaultExpression(astRoot.getAST(), paramTypes[idx]);
-				rewrite.markAsInserted(newArg);
-				arguments.add(idx, newArg);
-			}
-			
+		{			
 			String[] arg= new String[] { getMethodSignature(methodBinding, false) };
 			String label;
 			if (diff == 1) {
@@ -555,8 +545,8 @@ public class UnresolvedElementsSubProcessor {
 			} else {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addarguments.description", arg); //$NON-NLS-1$
 			}			
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
+			AddArgumentCorrectionProposal proposal= new AddArgumentCorrectionProposal(label, context.getCompilationUnit(), context.getCoveredNode(), arguments, indexSkipped, paramTypes, 8);
+			proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD));
 			proposal.ensureNoModifications();
 			proposals.add(proposal);				
 		}

@@ -18,29 +18,16 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.NamingConventions;
-import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.*;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IPackageBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -51,9 +38,12 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
 
-public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal {
+public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal implements ICompletionProposalExtension2 {
 
 	public static final int LOCAL= 1;
 	public static final int FIELD= 2;
@@ -61,6 +51,7 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 	private int  fVariableKind;
 	private ExpressionStatement fExpressionStatement;
 	private ITypeBinding fTypeBinding;
+	private IRegion fSelectedRegion;
 
 	public AssignToVariableAssistProposal(ICompilationUnit cu, int variableKind, ExpressionStatement node, ITypeBinding typeBinding, int relevance) {
 		super(null, cu, null, relevance, null);
@@ -94,7 +85,6 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		}
 	}
 
-
 	private ASTRewrite doAddLocal() throws CoreException {
 		Expression expression= fExpressionStatement.getExpression();
 		ASTRewrite rewrite= new ASTRewrite(fExpressionStatement.getParent());
@@ -102,15 +92,19 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 
 		String varName= suggestLocalVariableNames(fTypeBinding);
 
+		SimpleName name= ast.newSimpleName(varName);
+		rewrite.markAsTracked(name, "LINKED"); //$NON-NLS-1$
+		
 		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
-		newDeclFrag.setName(ast.newSimpleName(varName));
+		newDeclFrag.setName(name);
 		newDeclFrag.setInitializer((Expression) rewrite.createCopy(expression));
 		
 		VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
 		String typeName= addImport(fTypeBinding);
 		newDecl.setType(ASTNodeFactory.newType(ast, typeName));
 		
-		rewrite.markAsReplaced(fExpressionStatement, newDecl, "ID"); //$NON-NLS-1$
+		rewrite.markAsReplaced(fExpressionStatement, newDecl); //$NON-NLS-1$
+		rewrite.markAsTracked(newDecl, "ENDPOS"); //$NON-NLS-1$
 		return rewrite;
 	}
 
@@ -123,12 +117,15 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		
 		ASTRewrite rewrite= new ASTRewrite(newTypeDecl);
 		AST ast= fExpressionStatement.getAST();
-			
+		
 		String varName= suggestFieldNames(fTypeBinding);
 
-		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
-		newDeclFrag.setName(ast.newSimpleName(varName));
+		SimpleName name= ast.newSimpleName(varName);
+		rewrite.markAsTracked(name, "LINKED-1"); //$NON-NLS-1$
 		
+		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
+		newDeclFrag.setName(name);
+				
 		FieldDeclaration newDecl= ast.newFieldDeclaration(newDeclFrag);
 		String typeName= addImport(fTypeBinding);
 		newDecl.setType(ASTNodeFactory.newType(ast, typeName));
@@ -137,16 +134,18 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		Assignment assignment= ast.newAssignment();
 		assignment.setRightHandSide((Expression) rewrite.createCopy(expression));
 
+		SimpleName accessName= ast.newSimpleName(varName);
+		rewrite.markAsTracked(accessName, "LINKED"); //$NON-NLS-1$
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_KEYWORD_THIS)) {
 			FieldAccess fieldAccess= ast.newFieldAccess();
-			fieldAccess.setName(ast.newSimpleName(varName));
+			fieldAccess.setName(accessName);
 			fieldAccess.setExpression(ast.newThisExpression());
 			assignment.setLeftHandSide(fieldAccess);
 		} else {
-			assignment.setLeftHandSide(ast.newSimpleName(varName));
+			assignment.setLeftHandSide(accessName);
 		}
-
-		rewrite.markAsReplaced(expression, assignment, "ID"); //$NON-NLS-1$
+		rewrite.markAsReplaced(expression, assignment); //$NON-NLS-1$
+		rewrite.markAsTracked(fExpressionStatement, "ENDPOS"); //$NON-NLS-1$
 		
 		decls.add(findInsertIndex(decls, fExpressionStatement.getStartPosition()), newDecl);
 		
@@ -214,37 +213,66 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 	}
 	
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
-	 */
-	public Point getSelection(IDocument document) {
+	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 		try {
-			CompilationUnitChange change= getCompilationUnitChange();
-			GroupDescription[] desc= change.getGroupDescriptions();
-			TextRange range= change.getNewTextRange(desc[0].getTextEdits());
+			IDocument document= viewer.getDocument();
+
+			super.apply(document);
 			
-			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
-			scanner.setSource(document.get(range.getOffset(), range.getLength()).toCharArray());
-			Point res= new Point(0, 0);
-			int tok= scanner.getNextToken();
-			while (tok != ITerminalSymbols.TokenNameEOF) {
-				res.x= scanner.getCurrentTokenStartPosition() + range.getOffset();
-				res.y= scanner.getCurrentTokenEndPosition() - scanner.getCurrentTokenStartPosition() + 1;
-				tok= scanner.getNextToken();
-				if (tok == ITerminalSymbols.TokenNameEQUAL) {
-					return res;
+			LinkedPositionManager manager= new LinkedPositionManager(document);
+			LinkedPositionUI editor= new LinkedPositionUI(viewer, manager);
+			
+			CompilationUnitChange change= getCompilationUnitChange();
+			GroupDescription[] descriptions= change.getGroupDescriptions();
+			for (int i= 0; i < descriptions.length; i++) {
+				GroupDescription curr= descriptions[i];
+				String name= curr.getName();
+				if (name.startsWith("LINKED")) { //$NON-NLS-1$
+					TextRange range= change.getNewTextRange(curr.getTextEdits());
+					manager.addPosition(range.getOffset(), range.getLength());
+					if (name.equals("LINKED")) { //$NON-NLS-1$
+						editor.setInitialOffset(range.getOffset());
+					}
+				} else if (name.equals("ENDPOS")) { //$NON-NLS-1$
+					TextRange range= change.getNewTextRange(curr.getTextEdits());
+					editor.setFinalCaretOffset(range.getExclusiveEnd());
 				}
 			}
-		} catch (CoreException e) {
-			// can't happen (change already exists at this point)
-		} catch (InvalidInputException e) {
-			// ignore
+			editor.enter();
+			
+			fSelectedRegion= editor.getSelectedRegion();
 		} catch (BadLocationException e) {
-			// ignore
+			JavaPlugin.log(e);
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
 		}
-		return null;
+	}
+		
+	/*
+	 * @see ICompletionProposal#getSelection(IDocument)
+	 */
+	public Point getSelection(IDocument document) {
+		return new Point(fSelectedRegion.getOffset(), fSelectedRegion.getLength());
+	}	
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(org.eclipse.jface.text.ITextViewer, boolean)
+	 */
+	public void selected(ITextViewer viewer, boolean smartToggle) {
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(org.eclipse.jface.text.ITextViewer)
+	 */
+	public void unselected(ITextViewer viewer) {
+	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
+	 */
+	public boolean validate(IDocument document, int offset, DocumentEvent event) {
+		return false;
+	}	
+	
 
 }

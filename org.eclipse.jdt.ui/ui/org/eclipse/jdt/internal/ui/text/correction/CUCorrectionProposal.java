@@ -167,7 +167,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 			}
 		}
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
 	 */
@@ -187,14 +187,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 			if (descriptions.length > 0) {
 				change.setKeepExecutedTextEdits(true);
 			}
-			GroupDescription selection= null;
-			for (int i= 0; i < descriptions.length; i++) {
-				GroupDescription curr= descriptions[i];
-				if (SELECTION_GROUP_DESC.equals(curr.getName())) {
-					selection= curr;
-					break;
-				}
-			}
+			GroupDescription selection= change.getGroupDescription(SELECTION_GROUP_DESC);
 			
 			IEditorPart part= null;
 			if (selection != null) {
