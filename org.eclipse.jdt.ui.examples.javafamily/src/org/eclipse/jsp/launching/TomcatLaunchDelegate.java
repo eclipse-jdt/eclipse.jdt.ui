@@ -12,16 +12,11 @@ package org.eclipse.jsp.launching;
 
 import java.io.File;
 import java.text.MessageFormat;
-
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.variables.IValueVariable;
 import org.eclipse.core.variables.VariablesPlugin;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.internal.launching.JavaLocalApplicationLaunchConfigurationDelegate;
 import org.eclipse.jsp.JspUIPlugin;
 
@@ -51,20 +46,6 @@ public class TomcatLaunchDelegate extends JavaLocalApplicationLaunchConfiguratio
 	 * folder of a web application.
 	 */
 	public static final String ATTR_WEB_APP_ROOT= "org.eclipse.jsp.WEB_APP_ROOT"; //$NON-NLS-1$	
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.core.model.ILaunchConfigurationDelegate#launch(org.eclipse.debug.core.ILaunchConfiguration, java.lang.String, org.eclipse.debug.core.ILaunch, org.eclipse.core.runtime.IProgressMonitor)
-	 */
-	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
-		super.launch(configuration, mode, launch, monitor);
-		
-		// set default stratum
-		IJavaDebugTarget target = (IJavaDebugTarget)launch.getDebugTarget();
-		if (target != null) {
-			// only available in debug mode
-			target.setDefaultStratum("JSP"); //$NON-NLS-1$
-		}
-	}
 
 	/**
 	 * Constructs a new launch delegate
