@@ -2334,6 +2334,9 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @since 3.0
 	 */
 	protected void selectionChanged() {
+		if (getSelectionProvider() == null)
+			return;
+		
 		ISourceReference element= computeHighlightRangeSourceReference();
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE))
 			synchronizeOutlinePage(element);
@@ -2342,7 +2345,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	}
 	
 	protected void setSelection(ISourceReference reference, boolean moveCursor) {
-		
 		ISelection selection= getSelectionProvider().getSelection();
 		if (selection instanceof TextSelection) {
 			TextSelection textSelection= (TextSelection) selection;
