@@ -537,7 +537,7 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 		
 		// filter constructor checkbox
 		fFilterConstructorButton = new Button(container, SWT.CHECK);
-		fFilterConstructorButton.setText("Filter constructors");
+		fFilterConstructorButton.setText("Filter co&nstructors");
 		fFilterConstructorButton.setToolTipText("Don't stop in constructors");
 		gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalSpan = 2;
