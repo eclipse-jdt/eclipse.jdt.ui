@@ -34,6 +34,7 @@ abstract class PackageReorgChange extends Change {
 		fPackageHandle= pack.getHandleIdentifier();
 		fDestinationHandle= dest.getHandleIdentifier();
 		fNameQuery= nameQuery;
+		makeNotUndoable();
 	}
 	
 	abstract void doPerform(IProgressMonitor pm) throws JavaModelException;
@@ -74,10 +75,6 @@ abstract class PackageReorgChange extends Change {
 		if (fNameQuery == null)
 			return null;
 		return fNameQuery.getNewName();
-	}
-
-	public boolean isUndoable() {
-		return false;
 	}
 
 	public IChange getUndoChange() {

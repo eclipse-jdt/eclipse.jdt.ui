@@ -24,6 +24,7 @@ public class CopyCompilationUnitChange extends CompilationUnitReorgChange {
 	
 	public CopyCompilationUnitChange(ICompilationUnit cu, IPackageFragment dest, INewNameQuery newNameQuery){
 		super(cu, dest, newNameQuery);
+		makeNotUndoable();
 	}
 		
 	/* non java-doc
@@ -38,13 +39,6 @@ public class CopyCompilationUnitChange extends CompilationUnitReorgChange {
 	 */
 	public IChange getUndoChange() {
 		return null;
-	}
-
-	/* non java-doc
-	 * @see IChange#isUndoable()
-	 */	
-	public boolean isUndoable(){
-		return false;
 	}
 
 	/* non java-doc

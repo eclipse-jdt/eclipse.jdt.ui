@@ -44,6 +44,7 @@ abstract class PackageFragmentRootReorgChange extends Change {
 		fDestinationPath= Utils.getResourcePath(destination);
 		fNewNameQuery= newNameQuery;
 		fUpdateClasspathQuery= updateClasspathQuery;
+		makeNotUndoable();
 	}
 
 	/* non java-doc
@@ -83,13 +84,6 @@ abstract class PackageFragmentRootReorgChange extends Change {
 	
 	protected IPackageFragmentRoot getRoot(){
 		return (IPackageFragmentRoot)JavaCore.create(fRootHandle);
-	}
-	
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#isUndoable()
-	 */
-	public boolean isUndoable() {
-		return false;
 	}
 	
 	protected IPath getDestinationProjectPath(){

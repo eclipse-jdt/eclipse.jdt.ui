@@ -24,6 +24,10 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 
 abstract class AbstractDeleteChange extends Change {
 	
+	AbstractDeleteChange(){
+		makeNotUndoable();
+	}
+	
 	protected abstract void doDelete(ChangeContext context, IProgressMonitor pm) throws CoreException;
 	
 	/* non java-doc
@@ -49,12 +53,6 @@ abstract class AbstractDeleteChange extends Change {
 	public final IChange getUndoChange() {
 		return new NullChange();
 	}
-	
-	/* non java-doc
-	 * @see IChange#isUndoable()
-	 */
-	public final boolean isUndoable() {
-		return false;
-	}
+
 }
 

@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 public abstract class Change implements IChange {
 
 	private boolean fIsActive= true;
+	private boolean fIsUndoable= true;
 
 	/* (Non-Javadoc)
 	 * Method declared in IChange.
@@ -77,7 +78,11 @@ public abstract class Change implements IChange {
 	 * Method declared in IChange.
 	 */
 	public boolean isUndoable() {
-		return true;
+		return fIsUndoable;
+	}
+	
+	public final void makeNotUndoable(){
+		fIsUndoable= false;
 	}
 	
 	/* (Non-Javadoc)

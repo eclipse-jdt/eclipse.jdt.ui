@@ -22,8 +22,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 
 public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 
-	private boolean fUndoable;
-	
 	public MoveCompilationUnitChange(ICompilationUnit cu, IPackageFragment newPackage){
 		super(cu, newPackage);
 	}
@@ -38,13 +36,6 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 	public String getName() {
 		return RefactoringCoreMessages.getFormattedString("MoveCompilationUnitChange.name", //$NON-NLS-1$
 		new String[]{getCu().getElementName(), getPackageName(getDestinationPackage())}); 
-	}
-
-	/* non java-doc
-	 * @see IChange#isUndoable()
-	 */
-	public boolean isUndoable(){
-		return fUndoable;
 	}
 	
 	/* non java-doc
@@ -67,7 +58,9 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 			name= getCu().getElementName();
 		else
 			name= newName;	
-		fUndoable= ! getDestinationPackage().getCompilationUnit(name).exists();
+
+		if (getDestinationPackage().getCompilationUnit(name).exists())
+			makeNotUndoable();
 		
 		getCu().move(getDestinationPackage(), null, newName, true, pm);
 	}

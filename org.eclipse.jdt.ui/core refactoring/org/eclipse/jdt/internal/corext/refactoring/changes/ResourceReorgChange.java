@@ -47,6 +47,7 @@ abstract class ResourceReorgChange extends Change {
 		fIsDestinationProject= (dest instanceof IProject);
 		fDestinationPath= Utils.getResourcePath(dest);
 		fNewNameQuery= nameQuery;
+		makeNotUndoable();
 	}
 	
 	protected abstract void doPerform(IPath path, IProgressMonitor pm) throws CoreException;
@@ -149,13 +150,6 @@ abstract class ResourceReorgChange extends Change {
 	 */
 	public IChange getUndoChange() {
 		return null;
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#isUndoable()
-	 */
-	public boolean isUndoable() {
-		return false;
 	}
 
 	protected int getReorgFlags() {
