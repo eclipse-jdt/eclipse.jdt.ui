@@ -186,9 +186,6 @@ class RenamePackageASTAnalyzer extends RefactoringASTAnalyzer {
 	/* overriden
 	 */
 	protected boolean sourceRangeOnList(AstNode astNode){
-		//DebugUtils.dump("sourceRangeOnList:" + astNode.getClass().getName());
-		//DebugUtils.dump("sourceRangeOnList:" + astNode);
-		
 		if (astNode instanceof SingleNameReference)
 			return false;
 		else if (astNode instanceof SingleTypeReference)

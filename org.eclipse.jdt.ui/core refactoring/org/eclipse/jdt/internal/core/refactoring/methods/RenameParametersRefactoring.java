@@ -9,69 +9,42 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.refactoring.base.IChange;
-import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
-
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.AbstractRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
+import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 
-/**
- * <p>
- * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 
- * and expected to change significantly before reaching stability. It is being made available at 
- * this early stage to solicit feedback from pioneering adopters on the understanding that any 
- * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
- */
 public class RenameParametersRefactoring extends MethodRefactoring implements IPreactivatedRefactoring{
 	private String[] fNewParameterNames;
-
-	//helper 
 	private String[] fOldParameterNames;
-	
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	
 	public RenameParametersRefactoring(ITextBufferChangeCreator changeCreator, IMethod method){
 		super(method);
 		setOldParameterNames();
+		Assert.isNotNull(changeCreator);
 		fTextBufferChangeCreator= changeCreator;
 	}
 	
-	private void setOldParameterNames(){
-		if (getMethod().isBinary()) 
-			return;
-		try{
-			fOldParameterNames= getMethod().getParameterNames();
-		} catch (JavaModelException e){
-		}	
-	}
-	
+	/* non java-doc 
+	 * @see IRefactoring#getName
+	 */
 	public String getName(){
 		return RefactoringCoreMessages.getString("RenameParametersRefactoring.rename_parameters"); //$NON-NLS-1$
 	}
 	
-	private void checkParameterNames(String[] newParameterNames) {
-		Assert.isNotNull(fOldParameterNames, RefactoringCoreMessages.getString("RenameParametersRefactoring.assert.names_null")); //$NON-NLS-1$
-		Assert.isTrue(newParameterNames.length > 0, RefactoringCoreMessages.getString("RenameParametersRefactoring.assert.one_parameter")); //$NON-NLS-1$
-		Assert.isTrue(fOldParameterNames.length == newParameterNames.length, RefactoringCoreMessages.getString("RenameParametersRefactoring.assert.same_number"));	 //$NON-NLS-1$
-		for (int i= 0; i < newParameterNames.length; i++){
-			Assert.isNotNull(newParameterNames[i], RefactoringCoreMessages.getString("RenameParametersRefactoring.assert.name_null") + i); //$NON-NLS-1$
-		}	
-	}
-	
-	public void setNewParameterNames(String[] newParameterNames){
-		checkParameterNames(newParameterNames);
-		fNewParameterNames= newParameterNames;
-	}
-	
+	/* non java-doc 
+	 * @see IPreactivatedRefactoring#getPreactivation
+	 */
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(getMethod()));
@@ -80,6 +53,9 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 		return result;
 	}
 	
+	/* non java-doc 
+	 * @see Refactoring#getActivation
+	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
 		return Checks.checkIfCuBroken(getMethod());
 	}
@@ -99,30 +75,59 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 		return result;
 	}
 	
+	/* non java-doc 
+	 * @see Refactoring#getInput
+	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= new RefactoringStatus();
-		pm.beginTask("", 10); //$NON-NLS-1$
-		result.merge(Checks.checkIfCuBroken(getMethod()));
-		if (result.hasFatalError())
+		try{
+			RefactoringStatus result= new RefactoringStatus();
+			pm.beginTask("", 10); //$NON-NLS-1$
+			result.merge(Checks.checkIfCuBroken(getMethod()));
+			if (result.hasFatalError())
+				return result;
+			if (Arrays.asList(getUnsavedFiles()).contains(Refactoring.getResource(getMethod())))
+				result.addFatalError(RefactoringCoreMessages.getString("RenameParametersRefactoring.not_saved"));		 //$NON-NLS-1$
+			if (result.hasFatalError())
+				return result;	
+			pm.subTask(RefactoringCoreMessages.getString("RenameParametersRefactoring.checking")); //$NON-NLS-1$
+			result.merge(checkNewNames());
+			pm.worked(3);
+			/*
+			 * only one resource is affected - no need to check its availability
+			 * (done in MethodRefactoring::checkActivation)
+			 */
+			if (mustAnalyzeAst()) 
+				result.merge(analyzeAst()); 
+			pm.worked(7);
 			return result;
-		if (getUnsavedFileList().contains(Refactoring.getResource(getMethod())))
-			result.addFatalError(RefactoringCoreMessages.getString("RenameParametersRefactoring.not_saved"));		 //$NON-NLS-1$
-		if (result.hasFatalError())
-			return result;	
-		pm.subTask(RefactoringCoreMessages.getString("RenameParametersRefactoring.checking")); //$NON-NLS-1$
-		result.merge(checkNewNames());
-		pm.worked(3);
-		/*
-		 * only one resource is affected - no need to check its availability
-		 * (done in MethodRefactoring::checkActivation)
-		 */
-		if (mustAnalyzeAst()) 
-			result.merge(analyzeAst()); 
-		pm.worked(7);
-		pm.done();
-		return result;
+		} finally{
+			pm.done();
+		}	
 	}
-	//------
+	
+	private void setOldParameterNames(){
+		if (getMethod().isBinary()) 
+			return;
+		try{
+			fOldParameterNames= getMethod().getParameterNames();
+		} catch (JavaModelException e){
+			//ok to ignore - if this method does not exist, then the refactoring will not
+			//be activated anyway
+		}	
+	}
+	private void checkParameterNames(String[] newParameterNames) {
+		Assert.isNotNull(fOldParameterNames, RefactoringCoreMessages.getString("RenameParametersRefactoring.assert.names_null")); //$NON-NLS-1$
+		Assert.isTrue(newParameterNames.length > 0, RefactoringCoreMessages.getString("RenameParametersRefactoring.assert.one_parameter")); //$NON-NLS-1$
+		Assert.isTrue(fOldParameterNames.length == newParameterNames.length, RefactoringCoreMessages.getString("RenameParametersRefactoring.assert.same_number"));	 //$NON-NLS-1$
+		for (int i= 0; i < newParameterNames.length; i++){
+			Assert.isNotNull(newParameterNames[i], RefactoringCoreMessages.getString("RenameParametersRefactoring.assert.name_null") + i); //$NON-NLS-1$
+		}	
+	}
+	
+	public void setNewParameterNames(String[] newParameterNames){
+		checkParameterNames(newParameterNames);
+		fNewParameterNames= newParameterNames;
+	}
 	
 	private boolean anythingRenamed(){
 		for (int i= 0; i < fNewParameterNames.length; i++){
@@ -132,7 +137,7 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 		return false;
 	}
 	
-	private String[] getSortedCopy(String[] array){
+	private static String[] getSortedCopy(String[] array){
 		//should we use arrayCopy?
 		String[] copy= (String[])array.clone();
 		Arrays.sort(copy);
@@ -181,18 +186,22 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 	//-------- changes ----
 	
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask(RefactoringCoreMessages.getString("RenameParametersRefactoring.creating_change"), 10); //$NON-NLS-1$
-		ITextBufferChange builder= fTextBufferChangeCreator.create(RefactoringCoreMessages.getString("RenameParametersRefactoring.rename_method_parameters"), getMethod().getCompilationUnit()); //$NON-NLS-1$
-		List renamed= getRenamedParameterIndices(fOldParameterNames, fNewParameterNames);
-		for (Iterator iter= renamed.iterator(); iter.hasNext() ;){
-			Integer i= 	(Integer)iter.next();
-			addParameterRenaming(i.intValue(), builder);
-		}
-		pm.done();
-		return builder;
+		try{
+			List renamed= getRenamedParameterIndices(fOldParameterNames, fNewParameterNames);
+			pm.beginTask(RefactoringCoreMessages.getString("RenameParametersRefactoring.creating_change"), renamed.size()); //$NON-NLS-1$
+			ITextBufferChange builder= fTextBufferChangeCreator.create(RefactoringCoreMessages.getString("RenameParametersRefactoring.rename_method_parameters"), getMethod().getCompilationUnit()); //$NON-NLS-1$
+			for (Iterator iter= renamed.iterator(); iter.hasNext() ;){
+				Integer i= 	(Integer)iter.next();
+				addParameterRenaming(i.intValue(), builder);
+				pm.worked(1);
+			}
+			return builder;
+		} finally{
+			pm.done();
+		}	
 	}
 	
-	private List getRenamedParameterIndices(String[] oldNames, String[] newNames){
+	private static List getRenamedParameterIndices(String[] oldNames, String[] newNames){
 		List l= new ArrayList(oldNames.length);
 		for (int i= 0; i < oldNames.length; i++){
 			if (! oldNames[i].equals(newNames[i]))
@@ -220,5 +229,3 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 		builder.addReplace(RefactoringCoreMessages.getString("RenameParametersRefactoring.update_reference"), occurrenceOffset, length, newName); //$NON-NLS-1$
 	}
 }
-
-

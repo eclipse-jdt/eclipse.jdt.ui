@@ -29,9 +29,9 @@ import org.eclipse.jdt.internal.core.CompilationUnit;
 
 public abstract class RefactoringASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 
-	private List fSearchResults;
+	private SearchResult[] fSearchResults;
 	
-	public final RefactoringStatus analyze(List searchResults, ICompilationUnit cu) throws JavaModelException{
+	public final RefactoringStatus analyze(SearchResult[] searchResults, ICompilationUnit cu) throws JavaModelException{
 		fSearchResults= searchResults;
 		return super.analyze(cu);
 	}
@@ -39,12 +39,8 @@ public abstract class RefactoringASTAnalyzer extends AbstractRefactoringASTAnaly
 	//-------
 		
 	protected boolean sourceRangeOnList(int start, int end){
-		//DebugUtils.dump("start:" + start + " end:" + end);
-		Iterator iter= fSearchResults.iterator();
-		while (iter.hasNext()){
-			SearchResult searchResult= (SearchResult)iter.next();
-			//DebugUtils.dump("[" + searchResult.getStart() + ", " + searchResult.getEnd() + "]");
-			if (start == searchResult.getStart() && end == searchResult.getEnd())
+		for (int i= 0; i < fSearchResults.length; i++){
+			if (start == fSearchResults[i].getStart() && end == fSearchResults[i].getEnd())
 				return true;
 		}
 		return false;

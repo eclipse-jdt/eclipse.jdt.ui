@@ -16,11 +16,13 @@ import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.packageroots.*;
+import org.eclipse.jdt.internal.core.refactoring.changes.*;
+import org.eclipse.jdt.internal.core.refactoring.*;
 
 
 public class RenameJavaProjectChange extends AbstractRenameChange {
 
-	/*package*/ RenameJavaProjectChange(IJavaProject project, String newName) throws JavaModelException {
+	public RenameJavaProjectChange(IJavaProject project, String newName) throws JavaModelException {
 		this(project.getCorrespondingResource().getFullPath(), project.getElementName(), newName);
 		Assert.isTrue(!project.isReadOnly(), "should not be read-only"); 
 	}
@@ -29,7 +31,7 @@ public class RenameJavaProjectChange extends AbstractRenameChange {
 		super(resourcePath, oldName, newName);
 	}
 
-	/**
+	/* non java-doc
 	 * @see AbstractRenameChange#doRename(IProgressMonitor)
 	 */
 	protected void doRename(IProgressMonitor pm) throws Exception {
@@ -37,21 +39,21 @@ public class RenameJavaProjectChange extends AbstractRenameChange {
 		IProject project= p.getProject();
 		IContainer parent= project.getParent();
 		IPath newPath= parent.getFullPath().append(getNewName());
-		p.getProject().move(newPath, true, pm);
+		p.getProject().move(newPath, false, pm);
 	}
 	
 	private IPath createNewPath(){
 		return getResourcePath().removeLastSegments(1).append(getNewName());
 	}
 	
-	/**
+	/* non java-doc
 	 * @see AbstractRenameChange#createUndoChange()
 	 */
 	protected IChange createUndoChange() throws JavaModelException {
 		return new RenameJavaProjectChange(createNewPath(), getNewName(), getOldName());
 	}
 
-	/**
+	/* non java-doc
 	 * @see IChange#getName()
 	 */
 	public String getName() {
@@ -65,22 +67,23 @@ public class RenameJavaProjectChange extends AbstractRenameChange {
 			return result;
 			
 		IJavaProject project= (IJavaProject)getCorrespondingJavaElement();
-		if (project.exists()) {
-			try {
-				IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-				if (roots.length == 0)
-					return result;
-					
-				pm.beginTask("", roots.length); //$NON-NLS-1$
-				for (int i= 0; i < roots.length; i++) {
-					result.merge(checkIfUnsaved(roots[i], context, new SubProgressMonitor(pm, 1)));
-				}	
-				pm.done();
-			} catch (JavaModelException e) {
-				handleJavaModelException(e, result);
+		if (! project.exists()) 
+			return result;
+			
+		try {
+			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
+			if (roots.length == 0)
+				return result;
+			
+			pm.beginTask("", roots.length); //$NON-NLS-1$
+			for (int i= 0; i < roots.length; i++) {
+				result.merge(checkIfUnsaved(roots[i], context, new SubProgressMonitor(pm, 1)));
 			}
+		} catch (JavaModelException e) {
+			handleJavaModelException(e, result);
+		} finally{
+			pm.done();
+			return result;	
 		}
-		return result;
 	}
 }
-

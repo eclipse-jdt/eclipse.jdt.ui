@@ -6,14 +6,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
-import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.internal.core.refactoring.resources.*;
-
 
 public class RenameResourceRefactoring extends Refactoring implements IRenameRefactoring {
 
@@ -22,28 +19,38 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	
 	public RenameResourceRefactoring(ITextBufferChangeCreator changeCreator, IResource resource){
-		Assert.isNotNull(resource, "resource"); 
-		Assert.isNotNull(changeCreator, "change creator");
+		Assert.isNotNull(resource); 
+		Assert.isNotNull(changeCreator);
 		fTextBufferChangeCreator= changeCreator;		
 		fResource= resource;
 	}
 	
-	/**
-	 * @see Refactoring#checkInput(IProgressMonitor)
+	/* non java-doc
+	 * @see IRefactoring#getName()
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);
-		try{
-			RefactoringStatus result= new RefactoringStatus();
-			if (isReadOnly())
-				result.addError("Resource " + fResource.getName() + " is marked as read-only.");
-			return result;
-		} finally{
-			pm.done();
-		}	
+	public String getName() {
+		return "Rename resource " +  getCurrentName() + " to:" + fNewName;
+	}
+	
+	/* non java-doc
+	 * @see IRenameRefactoring#setNewName(String)
+	 */
+	public void setNewName(String newName) {
+		Assert.isNotNull(newName);
+		fNewName= newName;
 	}
 
-	/**
+	/* non java-doc
+	 * @see IRenameRefactoring#getCurrentName()
+	 */
+	public String getCurrentName() {
+		return fResource.getName();
+	}
+	
+	
+	//--- preconditions 
+	
+	/* non java-doc
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
@@ -58,23 +65,8 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 		
 		return new RefactoringStatus();
 	}
-
-	/**
-	 * @see IRenameRefactoring#setNewName(String)
-	 */
-	public void setNewName(String newName) {
-		Assert.isNotNull(newName);
-		fNewName= newName;
-	}
-
-	/**
-	 * @see IRenameRefactoring#getCurrentName()
-	 */
-	public String getCurrentName() {
-		return fResource.getName();
-	}
-
-	/**
+	
+	/* non java-doc
 	 * @see IRenameRefactoring#checkNewName()
 	 */
 	public RefactoringStatus checkNewName() throws JavaModelException {
@@ -95,33 +87,43 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 		return result;		
 	}
 	
-	
-	private boolean isReadOnly(){
-		return fResource.isReadOnly();
+	/* non java-doc
+	 * @see Refactoring#checkInput(IProgressMonitor)
+	 */
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 1);
+		try{
+			if (fResource.isReadOnly())
+				return RefactoringStatus.createErrorStatus("Resource " + fResource.getName() + " is marked as read-only.");
+			return new RefactoringStatus();
+		} finally{
+			pm.done();
+		}	
 	}
-	
+
 	private String createNewPath(){
 		return fResource.getFullPath().removeLastSegments(1).append(fNewName).toString();
 	}
 	
 	private static RefactoringStatus validateStatus(IStatus status){
-		RefactoringStatus result= new RefactoringStatus();
-		if (! status.isOK()){
-			switch (status.getSeverity()){
-				case IStatus.INFO:
-					result.addWarning(status.getMessage());
-					break;
-				case IStatus.WARNING:
-					result.addError(status.getMessage());
-					break;
-				case IStatus.ERROR:
-					return RefactoringStatus.createFatalErrorStatus(status.getMessage());
-			}
-		}	
-		return result;
+		if (status.isOK())
+			return null;
+		
+		switch (status.getSeverity()){
+			case IStatus.INFO:
+				return RefactoringStatus.createWarningStatus(status.getMessage());
+			case IStatus.WARNING:
+				return RefactoringStatus.createErrorStatus(status.getMessage());
+			case IStatus.ERROR:
+				return RefactoringStatus.createFatalErrorStatus(status.getMessage());
+			default:	
+				return null;
+		}
 	}
 	
-	/**
+	//--- changes 
+	
+	/* non java-doc 
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
@@ -131,13 +133,6 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 		} finally{
 			pm.done();
 		}	
-	}
-
-	/**
-	 * @see IRefactoring#getName()
-	 */
-	public String getName() {
-		return "Rename resource " +  getCurrentName() + " to:" + fNewName;
 	}
 }
 

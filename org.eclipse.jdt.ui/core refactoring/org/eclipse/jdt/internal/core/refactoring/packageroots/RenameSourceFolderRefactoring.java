@@ -8,15 +8,11 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
-import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.core.refactoring.NullChange;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.internal.core.refactoring.packageroots.*;
-
 
 public class RenameSourceFolderRefactoring	extends Refactoring implements IRenameRefactoring {
 
@@ -25,13 +21,35 @@ public class RenameSourceFolderRefactoring	extends Refactoring implements IRenam
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	
 	public RenameSourceFolderRefactoring(ITextBufferChangeCreator changeCreator, IPackageFragmentRoot sourceFolder){
-		Assert.isNotNull(sourceFolder, "source folder"); //$NON-NLS-1$
-		Assert.isNotNull(changeCreator, "change creator"); //$NON-NLS-1$
+		Assert.isNotNull(sourceFolder); 
+		Assert.isNotNull(changeCreator);
 		fTextBufferChangeCreator= changeCreator;		
 		fSourceFolder= sourceFolder;
 	}
 	
-	/**
+	/* non java-doc
+	 * @see IRefactoring#getName()
+	 */
+	public String getName() {
+		return "Rename Source Folder:" + fSourceFolder + " to:" + fNewName;
+	}
+	
+	/* non java-doc
+	 * @see IRenameRefactoring#setNewName(String)
+	 */
+	public void setNewName(String newName) {
+		Assert.isNotNull(newName);
+		fNewName= newName;
+	}
+	
+	/* non java-doc
+	 * @see IRenameRefactoring#getCurrentName()
+	 */
+	public String getCurrentName() {
+		return fSourceFolder.getElementName();
+	}
+	
+	/* non java-doc
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
@@ -59,59 +77,41 @@ public class RenameSourceFolderRefactoring	extends Refactoring implements IRenam
 		return new RefactoringStatus();
 	}
 
-	/**
-	 * @see IRenameRefactoring#setNewName(String)
-	 */
-	public void setNewName(String newName) {
-		Assert.isNotNull(newName);
-		fNewName= newName;
-	}
-
-	/**
-	 * @see IRenameRefactoring#getCurrentName()
-	 */
-	public String getCurrentName() {
-		return fSourceFolder.getElementName();
-	}
-
-	/**
+	/* non java-doc
 	 * @see IRenameRefactoring#checkNewName()
 	 */
 	public RefactoringStatus checkNewName() throws JavaModelException {
 		IJavaProject project= fSourceFolder.getJavaProject();
 		IPath p= project.getProject().getFullPath().append(fNewName);
-		try {
-			if (project.findPackageFragmentRoot(p) != null)
-				return RefactoringStatus.createFatalErrorStatus("The package or folder already exists");
-		} catch (JavaModelException e) {
-			return RefactoringStatus.createFatalErrorStatus("Exception occurred");
-		}
-		return new RefactoringStatus();
+		if (project.findPackageFragmentRoot(p) != null)
+			return RefactoringStatus.createFatalErrorStatus("The package or folder already exists");
+		return new RefactoringStatus();	
 	}
 
-	/**
-	 * @see IRefactoring#getName()
-	 */
-	public String getName() {
-		return "Rename Source Folder:" + fSourceFolder + " to:" + fNewName;
-	}
 	
-	/**
+	/* non java-doc
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1);
 		try{
-			RefactoringStatus result= new RefactoringStatus();
 			if (isReadOnly())
-				result.addError("Source folder " + fSourceFolder.getElementName() + " is marked as read-only.");
-			return result;	
+				return RefactoringStatus.createErrorStatus("Source folder " + fSourceFolder.getElementName() + " is marked as read-only.");
+			return new RefactoringStatus();
 		} finally{
 			pm.done();
 		}		
 	}
+	
+	private boolean isReadOnly() throws JavaModelException{
+		if (Checks.isClasspathDelete(fSourceFolder))
+			return false;
+		return fSourceFolder.getCorrespondingResource().isReadOnly();
+	}
+	
+	//-- changes
 
-	/**
+	/* non java-doc
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
@@ -121,12 +121,6 @@ public class RenameSourceFolderRefactoring	extends Refactoring implements IRenam
 		} finally{
 			pm.done();
 		}	
-	}
-	
-	private boolean isReadOnly() throws JavaModelException{
-		if (Checks.isClasspathDelete(fSourceFolder))
-			return false;
-		return fSourceFolder.getCorrespondingResource().isReadOnly();
 	}
 }
 

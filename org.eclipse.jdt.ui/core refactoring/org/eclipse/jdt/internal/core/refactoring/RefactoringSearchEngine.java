@@ -10,11 +10,11 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -46,20 +46,33 @@ public class RefactoringSearchEngine{
 	
 	/**
 	 * Performs searching for a given <code>SearchPattern</code>.
-	 * Returns a List of Lists or <code>SearchResults</code>.
-	 * Each of these lists collects <code>SearchResults</code> found in one resource
-	 * and each is sorted backwards by <code>SearchResult#getStart()</code> 
+	 * Returns SearchResultGroup[] 
+	 * In each of SearchResultGroups all SearchResults are
+	 * sorted backwards by <code>SearchResult#getStart()</code> 
 	 * @see SearchResult
 	 */			
-	public static List search(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern) throws JavaModelException {
+	public static SearchResultGroup[] search(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern) throws JavaModelException {
 		SearchResultCollector collector= new SearchResultCollector(pm);
 		search(pm, scope, pattern, collector);	
 		List l= collector.getResults();
 		Collections.sort(l, createComparator());
-		return groupByResource(l);
+		List grouped= groupByResource(l);
+		
+		SearchResultGroup[] result= new SearchResultGroup[grouped.size()];
+		for (int i= 0; i < result.length; i++){
+			List searchResults= (List)grouped.get(i);
+			IResource res= ((SearchResult)searchResults.get(0)).getResource();
+			result[i]= new SearchResultGroup(res, createSearchResultArray(searchResults));
+		}
+		return result;
 	}
 	
-	public static List customSearch(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern) throws JavaModelException {
+	private static SearchResult[] createSearchResultArray(List searchResults){
+		return (SearchResult[])searchResults.toArray(new SearchResult[searchResults.size()]);
+	}
+	
+	//XXX: should get rid of this
+	public static SearchResultGroup[] customSearch(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern) throws JavaModelException {
 		SearchEngine engine= fgSearchEngine;
 		fgSearchEngine= new CustomSearchEngine();
 		try{
