@@ -483,6 +483,9 @@ public final class MemberVisibilityAdjustor {
 	/** Should incoming references be adjusted? */
 	private boolean fIncoming= true;
 
+	/** Should outgoing references be adjusted? */
+	private boolean fOutgoing= true;
+
 	/** The referenced element causing the visibility adjustment */
 	private final IMember fReferenced;
 
@@ -530,11 +533,26 @@ public final class MemberVisibilityAdjustor {
 	}
 
 	/**
+	 * Adjusts the visibility of the specified member.
+	 * 
+	 * @param member the member to adjust its visibility
+	 * @param monitor the progress monitor to use
+	 * @throws JavaModelException if the visibility adjustment could not be computed
+	 */
+	private void adjustIncomingVisibility(final IMember member, final IProgressMonitor monitor) throws JavaModelException {
+		Assert.isNotNull(member);
+		Assert.isNotNull(monitor);
+		final ModifierKeyword threshold= computeIncomingVisibilityThreshold(member, fReferencing, monitor);
+		if (hasLowerVisibility(member.getFlags(), threshold == null ? Modifier.NONE : threshold.toFlagValue()) && needsVisibilityAdjustment(member, threshold))
+			fAdjustments.put(fReferenced, new IncomingMemberVisibilityAdjustment(fReferenced, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, RefactoringCoreMessages.getFormattedString(getMessage(fReferenced), new String[] { getLabel(fReferenced), getLabel(threshold)}), JavaStatusContext.create(fReferenced), null, RefactoringStatusEntry.NO_CODE, null)));
+	}
+
+	/**
 	 * Adjusts the visibility of the specified search match found in a compilation unit.
 	 * 
 	 * @param match the search match that has been found
 	 * @param monitor the progress monitor to use
-	 * @throws JavaModelException if the java elements could not be accessed
+	 * @throws JavaModelException if the visibility adjustment could not be computed
 	 */
 	private void adjustIncomingVisibility(final SearchMatch match, final IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(match);
@@ -544,11 +562,8 @@ public final class MemberVisibilityAdjustor {
 			IMember member= (IMember) element;
 			if (member instanceof IInitializer)
 				member= member.getDeclaringType();
-			if (member != null) {
-				final ModifierKeyword threshold= computeIncomingVisibilityThreshold(member, fReferencing, monitor);
-				if (hasLowerVisibility(member.getFlags(), threshold == null ? Modifier.NONE : threshold.toFlagValue()) && needsVisibilityAdjustment(member, threshold))
-					fAdjustments.put(fReferenced, new IncomingMemberVisibilityAdjustment(fReferenced, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, RefactoringCoreMessages.getFormattedString(getMessage(fReferenced), new String[] { getLabel(fReferenced), getLabel(threshold)}), JavaStatusContext.create(fReferenced), null, RefactoringStatusEntry.NO_CODE, null)));
-			}
+			if (member != null)
+				adjustIncomingVisibility(member, monitor);
 		}
 	}
 
@@ -733,19 +748,65 @@ public final class MemberVisibilityAdjustor {
 	public final void adjustVisibility(final IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(monitor);
 		try {
-			monitor.beginTask("", 6); //$NON-NLS-1$
+			monitor.beginTask("", 7); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.getString("MemberVisibilityAdjustor.checking")); //$NON-NLS-1$
 			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(fReferenced, IJavaSearchConstants.REFERENCES));
 			engine.setScope(fScope);
 			engine.setStatus(fStatus);
-			engine.searchPattern(new SubProgressMonitor(monitor, 1));
-			if (fIncoming)
+			if (fIncoming) {
+				engine.searchPattern(new SubProgressMonitor(monitor, 1));
 				adjustIncomingVisibility((SearchResultGroup[]) engine.getResults(), new SubProgressMonitor(monitor, 1));
-			engine.clearResults();
-			engine.searchReferencedTypes(fReferenced, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-			engine.searchReferencedFields(fReferenced, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-			engine.searchReferencedMethods(fReferenced, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-			adjustOutgoingVisibility((SearchResultGroup[]) engine.getResults(), new SubProgressMonitor(monitor, 1));
+				engine.clearResults();
+				if (fReferenced instanceof IType) {
+					final IType type= (IType) fReferenced;
+					adjustVisibility(type, new SubProgressMonitor(monitor, 1));
+				}
+			}
+			if (fOutgoing) {
+				engine.searchReferencedTypes(fReferenced, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				engine.searchReferencedFields(fReferenced, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				engine.searchReferencedMethods(fReferenced, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				adjustOutgoingVisibility((SearchResultGroup[]) engine.getResults(), new SubProgressMonitor(monitor, 1));
+			}
+		} finally {
+			monitor.done();
+		}
+	}
+
+	/**
+	 * Adjusts the visibility of all members declared in the specified type.
+	 * 
+	 * @param referenced the type whose members should be adjusted
+	 * @param monitor the progress monitor to use
+	 * @throws JavaModelException if an error occurs
+	 */
+	private void adjustVisibility(final IType referenced, final IProgressMonitor monitor) throws JavaModelException {
+		Assert.isNotNull(referenced);
+		Assert.isNotNull(monitor);
+		try {
+			final IField[] fields= referenced.getFields();
+			final IMethod[] methods= referenced.getMethods();
+			final IType[] types= referenced.getTypes();
+			monitor.beginTask("", fields.length + methods.length + types.length); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.getString("MemberVisibilityAdjustor.checking")); //$NON-NLS-1$
+			IField field= null;
+			for (int index= 0; index < fields.length; index++) {
+				field= fields[index];
+				if (!field.isBinary() && !field.isReadOnly())
+					adjustIncomingVisibility(field, new SubProgressMonitor(monitor, 1));
+			}
+			IMethod method= null;
+			for (int index= 0; index < methods.length; index++) {
+				method= methods[index];
+				if (!method.isBinary() && !method.isReadOnly() && !method.isMainMethod())
+					adjustIncomingVisibility(method, new SubProgressMonitor(monitor, 1));
+			}
+			IType type= null;
+			for (int index= 0; index < types.length; index++) {
+				type= types[index];
+				if (!type.isBinary() && !type.isReadOnly())
+					adjustIncomingVisibility(type, new SubProgressMonitor(monitor, 1));
+			}
 		} finally {
 			monitor.done();
 		}
@@ -1038,14 +1099,25 @@ public final class MemberVisibilityAdjustor {
 	}
 
 	/**
-	 * Determines whether incoming references should be adjusted too.
+	 * Determines whether incoming references should be adjusted.
 	 * <p>
-	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to use setters where possible.
+	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to adjust incoming references.
 	 * 
 	 * @param incoming <code>true</code> if incoming references should be adjusted, <code>false</code> otherwise
 	 */
 	public final void setIncoming(final boolean incoming) {
 		fIncoming= incoming;
+	}
+
+	/**
+	 * Determines whether outgoing references should be adjusted.
+	 * <p>
+	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to adjust outgoing references.
+	 * 
+	 * @param outgoing <code>true</code> if outgoing references should be adjusted, <code>false</code> otherwise
+	 */
+	public final void setOutgoing(final boolean outgoing) {
+		fOutgoing= outgoing;
 	}
 
 	/**
