@@ -18,6 +18,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -41,7 +42,11 @@ class ReorgExceptionHandler implements IReorgExceptionHandler{
 	}
 
 	public void handle(ChangeContext context, IChange change, Exception e) {		
-		if (e instanceof CoreException)
+		if (e instanceof JavaModelException){
+			JavaModelException jme= (JavaModelException)e;
+			if (jme.getException() instanceof CoreException)
+				fStatus.merge(((CoreException) jme.getException()).getStatus());
+		} else if (e instanceof CoreException)
 			fStatus.merge(((CoreException) e).getStatus());
 	}
 
