@@ -17,14 +17,17 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -35,7 +38,6 @@ import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.corext.template.TemplatePosition;
 import org.eclipse.jdt.internal.corext.template.java.GlobalVariables;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
@@ -45,7 +47,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * A template proposal.
  */
-public class TemplateProposal implements IJavaCompletionProposal {
+public class TemplateProposal implements IJavaCompletionProposal, ICompletionProposalExtension3 {
 
 	private final Template fTemplate;
 	private final TemplateContext fContext;
@@ -193,7 +195,7 @@ public class TemplateProposal implements IJavaCompletionProposal {
 			if (templateBuffer == null)
 				return null;
 
-			return textToHTML(templateBuffer.getString());
+			return templateBuffer.getString();
 
 	    } catch (CoreException e) {
 			handleException(e);		    
@@ -229,44 +231,6 @@ public class TemplateProposal implements IJavaCompletionProposal {
 		return null;
 	}
 
-	private static String textToHTML(String string) {
-		StringBuffer buffer= new StringBuffer(string.length());
-		buffer.append("<pre>"); //$NON-NLS-1$
-	
-		for (int i= 0; i != string.length(); i++) {
-			char ch= string.charAt(i);
-			
-			switch (ch) {
-				case '&':
-					buffer.append("&amp;"); //$NON-NLS-1$
-					break;
-					
-				case '<':
-					buffer.append("&lt;"); //$NON-NLS-1$
-					break;
-
-				case '>':
-					buffer.append("&gt;"); //$NON-NLS-1$
-					break;
-
-				case '\t':
-					buffer.append("    "); //$NON-NLS-1$
-					break;
-
-				case '\n':
-					buffer.append("<br>"); //$NON-NLS-1$
-					break;
-
-				default:
-					buffer.append(ch);
-					break;
-			}
-		}
-
-		buffer.append("</pre>"); //$NON-NLS-1$
-		return buffer.toString();
-	}
-
 	private void openErrorDialog(Exception e) {
 		Shell shell= fViewer.getTextWidget().getShell();
 		MessageDialog.openError(shell, TemplateMessages.getString("TemplateEvaluator.error.title"), e.getMessage()); //$NON-NLS-1$
@@ -292,4 +256,10 @@ public class TemplateProposal implements IJavaCompletionProposal {
 		return fTemplate;
 	}
 
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getInformationControlCreator()
+	 */
+	public IInformationControlCreator getInformationControlCreator() {
+		return new TemplateInformationControlCreator();
+	}
 }
