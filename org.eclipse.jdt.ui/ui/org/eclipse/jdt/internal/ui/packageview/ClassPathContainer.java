@@ -35,11 +35,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
  * Representation of class path containers in Java UI.
@@ -156,11 +153,7 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 	}
 
 	public ImageDescriptor getImageDescriptor(Object object) {
-		ImageDescriptor desc= JavaPluginImages.DESC_OBJS_LIBRARY;
-		if (fContainer == null) {
-			desc = new JavaElementImageDescriptor(desc, JavaElementImageDescriptor.ERROR, JavaElementImageProvider.SMALL_SIZE);
-		}
-		return desc;
+		return JavaPluginImages.DESC_OBJS_LIBRARY;
 	}
 
 	public String getLabel(Object o) {
