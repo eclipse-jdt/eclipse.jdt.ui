@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -24,7 +26,6 @@ import org.eclipse.jface.dialogs.Dialog;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -40,36 +41,36 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 		setDefaultPageTitle(RefactoringMessages.getString("MoveInnerToTopWizard.Move_Inner")); //$NON-NLS-1$
 	}
 
-	/* non java-doc
+	/*
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
-		if (getMoveRefactoring().isCreatingInstanceFieldPossible())
-			addPage(new MoveInnerToToplnputPage(getInitialNameForEnclosingInstance()));
+		final MoveInnerToTopRefactoring refactoring= getMoveRefactoring();
+		if (refactoring.isCreatingInstanceFieldPossible())
+			addPage(new MoveInnerToToplnputPage(refactoring.isCreatingInstanceFieldMandatory() ? refactoring.getEnclosingInstanceName() : "")); //$NON-NLS-1$
 		else
 			setChangeCreationCancelable(false);
-	}
-
-	private String getInitialNameForEnclosingInstance() {
-		return getMoveRefactoring().getEnclosingInstanceName();
 	}
 
 	private MoveInnerToTopRefactoring getMoveRefactoring() {
 		return (MoveInnerToTopRefactoring)getRefactoring();
 	}
 	
-	private static class MoveInnerToToplnputPage extends TextInputWizardPage {
+	private class MoveInnerToToplnputPage extends TextInputWizardPage {
 
-		private final boolean fIsInitialInputValid;
-		private static final String DESCRIPTION = RefactoringMessages.getString("MoveInnerToToplnputPage.description"); //$NON-NLS-1$
-		private Button fCreateFieldCheckBox;
+		private final boolean fInitialInputValid;
 		private Button fFinalCheckBox;
 		private Label fFieldNameLabel;
 		private Text fFieldNameEntryText;
-	
+
 		public MoveInnerToToplnputPage(String initialValue) {
-			super(DESCRIPTION, true, initialValue);
-			fIsInitialInputValid= ! ("".equals(initialValue)); //$NON-NLS-1$
+			super(RefactoringMessages.getString("MoveInnerToToplnputPage.description"), true, initialValue); //$NON-NLS-1$
+			final MoveInnerToTopRefactoring refactoring= getMoveRefactoring();
+			final boolean nonEmpty= initialValue.equals(""); //$NON-NLS-1$
+			final boolean mandatory= refactoring.isCreatingInstanceFieldMandatory();
+			fInitialInputValid= nonEmpty || !mandatory;
+			if (!mandatory)
+				refactoring.setCreateInstanceField(false);
 		}
 
 		public void createControl(Composite parent) {
@@ -85,83 +86,87 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 			layout.verticalSpacing= 8;
 			newControl.setLayout(layout);
 
-			int indentSize= convertWidthInCharsToPixels(3);
-
-			addCreateFieldCheckBox(newControl);
-			addFinalCheckBox(newControl, indentSize);
-			addFieldNameEntry(newControl, indentSize);
-
-			fCreateFieldCheckBox.addSelectionListener(new SelectionAdapter(){
-				public void widgetSelected(SelectionEvent e) {
-					updateControlEnablement(fCreateFieldCheckBox, fFinalCheckBox, fFieldNameLabel, fFieldNameEntryText);
-					getMoveRefactoring().setCreateInstanceField(fCreateFieldCheckBox.getSelection());
-				}
-			});
-			updateControlEnablement(fCreateFieldCheckBox, fFinalCheckBox, fFieldNameLabel, fFieldNameEntryText);
+			addFieldNameEntry(newControl);
+			addFinalCheckBox(newControl);
+			
+			final boolean mandatory= getMoveRefactoring().isCreatingInstanceFieldMandatory();
+			fFinalCheckBox.setSelection(mandatory);
+			fFinalCheckBox.setEnabled(mandatory);
 		}
 
-		private void addFieldNameEntry(Composite newControl, int indentSize) {
+		private void addFieldNameEntry(Composite newControl) {
 			fFieldNameLabel= new Label(newControl, SWT.NONE);
-			fFieldNameLabel.setText(RefactoringMessages.getString("MoveInnerToToplnputPage.enter_name")); //$NON-NLS-1$
-			GridData gd1= new GridData();
-			gd1.horizontalIndent= indentSize;
-			fFieldNameLabel.setLayoutData(gd1);
-			
+			if (getMoveRefactoring().isCreatingInstanceFieldMandatory())
+				fFieldNameLabel.setText(RefactoringMessages.getString("MoveInnerToToplnputPage.enter_name_mandatory")); //$NON-NLS-1$
+			else
+				fFieldNameLabel.setText(RefactoringMessages.getString("MoveInnerToToplnputPage.enter_name")); //$NON-NLS-1$
+			fFieldNameLabel.setLayoutData(new GridData());
+
 			fFieldNameEntryText= createTextInputField(newControl);
 			fFieldNameEntryText.selectAll();
 			fFieldNameEntryText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		}
 
-		private void addFinalCheckBox(Composite newControl, int indentSize) {
+		private void addFinalCheckBox(Composite newControl) {
 			fFinalCheckBox= new Button(newControl, SWT.CHECK);
 			fFinalCheckBox.setText(RefactoringMessages.getString("MoveInnerToToplnputPage.instance_final")); //$NON-NLS-1$
 			fFinalCheckBox.setSelection(getMoveRefactoring().isInstanceFieldMarkedFinal());
-			GridData gd= new GridData(GridData.FILL_HORIZONTAL);
-			gd.horizontalSpan= 2;
-			gd.horizontalIndent= indentSize;
-			fFinalCheckBox.setLayoutData(gd);		
-			fFinalCheckBox.addSelectionListener(new SelectionAdapter(){
-				public void widgetSelected(SelectionEvent e) {
+			GridData data= new GridData(GridData.FILL_HORIZONTAL);
+			data.horizontalSpan= 2;
+			fFinalCheckBox.setLayoutData(data);
+			fFinalCheckBox.addSelectionListener(new SelectionAdapter() {
+
+				public void widgetSelected(SelectionEvent event) {
 					getMoveRefactoring().setMarkInstanceFieldAsFinal(fFinalCheckBox.getSelection());
 				}
 			});
-		}
+			fFieldNameEntryText.addModifyListener(new ModifyListener() {
 
-		private void addCreateFieldCheckBox(Composite newControl) {
-			fCreateFieldCheckBox= new Button(newControl, SWT.CHECK);
-			fCreateFieldCheckBox.setText(RefactoringMessages.getString("MoveInnerToToplnputPage.create_field")); //$NON-NLS-1$
-			Assert.isTrue(getMoveRefactoring().isCreatingInstanceFieldPossible());//checked before page got created
-			fCreateFieldCheckBox.setEnabled(! getMoveRefactoring().isCreatingInstanceFieldMandatory());
-			fCreateFieldCheckBox.setSelection(getMoveRefactoring().getCreateInstanceField());
-			GridData gd0= new GridData(GridData.FILL_HORIZONTAL);
-			gd0.horizontalSpan= 2;
-			fCreateFieldCheckBox.setLayoutData(gd0);
-		}
-
-		private void updateControlEnablement(final Button createFieldCheckBox, final Button finalCheckBox, final Label label, final Text text) {
-			boolean selected= createFieldCheckBox.getSelection();
-			finalCheckBox.setEnabled(selected);
-			label.setEnabled(selected);
-			text.setEnabled(selected);
+				public final void modifyText(ModifyEvent event) {
+					final String text= fFieldNameEntryText.getText();
+					final MoveInnerToTopRefactoring refactoring= getMoveRefactoring();
+					if (refactoring.isCreatingInstanceFieldMandatory())
+						setPageComplete(validateTextField(text));
+					final boolean empty= text.length() == 0;
+					if (refactoring.isCreatingInstanceFieldMandatory()) {
+						// Do nothing
+					} else if (refactoring.isCreatingInstanceFieldPossible()) {
+						fFinalCheckBox.setEnabled(!empty);
+						if (empty)
+							fFinalCheckBox.setSelection(false);
+					}
+					if (!refactoring.isCreatingInstanceFieldMandatory())
+						refactoring.setCreateInstanceField(!empty);
+				}
+			});
 		}
 
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#validateTextField(String)
 		 */
 		protected RefactoringStatus validateTextField(String text) {
-			getMoveRefactoring().setEnclosingInstanceName(text);
-			return getMoveRefactoring().checkEnclosingInstanceName(text);
-		}	
+			final MoveInnerToTopRefactoring refactoring= getMoveRefactoring();
+			refactoring.setEnclosingInstanceName(text);
+			if (refactoring.isCreatingInstanceFieldMandatory())
+				return refactoring.checkEnclosingInstanceName(text);
+			else if (!text.equals("")) //$NON-NLS-1$
+				return refactoring.checkEnclosingInstanceName(text);
+			else
+				return RefactoringStatus.createInfoStatus(RefactoringMessages.getString("MoveInnerToToplnputPage.optional.info")); //$NON-NLS-1$
+		}
 
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#isInitialInputValid()
 		 */
 		protected boolean isInitialInputValid() {
-			return fIsInitialInputValid;
+			return fInitialInputValid;
 		}
 
-		private MoveInnerToTopRefactoring getMoveRefactoring() {
-			return (MoveInnerToTopRefactoring)getRefactoring();
+		/*
+		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#isEmptyInputValid()
+		 */
+		protected boolean isEmptyInputValid() {
+			return !getMoveRefactoring().isCreatingInstanceFieldMandatory();
 		}
 	}
 }

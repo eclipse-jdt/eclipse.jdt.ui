@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
@@ -80,8 +79,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
-
 import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -111,6 +108,9 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IRefactoringStatusEntryComparator;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -1179,7 +1179,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			return null;
 		else if (isInsideSubclassOfDeclaringType(node))
 			return ast.newThisExpression();
-		else if (isInsideInputType(node)) {
+		else if ((node.getStartPosition() >= fType.getSourceRange().getOffset() && ASTNodes.getExclusiveEnd(node) <= fType.getSourceRange().getOffset() + fType.getSourceRange().getLength())) {
 			if (fCodeGenerationSettings.useKeywordThis || fEnclosingInstanceFieldName.equals(fNameForEnclosingInstanceConstructorParameter)) {
 				final FieldAccess access= ast.newFieldAccess();
 				access.setExpression(ast.newThisExpression());
@@ -1229,12 +1229,6 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return false;
 	}
 
-	private boolean isInsideInputType(ASTNode node) throws JavaModelException {
-		Assert.isTrue((node instanceof ClassInstanceCreation) || (node instanceof SuperConstructorInvocation));
-		ISourceRange range= fType.getSourceRange();
-		return (node.getStartPosition() >= range.getOffset() && ASTNodes.getExclusiveEnd(node) <= range.getOffset() + range.getLength());
-	}
-
 	private static boolean isCorrespondingTypeBinding(ITypeBinding binding, IType type) {
 		if (binding == null)
 			return false;
@@ -1242,20 +1236,20 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}	
 
 	private Expression createQualifiedReadAccessExpressionForEnclosingInstance(AST ast) {
-		ThisExpression thisE= ast.newThisExpression();
-		thisE.setQualifier(ast.newName(new String[]{fType.getElementName()}));
-		FieldAccess fa= ast.newFieldAccess();
-		fa.setExpression(thisE);
-		fa.setName(ast.newSimpleName(fEnclosingInstanceFieldName));
-		return fa;
+		ThisExpression expression= ast.newThisExpression();
+		expression.setQualifier(ast.newName(new String[]{fType.getElementName()}));
+		FieldAccess access= ast.newFieldAccess();
+		access.setExpression(expression);
+		access.setName(ast.newSimpleName(fEnclosingInstanceFieldName));
+		return access;
 	}
 
 	private Expression createReadAccessExpressionForEnclosingInstance(AST ast) {
 		if (fCodeGenerationSettings.useKeywordThis || fEnclosingInstanceFieldName.equals(fNameForEnclosingInstanceConstructorParameter)) {
-			FieldAccess fa= ast.newFieldAccess();
-			fa.setExpression(ast.newThisExpression());
-			fa.setName(ast.newSimpleName(fEnclosingInstanceFieldName));
-			return fa;
+			final FieldAccess access= ast.newFieldAccess();
+			access.setExpression(ast.newThisExpression());
+			access.setName(ast.newSimpleName(fEnclosingInstanceFieldName));
+			return access;
 		}
 		return ast.newSimpleName(fEnclosingInstanceFieldName);
 	}
