@@ -75,7 +75,7 @@ public class JavaElementImageProvider {
 	private ImageDescriptorRegistry fRegistry;
 		
 	public JavaElementImageProvider() {
-		fRegistry= JavaPlugin.getImageDescriptorRegistry();
+		fRegistry= null; // lazy initialization
 	}	
 		
 	/**
@@ -91,8 +91,16 @@ public class JavaElementImageProvider {
 	private Image getImageLabel(ImageDescriptor descriptor){
 		if (descriptor == null) 
 			return null;	
-		return fRegistry.get(descriptor);
+		return getRegistry().get(descriptor);
 	}
+	
+	private ImageDescriptorRegistry getRegistry() {
+		if (fRegistry == null) {
+			fRegistry= JavaPlugin.getImageDescriptorRegistry();
+		}
+		return fRegistry;
+	}
+	
 
 	private ImageDescriptor computeDescriptor(Object element, int flags){
 		if (element instanceof IJavaElement) {
