@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui;
 
 import java.util.*;
@@ -17,6 +23,10 @@ import org.eclipse.ui.part.FileEditorInput;
 /**
  * A base content provider for Java elements. It provides access to the
  * Java element hierarchy without listening to changes in the Java model.
+ * If updating the presentation on Java model change is required than 
+ * clients have to subclass, listen to Java model changes and have to update
+ * the UI using corresponding methods provided by the JFace viewers or their 
+ * own UI presentation.
  * <p>
  * The following Java element hierarchy is surfaced by this content provider:
  * <p>
@@ -34,8 +44,13 @@ Java model (<code>IJavaModel</code>)
  * the corresponding package fragment root element that normally appears between the
  * Java project and the package fragments is automatically filtered out.
  * </p>
- * This content provider can optionally return working copy elements.
+ * This content provider can optionally return working copy elements for members 
+ * below compilation units. If enabled, working copy members are returned for those
+ * compilation units in the Java element hierarchy for which a shared working copy exists 
+ * in JDT core.
+ * 
  * @see org.eclipse.jdt.ui.IWorkingCopyProvider
+ * @see JavaCore#getSharedWorkingCopies(org.eclipse.jdt.core.IBufferFactory)
  * 
  * @since 2.0
  */
@@ -47,18 +62,21 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	protected boolean fProvideWorkingCopy= false;
 	
 	/**
-	 * Creates a new conent provider. It does not
-	 * provide the members of a compilation unit and
-	 * it does not provide working copies.
+	 * Creates a new content provider. The content provider does not
+	 * provide members of compilation units or class files and it does 
+	 * not provide working copy elements.
 	 */	
 	public StandardJavaElementContentProvider() {
 	}
 	
 	/**
-	 * Creates a new label provider.
+	 * Creates a new <code>StandardJavaElementContentProvider</code>.
 	 *
-	 * @param providerMembers does this content provider provide the members of a compilation unit
-	 * @param provideWorkingCopies does this content provider provide working copy elements.
+	 * @param provideMembers if <code>true</code> members below compilation units 
+	 * and class files are provided. 
+	 * @param provideWorkingCopy if <code>true</code> the element provider provides
+	 * working copies members of compilation units which have an associated working 
+	 * copy in JDT core. Otherwise only original elements are provided.
 	 */
 	public StandardJavaElementContentProvider(boolean provideMembers, boolean provideWorkingCopy) {
 		fProvideMembers= provideMembers;
@@ -66,45 +84,61 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	}
 	
 	/**
-	 * Returns whether the members are provided when asking
-	 * for a CU's or ClassFile's children.
+	 * Returns whether members are provided when asking
+	 * for a compilation units or class file for its children.
+	 * 
+	 * @return <code>true</code> if the content provider provides members; 
+	 * otherwise <code>false</code> is returned
 	 */
 	public boolean getProvideMembers() {
 		return fProvideMembers;
 	}
 
 	/**
-	 * Sets whether the members are provided from
-	 * a working copy of a compilation unit
-	 */
-	public void setProvideWorkingCopy(boolean b) {
-		fProvideWorkingCopy= b;
-	}
-
-	/**
-	 * Returns whether the members are provided 
-	 * from a working copy a compilation unit.
-	 */
-	public boolean getProvideWorkingCopy() {
-		return fProvideWorkingCopy;
-	}
-
-	/* (non-Javadoc)
-	 * @see IReconciled#isReconciled()
-	 */
-	public boolean providesWorkingCopies() {
-		return fProvideWorkingCopy;
-	}
-
-
-	/**
-	 * Returns whether the members are provided when asking
-	 * for a CU's or ClassFile's children.
+	 * Sets whether the content provider is supposed to return members
+	 * when asking a compilation unit or class file for its children.
+	 * 
+	 * @param b if <code>true</code> then members are provided. 
+	 * If <code>false</code> compilation units and class files are the
+	 * leaves provided by this content provider.
 	 */
 	public void setProvideMembers(boolean b) {
 		fProvideMembers= b;
 	}
 	
+	/**
+	 * Returns whether the provided members are from a working
+	 * copy or the original compilation unit. 
+	 * 
+	 * @return <code>true</code> if the content provider provides
+	 * working copy members; otherwise <code>false</code> is
+	 * returned
+	 * 
+	 * @see #setProvideWorkingCopy(boolean)
+	 */
+	public boolean getProvideWorkingCopy() {
+		return fProvideWorkingCopy;
+	}
+
+	/**
+	 * Sets whether the members are provided from a shared working copy 
+	 * that exists for a original compilation unit in the Java element hierarchy.
+	 * 
+	 * @param b if <code>true</code> members are provided from a 
+	 * working copy if one exists in JDT core. If <code>false</code> the 
+	 * provider always returns original elements.
+	 */
+	public void setProvideWorkingCopy(boolean b) {
+		fProvideWorkingCopy= b;
+	}
+
+	/* (non-Javadoc)
+	 * @see IWorkingCopyProvider#providesWorkingCopies()
+	 */
+	public boolean providesWorkingCopies() {
+		return fProvideWorkingCopy;
+	}
+
 	/* (non-Javadoc)
 	 * Method declared on IStructuredContentProvider.
 	 */
@@ -163,7 +197,6 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	}
 
 	/* (non-Javadoc)
-	 *
 	 * @see ITreeContentProvider
 	 */
 	public boolean hasChildren(Object element) {
@@ -283,6 +316,9 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		}
 	}
 	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
 	protected boolean isClassPathChange(IJavaElementDelta delta) {
 		int flags= delta.getFlags();
 		return (delta.getKind() == IJavaElementDelta.CHANGED && 
@@ -291,10 +327,8 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			 ((flags & IJavaElementDelta.F_CLASSPATH_REORDER) != 0));
 	}
 	
-	
 	/**
-	 * Returns parent of the presented hierarchy. Skips over 
-	 * project package fragment root nodes.
+	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
 	protected Object skipProjectPackageFragmentRoot(IPackageFragmentRoot root) {
 		try {
@@ -306,6 +340,9 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		}
 	}
 	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
 	protected boolean isPackageFragmentEmpty(IJavaElement element) throws JavaModelException {
 		if (element instanceof IPackageFragment) {
 			IPackageFragment fragment= (IPackageFragment)element;
@@ -315,11 +352,17 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		return false;
 	}
 
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
 	protected boolean isProjectPackageFragmentRoot(IPackageFragmentRoot root) throws JavaModelException {
 		IResource resource= root.getUnderlyingResource();
 		return (resource instanceof IProject);
 	}
 	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
 	protected boolean exists(Object element) {
 		if (element == null) {
 			return false;
@@ -333,6 +376,9 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		return true;
 	}
 	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
 	protected Object internalGetParent(Object element) {
 		if (element instanceof IJavaProject) {
 			return ((IJavaProject)element).getJavaModel();
@@ -366,6 +412,9 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		return null;
 	}
 	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
 	protected static Object[] concatenate(Object[] a1, Object[] a2) {
 		int a1Len= a1.length;
 		int a2Len= a2.length;

@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui;
 
 /**
@@ -48,6 +54,8 @@ public interface IJavaElementSearchConstants {
 	/**
 	 * Search scope constant (bit mask) indicating that required projects should be considered.
 	 * Used when opening certain kinds of selection dialogs.
+	 * 
+	 * @since 2.0
 	 */	
 	public static final int CONSIDER_REQUIRED_PROJECTS= 1 << 5;
 

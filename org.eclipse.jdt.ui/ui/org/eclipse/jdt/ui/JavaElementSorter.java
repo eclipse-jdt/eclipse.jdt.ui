@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui;
 
 import org.eclipse.core.resources.IContainer;
@@ -32,6 +38,11 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 /**
  * Sorter for Java elements. Ordered by element category, then by element name. 
  * Package fragment roots are sorted as ordered on the classpath.
+ * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
  * @since 2.0
  */
 public class JavaElementSorter extends ViewerSorter {

@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui;
 
 
@@ -19,6 +25,10 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  * are computed according to the flags either passed during creation or set via the method
  * <code>setAdornments</code>. 
  * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ *
  * @since 2.0 
  */
 public class JavaElementImageDescriptor extends CompositeImageDescriptor {
@@ -58,7 +68,7 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	private Point fSize;
 
 	/**
-	 * Create a new JavaElementImageDescriptor.
+	 * Creates a new JavaElementImageDescriptor.
 	 * 
 	 * @param baseImage an image descriptor used as the base image
 	 * @param flags flags indicating which adornments are to be rendered. See <code>setAdornments</code>
@@ -101,6 +111,7 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	 * Sets the size of the image created by calling <code>createImage()</code>.
 	 * 
 	 * @param size the size of the image returned from calling <code>createImage()</code>
+	 * @see ImageDescriptor#createImage()
 	 */
 	public void setImageSize(Point size) {
 		Assert.isNotNull(size);
@@ -111,7 +122,8 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	/**
 	 * Returns the size of the image created by calling <code>createImage()</code>.
 	 * 
-	 * @return the size of the image created by calling <code>createImage</code>
+	 * @return the size of the image created by calling <code>createImage()</code>
+	 * @see ImageDescriptor#createImage()
 	 */
 	public Point getImageSize() {
 		return new Point(fSize.x, fSize.y);

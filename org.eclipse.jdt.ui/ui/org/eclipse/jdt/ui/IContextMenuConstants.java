@@ -1,9 +1,9 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
  * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Common Public License v0.5 
+ * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/cpl-v05.html
+ * http://www.eclipse.org/legal/cpl-v10.html
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -22,26 +22,34 @@ public interface IContextMenuConstants {
 	
 	
 	/**
-	 * Pop-up menu target IDs for the Type Hierarchy viewpart.
-	 * Type hierarchy view target ID
+	 * Type hierarchy view part: pop-up menu target ID for type hierarchy viewer
+	 * (value <code>"org.eclipse.jdt.ui.TypeHierarchy.typehierarchy"</code>).
+	 * 
+	 * @since 2.0
 	 */
 	public static final String TARGET_ID_HIERARCHY_VIEW= JavaUI.ID_TYPE_HIERARCHY + ".typehierarchy"; //$NON-NLS-1$	
 
 	/**
-	 * Pop-up menu target IDs for the Type Hierarchy viewpart.
-	 * Supertype hierarchy view target ID
+	 * Type hierarchy view part: pop-up menu target ID for supertype hierarchy viewer
+	 * (value <code>"org.eclipse.jdt.ui.TypeHierarchy.supertypes"</code>).
+	 * 
+	 * @since 2.0
 	 */
 	public static final String TARGET_ID_SUPERTYPES_VIEW= JavaUI.ID_TYPE_HIERARCHY + ".supertypes"; //$NON-NLS-1$	
 
 	/**
-	 * Pop-up menu target IDs for the Type Hierarchy viewpart.
-	 * Subtype hierarchy view target ID
+	 * Type hierarchy view part: Pop-up menu target ID for the subtype hierarchy viewer
+	 * (value <code>"org.eclipse.jdt.ui.TypeHierarchy.subtypes"</code>).
+	 * 
+	 * @since 2.0
 	 */
 	public static final String TARGET_ID_SUBTYPES_VIEW= JavaUI.ID_TYPE_HIERARCHY + ".subtypes"; //$NON-NLS-1$	
 
 	/**
-	 * Pop-up menu target IDs for the Type Hierarchy viewpart.
-	 * Member view target ID
+	 * Type hierarchy view part: pop-up menu target ID for the meber viewer
+	 * (value <code>"org.eclipse.jdt.ui.TypeHierarchy.members"</code>).
+	 * 
+	 * @since 2.0
 	 */
 	public static final String TARGET_ID_MEMBERS_VIEW= JavaUI.ID_TYPE_HIERARCHY + ".members"; //$NON-NLS-1$	
 	

@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui;
 
 import org.eclipse.swt.graphics.Image;
@@ -24,8 +34,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
 
 /**
  * LabelDecorator that decorates an method's image with override or implements overlays.
- * Updating of images on element changes is the resposibility of the viewers using this 
- * decorator.
+ * The viewer using this decorator is responsible for updating the images on element changes.
+ * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
+ * @since 2.0
  */
 public class OverrideIndicatorLabelDecorator implements ILabelDecorator {
 
@@ -41,11 +56,15 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator {
 		fRegistryNeedsDispose= true;
 	}	
 
-	/**
-	 * Internal constructor. Creates decorator with a shared image registry.
+	/*
+	 * Creates decorator with a shared image registry.
+	 * 
 	 * @param registry The registry to use or <code>null</code> to use the Java plugin's
 	 * image registry.
 	 */	
+	/**
+	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 */
 	public OverrideIndicatorLabelDecorator(ImageDescriptorRegistry registry) {
 		if (registry == null) {
 			registry= JavaPlugin.getImageDescriptorRegistry();
@@ -73,6 +92,9 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator {
 		return image;
 	}
 	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
 	public int computeAdornmentFlags(Object element) {
 		if (AppearancePreferencePage.showOverrideIndicators()) {
 			if (element instanceof IMethod) {
@@ -94,6 +116,9 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator {
 		return 0;
 	}
 	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
 	protected int getOverrideIndicators(IMethod method) throws JavaModelException {
 		IType type= method.getDeclaringType();
 		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(type);
@@ -103,6 +128,9 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator {
 		return 0;
 	}
 	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
 	protected int findInHierarchy(IType type, ITypeHierarchy hierarchy, String name, String[] paramTypes) throws JavaModelException {
 		IMethod impl= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, name, paramTypes, false);
 		if (impl != null) {

@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui;
 
 import org.eclipse.core.resources.IStorage;
@@ -91,6 +97,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 * Flag (bit mask) indicating that Complation Units, Class Files, Types, Declarations and Members
 	 * should be rendered qualified.
 	 * Examples: java.lang.String, java.util.Vector.size()
+	 * 
 	 * @since 2.0
 	 */
 	public final static int SHOW_QUALIFIED=				0x400;
@@ -99,6 +106,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 * Flag (bit mask) indicating that Complation Units, Class Files, Types, Declarations and Members
 	 * should be rendered qualified. The qualifcation is appended
 	 * Examples: String - java.lang, size() - java.util.Vector
+	 * 
 	 * @since 2.0
 	 */
 	public final static int SHOW_POST_QUALIFIED=	0x800;	
@@ -119,8 +127,8 @@ public class JavaElementLabelProvider extends LabelProvider {
 	public final static int SHOW_DEFAULT= new Integer(SHOW_PARAMETERS | SHOW_OVERLAY_ICONS).intValue();
 
 	private JavaElementImageProvider fImageLabelProvider;
+	
 	private StorageLabelProvider fStorageLabelProvider;
-
 	private int fFlags;
 	private int fImageFlags;
 	private int fTextFlags;

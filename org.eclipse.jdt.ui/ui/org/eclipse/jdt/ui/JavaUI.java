@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui;
 
 import java.net.URL;
@@ -175,30 +181,40 @@ public final class JavaUI {
 	/**
 	 * The id of the Java Browsing Perspective
 	 * (value <code>"org.eclipse.jdt.ui.JavaBrowsingPerspective"</code>).
+	 * 
+	 * @since 2.0
 	 */
 	public static String ID_BROWSING_PERSPECTIVE= "org.eclipse.jdt.ui.JavaBrowsingPerspective"; //$NON-NLS-1$
 
 	/**
 	 * The view part id of the Java Browsing Projects view
 	 * (value <code>"org.eclipse.jdt.ui.ProjectsView"</code>).
+	 * 
+	 * @since 2.0
 	 */
 	public static String ID_PROJECTS_VIEW= "org.eclipse.jdt.ui.ProjectsView"; //$NON-NLS-1$
 
 	/**
 	 * The view part id of the Java Browsing Packages view
 	 * (value <code>"org.eclipse.jdt.ui.PackagesView"</code>).
+	 * 
+	 * @since 2.0
 	 */
 	public static String ID_PACKAGES_VIEW= "org.eclipse.jdt.ui.PackagesView"; //$NON-NLS-1$
 
 	/**
 	 * The view part id of the Java Browsing Types view
 	 * (value <code>"org.eclipse.jdt.ui.TypesView"</code>).
+	 * 
+	 * @since 2.0
 	 */
 	public static String ID_TYPES_VIEW= "org.eclipse.jdt.ui.TypesView"; //$NON-NLS-1$
 
 	/**
 	 * The view part id of the Java Browsing Members view
 	 * (value <code>"org.eclipse.jdt.ui.MembersView"</code>).
+	 * 
+	 * @since 2.0
 	 */
 	public static String ID_MEMBERS_VIEW= "org.eclipse.jdt.ui.MembersView"; //$NON-NLS-1$
 
@@ -228,7 +244,7 @@ public final class JavaUI {
 	/**
 	 * Creates a selection dialog that lists all packages of the given Java project.
 	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
-	 * and subsequently extracting the selected packages (of type
+	 * and subsequently extracting the selected package (of type
 	 * <code>IPackageFragment</code>) via <code>SelectionDialog.getResult</code>.
 	 * 
 	 * @param parent the parent shell of the dialog to be created
@@ -239,9 +255,14 @@ public final class JavaUI {
 	 *   to those from source package fragment roots;
 	 *   <code>IJavaElementSearchConstants.CONSIDER_REQUIRED_PROJECTS</code>, indicating that
 	 *   packages from required projects should be included as well.
-	 * @param filter the filter
+	 * @param filter the initial pattern to filter the set of packages. For example "com" shows 
+	 * all packages starting with "com". The meta characters '?' representing any character and 
+	 * '*' representing any string are supported. Clients can pass an empty string if no filtering 
+	 * is required.
 	 * @return a new selection dialog
 	 * @exception JavaModelException if the selection dialog could not be opened
+	 * 
+	 * @since 2.0
 	 */
 	public static SelectionDialog createPackageDialog(Shell parent, IJavaProject project, int style, String filter) throws JavaModelException {
 		Assert.isTrue((style | IJavaElementSearchConstants.CONSIDER_BINARIES | IJavaElementSearchConstants.CONSIDER_REQUIRED_PROJECTS) ==
@@ -285,7 +306,21 @@ public final class JavaUI {
 	}
 
 	/**
-	 * @see #createPackageDialog(Shell, IJavaProject, int, String)
+	 * Creates a selection dialog that lists all packages of the given Java project.
+	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
+	 * and subsequently extracting the selected package (of type
+	 * <code>IPackageFragment</code>) via <code>SelectionDialog.getResult</code>.
+	 * 
+	 * @param parent the parent shell of the dialog to be created
+	 * @param project the Java project
+	 * @param style flags defining the style of the dialog; the valid flags are:
+	 *   <code>IJavaElementSearchConstants.CONSIDER_BINARIES</code>, indicating that 
+	 *   packages from binary package fragment roots should be included in addition
+	 *   to those from source package fragment roots;
+	 *   <code>IJavaElementSearchConstants.CONSIDER_REQUIRED_PROJECTS</code>, indicating that
+	 *   packages from required projects should be included as well.
+	 * @return a new selection dialog
+	 * @exception JavaModelException if the selection dialog could not be opened
 	 */
 	public static SelectionDialog createPackageDialog(Shell parent, IJavaProject project, int style) throws JavaModelException {
 		return createPackageDialog(parent, project, style, ""); //$NON-NLS-1$
@@ -295,14 +330,19 @@ public final class JavaUI {
 	 * Creates a selection dialog that lists all packages under the given package 
 	 * fragment root.
 	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
-	 * and subsequently extracting the selected packages (of type
+	 * and subsequently extracting the selected package (of type
 	 * <code>IPackageFragment</code>) via <code>SelectionDialog.getResult</code>.
 	 * 
 	 * @param parent the parent shell of the dialog to be created
 	 * @param root the package fragment root
-	 * @param filter the filter
+	 * @param filter the initial pattern to filter the set of packages. For example "com" shows 
+	 * all packages starting with "com". The meta characters '?' representing any character and 
+	 * '*' representing any string are supported. Clients can pass an empty string if no filtering 
+	 * is required.
 	 * @return a new selection dialog
 	 * @exception JavaModelException if the selection dialog could not be opened
+	 * 
+	 * @since 2.0
 	 */
 	public static SelectionDialog createPackageDialog(Shell parent, IPackageFragmentRoot root, String filter) throws JavaModelException {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(parent, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
@@ -313,7 +353,16 @@ public final class JavaUI {
 	}
 
 	/**
-	 * @see #createPackageDialog(Shell, IPackageFragmentRoot)
+	 * Creates a selection dialog that lists all packages under the given package 
+	 * fragment root.
+	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
+	 * and subsequently extracting the selected package (of type
+	 * <code>IPackageFragment</code>) via <code>SelectionDialog.getResult</code>.
+	 * 
+	 * @param parent the parent shell of the dialog to be created
+	 * @param root the package fragment root
+	 * @return a new selection dialog
+	 * @exception JavaModelException if the selection dialog could not be opened
 	 */
 	public static SelectionDialog createPackageDialog(Shell parent, IPackageFragmentRoot root) throws JavaModelException {
 		return createPackageDialog(parent, root, ""); //$NON-NLS-1$
@@ -322,7 +371,7 @@ public final class JavaUI {
 	/**
 	 * Creates a selection dialog that lists all types in the given scope.
 	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
-	 * and subsequently extracting the selected packages (of type
+	 * and subsequently extracting the selected type(s) (of type
 	 * <code>IType</code>) via <code>SelectionDialog.getResult</code>.
 	 * 
 	 * @param parent the parent shell of the dialog to be created
@@ -334,9 +383,13 @@ public final class JavaUI {
 	 *   <code>CONSIDER_INTERFACES</code>, or their bitwise OR 
 	 *   (equivalent to <code>CONSIDER_TYPES</code>)
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
-	 * @param filter the filter
-	 * @return a new selection dialog
+	 * @param filter the initial pattern to filter the set of types. For example "Abstract" shows 
+	 * all types starting with "abstract". The meta characters '?' representing any character and 
+	 * '*' representing any string are supported. Clients can pass an empty string if no filtering 
+	 * is required.
 	 * @exception JavaModelException if the selection dialog could not be opened
+	 * 
+	 * @since 2.0
 	 */
 	public static SelectionDialog createTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection, String filter) throws JavaModelException {
 		int elementKinds= 0;
@@ -361,7 +414,22 @@ public final class JavaUI {
 	}
 
 	/**
-	 * @see #createTypeDialog(Shell, IRunnableContext, IJavaSearchScope, int, boolean, String)
+	 * Creates a selection dialog that lists all types in the given scope.
+	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
+	 * and subsequently extracting the selected type(s) (of type
+	 * <code>IType</code>) via <code>SelectionDialog.getResult</code>.
+	 * 
+	 * @param parent the parent shell of the dialog to be created
+	 * @param context the runnable context used to show progress when the dialog
+	 *   is being populated
+	 * @param scope the scope that limits which types are included
+	 * @param style flags defining the style of the dialog; the only valid values are
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES</code>,
+	 *   <code>CONSIDER_INTERFACES</code>, or their bitwise OR 
+	 *   (equivalent to <code>CONSIDER_TYPES</code>)
+	 * @param multipleSelection <code>true</code> if multiple selection is allowed
+	 * @return a new selection dialog
+	 * @exception JavaModelException if the selection dialog could not be opened
 	 */
 	public static SelectionDialog createTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection) throws JavaModelException {
 		return createTypeDialog(parent, context, scope, style, multipleSelection, "");//$NON-NLS-1$
@@ -371,11 +439,8 @@ public final class JavaUI {
 	 * Creates a selection dialog that lists all types in the given scope containing 
 	 * a standard <code>main</code> method.
 	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
-	 * and subsequently extracting the selected packages (of type
+	 * and subsequently extracting the selected type(s) (of type
 	 * <code>IType</code>) via <code>SelectionDialog.getResult</code>.
-	 * <p>
-	 * [Issue: IJavaSearchScope is not currently part of the Java core API.]
-	 * </p>
 	 * 
 	 * @param parent the parent shell of the dialog to be created
 	 * @param context the runnable context used to show progress when the dialog
@@ -385,8 +450,13 @@ public final class JavaUI {
 	 *   <code>IJavaElementSearchConstants.CONSIDER_BINARIES</code>,
 	 *   <code>CONSIDER_EXTERNAL_JARS</code>, or their bitwise OR, or <code>0</code>
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
-	 * @param filter the filter
+	 * @param filter the initial pattern to filter the set of types containg a main method. For 
+	 * example "App" shows all types starting with "app". The meta characters '?' representing 
+	 * any character and '*' representing any string are supported. Clients can pass an empty 
+	 * string if no filtering is required.
 	 * @return a new selection dialog
+	 * 
+	 * @since 2.0
 	 */
 	public static SelectionDialog createMainTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection, String filter) {
 		if (multipleSelection) {
@@ -401,7 +471,21 @@ public final class JavaUI {
 	}
 
 	/**
-	 * @see #createMainTypeDialog(Shell, IRunnableContext, IJavaSearchScope, int, boolean, String)
+	 * Creates a selection dialog that lists all types in the given scope containing 
+	 * a standard <code>main</code> method.
+	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
+	 * and subsequently extracting the selected type(s) (of type
+	 * <code>IType</code>) via <code>SelectionDialog.getResult</code>.
+	 * 
+	 * @param parent the parent shell of the dialog to be created
+	 * @param context the runnable context used to show progress when the dialog
+	 *   is being populated
+	 * @param scope the scope that limits which types are included
+	 * @param style flags defining the style of the dialog; the only valid values are
+	 *   <code>IJavaElementSearchConstants.CONSIDER_BINARIES</code>,
+	 *   <code>CONSIDER_EXTERNAL_JARS</code>, or their bitwise OR, or <code>0</code>
+	 * @param multipleSelection <code>true</code> if multiple selection is allowed
+	 * @return a new selection dialog
 	 */
 	public static SelectionDialog createMainTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection) {
 		return createMainTypeDialog(parent, context, scope, style, multipleSelection, "");//$NON-NLS-1$
@@ -410,7 +494,7 @@ public final class JavaUI {
 	/**
 	 * Creates a selection dialog that lists all types in the given project.
 	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
-	 * and subsequently extracting the selected packages (of type
+	 * and subsequently extracting the selected type(s) (of type
 	 * <code>IType</code>) via <code>SelectionDialog.getResult</code>.
 	 * 
 	 * @param parent the parent shell of the dialog to be created
@@ -431,16 +515,8 @@ public final class JavaUI {
 	}
 	
 	/**
-	 * Opens a Java editor on the given Java compilation unit of class file. 
-	 * If there already is an open Java editor for the given element, it is returned.
-	 * <p>
-	 * [Issue: Explain semantics of opening an editor on a class file.]
-	 * </p>
-	 * <p>
-	 * [Issue: Explain under which conditions it returns null, throws JavaModelException,
-	 *  or throws JavaModelException.
-	 * ]
-	 * </p>
+	 * Opens a Java editor on the given Java element. The element can be a compilation unit 
+	 * or class file. If there already is an open Java editor for the given element, it is returned.
 	 *
 	 * @param element the input element; either a compilation unit 
 	 *   (<code>ICompilationUnit</code>) or a class file (</code>IClassFile</code>)
@@ -456,14 +532,8 @@ public final class JavaUI {
 	/** 
 	 * Reveals the source range of the given source reference element in the
 	 * given editor. No checking is done if the editor displays a compilation unit or
-	 * class file that contains the given source reference.
-	 * <p>
-	 * [Issue: Explain what is meant by that last sentence.]
-	 * </p>
-	 * <p>
-	 * [Issue: Explain what happens if the source reference is from some other
-	 *  compilation unit, editor is not open, etc.]
-	 * </p>
+	 * class file that contains the given source reference. The editor simply reveals
+	 * the source range denoted by the given source reference.
 	 *
 	 * @param part the editor displaying the compilation unit or class file
 	 * @param element the source reference element defining the source range to be revealed
@@ -476,11 +546,16 @@ public final class JavaUI {
 	}
 	
 	/** 
-	 * Reveals the given java element  in the given editor. No checking is done if the 
-	 * editor displays a compilation unit or class file that contains the given element.
-	 * If the element is not contained, nothing happens.
+	 * Reveals the given java element  in the given editor. If the element is not an instance
+	 * of <code>ISourceReference</code> this method result in a NOP. If it is a source
+	 * reference no checking is done if the editor displays a compilation unit or class file that 
+	 * contains the source reference element. The editor simply reveals the source range 
+	 * denoted by the given element.
+	 * 
 	 * @param part the editor displaying a compilation unit or class file
 	 * @param element the element to be revealed
+	 * 
+	 * @since 2.0
 	 */
 	public static void revealInEditor(IEditorPart part, IJavaElement element) {
 		EditorUtility.revealInEditor(part, element);
@@ -499,6 +574,7 @@ public final class JavaUI {
 	 * Answers the shared working copies currently registered for the Java plug-in. 
 	 * 
 	 * @return the list of shared working copies this plug-in
+	 * 
 	 * @see org.eclipse.jdt.core.JavaCore#getSharedWorkingCopies(org.eclipse.jdt.core.IBufferFactory)
 	 * @since 2.0
 	 */
@@ -510,7 +586,9 @@ public final class JavaUI {
 	 * Returns the BufferFactory for the Java UI plug-in.
 	 *
 	 * @return the BufferFactory for the Java UI plug-in
+	 * 
 	 * @see org.eclipse.jdt.core.IBufferFactory
+	 * @since 2.0
 	 */
 	public static IBufferFactory getBufferFactory() {
 		CompilationUnitDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
@@ -523,7 +601,9 @@ public final class JavaUI {
 	 * Returns the DocumentProvider used for Java compilation units.
 	 *
 	 * @return the DocumentProvider for Java compilation units.
+	 * 
 	 * @see IDocumentProvider
+	 * @since 2.0
 	 */
 	public static IDocumentProvider getDocumentProvider() {
 		return JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
@@ -531,10 +611,13 @@ public final class JavaUI {
 	
 	/**
 	 * Sets the Javadoc location for an archive with the given path.
-	 * @param archivePath the path of the library; this can be an absolute path
+	 * 
+	 * @param archivePath the path of the library; this can be an workspace path
 	 * or an external path in case of an external library.
 	 * @param url The Javadoc location to set. This location should contain index.html and
 	 * a file 'package-list'.
+	 * 
+	 * @since 2.0
 	 */
 	public static void setLibraryJavadocLocation(IPath archivePath, URL url) {
 		JavaDocLocations.setLibraryJavadocLocation(archivePath, url);
@@ -543,8 +626,11 @@ public final class JavaUI {
 	/**
 	 * Returns the Javadoc location for an archive or <code>null</code> if no
 	 * location is available.
-	 * @param archivePath the path of the library. This can be an absolute path
+	 * 
+	 * @param archivePath the path of the library. This can be an workspace path
 	 * or an external path in case of an external library.
+	 * 
+	 * @since 2.0
 	 */	
 	public static URL getLibraryJavadocLocation(IPath archivePath) {
 		return JavaDocLocations.getLibraryJavadocLocation(archivePath);
@@ -555,7 +641,10 @@ public final class JavaUI {
 	 * index file. This location must not exist. Returns <code>null</code> if no javadoc location
 	 * has been attached to the element's library or project.
 	 * Example of a returned URL is <i>http://www.junit.org/junit/javadoc</i>.
+	 * 
 	 * @param The element for witch the doc URL is requested.
+	 * 
+	 * @since 2.0
 	 */		
 	public static URL getJavadocBaseLocation(IJavaElement element) throws JavaModelException {	
 		return JavaDocLocations.getJavadocBaseLocation(element);
@@ -566,14 +655,15 @@ public final class JavaUI {
 	 * <i>http://www.junit.org/junit/javadoc/junit/extensions/TestSetup.html</i>.
 	 * This returned location must not exist. Returns <code>null</code> if no javadoc location
 	 * has been attached to the element's library or project.
+	 * 
 	 * @param The element for witch the doc URL is requested.
 	 * @param includeAnchor If set, the URL contains an anchor for member references:
 	 * <i>http://www.junit.org/junit/javadoc/junit/extensions/TestSetup.html#run(junit.framework.TestResult)</i>. Note
 	 * that this involves type resolving and is a more expensive call than without anchor.
+	 * 
+	 * @since 2.0
 	 */		
 	public static URL getJavadocLocation(IJavaElement element, boolean includeAnchor) throws JavaModelException {
 		return JavaDocLocations.getJavadocLocation(element, includeAnchor);
 	}
-	
-
 }

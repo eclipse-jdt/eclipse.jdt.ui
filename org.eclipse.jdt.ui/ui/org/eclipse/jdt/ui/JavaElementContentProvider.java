@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2001 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.ui;
 
 import org.eclipse.core.resources.*;
@@ -54,6 +60,14 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 
 	/**
 	 * Creates a new content provider for Java elements.
+	 * 
+	 * @param provideMembers if <code>true</code> members below compilation units
+	 * and class files are provided. 
+	 * @param provideWorkingCopy if <code>true</code> the element provider provides
+	 * working copies for members of compilation units which have an associated working 
+	 * copy. Otherwise only original elements are provided.
+	 * 
+	 * @since 2.0
 	 */
 	public JavaElementContentProvider(boolean provideMembers, boolean provideWorkingCopy) {
 		super(provideMembers, provideWorkingCopy);
@@ -74,6 +88,8 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 	 * Processes a delta recursively. When more than two children are affected the
 	 * tree is fully refreshed starting at this node. The delta is processed in the
 	 * current thread but the viewer updates are posted to the UI thread.
+	 * 
+	 * @param delta the delta to be processed
 	 */
 	protected void processDelta(IJavaElementDelta delta) throws JavaModelException {
 		int kind= delta.getKind();
@@ -204,7 +220,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		return project.isOnClasspath(element);
 	}
 
-	/**
+	/*
 	 * Refreshes the Compilation unit corresponding to the workging copy
 	 * @param iWorkingCopy
 	 */
@@ -218,7 +234,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		return (element instanceof IWorkingCopy) && ((IWorkingCopy)element).isWorkingCopy();
 	}
 	
-	/**
+	/*
 	 * Updates the package icon
 	 */
 	 private void updatePackageIcon(final IJavaElement element) {
@@ -231,7 +247,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 			}
 		});
 	 }
-	/**
+	/*
 	 * Process resource deltas
 	 */
 	private void processResourceDelta(IResourceDelta delta, Object parent) {

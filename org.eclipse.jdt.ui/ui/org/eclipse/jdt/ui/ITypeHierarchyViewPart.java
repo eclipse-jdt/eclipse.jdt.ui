@@ -35,10 +35,11 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	/**
 	 * Sets the input element of this type hierarchy view. The following input types are possible
 	 * <code>IMember</code> (types, methods, fields..), <code>IPackageFragment</code>, <code>IPackageFragmentRoot</code>
-	 * <code>IJavaProject</code> 
+	 * and <code>IJavaProject</code> 
 	 *
 	 * @param type the input element of this type hierarchy view, or <code>null</code>
-	 *  to clear any input element
+	 *  to clear any input
+	 * 
 	 * @since 2.0
 	 */
 	public void setInputElement(IJavaElement element);	
@@ -47,7 +48,6 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 * Returns the input element of this type hierarchy view
 	 *
 	 * @return the input element, or <code>null</code> if no input element is set
-	 * or the input is not a type
 	 * @see #setInput
 	 * @deprecated use getInputElement instead
 	 */
@@ -59,8 +59,8 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 *
 	 * @return the input element, or <code>null</code> if no input element is set
 	 * @see #setInputElement
+	 * 
 	 * @since 2.0
 	 */
-	public IJavaElement getInputElement(); 
-	
+	public IJavaElement getInputElement(); 	
 }
