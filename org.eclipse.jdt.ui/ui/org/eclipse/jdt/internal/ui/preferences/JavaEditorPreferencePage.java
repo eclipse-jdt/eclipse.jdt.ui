@@ -230,14 +230,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fBackgroundColorButton;
 	private Button fBoldCheckBox;
 	private SourceViewer fPreviewViewer;
-	
-	private Button fLineNumberButton;
-	private Button fBracketHighlightButton;
-	private Button fLineHighlightButton;
-	private Button fPrintMarginButton;
-	private Control fPrintMarginColumn;
-	private Button fProblemIndicationButton;
-	private Button fQuickFixableProblemButton;
+	private Color fBackgroundColor;
 	
 	public JavaEditorPreferencePage() {
 		setDescription(JavaUIMessages.getString("JavaEditorPreferencePage.description")); //$NON-NLS-1$
@@ -548,8 +541,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		return fPreviewViewer.getControl();
 	}
 	
-	private Color fBackgroundColor;
-	
 	/**
 	 * Initializes the given viewer's colors.
 	 * 
@@ -621,7 +612,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		addTextField(behaviorComposite, label, JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH, 3, 0, true);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.printMarginColumn"); //$NON-NLS-1$
-		fPrintMarginColumn= addTextField(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN_COLUMN, 3, 0, true);
+		addTextField(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN_COLUMN, 3, 0, true);
 				
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.insertSpaceForTabs"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.SPACES_FOR_TABS, 0);
@@ -633,22 +624,22 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.OVERVIEW_RULER, 0);
 				
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showLineNumbers"); //$NON-NLS-1$
-		fLineNumberButton= addCheckBox(behaviorComposite, label, JavaEditor.LINE_NUMBER_RULER, 0);
+		addCheckBox(behaviorComposite, label, JavaEditor.LINE_NUMBER_RULER, 0);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightMatchingBrackets"); //$NON-NLS-1$
-		fBracketHighlightButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS, 0);
+		addCheckBox(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightCurrentLine"); //$NON-NLS-1$
-		fLineHighlightButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.CURRENT_LINE, 0);
+		addCheckBox(behaviorComposite, label, CompilationUnitEditor.CURRENT_LINE, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightProblems"); //$NON-NLS-1$
-		fProblemIndicationButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.PROBLEM_INDICATION, 0);
+		addCheckBox(behaviorComposite, label, CompilationUnitEditor.PROBLEM_INDICATION, 0);
 
 		label= "Show &temporary problems solvable with Quick Fix in vertical ruler";
-		fQuickFixableProblemButton= addCheckBox(behaviorComposite, label, WorkInProgressPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
+		addCheckBox(behaviorComposite, label, WorkInProgressPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showPrintMargin"); //$NON-NLS-1$
-		fPrintMarginButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN, 0);
+		addCheckBox(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN, 0);
 
 		Label l= new Label(behaviorComposite, SWT.LEFT);
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
