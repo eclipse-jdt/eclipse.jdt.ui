@@ -26,11 +26,11 @@ public class CommentRange extends Position implements ICommentAttributes, IHtmlT
 	/**
 	 * Creates a new comment range.
 	 * 
-	 * @param offset Offset of the range
-	 * @param length Length of the range
+	 * @param position Offset of the range
+	 * @param count Length of the range
 	 */
-	public CommentRange(final int offset, final int length) {
-		super(offset, length);
+	public CommentRange(final int position, final int count) {
+		super(position, count);
 	}
 
 	/**

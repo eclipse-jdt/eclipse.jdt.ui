@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.ui.text.comment;
 
 import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.Map;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -41,6 +42,9 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocAttribu
 
 	/** Position category of javadoc code ranges */
 	protected static final String CODE_POSITION_CATEGORY= "__javadoc_code_position"; //$NON-NLS-1$
+	
+	/** Should html tags be formatted? */
+	private final boolean fFormatHtml;
 
 	/** Should source code regions be formatted? */
 	private final boolean fFormatSource;
@@ -74,14 +78,15 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocAttribu
 		fSeparateRootTags= preferences.get(PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS) == IPreferenceStore.TRUE;
 		fParameterNewLine= preferences.get(PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER) == IPreferenceStore.TRUE;
 		fIndentRootDescriptions= preferences.get(PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION) == IPreferenceStore.TRUE;
+		fFormatHtml= preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMATHTML) == IPreferenceStore.TRUE;
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentRegion#applyRegion(java.lang.String, int)
 	 */
-	protected void applyRegion(final String indentation, final int length) {
+	protected void applyRegion(final String indentation, final int width) {
 
-		super.applyRegion(indentation, length);
+		super.applyRegion(indentation, width);
 
 		if (fFormatSource) {
 
@@ -118,7 +123,7 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocAttribu
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentRegion#canAppend(org.eclipse.jdt.internal.ui.text.comment.CommentLine, org.eclipse.jdt.internal.ui.text.comment.CommentRange, org.eclipse.jdt.internal.ui.text.comment.CommentRange, int, int)
 	 */
-	protected boolean canAppend(final CommentLine line, final CommentRange previous, final CommentRange next, final int offset, int length) {
+	protected boolean canAppend(final CommentLine line, final CommentRange previous, final CommentRange next, final int position, int count) {
 
 		final boolean blank= next.hasAttribute(COMMENT_BLANKLINE);
 
@@ -130,7 +135,7 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocAttribu
 
 		if (previous != null) {
 
-			if (offset != 0 && (blank || previous.hasAttribute(COMMENT_BLANKLINE) || next.hasAttribute(JAVADOC_PARAMETER) || next.hasAttribute(JAVADOC_ROOT) || next.hasAttribute(JAVADOC_SEPARATOR) || next.hasAttribute(COMMENT_NEWLINE) || previous.hasAttribute(COMMENT_BREAK) || previous.hasAttribute(JAVADOC_SEPARATOR)))
+			if (position != 0 && (blank || previous.hasAttribute(COMMENT_BLANKLINE) || next.hasAttribute(JAVADOC_PARAMETER) || next.hasAttribute(JAVADOC_ROOT) || next.hasAttribute(JAVADOC_SEPARATOR) || next.hasAttribute(COMMENT_NEWLINE) || previous.hasAttribute(COMMENT_BREAK) || previous.hasAttribute(JAVADOC_SEPARATOR)))
 				return false;
 
 			if (next.hasAttribute(JAVADOC_IMMUTABLE) && previous.hasAttribute(JAVADOC_IMMUTABLE))
@@ -138,9 +143,9 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocAttribu
 		}
 
 		if (fIndentRootTags && !line.hasAttribute(JAVADOC_ROOT) && !line.hasAttribute(JAVADOC_PARAMETER))
-			length -= stringToLength(line.getReference());
+			count -= stringToLength(line.getReference());
 
-		return super.canAppend(line, previous, next, offset, length);
+		return super.canAppend(line, previous, next, position, count);
 	}
 
 	/*
@@ -155,13 +160,13 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocAttribu
 
 			try {
 
-				final int offset= getOffset();
+				final int index= getOffset();
 				final IDocument document= getDocument();
 
 				if (!isLastCode && isCurrentCode)
-					document.addPosition(CODE_POSITION_CATEGORY, new Position(offset + next.getOffset() + next.getLength()));
+					document.addPosition(CODE_POSITION_CATEGORY, new Position(index + next.getOffset() + next.getLength()));
 				else if (isLastCode && !isCurrentCode)
-					document.addPosition(CODE_POSITION_CATEGORY, new Position(offset + previous.getOffset()));
+					document.addPosition(CODE_POSITION_CATEGORY, new Position(index + previous.getOffset()));
 
 			} catch (BadLocationException exception) {
 				// Should not happen
@@ -256,10 +261,10 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocAttribu
 			else if (previous.hasAttribute(JAVADOC_CODE) && !next.hasAttribute(JAVADOC_CODE))
 				return getDelimiter();
 
-			else if ((next.hasAttribute(JAVADOC_IMMUTABLE | JAVADOC_SEPARATOR) || previous.hasAttribute(JAVADOC_PARAGRAPH)) && !successor.hasAttribute(COMMENT_BLANKLINE))
+			else if ((next.hasAttribute(JAVADOC_IMMUTABLE | JAVADOC_SEPARATOR) || ((fSeparateRootTags || !isClearBlankLines()) && previous.hasAttribute(COMMENT_PARAGRAPH))) && !successor.hasAttribute(COMMENT_BLANKLINE))
 				return delimiter + delimiter;
 
-			else if (fIndentRootTags && !predecessor.hasAttribute(JAVADOC_ROOT) && !predecessor.hasAttribute(JAVADOC_PARAMETER))
+			else if (fIndentRootTags && !predecessor.hasAttribute(JAVADOC_ROOT) && !predecessor.hasAttribute(JAVADOC_PARAMETER) && !predecessor.hasAttribute(COMMENT_BLANKLINE))
 				return delimiter + stringToIndent(predecessor.getReference(), false);
 		}
 		return delimiter;
@@ -291,48 +296,12 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocAttribu
 	}
 
 	/**
-	 * Should inline source code be formatted?
-	 * 
-	 * @return <code>true</code> iff the code should be formatted, <code>false</code> otherwise.
-	 */
-	protected final boolean isFormatSource() {
-		return fFormatSource;
-	}
-
-	/**
 	 * Should parameter descriptions be indented from their parameter?
 	 * 
 	 * @return <code>true</code> iff the descriptions should be indented, <code>false</code> otherwise.
 	 */
 	protected final boolean isIndentRootDescriptions() {
 		return fIndentRootDescriptions;
-	}
-
-	/**
-	 * Should javadoc root tags be indented?
-	 * 
-	 * @return <code>true</code> iff the root tags should be indented, <code>false</code> otherwise.
-	 */
-	protected final boolean isIndentRootTags() {
-		return fIndentRootTags;
-	}
-
-	/**
-	 * Should the formatter insert a new line after javadoc parameters?
-	 * 
-	 * @return <code>true</code> iff a new line should be inserted, <code>false</code> otherwise.
-	 */
-	protected final boolean isParameterNewLine() {
-		return fParameterNewLine;
-	}
-
-	/**
-	 * Should javadoc root tags be separated from the rest of the comment?
-	 * 
-	 * @return <code>true</code> iff the root tags should be separated, <code>false</code> otherwise.
-	 */
-	protected final boolean isSeparateRootTags() {
-		return fSeparateRootTags;
 	}
 
 	/**
@@ -345,7 +314,7 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocAttribu
 	protected void markRanges(final String[] tags, final int key, final boolean html) {
 
 		int level= 0;
-		int length= 0;
+		int count= 0;
 		String token= null;
 		JavaDocRange current= null;
 
@@ -355,9 +324,9 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocAttribu
 			for (final Iterator iterator= getRanges().iterator(); iterator.hasNext();) {
 
 				current= (JavaDocRange)iterator.next();
-				length= current.getLength();
+				count= current.getLength();
 
-				if (length > 0) {
+				if (count > 0) {
 
 					token= getText(current.getOffset(), current.getLength());
 					level= current.markRange(token, tags[index], level, key, html);
@@ -371,34 +340,52 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocAttribu
 	 */
 	protected void markRegion() {
 
-		int length= 0;
+		int count= 0;
+		boolean paragraph= false;
+
 		String token= null;
 		JavaDocRange range= null;
+		JavaDocRange blank= null;
 
-		for (final Iterator iterator= getRanges().iterator(); iterator.hasNext();) {
+		for (final ListIterator iterator= getRanges().listIterator(); iterator.hasNext();) {
 
 			range= (JavaDocRange)iterator.next();
-			length= range.getLength();
+			count= range.getLength();
 
-			if (length > 0) {
+			if (count > 0) {
 
-				token= getText(range.getOffset(), length).toLowerCase();
+				token= getText(range.getOffset(), count).toLowerCase();
 
 				range.markJavadocTag(JAVADOC_PARAM_TAGS, token, JAVADOC_PARAMETER);
 				range.markJavadocTag(JAVADOC_ROOT_TAGS, token, JAVADOC_ROOT);
 
-				if (fSeparateRootTags && (range.hasAttribute(JAVADOC_ROOT) || range.hasAttribute(JAVADOC_PARAMETER))) {
+				if (!paragraph && (range.hasAttribute(JAVADOC_ROOT) || range.hasAttribute(JAVADOC_PARAMETER))) {
 
-					range.setAttribute(JAVADOC_PARAGRAPH);
-					fSeparateRootTags= false;
+					iterator.previous();
+					while (iterator.hasPrevious()) {
+
+						blank= (JavaDocRange)iterator.previous();
+						if (blank.hasAttribute(COMMENT_BLANKLINE))
+							iterator.remove();
+						else
+							break;
+					}
+
+					range.setAttribute(COMMENT_PARAGRAPH);
+					paragraph= true;
 				}
 
 				if (range.hasAttribute(COMMENT_HTML)) {
 
-					range.markHtmlTag(JAVADOC_SEPARATOR_TAGS, token, JAVADOC_SEPARATOR, true, true);
-					range.markHtmlTag(JAVADOC_BREAK_TAGS, token, COMMENT_BREAK, false, true);
-					range.markHtmlTag(JAVADOC_NEWLINE_TAGS, token, COMMENT_NEWLINE, true, false);
 					range.markHtmlTag(JAVADOC_IMMUTABLE_TAGS, token, JAVADOC_IMMUTABLE, true, true);
+					if (fFormatHtml) {
+
+						range.markHtmlTag(JAVADOC_SEPARATOR_TAGS, token, JAVADOC_SEPARATOR, true, true);
+						range.markHtmlTag(JAVADOC_BREAK_TAGS, token, COMMENT_BREAK, false, true);
+						range.markHtmlTag(JAVADOC_NEWLINE_TAGS, token, COMMENT_NEWLINE, true, false);
+						
+					} else
+						range.markHtmlTag(JAVADOC_CODE_TAGS, token, JAVADOC_SEPARATOR, true, true);
 				}
 			}
 		}

@@ -326,6 +326,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.FORMATTER_COMMENT_FORMATHTML));
 
 		while (e.hasNext()) {
 			AnnotationPreference info= (AnnotationPreference) e.next();

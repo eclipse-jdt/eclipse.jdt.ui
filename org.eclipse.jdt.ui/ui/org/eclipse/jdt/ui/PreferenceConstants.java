@@ -1674,6 +1674,16 @@ public class PreferenceConstants {
 	public final static String FORMATTER_COMMENT_LINELENGTH= "comment_line_length"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether html tags are formatted.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.0
+	 */	
+	public final static String FORMATTER_COMMENT_FORMATHTML= "comment_format_html"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls if the Java code assist gets auto activated.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -2148,6 +2158,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER, true);
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS, true);
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES, false);
+		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_FORMATHTML, true);
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, 80);
 
 		// work in progress

@@ -45,7 +45,7 @@ public class SingleCommentLine extends CommentLine {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentLine#applyEnd(org.eclipse.jdt.internal.ui.text.comment.CommentRange, java.lang.String, int)
 	 */
-	protected void applyEnd(final CommentRange range, final String indentation, int length) {
+	protected void applyEnd(final CommentRange range, final String indentation, final int length) {
 
 		final int offset= range.getOffset() + range.getLength();
 		final CommentRegion parent= getParent();

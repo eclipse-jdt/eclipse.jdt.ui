@@ -13,7 +13,10 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.Preferences;
+
 import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.ICharacterScanner;
@@ -27,7 +30,6 @@ import org.eclipse.jface.text.rules.WordRule;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
-import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jdt.internal.ui.text.JavaCommentScanner;
 import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
 
@@ -97,18 +99,32 @@ public final class JavaDocScanner extends JavaCommentScanner {
 			super("<", ">", token, escapeCharacter); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 		
-		private IToken checkForWhitespace(ICharacterScanner scanner) {
-			
+		private IToken evaluateToken() {
 			try {
-				
-				char c= getDocument().getChar(getTokenOffset() + 1);
-				if (!Character.isWhitespace(c)) 
+				final String token= getDocument().get(getTokenOffset(), getTokenLength()) + "."; //$NON-NLS-1$
+
+				int offset= 0;
+				char character= token.charAt(++offset);
+
+				if (character == '/')
+					character= token.charAt(++offset);
+
+				while (Character.isWhitespace(character))
+					character= token.charAt(++offset);
+
+				while (Character.isLetterOrDigit(character))
+					character= token.charAt(++offset);
+
+				while (Character.isWhitespace(character))
+					character= token.charAt(++offset);
+
+				if (offset >= 2 && token.charAt(offset) == fEndSequence[0])
 					return fToken;
-					
-			} catch (BadLocationException x) {
+
+			} catch (BadLocationException exception) {
+				// Do nothing
 			}
-			
-			return Token.UNDEFINED;
+			return getToken(IJavaColorConstants.JAVADOC_DEFAULT);
 		}
 				
 		/*
@@ -117,7 +133,7 @@ public final class JavaDocScanner extends JavaCommentScanner {
 		public IToken evaluate(ICharacterScanner scanner) {
 			IToken result= super.evaluate(scanner);
 			if (result == fToken)
-				return checkForWhitespace(scanner);
+				return evaluateToken();
 			return result;
 		}
 	}

@@ -24,15 +24,12 @@ public interface IJavaDocAttributes extends ICommentAttributes {
 	/** Range has the immutable region attribute */
 	public static final int JAVADOC_IMMUTABLE= 1 << 2;
 
-	/** Range has paragraph attribute */
-	public static final int JAVADOC_PARAGRAPH= 1 << 3;
-
 	/** Range has parameter tag attribute */
-	public static final int JAVADOC_PARAMETER= 1 << 4;
+	public static final int JAVADOC_PARAMETER= 1 << 3;
 
 	/** Range has root tag attribute */
-	public static final int JAVADOC_ROOT= 1 << 5;
+	public static final int JAVADOC_ROOT= 1 << 4;
 
 	/** Range has paragraph separator attribute */
-	public static final int JAVADOC_SEPARATOR= 1 << 6;
+	public static final int JAVADOC_SEPARATOR= 1 << 5;
 }

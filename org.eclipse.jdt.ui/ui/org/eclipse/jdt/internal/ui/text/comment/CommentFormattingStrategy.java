@@ -37,8 +37,8 @@ import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 /**
  * Formatting strategy for general source code comments.
  * <p>
- * This strategy implements <code>IFormattingStrategyExtension</code>. It must be
- * registered with a content formatter implementing <code>IContentFormatterExtension2<code>
+ * This strategy implements <code>IFormattingStrategyExtension</code>. It
+ * must be registered with a content formatter implementing <code>IContentFormatterExtension2<code>
  * to take effect.
  * 
  * @since 3.0
@@ -48,12 +48,15 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	/**
 	 * Returns the indentation of the line at the specified offset.
 	 * 
-	 * @param document Document which owns the line
-	 * @param region Comment region which owns the line
-	 * @param offset Offset where to determine the indentation
+	 * @param document
+	 *                  Document which owns the line
+	 * @param region
+	 *                  Comment region which owns the line
+	 * @param offset
+	 *                  Offset where to determine the indentation
 	 * @return The indentation of the line
 	 */
-	protected static String getLineIndentation(final IDocument document, final CommentRegion region, final int offset) {
+	public static String getLineIndentation(final IDocument document, final CommentRegion region, final int offset) {
 
 		String result= ""; //$NON-NLS-1$
 
@@ -72,7 +75,10 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		return result;
 	}
 
-	/** Content formatter with which this formatting strategy has been registered */
+	/**
+	 * Content formatter with which this formatting strategy has been
+	 * registered
+	 */
 	private final ContentFormatter fFormatter;
 
 	/** Partitions to be formatted by this strategy */
@@ -81,8 +87,11 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	/**
 	 * Creates a new comment formatting strategy.
 	 * 
-	 * @param formatter The content formatter with which this formatting strategy has been registered
-	 * @param viewer The source viewer where to apply the formatting strategy
+	 * @param formatter
+	 *                  The content formatter with which this formatting strategy has
+	 *                  been registered
+	 * @param viewer
+	 *                  The source viewer where to apply the formatting strategy
 	 */
 	public CommentFormattingStrategy(final ContentFormatter formatter, final ISourceViewer viewer) {
 		super(viewer);
@@ -115,10 +124,12 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 
 			if (format && (header || position.getOffset() != 0 || !type.equals(IJavaPartitions.JAVA_DOC))) {
 
-				final CommentRegion region= CommentObjectFactory.createRegion(this, position, getLineDelimiter(document));
+				final CommentRegion region= CommentObjectFactory.createRegion(this, position, TextUtilities.getDefaultLineDelimiter(document));
 				final String indentation= getLineIndentation(document, region, position.getOffset());
 
+				final Map partitioners= TextUtilities.removeDocumentPartitioners(document);
 				region.format(indentation);
+				TextUtilities.addDocumentPartitioners(document, partitioners);
 			}
 		} catch (BadLocationException exception) {
 			// Should not happen
@@ -146,11 +157,12 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	}
 
 	/**
-	 * Returns the content formatter with which this formatting strategy has been registered.
+	 * Returns the content formatter with which this formatting strategy has
+	 * been registered.
 	 * 
 	 * @return The content formatter
 	 */
-	protected final ContentFormatter getFormatter() {
+	public final ContentFormatter getFormatter() {
 		return fFormatter;
 	}
 }

@@ -174,7 +174,7 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 		if (offset >= length && !parent.isClearBlankLines() && (line > 0 && line < parent.getSize() - 1)) {
 
 			result= CommentObjectFactory.createRange(parent, begin, 0);
-			result.setAttribute(COMMENT_BLANKLINE | COMMENT_NEWLINE);
+			result.setAttribute(COMMENT_BLANKLINE);
 
 			parent.append(result);
 		}

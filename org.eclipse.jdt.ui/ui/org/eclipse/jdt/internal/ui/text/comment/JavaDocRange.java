@@ -25,11 +25,11 @@ public class JavaDocRange extends CommentRange implements IJavaDocAttributes, IJ
 	/**
 	 * Creates a new javadoc range.
 	 * 
-	 * @param offset Offset of the range
-	 * @param length Length of the range
+	 * @param position Offset of the range
+	 * @param count Length of the range
 	 */
-	protected JavaDocRange(final int offset, final int length) {
-		super(offset, length);
+	protected JavaDocRange(final int position, final int count) {
+		super(position, count);
 	}
 
 	/**

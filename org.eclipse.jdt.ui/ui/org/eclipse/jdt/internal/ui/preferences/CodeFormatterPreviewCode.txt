@@ -18,8 +18,8 @@ package org.eclipse.formatter.example
 class File {
 
 	/**
-	 * Returns the number of bytes that can be read from this file input stream without blocking.<p>
-	 * Here is an example on how to use <code>availableSize</code>.
+	 * Returns the number of bytes that can be read from this file input stream without blocking.
+	 * <p>Here is an example on how to use <code>availableSize</code>.</p>
 	 *
 	 * The Loop to compute the number of bytes works as follows:
 	 * <pre>

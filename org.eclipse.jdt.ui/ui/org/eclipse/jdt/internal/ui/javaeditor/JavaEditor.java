@@ -1571,6 +1571,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 
 				final Point selection= viewer.rememberSelection();
 				try {
+					viewer.setRedraw(false);
 
 					final String type= TextUtilities.getContentType(viewer.getDocument(), IJavaPartitions.JAVA_PARTITIONING, selection.x);
 					if (type.equals(IDocument.DEFAULT_CONTENT_TYPE) && selection.y == 0) {
@@ -1601,6 +1602,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				} catch (BadLocationException exception) {
 					// Can not happen
 				} finally {
+
+					viewer.setRedraw(true);
 					viewer.restoreSelection();
 				}
 			}

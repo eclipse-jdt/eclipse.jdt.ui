@@ -38,7 +38,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  * 
  * @since 3.0
  */
-public class CommentRegion extends TypedPosition implements IHtmlTagConstants, IBorderAttributes {
+public class CommentRegion extends TypedPosition implements IHtmlTagConstants, IBorderAttributes, ICommentAttributes {
 
 	/** Position category of comment regions */
 	protected static final String COMMENT_POSITION_CATEGORY= "__comment_position"; //$NON-NLS-1$
@@ -94,12 +94,18 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 		fClearBlankLines= fStrategy.getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES) == IPreferenceStore.TRUE;
 
 		final ISourceViewer viewer= strategy.getViewer();
+		final StyledText text= viewer.getTextWidget();
 		fDocument= viewer.getDocument();
 
-		final StyledText text= viewer.getTextWidget();
-		fGraphics= new GC(text);
-		fGraphics.setFont(text.getFont());
-		fTabs= text.getTabs();
+		if (text != null && !text.isDisposed()) {
+			fGraphics= new GC(text);
+			fGraphics.setFont(text.getFont());
+			fTabs= text.getTabs();
+		} else {
+			fGraphics= null;
+			fTabs= 4;
+		}
+
 
 		final ILineTracker tracker= new ConfigurableLineTracker(new String[] { delimiter });
 
@@ -132,17 +138,17 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	 * 
 	 * @param range Comment range to append to this comment region
 	 */
-	protected void append(final CommentRange range) {
-		fRanges.add(range);
+	protected final void append(final CommentRange range) {
+		fRanges.addLast(range);
 	}
 
 	/**
 	 * Applies the formatted comment region to the underlying document.
 	 * 
 	 * @param indentation Indentation of the formatted comment region
-	 * @param length The maximal length of text in this comment region measured in average character widths
+	 * @param width The maximal width of text in this comment region measured in average character widths
 	 */
-	protected void applyRegion(final String indentation, final int length) {
+	protected void applyRegion(final String indentation, final int width) {
 
 		final int last= fLines.size() - 1;
 		if (last >= 0) {
@@ -151,7 +157,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 			CommentLine next= (CommentLine)fLines.get(last);
 
 			CommentRange range= next.getLast();
-			next.applyEnd(range, indentation, length);
+			next.applyEnd(range, indentation, width);
 
 			for (int line= last; line >= 0; line--) {
 
@@ -160,7 +166,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 
 				range= next.applyLine(previous, range, indentation, line);
 			}
-			next.applyStart(range, indentation, length);
+			next.applyStart(range, indentation, width);
 		}
 	}
 
@@ -168,18 +174,18 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	 * Applies the changed content to the underlying document
 	 * 
 	 * @param change Text content to apply to the underlying document
-	 * @param offset Offset measured in comment region coordinates where to apply the changed content
-	 * @param length Length of the content to be changed
+	 * @param position Offset measured in comment region coordinates where to apply the changed content
+	 * @param count Length of the content to be changed
 	 */
-	protected final void applyText(final String change, final int offset, final int length) {
+	protected final void applyText(final String change, final int position, final int count) {
 
 		try {
 
-			final int base= getOffset() + offset;
-			final String content= fDocument.get(base, length);
+			final int base= getOffset() + position;
+			final String content= fDocument.get(base, count);
 
 			if (!change.equals(content))
-				fDocument.replace(getOffset() + offset, length, change);
+				fDocument.replace(getOffset() + position, count, change);
 
 		} catch (BadLocationException exception) {
 			// Should not happen
@@ -193,11 +199,11 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	 * @param previous Comment range which is the predecessor of the current comment range
 	 * @param next Comment range to test whether it can be appended to the comment line
 	 * @param space Amount of space in the comment line used by already inserted comment ranges
-	 * @param length The maximal length of text in this comment region measured in average character widths
+	 * @param width The maximal width of text in this comment region measured in average character widths
 	 * @return <code>true</code> iff the comment range can be added to the line, <code>false</code> otherwise
 	 */
-	protected boolean canAppend(final CommentLine line, final CommentRange previous, final CommentRange next, final int space, final int length) {
-		return space == 0 || space + next.getLength() < length;
+	protected boolean canAppend(final CommentLine line, final CommentRange previous, final CommentRange next, final int space, final int width) {
+		return space == 0 || space + next.getLength() < width;
 	}
 
 	/**
@@ -227,8 +233,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	 */
 	public void format(String indentation) {
 
-		final IDocument document= getDocument();
-		final Map preferences= getStrategy().getPreferences();
+		final Map preferences= fStrategy.getPreferences();
 
 		int margin= 80;
 		try {
@@ -238,10 +243,10 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 		}
 		margin= Math.max(COMMENT_PREFIX_LENGTH + 1, margin - stringToLength(indentation) - COMMENT_PREFIX_LENGTH);
 
-		document.addPositionCategory(COMMENT_POSITION_CATEGORY);
+		fDocument.addPositionCategory(COMMENT_POSITION_CATEGORY);
 
 		final IPositionUpdater positioner= new DefaultPositionUpdater(COMMENT_POSITION_CATEGORY);
-		document.addPositionUpdater(positioner);
+		fDocument.addPositionUpdater(positioner);
 
 		try {
 
@@ -258,8 +263,8 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 
 			try {
 
-				document.removePositionCategory(COMMENT_POSITION_CATEGORY);
-				document.removePositionUpdater(positioner);
+				fDocument.removePositionCategory(COMMENT_POSITION_CATEGORY);
+				fDocument.removePositionUpdater(positioner);
 
 			} catch (BadPositionCategoryException exception) {
 				// Should not happen
@@ -333,22 +338,22 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	 * 
 	 * @return The formatting strategy for this comment region
 	 */
-	public final CommentFormattingStrategy getStrategy() {
+	protected final CommentFormattingStrategy getStrategy() {
 		return fStrategy;
 	}
 
 	/**
 	 * Returns the text of this comment region in the indicated range.
 	 * 
-	 * @param offset The offset of the comment range to retrieve in comment region coordinates
-	 * @param length The length of the comment range to retrieve
+	 * @param position The offset of the comment range to retrieve in comment region coordinates
+	 * @param count The length of the comment range to retrieve
 	 * @return The content of this comment region in the indicated range
 	 */
-	protected final String getText(final int offset, final int length) {
+	protected final String getText(final int position, final int count) {
 
 		String content= ""; //$NON-NLS-1$
 		try {
-			content= getDocument().get(getOffset() + offset, length);
+			content= fDocument.get(getOffset() + position, count);
 		} catch (BadLocationException exception) {
 			// Should not happen
 		}
@@ -371,7 +376,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	protected void initializeRegion() {
 
 		try {
-			getDocument().addPosition(COMMENT_POSITION_CATEGORY, this);
+			fDocument.addPosition(COMMENT_POSITION_CATEGORY, this);
 		} catch (BadLocationException exception) {
 			// Should not happen
 		} catch (BadPositionCategoryException exception) {
@@ -409,8 +414,8 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 
 		final String token= getText(current.getOffset(), current.getLength());
 
-		for (int offset= 0; offset < token.length(); offset++) {
-			if (!Character.isLetterOrDigit(token.charAt(offset)))
+		for (int index= 0; index < token.length(); index++) {
+			if (!Character.isLetterOrDigit(token.charAt(index)))
 				return false;
 		}
 		return true;
@@ -450,9 +455,14 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	 */
 	protected String stringToIndent(final String reference, final boolean tabs) {
 
-		final int pixels= stringToPixels(reference);
-		final int space= fGraphics.stringExtent(" ").x; //$NON-NLS-1$
+		int space= 1;
+		int pixels= reference.length();
 
+		if (fGraphics != null) {
+			pixels= stringToPixels(reference);
+			space= fGraphics.stringExtent(" ").x; //$NON-NLS-1$
+		}
+		
 		final StringBuffer buffer= new StringBuffer();
 		final int spaces= pixels / space;
 
@@ -484,16 +494,16 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	protected int stringToLength(final String reference) {
 
 		int tabs= 0;
-		int length= reference.length();
+		int count= reference.length();
 
-		for (int offset= 0; offset < length; offset++) {
+		for (int index= 0; index < count; index++) {
 
-			if (reference.charAt(offset) == '\t')
+			if (reference.charAt(index) == '\t')
 				tabs++;
 		}
-		length += tabs * (fTabs - 1);
+		count += tabs * (fTabs - 1);
 
-		return length;
+		return count;
 	}
 
 	/**
@@ -507,9 +517,9 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 		final StringBuffer buffer= new StringBuffer();
 
 		char character= 0;
-		for (int offset= 0; offset < reference.length(); offset++) {
+		for (int index= 0; index < reference.length(); index++) {
 
-			character= reference.charAt(offset);
+			character= reference.charAt(index);
 			if (character == '\t') {
 
 				for (int tab= 0; tab < fTabs; tab++)
@@ -524,13 +534,13 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Wraps the comment ranges in this comment region into comment lines.
 	 * 
-	 * @param length The maximal length of text in this comment region measured in average character widths
+	 * @param width The maximal width of text in this comment region measured in average character widths
 	 */
-	protected void wrapRegion(final int length) {
+	protected void wrapRegion(final int width) {
 
 		fLines.clear();
 
-		int offset= 0;
+		int index= 0;
 		boolean adapted= false;
 
 		CommentLine successor= null;
@@ -541,7 +551,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 
 		while (!fRanges.isEmpty()) {
 
-			offset= 0;
+			index= 0;
 			adapted= false;
 
 			predecessor= successor;
@@ -551,7 +561,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 			while (!fRanges.isEmpty()) {
 				next= (CommentRange)fRanges.getFirst();
 
-				if (canAppend(successor, previous, next, offset, length)) {
+				if (canAppend(successor, previous, next, index, width)) {
 
 					if (!adapted && predecessor != null) {
 
@@ -562,7 +572,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 					fRanges.removeFirst();
 					successor.append(next);
 
-					offset += (next.getLength() + 1);
+					index += (next.getLength() + 1);
 					previous= next;
 				} else
 					break;

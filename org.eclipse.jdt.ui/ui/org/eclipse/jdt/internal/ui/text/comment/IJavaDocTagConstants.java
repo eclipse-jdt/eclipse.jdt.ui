@@ -40,7 +40,7 @@ public interface IJavaDocTagConstants {
 	public static final String[] JAVADOC_ROOT_TAGS= new String[] { "@author", "@deprecated", "@return", "@see", "@serial", "@serialData", "@since", "@version" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 
 	/** Javadoc separator tags */
-	public static final String[] JAVADOC_SEPARATOR_TAGS= new String[] { "dl", "hr", "p", "pre", "q", "ul", "ol" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+	public static final String[] JAVADOC_SEPARATOR_TAGS= new String[] { "dl", "hr", "nl", "p", "pre", "ul", "ol" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
 
 	/** Tag prefix of javadoc tags */
 	public static final char JAVADOC_TAG_PREFIX= '@';

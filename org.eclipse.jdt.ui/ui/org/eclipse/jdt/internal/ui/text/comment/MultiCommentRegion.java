@@ -34,7 +34,7 @@ public class MultiCommentRegion extends CommentRegion {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.comment.CommentRegion#canAppend(org.eclipse.jdt.internal.ui.text.comment.CommentLine, org.eclipse.jdt.internal.ui.text.comment.CommentRange, org.eclipse.jdt.internal.ui.text.comment.CommentRange, int, int)
 	 */
-	protected boolean canAppend(final CommentLine line, final CommentRange previous, final CommentRange next, final int space, final int length) {
+	protected boolean canAppend(final CommentLine line, final CommentRange previous, final CommentRange next, final int space, final int width) {
 
 		if (previous != null) {
 
@@ -45,6 +45,6 @@ public class MultiCommentRegion extends CommentRegion {
 					return true;
 			}
 		}
-		return super.canAppend(line, previous, next, space, length);
+		return super.canAppend(line, previous, next, space, width);
 	}
 }

@@ -16,6 +16,7 @@ import java.util.Map;
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.TypedPosition;
 import org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy;
 import org.eclipse.jface.text.formatter.FormattingContext;
@@ -73,10 +74,8 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 		final TypedPosition partition= (TypedPosition)fPartitions.removeFirst();
 
 		final Map preferences= getPreferences();
-		final ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(preferences);
-
 		final IDocument document= getViewer().getDocument();
-		final String delimiter= getLineDelimiter(document);
+		final ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(preferences);
 
 		int indent= 0;
 		if (indentation != null) {
@@ -93,7 +92,7 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 		try {
 
 			final String raw= document.get(partition.getOffset(), partition.getLength());
-			final String formatted= formatter.format(raw, indent, positions, delimiter);
+			final String formatted= formatter.format(raw, indent, positions, TextUtilities.getDefaultLineDelimiter(document));
 
 			if (formatted != null && !formatted.equals(raw))
 				document.replace(partition.getOffset(), partition.getLength(), formatted);

@@ -35,4 +35,7 @@ public interface ICommentAttributes {
 
 	/** Range has open tag attribute */
 	public static final int COMMENT_OPEN= 1 << 21;
+
+	/** Range has paragraph attribute */
+	public static final int COMMENT_PARAGRAPH= 1 << 22;
 }

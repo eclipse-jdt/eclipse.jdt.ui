@@ -84,6 +84,7 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_COMMENT_SEPARATEROOTTAGS= PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS;
 	private static final String PREF_COMMENT_CLEARBLANKLINES= PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES;
 	private static final String PREF_COMMENT_LINELENGTH= PreferenceConstants.FORMATTER_COMMENT_LINELENGTH;
+	private static final String PREF_COMMENT_FORMATHTML= PreferenceConstants.FORMATTER_COMMENT_FORMATHTML;
 
 	// values
 	private static final String INSERT=  JavaCore.INSERT;
@@ -216,6 +217,10 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.getString("CodeFormatterPreferencePage.comment_formatheader.label"); //$NON-NLS-1$
 		Button slave= addCheckBox(commentComposite, label, PREF_COMMENT_FORMATHEADER, trueFalse, 20);
+		createSelectionDependency(master, slave);
+
+		label= PreferencesMessages.getString("CodeFormatterPreferencePage.comment_formathtml.label"); //$NON-NLS-1$
+		slave= addCheckBox(commentComposite, label, PREF_COMMENT_FORMATHTML, trueFalse, 20);
 		createSelectionDependency(master, slave);
 
 		label= PreferencesMessages.getString("CodeFormatterPreferencePage.comment_formatsource.label"); //$NON-NLS-1$

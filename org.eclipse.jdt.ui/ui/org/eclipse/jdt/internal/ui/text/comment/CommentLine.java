@@ -64,13 +64,11 @@ public abstract class CommentLine implements IBorderAttributes {
 	protected void applyEnd(final CommentRange range, final String indentation, final int length) {
 
 		final int offset= range.getOffset() + range.getLength();
-		final CommentRegion parent= getParent();
-
 		final StringBuffer buffer= new StringBuffer(length);
 		final String end= getEndingPrefix();
-		final String delimiter= parent.getDelimiter();
+		final String delimiter= fParent.getDelimiter();
 
-		if (parent.isSingleLine() && parent.getSize() == 1)
+		if (fParent.isSingleLine() && fParent.getSize() == 1)
 			buffer.append(end);
 		else {
 
@@ -79,7 +77,7 @@ public abstract class CommentLine implements IBorderAttributes {
 			buffer.append(delimiter);
 			buffer.append(indentation);
 
-			if (parent.hasBorder(BORDER_LOWER)) {
+			if (fParent.hasBorder(BORDER_LOWER)) {
 
 				buffer.append(' ');
 				for (int character= 0; character < length; character++)
@@ -90,7 +88,7 @@ public abstract class CommentLine implements IBorderAttributes {
 			} else
 				buffer.append(end);
 		}
-		parent.applyText(buffer.toString(), offset, parent.getLength() - offset);
+		fParent.applyText(buffer.toString(), offset, fParent.getLength() - offset);
 	}
 
 	/**
@@ -110,25 +108,23 @@ public abstract class CommentLine implements IBorderAttributes {
 		CommentRange next= last;
 		CommentRange previous= null;
 
-		final CommentRegion parent= getParent();
-
 		final int stop= fRanges.size() - 1;
-		final int end= parent.getSize() - 1;
+		final int end= fParent.getSize() - 1;
 
 		for (int index= stop; index >= 0; index--) {
 
 			previous= next;
 			next= (CommentRange)fRanges.get(index);
 
-			if (parent.canApply(previous, next)) {
+			if (fParent.canApply(previous, next)) {
 
 				offset= next.getOffset() + next.getLength();
 				length= previous.getOffset() - offset;
 
 				if (index == stop && line != end)
-					parent.applyText(parent.getDelimiter(predecessor, this, previous, next, indentation), offset, length);
+					fParent.applyText(fParent.getDelimiter(predecessor, this, previous, next, indentation), offset, length);
 				else
-					parent.applyText(parent.getDelimiter(previous, next), offset, length);
+					fParent.applyText(fParent.getDelimiter(previous, next), offset, length);
 			}
 		}
 		return next;
@@ -143,13 +139,11 @@ public abstract class CommentLine implements IBorderAttributes {
 	 */
 	protected void applyStart(final CommentRange range, final String indentation, final int length) {
 
-		final CommentRegion parent= getParent();
-
 		final StringBuffer buffer= new StringBuffer(length);
 		final String start= getStartingPrefix();
 		final String content= getContentPrefix();
 
-		if (parent.isSingleLine() && parent.getSize() == 1)
+		if (fParent.isSingleLine() && fParent.getSize() == 1)
 			buffer.append(start);
 		else {
 
@@ -158,17 +152,17 @@ public abstract class CommentLine implements IBorderAttributes {
 
 			buffer.append(trimmed);
 
-			if (parent.hasBorder(BORDER_UPPER)) {
+			if (fParent.hasBorder(BORDER_UPPER)) {
 
 				for (int character= 0; character < length - trimmed.length() + start.length(); character++)
 					buffer.append(filler);
 			}
 
-			buffer.append(parent.getDelimiter());
+			buffer.append(fParent.getDelimiter());
 			buffer.append(indentation);
 			buffer.append(content);
 		}
-		parent.applyText(buffer.toString(), 0, range.getOffset());
+		fParent.applyText(buffer.toString(), 0, range.getOffset());
 	}
 
 	/**
@@ -273,11 +267,10 @@ public abstract class CommentLine implements IBorderAttributes {
 		int offset= 0;
 		int index= offset;
 
-		final CommentRegion parent= getParent();
 		final CommentRange range= (CommentRange)fRanges.get(0);
 		final int begin= range.getOffset();
 
-		final String content= parent.getText(begin, range.getLength());
+		final String content= fParent.getText(begin, range.getLength());
 		final int length= content.length();
 
 		while (offset < length) {
@@ -291,7 +284,7 @@ public abstract class CommentLine implements IBorderAttributes {
 				index++;
 
 			if (index - offset > 0) {
-				parent.append(CommentObjectFactory.createRange(parent, begin + offset, index - offset));
+				fParent.append(CommentObjectFactory.createRange(fParent, begin + offset, index - offset));
 
 				offset= index;
 			}
