@@ -221,11 +221,6 @@ public class ReturnTypeSubProcessor {
 		}
 	}
 
-	/**
-	 * Method addMissingReturnStatementProposals.
-	 * @param context
-	 * @param proposals
-	 */
 	public static void addMissingReturnStatementProposals(ICorrectionContext context, List proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		
@@ -233,48 +228,15 @@ public class ReturnTypeSubProcessor {
 		if (selectedNode == null) {
 			return;
 		}
-		AST ast= selectedNode.getAST();
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
 		if (decl instanceof MethodDeclaration) {
 			MethodDeclaration methodDecl= (MethodDeclaration) decl;
-			
- 			if (selectedNode instanceof ReturnStatement) {
-				ReturnStatement returnStatement= (ReturnStatement) selectedNode;
-				if (returnStatement.getExpression() == null) {
-					ASTRewrite rewrite= new ASTRewrite(methodDecl);
-					
-					Expression expression= ASTNodeFactory.newDefaultExpression(ast, methodDecl.getReturnType(), methodDecl.getExtraDimensions());
-					if (expression != null) {
-						returnStatement.setExpression(expression);
-						rewrite.markAsInserted(expression);
-					}
-					
-					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-					String label= CorrectionMessages.getString("ReturnTypeSubProcessor.changereturnstatement.description");					 //$NON-NLS-1$
-					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 3, image);
-					proposal.ensureNoModifications();
-					proposals.add(proposal);
-				}
- 			} else {
-				Block block= methodDecl.getBody();
-				if (block == null) {
-					return;
-				}
-
-				ASTRewrite rewrite= new ASTRewrite(methodDecl);
-				
-				List statements= block.statements();
-				ReturnStatement returnStatement= ast.newReturnStatement();
-				returnStatement.setExpression(ASTNodeFactory.newDefaultExpression(ast, methodDecl.getReturnType(), methodDecl.getExtraDimensions()));
-				statements.add(returnStatement);
-				rewrite.markAsInserted(returnStatement);
-				
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				String label= CorrectionMessages.getString("ReturnTypeSubProcessor.addreturnstatement.description"); //$NON-NLS-1$
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 3, image);
-				proposal.ensureNoModifications();
-				proposals.add(proposal);
-			} 
+			Block block= methodDecl.getBody();
+			if (block == null) {
+				return;
+			}
+			ReturnStatement existingStatement= (selectedNode instanceof ReturnStatement) ? (ReturnStatement) selectedNode : null;
+			proposals.add( new MissingReturnTypeCorrectionProposal(cu, methodDecl, existingStatement, 3));			
 		}
 	
 	}

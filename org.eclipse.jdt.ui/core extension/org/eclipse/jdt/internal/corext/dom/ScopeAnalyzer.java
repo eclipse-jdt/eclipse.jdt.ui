@@ -10,6 +10,7 @@
  */
 package org.eclipse.jdt.internal.corext.dom;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -38,28 +39,38 @@ public class ScopeAnalyzer {
 	 */		
 	public static final int TYPES= 4;
 	
-	private HashSet fRequestor;
-	private HashSet fMethodAdded;
+	private ArrayList fRequestor;
+	private HashSet fNamesAdded;
 	private HashSet fTypesVisited;
 	
 	private CompilationUnit fRoot;
 	
 	public ScopeAnalyzer() {
-		fRequestor= new HashSet();
-		fMethodAdded= new HashSet();
+		fRequestor= new ArrayList();
+		fNamesAdded= new HashSet();
 		fTypesVisited= new HashSet();
 	}
 	
 	private void clearLists() {
 		fRequestor.clear();
-		fMethodAdded.clear();
+		fNamesAdded.clear();
 		fTypesVisited.clear();
 		
 		fRoot= null;
 	}
 	
+	private static String getVariableSignature(IVariableBinding binding) {
+		return 'V' + binding.getName();
+	}
+
+	private static String getTypeSignature(ITypeBinding binding) {
+		return 'T' + binding.getName();
+	}
+	
+	
 	private static String getMethodSignature(IMethodBinding binding) {
 		StringBuffer buf= new StringBuffer();
+		buf.append('M');
 		buf.append(binding.getName()).append('(');
 		ITypeBinding[] parameters= binding.getParameterTypes();
 		for (int i= 0; i < parameters.length; i++) {
@@ -84,7 +95,10 @@ public class ScopeAnalyzer {
 		if (hasFlag(VARIABLES, flags)) {
 			IVariableBinding[] variableBindings= binding.getDeclaredFields();
 			for (int i= 0; i < variableBindings.length; i++) {
-				fRequestor.add(variableBindings[i]);
+				IVariableBinding curr= variableBindings[i];
+				if (fNamesAdded.add(getVariableSignature(curr))) { // avoid duplicated results from inheritance
+					fRequestor.add(curr);
+				}
 			}
 		}
 		
@@ -94,9 +108,9 @@ public class ScopeAnalyzer {
 				IMethodBinding curr= methodBindings[i];
 				if (!curr.isSynthetic() && !curr.isConstructor()) {
 					String signature= getMethodSignature(curr);
-					if (fMethodAdded.add(signature)) { // avoid duplicated results from inheritance
+					if (fNamesAdded.add(signature)) { // avoid duplicated results from inheritance
 						fRequestor.add(curr);
-					}					
+					}			
 				}
 			}
 		}
@@ -104,7 +118,10 @@ public class ScopeAnalyzer {
 		if (hasFlag(TYPES, flags)) {
 			ITypeBinding[] typeBindings= binding.getDeclaredTypes();
 			for (int i= 0; i < typeBindings.length; i++) {
-				fRequestor.add(typeBindings[i]);
+				ITypeBinding curr= typeBindings[i];
+				if (fNamesAdded.add(getTypeSignature(curr))) { // avoid duplicated results from inheritance
+					fRequestor.add(curr);
+				}				
 			}
 		}		
 		
@@ -145,9 +162,9 @@ public class ScopeAnalyzer {
 					for (int i= 0; i < types.size(); i++) {
 						TypeDeclaration decl= (TypeDeclaration) types.get(i);
 						ITypeBinding curr= decl.resolveBinding();
-						if (curr != null) {
+						if (curr != null && fNamesAdded.add(getTypeSignature(curr))) { // avoid duplicated results from inheritance
 							fRequestor.add(curr);
-						}
+						}	
 					}
 				}
 			}
@@ -215,7 +232,7 @@ public class ScopeAnalyzer {
 					binding= ASTResolving.getBindingOfParentType(selector);
 				}	
 			} else {
-				addLocalDeclarations(node, flags);
+				addLocalDeclarations(node, offset, flags);
 				binding= ASTResolving.getBindingOfParentType(node);				
 			}
 
@@ -304,9 +321,9 @@ public class ScopeAnalyzer {
 		public boolean visit(VariableDeclaration node) {
 			if (hasFlag(VARIABLES, fFlags) && node.getStartPosition() < fPosition) {
 				IVariableBinding binding= node.resolveBinding();
-				if (binding != null) {
+				if (binding != null && fNamesAdded.add(getVariableSignature(binding))) { // only if not already defined
 					fRequestor.add(binding);
-				}				
+				}							
 			}
 			return false;
 		}
@@ -326,14 +343,13 @@ public class ScopeAnalyzer {
 		public boolean visit(TypeDeclarationStatement node) {
 			if (hasFlag(TYPES, fFlags) && node.getStartPosition() + node.getLength() < fPosition) {
 				ITypeBinding binding= node.getTypeDeclaration().resolveBinding();
-				if (binding != null && fTypesVisited.add(binding)) {
+				if (binding != null && fNamesAdded.add(getTypeSignature(binding))) {
 					fRequestor.add(binding);
 				}
 				return false;
 			}
 			return isInside(node);
 		}
-
 	}
 	
 	private class DeclarationsAfterVisitor extends HierarchicalASTVisitor {
@@ -352,7 +368,7 @@ public class ScopeAnalyzer {
 		public boolean visit(VariableDeclaration node) {
 			if (hasFlag(VARIABLES, fFlags) && fPosition < node.getStartPosition()) {
 				IVariableBinding binding= node.resolveBinding();
-				if (binding != null) {
+				if (binding != null && fNamesAdded.add(getVariableSignature(binding))) {
 					fRequestor.add(binding);
 				}				
 			}
@@ -366,7 +382,7 @@ public class ScopeAnalyzer {
 		public boolean visit(TypeDeclarationStatement node) {
 			if (hasFlag(TYPES, fFlags) && fPosition < node.getStartPosition()) {
 				ITypeBinding binding= node.getTypeDeclaration().resolveBinding();
-				if (binding != null && fTypesVisited.add(binding)) {
+				if (binding != null && fNamesAdded.add(getTypeSignature(binding))) {
 					fRequestor.add(binding);
 				}
 			}
@@ -375,10 +391,15 @@ public class ScopeAnalyzer {
 	}
 	
 	private void addLocalDeclarations(ASTNode node, int flags) {
+		addLocalDeclarations(node, node.getStartPosition(), flags);
+	}
+	
+	
+	private void addLocalDeclarations(ASTNode node, int offset, int flags) {
 		if (hasFlag(VARIABLES, flags) || hasFlag(TYPES, flags)) {
 			BodyDeclaration declaration= ASTResolving.findParentBodyDeclaration(node);
 			if (declaration instanceof MethodDeclaration || declaration instanceof Initializer) {		
-				ScopeAnalyzerVisitor visitor= new ScopeAnalyzerVisitor(node.getStartPosition(), flags);
+				ScopeAnalyzerVisitor visitor= new ScopeAnalyzerVisitor(offset, flags);
 				declaration.accept(visitor);
 			}
 		}
