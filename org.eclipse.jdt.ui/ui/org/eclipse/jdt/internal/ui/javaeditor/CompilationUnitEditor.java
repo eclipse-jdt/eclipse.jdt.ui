@@ -567,7 +567,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					
 					level.fEditor= new LinkedUIControl(env, sourceViewer);
 					level.fEditor.setExitPolicy(new ExitPolicy(closingCharacter, getEscapeCharacter(closingCharacter), fBracketLevelStack));
-					level.fEditor.setExitPosition(sourceViewer, offset + 2, 0, true);
+					level.fEditor.setExitPosition(sourceViewer, offset + 2, 0, Integer.MAX_VALUE);
 					level.fEditor.setCyclingMode(LinkedUIControl.CYCLE_NEVER);
 					level.fEditor.enter();
 					
