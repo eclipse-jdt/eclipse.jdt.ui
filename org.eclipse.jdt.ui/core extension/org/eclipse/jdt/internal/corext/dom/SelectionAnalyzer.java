@@ -101,8 +101,7 @@ public class SelectionAnalyzer extends GenericVisitor {
 			fLastCoveringNode= node;
 			return true;
 		} else if (fSelection.endsIn(node)) {
-			handleSelectionEndsIn(node);
-			return false;
+			return handleSelectionEndsIn(node);
 		}
 		// There is a possibility that the user has selected trailing semicolons that don't belong
 		// to the statement. So dive into it to check if sub nodes are fully covered.
@@ -124,7 +123,8 @@ public class SelectionAnalyzer extends GenericVisitor {
 		}
 	}
 
-	protected void handleSelectionEndsIn(ASTNode node) {
+	protected boolean handleSelectionEndsIn(ASTNode node) {
+		return false;
 	}
 	
 	protected List internalGetSelectedNodes() {

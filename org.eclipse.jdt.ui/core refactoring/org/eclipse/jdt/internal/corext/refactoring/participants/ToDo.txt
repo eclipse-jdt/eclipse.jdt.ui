@@ -65,6 +65,8 @@
   possible to chain processor. Nor is it possible to introduce a JavaModification object
   (similar to ResourceModifications) since the refactoring itself can't be extended.
   
+- processors and participants should derive from PlatformObject if the implement IAdaptable
+  
 ======================================= UI ===============================================
   
 - UI: Label and image of preview viewer. Must be determined by the change element

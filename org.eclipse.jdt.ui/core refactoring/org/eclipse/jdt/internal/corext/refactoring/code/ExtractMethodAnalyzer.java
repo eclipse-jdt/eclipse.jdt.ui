@@ -434,9 +434,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		checkParent(node);
 	}
 	
-	protected void handleSelectionEndsIn(ASTNode node) {
+	protected boolean handleSelectionEndsIn(ASTNode node) {
 		invalidSelection(RefactoringCoreMessages.getString("StatementAnalyzer.doesNotCover"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
-		super.handleSelectionEndsIn(node);
+		return super.handleSelectionEndsIn(node);
 	}
 		
 	private void checkParent(ASTNode node) {

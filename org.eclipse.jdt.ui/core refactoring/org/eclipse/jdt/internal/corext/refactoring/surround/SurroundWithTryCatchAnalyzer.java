@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.surround;
 
+import java.util.List;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -17,6 +19,8 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Message;
@@ -57,7 +61,12 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 		return (BodyDeclaration)ASTNodes.getParent(node, BodyDeclaration.class);
 	}
 	
+	protected boolean handleSelectionEndsIn(ASTNode node) {
+		return true;
+	}
+	
 	public void endVisit(CompilationUnit node) {
+		postProcessSelectedNodes(internalGetSelectedNodes());
 		BodyDeclaration enclosingNode= null;
 		superCall: {
 			if (getStatus().hasFatalError())
@@ -111,6 +120,18 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 			invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.cannotHandleThis"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
 		}
 		super.endVisit(node);
+	}
+	
+	protected void postProcessSelectedNodes(List selectedNodes) {
+		if (selectedNodes == null || selectedNodes.size() == 0)
+			return;
+		if (selectedNodes.size() == 1) {
+			ASTNode node= (ASTNode)selectedNodes.get(0);
+			if (node instanceof Expression && node.getParent() instanceof ExpressionStatement) {
+				selectedNodes.clear();
+				selectedNodes.add(node.getParent());
+			}
+		}
 	}
 	
 	private boolean onlyStatements() {

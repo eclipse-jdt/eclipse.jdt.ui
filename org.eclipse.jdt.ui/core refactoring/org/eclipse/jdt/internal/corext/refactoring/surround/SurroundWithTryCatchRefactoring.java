@@ -138,11 +138,6 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit})));
-		if (result.hasFatalError())
-			return result;
-		
 		CompilationUnit rootNode= AST.parseCompilationUnit(fCUnit, true);
 		return checkActivationBasics(rootNode, pm);
 	}
@@ -151,7 +146,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		return new RefactoringStatus();
+		return Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit}));
 	}
 
 	/* non Java-doc
