@@ -61,6 +61,7 @@ class FailureTraceView implements IMenuListener {
 		ToolBarManager failureToolBarmanager= new ToolBarManager(toolBar);
 		failureToolBarmanager.add(new EnableStackFilterAction(this));			
 		fCompareAction = new CompareResultsAction(this);
+		fCompareAction.setEnabled(false);
         failureToolBarmanager.add(fCompareAction);			
 		failureToolBarmanager.update(true);
 		
@@ -106,6 +107,8 @@ class FailureTraceView implements IMenuListener {
 				manager.add(a);		
 			manager.add(new CopyTraceAction(FailureTraceView.this, fClipboard));
 		}
+		if (fFailure.isComparisonFailure()) 
+			manager.add(new CompareResultsAction(FailureTraceView.this));
 	}
 
 	public String getTrace() {
