@@ -53,21 +53,20 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
-import org.eclipse.jdt.internal.corext.refactoring.rename.ProblemNodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class ChangeSignatureRefactoring extends Refactoring {
@@ -178,7 +177,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	public RefactoringStatus checkParameters() throws JavaModelException{
 		if (fMethod.getNumberOfParameters() == 0 && fParameterInfos.isEmpty() && isVisibilitySameAsInitial())
 			return RefactoringStatus.createFatalErrorStatus("No parameters were added and visibility is unchanged");
-		if (areNamesSameAsInitial() && isOrderSameAsInitial() && isVisibilitySameAsInitial())
+		if (isSignatureSameAsOriginal())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.no_changes")); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		checkForDuplicateNames(result);
@@ -189,6 +188,22 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return result;
 		checkAddedParameters(result);	
 		return result;
+	}
+
+	private boolean isSignatureSameAsOriginal() throws JavaModelException {
+		return areNamesSameAsInitial() 
+			&& isOrderSameAsInitial() 
+			&& isVisibilitySameAsInitial()
+			&& ! areAnyParametersDeleted();
+	}
+	
+	private boolean areAnyParametersDeleted() {
+		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo info= (ParameterInfo) iter.next();
+			if (info.isDeleted())
+				return true;
+		}
+		return false;
 	}
 
 	private void checkAddedParameters(RefactoringStatus result) {
@@ -323,7 +338,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				return result;
 
 			fRippleMethods= RippleMethodFinder.getRelatedMethods(fMethod, new SubProgressMonitor(pm, 1), null);
-			fOccurrenceNodes= getOccurrenceNodes(new SubProgressMonitor(pm, 1));
+			fOccurrenceNodes= findOccurrenceNodes(new SubProgressMonitor(pm, 1));
 			
 			result.merge(checkVisibilityChanges());
 					
@@ -385,7 +400,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private void checkForDuplicateNames(RefactoringStatus result){
 		Set found= new HashSet();
 		Set doubled= new HashSet();
-		for (Iterator iter = getParameterInfos().iterator(); iter.hasNext();) {
+		for (Iterator iter = getNotDeletedInfos().iterator(); iter.hasNext();) {
 			ParameterInfo info= (ParameterInfo)iter.next();
 			String newName= info.getNewName();
 			if (found.contains(newName) && !doubled.contains(newName)){
@@ -398,7 +413,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 	
 	private void  checkAllNames(RefactoringStatus result){
-		for (Iterator iter = getParameterInfos().iterator(); iter.hasNext();) {
+		for (Iterator iter = getNotDeletedInfos().iterator(); iter.hasNext();) {
 			ParameterInfo info= (ParameterInfo)iter.next();
 			String newName= info.getNewName();
 			result.merge(Checks.checkFieldName(newName));	
@@ -433,15 +448,15 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			result.merge(RefactoringAnalyzeUtil.analyzeIntroducedCompileErrors(newCuSource, newCUNode, compliationUnitNode));
 			if (result.hasError())
 				return result;
-
-			ParameterInfo[] renamedInfos= getRenamedParameterNames();				
-			for (int i= 0; i < renamedInfos.length; i++) {
-				VariableDeclaration vd= getVariableDeclaration(renamedInfos[i], fMethod);
-				String fullKey= RefactoringAnalyzeUtil.getFullBindingKey(vd);
-				TextEdit[] paramRenameEdits= findEditGroupDescription(fDescriptionGroups, renamedInfos[i]).getTextEdits();
-				SimpleName[] problemNodes= ProblemNodeFinder.getProblemNodes(newCUNode, paramRenameEdits, change, fullKey);
-				result.merge(RefactoringAnalyzeUtil.reportProblemNodes(newCuSource, problemNodes));
-			}
+//
+//			ParameterInfo[] renamedInfos= getRenamedParameterNames();				
+//			for (int i= 0; i < renamedInfos.length; i++) {
+//				VariableDeclaration vd= getVariableDeclaration(renamedInfos[i], fMethod);
+//				String fullKey= RefactoringAnalyzeUtil.getFullBindingKey(vd);
+//				TextEdit[] paramRenameEdits= findEditGroupDescription(fDescriptionGroups, renamedInfos[i]).getTextEdits();
+//				SimpleName[] problemNodes= ProblemNodeFinder.getProblemNodes(newCUNode, paramRenameEdits, change, fullKey);
+//				result.merge(RefactoringAnalyzeUtil.reportProblemNodes(newCuSource, problemNodes));
+//			}
 			return result;
 		} catch(CoreException e) {
 			throw new JavaModelException(e);
@@ -486,13 +501,23 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private String getMethodParameters() throws JavaModelException {
 		StringBuffer buff= new StringBuffer();
 		int i= 0;
-		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext(); i++) {
+		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext(); i++) {
 			ParameterInfo info= (ParameterInfo) iter.next();
-			if (i != 0)
+			if (i != 0 )
 				buff.append(", ");  //$NON-NLS-1$
 			buff.append(createDeclarationString(info));
 		}
 		return buff.toString();
+	}
+	
+	private List getNotDeletedInfos(){
+		List result= new ArrayList(fParameterInfos.size());
+		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo info= (ParameterInfo) iter.next();
+			if (! info.isDeleted())
+				result.add(info);
+		}
+		return result;
 	}
 
 	private boolean areNamesSameAsInitial() {
@@ -531,7 +556,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkParameterNamesInRippleMethods() throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		List newParameterNames= getNewParameterNamesList();
+		Set newParameterNames= getNewParameterNamesList();
 		for (int i= 0; i < fRippleMethods.length; i++) {
 			String[] paramNames= fRippleMethods[i].getParameterNames();
 			for (int j= 0; j < paramNames.length; j++) {
@@ -547,14 +572,30 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private List getNewParameterNamesList() {
-		List newNames= new ArrayList(0);
+	private Set getNewParameterNamesList() {
+		Set oldNames= getOriginalParameterNames();
+		Set currentNames= getNamesOfNotDeletedParameters();
+		currentNames.removeAll(oldNames);
+		return currentNames;
+	}
+	
+	private Set getNamesOfNotDeletedParameters() {
+		Set result= new HashSet();
+		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext();) {
+			ParameterInfo info= (ParameterInfo) iter.next();
+			result.add(info.getNewName());
+		}
+		return result;
+	}
+	
+	private Set getOriginalParameterNames() {
+		Set result= new HashSet();
 		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
 			ParameterInfo info= (ParameterInfo) iter.next();
-			if (info.isAdded())
-				newNames.add(info.getNewName());
+			if (! info.isAdded())
+				result.add(info.getOldName());
 		}
-		return newNames;
+		return result;
 	}
 	
 	private RefactoringStatus checkNativeMethods() throws JavaModelException{
@@ -579,6 +620,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 	//--  changes ----
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 1);
 		try{
 			return new CompositeChange(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.restructure_parameters"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 		} finally{
@@ -587,24 +629,19 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.preparing_preview"), 4); //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.preparing_preview"), 1); //$NON-NLS-1$
 
-		if (! isVisibilitySameAsInitial())
-			addVisibilityChanges(new SubProgressMonitor(pm, 1));
-		else	
-			pm.worked(1);	
-		
 		if (! areNamesSameAsInitial())
 			addRenamings();
-		pm.worked(1);	
-
-		addReorderings();
-		pm.worked(1);	
-		addNewParameters();
-		pm.worked(1);	
-
+		modifyMethodOccurrences(new SubProgressMonitor(pm, 1));
 
 		TextChangeManager manager= new TextChangeManager();
+		fillWithRewriteEdits(manager);
+		pm.done();
+		return manager;
+	}
+
+	private void fillWithRewriteEdits(TextChangeManager manager) throws JavaModelException, CoreException {
 		CompilationUnit[] cuNodes= fRewriteManager.getAllCompilationUnitNodes();
 		for (int i= 0; i < cuNodes.length; i++) {
 			CompilationUnit cuNode= cuNodes[i];
@@ -613,37 +650,117 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			TextEdit resultingEdits= new MultiTextEdit();
 			rewrite.rewriteNode(textBuffer, resultingEdits, fDescriptionGroups);
 			manager.get(fAstManager.getCompilationUnit(cuNode)).addTextEdit("Modify parameters", resultingEdits);
+			rewrite.removeModifications();
 		}
-		
-		return manager;
 	}
 
-	private void addVisibilityChanges(IProgressMonitor pm) throws CoreException {
-		pm.beginTask("", fRippleMethods.length);
-		for (int i= 0; i < fRippleMethods.length; i++) {
-			IMethod method= fRippleMethods[i];
-			if (needsVisibilityUpdate(method)){
-				CompilationUnit cuNode= fAstManager.getAST(method.getCompilationUnit());
-				MethodDeclaration md= getDeclarationNode(method);
-				MethodDeclaration md1= md.getAST().newMethodDeclaration();
-				md1.setModifiers(getNewModifiers(md));
-				md1.setExtraDimensions(md.getExtraDimensions());
-				fRewriteManager.getRewrite(cuNode).markAsModified(md, md1);				
-			}	
-			pm.worked(1);
+	private void modifyMethodOccurrences(IProgressMonitor pm) throws JavaModelException{
+		pm.beginTask("", fOccurrenceNodes.length);
+		try{
+			for (int i= 0; i < fOccurrenceNodes.length; i++) {
+				ASTNode methodOccurrence= fOccurrenceNodes[i];
+				if (isReferenceNode(methodOccurrence))
+					updateReferenceNode(methodOccurrence);
+				else	
+					updateDeclarationNode(methodOccurrence);
+				pm.worked(1);	
+			}
+		} finally{
+			pm.done();
 		}
-		pm.done();
 	}
 	
+	private void updateDeclarationNode(ASTNode methodOccurrence) throws JavaModelException {
+		MethodDeclaration methodDeclaration= getMethodDeclaration(methodOccurrence);
+		if (needsVisibilityUpdate(methodDeclaration))
+			changeVisibility(methodDeclaration);
+		reshuffleElements(methodOccurrence, methodDeclaration.parameters());
+	}
+
+	private void updateReferenceNode(ASTNode methodOccurrence) {		
+		reshuffleElements(methodOccurrence, getArguments(methodOccurrence));
+	}
+
+	private void changeVisibility(MethodDeclaration methodDeclaration) throws JavaModelException {
+		MethodDeclaration modifierMethodDeclaration= methodDeclaration.getAST().newMethodDeclaration();
+		modifierMethodDeclaration.setModifiers(getNewModifiers(methodDeclaration));
+		modifierMethodDeclaration.setExtraDimensions(methodDeclaration.getExtraDimensions());
+		ASTRewrite rewrite= fRewriteManager.getRewrite(ASTNodeMappingManager.getCompilationUnitNode(methodDeclaration));
+		rewrite.markAsModified(methodDeclaration, modifierMethodDeclaration);
+	}
+	
+	private void reshuffleElements(ASTNode methodOccurrence, List elementList) {
+		ASTRewrite rewrite= fRewriteManager.getRewrite(ASTNodeMappingManager.getCompilationUnitNode(methodOccurrence));
+		AST ast= methodOccurrence.getAST();
+		boolean isReference= isReferenceNode(methodOccurrence);
+		ASTNode[] nodes= getSubNodesOfParameterOccurrenceNode(methodOccurrence);
+		deleteExcesiveElements(rewrite, nodes);
+		
+		List nonDeletedInfos= getNotDeletedInfos();
+		ASTNode[] newPermutation= new ASTNode[nonDeletedInfos.size()];
+		for (int i=0; i < newPermutation.length; i++) {
+			ParameterInfo info= (ParameterInfo) nonDeletedInfos.get(i);
+			if (info.isAdded())
+				newPermutation[i]= createNewElementForList(rewrite, ast, info, isReference);
+			 else if (info.getOldIndex() != i)
+			 	if (rewrite.isReplaced(nodes[info.getOldIndex()]))
+					newPermutation[i]= rewrite.getReplacingNode(nodes[info.getOldIndex()]);
+			 	else
+					newPermutation[i]= rewrite.createCopy(nodes[info.getOldIndex()]);
+			 else
+			 	newPermutation[i]= nodes[i];
+		}
+		for (int i= 0; i < Math.min(nodes.length, newPermutation.length); i++) {
+			if (nodes[i] != newPermutation[i])
+				rewrite.markAsReplaced(nodes[i], newPermutation[i]);
+		}
+		for (int i= nodes.length; i < newPermutation.length; i++) {
+			ParameterInfo info= (ParameterInfo) nonDeletedInfos.get(i);
+			if (info.isAdded()){
+				ASTNode newElement= createNewElementForList(rewrite, ast, info, isReference);
+				elementList.add(i, newElement);
+				rewrite.markAsInserted(newElement);
+			} else {
+				elementList.add(i, newPermutation[i]);
+				rewrite.markAsInserted(newPermutation[i]);
+			}	
+		}
+	}
+
+	private void deleteExcesiveElements(ASTRewrite rewrite, ASTNode[] nodes) {
+		for (int i= getNotDeletedInfos().size(); i < nodes.length; i++) {
+			rewrite.markAsRemoved(nodes[i]);
+		}
+	}
+
+	private ASTNode createNewElementForList(ASTRewrite rewrite, AST ast, ParameterInfo info, boolean isReferenceNode){
+		if (isReferenceNode)
+			return createNewExpression(rewrite, info);
+		else
+			return createNewSingleVariableDeclaration(rewrite, ast, info);	
+	}
+	
+	private static SingleVariableDeclaration createNewSingleVariableDeclaration(ASTRewrite rewrite, AST ast, ParameterInfo info) {
+		SingleVariableDeclaration newP= ast.newSingleVariableDeclaration();
+		newP.setName(ast.newSimpleName(info.getNewName()));
+		newP.setType((Type)rewrite.createPlaceholder(info.getType(), ASTRewrite.TYPE));
+		return newP;
+	}
+	
+	private static Expression createNewExpression(ASTRewrite rewrite, ParameterInfo info) {
+		return (Expression)rewrite.createPlaceholder(info.getDefaultValue(), ASTRewrite.EXPRESSION);
+	}
+
 	private int getNewModifiers(MethodDeclaration md) {
 		return clearAccessModifiers(md.getModifiers()) | getModifierFlag(fVisibility);
 	}
 	
-	private int getModifierFlag(int visibility) {
+	private static int getModifierFlag(int visibility) {
 		switch(visibility){
-			case JdtFlags.VISIBILITY_CODE_PUBLIC: return Modifier.PUBLIC;
-   		 	case JdtFlags.VISIBILITY_CODE_PRIVATE: return Modifier.PRIVATE;
-   		 	case JdtFlags.VISIBILITY_CODE_PROTECTED: return Modifier.PROTECTED;
+			case JdtFlags.VISIBILITY_CODE_PUBLIC: 		return Modifier.PUBLIC;
+   		 	case JdtFlags.VISIBILITY_CODE_PRIVATE: 	return Modifier.PRIVATE;
+   		 	case JdtFlags.VISIBILITY_CODE_PROTECTED: 	return Modifier.PROTECTED;
+   		 	case JdtFlags.VISIBILITY_CODE_PACKAGE: 	return Modifier.NONE;
    		 	default: Assert.isTrue(false); return Modifier.NONE;
 		}
 	}
@@ -660,6 +777,14 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return ASTNodeSearchUtil.getMethodDeclarationNode(method, fAstManager);
 	}
 		
+	private IMethod getMethod(MethodDeclaration methodDeclaration) throws JavaModelException{
+		return (IMethod)fAstManager.getCompilationUnit(methodDeclaration).getElementAt(methodDeclaration.getStartPosition());
+	}
+	
+	private boolean needsVisibilityUpdate(MethodDeclaration methodDeclaration) throws JavaModelException {
+		return needsVisibilityUpdate(getMethod(methodDeclaration));
+	}
+	
 	private boolean needsVisibilityUpdate(IMethod method) throws JavaModelException {
 		if (isVisibilitySameAsInitial())
 			return false;
@@ -693,7 +818,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return SearchEngine.createWorkspaceScope();
 	}
 	
-	private ASTNode[] getOccurrenceNodes(IProgressMonitor pm) throws JavaModelException{
+	private ASTNode[] findOccurrenceNodes(IProgressMonitor pm) throws JavaModelException{
 		return ASTNodeSearchUtil.findOccurrenceNodes(fRippleMethods, fAstManager, pm, createRefactoringScope());
 	}
 	
@@ -718,68 +843,13 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 	}
 	
-	private void addReorderings() throws JavaModelException {
-		if (fOccurrenceNodes == null)
-			return;
-		int[] permutation= getPermutation();
-		for (int i= 0; i < fOccurrenceNodes.length; i++) {
-			ASTNode node= fOccurrenceNodes[i];
-			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fAstManager.getCompilationUnit(node));
-			if (cu == null)
-				continue;
-			ASTNode[] nodes;
-			if (isReferenceNode(node))
-				nodes= (Expression[]) getArguments(node).toArray(new Expression[getArguments(node).size()]);
-			else
-				nodes= (SingleVariableDeclaration[]) getMethodDeclaration(node).parameters().toArray(new SingleVariableDeclaration[getMethodDeclaration(node).parameters().size()]);
-			
-			ASTNode[] newPermutation= new ASTNode[nodes.length];
-			ASTRewrite rewrite= fRewriteManager.getRewrite(cu);
-			for (int j= 0; j < nodes.length; j++) {
-				if (permutation[j] == j)
-					continue;
-				ASTNode srcNode= nodes[permutation[j]];
-				if (rewrite.isReplaced(srcNode))
-					newPermutation[j]= rewrite.getReplacingNode(srcNode);
-				else
-					newPermutation[j]= rewrite.createCopy(srcNode);	
-			}
-			for (int j= 0; j < nodes.length; j++) {
-				if (permutation[j] == j)
-					continue;
-				ASTNode destNode= nodes[j];
-				rewrite.markAsReplaced(destNode, newPermutation[j]);
-			}
-		}	
+	private ASTNode[] getSubNodesOfParameterOccurrenceNode(ASTNode occurrenceNode) {
+		if (isReferenceNode(occurrenceNode))
+			return (Expression[])getArguments(occurrenceNode).toArray(new Expression[getArguments(occurrenceNode).size()]);
+		else
+			return (SingleVariableDeclaration[]) getMethodDeclaration(occurrenceNode).parameters().toArray(new SingleVariableDeclaration[getMethodDeclaration(occurrenceNode).parameters().size()]);
 	}
 	
-	private void addNewParameters() throws CoreException {
-		int i= 0;
-		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext(); i++) {
-			ParameterInfo info= (ParameterInfo) iter.next();
-			if (! info.isAdded())
-				continue;
-			for (int j= 0; j < fOccurrenceNodes.length; j++) {
-				ASTNode node= fOccurrenceNodes[j];
-				ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fAstManager.getCompilationUnit(node));
-				if (cu == null)
-					continue;
-				
-				if (isReferenceNode(node)){
-					Expression newArg= (Expression)fRewriteManager.getRewrite(cu).createPlaceholder(info.getDefaultValue(), ASTRewrite.EXPRESSION);
-					getArguments(node).add(i, newArg);
-					fRewriteManager.getRewrite(cu).markAsInserted(newArg);
-				} else {
-					SingleVariableDeclaration newP= node.getAST().newSingleVariableDeclaration();
-					newP.setName(node.getAST().newSimpleName(info.getNewName()));
-					newP.setType((Type)fRewriteManager.getRewrite(cu).createPlaceholder(info.getType(), ASTRewrite.TYPE));
-					getMethodDeclaration(node).parameters().add(i, newP);
-					fRewriteManager.getRewrite(cu).markAsInserted(newP);
-				}	
-			}
-		}
-	}
-
 	private static MethodDeclaration getMethodDeclaration(ASTNode node){
 		return (MethodDeclaration)ASTNodes.getParent(node, MethodDeclaration.class);
 	}
@@ -826,19 +896,5 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		if (node instanceof SuperConstructorInvocation)	
 			return true;
 		return false;	
-	}
-
-	private int[] getPermutation() {
-		List integers= new ArrayList(fParameterInfos.size());
-		for (int i= 0, n= fParameterInfos.size(); i < n; i++) {
-			ParameterInfo info= (ParameterInfo)fParameterInfos.get(i);
-			if (! info.isAdded())
-				integers.add(new Integer(info.getOldIndex()));
-		}
-		int[] result= new int[integers.size()];
-		for (int i= 0; i < result.length; i++) {
-			result[i]= ((Integer)integers.get(i)).intValue();
-		}
-		return result;
 	}
 }
