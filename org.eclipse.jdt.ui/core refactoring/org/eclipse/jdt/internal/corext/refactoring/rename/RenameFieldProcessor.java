@@ -108,8 +108,12 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return JavaProcessors.computeAffectedNatures(fField);
 	}
 
+	public IField getField() {
+		return fField;
+	}
+
 	public Object[] getElements() {
-		return new Object[] {fField};
+		return new Object[] { fField};
 	}
 	
 	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
@@ -143,7 +147,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		RefactoringStatus result= Checks.checkFieldName(newName);
 		
-		if (isInstaceField(fField) && (! Checks.startsWithLowerCase(newName)))
+		if (isInstanceField(fField) && (! Checks.startsWithLowerCase(newName)))
 			result.addWarning(RefactoringCoreMessages.getString("RenameFieldRefactoring.should_start_lowercase")); //$NON-NLS-1$
 			
 		if (Checks.isAlreadyNamed(fField, newName))
@@ -366,7 +370,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return result;
 	}
 	
-	private static boolean isInstaceField(IField field) throws CoreException{
+	private static boolean isInstanceField(IField field) throws CoreException{
 		if (field.getDeclaringType().isInterface())
 			return false;
 		else 

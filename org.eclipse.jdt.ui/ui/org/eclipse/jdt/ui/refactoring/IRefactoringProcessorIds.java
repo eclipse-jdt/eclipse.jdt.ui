@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.refactoring;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameEnumConstProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
@@ -125,7 +126,18 @@ public interface IRefactoringProcessorIds {
 	 * </ul>
 	 */
 	public static String RENAME_FIELD_PROCESSOR= RenameFieldProcessor.IDENTIFIER;
-	
+
+	/**
+	 * Processor ID of the rename enum constant processor
+	 * (value <code>"org.eclipse.jdt.ui.renameEnumConstProcessor"</code>).
+	 * 
+	 * The rename filed processor loads the following participants:
+	 * <ul>
+	 *   <li>participants registered for renaming <code>IField</code>.</li>
+	 * </ul>
+	 */
+	public static String RENAME_ENUM_CONSTANT_PROCESSOR= RenameEnumConstProcessor.IDENTIFIER;
+
 	/**
 	 * Processor ID of the rename resource processor
 	 * (value <code>"org.eclipse.jdt.ui.renameResourceProcessor"</code>).

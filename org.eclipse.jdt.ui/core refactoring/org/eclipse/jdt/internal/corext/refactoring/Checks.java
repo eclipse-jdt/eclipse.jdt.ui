@@ -753,21 +753,35 @@ public class Checks {
 			result.addWarning(RefactoringCoreMessages.getString("ExtractTempRefactoring.convention")); //$NON-NLS-1$
 		return result;		
 	}
-	
-	public static RefactoringStatus checkConstantName(String newName) {
+
+	public static RefactoringStatus checkEnumConstantName(String newName) {
 		RefactoringStatus result= Checks.checkFieldName(newName);
-		if(result.hasFatalError())
+		if (result.hasFatalError())
 			return result;
-		for(int i= 0; i < newName.length(); i++) {
+		for (int i= 0; i < newName.length(); i++) {
 			char c= newName.charAt(i);
-			if(Character.isLetter(c) && !Character.isUpperCase(c)) {
-				result.addWarning(RefactoringCoreMessages.getString("ExtractConstantRefactoring.convention")); //$NON-NLS-1$	
+			if (Character.isLetter(c) && !Character.isUpperCase(c)) {
+				result.addWarning(RefactoringCoreMessages.getString("RenameEnumConstRefactoring.convention")); //$NON-NLS-1$	
 				break;
-			}	
+			}
 		}
 		return result;
 	}
-	
+
+	public static RefactoringStatus checkConstantName(String newName) {
+		RefactoringStatus result= Checks.checkFieldName(newName);
+		if (result.hasFatalError())
+			return result;
+		for (int i= 0; i < newName.length(); i++) {
+			char c= newName.charAt(i);
+			if (Character.isLetter(c) && !Character.isUpperCase(c)) {
+				result.addWarning(RefactoringCoreMessages.getString("ExtractConstantRefactoring.convention")); //$NON-NLS-1$	
+				break;
+			}
+		}
+		return result;
+	}
+
 	public static boolean isException(IType iType, IProgressMonitor pm) throws JavaModelException {
 		try{
 			if (iType.isInterface())

@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameEnumConstProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor;
@@ -39,6 +40,7 @@ public class RenameUserInterfaceManager extends UserInterfaceManager {
 		put(RenameCompilationUnitProcessor.class, RenameUserInterfaceStarter.class, RenameCuWizard.class);
 		put(RenameTypeProcessor.class, RenameUserInterfaceStarter.class, RenameTypeWizard.class);
 		put(RenameFieldProcessor.class, RenameUserInterfaceStarter.class, RenameFieldWizard.class);
+		put(RenameEnumConstProcessor.class, RenameUserInterfaceStarter.class, RenameEnumConstWizard.class);
 		put(RenameTypeParameterProcessor.class, RenameUserInterfaceStarter.class, RenameTypeParameterWizard.class);
 		put(RenameNonVirtualMethodProcessor.class, RenameMethodUserInterfaceStarter.class, RenameMethodWizard.class);
 		put(RenameVirtualMethodProcessor.class, RenameMethodUserInterfaceStarter.class, RenameMethodWizard.class);

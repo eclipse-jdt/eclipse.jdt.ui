@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.ITypeParameter;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameEnumConstProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor;
@@ -43,6 +44,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodPro
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -308,10 +310,14 @@ public class RenameSupport {
 	 * the {@link RenameSupport}.
 	 */
 	public static RenameSupport create(IField field, String newName, int flags) throws CoreException {
-		RenameFieldProcessor processor= new RenameFieldProcessor(field);
-		processor.setRenameGetter(updateGetterMethod(flags));
-		processor.setRenameSetter(updateSetterMethod(flags));
-		return new RenameSupport(processor, newName, flags);
+		if (JdtFlags.isEnum(field))
+			return new RenameSupport(new RenameEnumConstProcessor(field), newName, flags);
+		else {
+			final RenameFieldProcessor processor= new RenameFieldProcessor(field);
+			processor.setRenameGetter(updateGetterMethod(flags));
+			processor.setRenameSetter(updateSetterMethod(flags));
+			return new RenameSupport(processor, newName, flags);
+		}
 	}
 
 	/**
