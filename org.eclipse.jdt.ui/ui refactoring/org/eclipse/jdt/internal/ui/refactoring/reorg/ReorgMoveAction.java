@@ -135,8 +135,9 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 		 * is open, we will have access to its shell.
 		 */
 		processor.setReorgQueries(new ReorgQueries(wizard));
-		new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages
-			.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
+		new RefactoringStarter().activate(refactoring, wizard, getShell(), 
+			RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), //$NON-NLS-1$ 
+			true);
 	}
 
 	private RefactoringWizard createWizard(MoveRefactoring refactoring) {
