@@ -39,17 +39,19 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFolderChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFromClasspathChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DeletePackageFragmentRootChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteSourceManipulationChange;
 
 public class DeleteRefactoring extends Refactoring {
 	
 	private List fElements;
 	private boolean fCheckIfUsed;
+	private final IPackageFragmentRootManipulationQuery fRootManipulationQuery;
 	
-	public DeleteRefactoring(List elements){
+	public DeleteRefactoring(List elements, IPackageFragmentRootManipulationQuery rootManipulationQuery){
 		Assert.isNotNull(elements);
 		fElements= convertToInputElements(elements);
+		fRootManipulationQuery= rootManipulationQuery;
 	}
 	
 	private static List convertToInputElements(List elements){
@@ -109,7 +111,6 @@ public class DeleteRefactoring extends Refactoring {
 			result.merge(checkReadOnlyStatus());
 			if (!fCheckIfUsed)
 				return result;
-			//XX to be implemented
 			return result;
 		} finally{
 			pm.done();
@@ -277,13 +278,8 @@ public class DeleteRefactoring extends Refactoring {
 	}
 
 	private IChange createDeleteChange(IPackageFragmentRoot root) throws JavaModelException {
-		CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("DeleteRefactoring.delete_package_fragment_root"), 2); //$NON-NLS-1$
-
-		composite.add(new DeleteFromClasspathChange(root));
-		if (! ReorgUtils.isClasspathDelete(root))
-			composite.add(createDeleteChange(getResourceToDelete(root)));
-
-		return composite;
+		Assert.isTrue(! root.isExternal());
+		return new DeletePackageFragmentRootChange(root, fRootManipulationQuery);
 	}
 	
 	private static IResource[] getMembers(IFolder folder) throws JavaModelException {
@@ -331,8 +327,12 @@ public class DeleteRefactoring extends Refactoring {
 	
 	private static boolean canDelete(Object o){
 		try {
-			if (o instanceof IPackageFragmentRoot && Checks.isClasspathDelete((IPackageFragmentRoot)o)) {
-				return true;
+			if (o instanceof IPackageFragmentRoot){
+				IPackageFragmentRoot root= (IPackageFragmentRoot)o;
+				if (root.isExternal())	
+					return false;
+				if (Checks.isClasspathDelete(root))
+					return false;
 			}
 		} catch (JavaModelException e) {
 			// we can't delete.
