@@ -178,8 +178,10 @@ public class ListDialogField extends DialogField {
 			
 			fTable.setInput(fParentElement);
 			
-			fTable.setSelection(fSelectionWhenEnabled);
 			fTableControl.setEnabled(isEnabled());
+			if (fSelectionWhenEnabled != null) {
+				postSetSelection(fSelectionWhenEnabled);
+			}		
 		}
 		return fTableControl;
 	}

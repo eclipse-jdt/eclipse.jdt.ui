@@ -74,6 +74,7 @@ public class VariableBlock {
 					elements.add(elem);
 					if (name.equals(initSelection)) {
 						initSelectedElement= elem;
+						isInReserved= false;
 					}
 				}
 			} else {
@@ -85,7 +86,7 @@ public class VariableBlock {
 		
 		Object selElement= null;
 		if (initSelectedElement != null) {
-			ISelection sel= new StructuredSelection(new StructuredSelection(initSelectedElement));
+			ISelection sel= new StructuredSelection(initSelectedElement);
 			if (isInReserved) {
 				fReservedList.selectElements(sel);
 			} else {

@@ -5,7 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.internal.ui.IUIConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.DirectoryDialog;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jdt.core.JavaConventions;import org.eclipse.jdt.internal.ui.IUIConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.dialogs.StatusTool;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 public class VariableCreationDialog extends StatusDialog {
 	
@@ -21,6 +21,7 @@ public class VariableCreationDialog extends StatusDialog {
 	private static final String ERR_NAMEEXISTS= PAGE_NAME + ".error.nameexists";
 	
 	private static final String DIALOG_EXTJARDIALOG= PAGE_NAME + ".extjardialog";
+	private static final String DIALOG_EXTDIRDIALOG= PAGE_NAME + ".extdirdialog";
 	
 	private IDialogSettings fDialogSettings;
 	
@@ -29,6 +30,8 @@ public class VariableCreationDialog extends StatusDialog {
 	
 	private StringButtonDialogField fPathField;
 	private StatusInfo fPathStatus;
+	private StringButtonDialogField fDirButton;
+	
 		
 	private CPVariableElement fElement;
 	
@@ -53,7 +56,10 @@ public class VariableCreationDialog extends StatusDialog {
 		fPathField= new StringButtonDialogField(adapter);
 		fPathField.setDialogFieldListener(adapter);
 		fPathField.setLabelText(JavaPlugin.getResourceString(PATH + ".label"));
-		fPathField.setButtonLabel(JavaPlugin.getResourceString(PATH + ".button"));
+		fPathField.setButtonLabel(JavaPlugin.getResourceString(PATH + ".file.button"));
+		
+		fDirButton= new StringButtonDialogField(adapter);
+		fDirButton.setButtonLabel(JavaPlugin.getResourceString(PATH + ".dir.button"));
 		
 		fExistingNames= existingNames;
 		
@@ -79,7 +85,20 @@ public class VariableCreationDialog extends StatusDialog {
 		Composite composite= (Composite)super.createDialogArea(parent);
 		
 		Composite inner= new Composite(composite, SWT.NONE);
-		LayoutUtil.doDefaultLayout(inner, new DialogField[] { fNameField, fPathField }, false, 420, 0);
+		
+		MGridLayout layout= new MGridLayout();
+		layout.minimumWidth= 380;
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.numColumns= 3;
+		inner.setLayout(layout);
+		
+		fNameField.doFillIntoGrid(inner, 2);
+		//DialogField.createEmptySpace(inner, 2);
+		
+		fPathField.doFillIntoGrid(inner, 3);
+		DialogField.createEmptySpace(inner, 2);
+		fDirButton.getChangeControl(inner);
 		
 		DialogField focusField= (fElement == null) ? fNameField : fPathField;
 		focusField.postSetFocusOnDialogField(parent.getDisplay());
@@ -105,7 +124,12 @@ public class VariableCreationDialog extends StatusDialog {
 				if (path != null) {
 					fPathField.setText(path.toString());
 				}
-			}	
+			} else if (field == fDirButton) {
+				IPath path= chooseExtDirectory();
+				if (path != null) {
+					fPathField.setText(path.toString());
+				}
+			}			
 		}
 	}
 	
@@ -159,10 +183,8 @@ public class VariableCreationDialog extends StatusDialog {
 		return status;
 	}
 	
-	/*
-	 * Open a dialog to choose a jar from the file system
-	 */
-	private IPath chooseExtJarFile() {
+	
+	private String getInitPath() {
 		String initPath= fPathField.getText();
 		if (initPath.length() == 0) {		
 			initPath= fDialogSettings.get(IUIConstants.DIALOGSTORE_LASTEXTJAR);
@@ -177,6 +199,15 @@ public class VariableCreationDialog extends StatusDialog {
 			}
 			initPath= entryPath.toOSString();
 		}
+		return initPath;
+	}		
+	
+	
+	/*
+	 * Open a dialog to choose a jar from the file system
+	 */
+	private IPath chooseExtJarFile() {
+		String initPath= getInitPath();
 		
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setText(JavaPlugin.getResourceString(DIALOG_EXTJARDIALOG + ".text"));
@@ -188,7 +219,21 @@ public class VariableCreationDialog extends StatusDialog {
 			return new Path(res);
 		}
 		return null;
-	}	
+	}
+	
+	private IPath chooseExtDirectory() {
+		String initPath= getInitPath();
+		
+		DirectoryDialog dialog= new DirectoryDialog(getShell());
+		dialog.setText(JavaPlugin.getResourceString(DIALOG_EXTDIRDIALOG + ".text"));
+		dialog.setFilterPath(initPath);
+		String res= dialog.open();
+		if (res != null) {
+			fDialogSettings.put(IUIConstants.DIALOGSTORE_LASTEXTJAR, dialog.getFilterPath());
+			return new Path(res);
+		}
+		return null;		
+	}
 	
 		
 	

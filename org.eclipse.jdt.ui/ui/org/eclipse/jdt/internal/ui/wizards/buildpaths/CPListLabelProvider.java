@@ -85,7 +85,7 @@ class CPListLabelProvider extends LabelProvider {
 					return cpentry.getPath().lastSegment();
 				case IClasspathEntry.CPE_SOURCE: {
 					StringBuffer buf= new StringBuffer(cpentry.getPath().toString());
-					if (!resource.exists()) {
+					if (resource != null && !resource.exists()) {
 						buf.append(' ');
 						buf.append(fNewLabel);
 					}
