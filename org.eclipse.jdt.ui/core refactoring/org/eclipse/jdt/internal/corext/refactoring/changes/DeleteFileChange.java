@@ -3,27 +3,17 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.corext.refactoring.changes;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModelStatusConstants;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.IReorgExceptionHandler;
 
 public class DeleteFileChange extends AbstractDeleteChange {
 
@@ -55,11 +45,26 @@ public class DeleteFileChange extends AbstractDeleteChange {
 	/* non java-doc
 	 * @see DeleteChange#doDelete(IProgressMonitor)
 	 */
-	protected void doDelete(IProgressMonitor pm) throws CoreException{
+	protected void doDelete(ChangeContext context, IProgressMonitor pm) throws CoreException{
 		IFile file= getFile();
 		Assert.isNotNull(file);
 		Assert.isTrue(file.exists());
-		file.delete(false, true, pm);
+		try {
+			file.delete(false, true, pm);
+		} catch (CoreException e) {
+			if (! (context.getExceptionHandler() instanceof IReorgExceptionHandler))
+				throw e;
+			IReorgExceptionHandler handler= (IReorgExceptionHandler)context.getExceptionHandler();
+			IStatus[] children= e.getStatus().getChildren();
+			if (children.length == 1 && children[0].getCode() == IResourceStatus.OUT_OF_SYNC_LOCAL){
+				if (handler.forceDeletingResourceOutOfSynch(file.getName(), e)){
+					file.delete(true, true, pm);
+					return;
+				}	else
+						return; //do not rethrow in this case
+			} else
+				throw e;
+		}
 	}
 }
 
