@@ -56,7 +56,7 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 		fTextEditor= editor;
 		
 		fAnnotationPreferenceLookup= EditorsUI.getAnnotationPreferenceLookup();
-		fStore= JavaPlugin.getDefault().getPreferenceStore();
+		fStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
 
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.JAVA_SELECT_MARKER_RULER_ACTION);
 	}

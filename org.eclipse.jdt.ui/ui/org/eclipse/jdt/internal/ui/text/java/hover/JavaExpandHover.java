@@ -16,13 +16,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
-import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 
 import org.eclipse.jface.text.IDocument;
@@ -37,12 +36,11 @@ import org.eclipse.jface.text.source.IAnnotationPresentation;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.ImageUtilities;
 
-import org.eclipse.ui.texteditor.AnnotationPreference;
-import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
-
 import org.eclipse.ui.internal.texteditor.AnnotationExpandHover;
 import org.eclipse.ui.internal.texteditor.AnnotationExpansionControl;
 import org.eclipse.ui.internal.texteditor.AnnotationExpansionControl.AnnotationHoverInput;
+import org.eclipse.ui.texteditor.AnnotationPreference;
+import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -82,6 +80,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 	}
 	
 	private AnnotationPreferenceLookup fLookup= new AnnotationPreferenceLookup();
+	private IPreferenceStore fStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
 	
 	public JavaExpandHover(CompositeRuler ruler, IAnnotationAccess access, IDoubleClickListener doubleClickListener) {
 		super(ruler, access, doubleClickListener);
@@ -99,14 +98,6 @@ public class JavaExpandHover extends AnnotationExpandHover {
 		
 		List exact= new ArrayList();
 		HashMap messagesAtPosition= new HashMap();
-		
-		StyledText text= viewer.getTextWidget();
-		Display display;
-		if (text != null && !text.isDisposed())
-			display= text.getDisplay();
-		else
-			display= null;
-			
 		
 		Iterator e= model.getAnnotationIterator();
 		while (e.hasNext()) {
@@ -129,7 +120,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 			AnnotationPreference pref= fLookup.getAnnotationPreference(annotation);
 			if (pref != null) {
 				String key= pref.getVerticalRulerPreferenceKey();
-				if (key != null && !JavaPlugin.getDefault().getPreferenceStore().getBoolean(key))
+				if (key != null && !fStore.getBoolean(key))
 					continue;
 			}
 			
