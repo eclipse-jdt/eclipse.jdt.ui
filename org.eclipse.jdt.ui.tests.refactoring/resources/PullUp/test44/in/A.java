@@ -8,7 +8,9 @@ class B extends A{
 	public static void m() {
 	}
 
-	public static class X{
+	public enum X{
+		TEST;
+		int f;
 	}
 
 	public static interface Y{

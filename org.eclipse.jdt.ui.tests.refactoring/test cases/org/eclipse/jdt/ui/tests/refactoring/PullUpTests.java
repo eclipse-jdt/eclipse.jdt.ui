@@ -861,6 +861,46 @@ public class PullUpTests extends RefactoringTest {
 								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
+	public void test44() throws Exception{
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {"A"};
+		String[] selectedTypeNames= {"X", "Y"};
+		String[] namesOfMethodsToPullUp= {"m"};
+		String[][] signaturesOfMethodsToPullUp= {new String[0]};
+		String[] namesOfFieldsToPullUp= {"A"};
+		String[] namesOfTypesToPullUp= {"X", "Y"};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures, 
+								selectedFieldNames,	
+								selectedTypeNames, namesOfMethodsToPullUp, 
+								signaturesOfMethodsToPullUp, 
+								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, 
+								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+	}
+
+	public void test45() throws Exception{
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {"A"};
+		String[] selectedTypeNames= {"X", "Y"};
+		String[] namesOfMethodsToPullUp= {"m"};
+		String[][] signaturesOfMethodsToPullUp= {new String[0]};
+		String[] namesOfFieldsToPullUp= {"A"};
+		String[] namesOfTypesToPullUp= {"X", "Y"};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures, 
+								selectedFieldNames,	
+								selectedTypeNames, namesOfMethodsToPullUp, 
+								signaturesOfMethodsToPullUp, 
+								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, 
+								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+	}
+
 	public void testFail0() throws Exception{
 //		printTestDisabledMessage("6538: searchDeclarationsOf* incorrect");
 		helper2(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);

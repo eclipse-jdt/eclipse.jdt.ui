@@ -11,6 +11,7 @@ class B extends A{
 	public static class X{
 	}
 
-	public static interface Y{
+	public @interface Y{
+		String name() default "foo";
 	}
 }

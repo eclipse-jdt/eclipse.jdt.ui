@@ -2,9 +2,9 @@ package p;
 class A{	
 	void x(){}
 
-	protected void n() {}
-
 	protected void mmm() {}
+
+	protected void n() {}
 }
 class B extends A{
 }

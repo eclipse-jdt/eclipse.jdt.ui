@@ -402,7 +402,7 @@ public class PullUpRefactoring extends HierarchyRefactoring {
 		fTargetType= targetType;
 	}
 	
-	/* @return matching elements of in targetClass and subtypes of targetClass */
+	/* @return matching elements of in targetClass and sub types of targetClass */
 	public IMember[] getMatchingElements(IProgressMonitor pm, boolean includeMethodsToDeclareAbstract) throws JavaModelException {
 		try{	
 			Set result= new HashSet();
@@ -902,7 +902,7 @@ public class PullUpRefactoring extends HierarchyRefactoring {
 		return result;
 	}
 	
-	//skipped superclasses are those declared in the hierarchy between the declaring type of the selected members 
+	//skipped super classes are those declared in the hierarchy between the declaring type of the selected members 
 	//and the target type
 	private Set getSkippedSuperclasses(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1); //$NON-NLS-1$
@@ -1044,7 +1044,7 @@ public class PullUpRefactoring extends HierarchyRefactoring {
 		}
 	}
 
-	private CompilationUnitRewrite getCompilationUnitRewrite(final Map rewrites, final ICompilationUnit unit) {
+	private static CompilationUnitRewrite getCompilationUnitRewrite(final Map rewrites, final ICompilationUnit unit) {
 		Assert.isNotNull(rewrites);
 		Assert.isNotNull(unit);
 		CompilationUnitRewrite rewrite= (CompilationUnitRewrite) rewrites.get(unit);
@@ -1055,55 +1055,61 @@ public class PullUpRefactoring extends HierarchyRefactoring {
 		return rewrite;
 	}
 
-	private TextChangeManager createChangeManager(IProgressMonitor monitor, RefactoringStatus status) throws CoreException {
+	private TextChangeManager createChangeManager(final IProgressMonitor monitor, final RefactoringStatus status) throws CoreException {
+		Assert.isNotNull(monitor);
+		Assert.isNotNull(status);
 		try {
 			monitor.beginTask(RefactoringCoreMessages.getString("PullUpRefactoring.preview"), 4); //$NON-NLS-1$
-			final CompilationUnitRewrite sourceRewriter= new CompilationUnitRewrite(getDeclaringType().getCompilationUnit());
-			final CompilationUnitRewrite targetRewriter= new CompilationUnitRewrite(getTargetClass().getCompilationUnit());
+			final ICompilationUnit source= getDeclaringType().getCompilationUnit();
+			final ICompilationUnit target= getTargetClass().getCompilationUnit();
+			final CompilationUnitRewrite sourceRewriter= new CompilationUnitRewrite(source);
+			final CompilationUnitRewrite targetRewriter= new CompilationUnitRewrite(target);
 			final Map rewrites= new HashMap(2);
-			rewrites.put(getDeclaringType().getCompilationUnit(), sourceRewriter);
-			rewrites.put(getTargetClass().getCompilationUnit(), targetRewriter);
+			rewrites.put(source, sourceRewriter);
+			rewrites.put(target, targetRewriter);
 			addImportsToCu(targetRewriter, getTypesThatNeedToBeImportedInTargetCu(new SubProgressMonitor(monitor, 1), sourceRewriter.getRoot()));
-			final TextChangeManager manager= new TextChangeManager();
 			final Map deleteMap= createMembersToDeleteMap(new SubProgressMonitor(monitor, 1));
 			final Map effectedMap= createNonAbstractSubclassesMapping(new SubProgressMonitor(monitor, 1));
-			final ICompilationUnit[] involvedUnits= getInvolvedCompilationUnits(new SubProgressMonitor(monitor, 1));
-			final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
-			subMonitor.beginTask("", involvedUnits.length * 6); //$NON-NLS-1$
+			final ICompilationUnit[] units= getInvolvedCompilationUnits(new SubProgressMonitor(monitor, 1));
 			ICompilationUnit unit= null;
 			CompilationUnitRewrite rewrite= null;
-			for (int index= 0; index < involvedUnits.length; index++) {
-				unit= involvedUnits[index];
-				if (!(getDeclaringType().getCompilationUnit().equals(unit) || getTargetClass().getCompilationUnit().equals(unit) || deleteMap.containsKey(unit) || effectedMap.containsKey(unit))) {
-					subMonitor.worked(6);
-					continue;
-				}
-				rewrite= getCompilationUnitRewrite(rewrites, unit);
-				if (deleteMap.containsKey(unit))
-					deleteDeclarationNodes(sourceRewriter, sourceRewriter.getCu().equals(targetRewriter.getCu()), rewrite, (List) deleteMap.get(unit));
-				if (unit.equals(getTargetClass().getCompilationUnit())) {
-					if (!JdtFlags.isAbstract(getTargetClass()) && getAbstractMethodsAddedToTargetClass().length > 0) {
-						final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getTargetClass(), rewrite.getRoot());
-						ModifierRewrite.create(rewrite.getASTRewrite(), declaration).setModifiers(declaration.getModifiers() | Modifier.ABSTRACT, rewrite.createGroupDescription(RefactoringCoreMessages.getString("PullUpRefactoring.make_target_abstract"))); //$NON-NLS-1$
+			final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
+			try {
+				subMonitor.beginTask("", units.length * 10); //$NON-NLS-1$
+				for (int index= 0; index < units.length; index++) {
+					unit= units[index];
+					if (!(source.equals(unit) || target.equals(unit) || deleteMap.containsKey(unit) || effectedMap.containsKey(unit))) {
+						subMonitor.worked(10);
+						continue;
 					}
-					final TypeVariableMaplet[] mapping= TypeVariableUtil.subTypeToSuperType(getDeclaringType(), getTargetClass());
-					copyMembersToTargetClass(sourceRewriter, rewrite, sourceRewriter.getRoot(), mapping, new SubProgressMonitor(subMonitor, 1), status);
-					AbstractTypeDeclaration targetClass= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getTargetClass(), rewrite.getRoot());
-					for (int i= 0; i < fMethodsToDeclareAbstract.length; i++)
-						createAbstractMethodInTargetClass(fMethodsToDeclareAbstract[i], sourceRewriter.getRoot(), targetClass, mapping, rewrite, new SubProgressMonitor(subMonitor, 1), status);
-				} else
-					subMonitor.worked(2);
-				if (unit.equals(sourceRewriter.getCu()))
-					increaseVisibilityOfMethodsDeclaredAbstract(rewrite.getASTRewrite(), rewrite.getRoot(), new SubProgressMonitor(subMonitor, 2), status);
-				else
-					subMonitor.worked(2);
-				if (effectedMap.containsKey(unit))
-					addMethodStubsToNonAbstractSubclassesOfTargetClass((List) effectedMap.get(unit), sourceRewriter.getRoot(), rewrite, new SubProgressMonitor(subMonitor, 2), status);
-				manager.manage(unit, rewrite.createChange());
-				if (subMonitor.isCanceled())
-					throw new OperationCanceledException();
+					rewrite= getCompilationUnitRewrite(rewrites, unit);
+					if (deleteMap.containsKey(unit))
+						deleteDeclarationNodes(sourceRewriter, sourceRewriter.getCu().equals(targetRewriter.getCu()), rewrite, (List) deleteMap.get(unit));
+					if (unit.equals(target)) {
+						if (!JdtFlags.isAbstract(getTargetClass()) && getAbstractMethodsAddedToTargetClass().length > 0) {
+							final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getTargetClass(), rewrite.getRoot());
+							ModifierRewrite.create(rewrite.getASTRewrite(), declaration).setModifiers(declaration.getModifiers() | Modifier.ABSTRACT, rewrite.createGroupDescription(RefactoringCoreMessages.getString("PullUpRefactoring.make_target_abstract"))); //$NON-NLS-1$
+						}
+						final TypeVariableMaplet[] mapping= TypeVariableUtil.subTypeToSuperType(getDeclaringType(), getTargetClass());
+						copyMembersToTargetClass(sourceRewriter, rewrite, sourceRewriter.getRoot(), mapping, new SubProgressMonitor(subMonitor, 1), status);
+						AbstractTypeDeclaration targetClass= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getTargetClass(), rewrite.getRoot());
+						for (int i= 0; i < fMethodsToDeclareAbstract.length; i++)
+							createAbstractMethodInTargetClass(fMethodsToDeclareAbstract[i], sourceRewriter.getRoot(), targetClass, mapping, rewrite, new SubProgressMonitor(subMonitor, 1), status);
+					} else
+						subMonitor.worked(2);
+					if (unit.equals(sourceRewriter.getCu()))
+						increaseVisibilityOfMethodsDeclaredAbstract(rewrite.getASTRewrite(), rewrite.getRoot(), new SubProgressMonitor(subMonitor, 2), status);
+					else
+						subMonitor.worked(2);
+					if (effectedMap.containsKey(unit))
+						addMethodStubsToNonAbstractSubclassesOfTargetClass((List) effectedMap.get(unit), sourceRewriter.getRoot(), rewrite, new SubProgressMonitor(subMonitor, 2), status);
+					if (subMonitor.isCanceled())
+						throw new OperationCanceledException();
+				}
+			} finally {
+				subMonitor.done();
 			}
-			subMonitor.done();
+			final TextChangeManager manager= new TextChangeManager();
 			for (final Iterator iterator= rewrites.keySet().iterator(); iterator.hasNext();) {
 				unit= (ICompilationUnit) iterator.next();
 				rewrite= (CompilationUnitRewrite) rewrites.get(unit);

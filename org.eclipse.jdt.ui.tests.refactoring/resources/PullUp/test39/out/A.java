@@ -1,16 +1,16 @@
 package p;
 class A{
 
-	public static interface Y{
+	public static final int A = 0;
+
+	public static void m() {
 	}
 
 	public static class X{
 	}
 
-	public static void m() {
+	public static interface Y{
 	}
-
-	public static final int A = 0;
 }
 class B extends A{
 }

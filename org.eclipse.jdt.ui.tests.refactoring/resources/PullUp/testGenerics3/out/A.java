@@ -2,9 +2,9 @@ package p;
 class A<X>{	
 	void x(){}
 
-	protected void n() {}
-
 	protected void mmm(X t) {}
+
+	protected void n() {}
 }
 class B<T> extends A<T>{
 }
