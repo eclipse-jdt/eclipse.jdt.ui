@@ -216,14 +216,12 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	}
 
 	private TextEdit handleLocal(VariableDeclarationStatement node, TextBuffer buffer, ASTNodeCodeBlock newLocals, int delta) throws CoreException {
-		int start= node.getStartPosition();
 		List fragments= node.fragments();
 		createNewDeclaration(node, newLocals);
 		if (allFragmentsUninitialized(fragments)) {
 			return new DeleteNodeEdit(node.getStartPosition() - delta, node.getLength(), true, ASTNodes.getDelimiterToken(node));
 		} else {
 			int size= fragments.size();
-			int lastElement= size - 1;
 			ASTNodeCodeBlock block= new ASTNodeCodeBlock();
 			for (int i= 0; i < size; i++) {
 				VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(i);
