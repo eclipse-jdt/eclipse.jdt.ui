@@ -20,13 +20,13 @@ import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.ui.text.IVersionDependent;
+import org.eclipse.jdt.internal.ui.text.ISourceVersionDependent;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 
 /**
  * Double click strategy aware of Java identifier syntax rules.
  */
-public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, IVersionDependent {
+public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourceVersionDependent {
 
 	/**
 	 * Detects java words depending on the source level. In 1.4 mode, detects
@@ -43,7 +43,7 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, IVersi
 	 * 
 	 * @since 3.1
 	 */
-	private static final class AtJavaIdentifierDetector implements IVersionDependent {
+	private static final class AtJavaIdentifierDetector implements ISourceVersionDependent {
 
 		private boolean fSelectAnnotations;
 		
@@ -103,9 +103,9 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, IVersi
 		}
 		
 		/*
-		 * @see org.eclipse.jdt.internal.ui.text.IVersionDependent#setCurrentVersion(java.lang.String)
+		 * @see org.eclipse.jdt.internal.ui.text.ISourceVersionDependent#setSourceVersion(java.lang.String)
 		 */
-		public void setCurrentVersion(String version) {
+		public void setSourceVersion(String version) {
 			if (JavaCore.VERSION_1_5.compareTo(version) <= 0)
 				fSelectAnnotations= true;
 			else
@@ -333,10 +333,10 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, IVersi
 	}
 	
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.IVersionDependent#setCurrentVersion(java.lang.String)
+	 * @see org.eclipse.jdt.internal.ui.text.ISourceVersionDependent#setSourceVersion(java.lang.String)
 	 */
-	public void setCurrentVersion(String version) {
-		fPairMatcher.setCurrentVersion(version);
-		fWordDetector.setCurrentVersion(version);
+	public void setSourceVersion(String version) {
+		fPairMatcher.setSourceVersion(version);
+		fWordDetector.setSourceVersion(version);
 	}
 }

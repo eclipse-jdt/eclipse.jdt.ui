@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.JavaCore;
 /**
  * Helper class for match pairs of characters.
  */
-public class JavaPairMatcher implements ICharacterPairMatcher, IVersionDependent {
+public class JavaPairMatcher implements ICharacterPairMatcher, ISourceVersionDependent {
 	
 	protected char[] fPairs;
 	protected IDocument fDocument;
@@ -272,9 +272,9 @@ public class JavaPairMatcher implements ICharacterPairMatcher, IVersionDependent
 	}
 	
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.IVersionDependent#setCurrentVersion(java.lang.String)
+	 * @see org.eclipse.jdt.internal.ui.text.ISourceVersionDependent#setSourceVersion(java.lang.String)
 	 */
-	public void setCurrentVersion(String version) {
+	public void setSourceVersion(String version) {
 		if (JavaCore.VERSION_1_5.compareTo(version) <= 0)
 			fHighlightAngularBrackets= true;
 		else

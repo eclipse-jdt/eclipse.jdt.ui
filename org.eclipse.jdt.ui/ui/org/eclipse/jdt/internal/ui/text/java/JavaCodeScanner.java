@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
 import org.eclipse.jdt.internal.ui.text.CombinedWordRule;
 import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
 import org.eclipse.jdt.internal.ui.text.JavaWordDetector;
-import org.eclipse.jdt.internal.ui.text.IVersionDependent;
+import org.eclipse.jdt.internal.ui.text.ISourceVersionDependent;
 
 
 /**
@@ -160,7 +160,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		}
 	}
 
-	private static class VersionedWordMatcher extends CombinedWordRule.WordMatcher implements IVersionDependent {
+	private static class VersionedWordMatcher extends CombinedWordRule.WordMatcher implements ISourceVersionDependent {
 
 		private final IToken fDefaultToken;
 		private final String fVersion;
@@ -169,13 +169,13 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		public VersionedWordMatcher(IToken defaultToken, String version, String currentVersion) {
 			fDefaultToken= defaultToken;
 			fVersion= version;
-			setCurrentVersion(currentVersion);
+			setSourceVersion(currentVersion);
 		}
 		
 		/*
-		 * @see org.eclipse.jdt.internal.ui.text.IVersionDependent#setCurrentVersion(java.lang.String)
+		 * @see org.eclipse.jdt.internal.ui.text.ISourceVersionDependent#setSourceVersion(java.lang.String)
 		 */
-		public void setCurrentVersion(String version) {
+		public void setSourceVersion(String version) {
 			fIsVersionMatch= fVersion.compareTo(version) <= 0;
 		}
 	
@@ -201,7 +201,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	 * 
 	 * @since 3.1
 	 */
-	private static class AnnotationRule implements IRule, IVersionDependent {
+	private static class AnnotationRule implements IRule, ISourceVersionDependent {
 		/**
 		 * A resettable scanner supports marking a position in a scanner and
 		 * unreading back to the marked position. 
@@ -297,7 +297,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			fInterfaceToken= interfaceToken;
 			fAnnotationToken= annotationToken;
 			fVersion= version;
-			setCurrentVersion(currentVersion);
+			setSourceVersion(currentVersion);
 		}
 
 		/*
@@ -349,9 +349,9 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		}
 
 		/*
-		 * @see org.eclipse.jdt.internal.ui.text.IVersionDependent#setCurrentVersion(java.lang.String)
+		 * @see org.eclipse.jdt.internal.ui.text.ISourceVersionDependent#setSourceVersion(java.lang.String)
 		 */
-		public void setCurrentVersion(String version) {
+		public void setSourceVersion(String version) {
 			fIsVersionMatch= fVersion.compareTo(version) <= 0; //$NON-NLS-1$
 		}
 		
@@ -512,8 +512,8 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 				String s= (String) value;
 	
 				for (Iterator it= fVersionDependentRules.iterator(); it.hasNext();) {
-					IVersionDependent dependent= (IVersionDependent) it.next();
-					dependent.setCurrentVersion(s);
+					ISourceVersionDependent dependent= (ISourceVersionDependent) it.next();
+					dependent.setSourceVersion(s);
 				}
 			}
 			

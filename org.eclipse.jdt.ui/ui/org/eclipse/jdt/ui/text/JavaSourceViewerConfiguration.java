@@ -469,7 +469,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			return new JavaStringDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer));
 		if (fJavaDoubleClickSelector == null) {
 			fJavaDoubleClickSelector= new JavaDoubleClickSelector();
-			fJavaDoubleClickSelector.setCurrentVersion(fPreferenceStore.getString(JavaCore.COMPILER_SOURCE));
+			fJavaDoubleClickSelector.setSourceVersion(fPreferenceStore.getString(JavaCore.COMPILER_SOURCE));
 		}
 		return fJavaDoubleClickSelector;
 	}
@@ -847,7 +847,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			fJavaDocScanner.adaptToPreferenceChange(event);
 		if (fJavaDoubleClickSelector != null && JavaCore.COMPILER_SOURCE.equals(event.getProperty()))
 			if (event.getNewValue() instanceof String)
-				fJavaDoubleClickSelector.setCurrentVersion((String) event.getNewValue());
+				fJavaDoubleClickSelector.setSourceVersion((String) event.getNewValue());
 	}
 	
 	/*

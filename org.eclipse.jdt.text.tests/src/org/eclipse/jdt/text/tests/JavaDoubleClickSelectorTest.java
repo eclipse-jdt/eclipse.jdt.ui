@@ -43,7 +43,7 @@ public class JavaDoubleClickSelectorTest extends TestCase {
 	private void assert14Selection(String content, int offset, int selOffset, int selLength) {
 		IDocument document= new Document(content);
 		PublicSelector selector= new PublicSelector();
-		selector.setCurrentVersion(JavaCore.VERSION_1_4);
+		selector.setSourceVersion(JavaCore.VERSION_1_4);
 		IRegion selection= selector.selectWord(document, offset);
 		assertEquals(new Region(selOffset, selLength), selection);
 	}
@@ -51,7 +51,7 @@ public class JavaDoubleClickSelectorTest extends TestCase {
 	private void assert15Selection(String content, int offset, int selOffset, int selLength) {
 		IDocument document= new Document(content);
 		PublicSelector selector= new PublicSelector();
-		selector.setCurrentVersion(JavaCore.VERSION_1_5);
+		selector.setSourceVersion(JavaCore.VERSION_1_5);
 		IRegion selection= selector.selectWord(document, offset);
 		assertEquals(new Region(selOffset, selLength), selection);
 	}

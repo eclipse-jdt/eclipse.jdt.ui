@@ -12,11 +12,12 @@ package org.eclipse.jdt.internal.ui.text;
 
 
 /**
- * Mix-in for any rule that changes its behavior based on the JLS version.
+ * Mix-in for any rule that changes its behavior based on the Java source
+ * version.
  * 
  * @since 3.1
  */
-public interface IVersionDependent {
+public interface ISourceVersionDependent {
 	
 	/**
 	 * Sets the configured java source version to one of the
@@ -25,5 +26,5 @@ public interface IVersionDependent {
 	 * @param version the new java source version
 	 * @see org.eclipse.jdt.core.JavaCore
 	 */
-	void setCurrentVersion(String version);
+	void setSourceVersion(String version);
 }
