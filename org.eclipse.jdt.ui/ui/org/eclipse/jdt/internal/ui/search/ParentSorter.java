@@ -19,7 +19,11 @@ public class ParentSorter extends NameSorter {
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		String leftParent= getParentName(e1);
 		String rightParent= getParentName(e2);
-		return collator.compare(leftParent, rightParent);
+		int result= collator.compare(leftParent, rightParent);
+		if (result == 0)
+			return super.compare(viewer, e1, e2);
+		else 
+			return result;
 	}
 	
 	private String getParentName(Object element) {

@@ -20,7 +20,11 @@ public class PathSorter extends NameSorter {
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		IPath path1= getPath(e1);
 		IPath path2=getPath(e2);
-		return compare(path1, path2);
+		int result= compare(path1, path2);
+		if (result != 0)
+			return result;
+		else
+			return super.compare(viewer, e1, e2);
 	}
 	
 	/**
