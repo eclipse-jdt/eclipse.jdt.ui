@@ -93,7 +93,7 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 		StringTokenizer modifierTokenizer= new StringTokenizer(modifiers, ",;.:+-* "); //$NON-NLS-1$
 		while (modifierTokenizer.hasMoreTokens()) {
 			int modifier= Action.findModifier(modifierTokenizer.nextToken());
-			if (modifier == 0)
+			if (modifier == 0 || (stateMask & modifier) == modifier)
 				return -1;
 			stateMask= stateMask | modifier;
 		}
