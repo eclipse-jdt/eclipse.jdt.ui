@@ -118,10 +118,13 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		
 		int initalOffset= fViewer.getSelectedRange().x;
 		int invocationOffset= computeOffsetWithCorrection(initalOffset);
-
-		storePosition();
-		fViewer.setSelectedRange(invocationOffset, 0);
-		fViewer.revealRange(invocationOffset, 0);
+		if (invocationOffset != -1) {
+			storePosition();
+			fViewer.setSelectedRange(invocationOffset, 0);
+			fViewer.revealRange(invocationOffset, 0);
+		} else {
+			fPosition= null;
+		}
 		
 		String errorMsg= super.showPossibleCompletions();
 
@@ -134,17 +137,17 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	 * to right and restarting at end of line if the
 	 * beginning of the line is reached.
 	 * 
-	 * @return an offset where corrections are available or initalOffset if none
+	 * @return an offset where corrections are available or -1 if none
 	 */
 	private int computeOffsetWithCorrection(int initalOffset) {
 		if (fViewer == null || fViewer.getDocument() == null)
-			return initalOffset;
+			return -1;
 		
 		IRegion lineInfo= null;
 		try {
 			lineInfo= fViewer.getDocument().getLineInformationOfOffset(initalOffset);
 		} catch (BadLocationException ex) {
-			return initalOffset;
+			return -1;
 		}
 		int startOffset= lineInfo.getOffset();
 		int endOffset= startOffset + lineInfo.getLength();
@@ -153,7 +156,7 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		if (result > 0)
 			return result;
 		else
-			return initalOffset;
+			return -1;
 	}
 
 	/**
