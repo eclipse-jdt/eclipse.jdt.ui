@@ -40,6 +40,7 @@ public class JdtTextTestSuite {
 		suite.addTest(JavaPartitionerTest.suite());
 		suite.addTest(PartitionTokenScannerTest.suite());
 		suite.addTest(StringsTest.suite());
+		suite.addTest(MarkOccurrenceTest.suite());
 		//$JUnit-END$
 		
 		suite.addTest(SpellingTestSuite.suite());

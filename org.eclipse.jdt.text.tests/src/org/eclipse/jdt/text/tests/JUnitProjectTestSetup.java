@@ -23,7 +23,7 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
  * <p>
  * - the project name is "JUnit_" + current time
  * - the source folder is called "src"
- * - the bin folder is called "bin"
+ * - the output folder is called "bin"
  * </p>
  * 
  * @since 3.1

@@ -19,6 +19,13 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.zip.ZipFile;
 
+import junit.framework.Assert;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -30,10 +37,6 @@ import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.wizards.datatransfer.ImportOperation;
@@ -104,6 +107,33 @@ public class JavaProjectHelper {
 		
 		return jproject;	
 	}
+	
+	/**
+	 * Creates a Java project with JUnit source.
+	 * 
+	 * @param projectName the project name
+	 * @param srcContainerName the source container name
+	 * @param outputFolderName the output folder name
+	 * @return the IJavaProject
+	 * @throws CoreException
+	 * @throws IOException
+	 * @throws InvocationTargetException
+	 * @since 3.1
+	 */	
+	public static IJavaProject createJavaProjectWithJUnitSource(String projectName, String srcContainerName, String outputFolderName) throws CoreException, IOException, InvocationTargetException {
+		IJavaProject project= createJavaProject(projectName, outputFolderName); //$NON-NLS-2$
+		
+		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(project, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
+		Assert.assertNotNull(jdk);
+		
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		Assert.assertTrue(junitSrcArchive != null && junitSrcArchive.exists());
+		
+		JavaProjectHelper.addSourceContainerWithImport(project, srcContainerName, junitSrcArchive);
+		
+		return project;
+	}
+
 	
 	/**
 	 * Sets the compiler options to 1.5
