@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import java.util.List;
@@ -128,6 +127,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	/**
 	 * Provides hover information for the given Java elements.
 	 * 
+	 * @param javaElements the Java elements for which to provide hover information
 	 * @return the hover information string
 	 * @since 2.1
 	 */
@@ -167,7 +167,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 
 	/**
 	 * Returns the array of valid key sequence bindings for the
-	 * show tooltip description command.
+	 * show tool tip description command.
 	 * 
 	 * @return the array with the {@link KeySequence}s
 	 * 
