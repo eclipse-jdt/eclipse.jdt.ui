@@ -189,8 +189,9 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		int offset= region.getOffset();
 		int length= region.getLength();
 
-		int vOffset= getInclusiveTopIndexStartOffset();		
-		int vLength= fSourceViewer.getBottomIndexEndOffset();		
+		int vOffset= getInclusiveTopIndexStartOffset();
+		// http://bugs.eclipse.org/bugs/show_bug.cgi?id=17147
+		int vLength= fSourceViewer.getBottomIndexEndOffset() + 1;		
 		
 		for (Iterator e = fProblemPositions.iterator(); e.hasNext();) {
 			Position p = (Position) e.next();
