@@ -19,57 +19,8 @@ import java.util.Properties;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Widget;
-
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.FontRegistry;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.viewers.*;
-import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.IWizardPage;
-
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.help.WorkbenchHelp;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.nls.KeyValuePair;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
@@ -87,9 +38,71 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.FontRegistry;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnLayoutData;
+import org.eclipse.jface.viewers.ColumnPixelData;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ICellModifier;
+import org.eclipse.jface.viewers.IFontProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableLayout;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Widget;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 class ExternalizeWizardPage extends UserInputWizardPage {
 
@@ -814,26 +827,31 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private void createTableComposite(Composite parent) {
 		Composite comp= new Composite(parent, SWT.NONE);
 		comp.setLayoutData(new GridData(GridData.FILL_BOTH));
-		GridLayout gl= new GridLayout();
-		gl.marginWidth= 0;
-		gl.marginHeight= 0;
-		comp.setLayout(gl);
 		
-		Composite labelComp= new Composite(comp, SWT.NONE);
-		gl= new GridLayout();
-		gl.numColumns= 2;
-		gl.marginWidth= 0;
-		gl.marginHeight= 0;
-		labelComp.setLayout(gl);
-		labelComp.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-		
-		Label l= new Label(labelComp, SWT.NONE);
+		FormLayout fl= new FormLayout();
+		fl.marginWidth= 0;
+		fl.marginHeight= 0;
+		comp.setLayout(fl);
+				
+		Label l= new Label(comp, SWT.NONE);
 		l.setText(NLSUIMessages.getString("ExternalizeWizardPage.strings_to_externalize")); //$NON-NLS-1$
-		l.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		FormData formData = new FormData();
+		formData.left = new FormAttachment(0,0);
+		l.setLayoutData(formData);
 		
-		fFilterCheckBox= new Button(labelComp, SWT.CHECK);
+		Control tableControl= createTable(comp);
+		formData = new FormData();
+		formData.top = new FormAttachment(l, 5);
+		formData.left = new FormAttachment(0,0);
+		formData.right = new FormAttachment(100,0);
+		formData.bottom = new FormAttachment(100,0);
+		tableControl.setLayoutData(formData);
+		
+		fFilterCheckBox= new Button(comp, SWT.CHECK);
 		fFilterCheckBox.setText(NLSUIMessages.getString("ExternalizeWizardPage.filter.label")); //$NON-NLS-1$
-		fFilterCheckBox.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		formData = new FormData();
+		formData.right = new FormAttachment(100,0);
+		fFilterCheckBox.setLayoutData(formData);
 		fFilterCheckBox.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				doFilterCheckBoxPressed();
@@ -843,9 +861,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			}
 		});
 		fFilterCheckBox.setSelection(hasNewOrMissingSubstitutions());
-
-		Control tableControl= createTable(comp);
-		tableControl.setLayoutData(new GridData(GridData.FILL_BOTH));
 	}
 	
 	private boolean hasNewOrMissingSubstitutions() {
