@@ -13,8 +13,6 @@ package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.TestCase;
 
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Control;
@@ -26,7 +24,7 @@ import org.eclipse.test.performance.PerformanceMeter;
 import org.eclipse.ui.IEditorPart;
 
 public abstract class ScrollEditorTest extends TestCase {
-
+	
 	private static final int[] CTRL_HOME= new int[] { SWT.CTRL, SWT.HOME };
 	private static final int[] CTRL_DOWN= new int[] { SWT.CTRL, SWT.ARROW_DOWN };
 	private static final int[] PG_DOWN= new int[] { SWT.PAGE_DOWN };
@@ -73,76 +71,61 @@ public abstract class ScrollEditorTest extends TestCase {
 	};
 	
 	private PerformanceMeter fPerformanceMeter;
-	protected IEditorPart fEditor;
-	private ScrollingMode fMode;
-	private boolean fPreloadEvents= false;
 	
-	protected ScrollEditorTest() {
-		setScrollingMode(PAGE_WISE);
-	}
-
-	/**
-	 * Sets the scrolling mode, defaults to PAGE_WISE.
-	 * 
-	 * @param mode the new scrolling mode
-	 */
-	protected void setScrollingMode(ScrollingMode mode) {
-		fMode= mode;
-	}
-
-	protected void setPreloadEvents(boolean preloadEvents) {
-		fPreloadEvents= preloadEvents;
-	}
-
 	protected void setUp() throws Exception {
-		fPerformanceMeter= createPerformanceMeter();
+		fPerformanceMeter= Performance.getDefault().createPerformanceMeter(this);
 		EditorTestHelper.bringToTop();
-		fEditor= EditorTestHelper.openInEditor(getFile(), true);
-		EditorTestHelper.calmDown(3000, 10000, 100);
 	}
-
-	protected PerformanceMeter createPerformanceMeter() {
-		return Performance.getDefault().createPerformanceMeter(this);
-	}
-
-	protected abstract IFile getFile();
-
-	protected void tearDown() throws Exception {
-		EditorTestHelper.closeAllEditors();
-	}
-
-	protected void measureScrolling(int nOfRuns) {
-		Display display= SWTEventHelper.getActiveDisplay();
-		
-		StyledText text= (StyledText) fEditor.getAdapter(Control.class);
-		int numberOfLines= text.getLineCount();
-		int visibleLinesInViewport= text.getClientArea().height / text.getLineHeight();
-		int operations= fMode.computeOperations(numberOfLines, visibleLinesInViewport);
-		
-		for (int i= 0; i < nOfRuns; i++) {
-			if (fPreloadEvents) {
-				for (int j= 0; j < operations; j++) {
-					// avoid overhead: assertTrue(text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1);
-					SWTEventHelper.pressKeyCodeCombination(display, fMode.SCROLL_COMBO, false);
+	
+	protected void measureScrolling(String file, ScrollingMode mode, boolean preload, int nOfRuns) throws Exception {
+		IEditorPart editor= null;
+		try {
+			editor= EditorTestHelper.openInEditor(ResourceTestHelper.findFile(file), true);
+			EditorTestHelper.calmDown(3000, 10000, 100);
+			
+			setUp(editor);
+			
+			Display display= SWTEventHelper.getActiveDisplay();
+			
+			StyledText text= (StyledText) editor.getAdapter(Control.class);
+			int numberOfLines= text.getLineCount();
+			int visibleLinesInViewport= text.getClientArea().height / text.getLineHeight();
+			int operations= mode.computeOperations(numberOfLines, visibleLinesInViewport);
+			
+			for (int i= 0; i < nOfRuns; i++) {
+				if (preload) {
+					for (int j= 0; j < operations; j++) {
+						// avoid overhead: assertTrue(text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1);
+						SWTEventHelper.pressKeyCodeCombination(display, mode.SCROLL_COMBO, false);
+					}
+					fPerformanceMeter.start();
+					EditorTestHelper.runEventQueue(100);
+					fPerformanceMeter.stop();
+				} else {
+					fPerformanceMeter.start();
+					for (int j= 0; j < operations; j++) {
+						// avoid overhead: assertTrue(text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1);
+						SWTEventHelper.pressKeyCodeCombination(display, mode.SCROLL_COMBO);
+					}
+					fPerformanceMeter.stop();
+					EditorTestHelper.runEventQueue(100);
 				}
-				fPerformanceMeter.start();
+				assertTrue("TopIndex: "+text.getTopIndex() + " visibleLines: "+visibleLinesInViewport + " totalLines: " + numberOfLines + " operations: " + operations, text.getTopIndex() + visibleLinesInViewport >= numberOfLines - 1);
+				SWTEventHelper.pressKeyCodeCombination(display, mode.HOME_COMBO);
 				EditorTestHelper.runEventQueue(100);
-				fPerformanceMeter.stop();
-			} else {
-				fPerformanceMeter.start();
-				for (int j= 0; j < operations; j++) {
-					// avoid overhead: assertTrue(text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1);
-					SWTEventHelper.pressKeyCodeCombination(display, fMode.SCROLL_COMBO);
-				}
-				fPerformanceMeter.stop();
-				EditorTestHelper.runEventQueue(100);
+				assertEquals(0, text.getTopIndex());
 			}
-			assertTrue("TopIndex: "+text.getTopIndex() + " visibleLines: "+visibleLinesInViewport + " totalLines: " + numberOfLines + " operations: " + operations, text.getTopIndex() + visibleLinesInViewport >= numberOfLines - 1);
-			SWTEventHelper.pressKeyCodeCombination(display, fMode.HOME_COMBO);
-			EditorTestHelper.runEventQueue(100);
-			assertEquals(0, text.getTopIndex());
+			fPerformanceMeter.commit();
+			Performance.getDefault().assertPerformance(fPerformanceMeter);
+		} finally {
+			tearDown(editor);
+			EditorTestHelper.closeAllEditors();
 		}
-		fPerformanceMeter.commit();
-		Performance.getDefault().assertPerformance(fPerformanceMeter);
+	}
+
+	protected void setUp(IEditorPart editor) throws Exception {
+	}
+
+	protected void tearDown(IEditorPart editor) throws Exception {
 	}
 }
