@@ -255,12 +255,6 @@ public abstract class RenameMethodRefactoring extends MethodRefactoring implemen
 		else return (JavaModelUtility.isMainMethod(method));
 	}
 	
-	private static String computeErrorMessage(IMethod method, String key){
-		return RefactoringCoreMessages.getFormattedString(
-			key,
-			new String[]{method.getElementName(), method.getDeclaringType().getFullyQualifiedName()});
-	}
-	
 	private RefactoringStatus checkIfConstructorName(IMethod method){
 		return Checks.checkIfConstructorName(method, fNewName, method.getDeclaringType().getElementName());
 	}
@@ -272,16 +266,17 @@ public abstract class RenameMethodRefactoring extends MethodRefactoring implemen
 			
 			result.merge(checkIfConstructorName(method));
 			
+			String[] msgData= new String[]{method.getElementName(), method.getDeclaringType().getFullyQualifiedName()};
 			if (! method.exists()){
-				result.addFatalError(computeErrorMessage(method, "RenameMethodRefactoring.not_in_model")); //$NON-NLS-1$
+				result.addFatalError(RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.not_in_model", msgData)); //$NON-NLS-1$ 
 				continue;
 			}	
 			if (method.isBinary())
-				result.addFatalError(computeErrorMessage(method, "RenameMethodRefactoring.no_binary")); //$NON-NLS-1$
+				result.addFatalError(RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.no_binary", msgData)); //$NON-NLS-1$
 			if (method.isReadOnly())
-				result.addFatalError(computeErrorMessage(method, "RenameMethodRefactoring.no_read_only")); //$NON-NLS-1$
+				result.addFatalError(RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.no_read_only", msgData));//$NON-NLS-1$
 			if (Flags.isNative(method.getFlags()))
-				result.addError(computeErrorMessage(method, "RenameMethodRefactoring.no_native_1")); //$NON-NLS-1$
+				result.addError(RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.no_native_1", msgData));//$NON-NLS-1$
 		}
 		return result;	
 	}
