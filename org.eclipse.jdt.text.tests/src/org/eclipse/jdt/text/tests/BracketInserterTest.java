@@ -94,6 +94,9 @@ public class BracketInserterTest extends TestCase {
 	private IJavaProject fProject;
 
 	protected void setUp() throws Exception {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
+
 		setUpProject(JavaCore.VERSION_1_4);
 		setUpEditor();
 	}
@@ -130,6 +133,10 @@ public class BracketInserterTest extends TestCase {
 	protected void tearDown() throws Exception {
 		EditorTestHelper.closeAllEditors();
 		JavaProjectHelper.delete(fProject);
+
+		// reset to defaults
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
 	}
 	
 	public void testInsertClosingParenthesis() throws BadLocationException {
