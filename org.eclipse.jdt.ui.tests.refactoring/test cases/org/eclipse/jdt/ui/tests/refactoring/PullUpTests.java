@@ -1369,5 +1369,33 @@ public class PullUpTests extends RefactoringTest {
 		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
 	}
 	
+	public void testEnablement0() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement1() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IType typeD= cu.getType("D");
+		IMember[] members= {typeB, typeD};
+		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement2() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("Outer").getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement3() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+	}
 }
 
