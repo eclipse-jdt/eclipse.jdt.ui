@@ -166,6 +166,64 @@ public abstract class DisplayHelper {
 		return events;
 	}
 
+	/**
+	 * Until {@link #condition()} becomes <code>true</code> or the timeout
+	 * elapses, call {@link Display#sleep()} and run the event loop.
+	 * <p>
+	 * If <code>timeout &lt; 0</code>, the event loop is never driven and
+	 * only the condition is checked. If <code>timeout == 0</code>, the event
+	 * loop is driven at most once, but <code>Display.sleep()</code> is never
+	 * invoked.
+	 * </p>
+	 * <p>
+	 * The condition gets rechecked every <code>interval</code> milliseconds, even
+	 * if no events were read from the queue.
+	 * </p>
+	 * 
+	 * @param display the display to run the event loop of
+	 * @param timeout the timeout in milliseconds
+	 * @param interval the interval to re-check the condition in milliseconds
+	 * @return <code>true</code> if the condition became <code>true</code>,
+	 *         <code>false</code> if the timeout elapsed
+	 */
+	public final boolean waitForCondition(Display display, long timeout, long interval) {
+		// if the condition already holds, succeed
+		if (condition())
+			return true;
+		
+		if (timeout < 0)
+			return false;
+		
+		// if driving the event loop once makes the condition hold, succeed
+		// without spawning a thread.
+		driveEventQueue(display);
+		if (condition())
+			return true;
+		
+		// if the timeout is negative or zero, fail
+		if (timeout == 0)
+			return false;
+	
+		// repeatedly sleep until condition becomes true or timeout elapses
+		DisplayWaiter waiter= new DisplayWaiter(display, true);
+		long currentTimeMillis= System.currentTimeMillis();
+		long finalTimeout= timeout + currentTimeMillis;
+		if (finalTimeout < currentTimeMillis)
+			finalTimeout= Long.MAX_VALUE;
+		boolean condition;
+		try {
+			do {
+				waiter.restart(interval);
+				if (display.sleep())
+					driveEventQueue(display);
+				condition= condition();
+			} while (!condition && finalTimeout > System.currentTimeMillis());
+		} finally {
+			waiter.stop();
+		}
+		return condition;
+	}
+
 }
 
 /**
@@ -431,7 +489,9 @@ final class DisplayWaiter {
 			private void waitForTimeout() throws InterruptedException, ThreadChangedException {
 				long delta;
 				while (isState(RUNNING) && (delta = fNextTimeout - System.currentTimeMillis()) > 0) {
-					fMutex.wait(Math.max(delta, 50)); // wait at least 50ms in order to avoid timing out before the display is going to sleep
+					delta= Math.max(delta, 50); // wait at least 50ms in order to avoid timing out before the display is going to sleep
+					Logger.global.finest("sleeping for " + delta + "ms");
+					fMutex.wait(delta);
 					checkThread();
 				}
 			}
@@ -485,11 +545,11 @@ final class DisplayWaiter {
 	 */
 	private boolean tryTransition(int possibleStates, int nextState) {
 		if (isState(possibleStates)) {
-			Logger.global.finer("DisplayWaiter.tryTransition(): " + fState + " > " + nextState);
+			Logger.global.finer(name(fState) + " > " + name(nextState) + " (" + name(possibleStates) + ")");
 			fState= nextState;
 			return true;
 		}
-		Logger.global.finest("DisplayWaiter.tryTransition(): failed " + fState + " > " + nextState);
+		Logger.global.finest("noTransition" + name(fState) + " !> " + name(nextState) + " (" + name(possibleStates) + ")");
 		return false;
 	}
 	
@@ -501,8 +561,8 @@ final class DisplayWaiter {
 	 * @param nextState the state to transition to
 	 */
 	private void checkedTransition(int possibleStates, int nextState) {
-		Logger.global.finer("DisplayWaiter.checkedTransition(): " + fState + " > " + nextState);
 		assertStates(possibleStates);
+		Logger.global.finer(name(fState) + " > " + name(nextState));
 		fState= nextState;
 	}
 	
@@ -528,4 +588,32 @@ final class DisplayWaiter {
 	private boolean isState(int states) {
 		return (states & fState) == fState;
 	}
+	
+	/**
+	 * Pretty print the given states.
+	 * 
+	 * @param states the states
+	 * @return a string representation of the states
+	 */
+	private String name(int states) {
+		StringBuffer buf= new StringBuffer();
+		boolean comma= false;
+		if ((states & RUNNING) == RUNNING) {
+			buf.append("RUNNING");
+			comma= true;
+		}
+		if ((states & STOPPED) == STOPPED) {
+			if (comma)
+				buf.append(",");
+			buf.append("STOPPED");
+			comma= true;
+		}
+		if ((states & IDLE) == IDLE) {
+			if (comma)
+				buf.append(",");
+			buf.append("IDLE");
+		}
+		return buf.toString();
+	}
+
 }
