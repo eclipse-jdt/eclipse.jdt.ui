@@ -176,18 +176,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		pm.beginTask("", 1);//$NON-NLS-1$
 		try{
 			RefactoringStatus result= new RefactoringStatus();		
-			
-			if (getInputClassPackage().getCompilationUnit(getCuNameForNewInterface()).exists()){
-				String pattern= "Compilation Unit named ''{0}'' already exists in package ''{1}''";
-				String message= MessageFormat.format(pattern, new String[]{getCuNameForNewInterface(), getInputClassPackage().getElementName()});
-				result.addFatalError(message);
-			}	
-				
-			result.merge(checkNewInterfaceName(fNewInterfaceName));
-			result.merge(checkInterfaceTypeName());
-			if (result.hasFatalError())
-				return result;
-			
+						
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 			result.merge(validateModifiesFiles());
 			return result;
@@ -208,11 +197,26 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	public RefactoringStatus checkNewInterfaceName(String newName){
-		RefactoringStatus result= Checks.checkTypeName(newName);
-		if (result.hasFatalError())
+		try {
+			RefactoringStatus result= Checks.checkTypeName(newName);
+			if (result.hasFatalError())
+				return result;
+			result.merge(Checks.checkCompilationUnitName(newName + ".java"));
+			if (result.hasFatalError())
+				return result;
+	
+			if (getInputClassPackage().getCompilationUnit(getCuNameForNewInterface()).exists()){
+				String pattern= "Compilation Unit named ''{0}'' already exists in package ''{1}''";
+				String message= MessageFormat.format(pattern, new String[]{getCuNameForNewInterface(), getInputClassPackage().getElementName()});
+				result.addFatalError(message);
+				if (result.hasFatalError())
+					return result;
+			}	
+			result.merge(checkInterfaceTypeName());
 			return result;
-		result.merge(Checks.checkCompilationUnitName(newName + ".java"));
-		return result;
+		} catch (JavaModelException e) {
+			return RefactoringStatus.createFatalErrorStatus("Internal Error. Please see log for details.");
+		}
 	}
 
 	private IFile[] getAllFilesToModify() throws CoreException{
