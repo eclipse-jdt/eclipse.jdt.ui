@@ -15,9 +15,9 @@ public class StructureSelectHistoryAction extends Action implements IUpdate {
 	private SelectionHistory fHistory;
 	
 	public StructureSelectHistoryAction(CompilationUnitEditor editor, SelectionHistory history) {
-		super(JavaEditorMessages.getString("StructureSelectHistory.label"));
-		setToolTipText(JavaEditorMessages.getString("StructureSelectHistory.tooltip"));
-		setDescription(JavaEditorMessages.getString("StructureSelectHistory.description"));
+		super(JavaEditorMessages.getString("StructureSelectHistory.label")); //$NON-NLS-1$
+		setToolTipText(JavaEditorMessages.getString("StructureSelectHistory.tooltip")); //$NON-NLS-1$
+		setDescription(JavaEditorMessages.getString("StructureSelectHistory.description")); //$NON-NLS-1$
 		Assert.isNotNull(history);
 		Assert.isNotNull(editor);
 		fHistory= history;

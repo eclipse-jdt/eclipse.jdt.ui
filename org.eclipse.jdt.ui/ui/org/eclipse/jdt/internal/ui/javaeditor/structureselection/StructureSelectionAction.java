@@ -42,7 +42,7 @@ public abstract class StructureSelectionAction extends Action {
 	 * This constructor is for testing purpose only.
 	 */
 	protected StructureSelectionAction() {
-		super("");
+		super(""); //$NON-NLS-1$
 	}
 	
 	/* (non-JavaDoc)

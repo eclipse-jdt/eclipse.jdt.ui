@@ -11,9 +11,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 public class StructureSelectNextAction extends StructureSelectionAction{
 	
 	public StructureSelectNextAction(CompilationUnitEditor editor, SelectionHistory history) {
-		super(JavaEditorMessages.getString("StructureSelectNext.label"), editor, history);
-		setToolTipText(JavaEditorMessages.getString("StructureSelectNext.tooltip"));
-		setDescription(JavaEditorMessages.getString("StructureSelectNext.description"));
+		super(JavaEditorMessages.getString("StructureSelectNext.label"), editor, history); //$NON-NLS-1$
+		setToolTipText(JavaEditorMessages.getString("StructureSelectNext.tooltip")); //$NON-NLS-1$
+		setDescription(JavaEditorMessages.getString("StructureSelectNext.description")); //$NON-NLS-1$
 	}
 	
 	/*

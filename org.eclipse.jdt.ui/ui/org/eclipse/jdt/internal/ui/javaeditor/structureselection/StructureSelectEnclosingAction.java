@@ -11,9 +11,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 public class StructureSelectEnclosingAction extends StructureSelectionAction {
 
 	public StructureSelectEnclosingAction(CompilationUnitEditor editor, SelectionHistory history) {
-		super(JavaEditorMessages.getString("StructureSelectEnclosing.label"), editor, history);
-		setToolTipText(JavaEditorMessages.getString("StructureSelectEnclosing.tooltip"));
-		setDescription(JavaEditorMessages.getString("StructureSelectEnclosing.description"));
+		super(JavaEditorMessages.getString("StructureSelectEnclosing.label"), editor, history); //$NON-NLS-1$
+		setToolTipText(JavaEditorMessages.getString("StructureSelectEnclosing.tooltip")); //$NON-NLS-1$
+		setDescription(JavaEditorMessages.getString("StructureSelectEnclosing.description")); //$NON-NLS-1$
 	}
 	
 	/*

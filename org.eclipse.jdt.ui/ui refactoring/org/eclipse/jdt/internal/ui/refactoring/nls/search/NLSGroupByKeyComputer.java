@@ -27,7 +27,7 @@ class NLSGroupByKeyComputer implements IGroupByKeyComputer {
 		if (marker == null || marker.getResource() == null)
 			return null;
 		
-		if (!marker.getResource().getName().endsWith(".java"))
+		if (!marker.getResource().getName().endsWith(".java")) //$NON-NLS-1$
 			return marker.getResource();
 		
 		IJavaElement jElement= getJavaElement(marker);
