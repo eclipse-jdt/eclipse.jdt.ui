@@ -288,15 +288,15 @@ public class TemplateCollector implements ICompletionRequestor {
 			if (variable.equals(ARRAY)) {
 				LocalVariable[] localArrays= findLocalArrays();
 				
-				if (localArrays.length == 1)
-					return localArrays[0].name;
+				if (localArrays.length > 0)
+					return localArrays[localArrays.length - 1].name;
 	
 			// guess array base type
 			} else if (variable.equals(ARRAY_TYPE)) {
 				LocalVariable[] localArrays= findLocalArrays();
 				
-				if (localArrays.length == 1) {
-					String typeName= localArrays[0].typeName;
+				if (localArrays.length > 0) {
+					String typeName= localArrays[localArrays.length - 1].typeName;
 					return typeName.substring(0, typeName.indexOf('['));
 				}
 	
@@ -304,8 +304,8 @@ public class TemplateCollector implements ICompletionRequestor {
 			} else if (variable.equals(ARRAY_ELEMENT)) {
 				LocalVariable[] localArrays= findLocalArrays();
 				
-				if (localArrays.length == 1) {
-					String typeName= localArrays[0].typeName;
+				if (localArrays.length > 0) {
+					String typeName= localArrays[localArrays.length - 1].typeName;
 					String baseTypeName= typeName.substring(0, typeName.indexOf('['));
 					String variableName= typeToVariable(baseTypeName);
 					
@@ -317,8 +317,8 @@ public class TemplateCollector implements ICompletionRequestor {
 			} else if (variable.equals(COLLECTION)) {
 				LocalVariable[] localCollections= findLocalCollections();
 				
-				if (localCollections.length == 1)
-					return localCollections[0].name;
+				if (localCollections.length > 0)
+					return localCollections[localCollections.length - 1].name;
 					
 			// find non colliding index
 			} else if (variable.equals(INDEX)) {
@@ -495,9 +495,11 @@ public class TemplateCollector implements ICompletionRequestor {
 		Assert.isTrue(string.length() > 0);		
 		char first= string.charAt(0);
 		
+		// base type
 		if (Character.isLowerCase(first))
-			return null;
-			
+			return "value"; //$NON-NLS-1$
+
+		// class or interface
 		return Character.toLowerCase(first) + string.substring(1);
 	}
 	
