@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
@@ -59,8 +60,8 @@ public class MethodChecks {
 		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, inInterface, RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE);
 	}
 	
-	//works for virtual methods
-	private static IMethod isDeclaredInInterface(IMethod method, IProgressMonitor pm) throws JavaModelException {
+	public static IMethod isDeclaredInInterface(IMethod method, IProgressMonitor pm) throws JavaModelException {
+		Assert.isTrue(isVirtual(method));
 		try{	
 			pm.beginTask("", 4); //$NON-NLS-1$
 			ITypeHierarchy hier= method.getDeclaringType().newTypeHierarchy(new SubProgressMonitor(pm, 1));
