@@ -138,6 +138,9 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
         		doThresholdChanged();
         	}
         }
+        
+        public void doubleClicked(ListDialogField field) {
+        }
 	}
 
 	private ListDialogField fOrderListField;

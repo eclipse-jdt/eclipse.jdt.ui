@@ -18,5 +18,10 @@ public interface IListAdapter {
 	 * The selection of the list has changed.
 	 */	
 	void selectionChanged(ListDialogField field);
+	
+	/**
+	 * En entry in the list has been double clicked
+	 */
+	void doubleClicked(ListDialogField field);	
 
 }

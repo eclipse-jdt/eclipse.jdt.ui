@@ -145,6 +145,11 @@ public class DialogFieldExample {
 		// -------- IDialogFieldListener
 		public void dialogFieldChanged(DialogField field) {
 		}
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#doubleClicked(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
+		 */
+		public void doubleClicked(ListDialogField field) {
+		}
 	}	
 	
 	public DialogFieldExample run () {

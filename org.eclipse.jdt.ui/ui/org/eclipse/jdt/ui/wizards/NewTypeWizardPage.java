@@ -528,6 +528,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		public void dialogFieldChanged(DialogField field) {
 			typePageDialogFieldChanged(field);
 		}
+		
+		public void doubleClicked(ListDialogField field) {
+		}
 	}
 	
 	private void typePageChangeControlPressed(DialogField field) {

@@ -274,6 +274,9 @@ public class CompilerConfigurationBlock {
 			public void selectionChanged(ListDialogField field) {
 				field.enableButton(3, field.getSelectedElements().size() == 1);
 			}
+			
+			public void doubleClicked(ListDialogField field) {
+			}	
 		};
 		String[] buttons= new String[] {
 			/* 0 */ JavaUIMessages.getString("CompilerConfigurationBlock.markers.tasks.add.button"),

@@ -182,7 +182,10 @@ public class VariableBlock {
 		
 		public void selectionChanged(ListDialogField field) {
 			doSelectionChanged(field);
-		}				
+		}
+		
+		public void doubleClicked(ListDialogField field) {
+		}			
 			
 		// ---------- IDialogFieldListener --------
 	

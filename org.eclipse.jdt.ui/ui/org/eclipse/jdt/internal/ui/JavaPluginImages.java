@@ -209,6 +209,9 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_FILE_CHANGE= create(T_OBJ, "file_change.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_TEXT_EDIT= create(T_OBJ, "text_edit.gif"); //$NON-NLS-1$
 
+	public static final ImageDescriptor DESC_OBJS_EXCLUSION_FILTER_ATTRIB= create(T_OBJ, "exclusion_filter_attrib.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OBJS_OUTPUT_FOLDER_ATTRIB= create(T_OBJ, "output_folder_attrib.gif"); //$NON-NLS-1$
+
 	public static final ImageDescriptor DESC_OBJS_REFACTORING_FATAL= createManaged(T_OBJ, IMG_OBJS_REFACTORING_FATAL);
 	public static final ImageDescriptor DESC_OBJS_REFACTORING_ERROR= createManaged(T_OBJ, IMG_OBJS_REFACTORING_ERROR);
 	public static final ImageDescriptor DESC_OBJS_REFACTORING_WARNING= createManaged(T_OBJ, IMG_OBJS_REFACTORING_WARNING);

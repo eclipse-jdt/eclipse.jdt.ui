@@ -56,6 +56,9 @@ public class HistoryListAction extends Action {
 				public void selectionChanged(ListDialogField field) {
 					doSelectionChanged();
 				}
+				
+				public void doubleClicked(ListDialogField field) {
+				}				
 			};
 		
 			JavaElementLabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_QUALIFIED | JavaElementLabelProvider.SHOW_ROOT);

@@ -27,6 +27,8 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -92,6 +94,8 @@ public class ListDialogField extends DialogField {
 	private int fRemoveButtonIndex;
 	private int fUpButtonIndex;
 	private int fDownButtonIndex;
+	
+	private int fDefaultSelectIndex;
 	
 	private Label fLastSeparator;
 	
@@ -833,7 +837,7 @@ public class ListDialogField extends DialogField {
 	
 	// ------- ListViewerAdapter
 	
-	private class ListViewerAdapter implements IStructuredContentProvider, ISelectionChangedListener {
+	private class ListViewerAdapter implements IStructuredContentProvider, ISelectionChangedListener, IDoubleClickListener {
 
 		// ------- ITableContentProvider Interface ------------
 	
@@ -856,6 +860,12 @@ public class ListDialogField extends DialogField {
 		
 		public void selectionChanged(SelectionChangedEvent event) {
 			doListSelected(event);
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.viewers.IDoubleClickListener#doubleClick(org.eclipse.jface.viewers.DoubleClickEvent)
+		 */
+		public void doubleClick(DoubleClickEvent event) {
 		}
 
 	}

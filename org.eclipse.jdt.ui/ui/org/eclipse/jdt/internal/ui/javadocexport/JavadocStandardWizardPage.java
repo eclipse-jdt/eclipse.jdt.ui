@@ -531,6 +531,9 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 				fListDialogField.enableButton(2, true);
 			}
 		}
+		
+		public void doubleClicked(ListDialogField field) {
+		}		
 
 	}
 

@@ -46,7 +46,6 @@ import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.WorkbenchContentProvider;
@@ -726,7 +725,7 @@ public class BuildPathsBlock {
 			initSelection= fWorkspaceRoot.findMember(fOutputLocationPath);
 		}
 		
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
+		FolderSelectionDialog dialog= new FolderSelectionDialog(getShell(), lp, cp);
 		dialog.setTitle(NewWizardMessages.getString("BuildPathsBlock.ChooseOutputFolderDialog.title")); //$NON-NLS-1$
 		dialog.setValidator(validator);
 		dialog.setMessage(NewWizardMessages.getString("BuildPathsBlock.ChooseOutputFolderDialog.description")); //$NON-NLS-1$
@@ -735,7 +734,7 @@ public class BuildPathsBlock {
 		dialog.setInitialSelection(initSelection);
 		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
 		
-		if (dialog.open() == ElementTreeSelectionDialog.OK) {
+		if (dialog.open() == FolderSelectionDialog.OK) {
 			return (IContainer)dialog.getFirstResult();
 		}
 		return null;

@@ -191,15 +191,14 @@ class CPListLabelProvider extends LabelProvider {
 	
 	private String getVariableString(IPath path) {
 		String name= path.makeRelative().toString();
-		StringBuffer buf= new StringBuffer(name);
 		IPath entryPath= JavaCore.getClasspathVariable(path.segment(0));
 		if (entryPath != null) {
-			buf.append(" - "); //$NON-NLS-1$
-			buf.append(entryPath.append(path.removeFirstSegments(1)).toOSString());
+			String appended= entryPath.append(path.removeFirstSegments(1)).toOSString();
+			return NewWizardMessages.getFormattedString("CPListLabelProvider.twopart", new String[] { name, appended }); //$NON-NLS-1$
+		} else {
+			return name;
 		}
-		return buf.toString();
 	}
-	
 	
 	private ImageDescriptor getCPListElementBaseImage(CPListElement cpentry) {
 		switch (cpentry.getEntryKind()) {
@@ -251,13 +250,13 @@ class CPListLabelProvider extends LabelProvider {
 		} else if (element instanceof CPListElementAttribute) {
 			String key= ((CPListElementAttribute) element).getKey();
 			if (key.equals(CPListElement.SOURCEATTACHMENT)) {
-				return fRegistry.get(JavaPluginImages.DESC_OBJS_CUNIT);
+				return fRegistry.get(JavaPluginImages.DESC_OBJS_CUNIT); // todo: change image
 			} else if (key.equals(CPListElement.JAVADOC)) {
-				return fRegistry.get(JavaPluginImages.DESC_OBJS_HTMLTAG);
+				return fRegistry.get(JavaPluginImages.DESC_OBJS_HTMLTAG); // todo: change image
 			} else if (key.equals(CPListElement.OUTPUT)) {
-				return fRegistry.get(fFolderImage);
+				return fRegistry.get(JavaPluginImages.DESC_OBJS_OUTPUT_FOLDER_ATTRIB);
 			} else if (key.equals(CPListElement.EXCLUSION)) {
-				return fRegistry.get(JavaPluginImages.DESC_OBJS_ERROR);
+				return fRegistry.get(JavaPluginImages.DESC_OBJS_EXCLUSION_FILTER_ATTRIB);
 			}
 			return  fRegistry.get(fVariableImage);
 		}

@@ -265,7 +265,9 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		 */
 		public void selectionChanged(ListDialogField field) {
 		}
-
+		
+		public void doubleClicked(ListDialogField field) {
+		}
 	}
 
 	private class MemberSortLabelProvider implements ILabelProvider {
