@@ -9,12 +9,11 @@ public class TestWrappedLocal3 {
 		File file= null;
 		
 		int i;
-		/*]*/try {
-			int x; 
-			file.toURL();
+		try {
+			/*[*/int x; 
+			file.toURL();/*]*/
 		} catch (MalformedURLException e) {
-		}/*[*/
-		
+		}
 		i= 20;
 	}
 

@@ -4,6 +4,6 @@ public class TestRuntimeException1 {
 	public void foo() {
 		Class clazz= null;
 		
-		/*]*/clazz.getConstructors();/*[*/
+		/*[*/clazz.getConstructors();/*]*/
 	}
 }

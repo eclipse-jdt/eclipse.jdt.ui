@@ -6,9 +6,9 @@ import java.net.MalformedURLException;
 public class TestSimple {
 	public void foo() {
 		File file= null;
-		/*]*/try {
-			file.toURL();
+		try {
+			/*[*/file.toURL();/*]*/
 		} catch (MalformedURLException e) {
-		}/*[*/
+		}
 	}
 }

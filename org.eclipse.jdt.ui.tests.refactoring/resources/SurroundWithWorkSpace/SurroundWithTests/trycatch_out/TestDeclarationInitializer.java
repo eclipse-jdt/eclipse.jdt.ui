@@ -8,12 +8,11 @@ class TestDeclarationInitializer {
 	public void foo() {
 		File file= null;
 		
-		URL url;
+		/*[*/URL url;/*]*/
 		try {
 			url = file.toURL();
 		} catch (MalformedURLException e) {
-		}/*[*/
-		
+		}
 		url= null;
 	}
 }

@@ -13,11 +13,11 @@ public class TestExceptionOrder {
 	}
 	
 	public void foo() {
-		/*]*/try {
-			throw1();
-			throw2();
+		try {
+			/*[*/throw1();
+			throw2();/*]*/
 		} catch (Exception_2 e) {
 		} catch (Exception_1 e) {
-		}/*[*/
+		}
 	}	
 }

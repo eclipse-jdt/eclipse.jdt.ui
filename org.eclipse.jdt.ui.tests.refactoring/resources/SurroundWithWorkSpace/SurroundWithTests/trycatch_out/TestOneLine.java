@@ -7,8 +7,8 @@ public class TestOneLine {
 	public void foo() {
 		File file= null;
 		foo();/*]*/try {
-			file.toURL();
+			file.toURL();/*]*/
 		} catch (MalformedURLException e) {
-		}/*[*/foo();
+		}foo();
 	}
 }

@@ -9,9 +9,9 @@ public class TestInitializerThrowsException {
 	public void foo() {
 		File file= null;
 		
-		/*]*/try {
-			URL url= file.toURL();
+		try {
+			/*[*/URL url= file.toURL();/*]*/
 		} catch (MalformedURLException e) {
-		}/*[*/
+		}
 	}
 }

@@ -8,7 +8,7 @@ public class TestSuperCall {
 	
 	static class A extends TestSuperCall {
 		public void bar() {
-			/*]*/super.foo();/*[*/
+			/*[*/super.foo();/*]*/
 		}
 	}
 }

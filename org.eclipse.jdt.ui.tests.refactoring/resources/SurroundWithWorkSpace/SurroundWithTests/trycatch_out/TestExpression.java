@@ -6,13 +6,12 @@ class TestExpression{
 	void fg(){
 		File file= null;
 		
-		/*]*/int i;
+		/*[*/int i;
 		try {
 			i = 3 * (2 + 1);
-			file.toURL();
+			file.toURL();/*]*/
 		} catch (MalformedURLException e) {
-		}/*[*/
-		
+		}
 		i++;
 	}
 }

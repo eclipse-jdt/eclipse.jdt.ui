@@ -7,6 +7,6 @@ public class TestMultiLine {
 		File file= null;
 		foo();/*]*/file.toURL();
 		file.toURL();
-		file.toURL();/*[*/foo();
+		file.toURL();/*]*/foo();
 	}
 }

@@ -8,9 +8,8 @@ public class TestWrappedLocal3 {
 		File file= null;
 		
 		int i;
-		/*]*/int x; 
-		file.toURL();/*[*/
-		
+		/*[*/int x; 
+		file.toURL();/*]*/
 		i= 20;
 	}
 

@@ -8,9 +8,9 @@ public class TestInitializer {
     private static InputStream input;
 
     static {
-		/*]*/try {
-			input = new FileInputStream("myfile");
+		try {
+			/*[*/input = new FileInputStream("myfile");/*]*/
 		} catch (FileNotFoundException e) {
-		}/*[*/
+		}
     }
 }

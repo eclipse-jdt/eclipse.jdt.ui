@@ -5,7 +5,7 @@ public class TestNested {
 		try {
 			throw new Exception();
 		} catch (Exception e) {
-			/*]*/throw new Exception();/*[*/
+			/*[*/throw new Exception();/*]*/
 		}
 	}
 }

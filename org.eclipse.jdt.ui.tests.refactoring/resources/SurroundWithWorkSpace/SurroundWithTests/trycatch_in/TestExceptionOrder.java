@@ -13,7 +13,7 @@ public class TestExceptionOrder {
 	}
 	
 	public void foo() {
-		/*]*/throw1();
-		throw2();/*[*/
+		/*[*/throw1();
+		throw2();/*]*/
 	}	
 }

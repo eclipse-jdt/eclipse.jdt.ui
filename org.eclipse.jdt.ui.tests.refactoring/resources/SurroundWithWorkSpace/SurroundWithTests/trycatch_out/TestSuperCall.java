@@ -8,10 +8,10 @@ public class TestSuperCall {
 	
 	static class A extends TestSuperCall {
 		public void bar() {
-			/*]*/try {
-				super.foo();
+			try {
+				/*[*/super.foo();/*]*/
 			} catch (IOException e) {
-			}/*[*/
+			}
 		}
 	}
 }

@@ -7,6 +7,6 @@ public class TestInitializer {
     private static InputStream input;
 
     static {
-		/*]*/input = new FileInputStream("myfile");/*[*/
+		/*[*/input = new FileInputStream("myfile");/*]*/
     }
 }
