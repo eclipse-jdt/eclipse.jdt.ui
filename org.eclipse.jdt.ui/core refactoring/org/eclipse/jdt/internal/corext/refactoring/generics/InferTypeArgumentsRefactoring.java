@@ -26,6 +26,10 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -50,10 +54,10 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.InferTypeArgumentsTCModel;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.InferTypeArgumentsTCModel;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -61,12 +65,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-
 public class InferTypeArgumentsRefactoring extends Refactoring {
-
+	
+	private static final String REWRITTEN= "InferTypeArgumentsRefactoring.rewritten"; //$NON-NLS-1$
+	
 	private TextChangeManager fChangeManager;
 	private final IJavaElement[] fElements;
 	private InferTypeArgumentsTCModel fTCModel;
@@ -242,9 +244,8 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	private void rewriteConstraintVariable(ConstraintVariable2 cv, CompilationUnitRewrite rewrite) {
 		//TODO: make this clean
 		if (cv instanceof CollectionElementVariable2) {
-			CollectionElementVariable2 elementCv= (CollectionElementVariable2) cv;
-			ConstraintVariable2 element= elementCv.getElementVariable();
-			if (element instanceof VariableVariable2) {
+			ConstraintVariable2 parentElement= ((CollectionElementVariable2) cv).getParentConstraintVariable();
+			if (parentElement instanceof VariableVariable2) {
 				//TODO: don't change twice (as element variable and as type variable
 //				String variableBindingKey= ((VariableVariable2) element).getVariableBindingKey();
 //				ASTNode node= compilationUnit.findDeclaringNode(variableBindingKey);
@@ -260,19 +261,62 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 //						rewrite.replace(originalType, newType, null); // TODO: description
 //					}
 //				}
-			} else if (element instanceof TypeVariable2) {
-				ASTNode node= ((TypeVariable2) element).getRange().getNode(rewrite.getRoot());
+			} else if (parentElement instanceof TypeVariable2) {
+				TypeVariable2 typeCv= (TypeVariable2) parentElement;
+				ASTNode node= typeCv.getRange().getNode(rewrite.getRoot());
 				if (node instanceof SimpleName) {
-					TType chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(elementCv);
-					if (chosenType == null)
-						return; // couldn't infer an element type
 					Type originalType= (Type) ((SimpleName) node).getParent();
+					
+					// Must rewrite all type arguments in one batch. Do the rewrite when the first one is encountered; skip the others.
+					Object rewritten= originalType.getProperty(REWRITTEN); //$NON-NLS-1$
+					if (rewritten == REWRITTEN)
+						return;
+					originalType.setProperty(REWRITTEN, REWRITTEN);
+					
+					Map elementCvs= fTCModel.getElementVariables(typeCv);
+					ArrayList typeArgumentCvs= new ArrayList();
+					for (Iterator iter= elementCvs.values().iterator(); iter.hasNext();) {
+						CollectionElementVariable2 elementCv= (CollectionElementVariable2) iter.next();
+						int index= elementCv.getDeclarationTypeVariableIndex();
+						if (index != CollectionElementVariable2.NOT_DECLARED_TYPE_VARIABLE_INDEX) {
+							while (index >= typeArgumentCvs.size())
+								typeArgumentCvs.add(null);
+							typeArgumentCvs.set(index, elementCv);
+						}
+					}
+					Type[] typeArguments= new Type[typeArgumentCvs.size()];
+					for (int i= 0; i < typeArgumentCvs.size(); i++) {
+						CollectionElementVariable2 elementCv= (CollectionElementVariable2) typeArgumentCvs.get(i);
+						Type typeArgument;
+						TType chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(elementCv);
+						if (chosenType == null) { // couldn't infer an element type (no constraints)
+							// every guess could be wrong => leave the whole thing raw:
+							return;
+//							ASTNode originalTypeParent= originalType.getParent();
+//							if (originalTypeParent instanceof ClassInstanceCreation) {
+//								//No ? allowed. Take java.lang.Object.
+//								typeArgument= ASTNodeFactory.newType(rewrite.getAST(), rewrite.getImportRewrite().addImport("java.lang.Object")); //$NON-NLS-1$
+//							} else if (originalTypeParent instanceof ArrayCreation || originalTypeParent instanceof InstanceofExpression) {
+//								//Only ? allowed.
+//								typeArgument= rewrite.getAST().newWildcardType();
+//							} else {
+//								//E.g. field type: can put anything. Choosing ? in order to be most constraining.
+//								typeArgument= rewrite.getAST().newWildcardType();
+//							}
+						} else {
+							ITypeBinding[] binding= TypeEnvironment.createTypeBindings(new TType[] {chosenType}, rewrite.getCu().getJavaProject());
+
+							typeArgument= rewrite.getImportRewrite().addImport(binding[0], rewrite.getAST());
+						}
+						typeArguments[i]= typeArgument;
+					}
+					
 					Type movingType= (Type) rewrite.getASTRewrite().createMoveTarget(originalType);
 					ParameterizedType newType= rewrite.getAST().newParameterizedType(movingType);
 					
-					ITypeBinding[] binding= TypeEnvironment.createTypeBindings(new TType[] {chosenType}, rewrite.getCu().getJavaProject());
+					for (int i= 0; i < typeArguments.length; i++)
+						newType.typeArguments().add(typeArguments[i]);
 					
-					newType.typeArguments().add(rewrite.getImportRewrite().addImport(binding[0], rewrite.getAST()));
 					rewrite.getASTRewrite().replace(originalType, newType, null);
 				} //TODO: other node types?
 			}

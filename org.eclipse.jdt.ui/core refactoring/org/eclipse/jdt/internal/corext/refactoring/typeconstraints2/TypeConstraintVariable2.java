@@ -21,6 +21,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 public abstract class TypeConstraintVariable2 extends ConstraintVariable2 {
 
 	private TType fType;
+	private EquivalenceRepresentative fRepresentative;
 
 	/**
 	 * @param typeBindings the type binding
@@ -45,6 +46,14 @@ public abstract class TypeConstraintVariable2 extends ConstraintVariable2 {
 	 */
 	public final TType getType() {
 		return fType;
+	}
+	
+	public EquivalenceRepresentative getRepresentative() {
+		return fRepresentative;
+	}
+	
+	public void setRepresentative(EquivalenceRepresentative representatice) {
+		fRepresentative= representatice;
 	}
 	
 	public String toString() {

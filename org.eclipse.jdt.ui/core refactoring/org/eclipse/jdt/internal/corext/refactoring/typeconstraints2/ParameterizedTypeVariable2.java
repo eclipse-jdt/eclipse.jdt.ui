@@ -11,38 +11,31 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
-import org.eclipse.jdt.internal.corext.Assert;
-
 /**
- * A PlainTypeVariable is a ConstraintVariable which stands for a
- * plain type (without an updatable Source location)
+ * A ParameterizedTypeVariable2 is a ConstraintVariable which stands for
+ * a unique parameterization of a generic type (without an updatable source location)
  */
 
-public class PlainTypeVariable2 extends TypeConstraintVariable2 {
+public class ParameterizedTypeVariable2 extends TypeConstraintVariable2 {
 
-	protected PlainTypeVariable2(TType type) {
+	protected ParameterizedTypeVariable2(TType type) {
 		super(type);
 		Assert.isTrue(! type.isWildcardType());
 		Assert.isTrue(! type.isTypeVariable());
 	}
 
 	protected int getHash() {
-		return getType().hashCode();
+		return hashCode();
 	}
 
 	protected boolean isSameAs(ConstraintVariable2 other) {
-		if (this == other)
-			return true;
-		if (other.getClass() != PlainTypeVariable2.class)
-			return false;
-		
-		return getType() == ((PlainTypeVariable2) other).getType();
+		return this == other;
 	}
 	
 	public String toString() {
-		return getType().getPrettySignature();
+		return getType().getName();
 	}
-
 }

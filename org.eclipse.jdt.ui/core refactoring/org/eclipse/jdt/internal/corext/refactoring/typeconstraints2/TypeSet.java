@@ -175,7 +175,7 @@ public abstract class TypeSet {
 
 	public static TypeSet create(TType type) {
 		if (type == null)
-			return new Universe();
+			return fgUniverse;
 		else
 			return new SingleTypeSet(type);
 	}

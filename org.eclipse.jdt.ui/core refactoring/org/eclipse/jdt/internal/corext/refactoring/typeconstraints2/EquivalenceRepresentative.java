@@ -18,40 +18,44 @@ import java.util.List;
 
 public class EquivalenceRepresentative {
 	
-	private CollectionElementVariable2[] fElements;
+	private TypeConstraintVariable2[] fElements;
 	private TypeSet fTypeEstimate;
 	
 	
-	public EquivalenceRepresentative(CollectionElementVariable2 leftElement, CollectionElementVariable2 rightElement) {
-		fElements= new CollectionElementVariable2[] {leftElement, rightElement };
+	public EquivalenceRepresentative(TypeConstraintVariable2 leftElement, TypeConstraintVariable2 rightElement) {
+		fElements= new TypeConstraintVariable2[] {leftElement, rightElement };
 	}
 
-	public void add(CollectionElementVariable2 element) {
+	public EquivalenceRepresentative(TypeConstraintVariable2 element) {
+		fElements= new TypeConstraintVariable2[] {element};
+	}
+
+	public void add(TypeConstraintVariable2 element) {
 		for (int i= 0; i < fElements.length; i++)
 			if (fElements[i] == element)
 				return;
 		
 		int len= fElements.length;
-		CollectionElementVariable2[] newElements= new CollectionElementVariable2[len + 1];
+		TypeConstraintVariable2[] newElements= new TypeConstraintVariable2[len + 1];
 		System.arraycopy(fElements, 0, newElements, 0, len);
 		newElements[len]= element;
 		fElements= newElements;
 	}
 	
-	public CollectionElementVariable2[] getElements() {
+	public TypeConstraintVariable2[] getElements() {
 		return fElements;
 	}
 
-	public void addAll(CollectionElementVariable2[] rightElements) {
+	public void addAll(TypeConstraintVariable2[] rightElements) {
 		List elements= Arrays.asList(fElements);
 		ArrayList result= new ArrayList(fElements.length + rightElements.length);
 		result.addAll(elements);
 		for (int i= 0; i < rightElements.length; i++) {
-			CollectionElementVariable2 right= rightElements[i];
+			TypeConstraintVariable2 right= rightElements[i];
 			if (! result.contains(right))
 				result.add(right);
 		}
-		fElements= (CollectionElementVariable2[]) result.toArray(new CollectionElementVariable2[result.size()]);
+		fElements= (TypeConstraintVariable2[]) result.toArray(new TypeConstraintVariable2[result.size()]);
 	}
 
 	public void setTypeEstimate(TypeSet typeSet) {
@@ -67,7 +71,7 @@ public class EquivalenceRepresentative {
 		if (fElements.length > 0)
 			result.append(fElements[0].toString());
 		for (int i= 1; i < fElements.length; i++) {
-			result.append(" =^= "); //$NON-NLS-1$
+			result.append(" =^= \n"); //$NON-NLS-1$
 			result.append(fElements[i].toString());
 		}
 		return result.toString();

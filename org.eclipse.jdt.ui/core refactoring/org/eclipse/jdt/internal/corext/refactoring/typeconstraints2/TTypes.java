@@ -24,6 +24,8 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
  */
 public class TTypes {
 	
+	protected static final boolean BUG_84021= true;
+
 	private TTypes() {
 		// no instances
 	}
@@ -38,7 +40,9 @@ public class TTypes {
 				if (o1 == null || o1 == null)
 					return 0;
 				else
-					//TODO unclear if we can use pretty signature here 
+					//TODO unclear if we can use pretty signature here
+					if (BUG_84021)
+						return ((TType) o2).getName().compareTo(((TType) o1).getName());
 					return ((TType) o2).getPrettySignature().compareTo(((TType) o1).getPrettySignature());
 			}
 		});
