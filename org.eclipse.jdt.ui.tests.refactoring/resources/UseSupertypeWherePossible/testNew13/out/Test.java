@@ -6,6 +6,6 @@ class Test{
 		test(a);
 	}
 	void test(B b){
-		a.foo();
+		b.foo();
 	}
 }

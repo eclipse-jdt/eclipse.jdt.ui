@@ -1,4 +1,4 @@
 package p;
 interface B{
-	void foo(){}
+	void foo();
 }
