@@ -419,12 +419,13 @@ public class BuildPathsBlock {
 	private List getDefaultClassPath(IJavaProject jproj) {
 		List list= new ArrayList();
 		IResource srcFolder;
-		if (NewJavaProjectPreferencePage.useSrcAndBinFolders()) {
-			String sourceFolderName= NewJavaProjectPreferencePage.getSourceFolderName();
+		String sourceFolderName= NewJavaProjectPreferencePage.getSourceFolderName();
+		if (NewJavaProjectPreferencePage.useSrcAndBinFolders() && sourceFolderName.length() > 0) {
 			srcFolder= jproj.getProject().getFolder(sourceFolderName);
 		} else {
 			srcFolder= jproj.getProject();
 		}
+
 		list.add(new CPListElement(jproj, IClasspathEntry.CPE_SOURCE, srcFolder.getFullPath(), srcFolder));
 
 		IClasspathEntry[] jreEntries= NewJavaProjectPreferencePage.getDefaultJRELibrary();
