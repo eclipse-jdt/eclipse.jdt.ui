@@ -23,15 +23,6 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageDeclaration;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
@@ -48,7 +39,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -66,6 +56,8 @@ import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
@@ -90,9 +82,37 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
+
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.search.ui.ISearchResultView;
+import org.eclipse.search.ui.ISearchResultViewPart;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+import org.eclipse.jdt.ui.actions.BuildActionGroup;
+import org.eclipse.jdt.ui.actions.CCPActionGroup;
+import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.ImportActionGroup;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
+import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
+import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
@@ -115,23 +135,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaElementSorter;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
-import org.eclipse.jdt.ui.actions.BuildActionGroup;
-import org.eclipse.jdt.ui.actions.CCPActionGroup;
-import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
-import org.eclipse.jdt.ui.actions.GenerateActionGroup;
-import org.eclipse.jdt.ui.actions.ImportActionGroup;
-import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
-import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
-import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
-import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 
 abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISelectionListener, IViewPartInputProvider {
@@ -366,7 +369,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fViewer.setContentProvider(createContentProvider());
 		setInitialInput();
 				
-		// Initialize selecton
+		// Initialize selection
 		setInitialSelection();
 		fMemento= null;		
 		
@@ -616,7 +619,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 * input for this part.
 	 * 
 	 * @param 	element	the object to test
-	 * @return	<true> if the given element is a valid input
+	 * @return	<code>true</code> if the given element is a valid input
 	 */
 	abstract protected boolean isValidInput(Object element);
 
@@ -625,7 +628,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 * element for this part.
 	 * 
 	 * @param 	element	the object to test
-	 * @return	<true> if the given element is a valid element
+	 * @return	<code>true</code> if the given element is a valid element
 	 */
 	protected boolean isValidElement(Object element) {
 		if (element == null)
@@ -689,7 +692,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	private boolean isSearchResultView(IWorkbenchPart part) {
-		return SearchUtil.isSearchPlugInActivated() && (part instanceof ISearchResultView);
+		return SearchUtil.isSearchPlugInActivated() && (part instanceof ISearchResultView || part instanceof ISearchResultViewPart);
 	}
 
 	protected boolean needsToProcessSelectionChanged(IWorkbenchPart part, ISelection selection) {
@@ -1078,13 +1081,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		Object currentInput= getViewer().getInput();
 		if (currentInput == null || !currentInput.equals(findInputForJavaElement((IJavaElement)firstElement)))
 			if (iter.hasNext())
-				// multi selection and view is empty
+				// multi-selection and view is empty
 				return null;
 			else
-				// ok: single selection and view is empty 
+				// OK: single selection and view is empty 
 				return firstElement;
 
-		// be nice to multi selection
+		// be nice to multi-selection
 		while (iter.hasNext()) {
 			Object element= iter.next();
 			if (!(element instanceof IJavaElement))
@@ -1207,9 +1210,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	/**
 	 * Converts the given Java element to one which is suitable for this
-	 * view. It takes into account wether the view shows working copies or not.
+	 * view. It takes into account whether the view shows working copies or not.
 	 *
-	 * @param	 element the Java element to be converted
+	 * @param	obj the Java element to be converted
 	 * @return	an element suitable for this view
 	 */
 	IJavaElement getSuitableJavaElement(Object obj) {
