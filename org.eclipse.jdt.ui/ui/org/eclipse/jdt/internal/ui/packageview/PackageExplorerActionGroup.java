@@ -294,12 +294,8 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 		return new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				String property= event.getProperty();
-				if (IWorkbenchPage.CHANGE_WORKING_SET_REPLACE.equals(property)
-				|| IWorkingSet.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
-					Object workingSet= (IWorkingSet)event.getNewValue();
-					String workingSetName= null;
-					if (workingSet instanceof IWorkingSet)
-						workingSetName= ((IWorkingSet)workingSet).getName();
+				if (IWorkingSet.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
+					String workingSetName= (String)event.getNewValue();
 					fPart.setWorkingSetName(workingSetName);
 					fPart.updateTitle();
 				}

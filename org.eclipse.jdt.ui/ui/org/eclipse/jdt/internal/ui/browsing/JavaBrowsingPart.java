@@ -462,9 +462,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		IPropertyChangeListener titleUpdater= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				String property= event.getProperty();
-				if (IWorkbenchPage.CHANGE_WORKING_SET_REPLACE.equals(property))
-					updateTitle();
-				else if (IWorkingSet.CHANGE_WORKING_SET_NAME_CHANGE.equals(property))
+				if (IWorkingSet.CHANGE_WORKING_SET_NAME_CHANGE.equals(property))
 					updateTitle();
 			}
 		};
