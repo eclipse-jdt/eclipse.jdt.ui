@@ -165,7 +165,8 @@ public class JarPackagerUtil {
 		
 		IType mainClass= data.getManifestMainClass();
 		if (mainClass == null)
-			return false;
+			// no main class specified
+			return true;
 
 		try {
 			// Check if main method is in scope
