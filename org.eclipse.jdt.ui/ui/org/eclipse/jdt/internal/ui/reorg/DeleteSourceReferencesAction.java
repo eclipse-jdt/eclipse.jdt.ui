@@ -28,6 +28,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceReference;
@@ -178,13 +179,12 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 	}
 	
 	private static void delete(IField[] fields, IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", fields.length); //$NON-NLS-1$
-		for (int i= 0; i < fields.length; i++) {
-			fields[i].delete(false, new SubProgressMonitor(pm, 1));
-			if (pm.isCanceled())
-				throw new OperationCanceledException();
-		}
-	    pm.done();
+		if (fields.length != 0)
+			getJavaModel().delete(fields, false, pm);
+	}
+
+	private static IJavaModel getJavaModel() {
+		return JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 	}
 			
 	private static TextEdit createDeleteEdit(ISourceReference ref) throws JavaModelException{
