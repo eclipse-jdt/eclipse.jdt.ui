@@ -949,7 +949,7 @@
         point="org.eclipse.search.searchResultViewPages">
 		<viewPage
 			id="org.eclipse.jdt.ui.JavaSearchResultPage"
-			targetClass="org.eclipse.jdt.internal.ui.search.JavaSearchResult"
+			searchResultClass="org.eclipse.jdt.internal.ui.search.JavaSearchResult"
 			class="org.eclipse.jdt.internal.ui.search.JavaSearchResultPage">
 		</viewPage>
    </extension>
@@ -958,7 +958,7 @@
         point="org.eclipse.search.searchResultViewPages">
 		<viewPage
 			id="org.eclipse.jdt.internal.ui.search.OccurrencesSearchResultPage"
-			targetClass="org.eclipse.jdt.internal.ui.search.OccurrencesSearchResult"
+			searchResultClass="org.eclipse.jdt.internal.ui.search.OccurrencesSearchResult"
 			class="org.eclipse.jdt.internal.ui.search.OccurrencesSearchResultPage">
 		</viewPage>
    </extension>
@@ -967,7 +967,7 @@
         point="org.eclipse.search.searchResultViewPages">
 		<viewPage
 			id="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchResultPage"
-			targetClass="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchResult"
+			searchResultClass="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchResult"
 			class="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchResultPage">
 		</viewPage>
    </extension>
