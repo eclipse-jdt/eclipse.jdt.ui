@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -423,6 +424,52 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 	
+	private static int getTypeOrder(Code type) {
+		if (type == PrimitiveType.BYTE) return 1;
+		if (type == PrimitiveType.CHAR) return 2;
+		if (type == PrimitiveType.SHORT) return 3;
+		if (type == PrimitiveType.INT) return 4;
+		if (type == PrimitiveType.LONG) return 5;
+		if (type == PrimitiveType.FLOAT) return 6;
+		if (type == PrimitiveType.DOUBLE) return 7;
+		return 0;
+	}
+
+	private static boolean canAssign(ITypeBinding typeToAssign, String definedType) {
+		int arrStart= definedType.indexOf('[');
+		if (arrStart != -1) {
+			if (!typeToAssign.isArray()) {
+				return false; // can not assign a non-array type 
+			}
+			definedType= definedType.substring(0, arrStart);
+			typeToAssign= typeToAssign.getElementType();
+			if (typeToAssign.isPrimitive() && !definedType.equals(typeToAssign.getName())) {
+				return false; // can't assign arrays of primitive types to each other
+			}
+		}
+		
+		Code definedTypeCode= PrimitiveType.toCode(definedType);
+		if (typeToAssign.isPrimitive()) {
+			if (definedTypeCode == null) {
+				return false;
+			}
+			
+			Code toAssignCode= PrimitiveType.toCode(typeToAssign.getName());
+			if (toAssignCode == definedTypeCode) {
+				return true;
+			}
+			if (definedTypeCode == null || definedTypeCode == PrimitiveType.BOOLEAN || toAssignCode == PrimitiveType.BOOLEAN) {
+				return false;
+			}
+			return getTypeOrder(definedTypeCode) <= getTypeOrder(toAssignCode);
+		} else {
+			if (definedTypeCode != null) {
+				return false;
+			}
+			return (Bindings.findTypeInHierarchy(typeToAssign, definedType) == null);
+		}
+	}
+	
 	private static void addParameterMissmatchProposals(ICorrectionContext context, SimilarElement elem, List arguments, List proposals) throws CoreException {
 		String[] paramTypes= elem.getParameterTypes();
 		ITypeBinding[] argTypes= getArgumentTypes(arguments);
@@ -431,7 +478,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 		if (paramTypes.length == argTypes.length) {
 			for (int i= 0; i < argTypes.length; i++) {
-				if (Bindings.findTypeInHierarchy(argTypes[i], paramTypes[i]) == null) {
+				if (!canAssign(argTypes[i], paramTypes[i])) {
 					// argument can not be assigned to paramtype
 					Expression nodeToCast= (Expression) arguments.get(i);
 					String castType= paramTypes[i];
