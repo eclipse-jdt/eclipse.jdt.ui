@@ -23,6 +23,9 @@ public class SubtypeConstraint extends SimpleTypeConstraint implements ITypeCons
 		return getLeft().isSubtypeOf(getRight());
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	public String toString(){
 		return getLeft().toString() + " <= " + getRight().toString();
 	}

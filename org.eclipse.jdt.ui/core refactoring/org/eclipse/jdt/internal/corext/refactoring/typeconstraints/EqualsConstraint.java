@@ -23,6 +23,9 @@ public class EqualsConstraint extends SimpleTypeConstraint implements ITypeConst
 		return getLeft().isEqualType(getRight());
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	public String toString(){
 		return getLeft().toString() + " == " + getRight().toString();
 	}

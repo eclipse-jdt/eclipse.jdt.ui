@@ -23,6 +23,9 @@ public class DefinesConstraint extends SimpleTypeConstraint implements ITypeCons
 		return true;//by definition
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	public String toString(){
 		return getLeft().toString() + " =^= " + getRight().toString();
 	}

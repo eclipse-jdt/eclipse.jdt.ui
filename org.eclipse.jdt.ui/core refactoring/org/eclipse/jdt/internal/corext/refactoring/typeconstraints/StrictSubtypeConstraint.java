@@ -24,6 +24,9 @@ public class StrictSubtypeConstraint extends SimpleTypeConstraint {
 		return getLeft().isStrictSubtypeOf(getRight());
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	public String toString(){
 		return getLeft().toString() + " < " + getRight().toString();
 	}
