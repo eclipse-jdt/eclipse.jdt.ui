@@ -4,31 +4,26 @@
  */
 package org.eclipse.jdt.internal.ui.util;
 
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaStatusConstants;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 
 /**
- * Shows an error dialog for exceptions that contain an <code>IStatus</code>.
- * If the throwable passed to the methods is of a kind that the methods can handle, 
- * the error dialog is shown and <code>true</code> is returned. Otherwise <code>false
- * </code>is returned, and the client has to handle the error itself. If the passed
- * throwable is of type <code>InvocationTargetException</code> the wrapped excpetion
- * is considered.
+ * The default exception handler shows an error dialog when one of its handle methods
+ * is called. If the passed exception is a <code>CoreException</code> an error dialog
+ * pops up showing the exception's status information. For a <code>InvocationTargetException</code>
+ * a normal message dialog pops up showing the exception's message. Additionally the exception
+ * is written to the platform log.
  */
 public class ExceptionHandler {
 
@@ -43,20 +38,52 @@ public class ExceptionHandler {
 			JavaStatusConstants.INTERNAL_ERROR, message, t));
 	}
 	
+	/**
+	 * Handles the given <code>CoreException</code>. The workbench shell is used as a parent
+	 * for the dialog window.
+	 * 
+	 * @param e the <code>CoreException</code> to be handled
+	 * @param title the dialog window's window title
+	 * @param message message to be displayed by the dialog window
+	 */
 	public static void handle(CoreException e, String title, String message) {
 		handle(e, JavaPlugin.getActiveWorkbenchShell(), title, message);
 	}
 	
-	public static void handle(CoreException e, Shell shell, String title, String message) {
-		fgInstance.perform(e, shell, title, message);
+	/**
+	 * Handles the given <code>CoreException</code>. 
+	 * 
+	 * @param e the <code>CoreException</code> to be handled
+	 * @param parent the dialog window's parent shell
+	 * @param title the dialog window's window title
+	 * @param message message to be displayed by the dialog window
+	 */
+	public static void handle(CoreException e, Shell parent, String title, String message) {
+		fgInstance.perform(e, parent, title, message);
 	}
 	
+	/**
+	 * Handles the given <code>InvocationTargetException</code>. The workbench shell is used 
+	 * as a parent for the dialog window.
+	 * 
+	 * @param e the <code>InvocationTargetException</code> to be handled
+	 * @param title the dialog window's window title
+	 * @param message message to be displayed by the dialog window
+	 */
 	public static void handle(InvocationTargetException e, String title, String message) {
 		handle(e, JavaPlugin.getActiveWorkbenchShell(), title, message);
 	}
 	
-	public static void handle(InvocationTargetException e, Shell shell, String title, String message) {
-		fgInstance.perform(e, shell, title, message);
+	/**
+	 * Handles the given <code>InvocationTargetException</code>. 
+	 * 
+	 * @param e the <code>InvocationTargetException</code> to be handled
+	 * @param parent the dialog window's parent shell
+	 * @param title the dialog window's window title
+	 * @param message message to be displayed by the dialog window
+	 */
+	public static void handle(InvocationTargetException e, Shell parent, String title, String message) {
+		fgInstance.perform(e, parent, title, message);
 	}
 
 	//---- Hooks for subclasses to control exception handling ------------------------------------
@@ -96,13 +123,5 @@ public class ExceptionHandler {
 		else
 			msg.write(t.getMessage());
 		MessageDialog.openError(shell, title, msg.toString());			
-	}
-	
-	private static String getResourceString(ResourceBundle bundle, String key) {
-		try {
-			return bundle.getString(key);
-		} catch (MissingResourceException e) {
-			return key;
-		}
 	}	
 }
