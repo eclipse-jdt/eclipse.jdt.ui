@@ -11,20 +11,14 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.PostfixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -289,76 +283,4 @@ public class InlineTempRefactoring extends Refactoring {
 		return TempOccurrenceFinder.findTempOccurrenceOffsets(fTempDeclaration, true, false);
 	}	
 	
-	//--- private helper classes
-	
-	private static class TempAssignmentFinder extends ASTVisitor{
-		private ASTNode fFirstAssignment;
-		private IVariableBinding fTempBinding;
-		
-		TempAssignmentFinder(VariableDeclaration tempDeclaration){
-			fTempBinding= tempDeclaration.resolveBinding();
-		}
-		
-		private boolean isNameReferenceToTemp(Name name){
-			return fTempBinding == name.resolveBinding();
-		}
-			
-		private boolean isAssignmentToTemp(Assignment assignment){
-			if (fTempBinding == null)
-				return false;
-				
-			if (! (assignment.getLeftHandSide() instanceof Name))
-				return false;
-			Name ref= (Name)assignment.getLeftHandSide();
-			return isNameReferenceToTemp(ref);
-		}
-		
-		boolean hasAssignments(){
-			return fFirstAssignment != null;
-		}
-		
-		ASTNode getFirstAssignment(){
-			return fFirstAssignment;
-		}
-		
-		//-- visit methods
-		
-		public boolean visit(Assignment assignment) {
-			if (! isAssignmentToTemp(assignment))
-				return true;
-			
-			fFirstAssignment= assignment;
-			return false;
-		}
-		
-		public boolean visit(PostfixExpression postfixExpression) {
-			if (postfixExpression.getOperand() == null)
-				return true;
-			if (! (postfixExpression.getOperand() instanceof SimpleName))
-				return true;	
-			SimpleName simpleName= (SimpleName)postfixExpression.getOperand();	
-			if (! isNameReferenceToTemp(simpleName))
-				return true;
-			
-			fFirstAssignment= postfixExpression;
-			return false;	
-		}
-		
-		public boolean visit(PrefixExpression prefixExpression) {
-			if (prefixExpression.getOperand() == null)
-				return true;
-			if (! (prefixExpression.getOperand() instanceof SimpleName))
-				return true;
-			if (! prefixExpression.getOperator().equals(PrefixExpression.Operator.DECREMENT) &&
-				! prefixExpression.getOperator().equals(PrefixExpression.Operator.INCREMENT))
-				return true;
-			SimpleName simpleName= (SimpleName)prefixExpression.getOperand();	
-			if (! isNameReferenceToTemp(simpleName))
-				return true;
-			
-			fFirstAssignment= prefixExpression;
-			return false;	
-		}
 	}
-	
-}
