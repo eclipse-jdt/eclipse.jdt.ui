@@ -52,7 +52,8 @@ public class ResourceModifications {
 	 * Adds the given resource to the list of resources 
 	 * to be created.
 	 * 
-	 * @param add the list of resource to be created
+	 * @param create the resource to be add to the list of 
+	 *  resources to be created
 	 */
 	public void addCreate(IResource create) {
 		if (fCreate == null)

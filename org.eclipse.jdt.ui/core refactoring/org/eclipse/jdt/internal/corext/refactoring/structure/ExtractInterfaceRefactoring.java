@@ -354,7 +354,10 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private static void setContent(ICompilationUnit cu, String newContent) throws JavaModelException {
 		cu.getBuffer().setContents(newContent);
 		synchronized (cu) {
-			cu.reconcile();
+			cu.reconcile(ICompilationUnit.NO_AST, 
+				false /*don't force problem detection*/, 
+				null /*use primary owner*/, 
+				null /*no progress monitor*/);
 		}
 	}
 

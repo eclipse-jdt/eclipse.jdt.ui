@@ -160,9 +160,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 	
 	/**
 	 * Creates a new extract method refactoring.
-	 *
-	 * @param cu the compilation unit which is going to be modified.
-	 * @param accessor a callback object to access the source this refactoring is working on.
 	 */
 	private ExtractMethodRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) throws CoreException {
 		Assert.isNotNull(cu);
@@ -288,7 +285,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	/**
 	 * Sets whether the new method signature throws runtime exceptions.
 	 * 
-	 * @param throwsRuntimeExceptions flag indicating if the new method
+	 * @param throwRuntimeExceptions flag indicating if the new method
 	 * 	throws runtime exceptions
 	 */
 	public void setThrowRuntimeExceptions(boolean throwRuntimeExceptions) {

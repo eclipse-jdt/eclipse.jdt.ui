@@ -90,13 +90,13 @@ public class RefactoringSearchEngine {
 	
 	/**
 	 * Performs a search and groups the resulting {@link SearchMatch}es by
-	 * {@link SearchResultGroup#getCompilationUnit()()}.
+	 * {@link SearchResultGroup#getCompilationUnit()}.
 	 *
 	 * @param status an error is added here if inaccurate or non-cu matches have been found
 	 * @return a {@link SearchResultGroup}[], where each {@link SearchResultGroup} 
 	 * 		has a different {@link SearchMatch#getResource() getResource()}s.
 	 * @see SearchMatch
-	 * @throws CoreException when the search failed
+	 * @throws JavaModelException when the search failed
 	 */
 	//TODO: throw CoreException
 	public static SearchResultGroup[] search(SearchPattern pattern, IJavaSearchScope scope, IProgressMonitor monitor, RefactoringStatus status)

@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayCreation;
@@ -195,7 +194,6 @@ public class CallInliner {
 		 * @param candidate method binding to check
 		 * @return <code>true</code> if the method can be called without explicit casts, 
 		 * otherwise <code>false</code>.
-		 * @throws JavaModelException
 		 */
 		private boolean canImplicitlyCall(IMethodBinding candidate) {
 			ITypeBinding[] parameters= candidate.getParameterTypes();
@@ -597,7 +595,6 @@ public class CallInliner {
 
 	/**
 	 * @return <code>true</code> if explicit cast is needed otherwise <code>false</code>
-	 * @throws JavaModelException
 	 */
 	private boolean needsExplicitCast() {
 		// if the return type of the method is the same as the type of the

@@ -181,7 +181,7 @@ public abstract class JavaStatusContext extends RefactoringStatusContext {
 	 * Creates an status entry context for the given compilation unit and AST node.
 	 * 
 	 * @param cunit the compilation unit containing the error
-	 * @param astNode an astNode denoting the source range that has caused the error
+	 * @param node an astNode denoting the source range that has caused the error
 	 * 
 	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
 	 * 	context cannot be created

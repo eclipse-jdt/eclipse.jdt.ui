@@ -539,10 +539,10 @@ public class Checks {
 	 * From SearchResultGroup[] passed as the parameter
 	 * this method removes all those that correspond to a non-parsable ICompilationUnit
 	 * and returns it as a result.
-	 * Status object collect the result of checking.
-	 * @param grouped
-	 * @param status
-	 * @return
+	 * @param grouped the array of search result groups from which non parsable compilation
+	 *  units are to be removed.
+	 * @param status a refactoring status to collect errors and problems
+	 * @return the array of search result groups 
 	 * @throws JavaModelException
 	 */	
 	public static SearchResultGroup[] excludeCompilationUnits(SearchResultGroup[] grouped, RefactoringStatus status) throws JavaModelException{

@@ -32,9 +32,6 @@ public class TextChangeManager {
 		this(false);
 	}
 
-	/**
-	 * @see TextChange.setKeepExecutedTextEdits
-	 */
 	public TextChangeManager(boolean keepExecutedTextEdits) {
 		fKeepExecutedTextEdits= keepExecutedTextEdits;
 	}

@@ -169,6 +169,8 @@ public class InlineConstantRefactoring extends Refactoring {
 // ---- Begin InlineTargetCompilationUnit.ClassQualification ---------------------------------		
 		private static class ClassQualification extends StringInsertion {
 			public static class ClassQualificationCannotBePerformed extends Exception {
+				// not really serializable
+				private static final long serialVersionUID= 1L;
 				public ClassQualificationCannotBePerformed(String message) {
 					super(message);	
 				}

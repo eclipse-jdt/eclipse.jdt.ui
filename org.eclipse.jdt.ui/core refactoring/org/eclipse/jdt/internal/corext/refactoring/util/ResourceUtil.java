@@ -60,7 +60,6 @@ public class ResourceUtil {
 
 	/**
 	 * Returns the <code>IResource</code> that the given <code>IMember</code> is defined in.
-	 * @see #getResource
 	 */
 	public static IResource getResource(IMember member) {
 		Assert.isTrue(!member.isBinary());

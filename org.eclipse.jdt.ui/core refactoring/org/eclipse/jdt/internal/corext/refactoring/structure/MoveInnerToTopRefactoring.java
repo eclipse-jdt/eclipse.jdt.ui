@@ -244,7 +244,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-		fImportManager= new ImportRewriteManager(fCodeGenerationSettings);
+		fImportManager= new ImportRewriteManager();
 		fEnclosingInstanceFieldName= getInitialNameForEnclosingInstanceField();
 		fDeclaringCuNode= new RefactoringASTParser(AST.JLS3).parse(getDeclaringCu(), true, pm);
 		fIsInstanceFieldCreationPossible= !JdtFlags.isStatic(fType);

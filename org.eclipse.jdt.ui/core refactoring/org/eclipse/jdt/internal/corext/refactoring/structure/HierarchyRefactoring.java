@@ -510,7 +510,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 
 		fMembersToMove= (IMember[]) SourceReferenceUtil.sortByOffset(members);
 		fCodeGenerationSettings= settings;
-		fImportManager= new ImportRewriteManager(settings);
+		fImportManager= new ImportRewriteManager();
 	}
 
 	protected void addTextEditFromRewrite(final TextChangeManager manager, final ICompilationUnit cu, final ASTRewrite rewrite) throws CoreException {

@@ -19,19 +19,14 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 class ImportRewriteManager {
 
 	private final Map fImportRewrites; //ICompilationUnit -> ImportEdit
-	private final CodeGenerationSettings fPreferenceSettings;
 
-	public ImportRewriteManager(CodeGenerationSettings preferenceSettings) {
-		Assert.isNotNull(preferenceSettings);
-		fPreferenceSettings= preferenceSettings;
+	public ImportRewriteManager() {
 		fImportRewrites= new HashMap();
 	}
 

@@ -1132,7 +1132,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	}
 	
 	public String getTarget() {
-		String typeName= fSelectionTypeBinding == null ? "" : fSelectionTypeBinding.getName() + " "; //$NON-NLS-2$
+		String typeName= fSelectionTypeBinding == null ? "" : fSelectionTypeBinding.getName() + " ";  //$NON-NLS-1$//$NON-NLS-2$
 		if (fFieldBinding != null) {
 			return typeName + fFieldBinding.getName();
 		} else if (fMethodBinding != null) {

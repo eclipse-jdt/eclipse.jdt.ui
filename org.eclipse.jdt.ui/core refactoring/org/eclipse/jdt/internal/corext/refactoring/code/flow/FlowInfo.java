@@ -279,7 +279,7 @@ public abstract class FlowInfo {
 	 * access mode <code>mode</code>.
 	 * 
 	 * @param context the flow context object used to compute this flow info
-	 * @param the access type. Valid values are <code>READ</code>, <code>WRITE</code>,
+	 * @param mode the access type. Valid values are <code>READ</code>, <code>WRITE</code>,
 	 *  <code>UNKNOWN</code> and any combination of them.
 	 * @return an array of local variable bindings conforming to the given type.
 	 */

@@ -518,7 +518,6 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param ast An AST used as a factory for various AST nodes
 	 * @param ctorBinding binding for the constructor being wrapped
 	 * @param unitRewriter the ASTRewrite to be used
-	 * @return
 	 */
 	private MethodDeclaration createFactoryMethod(AST ast, IMethodBinding ctorBinding, OldASTRewrite unitRewriter) {
 		MethodDeclaration		newMethod= ast.newMethodDeclaration();
@@ -688,10 +687,6 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	/**
 	 * Creates and adds the necessary change to make the constructor method protected.
 	 * Returns false iff the constructor didn't exist (i.e. was implicit)
-	 * @param unit
-	 * @param unitChange
-	 * @param root
-	 * @param buffer
 	 */
 	private boolean protectConstructor(CompilationUnit unitAST, OldASTRewrite unitRewriter, TextEditGroup declGD) {
 		MethodDeclaration constructor= (MethodDeclaration) unitAST.findDeclaringNode(fCtorBinding.getKey());
@@ -789,8 +784,8 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * with calls to the newly-created factory method.
 	 * @param rg the <code>SearchResultGroup</code> indicating all of the constructor references
 	 * @param unit the <code>CompilationUnit</code> to be rewritten
-	 * @param unitRewriter
-	 * @param gd the <code>GroupDescription</code> to associate with the changes
+	 * @param unitRewriter the rewriter
+	 * @param unitChange the compilation unit change
 	 * @throws JavaModelException
 	 * @return true iff at least one constructor call site was rewritten.
 	 */
@@ -1019,7 +1014,6 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 	/**
 	 * Returns true iff the selected constructor can be protected.
-	 * @return
 	 */
 	public boolean canProtectConstructor() {
 		return !fCtorBinding.isSynthetic() && fFactoryCU.findDeclaringNode(fCtorBinding.getKey()) != null;

@@ -407,9 +407,9 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		for (int i= 0; i < fResources.length; i++) {
 			IResource resource= fResources[i];
 			resource.accept(new IResourceVisitor() {
-				public boolean visit(IResource resource) throws CoreException {
-					if (resource instanceof IFile) {
-						checkDirtyFile(result, (IFile)resource);
+				public boolean visit(IResource visitedResource) throws CoreException {
+					if (visitedResource instanceof IFile) {
+						checkDirtyFile(result, (IFile)visitedResource);
 					}
 					return true;
 				}
