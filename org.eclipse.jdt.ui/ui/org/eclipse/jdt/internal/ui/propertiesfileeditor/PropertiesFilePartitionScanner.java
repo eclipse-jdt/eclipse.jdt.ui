@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.EndOfLineRule;
 import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IPredicateRule;
@@ -91,8 +92,12 @@ public class PropertiesFilePartitionScanner extends RuleBasedPartitionScanner im
 		
 		IToken comment= new Token(COMMENT);
 		IToken propertyValue= new Token(PROPERTY_VALUE);
+		IToken key= new Token(IDocument.DEFAULT_CONTENT_TYPE);
 
 		List rules= new ArrayList();
+
+		// Add rule for leading white space.
+		rules.add(new WhitespacePredicateRule(key));
 
 		// Add rule for comments.
 		rules.add(new EndOfLineRule("#", comment, (char) 0, true)); //$NON-NLS-1$
