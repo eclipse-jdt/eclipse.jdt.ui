@@ -222,7 +222,8 @@ public class GenericJavaTypeProposal extends JavaTypeCompletionProposal {
 			if (index == line.length())
 				return true;
 				
-			return line.charAt(index) != '(';
+			char ch= line.charAt(index);
+			return ch != '<';
 		
 		} catch (BadLocationException e) {
 			return true;
