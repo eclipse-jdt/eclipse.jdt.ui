@@ -1,5 +1,5 @@
 package p;
-public class B{
+class B{
 
 	public static A i;
 }

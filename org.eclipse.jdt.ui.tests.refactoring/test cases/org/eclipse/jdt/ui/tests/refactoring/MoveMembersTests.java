@@ -20,13 +20,10 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 
 public class MoveMembersTests extends RefactoringTest {
 
@@ -231,13 +228,11 @@ public class MoveMembersTests extends RefactoringTest {
 	}
 	
 	public void test21() throws Exception{
-		printTestDisabledMessage("incorrect warning");	
-//		fieldMethodHelper_passingTest(new String[]{"F", "i"}, new String[0], new String[0][0]);
+		fieldMethodHelper_passingTest(new String[]{"F", "i"}, new String[0], new String[0][0]);
 	}
 	
 	public void test22() throws Exception{
-		printTestDisabledMessage("nasty corner case");	
-//		fieldMethodHelper_passingTest(new String[]{"i"}, new String[0], new String[0][0]);
+		fieldMethodHelper_passingTest(new String[]{"i"}, new String[0], new String[0][0]);
 	}
 	
 	public void test23() throws Exception{
@@ -298,6 +293,19 @@ public class MoveMembersTests extends RefactoringTest {
 		//fieldMethodHelper_passingTest(new String[0], new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	public void test33() throws Exception{ //test for bug 28022
+		fieldMethodHelper_passingTest(new String[]{"i"}, new String[0], new String[0][0]);
+	}
+
+	public void test34() throws Exception{ //test for bug 28022
+		fieldMethodHelper_passingTest(new String[]{"i"}, new String[0], new String[0][0]);
+	}
+
+	public void test35() throws Exception{ //test for bug 28022
+		fieldMethodHelper_passingTest(new String[]{"i"}, new String[0], new String[0][0]);
+	}
+	
+	
 	//---
 	public void testFail0() throws Exception{
 		fieldMethodHelper_failingTest(new String[0], 
@@ -354,34 +362,34 @@ public class MoveMembersTests extends RefactoringTest {
 	public void testFail9() throws Exception{
 		fieldMethodHelper_failingTest(new String[0], 
 									  new String[]{"m"}, new String[][]{new String[0]}, 
-									  RefactoringStatus.WARNING, "p.B");
+									  RefactoringStatus.ERROR, "p.B");
 	}
 	
 	public void testFail10() throws Exception{
 		fieldMethodHelper_failingTest(new String[0], 
 									  new String[]{"m"}, new String[][]{new String[0]}, 
-									  RefactoringStatus.WARNING, "p.B");
+									  RefactoringStatus.ERROR, "p.B");
 	}
 
 	public void testFail11() throws Exception{
 		fieldMethodHelper_failingTest(new String[]{"i"}, new String[0], new String[0][0],  
-									  RefactoringStatus.WARNING, "p.B");
+									  RefactoringStatus.ERROR, "p.B");
 	}
 
 	public void testFail12() throws Exception{
 		fieldMethodHelper_failingTest(new String[]{"i"}, new String[0], new String[0][0],  
-									  RefactoringStatus.WARNING, "p.B");
+									  RefactoringStatus.ERROR, "p.B");
 	}
 
 	public void testFail13() throws Exception{
 		fieldMethodHelper_failingTest(new String[0], 
 									  new String[]{"m"}, new String[][]{new String[0]}, 
-									  RefactoringStatus.WARNING, "p.B");
+									  RefactoringStatus.ERROR, "p.B");
 	}
 
 	public void testFail14() throws Exception{
 		fieldMethodHelper_failingTest(new String[]{"i"}, new String[0], new String[0][0],  
-									  RefactoringStatus.WARNING, "p.B");
+									  RefactoringStatus.ERROR, "p.B");
 	}
 
 	public void testFail15() throws Exception{
@@ -395,7 +403,7 @@ public class MoveMembersTests extends RefactoringTest {
 		try{
 			packageForB= getRoot().createPackageFragment("r", false, null);
 			fieldMethodHelper_failingTest(new String[]{"f"}, new String[0], new String[0][0],
-										 RefactoringStatus.WARNING, "r.B", 
+										 RefactoringStatus.ERROR, "r.B", 
 										 getPackageP(), packageForB);
 		} finally{
 			performDummySearch();
@@ -419,13 +427,11 @@ public class MoveMembersTests extends RefactoringTest {
 	public void testFail19() throws Exception{
 		fieldMethodHelper_failingTest(new String[0], 
 									  new String[]{"m"}, new String[][]{new String[0]}, 
-									  RefactoringStatus.FATAL, "p.B");
+									  RefactoringStatus.ERROR, "p.B");
 	}
 	
 	public void testFail20() throws Exception{
-		fieldMethodHelper_failingTest(new String[0], 
-									  new String[]{"m"}, new String[][]{new String[0]}, 
-									  RefactoringStatus.FATAL, "p.B");
+		// was same as test19
 	}
 	
 	public void testFail21() throws Exception{
@@ -435,15 +441,11 @@ public class MoveMembersTests extends RefactoringTest {
 	}
 
 	public void testFail22() throws Exception{
-		fieldMethodHelper_failingTest(new String[]{"i"}, 
-									  new String[0], new String[0][0], 
-									  RefactoringStatus.FATAL, "p.B");
+		//free slot
 	}
 
 	public void testFail23() throws Exception{
-		fieldMethodHelper_failingTest(new String[]{"i"}, 
-									  new String[0], new String[0][0], 
-									  RefactoringStatus.FATAL, "p.B");
+		//free slot
 	}
 
 	public void testFail24() throws Exception{
