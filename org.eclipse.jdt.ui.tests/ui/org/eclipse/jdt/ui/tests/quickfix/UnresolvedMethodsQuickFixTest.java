@@ -1131,7 +1131,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo(X x) {\n");
-		buf.append("        boolean i= ((Object) x).goo(1, 2.1);\n");
+		buf.append("        boolean i= ((Object) x).goo(getClass());\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();		

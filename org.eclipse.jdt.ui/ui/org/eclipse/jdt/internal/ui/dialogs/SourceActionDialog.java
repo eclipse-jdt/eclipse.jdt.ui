@@ -104,18 +104,13 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fSettings= dialogSettings.getSection(sectionId);		
 		if (fSettings == null)  {
 			fSettings= dialogSettings.addNewSection(sectionId);
-			fSettings.put(SETTINGS_VISIBILITY_MODIFIER, StringConverter.asString(Modifier.PUBLIC));
-			fSettings.put(SETTINGS_FINAL_MODIFIER, StringConverter.asString(false));
-			fSettings.put(SETTINGS_SYNCHRONIZED_MODIFIER, StringConverter.asString(false));
-			fSettings.put(SETTINGS_INSERTPOSITION, insertionDefault);
-			fSettings.put(SETTINGS_COMMENTS, generateCommentsDefault);
-		}
+		}	
 		
-		fVisibilityModifier= StringConverter.asInt(fSettings.get(SETTINGS_VISIBILITY_MODIFIER), Modifier.PUBLIC);
-		fFinal= StringConverter.asBoolean(fSettings.get(SETTINGS_FINAL_MODIFIER), false);
-		fSynchronized= StringConverter.asBoolean(fSettings.get(SETTINGS_SYNCHRONIZED_MODIFIER), false);
-		fCurrentPositionIndex= StringConverter.asInt(fSettings.get(SETTINGS_INSERTPOSITION), insertionDefault);
-		fGenerateComment= StringConverter.asBoolean(fSettings.get(SETTINGS_COMMENTS), generateCommentsDefault);
+		fVisibilityModifier= asInt(fSettings.get(SETTINGS_VISIBILITY_MODIFIER), Modifier.PUBLIC);
+		fFinal= asBoolean(fSettings.get(SETTINGS_FINAL_MODIFIER), false);
+		fSynchronized= asBoolean(fSettings.get(SETTINGS_SYNCHRONIZED_MODIFIER), false);
+		fCurrentPositionIndex= asInt(fSettings.get(SETTINGS_INSERTPOSITION), insertionDefault);
+		fGenerateComment= asBoolean(fSettings.get(SETTINGS_COMMENTS), generateCommentsDefault);
 		
 		fInsertPositions= new ArrayList();
 		fLabels= new ArrayList(); 
@@ -143,6 +138,20 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fInsertPositions.add(null);
 	}
 	
+	private boolean asBoolean(String string, boolean defaultValue) {
+		if (string != null) {
+			return StringConverter.asBoolean(string, defaultValue);
+		}
+		return defaultValue;
+	}
+
+	private int asInt(String string, int defaultValue) {
+		if (string != null) {
+			return StringConverter.asInt(string, defaultValue);
+		}
+		return defaultValue;
+	}
+
 	private IJavaElement findSibling(IMethod curr, IJavaElement[] members) throws JavaModelException {
 		IJavaElement res= null;
 		int methodStart= curr.getSourceRange().getOffset();
