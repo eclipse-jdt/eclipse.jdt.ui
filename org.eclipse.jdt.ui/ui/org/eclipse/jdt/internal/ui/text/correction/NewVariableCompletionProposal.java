@@ -132,7 +132,7 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 			
 			TextBuffer buffer= editor.getTextBuffer();
 			int offset= 0;
-			String insertString= "";
+			String insertString= ""; //$NON-NLS-1$
 			
 			ASTNode curr= fAstRoot;
 			while (curr != null && !(curr instanceof MethodDeclaration)) {
@@ -144,7 +144,7 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 				if (!params.isEmpty()) {
 					ASTNode p= (ASTNode) params.get(params.size() - 1);
 					offset= p.getStartPosition() + p.getLength();
-					insertString= ", " + fContent;
+					insertString= ", " + fContent; //$NON-NLS-1$
 				} else {
 					SimpleName name= declaration.getName();
 					offset= name.getStartPosition() + name.getLength() - 1;
@@ -233,16 +233,16 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 		if (fVariableKind == FIELD) {
 			buf.append("private "); //$NON-NLS-1$
 		}
-		buf.append(varType != null ? varType.getName() : "Object");
+		buf.append(varType != null ? varType.getName() : "Object"); //$NON-NLS-1$
 		buf.append(' ');
 		buf.append(fVariableName);
 		if (fVariableKind == LOCAL) {
 			if (varType == null || !varType.isPrimitive()) {
-				buf.append("= null");
-			} else if (varType.getName().equals("boolean")) {
-				buf.append("= false");
+				buf.append("= null"); //$NON-NLS-1$
+			} else if (varType.getName().equals("boolean")) { //$NON-NLS-1$
+				buf.append("= false"); //$NON-NLS-1$
 			} else {
-				buf.append("= 0");
+				buf.append("= 0"); //$NON-NLS-1$
 			}
 		}
 		if (fVariableKind != PARAM) {

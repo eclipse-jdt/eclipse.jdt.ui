@@ -112,7 +112,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					}
 					IType type= chosen.resolveType(searchScope);
 					if (type == null) {
-						JavaPlugin.logErrorMessage("AddImportOnSelectionAction: Failed to resolve TypeRef: " + chosen.toString());
+						JavaPlugin.logErrorMessage("AddImportOnSelectionAction: Failed to resolve TypeRef: " + chosen.toString()); //$NON-NLS-1$
 						MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), JavaEditorMessages.getString("AddImportOnSelection.error.notresolved.message")); //$NON-NLS-1$ //$NON-NLS-2$
 						return;
 					}

@@ -25,7 +25,7 @@ import org.eclipse.jface.text.TextPresentation;
 public class HTML2TextReader extends SubstitutionTextReader {
 	
 	
-	private static final String LINE_DELIM= System.getProperty("line.separator", "\n");
+	private static final String LINE_DELIM= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 	private static HashMap fgEntityLookup;
 	private static List fgTags;
@@ -33,14 +33,14 @@ public class HTML2TextReader extends SubstitutionTextReader {
 	static {
 		
 		fgTags= new ArrayList();
-		fgTags.add("b");
-		fgTags.add("h5");
-		fgTags.add("p");
-		fgTags.add("dl");
-		fgTags.add("dt");
-		fgTags.add("dd");
-		fgTags.add("li");
-		fgTags.add("ul");
+		fgTags.add("b"); //$NON-NLS-1$
+		fgTags.add("h5"); //$NON-NLS-1$
+		fgTags.add("p"); //$NON-NLS-1$
+		fgTags.add("dl"); //$NON-NLS-1$
+		fgTags.add("dt"); //$NON-NLS-1$
+		fgTags.add("dd"); //$NON-NLS-1$
+		fgTags.add("li"); //$NON-NLS-1$
+		fgTags.add("ul"); //$NON-NLS-1$
 		
 		fgEntityLookup= new HashMap(7);
 		fgEntityLookup.put("lt", "<"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -104,44 +104,44 @@ public class HTML2TextReader extends SubstitutionTextReader {
 			tag= tag.substring(1);
 			
 		if (!fgTags.contains(tag))
-			return "";
+			return ""; //$NON-NLS-1$
 			
-		if ("b".equals(html)) {
+		if ("b".equals(html)) { //$NON-NLS-1$
 			startBold();
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 				
-		if ("h5".equals(html) || "dt".equals(html)) {
+		if ("h5".equals(html) || "dt".equals(html)) { //$NON-NLS-1$ //$NON-NLS-2$
 			startBold();
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		
-		if ("dl".equals(html))
+		if ("dl".equals(html)) //$NON-NLS-1$
 			return LINE_DELIM;
 		
-		if ("dd".equals(html))
-			return "\t";
+		if ("dd".equals(html)) //$NON-NLS-1$
+			return "\t"; //$NON-NLS-1$
 		
-		if ("li".equals(html))
-			return LINE_DELIM + "\t" + "- ";
+		if ("li".equals(html)) //$NON-NLS-1$
+			return LINE_DELIM + "\t" + "- "; //$NON-NLS-1$ //$NON-NLS-2$
 					
-		if ("/b".equals(html)) {
+		if ("/b".equals(html)) { //$NON-NLS-1$
 			stopBold();
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		
-		if ("/p".equals(html))
+		if ("/p".equals(html)) //$NON-NLS-1$
 			return LINE_DELIM;
 			
-		if ("/h5".equals(html) || "/dt".equals(html)) {
+		if ("/h5".equals(html) || "/dt".equals(html)) { //$NON-NLS-1$ //$NON-NLS-2$
 			stopBold();
 			return LINE_DELIM;
 		}
 		
-		if ("/dd".equals(html))
+		if ("/dd".equals(html)) //$NON-NLS-1$
 			return LINE_DELIM;
 				
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	/*

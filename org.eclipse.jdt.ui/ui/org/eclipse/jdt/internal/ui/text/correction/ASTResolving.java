@@ -67,7 +67,7 @@ public class ASTResolving {
 				return binding.getSuperclass();
 			} else if (binding.isPrimitive()) {
 				String name= binding.getName();
-				if ("void".equals(name) || "null".equals(name)) {
+				if ("void".equals(name) || "null".equals(name)) { //$NON-NLS-1$ //$NON-NLS-2$
 					return node.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 				}
 			}

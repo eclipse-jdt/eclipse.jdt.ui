@@ -119,7 +119,7 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 		String returnTypeName= returnType.getName();
 		
 		if (settings.createComments) {
-			StubUtility.genJavaDocStub("Method " + fMethodName, fParamTypes, Signature.createTypeSignature(returnTypeName, true), null, buf);
+			StubUtility.genJavaDocStub("Method " + fMethodName, fParamTypes, Signature.createTypeSignature(returnTypeName, true), null, buf); //$NON-NLS-1$
 		}
 		
 		if (isSameType) {

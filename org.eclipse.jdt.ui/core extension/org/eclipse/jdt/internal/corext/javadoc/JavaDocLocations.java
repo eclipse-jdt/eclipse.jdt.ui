@@ -57,12 +57,12 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class JavaDocLocations {
 	
-	private static final QualifiedName QUALIFIED_NAME= new QualifiedName(JavaUI.ID_PLUGIN, "jdoclocation");
+	private static final QualifiedName QUALIFIED_NAME= new QualifiedName(JavaUI.ID_PLUGIN, "jdoclocation"); //$NON-NLS-1$
 	
-	private static final String NODE_ROOT= "javadoclocation";
-	private static final String NODE_ENTRY= "location_01";
-	private static final String NODE_PATH= "path";
-	private static final String NODE_URL= "url";
+	private static final String NODE_ROOT= "javadoclocation"; //$NON-NLS-1$
+	private static final String NODE_ENTRY= "location_01"; //$NON-NLS-1$
+	private static final String NODE_PATH= "path"; //$NON-NLS-1$
+	private static final String NODE_URL= "url"; //$NON-NLS-1$
 	
 	private static final boolean IS_CASE_SENSITIVE = !new File("Temp").equals(new File("temp")); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -183,7 +183,7 @@ public class JavaDocLocations {
 			Serializer serializer = SerializerFactory.getSerializerFactory(Method.XML).makeSerializer(writer, format);
 			serializer.asDOMSerializer().serialize(document);
 		} catch (IOException e) {
-			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, "Error", e);
+			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, "Error", e); //$NON-NLS-1$
 			throw new CoreException(status);			
 		}
 		return writer.toString();			
@@ -236,7 +236,7 @@ public class JavaDocLocations {
 			try {
 				readVariables(xmlString);
 			} catch (IOException e) {
-				IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, "Error", e);
+				IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, "Error", e); //$NON-NLS-1$
 				throw new CoreException(status);
 			}
 		}
@@ -251,7 +251,7 @@ public class JavaDocLocations {
 		String urlString= baseLocation.toExternalForm();
 
 		StringBuffer pathBuffer= new StringBuffer(urlString);
-		if (!urlString.endsWith("/")) {
+		if (!urlString.endsWith("/")) { //$NON-NLS-1$
 			pathBuffer.append('/');
 		}
 
@@ -334,15 +334,15 @@ public class JavaDocLocations {
 	private static void appendPackageSummaryPath(IPackageFragment pack, StringBuffer buf) {
 		String packPath= pack.getElementName().replace('.', '/');
 		buf.append(packPath);
-		buf.append("/package-summary.html");
+		buf.append("/package-summary.html"); //$NON-NLS-1$
 	}
 	
 	private static void appendIndexPath(StringBuffer buf) {
-		buf.append("index.html");
+		buf.append("index.html"); //$NON-NLS-1$
 	}	
 	
 	private static boolean doesExist(URL url) {
-		if (url.getProtocol().equals("file")) {
+		if (url.getProtocol().equals("file")) { //$NON-NLS-1$
 			File file= new File(url.getFile());
 			return file.isFile();
 		}	
@@ -357,7 +357,7 @@ public class JavaDocLocations {
 		buf.append(packPath);
 		buf.append('/');
 		buf.append(typePath);
-		buf.append(".html");
+		buf.append(".html"); //$NON-NLS-1$
 	}		
 		
 	private static void appendFieldReference(IField field, StringBuffer buf) throws JavaModelException {
@@ -375,7 +375,7 @@ public class JavaDocLocations {
 		IType declaringType= meth.getDeclaringType();
 		for (int i= 0; i < params.length; i++) {
 			if (i != 0) {
-				buf.append(", ");
+				buf.append(", "); //$NON-NLS-1$
 			}
 			String curr= params[i];
 			String fullName= JavaModelUtil.getResolvedTypeName(curr, declaringType);
@@ -383,7 +383,7 @@ public class JavaDocLocations {
 				buf.append(fullName);
 				int dim= Signature.getArrayCount(curr);
 				while (dim > 0) {
-					buf.append("[]");
+					buf.append("[]"); //$NON-NLS-1$
 					dim--;
 				}
 			}

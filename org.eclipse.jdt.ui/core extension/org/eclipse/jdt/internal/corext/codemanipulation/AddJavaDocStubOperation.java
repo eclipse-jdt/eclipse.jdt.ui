@@ -56,17 +56,18 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		Template[] templates= Templates.getInstance().getTemplates();
 		String comment= null;
 		for (int i= 0; i < templates.length; i++) {
-			if ("typecomment".equals(templates[i].getName())) {
+			if ("typecomment".equals(templates[i].getName())) { //$NON-NLS-1$
 				comment= JavaContext.evaluateTemplate(templates[i], type.getCompilationUnit());
 				break;
 			}
 		}
 		if (comment == null || comment.length() == 0) {
 			StringBuffer buf= new StringBuffer();
-			buf.append("/**\n");
-			buf.append(" * This comment is specified in template 'typecomment'.\n");
-			buf.append(" * (Workbench>Preferences>Java>Templates)\n");
-			buf.append(" */\n");
+			buf.append("/**\n"); //$NON-NLS-1$
+			buf.append(" * "); //$NON-NLS-1$
+			buf.append(CodeGenerationMessages.getString("AddJavaDocStubOperation.configure.message")); //$NON-NLS-1$
+			buf.append('\n');
+			buf.append(" */\n"); //$NON-NLS-1$
 			return buf.toString();
 		}		
 		return comment;
@@ -84,7 +85,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 			boolean isDeprecated= Flags.isDeprecated(inheritedMethod.getFlags());
 			StubUtility.genJavaDocSeeTag(inheritedMethod.getDeclaringType().getElementName(), inheritedMethod.getElementName(), inheritedMethod.getParameterTypes(), nonJavaDocComments, isDeprecated, buf);
 		} else {
-			String desc= "Method " + meth.getElementName();
+			String desc= "Method " + meth.getElementName(); //$NON-NLS-1$
 			StubUtility.genJavaDocStub(desc, meth.getParameterNames(), meth.getReturnType(), meth.getExceptionTypes(), buf);
 		}
 		return buf.toString();

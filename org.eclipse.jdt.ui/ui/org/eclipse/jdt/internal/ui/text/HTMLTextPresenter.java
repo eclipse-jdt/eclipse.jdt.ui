@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class HTMLTextPresenter implements DefaultInformationControl.IInformationPresenter {
 	
-	private static final String LINE_DELIM= System.getProperty("line.separator", "\n");
+	private static final String LINE_DELIM= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 	
 	private int fCounter;
 	private boolean fEnforceUpperLineLimit;
@@ -86,7 +86,7 @@ public class HTMLTextPresenter implements DefaultInformationControl.IInformation
 		int i= 0;
 		while (i < length && Character.isWhitespace(line.charAt(i))) ++i;
 		
-		return (i == length ? line : line.substring(0, i)) + " ";
+		return (i == length ? line : line.substring(0, i)) + " "; //$NON-NLS-1$
 	}
 	
 	/*
@@ -143,7 +143,7 @@ public class HTMLTextPresenter implements DefaultInformationControl.IInformation
 			
 			if (line != null) {
 				append(buffer, LINE_DELIM, lineFormatted ? presentation : null);
-				append(buffer, "...", presentation);
+				append(buffer, "...", presentation); //$NON-NLS-1$
 			}
 			
 			return trim(buffer, presentation);
@@ -167,7 +167,7 @@ public class HTMLTextPresenter implements DefaultInformationControl.IInformation
 			-- end;
 		
 		if (end == -1)
-			return "";
+			return ""; //$NON-NLS-1$
 			
 		if (end < length -1)
 			buffer.delete(end + 1, length);

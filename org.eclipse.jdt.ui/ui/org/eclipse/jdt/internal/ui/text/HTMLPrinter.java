@@ -38,8 +38,8 @@ public class HTMLPrinter {
 	}
 	
 	public static String convertToHTMLContent(String content) {
-		content= replace(content, '<', "&lt;");
-		return replace(content, '>', "&gt;");
+		content= replace(content, '<', "&lt;"); //$NON-NLS-1$
+		return replace(content, '>', "&gt;"); //$NON-NLS-1$
 	}
 	
 	public static String read(Reader rd) {
@@ -61,7 +61,7 @@ public class HTMLPrinter {
 	}
 
 	public static void insertPageProlog(StringBuffer buffer, int position) {
-		buffer.insert(position, "<html><body text=\"#000000\" bgcolor=\"#FFFF88\"><font size=-1>");
+		buffer.insert(position, "<html><body text=\"#000000\" bgcolor=\"#FFFF88\"><font size=-1>"); //$NON-NLS-1$
 	}
 	
 	public static void addPageProlog(StringBuffer buffer) {
@@ -69,38 +69,38 @@ public class HTMLPrinter {
 	}
 	
 	public static void addPageEpilog(StringBuffer buffer) {
-		buffer.append("</font></body></html>");
+		buffer.append("</font></body></html>"); //$NON-NLS-1$
 	}
 	
 	public static void startBulletList(StringBuffer buffer) {
-		buffer.append("<ul>");
+		buffer.append("<ul>"); //$NON-NLS-1$
 	}
 	
 	public static void endBulletList(StringBuffer buffer) {
-		buffer.append("</ul>");
+		buffer.append("</ul>"); //$NON-NLS-1$
 	}
 	
 	public static void addBullet(StringBuffer buffer, String bullet) {
 		if (bullet != null) {
-			buffer.append("<li>");
+			buffer.append("<li>"); //$NON-NLS-1$
 			buffer.append(bullet);
-			buffer.append("</li>");
+			buffer.append("</li>"); //$NON-NLS-1$
 		}
 	}
 	
 	public static void addSmallHeader(StringBuffer buffer, String header) {
 		if (header != null) {
-			buffer.append("<h5>");
+			buffer.append("<h5>"); //$NON-NLS-1$
 			buffer.append(header);
-			buffer.append("</h5>");
+			buffer.append("</h5>"); //$NON-NLS-1$
 		}
 	}
 	
 	public static void addParagraph(StringBuffer buffer, String paragraph) {
 		if (paragraph != null) {
-			buffer.append("<p>");
+			buffer.append("<p>"); //$NON-NLS-1$
 			buffer.append(paragraph);
-			buffer.append("</p>");
+			buffer.append("</p>"); //$NON-NLS-1$
 		}
 	}
 	

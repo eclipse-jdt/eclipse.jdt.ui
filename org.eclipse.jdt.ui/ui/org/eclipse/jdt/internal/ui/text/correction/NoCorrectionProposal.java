@@ -23,7 +23,7 @@ public class NoCorrectionProposal extends ChangeCorrectionProposal {
 	private ProblemPosition fProblemPosition;
 
 	public NoCorrectionProposal(ProblemPosition problemPosition) {
-		super(CorrectionMessages.getString("NoCorrectionProposal.description"), new NullChange(), 0);
+		super(CorrectionMessages.getString("NoCorrectionProposal.description"), new NullChange(), 0); //$NON-NLS-1$
 		fProblemPosition= problemPosition;
 	}
 

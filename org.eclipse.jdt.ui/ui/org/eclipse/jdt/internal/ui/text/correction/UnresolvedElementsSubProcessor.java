@@ -187,8 +187,8 @@ public class UnresolvedElementsSubProcessor {
 		String[] res= new String[nTokens];
 		for (int i= 0; i < nTokens; i++) {
 			String str= tok.nextToken().trim();
-			if (str.startsWith("<")) {
-				str= "java.lang.Object";
+			if (str.startsWith("<")) { //$NON-NLS-1$
+				str= "java.lang.Object"; //$NON-NLS-1$
 			}
 			res[i]= str;
 		}
