@@ -392,7 +392,7 @@ public class LocalCorrectionsSubProcessor {
 			typeNode= creation.getAnonymousClassDeclaration();				
 		}
 		if (typeNode != null) {
-			UnimplementedMethodsCompletionProposal proposal= new UnimplementedMethodsCompletionProposal(cu, typeNode, 0);
+			UnimplementedMethodsCompletionProposal proposal= new UnimplementedMethodsCompletionProposal(cu, typeNode, 10);
 			proposals.add(proposal);
 		}
 		if (typeNode instanceof TypeDeclaration) {
