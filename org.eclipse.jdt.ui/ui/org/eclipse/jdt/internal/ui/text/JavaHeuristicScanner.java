@@ -55,6 +55,8 @@ public class JavaHeuristicScanner implements Symbols {
 	private static final char RBRACKET= ']';
 	private static final char QUESTIONMARK= '?';
 	private static final char EQUAL= '=';
+	private static final char LANGLE= '<';
+	private static final char RANGLE= '>';
 
 	/**
 	 * Specifies the stop condition, upon which the <code>scanXXX</code> methods will decide whether
@@ -331,6 +333,10 @@ public class JavaHeuristicScanner implements Symbols {
 				return TokenQUESTIONMARK;
 			case EQUAL:
 				return TokenEQUAL;
+			case LANGLE:
+				return TokenLESSTHAN;
+			case RANGLE:
+				return TokenGREATERTHAN;
 		}
 		
 		// else
@@ -399,6 +405,10 @@ public class JavaHeuristicScanner implements Symbols {
 				return TokenQUESTIONMARK;
 			case EQUAL:
 				return TokenEQUAL;
+			case LANGLE:
+				return TokenLESSTHAN;
+			case RANGLE:
+				return TokenGREATERTHAN;
 		}
 		
 		// else

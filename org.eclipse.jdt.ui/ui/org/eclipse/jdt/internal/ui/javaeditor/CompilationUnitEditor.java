@@ -605,7 +605,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					case '<':
 						if (!(fCloseAngularBrackets && fCloseBrackets)
 								|| nextToken == Symbols.TokenLESSTHAN 
-								|| nextToken == Symbols.TokenIDENT
 								|| 		   prevToken != Symbols.TokenLBRACE	
 										&& prevToken != Symbols.TokenRBRACE 
 										&& prevToken != Symbols.TokenSEMICOLON

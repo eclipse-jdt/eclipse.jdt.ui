@@ -76,12 +76,20 @@ public class BracketInserterTest extends TestCase {
 				"    public static void main(String[] args) {\n" + 
 				"        \n" + 
 				"    }\n" + 
+				"    void foo(String[] args) {\n" + 
+				"        \n" + 
+				"    }\n" + 
+				"    " +
+				"    HashMap hm= new HashMap();" +
 				"}\n";
 	
 	// document offsets 
 	private static final int BODY_OFFSET= 196;
 	private static final int ARGS_OFFSET= 171;
 	private static final int BRACKETS_OFFSET= 178;
+	private static final int MAIN_VOID_OFFSET= 161;
+	private static final int FOO_VOID_OFFSET= 207;
+	private static final int FIELD_OFFSET= 263;
 	
 	public static Test suite() {
 		return new TestSuite(BracketInserterTest.class);
@@ -144,15 +152,7 @@ public class BracketInserterTest extends TestCase {
 		type('(');
 		
 		assertEquals("()", fDocument.get(BODY_OFFSET, 2));
-		assertEquals(BODY_OFFSET + 1, getCaret());
-		
-		LinkedModeModel model= LinkedModeModel.getModel(fDocument, BODY_OFFSET + 1);
-		assertNotNull(model);
-		assertFalse(model.isNested());
-		LinkedPosition position= model.findPosition(new LinkedPosition(fDocument, BODY_OFFSET + 1, 0));
-		assertNotNull(position);
-		assertEquals(BODY_OFFSET + 1, position.getOffset());
-		assertEquals(0, position.getLength());
+		assertSingleLinkedPosition(BODY_OFFSET + 1);
 	}
 	
 	public void testDeletingParenthesis() {
@@ -229,15 +229,7 @@ public class BracketInserterTest extends TestCase {
 		type('(');
 		
 		assertEquals("()", fDocument.get(BRACKETS_OFFSET, 2));
-		assertEquals(BRACKETS_OFFSET + 1, getCaret());
-		
-		LinkedModeModel model= LinkedModeModel.getModel(fDocument, BRACKETS_OFFSET + 1);
-		assertNotNull(model);
-		assertFalse(model.isNested());
-		LinkedPosition position= model.findPosition(new LinkedPosition(fDocument, BRACKETS_OFFSET + 1, 0));
-		assertNotNull(position);
-		assertEquals(BRACKETS_OFFSET + 1, position.getOffset());
-		assertEquals(0, position.getLength());
+		assertSingleLinkedPosition(BRACKETS_OFFSET + 1);
 	}
 	
 	public void testPeerEntry() throws BadLocationException {
@@ -346,15 +338,8 @@ public class BracketInserterTest extends TestCase {
 		type('"');
 		
 		assertEquals("\"\"", fDocument.get(BODY_OFFSET, 2));
-		assertEquals(BODY_OFFSET + 1, getCaret());
 		
-		LinkedModeModel model= LinkedModeModel.getModel(fDocument, BODY_OFFSET + 1);
-		assertNotNull(model);
-		assertFalse(model.isNested());
-		LinkedPosition position= model.findPosition(new LinkedPosition(fDocument, BODY_OFFSET + 1, 0));
-		assertNotNull(position);
-		assertEquals(BODY_OFFSET + 1, position.getOffset());
-		assertEquals(0, position.getLength());
+		assertSingleLinkedPosition(BODY_OFFSET + 1);
 	}
 	
 	public void testPreferences() throws BadLocationException {
@@ -370,13 +355,10 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 
-	public void testAngularBracketsAsOperator() throws BadLocationException {
+	public void testAngleBracketsAsOperator() throws Exception {
+		use15();
 		setCaret(BODY_OFFSET);
-		type('t');
-		type('e');
-		type('s');
-		type('t');
-		type('<');
+		type("test<");
 		
 		assertEquals("test<", fDocument.get(BODY_OFFSET, 5));
 		assertFalse(">".equals(fDocument.get(BODY_OFFSET + 5, 1)));
@@ -385,13 +367,9 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 	
-	public void testAngularBracketsIn14Project() throws BadLocationException {
+	public void testAngleBracketsIn14Project() throws BadLocationException {
 		setCaret(BODY_OFFSET);
-		type('T');
-		type('e');
-		type('s');
-		type('t');
-		type('<');
+		type("Test<");
 		
 		assertEquals("Test<", fDocument.get(BODY_OFFSET, 5));
 		assertFalse(">".equals(fDocument.get(BODY_OFFSET + 5, 1)));
@@ -400,32 +378,76 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 	
-	public void testAngularBracketsIn15Project() throws Exception {
-		tearDown();
-		setUpProject(JavaCore.VERSION_1_5);
-		setUpEditor();
+	public void testAngleBracketsIn15Project() throws Exception {
+		use15();
 		
 		setCaret(BODY_OFFSET);
-		type('T');
-		type('e');
-		type('s');
-		type('t');
-		type('<');
+		type("Test<");
 		
 		assertEquals("Test<>", fDocument.get(BODY_OFFSET, 6));
-		assertEquals(BODY_OFFSET + 5, getCaret());
+		assertSingleLinkedPosition(BODY_OFFSET + 5);
+	}
+	
+	public void testAngleBracketsInFieldDecl15() throws Exception {
+		use15();
 		
-		LinkedModeModel model= LinkedModeModel.getModel(fDocument, BODY_OFFSET + 5);
+		setCaret(FIELD_OFFSET);
+		type('<');
+		
+		assertEquals("HashMap<> hm", fDocument.get(FIELD_OFFSET - 7, 12));
+		assertSingleLinkedPosition(FIELD_OFFSET + 1);
+	}
+
+	public void testAngleBracketsInsideMethodDecl15() throws Exception {
+		use15();
+		
+		setCaret(MAIN_VOID_OFFSET);
+		type('<');
+		
+		assertEquals("public static <>void", fDocument.get(MAIN_VOID_OFFSET - 14, 20));
+		assertSingleLinkedPosition(MAIN_VOID_OFFSET + 1);
+	}
+
+	public void testAngleBracketsBeforeMethodDecl15() throws Exception {
+		use15();
+		
+		setCaret(FOO_VOID_OFFSET);
+		type('<');
+		
+		assertEquals("<>void foo", fDocument.get(FOO_VOID_OFFSET, 10));
+		assertSingleLinkedPosition(FOO_VOID_OFFSET + 1);
+	}
+
+	/* utilities */
+
+	private void assertSingleLinkedPosition(int offset) {
+		assertEquals(offset, getCaret());
+		
+		LinkedModeModel model= LinkedModeModel.getModel(fDocument, offset);
 		assertNotNull(model);
 		assertFalse(model.isNested());
-		LinkedPosition position= model.findPosition(new LinkedPosition(fDocument, BODY_OFFSET + 5, 0));
+		LinkedPosition position= model.findPosition(new LinkedPosition(fDocument, offset, 0));
 		assertNotNull(position);
-		assertEquals(BODY_OFFSET + 5, position.getOffset());
+		assertEquals(offset, position.getOffset());
 		assertEquals(0, position.getLength());
 	}
 	
-	/* utilities */
+	private void use15() throws Exception, CoreException, JavaModelException {
+		tearDown();
+		setUpProject(JavaCore.VERSION_1_5);
+		setUpEditor();
+	}
 	
+	/**
+	 * Type characters into the styled text.
+	 * 
+	 * @param characters the characters to type
+	 */
+	private void type(CharSequence characters) {
+		for (int i= 0; i < characters.length(); i++)
+			type(characters.charAt(i), 0, 0);
+	}
+
 	/**
 	 * Type a character into the styled text.
 	 * 
