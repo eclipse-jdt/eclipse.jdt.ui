@@ -160,7 +160,31 @@ public class ExtractConstantTests extends RefactoringTest {
 	public void test8() throws Exception {
 		helper1(8, 16, 8, 22, true, true, "CONSTANT");	
 	}
-			
+	
+	public void test9() throws Exception {
+		helper1(6, 24, 6, 29, true, true, "CONSTANT");	
+	}
+
+	public void test10() throws Exception {
+		helper1(8, 17, 8, 22, true, true, "CONSTANT");	
+	}			
+	
+	public void test11() throws Exception {
+		helper1(10, 37, 10, 43, true, true, "CONSTANT");	
+	}
+	
+	public void test12() throws Exception {
+		helper1(9, 19, 9, 24, true, true, "CONSTANT");	
+	}
+	
+	public void test13() throws Exception{
+		helper1(9, 16, 9, 28, true, true, "CONSTANT");		
+	}
+		
+	public void test14() throws Exception{
+		helper1(10, 28, 10, 44, true, true, "CONSTANT");
+	}	
+	
 	// -- testing failing preconditions
 	public void testFail0() throws Exception{
 		failHelper1(8, 16, 8, 21, true, true, "CONSTANT");		
@@ -194,14 +218,6 @@ public class ExtractConstantTests extends RefactoringTest {
 		failHelper1(11, 20, 11, 34, true, true, "CONSTANT");	
 	}
 		
-	public void testFail8() throws Exception{
-		failHelper1(9, 16, 9, 28, true, true, "CONSTANT");		
-	}
-		
-	public void testFail9() throws Exception{
-		failHelper1(10, 28, 10, 44, true, true, "CONSTANT");
-	}
-		
 	public void testFail10() throws Exception{
 		failHelper1(15, 20, 15, 37, true, false, "CONSTANT");	
 	}
@@ -219,11 +235,11 @@ public class ExtractConstantTests extends RefactoringTest {
 	}
 	
 	public void testFail14() throws Exception {
-		failHelper1(5, 9, 5, 11, true, true, "CONSTANT", RefactoringStatusCodes.EXTRANEOUS_TEXT, true);	
+		failHelper1(5, 9, 5, 11, true, true, "CONSTANT");	
 	}
 	
 	public void testFail15() throws Exception {
-		failHelper1(5, 10, 5, 13, true, true, "CONSTANT", RefactoringStatusCodes.EXTRANEOUS_TEXT, true);	
+		failHelper1(5, 10, 5, 13, true, true, "CONSTANT");	
 	}
 }
 
