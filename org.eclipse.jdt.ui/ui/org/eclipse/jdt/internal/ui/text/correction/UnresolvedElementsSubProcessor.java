@@ -87,6 +87,11 @@ public class UnresolvedElementsSubProcessor {
 		
 		// corrections
 		String typeName= cu.getBuffer().getText(problemPos.getOffset(), problemPos.getLength());
+		int bracketIndex= typeName.indexOf('[');
+		if (bracketIndex != -1) {
+			typeName= typeName.substring(0, bracketIndex);
+		}
+		
 		
 		SimilarElementsRequestor requestor= new SimilarElementsRequestor(typeName, kind, null, null);
 		cu.codeComplete(problemPos.getOffset() + 1, requestor);
@@ -114,7 +119,7 @@ public class UnresolvedElementsSubProcessor {
 				change.addTextEdit("Add Import", importEdit); //$NON-NLS-1$
 			}
 			if (!importOnly) {
-				change.addTextEdit("Change", SimpleTextEdit.createReplace(problemPos.getOffset(), problemPos.getLength(), simpleName)); //$NON-NLS-1$
+				change.addTextEdit("Change", SimpleTextEdit.createReplace(problemPos.getOffset(), typeName.length(), simpleName)); //$NON-NLS-1$
 				proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.description", simpleName)); //$NON-NLS-1$
 				proposal.setRelevance(3);
 			} else {
