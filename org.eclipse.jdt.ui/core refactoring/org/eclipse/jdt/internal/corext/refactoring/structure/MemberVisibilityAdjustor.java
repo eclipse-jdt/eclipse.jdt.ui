@@ -139,7 +139,7 @@ public final class MemberVisibilityAdjustor {
 			Assert.isNotNull(adjustor);
 			Assert.isNotNull(rewrite);
 			Assert.isNotNull(root);
-			final int visibility= getKeyword() != null ? getKeyword().toFlagValue() : Modifier.NONE;
+			final int visibility= fKeyword != null ? fKeyword.toFlagValue() : Modifier.NONE;
 			if (fMember instanceof IField) {
 				final VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) fMember, root);
 				final FieldDeclaration declaration= (FieldDeclaration) fragment.getParent();
@@ -154,7 +154,7 @@ public final class MemberVisibilityAdjustor {
 					rewrite.getListRewrite(type, type.getBodyDeclarationsProperty()).insertAfter(newDeclaration, declaration, null);
 					rewrite.getListRewrite(declaration, FieldDeclaration.FRAGMENTS_PROPERTY).remove(fragment, group);
 				}
-			} else {
+			} else if (fMember != null) {
 				final BodyDeclaration declaration= ASTNodeSearchUtil.getBodyDeclarationNode(fMember, root);
 				if (declaration != null) {
 					ModifierRewrite.create(rewrite, declaration).setVisibility(visibility, group);
@@ -358,7 +358,7 @@ public final class MemberVisibilityAdjustor {
 	 */
 	private static boolean hasLowerVisibility(final List modifiers, final ModifierKeyword threshold) {
 		Assert.isNotNull(modifiers);
-		Assert.isTrue(threshold == null || isVisibilityKeyword(threshold));
+		Assert.isTrue(isVisibilityKeyword(threshold));
 		Modifier modifier= null;
 		IExtendedModifier extended= null;
 		for (final Iterator iterator= modifiers.iterator(); iterator.hasNext();) {
@@ -380,11 +380,9 @@ public final class MemberVisibilityAdjustor {
 	 * @return <code>true</code> if the visibility is lower than required, <code>false</code> otherwise
 	 */
 	private static boolean hasLowerVisibility(final ModifierKeyword keyword, final ModifierKeyword threshold) {
-		Assert.isTrue(keyword == null || isVisibilityKeyword(keyword));
-		Assert.isTrue(threshold == null || isVisibilityKeyword(threshold));
-		final int keywordFlag= keyword != null ? keyword.toFlagValue() : Modifier.NONE;
-		final int thresholdFlag= threshold != null ? threshold.toFlagValue() : Modifier.NONE;
-		return hasLowerVisibility(keywordFlag, thresholdFlag);
+		Assert.isTrue(isVisibilityKeyword(keyword));
+		Assert.isTrue(isVisibilityKeyword(threshold));
+		return hasLowerVisibility(keyword != null ? keyword.toFlagValue() : Modifier.NONE, threshold != null ? threshold.toFlagValue() : Modifier.NONE);
 	}
 
 	/**
@@ -430,9 +428,10 @@ public final class MemberVisibilityAdjustor {
 		Assert.isTrue(isVisibilityModifier(threshold));
 		Assert.isNotNull(adjustments);
 		final IncomingMemberVisibilityAdjustment adjustment= (IncomingMemberVisibilityAdjustment) adjustments.get(member);
-		final ModifierKeyword keyword= adjustment.getKeyword();
-		if (adjustment != null)
+		if (adjustment != null) {
+			final ModifierKeyword keyword= adjustment.getKeyword();
 			return hasLowerVisibility(keyword == null ? Modifier.NONE : keyword.toFlagValue(), threshold);
+		}
 		return true;
 	}
 
@@ -523,9 +522,11 @@ public final class MemberVisibilityAdjustor {
 			IMember member= (IMember) element;
 			if (member instanceof IInitializer)
 				member= member.getDeclaringType();
-			final ModifierKeyword threshold= computeIncomingVisibilityThreshold(member, fReferencing, monitor);
-			if (hasLowerVisibility(member.getFlags(), threshold == null ? Modifier.NONE : threshold.toFlagValue()) && needsVisibilityAdjustment(member, threshold))
-				fAdjustments.put(member, new IncomingMemberVisibilityAdjustment(member, threshold));
+			if (member != null) {
+				final ModifierKeyword threshold= computeIncomingVisibilityThreshold(member, fReferencing, monitor);
+				if (hasLowerVisibility(member.getFlags(), threshold == null ? Modifier.NONE : threshold.toFlagValue()) && needsVisibilityAdjustment(member, threshold))
+					fAdjustments.put(member, new IncomingMemberVisibilityAdjustment(member, threshold));
+			}
 		}
 	}
 
@@ -568,7 +569,7 @@ public final class MemberVisibilityAdjustor {
 	private void adjustOutgoingVisibility(final CompilationUnitRewrite rewrite, final IField field, final ModifierKeyword threshold, final VariableDeclarationFragment fragment, final FieldDeclaration declaration) {
 		Assert.isNotNull(rewrite);
 		Assert.isNotNull(field);
-		Assert.isTrue(threshold == null || isVisibilityKeyword(threshold));
+		Assert.isTrue(isVisibilityKeyword(threshold));
 		Assert.isNotNull(fragment);
 		Assert.isNotNull(declaration);
 		if (hasLowerVisibility((List) declaration.getStructuralProperty(declaration.getModifiersProperty()), threshold) && needsVisibilityAdjustment(field, threshold)) {
@@ -617,7 +618,7 @@ public final class MemberVisibilityAdjustor {
 		Assert.isNotNull(member);
 		Assert.isNotNull(rewrite);
 		Assert.isNotNull(declaration);
-		Assert.isTrue(threshold == null || isVisibilityKeyword(threshold));
+		Assert.isTrue(isVisibilityKeyword(threshold));
 		Assert.isNotNull(binding);
 		Assert.isNotNull(template);
 		if (hasLowerVisibility((List) declaration.getStructuralProperty(declaration.getModifiersProperty()), threshold) && needsVisibilityAdjustment(member, threshold))
@@ -955,6 +956,8 @@ public final class MemberVisibilityAdjustor {
 
 	/**
 	 * Sets the severity of failure messages.
+	 * <p>
+	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is a status with value {@link RefactoringStatus#ERROR}.
 	 * 
 	 * @param severity the severity of failure messages
 	 */
@@ -1038,7 +1041,7 @@ public final class MemberVisibilityAdjustor {
 	/**
 	 * Sets the severity of visibility messages.
 	 * <p>
-	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is a fresh status with status {@link RefactoringStatus#WARNING}.
+	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is a status with value {@link RefactoringStatus#WARNING}.
 	 * 
 	 * @param severity the severity of visibility messages
 	 */
