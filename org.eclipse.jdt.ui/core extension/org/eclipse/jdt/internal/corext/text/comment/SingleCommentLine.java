@@ -37,15 +37,15 @@ public class SingleCommentLine extends CommentLine {
 		super(region);
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentLine#adapt(org.eclipse.jdt.internal.corext.text.comment.CommentLine)
 	 */
 	protected void adapt(final CommentLine previous) {
 		// Do nothing
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentLine#formatLowerBorder(org.eclipse.jdt.internal.corext.text.comment.CommentRange, java.lang.String, int)
 	 */
 	protected void formatLowerBorder(final CommentRange range, final String indentation, final int length) {
 
@@ -55,8 +55,8 @@ public class SingleCommentLine extends CommentLine {
 		parent.logEdit(parent.getDelimiter(), offset, parent.getLength() - offset);
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentLine#formatUpperBorder(org.eclipse.jdt.internal.corext.text.comment.CommentRange, java.lang.String, int)
 	 */
 	protected void formatUpperBorder(final CommentRange range, final String indentation, final int length) {
 
@@ -65,29 +65,29 @@ public class SingleCommentLine extends CommentLine {
 		parent.logEdit(getContentPrefix(), 0, range.getOffset());
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentLine#getContentPrefix()
 	 */
 	protected String getContentPrefix() {
 		return SINGLE_COMMENT_PREFIX;
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentLine#getEndingPrefix()
 	 */
 	protected String getEndingPrefix() {
 		return SINGLE_COMMENT_PREFIX;
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentLine#getStartingPrefix()
 	 */
 	protected String getStartingPrefix() {
 		return SINGLE_COMMENT_PREFIX;
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentLine#scanLine(int)
 	 */
 	protected void scanLine(final int line) {
 
@@ -105,8 +105,8 @@ public class SingleCommentLine extends CommentLine {
 		}
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentLine#tokenizeLine(int)
 	 */
 	protected void tokenizeLine(final int line) {
 

@@ -31,8 +31,8 @@ public class JavaDocLine extends MultiCommentLine {
 		super(region);
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentLine#formatUpperBorder(org.eclipse.jdt.internal.corext.text.comment.CommentRange, java.lang.String, int)
 	 */
 	protected void formatUpperBorder(final CommentRange range, final String indentation, final int length) {
 
@@ -44,8 +44,8 @@ public class JavaDocLine extends MultiCommentLine {
 			super.formatUpperBorder(range, indentation, length);
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentLine#getStartingPrefix()
 	 */
 	protected String getStartingPrefix() {
 		return JAVADOC_START_PREFIX;

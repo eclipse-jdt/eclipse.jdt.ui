@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.corext.text.comment;
  * 
  * @since 3.0
  */
-public interface IHtmlTagConstants {
+public interface IHtmlTagDelimiters {
 
 	/** Html tag close prefix */
 	public static final String HTML_CLOSE_PREFIX= "</"; //$NON-NLS-1$

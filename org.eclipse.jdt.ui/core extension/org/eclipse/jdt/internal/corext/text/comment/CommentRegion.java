@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
  * 
  * @since 3.0
  */
-public class CommentRegion extends Position implements IHtmlTagConstants, IBorderAttributes, ICommentAttributes {
+public class CommentRegion extends Position implements IHtmlTagDelimiters, IBorderAttributes, ICommentAttributes {
 
 	/** Default comment range delimiter */
 	protected static final String COMMENT_RANGE_DELIMITER= " "; //$NON-NLS-1$

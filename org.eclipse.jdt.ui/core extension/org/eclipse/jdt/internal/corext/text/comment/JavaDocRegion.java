@@ -67,8 +67,8 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 		fFormatHtml= trueProperty.equals(preferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMATHTML));
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentRegion#canFormat(org.eclipse.jdt.internal.corext.text.comment.CommentRange, org.eclipse.jdt.internal.corext.text.comment.CommentRange)
 	 */
 	protected boolean canFormat(final CommentRange previous, final CommentRange next) {
 		
@@ -92,9 +92,9 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 		return true;
 	}
 
-	/**
-	 * @inheritDoc
- 	 */
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentRegion#formatRegion(java.lang.String, int)
+	 */
 	protected final void formatRegion(final String indentation, final int width) {
 	
 		super.formatRegion(indentation, width);
@@ -220,8 +220,8 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 		return buffer.toString();
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.MultiCommentRegion#markHtmlRanges()
 	 */
 	protected final void markHtmlRanges() {
 
@@ -231,8 +231,8 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 			markTagRanges(JAVADOC_CODE_TAGS, COMMENT_CODE, false);
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.MultiCommentRegion#markHtmlTag(org.eclipse.jdt.internal.corext.text.comment.CommentRange, java.lang.String)
 	 */
 	protected final void markHtmlTag(final CommentRange range, final String token) {
 
@@ -251,8 +251,8 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 		}
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.MultiCommentRegion#markJavadocTag(org.eclipse.jdt.internal.corext.text.comment.CommentRange, java.lang.String)
 	 */
 	protected final void markJavadocTag(final CommentRange range, final String token) {
 
@@ -294,8 +294,8 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 		}
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentRegion#canAppend(org.eclipse.jdt.internal.corext.text.comment.CommentLine, org.eclipse.jdt.internal.corext.text.comment.CommentRange, org.eclipse.jdt.internal.corext.text.comment.CommentRange, int, int)
 	 */
 	protected boolean canAppend(CommentLine line, CommentRange previous, CommentRange next, int index, int count) {
 		// don't append code sections

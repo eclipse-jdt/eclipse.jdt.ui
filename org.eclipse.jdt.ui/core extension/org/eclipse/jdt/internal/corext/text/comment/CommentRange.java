@@ -18,7 +18,7 @@ import org.eclipse.jface.text.Position;
  * 
  * @since 3.0
  */
-public class CommentRange extends Position implements ICommentAttributes, IHtmlTagConstants {
+public class CommentRange extends Position implements ICommentAttributes, IHtmlTagDelimiters {
 
 	/** The attributes of this range */
 	private int fAttributes= 0;

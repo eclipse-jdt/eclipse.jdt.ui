@@ -22,7 +22,7 @@ import org.eclipse.jface.text.Region;
  * 
  * @since 3.0
  */
-public class MultiCommentLine extends CommentLine implements ICommentAttributes, IHtmlTagConstants, IJavaDocTagConstants {
+public class MultiCommentLine extends CommentLine implements ICommentAttributes, IHtmlTagDelimiters, IJavaDocTagConstants {
 
 	/** Line prefix of multi-line comment content lines */
 	public static final String MULTI_COMMENT_CONTENT_PREFIX= " * "; //$NON-NLS-1$
@@ -106,7 +106,7 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 					fReferenceIndentation= common;
 				else if (hasAttribute(COMMENT_PARAMETER)) {
 					if (parent.isIndentDescriptions())
-						fReferenceIndentation= common + parent.getText(range.getOffset(), range.getLength()) + CommentRegion.COMMENT_RANGE_DELIMITER;
+						fReferenceIndentation= "\t" + common; //$NON-NLS-1$
 					else
 						fReferenceIndentation= common;
 				}

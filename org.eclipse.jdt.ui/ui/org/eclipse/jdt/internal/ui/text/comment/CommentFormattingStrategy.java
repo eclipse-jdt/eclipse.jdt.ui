@@ -71,16 +71,15 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	/**
 	 * Creates a new comment formatting strategy.
 	 * 
-	 * @param textMeasurement
-	 *                  The text measurement
+	 * @param textMeasurement The text measurement
 	 */
 	public CommentFormattingStrategy(ITextMeasurement textMeasurement) {
 		super();
 		fTextMeasurement= textMeasurement;
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jface.text.formatter.IFormattingStrategyExtension#format()
 	 */
 	public void format() {
 		super.format();
@@ -97,27 +96,31 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		if (isFormattingHeader || position.offset >= documentsHeaderEnd) {
 			TextEdit edit= null;
 			try {
+				// compute offset in document of region passed to the formatter
 				int sourceOffset= document.getLineOffset(document.getLineOfOffset(position.getOffset()));
+				
+				// format region
 				int partitionOffset= position.getOffset() - sourceOffset;
 				int sourceLength= partitionOffset + position.getLength();
 				String source= document.get(sourceOffset, sourceLength);
-				
 				CodeFormatter commentFormatter= new CommentFormatter(fTextMeasurement, preferences);
 				int indentationLevel= inferIndentationLevel(source.substring(0, partitionOffset), getTabSize(preferences));
-				edit= commentFormatter.format(getPartitionKind(position.getType()), source, partitionOffset, position.getLength(), indentationLevel, TextUtilities.getDefaultLineDelimiter(document));
+				edit= commentFormatter.format(getKindForPartitionType(position.getType()), source, partitionOffset, position.getLength(), indentationLevel, TextUtilities.getDefaultLineDelimiter(document));
+				
+				// move edit offset to match document
 				if (edit != null)
 					edit.moveTree(sourceOffset);
-			} catch (BadLocationException exception) {
-				JavaPlugin.log(exception);
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
 			}
 			
 			try {
 				if (edit != null)
 					edit.apply(document);
-			} catch (MalformedTreeException exception) {
-				JavaPlugin.log(exception);
-			} catch (BadLocationException exception) {
-				JavaPlugin.log(exception);
+			} catch (MalformedTreeException e) {
+				JavaPlugin.log(e);
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
 			}
 		}
 	}
@@ -150,7 +153,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	 * @return the code snippet kind
 	 * @since 3.1
 	 */
-	private static int getPartitionKind(String type) {
+	private static int getKindForPartitionType(String type) {
 		if (IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(type))
 				return CommentObjectFactory.K_SINGLE_LINE_COMMENT;
 		if (IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type))

@@ -62,8 +62,8 @@ public class MultiCommentRegion extends CommentRegion implements IJavaDocTagCons
 		fParameterNewLine= trueProperty.equals(preferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER));
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentRegion#canAppend(org.eclipse.jdt.internal.corext.text.comment.CommentLine, org.eclipse.jdt.internal.corext.text.comment.CommentRange, org.eclipse.jdt.internal.corext.text.comment.CommentRange, int, int)
 	 */
 	protected boolean canAppend(final CommentLine line, final CommentRange previous, final CommentRange next, final int index, int count) {
 
@@ -120,8 +120,8 @@ public class MultiCommentRegion extends CommentRegion implements IJavaDocTagCons
 		return super.canAppend(line, previous, next, index, count);
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentRegion#getDelimiter(org.eclipse.jdt.internal.corext.text.comment.CommentLine, org.eclipse.jdt.internal.corext.text.comment.CommentLine, org.eclipse.jdt.internal.corext.text.comment.CommentRange, org.eclipse.jdt.internal.corext.text.comment.CommentRange, java.lang.String)
 	 */
 	protected String getDelimiter(CommentLine predecessor, CommentLine successor, CommentRange previous, CommentRange next, String indentation) {
 
@@ -154,8 +154,8 @@ public class MultiCommentRegion extends CommentRegion implements IJavaDocTagCons
 		return delimiter;
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentRegion#getDelimiter(org.eclipse.jdt.internal.corext.text.comment.CommentRange, org.eclipse.jdt.internal.corext.text.comment.CommentRange)
 	 */
 	protected String getDelimiter(final CommentRange previous, final CommentRange next) {
 
@@ -230,8 +230,8 @@ public class MultiCommentRegion extends CommentRegion implements IJavaDocTagCons
 		range.markPrefixTag(COMMENT_ROOT_TAGS, COMMENT_TAG_PREFIX, token, COMMENT_ROOT);
 	}
 
-	/**
-	 * @inheritDoc
+	/*
+	 * @see org.eclipse.jdt.internal.corext.text.comment.CommentRegion#markRegion()
 	 */
 	protected void markRegion() {
 
