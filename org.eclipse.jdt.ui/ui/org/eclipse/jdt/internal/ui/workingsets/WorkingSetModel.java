@@ -363,7 +363,7 @@ public class WorkingSetModel {
 	private void restoreState(IMemento memento) {
 		String configured= memento.getString(TAG_CONFIGURED);
 		if (configured != null)
-			fConfigured= Boolean.getBoolean(configured);
+			fConfigured= Boolean.valueOf(configured).booleanValue();
 		fLocalWorkingSetManager= PlatformUI.getWorkbench().createLocalWorkingSetManager();
 		addListenersToWorkingSetManagers();
 		fLocalWorkingSetManager.restoreState(memento.getChild(TAG_LOCAL_WORKING_SET_MANAGER));

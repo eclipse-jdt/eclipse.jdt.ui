@@ -85,7 +85,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		AST ast= fTypeNode.getAST();
 		
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(getCompilationUnit().getJavaProject());
 		if (!settings.createComments) {
 			settings= null;
 		}

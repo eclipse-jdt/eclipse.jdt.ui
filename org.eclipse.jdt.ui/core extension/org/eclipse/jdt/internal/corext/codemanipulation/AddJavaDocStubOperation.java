@@ -153,7 +153,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 					}
 				}
 				
-				int tabWidth= CodeFormatterUtil.getTabWidth();
+				int tabWidth= CodeFormatterUtil.getTabWidth(cu.getJavaProject());
 				IRegion region= document.getLineInformationOfOffset(memberStartOffset);
 				
 				String line= document.get(region.getOffset(), region.getLength());

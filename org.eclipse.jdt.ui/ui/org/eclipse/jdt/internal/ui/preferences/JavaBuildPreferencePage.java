@@ -68,7 +68,9 @@ public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
 	public void dispose() {
-		fConfigurationBlock.dispose();
+		if (fConfigurationBlock != null) {
+			fConfigurationBlock.dispose();
+		}
 		super.dispose();
 	}
 	

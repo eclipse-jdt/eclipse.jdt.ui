@@ -488,7 +488,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	
 	
 	private void addImports(ICompilationUnit unit, ClipboardData data) throws CoreException {
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(unit.getJavaProject());
 		ImportsStructure importsStructure= new ImportsStructure(unit, settings.importOrder, settings.importThreshold, true);
 		importsStructure.setFindAmbiguousImports(false);
 		String[] imports= data.getTypeImports();

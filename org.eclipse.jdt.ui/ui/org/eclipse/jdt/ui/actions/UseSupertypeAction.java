@@ -174,7 +174,7 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 	}
 	
 	private void startRefactoring(IType type) throws JavaModelException {
-		UseSupertypeWherePossibleRefactoring refactoring= UseSupertypeWherePossibleRefactoring.create(type, JavaPreferencesSettings.getCodeGenerationSettings());
+		UseSupertypeWherePossibleRefactoring refactoring= UseSupertypeWherePossibleRefactoring.create(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()));
 		Assert.isNotNull(refactoring);
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
 		if (!ActionUtil.isProcessable(getShell(), refactoring.getInputType()))

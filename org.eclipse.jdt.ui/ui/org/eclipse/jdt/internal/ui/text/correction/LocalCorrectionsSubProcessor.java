@@ -31,7 +31,6 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
@@ -85,7 +84,7 @@ public class LocalCorrectionsSubProcessor {
 			length= selectionEnd - offset;
 		}
 			
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
 		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(cu, offset, length, settings, null);
 		if (refactoring == null)
 			return;
@@ -128,7 +127,7 @@ public class LocalCorrectionsSubProcessor {
 			ListRewrite clausesRewrite= rewrite.getListRewrite(surroundingTry, TryStatement.CATCH_CLAUSES_PROPERTY);
 			for (int i= 0; i < uncaughtExceptions.length; i++) {
 				ITypeBinding excBinding= uncaughtExceptions[i];
-				String varName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME);
+				String varName= StubUtility.getExceptionVariableName(cu.getJavaProject());
 				SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 				var.setName(ast.newSimpleName(varName));
 				var.setType(imports.addImport(excBinding, ast));

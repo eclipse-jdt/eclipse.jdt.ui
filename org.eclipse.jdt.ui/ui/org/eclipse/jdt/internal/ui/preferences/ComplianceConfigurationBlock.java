@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
@@ -27,7 +28,6 @@ import org.eclipse.swt.widgets.Group;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -39,19 +39,19 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	// Preference store keys, see JavaCore.getOptions
-	private static final String PREF_LOCAL_VARIABLE_ATTR=  JavaCore.COMPILER_LOCAL_VARIABLE_ATTR;
-	private static final String PREF_LINE_NUMBER_ATTR= JavaCore.COMPILER_LINE_NUMBER_ATTR;
-	private static final String PREF_SOURCE_FILE_ATTR= JavaCore.COMPILER_SOURCE_FILE_ATTR;
-	private static final String PREF_CODEGEN_UNUSED_LOCAL= JavaCore.COMPILER_CODEGEN_UNUSED_LOCAL;
-	private static final String PREF_CODEGEN_TARGET_PLATFORM= JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM;
-	private static final String PREF_CODEGEN_INLINE_JSR_BYTECODE= JavaCore.COMPILER_CODEGEN_INLINE_JSR_BYTECODE;
+	private static final Key PREF_LOCAL_VARIABLE_ATTR=  getJDTCoreKey(JavaCore.COMPILER_LOCAL_VARIABLE_ATTR);
+	private static final Key PREF_LINE_NUMBER_ATTR= getJDTCoreKey(JavaCore.COMPILER_LINE_NUMBER_ATTR);
+	private static final Key PREF_SOURCE_FILE_ATTR= getJDTCoreKey(JavaCore.COMPILER_SOURCE_FILE_ATTR);
+	private static final Key PREF_CODEGEN_UNUSED_LOCAL= getJDTCoreKey(JavaCore.COMPILER_CODEGEN_UNUSED_LOCAL);
+	private static final Key PREF_CODEGEN_TARGET_PLATFORM= getJDTCoreKey(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM);
+	private static final Key PREF_CODEGEN_INLINE_JSR_BYTECODE= getJDTCoreKey(JavaCore.COMPILER_CODEGEN_INLINE_JSR_BYTECODE);
 	
-	private static final String PREF_SOURCE_COMPATIBILITY= JavaCore.COMPILER_SOURCE;
-	private static final String PREF_COMPLIANCE= JavaCore.COMPILER_COMPLIANCE;
-	private static final String PREF_PB_ASSERT_AS_IDENTIFIER= JavaCore.COMPILER_PB_ASSERT_IDENTIFIER;
-	private static final String PREF_PB_ENUM_AS_IDENTIFIER= JavaCore.COMPILER_PB_ENUM_IDENTIFIER;
+	private static final Key PREF_SOURCE_COMPATIBILITY= getJDTCoreKey(JavaCore.COMPILER_SOURCE);
+	private static final Key PREF_COMPLIANCE= getJDTCoreKey(JavaCore.COMPILER_COMPLIANCE);
+	private static final Key PREF_PB_ASSERT_AS_IDENTIFIER= getJDTCoreKey(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER);
+	private static final Key PREF_PB_ENUM_AS_IDENTIFIER= getJDTCoreKey(JavaCore.COMPILER_PB_ENUM_IDENTIFIER);
 	
-	private static final String INTR_DEFAULT_COMPLIANCE= "internal.default.compliance"; //$NON-NLS-1$
+	private static final Key INTR_DEFAULT_COMPLIANCE= getJDTUIKey("internal.default.compliance"); //$NON-NLS-1$
 
 	// values
 	private static final String GENERATE= JavaCore.GENERATE;
@@ -91,7 +91,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	private IStatus fComplianceStatus;
 
-	public ComplianceConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
+	public ComplianceConfigurationBlock(IStatusChangeListener context, IProject project) {
 		super(context, project, getKeys());
 		
 		fComplianceControls= new ArrayList();
@@ -108,18 +108,17 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		};
 	}
 	
-	private static String[] getKeys() {
-		String[] keys= new String[] {
+	private static Key[] getKeys() {
+		return new Key[] {
 				PREF_LOCAL_VARIABLE_ATTR, PREF_LINE_NUMBER_ATTR, PREF_SOURCE_FILE_ATTR, PREF_CODEGEN_UNUSED_LOCAL,
 				PREF_CODEGEN_INLINE_JSR_BYTECODE,
 				PREF_COMPLIANCE, PREF_SOURCE_COMPATIBILITY,
 				PREF_CODEGEN_TARGET_PLATFORM, PREF_PB_ASSERT_AS_IDENTIFIER, PREF_PB_ENUM_AS_IDENTIFIER
 			};
-		return keys;
 	}
 	
-	protected final Map getOptions(boolean inheritJavaCoreOptions) {
-		Map map= super.getOptions(inheritJavaCoreOptions);
+	protected final Map getOptions() {
+		Map map= super.getOptions();
 		map.put(INTR_DEFAULT_COMPLIANCE, getCurrentCompliance(map));
 		return map;
 	}
@@ -248,7 +247,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.
 	 */	
-	protected void validateSettings(String changedKey, String oldValue, String newValue) {
+	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		
 		if (changedKey != null) {
 			if (INTR_DEFAULT_COMPLIANCE.equals(changedKey)) {
@@ -353,7 +352,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		}
 	}
 	
-	private void updateRememberedComplianceOption(String prefKey, int idx, boolean enabled) {
+	private void updateRememberedComplianceOption(Key prefKey, int idx, boolean enabled) {
 		Combo combo= getComboBox(prefKey);
 		combo.setEnabled(enabled);
 		

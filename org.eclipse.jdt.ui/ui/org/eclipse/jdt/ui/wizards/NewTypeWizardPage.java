@@ -34,7 +34,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.templates.Template;
@@ -61,7 +60,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
@@ -123,9 +121,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 
 		/* package */ ImportsManager(ICompilationUnit createdWorkingCopy, Set addedTypes) throws CoreException {
-			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(store);
-			int threshold= JavaPreferencesSettings.getImportNumberThreshold(store);			
+			IJavaProject javaProject= createdWorkingCopy.getJavaProject();
+			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(javaProject);
+			int threshold= JavaPreferencesSettings.getImportNumberThreshold(javaProject);
 			fAddedTypes= addedTypes;
 			
 			fImportsStructure= new ImportsStructure(createdWorkingCopy, prefOrder, threshold, true);
@@ -1553,7 +1551,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
 				StringBuffer content= new StringBuffer();
 				
-				if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_ADD_COMMENTS)) {
+				if (StubUtility.doAddComments(parentCU.getJavaProject())) {
 					String comment= getTypeComment(parentCU, lineDelimiter);
 					if (comment != null) {
 						content.append(comment);
@@ -1870,7 +1868,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @deprecated Use getTypeComment(ICompilationUnit, String)
 	 */
 	protected String getTypeComment(ICompilationUnit parentCU) {
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_ADD_COMMENTS)) {
+		if (StubUtility.doAddComments(parentCU.getJavaProject())) {
 			return getTypeComment(parentCU, String.valueOf('\n'));
 		}
 		return null;
@@ -1929,7 +1927,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected IMethod[] createInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		ArrayList newMethods= new ArrayList();
 		ITypeHierarchy hierarchy= null;
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();	
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());	
 
 		if (doConstructors) {
 			hierarchy= type.newSupertypeHierarchy(monitor);

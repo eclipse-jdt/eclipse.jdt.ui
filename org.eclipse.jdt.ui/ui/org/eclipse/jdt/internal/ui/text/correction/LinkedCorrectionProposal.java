@@ -26,7 +26,6 @@ import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
@@ -51,12 +50,12 @@ import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
@@ -332,9 +331,9 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		}
 	
 		private ImportsStructure getImportStructure() throws CoreException {
-			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(store);
-			int threshold= JavaPreferencesSettings.getImportNumberThreshold(store);					
+			IJavaProject project= fCompilationUnit.getJavaProject();
+			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(project);
+			int threshold= JavaPreferencesSettings.getImportNumberThreshold(project);					
 			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit, prefOrder, threshold, true);
 			return impStructure;
 		}

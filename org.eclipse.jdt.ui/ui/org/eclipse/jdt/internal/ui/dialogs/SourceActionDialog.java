@@ -97,7 +97,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fHeight= 18;
 		
 		int insertionDefault= isConstructor ? 0 : 1;
-		boolean generateCommentsDefault= JavaPreferencesSettings.getCodeGenerationSettings().createComments;
+		boolean generateCommentsDefault= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()).createComments;
 		
 		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
 		String sectionId= isConstructor ? SETTINGS_SECTION_CONSTRUCTORS : SETTINGS_SECTION_METHODS;

@@ -399,7 +399,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					// pass dialog based information to the operation 
 					IJavaElement elementPosition= dialog.getElementPosition();
 						
-					CodeGenerationSettings settings = JavaPreferencesSettings.getCodeGenerationSettings();
+					CodeGenerationSettings settings = JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
 					settings.createComments= dialog.getGenerateComment();										
 					createdMethods= processResults(methods, type, elementPosition, settings);
 				} finally {

@@ -18,8 +18,6 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.core.runtime.Preferences;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
@@ -43,16 +41,49 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class CodeFormatterUtil {
 			
 	/**
-	 * Creates a string that represents the given number of indents (can be spaces or tabs..)
+	 * @deprecated use createIndentString(int, IJavaProject) instead to support project specific settings
 	 */
 	public static String createIndentString(int indent) {
-		String str= format(CodeFormatter.K_EXPRESSION, "x", indent, null, "", (Map) null); //$NON-NLS-1$ //$NON-NLS-2$
+		return createIndentString(indent, null);
+	}
+	
+	/**
+	 * Creates a string that represents the given number of indents (can be spaces or tabs..)
+	 * @param indent The number of indents to generate
+	 * @param project The project where the source is used, used for project specific options or <code>null</code> if
+	 * the project is unknown and the workspace default should be used
+	 * @return The indent string
+	 */
+	public static String createIndentString(int indent, IJavaProject project) {
+		String str= format(CodeFormatter.K_EXPRESSION, "x", indent, null, "", project); //$NON-NLS-1$ //$NON-NLS-2$
 		return str.substring(0, str.indexOf('x'));
 	} 
-		
+	
+	/**
+	 * @deprecated use getTabWidth(IJavaProject) instead to support project specific settings
+	 */
 	public static int getTabWidth() {
-		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
-		return preferences.getInt(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
+		return getTabWidth(null);
+	}
+	
+	/**
+	 * Gets the current tab width.
+	 * @param project The project where the source is used, used for project specific options or <code>null</code> if
+	 * 	the project is unknown and the workspace default should be used
+	 * 	@return The indent width
+	 */
+	public static int getTabWidth(IJavaProject project) {
+		String tabSize;
+		if (project != null) {
+			tabSize= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, true);
+		} else {
+			tabSize= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
+		}
+		try {
+			return Integer.parseInt(tabSize);
+		} catch (NumberFormatException e) {
+			return 4;
+		}
 	}
 
 	// transition code

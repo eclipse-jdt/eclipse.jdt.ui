@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -17,7 +19,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -28,21 +29,21 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
   */
 public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock {
 
-	private static final String PREF_JAVADOC_SUPPORT= JavaCore.COMPILER_DOC_COMMENT_SUPPORT;
+	private static final Key PREF_JAVADOC_SUPPORT= getJDTCoreKey(JavaCore.COMPILER_DOC_COMMENT_SUPPORT);
 
-	private static final String PREF_PB_INVALID_JAVADOC= JavaCore.COMPILER_PB_INVALID_JAVADOC;
-	private static final String PREF_PB_INVALID_JAVADOC_TAGS= JavaCore.COMPILER_PB_INVALID_JAVADOC_TAGS;
-	private static final String PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF= JavaCore.COMPILER_PB_INVALID_JAVADOC_TAGS__NOT_VISIBLE_REF;
-	private static final String PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF = JavaCore.COMPILER_PB_INVALID_JAVADOC_TAGS__DEPRECATED_REF;
-	private static final String PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY= JavaCore.COMPILER_PB_INVALID_JAVADOC_TAGS_VISIBILITY;
+	private static final Key PREF_PB_INVALID_JAVADOC= getJDTCoreKey(JavaCore.COMPILER_PB_INVALID_JAVADOC);
+	private static final Key PREF_PB_INVALID_JAVADOC_TAGS= getJDTCoreKey(JavaCore.COMPILER_PB_INVALID_JAVADOC_TAGS);
+	private static final Key PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF= getJDTCoreKey(JavaCore.COMPILER_PB_INVALID_JAVADOC_TAGS__NOT_VISIBLE_REF);
+	private static final Key PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF= getJDTCoreKey(JavaCore.COMPILER_PB_INVALID_JAVADOC_TAGS__DEPRECATED_REF);
+	private static final Key PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY= getJDTCoreKey(JavaCore.COMPILER_PB_INVALID_JAVADOC_TAGS_VISIBILITY);
 
-	private static final String PREF_PB_MISSING_JAVADOC_TAGS= JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS;
-	private static final String PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY= JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS_VISIBILITY;
-	private static final String PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING= JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS_OVERRIDING;
+	private static final Key PREF_PB_MISSING_JAVADOC_TAGS= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS);
+	private static final Key PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS_VISIBILITY);
+	private static final Key PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS_OVERRIDING);
 
-	private static final String PREF_PB_MISSING_JAVADOC_COMMENTS= JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS;
-	private static final String PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY= JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY;
-	private static final String PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING= JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING;
+	private static final Key PREF_PB_MISSING_JAVADOC_COMMENTS= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS);
+	private static final Key PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY);
+	private static final Key PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING);
 	
 
 	// values
@@ -62,12 +63,12 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	private Composite fJavadocComposite;
 
 
-	public JavadocProblemsConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
+	public JavadocProblemsConfigurationBlock(IStatusChangeListener context, IProject project) {
 		super(context, project, getKeys());
 	}
 	
-	private static String[] getKeys() {
-		String[] keys= new String[] {
+	private static Key[] getKeys() {
+		Key[] keys= new Key[] {
 				PREF_JAVADOC_SUPPORT,
 				PREF_PB_INVALID_JAVADOC, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, PREF_PB_INVALID_JAVADOC_TAGS,
 				PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY,
@@ -192,7 +193,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.
 	 */	
-	protected void validateSettings(String changedKey, String oldValue, String newValue) {
+	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		if (changedKey != null) {
 			if (PREF_PB_INVALID_JAVADOC.equals(changedKey) ||
 					PREF_PB_MISSING_JAVADOC_TAGS.equals(changedKey) ||

@@ -12,22 +12,12 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 
 public class CodeGenerationSettings {
 	
-	/**
-	 * @deprecated
-	 */
-	public boolean createFileComments= true;
-
 	public boolean createComments= true;
-	
 	public boolean useKeywordThis= false;
-	
-	/**
-	 * @deprecated
-	 */
-	public boolean createNonJavadocComments= true;
 	
 	public String[] importOrder= new String[0];
 	public int importThreshold= 99;
+	public boolean importIgnoreLowercase= true;
 		
 	public int tabWidth;
 	
@@ -36,6 +26,7 @@ public class CodeGenerationSettings {
 		settings.useKeywordThis= useKeywordThis;
 		settings.importOrder= importOrder;
 		settings.importThreshold= importThreshold;
+		settings.importIgnoreLowercase= importIgnoreLowercase;
 		settings.tabWidth= tabWidth;
 	}
 	

@@ -108,7 +108,7 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal {
 	 */
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
 		
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fField.getJavaProject());
 		boolean addComments= settings.createComments;
 		int flags= Flags.AccPublic | (fField.getFlags() & Flags.AccStatic);
 		

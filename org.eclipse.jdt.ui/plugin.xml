@@ -449,28 +449,6 @@
                value="org.eclipse.jdt.core.javanature">
          </filter>
       </page>
-      <!--
-      <page
-            objectClass="org.eclipse.core.resources.IProject"
-            name="%compilerPageName"
-            class="org.eclipse.jdt.internal.ui.preferences.CompilerPreferencePage"
-            id="org.eclipse.jdt.ui.propertyPages.CompilerPropertyPage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
-      </page>
-      <page
-            objectClass="org.eclipse.jdt.core.IJavaProject"
-            name="%compilerPageName"
-            class="org.eclipse.jdt.internal.ui.preferences.CompilerPreferencePage"
-            id="org.eclipse.jdt.ui.propertyPages.CompilerPropertyPage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
-      </page>
--->
       <page
             objectClass="org.eclipse.core.resources.IProject"
             name="%compliancePageName"

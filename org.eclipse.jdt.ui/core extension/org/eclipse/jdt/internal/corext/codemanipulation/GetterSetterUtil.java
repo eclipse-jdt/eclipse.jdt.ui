@@ -22,7 +22,6 @@ import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.CodeGeneration;
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -36,7 +35,7 @@ public class GetterSetterUtil {
 	}
 	
 	public static String getGetterName(IField field, String[] excludedNames) throws JavaModelException {
-		boolean useIs= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_IS_FOR_GETTERS);
+		boolean useIs= StubUtility.useIsForBooleanGetters(field.getJavaProject());
 		return getGetterName(field, excludedNames, useIs);
 	}
 	
@@ -130,7 +129,7 @@ public class GetterSetterUtil {
 		buf.append(argname); 
 		buf.append(") {\n"); //$NON-NLS-1$
 		
-		boolean useThis= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_KEYWORD_THIS);
+		boolean useThis= StubUtility.useThisForFieldAccess(project);
 		if (argname.equals(fieldName) || (useThis && !isStatic)) {
 			if (isStatic)
 				fieldName= parentType.getElementName() + '.' + fieldName;
@@ -190,7 +189,7 @@ public class GetterSetterUtil {
 		buf.append(getterName);
 		buf.append("() {\n"); //$NON-NLS-1$
 		
-		boolean useThis= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_KEYWORD_THIS);
+		boolean useThis= StubUtility.useThisForFieldAccess(field.getJavaProject());
 		if (useThis && !isStatic) {
 			fieldName= "this." + fieldName; //$NON-NLS-1$
 		}

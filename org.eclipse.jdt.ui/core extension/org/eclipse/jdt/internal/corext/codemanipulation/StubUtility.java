@@ -16,9 +16,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.DefaultScope;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.swt.SWT;
 
@@ -41,6 +44,9 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
+
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
@@ -1162,7 +1168,7 @@ public class StubUtility {
 				while (i > 0 && !Strings.isLineDelimiterChar(buf.getChar(i - 1)) ){
 					i--;
 				}
-				return Strings.computeIndent(buf.getText(i, offset - i), CodeFormatterUtil.getTabWidth());
+				return Strings.computeIndent(buf.getText(i, offset - i), CodeFormatterUtil.getTabWidth(elem.getJavaProject()));
 			}
 		}
 		return 0;
@@ -1323,5 +1329,37 @@ public class StubUtility {
 			}
 		}
 		return false;
+	}
+	
+	public static String getPreferenceInScope(IJavaProject project, String key) {
+		String val;
+		if (project != null) {
+			val= new ProjectScope(project.getProject()).getNode(JavaUI.ID_PLUGIN).get(key, null);
+			if (val != null) {
+				return val;
+			}
+		}
+		val= new InstanceScope().getNode(JavaUI.ID_PLUGIN).get(key, null);
+		if (val != null) {
+			return val;
+		}
+		return new DefaultScope().getNode(JavaUI.ID_PLUGIN).get(key, null);
+	}
+	
+	
+	public static boolean useThisForFieldAccess(IJavaProject project) {
+		return Boolean.valueOf(getPreferenceInScope(project, PreferenceConstants.CODEGEN_KEYWORD_THIS)).booleanValue(); 
+	}
+	
+	public static boolean useIsForBooleanGetters(IJavaProject project) {
+		return Boolean.valueOf(getPreferenceInScope(project, PreferenceConstants.CODEGEN_IS_FOR_GETTERS)).booleanValue(); 
+	}
+	
+	public static String getExceptionVariableName(IJavaProject project) {
+		return getPreferenceInScope(project, PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME); 
+	}
+	
+	public static boolean doAddComments(IJavaProject project) {
+		return Boolean.valueOf(getPreferenceInScope(project, PreferenceConstants.CODEGEN_ADD_COMMENTS)).booleanValue(); 
 	}
 }

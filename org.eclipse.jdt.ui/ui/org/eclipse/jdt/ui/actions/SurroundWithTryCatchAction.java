@@ -105,8 +105,8 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		ICompilationUnit cu= getCompilationUnit();
 		if (cu == null || !ElementValidator.checkValidateEdit(cu, getShell(), getDialogTitle()))
 			return;
-		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(getCompilationUnit(), selection, 
-			JavaPreferencesSettings.getCodeGenerationSettings(),
+		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(cu, selection, 
+			JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()),
 			new Query(getShell()));
 		
 		if (refactoring == null)

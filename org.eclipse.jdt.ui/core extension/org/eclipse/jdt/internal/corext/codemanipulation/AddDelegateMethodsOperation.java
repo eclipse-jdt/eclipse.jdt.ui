@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.ui.CodeGeneration;
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -173,7 +172,7 @@ public class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 			if (JdtFlags.isStatic(curr)) {
 				body.append(resolveTypeOfField(field).getElementName());
 			} else {
-				if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_KEYWORD_THIS)) {
+				if (StubUtility.useThisForFieldAccess(fType.getJavaProject())) {
 					body.append("this."); //$NON-NLS-1$
 				}
 				body.append(field.getElementName());

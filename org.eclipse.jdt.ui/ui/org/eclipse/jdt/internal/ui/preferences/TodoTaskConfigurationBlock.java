@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
@@ -31,7 +32,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -46,10 +46,10 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
   */
 public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 
-	private static final String PREF_COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;
-	private static final String PREF_COMPILER_TASK_PRIORITIES= JavaCore.COMPILER_TASK_PRIORITIES;
+	private static final Key PREF_COMPILER_TASK_TAGS= getJDTCoreKey(JavaCore.COMPILER_TASK_TAGS);
+	private static final Key PREF_COMPILER_TASK_PRIORITIES= getJDTCoreKey(JavaCore.COMPILER_TASK_PRIORITIES);
 	
-	private static final String PREF_COMPILER_TASK_CASE_SENSITIVE= JavaCore.COMPILER_TASK_CASE_SENSITIVE;	
+	private static final Key PREF_COMPILER_TASK_CASE_SENSITIVE= getJDTCoreKey(JavaCore.COMPILER_TASK_CASE_SENSITIVE);	
 	
 	private static final String PRIORITY_HIGH= JavaCore.COMPILER_TASK_PRIORITY_HIGH;
 	private static final String PRIORITY_NORMAL= JavaCore.COMPILER_TASK_PRIORITY_NORMAL;
@@ -138,7 +138,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 	private SelectionButtonDialogField fCaseSensitiveCheckBox;
 
 
-	public TodoTaskConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
+	public TodoTaskConfigurationBlock(IStatusChangeListener context, IProject project) {
 		super(context, project, getKeys());
 						
 		TaskTagAdapter adapter=  new TaskTagAdapter();
@@ -193,8 +193,8 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		fTodoTasksList.enableButton(IDX_DEFAULT, false);
 	}
 	
-	private static String[] getKeys() {
-		return new String[] {
+	private static Key[] getKeys() {
+		return new Key[] {
 			PREF_COMPILER_TASK_TAGS, PREF_COMPILER_TASK_PRIORITIES, PREF_COMPILER_TASK_CASE_SENSITIVE
 		};	
 	}	
@@ -261,7 +261,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		return markersComposite;
 	}
 
-	protected void validateSettings(String changedKey, String oldValue, String newValue) {
+	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		if (changedKey != null) {
 			if (PREF_COMPILER_TASK_TAGS.equals(changedKey)) {
 				fTaskTagsStatus= validateTaskTags();

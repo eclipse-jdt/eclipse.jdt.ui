@@ -402,7 +402,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 					
 			IField[] workingCopyFields= (IField[]) result.toArray(new IField[result.size()]);
 
-			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
 			settings.createComments= dialog.getGenerateComment();
 
 			IJavaElement elementPosition= dialog.getElementPosition();

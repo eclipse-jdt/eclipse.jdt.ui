@@ -25,8 +25,6 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Type;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -51,7 +49,7 @@ public final class ImportRewrite {
 	 * @throws CoreException
 	 */
 	public ImportRewrite(ICompilationUnit cunit) throws CoreException {
-		this(cunit, JavaPreferencesSettings.getImportOrderPreference(PreferenceConstants.getPreferenceStore()), JavaPreferencesSettings.getImportNumberThreshold(PreferenceConstants.getPreferenceStore()));
+		this(cunit, JavaPreferencesSettings.getImportOrderPreference(cunit.getJavaProject()), JavaPreferencesSettings.getImportNumberThreshold(cunit.getJavaProject()));
 	}
 	
 	public final TextEdit createEdit(IDocument document) throws CoreException {

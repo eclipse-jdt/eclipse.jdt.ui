@@ -29,7 +29,6 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -58,9 +57,9 @@ import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.ValidateEditException;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
@@ -321,27 +320,29 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	
 		monitor.beginTask("", cus.length); //$NON-NLS-1$
 		try {
-			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(store);
-			int threshold= JavaPreferencesSettings.getImportNumberThreshold(store);
-			boolean ignoreLowerCaseNames= store.getBoolean(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE);
-	
 			IChooseImportQuery query= new IChooseImportQuery() {
 				public TypeInfo[] chooseImports(TypeInfo[][] openChoices, ISourceRange[] ranges) {
 					throw new OrganizeImportError();
 				}
 			};
+			IJavaProject lastProject= null;
 			
 	
 			for (int i= 0; i < cus.length; i++) {
 				ICompilationUnit cu= cus[i];
 				if (testOnBuildPath(cu, status)) {
+					if (lastProject == null || !lastProject.equals(cu.getJavaProject())) {
+						lastProject= cu.getJavaProject();
+					}
+					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(lastProject);
+
+					
 					String cuLocation= cu.getPath().makeRelative().toString();
 					
 					monitor.subTask(cuLocation);
 
 					try {
-						OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), true, query);
+						OrganizeImportsOperation op= new OrganizeImportsOperation(cu, settings.importOrder, settings.importThreshold, settings.importIgnoreLowercase, !cu.isWorkingCopy(), true, query);
 						runInSync(op, cuLocation, status, monitor);
 
 						IProblem parseError= op.getParseError();
@@ -412,10 +413,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			return;
 			
 		try {
-			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(store);
-			int threshold= JavaPreferencesSettings.getImportNumberThreshold(store);
-			boolean ignoreLowerCaseNames= store.getBoolean(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE);
+			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
 			
 			if (fEditor == null && EditorUtility.isOpenInEditor(cu) == null) {
 				IEditorPart editor= EditorUtility.openInEditor(cu);
@@ -423,7 +421,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					fEditor= (JavaEditor) editor;
 				}			
 			}
-			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, prefOrder, threshold, ignoreLowerCaseNames, !cu.isWorkingCopy(), true, createChooseImportQuery());
+			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, settings.importOrder, settings.importThreshold, settings.importIgnoreLowercase, !cu.isWorkingCopy(), true, createChooseImportQuery());
 		
 			IRewriteTarget target= null;
 			if (fEditor != null) {

@@ -70,7 +70,7 @@ public class JavadocTagsSubProcessor {
 		protected void addEdits(IDocument document, TextEdit rootEdit) throws CoreException {
 			try {
 				String lineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
-				int tabWidth= CodeFormatterUtil.getTabWidth();
+				int tabWidth= CodeFormatterUtil.getTabWidth(getCompilationUnit().getJavaProject());
 				IRegion region= document.getLineInformationOfOffset(fInsertPosition);
 				
 				String lineContent= document.get(region.getOffset(), region.getLength());

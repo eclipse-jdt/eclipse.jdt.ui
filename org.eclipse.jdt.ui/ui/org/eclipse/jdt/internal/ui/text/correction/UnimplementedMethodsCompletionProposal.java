@@ -75,7 +75,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		fMethodsToOverride= methods;
 		
 		
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(getCompilationUnit().getJavaProject());
 		if (!settings.createComments || binding.isAnonymous()) {
 			settings= null;
 		}

@@ -141,7 +141,7 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 		}
 		decl.setBody(body);
 
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(getCompilationUnit().getJavaProject());
 		if (settings.createComments && !fSenderBinding.isAnonymous()) {
 			String string= CodeGeneration.getMethodComment(getCompilationUnit(), fSenderBinding.getName(), decl, null, String.valueOf('\n'));
 			if (string != null) {

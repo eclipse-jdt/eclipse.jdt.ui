@@ -74,8 +74,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -229,7 +227,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			CatchClause catchClause= getAST().newCatchClause();
 			tryStatement.catchClauses().add(catchClause);
 			SingleVariableDeclaration decl= getAST().newSingleVariableDeclaration();
-			String varName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME);
+			String varName= StubUtility.getExceptionVariableName(fCUnit.getJavaProject());
 			
 			String name= fScope.createName(varName, false);
 			decl.setName(getAST().newSimpleName(name));

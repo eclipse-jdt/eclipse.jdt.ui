@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -25,7 +26,6 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -37,20 +37,20 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
   */
 public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	
-	private static final String PREF_PB_MAX_PER_UNIT= JavaCore.COMPILER_PB_MAX_PER_UNIT;
-	private static final String PREF_PB_FORBIDDEN_REFERENCE= JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE;
+	private static final Key PREF_PB_MAX_PER_UNIT= getJDTCoreKey(JavaCore.COMPILER_PB_MAX_PER_UNIT);
+	private static final Key PREF_PB_FORBIDDEN_REFERENCE= getJDTCoreKey(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE);
 
 
-	private static final String PREF_RESOURCE_FILTER= JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER;
-	private static final String PREF_BUILD_INVALID_CLASSPATH= JavaCore.CORE_JAVA_BUILD_INVALID_CLASSPATH;
-	private static final String PREF_BUILD_CLEAN_OUTPUT_FOLDER= JavaCore.CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER;
-	private static final String PREF_ENABLE_EXCLUSION_PATTERNS= JavaCore.CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS;
-	private static final String PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS= JavaCore.CORE_ENABLE_CLASSPATH_MULTIPLE_OUTPUT_LOCATIONS;
+	private static final Key PREF_RESOURCE_FILTER= getJDTCoreKey(JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER);
+	private static final Key PREF_BUILD_INVALID_CLASSPATH= getJDTCoreKey(JavaCore.CORE_JAVA_BUILD_INVALID_CLASSPATH);
+	private static final Key PREF_BUILD_CLEAN_OUTPUT_FOLDER= getJDTCoreKey(JavaCore.CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER);
+	private static final Key PREF_ENABLE_EXCLUSION_PATTERNS= getJDTCoreKey(JavaCore.CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS);
+	private static final Key PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS= getJDTCoreKey(JavaCore.CORE_ENABLE_CLASSPATH_MULTIPLE_OUTPUT_LOCATIONS);
 
-	private static final String PREF_PB_INCOMPLETE_BUILDPATH= JavaCore.CORE_INCOMPLETE_CLASSPATH;
-	private static final String PREF_PB_CIRCULAR_BUILDPATH= JavaCore.CORE_CIRCULAR_CLASSPATH;
-	private static final String PREF_PB_INCOMPATIBLE_JDK_LEVEL= JavaCore.CORE_INCOMPATIBLE_JDK_LEVEL;
-	private static final String PREF_PB_DUPLICATE_RESOURCE= JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE;
+	private static final Key PREF_PB_INCOMPLETE_BUILDPATH= getJDTCoreKey(JavaCore.CORE_INCOMPLETE_CLASSPATH);
+	private static final Key PREF_PB_CIRCULAR_BUILDPATH= getJDTCoreKey(JavaCore.CORE_CIRCULAR_CLASSPATH);
+	private static final Key PREF_PB_INCOMPATIBLE_JDK_LEVEL= getJDTCoreKey(JavaCore.CORE_INCOMPATIBLE_JDK_LEVEL);
+	private static final Key PREF_PB_DUPLICATE_RESOURCE= getJDTCoreKey(JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE);
 
 	// values
 	private static final String ERROR= JavaCore.ERROR;
@@ -67,14 +67,14 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private IStatus fMaxNumberProblemsStatus, fResourceFilterStatus;
 
-	public JavaBuildConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
+	public JavaBuildConfigurationBlock(IStatusChangeListener context, IProject project) {
 		super(context, project, getKeys());
 		fMaxNumberProblemsStatus= new StatusInfo();
 		fResourceFilterStatus= new StatusInfo();
 	}
 	
-	private static String[] getKeys() {
-		String[] keys= new String[] {
+	private static Key[] getKeys() {
+		Key[] keys= new Key[] {
 				PREF_PB_MAX_PER_UNIT, PREF_PB_FORBIDDEN_REFERENCE,
 				PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_INCOMPLETE_BUILDPATH, PREF_PB_CIRCULAR_BUILDPATH,
 				PREF_BUILD_CLEAN_OUTPUT_FOLDER, PREF_PB_DUPLICATE_RESOURCE,
@@ -222,7 +222,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.
 	 */	
-	protected void validateSettings(String changedKey, String oldValue, String newValue) {
+	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		
 		if (changedKey != null) {
 			if (PREF_PB_MAX_PER_UNIT.equals(changedKey)) {

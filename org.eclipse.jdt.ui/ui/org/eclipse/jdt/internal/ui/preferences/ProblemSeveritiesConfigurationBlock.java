@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -20,7 +22,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.ImageHyperlink;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -32,43 +33,43 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlock {
 
 	// Preference store keys, see JavaCore.getOptions
-	private static final String PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD= JavaCore.COMPILER_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD;
-	private static final String PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME= JavaCore.COMPILER_PB_METHOD_WITH_CONSTRUCTOR_NAME;
-	private static final String PREF_PB_DEPRECATION= JavaCore.COMPILER_PB_DEPRECATION;
-	private static final String  PREF_PB_DEPRECATION_IN_DEPRECATED_CODE=JavaCore.COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE;
-	private static final String PREF_PB_DEPRECATION_WHEN_OVERRIDING= JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD;
+	private static final Key PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD= getJDTCoreKey(JavaCore.COMPILER_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD);
+	private static final Key PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME= getJDTCoreKey(JavaCore.COMPILER_PB_METHOD_WITH_CONSTRUCTOR_NAME);
+	private static final Key PREF_PB_DEPRECATION= getJDTCoreKey(JavaCore.COMPILER_PB_DEPRECATION);
+	private static final Key PREF_PB_DEPRECATION_IN_DEPRECATED_CODE=getJDTCoreKey(JavaCore.COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE);
+	private static final Key PREF_PB_DEPRECATION_WHEN_OVERRIDING= getJDTCoreKey(JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD);
 	
-	private static final String PREF_PB_HIDDEN_CATCH_BLOCK= JavaCore.COMPILER_PB_HIDDEN_CATCH_BLOCK;
-	private static final String PREF_PB_UNUSED_LOCAL= JavaCore.COMPILER_PB_UNUSED_LOCAL;
-	private static final String PREF_PB_UNUSED_PARAMETER= JavaCore.COMPILER_PB_UNUSED_PARAMETER;
-	private static final String PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING= JavaCore.COMPILER_PB_UNUSED_PARAMETER_WHEN_OVERRIDING_CONCRETE;
-	private static final String PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT= JavaCore.COMPILER_PB_UNUSED_PARAMETER_WHEN_IMPLEMENTING_ABSTRACT;
-	private static final String PREF_PB_SYNTHETIC_ACCESS_EMULATION= JavaCore.COMPILER_PB_SYNTHETIC_ACCESS_EMULATION;
-	private static final String PREF_PB_NON_EXTERNALIZED_STRINGS= JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL;
-	private static final String PREF_PB_UNUSED_IMPORT= JavaCore.COMPILER_PB_UNUSED_IMPORT;
-	private static final String PREF_PB_UNUSED_PRIVATE= JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER;
-	private static final String PREF_PB_STATIC_ACCESS_RECEIVER= JavaCore.COMPILER_PB_STATIC_ACCESS_RECEIVER;
-	private static final String PREF_PB_NO_EFFECT_ASSIGNMENT= JavaCore.COMPILER_PB_NO_EFFECT_ASSIGNMENT;
-	private static final String PREF_PB_CHAR_ARRAY_IN_CONCAT= JavaCore.COMPILER_PB_CHAR_ARRAY_IN_STRING_CONCATENATION;
-	private static final String PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT= JavaCore.COMPILER_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT;
-	private static final String PREF_PB_LOCAL_VARIABLE_HIDING= JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING;
-	private static final String PREF_PB_FIELD_HIDING= JavaCore.COMPILER_PB_FIELD_HIDING;
-	private static final String PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD= JavaCore.COMPILER_PB_SPECIAL_PARAMETER_HIDING_FIELD;
-	private static final String PREF_PB_INDIRECT_STATIC_ACCESS= JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS;
-	private static final String PREF_PB_EMPTY_STATEMENT= JavaCore.COMPILER_PB_EMPTY_STATEMENT;
-	private static final String PREF_PB_UNNECESSARY_ELSE= JavaCore.COMPILER_PB_UNNECESSARY_ELSE;
-	private static final String PREF_PB_UNNECESSARY_TYPE_CHECK= JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK;
-	private static final String PREF_PB_INCOMPATIBLE_INTERFACE_METHOD= JavaCore.COMPILER_PB_INCOMPATIBLE_NON_INHERITED_INTERFACE_METHOD;
-	private static final String PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION= JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION;
-	private static final String PREF_PB_MISSING_SERIAL_VERSION= JavaCore.COMPILER_PB_MISSING_SERIAL_VERSION;
-	private static final String PREF_PB_UNDOCUMENTED_EMPTY_BLOCK= JavaCore.COMPILER_PB_UNDOCUMENTED_EMPTY_BLOCK;
-	private static final String PREF_PB_FINALLY_BLOCK_NOT_COMPLETING= JavaCore.COMPILER_PB_FINALLY_BLOCK_NOT_COMPLETING;
-	private static final String PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING= JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING;
-	private static final String PREF_PB_UNQUALIFIED_FIELD_ACCESS= JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS;
+	private static final Key PREF_PB_HIDDEN_CATCH_BLOCK= getJDTCoreKey(JavaCore.COMPILER_PB_HIDDEN_CATCH_BLOCK);
+	private static final Key PREF_PB_UNUSED_LOCAL= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_LOCAL);
+	private static final Key PREF_PB_UNUSED_PARAMETER= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_PARAMETER);
+	private static final Key PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_PARAMETER_WHEN_OVERRIDING_CONCRETE);
+	private static final Key PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_PARAMETER_WHEN_IMPLEMENTING_ABSTRACT);
+	private static final Key PREF_PB_SYNTHETIC_ACCESS_EMULATION= getJDTCoreKey(JavaCore.COMPILER_PB_SYNTHETIC_ACCESS_EMULATION);
+	private static final Key PREF_PB_NON_EXTERNALIZED_STRINGS= getJDTCoreKey(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL);
+	private static final Key PREF_PB_UNUSED_IMPORT= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_IMPORT);
+	private static final Key PREF_PB_UNUSED_PRIVATE= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER);
+	private static final Key PREF_PB_STATIC_ACCESS_RECEIVER= getJDTCoreKey(JavaCore.COMPILER_PB_STATIC_ACCESS_RECEIVER);
+	private static final Key PREF_PB_NO_EFFECT_ASSIGNMENT= getJDTCoreKey(JavaCore.COMPILER_PB_NO_EFFECT_ASSIGNMENT);
+	private static final Key PREF_PB_CHAR_ARRAY_IN_CONCAT= getJDTCoreKey(JavaCore.COMPILER_PB_CHAR_ARRAY_IN_STRING_CONCATENATION);
+	private static final Key PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT= getJDTCoreKey(JavaCore.COMPILER_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT);
+	private static final Key PREF_PB_LOCAL_VARIABLE_HIDING= getJDTCoreKey(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING);
+	private static final Key PREF_PB_FIELD_HIDING= getJDTCoreKey(JavaCore.COMPILER_PB_FIELD_HIDING);
+	private static final Key PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD= getJDTCoreKey(JavaCore.COMPILER_PB_SPECIAL_PARAMETER_HIDING_FIELD);
+	private static final Key PREF_PB_INDIRECT_STATIC_ACCESS= getJDTCoreKey(JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS);
+	private static final Key PREF_PB_EMPTY_STATEMENT= getJDTCoreKey(JavaCore.COMPILER_PB_EMPTY_STATEMENT);
+	private static final Key PREF_PB_UNNECESSARY_ELSE= getJDTCoreKey(JavaCore.COMPILER_PB_UNNECESSARY_ELSE);
+	private static final Key PREF_PB_UNNECESSARY_TYPE_CHECK= getJDTCoreKey(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK);
+	private static final Key PREF_PB_INCOMPATIBLE_INTERFACE_METHOD= getJDTCoreKey(JavaCore.COMPILER_PB_INCOMPATIBLE_NON_INHERITED_INTERFACE_METHOD);
+	private static final Key PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION);
+	private static final Key PREF_PB_MISSING_SERIAL_VERSION= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_SERIAL_VERSION);
+	private static final Key PREF_PB_UNDOCUMENTED_EMPTY_BLOCK= getJDTCoreKey(JavaCore.COMPILER_PB_UNDOCUMENTED_EMPTY_BLOCK);
+	private static final Key PREF_PB_FINALLY_BLOCK_NOT_COMPLETING= getJDTCoreKey(JavaCore.COMPILER_PB_FINALLY_BLOCK_NOT_COMPLETING);
+	private static final Key PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING);
+	private static final Key PREF_PB_UNQUALIFIED_FIELD_ACCESS= getJDTCoreKey(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS);
 	
-	private static final String PREF_15_PB_UNSAVE_TYPE_OPERATION= JavaCore.COMPILER_PB_UNSAFE_TYPE_OPERATION;
-	private static final String PREF_15_PB_FINAL_PARAM_BOUND= JavaCore.COMPILER_PB_FINAL_PARAMETER_BOUND;
-	private static final String PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST= JavaCore.COMPILER_PB_VARARGS_ARGUMENT_NEED_CAST;
+	private static final Key PREF_15_PB_UNSAVE_TYPE_OPERATION= getJDTCoreKey(JavaCore.COMPILER_PB_UNSAFE_TYPE_OPERATION);
+	private static final Key PREF_15_PB_FINAL_PARAM_BOUND= getJDTCoreKey(JavaCore.COMPILER_PB_FINAL_PARAMETER_BOUND);
+	private static final Key PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST= getJDTCoreKey(JavaCore.COMPILER_PB_VARARGS_ARGUMENT_NEED_CAST);
 
 	// values
 	private static final String ERROR= JavaCore.ERROR;
@@ -81,7 +82,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 	private PixelConverter fPixelConverter;
 	
-	public ProblemSeveritiesConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
+	public ProblemSeveritiesConfigurationBlock(IStatusChangeListener context, IProject project) {
 		super(context, project, getKeys());
 		
 		// compatibilty code for the merge of the two option PB_SIGNAL_PARAMETER: 
@@ -90,8 +91,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		}
 	}
 	
-	private static String[] getKeys() {
-		String[] keys= new String[] {
+	private static Key[] getKeys() {
+		return new Key[] {
 				PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD,
 				PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, PREF_PB_DEPRECATION, PREF_PB_HIDDEN_CATCH_BLOCK, PREF_PB_UNUSED_LOCAL,
 				PREF_PB_UNUSED_PARAMETER, PREF_PB_SYNTHETIC_ACCESS_EMULATION, PREF_PB_NON_EXTERNALIZED_STRINGS,
@@ -107,7 +108,6 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING, PREF_PB_MISSING_SERIAL_VERSION, 				
 				PREF_15_PB_UNSAVE_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST
 			};
-		return keys;
 	}
 	
 	/*
@@ -334,7 +334,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.
 	 */	
-	protected void validateSettings(String changedKey, String oldValue, String newValue) {
+	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		if (changedKey != null) {
 			if (PREF_PB_UNUSED_PARAMETER.equals(changedKey) ||
 					PREF_PB_DEPRECATION.equals(changedKey) ||

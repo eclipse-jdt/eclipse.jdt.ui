@@ -128,7 +128,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		if (fDeclaringType == null) {
 			return true;
 		}
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fDeclaringType.getJavaProject());
 
 		ITypeHierarchy hierarchy= fDeclaringType.newSupertypeHierarchy(null);
 		

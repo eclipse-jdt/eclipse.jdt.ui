@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 
@@ -32,9 +34,6 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -50,12 +49,11 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	
 	private Control fConfigurationBlockControl;
 	private ControlEnableState fBlockEnableState;
-	//private SelectionButtonDialogField fUseWorkspaceSettings;
 	private Hyperlink fChangeWorkspaceSettings;
 	private SelectionButtonDialogField fUseProjectSettings;
 	private IStatus fBlockStatus;
 	
-	private IJavaProject fProject; // project or null
+	private IProject fProject; // project or null
 	
 	public PropertyAndPreferencePage() {
 		fBlockStatus= new StatusInfo();
@@ -84,13 +82,6 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 					doProjectWorkspaceStateChanged();
 				}
 			};
-			
-//			fUseWorkspaceSettings= new SelectionButtonDialogField(SWT.RADIO);
-//			fUseWorkspaceSettings.setDialogFieldListener(listener);
-//			fUseWorkspaceSettings.setLabelText(PreferencesMessages.getString("PropertyAndPreferencePage.useworkspacesettings.label")); //$NON-NLS-1$
-//			
-//			fUseWorkspaceSettings.doFillIntoGrid(composite, 1);
-//			LayoutUtil.setHorizontalGrabbing(fUseWorkspaceSettings.getSelectionButton(null));
 			
 			fUseProjectSettings= new SelectionButtonDialogField(SWT.CHECK);
 			fUseProjectSettings.setDialogFieldListener(listener);
@@ -150,7 +141,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		return fProject != null;
 	}
 	
-	protected IJavaProject getProject() {
+	protected IProject getProject() {
 		return fProject;
 	}
 	
@@ -238,7 +229,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	 * @see org.eclipse.ui.IWorkbenchPropertyPage#setElement(org.eclipse.core.runtime.IAdaptable)
 	 */
 	public void setElement(IAdaptable element) {
-		fProject= (IJavaProject) element.getAdapter(IJavaElement.class);
+		fProject= (IProject) element.getAdapter(IResource.class);
 	}
 	
 }

@@ -12,12 +12,11 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
@@ -38,8 +37,6 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.eclipse.jdt.core.IJavaProject;
-
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -57,16 +54,16 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 
 	/** Preference keys for the preferences in this block */
-	private static final String PREF_SPELLING_CHECK_SPELLING= PreferenceConstants.SPELLING_CHECK_SPELLING;
-	private static final String PREF_SPELLING_IGNORE_DIGITS= PreferenceConstants.SPELLING_IGNORE_DIGITS;
-	private static final String PREF_SPELLING_IGNORE_MIXED= PreferenceConstants.SPELLING_IGNORE_MIXED;
-	private static final String PREF_SPELLING_IGNORE_SENTENCE= PreferenceConstants.SPELLING_IGNORE_SENTENCE;
-	private static final String PREF_SPELLING_IGNORE_UPPER= PreferenceConstants.SPELLING_IGNORE_UPPER;
-	private static final String PREF_SPELLING_IGNORE_URLS= PreferenceConstants.SPELLING_IGNORE_URLS;
-	private static final String PREF_SPELLING_LOCALE= PreferenceConstants.SPELLING_LOCALE;
-	private static final String PREF_SPELLING_PROPOSAL_THRESHOLD= PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD;
-	private static final String PREF_SPELLING_USER_DICTIONARY= PreferenceConstants.SPELLING_USER_DICTIONARY;
-	private static final String PREF_SPELLING_ENABLE_CONTENTASSIST= PreferenceConstants.SPELLING_ENABLE_CONTENTASSIST;
+	private static final Key PREF_SPELLING_CHECK_SPELLING= getJDTUIKey(PreferenceConstants.SPELLING_CHECK_SPELLING);
+	private static final Key PREF_SPELLING_IGNORE_DIGITS= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_DIGITS);
+	private static final Key PREF_SPELLING_IGNORE_MIXED= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_MIXED);
+	private static final Key PREF_SPELLING_IGNORE_SENTENCE= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_SENTENCE);
+	private static final Key PREF_SPELLING_IGNORE_UPPER= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_UPPER);
+	private static final Key PREF_SPELLING_IGNORE_URLS= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_URLS);
+	private static final Key PREF_SPELLING_LOCALE= getJDTUIKey(PreferenceConstants.SPELLING_LOCALE);
+	private static final Key PREF_SPELLING_PROPOSAL_THRESHOLD= getJDTUIKey(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD);
+	private static final Key PREF_SPELLING_USER_DICTIONARY= getJDTUIKey(PreferenceConstants.SPELLING_USER_DICTIONARY);
+	private static final Key PREF_SPELLING_ENABLE_CONTENTASSIST= getJDTUIKey(PreferenceConstants.SPELLING_ENABLE_CONTENTASSIST);
 
 	/**
 	 * Creates a selection dependency between a master and a slave control.
@@ -220,7 +217,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 * @param project
 	 *                   The Java project
 	 */
-	public SpellingConfigurationBlock(final IStatusChangeListener context, final IJavaProject project) {
+	public SpellingConfigurationBlock(final IStatusChangeListener context, final IProject project) {
 		super(context, project, getAllKeys());
 
 		IStatus status= validateAbsoluteFilePath(getValue(PREF_SPELLING_USER_DICTIONARY));
@@ -232,7 +229,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 			setValue(PREF_SPELLING_LOCALE, SpellCheckEngine.getDefaultLocale().toString());
 	}
 
-	protected Combo addComboBox(Composite parent, String label, String key, String[] values, String[] valueLabels, int indent) {
+	protected Combo addComboBox(Composite parent, String label, Key key, String[] values, String[] valueLabels, int indent) {
 		ControlData data= new ControlData(key, values);
 		
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
@@ -356,23 +353,8 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		return composite;
 	}
 
-	private static String[] getAllKeys() {
-		return new String[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_CHECK_SPELLING, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD, PREF_SPELLING_ENABLE_CONTENTASSIST };
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#getDefaultOptions()
-	 */
-	protected Map getDefaultOptions() {
-
-		final String[] keys= fAllKeys;
-		final Map options= new HashMap();
-		final IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-
-		for (int index= 0; index < keys.length; index++)
-			options.put(keys[index], store.getDefaultString(keys[index]));
-
-		return options;
+	private static Key[] getAllKeys() {
+		return new Key[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_CHECK_SPELLING, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD, PREF_SPELLING_ENABLE_CONTENTASSIST };
 	}
 
 	/*
@@ -380,21 +362,6 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 */
 	protected final String[] getFullBuildDialogStrings(final boolean workspace) {
 		return null;
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#getOptions(boolean)
-	 */
-	protected Map getOptions(final boolean inherit) {
-
-		final String[] keys= fAllKeys;
-		final Map options= new HashMap();
-		final IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-
-		for (int index= 0; index < keys.length; index++)
-			options.put(keys[index], store.getString(keys[index]));
-
-		return options;
 	}
 
 	/**
@@ -413,21 +380,9 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#setOptions(java.util.Map)
-	 */
-	protected void setOptions(final Map options) {
-
-		final String[] keys= fAllKeys;
-		final IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-
-		for (int index= 0; index < keys.length; index++)
-			store.setValue(keys[index], getValue(keys[index]));
-	}
-
-	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(java.lang.String,java.lang.String)
 	 */
-	protected void validateSettings(final String key, final String oldValue, final String newValue) {
+	protected void validateSettings(final Key key, final String oldValue, final String newValue) {
 
 		if (key == null || PREF_SPELLING_PROPOSAL_THRESHOLD.equals(key))
 			fThresholdStatus= validatePositiveNumber(getValue(PREF_SPELLING_PROPOSAL_THRESHOLD));

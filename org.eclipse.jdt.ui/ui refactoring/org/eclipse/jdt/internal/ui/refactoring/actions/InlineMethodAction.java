@@ -154,7 +154,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 			return;
 		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(
 			cu, selectionOffset, selectionLength,
-			JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
 		if (refactoring == null) {
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineMethodAction.no_method_invocation_or_declaration_selected")); //$NON-NLS-1$
 			return;

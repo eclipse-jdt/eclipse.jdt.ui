@@ -101,7 +101,7 @@ public class AddMethodStubAction extends Action {
 			// open an editor and work on a working copy
 			IEditorPart editor= EditorUtility.openInEditor(fParentType);
 			
-			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fParentType.getJavaProject());
 
 			List list= ((IStructuredSelection)fSelection).toList();	
 			IMethod[] methods= (IMethod[]) list.toArray(new IMethod[list.size()]); 

@@ -154,7 +154,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 		
 		InlineConstantRefactoring refactoring= InlineConstantRefactoring.create(
 			cu, selectionOffset, selectionLength,
-			JavaPreferencesSettings.getCodeGenerationSettings());
+			JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
 		if (refactoring == null) {
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineConstantAction.no_constant_reference_or_declaration")); //$NON-NLS-1$
 			return;

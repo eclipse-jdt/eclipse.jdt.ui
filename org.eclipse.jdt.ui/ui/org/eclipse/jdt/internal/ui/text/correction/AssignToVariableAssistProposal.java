@@ -24,8 +24,6 @@ import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -167,7 +165,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		Assignment assignment= ast.newAssignment();
 		assignment.setRightHandSide((Expression) rewrite.createCopyTarget(expression));
 
-		boolean needsThis= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_KEYWORD_THIS);
+		boolean needsThis= StubUtility.useThisForFieldAccess(getCompilationUnit().getJavaProject());
 		if (isParamToField) {
 			needsThis |= varName.equals(((SimpleName) expression).getIdentifier());
 		}

@@ -83,7 +83,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 		}
 		
 		if (method != null) {
-			GenStubSettings settings= new GenStubSettings(JavaPreferencesSettings.getCodeGenerationSettings());
+			GenStubSettings settings= new GenStubSettings(JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject));
 			int flags= method.getFlags();
 
 			settings.noBody= (definingType != null) && definingType.isInterface();

@@ -115,7 +115,7 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 	 */
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
 		
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fType.getJavaProject());
 		boolean addComments= settings.createComments;
 
 		String[] empty= new String[0];

@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
@@ -24,14 +25,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -65,22 +64,27 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	private final static int ARGUMENT= 3;
 	private final static int LOCAL= 4;
 
-	// Preference store keys, see JavaCore.getOptions
-	private static final String PREF_FIELD_PREFIXES= JavaCore.CODEASSIST_FIELD_PREFIXES; 
-	private static final String PREF_FIELD_SUFFIXES= JavaCore.CODEASSIST_FIELD_SUFFIXES; 
-	private static final String PREF_STATIC_FIELD_PREFIXES= JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES; 
-	private static final String PREF_STATIC_FIELD_SUFFIXES= JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES; 
-	private static final String PREF_ARGUMENT_PREFIXES= JavaCore.CODEASSIST_ARGUMENT_PREFIXES; 
-	private static final String PREF_ARGUMENT_SUFFIXES= JavaCore.CODEASSIST_ARGUMENT_SUFFIXES; 
-	private static final String PREF_LOCAL_PREFIXES= JavaCore.CODEASSIST_LOCAL_PREFIXES; 
-	private static final String PREF_LOCAL_SUFFIXES= JavaCore.CODEASSIST_LOCAL_SUFFIXES; 
+	// Preference store keys
+	private static final Key PREF_FIELD_PREFIXES= getJDTCoreKey(JavaCore.CODEASSIST_FIELD_PREFIXES); 
+	private static final Key PREF_FIELD_SUFFIXES= getJDTCoreKey(JavaCore.CODEASSIST_FIELD_SUFFIXES); 
+	private static final Key PREF_STATIC_FIELD_PREFIXES= getJDTCoreKey(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES); 
+	private static final Key PREF_STATIC_FIELD_SUFFIXES= getJDTCoreKey(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES); 
+	private static final Key PREF_ARGUMENT_PREFIXES= getJDTCoreKey(JavaCore.CODEASSIST_ARGUMENT_PREFIXES); 
+	private static final Key PREF_ARGUMENT_SUFFIXES= getJDTCoreKey(JavaCore.CODEASSIST_ARGUMENT_SUFFIXES); 
+	private static final Key PREF_LOCAL_PREFIXES= getJDTCoreKey(JavaCore.CODEASSIST_LOCAL_PREFIXES); 
+	private static final Key PREF_LOCAL_SUFFIXES= getJDTCoreKey(JavaCore.CODEASSIST_LOCAL_SUFFIXES); 
 
+	private static final Key PREF_KEYWORD_THIS= getJDTUIKey(PreferenceConstants.CODEGEN_KEYWORD_THIS);
+	private static final Key PREF_IS_FOR_GETTERS= getJDTUIKey(PreferenceConstants.CODEGEN_IS_FOR_GETTERS);
+	private static final Key PREF_EXCEPTION_NAME= getJDTUIKey(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME);
+
+	
 	private static class NameConventionEntry {
 		public int kind;
 		public String prefix;
 		public String suffix;
-		public String prefixkey;
-		public String suffixkey;		
+		public Key prefixkey;
+		public Key suffixkey;		
 	}
 
 	private class NameConventionInputDialog extends StatusDialog implements IDialogFieldListener {
@@ -277,14 +281,11 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	private ListDialogField fNameConventionList;
 	private SelectionButtonDialogField fUseKeywordThisBox;
 	private SelectionButtonDialogField fUseIsForBooleanGettersBox;
-	private static final String PREF_KEYWORD_THIS= PreferenceConstants.CODEGEN_KEYWORD_THIS;
-	private static final String PREF_IS_FOR_GETTERS= PreferenceConstants.CODEGEN_IS_FOR_GETTERS;
-	private static final String PREF_EXCEPTION_NAME= PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME;
 	
 	private StringDialogField fExceptionName;
 
 	
-	public NameConventionConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
+	public NameConventionConfigurationBlock(IStatusChangeListener context, IProject project) {
 		super(context, project, getAllKeys());
 		
 		NameConventionAdapter adapter=  new NameConventionAdapter();
@@ -314,28 +315,27 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 			fNameConventionList.enableButton(0, false);
 		}
 
-		IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
-		
 		fExceptionName= new StringDialogField();
 		fExceptionName.setDialogFieldListener(adapter);
 		fExceptionName.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.exceptionname.label")); //$NON-NLS-1$
-		fExceptionName.setText(preferenceStore.getString(PREF_EXCEPTION_NAME));
+		fExceptionName.setText(getValue(PREF_EXCEPTION_NAME));
 		
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=38879
 		fUseKeywordThisBox= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);		
 		fUseKeywordThisBox.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.keywordthis.label")); //$NON-NLS-1$
-		fUseKeywordThisBox.setSelection(preferenceStore.getBoolean(PREF_KEYWORD_THIS));
+		fUseKeywordThisBox.setSelection(getBooleanValue(PREF_KEYWORD_THIS));
 		
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=39044
 		fUseIsForBooleanGettersBox= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);		
 		fUseIsForBooleanGettersBox.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.isforbooleangetters.label")); //$NON-NLS-1$
-		fUseIsForBooleanGettersBox.setSelection(preferenceStore.getBoolean(PREF_IS_FOR_GETTERS));		
+		fUseIsForBooleanGettersBox.setSelection(getBooleanValue(PREF_IS_FOR_GETTERS));		
 	}
 	
-	private static String[] getAllKeys() {
-		return new String[] {
+	private static Key[] getAllKeys() {
+		return new Key[] {
 			PREF_FIELD_PREFIXES, PREF_FIELD_SUFFIXES, PREF_STATIC_FIELD_PREFIXES, PREF_STATIC_FIELD_SUFFIXES,
-			PREF_ARGUMENT_PREFIXES, PREF_ARGUMENT_SUFFIXES, PREF_LOCAL_PREFIXES, PREF_LOCAL_SUFFIXES
+			PREF_ARGUMENT_PREFIXES, PREF_ARGUMENT_SUFFIXES, PREF_LOCAL_PREFIXES, PREF_LOCAL_SUFFIXES,
+			PREF_EXCEPTION_NAME, PREF_KEYWORD_THIS, PREF_IS_FOR_GETTERS
 		};	
 	}	
 
@@ -387,7 +387,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(java.lang.String, java.lang.String)
 	 */
-	protected void validateSettings(String changedKey, String oldValue, String newValue) {
+	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		// no validation
 	}	
 
@@ -405,7 +405,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		return null; // no build required
 	}
 	
-	private void createEntry(List list, String prefixKey, String suffixKey, int kind) {
+	private void createEntry(List list, Key prefixKey, Key suffixKey, int kind) {
 		NameConventionEntry entry= new NameConventionEntry();
 		entry.kind= kind;
 		entry.suffixkey= suffixKey;
@@ -415,7 +415,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		list.add(entry);
 	}
 	
-	private String getPreferenceValue(String key) {
+	private String getPreferenceValue(Key key) {
 		String value= getValue(key);
 		if (value == null) {
 			value= ""; //$NON-NLS-1$
@@ -475,21 +475,18 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	 */
 	public void performDefaults() {
 		super.performDefaults();
-		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
-		fExceptionName.setText(prefs.getDefaultString(PREF_EXCEPTION_NAME));
-		fUseKeywordThisBox.setSelection(prefs.getDefaultBoolean(PREF_KEYWORD_THIS));
-		fUseIsForBooleanGettersBox.setSelection(prefs.getDefaultBoolean(PREF_IS_FOR_GETTERS));
+		fExceptionName.setText(getValue(PREF_EXCEPTION_NAME));
+		fUseKeywordThisBox.setSelection(getBooleanValue(PREF_KEYWORD_THIS));
+		fUseIsForBooleanGettersBox.setSelection(getBooleanValue(PREF_IS_FOR_GETTERS));
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performOk(boolean)
 	 */
 	public boolean performOk(boolean enabled) {
-		IPreferenceStore prefs= PreferenceConstants.getPreferenceStore();
-		prefs.setValue(PREF_EXCEPTION_NAME, fExceptionName.getText());
-		prefs.setValue(PREF_KEYWORD_THIS, fUseKeywordThisBox.isSelected());
-		prefs.setValue(PREF_IS_FOR_GETTERS, fUseIsForBooleanGettersBox.isSelected());
-		JavaPlugin.getDefault().savePluginPreferences();
+		setValue(PREF_EXCEPTION_NAME, fExceptionName.getText());
+		setValue(PREF_KEYWORD_THIS, fUseKeywordThisBox.isSelected());
+		setValue(PREF_IS_FOR_GETTERS, fUseIsForBooleanGettersBox.isSelected());
 				
 		packEntries();
 		return super.performOk(enabled);

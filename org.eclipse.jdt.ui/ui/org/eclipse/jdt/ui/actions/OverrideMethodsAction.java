@@ -218,7 +218,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			}
 			selected= (IMethod[]) result.toArray(new IMethod[result.size()]);
 			
-			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
 			settings.createComments= dialog.getGenerateComment();
 	
 			IEditorPart editor= EditorUtility.openInEditor(type.getCompilationUnit());

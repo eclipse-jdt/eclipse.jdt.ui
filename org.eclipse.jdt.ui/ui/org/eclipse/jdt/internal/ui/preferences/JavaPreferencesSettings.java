@@ -14,25 +14,59 @@ import java.util.StringTokenizer;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jdt.core.IJavaProject;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 public class JavaPreferencesSettings  {
 	
-	public static CodeGenerationSettings getCodeGenerationSettings() {
-		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-		
+	
+	public static CodeGenerationSettings getCodeGenerationSettings(IJavaProject project) {
 		CodeGenerationSettings res= new CodeGenerationSettings();
-		res.createComments= store.getBoolean(PreferenceConstants.CODEGEN_ADD_COMMENTS);
-		res.useKeywordThis= store.getBoolean(PreferenceConstants.CODEGEN_KEYWORD_THIS);
-		res.importOrder= getImportOrderPreference(store);
-		res.importThreshold= getImportNumberThreshold(store);
-		res.tabWidth= CodeFormatterUtil.getTabWidth();
+		res.createComments= Boolean.valueOf(StubUtility.getPreferenceInScope(project, PreferenceConstants.CODEGEN_ADD_COMMENTS)).booleanValue();
+		res.useKeywordThis= Boolean.valueOf(StubUtility.getPreferenceInScope(project, PreferenceConstants.CODEGEN_KEYWORD_THIS)).booleanValue();
+		res.importOrder= getImportOrderPreference(project);
+		res.importThreshold= getImportNumberThreshold(project);
+		res.importIgnoreLowercase= Boolean.valueOf(StubUtility.getPreferenceInScope(project, PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE)).booleanValue();
+		res.tabWidth= CodeFormatterUtil.getTabWidth(project);
 		return res;
 	}
+	
+	/**
+	 * @deprecated Use getCodeGenerationSettings(IJavaProject) instead
+	 */
+	public static CodeGenerationSettings getCodeGenerationSettings() {
+		return getCodeGenerationSettings(null);
+	}
 
+	public static int getImportNumberThreshold(IJavaProject project) {
+		String thresholdStr= StubUtility.getPreferenceInScope(project, PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD);
+		try {
+			int threshold= Integer.parseInt(thresholdStr);
+			if (threshold < 0) {
+				threshold= Integer.MAX_VALUE;
+			}
+			return threshold;
+		} catch (NumberFormatException e) {
+			return Integer.MAX_VALUE;
+		}
+	}
+
+	public static String[] getImportOrderPreference(IJavaProject project) {
+		String str= StubUtility.getPreferenceInScope(project, PreferenceConstants.ORGIMPORTS_IMPORTORDER);
+		if (str != null) {
+			return unpackList(str, ";"); //$NON-NLS-1$
+		}
+		return new String[0];
+	}
+	
+	/**
+	 * @deprecated Use getImportNumberThreshold(IJavaProject) instead
+	 */
 	public static int getImportNumberThreshold(IPreferenceStore prefs) {
 		int threshold= prefs.getInt(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD);
 		if (threshold < 0) {
@@ -41,7 +75,9 @@ public class JavaPreferencesSettings  {
 		return threshold;
 	}
 
-
+	/**
+	 * @deprecated Use getImportOrderPreference(IJavaProject) instead
+	 */
 	public static String[] getImportOrderPreference(IPreferenceStore prefs) {
 		String str= prefs.getString(PreferenceConstants.ORGIMPORTS_IMPORTORDER);
 		if (str != null) {
