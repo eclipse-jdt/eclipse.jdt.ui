@@ -325,6 +325,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		 */
 		protected class CompilationUnitAnnotationModel extends ResourceMarkerAnnotationModel implements IProblemRequestor, IProblemRequestorExtension {
 			
+			private IFileEditorInput fInput;
 			private List fCollectedProblems;
 			private List fGeneratedAnnotations;
 			private IProgressMonitor fProgressMonitor;
@@ -333,10 +334,10 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			private ReverseMap fReverseMap= new ReverseMap();
 			private List fPreviouslyShadowed= null; 
 			private List fCurrentlyShadowed= new ArrayList();
-			
-			
-			public CompilationUnitAnnotationModel(IResource resource) {
-				super(resource);
+
+			public CompilationUnitAnnotationModel(IFileEditorInput input) {
+				super(input.getFile());
+				fInput= input;
 			}
 			
 			protected MarkerAnnotation createMarkerAnnotation(IMarker marker) {
@@ -359,6 +360,15 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see IProblemRequestor#beginReporting()
 			 */
 			public void beginReporting() {
+				ICompilationUnit unit= getWorkingCopy(fInput);
+				try {
+					if (unit != null && unit.getJavaProject().isOnClasspath(unit))
+						fCollectedProblems= new ArrayList();
+					else
+						fCollectedProblems= null;
+				} catch (JavaModelException e) {
+					fCollectedProblems= null;	
+				}				
 			}
 			
 			/*
@@ -393,7 +403,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 						fGeneratedAnnotations.clear();
 					}
 					
-					if (fCollectedProblems.size() > 0) {
+					if (fCollectedProblems != null && fCollectedProblems.size() > 0) {
 												
 						Iterator e= fCollectedProblems.iterator();
 						while (e.hasNext()) {
@@ -656,9 +666,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			
 			public void removeListener(IAnnotationModelListener listener) {
 				fListenerList.remove(listener);
-			}
+			}			
 		};
-		
+			
 		
 		/**
 		 * Document that can also be used by a background reconciler.
@@ -670,8 +680,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 */
 			synchronized public void startSequentialRewrite() {
 				super.startSequentialRewrite();
-			}
-			
+		}
+		
 			/*
 			 * @see IDocumentExtension#stopSequentialRewrite()
 			 */
@@ -922,7 +932,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			throw new CoreException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE_TYPE));
 		
 		IFileEditorInput input= (IFileEditorInput) element;
-		return new CompilationUnitAnnotationModel(input.getFile());
+		return new CompilationUnitAnnotationModel(input);
 	}
 	
 	protected void initializeDocument(IDocument document) {
@@ -942,11 +952,11 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		if (element instanceof IEditorInput) {
 			Document document= new PartiallySynchronizedDocument();
 			if (setDocumentContent(document, (IEditorInput) element, getEncoding(element))) {
-				initializeDocument(document);
-				return document;
-			}
+		initializeDocument(document);
+		return document;
+	}
 		}
-		
+	
 		return null;
 	}
 	
