@@ -863,6 +863,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return new CompositeChange(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.restructure_parameters"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 		} finally{
 			pm.done();
+			clearManagers();
+			fOccurrenceNodes= new ASTNode[0];
 		}	
 	}
 

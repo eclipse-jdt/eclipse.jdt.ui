@@ -1232,6 +1232,7 @@ public class PullUpRefactoring extends Refactoring {
 			return new CompositeChange(RefactoringCoreMessages.getString("PullUpRefactoring.Pull_Up"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 		} finally{
 			pm.done();
+			clearManagers();
 		}
 	}
 

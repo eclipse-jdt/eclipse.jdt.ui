@@ -756,6 +756,7 @@ public class PushDownRefactoring extends Refactoring {
 			return new CompositeChange("Push down", fChangeManager.getAllChanges()); //$NON-NLS-1$
 		} finally{
 			pm.done();
+			clearManagers();
 		}
 	}
 

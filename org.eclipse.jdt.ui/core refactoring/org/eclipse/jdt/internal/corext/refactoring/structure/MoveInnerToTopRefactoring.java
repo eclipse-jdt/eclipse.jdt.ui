@@ -114,7 +114,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private IType fType;
 	private TextChangeManager fChangeManager;
 	private String fEnclosingInstanceFieldName;
-	private ASTNodeMappingManager fASTManager;
+	private final ASTNodeMappingManager fASTManager;
 	private DeleteSourceReferenceEdit fCutTypeEdit; 
 	private boolean fMarkInstanceFieldAsFinal;
 	
@@ -314,7 +314,10 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			throw e;	
 		} catch(CoreException e){
 			throw new JavaModelException(e);
-		}	
+		} finally{
+			fASTManager.clear();
+			fImportEditManager.clear();
+		}
 	}
 
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
