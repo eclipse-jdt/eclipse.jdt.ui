@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -192,7 +193,11 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		initializerNode.accept(new SideEffectFinder(sideEffectNodes));
 		int nSideEffects= sideEffectNodes.size();
 		if (nSideEffects == 0) {
-			rewrite.remove(statementNode, null); 
+			if (ASTNodes.isControlStatementBody(statementNode.getLocationInParent())) {
+				rewrite.replace(statementNode, rewrite.getAST().newBlock(), null); 
+			} else {
+				rewrite.remove(statementNode, null);
+			}
 		} else {
 			// do nothing yet
 		}
