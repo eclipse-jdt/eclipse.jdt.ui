@@ -55,11 +55,10 @@ public class NLSKeyHyperlinkDetector implements IHyperlinkDetector {
 	}
 	
 	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlinkDetector#detectHyperlink(oorg.eclipse.jface.text.IRegion)
-	 * @since 3.1
+	 * @see org.eclipse.jface.text.hyperlink.IHyperlinkDetector#detectHyperlinks(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion, boolean)
 	 */
-	public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region) {
-		if (region == null || fTextEditor == null)
+	public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
+		if (region == null || fTextEditor == null || canShowMultipleHyperlinks)
 			return null;
 		
 		IEditorSite site= fTextEditor.getEditorSite();
