@@ -676,12 +676,12 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         IToolBarManager toolBar = actionBars.getToolBarManager();
 
         fActionGroups.fillActionBars(actionBars);
-        toolBar.add(fHistoryDropDownAction);
-        toolBar.add(fCancelSearchAction);
         
+        toolBar.add(fCancelSearchAction);
         for (int i = 0; i < fToggleCallModeActions.length; i++) {
             toolBar.add(fToggleCallModeActions[i]);
         }
+        toolBar.add(fHistoryDropDownAction);
     }
 
     private KeyListener createKeyListener() {

@@ -883,10 +883,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	private void fillMainToolBar(IToolBarManager tbmanager) {
 		tbmanager.removeAll();
-		tbmanager.add(fHistoryDropDownAction);
 		for (int i= 0; i < fViewActions.length; i++) {
 			tbmanager.add(fViewActions[i]);
 		}
+		tbmanager.add(fHistoryDropDownAction);
 		tbmanager.update(false);	
 	}
 
