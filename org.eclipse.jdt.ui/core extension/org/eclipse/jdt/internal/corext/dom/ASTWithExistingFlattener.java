@@ -11,8 +11,10 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import org.eclipse.jdt.core.ICodeFormatter;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -108,7 +110,9 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 			positions[k++]= startPos + length - 1;
 		}		
 		
-		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
+		Hashtable map= JavaCore.getOptions();
+		map.put(JavaCore.FORMATTER_LINE_SPLIT, String.valueOf(9999));
+		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(map);
 		String formatted= formatter.format(getResult(), initialIndentationLevel, positions, lineDelimiter);
 		
 		for (int i= 0, k= 0; i < nExistingNodes; i++) {
