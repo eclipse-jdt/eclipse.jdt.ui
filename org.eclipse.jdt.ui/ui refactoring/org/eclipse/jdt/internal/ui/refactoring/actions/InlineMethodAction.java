@@ -133,7 +133,7 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	}
 
 	private void activate(InlineMethodRefactoring refactoring) throws JavaModelException {
-		new RefactoringStarter().activate(refactoring, createWizard(refactoring), DIALOG_TITLE, true);
+		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_TITLE, true);
 	}
 
 	/*

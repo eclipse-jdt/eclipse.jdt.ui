@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -134,7 +135,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		
 		Refactoring refactoring= createNewRefactoringInstance(unit);
 		ExternalizeWizard wizard= new ExternalizeWizard(refactoring);
-		new RefactoringStarter().activate(refactoring, wizard, getDialogTitle(), true); 
+		new RefactoringStarter().activate(refactoring, wizard, JavaPlugin.getActiveWorkbenchShell(), getDialogTitle(), true); 
 	}	
 	
 	private static String getDialogTitle() {

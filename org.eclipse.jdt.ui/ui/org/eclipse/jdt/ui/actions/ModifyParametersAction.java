@@ -178,7 +178,7 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), fRefactoring.getMethod()))
 			return;
 		try{
-			Object newElementToProcess= new RefactoringStarter().activate(fRefactoring, createWizard(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
+			Object newElementToProcess= new RefactoringStarter().activate(fRefactoring, createWizard(), getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
 			if (newElementToProcess == null)
 				return;
 			IStructuredSelection mockSelection= new StructuredSelection(newElementToProcess);

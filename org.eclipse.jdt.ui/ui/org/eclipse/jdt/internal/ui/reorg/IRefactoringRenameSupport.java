@@ -3,6 +3,8 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.reorg;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jdt.core.JavaModelException;
 
 /**
@@ -18,5 +20,5 @@ public interface IRefactoringRenameSupport {
 	/**
 	 * Do the rename
 	 */
-	public void rename(Object element) throws JavaModelException;
+	public void rename(Shell parent, Object element) throws JavaModelException;
 }

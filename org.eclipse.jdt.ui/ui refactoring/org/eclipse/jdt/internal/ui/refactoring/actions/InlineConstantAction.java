@@ -131,7 +131,7 @@ public class InlineConstantAction extends SelectionDispatchAction {
 			return;
 		}
 		try {
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), DIALOG_TITLE, true);
+			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_TITLE, true);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, "Unexpected exception during operation");	
 		}		

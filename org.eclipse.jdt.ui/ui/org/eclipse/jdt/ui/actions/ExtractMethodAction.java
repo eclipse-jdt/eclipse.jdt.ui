@@ -70,7 +70,7 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 			if (target != null)
 				target.beginCompoundChange();
 			Refactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), fDialogMessageTitle, false);
+			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), fDialogMessageTitle, false);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, fDialogMessageTitle, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
 		} finally {

@@ -286,7 +286,7 @@ public class LocalCorrectionsSubProcessor {
 					NLSRefactoring refactoring= new NLSRefactoring(cu);
 					ExternalizeWizard wizard= new ExternalizeWizard(refactoring);
 					String dialogTitle= CorrectionMessages.getString("LocalCorrectionsSubProcessor.externalizestrings.dialog.title"); //$NON-NLS-1$
-					new RefactoringStarter().activate(refactoring, wizard, dialogTitle, true);
+					new RefactoringStarter().activate(refactoring, wizard, JavaPlugin.getActiveWorkbenchShell(), dialogTitle, true);
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
 				}

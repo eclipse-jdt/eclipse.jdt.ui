@@ -66,7 +66,7 @@ public class RefactoringStarter {
 	private boolean fSavedFiles;
 	private boolean fAutobuildState;
 	
-	public Object activate(Refactoring refactoring, RefactoringWizard wizard, String dialogTitle, boolean mustSaveEditors) throws JavaModelException {
+	public Object activate(Refactoring refactoring, RefactoringWizard wizard, Shell parent, String dialogTitle, boolean mustSaveEditors) throws JavaModelException {
 		if (! canActivate(mustSaveEditors))
 			return null;
 		RefactoringStatus activationStatus= refactoring.checkActivation(new NullProgressMonitor());
@@ -74,9 +74,9 @@ public class RefactoringStarter {
 			wizard.setActivationStatus(activationStatus);
 			Dialog dialog;
 			if (RefactoringPreferences.useWizardUI() || mustUseWizardUI(wizard))
-				dialog= new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
+				dialog= new RefactoringWizardDialog(parent, wizard);
 			else 
-				dialog= new RefactoringWizardDialog2(JavaPlugin.getActiveWorkbenchShell(), wizard);
+				dialog= new RefactoringWizardDialog2(parent, wizard);
 			if (dialog.open() == Dialog.CANCEL)
 				triggerBuild();
 			return null;	
@@ -84,8 +84,8 @@ public class RefactoringStarter {
 			return RefactoringErrorDialogUtil.open(dialogTitle, activationStatus);
 		}	
 	}
-	
-	public Object activate(final IRenameRefactoring renameRefactoring, String dialogTitle, String dialogMessage, boolean mustSaveEditors, Object element) throws JavaModelException {
+		
+	public Object activate(final IRenameRefactoring renameRefactoring, Shell parent, String dialogTitle, String dialogMessage, boolean mustSaveEditors, Object element) throws JavaModelException {
 		if (! canActivate(mustSaveEditors))
 			return null;
 		//XXX
@@ -96,7 +96,6 @@ public class RefactoringStarter {
 		if (status.hasFatalError()){
 			return RefactoringErrorDialogUtil.open(dialogTitle, status);
 		} else{
-			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 			IInputValidator validator= new IInputValidator(){
 				public String isValid(String newText){
 					try{
@@ -110,7 +109,7 @@ public class RefactoringStarter {
 					}
 				}
 			};
-			InputDialog dialog= new RenameInputDialog(shell, dialogTitle, dialogMessage, renameRefactoring.getCurrentName(), validator, renameRefactoring);
+			InputDialog dialog= new RenameInputDialog(parent, dialogTitle, dialogMessage, renameRefactoring.getCurrentName(), validator, renameRefactoring);
 			int result= dialog.open();
 			if (result != Window.OK) {
 				triggerBuild();

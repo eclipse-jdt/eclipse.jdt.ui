@@ -670,9 +670,10 @@ public final class JavaUI {
 
 	/**
 	 * Returns the Javadoc base URL for an element. The base location contains the
-	 * index file. This location must not exist. Returns <code>null</code> if no javadoc location
-	 * has been attached to the element's library or project.
-	 * Example of a returned URL is <i>http://www.junit.org/junit/javadoc</i>.
+	 * index file. This location doesn't have to exist. Returns
+	 * <code>null</code> if no javadoc location has been attached to the
+	 * element's library or project. Example of a returned URL is <i>http://www.
+	 * junit. org/junit/javadoc</i>.
 	 * 
 	 * @param The element for witch the doc URL is requested.
 	 * 
@@ -685,8 +686,9 @@ public final class JavaUI {
 	/**
 	 * Returns the Javadoc URL for an element. Example of a returned URL is
 	 * <i>http://www.junit.org/junit/javadoc/junit/extensions/TestSetup.html</i>.
-	 * This returned location must not exist. Returns <code>null</code> if no javadoc location
-	 * has been attached to the element's library or project.
+	 * This returned location doesn't have to exist. Returns <code>null</code>
+	 * if no javadoc location has been attached to the element's library or
+	 * project.
 	 * 
 	 * @param The element for witch the doc URL is requested.
 	 * @param includeAnchor If set, the URL contains an anchor for member references:

@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RenameJavaElementAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RenameResourceAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RenameTempAction;
 
 /**
@@ -41,6 +42,7 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RenameTempAction;
 public class RenameAction extends SelectionDispatchAction {
 
 	private RenameJavaElementAction fRenameJavaElement;
+	private RenameResourceAction fRenameResource;
 	private RenameTempAction fRenameTemp;
 
 	private CompilationUnitEditor fEditor;
@@ -57,6 +59,8 @@ public class RenameAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("RenameAction.text")); //$NON-NLS-1$
 		fRenameJavaElement= new RenameJavaElementAction(site);
 		fRenameJavaElement.setText(getText());
+		fRenameResource= new RenameResourceAction(site);
+		fRenameResource.setText(getText());
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.RENAME_ACTION);
 	}
 	
@@ -75,6 +79,8 @@ public class RenameAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(SelectionChangedEvent event) {
 		fRenameJavaElement.selectionChanged(event);
+		if (fRenameResource != null)
+			fRenameResource.selectionChanged(event);
 		if (fRenameTemp != null)
 			fRenameTemp.selectionChanged(event);
 		setEnabled(computeEnabledState());		
@@ -86,6 +92,8 @@ public class RenameAction extends SelectionDispatchAction {
 	public void update(ISelection selection) {
 		fRenameJavaElement.update(selection);
 		
+		if (fRenameResource != null)
+			fRenameResource.update(selection);
 		if (fRenameTemp != null)
 			fRenameTemp.update(selection);
 	
@@ -93,15 +101,20 @@ public class RenameAction extends SelectionDispatchAction {
 	}
 	
 	private boolean computeEnabledState(){
-		if (fRenameTemp != null)	
-			return fRenameTemp.isEnabled() || fRenameJavaElement.isEnabled();
-		else
+		if (fRenameTemp != null) {
+			return fRenameJavaElement.isEnabled()|| fRenameTemp.isEnabled();
+		} else if (fRenameResource != null) {
+			return fRenameJavaElement.isEnabled() || fRenameResource.isEnabled();
+		} else {
 			return fRenameJavaElement.isEnabled();
+		}
 	}
 	
 	protected void run(IStructuredSelection selection) {
 		 if (fRenameJavaElement.isEnabled())
 			fRenameJavaElement.run(selection);
+		if (fRenameResource != null && fRenameResource.isEnabled())
+			fRenameResource.run(selection);
 	}
 
 	protected void run(ITextSelection selection) {

@@ -73,7 +73,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 	protected void run(ITextSelection selection) {
 		try{
 			Refactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), DIALOG_MESSAGE_TITLE, false);
+			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
 		}	

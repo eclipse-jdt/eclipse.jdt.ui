@@ -137,7 +137,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 		try  {	
 			new RefactoringStarter().activate(
 				refactoring, 
-				new SelfEncapsulateFieldWizard(refactoring), getDialogTitle(), true);
+				new SelfEncapsulateFieldWizard(refactoring), getShell(), getDialogTitle(), true);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getDialogTitle(),
 				ActionMessages.getString("SelfEncapsulateFieldAction.dialog.cannot_perform")); //$NON-NLS-1$
