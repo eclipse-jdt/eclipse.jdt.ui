@@ -405,7 +405,8 @@ public class JavaIndenter {
 			} else {
 				indentBlockLess= false;
 				hasBrace= true;
-				return fPosition;
+				found= true;
+				// cannot return here since the opening brace may be on the last line of a multiline parameter list
 			}
 		}
 		
@@ -422,6 +423,7 @@ public class JavaIndenter {
 				
 				fPosition= position;
 				fIndent= 0;
+				found= true;
 			}
 		}
 		
