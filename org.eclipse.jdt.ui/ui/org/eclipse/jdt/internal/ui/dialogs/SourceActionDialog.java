@@ -105,6 +105,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fType= type;
 		fCommentString= ActionMessages.getString("SourceActionDialog.createMethodComment"); //$NON-NLS-1$
 		fAnnotationString= ActionMessages.getString("SourceActionDialog.createMethodAnnotation"); //$NON-NLS-1$
+		setEmptyListMessage(ActionMessages.getString("SourceActionDialog.no_entries")); //$NON-NLS-1$
 
 		fWidth= 60;
 		fHeight= 18;
