@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -192,6 +193,8 @@ public class ASTNodes {
 				return ((VariableDeclarationExpression)parent).getType();
 			else if (parent instanceof VariableDeclarationStatement)
 				return ((VariableDeclarationStatement)parent).getType();
+			else if (parent instanceof FieldDeclaration)
+				return ((FieldDeclaration)parent).getType();
 		}
 		Assert.isTrue(false, "Unknown VariableDeclaration"); //$NON-NLS-1$
 		return null;
