@@ -7,6 +7,9 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -45,9 +48,21 @@ class ParameterOffsetFinder {
 			fIncludeReferences= includeReferences;
 			fOffsetsFound= new HashSet();
 			fParamBindings= new HashSet();
-			fMethodSourceStart= method.getSourceRange().getOffset();
+			fMethodSourceStart= computeMethodSourceStart(method);
 			fMethodSourceEnd= method.getSourceRange().getOffset() + method.getSourceRange().getLength();
 			fParameterName= parameterName;
+		}
+		
+		private static int computeMethodSourceStart(IMethod method) throws JavaModelException{
+			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+			scanner.setSource(method.getSource().toCharArray());
+			scanner.resetTo(0, method.getSourceRange().getLength());
+			try{
+				scanner.getNextToken();
+				return method.getSourceRange().getOffset() + scanner.getCurrentTokenStartPosition();
+			}	catch (InvalidInputException e){
+				return method.getSourceRange().getOffset();
+			}
 		}
 		
 		private void addNodeOffset(ASTNode node){
