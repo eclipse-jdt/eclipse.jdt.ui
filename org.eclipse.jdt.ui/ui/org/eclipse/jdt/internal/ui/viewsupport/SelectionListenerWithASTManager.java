@@ -87,6 +87,10 @@ public class SelectionListenerWithASTManager {
 			if (fCurrentJob != null) {
 				fCurrentJob.cancel();
 			}
+			final IJavaElement input= getJavaElement();
+			if (input == null) {
+				return;
+			}
 			
 			fCurrentJob= new Job(JavaUIMessages.getString("SelectionListenerWithASTManager.job.title")) { //$NON-NLS-1$
 				public IStatus run(IProgressMonitor monitor) {
@@ -94,7 +98,7 @@ public class SelectionListenerWithASTManager {
 						monitor= new NullProgressMonitor();
 					}
 					synchronized (PartListenerGroup.this) {
-						return calculateASTandInform(selection, monitor);
+						return calculateASTandInform(input, selection, monitor);
 					}
 				}
 			};
@@ -111,12 +115,12 @@ public class SelectionListenerWithASTManager {
 				return null;
 		}
 		
-		protected IStatus calculateASTandInform(ITextSelection selection, IProgressMonitor monitor) {
+		protected IStatus calculateASTandInform(IJavaElement input, ITextSelection selection, IProgressMonitor monitor) {
 			if (monitor.isCanceled()) {
 				return Status.CANCEL_STATUS;
 			}
-			// create AST
-			CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(getJavaElement(), true, true, monitor);
+			// create AST		
+			CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(input, true, true, monitor);
 		
 			if (astRoot != null && !monitor.isCanceled()) {
 				Object[] listeners= fAstListeners.getListeners();
