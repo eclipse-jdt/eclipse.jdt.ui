@@ -84,7 +84,9 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 		fProposalAutoActivationSet = triggers.toCharArray();
 	}
 
-	/*
+	/**
+	 * Computing proposals on a <code>ITextViewer</code> is not supported.
+	 * @see #computeCompletionProposals(IContentAssistSubject, int)
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
@@ -92,7 +94,9 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 		return null;
 	}
 	
-	/*
+	/**
+	 * Computing context information on a <code>ITextViewer</code> is not supported.
+	 * @see #computeContextInformation(IContentAssistSubject, int)
 	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)
 	 */
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
