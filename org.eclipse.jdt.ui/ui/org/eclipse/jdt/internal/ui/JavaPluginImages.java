@@ -14,7 +14,7 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.action.IAction;
 
 /**
- * Bundle of most images used by the Java plugin.
+ * Bundle of most images used by the Java plugin. 
  */
 public class JavaPluginImages {
 
@@ -75,12 +75,16 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_CFILEINT= NAME_PREFIX + "classfi_obj.gif"; 
 	public static final String IMG_OBJS_PACKAGE= NAME_PREFIX + "package_obj.gif";
 	public static final String IMG_OBJS_PACKFRAG_ROOT= NAME_PREFIX + "packagefolder_obj.gif";
+	public static final String IMG_OBJS_MISSING_PACKFRAG_ROOT= NAME_PREFIX + "missing_packagefolder_obj.gif";
+	public static final String IMG_OBJS_MISSING_JAR= NAME_PREFIX + "missing_jar_obj.gif";
 	public static final String IMG_OBJS_JAR= NAME_PREFIX + "jar_obj.gif";
 	public static final String IMG_OBJS_EXTJAR= NAME_PREFIX + "jar_l_obj.gif";
 	public static final String IMG_OBJS_JAR_WSRC= NAME_PREFIX + "jar_src_obj.gif";
 	public static final String IMG_OBJS_EXTJAR_WSRC= NAME_PREFIX + "jar_lsrc_obj.gif";	
 	public static final String IMG_OBJS_ENV_VAR= NAME_PREFIX + "envvar_obj.gif";
+	public static final String IMG_OBJS_MISSING_ENV_VAR= NAME_PREFIX + "missing_envvar_obj.gif";
 	
+	public static final String IMG_OBJS_LIBRARY= NAME_PREFIX + "library_obj.gif";
 	
 	public static final String IMG_OBJS_JAVADOCTAG= NAME_PREFIX + "jdoc_tag_obj.gif";
 	public static final String IMG_OBJS_HTMLTAG= NAME_PREFIX + "html_tag_obj.gif";
@@ -169,14 +173,19 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_CFILEINT= createManaged(T_OBJ, IMG_OBJS_CFILEINT); 
 	public static final ImageDescriptor DESC_OBJS_PACKAGE= createManaged(T_OBJ, IMG_OBJS_PACKAGE);
 	public static final ImageDescriptor DESC_OBJS_PACKFRAG_ROOT= createManaged(T_OBJ, IMG_OBJS_PACKFRAG_ROOT);
+	public static final ImageDescriptor DESC_OBJS_MISSING_PACKFRAG_ROOT= createManaged(T_OBJ, IMG_OBJS_MISSING_PACKFRAG_ROOT);
 
 	public static final ImageDescriptor DESC_OBJS_JAR= createManaged(T_OBJ, IMG_OBJS_JAR);
+	public static final ImageDescriptor DESC_OBJS_MISSING_JAR= createManaged(T_OBJ, IMG_OBJS_MISSING_JAR);
 	public static final ImageDescriptor DESC_OBJS_EXTJAR= createManaged(T_OBJ, IMG_OBJS_EXTJAR);
 	public static final ImageDescriptor DESC_OBJS_JAR_WSRC= createManaged(T_OBJ, IMG_OBJS_JAR_WSRC);
 	public static final ImageDescriptor DESC_OBJS_EXTJAR_WSRC= createManaged(T_OBJ, IMG_OBJS_EXTJAR_WSRC);
 	public static final ImageDescriptor DESC_OBJS_ENV_VAR= createManaged(T_OBJ, IMG_OBJS_ENV_VAR);
-		
-	public static final ImageDescriptor DESC_OBJS_JAVADOCTAG= createManaged(T_OBJ, IMG_OBJS_ENV_VAR);
+	public static final ImageDescriptor DESC_OBJS_MISSING_ENV_VAR= createManaged(T_OBJ, IMG_OBJS_MISSING_ENV_VAR);
+	
+	public static final ImageDescriptor DESC_OBJS_LIBRARY= createManaged(T_OBJ, IMG_OBJS_LIBRARY);
+	
+	public static final ImageDescriptor DESC_OBJS_JAVADOCTAG= createManaged(T_OBJ, IMG_OBJS_JAVADOCTAG);
 	public static final ImageDescriptor DESC_OBJS_HTMLTAG= createManaged(T_OBJ, IMG_OBJS_HTMLTAG);
 
 	public static final ImageDescriptor DESC_OBJS_EXCEPTION= createManaged(T_OBJ, IMG_OBJS_EXCEPTION);

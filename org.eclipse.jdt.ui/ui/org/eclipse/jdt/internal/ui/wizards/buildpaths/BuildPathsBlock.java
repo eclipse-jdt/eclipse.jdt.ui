@@ -23,8 +23,10 @@ public class BuildPathsBlock {
 		
 	private static final String CP_RECURSIVE_ERROR= "BuildPathsBlock.error.RecursiveClassPath";
 	private static final String CP_DUPLICATE_ERROR= "BuildPathsBlock.error.DuplicateEntriesInClassPath";
-	private static final String CP_CYCLES_ERROR= "BuildPathsBlock.error.CycleInClassPath";
-
+	
+	private static final String CP_CYCLES_WARNING= "BuildPathsBlock.warning.CycleInClassPath";
+	private static final String CP_ENTRYMISSING_WARNING= "BuildPathsBlock.warning.EntryMissing";
+	
 	private static final String CFD_DIALOG= "BuildPathsBlock.ChooseOutputFolderDialog";
 	
 	private static final String OPERATION_DESC= "BuildPathsBlock.operationdesc";
@@ -163,7 +165,7 @@ public class BuildPathsBlock {
 		fLibrariesPage= new LibrariesWorkbookPage(fWorkspaceRoot, fClassPathList);		
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(getResourceString(TAB_LIBRARIES));
-		item.setImage(imageRegistry.get(JavaPluginImages.IMG_OBJS_JAR));
+		item.setImage(imageRegistry.get(JavaPluginImages.IMG_OBJS_LIBRARY));
 		item.setData(fLibrariesPage);
 		item.setControl(fLibrariesPage.getControl(folder));
 		
@@ -235,11 +237,19 @@ public class BuildPathsBlock {
 						IPath path= curr.getPath();
 						// get the resource
 						IResource res= null;
+						boolean isMissing= false;
+						
 						if (entryKind != IClasspathEntry.CPE_VARIABLE) {
 							res= fWorkspaceRoot.findMember(path);
-						}
-						CPListElement elem= new CPListElement(entryKind, path, res);
-						elem.setSourceAttachment(curr.getSourceAttachmentPath(), curr.getSourceAttachmentRootPath());
+							if (res == null) {
+								isMissing= entryKind != IClasspathEntry.CPE_LIBRARY || !path.toFile().isFile();
+							}
+						} else {
+							IPath resolvedPath= JavaCore.getResolvedVariablePath(path);
+							isMissing= !path.toFile().isFile();
+						}												
+						CPListElement elem= new CPListElement(entryKind, path, res, curr.getSourceAttachmentPath(), curr.getSourceAttachmentRootPath());
+						elem.setIsMissing(isMissing);
 						newClassPath.add(elem);			
 					}
 					fClassPathList.setElements(newClassPath);
@@ -289,25 +299,16 @@ public class BuildPathsBlock {
 			for (int i= 0; i < fClassPathDefault.length; i++) {
 				IClasspathEntry entry= fClassPathDefault[i];
 				IResource res= fWorkspaceRoot.findMember(entry.getPath());			
-				vec.add(new CPListElement(entry.getEntryKind(), entry.getPath(), res));
+				vec.add(new CPListElement(entry.getEntryKind(), entry.getPath(), res, entry.getSourceAttachmentPath(), entry.getSourceAttachmentRootPath()));
 			}
 		}
 		
 		if (fAddJDKToDefault || fClassPathDefault == null) {
-			/*IPath jdkPath= JavaBasePreferencePage.getJDKPath();
-			if (jdkPath != null) {
-				/*IResource res= fWorkspaceRoot.findMember(jdkPath);
-				CPListElement elem= new CPListElement(IClasspathEntry.CPE_LIBRARY, jdkPath, res);
-				IPath[] attach= JavaBasePreferencePage.getJDKSourceAttachment();
-				if (attach != null) {
-					elem.setSourceAttachment(attach[0], attach[1]);
-				}*/
-				CPListElement elem= new CPListElement(IClasspathEntry.CPE_VARIABLE, new Path(ClasspathVariablesPreferencePage.JRELIB_VARIABLE), null);
-				IPath attachPath= new Path(ClasspathVariablesPreferencePage.JRESRC_VARIABLE);
-				IPath attachRoot= new Path(ClasspathVariablesPreferencePage.JRESRCROOT_VARIABLE);
-				elem.setSourceAttachment(attachPath, attachRoot);
-				vec.add(elem);
-			//}
+			IPath libPath= new Path(ClasspathVariablesPreferencePage.JRELIB_VARIABLE);
+			IPath attachPath= new Path(ClasspathVariablesPreferencePage.JRESRC_VARIABLE);
+			IPath attachRoot= new Path(ClasspathVariablesPreferencePage.JRESRCROOT_VARIABLE);
+			CPListElement elem= new CPListElement(IClasspathEntry.CPE_VARIABLE, libPath, null, attachPath, attachRoot);
+			vec.add(elem);
 		}
 		return vec;
 	}
@@ -373,6 +374,7 @@ public class BuildPathsBlock {
 		IPath buildPath= new Path(fBuildPathDialogField.getText());
 		IClasspathEntry[] entries= new IClasspathEntry[elements.size()];
 		
+		boolean entryMissing= false;
 		for (int i= elements.size()-1 ; i >= 0 ; i--) {
 			CPListElement currElement= (CPListElement)elements.get(i);
 			int currKind= currElement.getEntryKind();
@@ -398,9 +400,15 @@ public class BuildPathsBlock {
 				}
 			}
 			entries[i]= currElement.getClasspathEntry();
+			entryMissing= entryMissing || currElement.isMissing();
 		}
+		if (entryMissing) {
+			fClassPathStatus.setWarning(getResourceString(CP_ENTRYMISSING_WARNING));
+		}
+		
+		
 		if (fCurrJProject.hasClasspathCycle(entries)) {
-			fClassPathStatus.setWarning(getResourceString(CP_CYCLES_ERROR));
+			fClassPathStatus.setWarning(getResourceString(CP_CYCLES_WARNING));
 		}	
 	}
 	
@@ -571,6 +579,5 @@ public class BuildPathsBlock {
 			}
 			fCurrPage= newPage;
 		}
-	}
-		
+	}		
 }

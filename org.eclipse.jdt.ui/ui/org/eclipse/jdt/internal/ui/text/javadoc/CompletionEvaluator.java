@@ -290,7 +290,7 @@ public class CompletionEvaluator {
 				for (int i= 0; i < exceptions.length; i++) {
 					String curr= Signature.toString(exceptions[i]);
 					if (curr.startsWith(argument)) {
-						fResult.add(createCompletion(curr, argument, curr, JavaPluginImages.get(JavaPluginImages.IMG_MISC_DEFAULT), null));
+						fResult.add(createCompletion(curr, argument, curr, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS), null));
 					}
 				}
 			}

@@ -263,7 +263,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		ITreeContentProvider cp= new WorkbenchContentProvider();
 
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
-		dialog.setStatusLineAboveButtons(true);
 		dialog.setValidator(validator);
 		dialog.setTitle(JavaPlugin.getResourceString(DIALOG_JAR_ARCHIVE + ".title"));
 		dialog.setMessage(JavaPlugin.getResourceString(DIALOG_JAR_ARCHIVE + ".description"));
@@ -348,12 +347,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		IPath filterPath= new Path(dialog.getFilterPath());
 		CPListElement[] elems= new CPListElement[nChosen];
 		for (int i= 0; i < nChosen; i++) {
-			IPath path= filterPath.append(fileNames[i]).makeAbsolute();
-			IFile file= fWorkspaceRoot.getFileForLocation(path);
-			if (file != null) {
-				path= file.getFullPath();  // modify path if internal
-			}
-			elems[i]= new CPListElement(IClasspathEntry.CPE_LIBRARY, path, file);
+			IPath path= filterPath.append(fileNames[i]).makeAbsolute();	
+			elems[i]= new CPListElement(IClasspathEntry.CPE_LIBRARY, path, null);
 		}
 		fDialogSettings.put(IUIConstants.DIALOGSTORE_LASTEXTJAR, filterPath.toOSString());
 		

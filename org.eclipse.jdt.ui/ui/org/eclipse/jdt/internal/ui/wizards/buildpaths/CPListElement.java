@@ -17,20 +17,40 @@ public class CPListElement {
 	private IPath fPath;
 	private IResource fResource;
 	
+	private boolean fIsMissing;
+	
 	private IPath fSourceAttachmentPath;
 	private IPath fSourceAttachmentPrefix;
 	
-	private URL fJavaDocLocation;
-					
-	public CPListElement(int entryKind, IPath path, IResource res) {
+	private IClasspathEntry fCachedEntry;
+	
+	///private URL fJavaDocLocation;
+	
+	public CPListElement(int entryKind, IPath path, IResource res, IPath attachPath, IPath attachRoot) {
 		fEntryKind= entryKind;
 		fPath= path;
-		fSourceAttachmentPath= null;
-		fSourceAttachmentPrefix= null;
+		fSourceAttachmentPath= attachPath;
+		fSourceAttachmentPrefix= attachRoot;	
 		fResource= res;
+		fIsMissing= false;
+		
+		fCachedEntry= null;
 	}
+
+	public CPListElement(int entryKind, IPath path, IResource res) {
+		this(entryKind, path, res, null, null);
+	}
+
 	
 	public IClasspathEntry getClasspathEntry() {
+		if (fCachedEntry == null) {
+			fCachedEntry= newClasspathEntry();
+		}
+		return fCachedEntry;
+	}
+	
+
+	private IClasspathEntry newClasspathEntry() {
 		switch (fEntryKind) {
 			case IClasspathEntry.CPE_SOURCE:
 				return JavaCore.newSourceEntry(fPath);
@@ -42,7 +62,7 @@ public class CPListElement {
 				return JavaCore.newVariableEntry(fPath, fSourceAttachmentPath, fSourceAttachmentPrefix);
 		}
 	}
-	
+		
 	public IPath getPath() {
 		return fPath;
 	}
@@ -52,15 +72,13 @@ public class CPListElement {
 	}
 
 	/**
-	 * The resources is used for LIBRARY entries to destinguish
-	 * between folders, intrenal and external JARs
+	 * Entries without resource are either non existing or a variable entry
 	 * External jars do not have a resource
 	 */
 	public IResource getResource() {
 		return fResource;
 	}
-
-
+	
 	/**
 	 * Sets the paths for source annotation
 	 * @see org.eclipse.jdt.core.IPackageFragmentRoot#attachSource	
@@ -69,6 +87,8 @@ public class CPListElement {
 	public void setSourceAttachment(IPath path, IPath prefix) {
 		fSourceAttachmentPath= path;
 		fSourceAttachmentPrefix= prefix;
+		
+		fCachedEntry= null;
 	}
 	
 	/**
@@ -97,6 +117,21 @@ public class CPListElement {
 			return elem.fEntryKind == fEntryKind && elem.fPath == fPath;
 		}
 		return false;
+	}
+
+	/**
+	 * returns if entry is missing
+	 * @return Returns a boolean
+	 */
+	public boolean isMissing() {
+		return fIsMissing;
+	}
+
+	/**
+	 * Sets to be missing
+	 */
+	public void setIsMissing(boolean isMissing) {
+		fIsMissing= isMissing;
 	}
 
 }

@@ -31,6 +31,8 @@ class CPListLabelProvider extends LabelProvider {
 	private String fNewLabel, fClassLabel;
 	private Image fJarIcon, fExtJarIcon, fJarWSrcIcon, fExtJarWSrcIcon;
 	private Image fFolderImage, fProjectImage, fVariableImage;
+	private Image fMissingLibaryImage, fMissingVariableImage;
+	private Image fMissingFolderImage, fMissingProjectImage;
 	
 	public CPListLabelProvider() {
 		fNewLabel= JavaPlugin.getResourceString(R_NEW);
@@ -47,16 +49,22 @@ class CPListLabelProvider extends LabelProvider {
 		
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
 		fProjectImage= workbench.getSharedImages().getImage(ISharedImages.IMG_OBJ_PROJECT);
+	
+		fMissingLibaryImage= reg.get(JavaPluginImages.IMG_OBJS_MISSING_JAR);
+		fMissingVariableImage= reg.get(JavaPluginImages.IMG_OBJS_MISSING_ENV_VAR);
+		fMissingFolderImage= reg.get(JavaPluginImages.IMG_OBJS_MISSING_PACKFRAG_ROOT);
+		fMissingProjectImage= workbench.getSharedImages().getImage(ISharedImages.IMG_OBJ_PROJECT_CLOSED);
+	
 	}
 	
 	public String getText(Object element) {
 		if (element instanceof CPListElement) {
 			CPListElement cpentry= (CPListElement)element;
-			IResource resource= cpentry.getResource();
+			IPath path= cpentry.getPath();
 			switch (cpentry.getEntryKind()) {
 				case IClasspathEntry.CPE_LIBRARY: {
-					IPath path= cpentry.getPath();
-					if (cpentry.getResource() instanceof IFolder) {
+					IResource resource= cpentry.getResource();
+					if (resource instanceof IFolder) {
 						StringBuffer buf= new StringBuffer(path.toString());
 						buf.append(' ');
 						buf.append(fClassLabel);
@@ -66,11 +74,15 @@ class CPListLabelProvider extends LabelProvider {
 						}
 						return buf.toString();
 					} else {
-						return path.lastSegment() + " - " + path.removeLastSegments(1).toString();
-					}
+						String ext= path.getFileExtension();
+						if ("zip".equals(ext) || "jar".equals(ext)) {
+							return path.lastSegment() + " - " + path.removeLastSegments(1).toString();
+						} else {
+							return path.toString();
+						}
+					}					
 				}
 				case IClasspathEntry.CPE_VARIABLE: {
-					IPath path= cpentry.getPath();
 					String name= path.makeRelative().toString();
 					StringBuffer buf= new StringBuffer(name);
 					IPath entryPath= JavaCore.getClasspathVariable(path.segment(0));
@@ -81,9 +93,10 @@ class CPListLabelProvider extends LabelProvider {
 					return buf.toString();
 				}
 				case IClasspathEntry.CPE_PROJECT:
-					return cpentry.getPath().lastSegment();
+					return path.lastSegment();
 				case IClasspathEntry.CPE_SOURCE: {
-					StringBuffer buf= new StringBuffer(cpentry.getPath().toString());
+					StringBuffer buf= new StringBuffer(path.toString());
+					IResource resource= cpentry.getResource();
 					if (resource != null && !resource.exists()) {
 						buf.append(' ');
 						buf.append(fNewLabel);
@@ -100,30 +113,48 @@ class CPListLabelProvider extends LabelProvider {
 			CPListElement cpentry= (CPListElement)element;
 			switch (cpentry.getEntryKind()) {
 				case IClasspathEntry.CPE_SOURCE:
-					return fFolderImage;
+					if (!cpentry.isMissing()) {
+						return fFolderImage;
+					} else {
+						return fMissingFolderImage;
+					}
 				case IClasspathEntry.CPE_LIBRARY:
-					IResource res= cpentry.getResource();
-					if (res == null) {
-						if (cpentry.getSourceAttachmentPath() == null) {
-							return fExtJarIcon;
+					if (!cpentry.isMissing()) {
+						IResource res= cpentry.getResource();
+						if (res == null) {
+							if (cpentry.getSourceAttachmentPath() == null) {
+								return fExtJarIcon;
+							} else {
+								return fExtJarWSrcIcon;
+							}
+						} else if (res instanceof IFile) {
+							if (cpentry.getSourceAttachmentPath() == null) {
+								return fJarIcon;
+							} else {
+								return fJarWSrcIcon;
+							}
 						} else {
-							return fExtJarWSrcIcon;
-						}
-					} else if (res instanceof IFile) {
-						if (cpentry.getSourceAttachmentPath() == null) {
-							return fJarIcon;
-						} else {
-							return fJarWSrcIcon;
+							return fFolderImage;
 						}
 					} else {
-						return fFolderImage;
+						return fMissingLibaryImage;
 					}
 				case IClasspathEntry.CPE_PROJECT:
-					return fProjectImage;
+					if (!cpentry.isMissing()) {
+						return fProjectImage;
+					} else {
+						return fMissingProjectImage;
+					}				
 				case IClasspathEntry.CPE_VARIABLE:
-					return fVariableImage;					
+					if (!cpentry.isMissing()) {
+						return fVariableImage;
+					} else {
+						return fMissingVariableImage;
+					}		
 			}
 		}
 		return null;
 	}
+
+
 }	
