@@ -116,6 +116,8 @@ public class ChkpiiTests extends TestCase {
 	}
 	
 	private void assertChkpii(FileCategory type) {
+		new File(type.getOutputFile()).delete();
+		
 		boolean isExecuted= executeChkpiiProcess(type);
 		assertTrue("Could not run chkpii test on " + type + " files. See console for details.", isExecuted); //$NON-NLS-1$
 		StringBuffer buf= new StringBuffer();
@@ -337,11 +339,6 @@ public class ChkpiiTests extends TestCase {
 		fLogDirectoryName= getPluginDirectory() + "chkpiiResults" + File.separator; //$NON-NLS-1$ //$NON-NLS-2$
 
 		new File(fLogDirectoryName).mkdirs();
-
-		new File(PROPERTIES.getOutputFile()).delete();
-		new File(HTML.getOutputFile()).delete();
-		new File(XML.getOutputFile()).delete();
-		
 	}
 
 	/*
