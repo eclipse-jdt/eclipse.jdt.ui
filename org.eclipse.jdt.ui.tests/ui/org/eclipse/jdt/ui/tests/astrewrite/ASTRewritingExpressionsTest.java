@@ -349,6 +349,73 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 	}
 	
 	
+	public void testAssignment() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i, j;\n");
+		buf.append("        i= 0;\n");
+		buf.append("        i-= j= 3;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 3", statements.size() == 3);
+		{ // change left side & right side
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(1);
+			Assignment assignment= (Assignment) stmt.getExpression();
+			
+			SimpleName name= ast.newSimpleName("j");
+			ASTRewriteAnalyzer.markAsReplaced(assignment.getLeftHandSide(), name);
+			
+			MethodInvocation invocation= ast.newMethodInvocation();
+			invocation.setName(ast.newSimpleName("goo"));
+			invocation.setExpression(ast.newSimpleName("other"));
+			
+			ASTRewriteAnalyzer.markAsReplaced(assignment.getRightHandSide(), invocation);
+		}
+		{ // change operator and operator of inner
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(2);
+			Assignment assignment= (Assignment) stmt.getExpression();
+			
+			Assignment modifiedNode= ast.newAssignment();
+			modifiedNode.setOperator(Assignment.Operator.DIVIDE_ASSIGN);
+			ASTRewriteAnalyzer.markAsModified(assignment, modifiedNode);
+			
+			Assignment inner= (Assignment) assignment.getRightHandSide();
+			
+			Assignment modifiedInner= ast.newAssignment();
+			modifiedInner.setOperator(Assignment.Operator.RIGHT_SHIFT_UNSIGNED_ASSIGN);
+			ASTRewriteAnalyzer.markAsModified(inner, modifiedInner);			
+		}
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i, j;\n");
+		buf.append("        j= other.goo();\n");
+		buf.append("        i/= j>>>= 3;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
 	
 	
 

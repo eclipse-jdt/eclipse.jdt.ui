@@ -834,8 +834,18 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			replaceNode(leftHand, getReplacingNode(leftHand));
 		} else {
 			leftHand.accept(this);
-		}		
-			
+		}
+		
+		if (isModified(node)) {
+			try {
+				IScanner scanner= getScanner(leftHand.getStartPosition() + leftHand.getLength());
+				scanner.getNextToken(); // op
+				Assignment.Operator modifiedOp= ((Assignment) getModifiedNode(node)).getOperator();
+				addReplace(scanner.getCurrentTokenStartPosition(), scanner.getCurrentTokenSource().length, modifiedOp.toString(), "Replace operator");
+			} catch (InvalidInputException e) {
+				JavaPlugin.log(e);
+			}
+		}
 			
 		Expression rightHand= node.getRightHandSide();
 		if (isReplaced(rightHand)) {
