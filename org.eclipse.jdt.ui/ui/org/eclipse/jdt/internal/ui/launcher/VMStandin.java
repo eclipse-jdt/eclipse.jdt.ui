@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.launcher;import org.eclipse.jdt.launching.AbstractVMInstall;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;/** * A VMInstall class that used for manipulating the set of vm installs * withouth committing early. */
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.launcher;import org.eclipse.jdt.launching.AbstractVMInstall;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;/** * A VMInstall class that used for manipulating the set of vm installs * withouth committing early. */
 public class VMStandin extends AbstractVMInstall {
 
 	/**
