@@ -28,7 +28,7 @@ public abstract class JavaProjectPropertyPage extends PropertyPage {
 	
 	public final Control createContents(Composite parent) {
 		IJavaProject jproject= getJavaProject();
-		if (jproject != null && jproject.isOpen()) {
+		if (jproject != null && jproject.getProject().isOpen()) {
 			fHasJavaContents= true;
 			return createJavaContents(parent);
 		} else {
