@@ -54,7 +54,6 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	public void propertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
 		if (property.equals(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE)
-				|| property.equals(PreferenceConstants.APPEARANCE_OVERRIDE_INDICATOR)
 				|| property.equals(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW)
 				|| property.equals(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)) {
 			initMasks();
