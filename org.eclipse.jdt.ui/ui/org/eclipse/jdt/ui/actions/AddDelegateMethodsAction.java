@@ -301,13 +301,13 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			String first= ""; //$NON-NLS-1$
 			String second= ""; //$NON-NLS-1$
 			if (object1 instanceof IBinding[])
-				first= ((IBinding[]) object1)[1].getKey();
+				first= Bindings.asString(((IBinding[]) object1)[1]);
 			else if (object1 instanceof IVariableBinding)
-				first= ((IBinding) object1).getKey();
+				first= ((IBinding) object1).getName();
 			if (object2 instanceof IBinding[])
-				second= ((IBinding[]) object2)[1].getKey();
+				second= Bindings.asString(((IBinding[]) object2)[1]);
 			else if (object2 instanceof IVariableBinding)
-				second= ((IBinding) object2).getKey();
+				second= ((IBinding) object2).getName();
 			return first.compareTo(second);
 		}
 	}
