@@ -143,21 +143,29 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 	 * Remove the field or variable declaration including the initializer.
 	 */
 	private void removeVariableReferences(ASTRewrite rewrite, SimpleName reference) {
-		int nameParentType= reference.getParent().getNodeType();
+		ASTNode parent= reference.getParent();
+		while (parent instanceof QualifiedName) {
+			parent= parent.getParent();
+		}
+		if (parent instanceof FieldAccess) {
+			parent= parent.getParent();
+		}
+		
+		int nameParentType= parent.getNodeType();
 		if (nameParentType == ASTNode.ASSIGNMENT) {
-			Assignment assignment= (Assignment) reference.getParent();
+			Assignment assignment= (Assignment) parent;
 			Expression rightHand= assignment.getRightHandSide();
 			
-			ASTNode parent= assignment.getParent();
-			if (parent.getNodeType() == ASTNode.EXPRESSION_STATEMENT && rightHand.getNodeType() != ASTNode.ASSIGNMENT) {
-				removeVariableWithInitializer(rewrite, rightHand, parent);
+			ASTNode assignParent= assignment.getParent();
+			if (assignParent.getNodeType() == ASTNode.EXPRESSION_STATEMENT && rightHand.getNodeType() != ASTNode.ASSIGNMENT) {
+				removeVariableWithInitializer(rewrite, rightHand, assignParent);
 			}	else {
 				rewrite.replace(assignment, rewrite.createCopyTarget(rightHand), null);
 			}
 		} else if (nameParentType == ASTNode.SINGLE_VARIABLE_DECLARATION) {
-			rewrite.remove(reference.getParent(), null);
+			rewrite.remove(parent, null);
 		} else if (nameParentType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			VariableDeclarationFragment frag= (VariableDeclarationFragment) reference.getParent();
+			VariableDeclarationFragment frag= (VariableDeclarationFragment) parent;
 			ASTNode varDecl= frag.getParent();
 			List fragments;
 			if (varDecl instanceof VariableDeclarationExpression) {
