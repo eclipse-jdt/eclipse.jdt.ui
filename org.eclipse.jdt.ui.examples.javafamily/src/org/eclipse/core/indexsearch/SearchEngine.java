@@ -73,13 +73,14 @@ public class SearchEngine {
 	}
 	
 	public void add(AddFileToIndex job) {
+		/* TODO_SEARCH
 		if (fIndexManager.awaitingJobsCount() < IndexManager.MAX_FILES_IN_MEMORY) {
 			// reduces the chance that the file is open later on, preventing it from being deleted
 			if (!job.initializeContents())
 				return;
 		}
+		*/
 		fIndexManager.request(job);
-		
 	}
 
 	/**
@@ -93,10 +94,12 @@ public class SearchEngine {
 		IProgressMonitor pm= progressMonitor == null ? null : new SubProgressMonitor(progressMonitor, 5);
 		fIndexManager.performConcurrentJob(job, waitingPolicy, pm);
 		
+		/* TODO_SEARCH
 		IFile[] files= pathCollector.getFiles(ResourcesPlugin.getWorkspace());
 		for (int i= 0; i < files.length; i++) {
 			IFile file= files[i];
 			search.locateMatches(file, resultCollector);
 		}
+		*/
 	}
 }

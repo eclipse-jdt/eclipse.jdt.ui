@@ -69,10 +69,12 @@ public class JspTypeQuery implements IIndexQuery {
 		String typeName= fType.getFullyQualifiedName();
 		String s= JspIndexParser.JSP_TYPE_REF + "/" + typeName; //$NON-NLS-1$
 
+		/* TODO_SEARCH
 		IQueryResult[] result= index.queryPrefix(s.toCharArray());
 		if (result != null)
 			for (int i= 0; i < result.length; i++)
 				pathCollector.acceptTypeReference(result[i].getPath(), typeName.toCharArray());
+		*/
 	}
 
 	/* (non-Javadoc)

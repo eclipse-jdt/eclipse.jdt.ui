@@ -40,7 +40,10 @@ public abstract class AddFileToIndex extends IndexRequest {
 			return true;
 
 		/* ensure no concurrent write access to index */
-		IIndex index = manager.getIndex(this.indexPath, true, /*reuse index file*/ true /*create if none*/);
+		/* TODO_SEARCH */
+		//IIndex index = manager.getIndex(this.indexPath, true, /*reuse index file*/ true /*create if none*/);
+		IIndex index= null;
+		/* TODO_SEARCH */
 		if (index == null) return true;
 		ReadWriteMonitor monitor = manager.getMonitorFor(index);
 		if (monitor == null) return true; // index got deleted since acquired
