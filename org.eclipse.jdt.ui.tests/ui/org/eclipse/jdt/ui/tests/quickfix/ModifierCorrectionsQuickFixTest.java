@@ -42,7 +42,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ModifierCorrectionsQuickFixTest("testNativeMethodWithBody"));
+			suite.addTest(new ModifierCorrectionsQuickFixTest("testOuterLocalMustBeFinal"));
 			return suite;
 		}
 	}
@@ -851,6 +851,145 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		*/
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });		
+	}
+	
+	public void testOuterLocalMustBeFinal() throws Exception {
+	
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 9;\n");
+		buf.append("        Runnable run= new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                int x= i;\n");
+		buf.append("            }\n");
+		buf.append("        };\n");				
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        final int i= 9;\n");
+		buf.append("        Runnable run= new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                int x= i;\n");
+		buf.append("            }\n");
+		buf.append("        };\n");				
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testOuterParameterMustBeFinal() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i) {\n");
+		buf.append("        Runnable run= new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                int x= i;\n");
+		buf.append("            }\n");
+		buf.append("        };\n");				
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(final int i) {\n");
+		buf.append("        Runnable run= new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                int x= i;\n");
+		buf.append("            }\n");
+		buf.append("        };\n");				
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testOuterForParamMustBeFinal() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i= 1; true;) {\n");		
+		buf.append("            Runnable run= new Runnable() {\n");
+		buf.append("                public void run() {\n");
+		buf.append("                    int x= i;\n");
+		buf.append("                }\n");
+		buf.append("            };\n");			
+		buf.append("        }\n");				
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		CorrectionContext context= getCorrectionContext(cu, problems[0]);
+		assertCorrectContext(context);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(context,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (final int i= 1; true;) {\n");		
+		buf.append("            Runnable run= new Runnable() {\n");
+		buf.append("                public void run() {\n");
+		buf.append("                    int x= i;\n");
+		buf.append("                }\n");
+		buf.append("            };\n");			
+		buf.append("        }\n");				
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
 	}	
 	
 }
