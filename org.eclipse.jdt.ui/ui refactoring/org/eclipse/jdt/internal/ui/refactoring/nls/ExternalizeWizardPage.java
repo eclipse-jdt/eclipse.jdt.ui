@@ -61,6 +61,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -183,11 +184,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private static Image getNLSImage(int task){
 		switch (task){
 			case NLSSubstitution.TRANSLATE:
-				return NLSImages.get(NLSImages.IMG_OBJS_NLS_TRANSLATE);
+				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_TRANSLATE);
 			case NLSSubstitution.NEVER_TRANSLATE:	
-				return NLSImages.get(NLSImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
+				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
 			case NLSSubstitution.SKIP:
-				return NLSImages.get(NLSImages.IMG_OBJS_NLS_SKIP);	
+				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_SKIP);	
 		}
 		return null;
 	}
