@@ -4,22 +4,25 @@
  */
 package org.eclipse.jdt.ui.tests.actions;
 
+import java.io.IOException;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
+import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectNextAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectPreviousAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectionAction;
 
 import org.eclipse.jdt.ui.tests.refactoring.ExtractMethodTests;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.*;
-
-import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectionAction;public class StructureSelectionActionTests extends RefactoringTest{
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class StructureSelectionActionTests extends RefactoringTest{
 	
 	private static final Class clazz= StructureSelectionActionTests.class;
 	private static final String REFACTORING_PATH= "StructureSelectionAction/";
@@ -62,29 +65,45 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.Struct
 		int end= source.indexOf(ExtractMethodTests.SQUARE_BRACKET_CLOSE);
 		return new SourceRange(offset, end - offset);
 	}
-	
-	private void helper1() throws Exception{
-		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
-		ISourceRange selection= getSelection(cu);
 
-		ISourceRange newRange= new StructureSelectionAction().getNewSelectionRange(selection, cu);
-		
+	private void check(ICompilationUnit cu, ISourceRange newRange) throws IOException, JavaModelException {
 		String expected= getFileContents(getTestFileName(false));
 		String actual= cu.getSource().substring(newRange.getOffset(), newRange.getOffset() + newRange.getLength());
 //		assertEquals("selection incorrect length", expected.length(), actual.length());
 		assertEquals("selection incorrect", expected, actual);
 	}	
 	
-	private void helper1(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
+	private void helperSelectUp() throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
-		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
+		ISourceRange selection= getSelection(cu);
 
 		ISourceRange newRange= new StructureSelectionAction().getNewSelectionRange(selection, cu);
 		
-		String expected= getFileContents(getTestFileName(false));
-		String actual= cu.getSource().substring(newRange.getOffset(), newRange.getOffset() + newRange.getLength());
-//		assertEquals("selection incorrect length", expected.length(), actual.length());
-		assertEquals("selection incorrect", expected, actual);
+		check(cu, newRange);
+	}
+	
+	private void helperSelectUp(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
+		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
+		ISourceRange newRange= new StructureSelectionAction().getNewSelectionRange(selection, cu);
+
+		check(cu, newRange);
+	}	
+	
+	private void helperSelectNext(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
+		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
+
+		ISourceRange newRange= new StructureSelectNextAction().getNewSelectionRange(selection, cu);
+		check(cu, newRange);
+	}	
+	
+	private void helperSelectPrevious(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
+		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
+
+		ISourceRange newRange= new StructureSelectPreviousAction().getNewSelectionRange(selection, cu);
+		check(cu, newRange);
 	}	
 		
 	private void helperZeroLength(int line, int column) throws Exception{
@@ -94,11 +113,7 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.Struct
 		//DebugUtils.dump(name() + ":<" + cu.getSource().substring(selection.getOffset()) + "/>");
 		
 		ISourceRange newRange= new StructureSelectionAction().getNewSelectionRange(selection, cu);
-		
-		String expected= getFileContents(getTestFileName(false));
-		String actual= cu.getSource().substring(newRange.getOffset(), newRange.getOffset() + newRange.getLength());
-		assertEquals("selection incorrect length", expected.length(), actual.length());
-		assertEquals("selection incorrect", expected, actual);		
+		check(cu, newRange);
 	}
 	
 	private void offsetTest(int line, int column, int expected) throws Exception{
@@ -111,41 +126,41 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.Struct
 	// ---- tests --- 
 	
 	public void test0() throws Exception{
-		helper1();
+		helperSelectUp();
 	}
 	
 	public void test1() throws Exception{
-		helper1();
+		helperSelectUp();
 	}
 
 	public void test2() throws Exception{
-		helper1();
+		helperSelectUp();
 	}
 
 	public void test3() throws Exception{
-		helper1();
+		helperSelectUp();
 	}
 
 	public void test4() throws Exception{
-		helper1();
+		helperSelectUp();
 	}
 	
 	public void test5() throws Exception{
-		helper1();
+		helperSelectUp();
 	}
 	
 	public void test6() throws Exception{
-		helper1();
+		helperSelectUp();
 	}
 
 	public void test7() throws Exception{
 		//helper1();
-		helper1(3, 10, 3, 14);
+		helperSelectUp(3, 10, 3, 14);
 	}
 
 	public void test8() throws Exception{
 		//helper1();
-		helper1(3, 16, 3, 18);
+		helperSelectUp(3, 16, 3, 18);
 	}
 
 	public void test9() throws Exception{
@@ -154,23 +169,23 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.Struct
 	}
 	
 	public void test10() throws Exception{
-		helper1(4, 18, 4, 21);
+		helperSelectUp(4, 18, 4, 21);
 	}
 
 	public void test11() throws Exception{
-		helper1(4, 20, 4, 21);
+		helperSelectUp(4, 20, 4, 21);
 	}
 
 	public void test12() throws Exception{
-		helper1(4, 16, 4, 19);
+		helperSelectUp(4, 16, 4, 19);
 	}
 	
 	public void test13() throws Exception{
-		helper1(4, 13, 4, 16);
+		helperSelectUp(4, 13, 4, 16);
 	}
 	
 	public void test14() throws Exception{
-		helper1(4, 16, 4, 21);
+		helperSelectUp(4, 16, 4, 21);
 	}
 	
 	public void test15() throws Exception{
@@ -179,23 +194,33 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.Struct
 	}
 	
 	public void test16() throws Exception{
-		helper1(3, 16, 3, 17);
+		helperSelectUp(3, 16, 3, 17);
 	}
 	
 	public void test17() throws Exception{
-		helper1(3, 5, 7, 6);
+		helperSelectUp(3, 5, 7, 6);
 	}
 	
 	public void test18() throws Exception{
-		helper1(3, 5, 4, 6);
+		helperSelectUp(3, 5, 4, 6);
 	}
 	
 	public void test19() throws Exception{
-		helper1(7, 14, 7, 16);
+		helperSelectUp(7, 14, 7, 16);
 	}
 	
 	public void test20() throws Exception{
-		helper1(4, 18, 4, 19);
+		helperSelectUp(4, 18, 4, 19);
+	}
+	
+	public void test21() throws Exception{
+		//regression test for bug#10182
+		helperSelectNext(3, 21, 3, 28);
+	}
+	
+	public void test22() throws Exception{
+		//regression test for bug#10182
+		helperSelectPrevious(3, 21, 3, 28);
 	}
 	
 	public void testZeroLength0() throws Exception{
