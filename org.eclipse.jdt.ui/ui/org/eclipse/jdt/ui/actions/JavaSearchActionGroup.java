@@ -142,6 +142,15 @@ public class JavaSearchActionGroup extends ActionGroup {
 		
 		if(PreferenceConstants.getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_SEARCH_MENU)) {
 			fReferencesGroup.fillContextMenu(menu);
+			fDeclarationsGroup.fillContextMenu(menu);
+
+			if (fEditor == null) {
+				fImplementorsGroup.fillContextMenu(menu);
+				fReadAccessGroup.fillContextMenu(menu);
+				fWriteAccessGroup.fillContextMenu(menu);
+				addAction(menu, IContextMenuConstants.GROUP_SEARCH, fOccurrencesInFileAction);		
+			}
+
 		} else {
 			IMenuManager target= menu;
 			IMenuManager searchSubMenu= null;
