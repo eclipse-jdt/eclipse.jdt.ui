@@ -14,10 +14,13 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
-import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectNextAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectPreviousAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectionAction;
+import org.eclipse.jdt.internal.corext.*;
+import org.eclipse.jdt.internal.corext.SourceRange;
+
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectEnclosingAction;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectNextAction;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectPreviousAction;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectionAction;
 
 import org.eclipse.jdt.ui.tests.refactoring.ExtractMethodTests;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
@@ -77,7 +80,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class S
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
 		ISourceRange selection= getSelection(cu);
 
-		ISourceRange newRange= new StructureSelectionAction().getNewSelectionRange(selection, cu);
+		ISourceRange newRange= new StructureSelectEnclosingAction().getNewSelectionRange(selection, cu);
 		
 		check(cu, newRange);
 	}
@@ -85,7 +88,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class S
 	private void helperSelectUp(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		ISourceRange newRange= new StructureSelectionAction().getNewSelectionRange(selection, cu);
+		ISourceRange newRange= new StructureSelectEnclosingAction().getNewSelectionRange(selection, cu);
 
 		check(cu, newRange);
 	}	
@@ -112,7 +115,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class S
 			
 		//DebugUtils.dump(name() + ":<" + cu.getSource().substring(selection.getOffset()) + "/>");
 		
-		ISourceRange newRange= new StructureSelectionAction().getNewSelectionRange(selection, cu);
+		ISourceRange newRange= new StructureSelectEnclosingAction().getNewSelectionRange(selection, cu);
 		check(cu, newRange);
 	}
 	
@@ -238,7 +241,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class S
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
 		ISourceRange selection= cu.getSourceRange();
 
-		ISourceRange newRange= new StructureSelectionAction().getNewSelectionRange(selection, cu);
+		ISourceRange newRange= new StructureSelectEnclosingAction().getNewSelectionRange(selection, cu);
 		
 		String expected= getFileContents(getTestFileName(false));
 		String actual= cu.getSource().substring(newRange.getOffset(), newRange.getOffset() + newRange.getLength());

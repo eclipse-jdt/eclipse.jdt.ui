@@ -8,7 +8,7 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-class JavaEditorMessages {
+public class JavaEditorMessages {
 
 	private static final String RESOURCE_BUNDLE= "org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages";//$NON-NLS-1$
 

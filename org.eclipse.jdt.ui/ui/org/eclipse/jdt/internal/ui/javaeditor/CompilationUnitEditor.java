@@ -104,6 +104,12 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.SelectionHistory;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectEnclosingAction;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectHistroyAction;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectNextAction;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectPreviousAction;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.SurroundWithTryCatchAction;
 import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
@@ -261,7 +267,8 @@ public class CompilationUnitEditor extends JavaEditor {
 	private ProblemPainter fProblemPainter;
 	/** The editor's tab converter */
 	private TabConverter fTabConverter;
-	
+	/** History for structure select action */
+	private SelectionHistory fSelectionHistory;
 	
 	/**
 	 * Creates a new compilation unit editor.
@@ -301,6 +308,15 @@ public class CompilationUnitEditor extends JavaEditor {
 		setAction("SurroundWithTryCatch", new SurroundWithTryCatchAction(this)); //$NON-NLS-1$
 		
 		setAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK, getAction("ManageBreakpoints"));		 //$NON-NLS-1$
+		
+		
+		fSelectionHistory= new SelectionHistory(this);
+		setAction(StructureSelectionAction.ENCLOSING, new StructureSelectEnclosingAction(this, fSelectionHistory));
+		setAction(StructureSelectionAction.NEXT, new StructureSelectNextAction(this, fSelectionHistory));
+		setAction(StructureSelectionAction.PREVIOUS, new StructureSelectPreviousAction(this, fSelectionHistory));
+		StructureSelectHistroyAction historyAction= new StructureSelectHistroyAction(this, fSelectionHistory);
+		setAction(StructureSelectionAction.HISTORY, historyAction);
+		fSelectionHistory.setHistoryAction(historyAction);		
 	}
 	
 	/**
@@ -887,6 +903,9 @@ public class CompilationUnitEditor extends JavaEditor {
 			fJavaEditorErrorTickUpdater.setAnnotationModel(null);
 			fJavaEditorErrorTickUpdater= null;
 		}
+		
+		if (fSelectionHistory != null)
+			fSelectionHistory.dispose();
 		
 		stopBracketHighlighting();
 		stopLineHighlighting();

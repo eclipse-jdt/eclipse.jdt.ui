@@ -7,7 +7,7 @@ import java.util.Set;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
-import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
+import org.eclipse.jdt.internal.corext.SourceRange;
 
 public class TempNameUtil {
 

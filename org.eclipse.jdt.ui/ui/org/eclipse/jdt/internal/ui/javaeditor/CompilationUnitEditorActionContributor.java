@@ -9,9 +9,12 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.ResourceBundle;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectNextAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectPreviousAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectionAction;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.SelectionHistory;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectEnclosingAction;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectHistroyAction;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectNextAction;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectPreviousAction;
+import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectionAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jface.action.IAction;
@@ -39,9 +42,14 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	protected GotoErrorAction fPreviousError;
 	protected GotoErrorAction fNextError;
 	
-	private StructureSelectionAction fStructureSelectionAction;
-	private StructureSelectNextAction fStructureSelectNextAction;
-	private StructureSelectPreviousAction fStructureSelectPreviousAction;
+	/** The global actions to be connected with editor actions */
+	private final static String[] ACTIONS= {
+	};
+	
+	private RetargetTextEditorAction fStructureSelectEnclosingAction;
+	private RetargetTextEditorAction fStructureSelectNextAction;
+	private RetargetTextEditorAction fStructureSelectPreviousAction;
+	private RetargetTextEditorAction fStructureSelectHistoryAction;
 	//protected RetargetTextEditorAction fDisplay;
 	//protected RetargetTextEditorAction fInspect;
 	
@@ -50,11 +58,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		super();
 		
 		ResourceBundle bundle= JavaEditorMessages.getResourceBundle();
-		
-		fStructureSelectionAction= new StructureSelectionAction();
-		fStructureSelectNextAction= new StructureSelectNextAction();
-		fStructureSelectPreviousAction= new StructureSelectPreviousAction();
-		
+				
 		fOpenOnSelection= new OpenOnSelectionAction();
 		fOpenOnTypeSelection= new OpenHierarchyOnSelectionAction();
 		fAddImportOnSelection= new RetargetTextEditorAction(bundle, "AddImportOnSelectionAction."); //$NON-NLS-1$
@@ -67,6 +71,11 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fPreviousError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
 		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
 		fNextError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
+		
+		fStructureSelectEnclosingAction= new RetargetTextEditorAction(bundle, "StructureSelectEnclosing.");
+		fStructureSelectNextAction= new RetargetTextEditorAction(bundle, "StructureSelectNext.");
+		fStructureSelectPreviousAction= new RetargetTextEditorAction(bundle, "StructureSelectPrevious.");
+		fStructureSelectHistoryAction= new RetargetTextEditorAction(bundle, "StructureSelectHistory.");
 		
 		//fDisplay= new RetargetTextEditorAction(bundle, "DisplayAction."); //$NON-NLS-1$	
 		//Inspect= new RetargetTextEditorAction(bundle, "InpsectAction."); //$NON-NLS-1$
@@ -99,9 +108,10 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 
 	private void addStructureSelection(IMenuManager editMenu) {
 		MenuManager structureSelection= new MenuManager("Expand &Selection to");
-		structureSelection.add(fStructureSelectionAction);
+		structureSelection.add(fStructureSelectEnclosingAction);
 		structureSelection.add(fStructureSelectNextAction);
 		structureSelection.add(fStructureSelectPreviousAction);
+		structureSelection.add(fStructureSelectHistoryAction);
 		editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, structureSelection);
 	}
 	
@@ -127,10 +137,12 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		if (part instanceof ITextEditor)
 			textEditor= (ITextEditor) part;
 		
-		if (part instanceof AbstractTextEditor){
-			fStructureSelectionAction.setEditor((AbstractTextEditor)textEditor);
-			fStructureSelectNextAction.setEditor((AbstractTextEditor)textEditor);
-			fStructureSelectPreviousAction.setEditor((AbstractTextEditor)textEditor);
+		if (part instanceof CompilationUnitEditor){
+			CompilationUnitEditor editor= (CompilationUnitEditor)part;
+			fStructureSelectEnclosingAction.setAction(editor.getAction(StructureSelectionAction.ENCLOSING));
+			fStructureSelectNextAction.setAction(editor.getAction(StructureSelectionAction.NEXT));
+			fStructureSelectPreviousAction.setAction(editor.getAction(StructureSelectionAction.PREVIOUS));
+			fStructureSelectHistoryAction.setAction(editor.getAction(StructureSelectionAction.HISTORY));
 		}	
 		
 		fOpenOnSelection.setContentEditor(textEditor);
