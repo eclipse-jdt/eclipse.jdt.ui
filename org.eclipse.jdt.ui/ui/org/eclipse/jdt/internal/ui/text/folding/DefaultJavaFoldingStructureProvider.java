@@ -174,7 +174,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	 * @see org.eclipse.jface.text.source.projection.IProjectionListener#projectionEnabled()
 	 */
 	public void projectionEnabled() {
-		if (fEditor instanceof CompilationUnitEditor) {
+		if (fEditor instanceof JavaEditor) {
 			initialize();
 			fElementListener= new ElementChangedListener();
 			JavaCore.addElementChangedListener(fElementListener);
