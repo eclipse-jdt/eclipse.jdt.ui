@@ -45,7 +45,6 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.LocalVariable;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -95,7 +94,7 @@ public class JavaContext extends CompilationUnitContext {
 			String lineContent= document.get(region.getOffset(), region.getLength());
 			ICompilationUnit compilationUnit= getCompilationUnit();
 			IJavaProject project= compilationUnit == null ? null : compilationUnit.getJavaProject();
-			return Strings.computeIndent(lineContent, CodeFormatterUtil.getTabWidth(project));
+			return Strings.computeIndentUnits(lineContent, project);
 		} catch (BadLocationException e) {
 			return 0;
 		}

@@ -32,21 +32,22 @@ import org.eclipse.ui.texteditor.ITextEditorExtension3;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
+
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.Strings;
-import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
@@ -215,13 +216,14 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	 * Removes start and end of a comment and corrects indentation and line
 	 * delimiters.
 	 * 
-	 * @param comment the computed comment 
+	 * @param comment the computed comment
 	 * @param indentation the base indentation
-	 * @param tabWidth the tab width to use
+	 * @param project the java project for the formatter settings, or
+	 *        <code>null</code> for global preferences
 	 * @param lineDelimiter the line delimiter
 	 * @return a trimmed version of <code>comment</code>
 	 */
-	private String prepareTemplateComment(String comment, String indentation, int tabWidth, String lineDelimiter) {
+	private String prepareTemplateComment(String comment, String indentation, IJavaProject project, String lineDelimiter) {
 		//	trim comment start and end if any
 		if (comment.endsWith("*/")) //$NON-NLS-1$
 			comment= comment.substring(0, comment.length() - 2);
@@ -233,7 +235,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 				comment= comment.substring(2); // remove '/*'
 			}
 		}
-		return Strings.changeIndent(comment, 0, tabWidth, indentation, lineDelimiter);
+		return Strings.changeIndent(comment, 0, project, indentation, lineDelimiter);
 	}
 	
 	private String createTypeTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, IType type)
@@ -249,8 +251,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 		String[] typeParamNames= StubUtility.getTypeParameterNames(type.getTypeParameters());
 		String comment= CodeGeneration.getTypeComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), typeParamNames, lineDelimiter);
 		if (comment != null) {
-			int tabWidth= CodeFormatterUtil.getTabWidth(type.getJavaProject());
-			return prepareTemplateComment(comment.trim(), indentation, tabWidth, lineDelimiter);
+			return prepareTemplateComment(comment.trim(), indentation, type.getJavaProject(), lineDelimiter);
 		}
 		return null;
 	}
@@ -275,8 +276,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 			boolean javadocComment= comment.startsWith("/**"); //$NON-NLS-1$
 			boolean isJavaDoc= partition.getLength() >= 3 && document.get(partition.getOffset(), 3).equals("/**"); //$NON-NLS-1$
 			if (javadocComment == isJavaDoc) {
-				int tabWidth= CodeFormatterUtil.getTabWidth(method.getJavaProject());
-				return prepareTemplateComment(comment, indentation, tabWidth, lineDelimiter);
+				return prepareTemplateComment(comment, indentation, method.getJavaProject(), lineDelimiter);
 			}
 		}
 		return null;

@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -124,7 +125,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
@@ -1856,7 +1856,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(rewrite);
 		final IRegion range= new Region(declaration.getStartPosition(), declaration.getLength());
 		final RangeMarker marker= new RangeMarker(range.getOffset(), range.getLength());
-		final TextEdit[] edits= rewrite.rewriteAST(document, fMethod.getJavaProject().getOptions(true)).removeChildren();
+		final IJavaProject project= fMethod.getJavaProject();
+		final TextEdit[] edits= rewrite.rewriteAST(document, project.getOptions(true)).removeChildren();
 		for (int index= 0; index < edits.length; index++)
 			marker.addChild(edits[index]);
 		final MultiTextEdit result= new MultiTextEdit();
@@ -1864,9 +1865,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final TextEditProcessor processor= new TextEditProcessor(document, new MultiTextEdit(0, document.getLength()), TextEdit.UPDATE_REGIONS);
 		processor.getRoot().addChild(result);
 		processor.performEdits();
-		final int width= CodeFormatterUtil.getTabWidth(fMethod.getJavaProject());
 		final IRegion region= document.getLineInformation(document.getLineOfOffset(marker.getOffset()));
-		return Strings.changeIndent(document.get(marker.getOffset(), marker.getLength()), Strings.computeIndent(document.get(region.getOffset(), region.getLength()), width), width, "", StubUtility.getLineDelimiterFor(document)); //$NON-NLS-1$
+		return Strings.changeIndent(document.get(marker.getOffset(), marker.getLength()), Strings.computeIndentUnits(document.get(region.getOffset(), region.getLength()), project), project, "", StubUtility.getLineDelimiterFor(document)); //$NON-NLS-1$
 	}
 
 	/**

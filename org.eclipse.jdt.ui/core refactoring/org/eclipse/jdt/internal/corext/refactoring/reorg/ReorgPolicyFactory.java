@@ -122,7 +122,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResul
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -776,7 +775,8 @@ public class ReorgPolicyFactory {
 		private static String getUnindentedSource(ISourceReference sourceReference) throws JavaModelException {
 			Assert.isTrue(sourceReference instanceof IJavaElement);
 			String[] lines= Strings.convertIntoLines(sourceReference.getSource());
-			Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(((IJavaElement) sourceReference).getJavaProject()), false);
+			final IJavaProject project= ((IJavaElement) sourceReference).getJavaProject();
+			Strings.trimIndentation(lines, project, false);
 			return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed((IJavaElement) sourceReference));
 		}
 

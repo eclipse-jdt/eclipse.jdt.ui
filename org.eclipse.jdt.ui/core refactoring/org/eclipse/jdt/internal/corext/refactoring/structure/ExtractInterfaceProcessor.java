@@ -1001,7 +1001,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	protected final String normalizeText(final String code) throws JavaModelException {
 		Assert.isNotNull(code);
 		final String[] lines= Strings.convertIntoLines(code);
-		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(fSubType.getJavaProject()), false);
+		Strings.trimIndentation(lines, fSubType.getJavaProject(), false);
 		return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(fSubType));
 	}
 

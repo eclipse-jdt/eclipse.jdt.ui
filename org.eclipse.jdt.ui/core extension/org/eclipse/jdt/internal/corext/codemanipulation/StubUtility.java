@@ -67,7 +67,6 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -1256,7 +1255,7 @@ public class StubUtility {
 				while (i > 0 && !Strings.isLineDelimiterChar(buf.getChar(i - 1)) ){
 					i--;
 				}
-				return Strings.computeIndent(buf.getText(i, offset - i), CodeFormatterUtil.getTabWidth(elem.getJavaProject()));
+				return Strings.computeIndentUnits(buf.getText(i, offset - i), elem.getJavaProject());
 			}
 		}
 		return 0;

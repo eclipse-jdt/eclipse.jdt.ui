@@ -32,6 +32,7 @@ public class JavaPreferencesSettings  {
 		res.importThreshold= getImportNumberThreshold(project);
 		res.importIgnoreLowercase= Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE, project)).booleanValue();
 		res.tabWidth= CodeFormatterUtil.getTabWidth(project);
+		res.indentWidth= CodeFormatterUtil.getIndentWidth(project);
 		return res;
 	}
 	

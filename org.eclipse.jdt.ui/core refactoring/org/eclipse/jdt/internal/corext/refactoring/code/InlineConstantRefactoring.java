@@ -37,6 +37,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -92,7 +93,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -453,8 +453,9 @@ public class InlineConstantRefactoring extends Refactoring {
 
 		private String prepareInitializerForLocation(Expression location) throws CoreException {
 			HashSet staticImportsInReference= new HashSet();
+			final IJavaProject project= fCuRewrite.getCu().getJavaProject();
 			if (fIs15)
-				location.accept(new ImportReferencesCollector(fCuRewrite.getCu().getJavaProject(), null, new ArrayList(), staticImportsInReference));
+				location.accept(new ImportReferencesCollector(project, null, new ArrayList(), staticImportsInReference));
 			InitializerTraversal traversal= new InitializerTraversal(fInitializer, fStaticImportsInInitializer, location, staticImportsInReference, fCuRewrite);
 			ASTRewrite initializerRewrite= traversal.getInitializerRewrite();
 			IDocument document= new Document(fInitializerUnit.getBuffer().getContents()); // could reuse document when generating and applying undo edits
@@ -465,10 +466,9 @@ public class InlineConstantRefactoring extends Refactoring {
 			try {
 				marker.apply(document, TextEdit.UPDATE_REGIONS);
 				String rewrittenInitializer= document.get(marker.getOffset(), marker.getLength());
-				int width= CodeFormatterUtil.getTabWidth(fCuRewrite.getCu().getJavaProject());
 				IRegion region= document.getLineInformation(document.getLineOfOffset(marker.getOffset()));
-				int oldIndent= Strings.computeIndent(document.get(region.getOffset(), region.getLength()), width);
-				return Strings.changeIndent(rewrittenInitializer, oldIndent, width, "", StubUtility.getLineDelimiterFor(document)); //$NON-NLS-1$
+				int oldIndent= Strings.computeIndentUnits(document.get(region.getOffset(), region.getLength()), project);
+				return Strings.changeIndent(rewrittenInitializer, oldIndent, project, "", StubUtility.getLineDelimiterFor(document)); //$NON-NLS-1$
 			} catch (MalformedTreeException e) {
 				JavaPlugin.log(e);
 			} catch (BadLocationException e) {

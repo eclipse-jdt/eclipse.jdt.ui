@@ -142,7 +142,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 						IDocument contents= new Document(fCompilationUnit.getBuffer().getContents());
 						IRegion region= contents.getLineInformationOfOffset(getReplacementOffset());
 						ITrackedNodePosition position= rewrite.track(stub);
-						String indent= Strings.getIndentString(contents.get(region.getOffset(), region.getLength()), settings.tabWidth);
+						String indent= Strings.getIndentString(contents.get(region.getOffset(), region.getLength()), settings.tabWidth, settings.indentWidth);
 						try {
 							rewrite.rewriteAST(contents, fJavaProject.getOptions(true)).apply(contents, TextEdit.UPDATE_REGIONS);
 						} catch (MalformedTreeException exception) {
@@ -152,7 +152,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal {
 						} catch (BadLocationException exception) {
 							JavaPlugin.log(exception);
 						}
-						setReplacementString(Strings.changeIndent(Strings.trimIndentation(contents.get(position.getStartPosition(), position.getLength()), settings.tabWidth, false), 0, settings.tabWidth, indent, StubUtility.getLineDelimiterFor(contents)));
+						setReplacementString(Strings.changeIndent(Strings.trimIndentation(contents.get(position.getStartPosition(), position.getLength()), settings.tabWidth, settings.indentWidth, false), 0, settings.tabWidth, settings.indentWidth, indent, StubUtility.getLineDelimiterFor(contents)));
 					}
 				}
 			}

@@ -233,12 +233,12 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 
 		// use the code formatter
 		String lineDelim= StubUtility.getLineDelimiterFor(document);
-		int tabWidth= CodeFormatterUtil.getTabWidth(fCompilationUnit.getJavaProject());
+		final IJavaProject project= fCompilationUnit.getJavaProject();
 		IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
-		int indent= Strings.computeIndent(document.get(region.getOffset(), region.getLength()), tabWidth);
+		int indent= Strings.computeIndentUnits(document.get(region.getOffset(), region.getLength()), project);
 
 		String replacement= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, buf.toString(), 0, null, lineDelim, fDeclaringType.getJavaProject());
-		replacement= Strings.changeIndent(replacement, 0, tabWidth, CodeFormatterUtil.createIndentString(indent, fCompilationUnit.getJavaProject()), lineDelim);
+		replacement= Strings.changeIndent(replacement, 0, project, CodeFormatterUtil.createIndentString(indent, project), lineDelim);
 		setReplacementString(replacement.substring(replacement.indexOf('(') + 1));
 
 		int pos= offset;

@@ -48,12 +48,12 @@ import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -407,7 +407,12 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 		boolean firstCharNotWhitespace= firstLine != null && firstLine.length() > 0 && !Character.isWhitespace(firstLine.charAt(0));
 		if (firstCharNotWhitespace)
 			sourceLines[0]= ""; //$NON-NLS-1$
-		Strings.trimIndentation(sourceLines, CodeFormatterUtil.getTabWidth());
+		IJavaProject project;
+		if (input instanceof IJavaElement)
+			project= ((IJavaElement) input).getJavaProject();
+		else
+			project= null;
+		Strings.trimIndentation(sourceLines, project);
 
 		if (firstCharNotWhitespace)
 			sourceLines[0]= firstLine;

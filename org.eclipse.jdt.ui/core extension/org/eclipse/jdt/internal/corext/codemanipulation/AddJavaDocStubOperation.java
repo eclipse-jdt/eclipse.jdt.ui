@@ -34,6 +34,7 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -41,13 +42,13 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.ui.CodeGeneration;
-
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
+
+import org.eclipse.jdt.ui.CodeGeneration;
+
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
@@ -153,13 +154,13 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 					}
 				}
 				
-				int tabWidth= CodeFormatterUtil.getTabWidth(cu.getJavaProject());
+				final IJavaProject project= cu.getJavaProject();
 				IRegion region= document.getLineInformationOfOffset(memberStartOffset);
 				
 				String line= document.get(region.getOffset(), region.getLength());
-				String indentString= Strings.getIndentString(line, tabWidth);
+				String indentString= Strings.getIndentString(line, project);
 				
-				String indentedComment= Strings.changeIndent(comment, 0, tabWidth, indentString, lineDelim);
+				String indentedComment= Strings.changeIndent(comment, 0, project, indentString, lineDelim);
 
 				edit.addChild(new InsertEdit(memberStartOffset, indentedComment));
 

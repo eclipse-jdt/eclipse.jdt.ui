@@ -110,7 +110,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
@@ -1068,7 +1067,7 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 	private String getAlignedSourceBlock(final ICompilationUnit unit, final String block) {
 		Assert.isNotNull(block);
 		final String[] lines= Strings.convertIntoLines(block);
-		Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(unit.getJavaProject()), false);
+		Strings.trimIndentation(lines, unit.getJavaProject(), false);
 		return Strings.concatenate(lines, getLineSeperator());
 	}
 

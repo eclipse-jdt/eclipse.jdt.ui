@@ -31,7 +31,6 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -71,7 +70,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 				String firstLine= sourceLines[0];
 				if (!Character.isWhitespace(firstLine.charAt(0)))
 					sourceLines[0]= ""; //$NON-NLS-1$
-				Strings.trimIndentation(sourceLines, CodeFormatterUtil.getTabWidth(curr.getJavaProject()));
+				Strings.trimIndentation(sourceLines, curr.getJavaProject());
 
 				if (!Character.isWhitespace(firstLine.charAt(0)))
 					sourceLines[0]= firstLine;

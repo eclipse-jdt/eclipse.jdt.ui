@@ -32,7 +32,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -61,7 +60,7 @@ public class CodeRefactoringUtil {
 			ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(fullPath);
 			try {
 				IRegion region= buffer.getDocument().getLineInformationOfOffset(node.getStartPosition());
-				return Strings.computeIndent(buffer.getDocument().get(region.getOffset(), region.getLength()), CodeFormatterUtil.getTabWidth(unit.getJavaProject()));
+				return Strings.computeIndentUnits(buffer.getDocument().get(region.getOffset(), region.getLength()), unit.getJavaProject());
 			} catch (BadLocationException exception) {
 				JavaPlugin.log(exception);
 			}

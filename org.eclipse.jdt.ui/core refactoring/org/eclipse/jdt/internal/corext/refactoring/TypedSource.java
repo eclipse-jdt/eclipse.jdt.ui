@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 /**
@@ -186,7 +185,7 @@ public class TypedSource {
 			ISourceReference reference= (ISourceReference) elem;
 			String source= reference.getSource();
 			if (source != null)
-				return Strings.trimIndentation(source, CodeFormatterUtil.getTabWidth(cu.getJavaProject()), false);
+				return Strings.trimIndentation(source, cu.getJavaProject(), false);
 		}
 		return ""; //$NON-NLS-1$
 	}

@@ -20,6 +20,7 @@ public class CodeGenerationSettings {
 	public boolean importIgnoreLowercase= true;
 		
 	public int tabWidth;
+	public int indentWidth;
 	
 	public void setSettings(CodeGenerationSettings settings) {
 		settings.createComments= createComments;
@@ -28,6 +29,7 @@ public class CodeGenerationSettings {
 		settings.importThreshold= importThreshold;
 		settings.importIgnoreLowercase= importIgnoreLowercase;
 		settings.tabWidth= tabWidth;
+		settings.indentWidth= indentWidth;
 	}
 	
 

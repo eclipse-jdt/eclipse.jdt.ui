@@ -161,7 +161,7 @@ public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 		// use the code formatter
 		IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
 		int lineStart= region.getOffset();
-		int indent= Strings.computeIndent(document.get(lineStart, getReplacementOffset() - lineStart), settings.tabWidth);
+		int indent= Strings.computeIndentUnits(document.get(lineStart, getReplacementOffset() - lineStart), settings.tabWidth, settings.indentWidth);
 
 		String replacement= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, stub, indent, null, lineDelim, fType.getJavaProject());
 		
