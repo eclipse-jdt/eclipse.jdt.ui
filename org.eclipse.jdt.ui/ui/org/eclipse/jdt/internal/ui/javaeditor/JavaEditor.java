@@ -2414,7 +2414,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 			
 			if (DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE.equals(property)) {
-				sourceViewer.getTextWidget().setTabs(getPreferenceStore().getInt(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE));
+				sourceViewer.getTextWidget().setTabs(getSourceViewerConfiguration().getTabWidth(sourceViewer));
 				return;
 			}
 			

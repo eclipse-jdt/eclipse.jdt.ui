@@ -45,6 +45,8 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorExtension3;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
@@ -135,7 +137,7 @@ public class IndentAction extends TextEditorAction {
 					
 					try {
 						JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
-						JavaIndenter indenter= new JavaIndenter(document, scanner);
+						JavaIndenter indenter= new JavaIndenter(document, scanner, getJavaProject());
 						boolean hasChanged= false;
 						for (int i= 0; i < nLines; i++) {
 							hasChanged |= indentLine(document, firstLine + i, offset, indenter, scanner);
@@ -377,8 +379,8 @@ public class IndentAction extends TextEditorAction {
 	 */
 	private String getTabEquivalent() {
 		String tab;
-		if (JavaCore.SPACE.equals(JavaPlugin.getDefault().getCombinedPreferenceStore().getString(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR))) {
-			int size= JavaPlugin.getDefault().getCombinedPreferenceStore().getInt(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
+		if (JavaCore.SPACE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR))) {
+			int size= getTabSize();
 			StringBuffer buf= new StringBuffer();
 			for (int i= 0; i< size; i++)
 				buf.append(' ');
@@ -396,7 +398,57 @@ public class IndentAction extends TextEditorAction {
 	 * @return the tab size as defined in the current formatter preferences
 	 */
 	private int getTabSize() {
-		return JavaPlugin.getDefault().getCombinedPreferenceStore().getInt(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
+		return getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 4);
+	}
+	
+	/**
+	 * Returns the possibly project-specific core preference defined under <code>key</code>.
+	 * 
+	 * @param key the key of the preference
+	 * @return the value of the preference
+	 * @since 3.1
+	 */
+	private String getCoreFormatterOption(String key) {
+		IJavaProject project= getJavaProject();
+		if (project == null)
+			return JavaCore.getOption(key);
+		return project.getOption(key, true);
+	}
+
+	/**
+	 * Returns the possibly project-specific core preference defined under <code>key</code>, or
+	 * def if the value is not a integer.
+	 * 
+	 * @param key the key of the preference
+	 * @param def the default value
+	 * @return the value of the preference
+	 * @since 3.1
+	 */
+	private int getCoreFormatterOption(String key, int def) {
+		try {
+			return Integer.parseInt(getCoreFormatterOption(key));
+		} catch (NumberFormatException e) {
+			return def;
+		}
+	}
+
+	/**
+	 * Returns the <code>IJavaProject</code> of the current editor input, or
+	 * <code>null</code> if it cannot be found.
+	 * 
+	 * @return the <code>IJavaProject</code> of the current editor input, or
+	 *         <code>null</code> if it cannot be found
+	 * @since 3.1
+	 */
+	private IJavaProject getJavaProject() {
+		ITextEditor editor= getTextEditor();
+		if (editor == null)
+			return null;
+		
+		ICompilationUnit cu= JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editor.getEditorInput());
+		if (cu == null)
+			return null;
+		return cu.getJavaProject();
 	}
 
 	/**

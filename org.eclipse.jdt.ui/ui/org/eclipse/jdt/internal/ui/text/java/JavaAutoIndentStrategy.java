@@ -29,6 +29,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.ITextEditorExtension3;
 
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -81,14 +83,17 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	private boolean fIsSmartMode;
 
 	private String fPartitioning;
+	private final IJavaProject fProject;
 	
 	/**
 	 * Creates a new Java auto indent strategy for the given document partitioning.
 	 * 
 	 * @param partitioning the document partitioning
+	 * @param project the project to get formatting preferences from, or null to use default preferences
 	 */
-	public JavaAutoIndentStrategy(String partitioning) {
+	public JavaAutoIndentStrategy(String partitioning, IJavaProject project) {
 		fPartitioning= partitioning;
+		fProject= project;
  	}
 
 	private int getBracketCount(IDocument d, int startOffset, int endOffset, boolean ignoreCloseBrackets) throws BadLocationException {
@@ -190,7 +195,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			int whiteend= findEndOfWhiteSpace(d, start, c.offset);
 			
 			JavaHeuristicScanner scanner= new JavaHeuristicScanner(d);
-			JavaIndenter indenter= new JavaIndenter(d, scanner);
+			JavaIndenter indenter= new JavaIndenter(d, scanner, fProject);
 
 			// shift only when line does not contain any text up to the closing bracket
 			if (whiteend == c.offset) {
@@ -609,7 +614,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		document.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, partitioner);
 	}
 
-	private static void smartPaste(IDocument document, DocumentCommand command) {
+	private void smartPaste(IDocument document, DocumentCommand command) {
 		int newOffset= command.offset;
 		int newLength= command.length;
 		String newText= command.text;
@@ -754,7 +759,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * @param difference a string buffer - if the return value is positive, it will be cleared and set to the substring of <code>current</code> of that length
 	 * @return the difference in lenght of <code>correct</code> and <code>current</code> 
 	 */
-	private static int subtractIndent(CharSequence correct, CharSequence current, StringBuffer difference) {
+	private int subtractIndent(CharSequence correct, CharSequence current, StringBuffer difference) {
 		int c1= computeVisualLength(correct);
 		int c2= computeVisualLength(current);
 		int diff= c1 - c2;
@@ -805,7 +810,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * @param toDelete the number of space equivalents to delete.
 	 * @throws BadLocationException on concurrent document modification
 	 */
-	private static void cutIndent(Document document, int line, int toDelete) throws BadLocationException {
+	private void cutIndent(Document document, int line, int toDelete) throws BadLocationException {
 		IRegion region= document.getLineInformation(line);
 		int from= region.getOffset();
 		int endOffset= region.getOffset() + region.getLength();
@@ -836,7 +841,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * @param seq the string to measure
 	 * @return the visual length of <code>seq</code>
 	 */
-	private static int computeVisualLength(CharSequence seq) {
+	private int computeVisualLength(CharSequence seq) {
 		int size= 0;
 		int tablen= getVisualTabLengthPreference();
 		
@@ -857,7 +862,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * @param ch the character to measure
 	 * @return the visual length of <code>ch</code>
 	 */
-	private static int computeVisualLength(char ch) {
+	private int computeVisualLength(char ch) {
 		if (ch == '\t')
 			return getVisualTabLengthPreference();
 		else
@@ -869,8 +874,19 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 *  
 	 * @return the number of spaces displayed for a tabulator in the editor
 	 */
-	private static int getVisualTabLengthPreference() {
-		return getPreferenceStore().getInt(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
+	private int getVisualTabLengthPreference() {
+		String val;
+		if (fProject == null)
+			val= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
+		else
+			val= fProject.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, true);
+		
+		try {
+			return Integer.parseInt(val);
+		} catch (NumberFormatException e) {
+			// sensible default
+			return 4;
+		}
 	}
 
 	private static int getPeerPosition(IDocument document, DocumentCommand command) {

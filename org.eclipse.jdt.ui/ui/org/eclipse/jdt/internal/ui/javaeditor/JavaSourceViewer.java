@@ -122,6 +122,8 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 */
 	public IFormattingContext createFormattingContext() {
 
+		// it's ok to use instance preferences here as subclasses replace
+		// with project dependent versions (see CompilationUnitEditor.AdaptedSourceViewer)
 		IFormattingContext context= new CommentFormattingContext();
 		Map map= new Hashtable(JavaCore.getOptions());
 		

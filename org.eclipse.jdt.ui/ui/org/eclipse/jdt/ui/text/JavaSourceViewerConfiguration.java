@@ -12,10 +12,10 @@ package org.eclipse.jdt.ui.text;
 
 import java.util.Vector;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -49,13 +49,16 @@ import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
-
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
@@ -63,8 +66,9 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaElementHyperlinkDetector;
 import org.eclipse.jdt.internal.ui.javaeditor.NLSKeyHyperlinkDetector;
 import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
@@ -443,9 +447,9 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		else if (IJavaPartitions.JAVA_STRING.equals(contentType))
 			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaStringAutoIndentStrategy(partitioning) };
 		else if (IJavaPartitions.JAVA_CHARACTER.equals(contentType) || IDocument.DEFAULT_CONTENT_TYPE.equals(contentType))
-			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaAutoIndentStrategy(partitioning) };
+			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaAutoIndentStrategy(partitioning, getProject()) };
 		else {
-			IAutoEditStrategy[] autoEditStrategies= new IAutoEditStrategy[] { new JavaAutoIndentStrategy(partitioning) };
+			IAutoEditStrategy[] autoEditStrategies= new IAutoEditStrategy[] { new JavaAutoIndentStrategy(partitioning, getProject()) };
 			autoEditStrategies.toString();
 			return autoEditStrategies;
 		}
@@ -485,9 +489,14 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		Vector vector= new Vector();
 
 		// prefix[0] is either '\t' or ' ' x tabWidth, depending on useSpaces
-				
-		int tabWidth= CodeFormatterUtil.getTabWidth();
-		boolean useSpaces= JavaCore.SPACE.equals(fPreferenceStore.getString(org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
+		
+		IJavaProject project= getProject();
+		int tabWidth= CodeFormatterUtil.getTabWidth(project);
+		boolean useSpaces;
+		if (project == null)
+			useSpaces= JavaCore.SPACE.equals(JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
+		else
+			useSpaces= JavaCore.SPACE.equals(project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, true));
 		
 		for (int i= 0; i <= tabWidth; i++) {
 		    StringBuffer prefix= new StringBuffer();
@@ -513,12 +522,34 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		
 		return (String[]) vector.toArray(new String[vector.size()]);
 	}
+	
+	private IJavaProject getProject() {
+		ITextEditor editor= getEditor();
+		if (editor == null)
+			return null;
+		
+		IJavaElement element= null;
+		IEditorInput input= editor.getEditorInput();
+		IDocumentProvider provider= editor.getDocumentProvider();
+		if (provider instanceof ICompilationUnitDocumentProvider) {
+			ICompilationUnitDocumentProvider cudp= (ICompilationUnitDocumentProvider) provider;
+			element= cudp.getWorkingCopy(input);
+		} else if (input instanceof IClassFileEditorInput) {
+			IClassFileEditorInput cfei= (IClassFileEditorInput) input;
+			element= cfei.getClassFile();
+		}
+		
+		if (element == null)
+			return null;
+		
+		return element.getJavaProject();
+	}
 
 	/*
 	 * @see SourceViewerConfiguration#getTabWidth(ISourceViewer)
 	 */
 	public int getTabWidth(ISourceViewer sourceViewer) {
-		return fPreferenceStore.getInt(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
+		return CodeFormatterUtil.getTabWidth(getProject());
 	}
 
 	/*
