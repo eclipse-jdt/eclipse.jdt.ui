@@ -14,6 +14,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CLabel;
@@ -100,7 +106,6 @@ import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
-import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
@@ -123,7 +128,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 /**
- * view showing the supertypes/subtypes of its input.
+ * view showing the super types/sub types of its input.
  */
 public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyViewPart, IViewPartInputProvider {
 
@@ -209,6 +214,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private SelectAllAction fSelectAllAction;
 	
 	private WorkingSetFilterActionGroup fWorkingSetActionGroup;
+	private Job fRestoreStateJob;
 	
 	public TypeHierarchyViewPart() {
 		fSelectedType= null;
@@ -216,6 +222,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fIsVisible= false;
 		fIsRefreshRunnablePosted= false;
 		fSelectInEditor= true;
+		fRestoreStateJob= null;
 		
 		fHierarchyLifeCycle= new TypeHierarchyLifeCycle();
 		fTypeHierarchyLifeCycleListener= new ITypeHierarchyLifeCycleListener() {
@@ -459,6 +466,19 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private void updateInput(IJavaElement inputElement) {
 		IJavaElement prevInput= fInputElement;
 		
+		synchronized (this) {
+			if (fRestoreStateJob != null) {
+				fRestoreStateJob.cancel();
+				try {
+					fRestoreStateJob.join();
+				} catch (InterruptedException e) {
+					// ignore
+				} finally {
+					fRestoreStateJob= null;
+				}
+			}
+		}
+		
 		// Make sure the UI got repainted before we execute a long running
 		// operation. This can be removed if we refresh the hierarchy in a 
 		// separate thread.
@@ -678,7 +698,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}	
 		addDragAdapters(fMethodsViewer, ops, transfers);
 
-		//dnd on empty hierarchy
+		//DND on empty hierarchy
 		DropTarget dropTarget = new DropTarget(fNoHierarchyShownLabel, ops | DND.DROP_DEFAULT);
 		dropTarget.setTransfer(transfers);
 		dropTarget.addDropListener(new TypeHierarchyTransferDropAdapter(this, fAllViewers[0]));
@@ -708,8 +728,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 		fPagebook= new PageBook(container, SWT.NONE);
 		fWorkingSetActionGroup= new WorkingSetFilterActionGroup(JavaUI.ID_TYPE_HIERARCHY, container.getShell(), fPropertyChangeListener);
-						
-		// page 1 of pagebook (viewers)
+
+		// page 1 of page book (no hierarchy label)
+		
+		fNoHierarchyShownLabel= new Label(fPagebook, SWT.TOP + SWT.LEFT + SWT.WRAP);
+		fNoHierarchyShownLabel.setText(TypeHierarchyMessages.getString("TypeHierarchyViewPart.empty")); //$NON-NLS-1$	
+		
+		// page 2 of page book (viewers)
 
 		fTypeMethodsSplitter= new SashForm(fPagebook, SWT.VERTICAL);
 		fTypeMethodsSplitter.setVisible(false);
@@ -730,10 +755,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				
 		ToolBar methodViewerToolBar= new ToolBar(fMethodViewerViewForm, SWT.FLAT | SWT.WRAP);
 		fMethodViewerViewForm.setTopCenter(methodViewerToolBar);
-				
-		// page 2 of pagebook (no hierarchy label)
-		fNoHierarchyShownLabel= new Label(fPagebook, SWT.TOP + SWT.LEFT + SWT.WRAP);
-		fNoHierarchyShownLabel.setText(TypeHierarchyMessages.getString("TypeHierarchyViewPart.empty")); //$NON-NLS-1$	
 
 		initDragAndDrop();
 		
@@ -766,7 +787,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		IActionBars actionBars= getViewSite().getActionBars();
 		IMenuManager viewMenu= actionBars.getMenuManager();
 		for (int i= 0; i < fViewActions.length; i++) {
-			viewMenu.add(fViewActions[i]);
+			ToggleViewAction action= fViewActions[i];
+			viewMenu.add(action);
+			action.setEnabled(false);
 		}
 		viewMenu.add(new Separator());
 		
@@ -784,7 +807,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		viewMenu.add(fToggleLinkingAction);
 		
 	
-		// fill the method viewer toolbar
+		// fill the method viewer tool bar
 		ToolBarManager lowertbmanager= new ToolBarManager(methodViewerToolBar);
 		lowertbmanager.add(fEnableMemberFilterAction);			
 		lowertbmanager.add(new Separator());
@@ -996,6 +1019,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 */
 	private void updateHierarchyViewer(final boolean doExpand) {
 		if (fInputElement == null) {
+			fNoHierarchyShownLabel.setText(TypeHierarchyMessages.getString("TypeHierarchyViewPart.empty")); //$NON-NLS-1$	
 			fPagebook.showPage(fNoHierarchyShownLabel);
 		} else {
 			if (getCurrentViewer().containsElements() != null) {
@@ -1171,7 +1195,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		
 	/**
 	 * Sets the current view (see view id)
-	 * called from ToggleViewAction. Must be called after creation of the viewpart.
+	 * called from ToggleViewAction. Must be called after creation of the view part.
 	 */	
 	public void setView(int viewerIndex) {
 		Assert.isNotNull(fAllViewers);
@@ -1201,7 +1225,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 
 	/**
-	 * Gets the curret active view index.
+	 * Gets the current active view index.
 	 */		
 	public int getViewIndex() {
 		return fCurrentViewerIndex;
@@ -1213,7 +1237,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	/**
 	 * called from EnableMemberFilterAction.
-	 * Must be called after creation of the viewpart.
+	 * Must be called after creation of the view part.
 	 */	
 	public void enableMemberFilter(boolean on) {
 		if (on != fIsEnableMemberFilter) {
@@ -1241,7 +1265,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	/**
 	 * called from ShowQualifiedTypeNamesAction. Must be called after creation
-	 * of the viewpart.
+	 * of the view part.
 	 */	
 	public void showQualifiedTypeNames(boolean on) {
 		if (fAllViewers == null) {
@@ -1343,13 +1367,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 		if (fInputElement != null) {
 			String handleIndentifier=  fInputElement.getHandleIdentifier();
-			if (fInputElement instanceof IType) {
-				ITypeHierarchy hierarchy= fHierarchyLifeCycle.getHierarchy();
-				if (hierarchy != null && hierarchy.getSubtypes((IType) fInputElement).length > 1000) {
-					// for startup performance reasons do not try to recover huge hierarchies
-					handleIndentifier= null;
-				}
-			}
 			memento.putString(TAG_INPUT, handleIndentifier);
 		}		
 		memento.putInteger(TAG_VIEW, getViewIndex());
@@ -1381,22 +1398,62 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	/**
 	 * Restores the type hierarchy settings from a memento.
 	 */
-	private void restoreState(IMemento memento, IJavaElement defaultInput) {
+	private void restoreState(final IMemento memento, IJavaElement defaultInput) {
 		IJavaElement input= defaultInput;
-		
-		fWorkingSetActionGroup.restoreState(memento);
-		
 		String elementId= memento.getString(TAG_INPUT);
 		if (elementId != null) {
 			input= JavaCore.create(elementId);
 			if (input != null && !input.exists()) {
 				input= null;
 			}
-			if (!AllTypesCache.isIndexUpToDate()) {
-				input= null;
-			}
-			
 		}
+		if (input == null) {
+			doRestoreState(memento, input);
+		} else {
+			final IJavaElement hierarchyInput= input;
+			
+			synchronized (this) {
+				String label= TypeHierarchyMessages.getFormattedString("TypeHierarchyViewPart.restoreinput", hierarchyInput.getElementName()); //$NON-NLS-1$
+				fNoHierarchyShownLabel.setText(label); 
+
+				fRestoreStateJob= new Job(label) {
+					protected IStatus run(IProgressMonitor monitor) {
+						try {
+							doRestoreInBackground(memento, hierarchyInput, monitor);
+						} catch (JavaModelException e) {
+							return e.getStatus();
+						} catch (OperationCanceledException e) {
+							return Status.CANCEL_STATUS;
+						}
+						return Status.OK_STATUS;
+					}
+				};
+				fRestoreStateJob.schedule();
+			}
+		}
+	}
+	
+	private void doRestoreInBackground(final IMemento memento, final IJavaElement hierarchyInput, IProgressMonitor monitor) throws JavaModelException {
+		fHierarchyLifeCycle.doHierarchyRefresh(hierarchyInput, monitor);	
+		if (!monitor.isCanceled()) {
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					doRestoreState(memento, hierarchyInput);
+				}
+			});
+		}
+	}
+	
+		
+	private void doRestoreState(IMemento memento, IJavaElement input) {
+		synchronized (this) {
+			if (fRestoreStateJob == null) {
+				return;
+			}
+			fRestoreStateJob= null;
+		}
+		
+		fWorkingSetActionGroup.restoreState(memento);
 		setInputElement(input);
 
 		Integer viewerIndex= memento.getInteger(TAG_VIEW);
@@ -1418,17 +1475,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				bar.setSelection(vScroll.intValue());
 			}
 		}
-		
-
-		
-		//String selectionId= memento.getString(TAG_SELECTION);
-		// do not restore type hierarchy contents
-//		if (selectionId != null) {
-//			IJavaElement elem= JavaCore.create(selectionId);
-//			if (getCurrentViewer().isElementShown(elem) && elem instanceof IMember) {
-//				internalSelectType((IMember)elem, false);
-//			}
-//		}
 		fMethodsViewer.restoreState(memento);
 	}
 	

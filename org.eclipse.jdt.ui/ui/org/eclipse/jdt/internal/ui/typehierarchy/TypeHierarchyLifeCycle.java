@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -81,7 +82,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 			curr.typeHierarchyChanged(this, changedTypes);
 		}
 	}
-		
+			
 	public void ensureRefreshedTypeHierarchy(final IJavaElement element, IRunnableContext context) throws InvocationTargetException, InterruptedException {
 		if (element == null || !element.exists()) {
 			freeHierarchy();
@@ -92,11 +93,13 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		if (hierachyCreationNeeded || fHierarchyRefreshNeeded) {
 			
 			IRunnableWithProgress op= new IRunnableWithProgress() {
-				public void run(IProgressMonitor pm) throws InvocationTargetException {
+				public void run(IProgressMonitor pm) throws InvocationTargetException, InterruptedException {
 					try {
 						doHierarchyRefresh(element, pm);
 					} catch (JavaModelException e) {
 						throw new InvocationTargetException(e);
+					} catch (OperationCanceledException e) {
+						throw new InterruptedException();
 					}
 				}
 			};
@@ -106,46 +109,54 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		}
 	}
 	
-	private void doHierarchyRefresh(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
+	private ITypeHierarchy createTypeHierarchy(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
+		if (element.getElementType() == IJavaElement.TYPE) {
+			IType type= (IType) element;
+			if (fIsSuperTypesOnly) {
+				return type.newSupertypeHierarchy(pm);
+			} else {
+				return type.newTypeHierarchy(pm);
+			}
+		} else {
+			IRegion region= JavaCore.newRegion();
+			if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
+				// for projects only add the contained source folders
+				IPackageFragmentRoot[] roots= ((IJavaProject) element).getPackageFragmentRoots();
+				for (int i= 0; i < roots.length; i++) {
+					if (!roots[i].isExternal()) {
+						region.add(roots[i]);
+					}
+				}
+			} else if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+				IPackageFragmentRoot[] roots= element.getJavaProject().getPackageFragmentRoots();
+				String name= element.getElementName();
+				for (int i= 0; i < roots.length; i++) {
+					IPackageFragment pack= roots[i].getPackageFragment(name);
+					if (pack.exists()) {
+						region.add(pack);
+					}
+				}
+			} else {
+				region.add(element);
+			}
+			IJavaProject jproject= element.getJavaProject();
+			return jproject.newTypeHierarchy(region, pm);
+		}
+	}
+	
+	
+	public synchronized void doHierarchyRefresh(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
 		boolean hierachyCreationNeeded= (fHierarchy == null || !element.equals(fInputElement));
-		// to ensore the order of the two listeners always remove / add listeners on operations
+		// to ensure the order of the two listeners always remove / add listeners on operations
 		// on type hierarchies
 		if (fHierarchy != null) {
 			fHierarchy.removeTypeHierarchyChangedListener(this);
 			JavaCore.removeElementChangedListener(this);
 		}
 		if (hierachyCreationNeeded) {
-			if (element.getElementType() == IJavaElement.TYPE) {
-				IType type= (IType) element;
-				if (fIsSuperTypesOnly) {
-					fHierarchy= type.newSupertypeHierarchy(pm);
-				} else {
-					fHierarchy= type.newTypeHierarchy(pm);
-				}
-			} else {
-				IRegion region= JavaCore.newRegion();
-				if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
-					// for projects only add the contained source folders
-					IPackageFragmentRoot[] roots= ((IJavaProject) element).getPackageFragmentRoots();
-					for (int i= 0; i < roots.length; i++) {
-						if (!roots[i].isExternal()) {
-							region.add(roots[i]);
-						}
-					}
-				} else if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-					IPackageFragmentRoot[] roots= element.getJavaProject().getPackageFragmentRoots();
-					String name= element.getElementName();
-					for (int i= 0; i < roots.length; i++) {
-						IPackageFragment pack= roots[i].getPackageFragment(name);
-						if (pack.exists()) {
-							region.add(pack);
-						}
-					}
-				} else {
-					region.add(element);
-				}
-				IJavaProject jproject= element.getJavaProject();
-				fHierarchy= jproject.newTypeHierarchy(region, pm);				
+			fHierarchy= createTypeHierarchy(element, pm);
+			if (pm != null && pm.isCanceled()) {
+				throw new OperationCanceledException();
 			}
 			fInputElement= element;
 		} else {
@@ -153,6 +164,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		}
 		fHierarchy.addTypeHierarchyChangedListener(this);
 		JavaCore.addElementChangedListener(this);
+		fHierarchyRefreshNeeded= false;
 	}		
 	
 	/*
