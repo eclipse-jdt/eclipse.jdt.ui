@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
@@ -38,6 +39,9 @@ import org.eclipse.jdt.core.ToolFactory;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
@@ -56,6 +60,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
+import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class NLSRefactoring extends Refactoring {
 	
@@ -73,10 +78,13 @@ public class NLSRefactoring extends Refactoring {
 	private NLSSubstitution[] fNlsSubs;
 	private IPath fPropertyFilePath;
 	private String fAddedImport;
+	private final CodeGenerationSettings fCodeGenerationSettings;
 	
-	public NLSRefactoring(ICompilationUnit cu){
+	public NLSRefactoring(ICompilationUnit cu, CodeGenerationSettings codeGenerationSettings){
 		Assert.isNotNull(cu);
+		Assert.isNotNull(codeGenerationSettings);
 		fCu= cu;
+		fCodeGenerationSettings= codeGenerationSettings;
 	}
 			
 	public void setNlsSubstitutions(NLSSubstitution[] subs){
@@ -498,10 +506,13 @@ public class NLSRefactoring extends Refactoring {
 			pm.worked(1);
 			
 			if (willCreateAccessorClass())
-				builder.add(createAccessorCU());
-			pm.worked(1);
+				builder.add(createAccessorCU(new SubProgressMonitor(pm, 1)));
+			else	
+				pm.worked(1);
 			
 			return builder;
+		} catch (JavaModelException e){
+			throw e;	
 		} catch (CoreException e){
 			throw new JavaModelException(e);	
 		} finally {
@@ -720,11 +731,7 @@ public class NLSRefactoring extends Refactoring {
 	} 
 
 	// ------------ accessor class creation
-	
-	private IChange createAccessorCU() throws JavaModelException{
-		return new CreateTextFileChange(getAccessorCUPath(), createAccessorCUSource(), true);	
-	} 
-	
+
 	private IPackageFragment getPackage(){
 		 return (IPackageFragment)fCu.getParent();
 	}
@@ -754,6 +761,10 @@ public class NLSRefactoring extends Refactoring {
 		return fAccessorClassName + ".java"; //$NON-NLS-1$
 	}
 	
+	private IChange createAccessorCU(IProgressMonitor pm) throws CoreException {
+		return new CreateTextFileChange(getAccessorCUPath(), createAccessorCUSource(pm), true);	
+	} 
+		
 	private IPath getAccessorCUPath() throws JavaModelException{
 		IPath cuName= new Path(fCu.getElementName());
 		return ResourceUtil.getResource(fCu).getFullPath()
@@ -762,42 +773,33 @@ public class NLSRefactoring extends Refactoring {
 	}
 	
 	//--bundle class source creation
-	private String createAccessorCUSource() throws JavaModelException{
-		return ToolFactory.createDefaultCodeFormatter(getFormatterOptions()).format(getUnformattedSource(), 0, (int[])null, null);
+	private String createAccessorCUSource(IProgressMonitor pm) throws CoreException {
+		return ToolFactory.createDefaultCodeFormatter(getFormatterOptions()).format(getUnformattedSource(pm), 0, (int[])null, null);
 	}
 
-	private String getUnformattedSource() throws JavaModelException {
-		return new StringBuffer()
-			.append(createPackageDeclaration())
-			.append(fgLineDelimiter)
-			.append(createImports())
-			.append(fgLineDelimiter)
-			.append(createClass())
-			.toString();
+	private String getUnformattedSource(IProgressMonitor pm) throws CoreException {
+		ICompilationUnit newCu= null;
+		try{
+			newCu= WorkingCopyUtil.getNewWorkingCopy(getPackage(), getAccessorCUName());
+			String template= StubUtility.getTypeComment(newCu, fAccessorClassName, "");//$NON-NLS-1$
+			newCu.getBuffer().setContents(StubUtility.getCompilationUnitContent(newCu, template, createClass().toString(), fgLineDelimiter)); //$NON-NLS-1$
+			addImportsToAccessorCu(newCu, pm);
+			return newCu.getSource();
+		} finally{
+			if (newCu != null)
+				newCu.destroy();
+		}
+	}
+
+	private void addImportsToAccessorCu(ICompilationUnit newCu, IProgressMonitor pm) throws CoreException {
+		ImportsStructure is= new ImportsStructure(newCu, fCodeGenerationSettings.importOrder, fCodeGenerationSettings.importThreshold, true);
+		is.addImport("java.util.MissingResourceException"); //$NON-NLS-1$
+		is.addImport("java.util.ResourceBundle"); //$NON-NLS-1$
+		is.create(false, pm);
 	}
 
 	private static Map getFormatterOptions() {
 		return JavaCore.getOptions();
-	}
-	
-	private StringBuffer createPackageDeclaration(){
-		IPackageFragment pack= getPackage();
-		if (pack.isDefaultPackage())
-			return new StringBuffer();
-
-		StringBuffer buff= new StringBuffer();
-		buff.append("package ") //$NON-NLS-1$
-			.append(pack.getElementName())
-			.append(";") //$NON-NLS-1$
-			.append(fgLineDelimiter);
-		return buff;
-	}
-	
-	private StringBuffer createImports(){
-		StringBuffer buff= new StringBuffer();
-		buff.append("import java.util.MissingResourceException;").append(fgLineDelimiter) //$NON-NLS-1$
-			.append("import java.util.ResourceBundle;").append(fgLineDelimiter); //$NON-NLS-1$
-		return buff;
 	}
 	
 	private StringBuffer createClass() throws JavaModelException{
