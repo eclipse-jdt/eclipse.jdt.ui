@@ -24,6 +24,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -118,6 +119,11 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	private void run(IJavaElement element) {
 		if (element == null)
 			return;
+			
+		// reveal the top most element only
+		IOpenable openable= element.getOpenable();
+		if (openable instanceof IJavaElement)
+			element= (IJavaElement)openable;
 
 		PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
 		if (view != null) {
