@@ -120,6 +120,8 @@ public class RemoteTestRunner implements TestListener {
 	 * Thread reading from the socket
 	 */
 	private ReaderThread fReaderThread;
+
+	private String fRerunTest;
 	/**
 	 * Reader thread that processes messages from the client.
 	 */
@@ -240,6 +242,10 @@ public class RemoteTestRunner implements TestListener {
 				fHost= args[i+1];
 				i++;
 			}
+			else if(args[i].toLowerCase().equals("-rerun")) { //$NON-NLS-1$
+				fRerunTest= args[i+1];
+				i++;
+			}
 			else if(args[i].toLowerCase().equals("-keepalive")) { //$NON-NLS-1$
 				fKeepAlive= true;
 			}
@@ -288,7 +294,10 @@ public class RemoteTestRunner implements TestListener {
 	protected void run() {
 		if (!connect())
 			return;
-			
+		if (fRerunTest != null) {
+			rerunTest(Integer.parseInt(fRerunTest), fTestClassNames[0], fTestName);
+			return;
+		}
 		fTestResult= new TestResult();
 		fTestResult.addListener(this);
 		runTests(fTestClassNames, fTestName);
@@ -766,6 +775,23 @@ public class RemoteTestRunner implements TestListener {
 		}
 		if (failure != null) {
 			Throwable t= failure.thrownException();
+			
+			if ("3".equals(fVersion)) {
+			    if (t instanceof ComparisonFailure) {
+			        // transmit the expected and the actual string
+			        String expected = getField(t, "fExpected");
+			        String actual = getField(t, "fActual");
+			        if (expected != null && actual != null) {
+			    	    sendMessage(MessageIds.EXPECTED_START);
+			    	    sendMessage(expected);
+			    	    sendMessage(MessageIds.EXPECTED_END);
+			    	    
+			    	    sendMessage(MessageIds.ACTUAL_START);
+			    	    sendMessage(actual);
+			    	    sendMessage(MessageIds.ACTUAL_END);
+			    	    			    	    			       }
+			    }
+			}
 			String trace= getTrace(t);
 			sendMessage(MessageIds.RTRACE_START);
 			sendMessage(trace);
