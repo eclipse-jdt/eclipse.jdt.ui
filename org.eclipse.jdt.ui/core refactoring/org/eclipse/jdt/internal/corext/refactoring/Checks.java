@@ -34,13 +34,18 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
@@ -652,4 +657,16 @@ public class Checks {
 
 		return IS_RVALUE;		
 	}
+
+    public static boolean isDeclaredInMethod(VariableDeclaration tempDeclaration) {
+        ASTNode methodDeclaration= ASTNodes.getParent(tempDeclaration, MethodDeclaration.class);
+        if (methodDeclaration == null)
+        	return false;
+        ASTNode anonymous= ASTNodes.getParent(tempDeclaration, AnonymousClassDeclaration.class);	
+        if (anonymous == null)
+        	return true;
+        if (ASTNodes.isParent(anonymous, methodDeclaration))
+        	return false;
+        return true;	
+    }
 }
