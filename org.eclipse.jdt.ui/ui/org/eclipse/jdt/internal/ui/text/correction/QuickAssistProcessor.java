@@ -192,7 +192,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 		}
 				
-		LinkedNamesAssistProposal proposal= new LinkedNamesAssistProposal(name);
+		LinkedNamesAssistProposal proposal= new LinkedNamesAssistProposal(context.getCompilationUnit(), name);
 		resultingCollections.add(proposal);
 		return true;
 	}

@@ -22,12 +22,16 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
@@ -39,9 +43,11 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 
 	private SimpleName fNode;
 	private IRegion fSelectedRegion; // initialized by apply()
+	private ICompilationUnit fCompilationUnit;
 			
-	public LinkedNamesAssistProposal(SimpleName node) {
+	public LinkedNamesAssistProposal(ICompilationUnit cu, SimpleName node) {
 		fNode= node;
+		fCompilationUnit= cu;
 	}
 	
 	/* (non-Javadoc)
@@ -49,7 +55,11 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	 */
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 		try {
-			ASTNode[] sameNodes= LinkedNodeFinder.perform(fNode.getRoot(), fNode.resolveBinding());
+			// create full ast
+			CompilationUnit root= AST.parseCompilationUnit(fCompilationUnit, true);
+			SimpleName nameNode= (SimpleName) NodeFinder.perform(root, fNode.getStartPosition(), fNode.getLength());
+
+			ASTNode[] sameNodes= LinkedNodeFinder.perform(root, nameNode.resolveBinding());
 			
 			IDocument document= viewer.getDocument();
 			LinkedPositionManager manager= new LinkedPositionManager(document);

@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionProposal {
@@ -56,28 +57,27 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 	}
 
 
-	private CompilationUnit fRoot;
-	private IBinding fBinding;
+	private SimpleName fName;
 
-	public RemoveDeclarationCorrectionProposal(ICompilationUnit cu, CompilationUnit root, IBinding binding, int relevance) {
+	public RemoveDeclarationCorrectionProposal(ICompilationUnit cu, SimpleName name, int relevance) {
 		super("", cu, null, relevance, JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE)); //$NON-NLS-1$
-		fBinding= binding;
-		fRoot= root;
+		fName= name;
 	}
 
 	public String getDisplayString() {
-		String name= fBinding.getName();
-		switch (fBinding.getKind()) {
+		IBinding binding= fName.resolveBinding();
+		String name= fName.getIdentifier();
+		switch (binding.getKind()) {
 			case IBinding.TYPE:
 				return CorrectionMessages.getFormattedString("RemoveDeclarationCorrectionProposal.removeunusedtype.description", name); //$NON-NLS-1$
 			case IBinding.METHOD:
-				if (((IMethodBinding) fBinding).isConstructor()) {
+				if (((IMethodBinding) binding).isConstructor()) {
 					return CorrectionMessages.getFormattedString("RemoveDeclarationCorrectionProposal.removeunusedconstructor.description", name); //$NON-NLS-1$
 				} else {
 					return CorrectionMessages.getFormattedString("RemoveDeclarationCorrectionProposal.removeunusedmethod.description", name); //$NON-NLS-1$
 				}
 			case IBinding.VARIABLE:
-				if (((IVariableBinding) fBinding).isField()) {
+				if (((IVariableBinding) binding).isField()) {
 					return CorrectionMessages.getFormattedString("RemoveDeclarationCorrectionProposal.removeunusedfield.description", name); //$NON-NLS-1$
 				} else {
 					return CorrectionMessages.getFormattedString("RemoveDeclarationCorrectionProposal.removeunusedvar.description", name); //$NON-NLS-1$
@@ -91,15 +91,20 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
 	protected ASTRewrite getRewrite() throws CoreException {
-		ASTNode declaration= fRoot.findDeclaringNode(fBinding);
+		IBinding binding= fName.resolveBinding();
+		CompilationUnit root= (CompilationUnit) fName.getRoot();
 		ASTRewrite rewrite;
-		if (fBinding.getKind() != IBinding.VARIABLE) {
+		if (binding.getKind() != IBinding.VARIABLE) {
+			ASTNode declaration= root.findDeclaringNode(binding);
 			rewrite= new ASTRewrite(declaration.getParent());
 			rewrite.markAsRemoved(declaration);
-		} else {
-			// variable
-			rewrite= new ASTRewrite(fRoot); 
-			SimpleName[] references= LinkedNodeFinder.perform(fRoot, fBinding);
+		} else { // variable
+			// needs full AST
+			CompilationUnit completeRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
+			SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, fName.getStartPosition(), fName.getLength());
+
+			rewrite= new ASTRewrite(completeRoot); 
+			SimpleName[] references= LinkedNodeFinder.perform(completeRoot, nameNode.resolveBinding());
 			for (int i= 0; i < references.length; i++) {
 				removeVariableReferences(rewrite, references[i]);
 			}

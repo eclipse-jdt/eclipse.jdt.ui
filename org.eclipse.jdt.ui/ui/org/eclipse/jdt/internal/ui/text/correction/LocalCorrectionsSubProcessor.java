@@ -631,7 +631,7 @@ public class LocalCorrectionsSubProcessor {
 		if (name != null) {
 			IBinding binding= name.resolveBinding();
 			if (binding != null) {
-				proposals.add(new RemoveDeclarationCorrectionProposal(context.getCompilationUnit(), context.getASTRoot(), binding, 5));
+				proposals.add(new RemoveDeclarationCorrectionProposal(context.getCompilationUnit(), name, 5));
 			}
 		}
 	}
