@@ -2,18 +2,13 @@ package argument_out;
 
 public class TestLocalReferenceRead {
 	public void main() {
-		int i= 10;
-		int x = i;
-		/*]*/x= x + 10;
-		bar(x);/*[*/
-		System.out.println(i);
+		int foo = 0;
+		int bar = foo;
+		/*]*/bar++;/*[*/
+		System.out.println(foo);
 	}
 	
-	public void foo(int x) {
-		x= x + 10;
-		bar(x);
-	}
-	
-	public void bar(int z) {
+	public void inlineMe(int bar) {
+		bar++;
 	}
 }

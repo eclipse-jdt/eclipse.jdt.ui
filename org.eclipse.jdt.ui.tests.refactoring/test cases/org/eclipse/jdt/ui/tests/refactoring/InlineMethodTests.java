@@ -147,6 +147,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performArgumentTest();
 	}	
 	
+	public void testLocalReferenceRead2() throws Exception {
+		performArgumentTest();
+	}	
+	
 	public void testLocalReferenceWrite() throws Exception {
 		performArgumentTest();
 	}	
