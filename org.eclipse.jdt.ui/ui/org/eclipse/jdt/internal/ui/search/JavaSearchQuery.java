@@ -154,18 +154,7 @@ public class JavaSearchQuery implements ISearchQuery {
 	}
 
 	public String getLabel() {
-		Object[] args= new Object[] { quote(getSearchPattern()), fPatternData.getScopeDescription() };
-		if (fPatternData.getLimitTo() == IJavaSearchConstants.REFERENCES)
-			return SearchMessages.getFormattedString("JavaSearchQuery.searchfor_references", args); //$NON-NLS-1$
-		else if (fPatternData.getLimitTo() == IJavaSearchConstants.DECLARATIONS)
-			return SearchMessages.getFormattedString("JavaSearchQuery.searchfor_declarations", args); //$NON-NLS-1$
-		else if (fPatternData.getLimitTo() == IJavaSearchConstants.READ_ACCESSES)
-			return SearchMessages.getFormattedString("JavaSearchQuery.searchfor_read_access", args); //$NON-NLS-1$
-		else if (fPatternData.getLimitTo() == IJavaSearchConstants.WRITE_ACCESSES)
-			return SearchMessages.getFormattedString("JavaSearchQuery.searchfor_write_access", args); //$NON-NLS-1$
-		else if (fPatternData.getLimitTo() == IJavaSearchConstants.IMPLEMENTORS)
-			return SearchMessages.getFormattedString("JavaSearchQuery.searchfor_implementors", args); //$NON-NLS-1$
-		return SearchMessages.getString("JavaSearchQuery.search_label"); //$NON-NLS-1$
+		return SearchMessages.getString("JavaSearchQuery.label"); //$NON-NLS-1$
 	}
 
 	String getSingularLabel() {
