@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -65,7 +66,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	
 	private IType getDeclaringType(IJavaProject project, String typeName) {
 		try {
-			return project.findType(typeName);
+			return JavaModelUtil.findType(project, typeName);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
