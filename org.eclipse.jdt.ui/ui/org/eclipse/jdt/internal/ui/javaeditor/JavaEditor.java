@@ -156,6 +156,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.ISourceRange;
@@ -1949,7 +1950,14 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				
 			try {
 				
-				ISourceRange range= reference.getSourceRange();
+				ISourceRange range= null;
+				if (reference instanceof ILocalVariable) {
+					IJavaElement je= ((ILocalVariable)reference).getParent();
+					if (je instanceof ISourceReference)
+						range= ((ISourceReference)je).getSourceRange();
+				} else
+					range= reference.getSourceRange();
+				
 				if (range == null)
 					return;
 				
@@ -1969,6 +1977,12 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				
 				if (reference instanceof IMember) {
 					range= ((IMember) reference).getNameRange();
+					if (range != null) {
+						offset= range.getOffset();
+						length= range.getLength();
+					}
+				} else if (reference instanceof ILocalVariable) {
+					range= ((ILocalVariable)reference).getNameRange();
 					if (range != null) {
 						offset= range.getOffset();
 						length= range.getLength();
