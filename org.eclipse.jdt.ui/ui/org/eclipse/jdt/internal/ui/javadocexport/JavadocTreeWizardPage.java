@@ -189,7 +189,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		try {
 			setTreeChecked(fStore.getSelectedElements(), fStore.getJavaProject());
 		} catch(JavaModelException e) {
-			JavaPlugin.logErrorMessage(e.getMessage());
+			JavaPlugin.log(e);
 		}
 		
 		fInputGroup.aboutToOpen();

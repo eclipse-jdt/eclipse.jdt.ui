@@ -67,7 +67,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		try {
 			processDelta(event.getDelta());
 		} catch(JavaModelException e) {
-			JavaPlugin.getDefault().logErrorStatus(JavaUIMessages.getString("JavaElementContentProvider.errorMessage"), e.getStatus()); //$NON-NLS-1$
+			JavaPlugin.log(e);
 		}
 	}
 	

@@ -42,7 +42,7 @@ public class JavaElementInfoPage extends PropertyPage {
 		try {
 			resource= element.getUnderlyingResource(); 
 		} catch (JavaModelException e) {
-			JavaPlugin.getDefault().logErrorStatus("Creating ElementInfoPage", e.getStatus()); //$NON-NLS-1$
+			JavaPlugin.log(e);
 		}
 		
 		Composite composite= new Composite(parent, SWT.NONE);

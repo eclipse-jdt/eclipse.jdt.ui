@@ -38,7 +38,7 @@ public class JavaWorkbenchAdapter implements IWorkbenchAdapter {
 			try {
 				return ((IParent)element).getChildren();
 			} catch(JavaModelException e) {
-				JavaPlugin.logErrorMessage(getClass().getName() + ": Error getting children for: " + element); //$NON-NLS-1$
+				JavaPlugin.log(e); 
 			}
 		}
 		return NO_CHILDREN;
