@@ -70,7 +70,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		private Font fBold;
 
 		public TodoTaskLabelProvider() {
-			fBold= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
+			fBold= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry().getBold(JFaceResources.DIALOG_FONT);
 		}
 		
 		/* (non-Javadoc)
