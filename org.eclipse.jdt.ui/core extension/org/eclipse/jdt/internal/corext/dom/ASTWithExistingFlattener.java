@@ -48,6 +48,9 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 			case ASTRewrite.SINGLEVAR_DECLARATION:
 				placeHolder= ast.newSingleVariableDeclaration();
 				break;
+			case ASTRewrite.VAR_DECLARATION_FRAGMENT:
+				placeHolder= ast.newVariableDeclarationFragment();
+				break;
 			case ASTRewrite.JAVADOC:
 				placeHolder= ast.newJavadoc();
 				break;				
