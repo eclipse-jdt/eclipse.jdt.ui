@@ -33,6 +33,20 @@ public final class UseSuperTypeRefactoring extends ProcessorBasedRefactoring {
 	 * @return the created refactoring
 	 * @throws JavaModelException if the the refactoring could not be tested for availability
 	 */
+	public static UseSuperTypeRefactoring create(final IType subType) throws JavaModelException {
+		Assert.isNotNull(subType);
+		Assert.isTrue(subType.exists() && !subType.isAnonymous() && !subType.isAnnotation());
+		return new UseSuperTypeRefactoring(new UseSuperTypeProcessor(subType));
+	}
+
+	/**
+	 * Creates a new use super type refactoring.
+	 * 
+	 * @param subType the type to replace its occurrences
+	 * @param superType the type as replacement
+	 * @return the created refactoring
+	 * @throws JavaModelException if the the refactoring could not be tested for availability
+	 */
 	public static UseSuperTypeRefactoring create(final IType subType, final IType superType) throws JavaModelException {
 		Assert.isNotNull(subType);
 		Assert.isNotNull(superType);
