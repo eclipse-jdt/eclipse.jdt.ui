@@ -20,7 +20,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.OpenStrategy;
@@ -41,7 +40,6 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.MoveResourceAction;
-import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.actions.OpenInNewWindowAction;
 import org.eclipse.ui.actions.RenameResourceAction;
 import org.eclipse.ui.views.framelist.BackAction;
@@ -58,7 +56,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
@@ -74,7 +71,6 @@ import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
-
 import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
