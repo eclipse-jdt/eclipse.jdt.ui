@@ -209,13 +209,6 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 */
 	private static final boolean DEBUG= false;
 
-	/**
-	 * Enumeration: the types considered when determining possible replacement types. 
-	 */
-	private short fTypesToConsider= SUPERTYPES_ONLY;
-
-	public static final short SUPERTYPES_ONLY= 1;
-	public static final short SUPERTYPES_AND_SUBTYPES= 2;
 	private ConstraintVariable fCv;
 	private IBinding fSelectionBinding;
 	private ITypeBinding fSelectionTypeBinding;
@@ -960,11 +953,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		IJavaProject project= fCu.getJavaProject();
 
 		Collection/*<IType>*/ allTypes = new HashSet/*<IType>*/();
-		if (fTypesToConsider == SUPERTYPES_ONLY){ 
-			allTypes.addAll(Arrays.asList(fTypeHierarchy.getAllSupertypes(originalType))); 
-		} else {
-			allTypes.addAll(Arrays.asList(fTypeHierarchy.getAllTypes()));
-		}
+		allTypes.addAll(Arrays.asList(fTypeHierarchy.getAllSupertypes(originalType))); 
 		
 		// Object is not considered a supertype of any interface type
 		// (see ITypeHierarchy.getAllSuperTypes())
@@ -993,34 +982,10 @@ public class ChangeTypeRefactoring extends Refactoring {
 	}
 	
 	/**
-	 * Finds a type hierarchy that contains all possible replacement types. For most types, this
-	 * simply gets the TypeHierarchy. However, for class Object we attempt to find a tighter
-	 * bound by examining the constraints because the TypeHierarchy for Object contains 10000+
-	 * types, which makes performance unacceptably slow.
+	 * Finds a supertype hierarchy that contains all possible replacement types. 
 	 */
 	private ITypeHierarchy getTypeHierarchy(IType originalType, IProgressMonitor pm, IJavaProject project) throws JavaModelException {
-		if (fRelevantConstraints == null ||
-			!originalType.getFullyQualifiedName().equals("java.lang.Object")) //$NON-NLS-1$
-			return originalType.newTypeHierarchy(project, pm);
-		for (Iterator it= fRelevantConstraints.iterator(); it.hasNext(); ){
-			ITypeConstraint tc= (ITypeConstraint)it.next();
-			if (tc instanceof SimpleTypeConstraint){
-				SimpleTypeConstraint stc= (SimpleTypeConstraint)tc;
-				ConstraintVariable left= stc.getLeft();
-				ConstraintVariable right= stc.getRight();
-				if (left.equals(fCv) && stc.isSubtypeConstraint()){
-					String typeName= right.getBinding().getQualifiedName();
-					IType type= JavaModelUtil.findType(project, typeName);
-					return type.newTypeHierarchy(project, pm);
-				}
-				if (right.equals(fCv) && stc.isSubtypeConstraint()){
-					String typeName= left.getBinding().getQualifiedName();
-					IType type= JavaModelUtil.findType(project, typeName);
-					return type.newTypeHierarchy(project, pm);
-				}
-			}
-		}
-		return originalType.newTypeHierarchy(project, pm);
+		return originalType.newSupertypeHierarchy(pm);
 	}
 
 	/**
@@ -1052,11 +1017,6 @@ public class ChangeTypeRefactoring extends Refactoring {
 											SimpleTypeConstraint stc) throws JavaModelException{
 		if (relevantVars.contains(stc.getLeft())) { // upper bound
 			if (!isSubTypeOf(type, findType(project, stc.getRight()))) {
-				return false;
-			}
-		}
-		if (relevantVars.contains(stc.getRight())) { // lower bound
-			if (!isSubTypeOf(findType(project, stc.getLeft()), type)) {
 				return false;
 			}
 		}
