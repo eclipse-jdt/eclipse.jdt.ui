@@ -526,11 +526,11 @@ public class PasteAction extends SelectionDispatchAction{
 			public RefactoringStatus setDestination(IJavaElement destination) {
 				fDestination= destination;
 				if (ReorgUtils.getCompilationUnit(destination) == null)
-					return RefactoringStatus.createFatalErrorStatus("A Java file of an element inside a Java file should be selected");
+					return RefactoringStatus.createFatalErrorStatus(ReorgMessages.getString("PasteAction.wrong_destination")); //$NON-NLS-1$
 				if (! destination.exists())
-					return RefactoringStatus.createFatalErrorStatus("The selected element does not exist in the workspace");
+					return RefactoringStatus.createFatalErrorStatus(ReorgMessages.getString("PasteAction.element_doesnot_exist")); //$NON-NLS-1$
 				if (! canPasteAll(destination))
-					return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this paste operation.");
+					return RefactoringStatus.createFatalErrorStatus(ReorgMessages.getString("PasteAction.invalid_destination")); //$NON-NLS-1$
 				return new RefactoringStatus();
 			}
 			private boolean canPasteAll(IJavaElement destination) {
@@ -587,10 +587,10 @@ public class PasteAction extends SelectionDispatchAction{
 				TextBuffer textBuffer= TextBuffer.create(getDestinationCu().getBuffer().getContents());
 				TextEdit rootEdit= new MultiTextEdit();
 				rewrite.rewriteNode(textBuffer, rootEdit);
-				final CompilationUnitChange result= new CompilationUnitChange("name", getDestinationCu());
+				final CompilationUnitChange result= new CompilationUnitChange(ReorgMessages.getString("PasteAction.change.name"), getDestinationCu()); //$NON-NLS-1$
 				if (getDestinationCu().isWorkingCopy()) 
 					result.setSaveMode(TextFileChange.LEAVE_DIRTY);
-				TextChangeCompatibility.addTextEdit(result, "paste elements", rootEdit);
+				TextChangeCompatibility.addTextEdit(result, ReorgMessages.getString("PasteAction.edit.name"), rootEdit); //$NON-NLS-1$
 				return result;
 			}
 			
@@ -693,7 +693,7 @@ public class PasteAction extends SelectionDispatchAction{
 			}
 
 			public String getName() {
-				return "Paste";
+				return ReorgMessages.getString("PasteAction.name"); //$NON-NLS-1$
 			}
 		}
     }

@@ -74,12 +74,12 @@ public class ExceptionInfo {
 	public String toString() {
 		StringBuffer result= new StringBuffer();
 		switch (fKind) {
-			case OLD : result.append("OLD: "); break;
-			case ADDED : result.append("ADDED: "); break;
-			case DELETED : result.append("DELETED: "); break;
+			case OLD : result.append("OLD: "); break; //$NON-NLS-1$
+			case ADDED : result.append("ADDED: "); break; //$NON-NLS-1$
+			case DELETED : result.append("DELETED: "); break; //$NON-NLS-1$
 		}
 		if (fType == null)
-			result.append("null");
+			result.append("null"); //$NON-NLS-1$
 		else
 			result.append(fType.toString());
 		return result.toString();
