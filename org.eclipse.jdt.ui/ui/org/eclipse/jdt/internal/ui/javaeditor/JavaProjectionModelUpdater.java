@@ -401,7 +401,7 @@ public class JavaProjectionModelUpdater implements IProjectionListener {
 						JavaProjectionAnnotation a= (JavaProjectionAnnotation) x.next();
 						if (annotation.isComment() == a.isComment()) {
 							Position p= model.getPosition(a);
-							if (!position.equals(p)) {
+							if (p != null && !position.equals(p)) {
 								p.setOffset(position.getOffset());
 								p.setLength(position.getLength());
 								updates.add(a);
@@ -449,12 +449,17 @@ public class JavaProjectionModelUpdater implements IProjectionListener {
 		outer: while (deletionIterator.hasNext()) {
 			JavaProjectionAnnotation deleted= (JavaProjectionAnnotation) deletionIterator.next();
 			Position deletedPosition= model.getPosition(deleted);
+			if (deletedPosition == null)
+				continue;
 			
 			Iterator changesIterator= changes.iterator();
 			while (changesIterator.hasNext()) {
 				JavaProjectionAnnotation changed= (JavaProjectionAnnotation) changesIterator.next();
 				if (deleted.isComment() == changed.isComment()) {
 					Position changedPosition= model.getPosition(changed);
+					if (changedPosition == null)
+						continue;
+					
 					if (deletedPosition.getOffset() == changedPosition.getOffset()) {
 						
 						deletedPosition.setLength(changedPosition.getLength());
