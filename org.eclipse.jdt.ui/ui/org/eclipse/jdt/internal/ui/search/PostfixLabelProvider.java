@@ -22,8 +22,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.ui.search.*;
-
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 
 public class PostfixLabelProvider extends LabelProvider {
