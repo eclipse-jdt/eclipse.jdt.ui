@@ -41,11 +41,11 @@ public class RefactoringStarter {
 	private RefactoringSaveHelper fSaveHelper= new RefactoringSaveHelper();
 	
 	public Object activate(Refactoring refactoring, RefactoringWizard wizard, Shell parent, String dialogTitle, boolean mustSaveEditors) throws JavaModelException {
-		if (! canActivate(mustSaveEditors))
+		if (! canActivate(mustSaveEditors, parent))
 			return null;
 		RefactoringStatus activationStatus= checkActivation(refactoring);
 		if (activationStatus.hasFatalError()){
-			return RefactoringErrorDialogUtil.open(dialogTitle, activationStatus);
+			return RefactoringErrorDialogUtil.open(dialogTitle, activationStatus, parent);
 		} else {
 			wizard.setActivationStatus(activationStatus);
 			Dialog dialog;
@@ -74,7 +74,7 @@ public class RefactoringStarter {
 		}
 	}
 	
-	private boolean canActivate(boolean mustSaveEditors) {
-		return ! mustSaveEditors || fSaveHelper.saveEditors();
+	private boolean canActivate(boolean mustSaveEditors, Shell shell) {
+		return ! mustSaveEditors || fSaveHelper.saveEditors(shell);
 	}
 }

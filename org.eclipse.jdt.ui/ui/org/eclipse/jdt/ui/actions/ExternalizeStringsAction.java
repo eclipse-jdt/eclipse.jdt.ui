@@ -10,10 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -21,10 +18,12 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -33,6 +32,8 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 
 /**
  * Externalizes the strings of a compilation unit. Opens a wizard that
@@ -116,7 +117,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), unit))
 			return;
 		try {
-			openExternalizeStringsWizard(unit);
+			openExternalizeStringsWizard(getShell(), unit);
 		} catch(JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("ExternalizeStringsAction.dialog.message")); //$NON-NLS-1$
 		}
@@ -137,7 +138,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		return NLSRefactoring.create(cu, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 	
-	static void openExternalizeStringsWizard(ICompilationUnit unit) throws JavaModelException {
+	static void openExternalizeStringsWizard(Shell parentShell, ICompilationUnit unit) throws JavaModelException {
 		if (! NLSRefactoring.isAvailable(unit))
 			return;
 		
@@ -145,7 +146,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		if (refactoring == null)
 			return;
 		ExternalizeWizard wizard= new ExternalizeWizard(refactoring);
-		new RefactoringStarter().activate(refactoring, wizard, JavaPlugin.getActiveWorkbenchShell(), getDialogTitle(), true); 
+		new RefactoringStarter().activate(refactoring, wizard, parentShell, getDialogTitle(), true); 
 	}	
 	
 	private static String getDialogTitle() {

@@ -76,7 +76,7 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 	}
 
 	private MoveProjectAction createWorkbenchAction(IStructuredSelection selection) {
-		MoveProjectAction action= new MoveProjectAction(JavaPlugin.getActiveWorkbenchShell());
+		MoveProjectAction action= new MoveProjectAction(getShell());
 		action.selectionChanged(selection);
 		return action;
 	}

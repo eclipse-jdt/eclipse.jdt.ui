@@ -185,6 +185,6 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 		if (isEnabled())
 			run(mockSelection);
 		else
-			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), ActionMessages.getString("ModifyParameterAction.problem.title"), ActionMessages.getString("ModifyParameterAction.problem.message"));	 //$NON-NLS-1$ //$NON-NLS-2$
+			MessageDialog.openInformation(getShell(), ActionMessages.getString("ModifyParameterAction.problem.title"), ActionMessages.getString("ModifyParameterAction.problem.message"));	 //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

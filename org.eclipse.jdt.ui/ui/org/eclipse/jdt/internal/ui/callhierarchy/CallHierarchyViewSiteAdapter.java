@@ -24,8 +24,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 /**
  * This class adapts a Call Hierarchy view site.
  * It converts selection of Call Hierarchy view entries to
@@ -51,7 +49,7 @@ class CallHierarchyViewSiteAdapter implements IViewSite {
     }
 
     public Shell getShell() {
-        return JavaPlugin.getActiveWorkbenchShell();
+        return fSite.getShell();
     }
 
     public IWorkbenchWindow getWorkbenchWindow() {

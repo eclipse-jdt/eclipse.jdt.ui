@@ -189,6 +189,6 @@ public class PullUpAction extends SelectionDispatchAction{
 		if (isEnabled())
 			run(mockSelection);
 		else
-			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), ActionMessages.getString("PullUpAction.problem.title"), ActionMessages.getString("PullUpAction.problem.message"));	 //$NON-NLS-1$ //$NON-NLS-2$
+			MessageDialog.openInformation(getShell(), ActionMessages.getString("PullUpAction.problem.title"), ActionMessages.getString("PullUpAction.problem.message"));	 //$NON-NLS-1$ //$NON-NLS-2$
 	}	
 }

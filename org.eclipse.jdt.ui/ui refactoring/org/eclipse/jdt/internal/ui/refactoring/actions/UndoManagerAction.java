@@ -118,7 +118,7 @@ abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 	 * Method declared in IActionDelegate
 	 */
 	public void run(IAction action) {
-		Shell parent= JavaPlugin.getActiveWorkbenchShell();
+		Shell parent= fWorkbenchWindow.getShell();
 		ChangeContext context= new ChangeContext(new AbortChangeExceptionHandler(), getUnsavedFiles());
 		IRunnableWithProgress op= createOperation(context);
 		try {

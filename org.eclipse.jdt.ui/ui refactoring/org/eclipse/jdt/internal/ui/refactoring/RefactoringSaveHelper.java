@@ -47,13 +47,12 @@ public class RefactoringSaveHelper {
 		super();
 	}
 
-	public boolean saveEditors() {
+	public boolean saveEditors(Shell shell) {
 		IEditorPart[] dirtyEditors= JavaPlugin.getDirtyEditors();
 		if (dirtyEditors.length == 0)
 			return true;
-		if (! saveAllDirtyEditors())
+		if (! saveAllDirtyEditors(shell))
 			return false;
-		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		try {
 			// Save isn't cancelable.
 			IWorkspace workspace= ResourcesPlugin.getWorkspace();
@@ -82,10 +81,10 @@ public class RefactoringSaveHelper {
 		}
 	}
 	
-	private boolean saveAllDirtyEditors() {
+	private boolean saveAllDirtyEditors(Shell shell) {
 		if (RefactoringPreferences.getSaveAllEditors()) //must save everything
 			return true;
-		ListDialog dialog= new ListDialog(JavaPlugin.getActiveWorkbenchShell()) {
+		ListDialog dialog= new ListDialog(shell) {
 			protected Control createDialogArea(Composite parent) {
 				Composite result= (Composite) super.createDialogArea(parent);
 				final Button check= new Button(result, SWT.CHECK);

@@ -76,7 +76,7 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 	}
 
 	private CopyProjectAction createWorkbenchAction(IStructuredSelection selection) {
-		CopyProjectAction action= new CopyProjectAction(JavaPlugin.getActiveWorkbenchShell());
+		CopyProjectAction action= new CopyProjectAction(getShell());
 		action.selectionChanged(selection);
 		return action;
 	}

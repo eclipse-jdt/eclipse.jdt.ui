@@ -185,7 +185,7 @@ public class CutSourceReferencesToClipboardAction extends SourceReferenceAction 
 					if (areAllFilesReadOnly(mapping)){
 						String title= ReorgMessages.getString("DeleteSourceReferencesAction.title"); //$NON-NLS-1$
 						String label= ReorgMessages.getString("DeleteSourceReferencesAction.read_only");  //$NON-NLS-1$
-						MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), title, label);
+						MessageDialog.openInformation(getShell(), title, label);
 						return;
 					}	
 				
@@ -311,9 +311,9 @@ public class CutSourceReferencesToClipboardAction extends SourceReferenceAction 
 		}
 
 
-		private static boolean isOkToDeleteReadOnly(ICompilationUnit cu){
+		private boolean isOkToDeleteReadOnly(ICompilationUnit cu){
 			String message= ReorgMessages.getFormattedString("DeleteSourceReferencesAction.cu_read_only", getName(cu));//$NON-NLS-1$
-			return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), ReorgMessages.getString("DeleteSourceReferencesAction.delete1"), message); //$NON-NLS-1$
+			return MessageDialog.openQuestion(getShell(), ReorgMessages.getString("DeleteSourceReferencesAction.delete1"), message); //$NON-NLS-1$
 		}
 	
 		/*
@@ -384,7 +384,7 @@ public class CutSourceReferencesToClipboardAction extends SourceReferenceAction 
 			return (IField[]) fields.toArray(new IField[fields.size()]);
 		}
 	
-		private static IMethod[] getGettersSettersForFields(IField[] fields) {
+		private IMethod[] getGettersSettersForFields(IField[] fields) {
 			try {
 				List gettersSetters= new ArrayList();
 				for (int i= 0; i < fields.length; i++) {
@@ -397,11 +397,11 @@ public class CutSourceReferencesToClipboardAction extends SourceReferenceAction 
 				}
 				return  (IMethod[]) gettersSetters.toArray(new IMethod[gettersSetters.size()]);
 			} catch(JavaModelException e) {
-				ExceptionHandler.handle(e, JavaPlugin.getActiveWorkbenchShell(), ReorgMessages.getString("DeleteSourceReferencesAction.delete_elements"), ReorgMessages.getString("DeleteSourceReferencesAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+				ExceptionHandler.handle(e, getShell(), ReorgMessages.getString("DeleteSourceReferencesAction.delete_elements"), ReorgMessages.getString("DeleteSourceReferencesAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 				return new IMethod[0];
 			}
 		}
-		private static boolean confirmDelete(IStructuredSelection selection) {
+		private boolean confirmDelete(IStructuredSelection selection) {
 			String title= ReorgMessages.getString("deleteAction.confirm.title"); //$NON-NLS-1$
 			String label;
 			if (selection.size() == 1){
@@ -411,7 +411,7 @@ public class CutSourceReferencesToClipboardAction extends SourceReferenceAction 
 				String[] keys= {String.valueOf(selection.size())};
 				label= ReorgMessages.getFormattedString("DeleteSourceReferencesAction.sure_elements", keys); //$NON-NLS-1$
 			}
-			return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), title, label);
+			return MessageDialog.openQuestion(getShell(), title, label);
 		}
 
 		private static String getName(Object element) {
@@ -434,14 +434,14 @@ public class CutSourceReferencesToClipboardAction extends SourceReferenceAction 
 			} else {
 				message= ReorgMessages.getFormattedString("DeleteSourceReferencesAction.cus_empty", String.valueOf(cusToDelete.length));//$NON-NLS-1$
 			}	
-			return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), ReorgMessages.getString("DeleteSourceReferencesAction.delete1"), message); //$NON-NLS-1$
+			return MessageDialog.openQuestion(getShell(), ReorgMessages.getString("DeleteSourceReferencesAction.delete1"), message); //$NON-NLS-1$
 		}
 	
 		//made protected for ui-less testing
 		protected boolean confirmGetterSetterDelete() {
 			String title= ReorgMessages.getString("DeleteSourceReferencesAction.confirm_gs_delete"); //$NON-NLS-1$
 			String label= ReorgMessages.getString("DeleteSourceReferencesAction.delete_gs"); //$NON-NLS-1$
-			Shell parent= JavaPlugin.getActiveWorkbenchShell();
+			Shell parent= getShell();
 			return MessageDialog.openQuestion(parent, title, label);
 		}
 	
@@ -563,7 +563,7 @@ abstract class SourceReferenceAction extends SelectionDispatchAction {
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
 	public final void run(final IStructuredSelection selection) {
-		BusyIndicator.showWhile(JavaPlugin.getActiveWorkbenchShell().getDisplay(), new Runnable() {
+		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
 			public void run() {
 				try {
 					perform(selection);

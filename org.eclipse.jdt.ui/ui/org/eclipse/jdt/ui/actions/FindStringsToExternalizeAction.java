@@ -403,7 +403,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 
 		private void openWizard(ICompilationUnit unit) {
 			try {
-				ExternalizeStringsAction.openExternalizeStringsWizard(unit);
+				ExternalizeStringsAction.openExternalizeStringsWizard(getShell(), unit);
 			} catch (JavaModelException e) {
 				ExceptionHandler.handle(e, 
 					ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"), //$NON-NLS-1$

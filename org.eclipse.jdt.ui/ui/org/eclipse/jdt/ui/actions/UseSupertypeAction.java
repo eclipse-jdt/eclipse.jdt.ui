@@ -173,6 +173,6 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 		if (isEnabled())
 			run(mockSelection);
 		else
-			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("UseSupertypeAction.Refactoring"), RefactoringMessages.getString("UseSupertypeAction.not_possible")); //$NON-NLS-1$ //$NON-NLS-2$
+			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("UseSupertypeAction.Refactoring"), RefactoringMessages.getString("UseSupertypeAction.not_possible")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

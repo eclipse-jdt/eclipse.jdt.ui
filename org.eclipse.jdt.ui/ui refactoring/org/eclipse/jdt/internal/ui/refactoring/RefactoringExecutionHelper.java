@@ -117,7 +117,7 @@ public class RefactoringExecutionHelper {
 	
 	public void perform() throws InterruptedException, InvocationTargetException {
 		RefactoringSaveHelper saveHelper= new RefactoringSaveHelper();
-		if (fNeedsSavedEditors && !saveHelper.saveEditors())
+		if (fNeedsSavedEditors && !saveHelper.saveEditors(fParent))
 			throw new InterruptedException();
 		fContext= new ChangeContext(new ChangeExceptionHandler(fParent));
 		boolean success= false;

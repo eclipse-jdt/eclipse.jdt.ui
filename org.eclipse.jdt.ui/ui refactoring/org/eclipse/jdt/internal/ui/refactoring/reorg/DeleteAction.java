@@ -90,8 +90,8 @@ public class DeleteAction extends SelectionDispatchAction{
 		return ReorgUtils.containsOnlyProjects(selection.toList());
 	}
 
-	private static IAction createWorkbenchAction(IStructuredSelection selection) {
-		DeleteResourceAction action= new DeleteResourceAction(JavaPlugin.getActiveWorkbenchShell());
+	private IAction createWorkbenchAction(IStructuredSelection selection) {
+		DeleteResourceAction action= new DeleteResourceAction(getShell());
 		action.selectionChanged(selection);
 		return action;
 	}

@@ -188,6 +188,6 @@ public class PushDownAction extends SelectionDispatchAction{
 		if (isEnabled())
 			run(mockSelection);
 		else
-			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("PushDownAction.Refactoring"), RefactoringMessages.getString("PushDownAction.not_possible")); //$NON-NLS-1$ //$NON-NLS-2$
+			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("PushDownAction.Refactoring"), RefactoringMessages.getString("PushDownAction.not_possible")); //$NON-NLS-1$ //$NON-NLS-2$
 	}	
 }
