@@ -189,7 +189,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 				}
 			};
 			WorkbenchRunnableAdapter op= new WorkbenchRunnableAdapter(runnable);
-			op.runAsUserJob("Setting build path", null); 
+			op.runAsUserJob(PreferencesMessages.getString("BuildPathsPropertyPage.job.title"), null);  //$NON-NLS-1$
 //			try {
 //				Shell shell= getControl().getShell();
 //				new ProgressMonitorDialog(shell).run(true, true, op);

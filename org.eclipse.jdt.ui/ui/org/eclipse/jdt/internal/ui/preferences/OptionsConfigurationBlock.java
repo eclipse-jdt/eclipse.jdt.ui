@@ -429,7 +429,7 @@ public abstract class OptionsConfigurationBlock {
 		
 	protected boolean doFullBuild() {
 		
-		Job buildJob = new Job("Rebuilding"){ 
+		Job buildJob = new Job(PreferencesMessages.getString("OptionsConfigurationBlock.job.title")){  //$NON-NLS-1$
 			/* (non-Javadoc)
 			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
 			 */
