@@ -1170,7 +1170,7 @@ public abstract class TypePage extends ContainerPage {
 			
 			lineDelimiter= StubUtility.getLineDelimiterUsed(parentCU);
 			
-			String content= createTypeBody(imports, lineDelimiter);
+			String content= createTypeBody(imports, lineDelimiter, parentCU);
 			createdType= parentCU.createType(content, null, false, new SubProgressMonitor(monitor, 5));
 		} else {
 			IType enclosingType= getEnclosingType();
@@ -1186,7 +1186,7 @@ public abstract class TypePage extends ContainerPage {
 			imports= new ImportsStructure(parentCU, prefOrder, threshold, true);
 			
 			lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
-			String content= createTypeBody(imports, lineDelimiter);
+			String content= createTypeBody(imports, lineDelimiter, parentCU);
 			IJavaElement[] elems= enclosingType.getChildren();
 			IJavaElement sibling= elems.length > 0 ? elems[0] : null;
 			
@@ -1224,7 +1224,7 @@ public abstract class TypePage extends ContainerPage {
 		String formattedContent= StubUtility.codeFormat(originalContent, indent, lineDelimiter);
 		buf.replace(range.getOffset(), range.getLength(), formattedContent);
 		if (!isInnerClass) {
-			String fileComment= getFileComment();
+			String fileComment= getFileComment(cu);
 			if (fileComment != null) {
 				buf.replace(0, 0, fileComment + lineDelimiter);
 			}
@@ -1281,9 +1281,9 @@ public abstract class TypePage extends ContainerPage {
 	/*
 	 * Called from createType to construct the source for this type
 	 */		
-	private String createTypeBody(IImportsStructure imports, String lineDelimiter) {	
+	private String createTypeBody(IImportsStructure imports, String lineDelimiter, ICompilationUnit parentCU) {	
 		StringBuffer buf= new StringBuffer();
-		String typeComment= getTypeComment();
+		String typeComment= getTypeComment(parentCU);
 		if (typeComment != null) {
 			buf.append(typeComment);
 			buf.append(lineDelimiter);
@@ -1320,7 +1320,7 @@ public abstract class TypePage extends ContainerPage {
 	 * 'filecomment' is taken.
 	 * Returns source or null, if no file comment should be added
 	 */		
-	protected String getFileComment() {
+	protected String getFileComment(ICompilationUnit parentCU) {
 		if (CodeGenerationPreferencePage.doFileComments()) {
 			return getTemplate("filecomment");
 		}
@@ -1331,7 +1331,7 @@ public abstract class TypePage extends ContainerPage {
 	 * Called from createType to get a type comment. 
 	 * Returns source or null, if no type comment should be added
 	 */		
-	protected String getTypeComment() {
+	protected String getTypeComment(ICompilationUnit parentCU) {
 		if (CodeGenerationPreferencePage.doCreateComments()) {
 			return getTemplate("typecomment");
 		}
