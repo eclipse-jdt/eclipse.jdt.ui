@@ -5,22 +5,22 @@ import java.util.LinkedList;
 import java.util.List;
 
 class A{
-	List<String> fList= new ArrayList<String>();
+	List<String> fItems= new ArrayList<String>();
 	
-	public List<String> getList() {
-		return fList;
+	public List<String> getItems() {
+		return fItems;
 	}
 	
-	public void setList(List<String> list) {
-		fList= list;
+	public void setItems(List<String> list) {
+		Items= list;
 	}
 }
 
 class B {
 	static {
 		A a= new A();
-		a.setList(new LinkedList<String>());
-		List<String> list= a.getList();
-		list.addAll(a.fList);
+		a.setItems(new LinkedList<String>());
+		List<String> list= a.getItems();
+		list.addAll(a.fItems);
 	}
 }
