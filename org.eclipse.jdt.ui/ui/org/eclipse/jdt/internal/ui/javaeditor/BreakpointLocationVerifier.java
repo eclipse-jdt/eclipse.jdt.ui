@@ -15,7 +15,7 @@ public class BreakpointLocationVerifier {
 
 	/**
 	 * Returns the line number closest to the given line number that represents a
-	 * valid location for a breakpoint in the given document, or -1 is a valid location
+	 * valid location for a breakpoint in the given document, or -1 if a valid location
 	 * cannot be found.
 	 */
 	public int getValidBreakpointLocation(IDocument doc, int lineNumber) {
