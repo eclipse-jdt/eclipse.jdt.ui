@@ -1212,7 +1212,15 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 			if (wasActive) {
 				if (fURLString != null) {
-					Program.launch(fURLString);
+					String platform= SWT.getPlatform();
+					if ("motif".equals(platform) || "gtk".equals(platform)) { //$NON-NLS-1$ //$NON-NLS-2$
+						Program program= Program.findProgram("html"); //$NON-NLS-1$
+						if (program == null)
+							program= Program.findProgram("htm"); //$NON-NLS-1$
+						if (program != null)
+							program.execute(fURLString);
+					} else
+						Program.launch(fURLString);
 				} else {
 					IAction action= getAction("OpenEditor");  //$NON-NLS-1$
 					if (action != null)
