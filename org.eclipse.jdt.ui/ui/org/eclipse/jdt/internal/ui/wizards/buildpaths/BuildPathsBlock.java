@@ -373,7 +373,8 @@ public class BuildPathsBlock {
 		List list= new ArrayList();
 		IResource srcFolder;
 		if (JavaBasePreferencePage.useSrcAndBinFolders()) {
-			srcFolder= jproj.getProject().getFolder("src"); //$NON-NLS-1$
+			String sourceFolderName= JavaBasePreferencePage.getSourceFolderName();
+			srcFolder= jproj.getProject().getFolder(sourceFolderName);
 		} else {
 			srcFolder= jproj.getProject();
 		}
@@ -390,7 +391,8 @@ public class BuildPathsBlock {
 	
 	private IPath getDefaultBuildPath(IJavaProject jproj) {
 		if (JavaBasePreferencePage.useSrcAndBinFolders()) {
-			return jproj.getProject().getFullPath().append("bin"); //$NON-NLS-1$
+			String outputLocationName= JavaBasePreferencePage.getOutputLocationName();
+			return jproj.getProject().getFullPath().append(outputLocationName);
 		} else {
 			return jproj.getProject().getFullPath();
 		}

@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
@@ -310,7 +311,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private void askForChangingBuildPathDialog() {
 		IPath outputFolder= new Path(fOutputLocationField.getText());
 		if (outputFolder.segmentCount() == 1) {
-			IPath newPath= outputFolder.append("bin");
+			String outputFolderName= JavaBasePreferencePage.getOutputLocationName();
+			IPath newPath= outputFolder.append(outputFolderName);
 			String title= NewWizardMessages.getString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.title"); //$NON-NLS-1$
 			String message= NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.message", newPath); //$NON-NLS-1$
 			if (MessageDialog.openQuestion(getShell(), title, message)) {
