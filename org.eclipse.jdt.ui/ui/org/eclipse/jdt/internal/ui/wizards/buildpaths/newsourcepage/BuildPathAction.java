@@ -131,7 +131,7 @@ public class BuildPathAction extends SelectionDispatchAction implements IClasspa
             List elements= fOperation.getSelectedElements();
             fJavaProject= getJavaProject(selection);
             
-            if (fJavaProject == null) {
+            if (fJavaProject == null || !fJavaProject.exists()) {
                 setEnabled(false);
                 return;
             }
