@@ -78,9 +78,25 @@
 			<separator name="replaceWithGroup"/>
 		</menu>
 
+		<action 
+			id="org.eclipse.jdt.ui.vcm.Version"
+			label="&amp;Version from Workspace..."
+			tooltip="Version the selected resources"
+			menubarPath="vcm.managing/manageGroup"
+			class="org.eclipse.vcm.internal.ui.actions.VersionAction">
+		</action>
+		
+		<action 
+			id="org.eclipse.jdt.ui.vcm.MergeStreams"
+			label="&amp;Merge..."
+			tooltip="Merge two server streams into this project"
+			menubarPath="vcm.managing/manageGroup"
+			class="org.eclipse.vcm.internal.ui.merge.MergeAction">
+		</action>
+
 		<action
 			id="vcm.BrowseHistory"
-			label="Show in &amp;History View"
+			label="Show in &amp;Resource History"
 			tooltip="Shows all versions of this resource in the history view"
 			menubarPath="vcm.managing/manageGroup"
 			class="org.eclipse.vcm.internal.ui.actions.BrowseHistoryAction">
@@ -127,22 +143,7 @@
 			enablesFor="1"
 			class="org.eclipse.vcm.internal.ui.actions.CompareWithTeamStreamAction">
 		</action>
-		
-		<action 
-			id="org.eclipse.jdt.ui.vcm.Version"
-			label="&amp;Version..."
-			tooltip="Version the selected resources"
-			menubarPath="vcm.managing/manageGroup"
-			class="org.eclipse.vcm.internal.ui.actions.VersionAction">
-		</action>
 
-		<action 
-			id="org.eclipse.jdt.ui.vcm.MergeStreams"
-			label="&amp;Merge..."
-			tooltip="Merge two server streams into this project"
-			menubarPath="vcm.managing/manageGroup"
-			class="org.eclipse.vcm.internal.ui.merge.MergeAction">
-		</action>
 	</objectContribution>
 
 	<objectContribution
