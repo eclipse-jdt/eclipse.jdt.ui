@@ -184,8 +184,12 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		for (int i= 0; i < nodes.length; i++) {
 			ASTNode node= nodes[i];
 			TextEdit edit= createReferenceUpdateEdit(node);
-			if (edit != null)
-				manager.get(astmanager.getCompilationUnit(node)).addTextEdit("Update Type Reference", edit);
+			ICompilationUnit cu= astmanager.getCompilationUnit(node);
+			if (edit != null){
+				manager.get(cu).addTextEdit("Update Type Reference", edit);
+				if (! getInputTypePackage().equals(cu.getParent()))
+					fImportEditManager.addImportTo(getNewFullyQualifiedNameOfInputType(), cu);
+			}	
 		}
 	}
 
