@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.corext.util.TypeInfo;
  * Import Declarations that are added next to the existing import that
  * has the best match.
  */
-public class ImportsStructure implements IImportsStructure {
+public final class ImportsStructure implements IImportsStructure {
 	
 	private ICompilationUnit fCompilationUnit;
 	private ArrayList fPackageEntries;
@@ -656,7 +656,12 @@ public class ImportsStructure implements IImportsStructure {
 		for (int i= 0; i < nPackageEntries; i++) {
 			PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
 			int nImports= pack.getNumberOfImports();
-			if (nImports == 0 || fFilterImplicitImports && isImplicitImport(pack.getName(), fCompilationUnit)) {
+
+			if (fFilterImplicitImports && isImplicitImport(pack.getName(), fCompilationUnit)) {
+				pack.removeAllNew();
+				nImports= pack.getNumberOfImports();
+			}
+			if (nImports == 0) {
 				continue;
 			}
 			
@@ -802,17 +807,17 @@ public class ImportsStructure implements IImportsStructure {
 		return 0;
 	}
 	
-	public String printStructure() {
+	public String toString() {
 		int nPackages= fPackageEntries.size();
 		StringBuffer buf= new StringBuffer("\n-----------------------\n"); //$NON-NLS-1$
 		for (int i= 0; i < nPackages; i++) {
 			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
-			entry.dumpStructure(buf);
+			buf.append(entry.toString());
 		}
 		return buf.toString();	
 	}
 	
-	private static class ImportDeclEntry {
+	private static final class ImportDeclEntry {
 		
 		private String fElementName;
 		private String fContent;
@@ -852,7 +857,7 @@ public class ImportsStructure implements IImportsStructure {
 	 * Internal element for the import structure: A container for imports
 	 * of all types from the same package
 	 */
-	private static class PackageEntry {
+	private final static class PackageEntry {
 		private String fName;
 		private ArrayList fImportEntries;
 		private String fGroup;
@@ -864,6 +869,7 @@ public class ImportsStructure implements IImportsStructure {
 			this("!", null); //$NON-NLS-1$
 		}
 		
+
 		/**
 		 * Comment group place holder entry (name equals group)
 		 */
@@ -950,9 +956,19 @@ public class ImportsStructure implements IImportsStructure {
 				}
 			}
 			return false;
-		}		
+		}
 		
-		public final ImportDeclEntry getImportAt(int index) {
+		public void removeAllNew() {
+			int nInports= fImportEntries.size();
+			for (int i= nInports - 1; i >= 0; i--) {
+				ImportDeclEntry curr= getImportAt(i);
+				if (curr.isNew()) {
+					fImportEntries.remove(i);
+				}
+			}
+		}
+		
+		public  ImportDeclEntry getImportAt(int index) {
 			return (ImportDeclEntry) fImportEntries.get(index);
 		}
 		
@@ -1017,7 +1033,8 @@ public class ImportsStructure implements IImportsStructure {
 			return fName.length() == 0;
 		}
 		
-		public void dumpStructure(StringBuffer buf) {
+		public String toString() {
+			StringBuffer buf= new StringBuffer();
 			if (isComment()) {
 				buf.append("comment\n"); //$NON-NLS-1$
 			} else {
@@ -1033,6 +1050,7 @@ public class ImportsStructure implements IImportsStructure {
 					buf.append("\n"); //$NON-NLS-1$
 				}
 			}
+			return buf.toString();
 		}
 	}	
 
