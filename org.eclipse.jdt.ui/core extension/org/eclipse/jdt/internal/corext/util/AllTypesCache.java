@@ -17,9 +17,15 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -31,8 +37,10 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.internal.corext.CorextMessages;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.swt.widgets.Display;
 
 /**
  * Manages a search cache for types in the workspace. Instead of returning objects of type <code>IType</code>
@@ -250,9 +258,14 @@ public class AllTypesCache {
 	 * Returns all types in the workspace. The returned array must not be
 	 * modified. The elements in the array are sorted by simple type name.
 	 */
-	public static TypeInfo[] getAllTypes(IProgressMonitor monitor) throws JavaModelException {
-		forceDeltaComplete();
-		
+	public static TypeInfo[] getAllTypes(IProgressMonitor monitor) {
+		if (monitor == null)
+			monitor= new NullProgressMonitor();
+		monitor.beginTask("", 10); //$NON-NLS-1$
+		SubProgressMonitor checkingMonitor = new SubProgressMonitor(monitor, 1);
+		SubProgressMonitor searchingMonitor= new SubProgressMonitor(monitor, 9);
+		forceDeltaComplete(checkingMonitor);
+		searchingMonitor.setTaskName(CorextMessages.getString("AllTypesCache.searching")); //$NON-NLS-1$
 		synchronized(fgLock) {
 			
 			try {
@@ -264,7 +277,7 @@ public class AllTypesCache {
 						ArrayList searchResult= new ArrayList(fgSizeHint);
 						try {
 							fgIsLocked= true;
-							if (search(new TypeInfoRequestor(searchResult), IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor)) {
+							if (search(new TypeInfoRequestor(searchResult), IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, searchingMonitor)) {
 								TypeInfo[] result= (TypeInfo[]) searchResult.toArray(new TypeInfo[searchResult.size()]);
 								Arrays.sort(result, fgTypeNameComparator);
 								fgTypeCache= result;
@@ -274,12 +287,12 @@ public class AllTypesCache {
 							fgIsLocked= false;
 						}	
 					} else {
-						fDelegatedProgressMonitor.setDelegate(monitor);
+						fDelegatedProgressMonitor.setDelegate(searchingMonitor);
 						// wait for the thread to finished
 						try {
 							while (fgTypeCache == null) {
 								fgLock.wait(CANCEL_POLL_INTERVAL);	// poll for cancel
-								if (monitor != null && monitor.isCanceled())
+								if (searchingMonitor.isCanceled())
 									throw new OperationCanceledException();
 							}
 						} catch (InterruptedException e) {
@@ -291,8 +304,7 @@ public class AllTypesCache {
 				}
 				
 			} finally {
-				if (monitor != null)
-					monitor.done();
+				monitor.done();
 			}
 			return fgTypeCache;
 		}
@@ -301,14 +313,18 @@ public class AllTypesCache {
 	/**
 	 * Returns true if the type cache is up to date.
 	 */
-	public static boolean isCacheUpToDate() {
-		forceDeltaComplete();
+	public static boolean isCacheUpToDate(IProgressMonitor pm) {
+		forceDeltaComplete(pm);
 		return fgTypeCache != null;
 	}
 	
-	private static void forceDeltaComplete() {
+	private static void forceDeltaComplete(IProgressMonitor pm) {
+		if (pm == null)
+			pm= new NullProgressMonitor();
 		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
 			ICompilationUnit[] primaryWorkingCopies= JavaCore.getWorkingCopies(null);
+			pm.beginTask("", primaryWorkingCopies.length); //$NON-NLS-1$
+			pm.setTaskName(CorextMessages.getString("AllTypesCache.checking_type_cache")); //$NON-NLS-1$
 			for (int i= 0; i < primaryWorkingCopies.length; i++) {
 				ICompilationUnit curr= primaryWorkingCopies[i];
 				try {
@@ -316,8 +332,15 @@ public class AllTypesCache {
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
 				}
+				pm.worked(1);
+				if (pm.isCanceled())
+					throw new OperationCanceledException();
 			}
-		}		
+		} else {
+			pm.beginTask("", 1); //$NON-NLS-1$
+			pm.worked(1);
+		}
+		pm.done();
 	}
 	
 	/**
@@ -531,7 +554,7 @@ public class AllTypesCache {
 	
 	private static void startBackgroundMode() {
 		
-		forceDeltaComplete();
+		forceDeltaComplete(new NullProgressMonitor());
 		
 		if (fgIsLocked) {
 			fgAsyncMode= true;

@@ -10,19 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
-
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IType;
@@ -50,7 +50,7 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 
 	public void run() {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
-		OpenTypeSelectionDialog dialog= new OpenTypeSelectionDialog(parent, new ProgressMonitorDialog(parent), 
+		OpenTypeSelectionDialog dialog= new OpenTypeSelectionDialog(parent, PlatformUI.getWorkbench().getProgressService(), 
 			IJavaSearchConstants.TYPE, SearchEngine.createWorkspaceScope());
 		
 		dialog.setMatchEmptyString(true);	
