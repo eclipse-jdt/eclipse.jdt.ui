@@ -274,7 +274,6 @@ public class SemanticHighlightingTest extends TestCase {
 		Position[] actual= getSemanticHighlightingPositions();
 		Position[] expected= new Position[] {
 				createPosition(39, 15, 1),
-				createPosition(39, 25, 6),
 				createPosition(40, 2, 1),
 		};
 //		System.out.println(toString(actual));
