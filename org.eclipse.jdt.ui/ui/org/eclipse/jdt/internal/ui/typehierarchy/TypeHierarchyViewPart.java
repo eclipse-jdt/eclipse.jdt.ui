@@ -64,6 +64,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 
+import org.eclipse.ui.*;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
@@ -330,11 +331,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 		if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
 			updateHierarchyViewer(true);
+			updateTitle();
 		}
 	}
 		
 	/**
 	 * Adds the entry if new. Inserted at the beginning of the history entries list.
+	 * @param entry The new entry
 	 */		
 	private void addHistoryEntry(IJavaElement entry) {
 		if (fInputHistory.contains(entry)) {
@@ -356,6 +359,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	/**
 	 * Goes to the selected entry, without updating the order of history entries.
+	 * @param entry The entry to open
 	 */	
 	public void gotoHistoryEntry(IJavaElement entry) {
 		if (fInputHistory.contains(entry)) {
@@ -365,6 +369,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	/**
 	 * Gets all history entries.
+	 * @return All history entries
 	 */
 	public IJavaElement[] getHistoryEntries() {
 		if (fInputHistory.size() > 0) {
@@ -375,6 +380,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	/**
 	 * Sets the history entries
+	 * @param elems The history elements to set
 	 */
 	public void setHistoryEntries(IJavaElement[] elems) {
 		fInputHistory.clear();
@@ -386,6 +392,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	/**
 	 * Selects an member in the methods list or in the current hierarchy.
+	 * @param member The member to select
 	 */	
 	public void selectMember(IMember member) {
 		fSelectInEditor= false;
@@ -410,6 +417,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 
 	/**
+	 * @return The input type
 	 * @deprecated
 	 */	
 	public IType getInput() {
@@ -421,6 +429,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	/**
 	 * Sets the input to a new type
+	 * @param type The new input type
 	 * @deprecated 
 	 */
 	public void setInput(IType type) {
@@ -430,6 +439,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	/**
 	 * Returns the input element of the type hierarchy.
 	 * Can be of type <code>IType</code> or <code>IPackageFragment</code>
+	 * @return the input element
 	 */	
 	public IJavaElement getInputElement() {
 		return fInputElement;
@@ -438,6 +448,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	/**
 	 * Sets the input to a new element.
+	 * @param element the input element
 	 */	
 	public void setInputElement(IJavaElement element) {
 		if (element != null) {
@@ -464,8 +475,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		updateInput(element);
 	}
 	
-	/**
+	/*
 	 * Changes the input to a new type
+	 * @param inputElement
 	 */
 	private void updateInput(IJavaElement inputElement) {
 		IJavaElement prevInput= fInputElement;
@@ -575,8 +587,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		super.dispose();
 	}
 		
-	/**
-	 * Answer the property defined by key.
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
 	public Object getAdapter(Class key) {
 		if (key == IShowInSource.class) {
@@ -969,7 +981,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}	
 	
 	
-	/**
+	/*
 	 * Creates the context menu for the hierarchy viewers
 	 */
 	private void fillTypesViewerContextMenu(TypeHierarchyViewer viewer, IMenuManager menu) {
@@ -988,7 +1000,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fActionGroups.setContext(null);
 	}
 
-	/**
+	/*
 	 * Creates the context menu for the method viewer
 	 */	
 	private void fillMethodsViewerContextMenu(IMenuManager menu) {
@@ -1005,7 +1017,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 	}
 	
-	/**
+	/*
 	 * Toggles between the empty viewer page and the hierarchy
 	 */
 	private void setViewerVisibility(boolean showHierarchy) {
@@ -1016,7 +1028,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 	}
 	
-	/**
+	/*
 	 * Sets the member filter. <code>null</code> disables member filtering.
 	 */	
 	private void setMemberFilter(IMember[] memberFilter) {
@@ -1041,7 +1053,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		viewer.addPostSelectionChangedListener(fSelectionChangedListener);
 	}
 		
-	/**
+	/*
 	 * When the input changed or the hierarchy pane becomes visible,
 	 * <code>updateHierarchyViewer<code> brings up the correct view and refreshes
 	 * the current tree
@@ -1199,14 +1211,21 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		String tooltip;
 		String title;
 		if (fInputElement != null) {
-			String[] args= new String[] { viewerTitle, JavaElementLabels.getElementLabel(fInputElement, JavaElementLabels.ALL_DEFAULT) };
-			title= TypeHierarchyMessages.getFormattedString("TypeHierarchyViewPart.title", args); //$NON-NLS-1$
-			tooltip= TypeHierarchyMessages.getFormattedString("TypeHierarchyViewPart.tooltip", args); //$NON-NLS-1$
+			IWorkingSet workingSet= fWorkingSetActionGroup.getWorkingSet();
+			if (workingSet == null) {
+				String[] args= new String[] { viewerTitle, JavaElementLabels.getElementLabel(fInputElement, JavaElementLabels.ALL_DEFAULT) };
+				title= TypeHierarchyMessages.getFormattedString("TypeHierarchyViewPart.title", args); //$NON-NLS-1$
+				tooltip= TypeHierarchyMessages.getFormattedString("TypeHierarchyViewPart.tooltip", args); //$NON-NLS-1$
+			} else {
+				String[] args= new String[] { viewerTitle, JavaElementLabels.getElementLabel(fInputElement, JavaElementLabels.ALL_DEFAULT), workingSet.getName() };
+				title= TypeHierarchyMessages.getFormattedString("TypeHierarchyViewPart.ws.title", args); //$NON-NLS-1$
+				tooltip= TypeHierarchyMessages.getFormattedString("TypeHierarchyViewPart.ws.tooltip", args); //$NON-NLS-1$
+			}
 		} else {
 			title= viewerTitle;
 			tooltip= viewerTitle;
 		}
-		setTitle(title);
+		setContentDescription(title);
 		setTitleToolTip(tooltip);
 	}
 	
@@ -1222,7 +1241,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 	}
 		
-	/**
+	/*
 	 * Sets the current view (see view id)
 	 * called from ToggleViewAction. Must be called after creation of the view part.
 	 */	
@@ -1255,6 +1274,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	/**
 	 * Gets the current active view index.
+	 * @return The index of the current viewer
 	 */		
 	public int getViewIndex() {
 		return fCurrentViewerIndex;
@@ -1267,6 +1287,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	/**
 	 * called from EnableMemberFilterAction.
 	 * Must be called after creation of the view part.
+	 * @param on <code>true</code> to turn the member filter on
 	 */	
 	public void enableMemberFilter(boolean on) {
 		if (on != fIsEnableMemberFilter) {
@@ -1295,6 +1316,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	/**
 	 * called from ShowQualifiedTypeNamesAction. Must be called after creation
 	 * of the view part.
+	 * @param on <code>true</code> to enable qualified type names
 	 */	
 	public void showQualifiedTypeNames(boolean on) {
 		if (fAllViewers == null) {
@@ -1312,6 +1334,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	/**
 	 * Called from ITypeHierarchyLifeCycleListener.
 	 * Can be called from any thread
+	 * @param typeHierarchy Hierarchy that has changed
+	 * @param changedTypes Types in the hierarchy that have change or <code>null</code> if the full hierarchy has changed
 	 */
 	protected void doTypeHierarchyChanged(final TypeHierarchyLifeCycle typeHierarchy, final IType[] changedTypes) {
 		if (!fIsVisible) {
@@ -1424,7 +1448,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		memento.putInteger(PreferenceConstants.LINK_TYPEHIERARCHY_TO_EDITOR, fLinkingEnabled ? 1 : 0);
 	}
 
-	/**
+	/*
 	 * Restores the type hierarchy settings from a memento.
 	 */
 	private void restoreState(final IMemento memento, IJavaElement defaultInput) {
@@ -1523,6 +1547,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	/**
 	 * view part becomes visible
+	 * @param isVisible 
 	 */
 	protected void visibilityChanged(boolean isVisible) {
 		fIsVisible= isVisible;
@@ -1535,6 +1560,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	/**
 	 * Link selection to active editor.
+	 * @param editor The activated editor
 	 */
 	protected void editorActivated(IEditorPart editor) {
 		if (!isLinkingEnabled()) {
@@ -1579,7 +1605,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	
 	/**
-	 * Returns the <code>IShowInSource</code> for this view.
+	 * @return Returns the <code>IShowInSource</code> for this view.
 	 */
 	protected IShowInSource getShowInSource() {
 		return new IShowInSource() {
