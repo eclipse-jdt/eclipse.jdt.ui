@@ -67,11 +67,9 @@ public class Checks {
 		if (! newMethodName.equals(newTypeName))
 			return null;
 		else
-			return RefactoringStatus.createWarningStatus("If you proceed, the method " 
-									+ JavaElementUtil.createMethodSignature(method)
-									+ " in \'" 
-									+ JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())
-									+ "\' will have a constructor name.");	
+			return RefactoringStatus.createWarningStatus(
+				RefactoringCoreMessages.getFormattedString("Checks.constructor_name",  //$NON-NLS-1$
+				new Object[] {JavaElementUtil.createMethodSignature(method), JavaModelUtil.getFullyQualifiedName(method.getDeclaringType()) } ));
 	}
 		
 	/**
@@ -218,11 +216,11 @@ public class Checks {
 	public static RefactoringStatus checkMethodInType(ITypeBinding type, String methodName, ITypeBinding[] parameters, IJavaProject scope) {
 		RefactoringStatus result= new RefactoringStatus();
 		if (methodName.equals(type.getName()))
-			result.addWarning("New method name has constructor name");
+			result.addWarning(RefactoringCoreMessages.getString("Checks.methodName.constructor")); //$NON-NLS-1$
 		IMethodBinding method= org.eclipse.jdt.internal.corext.dom.Bindings.findMethodInType(type, methodName, parameters);
 		if (method != null) 
-			result.addError(
-				"Method " + methodName + " already exists in " + type.getName(), 
+			result.addError(RefactoringCoreMessages.getFormattedString("Checks.methodName.exists",  //$NON-NLS-1$
+				new Object[] {methodName, type.getName()}),
 				JavaSourceContext.create(method, scope));
 		return result;
 	}
@@ -240,8 +238,8 @@ public class Checks {
 		IMethodBinding method= org.eclipse.jdt.internal.corext.dom.Bindings.findMethodInHierarchy(type, methodName, parameters);
 		if (method != null) {
 			ITypeBinding dc= method.getDeclaringClass();
-			result.addError(
-				"New method " + methodName + " overrides existing method in " + dc.getName(),
+			result.addError(RefactoringCoreMessages.getFormattedString("Checks.methodName.overrides", //$NON-NLS-1$
+				new Object[] {methodName, dc.getName()}),
 				JavaSourceContext.create(method, scope));
 		}
 		return result;
@@ -404,7 +402,7 @@ public class Checks {
 		for (int i= 0; i < grouped.length; i++){
 			IResource resource= grouped[i].getResource();
 			if (hasCompileErrors(resource))
-				result.addWarning("Affected resource:" + resource.getFullPath() + " has compile errors, which can affect accuracy of the code modification..");
+				result.addWarning(RefactoringCoreMessages.getFormattedString("Checks.cu_has_compile_errors", resource.getFullPath())); //$NON-NLS-1$
 		}
 		return result;
 	}
@@ -434,7 +432,7 @@ public class Checks {
 			return isReadOnly(((IJavaElement)element).getCorrespondingResource());
 		}
 		
-		Assert.isTrue(false, "not expected to get here");	
+		Assert.isTrue(false, "not expected to get here");	 //$NON-NLS-1$
 		return false;
 	}
 	
@@ -499,7 +497,7 @@ public class Checks {
 		for (Iterator iter= oldMap.keySet().iterator(); iter.hasNext();) {
 			IFile file= (IFile) iter.next();
 			if (! oldMap.get(file).equals(newMap.get(file)))
-				result.addFatalError("File \'" + file.getFullPath().toString() +  "\' has been modified since the beginning of this operation.");
+				result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.validateModifiedFiles", file.getFullPath().toString())); //$NON-NLS-1$
 		}
 		return result;
 	}
