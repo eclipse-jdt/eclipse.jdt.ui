@@ -4,83 +4,86 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.methods;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
-
+import java.util.List;
+import java.util.Set;
+
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 
-/**
- * <p>
- * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 
- * and expected to change significantly before reaching stability. It is being made available at 
- * this early stage to solicit feedback from pioneering adopters on the understanding that any 
- * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
- */
-public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
+class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 
-	public RenameMethodInInterfaceRefactoring(ITextBufferChangeCreator changeCreator, IMethod method){
+	RenameMethodInInterfaceRefactoring(ITextBufferChangeCreator changeCreator, IMethod method){
 		super(changeCreator, method);
 	}
 		
-	//---- Conditions ---------------------------
-		
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 10); //$NON-NLS-1$
-		pm.subTask(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.checking")); //$NON-NLS-1$
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(super.checkInput(new SubProgressMonitor(pm, 6)));
-		pm.subTask(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
-		if (isSpecialCase())
-			result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.special_case")); //$NON-NLS-1$
-		pm.worked(1);
-		pm.subTask(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
-		if (relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 3), getMethod(), getNewName()))
-			result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.already_defined")); //$NON-NLS-1$
-		pm.done();
-		return result;
-	}
-		
+	//---- preconditions ---------------------------
+	
+	/* non java-doc
+	 * @see IPreactivatedRefactoring#checkPreactivation
+	 */	
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkPreactivation());
-		if (! getMethod().getDeclaringType().isInterface()){
+		if (! getMethod().getDeclaringType().isInterface())
 			result.addFatalError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.no_class_method")); //$NON-NLS-1$
-		}
 		return result;
+	}
+	
+	/* non java-doc
+	 * @see Refactoring#checkInput
+	 */	
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
+		pm.beginTask("", 11); //$NON-NLS-1$
+		try{
+			pm.subTask(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.checking")); //$NON-NLS-1$
+			RefactoringStatus result= new RefactoringStatus();
+			result.merge(super.checkInput(new SubProgressMonitor(pm, 6)));
+			pm.subTask(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
+			if (isSpecialCase())
+				result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.special_case")); //$NON-NLS-1$
+			pm.worked(1);
+			pm.subTask(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.analyzing_hierarchy")); //$NON-NLS-1$
+			if (relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 3), getMethod(), getNewName()))
+				result.addError(RefactoringCoreMessages.getString("RenameMethodInInterfaceRefactoring.already_defined")); //$NON-NLS-1$
+			if (overridesAnotherMethod(new SubProgressMonitor(pm, 1)))
+				result.addError("This method overrides another method from - please rename it in the base type.");
+			return result;
+		} finally {
+			pm.done();
+		}
 	}
 		
 	private boolean relatedTypeDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws JavaModelException{
-		pm.beginTask("", 2); //$NON-NLS-1$
-		HashSet types= getRelatedTypes(new SubProgressMonitor(pm, 1));
-		Iterator iter= types.iterator();
-		int parameterCount= method.getParameterTypes().length;
-		while (iter.hasNext()) {
-			if (null != findMethod(newName, parameterCount, false, (IType) iter.next())) {
-				pm.done();
-				return true;
+		try{
+			pm.beginTask("", 2); //$NON-NLS-1$
+			Set types= getRelatedTypes(new SubProgressMonitor(pm, 1));
+			for (Iterator iter= types.iterator(); iter.hasNext(); ) {
+				IMethod m= findMethod(method, (IType)iter.next());
+				if (hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), m, newName))
+					return true;
 			}
-		}
-		pm.done();
-		return false;
+			return false;
+		} finally {
+			pm.done();
+		}	
 	}
-
-	/**
+	/*
 	 * special cases are mentioned in the java lang spec 2nd edition (9.2)
 	 */
 	private boolean isSpecialCase() throws JavaModelException {
@@ -107,118 +110,155 @@ public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring 
 		return false;		
 	}
 	
-	/************ Changes ***************/
-
-	private HashSet getRelatedTypes(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2); //$NON-NLS-1$
-		IType type= getMethod().getDeclaringType();
-		ITypeHierarchy hierarchy= type.newTypeHierarchy(new SubProgressMonitor(pm, 1));
-		HashSet result= getRelatedTypes(new HashSet(), hierarchy, type, getMethod(), new SubProgressMonitor(pm, 1));
-		pm.done();
+	private Set getRelatedTypes(IProgressMonitor pm) throws JavaModelException {
+		Set methods= getMethodsToRename(getMethod(), pm);
+		Set result= new HashSet(methods.size());
+		for (Iterator iter= methods.iterator(); iter.hasNext(); ){
+			result.add(((IMethod)iter.next()).getDeclaringType());
+		}
 		return result;
+	}
+	private boolean overridesAnotherMethod(IProgressMonitor pm) throws JavaModelException {
+		try{
+			pm.beginTask("", 1); //$NON-NLS-1$
+			ITypeHierarchy hierarchy= getMethod().getDeclaringType().newSupertypeHierarchy(new SubProgressMonitor(pm, 1));
+			IType[] supertypes= hierarchy.getAllSupertypes(getMethod().getDeclaringType());
+				for (int i= 0; i < supertypes.length; i++){
+					IMethod found= findMethod(getMethod(), supertypes[i]);
+					if (found != null) 
+						return true;
+				}
+			return false;
+		} finally{
+			pm.done();
+		}	
 	}
-
-	private boolean containsNew(IMethod method, IType type) throws JavaModelException {
-		IMethod found= findMethod(getNewName(), method.getParameterTypes().length, false, type);
-		return (found != null && !Flags.isPrivate(found.getFlags()) && !Flags.isStatic(found.getFlags()));
-	}
-
-	private boolean containsOld(IMethod method, IType type) throws JavaModelException {
-		IMethod found= findMethod(method, type);
-		return (found != null && !Flags.isPrivate(found.getFlags()) && !Flags.isStatic(found.getFlags()));
-	}
+	
+	//--------------
 	
 	/*
-	 * XXX
-	 * almost duplicated logic from doGetMethodToRename
-	 * need serious rework
-	 * see into private/static method issues
-	 * needs a better name
-	 */ 
-	private HashSet getRelatedTypes(HashSet typesVisited, ITypeHierarchy hier, IType type, IMethod method, IProgressMonitor pm) throws JavaModelException {
-		
-		HashSet typeSet= new HashSet();
-		typesVisited.add(type);
-		typeSet.add(type);
-		typeSet.addAll(Arrays.asList(hier.getAllSuperInterfaces(type)));
-		HashSet subtypes= findAllSubtypes(hier, type);
-		typeSet.addAll(subtypes);
-		
-		Iterator subtypesIter= subtypes.iterator();
-		while (subtypesIter.hasNext()){
-			IType each= (IType) subtypesIter.next();
-			IType[] superTypes= hier.getAllSupertypes(each);
-			for (int i=0; i < superTypes.length; i++){
-				if (!typesVisited.contains(superTypes[i])){
-					if (containsNew(method, superTypes[i])
-						|| containsOld(method, superTypes[i])){
-						typeSet.addAll(getRelatedTypes(typesVisited, hier, superTypes[i], method, pm));
-					}
-					typeSet.add(superTypes[i]);
-				}
-			}
+	 * We use the following algorithm to find methods to rename:
+	 * Input: type T, method m
+	   Assumption: No supertype of T declares m
+	   Output: variable result contains the list of types that declared the method to be renamed 
+
+	 	result:= empty set // set of types that declare methods to rename
+ 		visited:= empty set //set of already visited types
+	 	q:= empty queue //queue of types to visit
+	 	q.insert(T) 
+
+		while (!q.isEmpty()){
+			t:= q.remove();
+			//assert(t is an interface or declares m as virtual)
+			//assert(!visited.contains(t))
+			visited.add(t);
+			result.add(t);
+			forall: i in: t.subTypes do: 
+				if ((! visited.contains(i)) && (i declares m)) result.add(i);
+			forall: i in: t.subTypes do:
+				q.insert(x) 
+					where x is any type satisfying the followowing:
+					a. x is a supertype of i
+					b. x is an interface and declares m or
+					    x declares m as a virtual method
+					c. no supertype of x is an interface that declares m and
+					    no supertype of x is a class that declares m as a virtual method
+					d. ! visited.contains(x)
+					e. ! q.contains(x)
 		}
-		return typeSet;
-	}
-	
-	private HashSet findAllSubtypes(ITypeHierarchy hier, IType type){
-		IType[] extenders= hier.getSubtypes(type);
-		HashSet res= new HashSet(Arrays.asList(extenders));
-		for (int i= 0; i < extenders.length; i++){
-			res.addAll(findAllSubtypes(hier, extenders[i]));
-		}
-		return res;
-	}
-	
-	private HashSet getMatchingMethods(IMethod method, HashSet typeSet) throws JavaModelException {
-		HashSet methods= new HashSet();
-		Iterator iter= typeSet.iterator();
-		while (iter.hasNext()){
-			IMethod subMethod= findMethod(method, (IType)iter.next());
-				if (subMethod != null && !Flags.isPrivate(subMethod.getFlags())){
-					methods.add(subMethod);
-				}
-		}
-		return methods;
-	}
-	
-	/**
-	 * RenameMethodRefactoring#methodsToRename
 	 */
-	private HashSet doGetMethodsToRename(HashSet typesVisited, ITypeHierarchy hier, IType type, IMethod method, IProgressMonitor pm) throws JavaModelException {
-		
-		//XXX: needs serious rethinking and rework
-		
-		HashSet typeSet= new HashSet();
-		typesVisited.add(type);
-		typeSet.addAll(Arrays.asList(hier.getAllSuperInterfaces(type)));
-		HashSet subtypes= findAllSubtypes(hier, type);
-		typeSet.addAll(subtypes);
-		HashSet matchingMethods= new HashSet();
-		Iterator subtypesIter= subtypes.iterator();
-		while (subtypesIter.hasNext()){
-			IType each= (IType) subtypesIter.next();
-			IType[] superTypes= hier.getAllSupertypes(each);
-			for (int i=0; i < superTypes.length; i++){
-				if (!typesVisited.contains(superTypes[i])
-					&& containsOld(method, superTypes[i])){
-					matchingMethods.addAll(doGetMethodsToRename(typesVisited, hier, superTypes[i], method, pm));
-					typeSet.add(superTypes[i]);
-				}
+	
+	/* non java-doc
+	 * method declared in RenameMethodRefactoring
+	 */ 
+	Set getMethodsToRename(final IMethod method, IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 4); //$NON-NLS-1$
+		Set result= new HashSet();
+		Set visitedTypes= new HashSet();
+		List methodQueue= new ArrayList();
+		methodQueue.add(method);
+		while (! methodQueue.isEmpty()){
+			IMethod m= (IMethod)methodQueue.remove(0);
+			
+			/* must check for binary - otherwise will go all the way on all types
+			 * happens on toString() for example */  
+			if (m.isBinary())
+				continue; 
+			IType type= m.getDeclaringType();
+			Assert.isTrue(! visitedTypes.contains(type), "! visitedTypes.contains(type)");
+			Assert.isTrue(type.isInterface() || declaresAsVirtual(type, method), "second condition");
+			
+			visitedTypes.add(type);
+			result.add(m);
+			
+			IType[] subTypes= type.newTypeHierarchy(new SubProgressMonitor(pm, 1)).getAllSubtypes(type);
+			for (int i= 0; i < subTypes.length; i++){
+				if (!visitedTypes.contains(subTypes[i]) && declares(subTypes[i], method)){
+					result.add(findMethod(m, subTypes[i]));
+				}	
+			}
+			
+			for (int i= 0; i < subTypes.length; i++){
+				IMethod toAdd= findAppropriateMethod(visitedTypes, methodQueue, subTypes[i], method, new NullProgressMonitor());
+				if (toAdd != null)
+					methodQueue.add(toAdd);
 			}
 		}
-		matchingMethods.addAll(getMatchingMethods(method, typeSet));
-		return matchingMethods;
-	}
-	
-	/*package*/ HashSet getMethodsToRename(IMethod method, IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 4); //$NON-NLS-1$
-		IType type= method.getDeclaringType();
-		ITypeHierarchy hierarchy= type.newTypeHierarchy(new SubProgressMonitor(pm, 1));
-		HashSet result= doGetMethodsToRename(new HashSet(), hierarchy, type, method, pm);
-		pm.worked(3);
-		pm.done();
 		return result;
 	}
+		
+	private static IMethod findAppropriateMethod(Set visitedTypes, List methodQueue, IType type, IMethod method, IProgressMonitor pm)throws JavaModelException{
+		pm.beginTask("analizing hierarchy", 1);
+		IType[] superTypes= type.newSupertypeHierarchy(new SubProgressMonitor(pm, 1)).getAllSupertypes(type);
+		for (int i= 0; i< superTypes.length; i++){
+			IType x= superTypes[i];
+			if (visitedTypes.contains(x))
+				continue;
+			IMethod found= findMethod(method, x);	
+			if (found == null)
+				continue;
+			if (! declaresAsVirtual(x, method))	
+				continue;	
+			if (methodQueue.contains(found))	
+				continue;
+			return getTopMostMethod(visitedTypes, methodQueue, method, x, new NullProgressMonitor());	
+		}
+		return null;
+	}
 	
+	private static IMethod getTopMostMethod(Set visitedTypes, List methodQueue, IMethod method, IType type, IProgressMonitor pm)throws JavaModelException{
+		pm.beginTask("", 1);
+		Assert.isTrue(findMethod(method, type) != null);
+		IType[] superTypes= type.newSupertypeHierarchy(new SubProgressMonitor(pm, 1)).getAllSupertypes(type);
+		for (int i= 0; i < superTypes.length; i++){
+			IType t= superTypes[i];
+			if (visitedTypes.contains(t))
+				continue;
+			IMethod found= findMethod(method, t);	
+			if (found == null)
+				continue;
+			if (! declaresAsVirtual(t, method))	
+				continue;
+			if (methodQueue.contains(found))	
+				continue;
+			return getTopMostMethod(visitedTypes, methodQueue, method, t, new NullProgressMonitor());
+		}
+		return findMethod(method, type);
+	}
+	
+	private static boolean declares(IType type, IMethod m) throws JavaModelException{
+		return findMethod(m, type) != null;
+	}
+	
+	private static boolean declaresAsVirtual(IType type, IMethod m) throws JavaModelException{
+		IMethod found= findMethod(m, type);
+		if (found == null)
+			return false;
+		int flags= found.getFlags();	
+		if (Flags.isStatic(flags))	
+			return false;
+		if (Flags.isPrivate(flags))	
+			return false;	
+		return true;	
+	}
 }
