@@ -142,12 +142,12 @@ public class TypeConstraintTests extends RefactoringTest {
 	}
 
 	public void testConstraints4() throws Exception{
-		String[] strings= {"[as0] =^= A[]", "[a0] <= A", "[{a0,}] <= [as0]", "Decl(A:f()) =^= p.A", "[null] <= [a0]", "[a0] =^= A"};
+		String[] strings= {"[as0] =^= A[]", "[a0] <= A", "[{a0}] <= [as0]", "Decl(A:f()) =^= p.A", "[null] <= [a0]", "[a0] =^= A"};
 		testConstraints(strings);
 	}	
 
 	public void testConstraints5() throws Exception{
-		String[] strings= {"[as0] =^= A[]", "Decl(A:f()) =^= p.A", "[a0] <= A", "[a0] =^= A", "[null] <= [a0]", "[new A[]={a0,}] <= [as0]"};
+		String[] strings= {"[as0] =^= A[]", "Decl(A:f()) =^= p.A", "[a0] <= A", "[a0] =^= A", "[null] <= [a0]", "[new A[]={a0}] <= [as0]"};
 		testConstraints(strings);
 	}	
 
