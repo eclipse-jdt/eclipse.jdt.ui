@@ -155,11 +155,18 @@ public class JavaTextHover extends JavaElementHover {
 	protected List fInstantiatedTextHovers;
 	protected boolean fEnabled;
 	
+	
+	public JavaTextHover() {
+	}
+
 	public JavaTextHover(IEditorPart editor) {
-		
 		setEditor(editor);
 		
-		if (getEditor() != null) {
+	}
+
+	public void setEditor(IEditorPart editor) {
+		super.setEditor(editor);
+		if (editor != null) {
 			
 			fPartListener= new EditorWatcher();
 			IWorkbenchWindow window= getEditor().getSite().getWorkbenchWindow();
