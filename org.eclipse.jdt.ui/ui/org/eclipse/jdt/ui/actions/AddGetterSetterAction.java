@@ -115,7 +115,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	private boolean fGenerateComment;
 	private int fNumEntries;
 	private CompilationUnitEditor fEditor;
-	private static final String dialogTitle= ActionMessages.getString("AddGetterSetterAction.error.title"); //$NON-NLS-1$
+	private static final String DIALOG_TITLE= ActionMessages.getString("AddGetterSetterAction.error.title"); //$NON-NLS-1$
 
 	/**
 	 * Creates a new <code>AddGetterSetterAction</code>. The action requires
@@ -177,14 +177,14 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38500				
 				IType type= ((ICompilationUnit) firstElement).findPrimaryType();
 				if (type.isInterface()) {
-					MessageDialog.openInformation(getShell(), dialogTitle, ActionMessages.getString("AddGetterSetterAction.interface_not_applicable")); //$NON-NLS-1$					
+					MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.interface_not_applicable")); //$NON-NLS-1$					
 					return;
 				}
 				else 
 					run(((ICompilationUnit) firstElement).findPrimaryType(), new IField[0], false);
 			}
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), dialogTitle, ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
 		}
 				
 	}
@@ -218,11 +218,11 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 	private void run(IType type, IField[] preselected, boolean editor) throws CoreException {
 		if (type.isInterface()) {
-			MessageDialog.openInformation(getShell(), dialogTitle, ActionMessages.getString("AddGetterSetterAction.interface_not_applicable")); //$NON-NLS-1$					
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.interface_not_applicable")); //$NON-NLS-1$					
 			return;
 		}		
 		
-		if (!ElementValidator.check(type, getShell(), dialogTitle, editor))
+		if (!ElementValidator.check(type, getShell(), DIALOG_TITLE, editor))
 			return;
 		if (!ActionUtil.isProcessable(getShell(), type))
 			return;			
@@ -231,13 +231,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		resetNumEntries();
 		Map entries= createGetterSetterMapping(type);
 		if (entries.isEmpty()){
-			MessageDialog.openInformation(getShell(), dialogTitle, ActionMessages.getString("AddGettSetterAction.typeContainsNoFields.message")); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.getString("AddGettSetterAction.typeContainsNoFields.message")); //$NON-NLS-1$
 			return;
 		}	
 		AddGetterSetterContentProvider cp= new AddGetterSetterContentProvider(entries);
 		GetterSetterTreeSelectionDialog dialog= new GetterSetterTreeSelectionDialog(getShell(), lp, cp, fEditor, type);
 		dialog.setSorter(new JavaElementSorter());
-		dialog.setTitle(dialogTitle);
+		dialog.setTitle(DIALOG_TITLE);
 		String message= ActionMessages.getString("AddGetterSetterAction.dialog.label");//$NON-NLS-1$
 		dialog.setMessage(message);
 		dialog.setValidator(createValidator(fNumEntries));
@@ -539,10 +539,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 					} 
 				}
 			} 
-			MessageDialog.openInformation(getShell(), dialogTitle, 
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, 
 				ActionMessages.getString("AddGetterSetterAction.not_applicable")); //$NON-NLS-1$
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), dialogTitle, ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
 		}
 	}
 		
@@ -569,7 +569,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			}		
 		} catch (InvocationTargetException e) {
 			String message= ActionMessages.getString("AddGetterSetterAction.error.actionfailed"); //$NON-NLS-1$
-			ExceptionHandler.handle(e, getShell(), dialogTitle, message);
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, message);
 		} catch (InterruptedException e) {
 			// operation cancelled
 		} finally {
@@ -643,7 +643,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}	
 
 	private void showError(String message) {
-		MessageDialog.openError(getShell(), dialogTitle, message);
+		MessageDialog.openError(getShell(), DIALOG_TITLE, message);
 	}
 	
 	/*
