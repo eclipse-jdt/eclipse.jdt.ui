@@ -43,7 +43,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	private Text fFilterText;
 	
 	private ISelectionValidator fValidator;	
-	private String fFilter= ""; //$NON-NLS-1$
+	private String fFilter= null;
 	
 	private String fEmptyListMessage= ""; //$NON-NLS-1$
 	private String fEmptySelectionMessage= ""; //$NON-NLS-1$
@@ -166,7 +166,7 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	
 	/**
 	 * Returns the current filter pattern.
-	 * @return returns the current filter pattern.
+	 * @return returns the current filter pattern or <code>null<code> if filter was not set.
 	 */
 	public String getFilter() {
 		if (fFilteredList == null)
@@ -325,7 +325,10 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	}
 	
 	protected void initFilteredList() {
-		fFilteredList.setFilter(fFilter);				
+		if (fFilter == null)
+			fFilteredList.setFilter(""); //$NON-NLS-1$		
+		else
+			fFilteredList.setFilter(fFilter);
 	}
 	
 	protected Text createFilterText(Composite parent) {
@@ -351,7 +354,10 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	}
 
 	protected void initFilterText() {
-		fFilterText.setText(fFilter);
+		if (fFilter == null)
+			fFilterText.setText(""); //$NON-NLS-1$
+		else
+			fFilterText.setText(fFilter);
 	}
 
 	/*

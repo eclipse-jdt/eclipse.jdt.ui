@@ -88,6 +88,12 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 	public Control createDialogArea(Composite parent) {
 		Composite contents= (Composite) super.createDialogArea(parent);
 
+		List initialSelections= getInitialSelections();
+		if (initialSelections != null && initialSelections.size() != 0) {
+			String filter= (String) initialSelections.get(0);
+			setFilter(filter);
+		}
+
 		createMessageArea(contents);
 		createFilterText(contents);
 		createLabel(contents, fUpperListLabel);
@@ -162,7 +168,8 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 	 * @see SelectionStatusDialog#computeResult()
 	 */
 	protected void computeResult() {
-		setResult(Arrays.asList(getSelectedElements()));
+		Object[] results= new Object[] {getLowerSelectedElement()};
+		setResult(Arrays.asList(results));
 	}
 
 	/**

@@ -54,6 +54,13 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 		setUpperListLabel(JavaUIMessages.getString("TypeSelectionDialog.upperLabel")); //$NON-NLS-1$
 		setLowerListLabel(JavaUIMessages.getString("TypeSelectionDialog.lowerLabel")); //$NON-NLS-1$
 	}
+
+	public void create() {
+		if (getFilter() == null)
+			setFilter("A"); //$NON-NLS-1$
+				
+		super.create();
+	}
 	
 	/**
 	 * @see Window#open()
@@ -72,7 +79,7 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 			
 		TypeInfo[] typeRefs= (TypeInfo[])typeList.toArray(new TypeInfo[typeList.size()]);
 		setElements(typeRefs);
-		setFilter("A"); //$NON-NLS-1$
+
 		return super.open();
 	}
 	

@@ -76,7 +76,17 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 	}
 
 	/*
-	 * @private
+	 * @see Window#create()
+	 */
+	public void create() {	
+		if (getFilter() == null)
+			setFilter("A"); //$NON-NLS-1$
+			
+		super.create();				
+	}
+
+	/*
+	 * @see Window#open()
 	 */
 	public int open() {
 		MainMethodSearchEngine engine= new MainMethodSearchEngine();
@@ -92,7 +102,6 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 		}
 		
 		setElements(types);
-		setFilter("A"); //$NON-NLS-1$
 		return super.open();
 	}
 	
