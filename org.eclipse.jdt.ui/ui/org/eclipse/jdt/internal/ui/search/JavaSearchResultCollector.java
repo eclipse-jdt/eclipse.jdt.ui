@@ -5,9 +5,38 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.text.MessageFormat;
-import java.util.HashMap;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.viewers.IInputSelectionProvider;import org.eclipse.jface.viewers.ISelection;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.search.ui.IContextMenuContributor;import org.eclipse.search.ui.ISearchResultView;import org.eclipse.search.ui.ISearchResultViewEntry;import org.eclipse.search.ui.SearchUI;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.search.IJavaSearchResultCollector;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.GroupContext;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;import org.eclipse.jdt.internal.ui.util.SelectionUtil;import org.eclipse.jdt.ui.JavaUI;
+import java.util.HashMap;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.viewers.IInputSelectionProvider;
+import org.eclipse.jface.viewers.ISelection;
+
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+
+import org.eclipse.search.ui.IContextMenuContributor;
+import org.eclipse.search.ui.ISearchResultView;
+import org.eclipse.search.ui.ISearchResultViewEntry;
+import org.eclipse.search.ui.SearchUI;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
+
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.jdt.internal.ui.actions.GroupContext;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 
 public class JavaSearchResultCollector implements IJavaSearchResultCollector {
@@ -25,12 +54,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	private Integer[] fMessageFormatArgs= new Integer[1];
 	
 	private class ContextMenuContributor implements IContextMenuContributor {
-		private ElementSearchAction[] fSearchActions= new ElementSearchAction[] {
-			new FindReferencesAction(), 
-			new FindDeclarationsAction(),
-			new FindHierarchyDeclarationsAction(),
-			new FindImplementorsAction()};
-						
+
 		public void fill(IMenuManager menu, IInputSelectionProvider inputProvider) {
 			IWorkbenchWindow wbWindow= null;
 			if (fView != null && fView.getSite() != null)
