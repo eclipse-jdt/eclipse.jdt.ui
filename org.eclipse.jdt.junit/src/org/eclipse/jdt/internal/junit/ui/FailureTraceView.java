@@ -7,6 +7,8 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sebastian Davids: sdavids@gmx.de bug 37333 Failure Trace cannot 
+ * 			navigate to non-public class in CU throwing Exception  
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
@@ -113,9 +115,11 @@ class FailureTraceView implements IMenuListener {
 				testName= testName.substring(0, innerSeparatorIndex);
 			
 			String lineNumber= traceLine;
-			lineNumber= lineNumber.substring(lineNumber.indexOf(':') + 1, lineNumber.indexOf(")")); //$NON-NLS-1$
+			lineNumber= lineNumber.substring(lineNumber.indexOf(':') + 1, lineNumber.indexOf(')'));
 			int line= Integer.valueOf(lineNumber).intValue();
-			return new OpenEditorAtLineAction(fTestRunner, testName, line);
+			//fix for bug 37333	
+			String cuName= traceLine.substring(traceLine.indexOf('(') + 1, traceLine.indexOf(':'));
+			return new OpenEditorAtLineAction(fTestRunner, cuName, testName, line);
 		} catch(NumberFormatException e) {
 		}
 		catch(IndexOutOfBoundsException e) {	
