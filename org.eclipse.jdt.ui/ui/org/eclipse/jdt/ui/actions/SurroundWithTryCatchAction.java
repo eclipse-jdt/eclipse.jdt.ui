@@ -40,7 +40,6 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringErrorDialogUtil;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -49,7 +48,7 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
-import org.eclipse.ltk.internal.ui.refactoring.UIPerformChangeOperation;
+import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 /**
  * Action to surround a set of statements with a try/catch block.
@@ -114,8 +113,8 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		try {
 			RefactoringStatus status= refactoring.checkInitialConditions(new NullProgressMonitor());
 			if (status.hasFatalError()) {
-				RefactoringErrorDialogUtil.open(getDialogTitle(), status, getShell());
 				RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);
+				MessageDialog.openInformation(getShell(), getDialogTitle(), entry.getMessage());
 				if (entry.getContext() instanceof JavaStatusContext && fEditor != null) {
 					JavaStatusContext context= (JavaStatusContext)entry.getContext();
 					ISourceRange range= context.getSourceRange();
@@ -127,7 +126,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 				return;
 			Change change= refactoring.createChange(new NullProgressMonitor());
 			change.initializeValidationData(new NullProgressMonitor());
-			PerformChangeOperation op= new UIPerformChangeOperation(change);
+			PerformChangeOperation op= RefactoringUI.createUIAwareChangeOperation(change);
 			new BusyIndicatorRunnableContext().run(false, false, new WorkbenchRunnableAdapter(op)); // lock workspace
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.getString("SurroundWithTryCatchAction.exception")); //$NON-NLS-1$

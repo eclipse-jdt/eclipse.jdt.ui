@@ -51,7 +51,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
-import org.eclipse.ltk.internal.ui.refactoring.RefactoringPreferences;
+
+import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 /**
  * Central access point to execute rename refactorings.
@@ -136,7 +137,7 @@ public class RenameSupport {
 			throw new InvocationTargetException(e);
 		}
 		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(fRefactoring,
-			RefactoringPreferences.getStopSeverity(), true, parent, context);
+			RefactoringUI.getConditionCheckingFailedSeverity(), true, parent, context);
 		helper.perform();
 	}
 	

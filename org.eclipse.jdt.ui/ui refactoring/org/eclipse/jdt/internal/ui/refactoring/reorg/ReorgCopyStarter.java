@@ -28,8 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 
-import org.eclipse.ltk.internal.ui.refactoring.RefactoringPreferences;
-
+import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 public class ReorgCopyStarter {
 	
@@ -68,6 +67,6 @@ public class ReorgCopyStarter {
 		IRunnableContext context= new ProgressMonitorDialog(parent);
 		fCopyRefactoring.setNewNameQueries(new NewNameQueries(parent));
 		fCopyRefactoring.setReorgQueries(new ReorgQueries(parent));
-		new RefactoringExecutionHelper(fCopyRefactoring, RefactoringPreferences.getStopSeverity(), false, parent, context).perform();
+		new RefactoringExecutionHelper(fCopyRefactoring, RefactoringUI.getConditionCheckingFailedSeverity(), false, parent, context).perform();
 	}
 }

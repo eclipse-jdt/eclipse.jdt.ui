@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -63,26 +63,31 @@ public class CreateTextFileChangePreviewViewer implements IChangePreviewViewer {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.refactoring.IChangePreviewViewer#setInput(java.lang.Object)
 	 */
-	public void setInput(ChangePreviewViewerInput input) throws CoreException {
-		Change change= input.getChange();
-		if (!(change instanceof CreateTextFileChange)) {
-			fSourceViewer.setInput(null);
-			fPane.setText(""); //$NON-NLS-1$
-			return;
+	public void setInput(ChangePreviewViewerInput input) {
+		try {
+			Change change= input.getChange();
+			if (!(change instanceof CreateTextFileChange)) {
+				fSourceViewer.setInput(null);
+				fPane.setText(""); //$NON-NLS-1$
+				return;
+			}
+			CreateTextFileChange textFileChange= (CreateTextFileChange)change;
+			fPane.setText(textFileChange.getName());
+			IDocument document= new Document(textFileChange.getPreview());
+			// This is a temporary work around until we get the
+			// source viewer registry.
+			if ("java".equals(textFileChange.getTextType())) { //$NON-NLS-1$
+				JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+				textTools.setupJavaDocumentPartitioner(document);
+				fSourceViewer.configure(new JavaSourceViewerConfiguration(textTools, null));
+			} else {
+				fSourceViewer.configure(new SourceViewerConfiguration());
+			}
+			fSourceViewer.setInput(document);
+		} catch (JavaModelException e) {
+			Document doc= new Document(e.getMessage());
+			fSourceViewer.setInput(doc);
 		}
-		CreateTextFileChange textFileChange= (CreateTextFileChange)change;
-		fPane.setText(textFileChange.getName());
-		IDocument document= new Document(textFileChange.getPreview());
-		// This is a temporary work around until we get the
-		// source viewer registry.
-		if ("java".equals(textFileChange.getTextType())) { //$NON-NLS-1$
-			JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-			textTools.setupJavaDocumentPartitioner(document);
-			fSourceViewer.configure(new JavaSourceViewerConfiguration(textTools, null));
-		} else {
-			fSourceViewer.configure(new SourceViewerConfiguration());
-		}
-		fSourceViewer.setInput(document);
 	}
 
 	/* (non-Javadoc)
