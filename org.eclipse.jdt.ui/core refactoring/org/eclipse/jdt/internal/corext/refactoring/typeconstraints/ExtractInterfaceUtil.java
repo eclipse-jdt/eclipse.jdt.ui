@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -44,6 +45,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
@@ -57,7 +59,7 @@ public final class ExtractInterfaceUtil {
 
 	private ExtractInterfaceUtil(){}
 	
-	public static ConstraintVariable[] getAllOfType(ITypeConstraint[] constraints, ITypeBinding binding){
+	private static ConstraintVariable[] getAllOfType(ITypeConstraint[] constraints, ITypeBinding binding){
 		Set result= new HashSet();
 		ITypeBinding typeBinding= binding;
 		for (int i= 0; i < constraints.length; i++) {
@@ -75,22 +77,25 @@ public final class ExtractInterfaceUtil {
 		return (ConstraintVariable[]) result.toArray(new ConstraintVariable[result.size()]);
 	}
 
-	
-//---------------------------------------------------------//
-	public static ConstraintVariable[] getUpdatable(IType theClass, IType theInterface, IProgressMonitor pm) throws JavaModelException{
-		ASTNodeMappingManager astManager= new ASTNodeMappingManager();
+	private static ConstraintVariable[] getUpdatable(IType theClass, IType theInterface, ASTNodeMappingManager astManager, IProgressMonitor pm) throws JavaModelException{
 		ITypeBinding classBinding= getTypeBinding(theClass, astManager);
 		ITypeBinding interfaceBinding= getTypeBinding(theInterface, astManager);
 		ICompilationUnit[] referringCus= getCusToParse(theClass, pm, astManager);
 		ITypeConstraint[] constraints= getConstraints(referringCus, astManager);
-//		for (int i= 0; i < constraints.length; i++) {
-//			System.out.println("-----------------------------");
-//			System.out.println("constraint: " + constraints[i].toString());
-//			System.out.println("resolved:   " + constraints[i].toResolvedString());
-//			System.out.println("satisfied:  " + constraints[i].isSatisfied());
-//		}
-
 		return getUpdatable(constraints, classBinding, interfaceBinding);
+	}
+
+//	for (int i= 0; i < constraints.length; i++) {
+//		System.out.println("-----------------------------");
+//		System.out.println("constraint: " + constraints[i].toString());
+//		System.out.println("resolved:   " + constraints[i].toResolvedString());
+//		System.out.println("satisfied:  " + constraints[i].isSatisfied());
+//	}
+	
+	public static ASTNode[] getUpdatableNodes(IType theClass, IType theInterface, IProgressMonitor pm) throws JavaModelException{
+		ASTNodeMappingManager astManager= new ASTNodeMappingManager();
+		ConstraintVariable[] updatableVars= getUpdatable(theClass, theInterface, astManager, pm);
+		return getNodes(updatableVars, theClass.getJavaProject(), astManager);//XXX scope is bogus
 	}
 
 	private static ConstraintVariable[] getUpdatable(ITypeConstraint[] constraints, ITypeBinding classBinding, ITypeBinding interfaceBinding){
@@ -121,30 +126,96 @@ public final class ExtractInterfaceUtil {
 		System.out.println("bad:" + bad);
 		Set updatable= new HashSet(setOfAll);
 		updatable.removeAll(bad);
-		System.out.println("good:"+ updatable);
+//		System.out.println("good:"+ updatable);
 		return (ConstraintVariable[]) updatable.toArray(new ConstraintVariable[updatable.size()]);
 	}
 	
-	public static ConstraintVariable[] getInitialBad(Set setOfAll, ITypeConstraint[] constraints, ITypeBinding interfaceBinding){
+	private static ConstraintVariable[] getInitialBad(Set setOfAll, ITypeConstraint[] constraints, ITypeBinding interfaceBinding){
 		ConstraintVariable interfaceVariable= new RawBindingVariable(interfaceBinding);
 		Set result= new HashSet();
 		for (int i= 0; i < constraints.length; i++) {
 			ITypeConstraint constraint= constraints[i];
 			if (constraint instanceof SubtypeConstraint){
 				SubtypeConstraint sc= (SubtypeConstraint)constraint;
-				ConstraintVariable left= sc.getLeft();
-				ConstraintVariable right= sc.getRight();
-				if (left instanceof ExpressionVariable && right instanceof TypeVariable && setOfAll.contains(left) && ! setOfAll.contains(right) && ! interfaceVariable.isSubtypeOf(right))
-					result.add(left);
-				else if (left instanceof ExpressionVariable && right instanceof ExpressionVariable && setOfAll.contains(left) && ! setOfAll.contains(right) && ! interfaceVariable.isSubtypeOf(right)) 
-					result.add(left);
-				else if (left instanceof ExpressionVariable && right instanceof RawBindingVariable && setOfAll.contains(left) && ! interfaceVariable.isSubtypeOf(right))
-					result.add(left);
-				else if (left instanceof ExpressionVariable && right instanceof DeclaringTypeVariable && setOfAll.contains(left) && ! interfaceVariable.isSubtypeOf(right))
-					result.add(left);
-			} //TODO handle OR constraints
+				if (canAddLeftSideToInitialBadSet(sc, setOfAll, interfaceVariable))
+					result.add(sc.getLeft());
+			} else if (constraint instanceof CompositeOrTypeConstraint){
+				ITypeConstraint[] subConstraints= ((CompositeOrTypeConstraint)constraint).getConstraints();
+				if (canAddLeftSideToInitialBadSet(subConstraints, setOfAll, interfaceVariable))
+					result.add(((SimpleTypeConstraint)subConstraints[0]).getLeft());
+			}
 		}
 		return (ConstraintVariable[]) result.toArray(new ConstraintVariable[result.size()]);
+	}
+	
+	private static boolean canAddLeftSideToInitialBadSet(SubtypeConstraint sc, Set setOfAll, ConstraintVariable interfaceVariable) {
+		ConstraintVariable left= sc.getLeft();
+		ConstraintVariable right= sc.getRight();
+		if (! (left instanceof ExpressionVariable))
+			return false;
+		else if (! setOfAll.contains(left))	
+			return false;
+		else if (interfaceVariable.isSubtypeOf(right))
+			return false;
+		else if ((right instanceof ExpressionVariable || right instanceof TypeVariable) && setOfAll.contains(right))
+			return false;
+		else if (! (right instanceof RawBindingVariable) && !( right instanceof DeclaringTypeVariable))
+			return false;//TODO this case is strange
+		else
+			return true;
+	}
+
+	private static boolean canAddLeftSideToInitialBadSet(ITypeConstraint[] subConstraints, Set setOfAll, ConstraintVariable interfaceVariable) {
+		if (subConstraints.length == 0)
+			return false;
+		if (! allAreSimpleConstraints(subConstraints))
+			return false;
+		
+		SimpleTypeConstraint[] simpleTypeConstraints= toSimpleConstraintArray(subConstraints);
+		if (! allHaveSameLeftSide(simpleTypeConstraints))
+			return false;
+		
+		ConstraintVariable left= (simpleTypeConstraints[0]).getLeft();
+		if (! (left instanceof ExpressionVariable))
+			return false;
+		if (! setOfAll.contains(left))
+			return false;
+		if (rightSideIsSubtypeOf(simpleTypeConstraints, interfaceVariable))
+			return false;
+		return true;
+	}
+
+	private static boolean rightSideIsSubtypeOf(SimpleTypeConstraint[] simpleTypeConstraints, ConstraintVariable interfaceVariable) {
+		for (int i= 0; i < simpleTypeConstraints.length; i++) {
+			ConstraintVariable right= simpleTypeConstraints[i].getRight();
+			if (right.isSubtypeOf(interfaceVariable))
+				return true;
+		}
+		return false;
+	}
+	
+	private static SimpleTypeConstraint[] toSimpleConstraintArray(ITypeConstraint[] subConstraints) {
+		List result= Arrays.asList(subConstraints);
+		return (SimpleTypeConstraint[]) result.toArray(new SimpleTypeConstraint[result.size()]);
+	}
+
+	private static boolean allAreSimpleConstraints(ITypeConstraint[] subConstraints) {
+		for (int i= 0; i < subConstraints.length; i++) {
+			ITypeConstraint constraint= subConstraints[i];
+			if (! constraint.isSimpleTypeConstraint())
+				return false;
+		}
+		return true;
+	}
+
+	private static boolean allHaveSameLeftSide(SimpleTypeConstraint[] constraints) {
+		Assert.isTrue(constraints.length > 0);
+		ConstraintVariable first= constraints[0].getLeft();
+		for (int i= 1; i < constraints.length; i++) {
+			if (! first.equals(constraints[i].getLeft()))
+				return false;
+		}
+		return true;
 	}
 
 	private static ITypeConstraint[] getConstraints(ICompilationUnit[] referringCus, ASTNodeMappingManager astManager) {
@@ -178,7 +249,6 @@ public final class ExtractInterfaceUtil {
 		ISearchPattern pattern= createPatternForReferencingFieldsAndMethods(typeReferenceNodes, astManager);
 		if (pattern == null)
 			return new ICompilationUnit[0];
-		//TODO scope
 		IJavaSearchScope scope= RefactoringScopeFactory.create(theClass);
 		return RefactoringSearchEngine.findAffectedCompilationUnits(pm, scope, pattern);
 	}
@@ -298,5 +368,62 @@ public final class ExtractInterfaceUtil {
 
 	private static ITypeBinding getTypeBinding(IType theType, ASTNodeMappingManager astManager) throws JavaModelException {
 		return ASTNodeSearchUtil.getTypeDeclarationNode(theType, astManager).resolveBinding();
+	}
+	
+	//-- which nodes to update ----//
+	
+	private static ASTNode[] getNodes(ConstraintVariable[] variables, IJavaProject scope, ASTNodeMappingManager astManager) {
+		Set nodes= new HashSet();
+		for (int i= 0; i < variables.length; i++) {
+			ConstraintVariable variable= variables[i];
+			ASTNode node= getNode(variable, scope, astManager);
+			if (node != null)
+				nodes.add(node);
+		}
+		return (ASTNode[]) nodes.toArray(new ASTNode[nodes.size()]);
+	}
+
+	private static ASTNode getNode(ConstraintVariable variable, IJavaProject scope, ASTNodeMappingManager astManager) {
+		try {
+			if (variable instanceof DeclaringTypeVariable)
+				return null;
+			else if (variable instanceof RawBindingVariable)
+				return null;
+			else if (variable instanceof ParameterTypeVariable)
+				return getNode((ParameterTypeVariable)variable, scope, astManager);
+			else if (variable instanceof ReturnTypeVariable)
+				return getNode((ReturnTypeVariable)variable, scope, astManager);
+			else if (variable instanceof TypeVariable)
+				return ((TypeVariable)variable).getType();
+			else //TODO is this enough?
+				return null;
+		} catch (JavaModelException e) {
+			//TODO log
+			return null;
+		}
+	}
+	
+	private static ASTNode getNode(ReturnTypeVariable variable, IJavaProject scope, ASTNodeMappingManager astManager) throws JavaModelException {
+		IMethodBinding methodBinding= variable.getMethodBinding();
+		MethodDeclaration declaration= findMethodDeclaration(methodBinding, scope, astManager);
+		if (declaration == null)
+			return null;
+		return declaration.getReturnType();
+	}
+
+	private static ASTNode getNode(ParameterTypeVariable variable, IJavaProject scope, ASTNodeMappingManager astManager) throws JavaModelException{
+		IMethodBinding method= variable.getMethodBinding();
+		int paramIndex= variable.getParameterIndex();
+		MethodDeclaration declaration= findMethodDeclaration(method, scope, astManager);
+		if (declaration == null)
+			return null;
+		return ((SingleVariableDeclaration)declaration.parameters().get(paramIndex)).getType();
+	}
+
+	private static MethodDeclaration findMethodDeclaration(IMethodBinding methodBinding, IJavaProject scope, ASTNodeMappingManager astManager) throws JavaModelException {
+		IMethod method= Binding2JavaModel.find(methodBinding, scope);
+		if (method == null)
+			return null;
+		return ASTNodeSearchUtil.getMethodDeclarationNode(method, astManager);
 	}
 }
