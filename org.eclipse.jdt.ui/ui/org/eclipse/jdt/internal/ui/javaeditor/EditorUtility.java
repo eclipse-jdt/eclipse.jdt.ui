@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -165,10 +166,33 @@ public class EditorUtility {
 	 */
 	public static String getEditorID(IEditorInput input, Object inputObject) {
 		IEditorRegistry registry= PlatformUI.getWorkbench().getEditorRegistry();
-		IEditorDescriptor descriptor= registry.getDefaultEditor(input.getName());
-		if (descriptor != null)
-			return descriptor.getId();
-		return null;
+		String inputName= input.getName();
+
+		/*
+		 * XXX: This is code copied from IDE.openEditor
+		 *      Filed bug 50285 requesting API for getting the descriptor 
+		 */ 
+		
+		// check for a default editor
+		IEditorDescriptor editorDescriptor= registry.getDefaultEditor(inputName);
+		
+		// next check the OS for in-place editor (OLE on Win32)
+		if (editorDescriptor == null && registry.isSystemInPlaceEditorAvailable(inputName))
+			editorDescriptor= registry.findEditor(IEditorRegistry.SYSTEM_INPLACE_EDITOR_ID);
+		
+		// next check with the OS for an external editor
+		if (editorDescriptor == null && registry.isSystemExternalEditorAvailable(inputName))
+			editorDescriptor= registry.findEditor(IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID);
+		
+		// next lookup the default text editor
+		if (editorDescriptor == null)
+			editorDescriptor= registry.findEditor("org.eclipse.ui.DefaultTextEditor"); //$NON-NLS-1$
+		
+		// if no valid editor found, bail out
+		if (editorDescriptor == null)
+			return null;
+		
+		return editorDescriptor.getId();
 	}
 	
 	private static IEditorInput getEditorInput(IJavaElement element) throws JavaModelException {
