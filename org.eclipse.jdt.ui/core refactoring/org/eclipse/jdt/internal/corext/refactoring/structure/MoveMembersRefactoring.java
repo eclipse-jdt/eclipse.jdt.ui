@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 public class MoveMembersRefactoring extends Refactoring {
 	
@@ -537,9 +538,10 @@ public class MoveMembersRefactoring extends Refactoring {
 	
 	private TextEdit createAddMemberEdit(String source, int memberType) throws JavaModelException {
 		IMember sibling= getLastMember(fDestinationType, memberType);
+		String[] sourceLines= Strings.removeTrailingEmptyLines(Strings.convertIntoLines(source));
 		if (sibling != null)
-			return new MemberEdit(sibling, MemberEdit.INSERT_AFTER, new String[]{ source}, CodeFormatterUtil.getTabWidth());
-		return new MemberEdit(fDestinationType, MemberEdit.ADD_AT_END, new String[]{ source}, CodeFormatterUtil.getTabWidth());
+			return new MemberEdit(sibling, MemberEdit.INSERT_AFTER, sourceLines, CodeFormatterUtil.getTabWidth());
+		return new MemberEdit(fDestinationType, MemberEdit.ADD_AT_END, sourceLines, CodeFormatterUtil.getTabWidth());
 	}
 	
 	private void addDeleteMembersChange(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
