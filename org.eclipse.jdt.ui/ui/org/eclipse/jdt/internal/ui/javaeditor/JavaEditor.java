@@ -54,6 +54,8 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
@@ -2577,6 +2579,24 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE))
 			configureInsertMode(OVERWRITE, false);
+		
+		getEditorSite().getShell().addListener(SWT.Deactivate, new Listener() {
+			/*
+			 * @see org.eclipse.swt.widgets.Listener#handleEvent(org.eclipse.swt.widgets.Event)
+			 */
+			public void handleEvent(Event event) {
+				removeOccurrenceAnnotations();
+			}
+		});
+
+		getEditorSite().getShell().addListener(SWT.Activate, new Listener() {
+			/*
+			 * @see org.eclipse.swt.widgets.Listener#handleEvent(org.eclipse.swt.widgets.Event)
+			 */
+			public void handleEvent(Event event) {
+				updateOccurrences();
+			}
+		});
 	}
 	
 	protected void configureSourceViewerDecorationSupport(SourceViewerDecorationSupport support) {
