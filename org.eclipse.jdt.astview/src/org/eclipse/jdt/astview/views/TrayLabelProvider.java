@@ -23,6 +23,8 @@ import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 public class TrayLabelProvider extends LabelProvider implements IColorProvider {
 	
 	private Color fBlue, fRed;
+	private Color fWidgetForeground;
+	
 	private Binding fViewerElement;
 	
 	public TrayLabelProvider() {
@@ -30,6 +32,7 @@ public class TrayLabelProvider extends LabelProvider implements IColorProvider {
 		
 		fRed= display.getSystemColor(SWT.COLOR_RED);
 		fBlue= display.getSystemColor(SWT.COLOR_DARK_BLUE);
+		fWidgetForeground= display.getSystemColor(SWT.COLOR_WIDGET_FOREGROUND);
 	}
 	
 	public void setViewerElement(Binding viewerElement) {
@@ -41,7 +44,9 @@ public class TrayLabelProvider extends LabelProvider implements IColorProvider {
 	
 	public String getText(Object obj) {
 		if (obj instanceof DynamicBindingProperty) {
-			return ((DynamicBindingProperty) obj).getLabel(fViewerElement);
+			DynamicBindingProperty dynamicBindingProperty= (DynamicBindingProperty) obj;
+			dynamicBindingProperty.setViewerElement(fViewerElement);
+			return dynamicBindingProperty.getLabel();
 		} else if (obj instanceof ASTAttribute) {
 			return ((ASTAttribute) obj).getLabel();
 		} else {
@@ -50,7 +55,11 @@ public class TrayLabelProvider extends LabelProvider implements IColorProvider {
 	}
 	
 	public Image getImage(Object obj) {
-		if (obj instanceof ASTAttribute) {
+		if (obj instanceof DynamicBindingProperty) {
+			DynamicBindingProperty dynamicBindingProperty= (DynamicBindingProperty) obj;
+			dynamicBindingProperty.setViewerElement(fViewerElement);
+			return dynamicBindingProperty.getImage();
+		} else if (obj instanceof ASTAttribute) {
 			return ((ASTAttribute) obj).getImage();
 		} else {
 			return null;
@@ -71,13 +80,25 @@ public class TrayLabelProvider extends LabelProvider implements IColorProvider {
 	public Color getForeground(Object element) {
 		if (element instanceof Binding) {
 			Binding binding= (Binding) element;
-			if (binding.isRequired() && binding.getBinding() == null) {
+			if (binding.isRequired() && binding.getBinding() == null)
 				return fRed;
-			} else {
+			else
 				return fBlue;
-			}
+			
+		} else if (element instanceof ExceptionAttribute) {
+			if (element instanceof DynamicBindingProperty)
+				((DynamicBindingProperty) element).setViewerElement(fViewerElement);
+			
+			if (((ExceptionAttribute) element).getException() == null)
+//				return null; //Bug 75022: Does not work when label is updated (retains old color, doesn't get default)
+				//TODO remove hackaround when bug 75022 is fixed
+				return fWidgetForeground;
+			else
+				return fRed;
+			
+		} else {
+			return null; // normal color
 		}
-		return null; // normal color
 	}
 	
 	/*

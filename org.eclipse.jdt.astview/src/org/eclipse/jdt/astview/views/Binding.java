@@ -79,6 +79,7 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "MODIFIERS", Flags.toString(fBinding.getModifiers()))); //$NON-NLS-1$
 					res.add(new Binding(this, "TYPE", variableBinding.getType(), false)); //$NON-NLS-1$
 					res.add(new Binding(this, "DECLARING CLASS", variableBinding.getDeclaringClass(), false)); //$NON-NLS-1$
+					res.add(new Binding(this, "DECLARING METHOD", variableBinding.getDeclaringMethod(), false)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated())); //$NON-NLS-1$
 					Object constVal= variableBinding.getConstantValue();
@@ -172,12 +173,8 @@ public class Binding extends ASTAttribute {
 				IJavaElement javaElement= fBinding.getJavaElement();
 				res.add(new JavaElement(this, javaElement));
 			} catch (RuntimeException e) {
-				String msg;
-				if (e.getMessage() == null)
-					msg= e.getClass().getName();
-				else
-					msg= e.getClass().getName() + ": " + e.getMessage(); //$NON-NLS-1$
-				res.add(new Error(this, "!!! java element: " + msg)); //$NON-NLS-1$
+				String label= ">java element: " + e.getClass().getName() + " for \"" + fBinding.getKey() + "\"";  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+				res.add(new Error(this, label, e));
 			}
 			return res.toArray();
 		}

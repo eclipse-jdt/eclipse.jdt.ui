@@ -8,36 +8,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.astview.views;
 
-import org.eclipse.swt.graphics.Image;
 
+public abstract class ExceptionAttribute extends ASTAttribute {
 
-public class Error extends ExceptionAttribute {
-	
-	private final Binding fParent;
-	private final String fLabel;
-	
-	public Error(Binding parent, String label, RuntimeException thrownException) {
-		fParent= parent;
-		fLabel= label;
-		fException= thrownException;
+	protected RuntimeException fException= null;
+
+	public RuntimeException getException() {
+		return fException;
 	}
 
-	public Object[] getChildren() {
-		return EMPTY;
-	}
-
-	public Image getImage() {
-		return null;
-	}
-
-	public String getLabel() {
-		return fLabel;
-	}
-
-	public Object getParent() {
-		return fParent;
-	}
 }

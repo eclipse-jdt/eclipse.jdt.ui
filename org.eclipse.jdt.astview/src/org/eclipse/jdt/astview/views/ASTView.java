@@ -31,15 +31,17 @@ import org.eclipse.jdt.astview.EditorUtility;
 import org.eclipse.jdt.astview.NodeFinder;
 import org.eclipse.jdt.astview.TreeInfoCollector;
 
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -49,6 +51,8 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
@@ -84,6 +88,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.ISelectionService;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPart;
@@ -95,6 +100,7 @@ import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
@@ -365,6 +371,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private ArrayList fTrayRoots;
 	private Action fAddToTrayAction;
 	private ISelectionChangedListener fTrayUpdater;
+	private Action fDeleteAction;
 	
 	public ASTView() {
 		fSuperListener= null;
@@ -463,12 +470,22 @@ public class ASTView extends ViewPart implements IShowInSource {
 		boolean useReconciler= input instanceof ICompilationUnit && fUseReconcilerAction.isChecked();
 		
 		if (useReconciler) {
-			ICompilationUnit wc= ((ICompilationUnit) input).getWorkingCopy(null);
+			ICompilationUnit wc= ((ICompilationUnit) input).getWorkingCopy(
+					new WorkingCopyOwner() {/*useless subclass*/},
+					new IProblemRequestor() { //TODO: strange: don't get bindings when supplying null as problemRequestor
+						public void acceptProblem(IProblem problem) {/*not interested*/}
+						public void beginReporting() {/*not interested*/}
+						public void endReporting() {/*not interested*/}
+						public boolean isActive() {
+							return true;
+						}
+					},
+					null);
 			try {
 				//make inconsistent (otherwise, no AST is generated):
-				IBuffer buffer= wc.getBuffer();
-				buffer.append(new char[] {' '});
-				buffer.replace(buffer.getLength() - 2, 1, new char[0]);
+//				IBuffer buffer= wc.getBuffer();
+//				buffer.append(new char[] {' '});
+//				buffer.replace(buffer.getLength() - 1, 1, new char[0]);
 				
 				startTime= System.currentTimeMillis();
 				root= wc.reconcile(getCurrentASTLevel(), true, null, null);
@@ -575,7 +592,33 @@ public class ASTView extends ViewPart implements IShowInSource {
 		};
 		fTray.addPostSelectionChangedListener(fTrayUpdater);
 		fViewer.addPostSelectionChangedListener(fTrayUpdater);
-		//TODO: hook tray context menu, copy & delete actions, ...
+		fTray.addDoubleClickListener(new IDoubleClickListener() {
+			public void doubleClick(DoubleClickEvent event) {
+				performTrayDoubleClick();
+			}
+		});
+		fTray.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				IStructuredSelection selection= (IStructuredSelection) event.getSelection();
+				boolean deleteEnabled= false;
+				if (selection.size() == 1 && selection.getFirstElement() instanceof Binding)
+					deleteEnabled= fTray.getTree().isFocusControl();
+				fDeleteAction.setEnabled(deleteEnabled);
+			}
+		});
+		fTray.getTree().addFocusListener(new FocusAdapter() {
+			public void focusGained(FocusEvent e) {
+				IStructuredSelection selection= (IStructuredSelection) fTray.getSelection();
+				boolean deleteEnabled= false;
+				if (selection.size() == 1 && selection.getFirstElement() instanceof Binding)
+					deleteEnabled= true;
+				fDeleteAction.setEnabled(deleteEnabled);
+			}
+			public void focusLost(FocusEvent e) {
+				fDeleteAction.setEnabled(false);
+			}
+		});
+		//TODO: hook tray context menu with copy & delete actions, ...
 		
 		makeActions();
 		hookContextMenu();
@@ -617,6 +660,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fillLocalToolBar(bars.getToolBarManager());
 		bars.setGlobalActionHandler(ActionFactory.COPY.getId(), fCopyAction);
 		bars.setGlobalActionHandler(ActionFactory.REFRESH.getId(), fFocusAction);
+		bars.setGlobalActionHandler(ActionFactory.DELETE.getId(), fDeleteAction);
 	}
 
 	private void fillLocalPullDown(IMenuManager manager) {
@@ -742,6 +786,18 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fAddToTrayAction.setToolTipText("Add Selected Node to Comparison Tray"); //$NON-NLS-1$
 		fAddToTrayAction.setEnabled(false);
 		ASTViewImages.setImageDescriptors(fAddToTrayAction, ASTViewImages.ADD_TO_TRAY);
+		
+		fDeleteAction= new Action() {
+			public void run() {
+				performDelete();
+			}
+		};
+		fDeleteAction.setText("&Delete"); //$NON-NLS-1$
+		fDeleteAction.setToolTipText("Delete Binding from Tray"); //$NON-NLS-1$
+		fDeleteAction.setEnabled(false);
+		fDeleteAction.setImageDescriptor(ASTViewPlugin.getDefault().getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE));
+		fDeleteAction.setId(ActionFactory.DELETE.getId());
+		fDeleteAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.DELETE);
 	}
 	
 	private void refreshAST() throws CoreException {
@@ -810,14 +866,15 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fExpandAction.setEnabled(!selection.isEmpty());
 		fCollapseAction.setEnabled(!selection.isEmpty());
 		fCopyAction.setEnabled(!selection.isEmpty());
-		boolean enabled= false;
+		
+		boolean addEnabled= false;
 		IStructuredSelection structuredSelection= (IStructuredSelection) selection;
 		if (structuredSelection.size() == 1) {
 			Object first= structuredSelection.getFirstElement();
 			if (first instanceof Binding)
-				enabled= ((Binding) first).getBinding() != null;
+				addEnabled= ((Binding) first).getBinding() != null && fViewer.getTree().isFocusControl();
 		}
-		fAddToTrayAction.setEnabled(enabled);
+		fAddToTrayAction.setEnabled(addEnabled);
 	}
 
 	protected void handleEditorPostSelectionChanged(IWorkbenchPart part, ISelection selection) {
@@ -914,6 +971,12 @@ public class ASTView extends ViewPart implements IShowInSource {
 		ErrorDialog.openError(getSite().getShell(), "AST View", message, e.getStatus()); //$NON-NLS-1$
 	}
 	
+	private void showAndLogError(String message, Exception e) {
+		IStatus status= new Status(IStatus.ERROR, ASTViewPlugin.getPluginId(), 0, message, e);
+		ASTViewPlugin.log(status);
+		ErrorDialog.openError(getSite().getShell(), "AST View", null, status); //$NON-NLS-1$
+	}
+	
 	protected void performUseReconciler() {
 		fDoUseReconciler= fUseReconcilerAction.isChecked();
 		performRefresh();
@@ -925,6 +988,15 @@ public class ASTView extends ViewPart implements IShowInSource {
 
 		boolean isTrippleClick= (obj == fPreviousDouble);
 		fPreviousDouble= isTrippleClick ? null : obj;
+		
+		if (obj instanceof ExceptionAttribute) {
+			RuntimeException exception= ((ExceptionAttribute) obj).getException();
+			if (exception != null) {
+				String label= ((ExceptionAttribute) obj).getLabel();
+				showAndLogError("An error occurred while calculating an AST View Label:\n" + label, exception); //$NON-NLS-1$
+				return;
+			}
+		}
 		
 		ASTNode node= null;
 		if (obj instanceof ASTNode) {
@@ -980,16 +1052,60 @@ public class ASTView extends ViewPart implements IShowInSource {
 			fTrayRoots.add(firstElement);
 			fTray.setInput(fTrayRoots);
 		}
-		fTray.setSelection(selection, true);
 		if (fSash.getMaximizedControl() != null) {
 			int trayHeight= fTray.getTree().getItemHeight() * (2 + TrayContentProvider.DEFAULT_CHILDREN_COUNT);
 			int sashHeight= fSash.getClientArea().height;
 			fSash.setWeights(new int[] { sashHeight - trayHeight, trayHeight });
 			fSash.setMaximizedControl(null);
 		}
+		setTraySelection(selection);
+	}
+	
+	private void setTraySelection(IStructuredSelection selection) {
+		fTray.setSelection(selection, true);
 		TreeItem[] itemSelection= fTray.getTree().getSelection();
 		if (itemSelection.length > 0)
 			fTray.getTree().setTopItem(itemSelection[0]);
+	}
+
+	protected void performTrayDoubleClick() {
+		IStructuredSelection selection= (IStructuredSelection) fTray.getSelection();
+		if (selection.size() != 1)
+			return;
+		Object obj = selection.getFirstElement();
+		if (obj instanceof ExceptionAttribute) {
+			RuntimeException exception= ((ExceptionAttribute) obj).getException();
+			if (exception != null) {
+				String label= ((ExceptionAttribute) obj).getLabel();
+				showAndLogError("An error occurred while calculating an AST View Label:\n" + label, exception); //$NON-NLS-1$
+				return;
+			}
+		}
+		if (obj instanceof Binding) {
+			Binding binding= (Binding) obj;
+			fViewer.setSelection(new StructuredSelection(binding), true);
+		}
+	}
+		
+	protected void performDelete() {
+		IStructuredSelection selection= (IStructuredSelection) fTray.getSelection();
+		if (selection.size() != 1)
+			return;
+		Object obj = selection.getFirstElement();
+		if (obj instanceof Binding) {
+			int index= fTrayRoots.indexOf(obj);
+			if (index != -1) {
+				fTrayRoots.remove(index);
+				fTray.setInput(fTrayRoots);
+				int newSize= fTrayRoots.size();
+				if (newSize == 0)
+					return;
+				else if (index == newSize)
+					setTraySelection(new StructuredSelection(fTrayRoots.get(newSize - 1)));
+				else
+					setTraySelection(new StructuredSelection(fTrayRoots.get(index)));
+			}
+		}
 	}
 	
 	public void setFocus() {
