@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
-import java.util.Arrays;
-
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -21,8 +20,10 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.resource.JFaceResources;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewerExtension;
 
 import org.eclipse.jdt.internal.ui.text.java.hover.SourceViewerInformationControl;
@@ -131,12 +132,13 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 	 * @see org.eclipse.jface.text.IInformationControl#setInformation(java.lang.String)
 	 */
 	public void setInformation(String content) {
-		String spaces= getSpacesForHorizontalScrolling();
-		
-		super.setInformation(content + spaces);
+		super.setInformation(content);
 		IDocument doc= getViewer().getDocument();
 		if (doc == null)
 			return;
+		
+		// ensure that we can scroll enough
+		ensureScrollable();
 		
 		String start= null;
 		if (IJavaPartitions.JAVA_DOC.equals(fPartition)) {
@@ -150,6 +152,8 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 				int startLen= start.length();
 				getViewer().setDocument(doc, startLen, doc.getLength() - startLen);
 			} catch (BadLocationException e) {
+				// impossible
+				Assert.isTrue(false);
 			}
 		}
 		
@@ -157,16 +161,51 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 	}
 
 	/**
-	 * Returns a run of spaces the length of which is at least
-	 * <code>fHorizontalScrollPixel</code>.
-	 * 
-	 * @return the spaces to add to the document content to ensure that it can
-	 *         be scrolled at least <code>fHorizontalScrollPixel</code>
+	 * Ensures that the control can be scrolled at least to
+	 * <code>fHorizontalScrollPixel</code> and adjusts <code>fMaxWidth</code>
+	 * accordingly.
 	 */
-	private String getSpacesForHorizontalScrolling() {
-		char[] spaces= new char[300];
-		Arrays.fill(spaces, ' ');
-		return new String(spaces);
+	private void ensureScrollable() {
+		IDocument doc= getViewer().getDocument();
+		if (doc == null)
+			return;
+		
+		StyledText widget= getViewer().getTextWidget();
+		if (widget == null || widget.isDisposed())
+			return;
+		
+		int last= doc.getNumberOfLines() - 1;
+		GC gc= new GC(widget);
+		gc.setFont(widget.getFont());
+		int maxWidth= 0;
+		String content= new String();
+
+		try {
+			for (int i= 0; i <= last; i++) {
+				IRegion line;
+				line= doc.getLineInformation(i);
+				content= doc.get(line.getOffset(), line.getLength());
+				int width= gc.textExtent(content).x;
+				if (width > maxWidth) {
+					maxWidth= width;
+				}
+			}
+		} catch (BadLocationException e) {
+			return;
+		} finally {
+			gc.dispose();
+		}
+		
+		// limit the size of the window to the maximum width minus scrolling,
+		// but never more than the configured max size (viewport size).
+		fMaxWidth= Math.max(0, Math.min(fMaxWidth, maxWidth - fHorizontalScrollPixel + 8));
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.hover.SourceViewerInformationControl#hasContents()
+	 */
+	public boolean hasContents() {
+		return super.hasContents() && fMaxWidth > 0;
 	}
 	
 	/**
