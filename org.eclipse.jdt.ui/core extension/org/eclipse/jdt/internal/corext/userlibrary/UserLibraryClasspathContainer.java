@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.userlibrary;
 
+import org.eclipse.jdt.launching.IRuntimeContainerComparator;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -19,7 +21,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 /**
  *
  */
-public class UserLibraryClasspathContainer implements IClasspathContainer {
+public class UserLibraryClasspathContainer implements IClasspathContainer, IRuntimeContainerComparator {
 	
 	public static final String CONTAINER_ID= "org.eclipse.jdt.USER_LIBRARY"; //$NON-NLS-1$
 	
@@ -67,6 +69,13 @@ public class UserLibraryClasspathContainer implements IClasspathContainer {
 	 * @see org.eclipse.jdt.core.IClasspathContainer#getPath()
 	 */
 	public IPath getPath() {
-		return  new Path(CONTAINER_ID).append(name);
+		return new Path(CONTAINER_ID).append(name);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.launching.IRuntimeContainerComparator#isDuplicate(org.eclipse.core.runtime.IPath)
+	 */
+	public boolean isDuplicate(IPath containerPath) {
+		return getPath().equals(containerPath);
 	}
 }
