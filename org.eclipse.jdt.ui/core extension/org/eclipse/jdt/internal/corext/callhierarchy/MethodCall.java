@@ -17,6 +17,8 @@ import java.util.List;
 
 import org.eclipse.jdt.core.IMember;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 public class MethodCall {
     private IMember fMember;
     private List fCallLocations;
@@ -25,7 +27,7 @@ public class MethodCall {
      * @param enclosingElement
      */
     public MethodCall(IMember enclosingElement) {
-        this.fMember = CallHierarchy.getOriginalElement(enclosingElement);
+        this.fMember = JavaModelUtil.toOriginal(enclosingElement);
     }
 
     /**

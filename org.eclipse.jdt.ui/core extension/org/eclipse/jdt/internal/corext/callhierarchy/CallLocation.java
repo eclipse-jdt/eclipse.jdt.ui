@@ -12,13 +12,17 @@
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
 import org.eclipse.core.runtime.IAdaptable;
+
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class CallLocation implements IAdaptable {
     public static final int UNKNOWN_LINE_NUMBER= -1;
@@ -46,8 +50,8 @@ public class CallLocation implements IAdaptable {
      * @param end
      */
     public CallLocation(IMember member, IMember calledMember, int start, int end, int lineNumber) {
-        this.fMember = CallHierarchy.getOriginalElement(member);
-        this.fCalledMember = CallHierarchy.getOriginalElement(calledMember);
+        this.fMember = JavaModelUtil.toOriginal(member);
+        this.fCalledMember = JavaModelUtil.toOriginal(calledMember);
         this.fStart = start;
         this.fEnd = end;
         this.fLineNumber= lineNumber;
