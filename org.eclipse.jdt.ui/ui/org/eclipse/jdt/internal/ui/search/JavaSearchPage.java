@@ -418,6 +418,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 		fInitialPattern= values.pattern;
 		fPattern.setText(fInitialPattern);
+		fJavaElement= values.javaElement;
 	}
 
 	private SearchPatternData tryTypedTextSelection(ISelection selection) {
@@ -544,6 +545,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 					break;
 				}
 				searchFor= TYPE;
+				element= mainType;
 				limitTo= REFERENCES;
 				pattern= JavaModelUtil.getFullyQualifiedName((IType)mainType);
 				break;
@@ -557,6 +559,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				}
 				if (mainType == null)
 					break;
+				element= mainType;
 				searchFor= TYPE;
 				limitTo= REFERENCES;
 				pattern= JavaModelUtil.getFullyQualifiedName(mainType);

@@ -107,9 +107,14 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) throws CoreException {
 		IMarker marker= resource.createMarker(SearchUI.SEARCH_MARKER);
 		HashMap attributes;
+		Object groupKey= enclosingElement;
 		if (accuracy == POTENTIAL_MATCH) {
 			attributes= new HashMap(6);
 			attributes.put(IJavaSearchUIConstants.ATT_ACCURACY, POTENTIAL_MATCH_VALUE);
+			if (groupKey == null)
+				groupKey= "?:null";
+			else
+				groupKey= "?:" + enclosingElement.getHandleIdentifier();
 		} else
 			attributes= new HashMap(5);
 		JavaCore.addJavaElementMarkerAttributes(attributes, enclosingElement);
@@ -122,8 +127,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 			attributes.put(IWorkbenchPage.EDITOR_ID_ATTR, JavaUI.ID_CU_EDITOR);
 		marker.setAttributes(attributes);
 
-		fView.addMatch(enclosingElement.getElementName(), enclosingElement, resource, marker);
-
+		fView.addMatch(enclosingElement.getElementName(), groupKey, resource, marker);
 		fMatchCount++;
 		if (!getProgressMonitor().isCanceled())
 			getProgressMonitor().subTask(getFormattedMatchesString(fMatchCount));
