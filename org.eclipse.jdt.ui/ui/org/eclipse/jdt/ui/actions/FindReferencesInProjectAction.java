@@ -11,25 +11,25 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
  * Finds references to the selected element in the enclosing project 
@@ -66,13 +66,16 @@ public class FindReferencesInProjectAction extends FindReferencesAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_PROJECT_ACTION);
 	}
 
-	IJavaSearchScope getScope(IType element) throws JavaModelException {
+	IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {
 		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(new IResource[] { element.getJavaProject().getProject() });
 	}
 
-	String getScopeDescription(IType type) {
-		return SearchUtil.getProjectScopeDescription(type);
+	String getScopeDescription(IJavaElement element) {
+		return SearchUtil.getProjectScopeDescription(element);
 	}
 
-
+	JavaSearchOperation makeOperation(IJavaElement element) throws JavaModelException {
+		return new JavaSearchOperation(JavaPlugin.getWorkspace(), element, getLimitTo(), getScope(element), getScopeDescription(element), getCollector());
+	}
+	
 }
