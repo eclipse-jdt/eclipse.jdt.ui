@@ -5,14 +5,14 @@ public class TestPrefixBoolean {
 	
 	public void foo() {
 		boolean b;
-		b= !getField();
+		b= !isField();
 	}
 
 	void setField(boolean field) {
 		this.field = field;
 	}
 
-	boolean getField() {
+	boolean isField() {
 		return field;
 	}
 }
