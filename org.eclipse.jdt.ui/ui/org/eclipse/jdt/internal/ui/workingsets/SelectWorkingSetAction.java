@@ -37,12 +37,6 @@ public class SelectWorkingSetAction extends Action {
 	private IWorkingSet fWorkingSet;
 	private WorkingSetFilterActionGroup fActionGroup;
 
-	/**
-	 * Creates an instance of this class.
-	 * 
-	 * @param window the workbench window to use to determine 
-	 * 	the active workbench page
-	 */
 	public SelectWorkingSetAction(WorkingSetFilterActionGroup actionGroup, Shell shell) {
 		super(WorkingSetMessages.getString("SelectWorkingSetAction.text")); //$NON-NLS-1$
 		Assert.isNotNull(actionGroup);
