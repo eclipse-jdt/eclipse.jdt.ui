@@ -169,7 +169,10 @@ public class MoveCuUpdateCreator {
 		List cuList= Arrays.asList(fCus);
 		for (int i= 0; i < references.length; i++) {
 			SearchResultGroup searchResultGroup= references[i];
-			ICompilationUnit referencingCu= (ICompilationUnit)JavaCore.create(references[i].getResource());
+			IJavaElement je= JavaCore.create(references[i].getResource());
+			if (je.getElementType() != IJavaElement.COMPILATION_UNIT)
+				continue;
+			ICompilationUnit referencingCu= (ICompilationUnit)je;
 			if (hasSimpleReference(searchResultGroup) 
 				&& (!referencingCu.equals(movedUnit)) 
 				&& (!cuList.contains(referencingCu))){
