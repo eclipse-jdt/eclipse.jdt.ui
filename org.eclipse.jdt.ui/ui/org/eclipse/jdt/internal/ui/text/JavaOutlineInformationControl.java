@@ -41,8 +41,10 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 
+import org.eclipse.ui.IDecoratorManager;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.SWTKeySupport;
@@ -670,7 +672,10 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 
 		fInnerLabelProvider= new OutlineLabelProvider();
 		fInnerLabelProvider.addLabelDecorator(new ProblemsLabelDecorator(null));
-		fInnerLabelProvider.addLabelDecorator(new OverrideIndicatorLabelDecorator(null));
+		IDecoratorManager decoratorMgr= PlatformUI.getWorkbench().getDecoratorManager();
+		if (decoratorMgr.getEnabled("org.eclipse.jdt.ui.override.decorator")) //$NON-NLS-1$
+			fInnerLabelProvider.addLabelDecorator(new OverrideIndicatorLabelDecorator(null));
+		
 		treeViewer.setLabelProvider(fInnerLabelProvider);
 		
 		fLexicalSortingAction= new LexicalSortingAction(treeViewer);
