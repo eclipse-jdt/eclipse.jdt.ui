@@ -22,7 +22,7 @@ public class ShowQualifiedTypeNamesAction extends Action {
 		setDescription(TypeHierarchyMessages.getString("ShowQualifiedTypeNamesAction.description")); //$NON-NLS-1$
 		setToolTipText(TypeHierarchyMessages.getString("ShowQualifiedTypeNamesAction.tooltip")); //$NON-NLS-1$
 		
-		setImageDescriptor(JavaPluginImages.DESC_TOOL_PACKSNIPPET);
+		JavaPluginImages.setLocalImageDescriptors(this, "th_showqualified.gif"); //$NON-NLS-1$
 		
 		fView= v;
 		setChecked(initValue);
