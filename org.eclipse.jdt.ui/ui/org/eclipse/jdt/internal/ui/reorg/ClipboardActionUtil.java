@@ -116,6 +116,8 @@ class ClipboardActionUtil {
 			Object element= iter.next();
 			if (element instanceof IJavaProject) {
 				result.add(((IJavaProject)element).getResource());
+			} else if (element instanceof IProject) {
+				result.add(element);
 			}
 		}
 		return result;

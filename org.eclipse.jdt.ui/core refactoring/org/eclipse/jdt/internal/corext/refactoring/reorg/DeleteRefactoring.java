@@ -303,7 +303,7 @@ public class DeleteRefactoring extends Refactoring {
 	
 	private boolean hasNonProjects(){
 		for (Iterator iter= fElements.iterator(); iter.hasNext(); ){
-			if (! (iter.next() instanceof IJavaProject))
+			if (! isProject(iter.next()))
 				return true;
 		}
 		return false;
@@ -311,10 +311,14 @@ public class DeleteRefactoring extends Refactoring {
 	
 	private boolean hasProjects(){
 		for (Iterator iter= fElements.iterator(); iter.hasNext(); ){
-			if (iter.next() instanceof IJavaProject)
+			if (isProject(iter.next()))
 				return true;
 		}
 		return false;
+	}
+	
+	private static boolean isProject(Object element){
+		return (element instanceof IJavaProject) || (element instanceof IProject);
 	}
 	
 	private boolean canDeleteAll(){
