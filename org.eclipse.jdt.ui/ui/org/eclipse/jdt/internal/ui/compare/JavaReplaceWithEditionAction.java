@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.compare;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ResourceBundle;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
@@ -32,7 +33,7 @@ import org.eclipse.compare.contentmergeviewer.IDocumentRange;
  */
 public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 				
-	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.compare.ReplaceWithEditionAction";
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.compare.ReplaceWithEditionAction"; //$NON-NLS-1$
 	
 	private class DocumentNode implements ITypedElement, IStreamContentAccessor {
 	
@@ -62,9 +63,13 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			return new ByteArrayInputStream(fDocument.get().getBytes());
 		}
 	}
-
+		
 	public JavaReplaceWithEditionAction(ISelectionProvider sp) {
-		super(sp, BUNDLE_NAME);
+		super(sp);
+		
+		setText(CompareMessages.getString("ReplaceFromHistory.action.label")); //$NON-NLS-1$
+		
+		update();
 	}
 			
 	/**
@@ -72,16 +77,16 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 	 */
 	public final void run() {
 		
-		String errorMessage= getResourceString("internalError");
-		String noLocalHistoryError= getResourceString("noLocalHistoryError");
+		String errorTitle= CompareMessages.getString("ReplaceFromHistory.title"); //$NON-NLS-1$
+		String errorMessage= CompareMessages.getString("ReplaceFromHistory.internalErrorMessage"); //$NON-NLS-1$
 		
-		Shell parent= JavaPlugin.getActiveWorkbenchShell();
+		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		
 		ISelection selection= fSelectionProvider.getSelection();
 		IMember input= getEditionElement(selection);
 		if (input == null) {
 			// shouldn't happen because Action should not be enabled in the first place
-			MessageDialog.openInformation(parent, fTitle, errorMessage);
+			MessageDialog.openInformation(shell, errorTitle, errorMessage);
 			return;
 		}
 		
@@ -95,10 +100,9 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		try {
 			file= (IFile) cu.getUnderlyingResource();
 		} catch (JavaModelException ex) {
-			//ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "ReplaceWithEdition.Error.getUnderlyingResource.");
 		}
 		if (file == null) {
-			MessageDialog.openError(parent, fTitle, errorMessage);
+			MessageDialog.openError(shell, errorTitle, errorMessage);
 			return;
 		}
 		
@@ -110,7 +114,6 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		try {
 			states= file.getHistory(null);
 		} catch (CoreException ex) {
-			//ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "ReplaceWithEdition.Error.getUnderlyingResource.");
 		}
 		
 		if (states != null)
@@ -126,15 +129,14 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		try {
 			docManager= new DocumentManager(cu);
 		} catch (JavaModelException ex) {
-			//ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "ReplaceWithEdition.Error.getUnderlyingResource.");
-			MessageDialog.openError(parent, fTitle, errorMessage);
+			MessageDialog.openError(shell, errorTitle, errorMessage);
 			return;
 		}
 		
 		try {
 			docManager.connect();
-		
-			EditionSelectionDialog d= new EditionSelectionDialog(parent, fBundle);
+			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
+			EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);
 			
 			IDocument document= docManager.getDocument();
 			String type= file.getFileExtension();
@@ -158,11 +160,9 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			}
 
 		} catch(BadLocationException ex) {
-			//ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "ReplaceWithEdition.Error.getUnderlyingResource.");
-			MessageDialog.openError(parent, fTitle, errorMessage);
+			MessageDialog.openError(shell, errorTitle, errorMessage);
 		} catch(CoreException ex) {
-			//ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "ReplaceWithEdition.Error.getUnderlyingResource.");
-			MessageDialog.openError(parent, fTitle, errorMessage);
+			MessageDialog.openError(shell, errorTitle, errorMessage);
 		} finally {
 			docManager.disconnect();
 		}
@@ -174,7 +174,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			if (member != null) {
 				switch (member.getElementType()) {
 					case IJavaElement.INITIALIZER:
-						return "initializer";
+						return CompareMessages.getString("JavaNode.initializer"); //$NON-NLS-1$
 					default:
 						return member.getElementName();
 				}

@@ -39,9 +39,11 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 
 	private int fInitializerCount= 1;
 	private boolean fIsEditable;
+	private JavaNode fParent;
 
 	public JavaNode(JavaNode parent, int type, String name, IDocument doc, int start, int length) {
 		super(type, buildID(type, name), doc, start, length);
+		fParent= parent;
 		if (parent != null) {
 			parent.addChild(this);
 			fIsEditable= parent.isEditable();
@@ -49,7 +51,7 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	}	
 		
 	public JavaNode(IDocument doc, boolean editable) {
-		super(CU, buildID(CU, "root"), doc, 0, doc.getLength());
+		super(CU, buildID(CU, "root"), doc, 0, doc.getLength()); //$NON-NLS-1$
 		fIsEditable= editable;
 	}	
 
@@ -88,7 +90,7 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 			sb.append('<');
 			break;
 		default:
-			System.out.println("JavaNode.buildID: Should not happen");
+			// should not happen
 			break;
 		}
 		return sb.toString();
@@ -128,13 +130,13 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 		
 		switch (getTypeCode()) {
 		case INIT:
-			return "initializer";
+			return CompareMessages.getString("JavaNode.initializer"); //$NON-NLS-1$
 		case IMPORT_CONTAINER:
-			return "import declarations";
+			return CompareMessages.getString("JavaNode.importDeclarations"); //$NON-NLS-1$
 		case CU:
-			return "compilation unit";
+			return CompareMessages.getString("JavaNode.compilationUnit"); //$NON-NLS-1$
 		case PACKAGE:
-			return "package declaration";
+			return CompareMessages.getString("JavaNode.packageDeclaration"); //$NON-NLS-1$
 		}
 		return getId().substring(1);
 	}
@@ -143,7 +145,7 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	 * @see ITypedInput@getType
 	 */
 	public String getType() {
-		return "java2";
+		return "java2"; //$NON-NLS-1$
 	}
 	
 	/* (non Javadoc)
@@ -189,10 +191,10 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 				case INIT:
 				case METHOD:
 				case CONSTRUCTOR:
-					d= JavaCompareUtilities.getImageDescriptor("obj16/compare_method.gif");
+					d= JavaCompareUtilities.getImageDescriptor("obj16/compare_method.gif"); //$NON-NLS-1$
 					break;
 				case FIELD:
-					d= JavaCompareUtilities.getImageDescriptor("obj16/compare_field.gif");
+					d= JavaCompareUtilities.getImageDescriptor("obj16/compare_field.gif"); //$NON-NLS-1$
 					break;					
 				default:
 					break;
@@ -218,6 +220,22 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 				image.dispose();
 		}
 		fgImages.clear();
+	}
+	
+	public void setContent(byte[] content) {
+		super.setContent(content);
+		nodeChanged(this);
+	}
+	
+	public ITypedElement replace(ITypedElement child, ITypedElement other) {
+		ITypedElement e= super.replace(child, other);
+		nodeChanged(this);
+		return e;
+	}
+
+	void nodeChanged(JavaNode node) {
+		if (fParent != null)
+			fParent.nodeChanged(node);
 	}
 }
 

@@ -77,7 +77,7 @@ class JavaParseTreeBuilder implements ISourceElementRequestor, ICompilationUnit 
 			fImportContainer= new JavaNode(getCurrentContainer(), JavaNode.IMPORT_CONTAINER, null, getDocument(), declarationStart, length);
 		String nm= new String(name);
 		if (onDemand)
-			nm+= ".*";
+			nm+= ".*"; //$NON-NLS-1$
 		new JavaNode(fImportContainer, JavaNode.IMPORT, nm, getDocument(), declarationStart, length);
 		fImportContainer.setLength(declarationEnd-fImportContainer.getRange().getOffset()+1);
 		fImportContainer.setAppendPosition(declarationEnd+2);		// FIXME
@@ -205,7 +205,7 @@ class JavaParseTreeBuilder implements ISourceElementRequestor, ICompilationUnit 
 			for (int p= 0; p < parameterTypes.length; p++) {
 				buffer.append(parameterTypes[p]);
 				if (p < parameterTypes.length-1)
-					buffer.append(", ");
+					buffer.append(", "); //$NON-NLS-1$
 			}
 		}
 		buffer.append(')');

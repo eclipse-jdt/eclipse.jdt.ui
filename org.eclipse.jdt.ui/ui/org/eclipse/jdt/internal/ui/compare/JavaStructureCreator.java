@@ -39,7 +39,7 @@ public class JavaStructureCreator implements IStructureCreator {
 		}
 		
 		public String getLocalizedMessage(int problemId, String[] problemArguments) {
-			return "" + problemId;
+			return "" + problemId; //$NON-NLS-1$
 		}
 	}
 
@@ -102,10 +102,10 @@ public class JavaStructureCreator implements IStructureCreator {
 	}
 	
 	public String getName() {
-		return "Java Structure Compare";
+		return CompareMessages.getString("JavaStructureViewer.title"); //$NON-NLS-1$
 	}
 	
-	public IStructureComparator getStructure(Object input) {
+	public IStructureComparator getStructure(final Object input) {
 		
 		String s= null;
 		
@@ -122,7 +122,7 @@ public class JavaStructureCreator implements IStructureCreator {
 			char[] buffer= new char[n];
 			s.getChars(0, n, buffer, 0);
 			
-			Document doc= new Document(s);
+			final Document doc= new Document(s);
 			IDocumentPartitioner dp= JavaCompareUtilities.createJavaPartitioner();
 			doc.setDocumentPartitioner(dp);
 			dp.connect(doc);
@@ -131,7 +131,11 @@ public class JavaStructureCreator implements IStructureCreator {
 			if (input instanceof IEditableContent)
 				isEditable= ((IEditableContent) input).isEditable();
 			
-			JavaNode root= new JavaNode(doc, isEditable);
+			JavaNode root= new JavaNode(doc, isEditable) {
+				void nodeChanged(JavaNode node) {
+					save(this, input);
+				}
+			};
 			fgRequestor.init(root, buffer);
 			try {
 				fgParser.parseCompilationUnit(fgRequestor, false);
@@ -268,7 +272,7 @@ public class JavaStructureCreator implements IStructureCreator {
 				
 				String sig= jn.getSignature();
 				Info sinfo= null;
-				if (sig != null && !sig.equals("()")) {
+				if (sig != null && !sig.equals("()")) { //$NON-NLS-1$
 					sinfo= (Info) map.get(sig);
 					if (sinfo == null) {
 						sinfo= new Info();

@@ -25,7 +25,7 @@ class JavaTokenComparator implements ITokenComparator {
 		if (s != null)
 			fText= s;
 		else
-			fText= "";
+			fText= ""; //$NON-NLS-1$
 		fShouldEscape= shouldEscape;
 
 		fStarts= new int[fText.length()];

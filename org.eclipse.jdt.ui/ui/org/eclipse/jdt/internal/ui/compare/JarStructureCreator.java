@@ -142,7 +142,7 @@ public class JarStructureCreator implements IStructureCreator {
 	private String fTitle;
 
 	public JarStructureCreator() {
-		this("Jar Archive Compare");
+		this(CompareMessages.getString("JarStructureCreator.name")); //$NON-NLS-1$
 	}
 	
 	public JarStructureCreator(String title) {
@@ -169,7 +169,7 @@ public class JarStructureCreator implements IStructureCreator {
 			return null;
 
 		ZipInputStream zip= new ZipInputStream(is);
-		JarFolder root= new JarFolder("");
+		JarFolder root= new JarFolder(""); //$NON-NLS-1$
 		try {
 			for (;;) {
 				ZipEntry entry= zip.getNextEntry();
@@ -216,7 +216,7 @@ public class JarStructureCreator implements IStructureCreator {
 			byte[] bytes= ((JarFile)o).getBytes();
 			if (bytes != null)
 				return new String(bytes);
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		return null;
 	}
@@ -232,7 +232,7 @@ public class JarStructureCreator implements IStructureCreator {
 	 * Throws <code>AssertionFailedException</code> since we cannot update a zip archive.
 	 */
 	public void save(IStructureComparator structure, Object input) {
-		Assert.isTrue(false, "cannot update jar archive");
+		Assert.isTrue(false); // cannot update jar archive
 	}
 	
 	public IStructureComparator locate(Object path, Object source) {

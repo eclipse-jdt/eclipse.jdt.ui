@@ -69,7 +69,7 @@ public class JavaTextViewer extends Viewer {
 			} catch (CoreException ex) {
 			}
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	public ISelection getSelection() {

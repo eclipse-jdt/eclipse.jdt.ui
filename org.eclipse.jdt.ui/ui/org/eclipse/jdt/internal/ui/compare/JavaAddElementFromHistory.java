@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.compare;
 
+import java.util.ResourceBundle;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.resources.IFile;
@@ -32,13 +34,16 @@ import org.eclipse.compare.contentmergeviewer.IDocumentRange;;
 
 public class JavaAddElementFromHistory extends JavaHistoryAction {
 	
-	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.compare.AddFromHistoryAction";
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.compare.AddFromHistoryAction"; //$NON-NLS-1$
 	
 	private JavaEditor fEditor;
+
 		
 	public JavaAddElementFromHistory(JavaEditor editor, ISelectionProvider sp) {
-		super(sp, BUNDLE_NAME);
+		super(sp);
 		fEditor= editor;
+		setText(CompareMessages.getString("AddFromHistory.action.label")); //$NON-NLS-1$
+		update();
 	}
 	
 	/**
@@ -46,7 +51,8 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 	 */
 	public final void run() {
 		
-		String errorMessage= getResourceString("internalError");
+		String errorTitle= CompareMessages.getString("AddFromHistory.title"); //$NON-NLS-1$
+		String errorMessage= CompareMessages.getString("AddFromHistory.internalErrorMessage"); //$NON-NLS-1$
 		
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		
@@ -83,7 +89,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		}
 		
 		if (parent == null || cu == null) {
-			MessageDialog.openError(shell, fTitle, errorMessage);
+			MessageDialog.openError(shell, errorTitle, errorMessage);
 			return;
 		}
 				
@@ -98,7 +104,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		} catch (JavaModelException ex) {
 		}
 		if (file == null) {
-			MessageDialog.openError(shell, fTitle, errorMessage);
+			MessageDialog.openError(shell, errorTitle, errorMessage);
 			return;
 		}
 		
@@ -109,7 +115,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		} catch (CoreException ex) {
 		}	
 		if (states == null || states.length <= 0) {
-			MessageDialog.openInformation(shell, fTitle, getResourceString("noLocalHistoryError"));
+			MessageDialog.openInformation(shell, errorTitle, CompareMessages.getString("AddFromHistory.noHistoryMessage")); //$NON-NLS-1$
 			return;
 		}
 		
@@ -122,14 +128,15 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		try {
 			docManager= new DocumentManager(cu);
 		} catch(JavaModelException ex) {
-			MessageDialog.openError(shell, fTitle, errorMessage);
+			MessageDialog.openError(shell, errorTitle, errorMessage);
 			return;
 		}
 		
 		try {
 			docManager.connect();
 		
-			EditionSelectionDialog d= new EditionSelectionDialog(shell, fBundle);
+			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
+			EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);
 			
 			IDocument document= docManager.getDocument();
 			String type= file.getFileExtension();
@@ -151,9 +158,9 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			}
 
 		} catch(BadLocationException ex) {
-			MessageDialog.openError(shell, fTitle, errorMessage);
+			MessageDialog.openError(shell, errorTitle, errorMessage);
 		} catch(CoreException ex) {
-			MessageDialog.openError(shell, fTitle, errorMessage);
+			MessageDialog.openError(shell, errorTitle, errorMessage);
 		} finally {
 			docManager.disconnect();
 		}

@@ -28,7 +28,7 @@ class JavaCompareUtilities {
 					
 		if (installURL != null) {
 			try {
-				URL url= new URL(installURL, "icons/full/" + relativePath);
+				URL url= new URL(installURL, "icons/full/" + relativePath); //$NON-NLS-1$
 				return ImageDescriptor.createFromURL(url);
 			} catch (MalformedURLException e) {
 				Assert.isTrue(false);
@@ -41,7 +41,6 @@ class JavaCompareUtilities {
 		JavaPlugin plugin= JavaPlugin.getDefault();
 		if (plugin != null)
 			return plugin.getJavaTextTools();
-		System.out.println("no Java plugin");
 		return null;
 	}
 	

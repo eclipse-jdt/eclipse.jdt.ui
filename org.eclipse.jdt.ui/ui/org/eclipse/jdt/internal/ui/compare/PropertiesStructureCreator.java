@@ -15,9 +15,6 @@ import org.eclipse.compare.structuremergeviewer.*;
 import org.eclipse.core.runtime.CoreException;
 
 
-/**
- * 
- */
 public class PropertiesStructureCreator implements IStructureCreator {
 	
 	static class PropertyNode extends DocumentRangeNode implements ITypedElement {
@@ -35,8 +32,8 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		}
 						
 		public PropertyNode(IDocument doc, boolean editable) {
-			super(0, "root", doc, 0, doc.getLength());
-			fValue= "";
+			super(0, "root", doc, 0, doc.getLength()); //$NON-NLS-1$
+			fValue= ""; //$NON-NLS-1$
 			fIsEditable= editable;
 		}
 				
@@ -51,7 +48,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		 * @see ITypedElement#getType
 		 */
 		public String getType() {
-			return "txt";
+			return "txt"; //$NON-NLS-1$
 		}
 		
 		/**
@@ -69,16 +66,16 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		}
 	};
 	
-	private static final String whiteSpaceChars= " \t\r\n\f";
-	private static final String keyValueSeparators= "=: \t\r\n\f";
-	private static final String strictKeyValueSeparators= "=:";
+	private static final String WHITESPACE= " \t\r\n\f"; //$NON-NLS-1$
+	private static final String SEPARATORS2= "=:"; //$NON-NLS-1$
+	private static final String SEPARATORS= SEPARATORS2 + WHITESPACE;
 			
 
 	public PropertiesStructureCreator() {
 	}
 	
 	public String getName() {
-		return "Property Compare";
+		return CompareMessages.getString("PropertyCompareViewer.title"); //$NON-NLS-1$
 	}
 
 	public IStructureComparator getStructure(Object input) {
@@ -91,7 +88,7 @@ public class PropertiesStructureCreator implements IStructureCreator {
 			}
 		}
 			
-		Document doc= new Document(s != null ? s : "");
+		Document doc= new Document(s != null ? s : ""); //$NON-NLS-1$
 				
 		boolean isEditable= false;
 		if (input instanceof IEditableContent)
@@ -166,149 +163,144 @@ public class PropertiesStructureCreator implements IStructureCreator {
 		
 		int start= 0;
 		
-		int [] args= new int[2];
+		int[] args= new int[2];
 		args[0]= 1;
 		args[1]= 0;
 		
-		while (true) {
-			// Get next line
-            		String line= readLine(args, doc);
+		for (;;) {
+            String line= readLine(args, doc);
 			if (line == null)
 				return;
 
-			if (line.length() > 0) {
-				// Continue lines that end in slashes if they are not comments
-				char firstChar= line.charAt(0);
-				if ((firstChar != '#') && (firstChar != '!')) {
-					
-					while (continueLine(line)) {
-						String nextLine= readLine(args, doc);
-						if (nextLine == null)
-							nextLine= new String("");
-						String loppedLine= line.substring(0, line.length()-1);
-						// Advance beyond whitespace on new line
-						int startIndex= 0;
-						for (startIndex= 0; startIndex < nextLine.length(); startIndex++)
-							if (whiteSpaceChars.indexOf(nextLine.charAt(startIndex)) == -1)
-								break;
-						nextLine= nextLine.substring(startIndex, nextLine.length());
-						line= new String(loppedLine+nextLine);
-					}
-					
-            		// Find start of key
-            		int len = line.length();
-            		int keyStart;
-            		for (keyStart= 0; keyStart < len; keyStart++) {
-               			if (whiteSpaceChars.indexOf(line.charAt(keyStart)) == -1)
-                    			break;
-            		}
-            		
-            		// Find separation between key and value
-            		int separatorIndex;
-            		for (separatorIndex= keyStart; separatorIndex < len; separatorIndex++) {
-                			char currentChar = line.charAt(separatorIndex);
-                			if (currentChar == '\\')
-                    			separatorIndex++;
-                			else if(keyValueSeparators.indexOf(currentChar) != -1)
-                    			break;
-            		}
-
-            		// Skip over whitespace after key if any
-            		int valueIndex;
-            		for (valueIndex=separatorIndex; valueIndex<len; valueIndex++)
-                			if (whiteSpaceChars.indexOf(line.charAt(valueIndex)) == -1)
-                    			break;
-
-            		// Skip over one non whitespace key value separators if any
-            		if (valueIndex < len)
-                			if (strictKeyValueSeparators.indexOf(line.charAt(valueIndex)) != -1)
-                    			valueIndex++;
-
-            		// Skip over white space after other separators if any
-            		while (valueIndex < len) {
-                			if (whiteSpaceChars.indexOf(line.charAt(valueIndex)) == -1)
-                    			break;
-                			valueIndex++;
-            		}
-            
-            		String key= line.substring(keyStart, separatorIndex);
-            		String value= (separatorIndex < len) ? line.substring(valueIndex, len) : "";
-
-            		// Convert then store key and value
-            		key= loadConvert(key);
-            		value= loadConvert(value);
-            		
-            		int length= (args[1]-1) - start;
-             		new PropertyNode(root, 0, key, value, doc, start, length);
-                     
-					start= args[1];
-				}
+			if (line.length() <= 0)
+				continue;	// empty line
+				
+			char firstChar= line.charAt(0);
+			if (firstChar == '#' || firstChar == '!')
+				continue;	// comment
+								
+			// find continuation lines
+			while (continueLine(line)) {
+				String nextLine= readLine(args, doc);
+				if (nextLine == null)
+					nextLine= ""; //$NON-NLS-1$
+				String line2= line.substring(0, line.length()-1);
+				int startPos= 0;
+				for (; startPos < nextLine.length(); startPos++)
+					if (WHITESPACE.indexOf(nextLine.charAt(startPos)) == -1)
+						break;
+				nextLine= nextLine.substring(startPos, nextLine.length());
+				line= line2 + nextLine;
 			}
+			
+    		// key start
+    		int len= line.length();
+    		int keyPos= 0;
+    		for (; keyPos < len; keyPos++) {
+       			if (WHITESPACE.indexOf(line.charAt(keyPos)) == -1)
+            		break;
+    		}
+    		
+    		// key/value separator
+    		int separatorPos;
+    		for (separatorPos= keyPos; separatorPos < len; separatorPos++) {
+        		char c= line.charAt(separatorPos);
+        		if (c == '\\')
+            		separatorPos++;
+        		else if (SEPARATORS.indexOf(c) != -1)
+            		break;
+    		}
+
+     		int valuePos;
+    		for (valuePos= separatorPos; valuePos < len; valuePos++)
+        		if (WHITESPACE.indexOf(line.charAt(valuePos)) == -1)
+            		break;
+
+     		if (valuePos < len)
+        		if (SEPARATORS2.indexOf(line.charAt(valuePos)) != -1)
+            		valuePos++;
+
+     		while (valuePos < len) {
+        		if (WHITESPACE.indexOf(line.charAt(valuePos)) == -1)
+            		break;
+        		valuePos++;
+    		}
+    
+    		String key= line.substring(keyPos, separatorPos);
+    		String value= (separatorPos < len) ? line.substring(valuePos, len) : ""; //$NON-NLS-1$
+
+    		key= convert(key);
+    		value= convert(value);
+    		
+    		int length= (args[1]-1) - start;
+     		new PropertyNode(root, 0, key, value, doc, start, length);
+             
+			start= args[1];
 		}
 	}
 
-	/*
-	 * Returns true if the given line is a line that must
-	 * be appended to the next line
- 	 */
-	private boolean continueLine (String line) {
-		int slashCount= 0;
-		int index= line.length() - 1;
-		while((index >= 0) && (line.charAt(index--) == '\\'))
-			slashCount++;
-		return (slashCount % 2 == 1);
+	private boolean continueLine(String line) {
+		int slashes= 0;
+		int ix= line.length() - 1;
+		while ((ix >= 0) && (line.charAt(ix--) == '\\'))
+			slashes++;
+		return slashes % 2 == 1;
 	}
 
 	/*
-	 * Converts encoded \\uxxxx to unicode chars
-	 * and changes special saved chars to their original forms
+	 * Converts escaped characters to Unicode.
 	 */
-	private String loadConvert(String theString) {
-		char aChar;
-		int len= theString.length();
-		StringBuffer outBuffer= new StringBuffer(len);
-
-		for (int x= 0; x < len; ) {
-			aChar = theString.charAt(x++);
-			if (aChar == '\\') {
-				aChar = theString.charAt(x++);
-				if (aChar == 'u') {
-					// Read the xxxx
-					int value= 0;
-					for (int i= 0; i < 4; i++) {
-						aChar= theString.charAt(x++);
-				        	switch (aChar) {
-				          	case '0': case '1': case '2': case '3': case '4':
-				          	case '5': case '6': case '7': case '8': case '9':
-							value = (value << 4) + aChar - '0';
-					     		break;
+	private String convert(String s) {
+		int l= s.length();
+		StringBuffer buf= new StringBuffer(l);
+		int i= 0;
+		
+		while (i < l) {
+			char c= s.charAt(i++);
+			if (c == '\\') {
+				c= s.charAt(i++);
+				if (c == 'u') {
+					int v= 0;
+					for (int j= 0; j < 4; j++) {
+						c= s.charAt(i++);
+				        switch (c) {
+				        case '0': case '1': case '2': case '3': case '4':
+				        case '5': case '6': case '7': case '8': case '9':
+							v= (v << 4) + (c-'0');
+					     	break;
 						case 'a': case 'b': case 'c':
-		     				case 'd': case 'e': case 'f':
-							value = (value << 4) + 10 + aChar - 'a';
+		     			case 'd': case 'e': case 'f':
+							v= (v << 4) + 10+(c-'a');
 							break;
 						case 'A': case 'B': case 'C':
-		                    	case 'D': case 'E': case 'F':
-							value = (value << 4) + 10 + aChar - 'A';
+		                case 'D': case 'E': case 'F':
+							v= (v << 4) + 10+(c - 'A');
 							break;
 						default:
-		             				throw new IllegalArgumentException("Malformed \\uxxxx encoding.");
-		                        }
+		             		throw new IllegalArgumentException(CompareMessages.getString("PropertyCompareViewer.malformedEncoding")); //$NON-NLS-1$
+		                }
 					}
-					outBuffer.append((char)value);
+					buf.append((char)v);
 				} else {
-		    			if (aChar == 't')
-		    				aChar= '\t';
-		       		else if (aChar == 'r')
-		       			aChar= '\r';
-		            	else if (aChar == 'n')
-		            		aChar= '\n';
-		          		else if (aChar == 'f')
-		          			aChar= '\f';
-		            	outBuffer.append(aChar);
+					switch (c) {
+					case 't':
+		    			c= '\t';
+						break;
+					case 'r':
+		    			c= '\r';
+						break;
+					case 'n':
+		    			c= '\n';
+						break;
+					case 'f':
+		    			c= '\f';
+						break;
+					}
+		            buf.append(c);
 				}
 			} else
-				outBuffer.append(aChar);
+				buf.append(c);
 		}
-		return outBuffer.toString();
+		return buf.toString();
 	}
 }

@@ -25,7 +25,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 	}
 	
 	public String getTitle() {
-		return "Java Source Compare";
+		return CompareMessages.getString("JavaMergeViewer.title"); //$NON-NLS-1$
 	}
 
 	protected ITokenComparator createTokenComparator(String s) {
