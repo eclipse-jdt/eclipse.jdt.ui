@@ -70,6 +70,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -407,6 +408,62 @@ public class PushDownRefactoring extends Refactoring {
 		return fMemberInfos;
 	}
 	
+	public void computeAdditionalRequiredMembersToPushDown(IProgressMonitor pm) throws JavaModelException {
+		IMember[] additional= getAdditionalRequiredMembers(pm);
+		setInfoAction(MemberActionInfo.PUSH_DOWN_ACTION, additional);
+	}
+	
+	public IMember[] getAdditionalRequiredMembers(IProgressMonitor pm) throws JavaModelException {
+		IMember[] members= getMembersToBeCreatedInSubclasses();
+		pm.beginTask("Calculating required members", members.length);//not true, but not easy to give anything better
+		List queue= new ArrayList(members.length);
+		queue.addAll(Arrays.asList(members));
+		int i= 0;
+		IMember current;
+		do{
+			current= (IMember)queue.get(i);
+			addAllRequiredPushableMembers(queue, current, new SubProgressMonitor(pm, 1));
+			i++;
+			if (queue.size() == i)
+				current= null;
+		} while(current != null);
+		queue.removeAll(Arrays.asList(members));//report only additional
+		return (IMember[]) queue.toArray(new IMember[queue.size()]);
+	}
+	
+	private void addAllRequiredPushableMembers(List queue, IMember member, IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 2);
+		addAllRequiredPushableMethods(queue, member, new SubProgressMonitor(pm, 1));
+		addAllRequiredPushableFields(queue, member, new SubProgressMonitor(pm, 1));
+		pm.done();
+	}
+	
+	private void addAllRequiredPushableFields(List queue, IMember member, IProgressMonitor pm) throws JavaModelException {
+		IField[] requiredFields= ReferenceFinderUtil.getFieldsReferencedIn(new IJavaElement[]{member}, pm);
+		for (int i= 0; i < requiredFields.length; i++) {
+			IField field= requiredFields[i];
+			if (isRequiredPushableMember(queue, field))
+				queue.add(field);
+		}
+	}
+	
+	private void addAllRequiredPushableMethods(List queue, IMember member, IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 2);
+		IMethod[] requiredMethods= ReferenceFinderUtil.getMethodsReferencedIn(new IJavaElement[]{member}, new SubProgressMonitor(pm, 1));
+		SubProgressMonitor sPm= new SubProgressMonitor(pm, 1);
+		sPm.beginTask("", requiredMethods.length);
+		for (int i= 0; i < requiredMethods.length; i++) {
+			IMethod method= requiredMethods[i];
+			if (! MethodChecks.isVirtual(method) && isRequiredPushableMember(queue, method))
+				queue.add(method);
+		}
+		sPm.done();
+	}
+
+	private boolean isRequiredPushableMember(List queue, IMember member) throws JavaModelException {
+		return member.getDeclaringType().equals(getDeclaringClass()) && ! queue.contains(member) && isPushable(member);
+	}
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -454,7 +511,7 @@ public class PushDownRefactoring extends Refactoring {
 				if (! (element instanceof IMember))
 					continue;
 				IMember referencingMember= (IMember)element;	
-				String pattern= "Member ''{0}'' is referenced by ''{1}''";
+				String pattern= "Pushed down member ''{0}'' is referenced by ''{1}''";
 				Object[] keys= {label, createLabel(referencingMember)};
 				String msg= MessageFormat.format(pattern, keys);	
 				result.addError(msg, JavaSourceContext.create(referencingMember));

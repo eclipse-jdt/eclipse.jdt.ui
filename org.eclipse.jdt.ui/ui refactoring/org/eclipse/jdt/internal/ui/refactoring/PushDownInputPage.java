@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +18,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -32,6 +35,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
@@ -46,11 +50,15 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
@@ -281,7 +289,7 @@ public class PushDownInputPage extends UserInputWizardPage {
 		composite.setLayout(gl);
 		
 		fEditButton= new Button(composite, SWT.PUSH);
-		fEditButton.setText("&Edit Selected...");
+		fEditButton.setText("&Edit...");
 		fEditButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fEditButton.setEnabled(false);
 		SWTUtil.setButtonDimensionHint(fEditButton);
@@ -290,8 +298,39 @@ public class PushDownInputPage extends UserInputWizardPage {
 				PushDownInputPage.this.editSelectedMembers();
 			}
 		});
+
+		Button addButton= new Button(composite, SWT.PUSH);
+		addButton.setText("&Push Down Required Members");
+		addButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		SWTUtil.setButtonDimensionHint(addButton);
+		addButton.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent event) {
+				PushDownInputPage.this.markAdditionalRequiredMembersAsMembersToPushDown();
+			}
+		});
 	}
 	
+	public void markAdditionalRequiredMembersAsMembersToPushDown() {
+		try {
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, new IRunnableWithProgress() {
+				public void run(IProgressMonitor pm) throws InvocationTargetException {
+					try {
+						getPushDownRefactoring().computeAdditionalRequiredMembersToPushDown(pm);
+						updateUIElements(null);
+					} catch (JavaModelException e) {
+						throw new InvocationTargetException(e);
+					} finally {
+						pm.done();
+					}
+				}
+			});
+		} catch(InvocationTargetException e) {
+			ExceptionHandler.handle(e, getShell(), "Push Down", "Internal Error. See log for details.");
+		} catch(InterruptedException e) {
+			Assert.isTrue(false);//not cancellable
+		}
+	}
+
 	private void editSelectedMembers() {
 		ISelection preserved= fTableViewer.getSelection();
 		try{
