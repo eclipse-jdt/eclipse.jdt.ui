@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -47,6 +48,8 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+
+import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
@@ -85,6 +88,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private ImportRewrite fImportRewriter;
 	private int fSelectionStart;
 	private int fSelectionLength;
+	private CodeGenerationSettings fSettings;
 	private AST fAST;
 	private ASTRewrite fRewriter;
 	private ExtractMethodAnalyzer fAnalyzer;
@@ -93,11 +97,11 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private boolean fThrowRuntimeExceptions;
 	private List fParameterInfos;
 	private Set fUsedNames;
+	private boolean fGenerateJavadoc;
 	private boolean fReplaceDuplicates;
 	private SnippetFinder.Match[] fDuplicates;
 
 	private static final String EMPTY= ""; //$NON-NLS-1$
-	
 
 	private static class UsedNamesCollector extends ASTVisitor {
 		private Set result= new HashSet();
@@ -161,6 +165,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fMethodName= "extracted"; //$NON-NLS-1$
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
+		fSettings= settings;
 		fVisibility= -1;
 	}
 	
@@ -370,7 +375,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				ASTNodes.expandRange(selectedNodes, buffer, fSelectionStart, fSelectionLength);
 				ASTNode target= getTargetNode(selectedNodes);
 				
-				MethodDeclaration mm= createNewMethod(fMethodName, true, target);
+				MethodDeclaration mm= createNewMethod(fMethodName, true, target, buffer.getLineDelimiter());
 
 				GroupDescription insertDesc= new GroupDescription(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName)); //$NON-NLS-1$
 				result.addGroupDescription(insertDesc);
@@ -439,7 +444,13 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 * @return the signature of the extracted method
 	 */
 	public String getSignature(String methodName) {
-		MethodDeclaration method= createNewMethod(methodName, false, null);
+		MethodDeclaration method= null;
+		try {
+			method= createNewMethod(methodName, false, null, String.valueOf('\n'));
+		} catch (CoreException cannotHappen) {
+			// we don't generate a code block and java comments.
+			Assert.isTrue(false);
+		}
 		method.setBody(fAST.newBlock());
 		ASTFlattener flattener= new ASTFlattener() {
 			public boolean visit(Block node) {
@@ -468,6 +479,14 @@ public class ExtractMethodRefactoring extends Refactoring {
 	
 	public void setReplaceDuplicates(boolean replace) {
 		fReplaceDuplicates= replace;
+	}
+	
+	public void setGenerateJavadoc(boolean generate) {
+		fGenerateJavadoc= generate;
+	}
+	
+	public boolean getGenerateJavadoc() {
+		return fGenerateJavadoc;
 	}
 	
 	//---- Helper methods ------------------------------------------------------------------------
@@ -615,7 +634,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}		
 	}
 	
-	private MethodDeclaration createNewMethod(String name, boolean code, ASTNode selection) {
+	private MethodDeclaration createNewMethod(String name, boolean code, ASTNode selection, String lineDelimiter) throws CoreException {
 		MethodDeclaration result= fAST.newMethodDeclaration();
 		int modifiers= fVisibility;
 		if (Modifier.isStatic(fAnalyzer.getEnclosingMethod().getModifiers()) || fAnalyzer.getForceStatic()) {
@@ -647,8 +666,18 @@ public class ExtractMethodRefactoring extends Refactoring {
 			ITypeBinding exceptionType= exceptionTypes[i];
 			exceptions.add(ASTNodeFactory.newName(fAST, fImportRewriter.addImport(exceptionType)));
 		}
-		if (code)
+		if (code) {
 			result.setBody(createMethodBody(selection));
+			if (fGenerateJavadoc) {
+				TypeDeclaration enclosingType= 
+					(TypeDeclaration)ASTNodes.getParent(fAnalyzer.getEnclosingMethod(), TypeDeclaration.class);
+				String string= CodeGeneration.getMethodComment(fCUnit, enclosingType.getName().getIdentifier(), result, null, lineDelimiter);
+				if (string != null) {
+					Javadoc javadoc= (Javadoc)fRewriter.createPlaceholder(string, ASTRewrite.JAVADOC);
+					result.setJavadoc(javadoc);
+				}
+			}
+		}
 		
 		return result;
 	}

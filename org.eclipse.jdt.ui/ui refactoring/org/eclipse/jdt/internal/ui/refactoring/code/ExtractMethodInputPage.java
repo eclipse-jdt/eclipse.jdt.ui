@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeParametersControl;
 import org.eclipse.jdt.internal.ui.refactoring.IParameterListChangeListener;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -55,6 +56,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 	
 	private static final String DESCRIPTION = RefactoringMessages.getString("ExtractMethodInputPage.description");//$NON-NLS-1$
 	private static final String THROW_RUNTIME_EXCEPTIONS= "ThrowRuntimeExceptions"; //$NON-NLS-1$
+	private static final String GENERATE_JAVADOC= "GenerateJavadoc";  //$NON-NLS-1$
 
 	public ExtractMethodInputPage() {
 		super(PAGE_NAME, true);
@@ -146,6 +148,18 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		});
 		layouter.perform(checkBox);
 		
+		checkBox= new Button(result, SWT.CHECK);
+		checkBox.setText(RefactoringMessages.getString("ExtractMethodInputPage.generateJavadocComment")); //$NON-NLS-1$
+		boolean generate= computeGenerateJavadoc();
+		setGenerateJavadoc(generate);
+		checkBox.setSelection(generate);
+		checkBox.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				setGenerateJavadoc(((Button)e.widget).getSelection());
+			}
+		});
+		layouter.perform(checkBox);
+		
 		int dupliactes= fRefactoring.getNumberOfDuplicates();
 		checkBox= new Button(result, SWT.CHECK);
 		if (dupliactes == 0) {
@@ -217,6 +231,17 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		updatePreview(getText());
 	}
 	
+	private boolean computeGenerateJavadoc() {
+		boolean result= fRefactoring.getGenerateJavadoc();
+		if (result)
+			return result;
+		return fSettings.getBoolean(GENERATE_JAVADOC);
+	}
+	private void setGenerateJavadoc(boolean value) {
+		fSettings.put(GENERATE_JAVADOC, value);
+		fRefactoring.setGenerateJavadoc(value);
+	}
+	
 	private void updatePreview(String text) {
 		if (fPreview == null)
 			return;
@@ -232,6 +257,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		if (fSettings == null) {
 			fSettings= getDialogSettings().addNewSection(ExtractMethodWizard.DIALOG_SETTING_SECTION);
 			fSettings.put(THROW_RUNTIME_EXCEPTIONS, false);
+			fSettings.put(GENERATE_JAVADOC, JavaPreferencesSettings.getCodeGenerationSettings().createComments);
 		}
 		fRefactoring.setThrowRuntimeExceptions(fSettings.getBoolean(THROW_RUNTIME_EXCEPTIONS));
 	}
