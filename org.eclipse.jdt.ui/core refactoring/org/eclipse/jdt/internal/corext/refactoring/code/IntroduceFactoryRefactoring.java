@@ -81,7 +81,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -804,7 +803,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		boolean someCallPatched= false;
 
 		for(int i=0; i < hits.length; i++) {
-			ClassInstanceCreation	creation= getCtorCallAt(hits[i].getOffset(), SearchUtils.getEnd(hits[i]), unit);
+			ClassInstanceCreation	creation= getCtorCallAt(hits[i].getOffset(), hits[i].getLength(), unit);
 
 			if (creation != null) {
 				TextEditGroup gd= new TextEditGroup(RefactoringCoreMessages.getString("IntroduceFactory.replaceCalls")); //$NON-NLS-1$
@@ -822,20 +821,19 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * node that this search hit identified. Necessary because the <code>SearchEngine</code>
 	 * doesn't always cough up text extents that <code>NodeFinder.perform()</code> agrees with.
 	 * @param start
-	 * @param end
+	 * @param length
 	 * @param unitAST
 	 * @return may return null if this is really a constructor->constructor call (e.g. "this(...)")
 	 */
-	private ClassInstanceCreation getCtorCallAt(int start, int end, CompilationUnit unitAST) throws JavaModelException {
+	private ClassInstanceCreation getCtorCallAt(int start, int length, CompilationUnit unitAST) throws JavaModelException {
 		ICompilationUnit	unitHandle= ASTCreator.getCu(unitAST);
-		int			length= end - start;
 		ASTNode		node= NodeFinder.perform(unitAST, start, length);
 
 		if (node == null)
 			throw new JavaModelException(new JavaModelStatus(IStatus.ERROR,
 				RefactoringCoreMessages.getFormattedString("IntroduceFactory.noASTNodeForConstructorSearchHit", //$NON-NLS-1$
-					new Object[] {	Integer.toString(start), Integer.toString(end),
-									unitHandle.getSource().substring(start, end),
+					new Object[] {	Integer.toString(start), Integer.toString(start + length),
+									unitHandle.getSource().substring(start, start + length),
 									unitHandle.getElementName() })));
 
 		if (node instanceof ClassInstanceCreation) {
