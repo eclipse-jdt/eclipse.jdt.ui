@@ -146,7 +146,7 @@ public class CPUserLibraryElement {
 	}
 		
 	public boolean hasChanges(IClasspathContainer oldContainer) {
-		if (oldContainer == null || (oldContainer.getKind() == IClasspathContainer.K_SYSTEM) && !fIsSystemLibrary) {
+		if (oldContainer == null || (oldContainer.getKind() == IClasspathContainer.K_SYSTEM) != fIsSystemLibrary) {
 			return true;
 		}
 		IClasspathEntry[] oldEntries= oldContainer.getClasspathEntries();
