@@ -387,7 +387,7 @@ public class StubUtility {
 		ITypeBinding[] typeBindings= binding.getParameterTypes();
 		String[] result= new String[typeBindings.length];
 		for (int i= 0; i < result.length; i++) {
-			result[i]= typeBindings[i].getQualifiedName();
+			result[i]= typeBindings[i].getErasure().getQualifiedName();
 		}
 		return result;
 	}
@@ -422,7 +422,7 @@ public class StubUtility {
 			if (i > 0) {
 				buf.append(", "); //$NON-NLS-1$
 			}
-			String curr= paramTypes[i];
+			String curr= Signature.getTypeErasure(paramTypes[i]);
 			buf.append(JavaModelUtil.getResolvedTypeName(curr, declaringType));
 			int arrayCount= Signature.getArrayCount(curr);
 			while (arrayCount > 0) {
@@ -587,6 +587,7 @@ public class StubUtility {
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, IMethodBinding overridden, String lineDelimiter) throws CoreException {
 		if (overridden != null) {
+			overridden= overridden.getErasure();
 			String declaringClassQualifiedName= overridden.getDeclaringClass().getQualifiedName();
 			String[] parameterTypesQualifiedNames= getParameterTypesQualifiedNames(overridden);			
 			return getMethodComment(cu, typeName, decl, true, overridden.isDeprecated(), declaringClassQualifiedName, parameterTypesQualifiedNames, lineDelimiter);
