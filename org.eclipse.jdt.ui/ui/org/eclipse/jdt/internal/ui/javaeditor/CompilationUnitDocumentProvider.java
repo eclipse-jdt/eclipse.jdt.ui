@@ -26,7 +26,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.SWT;
@@ -834,18 +833,16 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		if (original != null) {
 				
 			try {
-				
-				IProgressMonitor monitor= new NullProgressMonitor();
-				
+								
 				try {
-					input.getFile().refreshLocal(IResource.DEPTH_INFINITE, monitor);
+					refreshFile(input.getFile());
 				} catch (CoreException x) {
 					handleCoreException(x, JavaEditorMessages.getString("CompilationUnitDocumentProvider.error.createElementInfo")); //$NON-NLS-1$
 				}
 				
 				IAnnotationModel m= createCompilationUnitAnnotationModel(input);
 				IProblemRequestor r= m instanceof IProblemRequestor ? (IProblemRequestor) m : null;
-				ICompilationUnit c= (ICompilationUnit) original.getSharedWorkingCopy(monitor, fBufferFactory, r);
+				ICompilationUnit c= (ICompilationUnit) original.getSharedWorkingCopy(getProgressMonitor(), fBufferFactory, r);
 				
 				DocumentAdapter a= null;
 				try {
@@ -1023,11 +1020,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				if (resource instanceof IFile) {
 					
 					IFile file= (IFile) resource;
-					IProgressMonitor monitor= new NullProgressMonitor();
 					
 					try {
-						// http://dev.eclipse.org/bugs/show_bug.cgi?id=19014
-						file.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+						refreshFile(file);
 					} catch (CoreException x) {
 						handleCoreException(x, JavaEditorMessages.getString("CompilationUnitDocumentProvider.error.resetDocument")); //$NON-NLS-1$
 					}
