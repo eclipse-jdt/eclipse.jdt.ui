@@ -500,7 +500,8 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append("public class A {\n");
 		buf.append("    public void foo() {\n");
 		buf.append("    Runnable runnable = new Runnable() {\n");
-		buf.append("        };\n");		buf.append("    runnable.toString();\n");
+		buf.append("        };\n");
+		buf.append("    runnable.toString();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected= buf.toString();

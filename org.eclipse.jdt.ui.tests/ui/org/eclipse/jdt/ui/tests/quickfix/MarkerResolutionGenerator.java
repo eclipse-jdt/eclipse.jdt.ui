@@ -32,7 +32,8 @@ import org.eclipse.jdt.ui.JavaUI;
 public class MarkerResolutionGenerator implements IMarkerResolutionGenerator {
 
 	/**
-	 * Marker resolution that replaces the covered range with the uppercased content.	 */
+	 * Marker resolution that replaces the covered range with the uppercased content.
+	 */
 	public static class TestCorrectionMarkerResolution implements IMarkerResolution {
 
 		public TestCorrectionMarkerResolution() {

@@ -945,7 +945,8 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    B b;\n");
 		buf.append("    C c;\n");		
-		buf.append("    public void foo(A a) {");		buf.append("    }\n");
+		buf.append("    public void foo(A a) {");
+		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 

@@ -408,7 +408,8 @@ public class JavaProjectHelper {
 
 	/**
 	 * Sets autobuilding state for the test workspace.
-	 */	public static boolean setAutoBuilding(boolean state) throws CoreException {
+	 */
+	public static boolean setAutoBuilding(boolean state) throws CoreException {
 		// disable auto build
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		IWorkspaceDescription desc= workspace.getDescription();
