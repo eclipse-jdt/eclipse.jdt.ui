@@ -101,15 +101,16 @@ class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragS
 		if (!event.doit)
 			return;
 		
-		if (event.detail == DND.DROP_MOVE){
-			handleDropMove(event);
+		if (event.detail == DND.DROP_MOVE) {
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=30543
+			// handleDropMove(event);
 		}	
 		else if (event.detail == DND.DROP_NONE || event.detail == DND.DROP_TARGET_MOVE) {
 			handleRefresh(event);
 		}
 	}
 	
-	private void handleDropMove(DragSourceEvent event) {
+	/* package */ void handleDropMove(DragSourceEvent event) {
 		final List elements= getResources();
 		if (elements == null || elements.size() == 0)
 			return;
