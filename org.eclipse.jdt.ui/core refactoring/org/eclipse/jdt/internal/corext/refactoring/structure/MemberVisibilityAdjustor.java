@@ -99,6 +99,8 @@ public final class MemberVisibilityAdjustor {
 		 */
 		public IncomingMemberVisibilityAdjustment(final IMember member, final ModifierKeyword keyword, final RefactoringStatus status) {
 			Assert.isNotNull(member);
+			Assert.isTrue(!(member instanceof IInitializer));
+			Assert.isTrue(!member.isBinary() && !member.isReadOnly());
 			Assert.isTrue(isVisibilityKeyword(keyword));
 			fMember= member;
 			fKeyword= keyword;
@@ -543,6 +545,7 @@ public final class MemberVisibilityAdjustor {
 	 */
 	private void adjustIncomingVisibility(final IMember member, final IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(member);
+		Assert.isTrue(!member.isBinary() && !member.isReadOnly());
 		Assert.isNotNull(monitor);
 		final ModifierKeyword threshold= computeIncomingVisibilityThreshold(member, fReferencing, monitor);
 		if (hasLowerVisibility(member.getFlags(), threshold == null ? Modifier.NONE : threshold.toFlagValue()) && needsVisibilityAdjustment(member, threshold))
@@ -604,7 +607,7 @@ public final class MemberVisibilityAdjustor {
 			IMember member= (IMember) element;
 			if (member instanceof IInitializer)
 				member= member.getDeclaringType();
-			if (member != null)
+			if (member != null && !member.isBinary() && !member.isReadOnly())
 				adjustIncomingVisibility(member, monitor);
 		}
 	}
@@ -649,6 +652,7 @@ public final class MemberVisibilityAdjustor {
 	private void adjustOutgoingVisibility(final CompilationUnitRewrite rewrite, final IField field, final ModifierKeyword threshold, final VariableDeclarationFragment fragment, final FieldDeclaration declaration) throws JavaModelException {
 		Assert.isNotNull(rewrite);
 		Assert.isNotNull(field);
+		Assert.isTrue(!field.isBinary() && !field.isReadOnly());
 		Assert.isTrue(isVisibilityKeyword(threshold));
 		Assert.isNotNull(fragment);
 		Assert.isNotNull(declaration);
@@ -697,6 +701,7 @@ public final class MemberVisibilityAdjustor {
 	 */
 	private void adjustOutgoingVisibility(final CompilationUnitRewrite rewrite, final IMember member, final BodyDeclaration declaration, final ModifierKeyword threshold, final IBinding binding, final String template) throws JavaModelException {
 		Assert.isNotNull(member);
+		Assert.isTrue(!member.isBinary() && !member.isReadOnly());
 		Assert.isNotNull(rewrite);
 		Assert.isNotNull(declaration);
 		Assert.isTrue(isVisibilityKeyword(threshold));
@@ -724,19 +729,21 @@ public final class MemberVisibilityAdjustor {
 		final Object element= match.getElement();
 		if (element instanceof IMember) {
 			final IMember member= (IMember) element;
-			final ModifierKeyword threshold= computeOutgoingVisibilityThreshold(fReferencing, member, monitor);
-			final ASTNode node= ASTNodeSearchUtil.findNode(match, rewrite.getRoot());
-			if (node instanceof MethodDeclaration) {
-				final MethodDeclaration declaration= (MethodDeclaration) node;
-				adjustOutgoingVisibility(rewrite, member, declaration, threshold, declaration.resolveBinding(), "MemberVisibilityAdjustor.change_visibility_method_warning"); //$NON-NLS-1$
-			} else if (node instanceof SimpleName) {
-				final ASTNode parent= node.getParent();
-				if (parent instanceof VariableDeclarationFragment) {
-					final VariableDeclarationFragment fragment= (VariableDeclarationFragment) parent;
-					adjustOutgoingVisibility(rewrite, (IField) member, threshold, fragment, (FieldDeclaration) fragment.getParent());
-				} else if (parent instanceof AbstractTypeDeclaration) {
-					final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) parent;
-					adjustOutgoingVisibility(rewrite, member, declaration, threshold, declaration.resolveBinding(), "MemberVisibilityAdjustor.change_visibility_type_warning"); //$NON-NLS-1$
+			if (!member.isBinary() && !member.isReadOnly()) {
+				final ModifierKeyword threshold= computeOutgoingVisibilityThreshold(fReferencing, member, monitor);
+				final ASTNode node= ASTNodeSearchUtil.findNode(match, rewrite.getRoot());
+				if (node instanceof MethodDeclaration) {
+					final MethodDeclaration declaration= (MethodDeclaration) node;
+					adjustOutgoingVisibility(rewrite, member, declaration, threshold, declaration.resolveBinding(), "MemberVisibilityAdjustor.change_visibility_method_warning"); //$NON-NLS-1$
+				} else if (node instanceof SimpleName) {
+					final ASTNode parent= node.getParent();
+					if (parent instanceof VariableDeclarationFragment) {
+						final VariableDeclarationFragment fragment= (VariableDeclarationFragment) parent;
+						adjustOutgoingVisibility(rewrite, (IField) member, threshold, fragment, (FieldDeclaration) fragment.getParent());
+					} else if (parent instanceof AbstractTypeDeclaration) {
+						final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) parent;
+						adjustOutgoingVisibility(rewrite, member, declaration, threshold, declaration.resolveBinding(), "MemberVisibilityAdjustor.change_visibility_type_warning"); //$NON-NLS-1$
+					}
 				}
 			}
 		}
