@@ -618,7 +618,8 @@ public final class JavaUI {
 	 * @param archivePath the path of the library; this can be an workspace path
 	 * or an external path in case of an external library.
 	 * @param url The Javadoc location to set. This location should contain index.html and
-	 * a file 'package-list'.
+	 * a file 'package-list'. <code>null</code> clears the current documentation
+	 * location.
 	 * 
 	 * @since 2.0
 	 */
@@ -638,6 +639,34 @@ public final class JavaUI {
 	public static URL getLibraryJavadocLocation(IPath archivePath) {
 		return JavaDocLocations.getLibraryJavadocLocation(archivePath);
 	}
+	
+	/**
+	 * Sets the Javadoc location for a Java project. This location is used for
+	 * all types located in the project's source folders.
+	 * 
+	 * @param project the project
+	 * @param url The Javadoc location to set. This location should contain index.html and
+	 * a file 'package-list'. <code>null</code> clears the current documentation
+	 * location.
+	 * 
+	 * @since 2.1
+	 */
+	public static void setProjectJavadocLocation(IJavaProject project, URL url) {
+		JavaDocLocations.setProjectJavadocLocation(project, url);
+	}
+
+	/**
+	 * Returns the Javadoc location for a Java project or <code>null</code> if no
+	 * location is available. This location is used for all types located in the project's
+	 * source folders.
+	 * 
+	 * @param project the project
+	 * 
+	 * @since 2.1
+	 */	
+	public static URL getProjectJavadocLocation(IJavaProject project) {
+		return JavaDocLocations.getProjectJavadocLocation(project);
+	}	
 
 	/**
 	 * Returns the Javadoc base URL for an element. The base location contains the
