@@ -39,21 +39,21 @@ public class CopyQueries implements ICopyQueries {
 	}
 
 	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu) {
-		String key= "Enter a new name for ''{0}''";
-		String message= MessageFormat.format(key, new String[]{cu.getElementName()});
+		String key= "Enter a new name for ''{0}'':";
+		String message= MessageFormat.format(key, new String[]{removeTrailingJava(cu.getElementName())});
 		return createStaticQuery(createCompilationUnitNameValidator(cu), message, removeTrailingJava(cu.getElementName()));
 	}
 
 
 	public INewNameQuery createNewResourceNameQuery(IResource res) {
-		String key= "Enter a new name for ''{0}''";
+		String key= "Enter a new name for ''{0}'':";
 		String message= MessageFormat.format(key, new String[]{ res.getName()});
 		return createStaticQuery(createResourceNameValidator(res), message, res.getName());
 	}
 
 
 	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack) {
-		String key= "Enter a new name for ''{0}''";
+		String key= "Enter a new name for ''{0}'':";
 		String message= MessageFormat.format(key, new String[]{pack.getElementName()});
 		return createStaticQuery(createPackageNameValidator(pack), message, pack.getElementName());
 	}
