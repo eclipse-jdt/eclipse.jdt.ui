@@ -101,9 +101,7 @@ public class ViewSiteDecorator extends PlatformObject implements IViewSite {
      * @see org.eclipse.ui.IWorkbenchPartSite#getPart()
      */
     public IWorkbenchPart getPart() {
-    	return null;
-    	// TODO has to be enabled after next integration build
-        // return fViewSite.getPart();
+		return fViewSite.getPart();
     }
 	public IActionBars getActionBars() {
 		return fViewSite.getActionBars();
