@@ -97,15 +97,6 @@ public class JavadocView extends AbstractInfoView {
 		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS 
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE;
 
-	/**
-	 * Flag which tells whether the SWT Browser widget
-	 * is not working correctly on the platform.
-	 * 
-	 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=67167
-	 * @since 3.0
-	 */
-	private static final boolean fgBrowserDoesNotWorkOnPlatform= "gtk".equalsIgnoreCase(SWT.getPlatform()); //$NON-NLS-1$
-
 	
 	/** The HTML widget. */
 	private Browser fBrowser;
@@ -256,12 +247,8 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	protected void internalCreatePartControl(Composite parent) {
 		try {
-			if (fgBrowserDoesNotWorkOnPlatform)
-				fIsUsingBrowserWidget= false;
-			else {
-				fBrowser= new Browser(parent, SWT.NONE);
-				fIsUsingBrowserWidget= true;
-			}
+			fBrowser= new Browser(parent, SWT.NONE);
+			fIsUsingBrowserWidget= true;
 		} catch (SWTError er) {
 			
 			/* The Browser widget throws an SWTError if it fails to
