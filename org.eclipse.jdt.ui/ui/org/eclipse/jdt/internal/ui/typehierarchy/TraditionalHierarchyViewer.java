@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
@@ -97,82 +97,39 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 			return count;
 		}
 		
-	
-		/*
-		 * @see TypeHierarchyContentProvider.getElements
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyContentProvider#getRootTypes(java.util.List)
 		 */
-		public Object[] getElements(Object parent) {
+		protected final void getRootTypes(List res) {
 			ITypeHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
 				IType input= hierarchy.getType();
 				if (input == null) {
-					ArrayList res=  new ArrayList();
 					IType[] classes= hierarchy.getRootClasses();
-					for  (int i= 0; i < classes.length; i++) {
+					for (int i= 0; i < classes.length; i++) {
 						res.add(classes[i]);
 					}
 					IType[] interfaces= hierarchy.getRootInterfaces();
 					for (int i= 0; i < interfaces.length; i++) {
-						if (isRootOfInterfaceOrAnonym(hierarchy, interfaces[i])) {
-							res.add(interfaces[i]);
-						}
+						res.add(interfaces[i]);
 					}
-					return res.toArray();
 				} else {
 					if (Flags.isInterface(hierarchy.getCachedFlags(input))) {
-						return new Object[] { input };
+						res.add(input);
 					} else {
 						IType[] roots= hierarchy.getRootClasses();
 						for (int i= 0; i < roots.length; i++) {
 							if (isObject(roots[i])) {
-								return new Object[] { roots[i] };
+								res.add(roots[i]);
+								return;
 							}
-						} 
-						return roots; // a problem with the hierarchy
+						}
+						res.addAll(Arrays.asList(roots)); // something wrong with the hierarchy
 					}
 				}
 			}
-			return NO_ELEMENTS;
 		}
-			
-		private boolean isRootOfInterfaceOrAnonym(ITypeHierarchy hierarchy, IType type) {
-			if (isInScope(type)) {
-				return true;
-			}
-			
-			IType[] subTypes= hierarchy.getSubtypes(type);
-			for (int i= 0; i < subTypes.length; i++) {
-				IType curr= subTypes[i];
-				if (isAnonymous(curr)) {
-					return true;
-				}
-				if (Flags.isInterface(hierarchy.getCachedFlags(curr))) {
-					if (isRootOfInterfaceOrAnonym(hierarchy, curr)) {
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
-		private boolean isInScope(IType type) {
-			IJavaElement input= fTypeHierarchy.getInputElement();
-			int inputType= input.getElementType();
-			if (inputType ==  IJavaElement.TYPE) {
-				return true;
-			}
-			
-			IJavaElement parent= type.getAncestor(input.getElementType());
-			if (inputType == IJavaElement.PACKAGE_FRAGMENT) {
-				if (parent == null || parent.getElementName().equals(input.getElementName())) {
-					return true;
-				}
-			} else if (input.equals(parent)) {
-				return true;
-			}
-			return false;
-		}
-	
+				
 		/*
 		 * @see TypeHierarchyContentProvider.getTypesInHierarchy
 		 */	
@@ -183,21 +140,22 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 				if (isObject(type)) {
 					for (int i= 0; i < types.length; i++) {
 						IType curr= types[i];
-						if (!isAnonymous(curr)) {
+						if (!isAnonymous(curr)) { // no anonyous classes on 'Object' -> will be children of interface
 							res.add(curr);
 						}
 					}
 				} else {
-					if (fTypeHierarchy.getInputElement() instanceof IType) {
+					boolean isClass= !Flags.isInterface(hierarchy.getCachedFlags(type));
+					if (isClass) {
 						for (int i= 0; i < types.length; i++) {
 							res.add(types[i]);
 						}
 					} else {
-						boolean isClass= !Flags.isInterface(hierarchy.getCachedFlags(type));
 						for (int i= 0; i < types.length; i++) {
 							IType curr= types[i];
-							if (isClass || isRootOfInterfaceOrAnonym(hierarchy, curr)) {
-								res.add(types[i]);
+							// no classes implementing inetrfaces, only if anonymous
+							if (Flags.isInterface(hierarchy.getCachedFlags(curr)) || isAnonymous(curr)) {
+								res.add(curr);
 							}
 						}
 					}

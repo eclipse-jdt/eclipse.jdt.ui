@@ -57,7 +57,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 * an implementation of one of the filter members and the members themself.
 	 * The hierarchy can be empty as well.
 	 */
-	public void setMemberFilter(IMember[] memberFilter) {
+	public final void setMemberFilter(IMember[] memberFilter) {
 		fMemberFilter= memberFilter;
 	}
 	
@@ -94,15 +94,30 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 * @see IStructuredContentProvider#getElements	 
 	 */
 	public Object[] getElements(Object parent) {
+		ArrayList types= new ArrayList();
+		getRootTypes(types);
+		for (int i= types.size() - 1; i >= 0; i--) {
+			IType curr= (IType) types.get(i);
+			try {
+				if (!isInTree(curr)) {
+					types.remove(i);
+				}
+			} catch (JavaModelException e) {
+				// ignore
+			}
+		}
+		return types.toArray();
+	}
+	
+	protected void getRootTypes(List res) {
 		ITypeHierarchy hierarchy= getHierarchy();
 		if (hierarchy != null) {
 			IType input= hierarchy.getType();
 			if (input != null) {
-				return new IType[] { input };
+				res.add(input);
 			}
 			// opened on a region: dont show
 		}
-		return NO_ELEMENTS; 
 	}
 	
 	/**
@@ -116,8 +131,26 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	protected abstract IType getParentType(IType type);	
 	
 	
-	private boolean isInWorkingSet(Object element) {
-		return fWorkingSetFilter == null || fWorkingSetFilter.select(null, null, element);
+	private boolean isInScope(IType type) {
+		if (fWorkingSetFilter != null && !fWorkingSetFilter.select(null, null, type)) {
+			return false;
+		}
+		
+		IJavaElement input= fTypeHierarchy.getInputElement();
+		int inputType= input.getElementType();
+		if (inputType ==  IJavaElement.TYPE) {
+			return true;
+		}
+		
+		IJavaElement parent= type.getAncestor(input.getElementType());
+		if (inputType == IJavaElement.PACKAGE_FRAGMENT) {
+			if (parent == null || parent.getElementName().equals(input.getElementName())) {
+				return true;
+			}
+		} else if (input.equals(parent)) {
+			return true;
+		}
+		return false;
 	}
 	
 	/*
@@ -189,16 +222,14 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		}
 	}
 	
-
-	private boolean isInTree(IType type) throws JavaModelException {
-		if (isInWorkingSet(type)) {
+	protected final boolean isInTree(IType type) throws JavaModelException {
+		if (isInScope(type)) {
 			if (fMemberFilter != null) {
 				return hasMemberFilterChildren(type) || hasTypeChildren(type);
 			} else {
 				return true;
 			}
 		}
-		
 		return hasTypeChildren(type);
 	}
 	
@@ -268,6 +299,8 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	protected final boolean isObject(IType type) {
 		return "Object".equals(type.getElementName()) && type.getDeclaringType() == null && "java.lang".equals(type.getPackageFragment().getElementName());  //$NON-NLS-1$//$NON-NLS-2$
 	}
+
+
 
 
 	
