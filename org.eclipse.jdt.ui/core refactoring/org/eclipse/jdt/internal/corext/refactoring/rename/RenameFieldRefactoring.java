@@ -189,7 +189,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
 		IField orig= (IField)WorkingCopyUtil.getOriginal(fField);
 		if (orig == null || ! orig.exists())
-			return RefactoringStatus.createFatalErrorStatus("Please save the compilation unit '" + fField.getCompilationUnit().getElementName()+ "' before performing this refactoring.");
+			return RefactoringStatus.createFatalErrorStatus("The selected field has been deleted from '" + fField.getCompilationUnit().getElementName()+ "'.");
 		fField= orig;
 		
 		return Checks.checkIfCuBroken(fField);
