@@ -42,7 +42,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -193,7 +192,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		TableColumn column3= new TableColumn(table, SWT.NONE);
 		column3.setText(JavaTemplateMessages.getString("TemplatePreferencePage.column.description")); //$NON-NLS-1$
 		
-		fTableViewer= new CheckboxTableViewer(table);		
+		fTableViewer= new TableViewer(table);		
 		fTableViewer.setLabelProvider(new TemplateLabelProvider());
 		fTableViewer.setContentProvider(new TemplateContentProvider());
 
