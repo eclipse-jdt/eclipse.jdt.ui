@@ -31,10 +31,14 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -96,7 +100,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	/**
 	 * The launcher that has started the test
 	 */
-	private IJUnitLauncherDelegate fLauncher;
+	private String fLaunchMode;
 	/**
 	 * The client side of the remote test runner
 	 */
@@ -176,6 +180,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 	 * @see ITestRunListener#testStarted
 	 */
 	public void testStarted(String testName) {
+		// reveal the part when the first test starts
+		if (fExecutedTests == 1) 
+			postShowTestResultsView();
 		postInfo("Started: " + testName);
 		TestRunInfo testInfo= getTestInfo(testName);
 		if (testInfo == null) 
@@ -281,9 +288,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		});	
 	}
 
-	public void startTestRunListening(IJUnitLauncherDelegate launcher) {
-		fTestType= launcher.getLaunchedType();
-		fLauncher= launcher;
+	public void startTestRunListening(IType type, int port, String mode) {
+		fTestType= type;
+		fLaunchMode= mode;
 		String msg= "Launching TestRunner";
 		showInformation(msg);
 		postInfo(msg);
@@ -291,16 +298,14 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		if (fTestRunnerClient != null) 
 			stopTest();
 		fTestRunnerClient= new RemoteTestRunnerClient();
-		fTestRunnerClient.startListening(this, launcher.getPort());
+		fTestRunnerClient.startListening(this, port);
 		
 		setTitle("JUnit ("+fTestType.getElementName()+")");
 		setTitleToolTip(fTestType.getFullyQualifiedName());
 	}
 	
 	public void rerunTest(String className, String testName) {
-		if (fTestRunnerClient != null && fTestRunnerClient.isRunning() 
-			&& fLauncher != null && ILaunchManager.DEBUG_MODE.equals(fLauncher.getRunMode())
-		)
+		if (fTestRunnerClient != null && fTestRunnerClient.isRunning() && ILaunchManager.DEBUG_MODE.equals(fLaunchMode))
 			fTestRunnerClient.rerunTest(className, testName);
 		else {
 			MessageDialog.openInformation(getSite().getShell(), 
@@ -383,6 +388,30 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		fCounterPanel.setFailureValue(fFailures);
 		fCounterPanel.setRunValue(fExecutedTests);
 		updateProgressColor(fErrors + fFailures);
+	}
+	
+	protected void postShowTestResultsView() {
+		postAsyncRunnable(new Runnable() {
+			public void run() {
+				if (isDisposed()) 
+					return;
+				showTestResultsView();
+			}
+		});
+	}
+	
+	public void showTestResultsView() {
+		IWorkbenchWindow window= getSite().getWorkbenchWindow();
+		IWorkbenchPage page= window.getActivePage();
+		TestRunnerViewPart testRunner= null;
+		
+		try {
+			testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
+		} catch (PartInitException e) {
+			ErrorDialog.openError(getSite().getShell(), 
+				"Could not show JUnit Result View", e.getMessage(), e.getStatus()
+			);
+		}
 	}
 	
 	protected void postInfo(final String message) {

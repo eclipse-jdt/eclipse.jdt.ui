@@ -7,14 +7,20 @@ package org.eclipse.jdt.internal.junit.ui;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
+import org.eclipse.jdt.internal.junit.oldlauncher.*;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.ILauncher;
 
 import org.eclipse.debug.ui.actions.RunAction;
 
@@ -22,6 +28,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ui.IWorkbench;
@@ -29,6 +36,10 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 
 /**
  * The plug-in runtime class for the JUnit plug-in.
@@ -38,6 +49,9 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 * The single instance of this plug-in runtime class.
 	 */
 	private static JUnitPlugin fgPlugin= null;
+	
+	public static final String PLUGIN_ID = "org.eclipse.jdt.junit" ; //$NON-NLS-1$
+
 	private static URL fgIconBaseURL;
 	
 	public JUnitPlugin(IPluginDescriptor desc) {
@@ -56,17 +70,27 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	}
 	
 	public static Shell getActiveWorkbenchShell() {
-		if (fgPlugin == null) 
-			return null;
-		IWorkbench workBench= fgPlugin.getWorkbench();
-		if (workBench == null) 
-			return null;
-		IWorkbenchWindow workBenchWindow= workBench.getActiveWorkbenchWindow();
+		IWorkbenchWindow workBenchWindow= getActiveWorkbenchWindow();
 		if (workBenchWindow == null) 
 			return null;
 		return workBenchWindow.getShell();
 	}
 	
+	/**
+	 * Returns the active workbench window
+	 * 
+	 * @return the active workbench window
+	 */
+	public static IWorkbenchWindow getActiveWorkbenchWindow() {
+		if (fgPlugin == null) 
+			return null;
+		IWorkbench workBench= fgPlugin.getWorkbench();
+		if (workBench == null) 
+			return null;
+		return workBench.getActiveWorkbenchWindow();
+	}	
+	
+
 	public static String getPluginId() {
 		return getDefault().getDescriptor().getUniqueIdentifier();
 	}
@@ -103,22 +127,55 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 * @see ILaunchListener#launchAdded(ILaunch)
 	 */
 	public void launchAdded(ILaunch launch) {
-		if (launch.getLauncher().getDelegate() instanceof IJUnitLauncherDelegate) {
-			IJUnitLauncherDelegate launcher= (IJUnitLauncherDelegate)launch.getLauncher().getDelegate();
-			IWorkbenchWindow window= getWorkbench().getActiveWorkbenchWindow();
-			IWorkbenchPage page= window.getActivePage();
-			TestRunnerViewPart testRunner= null;
-			
-			try {
-				testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
-			} catch (PartInitException e) {
-				ErrorDialog.openError(getActiveWorkbenchShell(), 
-					"Could not show JUnit Result View", e.getMessage(), e.getStatus()
-				);
-			}
-			if (testRunner != null)
-				testRunner.startTestRunListening(launcher);	
+		ILauncher launcher=launch.getLauncher();
+		IType launchedType= null;
+		int port= -1;
+		
+		if (launcher != null && launcher.getDelegate() instanceof IJUnitLauncherDelegate) {
+			// old launchers
+			IJUnitLauncherDelegate launcherDelegate= (IJUnitLauncherDelegate)launch.getLauncher().getDelegate();
+			launchedType= launcherDelegate.getLaunchedType();
+			port= launcherDelegate.getPort();
+		} else {
+			// new launch configs
+			ILaunchConfiguration config= launch.getLaunchConfiguration();
+			if (config != null) {
+				try {
+					ILaunchConfigurationType type= config.getType(); 
+					// TO DO should not know about org.eclipse.pde.junit.launchconfig
+					if (type.getIdentifier().equals("org.eclipse.jdt.junit.launchconfig") ||
+						type.getIdentifier().equals("org.eclipse.pde.junit.launchconfig")) {
+						port= config.getAttribute(JUnitBaseLaunchConfiguration.PORT_ATTR, 4500);
+						String testTypeHandle= config.getAttribute(JUnitBaseLaunchConfiguration.TESTTYPE_ATTR, "");
+						IJavaElement element= JavaCore.create(testTypeHandle);
+						if (element instanceof IType) 
+							launchedType= (IType)element;
+					}
+				} catch(CoreException e) {
+					ErrorDialog.openError(getActiveWorkbenchShell(), 
+						"Could not show JUnit Result View", e.getMessage(), e.getStatus()
+					);
+				}
+			}	
 		}
+		if (launchedType != null) 
+			connectTestRunner(launch, launchedType, port);
+	}
+
+	public void connectTestRunner(ILaunch launch, IType launchedType, int port) {
+		IWorkbenchWindow window= getWorkbench().getActiveWorkbenchWindow();
+		IWorkbenchPage page= window.getActivePage();
+		TestRunnerViewPart testRunner= null;
+		
+		try {
+			testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
+		} catch (PartInitException e) {
+			ErrorDialog.openError(getActiveWorkbenchShell(), 
+				"Could not show JUnit Result View", e.getMessage(), e.getStatus()
+			);
+		}
+		if (testRunner != null)
+			testRunner.startTestRunListening(launchedType, port, launch.getLaunchMode());	
 	}
 
 	/*
