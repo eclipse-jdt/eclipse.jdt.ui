@@ -65,25 +65,39 @@ public class DeleteRefactoring extends Refactoring {
 	}
 	
 	public static DeleteRefactoring create(List elements, IPackageFragmentRootManipulationQuery rootManipulationQuery){
-		DeleteRefactoring ref= new DeleteRefactoring(elements, rootManipulationQuery);
-		if (ref.checkPreactivation().hasFatalError())
+		if (! isAvailable(elements))
 			return null;
-		return ref;
+		return new DeleteRefactoring(elements, rootManipulationQuery);
 	}
 	
+	public static boolean isAvailable(List elements){
+		List converted= convertToInputElements(elements);
+		if (converted == null)
+			return false;
+		if (converted.isEmpty())
+			return false;
+		if (hasProjects(converted) && hasNonProjects(converted))
+			return false;
+		if (! canDeleteAll(converted))
+			return false;
+		return true;
+	}
+	
+	/* JDT Core does not support deletion of default packages but you still want to be able to delete them
+	  * this is a workaround for this missing functionality
+	  */
 	private static List convertToInputElements(List elements){
 		List result= new ArrayList(elements.size());
 		for (Iterator iter= elements.iterator(); iter.hasNext();) {
 			Object each= iter.next();
-			if (each instanceof IPackageFragment && ((IPackageFragment)each).isDefaultPackage()){
-				IPackageFragment pack= (IPackageFragment)each;
+			if (! JavaElementUtil.isDefaultPackage(each)){
+				result.add(each);
+			} else {
 				try {
-					result.addAll(Arrays.asList(pack.getCompilationUnits()));
+					result.addAll(Arrays.asList(((IPackageFragment)each).getCompilationUnits()));
 				} catch(JavaModelException e) {
 					//cannot show any ui here - just skip
 				}
-			} else {
-				result.add(each);
 			}
 		}
 		return result;
@@ -97,19 +111,6 @@ public class DeleteRefactoring extends Refactoring {
 		fCheckIfUsed= check;
 	}
 
-	private RefactoringStatus checkPreactivation(){
-		if (fElements.isEmpty())
-			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-			
-		if (hasProjects() && hasNonProjects())	
-			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-			
-		if (! canDeleteAll())
-			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-						
-		return new RefactoringStatus();
-	}
-	
 	/* non java-doc
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
@@ -344,16 +345,16 @@ public class DeleteRefactoring extends Refactoring {
 		return RefactoringCoreMessages.getString("DeleteRefactoring.delete"); //$NON-NLS-1$
 	}
 	
-	private boolean hasNonProjects(){
-		for (Iterator iter= fElements.iterator(); iter.hasNext(); ){
+	private static boolean hasNonProjects(List elements){
+		for (Iterator iter= elements.iterator(); iter.hasNext(); ){
 			if (! isProject(iter.next()))
 				return true;
 		}
 		return false;
 	}
 	
-	private boolean hasProjects(){
-		for (Iterator iter= fElements.iterator(); iter.hasNext(); ){
+	private static boolean hasProjects(List elements){
+		for (Iterator iter= elements.iterator(); iter.hasNext(); ){
 			if (isProject(iter.next()))
 				return true;
 		}
@@ -364,8 +365,8 @@ public class DeleteRefactoring extends Refactoring {
 		return (element instanceof IJavaProject) || (element instanceof IProject);
 	}
 	
-	private boolean canDeleteAll(){
-		for (Iterator iter= fElements.iterator(); iter.hasNext();){
+	private static boolean canDeleteAll(List elements){
+		for (Iterator iter= elements.iterator(); iter.hasNext();){
 			if (! canDelete(iter.next()))
 				return false;
 		}
