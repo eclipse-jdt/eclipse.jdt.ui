@@ -41,7 +41,7 @@ public class Selection {
 	 * Creates a new selection from the given start and length.
 	 * 
 	 * @param s the start offset of the selection (inclusive)
-	 * @param length the length of the selection
+	 * @param l the length of the selection
 	 * @return the created selection object
 	 */
 	public static Selection createFromStartLength(int s, int l) {
