@@ -108,7 +108,8 @@ class FailureTrace implements IMenuListener {
 				manager.add(a);		
 			manager.add(new CopyTraceAction(FailureTrace.this, fClipboard));
 		}
-		if (fFailure.isComparisonFailure()) 
+		// fix for bug 68058
+		if (fFailure != null && fFailure.isComparisonFailure()) 
 			manager.add(new CompareResultsAction(FailureTrace.this));
 	}
 
