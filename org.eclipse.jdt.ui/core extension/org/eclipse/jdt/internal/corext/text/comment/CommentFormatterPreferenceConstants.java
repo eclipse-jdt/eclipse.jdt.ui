@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.text.comment;
 
 /**
  * The CommentFormatter's preference keys.
+ * TODO: make API in JDT/Core
  * 
  * @since 3.1
  */

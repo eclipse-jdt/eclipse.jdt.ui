@@ -31,6 +31,7 @@ package org.eclipse.jdt.internal.corext.text.comment;
  * be <code>true</code> (disregarding rounding errors due to integer
  * arithmetic).
  * </p>
+ * TODO: make API in JDT/Core
  * 
  * @since 3.0
  */

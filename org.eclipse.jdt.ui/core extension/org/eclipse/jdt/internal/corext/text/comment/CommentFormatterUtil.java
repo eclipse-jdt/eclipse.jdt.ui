@@ -22,9 +22,8 @@ import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.ToolFactory;
 
-import org.eclipse.jdt.internal.corext.Assert; // TODO: replace
-
-import org.eclipse.jdt.internal.ui.JavaPlugin; // TODO: replace
+import org.eclipse.jdt.internal.corext.Assert; // TODO: replace with org.eclipse.jdt.internal.core.Assert
+import org.eclipse.jdt.internal.ui.JavaPlugin; // TODO: replace with org.eclipse.jdt.internal.core.util.Util
 
 /**
  * Comment formatting utils.
@@ -119,5 +118,6 @@ public class CommentFormatterUtil {
 	 */
 	public static void log(Throwable t) {
 		JavaPlugin.log(t);
+//		Util.log(t, "Exception occured while formatting comments"); //$NON-NLS-1$
 	}
 }
