@@ -114,13 +114,11 @@ public class OpenTypeHierarchyUtil {
 			}
 				
 		} catch (WorkbenchException e) {
-			JavaPlugin.log(e);
-			MessageDialog.openError(window.getShell(),
+			ExceptionHandler.handle(e, window.getShell(),
 				JavaUIMessages.getString("OpenTypeHierarchyUtil.error.open_perspective"), //$NON-NLS-1$
 				e.getMessage());
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e.getStatus());
-			MessageDialog.openError(window.getShell(),
+			ExceptionHandler.handle(e, window.getShell(),
 				JavaUIMessages.getString("OpenTypeHierarchyUtil.error.open_editor"), //$NON-NLS-1$
 				e.getMessage());
 		}
@@ -141,8 +139,7 @@ public class OpenTypeHierarchyUtil {
 			}
 			return result;
 		} catch (CoreException e) {
-			JavaPlugin.log(e.getStatus());
-			MessageDialog.openError(window.getShell(), 
+			ExceptionHandler.handle(e, window.getShell(), 
 				JavaUIMessages.getString("OpenTypeHierarchyUtil.error.open_view"), e.getMessage()); //$NON-NLS-1$
 		}
 		return null;		

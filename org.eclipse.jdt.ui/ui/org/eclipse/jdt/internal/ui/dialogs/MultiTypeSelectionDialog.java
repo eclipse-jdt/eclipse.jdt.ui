@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -121,7 +122,7 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 				} catch (JavaModelException e) {
 					String title= JavaUIMessages.getString("MultiTypeSelectionDialog.errorTitle"); //$NON-NLS-1$
 					String message= JavaUIMessages.getString("MultiTypeSelectionDialog.errorMessage"); //$NON-NLS-1$
-					MessageDialog.openError(getShell(), title, message);
+					ErrorDialog.openError(getShell(), title, message, e.getStatus());
 				}
 			}
 		}

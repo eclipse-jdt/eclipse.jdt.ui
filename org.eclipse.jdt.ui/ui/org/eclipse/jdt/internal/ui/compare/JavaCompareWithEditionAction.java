@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.compare.JavaHistoryAction.JavaTextBufferNode;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.compare.*;
 
@@ -77,8 +78,7 @@ public class JavaCompareWithEditionAction extends JavaHistoryAction {
 			d.selectEdition(target, editions, input);
 						
 		} catch(CoreException ex) {
-			JavaPlugin.log(ex);
-			MessageDialog.openError(shell, errorTitle, errorMessage);
+			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);
 		} finally {
 			if (buffer != null)
 				TextBuffer.release(buffer);

@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
 /**
@@ -56,8 +57,7 @@ public class ShowInNavigatorAction extends SelectionProviderAction {
 				((ISetSelectionTarget)view).selectReveal(selection);
 			}
 		} catch (PartInitException e) {
-			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), PackagesMessages.getString("ShowInNavigator.error"), e.getMessage()); //$NON-NLS-1$
-			JavaPlugin.log(e);
+			ExceptionHandler.handle(e, JavaPlugin.getActiveWorkbenchShell(), PackagesMessages.getString("ShowInNavigator.error"), e.getMessage()); //$NON-NLS-1$
 		}
 	}
 
