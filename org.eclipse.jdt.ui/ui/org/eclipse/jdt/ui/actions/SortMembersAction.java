@@ -15,28 +15,31 @@ import java.util.Iterator;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
+
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IParent;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.SortMembersOperation;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -48,8 +51,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * Sorts the members of a compilation unit with the sort order as specified in
@@ -69,8 +70,6 @@ import org.eclipse.jdt.ui.JavaUI;
  * @since 2.1
  */
 public class SortMembersAction extends SelectionDispatchAction {
-
-	private static final boolean BUG_81329= false;
 
 	private CompilationUnitEditor fEditor;
 	private final static String ID= "org.eclipse.jdt.ui.actions.SortMembersAction"; //$NON-NLS-1$
@@ -122,11 +121,8 @@ public class SortMembersAction extends SelectionDispatchAction {
 		Shell shell= getShell();
 		try {
 			ICompilationUnit cu= getSelectedCompilationUnit(selection);
-			int cuMembers= cu.getTypes().length;
-			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=38496
-			IType type= cu.findPrimaryType();
-			int memberCount= type.getChildren().length;
-			if (cuMembers <= 1 && memberCount <= 1) {
+			IType[] types= cu.getTypes();
+			if (!hasMembersToSort(types)) {
 				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("SortMembersAction.no_members")); //$NON-NLS-1$			
 				return;
 			}
@@ -143,6 +139,19 @@ public class SortMembersAction extends SelectionDispatchAction {
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, shell, getDialogTitle(), null); 
 		}			
+	}
+	
+	private boolean hasMembersToSort(IJavaElement[] members) throws JavaModelException {
+		if (members.length > 1) {
+			return true;
+		}
+		if (members.length == 1) {
+			IJavaElement elem= members[0];
+			if (elem instanceof IParent) {
+				return hasMembersToSort(((IParent) elem).getChildren());
+			}
+		}
+		return false;
 	}
 
 	//---- Java Editior --------------------------------------------------------------
@@ -189,22 +198,6 @@ public class SortMembersAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), cu)) {
 			return;
 		}		
-		
-		if (BUG_81329) {
-			try {
-				final IType[] types= cu.getAllTypes();
-				IType type= null;
-				for (int index= 0; index < types.length; index++) {
-					type= types[index];
-					if (type.isEnum()) {
-						MessageDialog.openInformation(shell, "Sort Members", "Sorting of enum types is currently not supported."); //$NON-NLS-1$ //$NON-NLS-2$
-						return;
-					}
-				}
-			} catch (JavaModelException exception) {
-				JavaPlugin.log(exception);
-			}
-		}
 		
 		if (containsRelevantMarkers(editor)) {
 			int returnCode= OptionalMessageDialog.open(ID, 
