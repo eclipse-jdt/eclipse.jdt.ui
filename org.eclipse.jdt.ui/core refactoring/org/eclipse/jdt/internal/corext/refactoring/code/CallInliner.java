@@ -259,7 +259,7 @@ public class CallInliner {
 		initializeTargetNode();
 		flowAnalysis();
 		
-		fContext= new CallContext(fInvocationScope, fTargetNode.getNodeType(), fImportEdit);
+		fContext= new CallContext(fInvocation, fInvocationScope, fTargetNode.getNodeType(), fImportEdit);
 		
 		computeRealArguments();
 		computeReceiver();

@@ -509,7 +509,7 @@ public class ASTNodes {
 		return result;
 	}
 	
-	public static ITypeBinding getDeclaringType(BodyDeclaration declaration) {
+	public static ITypeBinding getDeclaringType(ASTNode declaration) {
 		ASTNode node= declaration;
 		while(node != null) {
 			switch(node.getNodeType()) {

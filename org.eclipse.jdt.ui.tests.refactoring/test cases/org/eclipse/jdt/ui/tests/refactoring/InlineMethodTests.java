@@ -434,6 +434,22 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performReceiverTest();
 	}
 	
+	public void testExplicitStaticThisFieldReceiver() throws Exception {
+		performReceiverTest();
+	}
+	
+	public void testExplicitThisFieldReceiver() throws Exception {
+		performReceiverTest();
+	}
+	
+	public void testExplicitStaticThisMethodReceiver() throws Exception {
+		performReceiverTest();
+	}
+	
+	public void testExplicitThisMethodReceiver() throws Exception {
+		performReceiverTest();
+	}
+	
 	/* *********************** Import Tests ******************************* */
 		
 	private void performImportTest() throws Exception {

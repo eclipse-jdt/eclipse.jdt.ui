@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import org.eclipse.jdt.core.dom.ASTNode;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 
 public class CallContext {
 
+	public ASTNode invocation;
 	public String[] arguments;
 	public String receiver; 
 	public boolean receiverIsStatic;
@@ -22,8 +25,9 @@ public class CallContext {
 	public int callMode;
 	public ImportRewrite importer;
 
-	public CallContext(CodeScopeBuilder.Scope s, int cm, ImportRewrite i) {
+	public CallContext(ASTNode inv, CodeScopeBuilder.Scope s, int cm, ImportRewrite i) {
 		super();
+		invocation= inv;
 		scope= s;
 		callMode= cm;
 		importer= i;

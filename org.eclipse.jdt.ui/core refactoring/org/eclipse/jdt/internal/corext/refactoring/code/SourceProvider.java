@@ -53,7 +53,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
@@ -346,11 +345,14 @@ public class SourceProvider {
 			} else if (node instanceof SimpleName && ((SimpleName)node).resolveBinding() instanceof IVariableBinding) {
 				IVariableBinding vb= (IVariableBinding)((SimpleName)node).resolveBinding();
 				if (vb.isField()) { 
-					FieldAccess access= node.getAST().newFieldAccess();
-					ASTNode target= fRewriter.createMoveTarget(node);
-					access.setName((SimpleName)target);
-					access.setExpression(ASTNodeFactory.newName(node.getAST(), context.receiver));
-					fRewriter.replace(node, access, null);
+					Expression receiver= createReceiver(context, vb);
+					if (receiver != null) {
+						FieldAccess access= node.getAST().newFieldAccess();
+						ASTNode target= fRewriter.createMoveTarget(node);
+						access.setName((SimpleName)target);
+						access.setExpression(receiver);
+						fRewriter.replace(node, access, null);
+					}
 				}
 			}
 		}
@@ -371,15 +373,37 @@ public class SourceProvider {
 	}
 
 	private Expression createReceiver(CallContext context, IMethodBinding method) {
-		String receiver= context.receiver;
-		if (!context.receiverIsStatic && Modifier.isStatic(method.getModifiers())) {
-			receiver= context.importer.addImport(fDeclaration.resolveBinding().getDeclaringClass()); 
-		}
-		Expression exp= (Expression)fRewriter.createStringPlaceholder(receiver, ASTNode.METHOD_INVOCATION);
-		fRewriter.markAsInserted(exp);
-		return exp;
+		String receiver= getReceiver(context, method.getModifiers());
+		if (receiver == null)
+			return null;
+		Expression result= (Expression)fRewriter.createStringPlaceholder(receiver, ASTNode.METHOD_INVOCATION);
+		fRewriter.markAsInserted(result);
+		return result;
 	}
 	
+	private Expression createReceiver(CallContext context, IVariableBinding field) {
+		String receiver= getReceiver(context, field.getModifiers());
+		if (receiver == null)
+			return null;
+		Expression result= (Expression)fRewriter.createStringPlaceholder(receiver, ASTNode.SIMPLE_NAME);
+		fRewriter.markAsInserted(result);
+		return result;
+	}
+	
+	private String getReceiver(CallContext context, int modifiers) {
+		String receiver= context.receiver;
+		ITypeBinding invocationType= ASTNodes.getDeclaringType(context.invocation);
+		ITypeBinding sourceType= fDeclaration.resolveBinding().getDeclaringClass();
+		if (!context.receiverIsStatic && Modifier.isStatic(modifiers)) {
+			if ("this".equals(receiver) && invocationType != null && Bindings.equals(invocationType, sourceType)) { //$NON-NLS-1$
+				receiver= null;
+			} else {
+				receiver= context.importer.addImport(sourceType);
+			}
+		}
+		return receiver;
+	}
+
 	private ASTNode getLastStatement() {
 		List statements= fDeclaration.getBody().statements();
 		if (statements.isEmpty())
