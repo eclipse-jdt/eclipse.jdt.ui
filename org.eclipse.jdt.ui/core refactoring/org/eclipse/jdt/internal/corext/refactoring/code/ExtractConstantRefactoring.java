@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
@@ -348,10 +349,23 @@ public class ExtractConstantRefactoring extends Refactoring {
 	private String getModifier() {
 		return getAccessModifier() + " " + MODIFIER;	
 	}
-
+	
+	private static boolean isJustWhitespace(int start, int end, ICompilationUnit cu) throws JavaModelException {
+		return 0 == cu.getBuffer().getText(start, end - start).trim().length();
+	}
+	
+	private boolean selectionIncludesExtraneousText() throws JavaModelException {
+		Expression selectedExpression= getSelectedExpression();
+		if(!isJustWhitespace(fSelectionStart, selectedExpression.getStartPosition(), fCu))
+			return true;
+		if(!isJustWhitespace(selectedExpression.getStartPosition() + selectedExpression.getLength(), fSelectionStart + fSelectionLength, fCu))				
+			return true;
+		return false;
+	}
+	
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
 		try {
-			pm.beginTask("", 4); //$NON-NLS-1$
+			pm.beginTask("", 3); //$NON-NLS-1$
 
 			Expression selectedExpression= getSelectedExpression();
 
@@ -361,15 +375,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 			}
 			pm.worked(1);
 
-			if (selectedExpression.getStartPosition() != fSelectionStart) {
-				int length= selectedExpression.getStartPosition() - fSelectionStart;
-				if (length >= 0 && !"".equals(fCu.getBuffer().getText(fSelectionStart, length).trim())) //$NON-NLS-1$
-					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractConstantRefactoring.begining")); //$NON-NLS-1$
-			}
-			pm.worked(1);
-
-			if (selectedExpression instanceof Name && selectedExpression.getParent() instanceof ClassInstanceCreation)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractConstantRefactoring.name_in_new")); //$NON-NLS-1$
+			if(selectionIncludesExtraneousText())
+				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractConstantRefactoring.extraneous_text_selected"), null, null, RefactoringStatusCodes.EXTRANEOUS_TEXT); //$NON-NLS-1$
 			pm.worked(1);
 
 			RefactoringStatus result= new RefactoringStatus();
@@ -385,14 +392,15 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private RefactoringStatus checkExpressionBinding() throws JavaModelException {
-		ITypeBinding tb= getSelectedExpression().resolveTypeBinding();
-		if (tb == null)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractConstantRefactoring.currently_no")); //$NON-NLS-1$
-
-		if (tb.getName().equals("void")) //$NON-NLS-1$
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractConstantRefactoring.no_void")); //$NON-NLS-1$
-
-		return null;
+		/* Moved this functionality to Checks, to allow sharing with
+		   ExtractTempRefactoring, others */
+		switch(Checks.checkExpressionIsRValue(getSelectedExpression())) {
+			case Checks.NOT_RVALUE_MISC:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractConstantRefactoring.select_expression"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE);
+			case Checks.NOT_RVALUE_VOID:	return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("ExtractConstantRefactoring.no_void"), null, null, RefactoringStatusCodes.EXPRESSION_NOT_RVALUE_VOID);
+			case Checks.IS_RVALUE:			return new RefactoringStatus();
+			default:						Assert.isTrue(false); return null;
+		}
+		
 	}
 
 	// !!! --
@@ -428,7 +436,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 	/**
 	 * This method performs checks on the constant name which are
 	 * quick enough to be performed every time the ui input component
-	 * contents are changed.	 */
+	 * contents are changed.
+	 */
 	public RefactoringStatus checkConstantNameOnChange() 
 		throws JavaModelException
 	{
@@ -447,7 +456,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 		pm.beginTask(RefactoringCoreMessages.getString("ExtractConstantRefactoring.checking_preconditions"), 1); //$NON-NLS-1$
 		
 		/* Note: some checks are performed on change of input widget
-		 * values. (e.g. see ExtractConstantRefactoring.checkConstantNameOnChange())		 */ 
+		 * values. (e.g. see ExtractConstantRefactoring.checkConstantNameOnChange())
+		 */ 
 		
 		//TODO: possibly add more checking for name conflicts that might
 		//      lead to a change in behaviour
