@@ -7,9 +7,9 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.Iterator;
 
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -31,6 +31,7 @@ import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import sun.security.krb5.internal.o;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -153,7 +154,6 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		page.setAction("AddMethodEntryBreakpoint", new AddMethodEntryBreakpointAction(page)); //$NON-NLS-1$
 		page.setAction("AddWatchpoint", new AddWatchpointAction(page)); // $NON-NLS-1$
 		StructuredSelectionProvider selectionProvider= StructuredSelectionProvider.createFrom(page);
-		page.setAction("OpenSuperImplementation", new OpenSuperImplementationAction(selectionProvider)); // $NON-NLS-1$
 		return page;
 	}
 	
