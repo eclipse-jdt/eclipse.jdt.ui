@@ -40,7 +40,7 @@ public class AutomatedSuite extends TestSuite {
 		addTest(JavaModelUtilTest.suite());
 		addTest(TextBufferTest.suite());
 		addTest(TypeHierarchyTest.suite());
-		//addTest(AllTypesCacheTest.suite());
+		addTest(AllTypesCacheTest.suite());
 	}
 	
 	public static void main(String[] args) {
