@@ -103,7 +103,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 			TypeParameter newTypeParam= ast.newTypeParameter();
 			newTypeParam.setName(ast.newSimpleName(curr.getName()));
 			ITypeBinding[] typeBounds= curr.getTypeBounds();
-			if (typeBounds.length != 1 || typeBounds[0] != ast.resolveWellKnownType("java.lang.Object")) {//$NON-NLS-1$
+			if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
 				List newTypeBounds= newTypeParam.typeBounds();
 				for (int k= 0; k < typeBounds.length; k++) {
 					newTypeBounds.add(imports.addImport(typeBounds[k], ast));
@@ -163,7 +163,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		if (nParams > 0) {
 			try {
 				IJavaProject project= getCompilationUnit().getJavaProject();
-				IMethod method= Bindings.findMethod(binding, project);
+				IMethod method= (IMethod) binding.getJavaElement();
 				if (method != null) {
 					return StubUtility.suggestArgumentNames(project, method.getParameterNames());
 				}
