@@ -16,6 +16,7 @@ import java.util.*;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.IEncodedStreamContentAccessor;
 import org.eclipse.compare.IStreamContentAccessor;
 
@@ -23,6 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
 
@@ -254,6 +256,15 @@ class JavaCompareUtilities {
 		return null;
 	}
 	
+	static boolean getBoolean(CompareConfiguration cc, String key, boolean dflt) {
+		if (cc != null) {
+			Object value= cc.getProperty(key);
+			if (value instanceof Boolean)
+				return ((Boolean) value).booleanValue();
+		}
+		return dflt;
+	}
+
 	static Image getImage(IMember member) {
 		ImageDescriptor id= getImageDescriptor(member);
 		return id.createImage();
@@ -397,5 +408,77 @@ class JavaCompareUtilities {
 				}
 			}
 		}
+	}
+	
+	/*
+	 * Initialize the given Action from a ResourceBundle.
+	 */
+	static void initAction(IAction a, ResourceBundle bundle, String prefix) {
+		
+		String labelKey= "label"; //$NON-NLS-1$
+		String tooltipKey= "tooltip"; //$NON-NLS-1$
+		String imageKey= "image"; //$NON-NLS-1$
+		String descriptionKey= "description"; //$NON-NLS-1$
+		
+		if (prefix != null && prefix.length() > 0) {
+			labelKey= prefix + labelKey;
+			tooltipKey= prefix + tooltipKey;
+			imageKey= prefix + imageKey;
+			descriptionKey= prefix + descriptionKey;
+		}
+		
+		a.setText(getString(bundle, labelKey, labelKey));
+		a.setToolTipText(getString(bundle, tooltipKey, null));
+		a.setDescription(getString(bundle, descriptionKey, null));
+		
+		String relPath= getString(bundle, imageKey, null);
+		if (relPath != null && relPath.trim().length() > 0) {
+			
+			String dPath;
+			String ePath;
+			
+			if (relPath.indexOf("/") >= 0) { //$NON-NLS-1$
+				String path= relPath.substring(1);
+				dPath= 'd' + path;
+				ePath= 'e' + path;
+			} else {
+				dPath= "dlcl16/" + relPath; //$NON-NLS-1$
+				ePath= "elcl16/" + relPath; //$NON-NLS-1$
+			}
+			
+			ImageDescriptor id= JavaCompareUtilities.getImageDescriptor(dPath);	// we set the disabled image first (see PR 1GDDE87)
+			if (id != null)
+				a.setDisabledImageDescriptor(id);
+			id= JavaCompareUtilities.getImageDescriptor(ePath);
+			if (id != null) {
+				a.setImageDescriptor(id);
+				a.setHoverImageDescriptor(id);
+			}
+		}
+	}
+	
+	static void initToggleAction(IAction a, ResourceBundle bundle, String prefix, boolean checked) {
+
+		String tooltip= null;
+		if (checked)
+			tooltip= getString(bundle, prefix + "tooltip.checked", null);	//$NON-NLS-1$
+		else
+			tooltip= getString(bundle, prefix + "tooltip.unchecked", null);	//$NON-NLS-1$
+		if (tooltip == null)
+			tooltip= getString(bundle, prefix + "tooltip", null);	//$NON-NLS-1$
+		
+		if (tooltip != null)
+			a.setToolTipText(tooltip);
+			
+		String description= null;
+		if (checked)
+			description= getString(bundle, prefix + "description.checked", null);	//$NON-NLS-1$
+		else
+			description= getString(bundle, prefix + "description.unchecked", null);	//$NON-NLS-1$
+		if (description == null)
+			description= getString(bundle, prefix + "description", null);	//$NON-NLS-1$
+		
+		if (description != null)
+			a.setDescription(description);
 	}
 }

@@ -10,23 +10,59 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
+import java.util.ResourceBundle;
+
 import org.eclipse.swt.widgets.*;
 
 import org.eclipse.jface.action.*;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.compare.*;
-import org.eclipse.compare.internal.ChangePropertyAction;
 import org.eclipse.compare.structuremergeviewer.StructureDiffViewer;
-
 import org.eclipse.compare.structuremergeviewer.IDiffContainer;
 import org.eclipse.compare.structuremergeviewer.Differencer;
-import org.eclipse.compare.internal.Utilities;
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
 
 
 class JavaStructureDiffViewer extends StructureDiffViewer {
+	
+	/**
+	 * Toggles a boolean property of an <code>CompareConfiguration</code>.
+	 */
+	static class ChangePropertyAction extends Action {
+
+		private CompareConfiguration fCompareConfiguration;
+		private String fPropertyKey;
+		private ResourceBundle fBundle;
+		private String fPrefix;
+
+
+		public ChangePropertyAction(ResourceBundle bundle, CompareConfiguration cc, String rkey, String pkey) {
+			fPropertyKey= pkey;
+			fBundle= bundle;
+			fPrefix= rkey;
+			JavaCompareUtilities.initAction(this, fBundle, fPrefix);
+			setCompareConfiguration(cc);
+		}
+
+		public void run() {
+			boolean b= !JavaCompareUtilities.getBoolean(fCompareConfiguration, fPropertyKey, false);
+			setChecked(b);
+			if (fCompareConfiguration != null)
+				fCompareConfiguration.setProperty(fPropertyKey, new Boolean(b));
+		}
+
+		public void setChecked(boolean state) {
+			super.setChecked(state);
+			JavaCompareUtilities.initToggleAction(this, fBundle, fPrefix, state);
+		}
+		
+		public void setCompareConfiguration(CompareConfiguration cc) {
+			fCompareConfiguration= cc;
+			setChecked(JavaCompareUtilities.getBoolean(fCompareConfiguration, fPropertyKey, false));
+		}
+	}
 
 	private static final String SMART= "SMART"; //$NON-NLS-1$
 
@@ -106,7 +142,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 	
 	protected void postDiffHook(Differencer differencer, IDiffContainer root) {
 		if (fStructureCreator.canRewriteTree()) {
-			boolean smart= Utilities.getBoolean(getCompareConfiguration(), SMART, false);
+			boolean smart= JavaCompareUtilities.getBoolean(getCompareConfiguration(), SMART, false);
 			if (smart && root != null)
 				fStructureCreator.rewriteTree(differencer, root);
 		}
