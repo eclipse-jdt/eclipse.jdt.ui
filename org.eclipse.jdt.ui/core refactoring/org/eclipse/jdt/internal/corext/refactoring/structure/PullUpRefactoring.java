@@ -1003,7 +1003,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 								final VariableDeclarationFragment oldField= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) member, root);
 								FieldDeclaration newField= createNewFieldDeclarationNode(rewriter, root, (IField) member, oldField, mapping, new SubProgressMonitor(subsub, 1), status, getModifiersWithUpdatedVisibility(member, member.getFlags(), adjustments, new SubProgressMonitor(subsub, 1), true, status));
 								rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, ASTNodes.getInsertionIndex(newField, declaration.bodyDeclarations()), rewrite.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
-								ImportUpdateUtil.addImports(rewrite, oldField, new HashMap(), new HashMap(), false);
+								ImportUpdateUtil.addImports(rewrite, oldField.getParent(), new HashMap(), new HashMap(), false);
 							} else if (member instanceof IMethod) {
 								final MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) member, root);
 								MethodDeclaration newMethod= createNewMethodDeclarationNode(sourceRewriter, rewrite, ((IMethod) member), oldMethod, root, mapping, adjustments, new SubProgressMonitor(subsub, 1), status);
