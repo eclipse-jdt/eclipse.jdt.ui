@@ -35,7 +35,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerHelpRegistry;
 import org.eclipse.ui.IMarkerResolution;
-import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
