@@ -4,7 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.util.ArrayList;import java.util.Arrays;import java.util.Iterator;import java.util.List;import java.util.Set;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Text;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.resource.JFaceResources;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.ui.dialogs.ListSelectionDialog;import org.eclipse.ui.dialogs.ResourceSelectionDialog;import org.eclipse.ui.dialogs.SaveAsDialog;import org.eclipse.ui.dialogs.SelectionDialog;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.SelectionStatusDialog;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import java.util.ArrayList;import java.util.Arrays;import java.util.Iterator;import java.util.List;import java.util.Set;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.SelectionStatusDialog;import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.resource.JFaceResources;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Text;import org.eclipse.ui.dialogs.ListSelectionDialog;import org.eclipse.ui.dialogs.SaveAsDialog;import org.eclipse.ui.dialogs.SelectionDialog;import org.eclipse.ui.model.WorkbenchContentProvider;import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 
 /**
  *	Page 3 of the JAR Package wizard
@@ -345,7 +346,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	}
 
 	protected void handleManifestFileBrowseButtonPressed() {
-		ResourceSelectionDialog dialog= new ResourceSelectionDialog(getContainer().getShell(), JavaPlugin.getWorkspace().getRoot(), "Select the manifest file");
+		ElementTreeSelectionDialog dialog= createWorkspaceFileSelectionDialog("Manifest Selection", "Select the manifest file which should be added to the JAR");
 		if (fJarPackage.doesManifestExist())
 			dialog.setInitialSelections(new IResource[] {fJarPackage.getManifestFile()});
 		if (dialog.open() ==  dialog.OK) {
@@ -436,10 +437,13 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 		fMainClassText.setEnabled(generate);
 		fMainClassBrowseButton.setEnabled(generate);
 
-//		fDownloadHeaderLabel.setEnabled(generate);
-//		fDownloadExtensionLabel.setEnabled(generate);
-//		fDownloadExtensionText.setEnabled(generate);
-		
+		/*
+		 * Not used for now
+		 *
+		fDownloadHeaderLabel.setEnabled(generate);
+		fDownloadExtensionLabel.setEnabled(generate);
+		fDownloadExtensionText.setEnabled(generate);
+		 */		
 		updateSealingInfo();
 	}
 		
@@ -469,13 +473,31 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	 * Implements method from IJarPackageWizardPage
 	 */
 	public boolean computePageCompletion() {
-		if (fJarPackage.isManifestGenerated() && fJarPackage.isManifestSaved() && fJarPackage.getManifestLocation().toString().length() == 0) {
-			setErrorMessage("Invalid manifest file specified");
-			return false;
-		}
-		if (!fJarPackage.isManifestGenerated() && !fJarPackage.doesManifestExist()) {
-			setErrorMessage("Invalid manifest file specified");
-			return false;
+		boolean incompleteButNotAnError= false;
+		if (fJarPackage.getManifestLocation().toString().length() == 0)
+			incompleteButNotAnError= true;
+		else {
+			if (fJarPackage.isManifestGenerated() && fJarPackage.isManifestSaved()) {
+				IPath location= fJarPackage.getManifestLocation();
+				if (!location.toString().startsWith("/")) {
+					setErrorMessage("Manifest file path must be absolute (start with /)");
+					return false;
+				}			
+				IResource resource= findResource(location);
+				if (resource != null && resource.getType() != IResource.FILE) {
+					setErrorMessage("The manifest file location must not be an existing container");
+					return false;
+				}
+				resource= findResource(location.removeLastSegments(1));
+				if (resource == null || resource.getType() == IResource.FILE) {
+					setErrorMessage("Container for manifest file does not exist");
+					return false;
+				}
+			}
+			if (!fJarPackage.isManifestGenerated() && !fJarPackage.doesManifestExist()) {
+				setErrorMessage("Invalid manifest file specified");
+				return false;
+			}
 		}
 		if (fJarPackage.isJarSealed()
 				&& !fJarPackage.getPackagesForSelectedResources().containsAll(Arrays.asList(fJarPackage.getPackagesToUnseal()))) {
@@ -487,15 +509,11 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 			setErrorMessage("Some of the sealed packages are no longer within the selection");
 			return false;
 		}
-		/*
-		 * This takes too long
-		if (!fJarPackage.isMainClassValid(getContainer())) {
-			setErrorMessage("Invalid main class specified");
+		if (incompleteButNotAnError) {
+			setErrorMessage(null);
 			return false;
 		}
-		*/		
 		return true;
-
 	}
 	/* 
 	 * Implements method from IWizardPage.
@@ -760,5 +778,31 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 			return (IPackageFragment[])Arrays.asList(dialog.getResult()).toArray(new IPackageFragment[dialog.getResult().length]);
 		else
 			return new IPackageFragment[0];
+	}
+	/**
+	 * Creates and returns a dialog to choose an existing workspace file.
+	 */	
+	protected ElementTreeSelectionDialog createWorkspaceFileSelectionDialog(String title, String message) {
+		int labelFlags= JavaElementLabelProvider.SHOW_BASICS
+						| JavaElementLabelProvider.SHOW_OVERLAY_ICONS
+						| JavaElementLabelProvider.SHOW_SMALL_ICONS;
+		ITreeContentProvider contentProvider= new JavaElementContentProvider(true, false, false);
+		ILabelProvider labelProvider= new JavaElementLabelProvider(labelFlags);
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, contentProvider, false, true); 
+		dialog.setValidator(new ISelectionValidator() {
+			public void isValid(Object[] selection, StatusInfo res) {
+				// only single selection
+				if (selection.length == 1 && (selection[0] instanceof IFile))
+					res.setOK();
+				else
+					res.setError("");
+			}
+		});
+		dialog.addFilter(new EmptyInnerPackageFilter());
+		dialog.setTitle(title);
+		dialog.setMessage(message);
+		dialog.setStatusLineAboveButtons(true);
+		dialog.setInput(JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot()));
+		return dialog;
 	}
 }

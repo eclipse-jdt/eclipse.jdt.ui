@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.io.File;import java.util.Iterator;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Text;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.ui.dialogs.SaveAsDialog;import org.eclipse.ui.dialogs.WizardExportResourcesPage;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
+import java.io.File;import java.util.Iterator;import java.util.Set;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Text;import org.eclipse.ui.dialogs.SaveAsDialog;import org.eclipse.ui.dialogs.WizardExportResourcesPage;
 
 /**
  *	Page 1 of the JAR Package wizard
@@ -154,15 +154,23 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		return "." + JarPackage.EXTENSION;
 	}
 	/**
-	 * Returns this page's collection of currently-specified resources to be 
-	 * exported. This is the primary resource selection facility accessor for 
-	 * subclasses.
+	 * Returns an iterator over this page's collection of currently-specified 
+	 * elements to be exported. This is the primary element selection facility
+	 * accessor for subclasses.
 	 *
-	 * @return an iterator over the collection of resources currently selected 
-	 * for export (element type: <code>IResource</code>)
+	 * @return an iterator over the collection of elements currently selected for export
 	 */
 	protected Iterator getSelectedResourcesIterator() {
 		return fInputGroup.getAllCheckedListItems();
+	}
+	/**
+	 * Returns this page's collection of containers in which at least one element
+	 * is selected for export.
+	 *
+	 * @return a set containers that contain at least one element currently selected for export
+	 */
+	protected Set getSelectedContainers() {
+		return fInputGroup.getAllCheckedTreeItems();
 	}
 	/**
 	 * Persists resource specification control setting that are to be restored

@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import org.eclipse.core.resources.IFile;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.Path;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Text;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.resource.JFaceResources;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.ui.dialogs.SaveAsDialog;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.resource.JFaceResources;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Text;import org.eclipse.ui.dialogs.SaveAsDialog;
 
 /**
  *	Page 2 of the JAR Package wizard
@@ -206,8 +206,23 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	 */
 	public boolean computePageCompletion() {
 		if (fJarPackage.isDescriptionSaved()){
-			if (fDescriptionFileText.getText().length() == 0) {
-				setErrorMessage("Invalid description file.");
+			if (fJarPackage.getDescriptionLocation().toString().length() == 0) {
+				setErrorMessage(null);
+				return false;
+			}
+			IPath location= fJarPackage.getDescriptionLocation();
+			if (!location.toString().startsWith("/")) {
+				setErrorMessage("Description file path must be absolute (start with /)");
+				return false;
+			}			
+			IResource resource= findResource(location);
+			if (resource != null && resource.getType() != IResource.FILE) {
+				setErrorMessage("The description file location must not be an existing container");
+				return false;
+			}
+			resource= findResource(location.removeLastSegments(1));
+			if (resource == null || resource.getType() == IResource.FILE) {
+				setErrorMessage("Container for description file does not exist");
 				return false;
 			}
 			String fileExtension= fJarPackage.getDescriptionLocation().getFileExtension();
@@ -260,23 +275,6 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		});
 
 //		new Label(parent, SWT.NONE); // vertical spacer
-	}
-	/*
-	 * Overrides method from WizardDataTransferPage
-	 */
-	protected boolean validateOptionsGroup() {
-		if (fJarPackage.isDescriptionSaved()){
-			if (fDescriptionFileText.getText().length() == 0) {
-				setErrorMessage("Invalid description file.");
-				return false;
-			}
-			String fileExtension= fJarPackage.getDescriptionLocation().getFileExtension();
-			if (fileExtension == null || !fileExtension.equals(JarPackage.DESCRIPTION_EXTENSION)) {
-				setErrorMessage("Description file extension must be '.jardesc'");
-				return false;
-			}
-		}
-		return true;
 	}
 	/**
 	 * Creates a file resource handle for the file with the given workspace path.
@@ -340,6 +338,21 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		if (pageComplete) {
 			setErrorMessage(null);
 		}
+	}
+	/**
+	 * Returns the resource for the specified path.
+	 *
+	 * @param path	the path for which the resource should be returned
+	 * @return the resource specified by the path or <code>null</code>
+	 */
+	protected IResource findResource(IPath path) {
+		IWorkspace workspace = JavaPlugin.getWorkspace();
+		IStatus result= workspace.validatePath(
+							path.toString(),
+							IResource.ROOT | IResource.PROJECT | IResource.FOLDER | IResource.FILE);
+		if (result.isOK() && workspace.getRoot().exists(path))
+			return workspace.getRoot().findMember(path);
+		return null;
 	}
 
 	protected IPath getPathFromString(String text) {

@@ -225,7 +225,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	 */
 	public IStatus getStatus() {
 		IStatus[] errors= new IStatus[fErrors.size()];
-		fErrors.toArray(errors);		MultiStatus status= new MultiStatus(JavaPlugin.getPluginId(), IStatus.OK, errors, "", null);		String message= "";		if (status.getSeverity() == IStatus.ERROR)			message= "JAR export failed (no JAR generated):";		if (status.getSeverity() == IStatus.WARNING)			message= "JAR export finished with warnings:";		// need to recreate because no API to set message		return new MultiStatus(JavaPlugin.getPluginId(), IStatus.OK, errors, message, null);	}
+		fErrors.toArray(errors);		MultiStatus status= new MultiStatus(JavaPlugin.getPluginId(), IStatus.OK, errors, "", null);		String message= "";		if (status.getSeverity() == IStatus.ERROR)			message= "JAR export failed:";		if (status.getSeverity() == IStatus.WARNING)			message= "JAR export finished with warnings:";		// need to recreate because no API to set message		return new MultiStatus(JavaPlugin.getPluginId(), IStatus.OK, errors, message, null);	}
 	/**
 	 * Answer a boolean indicating whether the passed child is a descendent
 	 * of one or more members of the passed resources collection

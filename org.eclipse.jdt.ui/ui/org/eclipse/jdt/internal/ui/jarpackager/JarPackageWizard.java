@@ -31,6 +31,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	private IWorkbench fWorkbench;
 	private IStructuredSelection fSelection;
 	private JarPackage fJarPackage;
+	private JarPackageWizardPage fJarPackageWizardPage;
 	private boolean fHasNewDialogSettings;
 	
 	/**
@@ -52,7 +53,8 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	 */
 	public void addPages() {
 		super.addPages();
-		addPage(new JarPackageWizardPage(fJarPackage, fSelection));
+		fJarPackageWizardPage= new JarPackageWizardPage(fJarPackage, fSelection);
+		addPage(fJarPackageWizardPage);
 		addPage(new JarOptionsPage(fJarPackage));
 		addPage(new JarManifestWizardPage(fJarPackage));
 	}
@@ -115,6 +117,8 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	 * Method declared on IWizard.
 	 */
 	public boolean performFinish() {
+		
+		System.out.println("c= " + fJarPackageWizardPage.getSelectedContainers().size());
 		
 		if (!executeExportOperation(new JarFileExportOperation(fJarPackage, getShell())))
 			return false;

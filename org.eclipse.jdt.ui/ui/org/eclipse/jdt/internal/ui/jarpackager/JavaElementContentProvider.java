@@ -354,7 +354,19 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 			IJavaProject jp= (IJavaProject)element;
 			if (!jp.getProject().isOpen()) {
 				return false;
-			}	
+			}
+			if (!fShowPackageContent) {
+				try {
+					Object[] children= getChildren(element);
+					if (children.length == 1 && children[0] instanceof IPackageFragment) {
+						 IPackageFragment fragment= (IPackageFragment)children[0];
+						 if (isProjectPackageFragmentRoot((IPackageFragmentRoot)fragment.getParent()))
+							return false;
+					}
+				} catch(JavaModelException e) {
+					// continue with other checks
+				}
+			}
 		}
 
 		if (element instanceof IPackageFragment && !fShowPackageContent)
@@ -366,7 +378,6 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 				if (((IParent)element).hasChildren())
 					return true;
 			} catch(JavaModelException e) {
-				//ErrorDialog.openError(Utilities.getFocusShell(), "Children non present", null, e.getStatus());
 				return true;
 			}
 		}
