@@ -116,6 +116,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 			case IJavaElement.CLASS_FILE:
 			case IJavaElement.COMPILATION_UNIT:
 				return true;
+			case IJavaElement.LOCAL_VARIABLE:
 			default:
 				return false;
 		}
