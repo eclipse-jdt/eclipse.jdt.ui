@@ -23,6 +23,7 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
@@ -69,7 +70,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		Assert.isNotNull(replacementString);
 		Assert.isTrue(replacementOffset >= 0);
 		Assert.isTrue(replacementLength >= 0);
-		
+				
 		fReplacementString= replacementString;
 		fReplacementOffset= replacementOffset;
 		fReplacementLength= replacementLength;
@@ -276,15 +277,30 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	 * @see ICompletionProposalExtension#isValidFor(IDocument, int)
 	 */
 	public boolean isValidFor(IDocument document, int offset) {
-		
+		return validate(document, offset, null);
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
+	 */
+	public boolean validate(IDocument document, int offset, DocumentEvent event) {
+
 		if (offset < fReplacementOffset)
 			return false;
-			
+				
 		/* 
 		 * See http://dev.eclipse.org/bugs/show_bug.cgi?id=17667
 		String word= fReplacementString;
 		 */ 
-		return startsWith(document, offset, fDisplayString);
+		boolean validated= startsWith(document, offset, fDisplayString);	
+
+		if (validated && event != null) {
+			// adapt replacement range to document change
+			int delta= (event.fText == null ? 0 : event.fText.length()) - event.fLength;
+			fReplacementLength += delta;	
+		}
+
+		return validated;
 	}
 	
 	/**
@@ -417,4 +433,5 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		repairPresentation(viewer);
 		fRememberedStyleRange= null;
 	}
+
 }
