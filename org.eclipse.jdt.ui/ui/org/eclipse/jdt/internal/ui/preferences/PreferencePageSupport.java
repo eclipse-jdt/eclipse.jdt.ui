@@ -37,7 +37,7 @@ public class PreferencePageSupport {
 	 * @return Returns <code>true</code> if the user ended the page by pressing OK.
 	 */
 	public static boolean showPreferencePage(Shell shell, String id, IPreferencePage page) {
-		// inline when PreferencesUtil is finalized (see bug 63656) 
-		return PreferencesUtil.createPreferenceDialogOn(id, new String[] { id }, null).open() == Window.OK;
+		// inline when PreferencesUtil is finalized (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63656) 
+		return PreferencesUtil.createPreferenceDialogOn(shell, id, new String[] { id }, null).open() == Window.OK;
 	}	
 }

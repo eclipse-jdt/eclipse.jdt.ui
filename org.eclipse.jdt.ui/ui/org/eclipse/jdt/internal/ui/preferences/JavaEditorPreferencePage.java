@@ -306,7 +306,7 @@ public final class JavaEditorPreferencePage extends PreferencePage implements IW
 		link.setText(text);
 		link.addLinkListener(new ILinkListener() {
 			public void linkSelected(String url) {
-				PreferencesUtil.createPreferenceDialogOn(url, null, null);
+				PreferencesUtil.createPreferenceDialogOn(getShell(), url, null, null);
 			}
 		});
 		
