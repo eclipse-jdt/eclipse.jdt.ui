@@ -4,6 +4,10 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -37,10 +41,6 @@ import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.core.CompilationUnit;
-import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -59,6 +59,10 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class RenameTypeRefactoring extends Refactoring implements IRenameRefactoring, ITextUpdatingRefactoring, IReferenceUpdatingRefactoring{
@@ -74,12 +78,22 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 
 	public RenameTypeRefactoring(IType type) {
 		Assert.isTrue(type.exists());
-		//Assert.isTrue(! type.getCompilationUnit().isWorkingCopy());
 		fType= type;
+		fNewName= type.getElementName();
 		fUpdateReferences= true; //default is yes
 		fUpdateJavaDoc= false;
 		fUpdateComments= false;
 		fUpdateStrings= false;
+	}
+	
+	public Object getNewElement(){
+		IPackageFragment parent= fType.getPackageFragment();
+		ICompilationUnit cu;
+		if (isPrimaryType())
+			cu= parent.getCompilationUnit(fNewName + ".java");
+		else
+			cu= fType.getCompilationUnit();	
+		return cu.getType(fNewName);
 	}
 	
 	/*
@@ -141,6 +155,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		result.merge(super.checkPreconditions(pm));
 		return result;
 	}
+	
 	
 	/* non java-doc
 	 * @see IRenameRefactoring#getNewName
@@ -212,7 +227,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
 		IType orig= (IType)WorkingCopyUtil.getOriginal(fType);
 		if (orig == null || ! orig.exists())
-			return RefactoringStatus.createFatalErrorStatus("Please save the compilation unit '" + fType.getCompilationUnit().getElementName()+ "' before performing this refactoring.");
+			return RefactoringStatus.createFatalErrorStatus("Type " + fType.getFullyQualifiedName() + " does not exist in the saved version of '" + fType.getCompilationUnit().getElementName()+ "'.");
 		fType= orig;
 		
 		return Checks.checkIfCuBroken(fType);
@@ -288,7 +303,6 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 							
 			result.merge(analyseEnclosedLocalTypes(fType, fNewName));
 			pm.worked(1);
-
 			// before doing _the really_ expensive analysis
 			if (result.hasFatalError())
 				return result;
@@ -297,10 +311,8 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 				return result;
 										
 			result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 35))));
-
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
-
 			result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 25)));
 			
 			return result;
@@ -309,6 +321,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		}	
 	}
 
+		
 	private RefactoringStatus checkNewPathValidity() throws JavaModelException{
 		IContainer c= getResource(fType).getParent();
 		
