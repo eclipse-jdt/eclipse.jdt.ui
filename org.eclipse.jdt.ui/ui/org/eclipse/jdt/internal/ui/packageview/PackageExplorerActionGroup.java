@@ -12,11 +12,13 @@ package org.eclipse.jdt.internal.ui.packageview;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -46,9 +48,11 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.OpenInNewWindowAction;
 import org.eclipse.ui.views.framelist.BackAction;
 import org.eclipse.ui.views.framelist.ForwardAction;
+import org.eclipse.ui.views.framelist.Frame;
 import org.eclipse.ui.views.framelist.FrameAction;
 import org.eclipse.ui.views.framelist.FrameList;
 import org.eclipse.ui.views.framelist.GoIntoAction;
+import org.eclipse.ui.views.framelist.TreeFrame;
 import org.eclipse.ui.views.framelist.UpAction;
 
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
@@ -73,6 +77,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 
 	private PackageExplorerPart fPart;
 
+	private FrameList fFrameList;
 	private GoIntoAction fZoomInAction;
  	private BackAction fBackAction;
 	private ForwardAction fForwardAction;
@@ -125,13 +130,13 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		fViewActionGroup.fillFilters(viewer);
 		
 		PackagesFrameSource frameSource= new PackagesFrameSource(fPart);
-		FrameList frameList= new FrameList(frameSource);
-		frameSource.connectTo(frameList);
+		fFrameList= new FrameList(frameSource);
+		frameSource.connectTo(fFrameList);
 			
-		fZoomInAction= new GoIntoAction(frameList);
-		fBackAction= new BackAction(frameList);
-		fForwardAction= new ForwardAction(frameList);
-		fUpAction= new UpAction(frameList);
+		fZoomInAction= new GoIntoAction(fFrameList);
+		fBackAction= new BackAction(fFrameList);
+		fForwardAction= new ForwardAction(fFrameList);
+		fUpAction= new UpAction(fFrameList);
 		
 		fGotoTypeAction= new GotoTypeAction(fPart);
 		fGotoPackageAction= new GotoPackageAction(fPart);
@@ -309,6 +314,25 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	private void doWorkingSetChanged(PropertyChangeEvent event) {
 		if (ViewActionGroup.MODE_CHANGED.equals(event.getProperty())) {
 			fPart.rootModeChanged(((Integer)event.getNewValue()).intValue());
+			Object oldInput= null;
+			Object newInput= null;
+			if (fPart.showProjects()) {
+				oldInput= fPart.getWorkingSetModel();
+				newInput= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+			} else if (fPart.showWorkingSets()) {
+				oldInput= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+				newInput= fPart.getWorkingSetModel();
+			}
+			if (oldInput != null && newInput != null) {
+				Frame frame;
+				for (int i= 0; (frame= fFrameList.getFrame(i)) != null; i++) {
+					if (frame instanceof TreeFrame) {
+						TreeFrame treeFrame= (TreeFrame)frame;
+						if (oldInput.equals(treeFrame.getInput()))
+							treeFrame.setInput(newInput);
+					}
+				}
+			}
 		} else {
 			IWorkingSet workingSet= (IWorkingSet) event.getNewValue();
 			

@@ -671,7 +671,9 @@ public class PackageExplorerPart extends ViewPart
 	private void restoreRootMode(IMemento memento) {
 		if (memento != null) {
 			Integer value= fMemento.getInteger(TAG_ROOT_MODE);
-			fRootMode= value == null ? ViewActionGroup.SHOW_PROJECTS : value.intValue(); 
+			fRootMode= value == null ? ViewActionGroup.SHOW_PROJECTS : value.intValue();
+			if (fRootMode != ViewActionGroup.SHOW_PROJECTS && fRootMode != ViewActionGroup.SHOW_WORKING_SETS)
+				fRootMode= ViewActionGroup.SHOW_PROJECTS;
 		} else {
 			fRootMode= ViewActionGroup.SHOW_PROJECTS;
 		}
@@ -1788,18 +1790,24 @@ public class PackageExplorerPart extends ViewPart
 			}
 		}
 		ISelection selection= fViewer.getSelection();
+		Object input= fViewer.getInput();
+		boolean isRootInputChange= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).equals(input) || (fWorkingSetModel != null && fWorkingSetModel.equals(input));
 		try {
 			fViewer.getControl().setRedraw(false);
-			fViewer.setInput(null);
+			if (isRootInputChange) {
+				fViewer.setInput(null);
+			}
 			setProviders();
 			setSorter();
 			fActionSet.getWorkingSetActionGroup().fillFilters(fViewer);
-			fViewer.setInput(findInputElement());
+			if (isRootInputChange) {
+				fViewer.setInput(findInputElement());
+			}
 			fViewer.setSelection(selection, true);
 		} finally {
 			fViewer.getControl().setRedraw(true);
 		}
-		if (fWorkingSetModel.needsConfiguration()) {
+		if (isRootInputChange && fWorkingSetModel.needsConfiguration()) {
 			ConfigureWorkingSetAction action= new ConfigureWorkingSetAction(getSite().getShell());
 			action.setWorkingSetModel(fWorkingSetModel);
 			action.run();
@@ -1828,11 +1836,11 @@ public class PackageExplorerPart extends ViewPart
 		return fRootMode;
 	}
 	
-	private boolean showProjects() {
+	/* package */ boolean showProjects() {
 		return fRootMode == ViewActionGroup.SHOW_PROJECTS;
 	}
 	
-	private boolean showWorkingSets() {
+	/* package */ boolean showWorkingSets() {
 		return fRootMode == ViewActionGroup.SHOW_WORKING_SETS;
 	}
 	
