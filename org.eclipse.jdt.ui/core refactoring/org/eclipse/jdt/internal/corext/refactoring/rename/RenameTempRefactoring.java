@@ -13,9 +13,11 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
-import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -25,9 +27,9 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.code.TempNameUtil;
+import org.eclipse.jdt.internal.corext.refactoring.code.TempNameUtil2;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.util.AST;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 
 public class RenameTempRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring{
@@ -40,9 +42,9 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	private boolean fUpdateReferences;
 	private String fCurrentName;
 	private String fNewName;
-	private LocalDeclaration fTempDeclaration;
-	private AST fAST;
 	private Map fAlreadyUsedNames;//String -> ISourceRange
+	private CompilationUnit fCompilationUnitNode;
+	private VariableDeclaration fTempDeclarationNode;
 	
 	public RenameTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
@@ -115,15 +117,36 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm)	throws JavaModelException {
+		//XXX
+		org.eclipse.jdt.internal.corext.refactoring.util.AST ast= new org.eclipse.jdt.internal.corext.refactoring.util.AST(fCu);
+		if (ast.hasProblems()){
+			RefactoringStatus compileErrors= Checks.checkCompileErrors(ast, fCu);
+			if (compileErrors.hasFatalError())
+				return compileErrors;
+		}		
+		LocalDeclaration local= TempDeclarationFinder.findTempDeclaration(ast, fCu, fSelectionStart, fSelectionLength);
+		if (local == null)
+			return RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
 		
-		if (!(fCu instanceof CompilationUnit))
-			return RefactoringStatus.createFatalErrorStatus("Internal Error");
-
-		initializeAst();
-	
-		return checkSelection();	
+		///---
+		initAST();
+		if (fTempDeclarationNode == null)
+			return RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
+			
+		initNames();			
+		return new RefactoringStatus();
 	}
-
+	
+	private void initAST(){
+		fCompilationUnitNode= AST.parseCompilationUnit(fCu, true);
+		fTempDeclarationNode= TempDeclarationFinder2.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
+	}
+	
+	private void initNames(){
+		fAlreadyUsedNames= TempNameUtil2.getLocalNameMap(fTempDeclarationNode);
+		fCurrentName= fTempDeclarationNode.getName().getIdentifier();
+	}
+	
 	/*
 	 * @see IRenameRefactoring#checkNewName()
 	 */
@@ -135,32 +158,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 			result.addError("Name '" + newName + "' is already used.", JavaSourceContext.create(fCu, (ISourceRange)fAlreadyUsedNames.get(newName)));
 		return result;		
 	}
-	
-	private RefactoringStatus checkSelection() throws JavaModelException {
-				
-		if (fAST.hasProblems()){
-			RefactoringStatus compileErrors= Checks.checkCompileErrors(fAST, fCu);
-			if (compileErrors.hasFatalError())
-				return compileErrors;
-		}		
 		
-		LocalDeclaration local= TempDeclarationFinder.findTempDeclaration(fAST, fCu, fSelectionStart, fSelectionLength);
-		if (local == null)
-			return RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
-		initializeTempDeclaration(local);
-		return new RefactoringStatus();
-	}
-
-	private void initializeAst() throws JavaModelException {
-		fAST= new AST(fCu);
-	}
-	
-	private void initializeTempDeclaration(LocalDeclaration localDeclaration){
-		fTempDeclaration= localDeclaration;
-		fAlreadyUsedNames= TempNameUtil.getLocalNameMap(fTempDeclaration.binding.declaringScope);
-		fCurrentName= fTempDeclaration.name();		
-	}
-			
 	/* non java-doc
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
@@ -176,10 +174,14 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		}	
 	}
 		
-	private RefactoringStatus analyzeAST() throws JavaModelException{		
-		RenameTempASTAnalyzer analyzer= new RenameTempASTAnalyzer(fTempDeclaration, fNewName, fUpdateReferences);
+	private RefactoringStatus analyzeAST() throws JavaModelException{
+		org.eclipse.jdt.internal.corext.refactoring.util.AST ast= new org.eclipse.jdt.internal.corext.refactoring.util.AST(fCu);
+		LocalDeclaration local= TempDeclarationFinder.findTempDeclaration(ast, fCu, fSelectionStart, fSelectionLength);
+		
+		//-- original
+		RenameTempASTAnalyzer analyzer= new RenameTempASTAnalyzer(local, fNewName, fUpdateReferences);
 		analyzer.setCU(fCu);
-		fAST.accept(analyzer);
+		ast.accept(analyzer);
 		return analyzer.getStatus();
 	}
 	
@@ -214,8 +216,6 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	}
 	
 	private Integer[] getOccurrenceOffsets() throws JavaModelException{
-		TempOccurrenceFinder offsetFinder= new TempOccurrenceFinder(fTempDeclaration, fUpdateReferences, true);
-		fAST.accept(offsetFinder);
-		return offsetFinder.getOccurrenceOffsets();
+		return TempOccurrenceFinder.findTempOccurrenceOffsets(fCompilationUnitNode, fTempDeclarationNode, fUpdateReferences, true);
 	}
 }
