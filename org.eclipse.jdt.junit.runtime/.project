@@ -3,6 +3,8 @@
 	<name>org.eclipse.jdt.junit.runtime</name>
 	<comment></comment>
 	<projects>
+		<project>org.eclipse.core.boot</project>
+		<project>org.eclipse.core.runtime</project>
 		<project>org.junit</project>
 	</projects>
 	<buildSpec>
