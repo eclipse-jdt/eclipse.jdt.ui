@@ -14,9 +14,11 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -304,18 +306,25 @@ public class ReorgUtils {
 	}
 	
 	public static IJavaElement[] union(IJavaElement[] set1, IJavaElement[] set2) {
-		Set union= new HashSet(set1.length + set2.length);
-		union.addAll(Arrays.asList(set1));
-		union.addAll(Arrays.asList(set2));
+		List union= new ArrayList(set1.length + set2.length);//use lists to avoid sequence problems
+		addAll(set1, union);
+		addAll(set2, union);
 		return (IJavaElement[]) union.toArray(new IJavaElement[union.size()]);
 	}	
 
 	public static IResource[] union(IResource[] set1, IResource[] set2) {
-		Set union= new HashSet(set1.length + set2.length);
-		union.addAll(Arrays.asList(ReorgUtils.getNotNulls(set1)));
-		union.addAll(Arrays.asList(ReorgUtils.getNotNulls(set2)));
+		List union= new ArrayList(set1.length + set2.length);//use lists to avoid sequence problems
+		addAll(ReorgUtils.getNotNulls(set1), union);
+		addAll(ReorgUtils.getNotNulls(set2), union);
 		return (IResource[]) union.toArray(new IResource[union.size()]);
 	}	
+
+	private static void addAll(Object[] array, List list) {
+		for (int i= 0; i < array.length; i++) {
+			if (! list.contains(array[i]))
+				list.add(array[i]);
+		}
+	}
 
 	public static Set union(Set set1, Set set2){
 		Set union= new HashSet(set1.size() + set2.size());
@@ -553,5 +562,22 @@ public class ReorgUtils {
 				result.add(resource);
 		}
 		return (IResource[]) result.toArray(new IResource[result.size()]);
+	}
+	
+	/* List<IJavaElement> javaElements
+	 * return ICompilationUnit -> List<IJavaElement>
+	 */
+	public static Map groupByCompilationUnit(List javaElements){
+		Map result= new HashMap();
+		for (Iterator iter= javaElements.iterator(); iter.hasNext();) {
+			IJavaElement element= (IJavaElement) iter.next();
+			ICompilationUnit cu= ReorgUtils.getCompilationUnit(element);
+			if (cu != null){
+				if (! result.containsKey(cu))
+					result.put(cu, new ArrayList(1));
+				((List)result.get(cu)).add(element);
+			}
+		}
+		return result;
 	}
 }
