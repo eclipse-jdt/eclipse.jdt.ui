@@ -47,9 +47,9 @@ public class ExtractTempTests extends RefactoringTest {
 		return new MySetup(new TestSuite(clazz));
 	}
 	
-	private String getSimpleTestFileName(boolean canInline, boolean input){
+	private String getSimpleTestFileName(boolean canExtract, boolean input){
 		String fileName = "A_" + getName();
-		if (canInline)
+		if (canExtract)
 			fileName += input ? "_in": "_out";
 		return fileName + ".java"; 
 	}
@@ -60,14 +60,7 @@ public class ExtractTempTests extends RefactoringTest {
 		return fileName + getSimpleTestFileName(canExtract, input);
 	}
 	
-	private String getFailingTestFileName(){
-		return getTestFileName(false, false);
-	}
-	private String getPassingTestFileName(boolean input){
-		return getTestFileName(true, input);
-	}
-
-	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean canExtract, boolean input) throws Exception {
+	private ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean canExtract, boolean input) throws Exception {
 		return createCU(pack, getSimpleTestFileName(canExtract, input), getFileContents(getTestFileName(canExtract, input)));
 	}
 
