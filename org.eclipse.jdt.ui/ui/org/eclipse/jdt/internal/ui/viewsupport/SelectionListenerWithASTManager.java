@@ -15,6 +15,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
@@ -85,6 +86,9 @@ public class SelectionListenerWithASTManager {
 			
 			fCurrentJob= new Job(JavaUIMessages.getString("SelectionListenerWithASTManager.job.title")) { //$NON-NLS-1$
 				public IStatus run(IProgressMonitor monitor) {
+					if (monitor == null) {
+						monitor= new NullProgressMonitor();
+					}
 					synchronized (PartListenerGroup.this) {
 						return calculateASTandInform(selection, monitor);
 					}
