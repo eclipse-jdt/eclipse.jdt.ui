@@ -36,6 +36,8 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
@@ -46,36 +48,36 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpMethodRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public class PullUpMethodsInputPage extends UserInputWizardPage {
+public class PullUpInputPage extends UserInputWizardPage {
 	
-	private class PullUpMethodsFilter extends ViewerFilter {
+	private static class PullUpFilter extends ViewerFilter {
 		private Set fOkTypes;
 		
-		PullUpMethodsFilter(ITypeHierarchy hierarchy, IMethod[] methods){
-			//IType -> IMethod[]
-			Map typeToMethodArray= PullUpMethodsInputPage.createTypeToMethodArrayMapping(methods);
+		PullUpFilter(ITypeHierarchy hierarchy, IMember[] members){
+			//IType -> IMember[]
+			Map typeToMemberArray= PullUpInputPage.createTypeToMemberArrayMapping(members);
 			
 			fOkTypes= new HashSet();
 			IType[] subtypes= hierarchy.getAllSubtypes(hierarchy.getType());
 			for (int i= 0; i < subtypes.length; i++) {
 				IType subtype= subtypes[i];
-				if (isOk(subtype, typeToMethodArray, hierarchy))
+				if (isOk(subtype, typeToMemberArray, hierarchy))
 					fOkTypes.add(subtype);
 			}
 			fOkTypes.add(hierarchy.getType());
 		}
 		
-		private boolean isOk(IType type, Map typeToMethodArray, ITypeHierarchy hierarchy){
-			if (typeToMethodArray.containsKey(type))
+		private boolean isOk(IType type, Map typeToMemberArray, ITypeHierarchy hierarchy){
+			if (typeToMemberArray.containsKey(type))
 				return true;
 			IType[] subTypes= hierarchy.getSubtypes(type);
 			for (int i= 0; i < subTypes.length; i++) {
 				IType subType= subTypes[i];
-				if (isOk(subType, typeToMethodArray, hierarchy))
+				if (isOk(subType, typeToMemberArray, hierarchy))
 					return true;
 			}
 			return false;
@@ -91,14 +93,14 @@ public class PullUpMethodsInputPage extends UserInputWizardPage {
 		}
 	}
 	
-	private static class PullUpMethodsHierarchyContentProvider implements ITreeContentProvider{
+	private static class PullUpHierarchyContentProvider implements ITreeContentProvider{
 		private ITypeHierarchy fHierarchy;
-		private IMethod[] fMethods;
-		private Map fTypeToMethodArray; //IType -> IMethod[]
+		private IMember[] fMembers;
+		private Map fTypeToMemberArray; //IType -> IMember[]
 		
-		PullUpMethodsHierarchyContentProvider(IMethod[] methods){
-			fMethods= methods;
-			fTypeToMethodArray= PullUpMethodsInputPage.createTypeToMethodArrayMapping(methods);
+		PullUpHierarchyContentProvider(IMember[] members){
+			fMembers= members;
+			fTypeToMemberArray= PullUpInputPage.createTypeToMemberArrayMapping(members);
 		}
 				
 		/*
@@ -110,8 +112,8 @@ public class PullUpMethodsInputPage extends UserInputWizardPage {
 			IType type= (IType)parentElement; 
 			Set set= new HashSet();
 			set.addAll(Arrays.asList(fHierarchy.getSubclasses(type)));
-			if (fTypeToMethodArray.containsKey(type))
-				set.addAll(Arrays.asList((IMethod[])(fTypeToMethodArray.get(type))));
+			if (fTypeToMemberArray.containsKey(type))
+				set.addAll(Arrays.asList((IMember[])(fTypeToMemberArray.get(type))));
 			return set.toArray();
 		}
 
@@ -121,8 +123,8 @@ public class PullUpMethodsInputPage extends UserInputWizardPage {
 		public Object getParent(Object element) {
 			if (element instanceof IType)
 				return fHierarchy.getSuperclass((IType)element);
-			if (element instanceof IMethod)
-				return ((IMethod)element).getDeclaringType();
+			if (element instanceof IMember)
+				return ((IMember)element).getDeclaringType();
 			return null;
 		}
 
@@ -135,7 +137,7 @@ public class PullUpMethodsInputPage extends UserInputWizardPage {
 			IType type= (IType)element;
 			if (fHierarchy.getAllSubtypes(type).length > 0)
 				return true;
-			if (fTypeToMethodArray.containsKey(type))	
+			if (fTypeToMemberArray.containsKey(type))	
 				return true;
 			return false;	
 		}
@@ -154,9 +156,9 @@ public class PullUpMethodsInputPage extends UserInputWizardPage {
 		 */
 		public void dispose() {
 			fHierarchy= null;
-			fTypeToMethodArray.clear();
-			fTypeToMethodArray= null;
-			fMethods= null;
+			fTypeToMemberArray.clear();
+			fTypeToMemberArray= null;
+			fMembers= null;
 		}
 
 		/*
@@ -175,7 +177,7 @@ public class PullUpMethodsInputPage extends UserInputWizardPage {
 	public static final String PAGE_NAME= "PullUpMethodsInputPage"; //$NON-NLS-1$
 	private static final String fgHelpContextID= "HELP CONTEXT";
 	
-	public PullUpMethodsInputPage() {
+	public PullUpInputPage() {
 		super(PAGE_NAME, true);
 		fMarkedMethods= new HashSet();
 		setMessage("Select the methods to be deleted");
@@ -216,18 +218,18 @@ public class PullUpMethodsInputPage extends UserInputWizardPage {
 	 * @see RefactoringWizardPage#performFinish()
 	 */		
 	protected boolean performFinish() {
-		getPullUpMethodsRefactoring().setMethodsToDelete(getCheckedMethods());		
+		getPullUpMethodsRefactoring().setMethodsToDelete(getCheckedMethods());
 		return super.performFinish();
 	} 
 	
 	private IMethod[] getCheckedMethods(){
 		Object[] checked= fTreeViewerViewer.getCheckedElements();
-		List methods= new ArrayList(checked.length);
+		List members= new ArrayList(checked.length);
 		for (int i= 0; i < checked.length; i++) {
 			if (checked[i] instanceof IMethod)
-				methods.add(checked[i]);
+				members.add(checked[i]);
 		}
-		return (IMethod[]) methods.toArray(new IMethod[methods.size()]);
+		return (IMethod[]) members.toArray(new IMethod[members.size()]);
 	}
 	
 	private void createSourceViewer(Composite parent){
@@ -269,17 +271,17 @@ public class PullUpMethodsInputPage extends UserInputWizardPage {
 	private CheckboxTreeViewer createTreeViewer(Composite composite) {
 		Tree tree= new Tree(composite, SWT.CHECK | SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
-		final CheckboxTreeViewer treeViever= new PullUpMethodTreeViewer(tree);
+		final CheckboxTreeViewer treeViever= new PullUpTreeViewer(tree);
 		treeViever.setLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
 		treeViever.setUseHashlookup(true);
 		
 		//XXX pm
 		try{
-			fMarkedMethods.addAll(Arrays.asList(getPullUpMethodsRefactoring().getMethodsToPullUp()));
-			IMethod[] matchingMethods= getPullUpMethodsRefactoring().getMatchingMethods();
+			fMarkedMethods.addAll(Arrays.asList(getPullUpMethodsRefactoring().getElementsToPullUp()));
+			IMember[] matchingMethods= getPullUpMethodsRefactoring().getMatchingElements();
 			ITypeHierarchy hierarchy= getPullUpMethodsRefactoring().getSuperType().newTypeHierarchy(new NullProgressMonitor());
-			treeViever.addFilter(new PullUpMethodsFilter(hierarchy, matchingMethods));	
-			treeViever.setContentProvider(new PullUpMethodsHierarchyContentProvider(matchingMethods));
+			treeViever.addFilter(new PullUpFilter(hierarchy, matchingMethods));	
+			treeViever.setContentProvider(new PullUpHierarchyContentProvider(matchingMethods));
 			treeViever.setInput(hierarchy);
 			
 		} catch (JavaModelException e){
@@ -289,7 +291,7 @@ public class PullUpMethodsInputPage extends UserInputWizardPage {
 		treeViever.expandAll();
 		treeViever.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
-				PullUpMethodsInputPage.this.selectionChanged(event);
+				PullUpInputPage.this.selectionChanged(event);
 			}
 		});
 		return treeViever;
@@ -355,28 +357,28 @@ public class PullUpMethodsInputPage extends UserInputWizardPage {
 		return fMarkedMethods.contains(object);
 	}	
 	
-	private static Map createTypeToMethodArrayMapping(IMethod[] fMethods){
-			Map typeToMethodSet= new HashMap();
-			for (int i = 0; i < fMethods.length; i++) {
-				IMethod method = fMethods[i];
-				IType type= method.getDeclaringType();
-				if (!typeToMethodSet.containsKey(type))
-					typeToMethodSet.put(type, new HashSet());
+	private static Map createTypeToMemberArrayMapping(IMember[] members){
+			Map typeToMemberSet= new HashMap();
+			for (int i = 0; i < members.length; i++) {
+				IMember member = members[i];
+				IType type= member.getDeclaringType();
+				if (!typeToMemberSet.containsKey(type))
+					typeToMemberSet.put(type, new HashSet());
 
-				((Set)typeToMethodSet.get(type)).add(method);
+				((Set)typeToMemberSet.get(type)).add(member);
 			}
 			
-			Map typeToMethodArray= new HashMap();
-			for (Iterator iter = typeToMethodSet.keySet().iterator(); iter.hasNext();) {
+			Map typeToMemberArray= new HashMap();
+			for (Iterator iter = typeToMemberSet.keySet().iterator(); iter.hasNext();) {
 				IType type = (IType) iter.next();
-				Set methodSet= (Set)typeToMethodSet.get(type);
-				IMethod[] methodArray = (IMethod[]) methodSet.toArray(new IMethod[methodSet.size()]);
-				typeToMethodArray.put(type, methodArray);
+				Set memberSet= (Set)typeToMemberSet.get(type);
+				IMember[] memberArray = (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
+				typeToMemberArray.put(type, memberArray);
 			}
-			return typeToMethodArray;
+			return typeToMemberArray;
 		}
 	
-	private PullUpMethodRefactoring getPullUpMethodsRefactoring(){
-		return (PullUpMethodRefactoring)getRefactoring();
+	private PullUpRefactoring getPullUpMethodsRefactoring(){
+		return (PullUpRefactoring)getRefactoring();
 	}
 }

@@ -8,10 +8,10 @@ import org.eclipse.ui.IWorkbenchWindow;
 
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 
-public class PullUpMethodsActionDelegate extends RefactoringActionDelegate {
+public class PullUpActionDelegate extends RefactoringActionDelegate {
 
-	public PullUpMethodsActionDelegate() {
-		super("Pull Up Methods", "Operation unavailable on the current selection. Select one or more methods.");
+	public PullUpActionDelegate() {
+		super("Pull Up", "Operation unavailable on the current selection. Select methods or/and fields declared in one type.");
 	}
 
 	/* (non-Javadoc)
@@ -21,7 +21,7 @@ public class PullUpMethodsActionDelegate extends RefactoringActionDelegate {
 		super.init(window);
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(window.getSelectionService());
 		initPossibleTargets(new RefactoringAction[] {
-			RefactoringGroup.createPullUpMethodsAction(provider)
+			RefactoringGroup.createPullUpAction(provider)
 		});
 	}
 }

@@ -24,11 +24,11 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 
-public class PullUpMethodTreeViewer extends CheckboxTreeViewer {
+public class PullUpTreeViewer extends CheckboxTreeViewer {
 	
 	private Set fActiveElements;
 	
-	public PullUpMethodTreeViewer(Tree tree) {
+	public PullUpTreeViewer(Tree tree) {
 		super(tree);
 		
 		fActiveElements= new HashSet();
