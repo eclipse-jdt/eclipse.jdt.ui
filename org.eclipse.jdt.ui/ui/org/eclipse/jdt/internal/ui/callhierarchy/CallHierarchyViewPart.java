@@ -77,6 +77,7 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
@@ -773,11 +774,12 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
             
             CallHierarchy.getDefault().setSearchScope(getSearchScope());
 
-            if (fCurrentCallMode == CALL_MODE_CALLERS) {
-                setTitle(CallHierarchyMessages.getString("CallHierarchyViewPart.callsToMethod")); //$NON-NLS-1$
+            String elementName= JavaElementLabels.getElementLabel(fShownMethod, JavaElementLabels.ALL_DEFAULT);
+			if (fCurrentCallMode == CALL_MODE_CALLERS) {
+                setTitle(CallHierarchyMessages.getFormattedString("CallHierarchyViewPart.callsToMethod", elementName)); //$NON-NLS-1$
                 fCallHierarchyViewer.setMethodWrapper(getCallerRoot());
             } else {
-                setTitle(CallHierarchyMessages.getString("CallHierarchyViewPart.callsFromMethod")); //$NON-NLS-1$
+                setTitle(CallHierarchyMessages.getFormattedString("CallHierarchyViewPart.callsFromMethod", elementName)); //$NON-NLS-1$
                 fCallHierarchyViewer.setMethodWrapper(getCalleeRoot());
             }
         }
