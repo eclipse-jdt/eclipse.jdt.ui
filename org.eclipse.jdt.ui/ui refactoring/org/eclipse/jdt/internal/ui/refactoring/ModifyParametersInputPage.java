@@ -42,41 +42,45 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		GridData gl= new GridData(GridData.FILL_BOTH);
 		gl.widthHint= convertWidthInCharsToPixels(50);
 		fSignaturePreview.setLayoutData(gl);
-		updateSignaturePreview();
+		update(false);
 		
 		setControl(composite);
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.MODIFY_PARAMETERS_WIZARD_PAGE);
 	}
-
+	
 	private void createParameterTableComposite(Composite composite) {
 		String labelText= RefactoringMessages.getString("ModifyParametersInputPage.parameters");
 		ChangeParametersControl cp= new ChangeParametersControl(composite, SWT.NONE, labelText, new ParameterListChangeListener() {
 			public void parameterChanged(ParameterInfo parameter) {
-				updateStatus();
-				updateSignaturePreview();
+				update(true);
 			}
 			public void parameterListChanged() {
-				updateStatus();
-				updateSignaturePreview();
+				update(true);
 			}
-		}, true, false);
+		}, true, true);
 		cp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
 		cp.setInput(getModifyParametersRefactoring().getParameterInfos());
 	}
 
-	private void updateStatus() {
+	private ModifyParametersRefactoring getModifyParametersRefactoring(){
+		return	(ModifyParametersRefactoring)getRefactoring();
+	}
+
+	private void update(boolean displayErrorMessage){
+		updateStatus(displayErrorMessage);
+		updateSignaturePreview();
+	}
+
+	private void updateStatus(boolean displayErrorMessage) {
 		RefactoringStatus nameCheck= getModifyParametersRefactoring().checkParameters();
 		if (nameCheck.hasFatalError()){
-			setErrorMessage(nameCheck.getFirstMessage(RefactoringStatus.FATAL));
+			if (displayErrorMessage)
+				setErrorMessage(nameCheck.getFirstMessage(RefactoringStatus.FATAL));
 			setPageComplete(false);
 		} else {
 			setErrorMessage(null);	
 			setPageComplete(true);
 		}	
-	}
-
-	private ModifyParametersRefactoring getModifyParametersRefactoring(){
-		return	(ModifyParametersRefactoring)getRefactoring();
 	}
 
 	private void updateSignaturePreview() {
