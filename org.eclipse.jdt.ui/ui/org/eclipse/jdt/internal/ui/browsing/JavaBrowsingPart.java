@@ -231,8 +231,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		// Filters
 		addFilters();
 
-		fillToolBar(getViewSite().getActionBars().getToolBarManager());	
-
 		// Listen to workbench window changes
 		getViewSite().getWorkbenchWindow().getSelectionService().addSelectionListener(this);
 		getViewSite().getPage().addPartListener(fPartListener);
