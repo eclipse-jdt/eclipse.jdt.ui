@@ -132,7 +132,7 @@ public class JavaUIHelp {
 						fText= ""; // no doc on multiple selection
 					}					
 					
-					URL url= JavaDocLocations.getJavaDocLocation(element, true);
+					URL url= JavaDocLocations.getJavadocLocation(element, true);
 					if (url == null || doesNotExist(url)) {
 						IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
 						if (root != null) {
@@ -142,7 +142,7 @@ public class JavaUIHelp {
 							} else {
 								element= root;
 							}
-							url= JavaDocLocations.getJavaDocLocation(element, false);
+							url= JavaDocLocations.getJavadocLocation(element, false);
 						}
 					}
 					if (url != null) {

@@ -4,12 +4,14 @@
  */
 package org.eclipse.jdt.ui;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -34,14 +36,15 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.SharedImages;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.dialogs.MainTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiMainTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
  * Central access point for the Java UI plug-in (id <code>"org.eclipse.jdt.ui"</code>).
@@ -509,5 +512,52 @@ public final class JavaUI {
 	public static IDocumentProvider getDocumentProvider() {
 		return JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
 	}
+	
+	/**
+	 * Sets the Javadoc location for an archive with the given path.
+	 * @param archivePath the path of the library; this can be an absolute path
+	 * or an external path in case of an external library.
+	 * @param url The Javadoc location to set. This location should contain index.html and
+	 * a file 'package-list'.
+	 */
+	public static void setLibraryJavadocLocation(IPath archivePath, URL url) {
+		JavaDocLocations.setLibraryJavadocLocation(archivePath, url);
+	}
+
+	/**
+	 * Returns the Javadoc location for an archive or <code>null</code> if no
+	 * location is available.
+	 * @param archivePath the path of the library. This can be an absolute path
+	 * or an external path in case of an external library.
+	 */	
+	public static URL getLibraryJavadocLocation(IPath archivePath) {
+		return JavaDocLocations.getLibraryJavadocLocation(archivePath);
+	}
+
+	/**
+	 * Returns the Javadoc base URL for an element. The base location contains the
+	 * index file. This location must not exist. Returns <code>null</code> if no javadoc location
+	 * has been attached to the element's library or project.
+	 * Example of a returned URL is <i>http://www.junit.org/junit/javadoc</i>.
+	 * @param The element for witch the doc URL is requested.
+	 */		
+	public static URL getJavadocBaseLocation(IJavaElement element) throws JavaModelException {	
+		return JavaDocLocations.getJavadocBaseLocation(element);
+	}
+	
+	/**
+	 * Returns the Javadoc URL for an element. Example of a returned URL is
+	 * <i>http://www.junit.org/doc/junit/extensions/TestSetup.html</i>.
+	 * This returned location must not exist. Returns <code>null</code> if no javadoc location
+	 * has been attached to the element's library or project.
+	 * @param The element for witch the doc URL is requested.
+	 * @param includeAnchor If set, the URL contains an anchor for member references:
+	 * <i>http://www.junit.org/junit/javadoc/junit/extensions/TestSetup.html#run(junit.framework.TestResult)</i>. Note
+	 * that this involves type resolving and is a more expensive call than without anchor.
+	 */		
+	public static URL getJavadocLocation(IJavaElement element, boolean includeAnchor) throws JavaModelException {
+		return JavaDocLocations.getJavadocLocation(element, includeAnchor);
+	}
+	
 
 }

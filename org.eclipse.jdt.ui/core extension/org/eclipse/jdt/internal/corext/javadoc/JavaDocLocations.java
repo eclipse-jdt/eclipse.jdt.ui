@@ -85,25 +85,6 @@ public class JavaDocLocations {
 		return externalPath;
 	}
 
-
-
-	/**
-	 * Gets the Javadoc location for an archive with the given path.
-	 * @deprecated Use getJavaDocBaseLocation
-	 */
-	public static URL getJavadocLocation(IPath path) {
-		return getJavadocBaseLocation(path);
-	}
-
-	/**
-	 * Sets the Javadoc location for an archive with the given path.
-	 * @deprecated Use setJavaDocBaseLocation
-	 */
-	public static void setJavadocLocation(IPath path, URL url) {
-		setJavadocBaseLocation(path, url);
-	}
-
-
 	private static void setJavadocBaseLocation(IPath path, URL url) {
 		if (url == null) {
 			fgJavadocLocations.remove(path);
@@ -242,7 +223,7 @@ public class JavaDocLocations {
 		}
 	}
 	
-	public static URL getJavaDocLocation(IJavaElement element, boolean includeMemberReference) throws CoreException {
+	public static URL getJavadocLocation(IJavaElement element, boolean includeMemberReference) throws JavaModelException {
 		URL baseLocation= getJavadocBaseLocation(element);
 		if (baseLocation == null) {
 			return null;
@@ -366,7 +347,6 @@ public class JavaDocLocations {
 	}
 	
 	private static void appendMethodReference(IMethod meth, StringBuffer buf) throws JavaModelException {
-		
 		buf.append('#');
 		buf.append(meth.getElementName());	
 		
