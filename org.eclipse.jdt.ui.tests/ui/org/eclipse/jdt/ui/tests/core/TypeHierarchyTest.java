@@ -141,6 +141,7 @@ public class TypeHierarchyTest extends TestCase {
 			assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
 			
 			part.doSave(null);
+			hierarchy.refresh(null);
 			
 			allTypes= hierarchy.getAllTypes();
 		
@@ -212,6 +213,7 @@ public class TypeHierarchyTest extends TestCase {
 			assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
 			
 			part.doSave(null);
+			hierarchy.refresh(null);
 			
 			allTypes= hierarchy.getAllTypes();
 		
