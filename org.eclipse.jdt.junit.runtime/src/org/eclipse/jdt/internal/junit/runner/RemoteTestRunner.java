@@ -21,6 +21,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.Socket;
 import java.util.Vector;
 
@@ -38,18 +39,19 @@ import junit.framework.TestSuite;
  * See MessageIds for more information about the protocl.
  */
 public class RemoteTestRunner implements TestListener {
+	private static final String SET_UP_TEST_METHOD_NAME= "setUpTest"; //$NON-NLS-1$
 	/**
 	 * Holder for information for a rerun request
 	 */
 	private static class RerunRequest {
-		String fClassName;
-		String fTestName;
-		int fTestId;
+		String fRerunClassName;
+		String fRerunTestName;
+		int fRerunTestId;
 		
 		public RerunRequest(int testId, String className, String testName) {
-			fTestId= testId;
-			fClassName= className;
-			fTestName= testName;
+			fRerunTestId= testId;
+			fRerunClassName= className;
+			fRerunTestName= testName;
 		}
 
 	}
@@ -299,7 +301,7 @@ public class RemoteTestRunner implements TestListener {
 				wait();
 				if (!fStopped && fRerunRequests.size() > 0) {
 					RerunRequest r= (RerunRequest)fRerunRequests.remove(0);
-					rerunTest(r.fTestId, r.fClassName, r.fTestName);
+					rerunTest(r.fRerunTestId, r.fRerunClassName, r.fRerunTestName);
 				}
 			} catch (InterruptedException e) {
 			}
@@ -320,11 +322,11 @@ public class RemoteTestRunner implements TestListener {
 			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.classnotfound", clazz)); //$NON-NLS-1$
 			return null;
 		} catch(Exception e) {
-			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.exception", e.toString() )); //$NON-NLS-1$
+			runFailed(JUnitMessages.getFormattedString("RemoteTestRunner.error.exception", e )); //$NON-NLS-1$
 			return null;
 		}
 		if (testName != null) {
-			return createTest(testName, testClass);
+			return setupTest(testClass, createTest(testName, testClass));
 		}
 		Method suiteMethod= null;
 		try {
@@ -416,15 +418,53 @@ public class RemoteTestRunner implements TestListener {
 	 */
 	public void rerunTest(int testId, String className, String testName) {
 		Test reloadedTest= null;
+		Class reloadedTestClass= null;
 		try {
-			Class reloadedTestClass= getClassLoader().loadClass(className);
+			reloadedTestClass= getClassLoader().loadClass(className);
 			reloadedTest= createTest(testName, reloadedTestClass);
 		} catch(Exception e) {
-			reloadedTest= warning("Could not create test \'"+testName+"\'"); //$NON-NLS-1$ //$NON-NLS-2$
+			reloadedTest= warning(JUnitMessages.getFormattedString("RemoteTestRunner.error.couldnotcreate", testName));  //$NON-NLS-1$ 
 		}
+		Test rerunTest= setupTest(reloadedTestClass, reloadedTest);
 		TestResult result= new TestResult();
-		reloadedTest.run(result);
+		rerunTest.run(result);
 		notifyTestReran(result, Integer.toString(testId), className, testName);
+	}
+
+	/**
+	 * Prepare a single test to be run standalone. If the test case class provides
+	 * a static method Test setUpTest(Test test) then this method will be invoked.
+	 * Instead of calling the test method directly the "decorated" test returned from
+	 * setUpTest will be called. The purpose of this mechanism is to enable
+	 * tests which requires a set-up to be run individually.
+	 */
+	private Test setupTest(Class reloadedTestClass, Test reloadedTest) {
+		Method setup= null;
+		try {
+			setup= reloadedTestClass.getMethod(SET_UP_TEST_METHOD_NAME, new Class[] {Test.class});
+		} catch (SecurityException e1) {
+			return reloadedTest;
+		} catch (NoSuchMethodException e) {
+			return reloadedTest;
+		}
+		if (setup.getReturnType() != Test.class)
+			return warning(JUnitMessages.getString("RemoteTestRunner.error.notestreturn")); //$NON-NLS-1$
+		if (!Modifier.isPublic(setup.getModifiers()))
+			return warning(JUnitMessages.getString("RemoteTestRunner.error.shouldbepublic"));  //$NON-NLS-1$
+		if (!Modifier.isStatic(setup.getModifiers()))
+			return warning(JUnitMessages.getString("RemoteTestRunner.error.shouldbestatic"));  //$NON-NLS-1$
+		try {
+			Test test= (Test)setup.invoke(null, new Object[] {reloadedTest});
+			if (test == null)
+				return warning(JUnitMessages.getString("RemoteTestRunner.error.nullreturn")); //$NON-NLS-1$
+			return test;
+		} catch (IllegalArgumentException e) {
+			return warning(JUnitMessages.getFormattedString("RemoteTestRunner.error.couldnotinvoke", e)); //$NON-NLS-1$
+		} catch (IllegalAccessException e) {
+			return warning(JUnitMessages.getFormattedString("RemoteTestRunner.error.couldnotinvoke", e)); //$NON-NLS-1$
+		} catch (InvocationTargetException e) {
+			return warning(JUnitMessages.getFormattedString("RemoteTestRunner.error.invocationexception", e.getTargetException())); //$NON-NLS-1$
+		} 
 	}
 
 	/**
