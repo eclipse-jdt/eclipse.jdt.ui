@@ -15,6 +15,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
@@ -47,7 +48,7 @@ Java model (<code>IJavaModel</code>)
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  */
-public class JavaElementContentProvider extends AbstractJavaElementContentProvider implements ITreeContentProvider {
+public class JavaElementContentProvider extends AbstractJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
 	
 	/**
 	 * Creates a new content provider for Java elements.
