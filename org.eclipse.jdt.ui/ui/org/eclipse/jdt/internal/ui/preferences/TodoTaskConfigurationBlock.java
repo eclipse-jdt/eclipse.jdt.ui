@@ -212,7 +212,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		data.verticalAlignment= GridData.FILL;
 		//data.heightHint= SWTUtil.getTableHeightHint(table, 6);
 		
-		fCaseSensitiveCheckBox.doFillIntoGrid(markersComposite, 2);
+		//fCaseSensitiveCheckBox.doFillIntoGrid(markersComposite, 2);
 
 		return markersComposite;
 	}
