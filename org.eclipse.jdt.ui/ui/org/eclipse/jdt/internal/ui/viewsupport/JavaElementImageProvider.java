@@ -266,64 +266,52 @@ public class JavaElementImageProvider {
 	// ---- Methods to compute the adornments flags ---------------------------------
 	
 	private int computeJavaAdornmentFlags(IJavaElement element, int renderFlags) {
-		
 		int flags= 0;
+		if (showOverlayIcons(renderFlags) && element instanceof IMember) {
+			try {
+				IMember member= (IMember) element;
+				int modifiers= member.getFlags();
 		
-		if (showOverlayIcons(renderFlags) && element instanceof ISourceReference) { 
-			ISourceReference sourceReference= (ISourceReference)element;
-			int modifiers= getModifiers(sourceReference);
-		
-			if (Flags.isAbstract(modifiers) && confirmAbstract((IMember) sourceReference))
-				flags |= JavaElementImageDescriptor.ABSTRACT;
-			if (Flags.isFinal(modifiers))
-				flags |= JavaElementImageDescriptor.FINAL;
-			if (Flags.isSynchronized(modifiers) && confirmSynchronized((IMember) sourceReference))
-				flags |= JavaElementImageDescriptor.SYNCHRONIZED;
-			if (Flags.isStatic(modifiers))
-				flags |= JavaElementImageDescriptor.STATIC;
+				if (Flags.isAbstract(modifiers) && confirmAbstract(member))
+					flags |= JavaElementImageDescriptor.ABSTRACT;
+				if (Flags.isFinal(modifiers) || isInterfaceField(member))
+					flags |= JavaElementImageDescriptor.FINAL;
+				if (Flags.isSynchronized(modifiers) && confirmSynchronized(member))
+					flags |= JavaElementImageDescriptor.SYNCHRONIZED;
+				if (Flags.isStatic(modifiers))
+					flags |= JavaElementImageDescriptor.STATIC;
 				
-			if (sourceReference instanceof IType) {
-				try {
-					if (JavaModelUtil.hasMainMethod((IType)sourceReference))
+				if (member.getElementType() == IJavaElement.TYPE) {
+					if (JavaModelUtil.hasMainMethod((IType) member)) {
 						flags |= JavaElementImageDescriptor.RUNNABLE;
-				} catch (JavaModelException e) {
-					// do nothing. Can't compute runnable adornment.
+					}
 				}
+			} catch (JavaModelException e) {
+				// do nothing. Can't compute runnable adornment or get flags
 			}
 		}
 		return flags;
 	}
 		
-	private boolean confirmAbstract(IMember member) {
-		 // Although all methods of a Java interface are abstract, the abstract 
-		 // icon should not be shown.
-		IType t= member.getDeclaringType();
-		if (t == null && member instanceof IType)
-			t= (IType) member;
-		if (t != null) {
-			try {
-				return !t.isInterface();
-			} catch (JavaModelException x) {
-				// do nothing. Can't compute abstract state.
-			}
+	private boolean confirmAbstract(IMember element) throws JavaModelException {
+		// never show the abstract symbol on interfaces or members in interfaces
+		if (element.getElementType() == IJavaElement.TYPE) {
+			return ((IType) element).isClass();
 		}
-		return true;
+		return element.getDeclaringType().isClass();
 	}
 	
-	private boolean confirmSynchronized(IMember member) {
+	private boolean isInterfaceField(IMember element) throws JavaModelException {
+		// always show the final symbol on interface fields
+		if (element.getElementType() == IJavaElement.FIELD) {
+			return element.getDeclaringType().isInterface();
+		}
+		return false;
+	}	
+	
+	private boolean confirmSynchronized(IJavaElement member) {
 		// Synchronized types are allowed but meaningless.
-		return !(member instanceof IType);
-	}
-	
-	private int getModifiers(ISourceReference sourceReference) {
-		if (sourceReference instanceof IMember) {
-			try {
-				return ((IMember) sourceReference).getFlags();
-			} catch (JavaModelException x) {
-				// do nothing. Can't compute modifier state.
-			}
-		}
-		return 0;
+		return member.getElementType() != IJavaElement.TYPE;
 	}
 	
 	public void dispose() {
