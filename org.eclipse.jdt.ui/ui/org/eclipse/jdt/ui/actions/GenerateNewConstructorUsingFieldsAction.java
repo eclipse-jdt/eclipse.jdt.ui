@@ -616,13 +616,13 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			inner.setLayoutData(gd);
 
 			Composite entryComposite= createEntryPtCombo(composite);
-			entryComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+			entryComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 			Composite commentComposite= createCommentSelection(composite);
-			commentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+			commentComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 			Composite overrideSuperComposite= createOmitSuper(composite);
-			overrideSuperComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+			overrideSuperComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 			gd= new GridData(GridData.FILL_BOTH);
 			composite.setLayoutData(gd);
@@ -729,7 +729,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		private Composite addSuperClassConstructorChoices(Composite composite) {
 			Label label= new Label(composite, SWT.NONE);
 			label.setText(ActionMessages.getString("GenerateConstructorUsingFieldsSelectionDialog.sort_constructor_choices.label")); //$NON-NLS-1$
-			GridData gd= new GridData(GridData.FILL_BOTH);
+			GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 			label.setLayoutData(gd);
 
 			final Combo combo= new Combo(composite, SWT.READ_ONLY);
@@ -739,7 +739,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 
 			// TODO: Can we be a little more intelligent about guessing the super() ?
 			combo.setText(combo.getItem(0));
-			combo.setLayoutData(new GridData(GridData.FILL_BOTH));
+			combo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			combo.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					fSuperIndex= combo.getSelectionIndex();
