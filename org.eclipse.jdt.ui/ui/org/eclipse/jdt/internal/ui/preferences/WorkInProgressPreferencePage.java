@@ -150,7 +150,7 @@ WorkInProgressPreferencePage
 		group.setText(PreferencesMessages.getString(PREFIX + "editor")); //$NON-NLS-1$
 		
 		addCheckBox(group, PreferencesMessages.getString(PREFIX + "overwriteMode"), PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE); //$NON-NLS-1$
-		addCheckBox(group, PreferencesMessages.getString(PREFIX + "formatComments"), "work_in_progress_enable_comment_formatting");   //$NON-NLS-1$ //$NON-NLS-2$
+//		addCheckBox(group, PreferencesMessages.getString(PREFIX + "formatComments"), "work_in_progress_enable_comment_formatting");   //$NON-NLS-1$ //$NON-NLS-2$
 		createSpacer(group, 1);
 
 		Label label= new Label(group, SWT.NONE);

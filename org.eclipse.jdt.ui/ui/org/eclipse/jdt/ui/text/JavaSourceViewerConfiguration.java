@@ -59,7 +59,6 @@ import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
 import org.eclipse.jdt.internal.ui.text.JavaElementProvider;
 import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
 import org.eclipse.jdt.internal.ui.text.JavaReconciler;
-import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
@@ -463,16 +462,18 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	public IContentFormatter getContentFormatter(ISourceViewer sourceViewer) {
 		ContentFormatter formatter= new ContentFormatter();
 		formatter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
-		if (getPreferenceStore().getBoolean("work_in_progress_enable_comment_formatting")) {  //$NON-NLS-1$
-			formatter.enablePartitionAwareFormatting(true);
-			formatter.setFormattingStrategy(new JavaFormattingStrategy(sourceViewer), IDocument.DEFAULT_CONTENT_TYPE);
-			formatter.setFormattingStrategy(new CommentFormattingStrategy(sourceViewer), IJavaPartitions.JAVA_DOC);
-			formatter.setFormattingStrategy(new CommentFormattingStrategy(sourceViewer), IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
-			formatter.setFormattingStrategy(new CommentFormattingStrategy(sourceViewer), IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
-		} else {
+
+// *** Formatting of comments is currently disabled. ***
+//		if (getPreferenceStore().getBoolean("work_in_progress_enable_comment_formatting")) {  //$NON-NLS-1$
+//			formatter.enablePartitionAwareFormatting(true);
+//			formatter.setFormattingStrategy(new JavaFormattingStrategy(sourceViewer), IDocument.DEFAULT_CONTENT_TYPE);
+//			formatter.setFormattingStrategy(new CommentFormattingStrategy(sourceViewer), IJavaPartitions.JAVA_DOC);
+//			formatter.setFormattingStrategy(new CommentFormattingStrategy(sourceViewer), IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
+//			formatter.setFormattingStrategy(new CommentFormattingStrategy(sourceViewer), IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
+//		} else {
 			formatter.enablePartitionAwareFormatting(false);
 			formatter.setFormattingStrategy(new JavaFormattingStrategy(sourceViewer), IDocument.DEFAULT_CONTENT_TYPE);
-		}
+//		}
 		return formatter;
 	}
 	
