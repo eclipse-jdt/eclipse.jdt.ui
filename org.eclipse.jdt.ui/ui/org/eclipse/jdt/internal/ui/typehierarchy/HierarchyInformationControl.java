@@ -12,8 +12,6 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -40,11 +38,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommand;
 import org.eclipse.ui.commands.ICommandManager;
 import org.eclipse.ui.commands.IKeySequenceBinding;
-import org.eclipse.ui.keys.CharacterKey;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.KeyStroke;
-import org.eclipse.ui.keys.ModifierKey;
-import org.eclipse.ui.keys.NaturalKey;
+import org.eclipse.ui.keys.SWTKeySupport;
 import org.eclipse.ui.keys.SpecialKey;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -97,7 +93,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	
 	private KeySequence[] getKeySequences() {
 		if (fKeySequences == null) {
-			ICommandManager commandManager = PlatformUI.getWorkbench().getCommandManager();
+			ICommandManager commandManager = PlatformUI.getWorkbench().getCommandSupport().getCommandManager();
 			ICommand command = commandManager.getCommand(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY);
 			if (command.isDefined()) {
 				List list= command.getKeySequenceBindings();
@@ -121,8 +117,8 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		if (fKeyAdapter == null) {
 			fKeyAdapter= new KeyAdapter() {
 				public void keyPressed(KeyEvent e) {
-					int accelerator = convertEventToUnmodifiedAccelerator(e);
-					KeySequence keySequence = KeySequence.getInstance(convertAcceleratorToKeyStroke(accelerator));
+					int accelerator = SWTKeySupport.convertEventToUnmodifiedAccelerator(e);
+					KeySequence keySequence = KeySequence.getInstance(SWTKeySupport.convertAcceleratorToKeyStroke(accelerator));
 					KeySequence[] sequences= getKeySequences();
 					
 					for (int i= 0; i < sequences.length; i++) {
@@ -277,6 +273,10 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		IMethod locked= null;
 		try {
 			IJavaElement elem= (IJavaElement) information;
+			if (elem.getElementType() == IJavaElement.LOCAL_VARIABLE) {
+				elem= elem.getParent();
+			}
+			
 			switch (elem.getElementType()) {
 				case IJavaElement.JAVA_PROJECT :
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT :
@@ -313,6 +313,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 					}
 					break;
 				default :
+					JavaPlugin.logErrorMessage("Element unsupported by the hierarchy: " + elem.getClass()); //$NON-NLS-1$
 					input= null;
 			}
 		} catch (JavaModelException e) {
@@ -388,9 +389,11 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		if (input instanceof IMethod) {
 			String[] args= { input.getParent().getElementName(), JavaElementLabels.getElementLabel(input, JavaElementLabels.ALL_DEFAULT) };
 			return TypeHierarchyMessages.getFormattedString("HierarchyInformationControl.methodhierarchy.label", args); //$NON-NLS-1$
-		} else {
+		} else if (input != null) {
 			String arg= JavaElementLabels.getElementLabel(input, JavaElementLabels.DEFAULT_QUALIFIED);
 			return TypeHierarchyMessages.getFormattedString("HierarchyInformationControl.hierarchy.label", arg);	 //$NON-NLS-1$
+		} else {
+			return ""; //$NON-NLS-1$
 		}
 	}
 	
@@ -418,114 +421,6 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			}
 		}
 		return selectedElement;
-	}
-	
-	/*
-	 * Copied from KeySupport
-	 */
-	protected KeyStroke convertAcceleratorToKeyStroke(int accelerator) {
-		final SortedSet modifierKeys = new TreeSet();
-		NaturalKey naturalKey = null;
-
-		if ((accelerator & SWT.ALT) != 0)
-			modifierKeys.add(ModifierKey.ALT);
-
-		if ((accelerator & SWT.COMMAND) != 0)
-			modifierKeys.add(ModifierKey.COMMAND);
-
-		if ((accelerator & SWT.CTRL) != 0)
-			modifierKeys.add(ModifierKey.CTRL);
-
-		if ((accelerator & SWT.SHIFT) != 0)
-			modifierKeys.add(ModifierKey.SHIFT);
-
-		if (((accelerator & SWT.KEY_MASK) == 0) && (accelerator != 0)) {
-			// There were only accelerators
-			naturalKey = null;
-		} else {
-			// There were other keys.
-			accelerator &= SWT.KEY_MASK;
-
-			switch (accelerator) {
-				case SWT.ARROW_DOWN :
-					naturalKey = SpecialKey.ARROW_DOWN;
-					break;
-				case SWT.ARROW_LEFT :
-					naturalKey = SpecialKey.ARROW_LEFT;
-					break;
-				case SWT.ARROW_RIGHT :
-					naturalKey = SpecialKey.ARROW_RIGHT;
-					break;
-				case SWT.ARROW_UP :
-					naturalKey = SpecialKey.ARROW_UP;
-					break;
-				case SWT.END :
-					naturalKey = SpecialKey.END;
-					break;
-				case SWT.F1 :
-					naturalKey = SpecialKey.F1;
-					break;
-				case SWT.F10 :
-					naturalKey = SpecialKey.F10;
-					break;
-				case SWT.F11 :
-					naturalKey = SpecialKey.F11;
-					break;
-				case SWT.F12 :
-					naturalKey = SpecialKey.F12;
-					break;
-				case SWT.F2 :
-					naturalKey = SpecialKey.F2;
-					break;
-				case SWT.F3 :
-					naturalKey = SpecialKey.F3;
-					break;
-				case SWT.F4 :
-					naturalKey = SpecialKey.F4;
-					break;
-				case SWT.F5 :
-					naturalKey = SpecialKey.F5;
-					break;
-				case SWT.F6 :
-					naturalKey = SpecialKey.F6;
-					break;
-				case SWT.F7 :
-					naturalKey = SpecialKey.F7;
-					break;
-				case SWT.F8 :
-					naturalKey = SpecialKey.F8;
-					break;
-				case SWT.F9 :
-					naturalKey = SpecialKey.F9;
-					break;
-				case SWT.HOME :
-					naturalKey = SpecialKey.HOME;
-					break;
-				case SWT.INSERT :
-					naturalKey = SpecialKey.INSERT;
-					break;
-				case SWT.PAGE_DOWN :
-					naturalKey = SpecialKey.PAGE_DOWN;
-					break;
-				case SWT.PAGE_UP :
-					naturalKey = SpecialKey.PAGE_UP;
-					break;
-				default :
-					naturalKey = CharacterKey.getInstance((char) (accelerator & 0xFFFF));
-			}
-		}
-
-		return KeyStroke.getInstance(modifierKeys, naturalKey);
-	}
-
-	/*
-	 * Copied from KeySupport
-	 */
-	protected int convertEventToUnmodifiedAccelerator(KeyEvent e) {
-		int modifiers = e.stateMask & SWT.MODIFIER_MASK;
-		char ch = (char) e.keyCode;
-		
-		return modifiers + (Character.isLetter(ch) ? Character.toUpperCase(ch) : ch);
 	}
 
 }
