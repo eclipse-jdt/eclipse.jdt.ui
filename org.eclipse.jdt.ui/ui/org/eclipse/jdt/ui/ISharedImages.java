@@ -44,14 +44,128 @@ public interface ISharedImages {
 	/** Key to access the shared image or image descriptor for a JAR. */
 	public static final String IMG_OBJS_JAR= JavaPluginImages.IMG_OBJS_JAR;
 	
-	/** Key to access the shared image or image descriptor for a package. */
+	/**
+	 * Key to access the shared image or image descriptor for a JAR with source.
+	 * @since 3.0
+	 */
+	public static final String IMG_OBJS_JAR_WITH_SOURCE= JavaPluginImages.IMG_OBJS_JAR_WSRC;
+	
+	/**
+	 * Key to access the shared image or image descriptor for external archives. 
+	 * @since 2.1
+	 */
+	public static final String IMG_OBJS_EXTERNAL_ARCHIVE= JavaPluginImages.IMG_OBJS_EXTJAR;
+	
+	/** 
+	 * Key to access the shared image or image descriptor for external archives with source.
+	 * @since 2.1
+	 */
+	public static final String IMG_OBJS_EXTERNAL_ARCHIVE_WITH_SOURCE= JavaPluginImages.IMG_OBJS_EXTJAR_WSRC;
+
+	/**
+	 * Key to access the shared image or image descriptor for a library (class path container)
+	 * @since 3.0
+	 */
+	public static final String IMG_OBJS_LIBRARY= JavaPluginImages.IMG_OBJS_LIBRARY;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a package fragment root.
+	 * @since 3.0
+	 */
+	public static final String IMG_OBJS_PACKFRAG_ROOT= JavaPluginImages.IMG_OBJS_PACKFRAG_ROOT;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a package.
+	 */
 	public static final String IMG_OBJS_PACKAGE= JavaPluginImages.IMG_OBJS_PACKAGE;
 	
-	/** Key to access the shared image or image descriptor for a class. */	
+	/**
+	 * Key to access the shared image or image descriptor for an empty package.
+	 * @since 3.0
+	 */
+	public static final String IMG_OBJS_EMPTY_PACKAGE= JavaPluginImages.IMG_OBJS_EMPTY_PACKAGE;
+
+	/**
+	 * Key to access the shared image or image descriptor for an logical package.
+	 * @since 3.0
+	 */
+	public static final String IMG_OBJS_LOGICAL_PACKAGE= JavaPluginImages.IMG_OBJS_LOGICAL_PACKAGE;
+	
+	/**
+	 * Key to access the shared image or image descriptor for an empty logical package.
+	 * @since 3.0
+	 */
+	public static final String IMG_OBJS_EMPTY_LOGICAL_PACKAGE= JavaPluginImages.IMG_OBJS_EMPTY_LOGICAL_PACKAGE;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a class.
+	 */	
 	public static final String IMG_OBJS_CLASS= JavaPluginImages.IMG_OBJS_CLASS;
 	
-	/** Key to access the shared image or image descriptor for an interface. */
+	/**
+	 * Key to access the shared image or image descriptor for a class in the default package.
+	 * @since 3.0
+	 */
+	public static final String IMG_OBJS_CLASS_DEFAULT= JavaPluginImages.IMG_OBJS_CLASS_DEFAULT;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a public inner class.
+	 * @since 3.0
+	 */
+	public static final String IMG_OBJS_INNER_CLASS_PUBLIC= JavaPluginImages.IMG_OBJS_INNER_CLASS_PUBLIC;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a inner class with default visibility.
+	 * @since 3.0
+	 */
+	public static final String IMG_OBJS_INNER_CLASS_DEFAULT= JavaPluginImages.IMG_OBJS_INNER_CLASS_DEFAULT;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a protected inner class.
+	 * @since 3.0
+	 */
+	public static final String IMG_OBJS_INNER_CLASS_PROTECTED= JavaPluginImages.IMG_OBJS_INNER_CLASS_PROTECTED;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a private inner class.
+	 * @since 3.0
+	 */
+	public static final String IMG_OBJS_INNER_CLASS_PRIVATE= JavaPluginImages.IMG_OBJS_INNER_CLASS_PRIVATE;
+	
+	/**
+	 * Key to access the shared image or image descriptor for an interface.
+	 */
 	public static final String IMG_OBJS_INTERFACE= JavaPluginImages.IMG_OBJS_INTERFACE;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a interface with default visibility.
+	 * @since 3.0
+	 */
+	public static final String IMG_OBJS_INTERFACE_DEFAULT= JavaPluginImages.IMG_OBJS_INTERFACE_DEFAULT;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a public inner interface.
+	 * @since 3.0
+	 */
+	public static final String IMG_OBJS_INNER_INTERFACE_PUBLIC= JavaPluginImages.IMG_OBJS_INNER_INTERFACE_PUBLIC;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a inner interface with default visibility.
+	 * @since 3.0
+	 */
+	public static final String IMG_OBJS_INNER_INTERFACE_DEFAULT= JavaPluginImages.IMG_OBJS_INNER_INTERFACE_DEFAULT;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a protected inner interface.
+	 * @since 3.0
+	 */
+	public static final String IMG_OBJS_INNER_INTERFACE_PROTECTED= JavaPluginImages.IMG_OBJS_INNER_INTERFACE_PROTECTED;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a private inner interface.
+	 * @since 3.0
+	 */
+	public static final String IMG_OBJS_INNER_INTERFACE_PRIVATE= JavaPluginImages.IMG_OBJS_INNER_INTERFACE_PRIVATE;
 
 	/** Key to access the shared image or image descriptor for a package declaration. */
 	public static final String IMG_OBJS_PACKDECL= JavaPluginImages.IMG_OBJS_PACKDECL;
@@ -71,23 +185,39 @@ public interface ISharedImages {
 	/** Key to access the shared image or image descriptor for a private member. */
 	public static final String IMG_OBJS_PRIVATE= JavaPluginImages.IMG_MISC_PRIVATE;
 	
-	/** Key to access the shared image or image descriptor for class members with
-	 * default visibility.
-	 */
+	/** Key to access the shared image or image descriptor for class members with default visibility. */
 	public static final String IMG_OBJS_DEFAULT= JavaPluginImages.IMG_MISC_DEFAULT;
 	
 	/**
-	 * Key to access the shared image or image decriptor for external archives. 
-	 * @since 2.1
+	 * Key to access the shared image or image descriptor for a public field.
+	 * @since 3.0
 	 */
-	public static final String IMG_OBJS_EXTERNAL_ARCHIVE= JavaPluginImages.IMG_OBJS_EXTJAR;
+	public static final String IMG_FIELD_PUBLIC= JavaPluginImages.IMG_FIELD_PUBLIC;
 	
-	/** 
-	 * Key to access the shared image or image descriptor for external archives
-	 * with source.
-	 * @since 2.1
+	/**
+	 * Key to access the shared image or image descriptor for a protected field.
+	 * @since 3.0
 	 */
-	public static final String IMG_OBJS_EXTERNAL_ARCHIVE_WITH_SOURCE= JavaPluginImages.IMG_OBJS_EXTJAR_WSRC;
+	public static final String IMG_FIELD_PROTECTED= JavaPluginImages.IMG_FIELD_PROTECTED;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a private field.
+	 * @since 3.0
+	 */
+	public static final String IMG_FIELD_PRIVATE= JavaPluginImages.IMG_FIELD_PRIVATE;
+	
+	/**
+	 * Key to access the shared image or image descriptor for a field with default visibility.
+	 * @since 3.0
+	 */
+	public static final String IMG_FIELD_DEFAULT= JavaPluginImages.IMG_FIELD_DEFAULT;
+	
+	
+	/**
+	 * Key to access the shared image or image descriptor for a local variable.
+	 * @since 3.0
+	 */
+	public static final String IMG_OBJS_LOCAL_VARIABLE= JavaPluginImages.IMG_OBJS_LOCAL_VARIABLE;
 	
 	/**
 	 * Returns the shared image managed under the given key.

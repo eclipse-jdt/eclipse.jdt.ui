@@ -135,7 +135,7 @@ public class JavaElementImageProvider {
 	}	
 
 	/**
-	 * Returns an image descriptor for a compilatio unit not on the class path.
+	 * Returns an image descriptor for a compilation unit not on the class path.
 	 * The descriptor includes overlays, if specified.
 	 */
 	public ImageDescriptor getCUResourceImageDescriptor(IFile file, int flags) {
