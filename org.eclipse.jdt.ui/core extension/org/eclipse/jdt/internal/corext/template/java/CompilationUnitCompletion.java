@@ -7,10 +7,7 @@ package org.eclipse.jdt.internal.corext.template.java;
 import java.util.Iterator;
 import java.util.Vector;
 
-import org.eclipse.core.resources.IMarker;
-
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.ICompletionRequestor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -19,12 +16,13 @@ import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.core.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.util.MigrationCompletionRequestorAdapter;
 
 /**
  * A completion requestor to collect informations on local variables.
  * This class is used for guessing variable names like arrays, collections, etc.
  */
-class CompilationUnitCompletion implements ICompletionRequestor {
+class CompilationUnitCompletion extends MigrationCompletionRequestorAdapter {
 
 	static class LocalVariable {
 		String name;
@@ -40,18 +38,8 @@ class CompilationUnitCompletion implements ICompletionRequestor {
 
 	private ICompilationUnit fUnit;
 
-	private Vector fClasses;
-	private Vector fFields;
-	private Vector fInterfaces;
-	private Vector fKeywords;
-	private Vector fLabels;
 	private Vector fLocalVariables;
-	private Vector fMethods;
-	private Vector fMethodDeclarations;
-	private Vector fModifiers;
-	private Vector fPackages;
-	private Vector fTypes;
-	private Vector fVariableNames;
+
 
 	private boolean fError;
 
@@ -72,32 +60,9 @@ class CompilationUnitCompletion implements ICompletionRequestor {
 	public void reset(ICompilationUnit unit) {
 		fUnit= unit;
 		
-		fClasses= new Vector();
-		fFields= new Vector();
-		fInterfaces= new Vector();
-		fKeywords= new Vector();
-		fLabels= new Vector();
 		fLocalVariables= new Vector();
-		fMethods= new Vector();
-		fMethodDeclarations= new Vector();
-		fModifiers= new Vector();
-		fPackages= new Vector();
-		fTypes= new Vector();
-		fVariableNames= new Vector();		
 		
 		fError= false;
-	}
-
-	/*
-	 * @see ICodeCompletionRequestor#acceptClass(char[], char[], char[], int, int, int)
-	 */
-	public void acceptClass(
-		char[] packageName,
-		char[] className,
-		char[] completionName,
-		int modifiers,
-		int completionStart,
-		int completionEnd) {
 	}
 
 	/*
@@ -107,138 +72,17 @@ class CompilationUnitCompletion implements ICompletionRequestor {
 		fError= true;
 	}
 
-	/*
-	 * @see ICodeCompletionRequestor#acceptField(char[], char[], char[], char[], char[], char[], int, int, int)
-	 */
-	public void acceptField(
-		char[] declaringTypePackageName,
-		char[] declaringTypeName,
-		char[] name,
-		char[] typePackageName,
-		char[] typeName,
-		char[] completionName,
-		int modifiers,
-		int completionStart,
-		int completionEnd) {
-	}
 
 	/*
-	 * @see ICodeCompletionRequestor#acceptInterface(char[], char[], char[], int, int, int)
-	 */
-	public void acceptInterface(
-		char[] packageName,
-		char[] interfaceName,
-		char[] completionName,
-		int modifiers,
-		int completionStart,
-		int completionEnd) {
-	}
-
-	/*
-	 * @see ICodeCompletionRequestor#acceptKeyword(char[], int, int)
-	 */
-	public void acceptKeyword(
-		char[] keywordName,
-		int completionStart,
-		int completionEnd) {
-	}
-
-	/*
-	 * @see ICodeCompletionRequestor#acceptLabel(char[], int, int)
-	 */
-	public void acceptLabel(
-		char[] labelName,
-		int completionStart,
-		int completionEnd) {
-	}
-
-	/*
-	 * @see ICodeCompletionRequestor#acceptLocalVariable(char[], char[], char[], int, int, int)
+	 * @see ICodeCompletionRequestor#acceptLocalVariable
 	 */
 	public void acceptLocalVariable(char[] name, char[] typePackageName, char[] typeName,
-		int modifiers, int completionStart,	int completionEnd)
+		int modifiers, int completionStart,	int completionEnd, int relevance)
 	{
 		fLocalVariables.add(new LocalVariable(
 			new String(name), new String(typePackageName), new String(typeName)));
 	}
 
-	/*
-	 * @see ICodeCompletionRequestor#acceptMethod(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int)
-	 */
-	public void acceptMethod(
-		char[] declaringTypePackageName,
-		char[] declaringTypeName,
-		char[] selector,
-		char[][] parameterPackageNames,
-		char[][] parameterTypeNames,
-		char[][] parameterNames,
-		char[] returnTypePackageName,
-		char[] returnTypeName,
-		char[] completionName,
-		int modifiers,
-		int completionStart,
-		int completionEnd) {
-	}
-
-	/*
-	 * @see ICodeCompletionRequestor#acceptMethodDeclaration(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int)
-	 */
-	public void acceptMethodDeclaration(
-		char[] declaringTypePackageName,
-		char[] declaringTypeName,
-		char[] selector,
-		char[][] parameterPackageNames,
-		char[][] parameterTypeNames,
-		char[][] parameterNames,
-		char[] returnTypePackageName,
-		char[] returnTypeName,
-		char[] completionName,
-		int modifiers,
-		int completionStart,
-		int completionEnd) {
-	}
-
-	/*
-	 * @see ICodeCompletionRequestor#acceptModifier(char[], int, int)
-	 */
-	public void acceptModifier(
-		char[] modifierName,
-		int completionStart,
-		int completionEnd) {
-	}
-
-	/*
-	 * @see ICodeCompletionRequestor#acceptPackage(char[], char[], int, int)
-	 */
-	public void acceptPackage(
-		char[] packageName,
-		char[] completionName,
-		int completionStart,
-		int completionEnd) {
-	}
-
-	/*
-	 * @see ICodeCompletionRequestor#acceptType(char[], char[], char[], int, int)
-	 */
-	public void acceptType(
-		char[] packageName,
-		char[] typeName,
-		char[] completionName,
-		int completionStart,
-		int completionEnd) {
-	}
-
-	/*
-	 * @see ICodeCompletionRequestor#acceptVariableName(char[], char[], char[], char[], int, int)
-	 */
-	public void acceptVariableName(
-		char[] typePackageName,
-		char[] typeName,
-		char[] name,
-		char[] completionName,
-		int completionStart,
-		int completionEnd) {
-	}
 
 	// ---
 
@@ -377,21 +221,6 @@ class CompilationUnitCompletion implements ICompletionRequestor {
 
 		// class or interface
 		return Character.toLowerCase(first) + string.substring(1);
-	}
-
-	/*
-	 * @see ICompletionRequestor#acceptAnonymousType(char[], char[], char[][], char[][], char[][], char[], int, int, int)
-	 */
-	public void acceptAnonymousType(
-		char[] superTypePackageName,
-		char[] superTypeName,
-		char[][] parameterPackageNames,
-		char[][] parameterTypeNames,
-		char[][] parameterNames,
-		char[] completionName,
-		int modifiers,
-		int completionStart,
-		int completionEnd) {
 	}
 
 }

@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import org.eclipse.core.resources.IMarker;
-
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
@@ -19,7 +17,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.ICompletionRequestor;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -29,12 +26,13 @@ import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.util.MigrationCompletionRequestorAdapter;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 
 /**
  * Bin to collect the proposal of the infrastructure on code assist in a java text.
  */
-public class ResultCollector implements ICompletionRequestor {
+public class ResultCollector extends MigrationCompletionRequestorAdapter {
 		
 	private class ProposalComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
@@ -76,7 +74,7 @@ public class ResultCollector implements ICompletionRequestor {
 	/*
 	 * @see ICompletionRequestor#acceptClass
 	 */	
-	public void acceptClass(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end) {
+	public void acceptClass(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
 		ImageDescriptor descriptor= JavaPluginImages.DESC_OBJS_CLASS;
 		if (Flags.isDeprecated(modifiers))
 			descriptor= getDeprecatedDescriptor(descriptor);
@@ -86,7 +84,7 @@ public class ResultCollector implements ICompletionRequestor {
 	}
 	
 	/*
-	 * @see ICompletionRequestor#acceptError(IProblem)
+	 * @see ICompletionRequestor#acceptError
 	 */
 	public void acceptError(IProblem error) {
 		fLastProblem= error;
@@ -98,7 +96,7 @@ public class ResultCollector implements ICompletionRequestor {
 	public void acceptField(
 		char[] declaringTypePackageName, char[] declaringTypeName, char[] name,
 		char[] typePackageName, char[] typeName, char[] completionName,
-		int modifiers, int start, int end) {
+		int modifiers, int start, int end, int relevance) {
 
 		ImageDescriptor descriptor= getMemberDescriptor(modifiers);	
 		if (Flags.isDeprecated(modifiers))
@@ -125,7 +123,7 @@ public class ResultCollector implements ICompletionRequestor {
 	/*
 	 * @see ICompletionRequestor#acceptInterface
 	 */	
-	public void acceptInterface(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end) {
+	public void acceptInterface(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
 		ImageDescriptor descriptor= JavaPluginImages.DESC_OBJS_INTERFACE;
 		if (Flags.isDeprecated(modifiers))
 			descriptor= getDeprecatedDescriptor(descriptor);
@@ -135,10 +133,10 @@ public class ResultCollector implements ICompletionRequestor {
 	}
 	
 	/*
-	 * @see ICompletionRequestor#acceptAnonymousType(char[], char[], char[][], char[][], char[][], char[], int, int, int)
+	 * @see ICompletionRequestor#acceptAnonymousType
 	 */
 	public void acceptAnonymousType(char[] superTypePackageName, char[] superTypeName, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames,
-		char[] completionName, int modifiers, int completionStart, int completionEnd) {
+		char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
 
 		JavaCompletionProposal	proposal= createAnonymousTypeCompletion(superTypePackageName, superTypeName, parameterTypeNames, parameterNames, completionName, completionStart, completionEnd);
 		proposal.setProposalInfo(new ProposalInfo(fJavaProject, superTypePackageName, superTypeName));
@@ -148,7 +146,7 @@ public class ResultCollector implements ICompletionRequestor {
 	/*
 	 * @see ICompletionRequestor#acceptKeyword
 	 */	
-	public void acceptKeyword(char[] keyword, int start, int end) {
+	public void acceptKeyword(char[] keyword, int start, int end, int relevance) {
 		String kw= new String(keyword);
 		fKeywords.add(createCompletion(start, end, kw, null, kw));
 	}
@@ -156,7 +154,7 @@ public class ResultCollector implements ICompletionRequestor {
 	/*
 	 * @see ICompletionRequestor#acceptLabel
 	 */	
-	public void acceptLabel(char[] labelName, int start, int end) {
+	public void acceptLabel(char[] labelName, int start, int end, int relevance) {
 		String ln= new String(labelName);
 		fLabels.add(createCompletion(start, end, ln, null, ln));
 	}
@@ -164,7 +162,7 @@ public class ResultCollector implements ICompletionRequestor {
 	/*
 	 * @see ICompletionRequestor#acceptLocalVariable
 	 */	
-	public void acceptLocalVariable(char[] name, char[] typePackageName, char[] typeName, int modifiers, int start, int end) {
+	public void acceptLocalVariable(char[] name, char[] typePackageName, char[] typeName, int modifiers, int start, int end, int relevance) {
 		StringBuffer buf= new StringBuffer();
 		buf.append(name);
 		if (typeName != null) {
@@ -195,12 +193,12 @@ public class ResultCollector implements ICompletionRequestor {
 	}
 	
 	/*
-	 * @see ICompletionRequestor#acceptMethod(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int)
+	 * @see ICompletionRequestor#acceptMethod
 	 */
 	public void acceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] name,
 		char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames,
 		char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers,
-		int start, int end) {
+		int start, int end, int relevance) {
 	
 		JavaCompletionProposal proposal= createMethodCallCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
 		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, returnTypeName.length == 0));
@@ -232,7 +230,7 @@ public class ResultCollector implements ICompletionRequestor {
 	/*
 	 * @see ICompletionRequestor#acceptModifier
 	 */	
-	public void acceptModifier(char[] modifier, int start, int end) {
+	public void acceptModifier(char[] modifier, int start, int end, int relevance) {
 		String mod= new String(modifier);
 		fModifiers.add(createCompletion(start, end, mod, null, mod));
 	}
@@ -240,31 +238,31 @@ public class ResultCollector implements ICompletionRequestor {
 	/*
 	 * @see ICompletionRequestor#acceptPackage
 	 */	
-	public void acceptPackage(char[] packageName, char[] completionName, int start, int end) {
+	public void acceptPackage(char[] packageName, char[] completionName, int start, int end, int relevance) {
 		fPackages.add(createCompletion(start, end, new String(completionName), JavaPluginImages.DESC_OBJS_PACKAGE, new String(packageName)));
 	}
 	
 	/*
 	 * @see ICompletionRequestor#acceptType
 	 */	
-	public void acceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end) {
+	public void acceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end, int relevance) {
 		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
 		fTypes.add(createTypeCompletion(start, end, new String(completionName), JavaPluginImages.DESC_OBJS_CLASS, new String(typeName), new String(packageName), info));
 	}
 	
 	/*
-	 * @see ICodeCompletionRequestor#acceptMethodDeclaration(char[], char[], char[], char[][], char[][], char[][], char[], char[], char[], int, int, int)
+	 * @see ICodeCompletionRequestor#acceptMethodDeclaration
 	 */
-	public void acceptMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int start, int end) {
+	public void acceptMethodDeclaration(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int start, int end, int relevance) {
 		// XXX: To be revised
 		JavaCompletionProposal proposal= createMethodDeclarationCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
 		fMethods.add(proposal);
 	}
 	
 	/*
-	 * @see ICodeCompletionRequestor#acceptVariableName(char[], char[], char[], char[], int, int)
+	 * @see ICodeCompletionRequestor#acceptVariableName
 	 */
-	public void acceptVariableName(char[] typePackageName, char[] typeName, char[] name, char[] completionName, int start, int end) {
+	public void acceptVariableName(char[] typePackageName, char[] typeName, char[] name, char[] completionName, int start, int end, int relevance) {
 		// XXX: To be revised
 		StringBuffer buf= new StringBuffer();
 		buf.append(name);
