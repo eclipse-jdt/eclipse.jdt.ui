@@ -67,20 +67,18 @@ class GotoMarkerAction extends Action {
 		}
 		if (javaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 			// Goto packages view
-			IViewPart view= wbPage.findView(JavaUI.ID_PACKAGES);
-			if (view instanceof IPackagesViewPart) {
-				try {
-					view= wbPage.showView(JavaUI.ID_PACKAGES);
+			try {
+				IViewPart view= wbPage.showView(JavaUI.ID_PACKAGES);
+				if (view instanceof IPackagesViewPart)
 					((IPackagesViewPart)view).selectAndReveal(javaElement);
-				} catch (PartInitException ex) {
-					ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.openEditor.");
-				}
+			} catch (PartInitException ex) {
+				ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.openEditor.");
 			}
 		}			
 		else if (!isBinary(javaElement)) {
 			// This is the workbench's default
 			try {
-				wbPage.openEditor(marker);
+				wbPage.openEditor(marker, false);
 			} catch (PartInitException ex) {
 				ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.openEditor.");
 			}
@@ -89,7 +87,9 @@ class GotoMarkerAction extends Action {
 			IClassFile cf= getClassFile(javaElement);
 			if (cf != null) {
 				IEditorPart editor= null;
-				try {				
+				try {		
+//REMOVE ME		editor= ((org.eclipse.ui.internal.WorkbenchPage)wbPage).openEditor(new ClassFileEditorInput(cf), JavaUI.ID_CF_EDITOR, false);
+//USE ME		editor= wbPage.openEditor(new ClassFileEditorInput(cf), JavaUI.ID_CF_EDITOR, false);
 				editor= wbPage.openEditor(new ClassFileEditorInput(cf), JavaUI.ID_CF_EDITOR);
 				} catch (PartInitException ex) {
 					ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.openEditor.");
