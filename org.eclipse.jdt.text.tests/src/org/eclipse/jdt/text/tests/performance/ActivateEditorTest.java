@@ -62,8 +62,8 @@ public abstract class ActivateEditorTest extends TextPerformanceTestCase {
 		super.setUp();
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
-		ResourceTestHelper.replicate(PREFIX + FILE_SUFFIX, PREFIX, FILE_SUFFIX, EDITORS, FILE_PREFIX, FILE_PREFIX, ResourceTestHelper.SKIP_IF_EXISTS);
-		fEditors= openInEditor(ResourceTestHelper.findFiles(PREFIX, FILE_SUFFIX, 0, EDITORS));
+		ResourceTestHelper.replicate(PREFIX + FILE_SUFFIX, PREFIX, FILE_SUFFIX, getNumberOfEditors(), FILE_PREFIX, FILE_PREFIX, ResourceTestHelper.SKIP_IF_EXISTS);
+		fEditors= openInEditor(ResourceTestHelper.findFiles(PREFIX, FILE_SUFFIX, 0, getNumberOfEditors()));
 	}
 	
 	private AbstractTextEditor[] openInEditor(IFile[] files) throws PartInitException {
@@ -78,10 +78,8 @@ public abstract class ActivateEditorTest extends TextPerformanceTestCase {
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();
-		ResourceTestHelper.delete(PREFIX, FILE_SUFFIX, EDITORS);
+		ResourceTestHelper.delete(PREFIX, FILE_SUFFIX, getNumberOfEditors());
 	}
-	
-	protected abstract String getEditorId();
 	
 	public void testActivateEditor() {
 		measureActivateEditor(fEditors, getWarmUpRuns(), getNullPerformanceMeter());
@@ -93,14 +91,6 @@ public abstract class ActivateEditorTest extends TextPerformanceTestCase {
 		measureActivateEditor(fEditors, getMeasuredRuns(), performanceMeter);
 		commitAllMeasurements();
 		assertAllPerformance();
-	}
-	
-	protected final String getShortName() {
-		return fShortName;
-	}
-	
-	protected final void setShortName(String shortName) {
-		fShortName= shortName;
 	}
 	
 	protected void measureActivateEditor(AbstractTextEditor[] editors, int runs, PerformanceMeter performanceMeter) {
@@ -117,5 +107,19 @@ public abstract class ActivateEditorTest extends TextPerformanceTestCase {
 			for (int j= 0, n= editors.length; j < n; j++)
 				EditorTestHelper.joinReconciler(EditorTestHelper.getSourceViewer(editors[j]), 100, 10000, 100);
 		}
+	}
+	
+	protected abstract String getEditorId();
+	
+	protected static int getNumberOfEditors() {
+		return EDITORS;
+	}
+	
+	protected final String getShortName() {
+		return fShortName;
+	}
+	
+	protected final void setShortName(String shortName) {
+		fShortName= shortName;
 	}
 }

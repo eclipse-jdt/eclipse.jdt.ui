@@ -21,7 +21,7 @@ public class ActivateJavaEditorTest extends ActivateEditorTest {
 
 	private static final Class THIS= ActivateJavaEditorTest.class;
 	
-	private static final String SHORT_NAME= "Activate Java editor";
+	private static final String SHORT_NAME= "Activate " + ActivateEditorTest.getNumberOfEditors() + " Java editors";
 	
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
