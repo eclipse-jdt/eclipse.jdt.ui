@@ -9,6 +9,7 @@ public class AllAllTests {
 		suite.addTest(org.eclipse.jdt.ui.tests.actions.AllTests.suite());
 		suite.addTest(org.eclipse.jdt.ui.tests.nls.AllTests.suite());
 		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.AllTests.suite());
+		suite.addTest(org.eclipse.jdt.ui.tests.changes.AllTests.suite());
 	    return suite;
 	}
 }
