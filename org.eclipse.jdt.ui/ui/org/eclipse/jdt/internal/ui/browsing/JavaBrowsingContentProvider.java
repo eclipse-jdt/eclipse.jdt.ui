@@ -57,7 +57,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	private StructuredViewer fViewer;
 	private Object fInput;
 	private JavaBrowsingPart fBrowsingPart;
-	private int fReadsInDisplayTread;
+	private int fReadsInDisplayThread;
 
 	
 	public JavaBrowsingContentProvider(boolean provideMembers, JavaBrowsingPart browsingPart) {
@@ -491,12 +491,12 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	
 	protected void startReadInDisplayThread() {
 		if (isDisplayThread())
-			fReadsInDisplayTread++;
+			fReadsInDisplayThread++;
 	}
 
 	protected void finishedReadInDisplayThread() {
 		if (isDisplayThread())
-			fReadsInDisplayTread--;
+			fReadsInDisplayThread--;
 	}
 	
 	private boolean isDisplayThread() {
@@ -513,7 +513,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		if (ctrl != null && !ctrl.isDisposed()) {
 			fBrowsingPart.setProcessSelectionEvents(false);
 			try {
-				if (isDisplayThread() && fReadsInDisplayTread == 0)
+				if (isDisplayThread() && fReadsInDisplayThread == 0)
 					ctrl.getDisplay().syncExec(r);
 				else				
 					ctrl.getDisplay().asyncExec(r);
